@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] [Breath] 3を得る\n対象の[Laceration]が7以上なら、コイン威力+1",
+          "desc": "[WhenUse] [Breath] 3を得る\n対象の[Laceration]が7以上なら、コイン威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Breath] 回数が1増加\n[CriticalOnSucceedAttack] [Laceration] 2を付与",
             "[CriticalOnSucceedAttack] [Laceration] 2を付与"
@@ -61,14 +61,14 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 対象の[Laceration] 3につき、[Breath]1を得る(最大5)\n自分の[Breath]が7以上なら、コイン威力+1",
+          "desc": "[WhenUse] 対象の[Laceration] 3につき、[Breath]1を得る(最大5)\n自分の[Breath]が7以上なら、コイン威力 +1",
           "coinDescs": [
             "[CriticalOnSucceedAttack] [Laceration] 回数が2増加",
             "[Bullet] 1を消耗\nクリティカルダメージ量 +50%"
           ]
         },
         {
-          "desc": "[WhenUse] 対象の[Laceration]3につき、[Breath]1を得る(最大10)\n自分の[Breath]7につき、コイン威力+1(最大3)",
+          "desc": "[WhenUse] 対象の[Laceration]3につき、[Breath]1を得る(最大10)\n自分の[Breath]7につき、コイン威力 +1(最大3)",
           "coinDescs": [
             "[CriticalOnSucceedAttack] [Laceration] 回数が2増加",
             "[Bullet] 1を消耗\nクリティカルダメージ量 +100%\n[EnemyKill] 次のターンに[PlusCoinValueUp] 1を得る"

@@ -3232,6 +3232,29 @@
       "SLASH"
     ]
   },
+  "11015": {
+    "updateDate": 20260205,
+    "skillKeywordList": [
+      "Breath",
+      "Laceration"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "SPIDER_HOUSE"
+    ],
+    "attributeType": [
+      "AZURE",
+      "INDIGO",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH",
+      "SLASH"
+    ]
+  },
   "11101": {
     "updateDate": 20230227,
     "skillKeywordList": [
@@ -3859,6 +3882,31 @@
     "attributeType": [
       "AMBER",
       "SCARLET",
+      "INDIGO"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
+  "11214": {
+    "updateDate": 20260205,
+    "skillKeywordList": [
+      "Combustion",
+      "Sinking"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT",
+      "LIMBUS_COMPANY",
+      "LIMBUS_COMPANY_LCE"
+    ],
+    "attributeType": [
+      "CRIMSON",
+      "AZURE",
       "INDIGO"
     ],
     "atkType": [

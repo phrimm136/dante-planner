@@ -1,0 +1,200 @@
+{
+  "updatedDate": 20260205,
+  "skillKeywordList": [
+    "Combustion",
+    "Sinking"
+  ],
+  "panicType": 9999,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 86,
+    "incrementByLevel": 3.14
+  },
+  "defCorrection": 5,
+  "minSpeedList": [
+    1,
+    1,
+    1,
+    1
+  ],
+  "maxSpeedList": [
+    6,
+    5,
+    4,
+    4
+  ],
+  "season": 7,
+  "unitKeywordList": [
+    "SMALL",
+    "EGO_EQUIPMENT",
+    "LIMBUS_COMPANY",
+    "LIMBUS_COMPANY_LCE"
+  ],
+  "staggerList": [
+    40
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1121401,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 2,
+            "specialDuelIndex": 1,
+            "scale": 4,
+            "coinString": "CC"
+          },
+          {},
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1121402,
+        "skillTier": 2,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "specialDuelIndex": 0,
+            "scale": 3,
+            "coinString": "CCCC"
+          },
+          {
+            "scale": 3
+          },
+          {
+            "defaultValue": 3
+          },
+          {
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1121403,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "CCC"
+          },
+          {},
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 4,
+            "specialDuelIndex": 1,
+            "scale": 4
+          },
+          {
+            "defaultValue": 5,
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1121404,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 3,
+            "specialDuelIndex": 0,
+            "scale": 9,
+            "coinString": "U"
+          },
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "iconID": "1121404_4",
+            "scale": 10
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1121402,
+        1121403
+      ],
+      [
+        1121402,
+        1121403,
+        1121401
+      ],
+      [],
+      [
+        1121402,
+        1121403,
+        1121411
+      ]
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1121421
+      ],
+      []
+    ],
+    "conditions": {
+      "1121401": {
+        "type": "RESONANCE",
+        "values": {
+          "AZURE": 2
+        }
+      },
+      "1121421": {
+        "type": "RESONANCE",
+        "values": {
+          "CRIMSON": 3
+        }
+      }
+    }
+  }
+}

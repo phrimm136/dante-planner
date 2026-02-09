@@ -1,0 +1,129 @@
+{
+  "name": "ロボトミーE.G.O::\nランプ",
+  "skills": {
+    "1121401": {
+      "name": "零距離注視",
+      "descs": [
+        {
+          "desc": "[WhenUse] 次のターンに[Binding]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {
+          "desc": "下記の条件を一つでも満たしたとき、コイン威力 +1\n- 自分の速度が1以下の場合\n- 対象に[DelusionGregBigBird]がある場合\n[WhenUse] 次のターンに[Binding]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]1を付与",
+            "[OnSucceedAttack] [Sinking]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "下記の条件を一つでも満たしたとき、コイン威力 +1\n- 対象の速度が自分より3以上高い場合\n- 自分の速度が1以下の場合\n- 対象に[DelusionGregBigBird]がある場合\n[WhenUse] 対象の[Sinking]と[Combustion]の合計が6以上なら、コイン威力 +1\n[WhenUse] 次のターンに[Binding]1を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] [Sinking]3を付与"
+          ]
+        }
+      ]
+    },
+    "1121402": {
+      "name": "見えないもので見えるものを壊し",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttack] このコイン最終ダメージ量の30%だけ、打撃ダメージを与える",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] このコイン最終ダメージ量の30%だけ、打撃ダメージを与える",
+            "[OnSucceedAttack] [Combustion]2を付与",
+            ""
+          ]
+        },
+        {
+          "desc": "下記の条件を一つでも満たしたとき、マッチ威力 +2\n- 自分の速度が1以下の場合\n- 対象に[DelusionGregBigBird]がある場合",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加\n[OnSucceedAttack] このコイン最終ダメージ量の30%だけ、打撃ダメージを与える",
+            "[OnSucceedAttack] [Sinking]1を付与\n[OnSucceedAttack] このコイン最終ダメージ量の30%だけ、打撃ダメージを与える",
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "下記の条件を一つでも満たしたとき、マッチ威力 +2\n- 対象の速度が自分より3以上高い場合\n- 自分の速度が1以下の場合\n- 対象に[DelusionGregBigBird]がある場合\n[WhenUse] 対象の[Sinking]と[Combustion]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が3増加\n[OnSucceedAttack] このコイン最終ダメージ量の30%だけ、打撃ダメージを与える",
+            "[OnSucceedAttack] [Sinking]2を付与\n[OnSucceedAttack] このコイン最終ダメージ量の30%だけ、打撃ダメージを与える",
+            "[OnSucceedAttack] [Combustion]2を付与",
+            "[OnSucceedAttack] [Combustion]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1121403": {
+      "name": "灯りに眩惑されたものには救いを",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "下記の条件を一つでも満たしたとき、コイン威力 +1, ダメージ量 +20%\n- 自分の速度が1以下の場合\n- 対象に[DelusionGregBigBird]がある場合\n[WhenUse] 対象に[DelusionGregBigBird]があるなら、このスキルの全コインが[SuperCoin]に変更されてマッチ威力 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [Combustion]3を付与\n[OnSucceedAttack] [Sinking]3を付与",
+            "対象(本体)の体力が25%以下か、対象に[DelusionGregBigBird]があるなら、ダメージ量 +60%\n[OnSucceedAttack] 対象に[DelusionGregBigBird]があるなら、このコイン最終ダメージ量の60%だけ憂鬱ダメージを与える"
+          ]
+        },
+        {
+          "desc": "下記の条件を一つでも満たしたとき、コイン威力 +1, ダメージ量 +40%\n- 対象の速度が自分より3以上高い場合\n- 自分の速度が1以下の場合\n- 対象に[DelusionGregBigBird]がある場合\n[WhenUse] 対象の[Sinking]と[Combustion]の合計が6以上なら、コイン威力 +1\n[WhenUse] 対象に[DelusionGregBigBird]があるなら、このスキルの全コインが[SuperCoin]に変更されてマッチ威力 +3\n[EndSkill] 対象が死亡するか、対象の[DelusionGregBigBird]が3なら、次のターンに[PlusCoinValueUp]1を得る (1ターンにつき1回)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion]回数が1増加\n[OnSucceedAttack] [Sinking]回数が3増加",
+            "[OnSucceedAttack] [Combustion]3を付与\n[OnSucceedAttack] [Sinking]3を付与",
+            "対象(本体)の体力が25%以下か、対象に[DelusionGregBigBird]があるなら、ダメージ量 +60%\n[OnSucceedAttack] 対象に[DelusionGregBigBird]があるなら、このコイン最終ダメージ量の80%だけ憂鬱ダメージを与える"
+          ]
+        }
+      ]
+    },
+    "1121404": {
+      "name": "羽根を燃やして作った芯",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [LanternGregBigBird]が8になるように獲得し、獲得した数値1につき体力最大値の1%ずつ体力ダメージを受ける (この効果で体力が1未満にならない)\n[EndBattle] 自分を除く速度が最も遅い味方(自分の[Binding] ÷ 3)名へ、次のターンに[Agility]1を付与 (1ターンにつき1回、小数点切り捨て)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [LanternGregBigBird]が8になるように獲得し、獲得した数値1につき体力最大値の1%ずつ体力ダメージを受ける (この効果で体力が1未満にならない)\n[EndBattle] 自分を除く速度が最も遅い味方(自分の[Binding] ÷ 2)名へ、次のターンに[Agility]1を付与 (1ターンにつき1回、小数点切り捨て)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121402": {
+      "name": "眩惑のランプ",
+      "desc": "ターン開始時、[LanternGregBigBird]1を得る\n\n速度の最小・最大値が外部効果の影響で変動しない\n\nスキル指定時、速度と関係なく攻撃スキルの攻撃対象を自分に変更できる (集中戦闘専用)\n\n[Agility]を得るとき、代わりに[ParryingResultUp]1を得る (1ターンにつき1回)\n- 以降、このターンに[Agility]を獲得できない"
+    },
+    "1121403": {
+      "name": "E.G.O装備 熟練マニュアル",
+      "desc": "ターン開始時、E.G.O装備を着用した味方1名につき[DefenseUp]1を得る (最大3)\n\n味方死亡時、次のターンに[PenetrateDamageUp]2を得る (1ターンにつき1回)"
+    },
+    "1121401": {
+      "name": "灯りのような眼",
+      "desc": "戦闘開始時、[LanternGregBigBird]1を得る\n\n戦闘開始時、[DelusionGregBigBird]が付与された敵がいるなら、精神力を3回復\n\nターン終了時、以下の条件に含まれない味方のうち編成順が最も早い味方へ、次のターンに[ObedienceGregBigBird]を付与\n- 自分自身\n- [ObedienceGregBigBird]を保有した味方\n- パニック/侵蝕などの精神力の回復ができない味方"
+    },
+    "1121411": {
+      "name": "灯りのような眼",
+      "desc": "戦闘開始時、憂鬱共鳴2につき[LanternGregBigBird]1を得る (最大3)\n\n戦闘開始時、[DelusionGregBigBird]が付与された敵がいるなら、精神力を5回復\n\nターン終了時、以下の条件に含まれない味方のうち編成順が最も早い味方へ、次のターンに[ObedienceGregBigBird]を付与\n- 自分自身\n- [ObedienceGregBigBird]を保有した味方\n- パニック/侵蝕などの精神力の回復ができない味方"
+    },
+    "1121421": {
+      "name": "まだ救うべき命が残ってたのか",
+      "desc": "ターン終了時、マイナス効果を保有した味方のうち編成順が最も早い対象に下記の効果を適用\n- 次のターンに最左端スロットが[Aggro]4を得る\n- 次のターンに[HitDamageUp]1を得る"
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "name": "蜘蛛の巣\n小指の子方",
+  "skills": {
+    "1101501": {
+      "name": "連撃",
+      "descs": [
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]1を得る",
+            "[OnSucceedAttack] [Breath]2を得る\n[OnSucceedAttack] [Laceration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が3増加\n[WhenUse] 自分の[Breath]が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Breath]2を得る\n[OnSucceedAttack] [Laceration]回数が1増加\n[OnSucceedAttack] 次のターンに[Agility]1を得る(1ターンにつき1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 自分の[Breath]回数が3増加\n[WhenUse] 自分の[Breath]6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Breath]2を得る\n[OnSucceedAttack] [Laceration]回数が2増加\n[OnSucceedAttack] 次のターンに[Agility]1を得る(1ターンにつき1回)\n[CriticalOnSucceedAttackHead] 次のターンに[Agility]1を得る(1ターンにつき1回)"
+          ]
+        }
+      ]
+    },
+    "1101502": {
+      "name": "無名斬",
+      "descs": [
+        {
+          "desc": "[WideAreaRampage]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]3を得る\n[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "クリティカルダメージ量 +10%\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 自分の[Breath]が6以上なら、基本威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]3を得る\n[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "クリティカルダメージ量 +10%\n[OnSucceedAttack] [Laceration]1を付与\n[CriticalOnSucceedAttackHead] このコインを再使用 (スキルごとに1回)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 自分の[Breath]6につき、基本威力 +1 (最大2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath]3を得る\n[OnSucceedAttack] 自分の[Breath]回数が1増加",
+            "クリティカルダメージ量 +10%\n[OnSucceedAttack] 自分の[Breath]回数が1増加\n[OnSucceedAttack] [Laceration]2を付与\n[CriticalOnSucceedAttackHead] このコインを再使用(スキルごとに1回)\n[ReUseOnSucceedAttackHead] 自分の[LittleFingerID]が10以上なら、このコインを再使用(スキルごとに1回)"
+          ]
+        }
+      ]
+    },
+    "1101503": {
+      "name": "落星一殺",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "このスキルの攻撃加重値より攻撃対象数が少ない場合、1体につきダメージ量 +30% (集中戦闘の場合は部位で判定)\n[WhenUse] 自分の[LittleFingerID]が20なら、全コインが[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]4につき、コイン威力 +1 (最大3)\n[WhenUse] 自分の[LittleFingerID]4につき、基本威力 +1 (最大3)\n[WhenUse] [Breath]5を得る\n\n[BeforeAttack] 自分の[LittleFingerID]10につき、加重値 +1 (最大2)\n[EndSkill] このスキル効果で増加した加重値1につき、[LittleFingerID]を7消耗",
+          "coinDescs": [
+            "クリティカルダメージ量 +50%\n[OnSucceedAttack] [Laceration]3を付与\n[CriticalOnSucceedAttackHead] このコインの最終ダメージ量の25%だけ、斬撃ダメージを与える"
+          ]
+        },
+        {
+          "desc": "このスキルの攻撃加重値より攻撃対象数が少ない場合、1体につきダメージ量 +50% (集中戦闘の場合は部位で判定)\n[WhenUse] 自分の[LittleFingerID]が20なら、全コインが[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]4につき、コイン威力 +1 (最大5)\n[WhenUse] 自分の[LittleFingerID]4につき、基本威力 +1 (最大5)\n[WhenUse] [Breath]7を得る\n\n[BeforeAttack] 自分の[LittleFingerID]10につき、加重値 +1 (最大2)\n[EndSkill] このスキル効果で増加した加重値1につき、[LittleFingerID]を5消耗",
+          "coinDescs": [
+            "クリティカルダメージ量 +70%\n[OnSucceedAttack] [Laceration]5を付与\n[CriticalOnSucceedAttackHead] このコインの最終ダメージ量の25%だけ、斬撃ダメージを与える"
+          ]
+        }
+      ]
+    },
+    "1101504": {
+      "name": "守",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\nターン開始時、自分の[Breath]威力が25以上なら「回」に変更される\n\n[StartBattle] [Breath]6を得る (1ターンにつき1回)\n[StartBattle] 自分の[Breath]回数が1増加 (1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\nターン開始時、自分の[Breath]威力が25以上なら「回」に変更される\n\n[StartBattle] [Breath]8を得る (1ターンにつき1回)\n[StartBattle] 自分の[Breath]回数が2増加 (1ターンにつき1回)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1101505": {
+      "name": "回",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分の[LittleFingerID]の数値だけバリアを得る (1ターンにつき1回)\n[StartBattle] 自分の[Breath]回数が4増加 (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 自分の[LittleFingerID]の数値だけバリアを得る (1ターンにつき1回)\n[StartBattle] 自分の[Breath]回数が4増加 (1ターンにつき1回)\n[OnSucceedEvade] 次のターンに[CriticalDamageUp]1を得る (1ターンにつき最大2回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101501": {
+      "name": "整剣",
+      "desc": "戦闘開始時、(傲慢共鳴数 ÷ 2) +1だけ[Breath]を得る (最大4, 小数点切り捨て)\n\n戦闘終了時、自分の[Breath]威力が20以上なら、自分の[Breath]回数が1増加"
+    },
+    "1101502": {
+      "name": "精神一到",
+      "desc": "ターン終了時、25を超過した分の[Breath]威力を最大15まで[LittleFingerID]に変換\n\n戦闘開始時、自分がこのターンに(E.G.Oスキルを含めて)攻撃スキルを装着していなければ、精神力を5回復して次のターンに[SlashResultUp]1を得る"
+    },
+    "1101521": {
+      "name": "静念",
+      "desc": "速度が最も高い味方1名が守備スキルを装着している場合、戦闘開始時に精神力を5回復、バリア5を得る"
+    }
+  }
+}

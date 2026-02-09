@@ -1,0 +1,129 @@
+{
+  "name": "로보토미 E.G.O::\n램프",
+  "skills": {
+    "1121401": {
+      "name": "영거리 주시",
+      "descs": [
+        {
+          "desc": "[WhenUse] 다음 턴에 [Binding] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {
+          "desc": "아래 조건 중 하나라도 만족 시, 코인 위력 +1\n- 자신의 속도가 1 이하인 경우\n- 대상에게 [DelusionGregBigBird]이 있는 경우\n[WhenUse] 다음 턴에 [Binding] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 1 부여",
+            "[OnSucceedAttack] [Sinking] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "아래 조건 중 하나라도 만족 시, 코인 위력 +1\n- 대상의 속도가 자신보다 3 이상 높은 경우\n- 자신의 속도가 1 이하인 경우\n- 대상에게 [DelusionGregBigBird]이 있는 경우\n[WhenUse] 대상의 [Sinking]과 [Combustion]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 다음 턴에 [Binding] 1 얻음",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [Sinking] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1121402": {
+      "name": "보이지 않는 것으로 보이는 것을 부수고",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가\n[OnSucceedAttack] 이 코인 최종 피해량의 30%만큼 타격 피해",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[OnSucceedAttack] 이 코인 최종 피해량의 30%만큼 타격 피해",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            ""
+          ]
+        },
+        {
+          "desc": "아래 조건 중 하나라도 만족 시, 합 위력 +2\n- 자신의 속도가 1 이하인 경우\n- 대상에게 [DelusionGregBigBird]이 있는 경우",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가\n[OnSucceedAttack] 이 코인 최종 피해량의 30%만큼 타격 피해",
+            "[OnSucceedAttack] [Sinking] 1 부여\n[OnSucceedAttack] 이 코인 최종 피해량의 30%만큼 타격 피해",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "아래 조건 중 하나라도 만족 시, 합 위력 +2\n- 대상의 속도가 자신보다 3 이상 높은 경우\n- 자신의 속도가 1 이하인 경우\n- 대상에게 [DelusionGregBigBird]이 있는 경우\n[WhenUse] 대상의 [Sinking]과 [Combustion]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 3 증가\n[OnSucceedAttack] 이 코인 최종 피해량의 30%만큼 타격 피해",
+            "[OnSucceedAttack] [Sinking] 2 부여\n[OnSucceedAttack] 이 코인 최종 피해량의 30%만큼 타격 피해",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttack] [Combustion] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1121403": {
+      "name": "등불에 현혹된 것에는 구원을",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "아래 조건 중 하나라도 만족 시, 코인 위력 +1, 피해량 +20%\n- 자신의 속도가 1 이하인 경우\n- 대상에게 [DelusionGregBigBird]이 있는 경우\n[WhenUse] 대상에게 [DelusionGregBigBird]이 있으면, 이 스킬의 모든 코인이 [SuperCoin]으로 변경되고 합 위력 +3",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[OnSucceedAttack] [Combustion] 3 부여\n[OnSucceedAttack] [Sinking] 3 부여",
+            "대상(본체)의 체력이 25% 이하거나 대상에게 [DelusionGregBigBird]이 있으면, 피해량 +60%\n[OnSucceedAttack] 대상에게 [DelusionGregBigBird]이 있으면, 이 코인 최종 피해량의 60%만큼 우울 피해"
+          ]
+        },
+        {
+          "desc": "아래 조건 중 하나라도 만족 시, 코인 위력 +1, 피해량 +40%\n- 대상의 속도가 자신보다 3 이상 높은 경우\n- 자신의 속도가 1 이하인 경우\n- 대상에게 [DelusionGregBigBird]이 있는 경우\n[WhenUse] 대상의 [Sinking]과 [Combustion]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 대상에게 [DelusionGregBigBird]이 있으면, 이 스킬의 모든 코인이 [SuperCoin]으로 변경되고 합 위력 +3\n[EndSkill] 대상이 사망했거나 대상의 [DelusionGregBigBird]이 3이면, 다음 턴에 [PlusCoinValueUp] 1 얻음 (턴당 1회)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Combustion] 횟수 1 증가\n[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [Combustion] 3 부여\n[OnSucceedAttack] [Sinking] 3 부여",
+            "대상(본체)의 체력이 25% 이하거나 대상에게 [DelusionGregBigBird]이 있으면, 피해량 +60%\n[OnSucceedAttack] 대상에게 [DelusionGregBigBird]이 있으면, 이 코인 최종 피해량의 80%만큼 우울 피해"
+          ]
+        }
+      ]
+    },
+    "1121404": {
+      "name": "깃털을 태워 만든 심지",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [LanternGregBigBird]를 8이 되도록 얻고, 얻은 수치 1당 최대 체력의 1%만큼 체력 피해 입음 (이 효과로 체력이 1 미만이 되지 않음)\n[EndBattle] 자신을 제외한 속도가 가장 낮은 아군 (자신의 [Binding] / 3)명에게 다음 턴에 [Agility] 1 부여 (턴당 1회. 소수점 버림)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n[StartBattle] [LanternGregBigBird]를 8이 되도록 얻고, 얻은 수치 1당 최대 체력의 1%만큼 체력 피해 입음 (이 효과로 체력이 1 미만이 되지 않음)\n[EndBattle] 자신을 제외한 속도가 가장 낮은 아군 (자신의 [Binding] / 2)명에게 다음 턴에 [Agility] 1 부여 (턴당 1회. 소수점 버림)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1121402": {
+      "name": "현혹의 램프",
+      "desc": "턴 시작 시 [LanternGregBigBird] 1 얻음\n\n속도의 최솟값과 최댓값이 외부 효과의 영향으로 변동되지 않음\n\n스킬 지정 시 속도에 관계 없이 공격 스킬의 공격 대상을 자신으로 변경할 수 있음 (집중 전투 전용)\n\n[Agility]을 얻을 때, 대신 [ParryingResultUp] 1 얻음 (턴당 1회)\n- 이후 이번 턴에 [Agility]을 얻을 수 없음"
+    },
+    "1121403": {
+      "name": "E.G.O 장비 숙련 매뉴얼",
+      "desc": "턴 시작 시 E.G.O 장비를 착용한 아군 1명당, [DefenseUp] 1 얻음 (최대 3)\n\n아군 사망 시 다음 턴에 [PenetrateDamageUp] 2 얻음 (턴당 1회)"
+    },
+    "1121401": {
+      "name": "등불과 같은 눈",
+      "desc": "전투 시작 시 [LanternGregBigBird] 1 얻음\n\n전투 시작 시 [DelusionGregBigBird]이 부여된 적이 있으면, 정신력 3 회복\n\n턴 종료 시 아래 조건에 포함되지 않은 아군 중 편성 순서가 가장 빠른 아군에게 다음 턴에 [ObedienceGregBigBird] 부여\n- 자기 자신\n- [ObedienceGregBigBird]을 보유한 아군\n- 패닉/침식 등의 정신력 회복이 불가능한 아군"
+    },
+    "1121411": {
+      "name": "등불과 같은 눈",
+      "desc": "전투 시작 시 우울 공명 2당, [LanternGregBigBird] 1 얻음 (최대 3)\n\n전투 시작 시 [DelusionGregBigBird]이 부여된 적이 있으면, 정신력 5 회복\n\n턴 종료 시 아래 조건에 포함되지 않은 아군 중 편성 순서가 가장 빠른 아군에게 다음 턴에 [ObedienceGregBigBird] 부여\n- 자기 자신\n- [ObedienceGregBigBird]을 보유한 아군\n- 패닉/침식 등의 정신력 회복이 불가능한 아군"
+    },
+    "1121421": {
+      "name": "아직 구해야 할 생명이 더 남아있었나",
+      "desc": "턴 종료 시 부정적인 효과를 보유한 아군 중 편성 순서가 가장 빠른 아군에게 아래 효과 적용\n- 다음 턴에 가장 왼쪽 슬롯이 [Aggro] 4 얻음\n- 다음 턴에 [HitDamageUp] 1 얻음"
+    }
+  }
+}

@@ -1,0 +1,216 @@
+{
+  "updatedDate": 20260205,
+  "skillKeywordList": [
+    "Breath",
+    "Laceration"
+  ],
+  "panicType": 9999,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 66,
+    "incrementByLevel": 2.28
+  },
+  "defCorrection": -2,
+  "minSpeedList": [
+    3,
+    3,
+    4,
+    4
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    6,
+    6
+  ],
+  "season": 7,
+  "unitKeywordList": [
+    "SMALL",
+    "SPIDER_HOUSE"
+  ],
+  "staggerList": [
+    65,
+    35
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1101501,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 1,
+            "defaultValue": 3,
+            "scale": 3,
+            "coinString": "CC"
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1101502,
+        "skillTier": 2,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "SLASH",
+            "targetNum": 3,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "scale": 5,
+            "coinString": "CC"
+          },
+          {
+            "scale": 5
+          },
+          {
+            "defaultValue": 6
+          },
+          {
+            "scale": 5
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1101503,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "C"
+          },
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 6,
+            "specialDuelIndex": 0,
+            "scale": 12
+          },
+          {
+            "defaultValue": 8,
+            "scale": 14
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1101504,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "specialDuelIndex": 1,
+            "skillLevelCorrection": 2,
+            "defaultValue": 2,
+            "scale": 8,
+            "coinString": "U"
+          },
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "defaultValue": 3,
+            "iconID": "1101504_4",
+            "scale": 10
+          }
+        ]
+      },
+      {
+        "id": 1101505,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 10,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {
+            "attributeType": "INDIGO",
+            "iconID": "1101505_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1101502
+      ],
+      [
+        1101502,
+        1101501
+      ],
+      [],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1101521
+      ],
+      []
+    ],
+    "conditions": {
+      "1101501": {
+        "type": "RESONANCE",
+        "values": {
+          "INDIGO": 2
+        }
+      },
+      "1101521": {
+        "type": "RESONANCE",
+        "values": {
+          "INDIGO": 2
+        }
+      }
+    }
+  }
+}

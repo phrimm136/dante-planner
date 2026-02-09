@@ -1,0 +1,130 @@
+{
+  "name": "거미집\n소지 제자",
+  "skills": {
+    "1101501": {
+      "name": "연격[連擊]",
+      "descs": [
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 1 얻음",
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttack] [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 3 증가\n[WhenUse] 자신의 [Breath]이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttack] [Laceration] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음 (턴당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 자신의 [Breath] 횟수 3 증가\n[WhenUse] 자신의 [Breath] 6당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Breath] 2 얻음\n[OnSucceedAttack] [Laceration] 횟수 2 증가\n[OnSucceedAttack] 다음 턴에 [Agility] 1 얻음 (턴당 1회)\n[CriticalOnSucceedAttackHead] 다음 턴에 [Agility] 1 얻음 (턴당 1회)"
+          ]
+        }
+      ]
+    },
+    "1101502": {
+      "name": "무명참[無名斬]",
+      "descs": [
+        {
+          "desc": "[WideAreaRampage]",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음\n[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +10%\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 자신의 [Breath]이 6 이상이면, 기본 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음\n[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +10%\n[OnSucceedAttack] [Laceration] 1 부여\n[CriticalOnSucceedAttackHead] 이 코인 재사용 (스킬당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 자신의 [Breath] 6당, 기본 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] [Breath] 3 얻음\n[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가",
+            "크리티컬 피해량 +10%\n[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[OnSucceedAttack] [Laceration] 2 부여\n[CriticalOnSucceedAttackHead] 이 코인 재사용 (스킬당 1회)\n[ReUseOnSucceedAttackHead] 자신의 [LittleFingerID]가 10 이상이면, 이 코인 재사용 (스킬당 1회)"
+          ]
+        }
+      ]
+    },
+    "1101503": {
+      "name": "낙성일살[落星一殺]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "이 스킬 공격 가중치보다 낮은 공격 대상 1당 피해량 +30% (집중 전투의 경우, 부위로 판정)\n[WhenUse] 자신의 [LittleFingerID]가 20이면, 모든 코인이 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 4당 코인 위력 +1 (최대 3)\n[WhenUse] 자신의 [LittleFingerID] 4당 기본 위력 +1 (최대 3)\n[WhenUse] [Breath] 5 얻음\n\n[BeforeAttack] 자신의 [LittleFingerID] 10 당 가중치 +1 (최대 2)\n[EndSkill] 이 스킬 효과로 증가한 가중치 1당 [LittleFingerID] 7 소모",
+          "coinDescs": [
+            "크리티컬 피해량 +50%\n[OnSucceedAttack] [Laceration] 3 부여\n[CriticalOnSucceedAttackHead] 이 코인 최종 피해량의 25%만큼 참격 피해"
+          ]
+        },
+        {
+          "desc": "이 스킬 공격 가중치보다 낮은 공격 대상 1당 피해량 +50% (집중 전투의 경우, 부위로 판정)\n[WhenUse] 자신의 [LittleFingerID]가 20이면, 모든 코인이 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 4당 코인 위력 +1 (최대 5)\n[WhenUse] 자신의 [LittleFingerID] 4당 기본 위력 +1 (최대 5)\n[WhenUse] [Breath] 7 얻음\n\n[BeforeAttack] 자신의 [LittleFingerID] 10 당 가중치 +1 (최대 2)\n[EndSkill] 이 스킬 효과로 증가한 가중치 1당 [LittleFingerID] 5 소모",
+          "coinDescs": [
+            "크리티컬 피해량 +70%\n[OnSucceedAttack] [Laceration] 5 부여\n[CriticalOnSucceedAttackHead] 이 코인 최종 피해량의 25%만큼 참격 피해"
+          ]
+        }
+      ]
+    },
+    "1101504": {
+      "name": "수[守]",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n턴 시작시 자신의 [Breath] 위력이 25 이상이면 ‘회’로 변경됨\n\n[StartBattle] [Breath] 6 얻음 (턴당 1회)\n[StartBattle] 자신의 [Breath] 횟수 1 증가 (턴당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n턴 시작시 자신의 [Breath] 위력이 25 이상이면 ‘회’로 변경됨\n\n[StartBattle] [Breath] 8 얻음 (턴당 1회)\n[StartBattle] 자신의 [Breath] 횟수 2 증가 (턴당 1회)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1101505": {
+      "name": "회[回]",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신의 [LittleFingerID] 수치만큼 보호막 얻음 (턴당 1회)\n[StartBattle] 자신의 [Breath] 횟수 4 증가 (턴당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 자신의 [LittleFingerID] 수치만큼 보호막 얻음 (턴당 1회)\n[StartBattle] 자신의 [Breath] 횟수 4 증가 (턴당 1회)\n[OnSucceedEvade] 다음 턴에 [CriticalDamageUp] 1 얻음 (턴당 최대 2회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101501": {
+      "name": "정검[整劍]",
+      "desc": "전투 시작시, (오만 공명 수 / 2) +1만큼 [Breath] 얻음 (최대 4. 소수점 버림)\n\n전투 종료시 자신의 [Breath] 위력이 20 이상이면, 자신의 [Breath] 횟수 1 증가"
+    },
+    "1101502": {
+      "name": "정신일도",
+      "desc": "턴 종료시 25를 초과하는 [Breath] 위력을 최대 15까지 [LittleFingerID]로 전환\n\n전투 시작시 자신이 이번 턴에 (E.G.O 스킬 포함) 공격 스킬을 장착하지 않았으면, 정신력을 5 회복하고 다음 턴에 [SlashResultUp] 1 얻음"
+    },
+    "1101521": {
+      "name": "정념[靜念]",
+      "desc": "속도가 가장 빠른 아군 1명이 수비 스킬을 장착하고 전투 시작시 정신력 5 회복, 보호막 5 얻음"
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "name": "蜘蛛巢\n小指 子辈",
+  "skills": {
+    "1101501": {
+      "name": "连击",
+      "descs": [
+        {
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加1级[Breath]强度",
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 对目标施加1层[Laceration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 使自身获得3层[Breath]\n[WhenUse] 若自身的[Breath]强度不低于6级，则使本技能的硬币威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 对目标施加1层[Laceration]\n[OnSucceedAttack] 下回合使自身获得1层[Agility](每回合最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 使自身获得3层[Breath]\n[WhenUse] 自身每带有6级[Breath]强度，使本技能的硬币威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度\n[OnSucceedAttack] 对目标施加2层[Laceration]\n[OnSucceedAttack] 下回合使自身获得1层[Agility](每回合最多1次)\n[CriticalOnSucceedAttackHead] 下回合使自身获得1层[Agility](每回合最多1次)"
+          ]
+        }
+      ]
+    },
+    "1101502": {
+      "name": "无名斩",
+      "descs": [
+        {
+          "desc": "[WideAreaRampage]",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加3级[Breath]强度\n[OnSucceedAttack] 使自身获得1层[Breath]",
+            "使本硬币暴击时造成的伤害+10%\n[OnSucceedAttack] 使目标增加1级[Laceration]强度"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 若自身的[Breath]强度不低于6级，则使本技能的基础威力+1",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加3级[Breath]强度\n[OnSucceedAttack] 使自身获得1层[Breath]",
+            "使本硬币暴击时造成的伤害+10%\n[OnSucceedAttack] 使目标增加1级[Laceration]强度\n[CriticalOnSucceedAttackHead] 重复使用本硬币(每个技能最多1次)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] 自身每带有6级[Breath]强度，使本技能的基础威力+1(最多+2)",
+          "coinDescs": [
+            "[OnSucceedAttack] 使自身增加3级[Breath]强度\n[OnSucceedAttack] 使自身获得1层[Breath]",
+            "使本硬币暴击时造成的伤害+10%\n[OnSucceedAttack] 使自身获得1层[Breath]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttackHead] 重复使用本硬币(每个技能最多1次)\n[ReUseOnSucceedAttackHead] 若自身的[LittleFingerID]层数不低于10层，则重复使用本硬币(每个技能最多1次)"
+          ]
+        }
+      ]
+    },
+    "1101503": {
+      "name": "落星一杀",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "本技能的攻击容量高于攻击目标数时，每高于1点，使本技能造成的伤害+30%(若是集中遭遇战，则改为以部位判定)\n[WhenUse] 若自身的[LittleFingerID]层数为20层，则使本技能的所有硬币转化为[SuperCoin]\n[WhenUse] 自身每带有4级[Breath]强度，使本技能的硬币威力+1(最多+3)\n[WhenUse] 自身每带有4层[LittleFingerID]，使本技能的基础威力+1(最多+3)\n[WhenUse] 使自身增加5级[Breath]强度\n\n[BeforeAttack] 自身每带有10层[LittleFingerID]，使本技能的攻击容量+1(最多+2)\n[EndSkill] 通过本技能效果每增加1点攻击容量，使自身消耗7层[LittleFingerID]",
+          "coinDescs": [
+            "使本硬币暴击时造成的伤害+50%\n[OnSucceedAttack] 使目标增加3级[Laceration]强度\n[CriticalOnSucceedAttackHead] 对目标造成本硬币最终伤害量25%的斩击伤害"
+          ]
+        },
+        {
+          "desc": "本技能的攻击容量高于攻击目标数时，每高于1点，使本技能造成的伤害+50%(若是集中遭遇战，则改为以部位判定)\n[WhenUse] 若自身的[LittleFingerID]层数为20层，则使本技能的所有硬币转化为[SuperCoin]\n[WhenUse] 自身每带有4级[Breath]强度，使本技能的硬币威力+1(最多+5)\n[WhenUse] 自身每带有4层[LittleFingerID]，使本技能的基础威力+1(最多+5)\n[WhenUse] 使自身增加7级[Breath]强度\n\n[BeforeAttack] 自身每带有10层[LittleFingerID]，使本技能的攻击容量+1(最多+2)\n[EndSkill] 通过本技能效果每增加1点攻击容量，使自身消耗5层[LittleFingerID]",
+          "coinDescs": [
+            "使本硬币暴击时造成的伤害+70%\n[OnSucceedAttack] 使目标增加5级[Laceration]强度\n[CriticalOnSucceedAttackHead] 对目标造成本硬币最终伤害量25%的斩击伤害"
+          ]
+        }
+      ]
+    },
+    "1101504": {
+      "name": "守",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\n回合开始时，若自身的[Breath]强度不低于25级，则使本技能转化为“回”\n\n[StartBattle] 使自身增加6级[Breath]强度(每回合最多1次)\n[StartBattle] 使自身获得1层[Breath](每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\n回合开始时，若自身的[Breath]强度不低于25级，则使本技能转化为“回”\n\n[StartBattle] 使自身增加8级[Breath]强度(每回合最多1次)\n[StartBattle] 使自身获得2层[Breath](每回合最多1次)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1101505": {
+      "name": "回",
+      "descs": [
+        {
+          "desc": "[StartBattle] 使自身获得相当于自身[LittleFingerID]层数的护盾(每回合最多1次)\n[StartBattle] 使自身获得4层[Breath](每回合最多1次)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] 使自身获得相当于自身[LittleFingerID]层数的护盾(每回合最多1次)\n[StartBattle] 使自身获得4层[Breath](每回合最多1次)\n[OnSucceedEvade] 下回合使自身获得1层[CriticalDamageUp](每回合最多2次)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101501": {
+      "name": "整剑",
+      "desc": "战斗开始时，使自身增加(傲慢共鸣数/2)+1级[Breath]强度(最多4级，向下取整)\n\n战斗结束时，若自身的[Breath]强度不低于20级，则使自身获得1层[Breath]"
+    },
+    "1101502": {
+      "name": "精神一到",
+      "desc": "回合结束时，使自身至多15级超过25级的[Breath]强度转化为[LittleFingerID]\n\n战斗开始时，若本回合自身未装备攻击技能(包括E.G.O技能)，则使自身恢复5点理智值，下回合使自身获得1层[SlashResultUp]"
+    },
+    "1101521": {
+      "name": "静念",
+      "desc": "若速度值最高的1名友方单位装备了守备技能，则战斗开始时使其恢复5点理智值并获得5点护盾"
+    }
+  }
+}

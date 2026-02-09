@@ -1,0 +1,130 @@
+{
+  "name": "The House of Spiders:\nThe Pinky Apprentice",
+  "skills": {
+    "1101501": {
+      "name": "Chainstrike [連擊]",
+      "descs": [
+        {
+          "desc": "[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 1 [Breath]",
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Inflict +1 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Gain +3 [Breath] Count\n[WhenUse] At 6+ [Breath], Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Inflict +1 [Laceration] Count\n[OnSucceedAttack] Gain 1 [Agility] next turn (once per turn)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Gain +3 [Breath] Count\n[WhenUse] Coin Power +1 for every 6 [Breath] on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Gain 2 [Breath]\n[OnSucceedAttack] Inflict +2 [Laceration] Count\n[OnSucceedAttack] Gain 1 [Agility] next turn (once per turn)\n[CriticalOnSucceedAttackHead] Gain 1 [Agility] next turn (once per turn)"
+          ]
+        }
+      ]
+    },
+    "1101502": {
+      "name": "Nameless Slash [無名斬]",
+      "descs": [
+        {
+          "desc": "[WideAreaRampage]",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [Breath]\n[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +10% damage on Critical Hit\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] At 6+ [Breath], Base Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [Breath]\n[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +10% damage on Critical Hit\n[OnSucceedAttack] Inflict 1 [Laceration]\n[CriticalOnSucceedAttackHead] Reuse this Coin (once per Skill)"
+          ]
+        },
+        {},
+        {
+          "desc": "[WideAreaRampage]\n[WhenUse] Base Power +1 for every 6 [Breath] on self (max 2)",
+          "coinDescs": [
+            "[OnSucceedAttack] Gain 3 [Breath]\n[OnSucceedAttack] Gain +1 [Breath] Count",
+            "Deal +10% damage on Critical Hit\n[OnSucceedAttack] Gain +1 [Breath] Count\n[OnSucceedAttack] Inflict 2 [Laceration]\n[CriticalOnSucceedAttackHead] Reuse this Coin (once per Skill)\n[ReUseOnSucceedAttackHead] At 10+ [LittleFingerID], Reuse this Coin (once per Skill)"
+          ]
+        }
+      ]
+    },
+    "1101503": {
+      "name": "Fallstar Slayer [落星一殺]",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +30% damage for every excess Atk Weight beyond the # of actual targets (in Focused Encounters, the Part)\n[WhenUse] At 20 [LittleFingerID], convert all Coins of this Skill into [SuperCoin]s\n[WhenUse] Coin Power +1 for every 4 [Breath] on self (max 3)\n[WhenUse] Base Power +1 for every 4 [LittleFingerID] on self (max 3)\n[WhenUse] Gain 5 [Breath]\n\n[BeforeAttack] Atk Weight +1 for every 10 [LittleFingerID] on self (max 2)\n[EndSkill] Consume 7 [LittleFingerID] for every Atk Weight gained due to this Skill's effect",
+          "coinDescs": [
+            "Deal +50% damage on Critical Hit\n[OnSucceedAttack] Inflict 3 [Laceration]\n[CriticalOnSucceedAttackHead] Deal (25% of this Coin's final damage) Slash damage"
+          ]
+        },
+        {
+          "desc": "Deal +50% damage for every excess Atk Weight beyond the # of actual targets (in Focused Encounters, the Part)\n[WhenUse] At 20 [LittleFingerID], convert all Coins of this Skill into [SuperCoin]s\n[WhenUse] Coin Power +1 for every 4 [Breath] on self (max 5)\n[WhenUse] Base Power +1 for every 4 [LittleFingerID] on self (max 5)\n[WhenUse] Gain 7 [Breath]\n\n[BeforeAttack] Atk Weight +1 for every 10 [LittleFingerID] on self (max 2)\n[EndSkill] Consume 5 [LittleFingerID] for every Atk Weight gained due to this Skill's effect",
+          "coinDescs": [
+            "Deal +70% damage on Critical Hit\n[OnSucceedAttack] Inflict 5 [Laceration]\n[CriticalOnSucceedAttackHead] Deal (25% of this Coin's final damage) Slash damage"
+          ]
+        }
+      ]
+    },
+    "1101504": {
+      "name": "Defend [守]",
+      "descs": [
+        {
+          "desc": "[CanDuelGuard]\nTurn Start: At 25+ [Breath], change this Skill to 'Swerve'\n\n[StartBattle] Gain 6 [Breath] (once per turn)\n[StartBattle] Gain +1 [Breath] Count (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[CanDuelGuard]\nTurn Start: At 25+ [Breath], change this Skill to 'Swerve'\n\n[StartBattle] Gain 8 [Breath] (once per turn)\n[StartBattle] Gain +2 [Breath] Count (once per turn)",
+          "coinDescs": [
+            "[SuperCoin]"
+          ]
+        }
+      ]
+    },
+    "1101505": {
+      "name": "Swerve [回]",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain Shield equal to [LittleFingerID] Stack (once per turn)\n[StartBattle] Gain +4 [Breath] Count (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] Gain Shield equal to [LittleFingerID] Stack (once per turn)\n[StartBattle] Gain +4 [Breath] Count (once per turn)\n[OnSucceedEvade] Gain 1 [CriticalDamageUp] next turn (max 2 times per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1101501": {
+      "name": "The Orthodox Blade [整劍]",
+      "desc": "Combat Start: Gain ((Pride Reson. / 2) + 1) [Breath] (max 4, rounded down)\n\nCombat End: At 20+ [Breath], gain +1 [Breath] Count"
+    },
+    "1101502": {
+      "name": "Singular Focus of the Mind",
+      "desc": "Turn End: Any excess [Breath] Potency gained past 25 will be converted to [LittleFingerID] (max 15)\n\nCombat Start: If this unit did not equip Attack Skills (including E.G.O Skills) this turn, heal 5 SP and gain 1 [SlashResultUp] next turn"
+    },
+    "1101521": {
+      "name": "Tranquility [靜念]",
+      "desc": "The ally with the fastest Speed heals 5 SP and gains 5 Shield when starting combat with a Defense Skill equipped"
+    }
+  }
+}

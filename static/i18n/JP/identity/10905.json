@@ -65,7 +65,7 @@
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が2増加",
             "[OnSucceedAttackHead] [Vibration] 2を付与\n[OnSucceedAttack] [VibrationExplosion]。\n振動爆発時、[Vibration] 回数が1減少",
-            "[OnSucceedAttack] [VibrationExplosion]。\n振動爆発時、[Vibration] 回数が1減少\n[OnSucceedAttack] 対象が混乱 状態なら、ダメージ量25%分の追加ダメージを与える"
+            "[OnSucceedAttack] [VibrationExplosion]。\n振動爆発時、[Vibration] 回数が1減少\n[OnSucceedAttack] 対象が混乱 状態なら、ダメージ量25%だけ追加ダメージを与える"
           ]
         },
         {}
