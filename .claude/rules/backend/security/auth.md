@@ -12,6 +12,8 @@ paths:
 - **Secrets in env vars** - Never hardcode
 - **Verify ownership server-side** - Don't trust client IDs
 - **Skip JWT filter on ASYNC dispatch** - Prevents 403 on async
+- **ThreadLocal SecureRandom** - Use above 100 req/sec to prevent contention
+- **PEM key strength validation** - Verify minimum 2048-bit RSA at startup
 
 ## Forbidden Patterns
 
@@ -69,3 +71,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 ```
 
 **Reference:** `SecurityConfig.java`
+
+## Crypto Performance Patterns
+
+**ThreadLocal SecureRandom:** Use ThreadLocal.withInitial(SecureRandom::new) above 100 req/sec to prevent contention. Shared instance is synchronized.
+
+**PEM Key Validation:** Verify RSA key strength (minimum 2048 bits) at startup using RSAPrivateKey.getModulus().bitLength(). Fail-fast prevents weak keys.
+
+**Reference:** `JwtTokenService.java`, `JwtProperties.java`

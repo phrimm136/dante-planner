@@ -43,3 +43,13 @@ class UserServiceTest {
 ```
 
 **Reference:** `PlannerServiceTest.java`
+
+## Secondary Test Instance Pattern
+
+**Problem:** Tests needing different configuration (expired tokens, invalid signatures) create inline instances.
+
+**Solution:** Store primary test config as instance variables (keypair, keys). Secondary instances reuse for most fields, customize only what differs.
+
+**Example:** Invalid-signature test needs DIFFERENT RSA keypair. Expired-token test reuses SAME keypair, changes only expiry to 1ms.
+
+**Reference:** `JwtTokenServiceTest.java` (lines 182-186, 209-213)
