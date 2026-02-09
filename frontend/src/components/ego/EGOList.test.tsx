@@ -150,7 +150,7 @@ describe('EGOList', () => {
         { wrapper: createWrapper() }
       )
 
-      expect(screen.getByText(/No EGOs match/)).toBeInTheDocument()
+      expect(screen.getByText(/No E\.G\.Os match/)).toBeInTheDocument()
     })
   })
 
@@ -291,7 +291,7 @@ describe('EGOList', () => {
       )
 
       // Search returns no results when mappings are loading
-      expect(screen.getByText(/No EGOs match/)).toBeInTheDocument()
+      expect(screen.getByText(/No E\.G\.Os match/)).toBeInTheDocument()
     })
 
     it('filters by keyword search when mappings are loaded', () => {
