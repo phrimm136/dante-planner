@@ -38,7 +38,7 @@ import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode
 // Project types & schemas
 import type { MDCategory } from '@/lib/constants'
 import type { NoteContent } from '@/types/NoteEditorTypes'
-import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
+import type { SaveablePlanner, MDPlannerContent, ConflictResolutionChoice } from '@/types/PlannerTypes'
 import type { DecodedDeck } from '@/lib/deckCode'
 
 // Store
@@ -70,6 +70,7 @@ import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSec
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import { ConflictResolutionDialog } from '@/components/planner/ConflictResolutionDialog'
+import { SaveSyncOffWarningDialog } from '@/components/planner/SaveSyncOffWarningDialog'
 
 const MAX_TITLE_BYTES = 256
 
@@ -245,6 +246,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
+  const [showSaveWarning, setShowSaveWarning] = useState(false)
 
   // ============================================================================
   // Derived State
@@ -461,6 +463,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   }
 
   const handleSave = async () => {
+    // Check if sync is disabled and plan is published
+    if (syncEnabled === false && isPublished) {
+      // Show warning dialog for sync-off save
+      setShowSaveWarning(true)
+      return
+    }
+
     // Mark as intentional navigation to skip "leave page?" popup
     isIntentionalNavigationRef.current = true
 
@@ -479,13 +488,72 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     }
   }
 
+  const handleSaveWithSync = async () => {
+    setShowSaveWarning(false)
+
+    // Mark as intentional navigation to skip "leave page?" popup
+    isIntentionalNavigationRef.current = true
+
+    const success = await save({ forceSync: true })
+    if (success) {
+      toast.success(t('pages.plannerMD.save.success'))
+      // Navigate to appropriate viewer page based on published status
+      if (isPublished) {
+        void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
+      } else {
+        void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
+      }
+    } else {
+      // Reset intentional navigation flag if save failed
+      isIntentionalNavigationRef.current = false
+    }
+  }
+
+  const handleConflictResolution = async (choice: ConflictResolutionChoice) => {
+    // Mark as intentional navigation to skip "leave page?" popup
+    isIntentionalNavigationRef.current = true
+
+    const success = await resolveConflict(choice)
+    if (success) {
+      // Show appropriate success message based on choice
+      if (choice === 'overwrite') {
+        toast.success(t('pages.plannerMD.conflict.overwriteSuccess'))
+      } else if (choice === 'discard') {
+        toast.success(t('pages.plannerMD.conflict.discardSuccess'))
+      } else if (choice === 'both') {
+        toast.success(t('pages.plannerMD.conflict.keepBothSuccess'))
+      }
+
+      // For 'both', onKeepBothCreated callback handles navigation to new planner
+      // For 'overwrite' and 'discard', navigate to viewer page
+      if (choice !== 'both') {
+        // Navigate to appropriate viewer page based on published status
+        if (isPublished) {
+          void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
+        } else {
+          void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
+        }
+      }
+    } else {
+      // Reset intentional navigation flag if resolution failed
+      isIntentionalNavigationRef.current = false
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
       <ConflictResolutionDialog
         open={errorCode === 'conflict'}
         conflictState={conflictState}
-        onChoice={resolveConflict}
+        onChoice={handleConflictResolution}
         isResolving={isSaving}
+      />
+
+      <SaveSyncOffWarningDialog
+        open={showSaveWarning}
+        onOpenChange={setShowSaveWarning}
+        onConfirm={handleSaveWithSync}
+        isPending={isSaving}
       />
 
       <div className="flex items-center justify-end gap-2 mb-4">

@@ -139,8 +139,8 @@ export interface PlannerSaveResult {
   conflictState: ConflictState | null
   /** Clear the current error */
   clearError: () => void
-  /** Trigger manual save, returns true if succeeded. Pass published override for togglePublish. */
-  save: (options?: { published?: boolean }) => Promise<boolean>
+  /** Trigger manual save, returns true if succeeded. Pass published override for togglePublish. Pass forceSync to upload even when auto-sync is disabled. */
+  save: (options?: { published?: boolean; forceSync?: boolean }) => Promise<boolean>
   /** Resolve a conflict (overwrite local or discard and reload), returns true if succeeded */
   resolveConflict: (choice: ConflictResolutionChoice) => Promise<boolean>
   /** Current sync version (for debugging) */
@@ -360,7 +360,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * - Always saves to IndexedDB via SaveAdapter
    * - If authenticated AND syncEnabled, also syncs to server via SyncAdapter
    */
-  const performSave = useCallback(async (status: 'draft' | 'saved', force?: boolean, publishedOverride?: boolean): Promise<boolean> => {
+  const performSave = useCallback(async (status: 'draft' | 'saved', force?: boolean, publishedOverride?: boolean, forceSync?: boolean): Promise<boolean> => {
     if (!isClient) return false
 
     // Set createdAt on first save
@@ -408,8 +408,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       }
     }
 
-    // If authenticated AND syncEnabled, sync to server first to get new syncVersion
-    if (isAuthenticated && syncEnabled) {
+    // If authenticated AND (syncEnabled OR forceSync), sync to server first to get new syncVersion
+    if (isAuthenticated && (syncEnabled || forceSync)) {
       const synced = await syncAdapter.syncToServer(saveable, force)
 
       // Update sync version from server response
@@ -567,7 +567,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * Manual save function
    * @returns true if save succeeded, false if it failed
    */
-  const save = useCallback(async (options?: { published?: boolean }): Promise<boolean> => {
+  const save = useCallback(async (options?: { published?: boolean; forceSync?: boolean }): Promise<boolean> => {
     if (!isClient) return false
 
     // Clear pending auto-save timer BEFORE any operations
@@ -580,7 +580,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     setIsSaving(true)
 
     try {
-      await performSave('saved', false, options?.published)
+      await performSave('saved', false, options?.published, options?.forceSync)
       const currentStateString = stateToComparableString(getState())
       const now = new Date().toISOString()
       previousStateRef.current = currentStateString
@@ -615,8 +615,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     try {
       if (choice === 'overwrite') {
-        // Use force=true to bypass version check
-        await performSave('saved', true)
+        // Use force=true to bypass version check, forceSync=true to sync even when auto-sync is disabled
+        await performSave('saved', true, undefined, true)
         const currentStateString = stateToComparableString(getState())
         previousStateRef.current = currentStateString
         lastSyncedStateRef.current = currentStateString
@@ -652,8 +652,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           await saveAdapter.saveToLocal(newPlanner)
           copySavedToLocal = true
 
-          // 3. Sync the new planner to server immediately (user pressed save intentionally)
-          if (isAuthenticated && syncEnabled) {
+          // 3. Sync the new planner to server immediately (user pressed save intentionally, force sync regardless of syncEnabled)
+          if (isAuthenticated) {
             await syncAdapter.syncToServer(newPlanner)
           }
 
