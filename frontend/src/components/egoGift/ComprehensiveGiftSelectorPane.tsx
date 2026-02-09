@@ -158,22 +158,26 @@ export function ComprehensiveGiftSelectorPane({
         </DialogHeader>
 
         {/* Filter bar */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:justify-between sm:items-center py-2">
-          <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
-            <div className="min-w-0">
-              <EGOGiftKeywordFilter
-                selectedKeywords={selectedKeywords}
-                onSelectionChange={setSelectedKeywords}
+        <div className="space-y-2 py-2">
+          {/* Row 1: Keyword filter (full width) */}
+          <div>
+            <EGOGiftKeywordFilter
+              selectedKeywords={selectedKeywords}
+              onSelectionChange={setSelectedKeywords}
+            />
+          </div>
+          {/* Row 2: Sorter + SearchBar */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+            <div className="shrink-0">
+              <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
               />
             </div>
-            <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
-          </div>
-          <div className="min-w-0 sm:shrink-0">
-            <SearchBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
-            />
           </div>
         </div>
 

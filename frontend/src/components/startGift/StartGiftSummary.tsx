@@ -103,7 +103,7 @@ export function StartGiftSummary({
                   </ScaledCardWrapper>
                 ))
               ) : (
-                <span className="text-sm text-muted-foreground italic">
+                <span className="text-sm text-muted-foreground">
                   {t('pages.plannerMD.noEgoGiftSelected')}
                 </span>
               )}

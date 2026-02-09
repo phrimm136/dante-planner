@@ -26,6 +26,11 @@ interface EGOGiftSelectionListProps {
 /**
  * EGO gift selection list - CSS-based filtering with progressive rendering
  * Renders 10 cards initially, then 10 more per frame via requestAnimationFrame
+ *
+ * Note: This component is NOT memoized. When selection changes, parent re-renders,
+ * this component re-renders, but individual cards (EGOGiftSelectableCard/EGOGiftCard)
+ * are memoized and will only re-render if their specific props changed.
+ * This follows the deck builder pattern for optimal performance.
  */
 export function EGOGiftSelectionList({
   gifts,

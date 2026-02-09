@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useShallow } from 'zustand/shallow'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { toast } from 'sonner'
@@ -57,17 +58,24 @@ export function FloorThemeGiftSection({
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   // Store state (safe - returns undefined if outside context)
-  const storeFloorSelections = usePlannerEditorStoreSafe((s) => s.floorSelections)
-  const storeUpdateFloorSelection = usePlannerEditorStoreSafe((s) => s.updateFloorSelection)
-  const storeCategory = usePlannerEditorStoreSafe((s) => s.category)
-  const floorSelections = floorSelectionsOverride ?? storeFloorSelections!
+  // Extract only the data needed for this floor to minimize re-renders
+  const { currentFloor, allFloors, updateFloorSelection, storeCategory } = usePlannerEditorStoreSafe(
+    useShallow((s) => ({
+      currentFloor: s?.floorSelections?.[floorIndex],
+      allFloors: s?.floorSelections ?? [],
+      updateFloorSelection: s?.updateFloorSelection,
+      storeCategory: s?.category,
+    }))
+  ) ?? { currentFloor: undefined, allFloors: [], updateFloorSelection: undefined, storeCategory: undefined }
+
+  const floorSelections = floorSelectionsOverride ?? allFloors
   const category = categoryProp ?? storeCategory ?? '5F'
 
   // Handlers - use override if provided (tracker mode), otherwise use store action
   const handleThemePackSelect = (packId: string, difficulty: DungeonIdx) => {
     if (onThemePackSelectOverride) {
       onThemePackSelectOverride(packId, difficulty)
-    } else if (storeUpdateFloorSelection) {
+    } else if (updateFloorSelection) {
       // Preserve existing gifts
       const existingGifts = floorSelections[floorIndex]?.giftIds ?? new Set<string>()
 
@@ -75,11 +83,11 @@ export function FloorThemeGiftSection({
       if (existingGifts.size > 0) {
         const { names } = getUnaffordableGiftNames(existingGifts, packId, egoGiftSpec, egoGiftI18n)
         if (names.length > 0) {
-          toast.warning(t('pages.plannerMD.gifts.unaffordableWarning', { gifts: names.join(', ') }))
+          toast.warning(t('pages.plannerMD.gifts.unaffordableWarning', { floor: floorNumber, gifts: names.join(', ') }))
         }
       }
 
-      storeUpdateFloorSelection(floorIndex, {
+      updateFloorSelection(floorIndex, {
         themePackId: packId,
         difficulty,
         giftIds: existingGifts,
@@ -90,8 +98,8 @@ export function FloorThemeGiftSection({
   const handleGiftSelectionChange = (giftIds: Set<string>) => {
     if (setSelectedGiftIdsOverride) {
       setSelectedGiftIdsOverride(giftIds)
-    } else if (storeUpdateFloorSelection && floorSelections[floorIndex]) {
-      storeUpdateFloorSelection(floorIndex, {
+    } else if (updateFloorSelection && floorSelections[floorIndex]) {
+      updateFloorSelection(floorIndex, {
         ...floorSelections[floorIndex],
         giftIds,
       })

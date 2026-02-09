@@ -1,4 +1,4 @@
-import { useState, memo } from 'react'
+import { useState, memo, useEffect, useRef } from 'react'
 import type { EnhancementLevel } from '@/lib/constants'
 import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 
@@ -45,15 +45,57 @@ const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
   isSelected,
   onEnhancementSelect,
 }: EGOGiftSelectableCardInnerProps) {
-  const [isHovered, setIsHovered] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isTouchDeviceRef = useRef(false)
+
+  // Handle clicks outside to close on mobile
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+        isTouchDeviceRef.current = false
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isOpen])
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation()
+    isTouchDeviceRef.current = true
+    setIsOpen(true)
+  }
+
+  const handleMouseEnter = () => {
+    if (!isTouchDeviceRef.current) {
+      setIsOpen(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (!isTouchDeviceRef.current) {
+      setIsOpen(false)
+    }
+  }
 
   return (
     <div
+      ref={containerRef}
       className="absolute inset-0"
-      onMouseEnter={() => { setIsHovered(true); }}
-      onMouseLeave={() => { setIsHovered(false); }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
     >
-      {isHovered && (
+      {isOpen && (
         <EGOGiftEnhancementSelector
           giftId={giftId}
           currentEnhancement={enhancement}
