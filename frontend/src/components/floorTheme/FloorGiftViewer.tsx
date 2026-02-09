@@ -122,12 +122,12 @@ export function FloorGiftViewer({
       disabled={readOnly}
       aria-label={t('pages.plannerMD.selectedEgoGifts')}
       className={cn(
-        'w-full sm:min-h-104 rounded-lg text-left overflow-x-auto sm:overflow-x-visible flex items-start',
+        'w-full sm:min-h-104 rounded-lg text-left flex items-start',
         !readOnly && 'selectable',
         className
       )}
     >
-      <div className="flex flex-row sm:flex-col gap-2 p-2 sm:items-start">
+      <div className="flex flex-row flex-wrap items-start gap-2 p-2">
         {selectedGifts.map(({ item, enhancement }) => (
           <ScaledCardWrapper
             key={item.id}
