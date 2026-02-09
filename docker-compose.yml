@@ -48,6 +48,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./static/data:/app/data:ro
+      - ${JWT_KEYS_PATH:-./jwt-keys}:/app/keys:ro
     environment:
       GAME_DATA_PATH: /app/data
       MYSQL_HOST: mysql
@@ -55,7 +56,9 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_PRIVATE_KEY_PATH: ${JWT_PRIVATE_KEY_PATH}
+      JWT_PUBLIC_KEY_PATH: ${JWT_PUBLIC_KEY_PATH}
+      JWT_ENCRYPTION_KEY: ${JWT_ENCRYPTION_KEY}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
       GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
       GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}

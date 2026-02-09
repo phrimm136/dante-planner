@@ -22,6 +22,27 @@ public record TokenClaims(
         Date issuedAt,
         Date expiration
 ) {
+    public TokenClaims {
+        if (userId == null) {
+            throw new IllegalArgumentException("userId must not be null");
+        }
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("email must not be null or blank");
+        }
+        if (type == null || type.isBlank()) {
+            throw new IllegalArgumentException("type must not be null or blank");
+        }
+        if (issuedAt == null) {
+            throw new IllegalArgumentException("issuedAt must not be null");
+        }
+        if (expiration == null) {
+            throw new IllegalArgumentException("expiration must not be null");
+        }
+        if (expiration.before(issuedAt)) {
+            throw new IllegalArgumentException("expiration must be after issuedAt");
+        }
+    }
+
     /**
      * Token type constant for access tokens.
      */

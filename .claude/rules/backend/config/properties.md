@@ -73,3 +73,13 @@ spring.jpa.show-sql=false
 ```
 
 **Reference:** `application.properties`, `JacksonConfig.java`
+
+## Startup Validation Pattern
+
+**@PostConstruct Fail-Fast:** Validate required properties are non-blank at startup. Prevents silent failures in production.
+
+**Example:** Check jwt.private-key-path, jwt.encryption-key not null/blank before loading files. Throw IllegalStateException with clear message if missing.
+
+**When:** Loading external resources (files, keys, certificates) from configured paths.
+
+**Reference:** `JwtProperties.java`

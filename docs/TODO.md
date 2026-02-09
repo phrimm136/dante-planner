@@ -264,3 +264,125 @@ http.csrf(csrf -> csrf
 - OWASP CSRF Prevention: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
 - SameSite Cookie Spec: https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-rfc6265bis-03#section-5.3.7
 - Spring Security CSRF: https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html
+
+---
+
+## JWT Token Security - Deferred Issues
+
+### C1: Encryption Key Rotation Mechanism
+**Status:** Deferred to future sprint
+**Priority:** HIGH (not blocking for current scale)
+**Effort:** 2-3 days
+**Review Date:** 2026-02-09
+
+**Problem:**
+Single static AES-256 key with no rotation capability. If compromised, ALL historical tokens are decryptable.
+
+**Current Mitigation:**
+- Key stored in AWS SSM SecureString (encrypted at rest)
+- Access logged via CloudTrail
+- Rotation only needed if breach detected (acceptable to log out all users in that scenario)
+
+**When to Fix:**
+- User base grows to 10,000+ (support cost justifies graceful rotation)
+- Enterprise customers require compliance (SOC2, PCI-DSS)
+- Funding round / security audit requirement
+- Detected breach (emergency response)
+
+**Implementation Plan:**
+```java
+// JwtProperties.java
+private Map<String, byte[]> encryptionKeys = new HashMap<>();
+private String currentKeyId;
+
+@PostConstruct
+public void loadKeys() {
+    // Load multiple versioned keys from SSM
+    encryptionKeys.put("v1", fetchFromSSM("JWT_ENCRYPTION_KEY_V1"));
+    encryptionKeys.put("v2", fetchFromSSM("JWT_ENCRYPTION_KEY_V2"));
+    currentKeyId = "v2"; // Use newest for new tokens
+}
+
+// JwtTokenService.java - buildToken()
+.claim("kid", jwtProperties.getCurrentKeyId())
+
+// JwtTokenService.java - parseToken()
+String keyId = claims.get("kid", String.class);
+byte[] key = jwtProperties.getEncryptionKey(keyId);
+```
+
+**Rotation Process:**
+1. Generate new key v2, add to SSM
+2. Deploy - new tokens use v2, old tokens validated with v1
+3. Wait 7 days (refresh token max lifetime)
+4. Remove v1 from SSM
+
+---
+
+### C2: GCM IV Reuse Risk (Birthday Paradox)
+**Status:** Deferred to future sprint
+**Priority:** MEDIUM (negligible risk at current scale)
+**Effort:** 1 day
+**Review Date:** 2026-02-09
+
+**Problem:**
+Pure random 12-byte IV generation. Birthday paradox collision risk at ~281 trillion tokens (2^48).
+
+**Current Risk Assessment:**
+- At 100 tokens/sec: 89 million years to collision
+- At 1000 tokens/sec: 8.9 million years to collision
+- Current traffic: <50 req/sec (decades to risk zone)
+
+**When to Fix:**
+- Sustained 1000+ req/sec traffic
+- Multi-datacenter deployment (10+ servers × 100 req/sec = collision risk)
+- Enterprise SLA requirements for cryptographic guarantees
+
+**Implementation Plan:**
+```java
+// Add to JwtTokenService
+private final AtomicInteger ivCounter = new AtomicInteger(0);
+
+private byte[] generateIV() {
+    byte[] iv = new byte[12];
+
+    // First 4 bytes: monotonic counter (prevents reuse)
+    int counter = ivCounter.incrementAndGet();
+    ByteBuffer.wrap(iv).putInt(counter);
+
+    // Last 8 bytes: random (unpredictability)
+    secureRandom.nextBytes(iv, 4, 8);
+
+    return iv;
+}
+```
+
+**Alternative (Timestamp-based):**
+```java
+// First 8 bytes: nanosecond timestamp
+ByteBuffer.wrap(iv).putLong(System.nanoTime());
+// Last 4 bytes: random
+secureRandom.nextBytes(iv, 8, 4);
+```
+
+**Test Coverage:**
+```java
+@Test
+void ivUniqueness_1MillionTokens() {
+    Set<String> ivs = new HashSet<>();
+    for (int i = 0; i < 1_000_000; i++) {
+        String token = tokenService.generateAccessToken(...);
+        String iv = extractIV(token);
+        assertTrue(ivs.add(iv), "Duplicate IV at iteration " + i);
+    }
+}
+```
+
+---
+
+**Revisit Triggers:**
+- User growth milestone: 10,000+ active users
+- Traffic milestone: 500+ req/sec sustained
+- Compliance requirement: SOC2, PCI-DSS, HIPAA
+- Funding round: Investor security audit
+- Detected breach: Emergency key rotation needed

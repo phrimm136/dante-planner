@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service.token;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.JwtProperties;
 import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.InvalidTokenException;
@@ -7,6 +8,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,20 +26,37 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class JwtTokenServiceTest {
 
-    private static final String TEST_SECRET = "test-secret-key-for-testing-purposes-only-min-256-bits-required";
     private static final Long ACCESS_TOKEN_EXPIRY = 900000L; // 15 minutes
     private static final Long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
 
     private JwtTokenService tokenService;
+    private JwtProperties jwtProperties;
+    private KeyPair testKeyPair;
+    private byte[] testAesKey;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp() {
-        JwtProperties jwtProperties = new JwtProperties();
-        jwtProperties.setSecret(TEST_SECRET);
+    void setUp() throws Exception {
+        // Generate RSA keypair for testing
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+        keyPairGenerator.initialize(2048);
+        testKeyPair = keyPairGenerator.generateKeyPair();
+
+        // Generate AES-256 key for testing
+        testAesKey = new byte[32];
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(testAesKey);
+
+        // Setup JWT properties
+        jwtProperties = new JwtProperties();
+        jwtProperties.setPrivateKey(testKeyPair.getPrivate());
+        jwtProperties.setPublicKey(testKeyPair.getPublic());
+        jwtProperties.setEncryptionKeyBytes(testAesKey);
         jwtProperties.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
         jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
 
-        tokenService = new JwtTokenService(jwtProperties);
+        objectMapper = new ObjectMapper();
+        tokenService = new JwtTokenService(jwtProperties, objectMapper);
     }
 
     @Nested
@@ -40,7 +65,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should contain correct claims")
-        void generateAccessToken_containsCorrectClaims() {
+        void givenValidInput_whenGenerateAccessToken_thenContainsCorrectClaims() {
             // Arrange
             Long userId = 123L;
             String email = "test@example.com";
@@ -61,7 +86,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should have correct expiration time")
-        void generateAccessToken_hasCorrectExpiration() {
+        void givenValidInput_whenGenerateAccessToken_thenHasCorrectExpiration() {
             // Arrange
             Long userId = 123L;
             String email = "test@example.com";
@@ -88,7 +113,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should set issuedAt timestamp")
-        void generateAccessToken_setsIssuedAt() {
+        void givenValidInput_whenGenerateAccessToken_thenSetsIssuedAt() {
             // Arrange
             Long userId = 123L;
             String email = "test@example.com";
@@ -114,7 +139,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should contain correct claims")
-        void generateRefreshToken_containsCorrectClaims() {
+        void givenValidInput_whenGenerateRefreshToken_thenContainsCorrectClaims() {
             // Arrange
             Long userId = 456L;
             String email = "refresh@example.com";
@@ -134,7 +159,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should have longer expiration than access token")
-        void generateRefreshToken_hasLongerExpiration() {
+        void givenAccessAndRefreshTokens_whenCompareExpiration_thenRefreshLonger() {
             // Arrange
             Long userId = 123L;
             String email = "test@example.com";
@@ -158,7 +183,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return claims for valid token")
-        void validateToken_returnsClaimsForValidToken() {
+        void givenValidToken_whenValidate_thenReturnsClaims() {
             // Arrange
             Long userId = 789L;
             String email = "valid@example.com";
@@ -177,13 +202,15 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for expired token")
-        void validateToken_throwsForExpiredToken() {
+        void givenExpiredToken_whenValidate_thenThrowsInvalidTokenException() {
             // Arrange - create service with very short expiry
             JwtProperties shortExpiryProps = new JwtProperties();
-            shortExpiryProps.setSecret(TEST_SECRET);
+            shortExpiryProps.setPrivateKey(testKeyPair.getPrivate());
+            shortExpiryProps.setPublicKey(testKeyPair.getPublic());
+            shortExpiryProps.setEncryptionKeyBytes(testAesKey);
             shortExpiryProps.setAccessTokenExpiry(1L); // 1ms expiry
             shortExpiryProps.setRefreshTokenExpiry(1L);
-            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps);
+            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps, objectMapper);
 
             String token = shortExpiryService.generateAccessToken(123L, "expired@example.com", UserRole.NORMAL);
 
@@ -204,13 +231,19 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for invalid signature")
-        void validateToken_throwsForInvalidSignature() {
-            // Arrange - create token with different secret
-            JwtProperties differentSecretProps = new JwtProperties();
-            differentSecretProps.setSecret("different-secret-key-that-is-at-least-32-characters-long");
-            differentSecretProps.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
-            differentSecretProps.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
-            JwtTokenService differentService = new JwtTokenService(differentSecretProps);
+        void givenInvalidSignature_whenValidate_thenThrowsInvalidTokenException() throws Exception {
+            // Arrange - create token with different RSA keypair
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            KeyPair differentKeyPair = keyPairGenerator.generateKeyPair();
+
+            JwtProperties differentKeyProps = new JwtProperties();
+            differentKeyProps.setPrivateKey(differentKeyPair.getPrivate());
+            differentKeyProps.setPublicKey(differentKeyPair.getPublic());
+            differentKeyProps.setEncryptionKeyBytes(testAesKey);
+            differentKeyProps.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
+            differentKeyProps.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
+            JwtTokenService differentService = new JwtTokenService(differentKeyProps, objectMapper);
 
             String tokenWithDifferentSignature = differentService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
 
@@ -224,7 +257,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for malformed token")
-        void validateToken_throwsForMalformedToken() {
+        void givenMalformedToken_whenValidate_thenThrowsInvalidTokenException() {
             // Arrange
             String malformedToken = "not.a.valid.jwt.token";
 
@@ -238,7 +271,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for completely invalid token")
-        void validateToken_throwsForInvalidToken() {
+        void givenGarbageData_whenValidate_thenThrowsInvalidTokenException() {
             // Arrange
             String invalidToken = "garbage-data";
 
@@ -257,7 +290,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return userId from valid token")
-        void getUserIdFromToken_returnsUserId() {
+        void givenValidToken_whenGetUserId_thenReturnsUserId() {
             // Arrange
             Long expectedUserId = 42L;
             String token = tokenService.generateAccessToken(expectedUserId, "user@example.com", UserRole.NORMAL);
@@ -271,7 +304,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should throw for invalid token")
-        void getUserIdFromToken_throwsForInvalidToken() {
+        void givenInvalidToken_whenGetUserId_thenThrowsInvalidTokenException() {
             // Arrange
             String invalidToken = "invalid.token";
 
@@ -289,7 +322,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return false for valid non-expired token")
-        void isTokenExpired_returnsFalseForValidToken() {
+        void givenValidToken_whenCheckExpired_thenReturnsFalse() {
             // Arrange
             String token = tokenService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
 
@@ -302,13 +335,15 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return true for expired token")
-        void isTokenExpired_returnsTrueForExpiredToken() {
+        void givenExpiredToken_whenCheckExpired_thenReturnsTrue() {
             // Arrange - create service with very short expiry
             JwtProperties shortExpiryProps = new JwtProperties();
-            shortExpiryProps.setSecret(TEST_SECRET);
+            shortExpiryProps.setPrivateKey(testKeyPair.getPrivate());
+            shortExpiryProps.setPublicKey(testKeyPair.getPublic());
+            shortExpiryProps.setEncryptionKeyBytes(testAesKey);
             shortExpiryProps.setAccessTokenExpiry(1L);
             shortExpiryProps.setRefreshTokenExpiry(1L);
-            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps);
+            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps, objectMapper);
 
             String token = shortExpiryService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
 
@@ -328,7 +363,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return true for invalid token")
-        void isTokenExpired_returnsTrueForInvalidToken() {
+        void givenInvalidToken_whenCheckExpired_thenReturnsTrue() {
             // Arrange
             String invalidToken = "invalid.jwt.token";
 
@@ -346,7 +381,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return email from valid token")
-        void getEmailFromToken_returnsEmail() {
+        void givenValidToken_whenGetEmail_thenReturnsEmail() {
             // Arrange
             String expectedEmail = "email@example.com";
             String token = tokenService.generateAccessToken(123L, expectedEmail, UserRole.NORMAL);
@@ -365,7 +400,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return 'access' for access token")
-        void getTokenType_returnsAccessForAccessToken() {
+        void givenAccessToken_whenGetType_thenReturnsAccess() {
             // Arrange
             String token = tokenService.generateAccessToken(123L, "test@example.com", UserRole.ADMIN);
 
@@ -378,7 +413,7 @@ class JwtTokenServiceTest {
 
         @Test
         @DisplayName("Should return 'refresh' for refresh token")
-        void getTokenType_returnsRefreshForRefreshToken() {
+        void givenRefreshToken_whenGetType_thenReturnsRefresh() {
             // Arrange
             String token = tokenService.generateRefreshToken(123L, "test@example.com");
 
@@ -387,6 +422,53 @@ class JwtTokenServiceTest {
 
             // Assert
             assertEquals(TokenClaims.TYPE_REFRESH, type);
+        }
+    }
+
+    @Nested
+    @DisplayName("Encryption Security Tests")
+    class EncryptionSecurityTests {
+
+        @Test
+        @DisplayName("Should not expose userId in JWT payload (only encrypted)")
+        void givenGeneratedToken_whenInspectPayload_thenClaimsEncrypted() {
+            // Arrange
+            String token = tokenService.generateAccessToken(12345L, "secret@example.com", UserRole.ADMIN);
+
+            // Act - extract middle segment (payload) and decode
+            String[] parts = token.split("\\.");
+            assertEquals(3, parts.length, "JWT should have 3 parts");
+
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+
+            // Assert - payload should contain "enc" field but NOT custom claims in plaintext
+            // Note: "sub" (email) is outside encryption per design (JJWT validates exp before decryption)
+            assertTrue(payload.contains("enc"), "Payload should contain encrypted claims field");
+            assertTrue(payload.contains("sub"), "Payload should contain subject (email) - required for JJWT exp validation");
+            assertFalse(payload.contains("12345"), "Payload should not contain userId in plaintext");
+            assertFalse(payload.contains("userId"), "Payload should not contain userId field name in plaintext");
+            assertFalse(payload.contains("ADMIN"), "Payload should not contain role in plaintext");
+        }
+
+        @Test
+        @DisplayName("Should generate unique IVs for identical claims")
+        void givenIdenticalClaims_whenGenerate100Times_thenAllTokensDistinct() {
+            // Arrange
+            Set<String> encryptedPayloads = new HashSet<>();
+            Long userId = 999L;
+            String email = "test@example.com";
+
+            // Act - generate 100 tokens with identical claims
+            for (int i = 0; i < 100; i++) {
+                String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
+                String[] parts = token.split("\\.");
+                String payload = parts[1]; // Base64-encoded payload
+                encryptedPayloads.add(payload);
+            }
+
+            // Assert - all 100 payloads should be unique (different IVs)
+            assertEquals(100, encryptedPayloads.size(),
+                    "All 100 tokens should have distinct encrypted payloads due to unique IVs");
         }
     }
 }
