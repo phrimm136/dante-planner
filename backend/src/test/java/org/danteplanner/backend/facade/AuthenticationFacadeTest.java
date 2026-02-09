@@ -108,7 +108,7 @@ class AuthenticationFacadeTest {
 
             when(providerRegistry.getProvider(providerName)).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(code, redirectUri, codeVerifier)).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo("oauth-access")).thenReturn(userInfo);
+            when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123"))
                     .thenReturn(Optional.of(testUser));
             when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
@@ -131,7 +131,7 @@ class AuthenticationFacadeTest {
             // Verify flow
             verify(providerRegistry).getProvider(providerName);
             verify(oauthProvider).exchangeCodeForTokens(code, redirectUri, codeVerifier);
-            verify(oauthProvider).getUserInfo("oauth-access");
+            verify(oauthProvider).getUserInfo(any(OAuthTokens.class));
             verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123");
             verify(tokenGenerator).generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class));
             verify(tokenGenerator).generateRefreshToken(testUser.getId(), testUser.getEmail());
