@@ -20,8 +20,10 @@ export const VoteDirectionSchema = z.literal('UP')
 
 /**
  * Planner keyword schema - validates against PLANNER_KEYWORDS constant
+ * Double cast (readonly → unknown → mutable) required for Zod v3 enum()
  */
-export const PlannerKeywordSchema = z.enum(PLANNER_KEYWORDS)
+const plannerKeywords = PLANNER_KEYWORDS as unknown as [string, ...string[]]
+export const PlannerKeywordSchema = z.enum(plannerKeywords)
 
 // ============================================================================
 // API Response Schemas
