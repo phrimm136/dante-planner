@@ -188,7 +188,7 @@ export interface PlannerSummary {
  * Branded type for planner UUID identifiers
  * Uses Zod's brand type for consistency with schema validation
  */
-export type PlannerId = string & z.$brand<'PlannerId'>
+export type PlannerId = string & z.BRAND<'PlannerId'>
 
 /**
  * Server response for a single planner
