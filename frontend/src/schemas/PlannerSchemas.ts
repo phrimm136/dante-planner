@@ -203,7 +203,7 @@ export const PlannerTypeSchema = z.enum(PLANNER_TYPES)
  */
 export const PlannerMetadataSchema = z.object({
   /** Unique identifier (UUID v4) */
-  id: z.uuid(),
+  id: z.string().uuid(),
   /** Planner title (identification, not game state) */
   title: z.string(),
   /** Current save status */
@@ -217,11 +217,11 @@ export const PlannerMetadataSchema = z.object({
   /** Server sync version for optimistic locking (starts at 1) */
   syncVersion: z.number().int().positive().default(1),
   /** ISO 8601 timestamp when planner was first created */
-  createdAt: z.iso.datetime(),
+  createdAt: z.string().datetime(),
   /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: z.iso.datetime(),
+  lastModifiedAt: z.string().datetime(),
   /** ISO 8601 timestamp when planner was explicitly saved */
-  savedAt: z.iso.datetime().nullable(),
+  savedAt: z.string().datetime().nullable(),
   /** Device identifier for local storage namespacing */
   deviceId: z.string(),
   /** Whether planner is published to Gesellschaft */
@@ -561,7 +561,7 @@ export function deserializeSets(state: SerializablePageState): PageStateWithSets
  * Branded UUID schema for planner identifiers
  * Validates as UUID and provides branded type for PlannerId
  */
-export const PlannerIdSchema = z.uuid().brand<'PlannerId'>()
+export const PlannerIdSchema = z.string().uuid().brand<'PlannerId'>()
 
 /**
  * Server response schema for a single planner
