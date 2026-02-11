@@ -2,9 +2,9 @@
  * Unread Count Query Hook
  *
  * Fetches unread notification count for the current user.
- * Polls every 30 seconds for real-time updates.
+ * Refetches automatically when SSE notification events occur via query invalidation.
  *
- * Pattern: useIdentityListData.ts + polling (refetchInterval)
+ * Pattern: useIdentityListData.ts (SSE-driven updates)
  */
 
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
@@ -33,8 +33,7 @@ function createUnreadCountQueryOptions() {
 
       return result.data
     },
-    staleTime: 30 * 1000, // 30 seconds
-    refetchInterval: 30 * 1000, // Poll every 30 seconds
+    staleTime: 5 * 60 * 1000, // 5 minutes (refetches on SSE notification events)
   })
 }
 
@@ -45,7 +44,7 @@ function createUnreadCountQueryOptions() {
 /**
  * Hook for fetching unread notification count
  *
- * Automatically polls every 30 seconds for real-time updates.
+ * Refetches automatically when SSE notification events occur (via useSseConnection).
  * Uses useSuspenseQuery - wrap in Suspense boundary for loading states.
  *
  * @returns Unread count data
