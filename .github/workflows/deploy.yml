@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
-      - 'frontend/**'
       - 'nginx/**'
       - 'docker-compose.yml'
       - '.github/workflows/deploy.yml'
@@ -27,7 +26,7 @@ env:
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
-  # 1. 테스트 단계 (병렬 실행)
+  # 1. Backend 테스트 (Frontend는 Cloudflare에서 처리)
   test-backend:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -43,29 +42,9 @@ jobs:
         working-directory: ./backend
         run: ./mvnw test -q
 
-  test-frontend:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-          cache-dependency-path: frontend/yarn.lock
-      - name: Install & Test
-        working-directory: ./frontend
-        env:
-          VITE_GOOGLE_CLIENT_ID: test-client-id-for-ci
-          VITE_API_BASE_URL: http://localhost:8080
-        run: |
-          yarn install --frozen-lockfile
-          yarn test --run
-
   # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
-    needs: [test-backend, test-frontend]
+    needs: [test-backend]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

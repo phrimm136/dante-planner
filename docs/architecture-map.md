@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-02-09 (66024879: JWT RS256 + AES-GCM encryption)
+> **Last Updated:** 2026-02-11 (396d306f: SSE-driven notification updates)
 
 ---
 
@@ -419,7 +419,7 @@ Frontend                      Backend                      Database
     │                            │    (user_id, !deleted, page)
     │<─[3] NotificationInboxResp─┤                            │
     │                            │                            │
-    ├─[4] GET /unread-count────>│ (30-second polling)        │
+    ├─[4] GET /unread-count────>│ (SSE-triggered refetch)    │
     │                            ├─[5] Count unread───────────>│
     │<─[6] UnreadCountResponse───┤                            │
     │                            │                            │
@@ -1057,7 +1057,7 @@ interface VoteRequest {
 
 **Notification System (New):**
 - Real-time notifications via Header bell icon
-- 30-second polling for unread count
+- SSE-driven unread count updates (no polling)
 - Notification types: PLANNER_RECOMMENDED, COMMENT_RECEIVED, REPLY_RECEIVED, REPORT_RECEIVED
 - Atomic threshold detection prevents duplicate notifications
 - Frontend components: NotificationDialog, NotificationIcon, NotificationItem
