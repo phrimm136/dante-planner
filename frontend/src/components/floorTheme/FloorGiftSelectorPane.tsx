@@ -9,10 +9,9 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
-import { SearchBar } from '@/components/common/SearchBar'
+import { EGOGiftFilterBar } from '@/components/egoGift/EGOGiftFilterBar'
 import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
-import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
-import { Sorter, type SortMode } from '@/components/common/Sorter'
+import type { SortMode } from '@/components/common/Sorter'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import {
   encodeGiftSelection,
@@ -216,29 +215,15 @@ export function FloorGiftSelectorPane({
             </div>
           </DialogHeader>
 
-          {/* Filter bar */}
-          <div className="space-y-2 py-2">
-            {/* Row 1: Keyword filter (full width) */}
-            <div>
-              <EGOGiftKeywordFilter
-                selectedKeywords={selectedKeywords}
-                onSelectionChange={setSelectedKeywords}
-              />
-            </div>
-            {/* Row 2: Sorter + SearchBar */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-              <div className="shrink-0">
-                <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <SearchBar
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
-                />
-              </div>
-            </div>
-          </div>
+          <EGOGiftFilterBar
+            className="py-2"
+            selectedKeywords={selectedKeywords}
+            onKeywordsChange={setSelectedKeywords}
+            sortMode={sortMode}
+            onSortModeChange={setSortMode}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
 
           {/* Gift selection list */}
           <div className="flex-1 overflow-y-auto">
