@@ -34,6 +34,12 @@ PACK_DIR = STATIC_DIR / "data" / "themePack"
 PACK_LIST_PATH = STATIC_DIR / "data" / "themePackList.json"
 EGO_GIFT_DIR = STATIC_DIR / "data" / "egoGift"
 
+# i18n ID remapping: source i18n ID -> output key
+# Used when the game's i18n ID doesn't match the floor data ID
+I18N_ID_REMAP = {
+    1124: 1123,  # Upcoming BokGak pack: i18n uses 1124 but floor data uses 1123
+}
+
 # Fields to extract for individual files
 INDIVIDUAL_FIELDS = [
     "exceptionConditions",
@@ -145,6 +151,7 @@ def generate_i18n():
 
             for item in data.get("dataList", []):
                 theme_id = item.get("id")
+                output_id = I18N_ID_REMAP.get(theme_id, theme_id)
                 obj = {}
 
                 if item.get("name") is not None:
@@ -152,7 +159,7 @@ def generate_i18n():
                 if item.get("specialName") is not None:
                     obj["specialName"] = item["specialName"]
 
-                theme_dict[str(theme_id)] = obj
+                theme_dict[str(output_id)] = obj
 
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(theme_dict, f, ensure_ascii=False, indent=2)
