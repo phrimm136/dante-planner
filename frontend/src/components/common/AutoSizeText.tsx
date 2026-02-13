@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState } from 'react'
+import { useRef, useLayoutEffect, useState, useCallback } from 'react'
 
 interface AutoSizeTextProps {
   text: string
@@ -23,6 +23,7 @@ interface AutoSizeTextProps {
  * - All lines use the same font size (determined by the longest line)
  * - Font size is clamped between minFontSize and maxFontSize
  * - If text overflows at minFontSize, wraps to next line (word-break: keep-all)
+ * - Retries measurement if element is not yet laid out (offsetWidth = 0)
  *
  * IMPORTANT: Pass fontFamily via style prop for accurate measurement
  */
@@ -39,52 +40,68 @@ export function AutoSizeText({
   const measureRef = useRef<HTMLDivElement>(null)
   const [fontSize, setFontSize] = useState(maxFontSize)
   const [shouldWrap, setShouldWrap] = useState(false)
+  const rafRef = useRef<number>()
 
   const lines = text.split('\n')
 
-  useLayoutEffect(() => {
+  const measure = useCallback(() => {
     const measureEl = measureRef.current
-    if (!measureEl) return
+    if (!measureEl) return false
 
-    // Measure each line's natural width at maxFontSize
     const lineSpans = measureEl.querySelectorAll<HTMLSpanElement>('[data-measure]')
-    if (lineSpans.length === 0) return
+    if (lineSpans.length === 0) return false
 
     let maxNaturalWidth = 0
     lineSpans.forEach(span => {
       maxNaturalWidth = Math.max(maxNaturalWidth, span.offsetWidth)
     })
 
-    if (maxNaturalWidth === 0) return
+    if (maxNaturalWidth === 0) return false
 
-    // Calculate font size needed to fit the widest line
-    // If text fits at maxFontSize, use maxFontSize
-    // If text is too wide, shrink proportionally
     let calculatedFontSize: number
     if (maxNaturalWidth <= width) {
-      // Text fits - use maxFontSize
       calculatedFontSize = maxFontSize
     } else {
-      // Text too wide - shrink to fit
-      // Formula: newFontSize / maxFontSize = width / naturalWidth
       calculatedFontSize = (width / maxNaturalWidth) * maxFontSize
     }
 
-    // Check if text still doesn't fit at minFontSize
     const needsWrap = calculatedFontSize < minFontSize
     setShouldWrap(needsWrap)
 
-    // Clamp to min/max bounds
     const clampedFontSize = Math.min(Math.max(calculatedFontSize, minFontSize), maxFontSize)
     setFontSize(clampedFontSize)
+    return true
+  }, [width, minFontSize, maxFontSize])
+
+  useLayoutEffect(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = undefined
+    }
+
+    if (measure()) return
+
+    // Element not laid out yet — retry after each paint until measurement succeeds
+    const retry = () => {
+      if (measure()) return
+      rafRef.current = requestAnimationFrame(retry)
+    }
+    rafRef.current = requestAnimationFrame(retry)
+
+    return () => {
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current)
+        rafRef.current = undefined
+      }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, width, minFontSize, maxFontSize, JSON.stringify(style)])
+  }, [text, width, minFontSize, maxFontSize, JSON.stringify(style), measure])
 
   // Extract font-related styles for measurement (exclude fontSize as we control it)
   const { fontSize: _ignoredFontSize, ...fontStyles } = style || {}
 
   return (
-    <div className={className} style={{ width, position: 'relative', ...fontStyles }}>
+    <div className={className} style={{ width, position: 'relative', overflow: 'hidden', ...fontStyles }}>
       {/* Hidden measurement container - uses same font styles at maxFontSize */}
       <div
         ref={measureRef}
