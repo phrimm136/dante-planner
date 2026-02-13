@@ -423,6 +423,8 @@ export const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFoundPage,
   defaultErrorComponent: RouteErrorComponent,
+  // Scroll to top on navigation; hash fragments (e.g., #comment-uuid) auto-scroll to element
+  scrollRestoration: true,
   // Show pending component immediately on navigation (no delay)
   defaultPendingMs: 0,
   // Minimum time to show pending component (prevents flash on very fast loads)
