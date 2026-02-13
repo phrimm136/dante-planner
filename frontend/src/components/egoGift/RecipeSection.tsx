@@ -38,10 +38,10 @@ function IngredientCard({ gift }: { gift: EGOGiftListItem }) {
     <Link
       to="/ego-gift/$id"
       params={{ id: gift.id }}
-      className="block transition-all hover:scale-105"
+      className="block"
     >
       <div className="flex flex-col items-center gap-1">
-        <EGOGiftCard gift={gift} enhancement={0} />
+        <EGOGiftCard gift={gift} enhancement={0} enableHoverHighlight />
         <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
           <Suspense fallback={<Skeleton className="h-5 w-20 bg-foreground" />}>
             <EGOGiftName id={gift.id} />
