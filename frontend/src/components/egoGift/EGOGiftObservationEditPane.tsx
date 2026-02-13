@@ -12,13 +12,11 @@ import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { SortMode } from '@/components/common/Sorter'
-import { Sorter } from '@/components/common/Sorter'
-import { SearchBar } from '@/components/common/SearchBar'
+import { EGOGiftFilterBar } from './EGOGiftFilterBar'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EGOGiftSelectionList } from './EGOGiftSelectionList'
 import { EGOGiftObservationSelection } from './EGOGiftObservationSelection'
-import { EGOGiftKeywordFilter } from './EGOGiftKeywordFilter'
 import { MAX_OBSERVABLE_GIFTS } from '@/lib/constants'
 
 interface EGOGiftObservationEditPaneProps {
@@ -141,28 +139,14 @@ export function EGOGiftObservationEditPane({
 
           {/* Scrollable content area */}
           <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6 flex flex-col gap-4">
-            {/* Filter row: keyword filter, sorter, search bar */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:justify-between">
-              {/* Left side: Filters and Sorter */}
-              <div className="flex flex-col sm:flex-row gap-4 sm:items-center min-w-0">
-                <div className="min-w-0">
-                  <EGOGiftKeywordFilter
-                    selectedKeywords={selectedKeywords}
-                    onSelectionChange={setSelectedKeywords}
-                  />
-                </div>
-                <Sorter sortMode={sortMode} onSortModeChange={setSortMode} />
-              </div>
-
-              {/* Right side: Search bar */}
-              <div className="min-w-0 sm:shrink-0">
-                <SearchBar
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
-                />
-              </div>
-            </div>
+            <EGOGiftFilterBar
+              selectedKeywords={selectedKeywords}
+              onKeywordsChange={setSelectedKeywords}
+              sortMode={sortMode}
+              onSortModeChange={setSortMode}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
 
             {/* Main content: Portrait phones stacked, ≥640px side-by-side */}
             <div className="flex flex-col sm:flex-row gap-2">

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
@@ -11,8 +12,8 @@ import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
-import { EGOGiftKeywordFilter } from '@/components/egoGift/EGOGiftKeywordFilter'
-import { SearchBar } from '@/components/common/SearchBar'
+import { EGOGiftFilterBar } from '@/components/egoGift/EGOGiftFilterBar'
+import type { SortMode } from '@/components/common/Sorter'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 
 interface ComprehensiveGiftGridTrackerProps {
@@ -41,9 +42,10 @@ export function ComprehensiveGiftGridTracker({
   const { spec, i18n } = useEGOGiftListData()
   const { keywordToValue } = useSearchMappingsDeferred()
 
-  // Filter states
+  // Filter and sort states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState('')
+  const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
@@ -147,14 +149,15 @@ export function ComprehensiveGiftGridTracker({
       }
     }
 
-    // Sort each array separately by gift ID (stable sort)
-    highlighted.sort((a, b) => a.item.id.localeCompare(b.item.id))
-    regular.sort((a, b) => a.item.id.localeCompare(b.item.id))
-    done.sort((a, b) => a.item.id.localeCompare(b.item.id))
+    // Sort each group by tier-then-keyword (matching edit page order)
+    const sortGroup = (gifts: DecodedGift[]) => {
+      const itemToGift = new Map(gifts.map((g) => [g.item, g]))
+      return sortEGOGifts(gifts.map((g) => g.item), sortMode).map((item) => itemToGift.get(item)!)
+    }
 
     // Concatenate: highlighted first, then regular, then done
-    return [...highlighted, ...regular, ...done]
-  }, [allComprehensiveGiftIds, spec, i18n, highlightedGiftIds, doneThemePackGiftIds, selectedKeywords, searchQuery, keywordToValue])
+    return [...sortGroup(highlighted), ...sortGroup(regular), ...sortGroup(done)]
+  }, [allComprehensiveGiftIds, spec, i18n, highlightedGiftIds, doneThemePackGiftIds, selectedKeywords, searchQuery, keywordToValue, sortMode])
 
   const hasAnyGifts = allComprehensiveGiftIds.size > 0
   const hasFilteredGifts = selectedGifts.length > 0
@@ -179,18 +182,14 @@ export function ComprehensiveGiftGridTracker({
 
   return (
     <div className="space-y-2">
-      {/* Filter bar - stacked layout with filter fully expanded */}
-      <div className="space-y-2">
-        <EGOGiftKeywordFilter
-          selectedKeywords={selectedKeywords}
-          onSelectionChange={setSelectedKeywords}
-        />
-        <SearchBar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          placeholder={t('deckBuilder.egoGiftSearchPlaceholder')}
-        />
-      </div>
+      <EGOGiftFilterBar
+        selectedKeywords={selectedKeywords}
+        onKeywordsChange={setSelectedKeywords}
+        sortMode={sortMode}
+        onSortModeChange={setSortMode}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {/* Gift grid or no results message */}
       {hasFilteredGifts ? (
