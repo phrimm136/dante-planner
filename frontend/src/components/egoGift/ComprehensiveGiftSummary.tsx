@@ -2,6 +2,7 @@ import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
@@ -95,7 +96,11 @@ export function ComprehensiveGiftSummary({
         })
       }
     }
-    return gifts
+    const enhancementMap = new Map(gifts.map((g) => [g.item.id, g.enhancement]))
+    return sortEGOGifts(gifts.map((g) => g.item), 'tier-first').map((item) => ({
+      item,
+      enhancement: enhancementMap.get(item.id)!,
+    }))
   }, [selectedGiftIds, spec, i18n])
 
   const hasSelectedGifts = selectedGifts.length > 0
