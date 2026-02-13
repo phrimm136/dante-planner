@@ -78,7 +78,7 @@ export function ThemePackCard({
       {/* Layer 3: Theme pack name */}
       <div
         className={`absolute left-0 right-0 flex justify-center items-center pointer-events-none ${!isExtreme ? 'translate-x-[3px]' : '-translate-x-[3px]'} leading-4`}
-        style={{ top: !isExtreme ? '72%' : '79%', height: !isExtreme ? 60 : 72 }}
+        style={{ top: !isExtreme ? '72%' : '76.8%', height: !isExtreme ? 60 : 71 }}
       >
         <AutoSizeText
           text={specialName ? stripColorTags(specialName) : packName}
