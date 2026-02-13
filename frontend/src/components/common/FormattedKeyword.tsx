@@ -8,7 +8,8 @@
  */
 
 import { useState } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import * as PopoverPrimitive from '@radix-ui/react-popover'
+import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/lib/assetPaths'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '@/types/KeywordTypes'
@@ -59,6 +60,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
       <PopoverTrigger asChild>
         <button
           type="button"
+          onClick={(e) => { e.stopPropagation() }}
           className={cn(
             'items-center gap-1 font-medium',
             'cursor-pointer underline transition-opacity',
@@ -76,8 +78,10 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           <span>{displayText}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent
+      <PopoverPrimitive.Content
+        sideOffset={4}
         className={cn(
+          'z-50 outline-hidden',
           'w-auto max-w-md bg-black/85 border-neutral-800',
           '!animate-none data-[state=open]:!animate-none data-[state=closed]:!animate-none text-foreground rounded-none p-2'
         )}
@@ -100,7 +104,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
             </p>
           )}
         </div>
-      </PopoverContent>
+      </PopoverPrimitive.Content>
     </Popover>
   )
 }

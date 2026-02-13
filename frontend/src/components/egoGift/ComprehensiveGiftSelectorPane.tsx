@@ -136,7 +136,7 @@ export function ComprehensiveGiftSelectorPane({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] overflow-hidden flex flex-col" showCloseButton={false}>
+      <DialogContent className="max-w-[95vw] lg:max-w-[1440px] max-h-[90vh] flex flex-col" showCloseButton={false}>
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>
@@ -182,7 +182,7 @@ export function ComprehensiveGiftSelectorPane({
         </div>
 
         {/* Gift selection list */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           <EGOGiftSelectionList
             gifts={sortedGifts}
             selectedKeywords={selectedKeywords}
