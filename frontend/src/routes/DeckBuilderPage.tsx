@@ -18,7 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Project constants
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, DEFAULT_SKILL_EA } from '@/lib/constants'
 
 // Project utilities (@/lib)
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode'
@@ -124,6 +124,7 @@ function DeckBuilderPageContent() {
   // Store actions
   const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
   const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
 
   // Spec data for deck code decoding
   const identitySpec = useIdentityListSpec()
@@ -192,6 +193,9 @@ function DeckBuilderPageContent() {
         onImport={handleImport}
         onExport={handleExport}
         onResetOrder={handleResetOrder}
+        onIdentityChange={(sinnerCode) => {
+          updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+        }}
       />
 
       {/* Import Confirmation Dialog */}

@@ -23,6 +23,8 @@ interface DeckBuilderPaneProps {
   setEquipmentOverride?: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
   /** Override setDeploymentOrder from store (for tracker mode) */
   setDeploymentOrderOverride?: React.Dispatch<React.SetStateAction<number[]>>
+  /** Callback when identity changes (different ID, not uptie/level). Resets skill EA in edit and tracker modes. */
+  onIdentityChange?: (sinnerCode: string) => void
 }
 
 /**
@@ -39,6 +41,7 @@ export function DeckBuilderPane({
   deploymentOrderOverride,
   setEquipmentOverride,
   setDeploymentOrderOverride,
+  onIdentityChange,
 }: DeckBuilderPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -66,6 +69,7 @@ export function DeckBuilderPane({
               deploymentOrderOverride={deploymentOrderOverride}
               setEquipmentOverride={setEquipmentOverride}
               setDeploymentOrderOverride={setDeploymentOrderOverride}
+              onIdentityChange={onIdentityChange}
             />
           </div>
         </DialogContent>

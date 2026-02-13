@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 // Project utilities (@/lib)
-import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES, DUNGEON_IDX } from '@/lib/constants'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES, DUNGEON_IDX, DEFAULT_SKILL_EA } from '@/lib/constants'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode'
@@ -236,6 +236,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   // Actions (stable references, no re-render)
   const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
   const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
   const initializeFromPlannerAction = usePlannerEditorStore((s) => s.initializeFromPlanner)
 
   // ============================================================================
@@ -683,6 +684,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 onImport={handleDeckImport}
                 onExport={handleDeckExport}
                 onResetOrder={handleResetDeployment}
+                onIdentityChange={(sinnerCode) => {
+                  updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+                }}
               />
             </Suspense>
           </>

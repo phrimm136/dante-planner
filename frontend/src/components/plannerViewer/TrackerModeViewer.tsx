@@ -25,6 +25,7 @@ import { useTrackerState } from '@/hooks/useTrackerState'
 import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
 import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
+import { DEFAULT_SKILL_EA } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
@@ -167,6 +168,12 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         deploymentOrderOverride={trackerState.deploymentOrder}
         setEquipmentOverride={setEquipment}
         setDeploymentOrderOverride={setDeploymentOrder}
+        onIdentityChange={(sinnerCode) => {
+          setCurrentSkillCounts((prev) => ({
+            ...prev,
+            [sinnerCode]: { ...DEFAULT_SKILL_EA },
+          }))
+        }}
       />
 
       {/* Section 1: Start Buff - Read-only */}
