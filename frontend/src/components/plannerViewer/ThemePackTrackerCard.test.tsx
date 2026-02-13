@@ -23,6 +23,17 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
+// Mock ThemePackViewer to simplify testing
+vi.mock('@/components/floorTheme/ThemePackViewer', () => ({
+  ThemePackViewer: ({ packName, overlay, className }: { packName: string; overlay?: React.ReactNode; className?: string }) => (
+    <div data-testid="theme-pack-viewer" className={className ?? ''}>
+      <img src="/mock.webp" alt={packName} />
+      <span>{packName}</span>
+      {overlay}
+    </div>
+  ),
+}))
+
 // Mock FloorNoteDialog
 vi.mock('./FloorNoteDialog', () => ({
   FloorNoteDialog: ({ open }: { open: boolean }) =>
@@ -60,15 +71,14 @@ describe('ThemePackTrackerCard', () => {
   })
 
   describe('Basic Rendering', () => {
-    it('renders pack name', () => {
+    it('renders pack name via ThemePackViewer', () => {
       render(<ThemePackTrackerCard {...defaultProps} />)
       expect(screen.getByText('Test Pack')).toBeInTheDocument()
     })
 
-    it('renders pack image', () => {
+    it('renders ThemePackViewer', () => {
       render(<ThemePackTrackerCard {...defaultProps} />)
-      const img = screen.getByRole('img')
-      expect(img).toHaveAttribute('alt', 'Test Pack')
+      expect(screen.getByTestId('theme-pack-viewer')).toBeInTheDocument()
     })
   })
 
@@ -83,42 +93,38 @@ describe('ThemePackTrackerCard', () => {
         />
       )
 
-      const container = screen.getByRole('img').closest('div')
-      if (container) {
-        fireEvent.mouseEnter(container)
-        expect(onHoverChange).toHaveBeenCalledWith(true)
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      const hoverTarget = viewer.parentElement!
 
-        fireEvent.mouseLeave(container)
-        expect(onHoverChange).toHaveBeenCalledWith(false)
-      }
+      fireEvent.mouseEnter(hoverTarget)
+      expect(onHoverChange).toHaveBeenCalledWith(true)
+
+      fireEvent.mouseLeave(hoverTarget)
+      expect(onHoverChange).toHaveBeenCalledWith(false)
     })
   })
 
   describe('Done State', () => {
-    it('applies brightness when isDone is true', () => {
+    it('applies brightness class when isDone is true', () => {
       render(<ThemePackTrackerCard {...defaultProps} isDone={true} />)
 
-      const img = screen.getByRole('img')
-      expect(img.className).toContain('brightness-50')
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      expect(viewer.className).toContain('brightness-50')
     })
 
-    it('shows check icon when isDone is true and hovered', () => {
+    it('shows action buttons on hover', () => {
       render(<ThemePackTrackerCard {...defaultProps} isDone={true} />)
 
-      // Trigger hover to show action buttons
-      const container = screen.getByRole('img').closest('div')
-      if (container) {
-        fireEvent.mouseEnter(container)
-      }
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      const hoverTarget = viewer.parentElement!
+      fireEvent.mouseEnter(hoverTarget)
 
-      // Look for the CheckCircle2 icon that appears in hover overlay
-      const outerContainer = screen.getByRole('img').closest('div')?.parentElement
-      expect(outerContainer?.innerHTML).toContain('svg')
+      expect(hoverTarget.innerHTML).toContain('svg')
     })
   })
 
   describe('Toggle Done Action', () => {
-    it('calls onToggleDone when provided', () => {
+    it('calls onToggleDone when done button is clicked', () => {
       const onToggleDone = vi.fn()
 
       render(
@@ -128,8 +134,15 @@ describe('ThemePackTrackerCard', () => {
         />
       )
 
-      // Component should accept the callback without error
-      expect(screen.getByText('Test Pack')).toBeInTheDocument()
+      // Trigger hover to show action buttons
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      const hoverTarget = viewer.parentElement!
+      fireEvent.mouseEnter(hoverTarget)
+
+      // Click the done button (first button in overlay)
+      const buttons = screen.getAllByRole('button')
+      fireEvent.click(buttons[0])
+      expect(onToggleDone).toHaveBeenCalledOnce()
     })
   })
 })
