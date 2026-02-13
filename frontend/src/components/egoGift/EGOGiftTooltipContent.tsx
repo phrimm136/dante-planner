@@ -59,6 +59,7 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
             ref={scrollRef}
             className="text-sm text-wrap break-keep h-full overflow-y-auto scrollbar-hide"
             onScroll={updateScrollState}
+            onWheel={(e) => { e.stopPropagation() }}
           >
             <FormattedDescription text={description} />
           </div>

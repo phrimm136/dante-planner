@@ -103,7 +103,7 @@ export function EGOGiftSelectionList({
   }
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6 h-[350px] overflow-y-auto scrollbar-hide">
+    <div className="bg-muted border border-border rounded-md p-6 max-h-[600px] overflow-y-auto">
       <ResponsiveCardGrid
         cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
         cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}

@@ -42,6 +42,8 @@ export function EGOGiftTooltip({
           'w-auto max-w-[330px] bg-background border-1 border-primary text-foreground rounded-none p-2',
           className
         )}
+        onClick={(e) => { e.stopPropagation() }}
+        onMouseDown={(e) => { e.stopPropagation() }}
       >
         <EGOGiftTooltipContent giftId={giftId} enhancement={enhancement} />
       </TooltipContent>
