@@ -193,7 +193,7 @@ export function ComprehensiveGiftGridTracker({
 
       {/* Gift grid or no results message */}
       {hasFilteredGifts ? (
-        <ScrollArea className="md:h-[178px] lg:h-[353px]">
+        <ScrollArea className="md:h-[178px] lg:h-[416px]">
           <div className="flex flex-wrap gap-2 p-2 min-h-24">
             {selectedGifts.map(({ item, enhancement, encodedId }) => {
               const isHighlighted = highlightedGiftIds.has(encodedId)
