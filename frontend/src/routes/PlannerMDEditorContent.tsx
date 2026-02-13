@@ -3,6 +3,8 @@ import { useState, useEffect, Suspense, startTransition, useCallback, useRef } f
 
 // TanStack
 import { useNavigate } from '@tanstack/react-router'
+import { queryClient } from '@/lib/queryClient'
+import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
@@ -476,14 +478,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     const success = await save()
     if (success) {
       toast.success(t('pages.plannerMD.save.success'))
-      // Navigate to appropriate viewer page based on published status
+      queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
       if (isPublished) {
         void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
       } else {
         void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
       }
     } else {
-      // Reset intentional navigation flag if save failed
       isIntentionalNavigationRef.current = false
     }
   }
@@ -497,14 +498,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     const success = await save({ forceSync: true })
     if (success) {
       toast.success(t('pages.plannerMD.save.success'))
-      // Navigate to appropriate viewer page based on published status
+      queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
       if (isPublished) {
         void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
       } else {
         void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
       }
     } else {
-      // Reset intentional navigation flag if save failed
       isIntentionalNavigationRef.current = false
     }
   }
@@ -527,7 +527,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       // For 'both', onKeepBothCreated callback handles navigation to new planner
       // For 'overwrite' and 'discard', navigate to viewer page
       if (choice !== 'both') {
-        // Navigate to appropriate viewer page based on published status
+        queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
         if (isPublished) {
           void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
         } else {
