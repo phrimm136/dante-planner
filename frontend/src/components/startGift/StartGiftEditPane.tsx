@@ -41,6 +41,8 @@ export function StartGiftEditPane({
   const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
   const setSelectedKeyword = usePlannerEditorStore((s) => s.setSelectedGiftKeyword)
   const setSelectedGiftIds = usePlannerEditorStore((s) => s.setSelectedGiftIds)
+  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
   // Load data
@@ -58,19 +60,38 @@ export function StartGiftEditPane({
   useEffect(() => {
     if (selectedGiftIds.size > maxSelectable) {
       const newSelection = new Set<string>()
+      const trimmedIds: string[] = []
       let count = 0
       for (const id of selectedGiftIds) {
         if (count < maxSelectable) {
           newSelection.add(id)
           count++
+        } else {
+          trimmedIds.push(id)
         }
+      }
+      if (trimmedIds.length > 0) {
+        const newComprehensive = new Set(comprehensiveGiftIds)
+        for (const id of trimmedIds) {
+          newComprehensive.delete(id)
+        }
+        setComprehensiveGiftIds(newComprehensive)
       }
       setSelectedGiftIds(newSelection)
     }
-  }, [maxSelectable, selectedGiftIds, setSelectedGiftIds])
+  }, [maxSelectable, selectedGiftIds, setSelectedGiftIds, comprehensiveGiftIds, setComprehensiveGiftIds])
 
   // Row click (not gift) - just toggle row selection
   const handleRowSelect = (keyword: string) => {
+    // Remove old gifts from comprehensive before clearing
+    if (selectedGiftIds.size > 0) {
+      const newComprehensive = new Set(comprehensiveGiftIds)
+      for (const id of selectedGiftIds) {
+        newComprehensive.delete(id)
+      }
+      setComprehensiveGiftIds(newComprehensive)
+    }
+
     if (selectedKeyword === keyword) {
       setSelectedKeyword(null)
       setSelectedGiftIds(new Set())
@@ -82,8 +103,17 @@ export function StartGiftEditPane({
 
   // Gift click - combined row + gift selection in ONE update
   const handleGiftClick = (rowKeyword: string, giftId: string) => {
+    const newComprehensive = new Set(comprehensiveGiftIds)
+
     // Different row - select row AND gift together
     if (selectedKeyword !== rowKeyword) {
+      // Remove old row's gifts from comprehensive
+      for (const id of selectedGiftIds) {
+        newComprehensive.delete(id)
+      }
+      // Add new gift to comprehensive
+      newComprehensive.add(giftId)
+      setComprehensiveGiftIds(newComprehensive)
       setSelectedKeyword(rowKeyword)
       setSelectedGiftIds(new Set([giftId]))
       return
@@ -93,9 +123,12 @@ export function StartGiftEditPane({
     const newSelection = new Set(selectedGiftIds)
     if (newSelection.has(giftId)) {
       newSelection.delete(giftId)
+      newComprehensive.delete(giftId)
     } else if (newSelection.size < maxSelectable) {
       newSelection.add(giftId)
+      newComprehensive.add(giftId)
     }
+    setComprehensiveGiftIds(newComprehensive)
     setSelectedGiftIds(newSelection)
   }
 
@@ -120,6 +153,13 @@ export function StartGiftEditPane({
                   variant="outline"
                   size="sm"
                   onClick={() => {
+                    if (selectedGiftIds.size > 0) {
+                      const newComprehensive = new Set(comprehensiveGiftIds)
+                      for (const id of selectedGiftIds) {
+                        newComprehensive.delete(id)
+                      }
+                      setComprehensiveGiftIds(newComprehensive)
+                    }
                     setSelectedKeyword(null)
                     setSelectedGiftIds(new Set())
                   }}

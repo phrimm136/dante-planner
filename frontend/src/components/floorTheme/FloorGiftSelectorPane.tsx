@@ -176,9 +176,16 @@ export function FloorGiftSelectorPane({
             if (visited.has(ingredientIdStr)) continue
             visited.add(ingredientIdStr)
 
-            if (!findEncodedGiftId(ingredientIdStr, newSelection)) {
+            const ingredientSpec = specById.get(ingredientIdStr)
+            const isObtainable = !ingredientSpec ||
+              ingredientSpec.themePack.length === 0 ||
+              ingredientSpec.themePack.includes(themePackId)
+
+            // Only add to floor if obtainable in this theme pack
+            if (isObtainable && !findEncodedGiftId(ingredientIdStr, newSelection)) {
               newSelection.add(encodeGiftSelection(0, ingredientIdStr))
             }
+            // Always add to comprehensive (no theme pack restriction)
             const ingredientEncodedId = encodeGiftSelection(0, ingredientIdStr)
             newComprehensive.add(ingredientEncodedId)
           }
@@ -190,7 +197,7 @@ export function FloorGiftSelectorPane({
         setComprehensiveGiftIds(newComprehensive)
       }
     })
-  }, [onGiftSelectionChange, setComprehensiveGiftIds, specById])
+  }, [onGiftSelectionChange, setComprehensiveGiftIds, specById, themePackId])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -204,7 +211,16 @@ export function FloorGiftSelectorPane({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { onGiftSelectionChange(new Set()) }}
+                  onClick={() => {
+                    if (setComprehensiveGiftIds && comprehensiveGiftIds) {
+                      const newComprehensive = new Set(comprehensiveGiftIds)
+                      for (const encodedId of selectedGiftIds) {
+                        newComprehensive.delete(encodedId)
+                      }
+                      setComprehensiveGiftIds(newComprehensive)
+                    }
+                    onGiftSelectionChange(new Set())
+                  }}
                 >
                   {t('common:reset')}
                 </Button>

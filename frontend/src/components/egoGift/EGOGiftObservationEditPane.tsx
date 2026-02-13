@@ -38,6 +38,8 @@ export function EGOGiftObservationEditPane({
   // Store state
   const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
   const setObservationGiftIds = usePlannerEditorStore((s) => s.setObservationGiftIds)
+  const comprehensiveGiftIds = usePlannerEditorStore((s) => s.comprehensiveGiftIds)
+  const setComprehensiveGiftIds = usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
   const { t } = useTranslation(['planner', 'common'])
 
   // Load observation data (suspends while loading)
@@ -82,23 +84,32 @@ export function EGOGiftObservationEditPane({
     }
   }, [open])
 
-  // Use ref to always access latest selectedGiftIds in stable callback
+  // Use ref to always access latest state in stable callback
   const selectedGiftIdsRef = useRef(selectedGiftIds)
   selectedGiftIdsRef.current = selectedGiftIds
+  const comprehensiveGiftIdsRef = useRef(comprehensiveGiftIds)
+  comprehensiveGiftIdsRef.current = comprehensiveGiftIds
 
   // Stable callback - uses ref to get latest state
   const handleGiftToggle = useCallback((giftId: string) => {
     startTransition(() => {
       const current = selectedGiftIdsRef.current
+      const currentComprehensive = comprehensiveGiftIdsRef.current
       const newSelection = new Set(current)
+      const newComprehensive = new Set(currentComprehensive)
+
       if (newSelection.has(giftId)) {
         newSelection.delete(giftId)
+        newComprehensive.delete(giftId)
       } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
         newSelection.add(giftId)
+        newComprehensive.add(giftId)
       }
+
       setObservationGiftIds(newSelection)
+      setComprehensiveGiftIds(newComprehensive)
     })
-  }, [setObservationGiftIds])
+  }, [setObservationGiftIds, setComprehensiveGiftIds])
 
   // Calculate current cost from observation data
   const currentCost =
@@ -119,6 +130,13 @@ export function EGOGiftObservationEditPane({
                     variant="outline"
                     size="sm"
                     onClick={() => {
+                      if (selectedGiftIds.size > 0) {
+                        const newComprehensive = new Set(comprehensiveGiftIds)
+                        for (const id of selectedGiftIds) {
+                          newComprehensive.delete(id)
+                        }
+                        setComprehensiveGiftIds(newComprehensive)
+                      }
                       setObservationGiftIds(new Set())
                     }}
                   >
