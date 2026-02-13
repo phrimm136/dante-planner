@@ -147,7 +147,6 @@ export function EGOGiftList({
     <div className="bg-muted border border-border rounded-md p-6">
       <ResponsiveCardGrid
         cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
         mobileScale={0.8}
       >
         {sortedGifts.slice(0, displayCount).map((gift) => (
