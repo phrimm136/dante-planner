@@ -55,7 +55,7 @@ export function CompactEGOGiftKeywordFilter({
         aria-checked={isNoneSelected}
         aria-label={`${t('filter.common', 'None')} filter`}
         data-selected={isNoneSelected}
-        className="selectable rounded-md border border-border p-0.5 w-full aspect-square"
+        className="selectable rounded-md border border-border p-0.5 size-10 lg:size-8"
         title={t('filter.common', 'None')}
       >
         <svg viewBox="0 0 100 100" className="w-full h-full">
