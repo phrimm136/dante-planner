@@ -40,7 +40,7 @@ export function AutoSizeText({
   const measureRef = useRef<HTMLDivElement>(null)
   const [fontSize, setFontSize] = useState(maxFontSize)
   const [shouldWrap, setShouldWrap] = useState(false)
-  const rafRef = useRef<number>()
+  const rafRef = useRef<number | undefined>(undefined)
 
   const lines = text.split('\n')
 

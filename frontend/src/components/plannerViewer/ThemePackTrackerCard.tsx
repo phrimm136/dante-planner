@@ -22,7 +22,7 @@ interface ThemePackTrackerCardProps {
 
 /**
  * Theme pack card for tracker mode with hover actions.
- * Wraps ThemePackViewer (ThemePackCard) with done-mark and notes overlays.
+ * Wraps ThemePackViewer with done-mark and notes overlays.
  */
 export function ThemePackTrackerCard({
   packId,
@@ -93,7 +93,6 @@ export function ThemePackTrackerCard({
           }
         />
       </div>
-
       <FloorNoteDialog
         open={showNotesDialog}
         onOpenChange={setShowNotesDialog}
