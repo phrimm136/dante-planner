@@ -38,6 +38,8 @@ interface DeckBuilderContentBaseProps {
   setEquipmentOverride?: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
   /** Override setDeploymentOrder from store (for tracker mode) */
   setDeploymentOrderOverride?: React.Dispatch<React.SetStateAction<number[]>>
+  /** Callback when identity changes (different ID, not uptie/level). Resets skill EA in edit and tracker modes. */
+  onIdentityChange?: (sinnerCode: string) => void
 }
 
 /** Standalone page mode - no dialog tracking needed */
@@ -63,7 +65,7 @@ const BATCH_SIZE = 10
  * Used by both DeckBuilderPane (dialog) and DeckBuilderPage (standalone).
  */
 export function DeckBuilderContent(props: DeckBuilderContentProps) {
-  const { onImport, onExport, onResetOrder, equipmentOverride, deploymentOrderOverride, setEquipmentOverride, setDeploymentOrderOverride } = props
+  const { onImport, onExport, onResetOrder, equipmentOverride, deploymentOrderOverride, setEquipmentOverride, setDeploymentOrderOverride, onIdentityChange } = props
   const isDialogMode = props.mode === 'dialog'
   const open = isDialogMode ? props.open : true
 
@@ -415,6 +417,8 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     }
 
     const sinnerCode = getSinnerCodeFromId(identityId)
+    const currentIdentityId = equipment[sinnerCode]?.identity?.id
+
     startTransition(() => {
       setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
         const sinnerEquipment = prevEquipment[sinnerCode]
@@ -431,6 +435,10 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
           },
         }
       })
+
+      if (currentIdentityId !== identityId) {
+        onIdentityChange?.(sinnerCode)
+      }
     })
   }
 
