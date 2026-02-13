@@ -133,7 +133,7 @@ export function SkillReplacementSection({
     <PlannerSection title={t('pages.plannerMD.skillReplacement.title')} onViewNotes={onViewNotes}>
       {/* Sinner Grid - Responsive: 6->4->3->2 columns */}
       <div
-        className="grid mx-auto"
+        className="grid mx-auto gap-0.5"
         style={{
           gridTemplateColumns: `repeat(${columnCount}, ${scaledWidth}px)`,
           gridAutoRows: `${scaledHeight}px`,

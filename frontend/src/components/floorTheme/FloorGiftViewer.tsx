@@ -5,6 +5,7 @@ import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
 import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { sortEGOGifts } from '@/lib/egoGiftSort'
 import { CARD_GRID } from '@/lib/constants'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel } from '@/lib/constants'
@@ -81,7 +82,11 @@ export function FloorGiftViewer({
         })
       }
     }
-    return gifts
+    const enhancementMap = new Map(gifts.map((g) => [g.item.id, g.enhancement]))
+    return sortEGOGifts(gifts.map((g) => g.item), 'tier-first').map((item) => ({
+      item,
+      enhancement: enhancementMap.get(item.id)!,
+    }))
   }, [selectedGiftIds, spec, i18n])
 
   // Handle click - prevent when readOnly
