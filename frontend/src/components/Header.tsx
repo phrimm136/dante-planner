@@ -58,7 +58,7 @@ function UnreadBadge() {
  * Uses useAuthQuery (suspends) - must be wrapped in Suspense boundary.
  */
 function AuthSection() {
-  const { t } = useTranslation(['common'])
+  const { t, i18n } = useTranslation(['common'])
   const { data: user } = useAuthQuery()
   const logout = useLogout()
   const login = useLogin()
@@ -207,7 +207,7 @@ function AuthSection() {
             <>
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium">
-                  {formatUsername(user.usernameEpithet, user.usernameSuffix)}
+                  {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
                 </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
