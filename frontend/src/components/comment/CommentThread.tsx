@@ -2,7 +2,7 @@
  * CommentThread
  *
  * Recursive thread renderer with depth indentation.
- * - Depth indentation: 24px per level, max 5 levels visual
+ * - Depth indentation: 24px per level, max 5 levels on mobile (<lg), 10 on desktop
  * - Border-left for nested replies
  * - Renders CommentCard for each node
  * - Memoized to prevent re-renders when sibling comments change
@@ -82,11 +82,12 @@ export const CommentThread = memo(function CommentThread({
   onReport,
   depth = 0,
 }: CommentThreadProps) {
-  // Responsive indent: cap at different depths for mobile vs desktop
-  // Mobile: indent up to depth 3, then flatten
-  // Desktop: indent up to depth 10 (backend caps at 5 anyway)
-  const shouldIndentMobile = depth > 0 && depth <= COMMENT_MAX_VISUAL_DEPTH_MOBILE
-  const shouldIndentDesktop = depth > 0 && depth <= COMMENT_MAX_VISUAL_DEPTH_DESKTOP
+  // Responsive hierarchy collapse:
+  // Mobile (<lg): fully collapse hierarchy beyond depth 5 (no indent, no border)
+  // Desktop (>=lg): indent up to depth 10
+  const withinMobileMax = depth > 0 && depth <= COMMENT_MAX_VISUAL_DEPTH_MOBILE
+  const beyondMobileWithinDesktop =
+    depth > COMMENT_MAX_VISUAL_DEPTH_MOBILE && depth <= COMMENT_MAX_VISUAL_DEPTH_DESKTOP
 
   // Wrap handlers that need additional logic
   const handleToggleNotifications = useCallback((commentId: string) => {
@@ -100,12 +101,10 @@ export const CommentThread = memo(function CommentThread({
   return (
     <div
       className={cn(
-        // Mobile: indent only if under mobile limit
-        shouldIndentMobile ? 'ml-6' : 'ml-0',
-        // Desktop: override to indent if under desktop limit
-        shouldIndentDesktop && 'sm:ml-6',
-        // Border for all nested comments
-        depth > 0 && 'border-l-2 border-border pl-3'
+        // Mobile (<lg): full nesting (indent + border) only within mobile depth limit
+        withinMobileMax && 'ml-1 border-l-2 border-border pl-1',
+        // Desktop (>=lg): restore nesting for depths beyond mobile cap
+        beyondMobileWithinDesktop && 'lg:ml-3 lg:border-l-2 lg:border-border lg:pl-3'
       )}
     >
       <CommentCard

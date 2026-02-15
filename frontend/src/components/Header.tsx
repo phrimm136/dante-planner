@@ -1,8 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Suspense, useEffect, useState } from 'react'
-import { Languages, Settings, User, LogOut } from 'lucide-react'
-import { getDisplayFontForLabel } from '@/lib/utils'
+import { Languages, Settings, User, LogOut, Bell } from 'lucide-react'
+import { cn, getDisplayFontForLabel } from '@/lib/utils'
 import { formatUsername } from '@/lib/formatUsername'
 
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
@@ -10,7 +10,6 @@ import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 import { useFirstLoginStore } from '@/stores/useFirstLoginStore'
 import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
-import { NotificationIcon } from '@/components/notifications/NotificationIcon'
 import { NotificationDialog } from '@/components/notifications/NotificationDialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -33,23 +32,22 @@ import {
 } from '@/lib/oauth'
 
 /**
- * NotificationBell - Authenticated-only notification component
- *
- * This component only renders when user is logged in.
- * The unread count hook is called inside this component, so it only
- * executes for authenticated users, preventing 403 errors.
+ * UnreadBadge - Renders unread notification count badge on User icon.
+ * Must only be rendered when user is authenticated (useSuspenseQuery).
  */
-interface NotificationBellProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
-function NotificationBell({ open, onOpenChange }: NotificationBellProps) {
+function UnreadBadge() {
   const { unreadCount } = useUnreadCountQuery()
+  if (unreadCount === 0) return null
   return (
-    <>
-      <NotificationIcon unreadCount={unreadCount} onClick={() => onOpenChange(true)} />
-      <NotificationDialog open={open} onOpenChange={onOpenChange} />
-    </>
+    <span
+      className={cn(
+        'absolute -top-1 -right-1 flex items-center justify-center',
+        'min-w-5 h-5 px-1 rounded-full',
+        'bg-destructive text-destructive-foreground text-xs font-medium'
+      )}
+    >
+      {unreadCount > 99 ? '99+' : unreadCount}
+    </span>
   )
 }
 
@@ -164,25 +162,21 @@ function AuthSection() {
 
   return (
     <>
-      {/* Notification Bell */}
-      {user && (
-        <Suspense fallback={null}>
-          <NotificationBell
-            open={notificationDialogOpen}
-            onOpenChange={setNotificationDialogOpen}
-          />
-        </Suspense>
-      )}
-
-      {/* User Authentication Dropdown */}
+      {/* User Authentication Dropdown (with integrated notifications) */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
+            className="relative"
             aria-label={t('header.settings.signIn')}
           >
             <User />
+            {user && (
+              <Suspense fallback={null}>
+                <UnreadBadge />
+              </Suspense>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
@@ -219,6 +213,15 @@ function AuthSection() {
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
+                <button
+                  className="w-full cursor-pointer flex items-center gap-2"
+                  onClick={() => setNotificationDialogOpen(true)}
+                >
+                  <Bell className="h-4 w-4" />
+                  {t('notifications.title')}
+                </button>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
                 <Link to="/settings" className="cursor-pointer flex items-center gap-2">
                   <Settings className="h-4 w-4" />
                   {t('header.settings.settings')}
@@ -245,6 +248,14 @@ function AuthSection() {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* Notification dialog - opened from dropdown menu item */}
+      {user && (
+        <NotificationDialog
+          open={notificationDialogOpen}
+          onOpenChange={setNotificationDialogOpen}
+        />
+      )}
     </>
   )
 }

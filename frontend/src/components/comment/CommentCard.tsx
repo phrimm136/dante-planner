@@ -93,9 +93,6 @@ export const CommentCard = memo(function CommentCard({
 
   // Format relative dates (short format with i18n)
   const formattedCreatedAt = formatShortRelativeTime(comment.createdAt, i18n.language)
-  const formattedUpdatedAt = comment.updatedAt
-    ? formatShortRelativeTime(comment.updatedAt, i18n.language)
-    : null
 
   // Sanitize HTML content for XSS protection using DOMPurify
   const sanitizedContent = comment.content
@@ -145,11 +142,6 @@ export const CommentCard = memo(function CommentCard({
           <span className="font-medium">{authorName}</span>
           <span className="text-muted-foreground text-xs whitespace-nowrap">
             {formattedCreatedAt}
-            {comment.isUpdated && formattedUpdatedAt && (
-              <span className="ml-1">
-                ({t('pages.plannerMD.comments.updatedAt', 'updated {{date}}', { date: formattedUpdatedAt })})
-              </span>
-            )}
           </span>
         </div>
         <CommentActionButtons
@@ -177,10 +169,17 @@ export const CommentCard = memo(function CommentCard({
           isReply
         />
       ) : (
-        <div
-          className="prose prose-sm max-w-none text-foreground"
-          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-        />
+        <>
+          {comment.isUpdated && (
+            <span className="text-muted-foreground text-xs">
+              ({t('pages.plannerMD.comments.modified', 'edited')})
+            </span>
+          )}
+          <div
+            className="prose prose-sm max-w-none text-foreground"
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          />
+        </>
       )}
 
       {/* Reply editor (inline, indented to match reply position) */}
