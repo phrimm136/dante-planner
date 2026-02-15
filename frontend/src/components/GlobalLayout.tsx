@@ -5,6 +5,7 @@ import { LanguageSync } from './LanguageSync'
 import { SyncChoiceDialog } from '@/components/dialogs/SyncChoiceDialog'
 import { useFirstLoginStore } from '@/stores/useFirstLoginStore'
 import { useSseConnection } from '@/hooks/useSseConnection'
+import { useDragToScroll } from '@/hooks/useDragToScroll'
 import { useAuthQueryNonBlocking } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 
@@ -15,6 +16,7 @@ interface GlobalLayoutProps {
 export function GlobalLayout({ children }: GlobalLayoutProps) {
   // Manage SSE connection based on auth + sync settings
   useSseConnection()
+  useDragToScroll()
 
   const { data: user } = useAuthQueryNonBlocking()
   const { data: settings } = useUserSettingsQuery()
