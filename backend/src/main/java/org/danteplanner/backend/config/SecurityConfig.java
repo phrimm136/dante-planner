@@ -102,7 +102,6 @@ public class SecurityConfig {
 
             // Security headers
             .headers(headers -> headers
-                .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
                 .xssProtection(xss -> xss.headerValue(
                     org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK
                 ))

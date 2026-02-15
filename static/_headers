@@ -1,3 +1,11 @@
+# Security headers
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self' https://api.dante-planner.com; form-action 'self' https://accounts.google.com; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; manifest-src 'self'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
 # Immutable assets (hashed filenames from Vite)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
