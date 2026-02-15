@@ -363,7 +363,8 @@ export function PlannerDetailHeader({
             <span className="text-sm text-muted-foreground hidden lg:inline">
               {formatUsername(
                 publishedPlanner.authorUsernameEpithet,
-                publishedPlanner.authorUsernameSuffix
+                publishedPlanner.authorUsernameSuffix,
+                i18n.language
               )}
             </span>
             <span className="text-sm text-muted-foreground hidden lg:inline">

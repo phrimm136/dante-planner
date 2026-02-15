@@ -52,7 +52,7 @@ export function PublishedPlannerCard({
   onContextMenu,
   className,
 }: PublishedPlannerCardProps) {
-  const { t } = useTranslation(['planner', 'common'])
+  const { t, i18n } = useTranslation(['planner', 'common'])
   const {
     title,
     category,
@@ -175,7 +175,7 @@ export function PublishedPlannerCard({
           {lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}
         </span>
         <span className="truncate max-w-[60%]">
-          {formatUsername(authorUsernameEpithet, authorUsernameSuffix)}
+          {formatUsername(authorUsernameEpithet, authorUsernameSuffix, i18n.language)}
         </span>
       </div>
     </div>

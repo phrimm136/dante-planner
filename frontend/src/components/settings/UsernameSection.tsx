@@ -29,7 +29,7 @@ import { GoogleIcon } from '@/components/icons/GoogleIcon'
  * Must be wrapped in Suspense boundary.
  */
 function UsernameSectionContent() {
-  const { t } = useTranslation(['common', 'epithet'])
+  const { t, i18n } = useTranslation(['common', 'epithet'])
   const { data: user } = useAuthQuery()
   const { epithets } = useEpithetsQuery()
   const updateEpithet = useUpdateEpithetMutation()
@@ -130,7 +130,7 @@ function UsernameSectionContent() {
 
       {/* Current username preview */}
       <div className="text-sm text-muted-foreground">
-        {t('settings.username.current')}: {formatUsername(user.usernameEpithet, user.usernameSuffix)}
+        {t('settings.username.current')}: {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
       </div>
 
       {/* Epithet dropdown */}
@@ -169,7 +169,7 @@ function UsernameSectionContent() {
       {/* Live preview when changed */}
       {isSaveEnabled && selectedEpithet && (
         <div className="text-sm">
-          {t('settings.username.preview')}: {formatUsername(selectedEpithet, user.usernameSuffix)}
+          {t('settings.username.preview')}: {formatUsername(selectedEpithet, user.usernameSuffix, i18n.language)}
         </div>
       )}
     </div>

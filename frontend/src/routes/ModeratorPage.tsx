@@ -17,7 +17,7 @@ import type { UserForMod, ModerationAction } from '@/types/ModeratorTypes'
  * User table row with action buttons
  */
 function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuffix: string }) {
-  const { t } = useTranslation(['moderation', 'common'])
+  const { t, i18n } = useTranslation(['moderation', 'common'])
   const [showBanDialog, setShowBanDialog] = useState(false)
   const [showUnbanDialog, setShowUnbanDialog] = useState(false)
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false)
@@ -31,7 +31,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
   const isSelf = user.usernameSuffix === currentUserSuffix
   const canBan = user.role !== 'ADMIN' && !isSelf
   const canTimeout = (user.role === 'NORMAL' || user.role === 'MODERATOR') && !isSelf
-  const username = formatUsername(user.usernameEpithet, user.usernameSuffix)
+  const username = formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)
 
   const handleBanConfirm = (reason: string) => {
     banMutation.mutate({ usernameSuffix: user.usernameSuffix, reason }, {
@@ -75,7 +75,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
 
   return (
     <tr className="border-b">
-      <td className="px-4 py-3 text-sm">{formatUsername(user.usernameEpithet, user.usernameSuffix)}</td>
+      <td className="px-4 py-3 text-sm">{formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}</td>
       <td className="px-4 py-3 text-sm">
         <span className={
           user.role === 'ADMIN' ? 'text-red-500 font-semibold' :
@@ -179,7 +179,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
  */
 function HistoryRow({ action }: { action: ModerationAction }) {
   const { i18n } = useTranslation()
-  const actorName = formatUsername(action.actorUsernameEpithet, action.actorUsernameSuffix)
+  const actorName = formatUsername(action.actorUsernameEpithet, action.actorUsernameSuffix, i18n.language)
 
   const getActionColor = (type: ModerationAction['actionType']) => {
     switch (type) {

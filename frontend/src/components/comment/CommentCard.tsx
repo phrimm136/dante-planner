@@ -88,7 +88,7 @@ export const CommentCard = memo(function CommentCard({
   // Format author name with i18n translation for epithet
   const authorName =
     comment.authorEpithet && comment.authorSuffix
-      ? formatUsername(comment.authorEpithet, comment.authorSuffix)
+      ? formatUsername(comment.authorEpithet, comment.authorSuffix, i18n.language)
       : t('pages.plannerMD.comments.deletedUser')
 
   // Format relative dates (short format with i18n)
