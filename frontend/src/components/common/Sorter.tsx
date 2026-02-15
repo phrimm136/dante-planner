@@ -12,7 +12,6 @@ export function Sorter({ sortMode, onSortModeChange }: SorterProps) {
 
   return (
     <div className="bg-card border border-border rounded-md h-14 flex items-center gap-2 px-2">
-      <span className="text-sm font-medium shrink-0">{t('sorter.label')}</span>
       <div className="flex gap-2">
         <button
           onClick={() => { onSortModeChange('tier-first'); }}
