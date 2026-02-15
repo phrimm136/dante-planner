@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 
+import { ApiClient } from '@/lib/api'
+
 /**
  * SSE reconnection configuration for planner comments
  */
@@ -67,9 +69,7 @@ export function usePlannerCommentsSse(plannerId: string) {
       }
 
       // Create EventSource with credentials (sends deviceId cookie)
-      const es = new EventSource(`/api/planner/${plannerId}/comments/events`, {
-        withCredentials: true,
-      })
+      const es = ApiClient.createEventSource(`/api/planner/${plannerId}/comments/events`)
 
       eventSourceRef.current = es
 
