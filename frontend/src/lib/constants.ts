@@ -1029,16 +1029,16 @@ export const COMMENT_MAX_CHARS = 10000
 /**
  * Comment thread indentation in pixels per depth level
  */
-export const COMMENT_INDENT_PER_LEVEL = 24
+export const COMMENT_INDENT_PER_LEVEL = 2
 
 /**
- * Maximum visual depth for comment indentation on mobile (< sm breakpoint)
+ * Maximum visual depth for comment indentation on mobile (< lg breakpoint)
  * Comments deeper than this still exist but don't indent further
  */
-export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 3
+export const COMMENT_MAX_VISUAL_DEPTH_MOBILE = 2
 
 /**
- * Maximum visual depth for comment indentation on desktop (>= sm breakpoint)
+ * Maximum visual depth for comment indentation on desktop (>= lg breakpoint)
  */
 export const COMMENT_MAX_VISUAL_DEPTH_DESKTOP = 10
 
