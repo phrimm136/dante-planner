@@ -181,7 +181,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PlannerValidationException.class)
     public ResponseEntity<ErrorResponse> handlePlannerValidation(PlannerValidationException ex) {
-        log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+        log.warn("Planner validation error [{}]: {} | content: {}",
+            ex.getErrorCode(), ex.getMessage(), truncate(ex.getFailedContent()));
 
         // Return granular error codes for user-fixable issues
         // Return generic code for structural issues to prevent information disclosure
@@ -203,7 +204,7 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult().getFieldErrors().stream()
             .map(e -> e.getField() + ": " + e.getDefaultMessage())
             .collect(Collectors.joining(", "));
-        log.warn("Validation error: {}", message);
+        log.warn("Validation error: {} | body: {}", message, ex.getBindingResult().getTarget());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", message));
     }
@@ -358,5 +359,17 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
+    }
+
+    private static final int MAX_LOG_CONTENT_LENGTH = 1000;
+
+    private static String truncate(String content) {
+        if (content == null) {
+            return "<null>";
+        }
+        if (content.length() <= MAX_LOG_CONTENT_LENGTH) {
+            return content;
+        }
+        return content.substring(0, MAX_LOG_CONTENT_LENGTH) + "...(truncated)";
     }
 }
