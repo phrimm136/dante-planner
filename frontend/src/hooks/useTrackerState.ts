@@ -22,6 +22,8 @@ export interface TrackerState {
   currentSkillCounts: Record<string, Record<OffensiveSkillSlot, number>>
   /** Done marks per floor (floorIndex 0-based -> Set<themePackID>) */
   doneMarks: Record<number, Set<string>>
+  /** Individually checked ego gift IDs (encodedId) */
+  egoGiftDoneMarks: Set<string>
 }
 
 /**
@@ -40,6 +42,8 @@ export interface TrackerStateResult {
   updateCurrentSkillCount: (sinnerId: string, skillSlot: OffensiveSkillSlot, count: number) => void
   /** Toggle done mark for a theme pack (floorIndex is 0-based) */
   toggleDoneMark: (floorIndex: number, themePackId: string) => void
+  /** Toggle done mark for an individual ego gift (by encodedId) */
+  toggleEgoGiftDoneMark: (encodedId: string) => void
   /** Reset all state to initial values (equipment and deployment from planner, skills to default, done marks cleared) */
   resetState: (initialEquipment: Record<string, SinnerEquipment>, initialDeployment: number[]) => void
 }
@@ -115,6 +119,7 @@ export function useTrackerState(
     createInitialSkillCounts
   )
   const [doneMarks, setDoneMarks] = useState<Record<number, Set<string>>>({})
+  const [egoGiftDoneMarks, setEgoGiftDoneMarks] = useState<Set<string>>(new Set())
 
   const updateCurrentSkillCount = useCallback((
     sinnerId: string,
@@ -147,11 +152,26 @@ export function useTrackerState(
     })
   }, [])
 
+  const toggleEgoGiftDoneMark = useCallback((encodedId: string) => {
+    setEgoGiftDoneMarks((prev) => {
+      const next = new Set(prev)
+
+      if (next.has(encodedId)) {
+        next.delete(encodedId)
+      } else {
+        next.add(encodedId)
+      }
+
+      return next
+    })
+  }, [])
+
   const resetState = useCallback((resetEquipment: Record<string, SinnerEquipment>, resetDeployment: number[]) => {
     setEquipment(resetEquipment)
     setDeploymentOrder(resetDeployment)
     setCurrentSkillCounts(createInitialSkillCounts())
     setDoneMarks({})
+    setEgoGiftDoneMarks(new Set())
   }, [])
 
   return {
@@ -160,12 +180,14 @@ export function useTrackerState(
       deploymentOrder,
       currentSkillCounts,
       doneMarks,
+      egoGiftDoneMarks,
     },
     setEquipment,
     setDeploymentOrder,
     setCurrentSkillCounts,
     updateCurrentSkillCount,
     toggleDoneMark,
+    toggleEgoGiftDoneMark,
     resetState,
   }
 }

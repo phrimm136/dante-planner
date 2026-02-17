@@ -224,6 +224,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
               floorSelections={content.floorSelections}
               doneMarks={{}}
               hoveredThemePackId={null}
+              readOnly
             />
           </Suspense>
         </PlannerSection>

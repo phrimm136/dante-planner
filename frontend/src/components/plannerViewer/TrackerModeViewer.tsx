@@ -73,6 +73,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     setDeploymentOrder,
     setCurrentSkillCounts,
     toggleDoneMark,
+    toggleEgoGiftDoneMark,
   } = useTrackerState(content.equipment, content.deploymentOrder)
 
   const deserialized = useMemo(
@@ -271,6 +272,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                   floorSelections={content.floorSelections}
                   doneMarks={trackerState.doneMarks}
                   hoveredThemePackId={hoveredThemePackId}
+                  egoGiftDoneMarks={trackerState.egoGiftDoneMarks}
+                  onToggleEgoGiftDone={toggleEgoGiftDoneMark}
                 />
               </Suspense>
             </PlannerSection>
