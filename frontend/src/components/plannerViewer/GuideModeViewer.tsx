@@ -222,7 +222,6 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           >
             <ComprehensiveGiftGridTracker
               floorSelections={content.floorSelections}
-              doneMarks={{}}
               hoveredThemePackId={null}
               readOnly
             />

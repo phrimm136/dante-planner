@@ -20,9 +20,9 @@ export interface TrackerState {
   deploymentOrder: number[]
   /** Current skill counts (sinnerID -> skillSlot -> count) */
   currentSkillCounts: Record<string, Record<OffensiveSkillSlot, number>>
-  /** Done marks per floor (floorIndex 0-based -> Set<themePackID>) */
+  /** Theme pack done marks per floor (floorIndex 0-based -> Set<themePackID>). Independent of gift marks. */
   doneMarks: Record<number, Set<string>>
-  /** Individually checked ego gift IDs (encodedId) */
+  /** Individual ego gift done marks (encodedId). Source of truth for gift-level dimming. */
   egoGiftDoneMarks: Set<string>
 }
 
@@ -40,10 +40,10 @@ export interface TrackerStateResult {
   setCurrentSkillCounts: React.Dispatch<React.SetStateAction<Record<string, Record<OffensiveSkillSlot, number>>>>
   /** Update a single skill count */
   updateCurrentSkillCount: (sinnerId: string, skillSlot: OffensiveSkillSlot, count: number) => void
-  /** Toggle done mark for a theme pack (floorIndex is 0-based) */
-  toggleDoneMark: (floorIndex: number, themePackId: string) => void
-  /** Toggle done mark for an individual ego gift (by encodedId) */
+  /** Toggle done mark for an individual ego gift (by encodedId). Does not affect theme pack state. */
   toggleEgoGiftDoneMark: (encodedId: string) => void
+  /** Toggle theme pack done mark and sync its gifts. Writes to both doneMarks and egoGiftDoneMarks. */
+  togglePackDone: (floorIndex: number, themePackId: string, giftIds: string[]) => void
   /** Reset all state to initial values (equipment and deployment from planner, skills to default, done marks cleared) */
   resetState: (initialEquipment: Record<string, SinnerEquipment>, initialDeployment: number[]) => void
 }
@@ -135,23 +135,6 @@ export function useTrackerState(
     }))
   }, [])
 
-  const toggleDoneMark = useCallback((floorIndex: number, themePackId: string) => {
-    setDoneMarks((prev) => {
-      const floorMarks = new Set(prev[floorIndex] || [])
-
-      if (floorMarks.has(themePackId)) {
-        floorMarks.delete(themePackId)
-      } else {
-        floorMarks.add(themePackId)
-      }
-
-      return {
-        ...prev,
-        [floorIndex]: floorMarks,
-      }
-    })
-  }, [])
-
   const toggleEgoGiftDoneMark = useCallback((encodedId: string) => {
     setEgoGiftDoneMarks((prev) => {
       const next = new Set(prev)
@@ -163,6 +146,32 @@ export function useTrackerState(
       }
 
       return next
+    })
+  }, [])
+
+  const togglePackDone = useCallback((floorIndex: number, themePackId: string, giftIds: string[]) => {
+    setDoneMarks((prev) => {
+      const floorMarks = new Set(prev[floorIndex] || [])
+      const wasDone = floorMarks.has(themePackId)
+
+      if (wasDone) {
+        floorMarks.delete(themePackId)
+      } else {
+        floorMarks.add(themePackId)
+      }
+
+      // Sync gift marks: marking pack → add all gifts, unmarking pack → remove all gifts
+      setEgoGiftDoneMarks((prevGifts) => {
+        const next = new Set(prevGifts)
+        if (wasDone) {
+          giftIds.forEach((id) => next.delete(id))
+        } else {
+          giftIds.forEach((id) => next.add(id))
+        }
+        return next
+      })
+
+      return { ...prev, [floorIndex]: floorMarks }
     })
   }, [])
 
@@ -186,8 +195,8 @@ export function useTrackerState(
     setDeploymentOrder,
     setCurrentSkillCounts,
     updateCurrentSkillCount,
-    toggleDoneMark,
     toggleEgoGiftDoneMark,
+    togglePackDone,
     resetState,
   }
 }
