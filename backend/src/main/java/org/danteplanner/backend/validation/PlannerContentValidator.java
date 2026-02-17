@@ -119,6 +119,15 @@ public class PlannerContentValidator {
      * @param strictMode if true, requires title and themePackId (for publish)
      */
     public JsonNode validate(String content, String category, boolean strictMode) {
+        try {
+            return doValidate(content, category, strictMode);
+        } catch (PlannerValidationException ex) {
+            ex.setFailedContent(content);
+            throw ex;
+        }
+    }
+
+    private JsonNode doValidate(String content, String category, boolean strictMode) {
         if (content == null || content.isBlank()) {
             log.warn("Validation failed: content is null or empty");
             throw emptyContentError();
