@@ -62,7 +62,7 @@ export function PublishedPlannerCard({
     viewCount,
     authorUsernameEpithet,
     authorUsernameSuffix,
-    lastModifiedAt,
+    createdAt,
     isBookmarked,
   } = planner
 
@@ -172,7 +172,7 @@ export function PublishedPlannerCard({
         {/* formatPlannerDate: <24h shows HH:mm, >=24h shows MM/DD */}
         <span className="flex items-center gap-1">
           <Clock className="size-3" />
-          {lastModifiedAt ? formatPlannerDate(lastModifiedAt) : '-'}
+          {createdAt ? formatPlannerDate(createdAt) : '-'}
         </span>
         <span className="truncate max-w-[60%]">
           {formatUsername(authorUsernameEpithet, authorUsernameSuffix, i18n.language)}
