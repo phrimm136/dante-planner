@@ -61,6 +61,8 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={false}
         onSelect={onSelect}
+        enhancement={0}
+        onEnhancementChange={vi.fn()}
         mdVersion={5}
       />
     )
@@ -80,6 +82,8 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={false}
         onSelect={onSelect}
+        enhancement={0}
+        onEnhancementChange={vi.fn()}
         mdVersion={5}
       />
     )
@@ -104,6 +108,8 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={true}
         onSelect={onSelect}
+        enhancement={0}
+        onEnhancementChange={vi.fn()}
         mdVersion={5}
       />
     )
@@ -128,6 +134,8 @@ describe('StartBuffCard', () => {
         i18n={mockI18n}
         isSelected={true}
         onSelect={onSelect}
+        enhancement={0}
+        onEnhancementChange={vi.fn()}
         mdVersion={5}
       />
     )

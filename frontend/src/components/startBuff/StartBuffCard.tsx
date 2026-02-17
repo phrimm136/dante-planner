@@ -9,7 +9,7 @@ import {
 import { MD_ACCENT_COLORS, type MDVersion } from '@/lib/constants'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
 import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
-import { getEnhancementSuffix, createBuffId, getEnhancementFromBuffId } from '@/types/StartBuffTypes'
+import { getEnhancementSuffix, createBuffId } from '@/types/StartBuffTypes'
 import { AutoSizeText } from '@/components/common/AutoSizeText'
 import { EnhancementButton } from './EnhancementButton'
 import { formatBuffEffects } from './formatBuffDescription'
@@ -22,6 +22,10 @@ interface StartBuffCardProps {
   battleKeywords?: BattleKeywords
   isSelected: boolean
   onSelect: (buffId: number) => void
+  /** Current enhancement level (controlled by parent) */
+  enhancement: EnhancementLevel
+  /** Callback when enhancement changes via card's +/++ buttons */
+  onEnhancementChange: (baseId: number, level: EnhancementLevel) => void
   /** Mirror Dungeon version for accent color */
   mdVersion: MDVersion
 }
@@ -29,10 +33,7 @@ interface StartBuffCardProps {
 /**
  * Individual start buff card component (edit-only)
  *
- * Enhancement behavior:
- * - Local state for preview, independent of selection
- * - Enhancement button only changes preview
- * - If already selected, also updates selection
+ * Enhancement is controlled by parent for batch operation support.
  *
  * Layout:
  * - Top black area: star light + cost (top-right)
@@ -47,19 +48,12 @@ export function StartBuffCard({
   battleKeywords,
   isSelected,
   onSelect,
+  enhancement,
+  onEnhancementChange,
   mdVersion,
 }: StartBuffCardProps) {
   const { i18n: i18nInstance } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
-
-  // Local enhancement state for preview
-  // Initialize from buff.id (which reflects selection if selected)
-  const [localEnhancement, setLocalEnhancement] = useState<EnhancementLevel>(
-    () => getEnhancementFromBuffId(Number(buff.id))
-  )
-
-  // Use local preview state for enhancement
-  const enhancement = localEnhancement
 
   // Show highlight on selection or hover
   const showHighlight = isSelected || isHovered
@@ -68,16 +62,10 @@ export function StartBuffCard({
   const currentBuffId = createBuffId(buff.baseId, enhancement)
   const displayBuff = allBuffs.find(b => Number(b.id) === currentBuffId) ?? buff
 
-  // Enhancement button click: update preview, and if selected, update selection
+  // Enhancement button click: toggle enhancement via parent
   const handleEnhancementClick = (level: 1 | 2) => {
     const newEnhancement: EnhancementLevel = enhancement === level ? 0 : level
-    setLocalEnhancement(newEnhancement)
-
-    // Only update selection if already selected
-    if (isSelected) {
-      const newBuffId = createBuffId(buff.baseId, newEnhancement)
-      onSelect(newBuffId)
-    }
+    onEnhancementChange(buff.baseId, newEnhancement)
   }
 
   // Press animation state
