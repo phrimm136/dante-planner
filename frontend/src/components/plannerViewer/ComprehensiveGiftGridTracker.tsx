@@ -20,7 +20,6 @@ import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 
 interface ComprehensiveGiftGridTrackerProps {
   floorSelections: SerializableFloorSelection[]
-  doneMarks: Record<number, Set<string>>
   hoveredThemePackId: string | null
   egoGiftDoneMarks?: Set<string>
   onToggleEgoGiftDone?: (encodedId: string) => void
@@ -40,7 +39,6 @@ interface DecodedGift {
  */
 export function ComprehensiveGiftGridTracker({
   floorSelections,
-  doneMarks,
   hoveredThemePackId,
   egoGiftDoneMarks,
   onToggleEgoGiftDone,
@@ -80,23 +78,6 @@ export function ComprehensiveGiftGridTracker({
     }
     return ids
   }, [hoveredThemePackId, floorSelections])
-
-  // Get gift IDs from "done" theme packs for dimming
-  const doneThemePackGiftIds = useMemo(() => {
-    const ids = new Set<string>()
-
-    // For each floor
-    floorSelections.forEach((selection, floorIndex) => {
-      const floorDoneMarks = doneMarks[floorIndex]
-      // If this floor's theme pack is marked as done
-      if (selection.themePackId && floorDoneMarks?.has(selection.themePackId)) {
-        // Add all gifts from this floor to dim list
-        selection.giftIds.forEach((giftId) => ids.add(giftId))
-      }
-    })
-
-    return ids
-  }, [floorSelections, doneMarks])
 
   // Decode selected IDs and convert to gift items with enhancement
   const selectedGifts = useMemo(() => {
@@ -146,7 +127,7 @@ export function ComprehensiveGiftGridTracker({
 
       // Separate into highlighted, regular, and done arrays
       const isHighlighted = highlightedGiftIds.has(encodedId)
-      const isDone = doneThemePackGiftIds.has(encodedId)
+      const isDone = egoGiftDoneMarks?.has(encodedId) ?? false
 
       if (isHighlighted) {
         highlighted.push(gift)
@@ -165,7 +146,7 @@ export function ComprehensiveGiftGridTracker({
 
     // Concatenate: highlighted first, then regular, then done
     return [...sortGroup(highlighted), ...sortGroup(regular), ...sortGroup(done)]
-  }, [allComprehensiveGiftIds, spec, i18n, highlightedGiftIds, doneThemePackGiftIds, selectedKeywords, searchQuery, keywordToValue, sortMode])
+  }, [allComprehensiveGiftIds, spec, i18n, highlightedGiftIds, egoGiftDoneMarks, selectedKeywords, searchQuery, keywordToValue, sortMode])
 
   const hasAnyGifts = allComprehensiveGiftIds.size > 0
   const hasFilteredGifts = selectedGifts.length > 0
@@ -205,7 +186,7 @@ export function ComprehensiveGiftGridTracker({
           <div className="flex flex-wrap gap-2 p-2 min-h-24">
             {selectedGifts.map(({ item, enhancement, encodedId }) => {
               const isHighlighted = highlightedGiftIds.has(encodedId)
-              const isDone = doneThemePackGiftIds.has(encodedId) || (egoGiftDoneMarks?.has(encodedId) ?? false)
+              const isDone = egoGiftDoneMarks?.has(encodedId) ?? false
 
               return (
                 <EgoGiftCardWithOverlay

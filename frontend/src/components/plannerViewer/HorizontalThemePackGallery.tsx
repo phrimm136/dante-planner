@@ -14,7 +14,7 @@ interface HorizontalThemePackGalleryProps {
   floorSelections: SerializableFloorSelection[]
   sectionNotes: Record<string, NoteContent>
   doneMarks: Record<number, Set<string>>
-  onToggleDone: (floorIndex: number, themePackId: string) => void
+  onTogglePackDone: (floorIndex: number, themePackId: string, giftIds: string[]) => void
   onHoverChange: (themePackId: string | null) => void
 }
 
@@ -26,7 +26,7 @@ export function HorizontalThemePackGallery({
   floorSelections,
   sectionNotes,
   doneMarks,
-  onToggleDone,
+  onTogglePackDone,
   onHoverChange,
 }: HorizontalThemePackGalleryProps) {
   const { t, i18n: i18nInstance } = useTranslation(['planner', 'common'])
@@ -97,6 +97,7 @@ export function HorizontalThemePackGallery({
 
             const floorIndex = getFloorIndexForPack(packId)
             const isDone = allDoneMarks.has(packId)
+            const giftIds = floorSelections[floorIndex]?.giftIds ?? []
 
             return (
               <div
@@ -122,7 +123,7 @@ export function HorizontalThemePackGallery({
                     floorNumber={floorIndex + 1}
                     noteContent={getNoteContentForPack(packId)}
                     isDone={isDone}
-                    onToggleDone={() => onToggleDone(floorIndex, packId)}
+                    onToggleDone={() => onTogglePackDone(floorIndex, packId, giftIds)}
                     onHoverChange={(hovering) => onHoverChange(hovering ? packId : null)}
                   />
                 </ScaledCardWrapper>
