@@ -431,6 +431,33 @@ export const router = createRouter({
   defaultPendingMinMs: 200,
 })
 
+// Sync document.title when language changes.
+// TanStack Router evaluates head() only during route matching, not on i18n changes.
+// This listener re-evaluates the active route's head() and applies the new title.
+i18n.on('languageChanged', async () => {
+  // Invalidate loaders so detail pages re-fetch localized data (e.g., identity names)
+  await router.invalidate()
+
+  // Re-evaluate head() for the deepest matched route and set document.title
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const routesById = (router as any).routesById as Record<string, any>
+  const { matches } = router.state
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const match = matches[i]
+    const headFn = routesById[match.routeId]?.options?.head
+    if (headFn) {
+      try {
+        const result = headFn({ params: match.params, loaderData: match.loaderData })
+        const titleMeta = result?.meta?.find((m: Record<string, unknown>) => 'title' in m)
+        if (titleMeta?.title) {
+          document.title = String(titleMeta.title)
+        }
+      } catch { /* head evaluation failed, keep current title */ }
+      break
+    }
+  }
+})
+
 // Register router for type safety
 declare module '@tanstack/react-router' {
   interface Register {
