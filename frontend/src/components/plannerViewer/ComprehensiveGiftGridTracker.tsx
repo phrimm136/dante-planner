@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CheckCircle2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
 import { sortEGOGifts } from '@/lib/egoGiftSort'
@@ -20,6 +22,9 @@ interface ComprehensiveGiftGridTrackerProps {
   floorSelections: SerializableFloorSelection[]
   doneMarks: Record<number, Set<string>>
   hoveredThemePackId: string | null
+  egoGiftDoneMarks?: Set<string>
+  onToggleEgoGiftDone?: (encodedId: string) => void
+  readOnly?: boolean
 }
 
 interface DecodedGift {
@@ -37,6 +42,9 @@ export function ComprehensiveGiftGridTracker({
   floorSelections,
   doneMarks,
   hoveredThemePackId,
+  egoGiftDoneMarks,
+  onToggleEgoGiftDone,
+  readOnly,
 }: ComprehensiveGiftGridTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
@@ -197,29 +205,20 @@ export function ComprehensiveGiftGridTracker({
           <div className="flex flex-wrap gap-2 p-2 min-h-24">
             {selectedGifts.map(({ item, enhancement, encodedId }) => {
               const isHighlighted = highlightedGiftIds.has(encodedId)
-              const isDone = doneThemePackGiftIds.has(encodedId)
+              const isDone = doneThemePackGiftIds.has(encodedId) || (egoGiftDoneMarks?.has(encodedId) ?? false)
 
               return (
-                <ScaledCardWrapper
+                <EgoGiftCardWithOverlay
                   key={encodedId}
+                  item={item}
+                  enhancement={enhancement}
+                  encodedId={encodedId}
+                  isHighlighted={isHighlighted}
+                  isDone={isDone}
                   mobileScale={mobileScale}
-                  cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-                  cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-                >
-                  <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-                    <div
-                      className={cn(
-                        isDone && 'brightness-50'
-                      )}
-                    >
-                      <EGOGiftCard
-                        gift={item}
-                        enhancement={enhancement}
-                        isSelected={isHighlighted}
-                      />
-                    </div>
-                  </EGOGiftTooltip>
-                </ScaledCardWrapper>
+                  readOnly={readOnly}
+                  onToggleDone={onToggleEgoGiftDone}
+                />
               )
             })}
           </div>
@@ -240,5 +239,70 @@ export function ComprehensiveGiftGridTracker({
         </div>
       )}
     </div>
+  )
+}
+
+interface EgoGiftCardWithOverlayProps {
+  item: EGOGiftListItem
+  enhancement: EnhancementLevel
+  encodedId: string
+  isHighlighted: boolean
+  isDone: boolean
+  mobileScale: number
+  readOnly?: boolean
+  onToggleDone?: (encodedId: string) => void
+}
+
+function EgoGiftCardWithOverlay({
+  item,
+  enhancement,
+  encodedId,
+  isHighlighted,
+  isDone,
+  mobileScale,
+  readOnly,
+  onToggleDone,
+}: EgoGiftCardWithOverlayProps) {
+  const { t } = useTranslation(['common'])
+  const [isHovered, setIsHovered] = useState(false)
+
+  return (
+    <ScaledCardWrapper
+      mobileScale={mobileScale}
+      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+    >
+      <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <div className={cn(isDone && 'brightness-50')}>
+            <EGOGiftCard
+              gift={item}
+              enhancement={enhancement}
+              isSelected={isHighlighted}
+            />
+          </div>
+          {!readOnly && isHovered && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Button
+                size="icon"
+                variant={isDone ? 'default' : 'secondary'}
+                className="h-8 w-8"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggleDone?.(encodedId)
+                }}
+                aria-label={isDone ? t('common:markAsNotDone', 'Mark as Not Done') : t('common:markAsDone', 'Mark as Done')}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </EGOGiftTooltip>
+    </ScaledCardWrapper>
   )
 }
