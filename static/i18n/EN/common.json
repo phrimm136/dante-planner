@@ -14,6 +14,8 @@
   "loading": "Loading...",
   "deleting": "Deleting...",
   "clearAll": "Clear All",
+  "selectAll": "Select All",
+  "unselectAll": "Unselect All",
   "noDescription": "No description available",
   "loadError": "Failed to load",
   "unknown": "Unknown",

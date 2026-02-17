@@ -12,6 +12,8 @@
   "equip": "장착",
   "unequip": "해제",
   "loading": "로딩 중...",
+  "selectAll": "전체 선택",
+  "unselectAll": "전체 해제",
   "noDescription": "설명 없음",
   "loadError": "불러오기 실패",
   "unknown": "몰?루",

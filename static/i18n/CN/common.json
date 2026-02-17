@@ -12,6 +12,8 @@
   "equip": "装备",
   "unequip": "卸下",
   "loading": "加载中...",
+  "selectAll": "全选",
+  "unselectAll": "取消全选",
   "noDescription": "无描述",
   "loadError": "加载失败",
   "unknown": "未知",
