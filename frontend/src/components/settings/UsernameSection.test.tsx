@@ -15,6 +15,7 @@ vi.mock('react-i18next', async (importOriginal) => {
   return {
     ...actual,
     useTranslation: () => ({
+      i18n: { language: 'en' },
       t: (key: string, options?: string | { ns?: string; defaultValue?: string }) => {
         const translations: Record<string, string> = {
           'settings.username.title': 'Username',
