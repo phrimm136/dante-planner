@@ -237,6 +237,7 @@ export const SYNERGY_KEYWORDS = [
 export const PLANNER_KEYWORDS = [
   ...KEYWORD_ORDER.filter((k) => k !== 'None'),
   ...AFFINITIES,
+  '9154',
   ...SYNERGY_KEYWORDS,
 ] as const
 
