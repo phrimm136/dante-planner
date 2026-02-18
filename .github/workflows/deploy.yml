@@ -113,6 +113,8 @@ jobs:
           if ! command -v git &> /dev/null; then
             sudo yum install -y git
           fi
+          # SSM runs as root but repo is owned by ec2-user
+          git config --global --add safe.directory /opt/danteplanner
           if [ ! -d ".git" ]; then
             git clone https://github.com/__GITHUB_REPO__ .
           else
