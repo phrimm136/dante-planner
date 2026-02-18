@@ -349,15 +349,6 @@ export function getEGOGiftIconPath(giftId: string): string {
 }
 
 /**
- * Gets EGO Gift grade icon path
- * @param tier - Gift tier (e.g., "1", "2", "3", "EX")
- * @returns Grade icon path
- */
-export function getEGOGiftGradeIconPath(tier: string): string {
-  return `/images/icon/egoGift/grade${tier}.webp`
-}
-
-/**
  * Gets EGO Gift enhancement icon path
  * @param level - Enhancement level (0, 1, 2, etc.)
  * @returns Enhancement icon path
@@ -433,7 +424,7 @@ const AFFINITY_TO_SIN_NAME: Record<string, string> = {
 }
 
 /**
- * Gets icon path for planner keywords (handles both status effects and affinities)
+ * Gets icon path for planner keywords (handles both affinity types, attack types, ego gifts, and battle keywords)
  * @param keyword - Keyword (e.g., "Combustion", "CRIMSON")
  * @returns Icon path
  */
@@ -447,6 +438,12 @@ export function getKeywordIconPath(keyword: string): string {
   if ((ATK_TYPES as readonly string[]).includes(keyword.toUpperCase())) {
     return `/images/UI/egoGift/${keyword}.webp`
   }
+
+  // Check if keyword is an ego gift
+  if (/^\d{4}$/.test(keyword)) {
+    return getEGOGiftIconPath(keyword)
+  }
+
   // Otherwise treat as battle keywords
   return getBattleKeywordIconPath(keyword)
 }

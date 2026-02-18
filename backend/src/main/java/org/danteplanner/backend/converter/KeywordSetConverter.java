@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  * - Status effects: Combustion, Laceration, Vibration, Burst, Sinking, Breath, Charge
  * - Attack types: Slash, Penetrate, Hit
  * - Affinities: CRIMSON, SCARLET, AMBER, SHAMROCK, AZURE, INDIGO, VIOLET
+ * - Ego gifts: 9154
  * - Synergy keywords: Assemble, KnowledgeExplored, CoverAttack, SwordPlayOfTheHomeland,
  *                     EchoOfMansion, TimeSuspend, ChargeLoad, BloodDinner,
  *                     BlackCloud, RetaliationBook, HeishouSynergy
@@ -33,6 +34,8 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
             "Slash", "Penetrate", "Hit",
             // Affinities
             "CRIMSON", "SCARLET", "AMBER", "SHAMROCK", "AZURE", "INDIGO", "VIOLET",
+            // Ego gifts
+            "9154",
             // Synergy keywords
             "Assemble", "KnowledgeExplored", "AaCePcBt", "SwordPlayOfTheHomeland",
             "EchoOfMansion", "TimeSuspend", "ChargeLoad", "BloodDinner",
