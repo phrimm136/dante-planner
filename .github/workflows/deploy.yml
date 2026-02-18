@@ -109,17 +109,13 @@ jobs:
           cat <<'EOF' > raw_script.sh
           cd /opt/danteplanner
 
-          # Update source code (need git for fetching deploy scripts)
-          if ! command -v git &> /dev/null; then
-            sudo yum install -y git
-          fi
-          # SSM runs as root but repo is owned by ec2-user
-          git config --global --add safe.directory /opt/danteplanner
-          if [ ! -d ".git" ]; then
-            git clone https://github.com/__GITHUB_REPO__ .
+          # Bootstrap: install git if needed (root), then update source as ec2-user
+          command -v git &> /dev/null || yum install -y git
+          if [ ! -d "/opt/danteplanner/.git" ]; then
+            sudo -u ec2-user git clone https://github.com/__GITHUB_REPO__ /opt/danteplanner
           else
-            git fetch origin main
-            git reset --hard origin/main
+            sudo -u ec2-user git -C /opt/danteplanner fetch origin main
+            sudo -u ec2-user git -C /opt/danteplanner reset --hard origin/main
           fi
 
           # Write deploy config (GitHub secrets -> temp file for scripts)
