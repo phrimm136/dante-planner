@@ -8,6 +8,10 @@
 
 set -euo pipefail
 
+# Cron runs with minimal PATH - ensure docker and aws are found
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-west-2}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 BACKUP_DIR="/tmp/danteplanner-backups"

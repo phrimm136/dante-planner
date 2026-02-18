@@ -7,6 +7,7 @@ on:
       - 'backend/**'
       - 'nginx/**'
       - 'docker-compose.yml'
+      - 'scripts/deploy/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
@@ -94,179 +95,93 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy via SSM
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          SSL_CERT_PATH: ${{ secrets.SSL_CERT_PATH }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GITHUB_REPO: ${{ github.repository }}
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
         run: |
-          # 1. EC2에서 실행될 순수 쉘 스크립트 작성
           cat <<'EOF' > raw_script.sh
           cd /opt/danteplanner
 
-          # Root 권한으로 Docker 및 Compose 설치 여부 확인 및 설치
-          if ! command -v docker &> /dev/null; then
-            echo "Installing Docker..."
-            sudo yum update -y
-            sudo yum install -y docker
-            sudo systemctl start docker
-            sudo systemctl enable docker
-            sudo usermod -aG docker ec2-user
-          fi
-
-          # Docker Compose V2 플러그인 설치 확인
-          if ! docker compose version &> /dev/null; then
-            echo "Installing Docker Compose V2..."
-            DOCKER_CONFIG=${DOCKER_CONFIG:-/usr/local/lib/docker/cli-plugins}
-            sudo mkdir -p $DOCKER_CONFIG
-            sudo curl -SL https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/docker-compose
-            sudo chmod +x $DOCKER_CONFIG/docker-compose
-          fi
-
-          # EC2 유저 권한으로 나머지 작업 수행
-          sudo -u ec2-user bash -e <<'INNER_BATCH'
-          cd /opt/danteplanner
-          
-          # Git 설치 확인
+          # Update source code (need git for fetching deploy scripts)
           if ! command -v git &> /dev/null; then
             sudo yum install -y git
           fi
-
-          # 소스 코드 업데이트
           if [ ! -d ".git" ]; then
-            git clone https://github.com/${{ github.repository }}.git .
+            git clone https://github.com/__GITHUB_REPO__ .
           else
             git fetch origin main
             git reset --hard origin/main
           fi
 
-          # Save current IMAGE_TAG for rollback before updating
-          if [ -f .env ]; then
-            CURRENT_TAG=$(grep '^IMAGE_TAG=' .env | cut -d'=' -f2 | tr -d '"' | tr -d "'" || echo "")
-            if [ -n "$CURRENT_TAG" ]; then
-              echo "$CURRENT_TAG" > .previous_image_tag
-              echo "Saved previous IMAGE_TAG: $CURRENT_TAG"
-            fi
+          # Write deploy config (GitHub secrets -> temp file for scripts)
+          cat > /tmp/deploy-config.env <<CONFIG
+          IMAGE_TAG=__IMAGE_TAG__
+          AWS_ACCOUNT_ID=__AWS_ACCOUNT_ID__
+          AWS_REGION=__AWS_REGION__
+          SSL_CERT_PATH=__SSL_CERT_PATH__
+          MYSQL_USER=__MYSQL_USER__
+          MYSQL_DATABASE=__MYSQL_DATABASE__
+          GOOGLE_OAUTH_CLIENT_ID=__GOOGLE_OAUTH_CLIENT_ID__
+          GITHUB_REPOSITORY=__GITHUB_REPO__
+          CONFIG
+
+          DEPLOY_ERRORS=""
+
+          # Critical steps - fail fast
+          sudo bash scripts/deploy/install-prerequisites.sh || { echo "[FATAL] Prerequisites failed at exit $?"; exit 1; }
+          sudo -u ec2-user bash scripts/deploy/setup-env.sh || { echo "[FATAL] Environment setup failed at exit $?"; exit 1; }
+          sudo -u ec2-user bash scripts/deploy/deploy-containers.sh || { echo "[FATAL] Container deploy failed at exit $?"; exit 1; }
+
+          # Non-critical steps - collect errors, continue
+          sudo -u ec2-user bash scripts/deploy/setup-cron.sh || DEPLOY_ERRORS="${DEPLOY_ERRORS}cron: exit $?\n"
+          sudo -u ec2-user bash scripts/deploy/setup-shell.sh || DEPLOY_ERRORS="${DEPLOY_ERRORS}shell: exit $?\n"
+
+          rm -f /tmp/deploy-config.env
+
+          if [ -n "$DEPLOY_ERRORS" ]; then
+            echo "[WARN] Non-critical failures:"
+            echo -e "$DEPLOY_ERRORS"
           fi
-
-          # Fetch secrets from SSM Parameter Store (encrypted)
-          MYSQL_PASSWORD=$(aws ssm get-parameter --name "MYSQL_PASSWORD" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
-          SENTRY_DSN=$(aws ssm get-parameter --name "SENTRY_DSN" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
-          GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
-
-          # Fetch JWT keys from SSM and write to files
-          mkdir -p /opt/danteplanner/jwt-keys
-          chmod 700 /opt/danteplanner/jwt-keys
-
-          aws ssm get-parameter --name "JWT_PRIVATE_KEY" --with-decryption --query "Parameter.Value" --output text --region us-west-2 > /opt/danteplanner/jwt-keys/private_key.pem
-          aws ssm get-parameter --name "JWT_PUBLIC_KEY" --query "Parameter.Value" --output text --region us-west-2 > /opt/danteplanner/jwt-keys/public_key.pem
-          JWT_ENCRYPTION_KEY=$(aws ssm get-parameter --name "JWT_ENCRYPTION_KEY" --with-decryption --query "Parameter.Value" --output text --region us-west-2)
-
-          chmod 600 /opt/danteplanner/jwt-keys/private_key.pem
-          chmod 644 /opt/danteplanner/jwt-keys/public_key.pem
-
-          # 환경 변수 파일 생성 (non-secrets from GitHub, secrets from SSM)
-          cat <<ENV_EOF > .env
-          IMAGE_TAG=${{ github.sha }}
-          AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
-          AWS_REGION=${{ secrets.AWS_REGION }}
-          SPRING_PROFILES_ACTIVE=prod
-          SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}
-          MYSQL_USER=${{ secrets.MYSQL_USER }}
-          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}
-          MYSQL_PASSWORD=$MYSQL_PASSWORD
-          GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
-          GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
-          JWT_KEYS_PATH=/opt/danteplanner/jwt-keys
-          JWT_PRIVATE_KEY_PATH=/app/keys/private_key.pem
-          JWT_PUBLIC_KEY_PATH=/app/keys/public_key.pem
-          JWT_ENCRYPTION_KEY=$JWT_ENCRYPTION_KEY
-          SENTRY_DSN=$SENTRY_DSN
-          TRUSTED_PROXY_IPS=172.16.0.0/12
-          CORS_ALLOWED_ORIGINS=https://dante-planner.com
-          ENV_EOF
-
-          # ECR 로그인
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          docker compose pull
-
-          # Rolling Update: nginx first (serves maintenance page), then backend
-          # This minimizes downtime - nginx stays up to respond with 503 during backend restart
-          docker compose up -d --no-deps --force-recreate nginx
-          sleep 2  # Wait for nginx to be ready
-          docker compose up -d --no-deps --force-recreate backend
-
-          # Cleanup orphaned containers and old images
-          docker compose up -d --remove-orphans
-          docker image prune -f --filter "until=720h"  # 30 days
-
-          # Setup cron jobs (idempotent)
-          chmod +x scripts/aws-backup.sh scripts/update-cloudflare-ips.sh
-
-          # Backup: 02:00 KST daily
-          BACKUP_CRON="0 17 * * * /opt/danteplanner/scripts/aws-backup.sh >> /var/log/danteplanner-backup.log 2>&1"
-          # Cloudflare IP update: 03:00 KST daily
-          CF_IP_CRON="0 18 * * * /opt/danteplanner/scripts/update-cloudflare-ips.sh >> /var/log/cloudflare-ip-update.log 2>&1"
-
-          (crontab -l 2>/dev/null | grep -v "aws-backup.sh" | grep -v "update-cloudflare-ips.sh"; echo "$BACKUP_CRON"; echo "$CF_IP_CRON") | crontab -
-
-          # Setup aliases and welcome message in ec2-user's bashrc
-          BASHRC_FILE="/home/ec2-user/.bashrc"
-
-          # Remove old danteplanner block if exists
-          sed -i '/# >>> danteplanner aliases >>>/,/# <<< danteplanner aliases <<</d' "$BASHRC_FILE" 2>/dev/null || true
-
-          # Add new block using echo to avoid YAML heredoc issues
-          {
-            echo ''
-            echo '# >>> danteplanner aliases >>>'
-            echo "alias dp-logs='cd /opt/danteplanner && docker compose logs -f'"
-            echo "alias dp-status='cd /opt/danteplanner && docker compose ps'"
-            echo "alias dp-restart='cd /opt/danteplanner && docker compose restart'"
-            echo "alias dp-backup='/opt/danteplanner/scripts/aws-backup.sh'"
-            echo "alias dp-cfips='/opt/danteplanner/scripts/update-cloudflare-ips.sh'"
-            echo "alias dp-deploy='cd /opt/danteplanner && git pull && docker compose pull && docker compose up -d'"
-            echo ''
-            echo '# Welcome message'
-            echo 'echo ""'
-            echo 'echo "=========================================="'
-            echo 'echo "  DantePlanner EC2 Server"'
-            echo 'echo "=========================================="'
-            echo 'echo ""'
-            echo 'echo "Available commands:"'
-            echo 'echo "  dp-logs     - Follow container logs"'
-            echo 'echo "  dp-status   - Show container status"'
-            echo 'echo "  dp-restart  - Restart all containers"'
-            echo 'echo "  dp-backup   - Run database backup to S3"'
-            echo 'echo "  dp-cfips    - Update Cloudflare IP ranges"'
-            echo 'echo "  dp-deploy   - Manual deploy (git pull + docker up)"'
-            echo 'echo ""'
-            echo 'echo "Logs:"'
-            echo 'echo "  /var/log/danteplanner-backup.log"'
-            echo 'echo "  /var/log/cloudflare-ip-update.log"'
-            echo 'echo ""'
-            echo '# <<< danteplanner aliases <<<'
-          } >> "$BASHRC_FILE"
-          INNER_BATCH
           EOF
 
-          # 2. jq를 사용하여 안전한 JSON 생성 (파일로부터 읽기)
+          # Replace placeholders with actual values from env vars
+          sed -i "s|__IMAGE_TAG__|$IMAGE_TAG|g" raw_script.sh
+          sed -i "s|__AWS_ACCOUNT_ID__|$AWS_ACCOUNT_ID|g" raw_script.sh
+          sed -i "s|__AWS_REGION__|$AWS_REGION|g" raw_script.sh
+          sed -i "s|__SSL_CERT_PATH__|$SSL_CERT_PATH|g" raw_script.sh
+          sed -i "s|__MYSQL_USER__|$MYSQL_USER|g" raw_script.sh
+          sed -i "s|__MYSQL_DATABASE__|$MYSQL_DATABASE|g" raw_script.sh
+          sed -i "s|__GOOGLE_OAUTH_CLIENT_ID__|$GOOGLE_OAUTH_CLIENT_ID|g" raw_script.sh
+          sed -i "s|__GITHUB_REPO__|$GITHUB_REPO|g" raw_script.sh
+
           jq -n --rawfile cmd raw_script.sh '{"commands": [$cmd]}' > ssm_params.json
 
-          # 3. SSM 명령어 전송 (파일 참조 방식)
           COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --instance-ids "$EC2_INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
             --parameters file://ssm_params.json \
             --query "Command.CommandId" --output text)
 
           echo "Command ID: $COMMAND_ID"
 
-          # 4. 결과 대기
-          aws ssm wait command-executed --command-id "$COMMAND_ID" --instance-id "${{ secrets.EC2_INSTANCE_ID }}" || true
-          
-          # 5. 상세 결과 확인 및 로그 출력
+          aws ssm wait command-executed --command-id "$COMMAND_ID" --instance-id "$EC2_INSTANCE_ID" || true
+
           INVOCATION_RESULT=$(aws ssm get-command-invocation \
             --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}")
-          
+            --instance-id "$EC2_INSTANCE_ID")
+
           STATUS=$(echo "$INVOCATION_RESULT" | jq -r '.Status')
           echo "Final Status: $STATUS"
+
+          echo "--- STDOUT ---"
+          echo "$INVOCATION_RESULT" | jq -r '.StandardOutputContent'
 
           if [ "$STATUS" != "Success" ]; then
             echo "--- ERROR LOG ---"
@@ -291,54 +206,37 @@ jobs:
 
       - name: Health check via SSM
         id: check
+        env:
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
         run: |
-          INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '"' | tr -d ' ')
-          MAX_ATTEMPTS=5
-          WAIT_TIME=5
-          TOTAL_WAIT=0
-          MAX_TOTAL_WAIT=120
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["cd /opt/danteplanner && sudo -u ec2-user bash scripts/deploy/health-check.sh"]' \
+            --query "Command.CommandId" --output text)
 
-          for attempt in $(seq 1 $MAX_ATTEMPTS); do
-            echo "Health check attempt $attempt (waited ${TOTAL_WAIT}s so far)..."
+          echo "Command ID: $COMMAND_ID"
 
-            RAW_COMMAND_ID=$(aws ssm send-command \
-              --instance-ids "$INSTANCE_ID" \
-              --document-name "AWS-RunShellScript" \
-              --parameters 'commands=["curl -sf http://localhost/health && curl -sf http://localhost/actuator/health || exit 1"]' \
-              --query "Command.CommandId" --output text)
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID" || true
 
-            COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
+          INVOCATION_RESULT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID")
 
-            aws ssm wait command-executed \
-              --command-id $COMMAND_ID \
-              --instance-id $INSTANCE_ID || true
+          STATUS=$(echo "$INVOCATION_RESULT" | jq -r '.Status')
+          echo "--- STDOUT ---"
+          echo "$INVOCATION_RESULT" | jq -r '.StandardOutputContent'
 
-            HEALTH_STATUS=$(aws ssm get-command-invocation \
-              --command-id $COMMAND_ID \
-              --instance-id $INSTANCE_ID \
-              --query "Status" --output text)
-
-            if [ "$HEALTH_STATUS" = "Success" ]; then
-              echo "healthy=true" >> $GITHUB_OUTPUT
-              echo "Health check passed on attempt $attempt"
-              exit 0
-            fi
-
-            # Exponential backoff: 5s, 10s, 20s, 40s
-            TOTAL_WAIT=$((TOTAL_WAIT + WAIT_TIME))
-            if [ $TOTAL_WAIT -ge $MAX_TOTAL_WAIT ]; then
-              echo "Exceeded max wait time of ${MAX_TOTAL_WAIT}s"
-              break
-            fi
-
-            echo "Health check failed, waiting ${WAIT_TIME}s before retry..."
-            sleep $WAIT_TIME
-            WAIT_TIME=$((WAIT_TIME * 2))
-          done
-
-          echo "healthy=false" >> $GITHUB_OUTPUT
-          echo "Health check failed after $MAX_ATTEMPTS attempts"
-          exit 1
+          if [ "$STATUS" = "Success" ]; then
+            echo "healthy=true" >> $GITHUB_OUTPUT
+          else
+            echo "healthy=false" >> $GITHUB_OUTPUT
+            echo "--- ERROR LOG ---"
+            echo "$INVOCATION_RESULT" | jq -r '.StandardErrorContent'
+            exit 1
+          fi
 
   # 5. Rollback (health-check 실패 시)
   rollback:
@@ -355,58 +253,36 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Rollback via SSM
+        env:
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
         run: |
           echo "Rolling back to previous version..."
 
-          cat <<'EOF' > rollback_script.sh
-          cd /opt/danteplanner
-          sudo -u ec2-user bash -e <<'INNER_BATCH'
-          cd /opt/danteplanner
-
-          # Restore previous IMAGE_TAG if saved
-          if [ -f .previous_image_tag ]; then
-            PREV_TAG=$(cat .previous_image_tag)
-            echo "Restoring previous IMAGE_TAG: $PREV_TAG"
-            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$PREV_TAG/" .env
-          else
-            echo "WARNING: No previous image tag found, using git rollback only"
-            git reset --hard HEAD~1
-          fi
-
-          # ECR login and restart with previous images
-          aws ecr get-login-password --region $(grep AWS_REGION .env | cut -d'=' -f2) | \
-            docker login --username AWS --password-stdin \
-            $(grep AWS_ACCOUNT_ID .env | cut -d'=' -f2).dkr.ecr.$(grep AWS_REGION .env | cut -d'=' -f2).amazonaws.com
-
-          docker compose pull
-          docker compose down --remove-orphans
-          docker compose up -d --force-recreate
-          INNER_BATCH
-          EOF
-
-          jq -n --rawfile cmd rollback_script.sh '{"commands": [$cmd]}' > rollback_params.json
-
-          RAW_COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
             --document-name "AWS-RunShellScript" \
-            --parameters file://rollback_params.json \
+            --parameters 'commands=["cd /opt/danteplanner && sudo -u ec2-user bash scripts/deploy/rollback.sh"]' \
             --query "Command.CommandId" --output text)
 
-          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
-          INSTANCE_ID=$(echo "${{ secrets.EC2_INSTANCE_ID }}" | tr -d '"' | tr -d ' ')
+          echo "Command ID: $COMMAND_ID"
 
           aws ssm wait command-executed \
-            --command-id $COMMAND_ID \
-            --instance-id $INSTANCE_ID
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID" || true
 
-          ROLLBACK_STATUS=$(aws ssm get-command-invocation \
-            --command-id $COMMAND_ID \
-            --instance-id $INSTANCE_ID \
-            --query "Status" --output text)
+          INVOCATION_RESULT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID")
 
-          if [ "$ROLLBACK_STATUS" = "Success" ]; then
+          STATUS=$(echo "$INVOCATION_RESULT" | jq -r '.Status')
+          echo "--- STDOUT ---"
+          echo "$INVOCATION_RESULT" | jq -r '.StandardOutputContent'
+
+          if [ "$STATUS" = "Success" ]; then
             echo "Rollback completed successfully"
           else
+            echo "--- ERROR LOG ---"
+            echo "$INVOCATION_RESULT" | jq -r '.StandardErrorContent'
             echo "Rollback failed - manual intervention required"
             exit 1
           fi
