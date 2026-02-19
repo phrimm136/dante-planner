@@ -76,7 +76,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and Push Backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
@@ -86,7 +86,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
 
       - name: Build and Push Nginx
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./nginx
           push: true
