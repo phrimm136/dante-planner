@@ -57,15 +57,17 @@ TOKEN_FILE = CREDENTIALS_DIR / "token.json"
 PROJECT_ROOT = Path(__file__).parent.parent
 OUTPUT_DIR = PROJECT_ROOT / "raw"
 
-# Target folders to download (URL or folder ID)
+# Target folders to download: (url_or_id, output_subdir)
+# output_subdir: local subdirectory under OUTPUT_DIR; None = use Drive folder name
 FOLDER_URLS = [
-    "https://drive.google.com/drive/folders/1c2A3EPLYMyykEG4riHLElu0wQwEVnlzk",
-    "https://drive.google.com/drive/folders/1LFS3FuC-lpkxcbjm9pQydWzwbL7LLxJR",
-    "https://drive.google.com/drive/folders/1SpXSol_vMaztp90diYdJ7kJIAoX8Gu6z",
-    "https://drive.google.com/drive/folders/1JqaJHdxrzegMH_0O_B3DxfNyEwQUZ_eM",
-    "https://drive.google.com/drive/folders/1cPu9VqNXsrnYO22vLHqrOMudcpaFSDOo",
-    "https://drive.google.com/drive/folders/1l-n5IEtK3ZdZjUiKPVOF7WQBlXkjadMf",
-    "https://drive.google.com/drive/folders/1CW9wiMc5-KbTtFFSC2RNCWxQ3el6tN--",
+    ("https://drive.google.com/drive/folders/1c2A3EPLYMyykEG4riHLElu0wQwEVnlzk", None),
+    ("https://drive.google.com/drive/folders/1LFS3FuC-lpkxcbjm9pQydWzwbL7LLxJR", None),
+    ("https://drive.google.com/drive/folders/1SpXSol_vMaztp90diYdJ7kJIAoX8Gu6z", None),
+    ("https://drive.google.com/drive/folders/1JqaJHdxrzegMH_0O_B3DxfNyEwQUZ_eM", None),
+    ("https://drive.google.com/drive/folders/1cPu9VqNXsrnYO22vLHqrOMudcpaFSDOo", None),
+    ("https://drive.google.com/drive/folders/1l-n5IEtK3ZdZjUiKPVOF7WQBlXkjadMf", None),
+    ("https://drive.google.com/drive/folders/1CW9wiMc5-KbTtFFSC2RNCWxQ3el6tN--", None),
+    ("https://drive.google.com/drive/folders/1CS5RM5u2wOtkLx9rEbYE_0uWcXRnN4oY", "Mirror Dungeon"),
 ]
 
 
@@ -257,6 +259,7 @@ def download_folder(
     creds: Credentials,
     folder_url_or_id: str,
     output_dir: str,
+    output_subdir: str | None = None,
     dry_run: bool = False,
 ) -> dict:
     """Download all files from a Google Drive folder with parallel downloads."""
@@ -264,7 +267,7 @@ def download_folder(
     folder_id = extract_folder_id(folder_url_or_id)
 
     # Get folder name and create subdirectory
-    folder_name = get_folder_name(service, folder_id)
+    folder_name = output_subdir or get_folder_name(service, folder_id)
     output_path = Path(output_dir) / folder_name
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -366,7 +369,7 @@ def main():
 
     total_stats = {"total": 0, "downloaded": 0, "skipped": 0, "failed": 0}
 
-    for i, folder_url in enumerate(FOLDER_URLS, 1):
+    for i, (folder_url, output_subdir) in enumerate(FOLDER_URLS, 1):
         print(f"\n{'='*60}")
         print(f"[{i}/{len(FOLDER_URLS)}] {folder_url[:60]}")
         print(f"{'='*60}\n")
@@ -376,6 +379,7 @@ def main():
                 creds=creds,
                 folder_url_or_id=folder_url,
                 output_dir=str(OUTPUT_DIR),
+                output_subdir=output_subdir,
                 dry_run=args.dry_run,
             )
             for key in total_stats:

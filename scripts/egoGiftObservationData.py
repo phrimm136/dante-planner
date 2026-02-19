@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
 
-INPUT_PATH = Path("../raw/Json/mirror-dungeon-egogift-observation-data-md6.json")
-OUTPUT_PATH = Path("../static/data/egoGiftObservationData.json")
+from md_config import MD_VERSION
+
+INPUT_PATH = Path(f"../raw/Json/mirror-dungeon-egogift-observation-data-md{MD_VERSION}.json")
+OUTPUT_PATH = Path(f"../static/data/MD{MD_VERSION}/egoGiftObservationData.json")
 
 OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 

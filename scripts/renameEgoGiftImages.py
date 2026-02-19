@@ -20,7 +20,7 @@ from PIL import Image
 # 경로 설정 (스크립트 위치 기준 상대 경로)
 BASE_DIR = Path(__file__).parent.parent
 INPUT_DIR = BASE_DIR / "raw" / "EGO Gifts"
-OUTPUT_DIR = BASE_DIR / "static" / "images" / "egoGift"
+OUTPUT_DIR = BASE_DIR / "static" / "images" / "icon" / "egoGift"
 NAME_LIST_PATH = BASE_DIR / "static" / "i18n" / "EN" / "egoGiftNameList.json"
 
 QUALITY = 85
@@ -206,15 +206,24 @@ def main():
         print(f"\n변환 시작...")
         output_dir.mkdir(parents=True, exist_ok=True)
 
+        converted = 0
+        skipped = 0
+
         for png_path, webp_name, original in matched:
             dst = output_dir / webp_name
+
+            if dst.exists():
+                skipped += 1
+                continue
+
             try:
                 convert_to_webp(png_path, dst)
                 print(f"  [OK] {original} → {webp_name}")
+                converted += 1
             except Exception as e:
                 print(f"  [ERROR] {original}: {e}")
 
-        print(f"\n완료: {len(matched)}개 파일 변환됨")
+        print(f"\n완료: {converted}개 변환됨, {skipped}개 스킵 (이미 존재)")
         print(f"출력 디렉토리: {output_dir}")
 
     elif dry_run:
