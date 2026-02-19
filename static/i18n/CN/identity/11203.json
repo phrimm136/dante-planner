@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "[WinDuel] 使本技能造成的伤害+40%\n若目标的[Burst] 强度不低于5级，则使本技能的硬币威力+1",
+          "desc": "[WinDuel] 使本技能造成的伤害+40%\n若目标的[Burst]强度不低于5级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力",
             ""
@@ -45,7 +45,7 @@
         },
         {},
         {
-          "desc": "若目标的[Burst] 强度不低于5级，则使本技能造成的伤害+50%",
+          "desc": "若目标的[Burst]强度不低于5级，则使本技能造成的伤害+50%",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加5级[Burst] 强度\n[OnSucceedAttack] 使自身恢复本硬币伤害量50%的体力"
           ]
@@ -67,7 +67,7 @@
           ]
         },
         {
-          "desc": "若目标的[Burst] 强度不低于5级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Burst]强度不低于5级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",
             "[OnSucceedAttack] 若目标带有[Burst]，则对其额外造成本硬币伤害量30%的伤害",

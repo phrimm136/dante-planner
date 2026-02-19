@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
             ""
           ]
         },
         {
-          "desc": "若目标的破裂 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度"
           ]
         },
         {},
         {
-          "desc": "若目标的破裂 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度\n[OnSucceedAttackHead] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度\n[OnSucceedAttackHead] 使目标增加1级破裂 强度"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttackHead] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttackHead] 使目标增加1级[Burst]强度"
           ]
         }
       ]
@@ -35,22 +35,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级破裂 强度"
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度"
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能不会增加破裂 强度或施加破裂 层数，而改为使本技能的硬币威力+1\n[WinDuel] 对目标施加1层破裂 ",
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能不会增加[Burst]强度或施加[Burst]层数，而改为使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层破裂 ",
-            "[OnSucceedAttack] 使目标增加2级破裂 强度\n[OnSucceedAttack] 下回合对目标施加1层体力恢复降低 "
+            "[OnSucceedAttack] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 下回合对目标施加1层体力恢复降低 "
           ]
         },
         {},
         {
-          "desc": "若目标的破裂 强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能不会增加破裂 强度或施加破裂 层数，而改为使本技能的硬币威力+1\n- 若目标属于<血魔>或<血袋>，则使本技能的硬币威力额外+1\n[WinDuel] 对目标施加1层破裂 ",
+          "desc": "若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能不会增加[Burst]强度或施加[Burst]层数，而改为使本技能的硬币威力+1\n- 若目标属于<血魔>或<血袋>，则使本技能的硬币威力额外+1\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层破裂 \n[OnSucceedAttackHead] 对目标施加1层破裂 ",
-            "[OnSucceedAttack] 使目标增加2级破裂 强度\n[OnSucceedAttack] 下回合对目标施加2层体力恢复降低 "
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttackHead] 对目标施加1层[Burst]",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n[OnSucceedAttack] 下回合对目标施加2层体力恢复降低 "
           ]
         }
       ]
@@ -61,18 +61,18 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能不会增加破裂 强度或施加破裂 层数，而改为使本技能的硬币威力+1\n[WinDuel] 对目标施加1层破裂 ",
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能不会增加[Burst]强度或施加[Burst]层数，而改为使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级破裂 强度",
-            "[OnSucceedAttackHead] 使目标增加2级破裂 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Burst]强度",
             ""
           ]
         },
         {
-          "desc": "若目标的破裂 强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 若目标的破裂 强度不低于15级且破裂 层数不低于3层，则本技能不会增加破裂 强度或施加破裂 层数，而改为使本技能的硬币威力+1\n- 若目标属于<血魔>或<血袋>，则使本技能的硬币威力额外+1\n[WinDuel] 对目标施加2层破裂 ",
+          "desc": "若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于15级且[Burst]层数不低于3层，则本技能不会增加[Burst]强度或施加[Burst]层数，而改为使本技能的硬币威力+1\n- 若目标属于<血魔>或<血袋>，则使本技能的硬币威力额外+1\n[WinDuel] 对目标施加2层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级破裂 强度",
-            "[OnSucceedAttackHead] 使目标增加2级破裂 强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttackHead] 使目标增加2级[Burst]强度",
             "[OnSucceedAttack] 若目标的[Burst]强度不低于15级，或目标现存体力低于30%，则重复使用本硬币(每个技能最多1次)"
           ]
         }
@@ -101,15 +101,15 @@
   "passives": {
     "1061001": {
       "name": "愉快的狩猎",
-      "desc": "若目标属于<血魔>或<血袋>，则使自身造成的伤害+10%\n使用技能时，若自身带有流血 ，则攻击命中时使目标增加3级破裂 强度(每回合最多1次)"
+      "desc": "若目标属于<血魔>或<血袋>，则使自身造成的伤害+10%\n使用技能时，若自身带有[Laceration]，则攻击命中时使目标增加3级[Burst]强度(每回合最多1次)"
     },
     "1061011": {
       "name": "愉快的狩猎",
-      "desc": "若目标属于<血魔>或<血袋>，或目标的破裂 强度不低于10级，则使自身造成的伤害+10%\n使用技能时，若自身带有流血 ，则攻击命中时使目标增加3级破裂 强度(每回合最多2次)"
+      "desc": "若目标属于<血魔>或<血袋>，或目标的[Burst]强度不低于10级，则使自身造成的伤害+10%\n使用技能时，若自身带有[Laceration]，则攻击命中时使目标增加3级[Burst]强度(每回合最多2次)"
     },
     "1061021": {
       "name": "血魔狩猎教程-止血",
-      "desc": "战斗开始时，使流血 强度与层数之和最高的1名友方单位的流血 层数减少2层\n速度值最高的1名友方单位攻击带有破裂 的敌方单位时，对该敌方单位施加1层防御等级降低 (每回合最多2次)"
+      "desc": "战斗开始时，使[Laceration]强度与层数之和最高的1名友方单位的[Laceration]层数减少2层\n速度值最高的1名友方单位攻击带有[Burst]的敌方单位时，对该敌方单位施加1层[DefenseDown](每回合最多2次)"
     }
   }
 }

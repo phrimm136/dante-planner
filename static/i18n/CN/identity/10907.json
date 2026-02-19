@@ -54,7 +54,7 @@
         },
         {},
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的10%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 若目标的[Sinking] 强度不低于5级，则使本技能的拼点威力+2",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的10%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的拼点威力+2",
           "coinDescs": [
             "",
             "",
@@ -79,7 +79,7 @@
           ]
         },
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的20%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的2个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 若目标的[Sinking] 强度不低于7级，则使本技能的硬币威力+1",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的20%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最低的2个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5\n[WhenUse] 若目标的[Sinking]强度不低于7级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加4层[Sinking] ",
             "",

@@ -5,25 +5,25 @@
       "name": "40S-2启动",
       "descs": [
         {
-          "desc": "[WhenUse] 消耗5层充能 并使本技能的硬币威力+1",
+          "desc": "[WhenUse] 消耗5层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使自身获得2层充能 "
+            "[OnSucceedAttack] 使自身获得2层[Charge]"
           ]
         },
         {
-          "desc": "[WhenUse] 消耗5层充能 并使本技能的硬币威力+1",
+          "desc": "[WhenUse] 消耗5层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层充能 ",
-            "[OnSucceedAttack] 使自身获得2层充能 "
+            "[OnSucceedAttack] 使自身获得2层[Charge]",
+            "[OnSucceedAttack] 使自身获得2层[Charge]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 消耗5层充能 并使本技能的硬币威力+1",
+          "desc": "[WhenUse] 消耗5层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层充能 ",
-            "[OnSucceedAttack] 使自身获得2层充能 "
+            "[OnSucceedAttack] 使自身获得2层[Charge]",
+            "[OnSucceedAttack] 使自身获得2层[Charge]"
           ]
         }
       ]
@@ -36,24 +36,24 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 对目标施加层数相当于自身充能 强度的光电 (最多2层)"
+            "[OnSucceedAttack] 对目标施加层数相当于自身[Charge]强度的光电 (最多2层)"
           ]
         },
         {
           "desc": "[WhenUse] 若自身的[Charge]层数在5~9层之间，则消耗体力上限2×(10-现存[Charge]层数)%的体力并使自身获得至10层[Charge]\n[WhenUse] 消耗10层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 若自身消耗了充能 层数，则对目标施加2层防御等级降低 ",
-            "[OnSucceedAttack] 对目标施加1层体力恢复降低 \n[OnSucceedAttack] 对目标施加层数相当于自身充能 强度的光电 (最多3层)"
+            "[OnSucceedAttack] 若自身消耗了[Charge]层数，则对目标施加2层[DefenseDown]",
+            "[OnSucceedAttack] 对目标施加1层体力恢复降低 \n[OnSucceedAttack] 对目标施加层数相当于自身[Charge]强度的光电 (最多3层)"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 若自身的[Charge]层数在5~9层之间，则消耗体力上限2×(10-现存[Charge]层数)%的体力并使自身获得至10层[Charge]\n[WhenUse] 消耗10层[Charge]并使本技能的硬币威力+2",
           "coinDescs": [
-            "[OnSucceedAttack] 若自身消耗了充能 层数，则对目标施加2层防御等级降低 ",
-            "[OnSucceedAttack] 若自身消耗了充能 层数，则对目标施加2层防御等级降低 ",
-            "[OnSucceedAttack] 对目标施加2层体力恢复降低 \n[OnSucceedAttack] 对目标施加层数相当于自身充能 强度的光电 (最多3层)"
+            "[OnSucceedAttack] 若自身消耗了[Charge]层数，则对目标施加2层[DefenseDown]",
+            "[OnSucceedAttack] 若自身消耗了[Charge]层数，则对目标施加2层[DefenseDown]",
+            "[OnSucceedAttack] 对目标施加2层体力恢复降低 \n[OnSucceedAttack] 对目标施加层数相当于自身[Charge]强度的光电 (最多3层)"
           ]
         }
       ]
@@ -64,21 +64,21 @@
         {},
         {},
         {
-          "desc": "若自身的充能 强度不低于2级，则使本技能的硬币威力+1",
+          "desc": "若自身的[Charge]强度不低于2级，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使自身获得5层充能 ",
-            "[OnSucceedAttack] 使自身获得(自身的充能 强度×3)层充能 (最多9层)",
-            "[OnSucceedAttack] 对目标施加层数相当于自身充能 强度的光电 (最多3层)"
+            "[OnSucceedAttack] 使自身获得5层[Charge]",
+            "[OnSucceedAttack] 使自身获得(自身的[Charge]强度×3)层[Charge](最多9层)",
+            "[OnSucceedAttack] 对目标施加层数相当于自身[Charge]强度的光电 (最多3层)"
           ]
         },
         {
-          "desc": "自身每带有2级充能 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "自身每带有2级[Charge]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使自身获得7层充能 ",
-            "[OnSucceedAttack] 使自身获得(自身的充能 强度×3)层充能 (最多9层)",
-            "[OnSucceedAttack] 对目标施加层数相当于自身充能 强度的光电 (最多3层)\n[OnSucceedAttack] 自身每带有2级充能 强度，对目标施加1层打击易损 (最多2层)"
+            "[OnSucceedAttack] 使自身获得7层[Charge]",
+            "[OnSucceedAttack] 使自身获得(自身的[Charge]强度×3)层[Charge](最多9层)",
+            "[OnSucceedAttack] 对目标施加层数相当于自身[Charge]强度的光电 (最多3层)\n[OnSucceedAttack] 自身每带有2级[Charge]强度，对目标施加1层[HitTakeDamageUp](最多2层)"
           ]
         }
       ]
@@ -87,7 +87,7 @@
       "name": "充能",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得3层充能 (每回合最多1次)",
+          "desc": "[WhenUse] 使自身获得3层[Charge](每回合最多1次)",
           "coinDescs": [
             ""
           ]
@@ -95,7 +95,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 使自身获得3层充能 (每回合最多2次)",
+          "desc": "[WhenUse] 使自身获得3层[Charge](每回合最多2次)",
           "coinDescs": [
             ""
           ]
@@ -106,15 +106,15 @@
   "passives": {
     "1070901": {
       "name": "型号L37充能",
-      "desc": "本场战斗中，每当自身累计消耗10层充能 时，使自身增加1级充能 强度\n\n回合结束时，若自身的充能 强度不低于2级，则下回合使自身获得1层迅捷 "
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n\n回合结束时，若自身的[Charge]强度不低于2级，则下回合使自身获得1层[Agility]"
     },
     "1070911": {
       "name": "型号L37充能",
-      "desc": "本场战斗中，每当自身累计消耗10层充能 时，使自身增加1级充能 强度\n回合结束时，若自身的充能 强度不低于2级，则下回合使自身获得1层迅捷 \n回合结束时，若自身的充能强度不低于3级，则下回合额外使自身获得1层迅捷 与1层拼点威力提升 "
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n回合结束时，若自身的[Charge]强度不低于2级，则下回合使自身获得1层[Agility]\n回合结束时，若自身的[Charge]强度不低于3级，则下回合额外使自身获得1层[Agility]与1层[ParryingResultUp]"
     },
     "1070921": {
       "name": "充能模块安装",
-      "desc": "第1顺位友方单位的最大充能 层数+5\n(满足条件时，本效果会持续到下回合开始)"
+      "desc": "第1顺位友方单位的最大[Charge]层数+5\n(满足条件时，本效果会持续到下回合开始)"
     }
   }
 }

@@ -32,14 +32,14 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于5级，则下回合对其施加1层[Reduction] "
+            "[OnSucceedAttack] 若目标的[Vibration]强度不低于5级，则下回合对其施加1层[Reduction] "
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于5级，则下回合对其施加1层[Reduction] "
+            "[OnSucceedAttack] 若目标的[Vibration]强度不低于5级，则下回合对其施加1层[Reduction] "
           ]
         },
         {},
@@ -47,7 +47,7 @@
           "desc": "若目标的[Vibration] 层数不低于7层，则使本技能的最终威力+1",
           "coinDescs": [
             "[OnSucceedAttackHead] 使目标增加2级[Vibration] 强度\n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 若目标的[Vibration] 强度不低于5级，则下回合对其施加1层[Reduction] "
+            "[OnSucceedAttack] 若目标的[Vibration]强度不低于5级，则下回合对其施加1层[Reduction] "
           ]
         }
       ]
@@ -63,7 +63,7 @@
             "[OnSucceedAttackHead] 使自身获得1层[Charge] \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
             "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
             "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少3层。消耗所有[Charge] 层数并使[VibrationExplosion] 时混乱阈值的前移量增加(消耗的[Charge] 层数×5)%(最多+50%)"
+            "[OnSucceedAttack] 使目标[VibrationExplosion]\n[VibrationExplosion]时，使目标的[Vibration] 层数减少3层。消耗所有[Charge] 层数并使[VibrationExplosion]时混乱阈值的前移量增加(消耗的[Charge] 层数×5)%(最多+50%)"
           ]
         },
         {
@@ -72,7 +72,7 @@
             "[OnSucceedAttackHead] 使自身获得1层[Charge] \n[OnSucceedAttack] 使目标增加1级[Vibration] 强度",
             "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加2级[Vibration] 强度",
             "[OnSucceedAttackHead] 使自身获得2层[Charge] \n[OnSucceedAttack] 使目标增加3级[Vibration] 强度",
-            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[VibrationExplosion] 时，使目标的[Vibration] 层数减少3层。消耗所有[Charge] 层数并使[VibrationExplosion] 时混乱阈值的前移量增加(消耗的[Charge] 层数×5)%(最多+50%)"
+            "[OnSucceedAttack] 使目标[VibrationExplosion]\n[VibrationExplosion]时，使目标的[Vibration] 层数减少3层。消耗所有[Charge] 层数并使[VibrationExplosion]时混乱阈值的前移量增加(消耗的[Charge] 层数×5)%(最多+50%)"
           ]
         }
       ]

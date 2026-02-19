@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "[OnSucceedAttackHead] 下回合对目标施加1层[DarkFlame] ",
-            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion]强度"
           ]
         },
         {
-          "desc": "目标每带有3级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有3级[Combustion]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
             "[OnSucceedAttackHead] 下回合对目标施加1层[DarkFlame] ",
-            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion]强度"
           ]
         },
         {},
         {
-          "desc": "目标每带有3级[Combustion] 强度，使本技能的硬币威力+1(最多+3)",
+          "desc": "目标每带有3级[Combustion]强度，使本技能的硬币威力+1(最多+3)",
           "coinDescs": [
             "[OnSucceedAttack] 下回合对目标施加1层[DarkFlame] ",
-            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion]强度"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "魔弹起爆",
       "descs": [
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 若自身的[FreischutzShotCount] 层数低于4层，则使自身获得1层[FreischutzShotCount] ，并根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] ",
-            "[OnSucceedAttackHead] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+            "[OnSucceedAttackHead] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion]强度"
           ]
         },
         {
-          "desc": "目标每带有6级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有6级[Combustion]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
             "[OnSucceedAttack] 若自身的[FreischutzShotCount] 层数低于4层，则使自身获得1层[FreischutzShotCount] ，并根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] ",
-            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion]强度"
           ]
         },
         {},
         {
-          "desc": "目标每带有6级[Combustion] 强度，使本技能的硬币威力+1(最多+3)",
+          "desc": "目标每带有6级[Combustion]强度，使本技能的硬币威力+1(最多+3)",
           "coinDescs": [
             "[OnSucceedAttack] 若自身的[FreischutzShotCount] 层数低于4层，则使自身获得1层[FreischutzShotCount] ，并根据自身带有的[FreischutzShotCount] 层数，下回合对目标施加相应层数的[DarkFlame] ",
-            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion] 强度"
+            "[OnSucceedAttack] 根据目标带有的[DarkFlame] 层数，使其增加相应的[Combustion]强度"
           ]
         }
       ]
@@ -97,11 +97,11 @@
   "passives": {
     "1110701": {
       "name": "射手的烟斗",
-      "desc": "若主要目标的防御等级被减少至少4级，则在攻击前使自身增加(主要目标的烧伤强度/2)级[Breath] 强度(每回合最多20级)"
+      "desc": "若主要目标的防御等级被减少至少4级，则在攻击前使自身增加(主要目标的[Combustion]强度/2)级[Breath]强度(每回合最多20级)"
     },
     "1110711": {
       "name": "射手的烟斗",
-      "desc": "若主要目标的防御等级被减少至少4级，则在攻击前使自身增加(主要目标的烧伤强度)级[Breath] 强度(每回合最多20级)"
+      "desc": "若主要目标的防御等级被减少至少4级，则在攻击前使自身增加(主要目标的[Combustion]强度)级[Breath]强度(每回合最多20级)"
     },
     "1110721": {
       "name": "委托工作",

@@ -7,20 +7,20 @@
         {
           "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层[Sinking] "
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking]"
           ]
         },
         {
           "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于3层，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层[Sinking] \n[OnSucceedAttack] 若自身的[KnowledgeExplored] 层数不低于3层，则重复使用本硬币1次"
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking]\n[OnSucceedAttack] 若自身的[KnowledgeExplored] 层数不低于3层，则重复使用本硬币1次"
           ]
         },
         {},
         {
           "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 使本技能的拼点威力+(自身的[KnowledgeExplored] 层数-1)",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层[Sinking] \n[OnSucceedAttack] 重复使用本硬币(自身的[KnowledgeExplored] 层数-1)次"
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking]\n[OnSucceedAttack] 重复使用本硬币(自身的[KnowledgeExplored] 层数-1)次"
           ]
         }
       ]
@@ -33,7 +33,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttackHead] 使目标增加3级[Sinking] 强度"
+            "[OnSucceedAttackHead] 使目标增加3级[Sinking]强度"
           ]
         },
         {
@@ -41,7 +41,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 使目标增加3级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加3级[Sinking]强度"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 使目标增加4级[Sinking] 强度"
+            "[OnSucceedAttack] 使目标增加4级[Sinking]强度"
           ]
         }
       ]
@@ -65,7 +65,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 对目标施加3层[Sinking] \n[EndSkill] 若目标陷入混乱或击杀目标，则使自身恢复10点理智值"
+            "[OnSucceedAttack] 对目标施加3层[Sinking]\n[EndSkill] 若目标陷入混乱或击杀目标，则使自身恢复10点理智值"
           ]
         },
         {
@@ -73,7 +73,7 @@
           "coinDescs": [
             "",
             "",
-            "[OnSucceedAttack] 对目标施加4层[Sinking] \n[EndSkill] 若目标陷入混乱或击杀目标，则使自身恢复10点理智值"
+            "[OnSucceedAttack] 对目标施加4层[Sinking]\n[EndSkill] 若目标陷入混乱或击杀目标，则使自身恢复10点理智值"
           ]
         }
       ]

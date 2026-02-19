@@ -7,20 +7,20 @@
         {
           "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n[EndSkill] 3回合内，回合结束时使自身失去10点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加4级震颤 强度\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标震颤引爆 "
+            "[OnSucceedAttack] 使目标增加4级[Vibration]强度\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion]"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被震颤引爆 时的混乱阈值前移量增加50%\n[EndSkill] 3回合内，回合结束时使自身失去9点理智值",
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion]时的混乱阈值前移量增加50%\n[EndSkill] 3回合内，回合结束时使自身失去9点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标震颤引爆 "
+            "[OnSucceedAttack] 使目标增加5级[Vibration]强度\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion]"
           ]
         },
         {
-          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被震颤引爆 时的混乱阈值前移量增加100%\n[EndSkill] 3回合内，回合结束时使自身失去8点理智值",
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion]时的混乱阈值前移量增加100%\n[EndSkill] 3回合内，回合结束时使自身失去8点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加6级震颤 强度\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标震颤引爆 "
+            "[OnSucceedAttack] 使目标增加6级[Vibration]强度\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion]"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加4级震颤 强度\n[OnSucceedAttack] 对目标施加2层震颤 \n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标震颤引爆 "
+            "[OnSucceedAttack] 使目标增加4级[Vibration]强度\n[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttack] 使目标[VibrationExplosion]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被震颤引爆 时的混乱阈值前移量增加50%",
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion]时的混乱阈值前移量增加50%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加5级震颤 强度\n[OnSucceedAttack] 对目标施加2层震颤 \n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttackTail] 使目标震颤引爆 \n[OnSucceedAttack] 使目标震颤引爆 "
+            "[OnSucceedAttack] 使目标增加5级[Vibration]强度\n[OnSucceedAttack] 对目标施加2层[Vibration]\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttackTail] 使目标[VibrationExplosion]\n[OnSucceedAttack] 使目标[VibrationExplosion]"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被震颤引爆 时的混乱阈值前移量增加50%",
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大傲慢或怠惰共鸣数-2)(最多+2)\n使目标被[VibrationExplosion]时的混乱阈值前移量增加50%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加6级震颤 强度\n[OnSucceedAttack] 对目标施加3层震颤 \n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttackTail] 使目标震颤引爆 \n[OnSucceedAttackTail] 使目标震颤引爆 \n[OnSucceedAttack] 使目标震颤引爆 "
+            "[OnSucceedAttack] 使目标增加6级[Vibration]强度\n[OnSucceedAttack] 对目标施加3层[Vibration]\n[OnSucceedAttack] 使目标振幅转换 为[VibrationCrack]\n[OnSucceedAttackTail] 使目标[VibrationExplosion]\n[OnSucceedAttackTail] 使目标[VibrationExplosion]\n[OnSucceedAttack] 使目标[VibrationExplosion]"
           ]
         }
       ]

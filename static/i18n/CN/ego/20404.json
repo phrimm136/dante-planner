@@ -7,20 +7,20 @@
         {
           "desc": "若主要目标的速度值低于自身至少3点，则使本技能的硬币威力+4",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则使本技能造成的伤害+20%"
+            "[OnSucceedAttack] 若目标的[Binding]层数不低于3层，则使本技能造成的伤害+20%"
           ]
         },
         {},
         {
           "desc": "若主要目标的速度值低于自身至少3点，则使本技能的硬币威力+4",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则使本技能造成的伤害+20%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
+            "[OnSucceedAttack] 若目标的[Binding]层数不低于3层，则使本技能造成的伤害+20%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
           ]
         },
         {
           "desc": "若主要目标的速度值低于自身至少3点，则使本技能的硬币威力+7",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则使本技能造成的伤害+40%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
+            "[OnSucceedAttack] 若目标的[Binding]层数不低于3层，则使本技能造成的伤害+40%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
           ]
         }
       ]
@@ -31,20 +31,20 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身至少3点，则使本技能的最终威力+7",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则使本技能造成的伤害+30%"
+            "[OnSucceedAttack] 若目标的[Binding]层数不低于3层，则使本技能造成的伤害+30%"
           ]
         },
         {},
         {
           "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身至少3点，则使本技能的最终威力+7",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则使本技能造成的伤害+30%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
+            "[OnSucceedAttack] 若目标的[Binding]层数不低于3层，则使本技能造成的伤害+30%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
           ]
         },
         {
           "desc": "[CantIdentify]\n随机指定目标\n若主要目标的速度值低于自身至少3点，则使本技能的最终威力+10",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标的[Binding] 层数不低于3层，则使本技能造成的伤害+50%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
+            "[OnSucceedAttack] 若目标的[Binding]层数不低于3层，则使本技能造成的伤害+50%\n[OnSucceedAttack] 若以本技能击杀目标或使目标陷入混乱，则使自身及除自身以外体力最低的1名友方单位恢复其体力上限10%的体力"
           ]
         }
       ]

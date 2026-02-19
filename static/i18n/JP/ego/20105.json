@@ -24,14 +24,14 @@
       "name": "狐雨",
       "descs": [
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次のターンの2ターン間、[AmberResultUp] 1, [AmberDamageUp] 1を得る",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次の2ターンの間、[AmberResultUp] 1, [AmberDamageUp] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] このターンと次のターンの間、[AmberTakeDamageUp] , [PenetrateTakeDamageUp] 1を付与"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次のターンの2ターン間、[AmberResultUp] 2, [AmberDamageUp] 2を得る",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] このターンと次の2ターンの間、[AmberResultUp] 2, [AmberDamageUp] 2を得る",
           "coinDescs": [
             "[OnSucceedAttack] このターンと次のターンの間、[AmberTakeDamageUp] , [PenetrateTakeDamageUp] 2を付与"
           ]

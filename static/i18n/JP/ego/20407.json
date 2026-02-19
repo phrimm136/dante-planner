@@ -20,7 +20,7 @@
           ]
         },
         {
-          "desc": "[BeforeAttack] 最大共鳴数だけ攻撃加重値が増加(最大6)\n[BeforeAttack] このターンと次のターンに(最大共鳴数 + 1)だけ[GazePersonality]を得る(最大7)\n[EndSkill] このスキルを含めて色欲共鳴を作ったなら、自分が保有している攻撃スキルと同じ属性のE.G.O資源 +1\n[EndSkill] 2ターンの間、精神力が10減少",
+          "desc": "[BeforeAttack] 最大共鳴数だけ攻撃加重値が増加(最大6)\n[BeforeAttack] このターンと次のターンに(最大共鳴数 + 1)だけ[GazePersonality]を得る(最大7)\n[EndSkill] このスキルを含めて色欲共鳴を作ったなら、自分が保有している基本攻撃スキルと同じ属性のE.G.O資源 +1\n[EndSkill] 2ターンの間、ターン終了時に精神力が10減少",
           "coinDescs": [
             "",
             "[EndSkill] [Laceration]15を攻撃対象へ、均等に分けて付与"
@@ -45,7 +45,7 @@
           ]
         },
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] [GazePersonality]7を得る\n[EndSkill] このスキルを含めて色欲共鳴を作ったなら、自分が保有している攻撃スキルと同じ属性のE.G.O資源 +1",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] [GazePersonality]7を得る\n[EndSkill] このスキルを含めて色欲共鳴を作ったなら、自分が保有している基本攻撃スキルと同じ属性のE.G.O資源 +1",
           "coinDescs": [
             "[OnSucceedAttack] 対象に[Laceration]があれば、ダメージ量 +(対象の[Laceration]威力と[Laceration]回数の合計)% (最大60%)\n[OnSucceedAttack] [Laceration]を(10 + 最大共鳴数 × 2.5)付与 (最大25, 小数点切り捨て)\n[OnSucceedAttack] [Laceration]回数が5増加"
           ]

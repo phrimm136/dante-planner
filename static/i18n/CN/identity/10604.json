@@ -28,23 +28,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则使其额外增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 对目标施加1层[Combustion] "
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度。若目标带有[Combustion]，则使其额外增加1级[Combustion]强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion]"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则使其额外增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 对目标施加1层[Combustion] 。若自身的理智值不低于30点，则对其额外施加1层[Combustion] ；若自身的理智值不低于45点，则对其额外施加2层[Combustion] "
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度。若目标带有[Combustion]，则使其额外增加1级[Combustion]强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion]。若自身的理智值不低于30点，则对其额外施加1层[Combustion]；若自身的理智值不低于45点，则对其额外施加2层[Combustion]"
           ]
         },
         {},
         {
-          "desc": "若目标的[Combustion] 层数不低于6层，则使本技能的硬币威力+2",
+          "desc": "若目标的[Combustion]层数不低于6层，则使本技能的硬币威力+2",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则使其额外增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 对目标施加1层[Combustion] 。若自身的理智值不低于30点，则对其额外施加1层[Combustion] ；若自身的理智值不低于45点，则对其额外施加2层[Combustion] "
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度。若目标带有[Combustion]，则使其额外增加1级[Combustion]强度",
+            "[OnSucceedAttack] 对目标施加1层[Combustion]。若自身的理智值不低于30点，则对其额外施加1层[Combustion]；若自身的理智值不低于45点，则对其额外施加2层[Combustion]"
           ]
         }
       ]
@@ -57,15 +57,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则额外对其施加1层[Combustion] ",
-            "[OnSucceedAttackHead] 使自身恢复6点理智值\n[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使目标的混乱阈值前移本硬币伤害量的30%"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度。若目标带有[Combustion]，则额外对其施加1层[Combustion]",
+            "[OnSucceedAttackHead] 使自身恢复6点理智值\n[OnSucceedAttack] 若目标的[Combustion]层数不低于6层，则使目标的混乱阈值前移本硬币伤害量的30%"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 层数不低于6层，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]层数不低于6层，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度。若目标带有[Combustion] ，则额外对其施加1层[Combustion] ",
-            "[OnSucceedAttackHead] 使自身恢复6点理智值\n[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使目标的混乱阈值前移本硬币伤害量的30%"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度。若目标带有[Combustion]，则额外对其施加1层[Combustion]",
+            "[OnSucceedAttackHead] 使自身恢复6点理智值\n[OnSucceedAttack] 若目标的[Combustion]层数不低于6层，则使目标的混乱阈值前移本硬币伤害量的30%"
           ]
         }
       ]

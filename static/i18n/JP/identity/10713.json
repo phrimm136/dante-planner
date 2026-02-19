@@ -32,14 +32,14 @@
       "name": "ブースト・エルボーカッター",
       "descs": [
         {
-          "desc": "[StartBattle] [ChargeForceField]を(2 + 自分の[Charge]威力)だけ得る (最大6, 1ターンにつ1回)\n[WhenUse] 自分の[Charge]回数を6消耗し、コイン威力 +1",
+          "desc": "[StartBattle] [ChargeForceField]を(2 + 自分の[Charge]威力)だけ得る (最大6, 1ターンにつき1回)\n[WhenUse] 自分の[Charge]回数を6消耗し、コイン威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Charge]回数が4増加",
             "[OnSucceedAttack] [Burst]1を付与"
           ]
         },
         {
-          "desc": "[StartBattle] [ChargeForceField]を(2 + 自分の[Charge]威力)だけ得る (最大6, 1ターンにつ1回)\n[WhenUse] 自分の[Charge]回数を6消耗し、コイン威力 +1",
+          "desc": "[StartBattle] [ChargeForceField]を(2 + 自分の[Charge]威力)だけ得る (最大6, 1ターンにつき1回)\n[WhenUse] 自分の[Charge]回数を6消耗し、コイン威力 +1",
           "coinDescs": [
             "[OnSucceedAttack] 自分の[Charge]回数が5増加\n[OnSucceedAttack] [Burst]回数が1増加",
             "[OnSucceedAttack] [Burst]2を付与"
@@ -107,7 +107,7 @@
     },
     "1071311": {
       "name": "コンジェスチョンクリーニング・アーマー",
-      "desc": "- 戦闘開始時、自分の体力が50%未満なら、([Charge]威力 × 5)だけバリアを獲得 (最大25)\n- 被ダメージ直前、(自分の[Charge]回数)だけバリアを獲得 (最大5, 1ターンにつき最大3回)\n- 自分のスキルで[Charge]回数最大値を超過して[Charge]回数を得たなら、最大値を超過した[Charge]回数1につき該当スキルのダメージ量 +3% (最大15%)"
+      "desc": "- 戦闘開始時、自分の体力が50%未満なら、([Charge]威力 × 5)だけバリアを獲得 (最大25)\n- 被ダメージ直前、(自分の[Charge]威力)だけバリアを獲得 (最大5, 1ターンにつき最大3回)\n- 自分のスキルで[Charge]回数最大値を超過して[Charge]回数を得たなら、最大値を超過した[Charge]回数1につき該当スキルのダメージ量 +3% (最大15%)"
     },
     "1071321": {
       "name": "「いつか運休列車用整理装備も狙ってみれるんじゃねぇか」",

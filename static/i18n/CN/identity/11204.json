@@ -14,15 +14,15 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Paralysis] 。若目标带有[Laceration] ，则下回合对其施加1层[Paralysis] ",
+            "[OnSucceedAttack] 对目标施加1层[Paralysis] 。若目标带有[Laceration]，则下回合对其施加1层[Paralysis] ",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
           ]
         },
         {},
         {
-          "desc": "若目标的[Binding] 层数不低于4层，则使本技能造成的伤害+30%",
+          "desc": "若目标的[Binding]层数不低于4层，则使本技能造成的伤害+30%",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Paralysis] 。若目标带有[Laceration] ，则下回合对其施加1层[Paralysis] ",
+            "[OnSucceedAttack] 对目标施加1层[Paralysis] 。若目标带有[Laceration]，则下回合对其施加1层[Paralysis] ",
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度"
           ]
         }
@@ -63,7 +63,7 @@
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 对目标施加1层[Paralysis] ",
             "[OnSucceedAttack] 对目标施加1层[Paralysis] ",
-            "[OnSucceedAttack] 根据目标带有的[Laceration] 强度使自身恢复相应的体力(最多恢复20%)"
+            "[OnSucceedAttack] 根据目标带有的[Laceration]强度使自身恢复相应的体力(最多恢复20%)"
           ]
         },
         {
@@ -72,7 +72,7 @@
             "[OnSucceedAttack] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttack] 对目标施加1层[Paralysis] ",
             "[OnSucceedAttack] 对目标施加1层[Paralysis] ",
-            "[OnSucceedAttack] 根据目标带有的[Laceration] 强度使自身恢复相应的体力(最多恢复20%)"
+            "[OnSucceedAttack] 根据目标带有的[Laceration]强度使自身恢复相应的体力(最多恢复20%)"
           ]
         }
       ]

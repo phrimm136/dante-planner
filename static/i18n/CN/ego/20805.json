@@ -14,13 +14,13 @@
         {
           "desc": "[EndSkill] 使理智值最低的4名友方单位恢复20点理智值",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使自身获得4层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得1层[Breath] \n[EndSkillHead] 使理智值最高的4名友方单位获得1层[PenetrateResultUp] 与1层[AttackDmgUp] "
+            "[OnSucceedAttackHead] 使自身获得4层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得1层[Breath] \n[EndSkillHead] 使理智值最高的4名友方单位获得1层[PenetrateResultUp]与1层[AttackDmgUp]"
           ]
         },
         {
           "desc": "[EndSkill] 使理智值最低的4名友方单位恢复25点理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得6层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得2层[Breath] \n[EndSkill] 使理智值最高的4名友方单位获得2层[PenetrateResultUp] 与2层[AttackDmgUp] "
+            "[OnSucceedAttack] 使自身获得6层[Charge] \n[OnSucceedAttack] 随机使1名友方单位获得2层[Breath] \n[EndSkill] 使理智值最高的4名友方单位获得2层[PenetrateResultUp]与2层[AttackDmgUp]"
           ]
         }
       ]

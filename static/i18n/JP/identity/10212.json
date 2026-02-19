@@ -82,7 +82,7 @@
       "name": "尊命。",
       "descs": [
         {
-          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect]1を得る (1ターンにつき1回)\n[WhenUse] 自分が今回のターンにて失った累計体力10%につき、このスキルの攻撃レベル +1 (最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] [LegStrength]3を得る",
+          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect]1を得る (1ターンにつき1回)\n[WhenUse] 自分がこの戦闘にて失った累計体力10%につき、このスキルの攻撃レベル +1 (最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] [LegStrength]3を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]1を付与",
             "[OnSucceedAttack] [Burst]1を付与"
@@ -91,7 +91,7 @@
         {},
         {},
         {
-          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect]1を得る (1ターンにつき1回)\n[WhenUse] 自分が今回のターンにて失った累計体力10%につき、このスキルの攻撃レベル +1 (最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] [LegStrength]3を得る\n [WhenUse] 自分の速度が対象よりも高いほど、基本威力 +1 (速度差2につき基本威力 +1, 最大2)",
+          "desc": "[DuelCounter]\n[StartBattle] [SupportProtect]1を得る (1ターンにつき1回)\n[WhenUse] 自分がこの戦闘にて失った累計体力10%につき、このスキルの攻撃レベル +1 (最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] [LegStrength]3を得る\n [WhenUse] 自分の速度が対象よりも高いほど、基本威力 +1 (速度差2につき基本威力 +1, 最大2)",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]1を付与",
             "[OnSucceedAttack] [Burst]1を付与"
@@ -126,7 +126,7 @@
       "name": "超速護衛",
       "descs": [
         {
-          "desc": "[CanDuelGuard]\n[SupportProtect]専用スキル\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 自分がこのターンにて失った累計体力10%につき、このスキルの防御レベル +1(最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WhenUse] [Protection]2を得る(1ターンにつき1回)",
+          "desc": "[CanDuelGuard]\n[SupportProtect]専用スキル\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 自分がこの戦闘にて失った累計体力10%につき、このスキルの防御レベル +1(最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WhenUse] [Protection]2を得る(1ターンにつき1回)",
           "coinDescs": [
             "[SuperCoin]"
           ]
@@ -134,7 +134,7 @@
         {},
         {},
         {
-          "desc": "[CanDuelGuard]\n[SupportProtect]専用スキル\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 自分がこのターンにて失った累計体力10%につき、このスキルの防御レベル +1(最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WhenUse] [Protection]2を得る(1ターンにつき1回)",
+          "desc": "[CanDuelGuard]\n[SupportProtect]専用スキル\n[BeforeUse] [EnhanceZilu]が10以上なら、「黒獣 卯 奥義 - 雲解顕現」として発動\n[WhenUse] 自分がこの戦闘にて失った累計体力10%につき、このスキルの防御レベル +1(最大6. 発動時点の体力最大値を基準とする)\n[WhenUse] このスキルが終了するまでダメージによって混乱状態にならない\n[WhenUse] [Protection]2を得る(1ターンにつき1回)",
           "coinDescs": [
             "[SuperCoin]"
           ]

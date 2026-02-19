@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度"
           ]
         },
         {
-          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度"
           ]
         },
         {},
         {
-          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度\n[CriticalOnSucceedAttack] 下回合使自身获得1层迅捷 "
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[CriticalOnSucceedAttack] 下回合使自身获得1层[Agility]"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "整理整顿",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合使自身获得1层迅捷 \n[OnSucceedAttack] 对目标施加2层防御等级降低 ",
-            "[OnSucceedAttack] 使目标增加4级沉沦 强度"
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]\n[OnSucceedAttack] 对目标施加2层[DefenseDown]",
+            "[OnSucceedAttack] 使目标增加4级[Sinking]强度"
           ]
         },
         {
-          "desc": "[WhenUse] 使自身获得2层呼吸法 \n[WinDuel] 使自身增加2级呼吸法 强度",
+          "desc": "[WhenUse] 使自身获得2层[Breath]\n[WinDuel] 使自身增加2级[Breath]强度",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合使自身获得1层迅捷 \n[OnSucceedAttack] 对目标施加2层防御等级降低 ",
-            "[OnSucceedAttack] 使目标增加4级沉沦 强度"
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]\n[OnSucceedAttack] 对目标施加2层[DefenseDown]",
+            "[OnSucceedAttack] 使目标增加4级[Sinking]强度"
           ]
         },
         {},
         {
-          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层呼吸法 \n[WinDuel] 使自身增加2级呼吸法 强度",
+          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]\n[WinDuel] 使自身增加2级[Breath]强度",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合使自身获得1层迅捷 \n[CriticalOnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 对目标施加2层防御等级降低 ",
-            "[OnSucceedAttack] 使目标增加4级沉沦 强度"
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]\n[CriticalOnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttack] 对目标施加2层[DefenseDown]",
+            "[OnSucceedAttack] 使目标增加4级[Sinking]强度"
           ]
         }
       ]
@@ -61,19 +61,19 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 使自身增加6级呼吸法 强度",
+          "desc": "[WhenUse] 使自身增加6级[Breath]强度",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层沉沦 ",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 下回合对目标施加1层斩击易损 "
+            "[OnSucceedAttack] 对目标施加3层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttack] 下回合对目标施加1层[SlashTakeDamageUp]"
           ]
         },
         {
-          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身增加6级呼吸法 强度",
+          "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身增加6级[Breath]强度",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层沉沦 ",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度\n[OnSucceedAttack] 下回合对目标施加2层束缚 \n[OnSucceedAttack] 下回合对目标施加1层斩击易损 "
+            "[OnSucceedAttack] 对目标施加3层[Sinking]",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度\n[OnSucceedAttack] 下回合对目标施加2层[Binding]\n[OnSucceedAttack] 下回合对目标施加1层[SlashTakeDamageUp]"
           ]
         }
       ]
@@ -105,11 +105,11 @@
     },
     "1080921": {
       "name": "忠诚的辅助",
-      "desc": "速度值最高的1名友方单位攻击带有沉沦 的目标时，目标每带有1级沉沦 强度，使该友方单位造成的伤害+0.5%(最多+10%)"
+      "desc": "速度值最高的1名友方单位攻击带有[Sinking]的目标时，目标每带有1级[Sinking]强度，使该友方单位造成的伤害+0.5%(最多+10%)"
     },
     "1080931": {
       "name": "忠诚的辅助",
-      "desc": "速度值最高的1名友方单位攻击带有沉沦 的目标时，目标每带有1级沉沦 强度，使该友方单位造成的伤害+1%(最多+20%)"
+      "desc": "速度值最高的1名友方单位攻击带有[Sinking]的目标时，目标每带有1级[Sinking]强度，使该友方单位造成的伤害+1%(最多+20%)"
     }
   }
 }

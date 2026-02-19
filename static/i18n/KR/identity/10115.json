@@ -1,0 +1,175 @@
+{
+  "name": "거미집\n검지 아비",
+  "skills": {
+    "1011501": {
+      "name": "얼어붙은 피를 삼백삼십 휘감아",
+      "descs": [
+        {
+          "desc": "(75-[KarmaOfIndexAlly]/2)% 확률로 타격 무기가 등장\n- 타격 무기 코인 피해량 +10%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +15%\n[WhenUse] ([UnlockBuff_Base] 단계-1)만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 횟수 1 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 2 얻음\n[UnBrokenCoinOnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {
+          "desc": "(75-[KarmaOfIndexAlly]/2)% 확률로 타격 무기가 등장\n- 타격 무기 코인 피해량 +10%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +15%\n자신의 [Breath]과 대상의 [Sinking]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] ([UnlockBuff_Base] 단계-1)만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 2 얻음\n[UnBrokenCoinOnSucceedAttack] [Sinking] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "(75-[KarmaOfIndexAlly]/2)% 확률로 타격 무기가 등장\n- 타격 무기 코인 피해량 +15%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 합 위력 +1, 피해량 +20%\n자신의 [Breath]과 대상의 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] ([UnlockBuff_Base] 단계-1)만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 횟수 2 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 2 얻음\n[UnBrokenCoinOnSucceedAttack] [Sinking] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1011502": {
+      "name": "소리 없이 손뼉 쳐 즐기고, 목소리 없이 슬피 꿰뚫어",
+      "descs": [
+        {
+          "desc": "(75-[KarmaOfIndexAlly]/2)% 확률로 관통 무기가 등장\n- 관통 무기 코인 피해량 +10%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 합 위력 +1\n[WhenUse] [UnlockBuff_Base] 단계만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[UnBrokenCoinOnSucceedAttack] [Sinking] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "(75-[KarmaOfIndexAlly]/2)% 확률로 관통 무기가 등장\n- 관통 무기 코인 피해량 +10%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 합 위력 +1\n자신의 [Breath]과 대상의 [Sinking]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [UnlockBuff_Base] 단계만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[UnBrokenCoinOnSucceedAttack] [Sinking] 횟수 1 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "(75-[KarmaOfIndexAlly]/2)% 확률로 관통 무기가 등장\n- 관통 무기 코인 피해량 +15%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 최종 위력 +1\n자신의 [Breath]과 대상의 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] [UnlockBuff_Base] 단계만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] [Breath] 3 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[OnSucceedAttack] 자신의 [Breath] 횟수 2 증가\n[UnBrokenCoinOnSucceedAttack] [Sinking] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1011503": {
+      "name": "날 세워 칼을 웃거라, 낙엽 향 나듯 폭포를 울거라",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "턴 시작 시 [StackYisangSpecialSkill]가 9면, ‘Furioso-Replica’로 변경됨 (턴당 1회)\n- 가장 왼쪽 슬롯의 아래 스킬 우선 변경\n- [BeforeUse] [StackYisangSpecialSkill]가 9 미만이면 스킬 3으로 발동됨\n(75-[KarmaOfIndexAlly]/2)% 확률로 참격 무기가 등장\n- 참격 무기 코인 피해량 +12.5%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +10%\n자신의 [Breath]과 대상의 [Sinking]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] [UnlockBuff_Base] 단계만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 횟수 3 증가",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 2 얻음",
+            "[OnSucceedAttack] [Sinking] 2 부여",
+            "[UnlockBuff_Base] 단계 1당 피해량 +10% (최대 30%)\n[CriticalOnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[UnBrokenCoinOnSucceedAttack] [Sinking] 횟수 2 증가"
+          ]
+        },
+        {
+          "desc": "턴 시작 시 [StackYisangSpecialSkill]가 9면, ‘Furioso-Replica’로 변경됨 (턴당 1회)\n- 가장 왼쪽 슬롯의 아래 스킬 우선 변경\n- [BeforeUse] [StackYisangSpecialSkill]가 9 미만이면 스킬 3으로 발동됨\n(75-[KarmaOfIndexAlly]/2)% 확률로 참격 무기가 등장\n- 참격 무기 코인 피해량 +25%\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +20%\n자신의 [Breath]과 대상의 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] ([UnlockBuff_Base] 단계+1)만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [Breath] 횟수 3 증가\n- [UnlockBuff_Base] 단계만큼 [Breath] 추가로 얻음",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath] 3 얻음",
+            "[OnSucceedAttack] [Sinking] 3 부여",
+            "[UnlockBuff_Base] 단계 1당 피해량 +20% (최대 60%)\n[CriticalOnSucceedAttack] 자신의 [Breath] 횟수 1 증가\n[UnBrokenCoinOnSucceedAttack] [Sinking] 횟수 3 증가"
+          ]
+        }
+      ]
+    },
+    "1011504": {
+      "name": "예측할 수 없는 변덕으로",
+      "descs": [
+        {
+          "desc": "[StartBattle] 자신의 [Breath] 횟수 2 증가 (턴당 1회)\n[OnSucceedEvade] [Breath] 1 얻음 (턴당 2회)\n[EndBattle] [UnlockBuffAlly_2] 미만이면, 다음 효과 발동 (전투당 1회)\n- [UnlockBuffAlly_2] 얻음\n- 6 미만인 [BlessingOfIndexPrescriptAlly]가 6으로 변경됨\n- 증가한 [BlessingOfIndexPrescriptAlly] 1당 다음 턴 시작 시 [KarmaOfIndexAlly] 5 얻음",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[UnlockBuffAlly_3]이면, 코인 위력 +2\n[StartBattle] 자신의 [Breath] 횟수 2 증가 (턴당 1회)\n[OnSucceedEvade] [Breath] 2 얻음 (턴당 2회)\n[EndBattle] [UnlockBuffAlly_2] 미만이면, 다음 효과 발동 (전투당 1회)\n- [UnlockBuffAlly_2] 얻음\n- 6 미만인 [BlessingOfIndexPrescriptAlly]가 6으로 변경됨\n- 증가한 [BlessingOfIndexPrescriptAlly] 1당 다음 턴 시작 시 [KarmaOfIndexAlly] 5 얻음",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1011505": {
+      "name": "Furioso-Replica",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n조작 슬롯에 1개만 배치 가능\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +10%\n코인 위력이 변하지 않는 대신, 코인 위력이 최종적으로 증가할 때 수치 1당 최종 위력 +5 (이 스킬은 [Paralysis]의 영향을 받지 않음)\n자신의 [Breath]과 메인 타겟의 [Sinking]의 합이 6 이상이면, 최종 위력 +1\n[StartBattle]\n- 모든 코인이 [SuperCoin]으로 변경됨\n- 이 스킬 적중 시마다 [Sinking] 1 부여 또는 [Breath] 1 얻음\n- 이번 턴 동안 [StackYisangSpecialSkill]를 얻지 않음\n[WhenUse]\n- 합 위력 +3\n- [Breath] 3 얻음, 자신의 [Breath] 횟수 3 증가\n[EndSkill]\n- 적중한 모든 대상에게 다음 턴에 [Combustion] 5, [Binding] 3, [Vulnerable] 3 부여\n- [StackYisangSpecialSkill] 전부 소모",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "이 코인의 무기는 낫으로 확정\n[UnBrokenCoinOnSucceedAttack] 침잠 횟수 3 증가"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n조작 슬롯에 1개만 배치 가능\n이 스킬에 [IndexPrescriptTargetMarkToEnemy]이 새겨졌으면, 피해량 +10%\n코인 위력이 변하지 않는 대신, 코인 위력이 최종적으로 증가할 때 수치 1당 최종 위력 +5, 피해량 +25% (이 스킬은 [Paralysis]의 영향을 받지 않음)\n자신의 [Breath]과 메인 타겟의 [Sinking]의 합 6당, 최종 위력 +1 (최대 2)\n[StartBattle]\n- 모든 코인이 [SuperCoin]으로 변경됨\n- 이 스킬 적중 시마다 [Sinking] 1 부여 또는 [Breath] 1 얻음\n- 이번 턴 동안 [StackYisangSpecialSkill]를 얻지 않음\n[WhenUse]\n- 합 위력 +3\n- [Breath] 3 얻음, 자신의 [Breath] 횟수 3 증가\n[EndSkill]\n- 적중한 모든 대상에게 다음 턴에 [Combustion] 5, [Binding] 3, [Vulnerable] 3 부여\n- [StackYisangSpecialSkill] 전부 소모",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "이 코인의 무기는 낫으로 확정\n크리티컬 피해량 +90%\n[UnBrokenCoinOnSucceedAttack] 침잠 횟수 3 증가"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011502": {
+      "name": "단말기로 전해진 지령",
+      "desc": "턴 시작 시,\n- 자신의 [UnlockBuff_Base] 단계에 따라 [IndexPrescriptYi_0]/[IndexPrescriptYi_1]/[IndexPrescriptYi_2]/[IndexPrescriptYi_3] 얻음\n- 무작위 적 1명에게 [IndexPrescriptTargetToEnemy] 부여 (집중 전투면, 부위에 부여)\n- 조작 슬롯의 자신의 기본 공격 스킬에 [IndexPrescriptTargetMarkToEnemy] 부여 (슬롯당 1개, 최대 2개 부여)\n· [UnlockBuffAlly_2] 이상이면, 스킬 3에 우선 부여 (강화된 스킬 우선)\n- 흐트러짐, 행동 불가[TabExplain], 패닉, E.G.O 침식 상태면, 위의 모든 효과와 [IndexPrescript_Base_2nd] 수행 여부가 적용되지 않음"
+    },
+    "1011503": {
+      "name": "신탁 대행자 / 해금",
+      "desc": "[UnlockBuffAlly_2] 미만일 때 이번 턴에 [IndexPrescript_Base_2nd]을 수행했으면,\n턴 종료 시 정신력 4 회복, [BlessingOfIndexPrescriptAlly] 1 얻음 (턴당 1회)\n- [IndexPrescript_Base_2nd] 수행 시 메인 타겟에게 [IndexPrescriptTargetToEnemy]이 있으면,\n대신 정신력 8 회복, [BlessingOfIndexPrescriptAlly] 3 얻음\n\n[UnlockBuffAlly_2]일 때 이번 턴에 [IndexPrescriptYi_2]을 수행했으면,\n턴 종료 시 정신력 4 회복 (턴당 1회)\n- [IndexPrescript_Base_2nd] 수행 시 [StackYisangSpecialSkill]가 9가 되었으면,\n대신 정신력 8 회복, [BlessingOfIndexPrescriptAlly] 3 얻음\n\n이번 턴에 [IndexPrescript_Base_2nd]을 수행하지 못했으면,\n턴 종료 시 [KarmaOfIndexAlly] 5 얻음\n- [UnlockBuffAlly_3]이면, [KarmaOfIndexAlly]를 얻지 않음\n- 전투 시작 시 [IndexPrescript_Base_2nd] 수행을 시도했으나, 전투 중에 대상을 타겟할 수 없게 되었으면, 턴 종료 시 [KarmaOfIndexAlly]를 얻지 않음 ([UnlockBuffAlly_2] 미만일 때 적용)\n\n턴 종료 시 [BlessingOfIndexPrescriptAlly]가 3/6/9이면, [UnlockBuffAlly_1]/[UnlockBuffAlly_2]/[UnlockBuffAlly_3] 얻음\n턴 시작 시 [UnlockBuffAlly_3]이면, [Shin_IndexFingerYisang] 얻음"
+    },
+    "1011504": {
+      "name": "검지 아비",
+      "desc": "스테이지에 첫 등장 시, [BurningWoundYisangMask] 얻음\n- 이 효과를 보유 중일 때 이번 전투에서 처음으로 흐트러지면,\n턴 종료 시 흐트러짐을 해제(강제 흐트러짐 제외)하고\n[BurningWoundYisangMask]이 [BurningWoundYisang]로 변경됨\n\n검지 대행자 - 개화 E.G.O::대행 돈키호테가 자신과 함께 전장에 있으면, 돈키호테에게 [SatisfyingEsteemNeeds] 부여"
+    },
+    "1011505": {
+      "name": "신탁 단말기 [카두세우스]",
+      "desc": "기본 공격 스킬의 코인마다 무기가 무작위로 정해져 특수한 효과가 적용됨\n- [YisangWeapon01Hatchet]\n- [YisangWeapon02Stiletto]\n- [YisangWeapon03Greatsword]\n- [YisangWeapon04Rapier]\n- [YisangWeapon05Sledgehammer]\n- [YisangWeapon06Ultragreatsword]\n- [YisangWeapon07Lance]\n- [YisangWeapon08Chain]\n- [YisangWeapon09Scythe]\n\n[IndexPrescriptTargetMarkToEnemy] 스킬 사용 시, [StackYisangSpecialSkill] 1 얻음"
+    },
+    "1011506": {
+      "name": "신탁 단말기 [카두세우스]",
+      "desc": "기본 공격 스킬의 코인마다 무기가 무작위로 정해져 특수한 효과가 적용됨\n- [YisangWeapon01Hatchet]\n- [YisangWeapon02Stiletto]\n- [YisangWeapon03Greatsword]\n- [YisangWeapon04Rapier]\n- [YisangWeapon05Sledgehammer]\n- [YisangWeapon06Ultragreatsword]\n- [YisangWeapon07Lance]\n- [YisangWeapon08Chain]\n- [YisangWeapon09Scythe]\n\n[IndexPrescriptTargetMarkToEnemy] 스킬 사용 시, [StackYisangSpecialSkill] 1 얻음\n\n이번 전투에서 ‘Furioso-Replica’를 처음 사용하였다면,\n해당 턴 종료 시 [BurningWoundYisangMask]이 [BurningWoundYisang]로 변경됨\n\n턴 시작 시 [BurningWoundYisang]를 보유 중일 때,\n조작 슬롯에 ‘Furioso-Replica’가 있으면 [BlackNightmareYisang] 얻음"
+    },
+    "1011501": {
+      "name": "모조된 삶",
+      "desc": "자신의 [BlessingOfIndexPrescriptAlly] 1당 [IndexPrescriptTargetMarkToEnemy] 스킬 피해량 +2% (최대 16%)\n - [BlessingOfIndexPrescriptAlly]가 9일 경우, 대신 기본 스킬의 피해량 +20%\n\n기본 공격 스킬의 [SuperCoin] 적중 시, [StackYisangSpecialSkill] 1 얻음\n- 공격 종료 시, 남은 [SuperCoin] 수만큼 [StackYisangSpecialSkill] 얻음"
+    },
+    "1011511": {
+      "name": "모조된 삶",
+      "desc": "자신의 [BlessingOfIndexPrescriptAlly] 1당 [IndexPrescriptTargetMarkToEnemy] 스킬 피해량 +2% (최대 16%)\n - [BlessingOfIndexPrescriptAlly]가 9일 경우, 대신 기본 스킬의 피해량 +20%\n\n기본 공격 스킬의 [SuperCoin] 적중 시, [StackYisangSpecialSkill] 1 얻음\n- 공격 종료 시, 남은 [SuperCoin] 수만큼 [StackYisangSpecialSkill] 얻음\n- ‘Furioso-Replica’ 공격 종료 시, 해당 스킬의 (남은 [SuperCoin] 수/2)만큼 다음 턴에 [StackYisangSpecialSkill] 얻음 (소수점 버림)\n\n턴 종료 시 이번 턴에 [StackYisangSpecialSkill]가 증가하여 9가 되었을 때,\n다음 턴 시작 시 조작 슬롯에 스킬 3이 없으면, 기본 스킬 하나를 스킬 3으로 변경 (가장 왼쪽 슬롯의 아래 스킬 우선)"
+    },
+    "1011521": {
+      "name": "신의 가호",
+      "desc": "이번 턴에 아군이 적에게 처음으로 사용한 참격, 관통, 타격 기본 공격 스킬의 피해량이 각각 +5%\n- 효과가 적용된 스킬이 검지 소속 인격의 스킬이면, 대신 +10%\n- 공격 시작 전 기준으로 적용됨"
+    }
+  }
+}

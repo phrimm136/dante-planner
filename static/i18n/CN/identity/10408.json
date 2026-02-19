@@ -5,24 +5,24 @@
       "name": "迎客之道1式 狩猎",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层呼吸法 ",
+            "[OnSucceedAttack] 使自身获得2层[Breath]",
             "[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         },
         {
-          "desc": "若自身的速度值高于目标至少3点，则使本技能的拼点威力+1\n[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "若自身的速度值高于目标至少3点，则使本技能的拼点威力+1\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层呼吸法 ",
+            "[OnSucceedAttack] 使自身获得2层[Breath]",
             "[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         },
         {},
         {
-          "desc": "若自身的速度值高于目标，则每相差2点，使本技能的拼点威力+1(最多+3)\n[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "若自身的速度值高于目标，则每相差2点，使本技能的拼点威力+1(最多+3)\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层呼吸法 ",
+            "[OnSucceedAttack] 使自身获得2层[Breath]",
             "[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         }
@@ -32,24 +32,24 @@
       "name": "迎客之道第7式 捕捉",
       "descs": [
         {
-          "desc": "[StartBattle] 消耗6层呼吸法 并使本技能的攻击容量+2",
+          "desc": "[StartBattle] 消耗6层[Breath]并使本技能的攻击容量+2",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级呼吸法 强度",
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
             "[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         },
         {
-          "desc": "[StartBattle] 消耗6层呼吸法 并使本技能的攻击容量+2",
+          "desc": "[StartBattle] 消耗6层[Breath]并使本技能的攻击容量+2",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加3级呼吸法 强度",
+            "[OnSucceedAttack] 使自身增加3级[Breath]强度",
             "[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         },
         {},
         {
-          "desc": "若自身的速度值高于主要目标，则每相差2点，使本技能的拼点威力+1(最多+3)\n[StartBattle] 消耗6层呼吸法 并使本技能的攻击容量+2",
+          "desc": "若自身的速度值高于主要目标，则每相差2点，使本技能的拼点威力+1(最多+3)\n[StartBattle] 消耗6层[Breath]并使本技能的攻击容量+2",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加3级呼吸法 强度\n[CriticalOnSucceedAttack] 对目标施加1层[MarkOfButler]",
+            "[OnSucceedAttack] 使自身增加3级[Breath]强度\n[CriticalOnSucceedAttack] 对目标施加1层[MarkOfButler]",
             "[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         }
@@ -61,16 +61,16 @@
         {},
         {},
         {
-          "desc": "若目标带有[MarkOfButler]，则使本技能的拼点威力+1\n[WhenUse] 使自身获得7层呼吸法 ",
+          "desc": "若目标带有[MarkOfButler]，则使本技能的拼点威力+1\n[WhenUse] 使自身获得7层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加5级呼吸法 强度\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的20%",
+            "[OnSucceedAttack] 使自身增加5级[Breath]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的20%",
             "[OnSucceedAttack] 若目标陷入混乱，则使本硬币暴击时造成的伤害+20%\n[OnSucceedAttack] 对目标施加2层[MarkOfButler]"
           ]
         },
         {
-          "desc": "若目标带有[MarkOfButler]，则使本技能的拼点威力+1\n若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得7层呼吸法 ",
+          "desc": "若目标带有[MarkOfButler]，则使本技能的拼点威力+1\n若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WhenUse] 使自身获得7层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加5级呼吸法 强度\n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的30%\n[CriticalOnSucceedAttack] 对目标施加1层[MarkOfButler]",
+            "[OnSucceedAttack] 使自身增加5级[Breath]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的30%\n[CriticalOnSucceedAttack] 对目标施加1层[MarkOfButler]",
             "[OnSucceedAttack] 若目标陷入混乱，则使本硬币暴击时造成的伤害+40%\n[OnSucceedAttack] 对目标施加2层[MarkOfButler]\n[EnemyKill] 随机对1名带有[MarkOfButler]的目标重复使用本技能1次\n(重复使用时不生效，没有目标带有[MarkOfButler]时不生效)"
           ]
         }
@@ -88,7 +88,7 @@
         {},
         {},
         {
-          "desc": "[OnSucceedEvade] 使自身恢复3点理智值(每回合最多5次)\n[OnSucceedEvade] 使自身获得1层呼吸法 (每回合最多5次)",
+          "desc": "[OnSucceedEvade] 使自身恢复3点理智值(每回合最多5次)\n[OnSucceedEvade] 使自身获得1层[Breath](每回合最多5次)",
           "coinDescs": [
             ""
           ]
@@ -99,11 +99,11 @@
   "passives": {
     "1040801": {
       "name": "完成家务",
-      "desc": "攻击命中带有管·标 的目标时，下回合使自身获得1层迅捷 (每回合最多3次)\n暴击命中带有管·标 的目标时，解除目标的管·标 ；若目标的速度值低于自身，则速度值每相差1点，使暴击时造成的伤害+5% (最多30%)"
+      "desc": "攻击命中带有管·标 的目标时，下回合使自身获得1层[Agility](每回合最多3次)\n暴击命中带有管·标 的目标时，解除目标的管·标 ；若目标的速度值低于自身，则速度值每相差1点，使暴击时造成的伤害+5% (最多30%)"
     },
     "1040811": {
       "name": "完成家务",
-      "desc": "攻击命中带有管·标 的目标时，使自身获得1层呼吸法 并在下回合获得1层迅捷 (每回合最多3次)\n暴击命中带有管·标 的目标时，解除目标的管·标 ；若目标的速度值低于自身，则速度值每相差1点，使暴击时造成的伤害+10% (最多60%)"
+      "desc": "攻击命中带有管·标 的目标时，使自身获得1层[Breath]并在下回合获得1层[Agility](每回合最多3次)\n暴击命中带有管·标 的目标时，解除目标的管·标 ；若目标的速度值低于自身，则速度值每相差1点，使暴击时造成的伤害+10% (最多60%)"
     },
     "1040821": {
       "name": "指挥清扫",
@@ -111,7 +111,7 @@
     },
     "1040831": {
       "name": "指挥清扫",
-      "desc": "最后编入的1名友方单位拼点胜利时，使其获得1层呼吸法 (每回合最多3次)，下回合使其获得1层迅捷 (每回合最多1次)。"
+      "desc": "最后编入的1名友方单位拼点胜利时，使其获得1层[Breath](每回合最多3次)，下回合使其获得1层[Agility](每回合最多1次)。"
     }
   }
 }

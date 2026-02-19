@@ -5,7 +5,7 @@
       "name": "火力反击",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层呼吸法 ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
             "消耗1发弹药 ",
             "消耗1发弹药 ",
@@ -15,7 +15,7 @@
         {
           "desc": "[WhenUse] 使自身获得2层[Breath]\n[WhenUse] 下回合使自身获得1层[Agility](每回合最多1次)",
           "coinDescs": [
-            "消耗1发弹药 \n[OnSucceedAttack] 使自身获得1层呼吸法 ",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身获得1层[Breath]",
             "消耗1发弹药 ",
             "消耗1发弹药 "
           ]
@@ -24,7 +24,7 @@
         {
           "desc": "[WhenUse] 使自身获得2层[Breath]\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)",
           "coinDescs": [
-            "消耗1发弹药 \n[OnSucceedAttack] 使自身获得1层呼吸法 ",
+            "消耗1发弹药 \n[OnSucceedAttack] 使自身获得1层[Breath]",
             "消耗1发弹药 ",
             "消耗1发弹药 "
           ]
@@ -35,7 +35,7 @@
       "name": "一枪爆头",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身增加3级呼吸法 强度并获得1层呼吸法 ",
+          "desc": "[WhenUse] 使自身增加3级[Breath]强度并获得1层[Breath]",
           "coinDescs": [
             "消耗1发弹药 \n[OnSucceedAttack] 对目标施加1层突刺易损 (每回合最多2次)"
           ]
@@ -63,13 +63,13 @@
         {
           "desc": "[BeforeUse] 若自身带有[Bullet_LogicAtelier]，则改为使用“逻辑工作室制 高速粉碎弹”\n若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×12.5)%",
           "coinDescs": [
-            "消耗1发弹药 \n使本硬币暴击时造成的伤害+50%\n[CriticalOnSucceedAttack] 若自身的呼吸法 强度不低于30级，则消耗至多10级超出30级的呼吸法 强度并使本硬币造成的伤害+(消耗的呼吸法 强度×10)%"
+            "消耗1发弹药 \n使本硬币暴击时造成的伤害+50%\n[CriticalOnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗至多10级超出30级的[Breath]强度并使本硬币造成的伤害+(消耗的[Breath]强度×10)%"
           ]
         },
         {
           "desc": "[BeforeUse] 若自身带有[Bullet_LogicAtelier]，则改为使用“逻辑工作室制 高速粉碎弹”\n若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×12.5)%\n[EndSkill] 使自身获得2层[Breath]",
           "coinDescs": [
-            "消耗1发弹药 \n使本硬币暴击时造成的伤害+80%\n使本硬币暴击时造成的伤害+(目标的突刺抗性×50)%\n[CriticalOnSucceedAttack] 若自身的呼吸法 强度不低于30级，则消耗至多10级超出30级的呼吸法 强度并使本硬币造成的伤害+(消耗的呼吸法 强度×10)%"
+            "消耗1发弹药 \n使本硬币暴击时造成的伤害+80%\n使本硬币暴击时造成的伤害+(目标的突刺抗性×50)%\n[CriticalOnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗至多10级超出30级的[Breath]强度并使本硬币造成的伤害+(消耗的[Breath]强度×10)%"
           ]
         }
       ]
@@ -101,13 +101,13 @@
         {
           "desc": "若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×25)%",
           "coinDescs": [
-            "消耗1发[Bullet_LogicAtelier]\n使本硬币暴击时造成的伤害+100%\n[CriticalOnSucceedAttack] 若自身的呼吸法 强度不低于30级，则消耗至多10级超出30级的呼吸法 强度并使本硬币造成的伤害+(消耗的呼吸法 强度×10)%"
+            "消耗1发[Bullet_LogicAtelier]\n使本硬币暴击时造成的伤害+100%\n[CriticalOnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗至多10级超出30级的[Breath]强度并使本硬币造成的伤害+(消耗的[Breath]强度×10)%"
           ]
         },
         {
           "desc": "若自身的速度值高于目标，则每相差1点，使本技能造成的伤害+10%(最多+50%)\n[WhenUse] 使自身增加5级[Breath]强度\n[WhenUse] 消耗所有[LogicAtelierAM]，使自身增加(消耗的[LogicAtelierAM]层数×2)级[Breath]强度并使本技能造成的伤害+(消耗的[LogicAtelierAM]层数×25)%\n[EndSkill] 使自身获得5层[Breath]",
           "coinDescs": [
-            "消耗1发[Bullet_LogicAtelier]\n使本硬币暴击时造成的伤害+130%\n使本硬币暴击时造成的伤害+(目标的突刺抗性×50)%\n[CriticalOnSucceedAttack] 若自身的呼吸法 强度不低于30级，则消耗至多10级超出30级的呼吸法 强度并使本硬币造成的伤害+(消耗的呼吸法 强度×10)%"
+            "消耗1发[Bullet_LogicAtelier]\n使本硬币暴击时造成的伤害+130%\n使本硬币暴击时造成的伤害+(目标的突刺抗性×50)%\n[CriticalOnSucceedAttack] 若自身的[Breath]强度不低于30级，则消耗至多10级超出30级的[Breath]强度并使本硬币造成的伤害+(消耗的[Breath]强度×10)%"
           ]
         }
       ]
@@ -135,7 +135,7 @@
   "passives": {
     "1071101": {
       "name": "远程狙杀",
-      "desc": "关卡开始时，使自身获得3层突刺威力提升 \n\n回合结束时，若自身所有类型的弹药 数均为0，则激活[Retreat_FullStop](每场战斗最多1次)\n\n若自身解除待命，或激活[Retreat_FullStop]后重返战斗，则获得[LogicAtelierAM]至最大值，获得3层突刺威力提升 并使自身[FullReload](不包括[Bullet_LogicAtelier]，每场战斗最多1次)"
+      "desc": "关卡开始时，使自身获得3层[PenetrateResultUp]\n\n回合结束时，若自身所有类型的弹药 数均为0，则激活[Retreat_FullStop](每场战斗最多1次)\n\n若自身解除待命，或激活[Retreat_FullStop]后重返战斗，则获得[LogicAtelierAM]至最大值，获得3层[PenetrateResultUp]并使自身[FullReload](不包括[Bullet_LogicAtelier]，每场战斗最多1次)"
     },
     "1071102": {
       "name": "精确瞄准",
@@ -143,7 +143,7 @@
     },
     "1071103": {
       "name": "远程狙杀",
-      "desc": "关卡开始时，使自身获得3层突刺威力提升 \n\n自身在战斗中登场时，使自身获得1发[Bullet_LogicAtelier](每场战斗最多1次)\n\n回合结束时，若自身所有类型的弹药 数均为0，则激活[Retreat_FullStop](每场战斗最多1次)\n\n若自身解除待命，或激活[Retreat_FullStop]后重返战斗，则获得[LogicAtelierAM]至最大值，获得3层突刺威力提升 并使自身[FullReload]\n(不包括[Bullet_LogicAtelier]，每场战斗最多1次)"
+      "desc": "关卡开始时，使自身获得3层[PenetrateResultUp]\n\n自身在战斗中登场时，使自身获得1发[Bullet_LogicAtelier](每场战斗最多1次)\n\n回合结束时，若自身所有类型的弹药 数均为0，则激活[Retreat_FullStop](每场战斗最多1次)\n\n若自身解除待命，或激活[Retreat_FullStop]后重返战斗，则获得[LogicAtelierAM]至最大值，获得3层[PenetrateResultUp]并使自身[FullReload]\n(不包括[Bullet_LogicAtelier]，每场战斗最多1次)"
     },
     "1071111": {
       "name": "精确瞄准",

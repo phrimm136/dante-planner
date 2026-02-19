@@ -42,7 +42,7 @@
           ]
         },
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の精神力が-15以下なら、攻撃加重値 +1",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の精神力が-15以下なら、攻撃加重値 +2",
           "coinDescs": [
             "[OnSucceedAttack] 自分を除いた味方1名へ[DefenseDown] 3を付与\n[OnSucceedAttack] 次のターンに[DefenseUp] 2を得る。\n[OnSucceedAttack] 次のターンに[AttackDmgUp] 1を得る。\n[OnSucceedAttackTail] 自分の精神力を4回復\n[OnSucceedAttackTail] [Vulnerable] 1を付与"
           ]

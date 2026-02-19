@@ -5,22 +5,22 @@
       "name": "低泣",
       "descs": [
         {
-          "desc": "若目标带有震颤 ，则使本技能造成的伤害+((目标的震颤 强度与层数之和)/2)%(最多+20%)",
+          "desc": "若目标带有[Vibration]，则使本技能造成的伤害+((目标的[Vibration]强度与层数之和)/2)%(最多+20%)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级震颤 强度\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
           ]
         },
         {},
         {
-          "desc": "若目标带有震颤 ，则使本技能造成的伤害+((目标的震颤 强度与层数之和)/2)%(最多+25%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(5+(目标的震颤 强度与层数之和)/2)%(最多+35%)",
+          "desc": "若目标带有[Vibration]，则使本技能造成的伤害+((目标的[Vibration]强度与层数之和)/2)%(最多+25%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(5+(目标的[Vibration]强度与层数之和)/2)%(最多+35%)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级震颤 强度并对其施加2层震颤 \n[OnSucceedAttack] 使目标振幅转换 为震颤-回响 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度并对其施加2层[Vibration]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationEcho]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
           ]
         },
         {
-          "desc": "若目标带有震颤 ，则使本技能造成的伤害+(5+(目标的震颤 强度与层数之和)/2)%(最多+30%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(7.5+(目标的震颤 强度与层数之和)/1.5)%(最多+40%)",
+          "desc": "若目标带有[Vibration]，则使本技能造成的伤害+(5+(目标的[Vibration]强度与层数之和)/2)%(最多+30%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(7.5+(目标的[Vibration]强度与层数之和)/1.5)%(最多+40%)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级震颤 强度并对其施加3层震颤 \n[OnSucceedAttack] 使目标振幅转换 为震颤-回响 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度并对其施加3层[Vibration]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationEcho]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "低泣",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标带有震颤 ，则使本技能造成的伤害+((目标的震颤 强度与层数之和)/2)%(最多+25%)\n- 若最大共鸣数不低于4，则改为造成的伤害最多+35%",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Vibration]，则使本技能造成的伤害+((目标的[Vibration]强度与层数之和)/2)%(最多+25%)\n- 若最大共鸣数不低于4，则改为造成的伤害最多+35%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级震颤 强度并对其施加3层震颤 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度并对其施加3层[Vibration]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标带有震颤 ，则使本技能造成的伤害+((目标的震颤 强度与层数之和)/2)%(最多+30%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(5+(目标的震颤 强度与层数之和)/2)%(最多+40%)",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Vibration]，则使本技能造成的伤害+((目标的[Vibration]强度与层数之和)/2)%(最多+30%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(5+(目标的[Vibration]强度与层数之和)/2)%(最多+40%)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加3级震颤 强度并对其施加3层震颤 \n[OnSucceedAttack] 使目标振幅转换 为震颤-回响 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层"
+            "[OnSucceedAttack] 使目标增加3级[Vibration]强度并对其施加3层[Vibration]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationEcho]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标带有震颤 ，则使本技能造成的伤害+(5+(目标的震颤 强度与层数之和)/2)%(最多+40%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(7.5+(目标的震颤 强度与层数之和)/1.5)%(最多+50%)",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Vibration]，则使本技能造成的伤害+(5+(目标的[Vibration]强度与层数之和)/2)%(最多+40%)\n- 若最大共鸣数不低于4，则改为造成的伤害+(7.5+(目标的[Vibration]强度与层数之和)/1.5)%(最多+50%)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加6级震颤 强度并对其施加6层震颤 \n[OnSucceedAttack] 使目标振幅转换 为震颤-回响 \n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层\n[OnSucceedAttack] 使目标震颤引爆 ，并使其震颤 层数减少1层"
+            "[OnSucceedAttack] 使目标增加6级[Vibration]强度并对其施加6层[Vibration]\n[OnSucceedAttack] 使目标[Switch_Vibration]为[VibrationEcho]\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层\n[OnSucceedAttack] 使目标[VibrationExplosion]，并使其[Vibration]层数减少1层"
           ]
         }
       ]
@@ -53,7 +53,7 @@
   "passives": {
     "2060611": {
       "name": "惆怅",
-      "desc": "自身通过技能使敌方单位震颤引爆 时，下回合对该敌方单位施加1层攻击等级降低 与2层防御等级降低 。(每回合最多3次，包括E.G.O技能)"
+      "desc": "自身通过技能使敌方单位[VibrationExplosion]时，下回合对该敌方单位施加1层[AttackDown]与2层[DefenseDown]。(每回合最多3次，包括E.G.O技能)"
     }
   }
 }

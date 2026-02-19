@@ -5,25 +5,25 @@
       "name": "炎斩",
       "descs": [
         {
-          "desc": "若目标的烧伤 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttackHead] 使目标增加1级烧伤 强度"
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度"
           ]
         },
         {
-          "desc": "若目标的烧伤 强度不低于3级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于3级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         },
         {},
         {
-          "desc": "目标每带有3级烧伤 强度，使本技能的硬币威力+1(最多+2)\n目标每带有10级烧伤 强度，使本技能造成的伤害+10%(最多+30%)",
+          "desc": "目标每带有3级[Combustion]强度，使本技能的硬币威力+1(最多+2)\n目标每带有10级[Combustion]强度，使本技能造成的伤害+10%(最多+30%)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttackHead] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度\n[OnSucceedAttackHead] 使目标增加1级烧伤 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度\n[OnSucceedAttackHead] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度\n[OnSucceedAttackHead] 使目标增加1级[Combustion]强度"
           ]
         }
       ]
@@ -32,28 +32,28 @@
       "name": "长驱直入",
       "descs": [
         {
-          "desc": "若目标的烧伤 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "[OnSucceedAttack] 若目标的烧伤 强度不低于6级，则对其施加2层烧伤 "
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 若目标的[Combustion]强度不低于6级，则对其施加2层[Combustion]"
           ]
         },
         {
-          "desc": "目标每带有6级烧伤 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有6级[Combustion]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "目标每带有1级烧伤 强度，使本硬币造成的伤害+2.5%(最多+30%)\n[OnSucceedAttack] 若目标的烧伤 强度不低于6级，则对其施加2层烧伤 "
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "目标每带有1级[Combustion]强度，使本硬币造成的伤害+2.5%(最多+30%)\n[OnSucceedAttack] 若目标的[Combustion]强度不低于6级，则对其施加2层[Combustion]"
           ]
         },
         {},
         {
-          "desc": "目标每带有6级烧伤 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有6级[Combustion]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "目标每带有1级烧伤 强度，使本硬币造成的伤害+5%(最多+60%)\n[OnSucceedAttack] 若目标的烧伤 强度不低于6级，则对其施加2层烧伤 "
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "目标每带有1级[Combustion]强度，使本硬币造成的伤害+5%(最多+60%)\n[OnSucceedAttack] 若目标的[Combustion]强度不低于6级，则对其施加2层[Combustion]"
           ]
         }
       ]
@@ -64,21 +64,21 @@
         {},
         {},
         {
-          "desc": "若目标的烧伤 强度不低于6级，则使本技能的硬币威力+1\n目标每带有6级烧伤 强度，使本技能造成的伤害+10%(最多+30%)\n[EndSkill] 使理智值最低的1名友方单位恢复10点理智值\n- 若击杀目标，或目标的烧伤 强度不低于10级，则额外使1名友方单位恢复理智值",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1\n目标每带有6级[Combustion]强度，使本技能造成的伤害+10%(最多+30%)\n[EndSkill] 使理智值最低的1名友方单位恢复10点理智值\n- 若击杀目标，或目标的[Combustion]强度不低于10级，则额外使1名友方单位恢复理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "目标每带有1级烧伤 强度，使本硬币造成的伤害+2%(最多+60%)\n[OnSucceedAttack] 对目标造成相当于其烧伤 强度的暴怒伤害(最多30点)，并使其烧伤 层数减少2层"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "目标每带有1级[Combustion]强度，使本硬币造成的伤害+2%(最多+60%)\n[OnSucceedAttack] 对目标造成相当于其[Combustion]强度的暴怒伤害(最多30点)，并使其[Combustion]层数减少2层"
           ]
         },
         {
-          "desc": "目标每带有6级烧伤 强度，使本技能的硬币威力+1(最多+2)\n目标每带有6级烧伤 强度，使本技能造成的伤害+10%(最多+30%)\n[EndSkill] 使理智值最低的1名友方单位恢复15点理智值\n- 若击杀目标，或目标的烧伤 强度不低于10级，则额外使1名友方单位恢复理智值",
+          "desc": "目标每带有6级[Combustion]强度，使本技能的硬币威力+1(最多+2)\n目标每带有6级[Combustion]强度，使本技能造成的伤害+10%(最多+30%)\n[EndSkill] 使理智值最低的1名友方单位恢复15点理智值\n- 若击杀目标，或目标的[Combustion]强度不低于10级，则额外使1名友方单位恢复理智值",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加1级烧伤 强度",
-            "[OnSucceedAttack] 使目标增加2级烧伤 强度",
-            "目标每带有1级烧伤 强度，使本硬币造成的伤害+2%(最多+60%)\n[OnSucceedAttack] 对目标造成相当于其烧伤 强度的暴怒伤害(最多30点)，并使其烧伤 层数减少2层"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "目标每带有1级[Combustion]强度，使本硬币造成的伤害+2%(最多+60%)\n[OnSucceedAttack] 对目标造成相当于其[Combustion]强度的暴怒伤害(最多30点)，并使其[Combustion]层数减少2层"
           ]
         }
       ]
@@ -87,19 +87,19 @@
       "name": "炎反",
       "descs": [
         {
-          "desc": "[BeforeHit] 使自身获得相当于目标烧伤 强度的护盾(最多10点，每回合最多1次)",
+          "desc": "[BeforeHit] 使自身获得相当于目标[Combustion]强度的护盾(最多10点，每回合最多1次)",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级烧伤 强度\n- 若自身带有护盾，则使目标额外增加1级烧伤 强度",
-            "[OnSucceedAttackHead] 使目标增加1级烧伤 强度\n- 若自身带有护盾，则使目标额外增加1级烧伤 强度"
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度\n- 若自身带有护盾，则使目标额外增加1级[Combustion]强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度\n- 若自身带有护盾，则使目标额外增加1级[Combustion]强度"
           ]
         },
         {},
         {},
         {
-          "desc": "[BeforeHit] 使自身获得相当于目标烧伤 强度的护盾(最多15点，每回合最多1次)\n[WhenUse] 若目标的烧伤 强度不低于10级，则使本技能造成的伤害+10%",
+          "desc": "[BeforeHit] 使自身获得相当于目标[Combustion]强度的护盾(最多15点，每回合最多1次)\n[WhenUse] 若目标的[Combustion]强度不低于10级，则使本技能造成的伤害+10%",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级烧伤 强度\n- 若自身带有护盾，则使目标额外增加1级烧伤 强度",
-            "[OnSucceedAttackHead] 使目标增加1级烧伤 强度\n- 若自身带有护盾，则使目标额外增加1级烧伤 强度"
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度\n- 若自身带有护盾，则使目标额外增加1级[Combustion]强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度\n- 若自身带有护盾，则使目标额外增加1级[Combustion]强度"
           ]
         }
       ]
@@ -108,11 +108,11 @@
   "passives": {
     "1011201": {
       "name": "碧血丹心",
-      "desc": "回合结束时，使理智值最低的1名友方单位恢复(5+最大共鸣数)点理智值(最多10点)(不包括自身与陷入恐慌或E.G.O侵蚀的友方单位)\n- 若该友方单位拥有增加烧伤 强度或施加烧伤 层数的基础技能，则使其额外恢复5点理智值"
+      "desc": "回合结束时，使理智值最低的1名友方单位恢复(5+最大共鸣数)点理智值(最多10点)(不包括自身与陷入恐慌或E.G.O侵蚀的友方单位)\n- 若该友方单位拥有增加[Combustion]强度或施加[Combustion]层数的基础技能，则使其额外恢复5点理智值"
     },
     "1011211": {
       "name": "碧血丹心",
-      "desc": "回合结束时，使理智值最低的1名友方单位恢复(5+最大共鸣数)点理智值(最多10点)(不包括自身与陷入恐慌或E.G.O侵蚀的友方单位)\n- 若该友方单位拥有增加烧伤 强度或施加烧伤 层数的基础技能，则使其额外恢复5点理智值\n- 若暴怒共鸣数不低于4，则额外使1名友方单位恢复理智值"
+      "desc": "回合结束时，使理智值最低的1名友方单位恢复(5+最大共鸣数)点理智值(最多10点)(不包括自身与陷入恐慌或E.G.O侵蚀的友方单位)\n- 若该友方单位拥有增加[Combustion]强度或施加[Combustion]层数的基础技能，则使其额外恢复5点理智值\n- 若暴怒共鸣数不低于4，则额外使1名友方单位恢复理智值"
     },
     "1011221": {
       "name": "六协方阵",
@@ -120,7 +120,7 @@
     },
     "1011231": {
       "name": "六协方阵",
-      "desc": "若理智值最低的2名友方单位在本回合失去了理智值，则回合结束时使其恢复5点理智值\n- 若该友方单位拥有增加烧伤 强度或施加烧伤 层数的基础技能，则改为恢复5~10点理智值"
+      "desc": "若理智值最低的2名友方单位在本回合失去了理智值，则回合结束时使其恢复5点理智值\n- 若该友方单位拥有增加[Combustion]强度或施加[Combustion]层数的基础技能，则改为恢复5~10点理智值"
     }
   }
 }

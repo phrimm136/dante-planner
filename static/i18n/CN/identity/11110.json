@@ -5,25 +5,25 @@
       "name": "脉冲轰炸",
       "descs": [
         {
-          "desc": "[WhenUse] 若自身的充能 层数不低于4层，则使本技能的拼点威力+1\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于4层，则使本技能的拼点威力+1\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使自身获得1层充能 "
+            "[OnSucceedAttack] 使自身获得1层[Charge]"
           ]
         },
         {
-          "desc": "[WhenUse] 若自身的充能 层数不低于4层，则使本技能的基础威力+1\n[WhenUse] 若自身的充能 层数不低于6层，则使本技能的拼点威力+1\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于4层，则使本技能的基础威力+1\n[WhenUse] 若自身的[Charge]层数不低于6层，则使本技能的拼点威力+1\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使自身获得1层充能 "
+            "[OnSucceedAttack] 使自身获得1层[Charge]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 若自身的充能 层数不低于4层，则使本技能的基础威力+1\n[WhenUse] 自身每带有5层充能 ，使本技能的拼点威力+1(最多+2)\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于4层，则使本技能的基础威力+1\n[WhenUse] 自身每带有5层[Charge]，使本技能的拼点威力+1(最多+2)\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使自身获得2层充能 "
+            "[OnSucceedAttack] 使自身获得2层[Charge]"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "充能腾跃",
       "descs": [
         {
-          "desc": "[WhenUse] 消耗自身的6层充能 并使本技能的基础威力+1\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "[WhenUse] 消耗自身的6层[Charge]并使本技能的基础威力+1\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层充能 ",
-            "[OnSucceedAttack] 使自身获得1层充能 \n[OnSucceedAttack] 下回合对目标施加1层束缚 "
+            "[OnSucceedAttack] 使自身获得1层[Charge]",
+            "[OnSucceedAttack] 使自身获得1层[Charge]\n[OnSucceedAttack] 下回合对目标施加1层[Binding]"
           ]
         },
         {
-          "desc": "[WhenUse] 消耗自身的6层充能 并使本技能的基础威力+1\n- 若自身消耗了充能 层数，则使自身与除自身以外充能 层数最低的2名友方单位获得(自身的充能 强度+1)层充能力场 (最多7层，每回合最多1次)\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "[WhenUse] 消耗自身的6层[Charge]并使本技能的基础威力+1\n- 若自身消耗了[Charge]层数，则使自身与除自身以外[Charge]层数最低的2名友方单位获得(自身的[Charge]强度+1)层[ChargeForceField](最多7层，每回合最多1次)\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层充能 ",
-            "[OnSucceedAttack] 使自身获得2层充能 \n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttackHead] 若本技能使用时消耗了充能 层数，则下回合对目标施加2层束缚 "
+            "[OnSucceedAttack] 使自身获得1层[Charge]",
+            "[OnSucceedAttack] 使自身获得2层[Charge]\n[OnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttackHead] 若本技能使用时消耗了[Charge]层数，则下回合对目标施加2层[Binding]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 消耗自身的6层充能 并使本技能的硬币威力+1\n- 若自身消耗了充能 层数，则使自身与除自身以外充能 层数最低的2名友方单位获得(自身的充能 强度+2)层充能力场 (最多8层，每回合最多2次)\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "[WhenUse] 消耗自身的6层[Charge]并使本技能的硬币威力+1\n- 若自身消耗了[Charge]层数，则使自身与除自身以外[Charge]层数最低的2名友方单位获得(自身的[Charge]强度+2)层[ChargeForceField](最多8层，每回合最多2次)\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得2层充能 ",
-            "[OnSucceedAttack] 使自身获得2层充能 \n[OnSucceedAttack] 下回合对目标施加1层束缚 \n[OnSucceedAttack] 若本技能使用时消耗了充能 层数，则下回合对目标施加2层束缚 "
+            "[OnSucceedAttack] 使自身获得2层[Charge]",
+            "[OnSucceedAttack] 使自身获得2层[Charge]\n[OnSucceedAttack] 下回合对目标施加1层[Binding]\n[OnSucceedAttack] 若本技能使用时消耗了[Charge]层数，则下回合对目标施加2层[Binding]"
           ]
         }
       ]
@@ -61,21 +61,21 @@
         {},
         {},
         {
-          "desc": "[StartBattle] 根据自身带有的充能 强度，使自身与(最大共鸣数)名带有充能 的友方单位获得相应层数的载荷 \n(最多5名其他友方单位)\n[WhenUse] 若自身的充能 强度不低于2级，且自身的充能 层数在7~14层之间，则消耗自身所有充能 层数并使本技能的硬币威力+1\n[WhenUse] 消耗15层充能 并使本技能的硬币威力+1",
+          "desc": "[StartBattle] 根据自身带有的[Charge]强度，使自身与(最大共鸣数)名带有[Charge]的友方单位获得相应层数的载荷 \n(最多5名其他友方单位)\n[WhenUse] 若自身的[Charge]强度不低于2级，且自身的[Charge]层数在7~14层之间，则消耗自身所有[Charge]层数并使本技能的硬币威力+1\n[WhenUse] 消耗15层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 若本技能使用时消耗了15层充能 ，则使目标增加2级破裂 强度\n[OnSucceedAttack] 使自身获得(5-自身的充能 强度)层充能 (最少0层)"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 若本技能使用时消耗了15层[Charge]，则使目标增加2级[Burst]强度\n[OnSucceedAttack] 使自身获得(5-自身的[Charge]强度)层[Charge](最少0层)"
           ]
         },
         {
-          "desc": "[StartBattle] 根据自身带有的充能 强度，使自身与(最大共鸣数)名带有充能 的友方单位获得相应层数的载荷 \n(最多5名其他友方单位)\n[WhenUse] 若自身的充能 强度不低于2级，且自身的充能 层数在7~14层之间，则消耗自身所有充能 层数并使本技能的硬币威力+2\n[WhenUse] 消耗15层充能 并使本技能的硬币威力+2",
+          "desc": "[StartBattle] 根据自身带有的[Charge]强度，使自身与(最大共鸣数)名带有[Charge]的友方单位获得相应层数的载荷 \n(最多5名其他友方单位)\n[WhenUse] 若自身的[Charge]强度不低于2级，且自身的[Charge]层数在7~14层之间，则消耗自身所有[Charge]层数并使本技能的硬币威力+2\n[WhenUse] 消耗15层[Charge]并使本技能的硬币威力+2",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 若本技能使用时消耗了15层充能 ，则使目标增加2级破裂 强度\n[OnSucceedAttack] 使自身获得(5-自身的充能 强度)层充能 (最少0层)"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 若本技能使用时消耗了15层[Charge]，则使目标增加2级[Burst]强度\n[OnSucceedAttack] 使自身获得(5-自身的[Charge]强度)层[Charge](最少0层)"
           ]
         }
       ]
@@ -84,7 +84,7 @@
       "name": "等离子场展开",
       "descs": [
         {
-          "desc": "[WhenUse] 自身每带有2层充能 ，使本技能的基础威力+1(最多+5)\n[WhenUse] 使自身获得2层充能 (每回合最多2次)",
+          "desc": "[WhenUse] 自身每带有2层[Charge]，使本技能的基础威力+1(最多+5)\n[WhenUse] 使自身获得2层[Charge](每回合最多2次)",
           "coinDescs": [
             ""
           ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 自身每带有1层充能 ，使本技能的基础威力+1(最多+10)\n[WhenUse] 使自身获得2层充能 (每回合最多3次)",
+          "desc": "[WhenUse] 自身每带有1层[Charge]，使本技能的基础威力+1(最多+10)\n[WhenUse] 使自身获得2层[Charge](每回合最多3次)",
           "coinDescs": [
             ""
           ]
@@ -103,11 +103,11 @@
   "passives": {
     "1111001": {
       "name": "过度充能/清扫指示",
-      "desc": "本场战斗中，每当自身累计消耗10层充能 时，使自身增加1级充能 强度\n回合结束时，下回合按编队倒序使包括自身在内(自身的充能 强度)名属于W公司员工的友方单位获得1层拼点威力提升 (最多5名)"
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n回合结束时，下回合按编队倒序使包括自身在内(自身的[Charge]强度)名属于W公司员工的友方单位获得1层[ParryingResultUp](最多5名)"
     },
     "1111021": {
       "name": "折射",
-      "desc": "使回合开始时充能 层数最高的1名友方单位消耗不低于7层充能 的技能造成的伤害+10%(每回合最多1次)"
+      "desc": "使回合开始时[Charge]层数最高的1名友方单位消耗不低于7层[Charge]的技能造成的伤害+10%(每回合最多1次)"
     }
   }
 }

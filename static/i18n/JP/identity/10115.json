@@ -1,0 +1,175 @@
+{
+  "name": "蜘蛛の巣\n人差し指の親方",
+  "skills": {
+    "1011501": {
+      "name": "凍りついた血を三百三十巻きつけて",
+      "descs": [
+        {
+          "desc": "(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で打撃武器が出現\n- 打撃武器のコインダメージ量 +10%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +15%\n[WhenUse] ([UnlockBuff_Base]段階 - 1)だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]回数が1増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath]2を得る\n[UnBrokenCoinOnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {
+          "desc": "(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で打撃武器が出現\n- 打撃武器のコインダメージ量 +10%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +15%\n自分の[Breath]と対象の[Sinking]の合計が6以上なら、コイン威力 +1\n[WhenUse] ([UnlockBuff_Base]段階 - 1)だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath]2を得る\n[UnBrokenCoinOnSucceedAttack] [Sinking]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で打撃武器が出現\n- 打撃武器のコインダメージ量 +15%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、マッチ威力 +1, ダメージ量 +20%\n自分の[Breath]と対象の[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] ([UnlockBuff_Base]段階 - 1)だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]回数が2増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath]2を得る\n[UnBrokenCoinOnSucceedAttack] [Sinking]2を付与"
+          ]
+        }
+      ]
+    },
+    "1011502": {
+      "name": "音のしない手を拍き愉しみ、声を出さず憂く貫き",
+      "descs": [
+        {
+          "desc": "(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で貫通武器が出現\n- 貫通武器のコインダメージ量 +10%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、マッチ威力 +1\n[WhenUse] [UnlockBuff_Base]段階だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加\n[UnBrokenCoinOnSucceedAttack] [Sinking]回数が1増加"
+          ]
+        },
+        {
+          "desc": "(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で貫通武器が出現\n- 貫通武器のコインダメージ量 +10%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、マッチ威力 +1\n自分の[Breath]と対象の[Sinking]の合計が6以上なら、コイン威力 +1\n[WhenUse] [UnlockBuff_Base]段階だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[OnSucceedAttack] 自分の[Breath]回数が1増加\n[UnBrokenCoinOnSucceedAttack] [Sinking]回数が1増加"
+          ]
+        },
+        {},
+        {
+          "desc": "(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で貫通武器が出現\n- 貫通武器のコインダメージ量 +15%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、最終威力 +1\n自分の[Breath]と対象の[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] [UnlockBuff_Base]段階だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] [Breath]3を得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Sinking]3を付与",
+            "[OnSucceedAttack] 自分の[Breath]回数が2増加\n[UnBrokenCoinOnSucceedAttack] [Sinking]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1011503": {
+      "name": "刃を立て刀を笑いたまえ、落葉の匂のように滝を泣きたまえ",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "ターン開始時、[StackYisangSpecialSkill]が9なら、「Furioso-Replica」に変更される (1ターンにつき1回)\n- 最左端スロットの下のスキルが優先して変更される\n- [BeforeUse] [StackYisangSpecialSkill]が9未満なら、スキル3として発動\n(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で斬撃武器が出現\n- 斬撃武器のコインダメージ量 +12.5%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +10%\n自分の[Breath]と対象の[Sinking]の合計が6以上なら、コイン威力 +1\n[WhenUse] [UnlockBuff_Base]段階だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]回数が3増加",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath]2を得る",
+            "[OnSucceedAttack] [Sinking]2を付与",
+            "[UnlockBuff_Base]段階1につき、ダメージ量 +10%(最大30%)\n[CriticalOnSucceedAttack] 自分の[Breath]回数が1増加\n[UnBrokenCoinOnSucceedAttack] [Sinking]回数が2増加"
+          ]
+        },
+        {
+          "desc": "ターン開始時、[StackYisangSpecialSkill]が9なら、「Furioso-Replica」に変更される (1ターンにつき1回)\n- 最左端スロットの下のスキルが優先して変更される\n- [BeforeUse] [StackYisangSpecialSkill]が9未満なら、スキル3として発動\n(75 - [KarmaOfIndexAlly] ÷ 2)%の確率で斬撃武器が出現\n- 斬撃武器のコインダメージ量 +25%\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +20%\n自分の[Breath]と対象の[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] ([UnlockBuff_Base]段階 + 1)だけ、最終コインから[SuperCoin]に変更される\n[WhenUse] 自分の[Breath]回数が3増加\n- [UnlockBuff_Base]段階だけ、[Breath]を追加で得る",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] [Breath]3を得る",
+            "[OnSucceedAttack] [Sinking]3を付与",
+            "[UnlockBuff_Base]段階1につき、ダメージ量 +20%(最大60%)\n[CriticalOnSucceedAttack] 自分の[Breath]回数が1増加\n[UnBrokenCoinOnSucceedAttack] [Sinking]回数が3増加"
+          ]
+        }
+      ]
+    },
+    "1011504": {
+      "name": "予測できぬ気まぐれで",
+      "descs": [
+        {
+          "desc": "[StartBattle] 自分の[Breath]回数が2増加 (1ターンにつき1回)\n[OnSucceedEvade] [Breath]1を得る (1ターンにつき2回)\n[EndBattle] [UnlockBuffAlly_2]未満なら、下記の効果が発動 (戦闘ごとに1回)\n- [UnlockBuffAlly_2]を得る\n- 6未満の[BlessingOfIndexPrescriptAlly]が6に変更される\n- 増加した[BlessingOfIndexPrescriptAlly]1につき、次のターン開始時に[KarmaOfIndexAlly]5を得る",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[UnlockBuffAlly_3]なら、コイン威力 +2\n[StartBattle] 自分の[Breath]回数が2増加 (1ターンにつき1回)\n[OnSucceedEvade] [Breath]2を得る (1ターンにつき2回)\n[EndBattle] [UnlockBuffAlly_2]未満なら、下記の効果が発動 (戦闘ごとに1回)\n- [UnlockBuffAlly_2]を得る\n- 6未満の[BlessingOfIndexPrescriptAlly]が6に変更される\n- 増加した[BlessingOfIndexPrescriptAlly]1につき、次のターン開始時に[KarmaOfIndexAlly]5を得る",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1011505": {
+      "name": "Furioso-Replica",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\n操作スロットに1つだけ配置可能\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +10%\nコイン威力が変わらない代わり、コイン威力が最終的に増加するとき数値1につき最終威力 +5 (このスキルは[Paralysis]の影響を受けない)\n自分の[Breath]とメインターゲットの[Sinking]の合計が6以上なら、最終威力 +1\n[StartBattle]\n- 全コインが[SuperCoin]に変更される\n- このスキルが的中するたびに[Sinking]1を付与または[Breath]1を得る\n- このターンの間、[StackYisangSpecialSkill]を獲得しない\n[WhenUse]\n- マッチ威力 +3\n- [Breath]3を得る、自分の[Breath]回数が3増加\n[EndSkill]\n- 的中した全対象へ次のターンに[Combustion]5, [Binding]3, [Vulnerable]3を付与\n- [StackYisangSpecialSkill]を全て消耗",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "このコインの武器は鎌に確定\n[UnBrokenCoinOnSucceedAttack] 沈潜 回数が3増加"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\n操作スロットに1つだけ配置可能\nこのスキルに[IndexPrescriptTargetMarkToEnemy]が刻まれているなら、ダメージ量 +10%\nコイン威力が変わらない代わり、コイン威力が最終的に増加するとき数値1につき最終威力 +5, ダメージ量 +25% (このスキルは[Paralysis]の影響を受けない)\n自分の[Breath]とメインターゲットの[Sinking]の合計6につき、最終威力 +1 (最大2)\n[StartBattle]\n- 全コインが[SuperCoin]に変更される\n- このスキルが的中するたびに[Sinking]1を付与または[Breath]1を得る\n- このターンの間、[StackYisangSpecialSkill]を獲得しない\n[WhenUse]\n- マッチ威力 +3\n- [Breath]3を得る、自分の[Breath]回数が3増加\n[EndSkill]\n- 的中した全対象へ次のターンに[Combustion]5, [Binding]3, [Vulnerable]3を付与\n- [StackYisangSpecialSkill]を全て消耗",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "このコインの武器は鎌に確定\nクリティカルダメージ量 +90%\n[UnBrokenCoinOnSucceedAttack] 沈潜 回数が3増加"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011502": {
+      "name": "端末機で伝達された指令",
+      "desc": "ターン開始時、\n- 自分の[UnlockBuff_Base]段階によって[IndexPrescriptYi_0] / [IndexPrescriptYi_1] / [IndexPrescriptYi_2] / [IndexPrescriptYi_3]を得る\n- ランダムな敵1名へ[IndexPrescriptTargetToEnemy]を付与 (集中戦闘なら部位に付与)\n- 操作スロットにある自分の基本攻撃スキルに[IndexPrescriptTargetMarkToEnemy]を付与 (スロットごとに1つ、最大2つ付与)\n· [UnlockBuffAlly_2]以上なら、スキル3に優先して付与 (強化されたスキル優先)\n- 混乱・行動不能[TabExplain]・パニック・E.G.O侵蝕状態なら、上記の全効果と[IndexPrescript_Base_2nd]遂行成否が適用されない"
+    },
+    "1011503": {
+      "name": "神託代行者 / 解禁",
+      "desc": "[UnlockBuffAlly_2]未満のとき、このターンに[IndexPrescript_Base_2nd]を遂行したなら、\nターン終了時に精神力を4回復、[BlessingOfIndexPrescriptAlly]1を得る (1ターンにつき1回)\n- [IndexPrescript_Base_2nd]を遂行時、メインターゲットに[IndexPrescriptTargetToEnemy]があるなら、\n代わりに精神力を8回復、[BlessingOfIndexPrescriptAlly]3を得る\n\n[UnlockBuffAlly_2]のとき、このターンに[IndexPrescriptYi_2]を遂行したなら\nターン終了時に精神力を4回復 (1ターンにつき1回)\n- [IndexPrescript_Base_2nd]遂行時、[StackYisangSpecialSkill]が9になったなら\n代わりに精神力を8回復、[BlessingOfIndexPrescriptAlly]3を得る\n\nこのターンに[IndexPrescript_Base_2nd]を遂行できなかったなら、\nターン終了時に[KarmaOfIndexAlly]5を得る\n- [UnlockBuffAlly_3]なら、[KarmaOfIndexAlly]を獲得しない\n- 戦闘開始時に[IndexPrescript_Base_2nd]の遂行を試みたが、戦闘中に対象をターゲティングできなくなった場合には、ターン終了時に[KarmaOfIndexAlly]を獲得しない ([UnlockBuffAlly_2]未満のときに適用)\n\nターン終了時、[BlessingOfIndexPrescriptAlly]が3/6/9なら、[UnlockBuffAlly_1] / [UnlockBuffAlly_2] / [UnlockBuffAlly_3]を得る\nターン開始時、[UnlockBuffAlly_3]なら[Shin_IndexFingerYisang]を得る"
+    },
+    "1011504": {
+      "name": "人差し指の親方",
+      "desc": "ステージに初めて登場したとき、[BurningWoundYisangMask]を得る\n- この効果を保有しているときにこの戦闘にて最初に混乱したなら、\nターン終了時に混乱(強制混乱を除く)を解除して\n[BurningWoundYisangMask]が[BurningWoundYisang]に変更される\n\n人差し指代行者 - 開花E.G.O::代行 ドンキホーテが自分と一緒に戦場にいるなら、ドンキホーテに[SatisfyingEsteemNeeds]を付与"
+    },
+    "1011505": {
+      "name": "神託端末機 [カドゥケウス]",
+      "desc": "基本攻撃スキルのコインごとに武器がランダムに決まり、特殊効果が適用される\n- [YisangWeapon01Hatchet]\n- [YisangWeapon02Stiletto]\n- [YisangWeapon03Greatsword]\n- [YisangWeapon04Rapier]\n- [YisangWeapon05Sledgehammer]\n- [YisangWeapon06Ultragreatsword]\n- [YisangWeapon07Lance]\n- [YisangWeapon08Chain]\n- [YisangWeapon09Scythe]\n\n[IndexPrescriptTargetMarkToEnemy]スキル使用時、[StackYisangSpecialSkill]1を得る"
+    },
+    "1011506": {
+      "name": "神託端末機 [カドゥケウス]",
+      "desc": "基本攻撃スキルのコインごとに武器がランダムに決まり、特殊効果が適用される\n- [YisangWeapon01Hatchet]\n- [YisangWeapon02Stiletto]\n- [YisangWeapon03Greatsword]\n- [YisangWeapon04Rapier]\n- [YisangWeapon05Sledgehammer]\n- [YisangWeapon06Ultragreatsword]\n- [YisangWeapon07Lance]\n- [YisangWeapon08Chain]\n- [YisangWeapon09Scythe]\n\n[IndexPrescriptTargetMarkToEnemy]スキル使用時、[StackYisangSpecialSkill]1を得る\n\nこの戦闘にて、「Furioso-Replica」を初めて使用したなら\n当該ターン終了時に[BurningWoundYisangMask]が[BurningWoundYisang]に変更される\n\nターン開始時に[BurningWoundYisang]を保有しているとき、\n操作スロットに「Furioso-Replica」があるなら[BlackNightmareYisang]を得る"
+    },
+    "1011501": {
+      "name": "模造された生",
+      "desc": "自分の[BlessingOfIndexPrescriptAlly]1につき、[IndexPrescriptTargetMarkToEnemy]スキルのダメージ量 +2% (最大16%)\n- [BlessingOfIndexPrescriptAlly]が9なら、代わりに基本スキルのダメージ量 +20%\n\n基本攻撃スキルの[SuperCoin]が的中時、[StackYisangSpecialSkill]1を得る\n- 攻撃終了時、残った[SuperCoin]の数だけ[StackYisangSpecialSkill]を得る"
+    },
+    "1011511": {
+      "name": "模造された生",
+      "desc": "自分の[BlessingOfIndexPrescriptAlly]1につき、[IndexPrescriptTargetMarkToEnemy]スキルのダメージ量 +2% (最大16%)\n- [BlessingOfIndexPrescriptAlly]が9なら、代わりに基本スキルのダメージ量 +20%\n\n基本攻撃スキルの[SuperCoin]が的中時、[StackYisangSpecialSkill]1を得る\n- 攻撃終了時、残った[SuperCoin]の数だけ[StackYisangSpecialSkill]を得る\n- 「Furioso-Replica」の攻撃終了時、当該スキルの(残り[SuperCoin]数 ÷ 2)だけ次のターンに[StackYisangSpecialSkill]を得る (小数点切り捨て)\n\nターン終了時、このターンに[StackYisangSpecialSkill]が増加して9になったとき、\n次のターン開始時に操作スロットにスキル3がないなら、基本スキル1つをスキル3に変更 (最左端スロットの下のスキルを優先)"
+    },
+    "1011521": {
+      "name": "神の加護",
+      "desc": "このターンに味方が敵に初めて使用した斬撃・貫通・打撃基本攻撃スキルのダメージ量がそれぞれ +5%\n- 効果が適用されたスキルが人差し指所属人格のスキルなら、代わりに +10%\n- 攻撃開始前を基準に適用される"
+    }
+  }
+}

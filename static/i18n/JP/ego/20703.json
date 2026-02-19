@@ -29,19 +29,19 @@
             "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 1.5)%分の憂鬱属性追加ダメージを与える(最大30%)\n[OnSucceedAttackTail] 攻撃終了時、体力を最大値の10%消耗して自分の[Charge] 回数を7増加"
           ]
         },
-        {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大7)\n次のターンに[Agility] 2を得る",
-          "coinDescs": [
-            "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 2.5)%分の憂鬱属性追加ダメージを与える(最大50%)\n[EndSkill] [Charge] 回数を全て消耗\n[EndSkillTail] 体力を最大値の10%消耗し、自分の[Charge] 回数を10増加"
-          ]
-        },
+        {},
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大7)\n次のターンに[Agility] 2を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 2.5)%分の憂鬱属性追加ダメージを与える(最大50%)\n[OnSucceedAttackTail] 攻撃終了時、体力を最大値の10%消耗して自分の[Charge] 回数を10増加"
           ]
         },
-        {}
+        {
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] 自分の失った体力10%につき、[Charge] 回数を1増加(最大7)\n次のターンに[Agility] 2を得る",
+          "coinDescs": [
+            "[OnSucceedAttack] [Charge] 回数を全て消耗し、ダメージ量の(消耗した[Charge] 回数 × 2.5)%分の憂鬱属性追加ダメージを与える(最大50%)\n[EndSkill] [Charge] 回数を全て消耗\n[EndSkillTail] 体力を最大値の10%消耗し、自分の[Charge] 回数を10増加"
+          ]
+        }
       ]
     }
   },

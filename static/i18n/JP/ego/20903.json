@@ -20,7 +20,7 @@
         {
           "desc": "対象の体力が50%以上なら、ダメージ量 +30%",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] を5付与\n[OnSucceedAttack] [Sinking] 回数を5付与"
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] を5付与\n[OnSucceedAttack] [Sinking] 回数が5増加"
           ]
         }
       ]
@@ -44,7 +44,7 @@
         {
           "desc": "[CantIdentify]\n体力が最も多い対象を攻撃\n対象の体力が50%以上なら、ダメージ量 +30%",
           "coinDescs": [
-            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] を10付与\n[OnSucceedAttack] [Sinking] 回数を8付与"
+            "[OnSucceedAttack] [VibrationExplosion]\n[OnSucceedAttack] [Sinking] を10付与\n[OnSucceedAttack] [Sinking] 回数が8増加"
           ]
         }
       ]

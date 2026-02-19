@@ -108,7 +108,7 @@
   "passives": {
     "1021402": {
       "name": "紙片で伝達された指令",
-      "desc": "ターン開始時\n- 自分の[BlessingOfIndexPrescriptAlly]数値によって[IndexPrescriptFaust_0] / [IndexPrescriptFaust_1] / [IndexPrescriptFaust_2] /[IndexPrescriptFaust_3]を得る\n- ランダムな敵1名へ[IndexPrescriptTargetToEnemy]を付与 (集中戦闘なら部位に付与)\n- 操作スロットにある自分の基本攻撃スキルに[IndexPrescriptTargetMarkToEnemy]を付与 (スロットごとに1つ、最大2つ付与)\n· [BlessingOfIndexPrescriptAlly]が6以上なら、スキル3に優先して付与\n- 混乱・行動不能[TabExplain]・パニック・E.G.O侵蝕状態なら、上記の全効果と[IndexPrescript_Base]遂行成否が適用されない"
+      "desc": "ターン開始時\n- 自分の[BlessingOfIndexPrescriptAlly]数値によって[IndexPrescriptFaust_0] / [IndexPrescriptFaust_1] / [IndexPrescriptFaust_2] / [IndexPrescriptFaust_3]を得る\n- ランダムな敵1名へ[IndexPrescriptTargetToEnemy]を付与 (集中戦闘なら部位に付与)\n- 操作スロットにある自分の基本攻撃スキルに[IndexPrescriptTargetMarkToEnemy]を付与 (スロットごとに1つ、最大2つ付与)\n· [BlessingOfIndexPrescriptAlly]が6以上なら、スキル3に優先して付与\n- 混乱・行動不能[TabExplain]・パニック・E.G.O侵蝕状態なら、上記の全効果と[IndexPrescript_Base]遂行成否が適用されない"
     },
     "1021403": {
       "name": "指令の意味",

@@ -332,6 +332,33 @@
       "SLASH"
     ]
   },
+  "10115": {
+    "updateDate": 20260219,
+    "skillKeywordList": [
+      "Breath",
+      "Combustion",
+      "Sinking"
+    ],
+    "season": 7,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "FINGER",
+      "TRUST_AGENT",
+      "INDEX_FINGER",
+      "SPIDER_HOUSE"
+    ],
+    "attributeType": [
+      "SHAMROCK",
+      "INDIGO",
+      "AZURE"
+    ],
+    "atkType": [
+      "HIT",
+      "PENETRATE",
+      "SLASH"
+    ]
+  },
   "10201": {
     "updateDate": 20230227,
     "skillKeywordList": [],

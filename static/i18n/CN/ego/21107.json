@@ -5,22 +5,22 @@
       "name": "次元撕裂者",
       "descs": [
         {
-          "desc": "[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的充能 层数低于10层，则消耗体力上限15%的体力并获得10层充能 (该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层充能 ，每消耗1层充能 ，使本技能造成的伤害+1%(最多+10%)",
+          "desc": "[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的[Charge]层数低于10层，则消耗体力上限15%的体力并获得10层[Charge](该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+1%(最多+10%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加(自身的充能 强度-1)层次元裂痕 (最多1层)\n[OnSucceedAttack] 自身每带有1级充能 强度，下回合使自身获得1层迅捷 与1层载荷 (每个技能最多1层)\n[EnemyKill] 使自身获得2层充能 "
+            "[OnSucceedAttack] 对目标施加(自身的[Charge]强度-1)层次元裂痕 (最多1层)\n[OnSucceedAttack] 自身每带有1级[Charge]强度，下回合使自身获得1层[Agility]与1层载荷 (每个技能最多1层)\n[EnemyKill] 使自身获得2层[Charge]"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] 若最大共鸣数不低于3，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的充能 层数低于10层，则消耗体力上限15%的体力并获得10层充能 (该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层充能 ，每消耗1层充能 ，使本技能造成的伤害+1%(最多+20%)",
+          "desc": "[BeforeAttack] 若最大共鸣数不低于3，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的[Charge]层数低于10层，则消耗体力上限15%的体力并获得10层[Charge](该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+1%(最多+20%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加(自身的充能 强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级充能 强度，下回合使自身获得1层迅捷 与1层载荷 (每个技能最多2层)\n[EnemyKill] 使自身获得2层充能 "
+            "[OnSucceedAttack] 对目标施加(自身的[Charge]强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级[Charge]强度，下回合使自身获得1层[Agility]与1层载荷 (每个技能最多2层)\n[EnemyKill] 使自身获得2层[Charge]"
           ]
         },
         {
-          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 若自身的充能 层数低于10层，则消耗体力上限10%的体力并获得10层充能 (该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层充能 ，每消耗1层充能 ，使本技能造成的伤害+1%(最多+30%)",
+          "desc": "[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 若自身的[Charge]层数低于10层，则消耗体力上限10%的体力并获得10层[Charge](该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+1%(最多+30%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加(自身的充能 强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级充能 强度，下回合使自身获得1层迅捷 与1层载荷 (每个技能最多3层)\n[EnemyKill] 使自身获得2层充能 "
+            "[OnSucceedAttack] 对目标施加(自身的[Charge]强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级[Charge]强度，下回合使自身获得1层[Agility]与1层载荷 (每个技能最多3层)\n[EnemyKill] 使自身获得2层[Charge]"
           ]
         }
       ]
@@ -29,22 +29,22 @@
       "name": "次元撕裂者",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的充能 层数低于最大充能 层数，则消耗体力上限(相差的充能 层数×1.5)%的体力并使自身获得至最大充能 层数(本效果最大充能 层数获取量：30。该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层充能 ，每消耗1层充能 ，使本技能造成的伤害+2%(最多+20%)",
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的[Charge]层数低于最大[Charge]层数，则消耗体力上限(相差的[Charge]层数×1.5)%的体力并使自身获得至最大[Charge]层数(本效果最大[Charge]层数获取量：30。该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+2%(最多+20%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加(自身的充能 强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级充能 强度，下回合使自身获得1层迅捷 与1层载荷 (每个技能最多2层)\n[EnemyKill] 使自身获得2层充能 "
+            "[OnSucceedAttack] 对目标施加(自身的[Charge]强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级[Charge]强度，下回合使自身获得1层[Agility]与1层载荷 (每个技能最多2层)\n[EnemyKill] 使自身获得2层[Charge]"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的充能 层数低于最大充能 层数，则消耗体力上限(相差的充能 层数×1.2)%的体力并使自身获得至最大充能 层数(本效果最大充能 层数获取量：30。该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层充能 ，每消耗1层充能 ，使本技能造成的伤害+2%(最多+40%)",
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 若最大共鸣数不低于4，则使本技能的攻击容量+1\n[BeforeAttack] 若自身的[Charge]层数低于最大[Charge]层数，则消耗体力上限(相差的[Charge]层数×1.2)%的体力并使自身获得至最大[Charge]层数(本效果最大[Charge]层数获取量：30。该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+2%(最多+40%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加(自身的充能 强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级充能 强度，下回合使自身获得1层迅捷 与1层载荷 (每个技能最多2层)\n[EnemyKill] 使自身获得2层充能 "
+            "[OnSucceedAttack] 对目标施加(自身的[Charge]强度-1)层次元裂痕 (最多2层)\n[OnSucceedAttack] 自身每带有1级[Charge]强度，下回合使自身获得1层[Agility]与1层载荷 (每个技能最多2层)\n[EnemyKill] 使自身获得2层[Charge]"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 若自身的充能 层数低于最大充能 层数，则消耗体力上限(相差的充能 层数)%的体力并使自身获得至最大充能 层数(本效果最大充能 层数获取量：30。该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层充能 ，每消耗1层充能 ，使本技能造成的伤害+2%(最多+60%)",
+          "desc": "[CantIdentify]\n随机指定目标\n[BeforeAttack] 使本技能的攻击容量+(最大共鸣数-2)(最多+2)\n[BeforeAttack] 若自身的[Charge]层数低于最大[Charge]层数，则消耗体力上限(相差的[Charge]层数)%的体力并使自身获得至最大[Charge]层数(本效果最大[Charge]层数获取量：30。该伤害不会使自身体力降至0点，向下取整)\n[BeforeAttack] 消耗至多40层[Charge]，每消耗1层[Charge]，使本技能造成的伤害+2%(最多+60%)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加(自身的充能 强度-1)层次元裂痕 (最多4层)\n[OnSucceedAttack] 自身每带有1级充能 强度，下回合使自身获得1层迅捷 与1层载荷 (每个技能最多3层)\n[EnemyKill] 使自身获得2层充能 "
+            "[OnSucceedAttack] 对目标施加(自身的[Charge]强度-1)层次元裂痕 (最多4层)\n[OnSucceedAttack] 自身每带有1级[Charge]强度，下回合使自身获得1层[Agility]与1层载荷 (每个技能最多3层)\n[EnemyKill] 使自身获得2层[Charge]"
           ]
         }
       ]

@@ -12,7 +12,7 @@
           ]
         },
         {
-          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が3増加\n[WhenUse] 自分の[Vibration] 回数が2増加",
+          "desc": "このスキルが捨てられると、自分の[Vibration] 回数が4増加\n[WhenUse] 自分の[Vibration] 回数が2増加",
           "coinDescs": [
             "",
             "[OnSucceedAttack] [Vibration] 回数が2増加"

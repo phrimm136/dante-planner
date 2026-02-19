@@ -1,0 +1,233 @@
+{
+  "updatedDate": 20260219,
+  "skillKeywordList": [
+    "Breath",
+    "Combustion",
+    "Sinking"
+  ],
+  "panicType": 9999,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 66,
+    "incrementByLevel": 3.03
+  },
+  "defCorrection": 2,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    6,
+    7,
+    8,
+    8
+  ],
+  "season": 7,
+  "unitKeywordList": [
+    "SMALL",
+    "FINGER",
+    "TRUST_AGENT",
+    "INDEX_FINGER",
+    "SPIDER_HOUSE"
+  ],
+  "staggerList": [
+    65
+  ],
+  "ResistInfo": {
+    "SLASH": 0.5,
+    "PENETRATE": 2,
+    "HIT": 1
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyMp10",
+      "OnKillEnemyByOtherAlly5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1011501,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "SHAMROCK",
+            "atkType": "HIT",
+            "targetNum": 1,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3,
+            "coinString": "CC"
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1011502,
+        "skillTier": 2,
+        "skillData": [
+          {
+            "attributeType": "INDIGO",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 3,
+            "coinString": "CCC"
+          },
+          {},
+          {
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1011503,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "CCCC"
+          },
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "SLASH",
+            "targetNum": 1,
+            "specialDuelIndex": 0,
+            "skillLevelCorrection": 4,
+            "defaultValue": 3,
+            "scale": 3
+          },
+          {
+            "defaultValue": 4,
+            "scale": 3
+          }
+        ]
+      },
+      {
+        "id": 1011505,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "CCCCCCCCC"
+          },
+          {},
+          {
+            "attributeType": "CRIMSON",
+            "atkType": "SLASH",
+            "targetNum": 7,
+            "specialDuelIndex": 5,
+            "skillLevelCorrection": 5,
+            "defaultValue": 2,
+            "scale": 3
+          },
+          {
+            "defaultValue": 3,
+            "scale": 3
+          }
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1011504,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "skillLevelCorrection": 2,
+            "defaultValue": 4,
+            "scale": 10,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "iconID": "1011504_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1011502,
+        1011503,
+        1011504,
+        1011505
+      ],
+      [
+        1011502,
+        1011503,
+        1011504,
+        1011505,
+        1011501
+      ],
+      [
+        1011502,
+        1011503,
+        1011504,
+        1011506,
+        1011511
+      ],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1011521
+      ],
+      []
+    ],
+    "conditions": {
+      "1011501": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 1,
+          "AZURE": 1,
+          "INDIGO": 1
+        }
+      },
+      "1011511": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 1,
+          "AZURE": 1,
+          "INDIGO": 1
+        }
+      },
+      "1011521": {
+        "type": "STOCK",
+        "values": {
+          "SHAMROCK": 1,
+          "AZURE": 1,
+          "INDIGO": 1
+        }
+      }
+    }
+  }
+}

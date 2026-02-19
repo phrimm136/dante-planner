@@ -5,7 +5,7 @@
       "name": "凶弾",
       "descs": [
         {
-          "desc": "体力が最も低い味方を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
+          "desc": "体力が最も低い対象を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
           "coinDescs": [
             "このコインはメインターゲットにのみダメージを与える。\nメインターゲットが味方なら、[BoseProjektil]1につきダメージ量 +8%(最大56%)\n[AllyKill] 自分とランダムな味方2名へ[Breath]2を付与\n[AllyKillFail] [Breath]1を得る",
             "このコインはサブターゲットにのみダメージを与える。\n- 最初のコインで味方を倒せなかった場合、サブターゲットのうちランダムな1名がダメージを受ける\n[BoseProjektil]1につき、クリティカルダメージ量 +2%(最大14%)\n[CriticalOnSucceedAttack] [Laceration]2を付与"
@@ -13,14 +13,14 @@
         },
         {},
         {
-          "desc": "体力が最も低い味方を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
+          "desc": "体力が最も低い対象を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
           "coinDescs": [
             "このコインはメインターゲットにのみダメージを与える。\nメインターゲットが味方なら、[BoseProjektil]1につきダメージ量 +10%(最大70%)\n[AllyKill] 自分とランダムな味方2名へ[Breath]3を付与\n[AllyKill] 倒した味方のスキル1属性のE.G.O資源 +1\n[AllyKillFail] [Breath]3を得る",
             "このコインはサブターゲットにのみダメージを与える。\n- 最初のコインで味方を倒せなかった場合、サブターゲットのうちランダムな1名がダメージを受ける\n[BoseProjektil]1につき、クリティカルダメージ量 +5%(最大35%)\n[CriticalOnSucceedAttack] [Laceration]2を付与"
           ]
         },
         {
-          "desc": "体力が最も低い味方を優先して攻撃(味方優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n- 該当共鳴が傲慢共鳴なら、この効果の代わりに(最大共鳴数 × 2)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
+          "desc": "体力が最も低い対象を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n- 該当共鳴が傲慢共鳴なら、この効果の代わりに(最大共鳴数 × 2)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
           "coinDescs": [
             "このコインはメインターゲットにのみダメージを与える。\nメインターゲットが味方なら、[BoseProjektil]1につきダメージ量 +15%(最大105%)\n[AllyKill] 自分とランダムな味方2名へ[Breath]3を付与\n[AllyKill] 倒した味方のスキル1,2属性のE.G.O資源 +1\n[AllyKillFail] [Breath]3を得る",
             "このコインはサブターゲットにのみダメージを与える。\n- 最初のコインで味方を倒せなかった場合、サブターゲットのうちランダムな1名がダメージを受ける\n[BoseProjektil]1につき、クリティカルダメージ量 +9%(最大63%)\n[CriticalOnSucceedAttack] [Laceration]3を付与"
@@ -32,7 +32,7 @@
       "name": "凶弾",
       "descs": [
         {
-          "desc": "[CantIdentify]\n体力が最も低い味方を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につきダメージ量 +2%(最大14%)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
+          "desc": "[CantIdentify]\n体力が最も低い対象を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につきダメージ量 +2%(最大14%)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
           "coinDescs": [
             "このコインはメインターゲットにのみダメージを与える。\nメインターゲットが味方なら、[BoseProjektil]1につきダメージ量 +10%(最大70%)\nメインターゲットが味方なら、自分の[Breath]1につきダメージ量 +2%(最大50%)\n[AllyKill] 自分とランダムな味方3名へ[Breath]2を付与\n[AllyKill] [BoseProjektil]1につき次のコインのダメージ量 +2%(最大14%)\n[AllyKill] 倒した味方のスキル1, 2属性のE.G.O資源 +1\n[AllyKillFail] [Breath]1を得る",
             "このコインはサブターゲットにのみダメージを与える。\n- 最初のコインで味方を倒せなかった場合、サブターゲットのうちランダムな1名がダメージを受ける\n[BoseProjektil]1につき、クリティカルダメージ量 +2%(最大14%)\n[CriticalOnSucceedAttack] [Laceration]3を付与"
@@ -40,14 +40,14 @@
         },
         {},
         {
-          "desc": "[CantIdentify]\n体力が最も低い味方を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につきダメージ量 +3%(最大21%)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
+          "desc": "[CantIdentify]\n体力が最も低い対象を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につきダメージ量 +3%(最大21%)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
           "coinDescs": [
             "このコインはメインターゲットにのみダメージを与える。\nメインターゲットが味方なら、[BoseProjektil]1につきダメージ量 +12%(最大84%)\nメインターゲットが味方なら、自分の[Breath]1につきダメージ量 +2%(最大50%)\n[AllyKill] 自分とランダムな味方3名へ[Breath]3を付与\n[AllyKill] [BoseProjektil]1につき次のコインのダメージ量 +5%(最大35%)\n[AllyKill] 倒した味方のスキル1,2,3属性のE.G.O資源 +1\n[AllyKillFail] [Breath]2を得る",
             "このコインはサブターゲットにのみダメージを与える。\n- 最初のコインで味方を倒せなかった場合、サブターゲットのうちランダムな1名がダメージを受ける\n[BoseProjektil]1につき、クリティカルダメージ量 +3%(最大21%)\n[CriticalOnSucceedAttack] [Laceration]4を付与"
           ]
         },
         {
-          "desc": "[CantIdentify]\n体力が最も低い味方を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n- 該当共鳴が傲慢共鳴なら、この効果の代わりに(最大共鳴数 × 2)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につきダメージ量 +4%(最大28%)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
+          "desc": "[CantIdentify]\n体力が最も低い対象を優先して攻撃(味方を優先指定)\n[BeforeAttack] (最大共鳴数 +1)だけ[BoseProjektil]を得る(最大7)\n- 該当共鳴が傲慢共鳴なら、この効果の代わりに(最大共鳴数 × 2)だけ[BoseProjektil]を得る(最大7)\n[BeforeAttack] [BoseProjektil]1につきダメージ量 +4%(最大28%)\n[BeforeAttack] [BoseProjektil]1につき[Breath]を1得る(最大7)\n[EndSkill] [BoseProjektil]を全て消耗",
           "coinDescs": [
             "このコインはメインターゲットにのみダメージを与える。\nメインターゲットが味方なら、[BoseProjektil]1につきダメージ量 +15%(最大105%)\nメインターゲットが味方なら、自分の[Breath]1につきダメージ量 +2%(最大50%)\nクリティカルダメージ量 +30%\n[AllyKill] 自分とランダムな味方3名へ[Breath]4を付与\n[AllyKill] [BoseProjektil]1につき次のコインのダメージ量 +7%(最大49%)\n[AllyKill] 倒した味方のスキル1,2,3属性のE.G.O資源 +1\n[AllyKillFail] [Breath]3を得る",
             "このコインはサブターゲットにのみダメージを与える。\n- 最初のコインで味方を倒せなかった場合、サブターゲットのうちランダムな1名がダメージを受ける\n[BoseProjektil]1につき、クリティカルダメージ量 +4%(最大28%)\n[CriticalOnSucceedAttack] [Laceration]5を付与"

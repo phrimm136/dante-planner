@@ -58,7 +58,7 @@
             "",
             "",
             "",
-            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于6级，则使本硬币造成的伤害+20%"
+            "[OnSucceedAttack] 若目标的[Laceration]强度不低于6级，则使本硬币造成的伤害+20%"
           ]
         },
         {
@@ -67,7 +67,7 @@
             "[OnSucceedAttackHead]  使目标增加1级[Laceration] 强度",
             "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
             "[OnSucceedAttackHead] 使目标增加1级[Laceration] 强度",
-            "[OnSucceedAttack] 若目标的[Laceration] 强度不低于6级，则使本硬币造成的伤害+20%"
+            "[OnSucceedAttack] 若目标的[Laceration]强度不低于6级，则使本硬币造成的伤害+20%"
           ]
         }
       ]

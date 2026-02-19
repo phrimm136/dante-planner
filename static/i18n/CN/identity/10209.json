@@ -8,22 +8,22 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 使目标增加2级沉沦 强度"
+            "[OnSucceedAttackHead] 使目标增加2级[Sinking]强度"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 若目标的沉沦 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "[WhenUse] 若目标的[Sinking]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加2级沉沦 强度"
+            "[OnSucceedAttack] 使目标增加2级[Sinking]强度"
           ]
         }
       ]
@@ -35,14 +35,14 @@
           "desc": "",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 对目标施加2层沉沦 "
+            "[OnSucceedAttackHead] 对目标施加2层[Sinking]"
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的沉沦 强度不低于5级，则使本技能的拼点威力+1",
+          "desc": "[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的拼点威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加2层沉沦 "
+            "[OnSucceedAttack] 对目标施加2层[Sinking]"
           ]
         },
         {},
@@ -50,7 +50,7 @@
           "desc": "[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的拼点威力+1\n[WhenUse] 若目标的[Sinking]层数不低于3层，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 对目标施加3层沉沦 "
+            "[OnSucceedAttack] 对目标施加3层[Sinking]"
           ]
         }
       ]
@@ -63,19 +63,19 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层沉沦 ",
+            "[OnSucceedAttack] 对目标施加3层[Sinking]",
             "",
             "",
-            "[OnSucceedAttack] 下回合对目标施加2层[EchoOfMansion]\n[OnSucceedAttack] 若目标带有[EchoOfMansion]，则对其施加3层沉沦 "
+            "[OnSucceedAttack] 下回合对目标施加2层[EchoOfMansion]\n[OnSucceedAttack] 若目标带有[EchoOfMansion]，则对其施加3层[Sinking]"
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的沉沦 层数不低于5层，则使本技能的硬币威力+2",
+          "desc": "[WhenUse] 若目标的[Sinking]层数不低于5层，则使本技能的硬币威力+2",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加3层沉沦 ",
+            "[OnSucceedAttack] 对目标施加3层[Sinking]",
             "",
             "",
-            "[OnSucceedAttack] 下回合对目标施加2层[EchoOfMansion]\n[OnSucceedAttack] 若目标带有[EchoOfMansion]，则对其施加3层沉沦 "
+            "[OnSucceedAttack] 下回合对目标施加2层[EchoOfMansion]\n[OnSucceedAttack] 若目标带有[EchoOfMansion]，则对其施加3层[Sinking]"
           ]
         }
       ]
@@ -84,7 +84,7 @@
       "name": "预备狩猎",
       "descs": [
         {
-          "desc": "[WhenUse] 若目标的沉沦 强度不低于10级，则使本技能的硬币威力+3",
+          "desc": "[WhenUse] 若目标的[Sinking]强度不低于10级，则使本技能的硬币威力+3",
           "coinDescs": [
             ""
           ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 若目标的沉沦 强度不低于10级，则使本技能的硬币威力+7",
+          "desc": "[WhenUse] 若目标的[Sinking]强度不低于10级，则使本技能的硬币威力+7",
           "coinDescs": [
             ""
           ]
@@ -103,19 +103,19 @@
   "passives": {
     "1020901": {
       "name": "管家式应对",
-      "desc": "- 拼点胜利时，使目标增加1级沉沦 强度(每回合最多3次)"
+      "desc": "- 拼点胜利时，使目标增加1级[Sinking]强度(每回合最多3次)"
     },
     "1020911": {
       "name": "管家式应对",
-      "desc": "- 拼点胜利时，使目标增加1级沉沦 强度(每回合最多3次)\n- 若目标带有[EchoOfMansion]，则改为增加3级沉沦 强度"
+      "desc": "- 拼点胜利时，使目标增加1级[Sinking]强度(每回合最多3次)\n- 若目标带有[EchoOfMansion]，则改为增加3级[Sinking]强度"
     },
     "1020921": {
       "name": "以备那日的训练",
-      "desc": "理智值最低的1名友方单位攻击命中沉沦 强度不低于5级的目标时，使该友方单位恢复2点理智值(每回合最多4次)"
+      "desc": "理智值最低的1名友方单位攻击命中[Sinking]强度不低于5级的目标时，使该友方单位恢复2点理智值(每回合最多4次)"
     },
     "1020931": {
       "name": "以备那日的训练",
-      "desc": "理智值最低的1名友方单位攻击命中沉沦 强度不低于5级的目标时，使该友方单位恢复3点理智值(每回合最多4次)"
+      "desc": "理智值最低的1名友方单位攻击命中[Sinking]强度不低于5级的目标时，使该友方单位恢复3点理智值(每回合最多4次)"
     }
   }
 }

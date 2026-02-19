@@ -103,7 +103,7 @@
       "name": "君主の道を拓こうぞ",
       "descs": [
         {
-          "desc": "[WhenUse] 黒獣筆頭人格と連携したなら、基本威力 +1, コイン威力 +1\n\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +5%\n[EndSkill] [HeishouCombo]を発動した黒獣人格1名につき[HeishouComboCountHonglu]を1得る",
+          "desc": "[WhenUse] 黒獣筆頭人格と連携したなら、基本威力 +1, コイン威力 +1\n\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計が6以上なら、コイン威力 +1\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +5%\n[EndSkill] [HeishouCombo]を発動した黒獣人格に応じて[HeishouComboCountHonglu]を1得る",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]回数が1増加",
             "[OnSucceedAttack] [Burst]2を付与\n[EnemyKill] 味方の黒獣人格のうち精神力が最も低い対象2名の精神力を10回復し、次のターンに[Enhancement]1を付与"
@@ -112,7 +112,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 黒獣筆頭人格と連携したなら、基本威力 +1, コイン威力 +1\n\n対象と自分の失った体力の合計1%につき、ダメージ量 +1% (最大50%)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計6につき、コイン威力 +1 (最大3)\n[WhenUse] 対象のマイナス効果2種につき、ダメージ量 +10% (最大30%)\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +10%\n[EndSkill] [HeishouCombo]を発動した黒獣人格1名につき[HeishouComboCountHonglu]を1得る",
+          "desc": "[WhenUse] 黒獣筆頭人格と連携したなら、基本威力 +1, コイン威力 +1\n\n対象と自分の失った体力の合計1%につき、ダメージ量 +1% (最大50%)\n[WhenUse] 対象の[Burst]と自分の[Breath]の合計6につき、コイン威力 +1 (最大3)\n[WhenUse] 対象のマイナス効果2種につき、ダメージ量 +10% (最大30%)\n[WhenUse] [HeishouComboCountHonglu]1につき、ダメージ量 +10%\n[EndSkill] [HeishouCombo]を発動した黒獣人格に応じて[HeishouComboCountHonglu]を1得る",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]回数が1増加",
             "クリティカルダメージ量 +50%\n[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] 次のターンに[SlashResistDown]1を付与(1ターンにつき1回)\n[EnemyKill] 味方の黒獣人格のうち精神力が最も低い対象2名の精神力を10回復し、次のターンに[Enhancement]1を付与"

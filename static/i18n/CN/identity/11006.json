@@ -13,14 +13,14 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttackHead] 若目标的[Burst] 强度不低于5级，则使自身获得1层[Talisman] "
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttackHead] 若目标的[Burst]强度不低于5级，则使自身获得1层[Talisman] "
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst] 强度不低于5级，则使自身获得1层[Talisman] "
+            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n[OnSucceedAttack] 若目标的[Burst]强度不低于5级，则使自身获得1层[Talisman] "
           ]
         }
       ]
@@ -41,16 +41,16 @@
           "coinDescs": [
             "[OnSucceedAttack] 使自身获得1层[Talisman] ",
             "[OnSucceedAttack] 使自身获得1层[Talisman] ",
-            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标的[Burst] 强度不低于3级，则使自身获得1层[Talisman] "
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标的[Burst]强度不低于3级，则使自身获得1层[Talisman] "
           ]
         },
         {},
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst] ，则使自身获得1层[Talisman] ",
-            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst] ，则使自身获得1层[Talisman] ",
-            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst] ，则使自身获得1层[Talisman] "
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst]，则使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst]，则使自身获得1层[Talisman] ",
+            "[OnSucceedAttack] 使自身获得1层[Talisman] \n[OnSucceedAttack] 若目标带有[Burst]，则使自身获得1层[Talisman] "
           ]
         }
       ]
@@ -94,7 +94,7 @@
   "passives": {
     "1100601": {
       "name": "符咒剥离",
-      "desc": "攻击命中时，若目标带有[Burst] ，则使自身获得1层[Talisman] "
+      "desc": "攻击命中时，若目标带有[Burst]，则使自身获得1层[Talisman] "
     },
     "1100621": {
       "name": "祈愿符",

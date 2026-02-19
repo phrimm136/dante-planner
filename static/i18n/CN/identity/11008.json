@@ -5,25 +5,25 @@
       "name": "延续进攻",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttackHead] 下回合使自身获得1层[Agility] ",
-            "[OnSucceedAttackHead] 下回合使自身获得1层[Agility] "
+            "[OnSucceedAttackHead] 下回合使自身获得1层[Agility]",
+            "[OnSucceedAttackHead] 下回合使自身获得1层[Agility]"
           ]
         },
         {
-          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合使自身获得1层[Agility] ",
-            "[OnSucceedAttack] 下回合使自身获得1层[Agility] "
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]",
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]"
           ]
         },
         {},
         {
           "desc": "若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 下回合使自身获得1层[Agility] ",
-            "[OnSucceedAttack] 下回合使自身获得1层[Agility] "
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]",
+            "[OnSucceedAttack] 下回合使自身获得1层[Agility]"
           ]
         }
       ]
@@ -32,27 +32,27 @@
       "name": "交战",
       "descs": [
         {
-          "desc": "[WinDuel] 使自身获得2层[Breath] ",
+          "desc": "[WinDuel] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使自身获得1层[Breath] ",
-            "[OnSucceedAttackHead] 使自身获得1层[Breath] ",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath]",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath]",
             ""
           ]
         },
         {
           "desc": "若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WinDuel] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身获得1层[Breath]",
+            "[OnSucceedAttack] 使自身获得1层[Breath]",
             ""
           ]
         },
         {},
         {
-          "desc": "若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WinDuel] 使自身获得2层[Breath] ",
+          "desc": "若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WinDuel] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
+            "[OnSucceedAttack] 使自身获得1层[Breath]",
+            "[OnSucceedAttack] 使自身获得1层[Breath]",
             ""
           ]
         }
@@ -72,7 +72,7 @@
           ]
         },
         {
-          "desc": "若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+3)\n[WinDuel] 消耗10层[Breath] ，使自身增加(消耗的[Breath] 层数)级[Breath] 强度。若目标带有[DuelDeclaration_Sinclair] ，则改为增加(消耗的[Breath] 层数×2)级[Breath] 强度\n[WinDuel] 若自身指向在目标行动槽中的攻击技能时触发了[OneOnOneDuel] ，则使本技能命中时对目标施加1层[Vulnerable] (每回合最多2层)",
+          "desc": "若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+3)\n[WinDuel] 消耗10层[Breath]，使自身增加(消耗的[Breath]层数)级[Breath]强度。若目标带有[DuelDeclaration_Sinclair] ，则改为增加(消耗的[Breath]层数×2)级[Breath]强度\n[WinDuel] 若自身指向在目标行动槽中的攻击技能时触发了[OneOnOneDuel] ，则使本技能命中时对目标施加1层[Vulnerable](每回合最多2层)",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加[DuelDeclaration_Sinclair] ",
             "",
@@ -104,7 +104,7 @@
   "passives": {
     "1100801": {
       "name": "沉睡的杀气",
-      "desc": "回合结束时，自身每带有5层[Breath] ，在下回合使自身最大速度值+2(最多+6)"
+      "desc": "回合结束时，自身每带有5层[Breath]，在下回合使自身最大速度值+2(最多+6)"
     },
     "1100811": {
       "name": "沉睡的杀气",
@@ -112,7 +112,7 @@
     },
     "1100821": {
       "name": "太慢了",
-      "desc": "速度值最高的1名友方单位闪避成功时，下回合使其获得1层[Agility] (最多5层)"
+      "desc": "速度值最高的1名友方单位闪避成功时，下回合使其获得1层[Agility](最多5层)"
     }
   }
 }

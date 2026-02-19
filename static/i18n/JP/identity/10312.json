@@ -165,7 +165,7 @@
           ]
         },
         {
-          "desc": "このスキルによるサブターゲットへの与ダメージ量 -50%\n\n[WhenUse] [HystericGauge]を全て消耗し、消耗した数値1につきマッチ威力 +1 (最大3)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5ずつ消耗し、マッチ威力 +1 (最大4)\n自分の[ThePowerOfLoveAndHate]1につき、ダメージ量 +30% (最大150%)\n[BeforeAttack] 自分の[ArcanaQueenOfHate]を全て消耗し、消耗した数値に1につき攻撃加重値 +1 (最大3)\n- このスキルで消耗した[HystericGauge]が3なら、攻撃加重値 +1\n[BeforeAttack] 攻撃対象が1名(集中戦闘の場合は部位で判定)のとき、(攻撃加重値 - 1)だけダメージ量が増加 (数値1につき20%, 最大80%)\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -6 (最大 -18)\n[EndBattle] 精神力が -45ではなく精神力が0未満なら、精神力が10回復。精神力が0より低いほど回復量が増加 (差1につき2回復、最大50)\n[WhenUse] 精神力が10減少",
+          "desc": "このスキルによるサブターゲットへの与ダメージ量 -50%\n\n[WhenUse] [HystericGauge]を全て消耗し、消耗した数値1につきマッチ威力 +1 (最大3)\n[WhenUse] 自分の[ThePowerOfLoveAndHate]の回数を5ずつ消耗し、マッチ威力 +1 (最大4)\n自分の[ThePowerOfLoveAndHate]1につき、ダメージ量 +30% (最大150%)\n[BeforeAttack] 自分の[ArcanaQueenOfHate]を全て消耗し、消耗した数値1につき攻撃加重値 +1 (最大3)\n- このスキルで消耗した[HystericGauge]が3なら、攻撃加重値 +1\n[BeforeAttack] 攻撃対象が1名(集中戦闘の場合は部位で判定)のとき、(攻撃加重値 - 1)だけダメージ量が増加 (数値1につき20%, 最大80%)\n[BeforeAttack] 破壊されたコイン数1枚につき基本威力 -6 (最大 -18)\n[EndBattle] 精神力が -45ではなく精神力が0未満なら、精神力が10回復。精神力が0より低いほど回復量が増加 (差1につき2回復、最大50)\n[WhenUse] 精神力が10減少",
           "coinDescs": [
             "[SuperCoin]",
             "[SuperCoin]\n[UnBrokenCoinOnSucceedAttack] [Sinking]2を付与",

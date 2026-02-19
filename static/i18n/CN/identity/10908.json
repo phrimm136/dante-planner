@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 强度不低于3级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于3级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         },
         {},
         {
-          "desc": "目标每带有3级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有3级[Combustion]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         }
       ]
@@ -34,26 +34,26 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
-            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
-            "[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使未带有[Combustion] 或[Combustion] 层数最低的2名敌方单位增加3级[Combustion] 强度"
+            "[OnSucceedAttack] 对目标施加1层[Combustion]",
+            "[OnSucceedAttack] 对目标施加1层[Combustion]",
+            "[OnSucceedAttack] 若目标的[Combustion]层数不低于6层，则使未带有[Combustion]或[Combustion]层数最低的2名敌方单位增加3级[Combustion]强度"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
-            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
-            "[OnSucceedAttackHead] 对目标施加1层[Combustion] \n[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使未带有[Combustion] 或[Combustion] 层数最低的2名敌方单位增加3级[Combustion] 强度"
+            "[OnSucceedAttack] 对目标施加1层[Combustion]",
+            "[OnSucceedAttack] 对目标施加1层[Combustion]",
+            "[OnSucceedAttackHead] 对目标施加1层[Combustion]\n[OnSucceedAttack] 若目标的[Combustion]层数不低于6层，则使未带有[Combustion]或[Combustion]层数最低的2名敌方单位增加3级[Combustion]强度"
           ]
         },
         {},
         {
-          "desc": "目标每带有6级[Combustion] 强度，使本技能的硬币威力+1(最多+2)",
+          "desc": "目标每带有6级[Combustion]强度，使本技能的硬币威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
-            "[OnSucceedAttack] 对目标施加1层[Combustion] ",
-            "[OnSucceedAttackHead] 对目标施加1层[Combustion] \n[OnSucceedAttack] 若目标的[Combustion] 层数不低于6层，则使未带有[Combustion] 或[Combustion] 层数最低的2名敌方单位增加3级[Combustion] 强度"
+            "[OnSucceedAttack] 对目标施加1层[Combustion]",
+            "[OnSucceedAttack] 对目标施加1层[Combustion]",
+            "[OnSucceedAttackHead] 对目标施加1层[Combustion]\n[OnSucceedAttack] 若目标的[Combustion]层数不低于6层，则使未带有[Combustion]或[Combustion]层数最低的2名敌方单位增加3级[Combustion]强度"
           ]
         }
       ]
@@ -64,21 +64,21 @@
         {},
         {},
         {
-          "desc": "若目标的[Combustion] 强度与[Combustion] 层数均不低于6，则使本技能造成的伤害+30%",
+          "desc": "若目标的[Combustion]强度与[Combustion]层数均不低于6，则使本技能造成的伤害+30%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 对目标造成相当于其[Combustion] 强度一半的暴怒伤害(最多20点)，并使其[Combustion] 层数减少2层"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 对目标造成相当于其[Combustion]强度一半的暴怒伤害(最多20点)，并使其[Combustion]层数减少2层"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1\n若目标的[Combustion] 强度与[Combustion] 层数均不低于6，则使本技能造成的伤害+30%",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1\n若目标的[Combustion]强度与[Combustion]层数均不低于6，则使本技能造成的伤害+30%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 对目标造成相当于其[Combustion] 强度的暴怒伤害(最多30点)，并使其[Combustion] 层数减少2层"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 对目标造成相当于其[Combustion]强度的暴怒伤害(最多30点)，并使其[Combustion]层数减少2层"
           ]
         }
       ]
@@ -89,7 +89,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         },
         {},
@@ -97,7 +97,7 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         }
       ]
@@ -106,15 +106,15 @@
   "passives": {
     "1090801": {
       "name": "炽热激情",
-      "desc": "目标每带有6级[Combustion] 强度，使自身造成的伤害+5%(最多+15%)\n战斗开始时，若全体敌方单位的[Combustion] 强度均不低于6级，则按编队顺序使(最大暴怒完全共鸣数)名友方单位获得1层[CrimsonDamageUp] \n- 若是集中遭遇战，则改为所有部位"
+      "desc": "目标每带有6级[Combustion]强度，使自身造成的伤害+5%(最多+15%)\n战斗开始时，若全体敌方单位的[Combustion]强度均不低于6级，则按编队顺序使(最大暴怒完全共鸣数)名友方单位获得1层[CrimsonDamageUp]\n- 若是集中遭遇战，则改为所有部位"
     },
     "1090811": {
       "name": "炽热激情",
-      "desc": "目标每带有6级[Combustion] 强度，使自身造成的伤害+10%(最多+30%)\n战斗开始时，若全体敌方单位的[Combustion] 强度均不低于6级，则按编队顺序使(最大暴怒完全共鸣数)名友方单位获得1层[CrimsonDamageUp] \n- 若是集中遭遇战，则改为所有部位\n- 若该友方单位属于六协会收尾人，则使其获得1层[Enhancement] "
+      "desc": "目标每带有6级[Combustion]强度，使自身造成的伤害+10%(最多+30%)\n战斗开始时，若全体敌方单位的[Combustion]强度均不低于6级，则按编队顺序使(最大暴怒完全共鸣数)名友方单位获得1层[CrimsonDamageUp]\n- 若是集中遭遇战，则改为所有部位\n- 若该友方单位属于六协会收尾人，则使其获得1层[Enhancement] "
     },
     "1090821": {
       "name": "热烈鼓舞",
-      "desc": "理智值最低的1名友方单位攻击命中时，目标每带有6级[Combustion] 强度，使该友方单位造成的突刺伤害+5%(最多+15%)"
+      "desc": "理智值最低的1名友方单位攻击命中时，目标每带有6级[Combustion]强度，使该友方单位造成的突刺伤害+5%(最多+15%)"
     }
   }
 }

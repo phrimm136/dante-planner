@@ -5,20 +5,20 @@
       "name": "後悔",
       "descs": [
         {
-          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち1つを除去",
+          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち1つをランダムに除去",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が2増加、(憤怒完全共鳴数)÷3だけ追加で増加\n[OnSucceedAttack] [VibrationExplosion]"
           ]
         },
         {},
         {
-          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち1つを除去",
+          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち1つをランダムに除去",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が2増加、(憤怒完全共鳴数)÷3だけ追加で増加\n[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、対象に混乱区間がない場合は\n最終混乱区間前進値の(6 + 2×(憤怒完全共鳴数))%だけ憤怒ダメージを与える。"
           ]
         },
         {
-          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち2つを除去",
+          "desc": "[BeforeAttack] 自分に付与された解除可能なマイナス効果のうち2つをランダムに除去",
           "coinDescs": [
             "[OnSucceedAttack] [Vibration] 回数が3増加、(憤怒完全共鳴数)÷3だけ追加で増加\n[OnSucceedAttack] [VibrationExplosion]\n振動爆発時、対象に混乱区間がない場合は\n最終混乱区間前進値の(12 + 3×(憤怒完全共鳴数))%だけ憤怒ダメージを与える。"
           ]

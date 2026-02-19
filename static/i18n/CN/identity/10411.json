@@ -5,25 +5,25 @@
       "name": "瞬步",
       "descs": [
         {
-          "desc": "[WhenUse] 若目标的破裂 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 对目标施加1层破裂 "
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]"
           ]
         },
         {
-          "desc": "[WhenUse] 若目标的破裂 强度不低于4级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层破裂 ",
+          "desc": "[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 对目标施加1层破裂 \n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
           ]
         },
         {},
         {
           "desc": "若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "[OnSucceedAttack] 对目标施加1层破裂 \n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
           ]
         }
       ]
@@ -34,14 +34,14 @@
         {
           "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n[WhenUse] 若目标的[Burst]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
             "若自身的速度值不低于10，则使本硬币造成的伤害+10%"
           ]
         },
         {
           "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则对目标施加1层破裂 ",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则对目标施加1层[Burst]",
             "若自身的速度值不低于10，则使本硬币造成的伤害+20%"
           ]
         },
@@ -49,8 +49,8 @@
         {
           "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标至少3点，则使本技能的硬币威力+1\n[WhenUse] 若目标的[Burst]强度不低于4级，则使本技能的硬币威力+1\n[WhenUse] 下回合使自身获得2层[Agility](每回合最多1次)\n[WinDuel] 对目标施加1层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级破裂 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则对目标施加1层破裂 ",
-            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加1级破裂 强度"
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则对目标施加1层[Burst]",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加1级[Burst]强度"
           ]
         }
       ]
@@ -63,17 +63,17 @@
         {
           "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标至少2点，则使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[LegStrength]\n[WinDuel] 对目标施加2层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层破裂 \n[OnSucceedAttack] 对目标施加[BurstAgility]",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级破裂 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)"
           ]
         },
         {
           "desc": "若自身的速度值高于目标，则使本技能造成的伤害+(速度值之差×目标的[Burst]强度)%(最多+50%)\n若自身的速度值高于目标，则每相差2点，使本技能的硬币威力+1(最多+2)\n[WhenUse] 若目标的[Burst]强度不低于15级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得3层[LegStrength]\n[WinDuel] 对目标施加2层[Burst]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层破裂 \n[OnSucceedAttack] 对目标施加[BurstAgility]",
-            "[OnSucceedAttack] 使目标增加1级破裂 强度",
-            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级破裂 强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)\n[ReUseOnSucceedAttack] 对目标施加[BurstAgility]"
+            "[OnSucceedAttack] 对目标施加1层[Burst]\n[OnSucceedAttack] 对目标施加[BurstAgility]",
+            "[OnSucceedAttack] 使目标增加1级[Burst]强度",
+            "若自身的速度值不低于10，则使本硬币造成的伤害+30%\n[OnSucceedAttack] 使目标增加3级[Burst]强度\n[OnSucceedAttack] 若自身的速度值不低于10，则重复使用本硬币1次(每个技能最多1次)\n[ReUseOnSucceedAttack] 对目标施加[BurstAgility]"
           ]
         }
       ]
@@ -84,7 +84,7 @@
         {
           "desc": "[DuelCounter]\n[WhenUse] 使自身获得3层[LegStrength]",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层破裂 "
+            "[OnSucceedAttack] 对目标施加1层[Burst]"
           ]
         },
         {},
@@ -92,7 +92,7 @@
         {
           "desc": "[DuelCounter]\n[WhenUse] 使自身获得3层[LegStrength]\n[WhenUse] 若自身的速度值高于目标，则每相差2点，使本技能的基础威力+1(最多+2)",
           "coinDescs": [
-            "[OnSucceedAttack] 对目标施加1层破裂 "
+            "[OnSucceedAttack] 对目标施加1层[Burst]"
           ]
         }
       ]
@@ -109,7 +109,7 @@
     },
     "1041121": {
       "name": "部分黑兽化修炼",
-      "desc": "回合结束时，使速度值最高的1名友方单位下回合获得2层迅捷 "
+      "desc": "回合结束时，使速度值最高的1名友方单位下回合获得2层[Agility]"
     }
   }
 }

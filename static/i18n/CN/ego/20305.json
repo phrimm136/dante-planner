@@ -53,7 +53,7 @@
   "passives": {
     "2030511": {
       "name": "倒塌的石塔",
-      "desc": "击杀带有[Laceration] 的敌方单位时，使自身增加2级[Breath] 强度并使自身获得2层[Breath] (每回合最多3次)"
+      "desc": "击杀带有[Laceration]的敌方单位时，使自身增加2级[Breath] 强度并使自身获得2层[Breath] (每回合最多3次)"
     }
   }
 }

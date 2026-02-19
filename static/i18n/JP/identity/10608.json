@@ -18,9 +18,9 @@
         },
         {},
         {
-          "desc": "[WhenUse] 自分の全スキルスロットから、ランクが最も高いスキル1つを[Discard]\n[WhenUse] ([KnowledgeExplored] - 1)以上だけ、マッチ威力が増加",
+          "desc": "[WhenUse] 自分の全スキルスロットから、ランクが最も高いスキル1つを[Discard]\n[WhenUse] ([KnowledgeExplored] - 1)だけ、マッチ威力が増加",
           "coinDescs": [
-            "[OnSucceedAttackHead] [Sinking]回数が1増加\n[WhenUse] ([KnowledgeExplored] - 1)以上だけ、コイン再使用"
+            "[OnSucceedAttackHead] [Sinking]回数が1増加\n[OnSucceedAttack] ([KnowledgeExplored] - 1)以上だけ、コイン再使用"
           ]
         }
       ]

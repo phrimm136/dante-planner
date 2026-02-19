@@ -12,14 +12,14 @@
           ]
         },
         {
-          "desc": "[StartBattle] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "desc": "[StartBattle] 自分を除いた剣契組織員(最大完全共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]1を得る",
             "[OnSucceedAttack] [Breath]1を得る"
           ]
         },
         {
-          "desc": "[StartBattle_Force] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "desc": "[StartBattle_Force] 自分を除いた剣契組織員(最大完全共鳴数)名へ速度が低い順に[BladeResultUpTier1]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]1を得る",
             "[OnSucceedAttack] [Breath]1を得る"
@@ -46,7 +46,7 @@
           ]
         },
         {
-          "desc": "[StartBattle] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
+          "desc": "[StartBattle] 自分を除いた剣契組織員(最大完全共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]3を得る",
             "",
@@ -54,7 +54,7 @@
           ]
         },
         {
-          "desc": "[StartBattle_Force] 自分を除いた剣契組織員(最大共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
+          "desc": "[StartBattle_Force] 自分を除いた剣契組織員(最大完全共鳴数)名へ速度が低い順に[BladeResultUpTier2]1を付与(最大2回)\n[WhenUse] 自分の[Breath]回数が2増加\n[WinDuel] 次のターンに[SlashResultUp] 1を得る",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]3を得る",
             "",
@@ -94,7 +94,7 @@
       "name": "殺主",
       "descs": [
         {
-          "desc": "[WhenUse] 次のターンに斬撃増加 1を得る(最大1回)",
+          "desc": "[WhenUse] 次のターンに[SlashResultUp] 1を得る(最大1回)",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]2を得る"
           ]

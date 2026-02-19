@@ -5,20 +5,20 @@
       "name": "阻截入侵者",
       "descs": [
         {
-          "desc": "若目标的[Burst] 强度不低于5级，则硬币威力 +1",
+          "desc": "若目标的[Burst]强度不低于5级，则硬币威力 +1",
           "coinDescs": [
             ""
           ]
         },
         {
-          "desc": "若目标的[Burst] 强度不低于5级，则硬币威力 +2",
+          "desc": "若目标的[Burst]强度不低于5级，则硬币威力 +2",
           "coinDescs": [
             ""
           ]
         },
         {},
         {
-          "desc": "若目标的[Burst] 强度不低于5级，则硬币威力 +3\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5",
+          "desc": "若目标的[Burst]强度不低于5级，则硬币威力 +3\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5",
           "coinDescs": [
             ""
           ]
@@ -31,23 +31,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n若目标的[Burst] 强度不低于10级，则使自身恢复本硬币伤害量20%的体力",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n若目标的[Burst] 强度不低于10级，则使自身恢复本硬币伤害量20%的体力"
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n若目标的[Burst]强度不低于10级，则使自身恢复本硬币伤害量20%的体力",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n若目标的[Burst]强度不低于10级，则使自身恢复本硬币伤害量20%的体力"
           ]
         },
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n若目标的[Burst] 强度不低于10级，则使自身恢复本硬币伤害量50%的体力",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n若目标的[Burst] 强度不低于10级，则使自身恢复本硬币伤害量50%的体力"
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n若目标的[Burst]强度不低于10级，则使自身恢复本硬币伤害量50%的体力",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n若目标的[Burst]强度不低于10级，则使自身恢复本硬币伤害量50%的体力"
           ]
         },
         {},
         {
           "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +5",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n若目标的[Burst] 强度不低于10级，则使自身恢复本硬币伤害量50%的体力",
-            "[OnSucceedAttack] 使目标增加2级[Burst] 强度\n若目标的[Burst] 强度不低于10级，则使自身恢复本硬币伤害量50%的体力"
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n若目标的[Burst]强度不低于10级，则使自身恢复本硬币伤害量50%的体力",
+            "[OnSucceedAttack] 使目标增加2级[Burst]强度\n若目标的[Burst]强度不低于10级，则使自身恢复本硬币伤害量50%的体力"
           ]
         }
       ]

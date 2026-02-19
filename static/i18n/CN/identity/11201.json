@@ -52,8 +52,8 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 若目标带有[Burst] ，则使本硬币造成的伤害+10%",
-            "[OnSucceedAttack] 若目标带有[Burst] ，则使本硬币造成的伤害+10%\n[OnSucceedAttackHead] 使自身恢复本硬币伤害量30%的体力"
+            "[OnSucceedAttack] 若目标带有[Burst]，则使本硬币造成的伤害+10%",
+            "[OnSucceedAttack] 若目标带有[Burst]，则使本硬币造成的伤害+10%\n[OnSucceedAttackHead] 使自身恢复本硬币伤害量30%的体力"
           ]
         },
         {}

@@ -12,13 +12,13 @@
         },
         {},
         {
-          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +2\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大15%)\n- [CuredFilm]があるなら、この効果の最大値が1.5倍に増加\n[EndSkill] [CuredFilm]7を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の20%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を10回復",
+          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +2\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大15%)\n- [CuredFilm]があるなら、この効果と最大値が1.5倍に増加\n[EndSkill] [CuredFilm]7を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の20%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を10回復",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]2を付与\n[OnSucceedAttack] [Combustion]2を付与"
           ]
         },
         {
-          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +3\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大25%)\n- [CuredFilm]があるなら、この効果の最大値が2倍に増加\n[EndSkill] [CuredFilm]10を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の30%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を15回復",
+          "desc": "メインターゲットに[Combustion]または[Burst]があるなら、最終威力 +3\n[BeforeAttack] メインターゲットの[Burst]威力と[Burst]回数の合計1につき、ダメージ量 +1% (最大25%)\n- [CuredFilm]があるなら、この効果と最大値が2倍に増加\n[EndSkill] [CuredFilm]10を得る\n[EndSkill] 自分と、現在の体力の比率が最も低い味方1名の体力を、自分の最大体力の30%だけ回復\n- 自分の体力が最大なら、代わりに味方2名の体力を回復\n[EndSkill] 自分を含めて、現在の精神力が最も低い味方2名の精神力を15回復",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]3を付与\n[OnSucceedAttack] [Combustion]3を付与"
           ]

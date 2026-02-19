@@ -20,7 +20,7 @@
         {
           "desc": "[BeforeAttack] (最大色欲完全共鳴数)が4以上なら、攻撃加重値 +1\n(最大色欲完全共鳴数)が6以上なら、追加で攻撃加重値 +1",
           "coinDescs": [
-            "[OnSucceedAttack] [Combustion] 3を付与\n[OnSucceedAttack] 対象の[Combustion] 2を防御レベル1減少へ変換 (最大10)"
+            "[OnSucceedAttack] [Combustion] 3を付与\n[OnSucceedAttack] 対象の[Combustion] 2を[DefenseDown]1へ変換 (最大10)"
           ]
         }
       ]
@@ -38,13 +38,13 @@
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大色欲完全共鳴数)が4以上なら、攻撃加重値 +1",
           "coinDescs": [
-            "[OnSucceedAttackTail] 次のターンに[Binding] 2を付与\n[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttack] 対象の[Combustion] 2を防御レベル1減少へ変換 (最大10)"
+            "[OnSucceedAttackTail] 次のターンに[Binding] 2を付与\n[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttack] 対象の[Combustion] 2を[DefenseDown]1へ変換 (最大10)"
           ]
         },
         {
           "desc": "[CantIdentify]\nランダムな対象を攻撃\n[BeforeAttack] (最大色欲完全共鳴数)が4以上なら、攻撃加重値 +1\n(最大色欲完全共鳴数)が6以上なら、追加で攻撃加重値 +1",
           "coinDescs": [
-            "[OnSucceedAttackTail] 次のターンに[Binding] 2を付与\n[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttack] 対象の[Combustion] 2を防御レベル1減少へ変換 (最大10)"
+            "[OnSucceedAttackTail] 次のターンに[Binding] 2を付与\n[OnSucceedAttack] [Combustion] 4を付与\n[OnSucceedAttack] 対象の[Combustion] 2を[DefenseDown]1へ変換 (最大10)"
           ]
         }
       ]

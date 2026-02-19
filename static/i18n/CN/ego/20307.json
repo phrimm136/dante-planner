@@ -40,22 +40,22 @@
         {
           "desc": "[CantIdentify]\n随机指定目标\n使用本技能期间，自身的体力不会降至1点以下\n若目标的[Laceration]强度不低于10级，则使本技能的硬币威力-1\n[BeforeAttack] 若[BloodDinner]层数低于150层，则令本技能每次命中时使目标增加1级[Laceration]强度\n[BeforeAttack] 使自身增加20级[Laceration]强度，立即触发自身的[Laceration]1次并使自身的[Laceration]层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttack] 每有50层[BloodDinner_Common_Accumulation]，使目标增加1级流血 强度(最多10级)\n[OnSucceedAttack] 若[BloodDinner]层数不高于100层，则使目标增加10级[Laceration]强度",
+            "[OnSucceedAttack] 每有50层[BloodDinner_Common_Accumulation]，使目标增加1级[Laceration]强度(最多10级)\n[OnSucceedAttack] 若[BloodDinner]层数不高于100层，则使目标增加10级[Laceration]强度",
             "每有100层[BloodDinner_Common_Accumulation]，使本硬币造成的伤害+5%(最多+25%)\n[WinDuelAttack] 根据最大色欲完全共鸣数，相应对目标施加[ThirstyRose](最多3层)\n[WinDuelAttack] 使自身恢复本硬币造成体力伤害量50%的体力(最多10点)"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n使用本技能期间，自身的体力不会降至1点以下\n若目标的流血 强度不低于10级，则使本技能的硬币威力-1\n若自身的[BloodDinner_Accumulation]层数不低于200层，则使本技能的硬币威力-1\n[BeforeAttack] 若血宴 层数低于150层，则令本技能每次命中时使目标增加1级流血 强度\n[BeforeAttack] 使自身增加20级流血 强度，立即触发自身的流血 1次并使自身的流血 层数减少2层",
+          "desc": "[CantIdentify]\n随机指定目标\n使用本技能期间，自身的体力不会降至1点以下\n若目标的[Laceration]强度不低于10级，则使本技能的硬币威力-1\n若自身的[BloodDinner_Accumulation]层数不低于200层，则使本技能的硬币威力-1\n[BeforeAttack] 若[BloodDinner]层数低于150层，则令本技能每次命中时使目标增加1级[Laceration]强度\n[BeforeAttack] 使自身增加20级[Laceration]强度，立即触发自身的[Laceration]1次并使自身的[Laceration]层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttack] 每有50层[BloodDinner_Common_Accumulation]，使目标增加1级流血 强度(最多10级)\n[OnSucceedAttack] 若[BloodDinner]层数不高于100层，则使目标增加10级[Laceration]强度",
+            "[OnSucceedAttack] 每有50层[BloodDinner_Common_Accumulation]，使目标增加1级[Laceration]强度(最多10级)\n[OnSucceedAttack] 若[BloodDinner]层数不高于100层，则使目标增加10级[Laceration]强度",
             "每有100层[BloodDinner_Common_Accumulation]，使本硬币造成的伤害+10%(最多+50%)\n[WinDuelAttack] 根据最大色欲完全共鸣数，相应对目标施加[ThirstyRose](最多4层)\n[WinDuelAttack] 使自身恢复本硬币造成体力伤害量50%的体力(最多10点)"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n使用本技能期间，自身的体力不会降至1点以下\n若目标的流血 强度不低于10级，则使本技能的硬币威力-1\n若自身的[BloodDinner_Accumulation]层数不低于200层，则使本技能的硬币威力-1\n[BeforeAttack] 若血宴 层数低于150层，则令本技能每次命中时使目标增加1级流血 强度\n[BeforeAttack] 使自身增加20级流血 强度，立即触发自身的流血 1次并使自身的流血 层数减少2层",
+          "desc": "[CantIdentify]\n随机指定目标\n使用本技能期间，自身的体力不会降至1点以下\n若目标的[Laceration]强度不低于10级，则使本技能的硬币威力-1\n若自身的[BloodDinner_Accumulation]层数不低于200层，则使本技能的硬币威力-1\n[BeforeAttack] 若[BloodDinner]层数低于150层，则令本技能每次命中时使目标增加1级[Laceration]强度\n[BeforeAttack] 使自身增加20级[Laceration]强度，立即触发自身的[Laceration]1次并使自身的[Laceration]层数减少2层",
           "coinDescs": [
-            "[OnSucceedAttack] 每有50层[BloodDinner_Common_Accumulation]，使目标增加1级流血 强度(最多10级)\n[OnSucceedAttack] 若[BloodDinner]层数不高于100层，则使目标增加10级[Laceration]强度",
+            "[OnSucceedAttack] 每有50层[BloodDinner_Common_Accumulation]，使目标增加1级[Laceration]强度(最多10级)\n[OnSucceedAttack] 若[BloodDinner]层数不高于100层，则使目标增加10级[Laceration]强度",
             "每有100层[BloodDinner_Common_Accumulation]，使本硬币造成的伤害+20%(最多+100%)\n[WinDuelAttack] 根据最大色欲完全共鸣数，相应对目标施加[ThirstyRose](最多5层)\n[WinDuelAttack] 使自身恢复本硬币造成体力伤害量50%的体力(最多10点)"
           ]
         }
@@ -65,7 +65,7 @@
   "passives": {
     "2030711": {
       "name": "高耸的绯红之花",
-      "desc": "每造成10点流血 伤害，使自身恢复1点理智值(每回合最多10次)"
+      "desc": "每造成10点[Laceration]伤害，使自身恢复1点理智值(每回合最多10次)"
     }
   }
 }

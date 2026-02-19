@@ -5,25 +5,25 @@
       "name": "前进",
       "descs": [
         {
-          "desc": "[WhenUse] 下回合使自身获得2层[Agility] ",
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility]",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使自身获得1层[Breath] ",
-            "[OnSucceedAttackHead] 使自身获得1层[Breath] "
+            "[OnSucceedAttackHead] 使自身获得1层[Breath]",
+            "[OnSucceedAttackHead] 使自身获得1层[Breath]"
           ]
         },
         {
-          "desc": "[WhenUse] 下回合使自身获得2层[Agility] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +1",
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility]\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +1",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "[OnSucceedAttack] 使自身获得1层[Breath] "
+            "[OnSucceedAttack] 使自身获得1层[Breath]",
+            "[OnSucceedAttack] 使自身获得1层[Breath]"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] 下回合使自身获得2层[Agility] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "desc": "[WhenUse] 下回合使自身获得2层[Agility]\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得1层[Breath] ",
-            "[OnSucceedAttack] 使自身获得1层[Breath] "
+            "[OnSucceedAttack] 使自身获得1层[Breath]",
+            "[OnSucceedAttack] 使自身获得1层[Breath]"
           ]
         }
       ]
@@ -32,25 +32,25 @@
       "name": "惩罚",
       "descs": [
         {
-          "desc": "[WhenUse] 使自身获得2层[Breath] ",
+          "desc": "[WhenUse] 使自身获得2层[Breath]",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使自身增加2级[Breath] 强度",
-            "[OnSucceedAttack] 下回合对目标施加1层[Binding] "
+            "[OnSucceedAttackHead] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 下回合对目标施加1层[Binding]"
           ]
         },
         {
           "desc": "若自身的速度值高于目标，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Breath]\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +2",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 下回合对目标施加2层[Binding]"
           ]
         },
         {},
         {
           "desc": "若自身的速度值高于目标，则使本技能的硬币威力+2\n[WhenUse] 使自身获得2层[Breath]\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身增加2级[Breath] 强度",
-            "[OnSucceedAttack] 下回合对目标施加2层[Binding] "
+            "[OnSucceedAttack] 使自身增加2级[Breath]强度",
+            "[OnSucceedAttack] 下回合对目标施加2层[Binding]"
           ]
         }
       ]
@@ -61,13 +61,13 @@
         {},
         {},
         {
-          "desc": "若自身的[Breath] 强度不低于7级，则使本技能的最终威力+2\n[WinDuel] 根据拼点次数，相应使自身增加[Breath] 强度(最多10级)",
+          "desc": "若自身的[Breath]强度不低于7级，则使本技能的最终威力+2\n[WinDuel] 根据拼点次数，相应使自身增加[Breath]强度(最多10级)",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加[DuelDeclaration_Outis] \n[OnSucceedAttack] 使速度值最低的2名友方单位在下回合获得1层[Agility] \n[CriticalOnSucceedAttack] 使本硬币暴击时造成的伤害+50%"
           ]
         },
         {
-          "desc": "若自身的[Breath] 强度不低于7级，则使本技能的最终威力+4\n[WinDuel] 根据拼点次数，相应使自身增加[Breath] 强度(最多10级)",
+          "desc": "若自身的[Breath]强度不低于7级，则使本技能的最终威力+4\n[WinDuel] 根据拼点次数，相应使自身增加[Breath]强度(最多10级)",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加[DuelDeclaration_Outis] \n[OnSucceedAttack] 使速度值最低的2名友方单位在下回合获得2层[Agility] \n[CriticalOnSucceedAttack] 使本硬币暴击时造成的伤害+70%"
           ]
@@ -86,7 +86,7 @@
         {},
         {},
         {
-          "desc": "若自身的速度值高于攻击者，则每相差1点，使本技能的硬币威力+1(最多+3)\n[OnSucceedEvade] 使自身增加1级[Breath] 强度(最多10级)",
+          "desc": "若自身的速度值高于攻击者，则每相差1点，使本技能的硬币威力+1(最多+3)\n[OnSucceedEvade] 使自身增加1级[Breath]强度(最多10级)",
           "coinDescs": [
             ""
           ]
@@ -97,11 +97,11 @@
   "passives": {
     "1110601": {
       "name": "卸力",
-      "desc": "闪避成功时，下回合使自身获得1层[Agility] (最多3层)"
+      "desc": "闪避成功时，下回合使自身获得1层[Agility](最多3层)"
     },
     "1110611": {
       "name": "卸力",
-      "desc": "闪避成功时，下回合使自身获得1层[Agility] ；使自身的混乱阈值后移5(最多3次)"
+      "desc": "闪避成功时，下回合使自身获得1层[Agility]；使自身的混乱阈值后移5(最多3次)"
     },
     "1110621": {
       "name": "导师的指导",

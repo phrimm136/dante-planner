@@ -22,7 +22,7 @@
         },
         {},
         {
-          "desc": "自分の[Breath]が対象より5以上高ければ、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
+          "desc": "自分の[Breath]が5以上なら、コイン威力 +1\n[WhenUse] 自分の[Breath]回数が2増加",
           "coinDescs": [
             "",
             "[OnSucceedAttackHead] [Breath]1を得る",

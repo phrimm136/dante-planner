@@ -56,7 +56,7 @@
           "coinDescs": [
             "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Combustion]强度\n[OnSucceedAttack] 下回合对目标施加1层[Binding]",
             "[SuperCoin]\n[OnSucceedAttack] 使目标增加2级[Laceration]强度\n[CriticalOnSucceedAttack] 使本技能最后一枚硬币造成的伤害+50%(每个技能最多1次)",
-            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币造成的伤害+1%(最多+50%)\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币的最终威力+1(最多+5)\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害1.25%(最多+248%)\n- 若仅指定1名目标，则使该效果变为2倍(若是集中遭遇战，则以本体判定)"
+            "[SuperCoin]\n使本硬币暴击时造成的伤害+30%\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币造成的伤害+1%(最多+50%)\n[OnStartCoin] 全体目标的[Combustion]强度与全体目标的[Laceration]强度之和每有10级，使本硬币的最终威力+1(最多+5)\n[OnStartCoin] 消耗自身所有[RyoshuEGOPF]，每消耗5层[RyoshuEGOPF]，使本硬币造成的伤害+1.25%(最多+248%)\n- 若仅指定1名目标，则使该效果变为2倍(若是集中遭遇战，则以本体判定)"
           ]
         }
       ]

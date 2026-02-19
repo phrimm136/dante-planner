@@ -5,20 +5,20 @@
       "name": "终末火柴之光",
       "descs": [
         {
-          "desc": "若目标带有[Combustion] ，则使本技能威力+2\n[EnemyKill] 下回合使自身获得1层[Enhancement] ",
+          "desc": "若目标带有[Combustion]，则使本技能威力+2\n[EnemyKill] 下回合使自身获得1层[Enhancement] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
           ]
         },
         {},
         {
-          "desc": "若目标带有[Combustion] ，则使本技能威力+2\n[EnemyKill] 下回合使自身获得2层[Enhancement] ",
+          "desc": "若目标带有[Combustion]，则使本技能威力+2\n[EnemyKill] 下回合使自身获得2层[Enhancement] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
           ]
         },
         {
-          "desc": "若目标带有[Combustion] ，则使本技能威力+2\n目标每带有1级[Combustion] 强度，使本技能造成的伤害+5%(最多+100%)\n[EnemyKill] 下回合使自身获得2层[Enhancement] ",
+          "desc": "若目标带有[Combustion]，则使本技能威力+2\n目标每带有1级[Combustion]强度，使本技能造成的伤害+5%(最多+100%)\n[EnemyKill] 下回合使自身获得2层[Enhancement] ",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
           ]
@@ -29,20 +29,20 @@
       "name": "终末火柴之光",
       "descs": [
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Combustion] ，则使本技能威力+2\n[EnemyKill] 下回合使自身获得2层[Enhancement] \n[EnemyKillFail] 下回合使自身增加10级[Combustion] 强度",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Combustion]，则使本技能威力+2\n[EnemyKill] 下回合使自身获得2层[Enhancement] \n[EnemyKillFail] 下回合使自身增加10级[Combustion]强度",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Combustion] ，则使本技能威力+4\n[EnemyKill] 下回合使自身获得3层[Enhancement] \n[EnemyKillFail] 下回合使自身获得3层[Enhancement] 并增加10级[Combustion] 强度",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Combustion]，则使本技能威力+4\n[EnemyKill] 下回合使自身获得3层[Enhancement] \n[EnemyKillFail] 下回合使自身获得3层[Enhancement] 并增加10级[Combustion]强度",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
           ]
         },
         {
-          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Combustion] ，则使本技能威力+4\n目标每带有1级[Combustion] 强度，使本技能造成的伤害+5%(最多+100%)\n[EnemyKill] 下回合使自身获得3层[Enhancement] \n[EnemyKillFail] 下回合使自身获得3层[Enhancement] 并增加10级[Combustion] 强度",
+          "desc": "[CantIdentify]\n随机指定目标\n若目标带有[Combustion]，则使本技能威力+4\n目标每带有1级[Combustion]强度，使本技能造成的伤害+5%(最多+100%)\n[EnemyKill] 下回合使自身获得3层[Enhancement] \n[EnemyKillFail] 下回合使自身获得3层[Enhancement] 并增加10级[Combustion]强度",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Combustion] 强度"
           ]

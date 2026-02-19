@@ -18,7 +18,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n若目标的[Vibration] 强度不低于8级，则使本技能威力+2",
+          "desc": "[WhenUse] 下回合使本技能对应行动槽的[Aggro] +4\n若目标的[Vibration]强度不低于8级，则使本技能威力+2",
           "coinDescs": [
             "[OnSucceedAttack] 对目标施加3层[Paralysis] "
           ]

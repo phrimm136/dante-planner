@@ -93,11 +93,11 @@
   "passives": {
     "1120501": {
       "name": "启动锯刃",
-      "desc": "使带有[Vibration] 的单位增加的[Burst] 强度额外+1级"
+      "desc": "使带有[Vibration]的单位增加的[Burst] 强度额外+1级"
     },
     "1120521": {
       "name": "保养锯刃",
-      "desc": "令速度值最低的1名友方单位使带有[Vibration] 的单位增加的[Burst] 强度额外+1级"
+      "desc": "令速度值最低的1名友方单位使带有[Vibration]的单位增加的[Burst] 强度额外+1级"
     }
   }
 }

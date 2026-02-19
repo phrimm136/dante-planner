@@ -20,7 +20,7 @@
         },
         {},
         {
-          "desc": "若目标的[Sinking] 强度不低于4级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Sinking]强度不低于4级，则使本技能的硬币威力+1",
           "coinDescs": [
             "[OnSucceedAttack] 使目标增加4级[Sinking] 强度",
             ""
@@ -49,7 +49,7 @@
         },
         {},
         {
-          "desc": "若目标的[Sinking] 强度不低于6级，则使本技能的硬币威力+2",
+          "desc": "若目标的[Sinking]强度不低于6级，则使本技能的硬币威力+2",
           "coinDescs": [
             "[OnSucceedAttack] 使自身增加2级[Breath] 强度\n[OnSucceedAttack] 使自身获得1层[Breath] ",
             "[OnSucceedAttack] 使目标增加2级[Sinking] 强度\n[OnSucceedAttack] 对目标施加1层[Sinking] ",

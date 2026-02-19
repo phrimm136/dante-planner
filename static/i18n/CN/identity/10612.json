@@ -5,25 +5,25 @@
       "name": "能量轰击",
       "descs": [
         {
-          "desc": "若自身的充能 强度不低于2级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "若自身的[Charge]强度不低于2级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度"
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
           ]
         },
         {
-          "desc": "自身每带有1级充能 强度，使本技能造成的伤害+2%(最多+10%)\n若自身的充能 强度不低于2级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+2%(最多+10%)\n若自身的[Charge]强度不低于2级，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得(自身的充能 强度+1)层充能 (最多3层)",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度"
+            "[OnSucceedAttack] 使自身获得(自身的[Charge]强度+1)层[Charge](最多3层)",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
           ]
         },
         {},
         {
-          "desc": "自身每带有1级充能 强度，使本技能造成的伤害+3%(最多+15%)\n若自身的充能 强度不低于2级，则使本技能的硬币威力+1\n若自身的充能 层数不低于5层，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层充能 ",
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+3%(最多+15%)\n若自身的[Charge]强度不低于2级，则使本技能的硬币威力+1\n若自身的[Charge]层数不低于5层，则使本技能的硬币威力+1\n[WhenUse] 使自身获得2层[Charge]",
           "coinDescs": [
-            "[OnSucceedAttack] 使自身获得(自身的充能 强度+1)层充能 (最多4层)",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度"
+            "[OnSucceedAttack] 使自身获得(自身的[Charge]强度+1)层[Charge](最多4层)",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度"
           ]
         }
       ]
@@ -32,31 +32,31 @@
       "name": "精神鞭挞",
       "descs": [
         {
-          "desc": "[WhenUse] 若自身的充能 层数在5~9层之间，\n- 使自身增加15级沉沦 强度并使自身获得至10层充能 \n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n[WhenUse] 消耗10层充能 并使本技能的硬币威力+1",
+          "desc": "[WhenUse] 若自身的[Charge]层数在5~9层之间，\n- 使自身增加15级[Sinking]强度并使自身获得至10层[Charge]\n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n[WhenUse] 消耗10层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度",
-            "[OnSucceedAttack] 对目标施加2层沉沦 "
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度",
+            "[OnSucceedAttack] 对目标施加2层[Sinking]"
           ]
         },
         {
-          "desc": "自身每带有1级充能 强度，使本技能造成的伤害+2%(最多+10%)\n[WhenUse] 若自身的充能 层数在5~9层之间，\n- 使自身增加15级沉沦 强度并使自身获得至10层充能 \n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n[WhenUse] 消耗10层充能 并使本技能的硬币威力+1",
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+2%(最多+10%)\n[WhenUse] 若自身的[Charge]层数在5~9层之间，\n- 使自身增加15级[Sinking]强度并使自身获得至10层[Charge]\n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n[WhenUse] 消耗10层[Charge]并使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
-            "[OnSucceedAttack] 对目标施加2层沉沦 \n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%"
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
+            "[OnSucceedAttack] 对目标施加2层[Sinking]\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%"
           ]
         },
         {},
         {
-          "desc": "自身每带有1级充能 强度，使本技能造成的伤害+4%(最多+20%)\n[WhenUse] 若自身的充能 层数在5~9层之间，\n- 使自身增加10级沉沦 强度并使自身获得至10层充能 \n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n- [BeforeUse] 若自身的充能 强度不低于5级，则本技能不会获得[CantIdentify]状态\n[WhenUse] 消耗10层充能 并使本技能的硬币威力+2\n[BeforeAttack] 若自身剩余充能 层数不低于8层，则消耗8层充能并使本技能造成的伤害+40%",
+          "desc": "自身每带有1级[Charge]强度，使本技能造成的伤害+4%(最多+20%)\n[WhenUse] 若自身的[Charge]层数在5~9层之间，\n- 使自身增加10级[Sinking]强度并使自身获得至10层[Charge]\n- 使本技能获得[CantIdentify]与[WideAreaRampage]状态并使本技能的攻击容量+1\n- [BeforeUse] 若自身的[Charge]强度不低于5级，则本技能不会获得[CantIdentify]状态\n[WhenUse] 消耗10层[Charge]并使本技能的硬币威力+2\n[BeforeAttack] 若自身剩余[Charge]层数不低于8层，则消耗8层[Charge]并使本技能造成的伤害+40%",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
-            "[OnSucceedAttack] 使目标增加1级沉沦 强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
-            "[OnSucceedAttack] 对目标施加2层沉沦 \n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%"
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
+            "[OnSucceedAttack] 使目标增加1级[Sinking]强度\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的5%",
+            "[OnSucceedAttack] 对目标施加2层[Sinking]\n[OnSucceedAttack] 使目标的混乱阈值前移本硬币伤害量的10%"
           ]
         }
       ]
@@ -67,15 +67,15 @@
         {},
         {},
         {
-          "desc": "自身每带有1级充能 强度，使本技能的硬币威力+1(最多+5)\n若自身的充能 层数不低于10层，则使本技能的最终威力+2\n[WhenUse] 使自身获得5层充能 ",
+          "desc": "自身每带有1级[Charge]强度，使本技能的硬币威力+1(最多+5)\n若自身的[Charge]层数不低于10层，则使本技能的最终威力+2\n[WhenUse] 使自身获得5层[Charge]",
           "coinDescs": [
-            "使本硬币造成的伤害+(本技能的威力×5)%(最多+100%)\n[OnSucceedAttack] 使自身获得(自身的充能 强度+1)层充能 (最多6层)\n[OnSucceedAttack] 使目标增加4级沉沦 强度并对其施加2层沉沦 "
+            "使本硬币造成的伤害+(本技能的威力×5)%(最多+100%)\n[OnSucceedAttack] 使自身获得(自身的[Charge]强度+1)层[Charge](最多6层)\n[OnSucceedAttack] 使目标增加4级[Sinking]强度并对其施加2层[Sinking]"
           ]
         },
         {
-          "desc": "自身每带有1级充能 强度，使本技能的基础威力+1，硬币威力+1(分别最多+5)\n若自身的充能 层数不低于10层，则使本技能的最终威力+4\n[WhenUse] 使自身获得7层充能 ",
+          "desc": "自身每带有1级[Charge]强度，使本技能的基础威力+1，硬币威力+1(分别最多+5)\n若自身的[Charge]层数不低于10层，则使本技能的最终威力+4\n[WhenUse] 使自身获得7层[Charge]",
           "coinDescs": [
-            "使本硬币造成的伤害+(本技能的威力×5)%(最多+150%)\n若自身的充能 强度不低于3级，则每带有1级充能 强度，使本硬币造成的伤害+20%(最多+100%)\n[OnSucceedAttack] 使自身获得(自身的充能 强度+3)层充能 (最多8层)\n[OnSucceedAttack] 使目标增加4级沉沦 强度并对其施加4层沉沦 "
+            "使本硬币造成的伤害+(本技能的威力×5)%(最多+150%)\n若自身的[Charge]强度不低于3级，则每带有1级[Charge]强度，使本硬币造成的伤害+20%(最多+100%)\n[OnSucceedAttack] 使自身获得(自身的[Charge]强度+3)层[Charge](最多8层)\n[OnSucceedAttack] 使目标增加4级[Sinking]强度并对其施加4层[Sinking]"
           ]
         }
       ]
@@ -84,7 +84,7 @@
       "name": "能量凝聚",
       "descs": [
         {
-          "desc": "[WhenUse] 若自身的充能 层数不低于10层，则使本技能的硬币威力+2\n[WhenUse] 使自身获得3层充能 (每回合最多1次)",
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于10层，则使本技能的硬币威力+2\n[WhenUse] 使自身获得3层[Charge](每回合最多1次)",
           "coinDescs": [
             ""
           ]
@@ -92,7 +92,7 @@
         {},
         {},
         {
-          "desc": "[WhenUse] 若自身的充能 层数不低于10层，则使本技能的硬币威力+4\n[WhenUse] 使自身获得3层充能 (每回合最多2次)",
+          "desc": "[WhenUse] 若自身的[Charge]层数不低于10层，则使本技能的硬币威力+4\n[WhenUse] 使自身获得3层[Charge](每回合最多2次)",
           "coinDescs": [
             ""
           ]
@@ -103,19 +103,19 @@
   "passives": {
     "1061201": {
       "name": "脑波充能集束犄角",
-      "desc": "本场战斗中，每当自身累计消耗10层充能 时，使自身增加1级充能 强度\n\n若自身的充能 强度不低于2级，\n- 使自身基础攻击技能增加的沉沦 强度额外+1级(仅施加沉沦 层数或使自身增加沉沦 强度时不适用)\n- 使自身基础攻击技能造成的伤害+(自身的充能 强度×3)%(最多+15%)"
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n\n若自身的[Charge]强度不低于2级，\n- 使自身基础攻击技能增加的[Sinking]强度额外+1级(仅施加[Sinking]层数或使自身增加[Sinking]强度时不适用)\n- 使自身基础攻击技能造成的伤害+(自身的[Charge]强度×3)%(最多+15%)"
     },
     "1061211": {
       "name": "脑波充能集束犄角",
-      "desc": "本场战斗中，每当自身累计消耗10层充能 时，使自身增加1级充能 强度\n\n若自身的充能 强度不低于2级，\n- 自身每带有2级充能 强度，使自身基础攻击技能增加的沉沦 强度额外+1级(最多+2，仅施加沉沦 层数或使自身增加沉沦 强度时不适用)\n- 使自身基础攻击技能造成的伤害+(自身的充能 强度×5)%(最多+25%)"
+      "desc": "本场战斗中，每当自身累计消耗10层[Charge]时，使自身增加1级[Charge]强度\n\n若自身的[Charge]强度不低于2级，\n- 自身每带有2级[Charge]强度，使自身基础攻击技能增加的[Sinking]强度额外+1级(最多+2，仅施加[Sinking]层数或使自身增加[Sinking]强度时不适用)\n- 使自身基础攻击技能造成的伤害+(自身的[Charge]强度×5)%(最多+25%)"
     },
     "1061221": {
       "name": "支援充能摧毁",
-      "desc": "充能 强度最高的1名友方单位使用获得充能 层数的基础攻击技能时，使该技能最后一枚硬币造成的伤害+10%"
+      "desc": "[Charge]强度最高的1名友方单位使用获得[Charge]层数的基础攻击技能时，使该技能最后一枚硬币造成的伤害+10%"
     },
     "1061231": {
       "name": "支援充能摧毁",
-      "desc": "充能 强度最高的1名友方单位使用获得充能 层数的基础攻击技能时，使该技能最后一枚硬币造成的伤害+15%"
+      "desc": "[Charge]强度最高的1名友方单位使用获得[Charge]层数的基础攻击技能时，使该技能最后一枚硬币造成的伤害+15%"
     }
   }
 }

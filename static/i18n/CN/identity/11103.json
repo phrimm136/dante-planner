@@ -18,7 +18,7 @@
         },
         {},
         {
-          "desc": "若目标的[Sinking] 强度不低于5级，则使本技能威力+2",
+          "desc": "若目标的[Sinking]强度不低于5级，则使本技能威力+2",
           "coinDescs": [
             "[OnSucceedAttack] 使速度值最低的友方单位获得2层[Protection] "
           ]

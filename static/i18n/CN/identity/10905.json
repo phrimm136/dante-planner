@@ -89,11 +89,11 @@
   "passives": {
     "1090501": {
       "name": "祝提前下班~",
-      "desc": "[VibrationExplosion] 时消耗3层[Charge] ，使[VibrationExplosion] 造成的混乱阈值前移量+40%\n[VibrationExplosion] 时，下回合使自身获得1层[Agility] ，1层[HitDamageUp] "
+      "desc": "[VibrationExplosion]时消耗3层[Charge] ，使[VibrationExplosion]造成的混乱阈值前移量+40%\n[VibrationExplosion]时，下回合使自身获得1层[Agility] ，1层[HitDamageUp] "
     },
     "1090521": {
       "name": "共振扳手",
-      "desc": "使速度值最低的1名友方单位[VibrationExplosion] 造成的混乱阈值前移量+20%"
+      "desc": "使速度值最低的1名友方单位[VibrationExplosion]造成的混乱阈值前移量+20%"
     }
   }
 }

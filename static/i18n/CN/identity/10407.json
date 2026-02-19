@@ -7,23 +7,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         },
         {},
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的拼点威力+1\n若目标的[Combustion] 强度不低于10级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的拼点威力+1\n若目标的[Combustion]强度不低于10级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttackHead] 使目标增加1级[Combustion] 强度\n[OnSucceedAttack] 使目标增加1级[Combustion] 强度"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttackHead] 使目标增加1级[Combustion]强度\n[OnSucceedAttack] 使目标增加1级[Combustion]强度"
           ]
         }
       ]
@@ -34,23 +34,23 @@
         {
           "desc": "",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则使本硬币造成的伤害+20%"
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 若目标的[Combustion]强度不低于6级，则使本硬币造成的伤害+20%"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则使本硬币造成的伤害+30%"
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 若目标的[Combustion]强度不低于6级，则使本硬币造成的伤害+30%"
           ]
         },
         {},
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的拼点威力+1\n若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的拼点威力+1\n若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加2级[Combustion] 强度",
-            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于6级，则使本硬币造成的伤害+50%"
+            "[OnSucceedAttack] 使目标增加2级[Combustion]强度",
+            "[OnSucceedAttack] 若目标的[Combustion]强度不低于6级，则使本硬币造成的伤害+50%"
           ]
         }
       ]
@@ -61,21 +61,21 @@
         {},
         {},
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的拼点威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于10级，则使本硬币造成的伤害+20%"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 若目标的[Combustion]强度不低于10级，则使本硬币造成的伤害+20%"
           ]
         },
         {
-          "desc": "若目标的[Combustion] 强度不低于6级，则使本技能的拼点威力+1\n若目标的[Combustion] 强度不低于6级，则使本技能的硬币威力+1",
+          "desc": "若目标的[Combustion]强度不低于6级，则使本技能的拼点威力+1\n若目标的[Combustion]强度不低于6级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 使目标增加1级[Combustion] 强度",
-            "[OnSucceedAttack] 若目标的[Combustion] 强度不低于10级，则使本硬币造成的伤害+40%"
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 使目标增加1级[Combustion]强度",
+            "[OnSucceedAttack] 若目标的[Combustion]强度不低于10级，则使本硬币造成的伤害+40%"
           ]
         }
       ]
@@ -103,19 +103,19 @@
   "passives": {
     "1040701": {
       "name": "火焰传递",
-      "desc": "自身击杀带有[Combustion] 的敌方单位时，随机使未带有[Combustion] 或[Combustion] 强度最低的1名敌方单位增加4级[Combustion] 强度(每回合最多1次)\n- 若是集中遭遇战，则改为1个部位"
+      "desc": "自身击杀带有[Combustion]的敌方单位时，随机使未带有[Combustion]或[Combustion]强度最低的1名敌方单位增加4级[Combustion]强度(每回合最多1次)\n- 若是集中遭遇战，则改为1个部位"
     },
     "1040711": {
       "name": "火焰传递",
-      "desc": "自身击杀带有[Combustion] 的敌方单位时，随机使未带有[Combustion] 或[Combustion] 强度最低的2名敌方单位增加4级[Combustion] 强度(每回合最多2次)\n- 若是集中遭遇战，则改为2个部位"
+      "desc": "自身击杀带有[Combustion]的敌方单位时，随机使未带有[Combustion]或[Combustion]强度最低的2名敌方单位增加4级[Combustion]强度(每回合最多2次)\n- 若是集中遭遇战，则改为2个部位"
     },
     "1040721": {
       "name": "传递火焰",
-      "desc": "速度值最低的1名友方单位击杀带有[Combustion] 的敌方单位时，随机使1名敌方单位增加3级[Combustion] 强度(每回合最多1次)\n- 若是集中遭遇战，则改为1个部位"
+      "desc": "速度值最低的1名友方单位击杀带有[Combustion]的敌方单位时，随机使1名敌方单位增加3级[Combustion]强度(每回合最多1次)\n- 若是集中遭遇战，则改为1个部位"
     },
     "1040731": {
       "name": "传递火焰",
-      "desc": "速度值最低的1名友方单位击杀带有[Combustion] 的敌方单位时，随机使2名敌方单位增加3级[Combustion] 强度(每回合最多1次)\n- 若是集中遭遇战，则改为2个部位"
+      "desc": "速度值最低的1名友方单位击杀带有[Combustion]的敌方单位时，随机使2名敌方单位增加3级[Combustion]强度(每回合最多1次)\n- 若是集中遭遇战，则改为2个部位"
     }
   }
 }

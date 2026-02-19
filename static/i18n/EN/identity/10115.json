@@ -1,0 +1,175 @@
+{
+  "name": "The House of Spiders:\nThe Index Nursefather",
+  "skills": {
+    "1011501": {
+      "name": "\"Enwrap 330 times in Long Swaths of Frozen Blood\"",
+      "descs": [
+        {
+          "desc": "(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Blunt weapon\n- Coins using Blunt weapons deal +10% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +15% damage\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage - 1) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain +1 [Breath] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 [Breath]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {
+          "desc": "(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Blunt weapon\n- Coins using Blunt weapons deal +10% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +15% damage\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage - 1) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain +2 [Breath] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 [Breath]\n[UnBrokenCoinOnSucceedAttack] Inflict 1 [Sinking]"
+          ]
+        },
+        {},
+        {
+          "desc": "(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Blunt weapon\n- Coins using Blunt weapons deal +15% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Clash Power +1 and deal +20% damage\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage - 1) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain + 2 [Breath] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 [Breath]\n[UnBrokenCoinOnSucceedAttack] Inflict 2 [Sinking]"
+          ]
+        }
+      ]
+    },
+    "1011502": {
+      "name": "\"Revel with Soundless Applause, Impale in Voiceless Sorrow\"",
+      "descs": [
+        {
+          "desc": "(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Pierce weapon\n- Coins using Pierce weapons deal +10% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Clash Power +1\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain 3 [Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[UnBrokenCoinOnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Pierce weapon\n- Coins using Pierce weapons deal +10% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Clash Power +1\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain 3 [Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "[OnSucceedAttack] Gain +1 [Breath] Count\n[UnBrokenCoinOnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Pierce weapon\n- Coins using Pierce weapons deal +15% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], Final Power +1\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain 3 [Breath]",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Inflict 3 [Sinking]",
+            "[OnSucceedAttack] Gain +2 [Breath] Count\n[UnBrokenCoinOnSucceedAttack] Inflict +1 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1011503": {
+      "name": "\"Raise and Laugh the Blade, Cry the Waterfall Like the Scent of Fallen Leaves\"",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Turn Start: At 9 [StackYisangSpecialSkill], change this Skill to 'Furioso-Replica' (once per turn)\n- Prioritizes the Skill on the leftmost Slot's bottom row on the Dashboard\n- [BeforeUse] At less than 9 [StackYisangSpecialSkill], use as Skill 3\n(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Slash weapon\n- Coins using Slash weapons deal +12.5% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\nAt 6+ ([Breath] on self + [Sinking] on target), Coin Power +1\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain +3 [Breath] Count",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 2 [Breath]",
+            "[OnSucceedAttack] Inflict 2 [Sinking]",
+            "Deal +10% damage for every [UnlockBuff_Base] stage (max 30%)\n[CriticalOnSucceedAttack] Gain +1 [Breath] Count\n[UnBrokenCoinOnSucceedAttack] Inflict +2 [Sinking] Count"
+          ]
+        },
+        {
+          "desc": "Turn Start: At 9 [StackYisangSpecialSkill], change this Skill to 'Furioso-Replica' (once per turn)\n- Prioritizes the Skill on the leftmost Slot's bottom row on the Dashboard\n- [BeforeUse] At less than 9 [StackYisangSpecialSkill], use as Skill 3\n(75 - ([KarmaOfIndexAlly] / 2))% chance to produce a Slash weapon\n- Coins using Slash weapons deal +25% damage\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +20% damage\nCoin Power +1 for every 6 ([Breath] on self + [Sinking] on target) (max 2)\n[WhenUse] Convert Coins equal to ([UnlockBuff_Base] stage + 1) into [SuperCoin]s, beginning with the final Coin\n[WhenUse] Gain +3 [Breath] Count\n- Gain additional [Breath] equal to ([UnlockBuff_Base] stage)",
+          "coinDescs": [
+            "",
+            "[OnSucceedAttack] Gain 3 [Breath]",
+            "[OnSucceedAttack] Inflict 3 [Sinking]",
+            "Deal +20% damage for every [UnlockBuff_Base] stage (max 60%)\n[CriticalOnSucceedAttack] Gain +1 [Breath] Count\n[UnBrokenCoinOnSucceedAttack] Inflict +3 [Sinking] Count"
+          ]
+        }
+      ]
+    },
+    "1011504": {
+      "name": "By Unpredictable Whim",
+      "descs": [
+        {
+          "desc": "[StartBattle] Gain +2 [Breath] Count (once per turn)\n[OnSucceedEvade] Gain 1 [Breath] (2 times per turn)\n[EndBattle] At below [UnlockBuffAlly_2], activate the following effects (once per Encounter):\n- Gain [UnlockBuffAlly_2]\n- If [BlessingOfIndexPrescriptAlly] Stack is less than 6, raise the Stack to 6\n- Gain 5 [KarmaOfIndexAlly] at the start of the next turn for every [BlessingOfIndexPrescriptAlly] gained via the effect above",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "At [UnlockBuffAlly_3], Coin Power +2\n[StartBattle] Gain +2 [Breath] Count (once per turn)\n[OnSucceedEvade] Gain 2 [Breath] (2 times per turn)\n[EndBattle] At below [UnlockBuffAlly_2], activate the following effects (once per Encounter):\n- Gain [UnlockBuffAlly_2]\n- If [BlessingOfIndexPrescriptAlly] Stack is less than 6, raise the Stack to 6\n- Gain 5 [KarmaOfIndexAlly] at the start of the next turn for every [BlessingOfIndexPrescriptAlly] gained via the effect above",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1011505": {
+      "name": "Furioso-Replica",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WideAreaRampage]\nOnly 1 copy of this Skill can exist on the Dashboard\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\nThis Skill's Coin Power does not change; instead, for every net Coin Power increase, Final Power +5 (this Skill is not affected by [Paralysis])\nAt 6+ ([Breath] on self + [Sinking] on main target), Final Power +1\n[StartBattle]\n- Convert all Coins on this Skill to [SuperCoin]s\n- Inflict 1 [Sinking] or gain 1 [Breath] with every hit of this Skill\n- Does not gain [StackYisangSpecialSkill] for this turn\n[WhenUse]\n- Clash Power +3\n- Gain 3 [Breath] and +3 [Breath] Count\n[EndSkill]\n- Inflict 5 [Combustion], 3 [Binding], and 3 [Vulnerable] next turn to all targets this unit hit\n- Consume all [StackYisangSpecialSkill]",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Weapon assigned to this Coin is fixed as Scythe\n[UnBrokenCoinOnSucceedAttack] Inflict +3 Sinking Count"
+          ]
+        },
+        {
+          "desc": "[WideAreaRampage]\nOnly 1 copy of this Skill can exist on the Dashboard\nIf this Skill is marked with [IndexPrescriptTargetMarkToEnemy], deal +10% damage\nThis Skill's Coin Power does not change; instead, for every net Coin Power increase, Final Power +5 and deal +25% damage (this Skill is not affected by [Paralysis])\nFinal Power +1 for every 6 ([Breath] on self + [Sinking] on main target) (max 2)\n[StartBattle]\n- Convert all Coins on this Skill to [SuperCoin]s\n- Inflict 1 [Sinking] or gain 1 [Breath] with every hit of this Skill\n- Does not gain [StackYisangSpecialSkill] for this turn\n[WhenUse]\n- Clash Power +3\n- Gain 3 [Breath] and +3 [Breath] Count\n[EndSkill]\n- Inflict 5 [Combustion], 3 [Binding], and 3 [Vulnerable] next turn to all targets this unit hit\n- Consume all [StackYisangSpecialSkill]",
+          "coinDescs": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Weapon assigned to this Coin is fixed as Scythe\nDeal +90% Damage on Critical Hit\n[UnBrokenCoinOnSucceedAttack] Inflict +3 [Sinking] Count"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1011502": {
+      "name": "Prescript Delivered on a Device",
+      "desc": "Turn Start:\n- Gain [IndexPrescriptYi_0] / [IndexPrescriptYi_1] / [IndexPrescriptYi_2] / [IndexPrescriptYi_3] based on [UnlockBuff_Base] stage on self\n- Inflict [IndexPrescriptTargetToEnemy] to a random enemy (in Focused Encounters, a Part)\n- Apply [IndexPrescriptTargetMarkToEnemy] to Base Attack Skills on this unit's Dashboard (1 per Slot, max 2 Skills)\n· At [UnlockBuffAlly_2]+, the effect above prioritizes Skill 3 (prioritizes empowered Skill)\n- All of the effects above and [IndexPrescript_Base_2nd] execution checks do not trigger when this unit is Staggered, Immobilized[TabExplain], in Panic, or in E.G.O Corrosion[TabExplain]"
+    },
+    "1011503": {
+      "name": "The Oracle's Proxy / Unlock",
+      "desc": "Turn End: If [IndexPrescript_Base_2nd] was executed this turn at below [UnlockBuffAlly_2], heal 4 SP and gain 1 [BlessingOfIndexPrescriptAlly] (once per turn)\n- When executing [IndexPrescript_Base_2nd], if the main target has [IndexPrescriptTargetToEnemy], heal 8 SP and gain 3 [BlessingOfIndexPrescriptAlly] instead\n\nTurn End: If this unit is at [UnlockBuffAlly_2] and [IndexPrescriptYi_2] was executed this turn, heal 4 SP (once per turn)\n- When executing [IndexPrescript_Base_2nd], if [StackYisangSpecialSkill] has reached 9 Stacks, heal 8 SP and gain 3 [BlessingOfIndexPrescriptAlly]\n\nTurn End: If [IndexPrescript_Base_2nd] was not executed this turn, gain 5 [KarmaOfIndexAlly]\n- At [UnlockBuffAlly_3], does not gain [KarmaOfIndexAlly]\n- If this unit attempted to execute [IndexPrescript_Base_2nd] at Combat Start, but could not target the enemy during the combat phase, does not gain [KarmaOfIndexAlly] at Turn End (applies at below [UnlockBuffAlly_2])\n\nTurn End: At 3/6/9 [BlessingOfIndexPrescriptAlly], gain [UnlockBuffAlly_1]/[UnlockBuffAlly_2]/[UnlockBuffAlly_3]\nTurn Start: At [UnlockBuffAlly_3], gain [Shin_IndexFingerYisang]"
+    },
+    "1011504": {
+      "name": "The Index Nursefather",
+      "desc": "Upon entering the Encounter for the first time, gain [BurningWoundYisangMask]\n- Turn End: If this unit was Staggered for the first time in this Encounter while under this effect, recover from Stagger (excluding forced Stagger) and convert [BurningWoundYisangMask] to [BurningWoundYisang]\n\nApply [SatisfyingEsteemNeeds] to The Index Proxy - Effloresced E.G.O::Procuration Don Quixote when both units are on the field"
+    },
+    "1011505": {
+      "name": "Oracle Device [Caduceus]",
+      "desc": "A random weapon is assigned to every Coin for Base Attack Skills. Each weapon has a unique effect.\n- [YisangWeapon01Hatchet]\n- [YisangWeapon02Stiletto]\n- [YisangWeapon03Greatsword]\n- [YisangWeapon04Rapier]\n- [YisangWeapon05Sledgehammer]\n- [YisangWeapon06Ultragreatsword]\n- [YisangWeapon07Lance]\n- [YisangWeapon08Chain]\n- [YisangWeapon09Scythe]\n\nGain 1 [StackYisangSpecialSkill] when using Skills with [IndexPrescriptTargetMarkToEnemy]"
+    },
+    "1011506": {
+      "name": "Oracle Device [Caduceus]",
+      "desc": "A random weapon is assigned to every Coin for Base Attack Skills. Each weapon has a unique effect.\n- [YisangWeapon01Hatchet]\n- [YisangWeapon02Stiletto]\n- [YisangWeapon03Greatsword]\n- [YisangWeapon04Rapier]\n- [YisangWeapon05Sledgehammer]\n- [YisangWeapon06Ultragreatsword]\n- [YisangWeapon07Lance]\n- [YisangWeapon08Chain]\n- [YisangWeapon09Scythe]\n\nGain 1 [StackYisangSpecialSkill] when using Skills with [IndexPrescriptTargetMarkToEnemy]\n\nConvert [BurningWoundYisangMask] to [BurningWoundYisang] at the end of the turn this unit used 'Furioso-Replica' for the first time in this Encounter\n\nTurn Start: If this unit has [BurningWoundYisang] and has 'Furioso-Replica' on the Dashboard, gain [BlackNightmareYisang]"
+    },
+    "1011501": {
+      "name": "Imitation of a Life",
+      "desc": "Deal +2% damage with Skills marked with [IndexPrescriptTargetMarkToEnemy] for every [BlessingOfIndexPrescriptAlly] on self (max 16%)\n- At 9 [BlessingOfIndexPrescriptAlly], deal +20% damage with Base Skills instead\n\nOn Hit with Base Attack Skill's [SuperCoin]s, gain 1 [StackYisangSpecialSkill]\n- Attack End: Gain [StackYisangSpecialSkill] equal to (# of remaining [SuperCoin]s)"
+    },
+    "1011511": {
+      "name": "Imitation of a Life",
+      "desc": "Deal +2% damage with Skills marked with [IndexPrescriptTargetMarkToEnemy] for every [BlessingOfIndexPrescriptAlly] on self (max 16%)\n- At 9 [BlessingOfIndexPrescriptAlly], deal +20% damage with Base Skills instead\n\nOn Hit with Base Attack Skill's [SuperCoin]s, gain 1 [StackYisangSpecialSkill]\n- Attack End: Gain [StackYisangSpecialSkill] equal to (# of remaining [SuperCoin]s)\n- 'Furioso-Replica' Attack End: Gain [StackYisangSpecialSkill] next turn equal to (# of this Skill's remaining [SuperCoin]s / 2) (rounded down)\n\nIf [StackYisangSpecialSkill] reached 9 Stacks this turn at Turn End, and if this unit does not have a Skill 3 on the Dashboard at the start of the next turn, convert a Base Skill to Skill 3 (prioritizes the Skill on the leftmost Slot's bottom row)"
+    },
+    "1011521": {
+      "name": "Grace of God",
+      "desc": "Deal +5% damage with Slash, Pierce, and Blunt Base Attack Skills that are used for the first time by any ally each turn (once per type across all allies)\n- The Index Identities deal +10% damage instead\n- This effect's application is determined Before Attack"
+    }
+  }
+}

@@ -29,20 +29,20 @@
       "name": "迫り来る日",
       "descs": [
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%以上のとき、ダメージ量+15%",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%未満のとき、ダメージ量+15%",
           "coinDescs": [
             "[EnemyKillFail] 次のターンに[Laceration] 10を得る"
           ]
         },
         {},
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%以上のとき、ダメージ量+25%",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%未満のとき、ダメージ量+25%",
           "coinDescs": [
             "[EnemyKillFail] 次のターンに[Laceration] 10を得る\n[EnemyKillFail] 次のターンに[Enhancement] 3を得る"
           ]
         },
         {
-          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%以上のとき、ダメージ量 +50%",
+          "desc": "[CantIdentify]\nランダムな対象を攻撃\n対象の体力が25%未満のとき、ダメージ量 +50%",
           "coinDescs": [
             "[EnemyKillFail] 次のターンに[Laceration] 10を得る\n[EnemyKillFail] 次のターンに[Enhancement] 3を得る"
           ]

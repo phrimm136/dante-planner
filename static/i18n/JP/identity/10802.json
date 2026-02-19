@@ -58,7 +58,7 @@
         {},
         {},
         {
-          "desc": "[StartBattle] [Charge] 回数を全て消耗。\n戦闘開始時に[Charge] 回数維持数が10未満なら、ランダムな相手を一方攻撃",
+          "desc": "[StartBattle] [Charge] 回数を全て消耗。\n戦闘開始時に[Charge] 回数が10未満なら、ランダムな相手を一方攻撃",
           "coinDescs": [
             "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の40%分、混乱区間を前進",
             "[OnSucceedAttack] [Sinking] 1を付与\n[OnSucceedAttack] ダメージ量の30%分、混乱区間を前進",

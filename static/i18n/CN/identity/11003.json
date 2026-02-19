@@ -66,7 +66,7 @@
         {
           "desc": "[WhenUse] 使现存体力最低的1名友方单位在下回合获得1层[Protection] \n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +10",
           "coinDescs": [
-            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] [VibrationExplosion] 时，若目标的[Vibration] 强度不低于5级，则下回合使自身获得2层[Protection] \n[OnSucceedAttack] 对目标施加2层[HitTakeDamageUp] "
+            "[OnSucceedAttack] 使目标[VibrationExplosion] \n[OnSucceedAttack] [VibrationExplosion]时，若目标的[Vibration] 强度不低于5级，则下回合使自身获得2层[Protection] \n[OnSucceedAttack] 对目标施加2层[HitTakeDamageUp] "
           ]
         }
       ]
