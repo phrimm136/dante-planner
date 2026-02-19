@@ -2,8 +2,8 @@
   "name": "荆棘套索",
   "descs": [
     "回合结束时，使全体敌方单位增加与其速度值相等的[Burst]强度。\n\n激活色欲完全共鸣时，在战斗开始时随机使1名敌方单位增加3级[Burst]强度并对其施加3层[Burst]。",
-    "回合结束时，使全体敌方单位增加与其<style=\"upgradeHighlight\">(速度值+1)</style>相等的破裂 强度。\n\n激活色欲完全共鸣时，在战斗开始时随机使1名敌方单位<style=\"upgradeHighlight\">增加4级破裂 强度</style>并对其施加3层破裂 。",
-    "回合结束时，使全体敌方单位增加与其<style=\"upgradeHighlight\">(速度值+2)</style>相等的破裂 强度。\n\n激活色欲完全共鸣时，在战斗开始时随机使1名敌方单位<style=\"upgradeHighlight\">增加5级破裂 强度并对其施加4层破裂 。</style>"
+    "回合结束时，使全体敌方单位增加与其<style=\"upgradeHighlight\">(速度值+1)</style>相等的[Burst]强度。\n\n激活色欲完全共鸣时，在战斗开始时随机使1名敌方单位<style=\"upgradeHighlight\">增加4级[Burst]强度</style>并对其施加3层[Burst]。",
+    "回合结束时，使全体敌方单位增加与其<style=\"upgradeHighlight\">(速度值+2)</style>相等的[Burst]强度。\n\n激活色欲完全共鸣时，在战斗开始时随机使1名敌方单位<style=\"upgradeHighlight\">增加5级[Burst]强度并对其施加4层[Burst]。</style>"
   ],
   "obtain": "Shop"
 }

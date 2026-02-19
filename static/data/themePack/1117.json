@@ -11,6 +11,9 @@
       "selectableFloors": [
         4
       ]
+    },
+    {
+      "dungeonIdx": 2
     }
   ],
   "nodeOption": {
@@ -63,7 +66,6 @@
       901033,
       901047,
       901073,
-      901100,
       971055
     ],
     "specialEventPool": [

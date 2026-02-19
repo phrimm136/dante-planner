@@ -127,7 +127,7 @@ OUTPUT_DIR = STATIC_DIR / "images" / "themePack"
 
 # Pattern to match main Canto chapters (Canto_I, Canto_II, etc. with roman numerals)
 # Also matches variants like Canto_I_hard, Canto_II_mid
-CANTO_MAIN_PATTERN = re.compile(r'^Canto_(I{1,3}|IV|V|VI{0,3})(_.*)?$')
+CANTO_MAIN_PATTERN = re.compile(r'^Canto_(I{1,3}|IV|V|VI{0,3}|IX|X)(_.*)?$')
 
 # Prefixes for attack/attribute type packs
 ATTACK_ATTRIBUTE_PREFIXES = [

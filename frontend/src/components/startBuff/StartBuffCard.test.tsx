@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { StartBuffCard } from './StartBuffCard'
+import { StartBuffCardMD6 as StartBuffCard } from './StartBuffCardMD6'
 import type { StartBuff, StartBuffI18n } from '@/types/StartBuffTypes'
 
 // Mock react-i18next
@@ -29,14 +29,6 @@ vi.mock('@/components/common/AutoSizeText', () => ({
   AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
-// Mock EnhancementButton to render a simple button
-vi.mock('./EnhancementButton', () => ({
-  EnhancementButton: ({ level, onClick }: { level: number; onClick: () => void }) => (
-    <button data-testid={`enhancement-btn-${level}`} onClick={onClick}>
-      {level === 1 ? '+' : '++'}
-    </button>
-  ),
-}))
 
 const mockBuff: StartBuff = {
   id: '100',
@@ -63,13 +55,10 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-        mdVersion={5}
       />
     )
 
-    // Enhancement buttons should be visible
-    expect(screen.getByTestId('enhancement-btn-1')).toBeDefined()
-    expect(screen.getByTestId('enhancement-btn-2')).toBeDefined()
+    expect(screen.getAllByRole('button')).toHaveLength(2)
   })
 
   it('calls onSelect when card is clicked', () => {
@@ -84,7 +73,6 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-        mdVersion={5}
       />
     )
 
@@ -110,7 +98,6 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-        mdVersion={5}
       />
     )
 
@@ -136,7 +123,6 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-        mdVersion={5}
       />
     )
 

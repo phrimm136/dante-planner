@@ -1,0 +1,9 @@
+{
+  "name": "For You Who Love the City",
+  "descs": [
+    "If an ally is at less than 30% HP when hit, said ally heals 80% HP and other allies heal 40% HP next turn (once per Encounter)\n- Excess healing beyond max HP is applied as Shield\n- If an ally healed 50+ HP due to the above effect, gain 3 [AttackUp] and 3 [DefenseDown]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -93,6 +93,7 @@
     9174,
     9059,
     9095,
+    9209,
     9125,
     9065,
     9126,
@@ -152,6 +153,7 @@
     9027,
     9148,
     9201,
+    9210,
     9012,
     9149,
     9150,
@@ -202,7 +204,9 @@
     9085,
     9083
   ],
-  "specificEgoGiftPool": [],
+  "specificEgoGiftPool": [
+    9209
+  ],
   "difficulty": "DIFFICULT",
   "themePackConfig": {
     "textColor": "e5c6a0"

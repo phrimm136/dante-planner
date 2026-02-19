@@ -1,0 +1,9 @@
+{
+  "name": "열선 무기",
+  "descs": [
+    "질투 속성 스킬 또는 반격 스킬 적중 시 [Laceration] 횟수 또는 [Combustion] 횟수 1 증가 (턴당 3회)\n\n전투 중 적의 [Laceration] 횟수가 1 아래로 떨어질 때, 해당 적이 보유한 [Combustion] 횟수가 2 이상이면, [Laceration] 횟수 대신 [Combustion] 횟수 감소 (턴당 3회)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

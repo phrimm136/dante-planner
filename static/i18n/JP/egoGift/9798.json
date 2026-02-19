@@ -1,7 +1,7 @@
 {
   "name": "貪欲する棘",
   "descs": [
-    "3ターンごとに、[Laceration]を持つ敵(部位)に[RoseThorn]を2付与する。\n全ての敵(部位)に[Laceration]があれば、[RoseThorn]を4付与する。",
+    "ステージ開始時、[BloodDinner]を100生成\nターン開始時、[Laceration]を持つ敵(部位)に[RoseThorn]を2付与する。\n全ての敵(部位)に[Laceration]があれば、[RoseThorn]を4付与する。",
     "",
     ""
   ],

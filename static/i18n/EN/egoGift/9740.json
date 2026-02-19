@@ -1,7 +1,7 @@
 {
   "name": "Automated Joints",
   "descs": [
-    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that gain [Charge] Count or 'Unique Charge' effects. (except E.G.O Skills; except Backup Units)\n\nBase Attack Skills that consume [Charge] Count or 'Unique Charge': gain Coin Power +1 and deal +(sum of [Charge] Count and 'Unique Charge' consumed by that Skill x 4)% damage (max 40%)\n\nTurn End: allies with [Charge] Count or 'Unique Charge' gain 1 [Agility] (max 2) and 1 [AttackDmgUp] (max 3) next turn for every instance they used a base Attack Skill that consumes [Charge] Count or 'Unique Charge' in this Encounter.\n\nIf a MultiCrack Office Identity has 5+ [Charge], they gain Coin Power +1 to base Attack Skills.",
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that gain [Charge] Count or 'Unique Charge' effects. (except E.G.O Skills; except Backup Units)\n\nPlus Coin Base Attack Skills that consume [Charge] Count or 'Unique Charge': gain Coin Power +1 and deal +(sum of [Charge] Count and 'Unique Charge' consumed by that Skill x 4)% damage (max 40%)\nMinus Coin Base Attack Skills: Instead of gaining Coin Power, gain Base Power +(4 / # of Coins) (min 1; rounded down)\n\nTurn End: allies with [Charge] Count or 'Unique Charge' gain 1 [Agility] (max 2) and 1 [AttackDmgUp] (max 3) next turn for every instance they used a Base Attack Skill that consumes [Charge] Count or 'Unique Charge' in this Encounter.\n\nIf a MultiCrack Office Identity has 5+ [Charge], they gain Coin Power +1 to base Attack Skills.",
     "",
     ""
   ],

@@ -1,9 +1,9 @@
 {
   "name": "敬畏",
   "descs": [
-    "[第1、第2顺位友方单位专属]\n\n若主要目标的流血 层数不低于7层，则使增加流血 强度，施加流血 层数或施加特殊流血的技能造成的伤害+10%",
-    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n若主要目标的流血 层数不低于5层，则使增加流血 强度，施加流血 层数或施加特殊流血的技能<style=\"upgradeHighlight\">造成的伤害+15%</style>",
-    "[第1、第2、第3顺位友方单位专属]\n\n若主要目标的流血 层数不低于3层，则使增加流血 强度，施加流血 层数或施加特殊流血的技能<style=\"upgradeHighlight\">造成的伤害+20%</style>"
+    "[第1、第2顺位友方单位专属]\n\n若主要目标的[Laceration]层数不低于7层，则使增加[Laceration]强度，施加[Laceration]层数或施加特殊流血的技能造成的伤害+10%",
+    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n若主要目标的[Laceration]层数不低于5层，则使增加[Laceration]强度，施加[Laceration]层数或施加特殊流血的技能<style=\"upgradeHighlight\">造成的伤害+15%</style>",
+    "[第1、第2、第3顺位友方单位专属]\n\n若主要目标的[Laceration]层数不低于3层，则使增加[Laceration]强度，施加[Laceration]层数或施加特殊流血的技能<style=\"upgradeHighlight\">造成的伤害+20%</style>"
   ],
   "obtain": "Shop"
 }

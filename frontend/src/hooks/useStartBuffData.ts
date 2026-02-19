@@ -1,12 +1,8 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import type { MDVersion } from '@/lib/constants'
 import type { StartBuffDataList, StartBuffI18n, StartBuff } from '@/types/StartBuffTypes'
 import { BASE_BUFF_IDS } from '@/types/StartBuffTypes'
-
-/**
- * Mirror Dungeon version type
- */
-export type MDVersion = 5 | 6
 
 // Query key factory for start buff data
 export const startBuffQueryKeys = {

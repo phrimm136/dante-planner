@@ -1,7 +1,7 @@
 {
   "name": "Pinpoint Logic Circuit",
   "descs": [
-    "When hitting an enemy with an Envy Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict additional [Combustion] Potency by half the Skill's total Coins. (rounded up)\n\n[Cannot Stack] When Move-in Reg. Heathcliff E.G.O Passive 「Circuit Wiring」 activates, this effect does not activate",
+    "When hitting an enemy with an Envy Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict additional [Combustion] Potency by half the Skill's total Coins. (rounded up)\n- [Cannot Stack] When Move-in Reg. Heathcliff E.G.O Passive 「Circuit Wiring」 activates, this effect does not activate)\n\nOn Hit, if target has 99 [Combustion] Potency, inflict 1 [IDMicroChip] (once per enemy, 3 times per turn)",
     "",
     ""
   ],

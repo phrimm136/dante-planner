@@ -2120,6 +2120,282 @@
     "themePack": [],
     "maxEnhancement": 0
   },
+  "9207": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "SHAMROCK",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9208": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9209": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9210": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "maxEnhancement": 2
+  },
+  "9211": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9212": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Breath",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0,
+    "recipe": {
+      "materials": [
+        [
+          9154,
+          9427,
+          9428
+        ]
+      ]
+    }
+  },
+  "9213": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0,
+    "recipe": {
+      "materials": [
+        [
+          9192,
+          9205,
+          9440
+        ]
+      ]
+    }
+  },
+  "9214": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Vibration",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9215": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9216": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON",
+    "themePack": [],
+    "maxEnhancement": 0,
+    "recipe": {
+      "materials": [
+        [
+          9027,
+          9102,
+          9215
+        ]
+      ]
+    }
+  },
+  "9217": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9218": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9219": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9220": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Hit",
+    "attributeType": "VIOLET",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9221": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9222": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9223": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9224": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [],
+    "maxEnhancement": 0,
+    "recipe": {
+      "materials": [
+        [
+          9039,
+          9074,
+          9223
+        ]
+      ]
+    }
+  },
+  "9225": {
+    "tag": [
+      "TIER_1"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9226": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Breath",
+    "attributeType": "AZURE",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9227": {
+    "tag": [
+      "TIER_1",
+      "NO_SALE"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9228": {
+    "tag": [
+      "TIER_3",
+      "NO_SALE"
+    ],
+    "keyword": "None",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9229": {
+    "tag": [
+      "TIER_1",
+      "NO_SALE"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9230": {
+    "tag": [
+      "TIER_3",
+      "NO_SALE"
+    ],
+    "keyword": "None",
+    "attributeType": "AMBER",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9231": {
+    "tag": [
+      "TIER_1",
+      "NO_SALE"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
+  "9232": {
+    "tag": [
+      "TIER_3",
+      "NO_SALE"
+    ],
+    "keyword": "None",
+    "attributeType": "AZURE",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
   "9403": {
     "tag": [
       "TIER_2"

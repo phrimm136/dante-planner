@@ -57,6 +57,9 @@ public class PlannerController {
     @Value("${planner.md.current-version}")
     private Integer mdCurrentVersion;
 
+    @Value("${planner.md.available-versions}")
+    private String mdAvailableVersions;
+
     @Value("${planner.rr.available-versions}")
     private String rrAvailableVersions;
 
@@ -87,6 +90,10 @@ public class PlannerController {
      */
     @GetMapping("/config")
     public ResponseEntity<PlannerConfigResponse> getConfig() {
+        List<Integer> mdVersions = Arrays.stream(mdAvailableVersions.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .toList();
         List<Integer> rrVersions = Arrays.stream(rrAvailableVersions.split(","))
                 .map(String::trim)
                 .map(Integer::parseInt)
@@ -95,6 +102,7 @@ public class PlannerController {
         PlannerConfigResponse response = PlannerConfigResponse.builder()
                 .schemaVersion(schemaVersion)
                 .mdCurrentVersion(mdCurrentVersion)
+                .mdAvailableVersions(mdVersions)
                 .rrAvailableVersions(rrVersions)
                 .build();
 

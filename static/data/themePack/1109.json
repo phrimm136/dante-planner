@@ -3,8 +3,12 @@
     {
       "dungeonIdx": 1,
       "selectableFloors": [
-        3
+        3,
+        4
       ]
+    },
+    {
+      "dungeonIdx": 2
     }
   ],
   "nodeOption": {

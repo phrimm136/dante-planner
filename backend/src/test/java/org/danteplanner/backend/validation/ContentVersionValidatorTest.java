@@ -16,8 +16,8 @@ class ContentVersionValidatorTest {
 
     private ContentVersionValidator validator;
 
-    private static final int MD_CURRENT_VERSION = 6;
-    private static final String MD_AVAILABLE_VERSIONS_RAW = "6";
+    private static final int MD_CURRENT_VERSION = 7;
+    private static final String MD_AVAILABLE_VERSIONS_RAW = "6,7";
     private static final String RR_AVAILABLE_VERSIONS_RAW = "1,5";
 
     @BeforeEach
@@ -36,7 +36,7 @@ class ContentVersionValidatorTest {
         @Test
         @DisplayName("MD: accepts current version")
         void mdCurrentVersion_succeeds() {
-            assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 6));
+            assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 7));
         }
 
         @Test

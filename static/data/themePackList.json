@@ -167,6 +167,7 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
+          1,
           2
         ]
       }
@@ -210,7 +211,8 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          1
+          1,
+          2
         ]
       }
     ],
@@ -252,6 +254,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -314,6 +319,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -377,6 +385,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -394,6 +405,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -414,6 +428,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -434,6 +451,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -454,6 +474,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -471,6 +494,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -479,6 +505,31 @@
     ],
     "themePackConfig": {
       "textColor": "5bffde"
+    }
+  },
+  "1024": {
+    "exceptionConditions": [
+      {
+        "dungeonIdx": 0,
+        "selectableFloors": [
+          3,
+          4
+        ]
+      },
+      {
+        "dungeonIdx": 1,
+        "selectableFloors": [
+          2,
+          3
+        ]
+      }
+    ],
+    "specificEgoGiftPool": [
+      9220,
+      9221
+    ],
+    "themePackConfig": {
+      "textColor": "b60000"
     }
   },
   "1101": {
@@ -518,7 +569,8 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          1
+          1,
+          2
         ]
       }
     ],
@@ -542,7 +594,8 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          2
+          2,
+          3
         ]
       }
     ],
@@ -600,6 +653,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -630,6 +686,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -657,7 +716,8 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          2
+          2,
+          3
         ]
       }
     ],
@@ -679,9 +739,11 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -697,8 +759,12 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          3
+          3,
+          4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -716,6 +782,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       },
       {
         "dungeonIdx": 3
@@ -738,6 +807,9 @@
         ]
       },
       {
+        "dungeonIdx": 2
+      },
+      {
         "dungeonIdx": 3
       }
     ],
@@ -756,6 +828,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       },
       {
         "dungeonIdx": 3
@@ -777,6 +852,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -803,7 +881,8 @@
       {
         "dungeonIdx": 1,
         "selectableFloors": [
-          2
+          2,
+          3
         ]
       }
     ],
@@ -832,6 +911,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -856,6 +938,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -887,6 +972,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -909,6 +997,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       },
       {
         "dungeonIdx": 3
@@ -961,6 +1052,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -993,6 +1087,9 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -1033,6 +1130,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [
@@ -1201,6 +1301,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [],
@@ -1230,6 +1333,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [],
@@ -1259,6 +1365,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [],
@@ -1288,6 +1397,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [],
@@ -1317,9 +1429,14 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9211
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1346,6 +1463,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [],
@@ -1375,6 +1495,9 @@
           3,
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
     "specificEgoGiftPool": [],
@@ -1421,7 +1544,9 @@
         "dungeonIdx": 3
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9209
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1521,9 +1646,14 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1577,9 +1707,14 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1633,9 +1768,14 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1689,9 +1829,14 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1745,9 +1890,15 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9211,
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1789,7 +1940,9 @@
         ]
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9209
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1801,9 +1954,14 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }
@@ -1857,9 +2015,14 @@
         "selectableFloors": [
           4
         ]
+      },
+      {
+        "dungeonIdx": 2
       }
     ],
-    "specificEgoGiftPool": [],
+    "specificEgoGiftPool": [
+      9208
+    ],
     "themePackConfig": {
       "textColor": "e5c6a0"
     }

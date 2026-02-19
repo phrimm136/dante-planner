@@ -1,9 +1,9 @@
 {
   "name": "马蹄铁饰物",
   "descs": [
-    "回合开始时，随机使未带有呼吸法 强度的1名友方单位增加2级呼吸法 强度。\n\n若全体友方单位都带有呼吸法 强度，则改为使全体友方单位获得1层呼吸法 。",
-    "回合开始时，随机使未带有呼吸法 强度的1名友方单位<style=\"upgradeHighlight\">增加3级呼吸法 强度。</style>\n\n若全体友方单位都带有呼吸法 强度，则改为使全体友方单位<style=\"upgradeHighlight\">获得2层呼吸法 。</style>",
-    "回合开始时，随机使未带有呼吸法 强度的<style=\"upgradeHighlight\">2名友方单位增加3级呼吸法 强度。</style>\n\n若全体友方单位都带有呼吸法 强度，则改为使全体友方单位<style=\"upgradeHighlight\">获得3层呼吸法 。</style>"
+    "回合开始时，随机使未带有[Breath]强度的1名友方单位增加2级[Breath]强度。\n\n若全体友方单位都带有[Breath]强度，则改为使全体友方单位获得1层[Breath]。",
+    "回合开始时，随机使未带有[Breath]强度的1名友方单位<style=\"upgradeHighlight\">增加3级[Breath]强度。</style>\n\n若全体友方单位都带有[Breath]强度，则改为使全体友方单位<style=\"upgradeHighlight\">获得2层[Breath]。</style>",
+    "回合开始时，随机使未带有[Breath]强度的<style=\"upgradeHighlight\">2名友方单位增加3级[Breath]强度。</style>\n\n若全体友方单位都带有[Breath]强度，则改为使全体友方单位<style=\"upgradeHighlight\">获得3层[Breath]。</style>"
   ],
   "obtain": "Shop"
 }

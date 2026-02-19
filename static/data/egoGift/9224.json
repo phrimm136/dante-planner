@@ -1,0 +1,18 @@
+{
+  "attributeType": "SCARLET",
+  "tag": [
+    "TIER_4"
+  ],
+  "keyword": "Laceration",
+  "price": 404,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9039,
+        9074,
+        9223
+      ]
+    ]
+  }
+}

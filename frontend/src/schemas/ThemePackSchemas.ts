@@ -9,10 +9,11 @@ import { DUNGEON_IDX } from '@/lib/constants'
  * and provide strict runtime validation.
  */
 
-// Dungeon index schema - 0, 1, or 3 (no 2)
+// Dungeon index schema - 0, 1, 2, or 3
 const dungeonIdxSchema = z.union([
   z.literal(DUNGEON_IDX.NORMAL),
   z.literal(DUNGEON_IDX.HARD),
+  z.literal(DUNGEON_IDX.PARALLEL),
   z.literal(DUNGEON_IDX.EXTREME),
 ])
 

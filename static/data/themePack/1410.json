@@ -6,6 +6,9 @@
         3,
         4
       ]
+    },
+    {
+      "dungeonIdx": 2
     }
   ],
   "nodeOption": {
@@ -64,7 +67,8 @@
       901062,
       901074,
       901095,
-      971055
+      971055,
+      971088
     ]
   },
   "egoGiftPool": [
@@ -127,9 +131,12 @@
     9082,
     9084,
     9085,
-    9083
+    9083,
+    9211
   ],
-  "specificEgoGiftPool": [],
+  "specificEgoGiftPool": [
+    9211
+  ],
   "difficulty": "DIFFICULT",
   "themePackConfig": {
     "textColor": "e5c6a0"

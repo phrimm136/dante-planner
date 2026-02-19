@@ -187,7 +187,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           }
         >
           <StartBuffSection
-            mdVersion={planner.metadata.contentVersion as 5 | 6}
+            mdVersion={planner.metadata.contentVersion}
             selectedBuffIdsOverride={deserialized.selectedBuffIds}
             onClick={() => {}}
             readOnly={true}
@@ -230,7 +230,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             </PlannerSection>
           }
         >
-          <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
+          <EGOGiftObservationSummary mdVersion={planner.metadata.contentVersion} selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
         </Suspense>
       </div>
 

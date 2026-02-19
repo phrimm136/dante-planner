@@ -1,7 +1,7 @@
 {
   "name": "盗んできた炎",
   "descs": [
-    "ターン開始時、[Combustion]および特殊火傷を付与する攻撃スキルを保有した人格が5名以上なら、この戦闘の間発動。(E.G.Oスキルを除く、待機人員を除く)\n\nスキル(E.G.Oスキルを含む)的中時に対象の[Combustion]回数が3以上なら、対象の[Combustion]を1回発動する。([Combustion]回数1が減少、スキルごとに1回発動)\n\nターン終了時、[Combustion]回数を3回以上保有した敵が[Combustion]をもう1回発動する([Combustion]回数が1減少)\n\n[Combustion]状態の敵が死亡した場合(幻想体の場合は本体死亡時)、残った[Combustion]威力を数値分、次のターン開始時に[Combustion]威力数値が最も少ない敵のいずれかに付与。\n\nターン開始時に[Combustion]状態の敵へ、このターンの間[AttackDown]4を付与\n\n[Combustion]を保有している敵が死亡した場合、次のターン開始時に[Combustion]付与スキルを保有した味方(死亡した敵の[Combustion]威力 ÷ 15)名が[AttackDmgUp]2を得る。(1ターンにつき1回発動)",
+    "ターン開始時、[Combustion]および特殊火傷を付与する攻撃スキルを保有した人格が5名以上なら、この戦闘の間発動。(E.G.Oスキルを除く、待機人員を除く)\n\nスキル(E.G.Oスキルを含む)的中時に対象の[Combustion]回数が3以上なら、対象の[Combustion]を1回発動する。([Combustion]回数が1減少、スキルごとに1回発動)\n\nターン終了時、[Combustion]回数を3回以上保有した敵が[Combustion]をもう1回発動する([Combustion]回数が1減少)\n\n[Combustion]状態の敵が死亡した場合(幻想体の場合は本体死亡時)、残った[Combustion]威力を数値分、次のターン開始時に[Combustion]威力数値が最も少ない敵のいずれかに付与。\n\nターン開始時に[Combustion]状態の敵へ、このターンの間[AttackDown]4を付与\n\n[Combustion]を保有している敵が死亡した場合、次のターン開始時に[Combustion]付与スキルを保有した味方(死亡した敵の[Combustion]威力 ÷ 15)名が[AttackDmgUp]2を得る。(1ターンにつき1回発動)",
     "",
     ""
   ],

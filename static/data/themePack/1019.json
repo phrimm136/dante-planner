@@ -5,6 +5,9 @@
       "selectableFloors": [
         4
       ]
+    },
+    {
+      "dungeonIdx": 2
     }
   ],
   "nodeOption": {

@@ -581,6 +581,11 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://dante-planner.com/identity/10814</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://dante-planner.com/identity/10901</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
@@ -721,6 +726,11 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://dante-planner.com/identity/11015</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://dante-planner.com/identity/11101</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
@@ -852,6 +862,11 @@
   </url>
   <url>
     <loc>https://dante-planner.com/identity/11213</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://dante-planner.com/identity/11214</loc>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>

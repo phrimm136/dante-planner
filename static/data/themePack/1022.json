@@ -5,6 +5,9 @@
       "selectableFloors": [
         4
       ]
+    },
+    {
+      "dungeonIdx": 2
     }
   ],
   "nodeOption": {
@@ -182,7 +185,8 @@
     9151,
     9152,
     9153,
-    9154
+    9154,
+    9210
   ],
   "specificEgoGiftPool": [
     9801,

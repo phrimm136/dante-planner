@@ -22,6 +22,7 @@ import { MAX_OBSERVABLE_GIFTS } from '@/lib/constants'
 interface EGOGiftObservationEditPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  mdVersion: number
 }
 
 /**
@@ -34,6 +35,7 @@ interface EGOGiftObservationEditPaneProps {
 export function EGOGiftObservationEditPane({
   open,
   onOpenChange,
+  mdVersion,
 }: EGOGiftObservationEditPaneProps) {
   // Store state
   const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
@@ -43,7 +45,7 @@ export function EGOGiftObservationEditPane({
   const { t } = useTranslation(['planner', 'common'])
 
   // Load observation data (suspends while loading)
-  const { data: observationData } = useEGOGiftObservationData()
+  const { data: observationData } = useEGOGiftObservationData(mdVersion)
   const { spec, i18n } = useEGOGiftListData()
 
   // LOCAL filter states

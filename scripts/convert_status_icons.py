@@ -46,6 +46,7 @@ IGNORED_DIRS = {
 IGNORED_FILES = {
     "Unbreakable Coin",
     "Hunger",
+    "When rending the body with a great sword..."
 }
 
 # Manual mappings for files that don't match keyword names exactly
@@ -78,6 +79,25 @@ MANUAL_MAPPING = {
     "Unrelenting Spirit [剛氣]": "Irritation",
     "LineCutting": "LineCutting",
     "Hunger 3": "VerHunger",
+    "The Middle - Grudge 2": "ResentmentIshmael",
+    "The Middle Styled Augmentation Tattoos": "ReinforcedTattooIshmael",
+    "Thermal Blades": "HeatingWireIshmael",
+    "Indulgence in Prescripts 2": "BlackNightmareYisang",
+    "Wound-casing Mask": "BurningWoundYisangMask",
+    "Sizzling Wound 2": "BurningWoundYisang",
+    "Firepower": "GiftCannon",
+    "Delicateness": "GiftGlass",
+    "Desire for Acknowledgement Sated": "SatisfyingEsteemNeeds",
+    "Procuration [Hermes] 2": "StackYisangSpecialSkill",
+    "When hacking through the ribs with a hatchet...": "RienWeapon01Hatchet",
+    "When penetrating the lungs with a stiletto...": "RienWeapon02Stiletto",
+    "When cleaving through the shoulder and the skull with a bastard sword...": "RienWeapon03Greatsword",
+    "When punching 10 or more holes in the torso with a rapier...": "RienWeapon04Rapier",
+    "When caving in the back of the skull with a hammer...": "RienWeapon05Sledgehammer",
+    "When rending the body with a greatsword...":"RienWeapon06Ultragreatsword",
+    "When boring a 20-inch hole with a lance...": "RienWeapon07Lance",
+    "When ripping the flesh to ten thousand strips with a whip...": "RienWeapon08Chain",
+    "When lacerating through space itself with a scythe, like a certain someone...": "RienWeapon09Scythe",
     # Punctuation/whitespace differences (fuzzy matched)
     "Artwork  Fascia": "BoneBladeTheRings",
     "Concentration[Sniper]": "LogicAtelierAM",

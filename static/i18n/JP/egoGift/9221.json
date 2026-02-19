@@ -1,0 +1,9 @@
+{
+  "name": "熱線武器",
+  "descs": [
+    "嫉妬属性スキルまたは反撃スキル的中時、[Laceration]回数または[Combustion]回数が1増加 (1ターンにつき3回)\n\n戦闘中、敵の[Laceration]回数が1未満になるとき、その敵が保有する[Combustion]回数が2以上なら、[Laceration]回数の代わりに[Combustion]回数が減少 (1ターンにつき3回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

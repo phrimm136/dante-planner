@@ -3,7 +3,7 @@
   "descs": [
     "[編成1・2番人格専用効果]\n\n[Sinking]威力と[Sinking]回数の合計が10以上の敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルでダメージを与えた場合、攻撃終了時に[Sinking]威力2、[Sinking]回数2を付与(人格別に1ターンにつき2回)\n集中戦闘方式の戦闘ステージでは効果が変更され、[Sinking]4、[Sinking]回数2を付与(人格別に1ターンにつき1回)",
     "[編成1・2・<style=\"upgradeHighlight\">3</style>番人格専用効果]\n\n[Sinking]威力と[Sinking]回数の合計が<style=\"upgradeHighlight\">8</style> 以上の敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルでダメージを与えた場合、攻撃終了時に[Sinking]威力<style=\"upgradeHighlight\">3</style>,[Sinking]回数2を付与(人格別に1ターンにつき2回)\n集中戦闘方式の戦闘ステージでは効果が変更され、[Sinking]<style=\"upgradeHighlight\">5</style>,[Sinking]回数2を付与(人格別に1ターンにつき1回)",
-    "[編成1・2・3番人格専用効果]\n\n[Sinking]威力と[Sinking]回数の合計が<style=\"upgradeHighlight\">5</style> 以上の敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルでダメージを与えた場合、攻撃終了時に[Sinking]威力3, [Sinking]回数<style=\"upgradeHighlight\">3</style>を付与(人格別に1ターンにつき2回)\n集中戦闘方式の戦闘ステージでは効果が変更され、[Sinking]5[Sinking]回数<style=\"upgradeHighlight\">3</style>を付与(人格別に1ターンにつき1回)"
+    "[編成1・2・3番人格専用効果]\n\n[Sinking]威力と[Sinking]回数の合計が<style=\"upgradeHighlight\">5</style> 以上の敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与する攻撃スキルでダメージを与えた場合、攻撃終了時に[Sinking]威力3, [Sinking]回数<style=\"upgradeHighlight\">3</style>を付与(人格別に1ターンにつき2回)\n集中戦闘方式の戦闘ステージでは効果が変更され、[Sinking]5, [Sinking]回数<style=\"upgradeHighlight\">3</style>を付与(人格別に1ターンにつき1回)"
   ],
   "obtain": "Shop"
 }

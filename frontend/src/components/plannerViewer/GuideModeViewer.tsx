@@ -97,7 +97,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           }
         >
           <StartBuffSection
-            mdVersion={planner.metadata.contentVersion as 5 | 6}
+            mdVersion={planner.metadata.contentVersion}
             selectedBuffIdsOverride={deserialized.selectedBuffIds}
             onClick={() => {}}
             readOnly={true}
@@ -160,7 +160,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             </PlannerSection>
           }
         >
-          <EGOGiftObservationSummary selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
+          <EGOGiftObservationSummary mdVersion={planner.metadata.contentVersion} selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
         </Suspense>
       )}
       {visibleSections[3] && (

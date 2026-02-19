@@ -466,26 +466,29 @@ export function getAffinityIconPath(affinity: string): string {
 /**
  * Gets Start Buff icon path
  * @param baseId - Base buff ID (100-109)
+ * @param version - Mirror Dungeon version
  * @returns Buff icon path
  */
-export function getStartBuffIconPath(baseId: number): string {
-  return `/images/UI/MD6/StartBuffIcon_${String(baseId)}.webp`
+export function getStartBuffIconPath(baseId: number, version: number): string {
+  return `/images/UI/MD${String(version)}/StartBuffIcon_${String(baseId)}.webp`
 }
 
 /**
  * Gets Start Buff pane background path
+ * @param version - Mirror Dungeon version
  * @returns Pane background path
  */
-export function getStartBuffPanePath(): string {
-  return `/images/UI/MD6/startBuffPane.webp`
+export function getStartBuffPanePath(version: number): string {
+  return `/images/UI/MD${String(version)}/startBuffPane.webp`
 }
 
 /**
  * Gets Start Buff highlight overlay path
+ * @param version - Mirror Dungeon version
  * @returns Highlight overlay path
  */
-export function getStartBuffHighlightPath(): string {
-  return `/images/UI/MD6/startBuffHighlight.webp`
+export function getStartBuffHighlightPath(version: number): string {
+  return `/images/UI/MD${String(version)}/startBuffHighlight.webp`
 }
 
 /**
@@ -493,19 +496,31 @@ export function getStartBuffHighlightPath(): string {
  * @returns Star light path
  */
 export function getStartBuffStarLightPath(): string {
-  return `/images/UI/MD6/starLight.webp`
+  return `/images/UI/MD/starLight.webp`
 }
 
 /**
  * Gets Start Buff enhancement button background path
  * @param level - Enhancement level (0 for unselected, 1 for +, 2 for ++)
+ * @param version - Mirror Dungeon version
  * @returns Enhancement button background path
  */
-export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2): string {
+export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2, version: number): string {
   if (level === 0) {
-    return `/images/UI/MD6/startBuffEnhancementUnselected.webp`
+    return `/images/UI/MD${String(version)}/startBuffEnhancementUnselected.webp`
   }
-  return `/images/UI/MD6/startBuffEnhancement${String(level)}Selected.webp`
+  return `/images/UI/MD${String(version)}/startBuffEnhancement${String(level)}Selected.webp`
+}
+
+/**
+ * Gets Start Buff enhancement selected overlay path (MD7+)
+ * Rendered on top of the base (unselected) frame when a buff is selected.
+ * MD7+ uses a single overlay image instead of level-numbered selected images.
+ * @param version - Mirror Dungeon version
+ * @returns Overlay image path
+ */
+export function getStartBuffEnhancementOverlayPath(version: number): string {
+  return `/images/UI/MD${String(version)}/startBuffEnhancementSelected.webp`
 }
 
 /**
@@ -515,7 +530,7 @@ export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2): string {
  */
 export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
   if (level === 0) {
-    return `/images/UI/MD6/startBuffEnhancementIcon.webp`
+    return `/images/UI/MD/startBuffEnhancementIcon.webp`
   }
   return `/images/UI/egoGift/enhancement${String(level)}.webp`
 }
@@ -634,11 +649,10 @@ export function getAttackWeightIconPath(): string {
 
 /**
  * Gets banner image path for home page carousel
- * @param mdVersion - Mirror Dungeon version (e.g., 5, 6)
  * @returns Banner image path
  */
-export function getBannerImagePath(mdVersion: number): string {
-  return `/images/banner/MD${String(mdVersion)}.webp`
+export function getBannerImagePath(): string {
+  return `/images/banner/MD.webp`
 }
 
 /**

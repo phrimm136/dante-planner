@@ -2,8 +2,8 @@
   "name": "축복이었던",
   "descs": [
     "[편성 6번 인격 전용 효과]\n\n관통 스킬을 사용하여 적에게 적중 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 1 얻음 (턴 당 1회).\n\n해당 스킬로 적 처치 시, 다음 턴에 [Agility] 1 추가로 얻음 (턴 당 1회).",
-    "[편성 <style=\"upgradeHighlight\">5번</style>, 6번 인격 전용 효과]\n\n관통 스킬을 사용하여 적에게 적중 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 1 얻음 (턴 당 1회).\n\n해당 스킬로 적 처치 시, 다음 턴에 [Agility] 1, <style=\"upgradeHighlight\">[PenetrateDamageUp] 1</style> 추가로 얻음 (턴 당 1회).",
-    "[편성 5번, 6번 인격 전용 효과]\n\n관통 스킬을 사용하여 적에게 적중 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 1 얻음 (턴 당 <style=\"upgradeHighlight\">2</style>회).\n\n해당 스킬로 적 처치 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] <style=\"upgradeHighlight\">2</style> 추가로 얻음 (턴 당 1회)."
+    "[편성 <style=\"upgradeHighlight\">5번</style>, 6번 인격 전용 효과]\n\n관통 스킬을 사용하여 적에게 적중 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 1 얻음 (인격 별로 턴 당 1회).\n\n해당 스킬로 적 처치 시, 다음 턴에 [Agility] 1, <style=\"upgradeHighlight\">[PenetrateDamageUp] 1</style> 추가로 얻음 (인격 별로 턴 당 1회).",
+    "[편성 5번, 6번 인격 전용 효과]\n\n관통 스킬을 사용하여 적에게 적중 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 1 얻음 (인격 별로 턴 당 <style=\"upgradeHighlight\">2</style>회).\n\n해당 스킬로 적 처치 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] <style=\"upgradeHighlight\">2</style> 추가로 얻음 (인격 별로 턴 당 1회)."
   ],
   "obtain": "Shop"
 }

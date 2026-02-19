@@ -2,8 +2,8 @@
   "name": "简历",
   "descs": [
     "回合结束时，使[Charge]与特殊充能层数之和不低于7层的友方单位在下回合获得1层[Agility]。\n\n若该友方单位拥有忧郁攻击技能，则改为获得2层[Agility]与1层[ResultEnhancement]。",
-    "回合结束时，充能 与特殊充能层数之和不低于7层的友方单位在下回合<style=\"upgradeHighlight\">获得2层迅捷 。</style>\n\n若该友方单位拥有忧郁攻击技能，则改为<style=\"upgradeHighlight\">获得3层迅捷 </style>与1层威力提升 。",
-    "回合结束时，充能 与特殊充能层数之和不低于7层的友方单位在下回合<style=\"upgradeHighlight\">获得3层迅捷 。</style>\n\n若该友方单位拥有忧郁攻击技能，则改为<style=\"upgradeHighlight\">获得4层迅捷 </style>与1层威力提升 。"
+    "回合结束时，[Charge]与特殊充能层数之和不低于7层的友方单位在下回合<style=\"upgradeHighlight\">获得2层[Agility]。</style>\n\n若该友方单位拥有忧郁攻击技能，则改为<style=\"upgradeHighlight\">获得3层[Agility]</style>与1层[ResultEnhancement]。",
+    "回合结束时，[Charge]与特殊充能层数之和不低于7层的友方单位在下回合<style=\"upgradeHighlight\">获得3层[Agility]。</style>\n\n若该友方单位拥有忧郁攻击技能，则改为<style=\"upgradeHighlight\">获得4层[Agility]</style>与1层[ResultEnhancement]。"
   ],
   "obtain": "Shop"
 }

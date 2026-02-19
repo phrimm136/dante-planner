@@ -1,9 +1,9 @@
 {
   "name": "辉光变动仪",
   "descs": [
-    "关卡的首个回合开始时，使全体敌方单位(或所有异想体部位)增加4级震颤 强度，并对其施加4层震颤 。\n\n使用嫉妒技能造成伤害时，使目标增加2级震颤 强度。",
-    "<style=\"upgradeHighlight\">波次的首个回合开始时</style>，使全体敌方单位(或所有异想体部位)增加4级震颤 强度，并对其施加4层震颤 。\n\n使用嫉妒技能造成伤害时，使目标增加2级震颤 强度。",
-    "波次的首个回合开始时，使全体敌方单位(或所有异想体部位)<style=\"upgradeHighlight\">增加5级震颤 强度，并对其施加5层震颤 。</style>\n\n使用嫉妒技能造成伤害时，使目标<style=\"upgradeHighlight\">增加3级震颤 强度。</style>"
+    "关卡的首个回合开始时，使全体敌方单位(或所有异想体部位)增加4级[Vibration]强度，并对其施加4层[Vibration]。\n\n使用嫉妒技能造成伤害时，使目标增加2级[Vibration]强度。",
+    "<style=\"upgradeHighlight\">波次的首个回合开始时</style>，使全体敌方单位(或所有异想体部位)增加4级[Vibration]强度，并对其施加4层[Vibration]。\n\n使用嫉妒技能造成伤害时，使目标增加2级[Vibration]强度。",
+    "波次的首个回合开始时，使全体敌方单位(或所有异想体部位)<style=\"upgradeHighlight\">增加5级[Vibration]强度，并对其施加5层[Vibration]。</style>\n\n使用嫉妒技能造成伤害时，使目标<style=\"upgradeHighlight\">增加3级[Vibration]强度。</style>"
   ],
   "obtain": "Shop"
 }

@@ -56,9 +56,9 @@ interface BannerSlide {
 
 const BANNER_SLIDES: BannerSlide[] = [
   {
-    id: 'md6',
+    id: 'md',
     type: 'image',
-    background: getBannerImagePath(6),
+    background: getBannerImagePath(),
     titleKey: 'md.title',
     subtitleKey: 'md.subtitle',
     ctaKey: 'md.cta',

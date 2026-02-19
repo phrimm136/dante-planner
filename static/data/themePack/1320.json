@@ -5,6 +5,9 @@
       "selectableFloors": [
         4
       ]
+    },
+    {
+      "dungeonIdx": 2
     }
   ],
   "nodeOption": {
@@ -84,6 +87,7 @@
     9118,
     9128,
     9193,
+    9210,
     9032,
     9034,
     9108,
@@ -141,9 +145,12 @@
     9081,
     9084,
     9085,
-    9083
+    9083,
+    9208
   ],
-  "specificEgoGiftPool": [],
+  "specificEgoGiftPool": [
+    9208
+  ],
   "difficulty": "DIFFICULT",
   "themePackConfig": {
     "textColor": "e5c6a0"

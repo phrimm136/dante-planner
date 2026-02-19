@@ -1,9 +1,9 @@
 {
   "name": "锈蚀的笼头",
   "descs": [
-    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其增加2级流血 强度。\n\n若该技能为斩击技能，则改为增加4级流血 强度。",
-    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其<style=\"upgradeHighlight\">增加3级流血 强度。</style>\n\n若该技能为斩击技能，则改为<style=\"upgradeHighlight\">增加5级流血 强度。</style>",
-    "使用单个技能<style=\"upgradeHighlight\">对敌方单位造成不低于1点体力伤害时</style>，使其增加3级流血 强度。\n\n若该技能为斩击技能，则改为增加5级流血 强度<style=\"upgradeHighlight\">并施加1层流血 。</style>"
+    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其增加2级[Laceration]强度。\n\n若该技能为斩击技能，则改为增加4级[Laceration]强度。",
+    "使用单个技能对敌方单位造成不低于12点体力伤害时，使其<style=\"upgradeHighlight\">增加3级[Laceration]强度。</style>\n\n若该技能为斩击技能，则改为<style=\"upgradeHighlight\">增加5级[Laceration]强度。</style>",
+    "使用单个技能<style=\"upgradeHighlight\">对敌方单位造成不低于1点体力伤害时</style>，使其增加3级[Laceration]强度。\n\n若该技能为斩击技能，则改为增加5级[Laceration]强度<style=\"upgradeHighlight\">并施加1层[Laceration]。</style>"
   ],
   "obtain": "Shop"
 }

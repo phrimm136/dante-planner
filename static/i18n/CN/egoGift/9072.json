@@ -1,9 +1,9 @@
 {
   "name": "避雷针",
   "descs": [
-    "关卡开始时，使全体友方单位获得3层充能 。\n\n若参战的拥有嫉妒攻击技能的友方单位不低于2名，则改为获得5层充能 。",
-    "关卡开始时，使全体友方单位<style=\"upgradeHighlight\">获得4层充能 。</style>\n\n若参战的拥有嫉妒攻击技能的友方单位不低于2名，则改为<style=\"upgradeHighlight\">获得6层充能 。</style>",
-    "关卡开始时，使全体友方单位<style=\"upgradeHighlight\">获得5层充能 。</style>\n\n若参战的拥有嫉妒攻击技能的友方单位不低于2名，则改为<style=\"upgradeHighlight\">获得7层充能 。</style>"
+    "关卡开始时，使全体友方单位获得3层[Charge]。\n\n若参战的拥有嫉妒攻击技能的友方单位不低于2名，则改为获得5层[Charge]。",
+    "关卡开始时，使全体友方单位<style=\"upgradeHighlight\">获得4层[Charge]。</style>\n\n若参战的拥有嫉妒攻击技能的友方单位不低于2名，则改为<style=\"upgradeHighlight\">获得6层[Charge]。</style>",
+    "关卡开始时，使全体友方单位<style=\"upgradeHighlight\">获得5层[Charge]。</style>\n\n若参战的拥有嫉妒攻击技能的友方单位不低于2名，则改为<style=\"upgradeHighlight\">获得7层[Charge]。</style>"
   ],
   "obtain": "Shop"
 }

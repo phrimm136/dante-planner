@@ -1,0 +1,18 @@
+{
+  "attributeType": "CRIMSON",
+  "tag": [
+    "TIER_4"
+  ],
+  "keyword": "Combustion",
+  "price": 398,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9027,
+        9102,
+        9215
+      ]
+    ]
+  }
+}

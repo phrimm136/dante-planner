@@ -4,14 +4,14 @@ import { StartBuffMiniCard } from './StartBuffMiniCard'
 
 // Mock asset path functions
 vi.mock('@/lib/assetPaths', () => ({
-  getStartBuffIconPath: (baseId: number) => `/mock/icon/${baseId}.webp`,
+  getStartBuffIconPath: (baseId: number, _version: number) => `/mock/icon/${baseId}.webp`,
   getStartBuffMiniPath: (version: number) => `/mock/startBuffMini-${version}.webp`,
   getStartBuffMiniHighlightPath: (version: number) => `/mock/startBuffMiniHighlight-${version}.webp`,
 }))
 
 // Mock constants
 vi.mock('@/lib/constants', () => ({
-  MD_ACCENT_COLORS: { 6: '#00ffcc' },
+  MD_ACCENT_COLORS: { 6: '#00ffcc', 7: '#b00000' },
 }))
 
 // Mock EGOGiftEnhancementIndicator to track when it's rendered

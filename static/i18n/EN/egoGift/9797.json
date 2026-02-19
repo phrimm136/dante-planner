@@ -1,7 +1,7 @@
 {
   "name": "Shatterbound Cannon",
   "descs": [
-    "Turn Start: gain 2 [AttackDmgUp] and 2 [Vulnerable] every turn\nStarting from the 2nd turn, Stacks of [AttackDmgUp] and [Vulnerable] gained from the above effect increases by 1 each (up to 8 times)",
+    "Turn Start: Gain 2 [GiftCannon] and 2 [GiftGlass] every turn\n\nStarting from the 2nd turn, Stacks of [GiftCannon] and [GiftGlass] gained from the above effect increase by 1 each (up to 8 times)",
     "",
     ""
   ],

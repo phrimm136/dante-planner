@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { CARD_GRID, ENHANCEMENT_LABELS, type MDVersion } from '@/lib/constants'
+import { CARD_GRID, START_BUFF_CARD_SIZE, ENHANCEMENT_LABELS, type MDVersion } from '@/lib/constants'
 import { getStartBuffEnhancementIconPath } from '@/lib/assetPaths'
 import { useStartBuffSelection } from '@/hooks/useStartBuffSelection'
 import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
@@ -17,10 +17,27 @@ import {
   deriveEnhancements,
   getBaseIdFromBuffId,
 } from '@/types/StartBuffTypes'
-import type { EnhancementLevel } from '@/types/StartBuffTypes'
+import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { StartBuffCard } from './StartBuffCard'
+import { StartBuffCardMD6 } from './StartBuffCardMD6'
+import { StartBuffCardMD7 } from './StartBuffCardMD7'
+
+type StartBuffCardProps = {
+  buff: StartBuff
+  allBuffs: StartBuff[]
+  i18n: StartBuffI18n
+  battleKeywords?: BattleKeywords
+  isSelected: boolean
+  onSelect: (buffId: number) => void
+  enhancement: EnhancementLevel
+  onEnhancementChange: (baseId: number, level: EnhancementLevel) => void
+}
+
+const START_BUFF_CARD_BY_VERSION: Record<number, ComponentType<StartBuffCardProps>> = {
+  6: StartBuffCardMD6,
+  7: StartBuffCardMD7,
+}
 
 interface StartBuffEditPaneProps {
   open: boolean
@@ -63,8 +80,9 @@ export function StartBuffEditPane({
   // Calculate scale and dimensions
   const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
   const scale = isDesktop ? 1 : mobileScale
-  const scaledWidth = CARD_GRID.WIDTH.START_BUFF * scale
-  const scaledHeight = CARD_GRID.HEIGHT.START_BUFF * scale
+  const { width: cardWidth, height: cardHeight } = START_BUFF_CARD_SIZE[mdVersion] ?? START_BUFF_CARD_SIZE[6]
+  const scaledWidth = cardWidth * scale
+  const scaledHeight = cardHeight * scale
 
   // Enhancement preview state for all cards (lifted from StartBuffCard)
   // Initialized from current selection; empty entries fall back to 0
@@ -133,6 +151,8 @@ export function StartBuffEditPane({
     }
   }
 
+  const StartBuffCard = START_BUFF_CARD_BY_VERSION[mdVersion] ?? StartBuffCardMD6
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -200,9 +220,9 @@ export function StartBuffEditPane({
           ))}
         </div>
 
-        <div className="w-full overflow-x-auto scrollbar-hide">
+        <div className="w-full scrollbar-hide">
           <div
-            className="bg-muted grid gap-1 w-max"
+            className="bg-muted grid gap-2 w-max mx-auto"
             style={{
               gridTemplateColumns: `repeat(5, ${scaledWidth}px)`,
               gridAutoRows: `${scaledHeight}px`,
@@ -217,8 +237,8 @@ export function StartBuffEditPane({
                 <ScaledCardWrapper
                   key={buff.baseId}
                   mobileScale={mobileScale}
-                  cardWidth={CARD_GRID.WIDTH.START_BUFF}
-                  cardHeight={CARD_GRID.HEIGHT.START_BUFF}
+                  cardWidth={cardWidth}
+                  cardHeight={cardHeight}
                 >
                   <StartBuffCard
                     buff={buff}
@@ -229,7 +249,6 @@ export function StartBuffEditPane({
                     onSelect={handleSelect}
                     enhancement={enhancement}
                     onEnhancementChange={handleEnhancementChange}
-                    mdVersion={mdVersion}
                   />
                 </ScaledCardWrapper>
               )

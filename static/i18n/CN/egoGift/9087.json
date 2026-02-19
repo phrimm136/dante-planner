@@ -1,9 +1,9 @@
 {
   "name": "炽热的智慧",
   "descs": [
-    "通过烧伤 效果击杀敌方单位后，下回合开始时使拥有增加烧伤 强度的技能的2名友方单位获得1层伤害强化 。",
-    "通过烧伤 效果击杀敌方单位后，下回合开始时使拥有增加烧伤 强度的技能的2名友方单位<style=\"upgradeHighlight\">获得2层伤害强化 。</style>",
-    "通过烧伤 效果击杀敌方单位后，下回合开始时使拥有增加烧伤 强度的技能的<style=\"upgradeHighlight\">3名友方单位</style>获得2层伤害强化 。"
+    "通过[Combustion]效果击杀敌方单位后，下回合开始时使拥有增加[Combustion]强度的技能的2名友方单位获得1层伤害强化 。",
+    "通过[Combustion]效果击杀敌方单位后，下回合开始时使拥有增加[Combustion]强度的技能的2名友方单位<style=\"upgradeHighlight\">获得2层伤害强化 。</style>",
+    "通过[Combustion]效果击杀敌方单位后，下回合开始时使拥有增加[Combustion]强度的技能的<style=\"upgradeHighlight\">3名友方单位</style>获得2层伤害强化 。"
   ],
   "obtain": "Shop"
 }

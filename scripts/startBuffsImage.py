@@ -2,7 +2,7 @@ from pathlib import Path
 from PIL import Image
 from md_config import MD_VERSION
 
-TINT_COLOR = "#B00000"
+TINT_COLOR = "#e5d7d7"
 
 INPUT_DIR = Path("../raw/Mirror Dungeon/Mirror of the Dreaming")
 OUTPUT_DIR = Path(f"../static/images/UI/MD{MD_VERSION}")

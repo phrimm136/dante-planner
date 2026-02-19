@@ -1,7 +1,7 @@
 import { startTransition } from 'react'
 import { useStartBuffData, getBaseBuffs } from '@/hooks/useStartBuffData'
 import { useBattleKeywords } from '@/hooks/useBattleKeywords'
-import type { MDVersion } from '@/hooks/useStartBuffData'
+import type { MDVersion } from '@/lib/constants'
 import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
 import {
   deriveEnhancements,

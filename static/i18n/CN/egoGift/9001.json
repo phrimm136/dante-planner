@@ -1,9 +1,9 @@
 {
   "name": "炼狱炎蝶之梦",
   "descs": [
-    "通过技能效果使已带有烧伤 或特殊烧伤的敌方单位增加烧伤 强度或施加特殊烧伤时，随机使敌方单位增加共计3级烧伤 强度。\n\n激活暴怒完全共鸣时，战斗开始时，随机使敌方单位增加共计5级烧伤 强度。",
-    "通过技能效果使已带有烧伤 或特殊烧伤的敌方单位增加烧伤 强度或施加特殊烧伤时，随机使敌方单位增加共计<style=\"upgradeHighlight\">4级烧伤 强度</style>。\n\n激活暴怒完全共鸣时，战斗开始时，随机使敌方单位增加共计<style=\"upgradeHighlight\">6级烧伤 强度</style>。",
-    "通过技能效果使已带有烧伤 或特殊烧伤的敌方单位增加烧伤 强度或施加特殊烧伤时，随机使敌方单位增加共计<style=\"upgradeHighlight\">5级烧伤 强度</style>。\n\n激活<style=\"upgradeHighlight\">暴怒共鸣</style>时，战斗开始时，随机使敌方单位增加共计<style=\"upgradeHighlight\">8级烧伤 强度</style>。"
+    "通过技能效果使已带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度或施加特殊烧伤时，随机使敌方单位增加共计3级[Combustion]强度。\n\n激活暴怒完全共鸣时，战斗开始时，随机使敌方单位增加共计5级[Combustion]强度。",
+    "通过技能效果使已带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度或施加特殊烧伤时，随机使敌方单位增加共计<style=\"upgradeHighlight\">4级[Combustion]强度</style>。\n\n激活暴怒完全共鸣时，战斗开始时，随机使敌方单位增加共计<style=\"upgradeHighlight\">6级[Combustion]强度</style>。",
+    "通过技能效果使已带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度或施加特殊烧伤时，随机使敌方单位增加共计<style=\"upgradeHighlight\">5级[Combustion]强度</style>。\n\n激活<style=\"upgradeHighlight\">暴怒共鸣</style>时，战斗开始时，随机使敌方单位增加共计<style=\"upgradeHighlight\">8级[Combustion]强度</style>。"
   ],
   "obtain": "Shop"
 }

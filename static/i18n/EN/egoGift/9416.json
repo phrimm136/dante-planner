@@ -1,7 +1,7 @@
 {
   "name": "Wholeness",
   "descs": [
-    "If the ally wins a Clash using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', inflict 2~3 [NailPersonality].\n\n'N Corp. Fanatic' Identities deal +25% damage against targets with [Laceration] and gain 1 Fanatic at Turn Start.\nIf the said ally's SP is maxed, also gain 3 [AttackDmgUp].\n\n'N Corp. Fanatic' Identities gain Final Power +1, Plus Coin Power +1, Minus Coin Power -1, and their Attack Skills inflict +1 more [NailPersonality].",
+    "If the ally wins a Clash using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', inflict 2~3 [NailPersonality].\n\n'N Corp. Fanatic' Identities deal +25% damage against enemies and gain 1 Fanatic at Turn Start. If the said ally's SP is maxed, or if a 3+ Lust Reson. was formed last turn, the said ally additionally gains 3 [AttackDmgUp].\n\n'N Corp. Fanatic' Identities gain Final Power +2, Plus Coin Power +1, Minus Coin Power -1, and their Attack Skills inflict +1 more [NailPersonality].\n\n'N Corp. Fanatic' Identities deal +50% damage against <Mechanical Amalgam> enemies with Base Skills",
     "",
     ""
   ],

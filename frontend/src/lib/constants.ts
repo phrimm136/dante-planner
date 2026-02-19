@@ -307,11 +307,12 @@ export const DEFAULT_SKILL_EA: Record<OffensiveSkillSlot, number> = {
 
 /**
  * Dungeon difficulty indices from themePackList.json
- * Maps to internal game data (0=normal, 1=hard, 3=extreme - no 2)
+ * Maps to internal game data (0=normal, 1=hard, 2=parallel, 3=extreme)
  */
 export const DUNGEON_IDX = {
   NORMAL: 0,
   HARD: 1,
+  PARALLEL: 2,
   EXTREME: 3,
 } as const
 
@@ -445,18 +446,14 @@ export const DEFAULT_PLANNER_TYPE: PlannerType = 'MIRROR_DUNGEON'
 export const MD_ACCENT_COLORS: Record<number, string> = {
   5: '#ff9933',
   6: '#00ffcc',
+  7: '#e5d7d7',
 } as const
 
 /**
- * Mirror Dungeon versions
- * Used for version-specific data loading (buffs, gifts)
- */
-export const MD_VERSIONS = [5, 6] as const
-
-/**
  * Mirror Dungeon version type
+ * Valid versions are determined at runtime by the backend config (mdAvailableVersions)
  */
-export type MDVersion = (typeof MD_VERSIONS)[number]
+export type MDVersion = number
 
 /**
  * Section Styling Tokens
@@ -757,6 +754,17 @@ export const CARD_GRID = {
  * Card width type for ResponsiveCardGrid
  */
 export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
+
+/**
+ * Start Buff card dimensions keyed by MD version.
+ * Each entry must match the actual pane image size used in the card component.
+ */
+export const START_BUFF_CARD_SIZE: Record<number, { width: number; height: number }> = {
+  /** MD6: w-68 h-80 */
+  6: { width: 272, height: 320 },
+  /** MD7: w-68 h-80 */
+  7: { width: 272, height: 320 },
+}
 
 /**
  * Virtual Grid Rendering Constants

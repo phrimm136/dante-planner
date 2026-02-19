@@ -9,7 +9,8 @@
     {
       "dungeonIdx": 1,
       "selectableFloors": [
-        1
+        1,
+        2
       ]
     }
   ],

@@ -145,9 +145,12 @@
     9082,
     9084,
     9085,
-    9083
+    9083,
+    9209
   ],
-  "specificEgoGiftPool": [],
+  "specificEgoGiftPool": [
+    9209
+  ],
   "difficulty": null,
   "themePackConfig": {
     "textColor": "e5c6a0"

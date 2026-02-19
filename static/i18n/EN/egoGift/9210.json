@@ -1,0 +1,9 @@
+{
+  "name": "Meat Tenderizer",
+  "descs": [
+    "[Effects apply only to #4 Deployed Identity]\n\nIf this unit has 2+ Blunt Attack Skills, gain 1 [ParryingResultUp] at Turn Start",
+    "[Effects apply only to #4 Deployed Identity]\n\nIf this unit has 2+ Blunt Attack Skills, gain <style=\"upgradeHighlight\">2</style> [ParryingResultUp] at Turn Start",
+    "[Effects apply only to #4, <style=\"upgradeHighlight\">#5</style> Deployed Identities]\n\nIf this unit has 2+ Blunt Attack Skills, gain 2 [ParryingResultUp] at Turn Start"
+  ],
+  "obtain": "Shop"
+}

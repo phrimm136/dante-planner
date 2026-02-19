@@ -1,9 +1,9 @@
 {
   "name": "尘归尘",
   "descs": [
-    "战斗开始时，若全体敌方单位(或所有异想体部位)都带有烧伤 或特殊烧伤，则使全体敌方单位(或所有异想体部位)增加2级烧伤 强度。",
-    "战斗开始时，<style=\"upgradeHighlight\">使带有烧伤 或特殊烧伤的全体敌方单位(或所有异想体部位)增加2级烧伤 强度</style>。",
-    "战斗开始时，<style=\"upgradeHighlight\">使全体敌方单位(或所有异想体部位)增加3级烧伤 强度</style>。"
+    "战斗开始时，若全体敌方单位(或所有异想体部位)都带有[Combustion]或特殊烧伤，则使全体敌方单位(或所有异想体部位)增加2级[Combustion]强度。",
+    "战斗开始时，<style=\"upgradeHighlight\">使带有[Combustion]或特殊烧伤的全体敌方单位(或所有异想体部位)增加2级[Combustion]强度</style>。",
+    "战斗开始时，<style=\"upgradeHighlight\">使全体敌方单位(或所有异想体部位)增加3级[Combustion]强度</style>。"
   ],
   "obtain": "Shop"
 }

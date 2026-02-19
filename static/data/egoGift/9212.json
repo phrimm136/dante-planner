@@ -1,0 +1,18 @@
+{
+  "attributeType": "INDIGO",
+  "tag": [
+    "TIER_4"
+  ],
+  "keyword": "Breath",
+  "price": 399,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9154,
+        9427,
+        9428
+      ]
+    ]
+  }
+}

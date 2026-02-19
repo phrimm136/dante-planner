@@ -1,0 +1,9 @@
+{
+  "name": "도둑맞은 해결사 잡지",
+  "descs": [
+    "턴 시작 시, [HitResultUp] 1 얻음\n\n질투 완전 공명을 발동하였다면, 전투 시작 시 [HitDamageUp] 1 얻음\n\n중지 소속 인격이 4인 이상 있다면, 스테이지 시작 시 무작위 적 1명에게 [RetaliationBook] 부여",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

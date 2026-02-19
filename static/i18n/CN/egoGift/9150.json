@@ -1,9 +1,9 @@
 {
   "name": "时间的枷锁",
   "descs": [
-    "回合开始时，使拥有打击攻击技能(不包括E.G.O技能)的友方单位获得1层攻击等级提升 。\n\n若该单位拥有不低于2个打击攻击技能，则改为获得1层攻击等级提升 与1层打击伤害强化 。\n\n若该单位拥有不低于2个使用减算硬币的打击攻击技能，则改为获得2层攻击等级提升 与2层打击伤害强化 。",
-    "回合开始时，使拥有打击攻击技能(不包括E.G.O技能)的友方单位获得<style=\"upgradeHighlight\">2层攻击等级提升 。</style>\n\n若该单位拥有不低于2个打击攻击技能，则改为获得<style=\"upgradeHighlight\">2层攻击等级提升 </style>与1层打击伤害强化 。\n\n若该单位拥有不低于2个使用减算硬币的打击攻击技能，则改为获得<style=\"upgradeHighlight\">3层攻击等级提升 </style>与2层打击伤害强化 。",
-    "回合开始时，使拥有打击攻击技能(不包括E.G.O技能)的友方单位获得2层攻击等级提升 与<style=\"upgradeHighlight\">1层打击伤害强化 。</style>\n\n若该单位拥有不低于2个打击攻击技能，则改为获得2层攻击等级提升 与<style=\"upgradeHighlight\">2层打击伤害强化 。</style>\n\n若该单位拥有不低于2个使用减算硬币的打击攻击技能，则改为获得3层攻击等级提升 与<style=\"upgradeHighlight\">3层打击伤害强化 。</style>"
+    "回合开始时，使拥有打击攻击技能(不包括E.G.O技能)的友方单位获得1层[AttackUp]。\n\n若该单位拥有不低于2个打击攻击技能，则改为获得1层[AttackUp]与1层[HitDamageUp]。\n\n若该单位拥有不低于2个使用减算硬币的打击攻击技能，则改为获得2层[AttackUp]与2层[HitDamageUp]。",
+    "回合开始时，使拥有打击攻击技能(不包括E.G.O技能)的友方单位获得<style=\"upgradeHighlight\">2层[AttackUp]。</style>\n\n若该单位拥有不低于2个打击攻击技能，则改为获得<style=\"upgradeHighlight\">2层[AttackUp]</style>与1层[HitDamageUp]。\n\n若该单位拥有不低于2个使用减算硬币的打击攻击技能，则改为获得<style=\"upgradeHighlight\">3层[AttackUp]</style>与2层[HitDamageUp]。",
+    "回合开始时，使拥有打击攻击技能(不包括E.G.O技能)的友方单位获得2层[AttackUp]与<style=\"upgradeHighlight\">1层[HitDamageUp]。</style>\n\n若该单位拥有不低于2个打击攻击技能，则改为获得2层[AttackUp]与<style=\"upgradeHighlight\">2层[HitDamageUp]。</style>\n\n若该单位拥有不低于2个使用减算硬币的打击攻击技能，则改为获得3层[AttackUp]与<style=\"upgradeHighlight\">3层[HitDamageUp]。</style>"
   ],
   "obtain": "Shop"
 }

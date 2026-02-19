@@ -1,7 +1,7 @@
 {
   "name": "탐하는 가시",
   "descs": [
-    "3턴마다, [Laceration]이 있는 적 (부위)에 [RoseThorn]을 2 부여함.\n모든 적 (부위)에 [Laceration]이 있으면, [RoseThorn]을 4 부여함.",
+    "스테이지 시작시, [BloodDinner]을 100 생성\n턴 시작 시, [Laceration]이 있는 적 (부위)에 [RoseThorn]을 2 부여함.\n모든 적 (부위)에 [Laceration]이 있으면, [RoseThorn]을 4 부여함.",
     "",
     ""
   ],

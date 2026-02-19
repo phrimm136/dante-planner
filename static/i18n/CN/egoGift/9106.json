@@ -1,9 +1,9 @@
 {
   "name": "被扣留的颂歌",
   "descs": [
-    "战斗开始时，若全体敌方单位(若是异想体，则改为所有部位)均带有流血 ，则下回合使全体友方单位获得1层迅捷 。",
-    "战斗开始时，若全体敌方单位(若是异想体，则改为所有部位)均带有流血 ，则下回合使全体友方单位获得1层迅捷 与<style=\"upgradeHighlight\">1层伤害强化 </style>。",
-    "战斗开始时，若全体敌方单位(若是异想体，则改为所有部位)均带有流血 ，则下回合使全体友方单位获得<style=\"upgradeHighlight\">2层迅捷 </style>，1层伤害强化 与<style=\"upgradeHighlight\">2层攻击等级提升 </style>。"
+    "战斗开始时，若全体敌方单位(若是异想体，则改为所有部位)均带有[Laceration]，则下回合使全体友方单位获得1层[Agility]。",
+    "战斗开始时，若全体敌方单位(若是异想体，则改为所有部位)均带有[Laceration]，则下回合使全体友方单位获得1层[Agility]与<style=\"upgradeHighlight\">1层伤害强化 </style>。",
+    "战斗开始时，若全体敌方单位(若是异想体，则改为所有部位)均带有[Laceration]，则下回合使全体友方单位获得<style=\"upgradeHighlight\">2层[Agility]</style>，1层伤害强化 与<style=\"upgradeHighlight\">2层[AttackUp]</style>。"
   ],
   "obtain": "Shop"
 }

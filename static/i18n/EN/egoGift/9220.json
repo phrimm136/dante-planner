@@ -1,0 +1,9 @@
+{
+  "name": "Stolen Fixer Magazine",
+  "descs": [
+    "Turn Start: Gain 1 [HitResultUp]\n\nCombat Start: Gain 1 [HitDamageUp] if Envy A-Reson. is activated\n\nEncounter Start: If there are 4 or more The Middle-faction Identities on the battlefield, apply [RetaliationBook] to a random enemy",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

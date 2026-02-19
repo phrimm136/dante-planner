@@ -1,5 +1,5 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
-import type { MDVersion } from '@/hooks/useStartBuffData'
+import type { MDVersion } from '@/lib/constants'
 import type { StartEgoGiftPools } from '@/types/StartGiftTypes'
 import { StartEgoGiftPoolsSchema } from '@/schemas'
 

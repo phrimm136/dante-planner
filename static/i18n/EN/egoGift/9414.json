@@ -1,7 +1,7 @@
 {
   "name": "Blood-red Mane",
   "descs": [
-    "Effects apply to all Identities with Wrath or Lust Affinity Attack Skills.\n\nTurn End: if this unit did not take any damage from enemy Attack Skills this turn, gain 2 [Agility] and 2 [Endurance].\n\nTurn End: if this unit did take damage from enemy Attack Skills this turn, gain 2 [Binding] and Clash Power +2 next turn.",
+    "Effects apply to all Identities with Wrath or Lust Attack Skills.\n\nTurn End: if this unit did not take any damage from enemy Attack Skills this turn, gain 2 [Agility] and 2 [Endurance].\n\nTurn End: if this unit did take damage from enemy Attack Skills this turn, gain 2 [Binding] and Clash Power +2 next turn.",
     "",
     ""
   ],

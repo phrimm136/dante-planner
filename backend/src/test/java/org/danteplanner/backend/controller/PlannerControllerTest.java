@@ -159,7 +159,7 @@ class PlannerControllerTest {
         request.setTitle("Test Planner");
         request.setStatus("draft");
         request.setContent(VALID_CONTENT);
-        request.setContentVersion(6);
+        request.setContentVersion(7);
         request.setPlannerType(PlannerType.MIRROR_DUNGEON);
         return request;
     }
@@ -217,7 +217,7 @@ class PlannerControllerTest {
                     .andExpect(jsonPath("$.status").value("draft"))
                     .andExpect(jsonPath("$.syncVersion").value(1))
                     .andExpect(jsonPath("$.schemaVersion").value(1))
-                    .andExpect(jsonPath("$.contentVersion").value(6))
+                    .andExpect(jsonPath("$.contentVersion").value(7))
                     .andExpect(jsonPath("$.plannerType").value("MIRROR_DUNGEON"));
         }
 

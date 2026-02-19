@@ -283,6 +283,12 @@
         "value": 1,
         "value2": 0,
         "isTypoExist": false
+      },
+      {
+        "type": "ACQUIRE_1_TIER_MATERIAL_EGO_GIFT_ON_ENTER_1ST_FLOOR",
+        "value": 1,
+        "value2": 0,
+        "isTypoExist": false
       }
     ],
     "uiConfig": {
@@ -376,13 +382,13 @@
         "isTypoExist": false
       },
       {
-        "type": "GiveBuffOnRSOnNewFloorTheme",
+        "type": "GiveBuffOnRSOnThemePackUnlockCount",
         "referenceData": {
           "buffKeyword": "ParryingResultUp",
           "stack": 1,
           "turn": 0,
           "activeRound": 0,
-          "limit": 5
+          "limit": 45
         },
         "isTypoExist": false
       }
@@ -614,6 +620,12 @@
         "value2": 0,
         "isTypoExist": false,
         "customLocalizeTextId": "ACQUIRE_3_TIER_RANDOM_KEYWORD_EGO_GIFT_ON_ENTER_1ST_FLOOR_TEXT_HIGHLIGHT"
+      },
+      {
+        "type": "ACQUIRE_12_TIER_MATERIAL_EGO_GIFT_ON_ENTER_1ST_FLOOR",
+        "value": 1,
+        "value2": 0,
+        "isTypoExist": false
       }
     ],
     "uiConfig": {
@@ -708,13 +720,13 @@
         "isTypoExist": false
       },
       {
-        "type": "GiveBuffOnRSOnNewFloorTheme",
+        "type": "GiveBuffOnRSOnThemePackUnlockCount",
         "referenceData": {
           "buffKeyword": "ParryingResultUp",
-          "stack": 3,
+          "stack": 2,
           "turn": 0,
           "activeRound": 0,
-          "limit": 5
+          "limit": 45
         },
         "isTypoExist": false
       }
@@ -956,6 +968,12 @@
         "value2": 0,
         "isTypoExist": false,
         "customLocalizeTextId": "ACQUIRE_3_TIER_RANDOM_KEYWORD_EGO_GIFT_ON_ENTER_1ST_FLOOR_TEXT_HIGHLIGHT"
+      },
+      {
+        "type": "ACQUIRE_123_TIER_MATERIAL_EGO_GIFT_ON_ENTER_1ST_FLOOR",
+        "value": 1,
+        "value2": 0,
+        "isTypoExist": false
       }
     ],
     "uiConfig": {

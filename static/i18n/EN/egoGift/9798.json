@@ -1,7 +1,7 @@
 {
   "name": "Coveting Thorn",
   "descs": [
-    "Every 3 turns, inflict 2 [RoseThorn] against enemies(or Parts) with [Laceration].\nIf all enemies(or all Parts) have [Laceration], inflict 4 [RoseThorn].",
+    "Encounter Start: Increase [BloodDinner] by 100\nTurn Start: Inflict 2 [RoseThorn] against enemies (or Parts) with [Laceration].\nIf all enemies (or all Parts) have [Laceration], inflict 4 [RoseThorn].",
     "",
     ""
   ],
