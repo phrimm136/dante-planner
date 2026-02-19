@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Update Github Dependency Graph
-        uses: advanced-security/maven-dependency-submission-action@v1
+        uses: advanced-security/maven-dependency-submission-action@v5
         with:
           directory: 'backend'
           # This ensures the scan uses your wrapper if possible
