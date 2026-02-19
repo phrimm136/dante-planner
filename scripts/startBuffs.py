@@ -1,9 +1,10 @@
 import json
 import os
+from md_config import MD_VERSION
 
 # 입력 파일
-input_file = "../raw/Json/mirrordungeon-start-buffs-06-second.json"
-output_file = "../static/data/startBuffsMD6.json"
+input_file = f"../raw/Json/mirrordungeon-start-buffs-{MD_VERSION:02d}.json"
+output_file = f"../static/data/MD{MD_VERSION}/startBuffs.json"
 
 # JSON 읽기
 with open(input_file, "r", encoding="utf-8") as f:
@@ -35,4 +36,3 @@ with open(output_file, "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False, indent=2)
 
 print(f"변환 완료: {output_file}")
-

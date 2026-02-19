@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
 
-INPUT_PATH = Path("../raw/Json/mirror-dungeon-common-data-md6.json")
-OUTPUT_PATH = Path("../static/data/startEgoGiftPoolsMD6.json")
+from md_config import MD_VERSION
+
+INPUT_PATH = Path("../raw/Json/mirror-dungeon-common-data.json")
+OUTPUT_PATH = Path(f"../static/data/MD{MD_VERSION}/startEgoGiftPools.json")
 
 
 def transform_ego_gift_pools(data: dict) -> dict:
