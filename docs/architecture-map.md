@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-02-11 (396d306f: SSE-driven notification updates)
+> **Last Updated:** 2026-02-19 (02b11c37: add MD7 Mirror Dungeon support)
 
 ---
 
@@ -674,7 +674,7 @@ The planner editor uses a shared component (`PlannerMDEditorContent.tsx`) with m
 │   │           └── Preserves scroll position on equipment changes│
 │   ├── StartBuff Section (Summary + EditPane)            │
 │   │     ├── Summary: StartBuffMiniCard (selected only) │
-│   │     └── EditPane: StartBuffCard, EnhancementButton │
+│   │     └── EditPane: StartBuffCardMD6, StartBuffCardMD7  │
 │   ├── StartGift Section (Summary + EditPane)            │
 │   │     ├── Summary: StartGiftSummary (selected only)  │
 │   │     └── EditPane: StartGiftEditPane, StartGiftRow  │
@@ -1083,8 +1083,9 @@ interface VoteRequest {
 | `egoGift/{id}.json` | EGO Gift details | `useEGOGiftDetailData` |
 | `egoGiftSpecList.json` | All EGO Gift specs (includes `recipe` field) | `useEGOGiftListData` |
 | `themePackList.json` | Floor theme packs | `useThemePackListData` |
-| `startBuff*.json` | Start buff data | `useStartBuffData` |
-| `startGift*.json` | Start gift pools | `useStartGiftPools` |
+| `MD{version}/startBuffs.json` | Start buff data (versioned per MD) | `useStartBuffData` |
+| `MD{version}/startEgoGiftPools.json` | Start EGO gift pools (versioned per MD) | `useStartGiftPools` |
+| `MD{version}/egoGiftObservationData.json` | EGO gift observation data (versioned per MD) | `useEGOGiftObservationData` |
 
 ### i18n (static/i18n/{lang}/)
 
