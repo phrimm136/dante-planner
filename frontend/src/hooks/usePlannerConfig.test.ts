@@ -27,7 +27,8 @@ import { ApiClient } from '@/lib/api'
  */
 const mockConfigResponse = {
   schemaVersion: 1,
-  mdCurrentVersion: 6,
+  mdCurrentVersion: 7,
+  mdAvailableVersions: [6, 7],
   rrAvailableVersions: [1, 5],
 }
 
@@ -69,7 +70,7 @@ describe('PlannerConfigSchema', () => {
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.schemaVersion).toBe(1)
-      expect(result.data.mdCurrentVersion).toBe(6)
+      expect(result.data.mdCurrentVersion).toBe(7)
       expect(result.data.rrAvailableVersions).toEqual([1, 5])
     }
   })

@@ -48,7 +48,7 @@ export function StartBuffMiniCard({ buffId, displayName, mdVersion }: StartBuffM
         {/* Upper half: Buff icon (centered) */}
         <div className="flex-1 flex items-center justify-center pt-1">
           <img
-            src={getStartBuffIconPath(baseId)}
+            src={getStartBuffIconPath(baseId, mdVersion)}
             alt=""
             className="w-12 h-12 object-contain"
           />

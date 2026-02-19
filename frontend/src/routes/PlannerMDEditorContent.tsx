@@ -196,6 +196,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const config = usePlannerConfig()
   const navigate = useNavigate()
 
+  // For existing planners, preserve the original content version (backward compat).
+  // New planners use the current server version.
+  const mdVersion = (mode === 'edit' && planner?.metadata.contentVersion)
+    ? planner.metadata.contentVersion
+    : config.mdCurrentVersion
+
   // Get user settings for sync preference
   const { data: userSettings } = useUserSettingsQuery()
   const syncEnabled = userSettings?.syncEnabled ?? false
@@ -341,7 +347,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     getState,
     subscribe: storeApi.subscribe,
     schemaVersion: config.schemaVersion,
-    contentVersion: config.mdCurrentVersion,
+    contentVersion: mdVersion,
     plannerType: 'MIRROR_DUNGEON',
     initialPlannerId: (() => {
       const id = mode === 'edit' && planner?.metadata.id ? planner.metadata.id : undefined
@@ -743,13 +749,13 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             }
           >
             <StartBuffSection
-              mdVersion={config.mdCurrentVersion}
+              mdVersion={mdVersion}
               onClick={() => { setIsStartBuffPaneOpen(true); }}
             />
             <StartBuffEditPane
               open={isStartBuffPaneOpen}
               onOpenChange={setIsStartBuffPaneOpen}
-              mdVersion={config.mdCurrentVersion}
+              mdVersion={mdVersion}
             />
             <NoteEditor
               value={sectionNotes.startBuffs}
@@ -774,7 +780,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             <StartGiftEditPane
               open={isStartGiftPaneOpen}
               onOpenChange={setIsStartGiftPaneOpen}
-              mdVersion={config.mdCurrentVersion}
+              mdVersion={mdVersion}
             />
             <NoteEditor
               value={sectionNotes.startGifts}
@@ -811,6 +817,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               }
             >
               <EGOGiftObservationSummary
+                mdVersion={mdVersion}
                 onClick={() => { setIsObservationPaneOpen(true); }}
               />
             </Suspense>
@@ -818,6 +825,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               <EGOGiftObservationEditPane
                 open={isObservationPaneOpen}
                 onOpenChange={setIsObservationPaneOpen}
+                mdVersion={mdVersion}
               />
             </Suspense>
             <NoteEditor

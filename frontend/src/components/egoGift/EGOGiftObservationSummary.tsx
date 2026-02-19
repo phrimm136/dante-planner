@@ -12,6 +12,7 @@ import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { EGOGiftCard } from './EGOGiftCard'
 
 interface EGOGiftObservationSummaryProps {
+  mdVersion: number
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
@@ -26,6 +27,7 @@ interface EGOGiftObservationSummaryProps {
  * Suspends while loading - wrap in Suspense boundary
  */
 export function EGOGiftObservationSummary({
+  mdVersion,
   onClick,
   readOnly = false,
   onViewNotes,
@@ -42,7 +44,7 @@ export function EGOGiftObservationSummary({
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Load observation data for cost calculation (suspends)
-  const { data: observationData } = useEGOGiftObservationData()
+  const { data: observationData } = useEGOGiftObservationData(mdVersion)
   const { spec, i18n } = useEGOGiftListData()
 
   // Calculate current cost based on selection count

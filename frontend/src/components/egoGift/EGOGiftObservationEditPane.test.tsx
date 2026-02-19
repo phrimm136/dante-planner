@@ -79,7 +79,7 @@ const mockI18n: EGOGiftNameList = {
 }
 
 vi.mock('@/hooks/useEGOGiftObservationData', () => ({
-  useEGOGiftObservationData: () => ({
+  useEGOGiftObservationData: (_version: number) => ({
     data: mockObservationData,
   }),
 }))
@@ -129,6 +129,7 @@ describe('EGOGiftObservationEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
+    mdVersion: 6,
   }
 
   beforeEach(() => {
@@ -145,7 +146,7 @@ describe('EGOGiftObservationEditPane', () => {
     })
 
     it('does not render dialog when open=false', () => {
-      render(<EGOGiftObservationEditPane open={false} onOpenChange={vi.fn()} />)
+      render(<EGOGiftObservationEditPane open={false} onOpenChange={vi.fn()} mdVersion={6} />)
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })

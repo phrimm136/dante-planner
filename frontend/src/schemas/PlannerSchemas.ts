@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, RR_CATEGORIES, PLANNER_TYPES } from '@/lib/constants'
+import type { DungeonIdx } from '@/lib/constants'
 import { JSONContentSchema } from './NoteEditorSchemas'
 import type { SerializableFloorSelection, SaveablePlanner, MDPlannerContent, RRPlannerContent } from '@/types/PlannerTypes'
 import { EgoTypeSchema } from './EGOSchemas'
@@ -78,12 +79,13 @@ export const MDCategorySchema = z.enum(MD_CATEGORIES)
 export const RRCategorySchema = z.enum(RR_CATEGORIES)
 
 /**
- * Dungeon index schema - 0, 1, or 3 (no 2)
+ * Dungeon index schema - 0, 1, 2, or 3
  * Matches DUNGEON_IDX constant values
  */
 export const DungeonIdxSchema = z.union([
   z.literal(DUNGEON_IDX.NORMAL),
   z.literal(DUNGEON_IDX.HARD),
+  z.literal(DUNGEON_IDX.PARALLEL),
   z.literal(DUNGEON_IDX.EXTREME),
 ])
 
@@ -480,7 +482,7 @@ interface PageStateWithSets {
   comprehensiveGiftIds: Set<string>
   floorSelections: {
     themePackId: string | null
-    difficulty: 0 | 1 | 3
+    difficulty: DungeonIdx
     giftIds: Set<string>
   }[]
 }
@@ -659,14 +661,13 @@ export const PlannerSseEventSchema = z.object({
  * Planner configuration schema from backend
  * Contains current versions for data format and game content
  */
-/** Schema for MD version - validates against MD_VERSIONS constant */
-const MDVersionSchema = z.union([z.literal(5), z.literal(6)])
-
 export const PlannerConfigSchema = z.object({
   /** Current planner data schema version for migration support */
   schemaVersion: z.number().int().positive(),
-  /** Current Mirror Dungeon version (e.g., 6 for MD6) */
-  mdCurrentVersion: MDVersionSchema,
+  /** Current Mirror Dungeon version (e.g., 7 for MD7) */
+  mdCurrentVersion: z.number().int().positive(),
+  /** Available Mirror Dungeon versions including legacy (e.g., [6, 7]) */
+  mdAvailableVersions: z.array(z.number().int().positive()).min(1),
   /** Available Refracted Railway versions (e.g., [1, 5] for RR1 and RR5) */
   rrAvailableVersions: z.array(z.number().int().positive()).min(1),
 }).strict()

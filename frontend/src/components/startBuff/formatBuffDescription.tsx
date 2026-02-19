@@ -8,30 +8,48 @@ import { getKeywordName } from '@/hooks/useBattleKeywords'
  */
 export function parseColorTags(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = []
-  const colorRegex = /<color=(#[0-9a-fA-F]{6})>([\s\S]*?)<\/color>/g
+  const openTagRegex = /<color=(#[0-9a-fA-F]{6})>/
   let lastIndex = 0
-  let match
 
-  while ((match = colorRegex.exec(text)) !== null) {
-    // Add text before the match
-    if (match.index > lastIndex) {
-      parts.push(text.slice(lastIndex, match.index))
+  while (lastIndex < text.length) {
+    const slice = text.slice(lastIndex)
+    const match = openTagRegex.exec(slice)
+    if (!match) {
+      parts.push(slice)
+      break
     }
 
-    // Add the colored span
-    const [, color, content] = match
+    const tagStart = lastIndex + match.index
+    const color = match[1]
+    const contentStart = tagStart + match[0].length
+
+    if (tagStart > lastIndex) {
+      parts.push(text.slice(lastIndex, tagStart))
+    }
+
+    // Find matching </color> using depth counter to handle nesting
+    let depth = 1
+    let pos = contentStart
+    while (pos < text.length && depth > 0) {
+      if (text.startsWith('<color=', pos)) {
+        depth++
+        const gtIndex = text.indexOf('>', pos)
+        pos = gtIndex === -1 ? text.length : gtIndex + 1
+      } else if (text.startsWith('</color>', pos)) {
+        depth--
+        if (depth > 0) pos += '</color>'.length
+      } else {
+        pos++
+      }
+    }
+
     parts.push(
-      <span key={match.index} style={{ color }}>
-        {content}
+      <span key={tagStart} style={{ color }}>
+        {parseColorTags(text.slice(contentStart, pos))}
       </span>
     )
 
-    lastIndex = match.index + match[0].length
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex))
+    lastIndex = pos + '</color>'.length
   }
 
   return parts

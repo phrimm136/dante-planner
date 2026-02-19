@@ -5,16 +5,19 @@ import {
   getStartBuffPanePath,
   getStartBuffHighlightPath,
   getStartBuffStarLightPath,
+  getStartBuffEnhancementBgPath,
+  getStartBuffEnhancementIconPath,
 } from '@/lib/assetPaths'
-import { MD_ACCENT_COLORS, type MDVersion } from '@/lib/constants'
+import { MD_ACCENT_COLORS } from '@/lib/constants'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
 import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
 import { getEnhancementSuffix, createBuffId } from '@/types/StartBuffTypes'
 import { AutoSizeText } from '@/components/common/AutoSizeText'
-import { EnhancementButton } from './EnhancementButton'
 import { formatBuffEffects } from './formatBuffDescription'
 
-interface StartBuffCardProps {
+const MD_VERSION = 6
+
+interface StartBuffCardMD6Props {
   /** The buff to display (contains enhancement level from displayBuffs) */
   buff: StartBuff
   allBuffs: StartBuff[]
@@ -26,12 +29,10 @@ interface StartBuffCardProps {
   enhancement: EnhancementLevel
   /** Callback when enhancement changes via card's +/++ buttons */
   onEnhancementChange: (baseId: number, level: EnhancementLevel) => void
-  /** Mirror Dungeon version for accent color */
-  mdVersion: MDVersion
 }
 
 /**
- * Individual start buff card component (edit-only)
+ * MD6 start buff card component (edit-only)
  *
  * Enhancement is controlled by parent for batch operation support.
  *
@@ -41,7 +42,7 @@ interface StartBuffCardProps {
  * - Center area: description
  * - Bottom: enhancement buttons
  */
-export function StartBuffCard({
+export function StartBuffCardMD6({
   buff,
   allBuffs,
   i18n,
@@ -50,8 +51,7 @@ export function StartBuffCard({
   onSelect,
   enhancement,
   onEnhancementChange,
-  mdVersion,
-}: StartBuffCardProps) {
+}: StartBuffCardMD6Props) {
   const { i18n: i18nInstance } = useTranslation()
   const [isHovered, setIsHovered] = useState(false)
 
@@ -86,6 +86,42 @@ export function StartBuffCard({
     }
   }
 
+  function EnhancementButton({ lvl }: { lvl: 1 | 2 }) {
+    const isButtonSelected = enhancement === lvl
+    const iconPath = isButtonSelected
+      ? getStartBuffEnhancementIconPath(lvl)
+      : getStartBuffEnhancementIconPath(0)
+    const iconCount = lvl === 2 && !isButtonSelected ? 2 : 1
+    const stateKey = isButtonSelected ? (lvl === 1 ? 'plus1' : 'plus2') : 'unselected'
+    const sliceValues = { unselected: 20, plus1: 28, plus2: 32 }
+    const borderValues = { unselected: 10, plus1: 13, plus2: 13 }
+    const outsetValues = { unselected: 0, plus1: 2, plus2: 2 }
+    const bgPath = getStartBuffEnhancementBgPath(isButtonSelected ? lvl : 0, MD_VERSION)
+    return (
+      <div className="flex-1 h-6 relative overflow-visible">
+        <button
+          onClick={(e) => { e.stopPropagation(); handleEnhancementClick(lvl) }}
+          className="absolute inset-0 overflow-visible"
+          style={{
+            borderStyle: 'solid',
+            borderWidth: `${borderValues[stateKey]}px`,
+            borderImageSource: `url('${bgPath}')`,
+            borderImageSlice: `${sliceValues[stateKey]} fill`,
+            borderImageOutset: `${outsetValues[stateKey]}px`,
+            borderImageRepeat: 'stretch',
+          }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center gap-0.5 pointer-events-none">
+          {Array.from({ length: iconCount }).map((_, i) => (
+            <img key={i} src={iconPath} alt=""
+              className={`w-auto shrink-0 ${isButtonSelected ? lvl === 2 ? 'h-[20.8px]' : 'h-[16.9px]' : 'h-4'}`}
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className={`relative cursor-pointer w-68 h-80 transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
@@ -95,7 +131,7 @@ export function StartBuffCard({
     >
       {/* Pane background */}
       <img
-        src={getStartBuffPanePath()}
+        src={getStartBuffPanePath(MD_VERSION)}
         alt=""
         className="w-full h-full object-cover"
       />
@@ -123,7 +159,7 @@ export function StartBuffCard({
         <div className="flex items-center" style={{ height: '12%' }}>
           {/* Buff icon - upper left */}
           <img
-            src={getStartBuffIconPath(buff.baseId)}
+            src={getStartBuffIconPath(buff.baseId, MD_VERSION)}
             alt=""
             className="w-14 h-14 ml-8 object-contain"
           />
@@ -137,7 +173,7 @@ export function StartBuffCard({
               maxFontSize={20}
               className="text-center"
               style={{
-                color: MD_ACCENT_COLORS[mdVersion],
+                color: MD_ACCENT_COLORS[MD_VERSION],
                 ...getDisplayFontForLanguage(i18nInstance.language),
               }}
             />
@@ -153,23 +189,15 @@ export function StartBuffCard({
 
         {/* Enhancement buttons - bottom */}
         <div className="flex gap-2 px-7 pb-8">
-          <EnhancementButton
-            level={1}
-            isSelected={enhancement === 1}
-            onClick={() => { handleEnhancementClick(1) }}
-          />
-          <EnhancementButton
-            level={2}
-            isSelected={enhancement === 2}
-            onClick={() => { handleEnhancementClick(2) }}
-          />
+          <EnhancementButton lvl={1} />
+          <EnhancementButton lvl={2} />
         </div>
       </div>
       {/* Highlight overlay */}
       <img
-        src={getStartBuffHighlightPath()}
+        src={getStartBuffHighlightPath(MD_VERSION)}
         alt=""
-        className={`absolute inset-0 w-66 h-78 justify-center translate-x-1 translate-y-1.75 pointer-events-none transition-opacity duration-200 ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 w-66 h-77.5 justify-center translate-x-0.25 translate-y-1.75 pointer-events-none transition-opacity duration-200 ${showHighlight ? 'opacity-100' : 'opacity-0'}`}
       />
     </div>
   )

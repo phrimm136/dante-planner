@@ -53,16 +53,18 @@ vi.mock('@/hooks/useBattleKeywords', () => ({
   useBattleKeywords: () => ({ data: {} }),
 }))
 
-// Mock StartBuffCard
-vi.mock('./StartBuffCard', () => ({
-  StartBuffCard: () => <div data-testid="start-buff-card">Start Buff Card</div>,
+vi.mock('./StartBuffCardMD6', () => ({
+  StartBuffCardMD6: () => <div data-testid="start-buff-card">Start Buff Card</div>,
+}))
+vi.mock('./StartBuffCardMD7', () => ({
+  StartBuffCardMD7: () => <div data-testid="start-buff-card">Start Buff Card</div>,
 }))
 
 describe('StartBuffEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
-    mdVersion: 'MD6' as const,
+    mdVersion: 6,
   }
 
   beforeEach(() => {

@@ -4,18 +4,18 @@ import { EGOGiftObservationDataSchema } from '@/schemas'
 
 // Query key factory for observation data
 export const egoGiftObservationQueryKeys = {
-  all: ['egoGiftObservation', 'md6'] as const,
+  all: (version: number) => ['egoGiftObservation', `md${version}`] as const,
 }
 
 // Observation data query options
-function createObservationDataQueryOptions() {
+function createObservationDataQueryOptions(version: number) {
   return queryOptions({
-    queryKey: egoGiftObservationQueryKeys.all,
+    queryKey: egoGiftObservationQueryKeys.all(version),
     queryFn: async () => {
-      const module = await import('@static/data/MD6/egoGiftObservationData.json')
+      const module = await import(`@static/data/MD${version}/egoGiftObservationData.json`)
       const result = EGOGiftObservationDataSchema.safeParse(module.default)
       if (!result.success) {
-        throw new Error(`[egoGiftObservation] Validation failed: ${result.error.message}`)
+        throw new Error(`[egoGiftObservation/md${version}] Validation failed: ${result.error.message}`)
       }
       return result.data as EGOGiftObservationData
     },
@@ -24,11 +24,12 @@ function createObservationDataQueryOptions() {
 }
 
 /**
- * Hook that loads EGO gift observation data for MD6
+ * Hook that loads EGO gift observation data for a specific MD version
  * Suspends while loading - wrap in Suspense boundary
+ * @param version - Mirror Dungeon version
  * @returns observation pool (cost data + eligible gift IDs)
  */
-export function useEGOGiftObservationData() {
-  const { data } = useSuspenseQuery(createObservationDataQueryOptions())
+export function useEGOGiftObservationData(version: number) {
+  const { data } = useSuspenseQuery(createObservationDataQueryOptions(version))
   return { data }
 }
