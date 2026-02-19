@@ -1,0 +1,40 @@
+version: 2
+updates:
+  # 1. Frontend: TypeScript with Yarn Legacy
+  - package-ecosystem: "npm" 
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    # Labels help your "Dependabot Helper" workflow identify these PRs
+    labels:
+      - "frontend"
+      - "javascript"
+      - "dependencies"
+    groups:
+      frontend-deps:
+        patterns:
+          - "*" # Combines multiple FE updates into one PR to reduce CI load
+
+  # 2. Backend: Java (Maven)
+  - package-ecosystem: "maven"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "backend"
+      - "java"
+      - "dependencies"
+    groups:
+      backend-deps:
+        patterns:
+          - "org.springframework.*"
+          - "com.fasterxml.jackson.*"
+          - "*"
+
+  # 3. GitHub Actions: Keep your workflow files secure and updated
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

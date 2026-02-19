@@ -42,16 +42,22 @@ jobs:
       - name: Run backend tests
         working-directory: ./backend
         run: ./mvnw test -q
+  update-dependency-graph:
+    needs: [test-backend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
       - name: Update Github Dependency Graph
         uses: advanced-security/maven-dependency-submission-action@v1
         with:
           directory: 'backend'
           # This ensures the scan uses your wrapper if possible
-          ignore-maven-warpper: false
+          ignore-maven-wrapper: false
 
   # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
-    needs: [test-backend]
+    needs: [update-dependency-graph]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
