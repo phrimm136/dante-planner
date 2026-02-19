@@ -20,6 +20,8 @@ jobs:
         run: |
           yarn install --frozen-lockfile
           yarn test
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
   test-backend:
     runs-on: ubuntu-latest
