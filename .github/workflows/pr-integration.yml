@@ -18,8 +18,11 @@ jobs:
       - name: FE Test
         working-directory: ./frontend
         run: |
+          echo "ID length is ${#VITE_GOOGLE_CLIENT_ID}"
           yarn install --frozen-lockfile
           yarn test
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
   test-backend:
     runs-on: ubuntu-latest
