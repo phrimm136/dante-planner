@@ -1093,3 +1093,13 @@ export const PROGRESSIVE_REVEAL = {
   /** Delay between each section reveal (ms) */
   STAGGER_DELAY: 50,
 } as const
+
+/**
+ * Announcement Section Constants
+ * Used by AnnouncementContent on the home page
+ */
+
+/**
+ * Number of announcements shown as preview on the home page
+ */
+export const ANNOUNCEMENT_PREVIEW_COUNT = 5

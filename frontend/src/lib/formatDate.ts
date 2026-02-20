@@ -5,6 +5,8 @@
  * All formatting uses Intl.DateTimeFormat for proper localization.
  */
 
+import { I18N_LOCALE_MAP } from '@/lib/constants'
+
 /**
  * Hours threshold for switching between time and date display
  */
@@ -98,16 +100,6 @@ export function formatEntityReleaseDate(dateInt: number, locale: string = 'en-US
 }
 
 /**
- * Map app language codes to BCP 47 locale codes for Intl APIs
- */
-const LOCALE_MAP: Record<string, string> = {
-  EN: 'en-US',
-  JP: 'ja',
-  KR: 'ko',
-  CN: 'zh-CN',
-}
-
-/**
  * Format a relative time string (e.g., "2 hours ago", "3 days ago").
  *
  * Useful for displaying how long ago something happened.
@@ -129,7 +121,7 @@ export function formatRelativeTime(dateString: string, locale?: string): string 
   const diffHours = Math.floor(diffMinutes / 60)
   const diffDays = Math.floor(diffHours / 24)
 
-  const bcp47Locale = locale ? (LOCALE_MAP[locale] ?? locale) : undefined
+  const bcp47Locale = locale ? (I18N_LOCALE_MAP[locale] ?? locale) : undefined
   const rtf = new Intl.RelativeTimeFormat(bcp47Locale, { numeric: 'auto' })
 
   if (diffDays > 0) {
@@ -142,4 +134,27 @@ export function formatRelativeTime(dateString: string, locale?: string): string 
     return rtf.format(-diffMinutes, 'minute')
   }
   return rtf.format(-diffSeconds, 'second')
+}
+
+/**
+ * Format "YYYY-MM-DD" date string for announcement display, respecting app language.
+ *
+ * Uses I18N_LOCALE_MAP from constants for correct BCP 47 locale strings.
+ *
+ * @param dateStr - Date string in "YYYY-MM-DD" format (e.g., "2026-02-19")
+ * @param language - App language code (KR/EN/CN/JP)
+ * @returns Formatted date string (e.g., "Feb 19, 2026" for EN, "2026. 2. 19." for KR)
+ *
+ * @example
+ * formatAnnouncementDate("2026-02-19", "EN") // => "Feb 19, 2026"
+ * formatAnnouncementDate("2026-02-19", "KR") // => "2026. 2. 19."
+ */
+export function formatAnnouncementDate(dateStr: string, language: string): string {
+  const [year, month, day] = dateStr.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  return date.toLocaleDateString(I18N_LOCALE_MAP[language] ?? 'en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 }

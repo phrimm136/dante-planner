@@ -17,6 +17,8 @@ import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { LoadingState } from '@/components/common/LoadingState'
 import { BannerSection } from '@/components/home/BannerSection'
+import { AnnouncementContent } from '@/components/home/AnnouncementContent'
+import { AnnouncementSkeleton } from '@/components/home/AnnouncementSection'
 import { RecentlyReleasedSection } from '@/components/home/RecentlyReleasedSection'
 import { CommunityPlansSection } from '@/components/home/CommunityPlansSection'
 
@@ -47,6 +49,13 @@ function HomePageContent() {
       {/* Banner carousel */}
       <div className="mb-8">
         <BannerSection />
+      </div>
+
+      {/* Announcement section */}
+      <div className="mb-8">
+        <Suspense fallback={<AnnouncementSkeleton />}>
+          <AnnouncementContent />
+        </Suspense>
       </div>
 
       {/* Two-column layout: Recently Released + Community Plans */}
