@@ -25,7 +25,7 @@ interface ComprehensiveGiftGridTrackerProps {
   onToggleEgoGiftDone?: (encodedId: string) => void
   readOnly?: boolean
   /** Authoritative gift list from saved plan content. When provided, used as-is instead of aggregating from floorSelections. */
-  comprehensiveGiftIds?: string[]
+  comprehensiveGiftIds: string[]
 }
 
 interface DecodedGift {
@@ -45,7 +45,7 @@ export function ComprehensiveGiftGridTracker({
   egoGiftDoneMarks,
   onToggleEgoGiftDone,
   readOnly,
-  comprehensiveGiftIds,
+  comprehensiveGiftIds = [],
 }: ComprehensiveGiftGridTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
@@ -60,10 +60,7 @@ export function ComprehensiveGiftGridTracker({
 
   // Use authoritative comprehensiveGiftIds when provided; fall back to aggregating from floors
   const allComprehensiveGiftIds = useMemo(() => {
-    if (comprehensiveGiftIds) {
-      return new Set(comprehensiveGiftIds)
-    }
-    const allGifts = new Set<string>()
+    const allGifts = new Set<string>(comprehensiveGiftIds)
     floorSelections.forEach((selection) => {
       selection.giftIds.forEach((giftId) => allGifts.add(giftId))
     })
