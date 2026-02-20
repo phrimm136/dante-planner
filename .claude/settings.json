@@ -25,7 +25,6 @@
       "NotebookEdit:*",
       "Bash(grep:*)",
       "Bash(yarn:*)",
-      "Bash(npx:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
@@ -79,6 +78,14 @@
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/git-add-guard.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-output-redirect.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-npm-npx.sh"
           }
         ]
       },

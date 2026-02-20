@@ -9,21 +9,21 @@ vi.mock('@/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: {
       gift1: {
-        tag: 'ATTACK',
+        tag: ['ATTACK'],
         keyword: 'Burn',
         attributeType: 'WRATH',
         themePack: 'pack1',
         maxEnhancement: 3,
       },
       gift2: {
-        tag: 'DEFENSE',
+        tag: ['DEFENSE'],
         keyword: 'Bleed',
         attributeType: 'LUST',
         themePack: 'pack2',
         maxEnhancement: 3,
       },
       gift3: {
-        tag: 'ATTACK',
+        tag: ['ATTACK'],
         keyword: 'Tremor',
         attributeType: 'PRIDE',
         themePack: 'pack1',
@@ -42,6 +42,16 @@ vi.mock('@/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: () => ({
     keywordToValue: new Map(),
   }),
+}))
+
+vi.mock('@/components/egoGift/EGOGiftCard', () => ({
+  EGOGiftCard: ({ gift }: { gift: { id: string } }) => (
+    <div data-testid={`gift-card-${gift.id}`} />
+  ),
+}))
+
+vi.mock('@/components/egoGift/EGOGiftTooltip', () => ({
+  EGOGiftTooltip: ({ children }: { children: JSX.Element }) => children,
 }))
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -96,6 +106,43 @@ describe('ComprehensiveGiftGridTracker', () => {
       )
 
       expect(container.textContent).toContain('pages.plannerMD.emptyState.noEgoGifts')
+    })
+  })
+
+  describe('comprehensiveGiftIds as authoritative source', () => {
+    it('displays a gift in comprehensiveGiftIds that is absent from all floor giftIds', () => {
+      const floorSelections: SerializableFloorSelection[] = [
+        { themePackId: 'pack1', difficulty: 0, giftIds: [] },
+      ]
+
+      const { getByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={floorSelections}
+          comprehensiveGiftIds={['gift1']}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      expect(getByTestId('gift-card-gift1')).toBeDefined()
+    })
+
+    it('display gifts present in both a floor giftIds and comprehensiveGiftIds', () => {
+      const floorSelections: SerializableFloorSelection[] = [
+        { themePackId: 'pack1', difficulty: 0, giftIds: ['gift2'] },
+      ]
+
+      const { queryByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={floorSelections}
+          comprehensiveGiftIds={['gift1']}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      expect(queryByTestId('gift-card-gift1')).toBeDefined()
+      expect(queryByTestId('gift-card-gift2')).toBeDefined()
     })
   })
 

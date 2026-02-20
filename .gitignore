@@ -1,8 +1,8 @@
-.claude/tsc-cache/
-.playwright-mcp/
 **/*.png
 **/*.jpg
 raw/
+tmux*
+**/dummy
 
 # Environment variables
 .env
@@ -11,3 +11,12 @@ raw/
 
 # Docker
 docker-compose.override.yml
+
+# Runtime log files (written by prod backend container via volume mount)
+logs/
+
+# Claude
+.claude/tsc-cache/
+.claude/logs/
+.playwright-mcp/
+
