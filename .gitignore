@@ -1,8 +1,8 @@
-.claude/tsc-cache/
-.playwright-mcp/
 **/*.png
 **/*.jpg
 raw/
+tmux*
+**/dummy
 
 # Environment variables
 .env
@@ -11,3 +11,9 @@ raw/
 
 # Docker
 docker-compose.override.yml
+
+# Claude
+.claude/tsc-cache/
+.claude/logs/
+.playwright-mcp/
+
