@@ -9,7 +9,8 @@ paths:
 
 | Data Type | StaleTime | Reason |
 |-----------|-----------|--------|
-| Static game data (specs) | 5 minutes | Rarely changes, frequently accessed |
+| Static game data (specs) | 7 days | Changes only on deploy |
+| Static deployment content | 7 days | Changes only on deploy (announcements, start buff lists) |
 | i18n translations | 7 days | Almost never changes per deployment |
 | User settings/preferences | 30 seconds | May change during session |
 | Real-time data (SSE) | 0 | Always fresh |
