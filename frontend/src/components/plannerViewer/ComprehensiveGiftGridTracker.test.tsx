@@ -44,6 +44,16 @@ vi.mock('@/hooks/useSearchMappings', () => ({
   }),
 }))
 
+vi.mock('@/components/egoGift/EGOGiftCard', () => ({
+  EGOGiftCard: ({ gift }: { gift: { id: string } }) => (
+    <div data-testid={`gift-card-${gift.id}`} />
+  ),
+}))
+
+vi.mock('@/components/egoGift/EGOGiftTooltip', () => ({
+  EGOGiftTooltip: ({ children }: { children: JSX.Element }) => children,
+}))
+
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
@@ -96,6 +106,42 @@ describe('ComprehensiveGiftGridTracker', () => {
       )
 
       expect(container.textContent).toContain('pages.plannerMD.emptyState.noEgoGifts')
+    })
+  })
+
+  describe('comprehensiveGiftIds as authoritative source', () => {
+    it('displays a gift in comprehensiveGiftIds that is absent from all floor giftIds', () => {
+      const floorSelections: SerializableFloorSelection[] = [
+        { themePackId: 'pack1', difficulty: 0, giftIds: [] },
+      ]
+
+      const { getByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={floorSelections}
+          comprehensiveGiftIds={['gift1']}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      expect(getByTestId('gift-card-gift1')).toBeDefined()
+    })
+
+    it('does not display a gift present in a floor giftIds but absent from comprehensiveGiftIds', () => {
+      const floorSelections: SerializableFloorSelection[] = [
+        { themePackId: 'pack1', difficulty: 0, giftIds: ['gift2'] },
+      ]
+
+      const { queryByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={floorSelections}
+          comprehensiveGiftIds={['gift1']}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      expect(queryByTestId('gift-card-gift2')).toBeNull()
     })
   })
 
