@@ -270,6 +270,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
               >
                 <ComprehensiveGiftGridTracker
                   floorSelections={content.floorSelections}
+                  comprehensiveGiftIds={content.comprehensiveGiftIds}
                   hoveredThemePackId={hoveredThemePackId}
                   egoGiftDoneMarks={trackerState.egoGiftDoneMarks}
                   onToggleEgoGiftDone={toggleEgoGiftDoneMark}
