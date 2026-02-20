@@ -246,6 +246,12 @@
       "reportReceived": "신고 접수됨"
     }
   },
+  "announcements": {
+    "title": "공지사항",
+    "viewAll": "전체보기",
+    "backToList": "목록으로",
+    "noAnnouncements": "공지사항이 없습니다"
+  },
   "moderation": {
     "accountSuspended": "계정이 정지되었습니다. 사유: {{reason}}",
     "accountSuspendedNoReason": "계정이 정지되었습니다",

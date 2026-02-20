@@ -246,6 +246,12 @@
       "reportReceived": "報告受信"
     }
   },
+  "announcements": {
+    "title": "お知らせ",
+    "viewAll": "すべて表示",
+    "backToList": "一覧に戻る",
+    "noAnnouncements": "お知らせはありません"
+  },
   "moderation": {
     "accountSuspended": "アカウントが停止されました。理由: {{reason}}",
     "accountSuspendedNoReason": "アカウントが停止されました",

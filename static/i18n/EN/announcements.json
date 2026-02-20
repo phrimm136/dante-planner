@@ -1,0 +1,6 @@
+{
+  "2026-02-19-01": {
+    "title": "2026/02/19 Update",
+    "body": "Reflecting the Limbus Company update from February 19, 2026.\n\nUpdate notes:\n- Added The House of Spiders: The Index Nursefather (Yi Sang) data\n- Mirror of Names and Spiders Normal difficulty update\n- Japanese/Chinese text corrections applied\n\nKnown issues:\n- An issue has been identified where Mirror of Eternity plans fail validation on first upload. A migration path for previous Mirror Dungeon plans will be provided alongside the Hard mode update, along with a popup to prompt version upgrades when validation fails."
+  }
+}
