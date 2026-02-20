@@ -19,7 +19,6 @@ import {
   decodeGiftSelection,
   getCascadeIngredients,
 } from '@/lib/egoGiftEncoding'
-import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel, DungeonIdx } from '@/lib/constants'
 import { DUNGEON_IDX } from '@/lib/constants'
@@ -64,10 +63,6 @@ export function FloorGiftSelectorPane({
   onGiftSelectionChange,
 }: FloorGiftSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
-
-  // Store state for comprehensive gift sync (safe - returns undefined outside context)
-  const comprehensiveGiftIds = usePlannerEditorStoreSafe((s) => s.comprehensiveGiftIds)
-  const setComprehensiveGiftIds = usePlannerEditorStoreSafe((s) => s.setComprehensiveGiftIds)
 
   const { spec, i18n } = useEGOGiftListData()
 
@@ -135,8 +130,6 @@ export function FloorGiftSelectorPane({
   // Use ref to always access latest state in stable callback
   const selectedGiftIdsRef = useRef(selectedGiftIds)
   selectedGiftIdsRef.current = selectedGiftIds
-  const comprehensiveGiftIdsRef = useRef(comprehensiveGiftIds ?? new Set<string>())
-  comprehensiveGiftIdsRef.current = comprehensiveGiftIds ?? new Set<string>()
 
   /**
    * Handle enhancement selection with toggle logic and cascade
@@ -144,9 +137,7 @@ export function FloorGiftSelectorPane({
   const handleEnhancementSelect = useCallback((giftId: string, enhancement: EnhancementLevel) => {
     startTransition(() => {
       const current = selectedGiftIdsRef.current
-      const currentComprehensive = comprehensiveGiftIdsRef.current
       const newSelection = new Set(current)
-      const newComprehensive = new Set(currentComprehensive)
 
       const existingEncodedId = findEncodedGiftId(giftId, current)
 
@@ -155,7 +146,6 @@ export function FloorGiftSelectorPane({
 
         if (currentEnhancement === enhancement) {
           newSelection.delete(existingEncodedId)
-          newComprehensive.delete(existingEncodedId)
         } else {
           newSelection.delete(existingEncodedId)
           const newEncodedId = encodeGiftSelection(enhancement, giftId)
@@ -164,7 +154,6 @@ export function FloorGiftSelectorPane({
       } else {
         const newEncodedId = encodeGiftSelection(enhancement, giftId)
         newSelection.add(newEncodedId)
-        newComprehensive.add(newEncodedId)
 
         const giftSpec = specById.get(giftId)
         if (giftSpec) {
@@ -185,19 +174,13 @@ export function FloorGiftSelectorPane({
             if (isObtainable && !findEncodedGiftId(ingredientIdStr, newSelection)) {
               newSelection.add(encodeGiftSelection(0, ingredientIdStr))
             }
-            // Always add to comprehensive (no theme pack restriction)
-            const ingredientEncodedId = encodeGiftSelection(0, ingredientIdStr)
-            newComprehensive.add(ingredientEncodedId)
           }
         }
       }
 
       onGiftSelectionChange(newSelection)
-      if (setComprehensiveGiftIds) {
-        setComprehensiveGiftIds(newComprehensive)
-      }
     })
-  }, [onGiftSelectionChange, setComprehensiveGiftIds, specById, themePackId])
+  }, [onGiftSelectionChange, specById, themePackId])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -211,16 +194,7 @@ export function FloorGiftSelectorPane({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    if (setComprehensiveGiftIds && comprehensiveGiftIds) {
-                      const newComprehensive = new Set(comprehensiveGiftIds)
-                      for (const encodedId of selectedGiftIds) {
-                        newComprehensive.delete(encodedId)
-                      }
-                      setComprehensiveGiftIds(newComprehensive)
-                    }
-                    onGiftSelectionChange(new Set())
-                  }}
+                  onClick={() => { onGiftSelectionChange(new Set()) }}
                 >
                   {t('common:reset')}
                 </Button>
