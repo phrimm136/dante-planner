@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from PIL import Image
 
@@ -10,13 +11,15 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 QUALITY = 90
 
-# Hex color to multiply with
-HEX_COLOR = "#828280"
-
 # =========================
 # Prepare color
 # =========================
-hex_color = HEX_COLOR.lstrip("#")
+if len(sys.argv) != 2:
+    print("Usage: python tintPng.py <hex_color>")
+    print("Example: python tintPng.py '#ebcca3'")
+    sys.exit(1)
+
+hex_color = sys.argv[1].lstrip("#")
 mul_r = int(hex_color[0:2], 16)
 mul_g = int(hex_color[2:4], 16)
 mul_b = int(hex_color[4:6], 16)
