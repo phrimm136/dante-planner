@@ -12,6 +12,9 @@ tmux*
 # Docker
 docker-compose.override.yml
 
+# Runtime log files (written by prod backend container via volume mount)
+logs/
+
 # Claude
 .claude/tsc-cache/
 .claude/logs/
