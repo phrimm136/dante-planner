@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ANNOUNCEMENT_PREVIEW_COUNT } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -48,7 +47,6 @@ export function AnnouncementSection({ announcements, onViewAll, onOpenAnnounceme
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">{t('announcements.title')}</h2>
         <button
-          size="sm"
           onClick={onViewAll}
           className={cn(
             'flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors'
