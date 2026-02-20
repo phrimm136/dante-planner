@@ -2,6 +2,7 @@ package org.danteplanner.backend.config;
 
 import org.danteplanner.backend.security.CustomAuthenticationEntryPoint;
 import org.danteplanner.backend.security.JwtAuthenticationFilter;
+import org.danteplanner.backend.security.MdcLoggingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import jakarta.servlet.DispatcherType;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -20,14 +22,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final MdcLoggingFilter mdcLoggingFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
+            MdcLoggingFilter mdcLoggingFilter,
             CustomAuthenticationEntryPoint authenticationEntryPoint
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.mdcLoggingFilter = mdcLoggingFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
+    }
+
+    /**
+     * Prevents Spring Boot from auto-registering MdcLoggingFilter in the servlet container.
+     * Without this, the filter runs twice: once at the servlet level (before JwtAuthenticationFilter,
+     * so SecurityContext is empty and userId = "guest") and once inside the Spring Security chain.
+     * We manage the filter exclusively via addFilterAfter() in securityFilterChain().
+     */
+    @Bean
+    public FilterRegistrationBean<MdcLoggingFilter> mdcFilterRegistration(MdcLoggingFilter filter) {
+        FilterRegistrationBean<MdcLoggingFilter> bean = new FilterRegistrationBean<>(filter);
+        bean.setEnabled(false);
+        return bean;
     }
 
     /**
@@ -99,6 +117,8 @@ public class SecurityConfig {
 
             // Add JWT filter before Spring Security's authentication filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            // MDC runs after JWT so SecurityContext is populated and userId is available
+            .addFilterAfter(mdcLoggingFilter, JwtAuthenticationFilter.class)
 
             // Security headers
             .headers(headers -> headers
