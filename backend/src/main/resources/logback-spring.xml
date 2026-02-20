@@ -2,15 +2,17 @@
 <configuration>
 
     <!-- ═══════════════════════════════════════════════════════════
-         PRODUCTION: Console (INFO+) + Rolling JSON file (WARN+)
+         PRODUCTION: Console (WARN+) + Rolling JSON file (WARN+)
+         awslogs Docker driver captures all stdout — console threshold
+         controls what reaches CloudWatch.
          ═══════════════════════════════════════════════════════════ -->
     <springProfile name="prod">
         <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-        <!-- Console: plain text with MDC context for CloudWatch stdout stream -->
+        <!-- Console: plain text WARN+ → stdout → awslogs → CloudWatch -->
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>INFO</level>
+                <level>WARN</level>
             </filter>
             <encoder>
                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%X{requestId:-no-id}/%X{userId:-guest}] [%thread] %logger{36} - %msg%n</pattern>
@@ -40,7 +42,7 @@
             <discardingThreshold>0</discardingThreshold>
         </appender>
 
-        <root level="INFO">
+        <root level="WARN">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ASYNC_FILE"/>
         </root>
