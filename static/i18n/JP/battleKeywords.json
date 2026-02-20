@@ -1583,65 +1583,47 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "Curse": {
-    "name": "呪い",
-    "desc": "ターン終了時、次のターンにて威力減少 1、守備威力減少 1、攻撃レベル減少 2、防御レベル減少 2からランダムに1つの効果を獲得し、値が1減少。",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "VibrationSpring": {
-    "name": "振動 - ネジ巻き",
-    "desc": "- 速度の最大値 +2\n- 自分がスキル・コイン効果で振動威力や振動回数を付与するとき、自分の振動回数を1消耗して付与量 +1\n- 振動爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n- (振動 威力および回数を増減させる効果を同様に受ける)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "Operation": {
-    "name": "施術",
-    "desc": "この数値が5になると死亡\n最大体力値が数値に比例して20%ずつ減少　\n与ダメージ量が数値に比例して20%ずつ増加\n毎ターン、数値分のクイックを得る",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "FreishutzOutisEgoBullet_5th": {
-    "name": "5つ目の魔弾",
-    "desc": "- 与ダメージ量 +30%\n- 攻撃開始前に加重値が4増加\n- 的中時に対象へ火傷10を付与。次のターンに攻撃レベル減少4, 防御レベル減少4を付与",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NiddleEGO": {
-    "name": "針",
-    "desc": "- 特殊出血\n- 嫉妬ダメージを受けると、出血回数が1増加してこの効果の数値が1減少\n- ターン終了時、出血1を得て数値が1減少",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "CrimsonResultUp": {
-    "name": "憤怒威力増加",
-    "desc": "1ターンの間、憤怒属性スキルの最終威力が数値だけ増加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AmberResultUp": {
-    "name": "怠惰威力増加",
-    "desc": "1ターンの間、怠惰属性スキルの最終威力が数値だけ増加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "MentalSystemResultDecrease_Typo": {
-    "name": "精神力減少効率",
-    "desc": "人格の基本精神力減少条件による精神力減少量",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
   "ForwardToTheBoundKing": {
     "name": "縛られし王の前へ",
     "desc": "攻撃加重値が1である自分の攻撃的中時、同一対象以外の攻撃可能な敵のうち体力が最も低い敵2名へ、攻撃スキルの属性と同じ属性ダメージを与える。(コイン結果値の100%分)",
     "iconId": null,
     "buffType": "Positive"
   },
-  "VibrationCrack": {
-    "name": "振動 - 亀裂",
-    "desc": "- 混乱状態になったとき、自分の振動威力と回数の合計が20以上なら、混乱段階が1増加\n- 該当効果で最大混乱段階を超過することはない\n\n振動爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\nターン終了後に回数が1減少\n(振動威力および回数を増減させる効果と同様に適用される)",
+  "RyoshuEGOPF": {
+    "name": "羅生",
+    "desc": "最大値 : 999\n- 良秀が与えたスキルダメージ1につき、数値が1増加\n- 数値33につき、基本スキルのダメージ量が1%増加 (最大10%)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "GainSinStockAdder": {
+    "name": "E.G.Oコスト獲得量+",
+    "desc": "1ターンの間、スキル使用時に獲得するE.G.O資源数が数値分増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmittedCurrent": {
+    "name": "放出電流",
+    "desc": "被ダメージ時、攻撃者の充電 回数が1増加。憂鬱属性で被ダメージ時、自分の破裂 回数が1増加。以降は数値が1減少。",
     "iconId": null,
     "buffType": "Negative"
+  },
+  "EntangledCurseTalisman": {
+    "name": "絡み付いてしまった呪いの札",
+    "desc": "- 最大値 : 10\n- ターン終了時に除去\n- 数値が10以上なら、スキルで30以上ダメージを受けた場合に破裂 回数が1増加、破裂 威力だけ暴食ダメージを受ける(1ターンにつき1回)\n- この効果が除去されるとき、次のターンに(数値 ÷ 4)だけ攻撃威力減少 を付与(最大2)\n※この効果は更新されない",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_6th": {
+    "name": "6つ目の魔弾",
+    "desc": "- 攻撃開始前に加重値が6増加\n- 対象の混乱区間をダメージ量だけ前進(最大30)\n- メインターゲットの火傷7につき、コインを再使用する(最大2回再使用)\n- 加算コインスキルの基本威力を16減少\n- 減算コインの基本威力を22減少\n - 加算コインの威力を8減少\n - 減算コインの威力を12減少",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FreishutzOutisEgoBullet_3rd": {
+    "name": "3つ目の魔弾",
+    "desc": "- 与ダメージ量 +20%\n- 攻撃開始前に加重値が2増加\n- 的中時に対象へ攻撃威力減少2, 火傷10を付与",
+    "iconId": null,
+    "buffType": "Positive"
   },
   "Muckworm": {
     "name": "蛆虫",
@@ -1649,51 +1631,45 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "AmberTakeDamageDown": {
-    "name": "怠惰保護",
-    "desc": "1ターンの間、怠惰属性スキルでの被ダメージが数値に比例して減少(最大10)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "RoseWedge": {
-    "name": "薔薇のとげ",
-    "desc": "- 威力の最大値 : 10\n- 回数の最大値 : 4\n- 出血ダメージを10受けるたび、威力が1増加。\n- 被ダメージ時にスキル効果で出血、特殊出血が付与されるたびに出血2を得て、攻撃者に出血1を与える。(1ターンにつき最大5回)\n- この効果の威力が10なら、上記の効果発動時に追加で出血回数が1増加。\n- ターン終了時に回数が1減少\n- 戦闘終了時に威力10または回数1なら、バフが消滅して(威力 × 10)の色欲属性ダメージを受ける。\n- 付与対象が死亡またはバフ消滅時は(威力 × 10)だけ血餐が増加、付与対象の全味方ユニットに(威力 × 2)の色欲属性ダメージを与える(最低1)",
+  "IndigoTakeDamageUp": {
+    "name": "傲慢脆弱",
+    "desc": "1ターンの間、傲慢属性スキルでの被ダメージが数値に比例して増加(最大10)",
     "iconId": null,
     "buffType": "Negative"
   },
-  "AmberDamageUp": {
-    "name": "怠惰ダメージ量増加",
-    "desc": "1ターンの間、怠惰属性スキルでの与ダメージが数値に比例して増加(最大10)",
+  "IndigoDamageUp": {
+    "name": "傲慢ダメージ量増加",
+    "desc": "1ターンの間、傲慢属性スキルでの与ダメージが数値に比例して増加(最大10)",
     "iconId": null,
     "buffType": "Positive"
   },
-  "CentipedePoison": {
-    "name": "百足の毒",
-    "desc": "- 最大値: 20\n- ターン終了時、(数値 ÷ 4)だけ次のターンに防御レベル減少を得る(小数点切り捨て)\n- ターン終了時、数値だけ暴食ダメージを受けて、数値が半減(小数点切り捨て)\n死亡時、この味方ユニットのうち百足の毒を保有していないか、最も少ない対象(集中戦闘の場合は部位で判定)へ威力だけ移る",
+  "CrimsonResultUp": {
+    "name": "憤怒威力増加",
+    "desc": "1ターンの間、憤怒属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "YesdragonNodie": {
+    "name": "不許",
+    "desc": "このターンに体力が0になるダメージを受ければ、このターンの間体力が1未満にならず、ダメージによる混乱状態を解除\n上記の効果が発動した場合、ターン終了時に死亡\nターン終了時、死亡時または退却時にバフ消滅",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "DragonLance": {
+    "name": "埋花櫼",
+    "desc": "基本値: 0\n最大値: 3\n- 自分の操作パネル最左端の基本攻撃スキルが破壊不能コインになる\n- ターン開始時、数値1につき攻撃レベル増加2, 防御レベル減少2を得る\n- ターン開始時に数値が3以上なら、汚血 1を得る (戦闘につき1回)\n- ターン終了時に1増加\n※上記の効果のみで数値を増加可能\n- 死亡、退却時に除去される\n\n- このターンに体力が0になるダメージを受ければ、このターンの間体力が1未満にならず、ダメージによる混乱状態を解除\n以降、該当ターンの間ダメージで混乱・死亡せず、該当ターンの最後の番にスキル「汚血泣涙 - 終」を使用する。該当スキル終了時に埋花櫼 を除去\nターン終了時に体力が1になるダメージを受けた場合、次のターンに速度順で「汚血泣涙 - 終」を使用する。",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BirdCage": {
+    "name": "熱せられた鳥籠",
+    "desc": "- 最大値: 5\n- 対象に火傷があるなら、数値1につき憤怒耐性 +0.1 (この効果によって憤怒耐性が2.0を超過することはない)\n- ターン終了時、次のターンに束縛を数値だけ得る\n- ターン終了時に数値が半減(小数点切り捨て)\n※この効果は更新されない",
     "iconId": null,
     "buffType": "Negative"
   },
-  "NebulizerInhale": {
-    "name": "ネブライザーβ",
-    "desc": "- 最大値: 5\n- この効果はこの戦闘の間、保たれる\n- 傲慢完全共鳴を発動したなら戦闘開始時、自分とランダムな味方(スタック)名が呼吸3を得て呼吸回数が3増加(呼吸または呼吸回数を自ら使用するか獲得する味方のうち、呼吸威力が低い対象へ優先して適用)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ReleaseBreath": {
-    "name": "荒い呼気",
-    "desc": "- 最大値 : 1\n- 自分の呼吸威力が20以上なら、自分のスキル・コイン効果で呼吸威力を得るときに回数が1増加。\n- ターン終了時に消滅",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "MlynarWaiting": {
-    "name": "鞘に納められた人",
-    "desc": "- 最大値: 40\n- (数値 ÷ 8)が1につき、挑発値1を得る (最大5, 小数点切り捨て、操作パネルの最左端のスキルスロットに適用)\n- (数値 ÷ 20)が1につき、保護1を得る (最大2, 小数点切り捨て)\n- ターン終了時に10増加\n※1ターンにつき最大20獲得可能",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "HitTakeDamageDown": {
-    "name": "打撃保護",
-    "desc": "1ターンの間、打撃属性スキルでの被ダメージが数値に比例して減少(最大10)",
+  "NebulizerExhale": {
+    "name": "ネブライザーα",
+    "desc": "- 最大値 : 5\n- この効果は今回の戦闘のあいだ維持される\n- 戦闘開始時に自分を含む全味方が呼吸 威力1を得て、呼吸 回数が1増加",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1703,11 +1679,149 @@
     "iconId": null,
     "buffType": "Negative"
   },
+  "PinkRibbon_Ishmael": {
+    "name": "桃色のリボン",
+    "desc": "1ターンの間、攻撃スキルのコインを使用する度に値が増加。\nターン終了時、数値分の束縛を得て効果消滅。",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Operation": {
+    "name": "施術",
+    "desc": "この数値が5になると死亡\n最大体力値が数値に比例して20%ずつ減少　\n与ダメージ量が数値に比例して20%ずつ増加\n毎ターン、数値分のクイックを得る",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
   "ShamrockTakeDamageUp": {
     "name": "暴食脆弱",
     "desc": "1ターンの間、暴食属性スキルでの被ダメージが数値に比例して増加(最大10)",
     "iconId": null,
     "buffType": "Negative"
+  },
+  "ThreeMirrorpartYiSang": {
+    "name": "割れた世界",
+    "desc": "- 最大値: 1\n- ターン終了時に消滅\n- 火傷による被ダメージ量1.2倍 (小数点切り捨て、特殊火傷を除く)\n- イサンの憤怒属性と憂鬱属性基本攻撃スキルによる被ダメージ量 +10%",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MlynarWaiting": {
+    "name": "鞘に納められた人",
+    "desc": "- 最大値: 40\n- (数値 ÷ 8)が1につき、挑発値1を得る (最大5, 小数点切り捨て、操作パネルの最左端のスキルスロットに適用)\n- (数値 ÷ 20)が1につき、保護1を得る (最大2, 小数点切り捨て)\n- ターン終了時に10増加\n※1ターンにつき最大20獲得可能",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Cianjing": {
+    "name": "弦驚",
+    "desc": "- ターン開始時、攻撃レベル増加1, 防御レベル増加1を得る\n- ターン終了時に1減少\n- 最大5",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NebulizerInhale": {
+    "name": "ネブライザーβ",
+    "desc": "- 最大値: 5\n- この効果はこの戦闘の間、保たれる\n- 傲慢完全共鳴を発動したなら戦闘開始時、自分とランダムな味方(スタック)名が呼吸3を得て呼吸回数が3増加(呼吸または呼吸回数を自ら使用するか獲得する味方のうち、呼吸威力が低い対象へ優先して適用)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberDamageUp": {
+    "name": "怠惰ダメージ量増加",
+    "desc": "1ターンの間、怠惰属性スキルでの与ダメージが数値に比例して増加(最大10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationContinue": {
+    "name": "振動 - 永続",
+    "desc": "- スキル・コイン効果で振動爆発時、(振動威力)%の確率で自分の振動爆発が1回追加で発動(最大50%)\n- スキル・コイン効果で振動爆発時、(振動回数)%の確率で自分の振動爆発が1回追加で発動(最大50%)\n- 振動爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n(振動威力および回数を増減させる効果が同様に適用される)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ReleaseBreath": {
+    "name": "荒い呼気",
+    "desc": "- 最大値 : 1\n- 自分の呼吸威力が20以上なら、自分のスキル・コイン効果で呼吸威力を得るときに回数が1増加。\n- ターン終了時に消滅",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HitTakeDamageDown": {
+    "name": "打撃保護",
+    "desc": "1ターンの間、打撃属性スキルでの被ダメージが数値に比例して減少(最大10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MentalSystemResultDecrease_Typo": {
+    "name": "精神力減少効率",
+    "desc": "人格の基本精神力減少条件による精神力減少量",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ThirstyRose": {
+    "name": "渇望する薔薇",
+    "desc": "- 最大値: 5\n- ターン終了時、自分の出血威力が10以上なら、自分の体力最大値の1%だけ色欲属性ダメージを受ける(最大30)\n- ターン終了時に1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IDMicroChip": {
+    "name": "住民登録マイクロチップ",
+    "desc": "- 最大値: 2\n- 憤怒属性、嫉妬属性スキルで被ダメージ時に受けるダメージ量 +10%\n- マッチ敗北時、火傷1を得る (1ターンにつき最大3回)\n- ターン終了時に1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AmberTakeDamageUp": {
+    "name": "怠惰脆弱",
+    "desc": "1ターンの間、怠惰属性スキルでの被ダメージが数値に比例して増加(最大10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CentipedePoison": {
+    "name": "百足の毒",
+    "desc": "- 最大値: 20\n- ターン終了時、(数値 ÷ 4)だけ次のターンに防御レベル減少を得る(小数点切り捨て)\n- ターン終了時、数値だけ暴食ダメージを受けて、数値が半減(小数点切り捨て)\n死亡時、この味方ユニットのうち百足の毒を保有していないか、最も少ない対象(集中戦闘の場合は部位で判定)へ威力だけ移る",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ForwardToTheKing": {
+    "name": "王の前へ",
+    "desc": "攻撃加重値が1である自分の攻撃的中時、同一対象以外の攻撃可能な敵のうち体力が最も低い敵2名へ、攻撃スキルの属性と同じ属性ダメージを与える。(コイン結果値の50%分)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HoldingBreath": {
+    "name": "深い吸気",
+    "desc": "- 最大値: 20\n- クリティカル発動時、呼吸威力が15, 呼吸回数が5以上なら、呼吸威力を(保有している呼吸威力 ÷ 5)だけ消耗してクリティカルダメージ量が(消耗した値 × 4)%だけ増加して数値を1消耗",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AccumulatedPastSinner": {
+    "name": "蓄積された過去",
+    "desc": "- 最大値 : 12\n- ターン開始時、数値3につきマッチ威力増加1, 攻撃レベル増加1を得る",
+    "iconId": "AccumulatedPast",
+    "buffType": "Positive"
+  },
+  "MentalSystemResultIncrease_Typo": {
+    "name": "精神力回復効率",
+    "desc": "人格の基本精神力増加条件による精神力回復量",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "SeniorCianjing": {
+    "name": "大龍",
+    "desc": "- ターン開始時、攻撃レベル増加2, 防御レベル増加2を得る\n- ターン終了時に1減少\n- 最大5",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ShamrockResultUp": {
+    "name": "暴食威力増加",
+    "desc": "1ターンの間、暴食属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberResultUp": {
+    "name": "怠惰威力増加",
+    "desc": "1ターンの間、怠惰属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FreishutzOutisEgoBullet_5th": {
+    "name": "5つ目の魔弾",
+    "desc": "- 与ダメージ量 +30%\n- 攻撃開始前に加重値が4増加\n- 的中時に対象へ火傷10を付与。次のターンに攻撃レベル減少4, 防御レベル減少4を付与",
+    "iconId": null,
+    "buffType": "Positive"
   },
   "FreishutzOutisEgoBullet_7th": {
     "name": "7つ目の魔弾",
@@ -1715,11 +1829,71 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "ForwardToTheKing": {
-    "name": "王の前へ",
-    "desc": "攻撃加重値が1である自分の攻撃的中時、同一対象以外の攻撃可能な敵のうち体力が最も低い敵2名へ、攻撃スキルの属性と同じ属性ダメージを与える。(コイン結果値の50%分)",
+  "FreishutzOutisEgoBullet_2nd": {
+    "name": "2つ目の魔弾",
+    "desc": "- 与ダメージ量 +10%\n- メインターゲットを除いた対象へダメージを与える(対象数: 最大4名)、メインターゲットの被ダメージは0になる\n- 的中時に麻痺3を付与",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "MaxHpMultiplier": {
+    "name": "体力最大値増加",
+    "desc": "体力最大値が値につき10%増加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationCrack": {
+    "name": "振動 - 亀裂",
+    "desc": "- 混乱状態になったとき、自分の振動威力と回数の合計が20以上なら、混乱段階が1増加\n- 該当効果で最大混乱段階を超過することはない\n\n振動爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\nターン終了後に回数が1減少\n(振動威力および回数を増減させる効果と同様に適用される)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_1st": {
+    "name": "1つ目の魔弾",
+    "desc": "- 与ダメージ量 +20%\n- 対象の混乱区間をダメージ量だけ前進(最大30)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Snare": {
+    "name": "投げ縄",
+    "desc": "- 最大値 : 3\n- ターン終了時、自分の現在の速度だけ破裂威力を得る(最大5), 次のターンに束縛1を得る\n- ターン終了時に数値が1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "NiddleEGO": {
+    "name": "針",
+    "desc": "- 特殊出血\n- 嫉妬ダメージを受けると、出血回数が1増加してこの効果の数値が1減少\n- ターン終了時、出血1を得て数値が1減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MagicalGirlResponse": {
+    "name": "魔法少女の詠唱",
+    "desc": "- 最大値: 2\n- この効果を得たなら、攻撃威力増加1, ダメージ量増加1を得る\n- 自分の充電回数を増加させるか充電回数を消耗する攻撃スキルの最終威力 +1, ダメージ量 +10%\n- ターン終了時に1減少",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ParryingResultDown": {
+    "name": "マッチ威力減少",
+    "desc": "マッチ進行時、マッチ威力が数値だけ減少",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationSpring": {
+    "name": "振動 - ネジ巻き",
+    "desc": "- 速度の最大値 +2\n- 自分がスキル・コイン効果で振動威力や振動回数を付与するとき、自分の振動回数を1消耗して付与量 +1\n- 振動爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n- (振動 威力および回数を増減させる効果を同様に受ける)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberTakeDamageDown": {
+    "name": "怠惰保護",
+    "desc": "1ターンの間、怠惰属性スキルでの被ダメージが数値に比例して減少(最大10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Curse": {
+    "name": "呪い",
+    "desc": "ターン終了時、次のターンにて威力減少 1、守備威力減少 1、攻撃レベル減少 2、防御レベル減少 2からランダムに1つの効果を獲得し、値が1減少。",
+    "iconId": null,
+    "buffType": "Negative"
   },
   "CuredFilm": {
     "name": "硬化バリア",
@@ -1733,147 +1907,15 @@
     "iconId": null,
     "buffType": "Neutral"
   },
-  "RyoshuEGOPF": {
-    "name": "羅生",
-    "desc": "最大値 : 999\n- 良秀が与えたスキルダメージ1につき、数値が1増加\n- 数値33につき、基本スキルのダメージ量が1%増加 (最大10%)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
   "ResultReduction": {
     "name": "威力減少",
     "desc": "1ターンの間、スキルの最終威力が数値だけ減少",
     "iconId": null,
     "buffType": "Negative"
   },
-  "BirdCage": {
-    "name": "熱せられた鳥籠",
-    "desc": "- 最大値: 5\n- 対象に火傷があるなら、数値1につき憤怒耐性 +0.1 (この効果によって憤怒耐性が2.0を超過することはない)\n- ターン終了時、次のターンに束縛を数値だけ得る\n- ターン終了時に数値が半減(小数点切り捨て)\n※この効果は更新されない",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "GainSinStockAdder": {
-    "name": "E.G.Oコスト獲得量+",
-    "desc": "1ターンの間、スキル使用時に獲得するE.G.O資源数が数値分増加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NebulizerExhale": {
-    "name": "ネブライザーα",
-    "desc": "- 最大値 : 5\n- この効果は今回の戦闘のあいだ維持される\n- 戦闘開始時に自分を含む全味方が呼吸 威力1を得て、呼吸 回数が1増加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AmberTakeDamageUp": {
-    "name": "怠惰脆弱",
-    "desc": "1ターンの間、怠惰属性スキルでの被ダメージが数値に比例して増加(最大10)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "FreishutzOutisEgoBullet_2nd": {
-    "name": "2つ目の魔弾",
-    "desc": "- 与ダメージ量 +10%\n- メインターゲットを除いた対象へダメージを与える(対象数: 最大4名)、メインターゲットの被ダメージは0になる\n- 的中時に麻痺3を付与",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "PinkRibbon_Ishmael": {
-    "name": "桃色のリボン",
-    "desc": "1ターンの間、攻撃スキルのコインを使用する度に値が増加。\nターン終了時、数値分の束縛を得て効果消滅。",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IDMicroChip": {
-    "name": "住民登録マイクロチップ",
-    "desc": "- 最大値: 2\n- 憤怒属性、嫉妬属性スキルで被ダメージ時に受けるダメージ量 +10%\n- マッチ敗北時、火傷1を得る (1ターンにつき最大3回)\n- ターン終了時に1減少",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "SeniorCianjing": {
-    "name": "大龍",
-    "desc": "- ターン開始時、攻撃レベル増加2, 防御レベル増加2を得る\n- ターン終了時に1減少\n- 最大5",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ThirstyRose": {
-    "name": "渇望する薔薇",
-    "desc": "- 最大値: 5\n- ターン終了時、自分の出血威力が10以上なら、自分の体力最大値の1%だけ色欲属性ダメージを受ける(最大30)\n- ターン終了時に1減少",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IndigoDamageUp": {
-    "name": "傲慢ダメージ量増加",
-    "desc": "1ターンの間、傲慢属性スキルでの与ダメージが数値に比例して増加(最大10)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_6th": {
-    "name": "6つ目の魔弾",
-    "desc": "- 攻撃開始前に加重値が6増加\n- 対象の混乱区間をダメージ量だけ前進(最大30)\n- メインターゲットの火傷7につき、コインを再使用する(最大2回再使用)\n- 加算コインスキルの基本威力を16減少\n- 減算コインの基本威力を22減少\n - 加算コインの威力を8減少\n - 減算コインの威力を12減少",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AccumulatedPastSinner": {
-    "name": "蓄積された過去",
-    "desc": "- 最大値 : 12\n- ターン開始時、数値3につきマッチ威力増加1, 攻撃レベル増加1を得る",
-    "iconId": "AccumulatedPast",
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_3rd": {
-    "name": "3つ目の魔弾",
-    "desc": "- 与ダメージ量 +20%\n- 攻撃開始前に加重値が2増加\n- 的中時に対象へ攻撃威力減少2, 火傷10を付与",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "UninvitedGuestPersonality": {
-    "name": "招聘されざる者",
-    "desc": "- 最大2\n- 死亡時に最後の攻撃者の精神力を3回復。この効果が、効果を保有しないランダムな味方に2移る。\n- 自分の沈潜1につき、被ダメージ量 +0.5%(最大10%, 集中戦闘の場合は部位ごとに別途判定)\n- ターン終了時に1減少",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "YesdragonNodie": {
-    "name": "不許",
-    "desc": "このターンに体力が0になるダメージを受ければ、このターンの間体力が1未満にならず、ダメージによる混乱状態を解除\n上記の効果が発動した場合、ターン終了時に死亡\nターン終了時、死亡時または退却時にバフ消滅",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "EntangledCurseTalisman": {
-    "name": "絡み付いてしまった呪いの札",
-    "desc": "- 最大値 : 10\n- ターン終了時に除去\n- 数値が10以上なら、スキルで30以上ダメージを受けた場合に破裂 回数が1増加、破裂 威力だけ暴食ダメージを受ける(1ターンにつき1回)\n- この効果が除去されるとき、次のターンに(数値 ÷ 4)だけ攻撃威力減少 を付与(最大2)\n※この効果は更新されない",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "Snare": {
-    "name": "投げ縄",
-    "desc": "- 最大値 : 3\n- ターン終了時、自分の現在の速度だけ破裂威力を得る(最大5), 次のターンに束縛1を得る\n- ターン終了時に数値が1減少",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "HoldingBreath": {
-    "name": "深い吸気",
-    "desc": "- 最大値: 20\n- クリティカル発動時、呼吸威力が15, 呼吸回数が5以上なら、呼吸威力を(保有している呼吸威力 ÷ 5)だけ消耗してクリティカルダメージ量が(消耗した値 × 4)%だけ増加して数値を1消耗",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VibrationContinue": {
-    "name": "振動 - 永続",
-    "desc": "- スキル・コイン効果で振動爆発時、(振動威力)%の確率で自分の振動爆発が1回追加で発動(最大50%)\n- スキル・コイン効果で振動爆発時、(振動回数)%の確率で自分の振動爆発が1回追加で発動(最大50%)\n- 振動爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n(振動威力および回数を増減させる効果が同様に適用される)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "DragonLance": {
-    "name": "埋花櫼",
-    "desc": "基本値: 0\n最大値: 3\n- 自分の操作パネル最左端の基本攻撃スキルが破壊不能コインになる\n- ターン開始時、数値1につき攻撃レベル増加2, 防御レベル減少2を得る\n- ターン開始時に数値が3以上なら、汚血 1を得る (戦闘につき1回)\n- ターン終了時に1増加\n※上記の効果のみで数値を増加可能\n- 死亡、退却時に除去される\n\n- このターンに体力が0になるダメージを受ければ、このターンの間体力が1未満にならず、ダメージによる混乱状態を解除\n以降、該当ターンの間ダメージで混乱・死亡せず、該当ターンの最後の番にスキル「汚血泣涙 - 終」を使用する。該当スキル終了時に埋花櫼 を除去\nターン終了時に体力が1になるダメージを受けた場合、次のターンに速度順で「汚血泣涙 - 終」を使用する。",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_4th": {
-    "name": "4つ目の魔弾",
-    "desc": "- 与ダメージ量 +30%\n- 攻撃開始前に加重値が3増加\n- 的中時に対象の混乱区間をダメージ量だけ前進(最大20), 次のターンに脆弱3を付与",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ParryingResultDown": {
-    "name": "マッチ威力減少",
-    "desc": "マッチ進行時、マッチ威力が数値だけ減少",
+  "RoseWedge": {
+    "name": "薔薇のとげ",
+    "desc": "- 威力の最大値 : 10\n- 回数の最大値 : 4\n- 出血ダメージを10受けるたび、威力が1増加。\n- 被ダメージ時にスキル効果で出血、特殊出血が付与されるたびに出血2を得て、攻撃者に出血1を与える。(1ターンにつき最大5回)\n- この効果の威力が10なら、上記の効果発動時に追加で出血回数が1増加。\n- ターン終了時に回数が1減少\n- 戦闘終了時に威力10または回数1なら、バフが消滅して(威力 × 10)の色欲属性ダメージを受ける。\n- 付与対象が死亡またはバフ消滅時は(威力 × 10)だけ血餐が増加、付与対象の全味方ユニットに(威力 × 2)の色欲属性ダメージを与える(最低1)",
     "iconId": null,
     "buffType": "Negative"
   },
@@ -1883,57 +1925,51 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "MaxHpMultiplier": {
-    "name": "体力最大値増加",
-    "desc": "体力最大値が値につき10%増加",
+  "FreishutzOutisEgoBullet_4th": {
+    "name": "4つ目の魔弾",
+    "desc": "- 与ダメージ量 +30%\n- 攻撃開始前に加重値が3増加\n- 的中時に対象の混乱区間をダメージ量だけ前進(最大20), 次のターンに脆弱3を付与",
     "iconId": null,
     "buffType": "Positive"
   },
-  "EmittedCurrent": {
-    "name": "放出電流",
-    "desc": "被ダメージ時、攻撃者の充電 回数が1増加。憂鬱属性で被ダメージ時、自分の破裂 回数が1増加。以降は数値が1減少。",
+  "UninvitedGuestPersonality": {
+    "name": "招聘されざる者",
+    "desc": "- 最大2\n- 死亡時に最後の攻撃者の精神力を3回復。この効果が、効果を保有しないランダムな味方に2移る。\n- 自分の沈潜1につき、被ダメージ量 +0.5%(最大10%, 集中戦闘の場合は部位ごとに別途判定)\n- ターン終了時に1減少",
     "iconId": null,
     "buffType": "Negative"
   },
-  "FreishutzOutisEgoBullet_1st": {
-    "name": "1つ目の魔弾",
-    "desc": "- 与ダメージ量 +20%\n- 対象の混乱区間をダメージ量だけ前進(最大30)",
+  "TakeHpHealIncrease": {
+    "name": "体力回復増加",
+    "desc": "パッシブ、スキル、コインの効果で回復する体力が数値に比例して増加(最大5)",
     "iconId": null,
     "buffType": "Positive"
   },
-  "MentalSystemResultIncrease_Typo": {
-    "name": "精神力回復効率",
-    "desc": "人格の基本精神力増加条件による精神力回復量",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "ShamrockResultUp": {
-    "name": "暴食威力増加",
-    "desc": "1ターンの間、暴食属性スキルの最終威力が数値だけ増加",
+  "BloodArmorCasting": {
+    "name": "鋳造された硬血",
+    "desc": "- 最大値: 3\n- 出血または特殊出血を保有した敵とマッチを進行するとき、マッチ威力 +1\n- 攻撃スキルで血餐を消耗時、血餐が足りなければ代わりに、不足している血餐1ごとに体力を1消耗して血餐を生成し、血餐を消耗 (この効果で受けるダメージによって混乱せず、体力が1未満に減少しない)\n- ターン終了時に1減少",
     "iconId": null,
     "buffType": "Positive"
   },
-  "ThreeMirrorpartYiSang": {
-    "name": "割れた世界",
-    "desc": "- 最大値: 1\n- ターン終了時に消滅\n- 火傷による被ダメージ量1.2倍 (小数点切り捨て、特殊火傷を除く)\n- イサンの憤怒属性と憂鬱属性基本攻撃スキルによる被ダメージ量 +10%",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IndigoTakeDamageUp": {
-    "name": "傲慢脆弱",
-    "desc": "1ターンの間、傲慢属性スキルでの被ダメージが数値に比例して増加(最大10)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "Cianjing": {
-    "name": "弦驚",
-    "desc": "- ターン開始時、攻撃レベル増加1, 防御レベル増加1を得る\n- ターン終了時に1減少\n- 最大5",
+  "ChoSuperCharge": {
+    "name": "超亜光蓄電",
+    "desc": "- 最大値 : 100\n- 自分が充電回数を消耗するとき、消耗値だけこのバフ数値が増加\n- 充電回数最大値 +10\n- 味方が充電威力や回数を得るとき、自分の充電回数が1増加\n- 自分のスキルで充電回数を消耗するとき、消耗量だけ追加で1回消耗 (回数が足りなければ、足りない分最大まで消耗)\n- 数値10につき、自分のスキルダメージ量 +10%\n- 数値20につき、自分の攻撃限定で敵の全属性 +0.1 . (最大 +0.5, 混乱状態を除く)\n- このバフを保有した人格が死亡時、現出戦人員のうち編成順が次に高い味方にこのバフが受け継がれ、バフ数値が保たれる\n- このバフの効果は特殊充電にも適用される",
     "iconId": null,
     "buffType": "Positive"
   },
-  "MagicalGirlResponse": {
-    "name": "魔法少女の詠唱",
-    "desc": "- 最大値: 2\n- この効果を得たなら、攻撃威力増加1, ダメージ量増加1を得る\n- 自分の充電回数を増加させるか充電回数を消耗する攻撃スキルの最終威力 +1, ダメージ量 +10%\n- ターン終了時に1減少",
+  "Zazen": {
+    "name": "禅定",
+    "desc": "- 最大値 : 108\n- 数値1につき与ダメージ量 +1%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmergencyChargeForceField": {
+    "name": "非常用力場バッテリー",
+    "desc": "- 最大値: 7\n- 混乱状態になると、非常用力場バッテリーを全て消耗して、消耗した数値だけ充電力場を得る",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "TraumaShield": {
+    "name": "トラウマ防止フィールド",
+    "desc": "- 敵からの精神力ダメージが80%減少\n- 沈潜ダメージが80%減少\n- ターン終了時に数値が1減少",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1949,11 +1985,17 @@
     "iconId": null,
     "buffType": "Neutral"
   },
-  "WaveSinking": {
-    "name": "逆流",
-    "desc": "- 最大値 : 3\n被ダメージ時、数値だけ沈潜威力を得る\n\nターン終了時に自分の精神力が-30以下なら以下の効果が適用される(精神力が無い敵は沈潜威力60以上保有時に発動)\n- 自分の(沈潜 威力 × 数値)だけ憂鬱ダメージを受ける\n- 自分を除く精神力が最も低い対象2体(幻想体の場合は部位)に逆流1を付与して、各対象の(沈潜威力 × 数値)だけ憂鬱ダメージ\n- 逆流 を保有した状態で死亡時、逆流 の数値が最も高い味方に自分の逆流数値だけ逆流を付与",
+  "ShareCharge": {
+    "name": "自己共振回路",
+    "desc": "現在の全味方が保有する充電回数の合計\n\nスキル的中時のダメージ量 +(現味方の充電回数合計 ÷ 3)%\n味方の充電回数累計消耗量100につき、全味方が攻撃レベル増加1を得る",
     "iconId": null,
-    "buffType": "Negative"
+    "buffType": "Neutral"
+  },
+  "ScarletResultUp": {
+    "name": "色欲威力増加",
+    "desc": "このターンの間、色欲属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
   },
   "KnightBless": {
     "name": "加護",
@@ -1961,69 +2003,9 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "BloodArmorCasting": {
-    "name": "鋳造された硬血",
-    "desc": "- 最大値: 3\n- 出血または特殊出血を保有した敵とマッチを進行するとき、マッチ威力 +1\n- 攻撃スキルで血餐を消耗時、血餐が足りなければ代わりに、不足している血餐1ごとに体力を1消耗して血餐を生成し、血餐を消耗 (この効果で受けるダメージによって混乱せず、体力が1未満に減少しない)\n- ターン終了時に1減少",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VerEmergencyCandy": {
-    "name": "非常用キャンディー",
-    "desc": "ターン終了時、体力最大値の60%未満なら\n体力を最大値の30%だけ回復、精神力を15回復して非常用キャンディー1, くうふく1減少\n数値が0になると、輝くまんぷく感を1付与して消滅",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VibrationDistribution": {
-    "name": "振動 - 分配",
-    "desc": "- ターン終了時(味方全体の振動 回数の合計 ÷ 生存している味方の数)だけ、次のターンに攻撃レベル増加を得る(最大5)\n- 振動 爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n(振動 威力および回数を増減させる効果を同様に受ける)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "GiftCannon": {
-    "name": "火力",
-    "desc": "- 最大値: 10\n- 数値1につき与ダメージ量 +10%",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "EmergencyChargeForceField": {
-    "name": "非常用力場バッテリー",
-    "desc": "- 最大値: 7\n- 混乱状態になると、非常用力場バッテリーを全て消耗して、消耗した数値だけ充電力場を得る",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ChoSuperCharge": {
-    "name": "超亜光蓄電",
-    "desc": "- 最大値 : 100\n- 自分が充電回数を消耗するとき、消耗値だけこのバフ数値が増加\n- 充電回数最大値 +10\n- 味方が充電威力や回数を得るとき、自分の充電回数が1増加\n- 自分のスキルで充電回数を消耗するとき、消耗量だけ追加で1回消耗 (回数が足りなければ、足りない分最大まで消耗)\n- 数値10につき、自分のスキルダメージ量 +10%\n- 数値20につき、自分の攻撃限定で敵の全属性 +0.1 . (最大 +0.5, 混乱状態を除く)\n- このバフを保有した人格が死亡時、現出戦人員のうち編成順が次に高い味方にこのバフが受け継がれ、バフ数値が保たれる\n- このバフの効果は特殊充電にも適用される",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "SkillPowerUp": {
-    "name": "基本威力増加",
-    "desc": "スキルの基本威力が数値だけ増加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "TraumaShield": {
-    "name": "トラウマ防止フィールド",
-    "desc": "- 敵からの精神力ダメージが80%減少\n- 沈潜ダメージが80%減少\n- ターン終了時に数値が1減少",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NervousImpairment": {
-    "name": "神経損傷",
-    "desc": "- 最大値 : 30\n- 数値が30なら、混乱してから最大体力の25%だけ固定ダメージを受けてこの効果を除去",
-    "iconId": null,
-    "buffType": "Negative"
-  },
   "GiftGlass": {
     "name": "軟弱",
     "desc": "- 最大値: 10\n- 数値1につき被ダメージ量 +10%",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "VioletResistDown": {
-    "name": "嫉妬耐性弱化",
-    "desc": "対象の嫉妬耐性を(数値 × 0.1)増加",
     "iconId": null,
     "buffType": "Negative"
   },
@@ -2033,21 +2015,15 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "ShareCharge": {
-    "name": "自己共振回路",
-    "desc": "現在の全味方が保有する充電回数の合計\n\nスキル的中時のダメージ量 +(現味方の充電回数合計 ÷ 3)%\n味方の充電回数累計消耗量100につき、全味方が攻撃レベル増加1を得る",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "Zazen": {
-    "name": "禅定",
-    "desc": "- 最大値 : 108\n- 数値1につき与ダメージ量 +1%",
+  "VerEmergencyCandy": {
+    "name": "非常用キャンディー",
+    "desc": "ターン終了時、体力最大値の60%未満なら\n体力を最大値の30%だけ回復、精神力を15回復して非常用キャンディー1, くうふく1減少\n数値が0になると、輝くまんぷく感を1付与して消滅",
     "iconId": null,
     "buffType": "Positive"
   },
-  "ScarletResultUp": {
-    "name": "色欲威力増加",
-    "desc": "このターンの間、色欲属性スキルの最終威力が数値だけ増加",
+  "SkillPowerUp": {
+    "name": "基本威力増加",
+    "desc": "スキルの基本威力が数値だけ増加",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -2057,15 +2033,39 @@
     "iconId": null,
     "buffType": "Positive"
   },
+  "NervousImpairment": {
+    "name": "神経損傷",
+    "desc": "- 最大値 : 30\n- 数値が30なら、混乱してから最大体力の25%だけ固定ダメージを受けてこの効果を除去",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationDistribution": {
+    "name": "振動 - 分配",
+    "desc": "- ターン終了時(味方全体の振動 回数の合計 ÷ 生存している味方の数)だけ、次のターンに攻撃レベル増加を得る(最大5)\n- 振動 爆発スキルで被ダメージ時、効果威力だけ混乱区間が前進\n- ターン終了時に回数が1減少\n(振動 威力および回数を増減させる効果を同様に受ける)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "WaveSinking": {
+    "name": "逆流",
+    "desc": "- 最大値 : 3\n被ダメージ時、数値だけ沈潜威力を得る\n\nターン終了時に自分の精神力が-30以下なら以下の効果が適用される(精神力が無い敵は沈潜威力60以上保有時に発動)\n- 自分の(沈潜 威力 × 数値)だけ憂鬱ダメージを受ける\n- 自分を除く精神力が最も低い対象2体(幻想体の場合は部位)に逆流1を付与して、各対象の(沈潜威力 × 数値)だけ憂鬱ダメージ\n- 逆流 を保有した状態で死亡時、逆流 の数値が最も高い味方に自分の逆流数値だけ逆流を付与",
+    "iconId": null,
+    "buffType": "Negative"
+  },
   "RequestedTarget": {
     "name": "依頼対象",
     "desc": "斬撃・貫通・打撃のうち1.5以下の耐性が +0.2。このバフが付与された対象を討伐すると全E.G.O資源を1得て、討伐者の精神力を10回復させる",
     "iconId": null,
     "buffType": "Negative"
   },
-  "TakeHpHealIncrease": {
-    "name": "体力回復増加",
-    "desc": "パッシブ、スキル、コインの効果で回復する体力が数値に比例して増加(最大5)",
+  "VioletResistDown": {
+    "name": "嫉妬耐性弱化",
+    "desc": "対象の嫉妬耐性を(数値 × 0.1)増加",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiftCannon": {
+    "name": "火力",
+    "desc": "- 最大値: 10\n- 数値1につき与ダメージ量 +10%",
     "iconId": null,
     "buffType": "Positive"
   }

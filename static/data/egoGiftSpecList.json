@@ -2135,7 +2135,15 @@
     ],
     "keyword": "None",
     "attributeType": "SCARLET",
-    "themePack": [],
+    "themePack": [
+      "1302",
+      "1305",
+      "1308",
+      "1311",
+      "1314",
+      "1317",
+      "1320"
+    ],
     "maxEnhancement": 0
   },
   "9209": {
@@ -2144,7 +2152,10 @@
     ],
     "keyword": "None",
     "attributeType": "INDIGO",
-    "themePack": [],
+    "themePack": [
+      "1504",
+      "1316"
+    ],
     "maxEnhancement": 0
   },
   "9210": {
@@ -2162,7 +2173,10 @@
     ],
     "keyword": "Sinking",
     "attributeType": "AZURE",
-    "themePack": [],
+    "themePack": [
+      "1410",
+      "1314"
+    ],
     "maxEnhancement": 0
   },
   "9212": {
@@ -2270,7 +2284,9 @@
     ],
     "keyword": "Hit",
     "attributeType": "VIOLET",
-    "themePack": [],
+    "themePack": [
+      "1024"
+    ],
     "maxEnhancement": 0
   },
   "9221": {
@@ -2279,7 +2295,9 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": [],
+    "themePack": [
+      "1024"
+    ],
     "maxEnhancement": 0
   },
   "9222": {

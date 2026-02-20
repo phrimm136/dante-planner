@@ -5,25 +5,25 @@
       "name": "知识消耗",
       "descs": [
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的2%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的2%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
           "coinDescs": [
-            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移",
-            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移"
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored]层数，相应使自身的混乱阈值后移",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored]层数，相应使自身的混乱阈值后移"
           ]
         },
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的3%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的3%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
           "coinDescs": [
-            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移",
-            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移"
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored]层数，相应使自身的混乱阈值后移",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored]层数，相应使自身的混乱阈值后移"
           ]
         },
         {},
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的3%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的硬币威力+1",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的3%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的硬币威力+1",
           "coinDescs": [
-            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移",
-            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，相应使自身的混乱阈值后移"
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored]层数，相应使自身的混乱阈值后移",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored]层数，相应使自身的混乱阈值后移"
           ]
         }
       ]
@@ -32,28 +32,28 @@
       "name": "关匣封存",
       "descs": [
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的4%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的4%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking]强度",
-            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking]强度"
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored]层数，使目标增加相应的[Sinking]强度",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored]层数，使目标增加相应的[Sinking]强度"
           ]
         },
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的5%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的5%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
           "coinDescs": [
             "",
-            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking]强度",
-            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking]强度"
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored]层数，使目标增加相应的[Sinking]强度",
+            "[OnSucceedAttackHead] 根据自身带有的[KnowledgeExplored]层数，使目标增加相应的[Sinking]强度"
           ]
         },
         {},
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的6%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的6%)点护盾\n[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若目标的[Sinking]强度不低于5级，则使本技能的硬币威力+1\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +3",
           "coinDescs": [
             "",
-            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking]强度",
-            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored] 层数，使目标增加相应的[Sinking]强度"
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored]层数，使目标增加相应的[Sinking]强度",
+            "[OnSucceedAttack] 根据自身带有的[KnowledgeExplored]层数，使目标增加相应的[Sinking]强度"
           ]
         }
       ]
@@ -64,7 +64,7 @@
         {},
         {},
         {
-          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored] 层数×体力上限的9%)点护盾\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +8",
+          "desc": "若本技能被[Discard]，则使自身获得(自身的[KnowledgeExplored]层数×体力上限的9%)点护盾\n[WhenUse] 下回合使本技能对应行动槽的[Aggro] +8",
           "coinDescs": [
             "",
             "",

@@ -11,16 +11,16 @@
           ]
         },
         {
-          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于3层，则使本技能的拼点威力+1",
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 若自身的[KnowledgeExplored]层数不低于3层，则使本技能的拼点威力+1",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层[Sinking]\n[OnSucceedAttack] 若自身的[KnowledgeExplored] 层数不低于3层，则重复使用本硬币1次"
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking]\n[OnSucceedAttack] 若自身的[KnowledgeExplored]层数不低于3层，则重复使用本硬币1次"
           ]
         },
         {},
         {
-          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 使本技能的拼点威力+(自身的[KnowledgeExplored] 层数-1)",
+          "desc": "[WhenUse] [Discard] 自身所有行动槽中级别最高的1个技能\n[WhenUse] 使本技能的拼点威力+(自身的[KnowledgeExplored]层数-1)",
           "coinDescs": [
-            "[OnSucceedAttackHead] 对目标施加1层[Sinking]\n[OnSucceedAttack] 重复使用本硬币(自身的[KnowledgeExplored] 层数-1)次"
+            "[OnSucceedAttackHead] 对目标施加1层[Sinking]\n[OnSucceedAttack] 重复使用本硬币(自身的[KnowledgeExplored]层数-1)次"
           ]
         }
       ]
@@ -37,7 +37,7 @@
           ]
         },
         {
-          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 若自身的[KnowledgeExplored] 层数不低于3层，则使本技能的硬币威力+1",
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 若自身的[KnowledgeExplored]层数不低于3层，则使本技能的硬币威力+1",
           "coinDescs": [
             "",
             "",
@@ -46,7 +46,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 使本技能的硬币威力+(自身的[KnowledgeExplored] 层数-1)",
+          "desc": "[WhenUse] 按技能级别由低到高随机[Discard] 自身所有行动槽中的2个技能\n[WhenUse] 使本技能的硬币威力+(自身的[KnowledgeExplored]层数-1)",
           "coinDescs": [
             "",
             "",

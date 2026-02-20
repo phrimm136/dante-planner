@@ -8,7 +8,7 @@
           "desc": "[BeforeAttack] 使自身获得(最大共鸣数+1)层[BoseProjektil](最多7层)\n- 若该共鸣为完全共鸣，则改为获得(最大共鸣数+2)层[BoseProjektil]\n[BeforeAttack] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多3级)\n[EndSkill] 消耗所有[BoseProjektil]",
           "coinDescs": [
             "",
-            "自身每带有1层撕裂的回忆 ，使本硬币暴击时造成的伤害+5%(最多+35%)\n[OnSucceedAttack] 使目标增加3级[Laceration]强度\n[CriticalOnSucceedAttack] 使目标增加3级[Sinking]强度\n[CriticalTargetKill] 若自身带有弹药 ，则使自身获得1发弹药 (每场战斗最多2发)"
+            "自身每带有1层撕裂的回忆 ，使本硬币暴击时造成的伤害+5%(最多+35%)\n[OnSucceedAttack] 使目标增加3级[Laceration]强度\n[CriticalOnSucceedAttack] 使目标增加3级[Sinking]强度\n[CriticalTargetKill] 若自身带有[Bullet]，则使自身获得1发[Bullet](每场战斗最多2发)"
           ]
         },
         {},
@@ -16,14 +16,14 @@
           "desc": "[BeforeAttack] 使自身获得(最大共鸣数+1)层[BoseProjektil](最多7层)\n- 若该共鸣为完全共鸣，则改为获得(最大共鸣数+2)层[BoseProjektil]\n[BeforeAttack] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多4级)\n[EndSkill] 消耗所有[BoseProjektil]",
           "coinDescs": [
             "",
-            "自身每带有1层撕裂的回忆 ，使本硬币暴击时造成的伤害+10%(最多+70%)\n[OnSucceedAttack] 使目标增加4级[Laceration]强度\n[CriticalOnSucceedAttack] 使目标增加3级[Sinking]强度\n[CriticalTargetKill] 若自身带有弹药 ，则使自身获得1发弹药 (每场战斗最多2发)"
+            "自身每带有1层撕裂的回忆 ，使本硬币暴击时造成的伤害+10%(最多+70%)\n[OnSucceedAttack] 使目标增加4级[Laceration]强度\n[CriticalOnSucceedAttack] 使目标增加3级[Sinking]强度\n[CriticalTargetKill] 若自身带有[Bullet]，则使自身获得1发[Bullet](每场战斗最多2发)"
           ]
         },
         {
           "desc": "[BeforeAttack] 使自身获得(最大共鸣数+1)层[BoseProjektil](最多7层)\n- 若该共鸣为完全共鸣，则改为获得(最大共鸣数+2)层[BoseProjektil]\n[BeforeAttack] 自身每带有1层[BoseProjektil]，使自身增加1级[Breath]强度(最多7级)\n[BeforeAttack] 使自身获得1层[Breath]\n[EndSkill] 消耗所有[BoseProjektil]",
           "coinDescs": [
             "",
-            "自身每带有1层撕裂的回忆 ，使本硬币暴击时造成的伤害+15%(最多+105%)\n[OnSucceedAttack] 使目标增加5级[Laceration]强度\n[CriticalOnSucceedAttack] 使目标增加3级[Sinking]强度\n[CriticalTargetKill] 若自身带有弹药 ，则使自身获得1发弹药 (每场战斗最多3发)"
+            "自身每带有1层撕裂的回忆 ，使本硬币暴击时造成的伤害+15%(最多+105%)\n[OnSucceedAttack] 使目标增加5级[Laceration]强度\n[CriticalOnSucceedAttack] 使目标增加3级[Sinking]强度\n[CriticalTargetKill] 若自身带有[Bullet]，则使自身获得1发[Bullet](每场战斗最多3发)"
           ]
         }
       ]

@@ -1583,65 +1583,47 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "Curse": {
-    "name": "Curse",
-    "desc": "Turn End: Next turn, randomly gain one of the following, then reduce this effect’s Count by 1.\n1 Attack Power Down/1 Defense Power Down/2 Offense Level Down/2 Defense Level Down.",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "VibrationSpring": {
-    "name": "Tremor - Clockwinding",
-    "desc": "- Max Speed + 2\n- Consume Tremor Count on self to inflict 1 more of Tremor Potency or Count when inflicting them with this unit's Skill or Coin effects\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n- (Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "Operation": {
-    "name": "Surgery",
-    "desc": "Die when Count reaches 5.\nReduce Max HP by 20% (per Count).\nDeal 20% (per Count) more damage.\nAt the start of the turn, gain Haste by the effect’s Count.",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "FreishutzOutisEgoBullet_5th": {
-    "name": "The Fifth Magic Bullet",
-    "desc": "- Deal +30% damage\n- Before Attack: gain +4 Atk Weight\n- On Hit, inflict 10 Burn; then, inflict 4 Offense Level down and 4 Defense Level Down next turn",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NiddleEGO": {
-    "name": "Needle",
-    "desc": "- Unique Bleed\n- When taking Envy damage, gain +1 Bleed Count and reduce this effect's Stack by 1\n- Turn End: Gain 1 Bleed and reduce this effect's Stack by 1",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "CrimsonResultUp": {
-    "name": "Wrath Power Up",
-    "desc": "Wrath skills gain final Power by the effect’s Count for one turn.",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AmberResultUp": {
-    "name": "Sloth Power Up",
-    "desc": "Sloth skills gain final Power by the effect’s Count for one turn.",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "MentalSystemResultDecrease_Typo": {
-    "name": "SP Loss Efficiency",
-    "desc": "Amount of SP lost due to the Identity's 'Base factors decreasing Sanity(SP)'",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
   "ForwardToTheBoundKing": {
     "name": "Before the King in Binds",
     "desc": "When this unit's attack with 1 Atk Weight hits, inflict 100% of the resulting Coin value On Hit as (Affinity/Attack Type of the Attack Skill used to hit) damage against 2 other attackable enemies with the least HP",
     "iconId": null,
     "buffType": "Positive"
   },
-  "VibrationCrack": {
-    "name": "Tremor - Fracture",
-    "desc": "- When Staggered, and when the sum of Tremor Potency and Count adds up to 20 or higher, raise Stagger Level by 1\n- Cannot exceed maximum Stagger Level with this effect\n\nWhen hit by attacks that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\nTurn End: reduce the Count by 1\n(Interacts the same way as normal Tremor does to effects that raises or reduces Tremor Potency/Count)",
+  "RyoshuEGOPF": {
+    "name": "Entangled Life [羅生]",
+    "desc": "Max Stack: 999\n- Gain 1 Stack for every HP damage dealt by Ryōshū's Skills\n- Deal +1% damage with Base Skills for every 33 Stack (max 10%)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "GainSinStockAdder": {
+    "name": "E.G.O Resource Amp",
+    "desc": "Increases the amount of E.G.O resources earned from skills by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmittedCurrent": {
+    "name": "Spark Discharge",
+    "desc": "When hit, the attacker gains +1 Charge Count; when hit with a Gloom attack, gain +1 Rupture Count, then reduce Count by 1",
     "iconId": null,
     "buffType": "Negative"
+  },
+  "EntangledCurseTalisman": {
+    "name": "Twisted Curse Talisman",
+    "desc": "- Max Stack: 10\n- Expires at Turn End\n- At 10+ Stack, when taking 30+ damage from a Skill: gain +1 Rupture Count; take Gluttony damage equal to Rupture Potency on self (once per turn)\n- When this effect expires, gain (Stack / 4) Attack Power Down next turn (max 2)\n※ Cannot gain additional Stacks of this effect while it is already active",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_6th": {
+    "name": "The Sixth Magic Bullet",
+    "desc": "- Before Attack: gain +6 Atk Weight\n- On Hit, raise the target's Stagger Threshold by damage dealt (max 30)\n- Reuse the Coin for every 7 Burn on the main target (2 times max)\n- Plus Coin Skill Base Power -16\n- Minus Coin Skill Base Power -22\n - Plus Coin Power -8\n - Minus Coin Power -12",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FreishutzOutisEgoBullet_3rd": {
+    "name": "The Third Magic Bullet",
+    "desc": "- Deal +20% damage\n- Before Attack: gain +2 Atk Weight\n- On Hit, inflict 2 Attack Power Down and 10 Burn",
+    "iconId": null,
+    "buffType": "Positive"
   },
   "Muckworm": {
     "name": "Maggots",
@@ -1649,51 +1631,45 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "AmberTakeDamageDown": {
-    "name": "Sloth Protection",
-    "desc": "Take less damage from Sloth skills based on the effect’s Count for one turn. (Max 10)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "RoseWedge": {
-    "name": "Rose Wedge",
-    "desc": "- Max Potency: 10\n- Max Count: 4\n- Gain 1 Potency every time this unit takes 10 Bleed damage\n- When gaining Bleed or 'Unique Bleed' from getting hit, gain 2 Bleed and inflict 1 Bleed against the Attacker. (5 times per turn)\n· At 10 Potency, gain +1 Bleed Count as well when triggering the above effect.\n- Turn End: lose 1 Count\n- Combat End: at 10 Potency or 1 Count, this effect expires, and this unit takes (Potency x 10) Lust damage.\n- If the unit inflicted with this effect dies, or when this effect expires: increase Bloodfeast by (Potency x 10), and deal (Potency x 2) Lust damage against all of its allies (min 1)",
+  "IndigoTakeDamageUp": {
+    "name": "Pride Fragility",
+    "desc": "Take more damage from Pride skills based on the effect’s Count for one turn. (Max 10)",
     "iconId": null,
     "buffType": "Negative"
   },
-  "AmberDamageUp": {
-    "name": "Sloth DMG Up",
-    "desc": "Deal more damage with Sloth skills based on the effect’s Count for one turn. (Max 10)",
+  "IndigoDamageUp": {
+    "name": "Pride DMG Up",
+    "desc": "Deal more damage with Pride skills based on the effect’s Count for one turn. (Max 10)",
     "iconId": null,
     "buffType": "Positive"
   },
-  "CentipedePoison": {
-    "name": "Centipede Venom",
-    "desc": "- Max Stack: 20\n- Turn End: gain (Stack / 4) Defense Level Down next turn (rounded down)\n- Turn End: take Gluttony damage equal to Stack, and halve the Stack (rounded down)\nUpon death, transfers to this unit's ally(for Focused Encounters, a different Part) with none or the least Centipede Venom Stacks.",
+  "CrimsonResultUp": {
+    "name": "Wrath Power Up",
+    "desc": "Wrath skills gain final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "YesdragonNodie": {
+    "name": "Denial [不許]",
+    "desc": "When this unit takes damage that brings their HP down to 0: this unit's HP does not drop below 1; recover from Stagger due to damage.\nIf the above effect activated, dies at Turn End.\nExpires upon death, Retreat, or Turn End",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "DragonLance": {
+    "name": "Flower-burying Wedge [埋花櫼]",
+    "desc": "Base Stack: 0\nMax Stack: 3\n- All Coins on this unit's leftmost Base Attack Skill on the Dashboard become Unbreakable Coins\n- Turn Start: gain 2 Offense Level Up and 2 Defense Level Down for every Stack\n- Turn Start: at 3+ Stack, gain 1 Tarnished Blood (once per Encounter)\n- Turn End: gain 1 Stack\n※ Cannot raise the effect's Stack by any other means than the ones above\n- Expires upon death or Retreat\n\n- When this unit takes damage that brings their HP down to 0: instead of letting this unit's HP drop below 1, or becoming Staggered or Defeated, use the 'Tears of the Tarnished Blood - The End' Skill at the very end of that turn. Remove the Flower-burying Wedge when the Skill ends.\nWhen this unit takes damage that brings their HP down to 1 at Turn End, use 'Tears of the Tarnished Blood - The End' Skill based on this unit's Speed next turn",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "BirdCage": {
+    "name": "Searing Birdcage",
+    "desc": "Max Stack: 5\nIf this unit has Burn, Wrath Resistance +0.1 for every Stack (cannot exceed 2.0 Wrath Resistance with this effect)\nTurn End: gain Bind equal to Stack next turn\nTurn End: halve Stack (rounded down)\n※ Cannot gain additional Stacks of this effect while it is already active",
     "iconId": null,
     "buffType": "Negative"
   },
-  "NebulizerInhale": {
-    "name": "Nebulizer β",
-    "desc": "- Max Stack: 5\n- This effect persists throughout the Encounter\n- When activating Pride A-Reson.: on Combat Start, apply 3 Poise and +3 Poise Count on self and (Stack) allies (prioritizes allies that gain or use Poise or Poise Count; among them, prioritize allies with the least Poise Potency)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ReleaseBreath": {
-    "name": "Shallow Exhale",
-    "desc": "- Max Value: 1\n- At 20+ Poise Potency, gain +1 Count as well whenever this unit gains Poise Potency with Skill and Coin effects\n- Expires at Turn End",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "MlynarWaiting": {
-    "name": "Man in Scabbard",
-    "desc": "- Max Stack: 40\n- For every (Stack / 8), gain 1 Aggro (max 5; rounded down; affects the leftmost Skill Slot on the Dashboard)\n- For every (Stack / 20), gain 1 Protection (max 2; rounded down)\n- Gain 10 Stacks at Turn End\n※ Can gain up to 20 per turn",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "HitTakeDamageDown": {
-    "name": "Blunt Protection",
-    "desc": "Take less damage from Blunt skills based on the effect’s Count for one turn. (Max 10)",
+  "NebulizerExhale": {
+    "name": "Nebulizer α",
+    "desc": "- Max Stack: 5\n- This effect persists throughout the Encounter\n- Combat Start: on all allies, including this unit, apply 1 Poise Potency and +1 Poise Count",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1703,11 +1679,149 @@
     "iconId": null,
     "buffType": "Negative"
   },
+  "PinkRibbon_Ishmael": {
+    "name": "Pink Ribbons",
+    "desc": "Count increases by 1 whenever the affected unit tosses an attack skill Coin.\nAt the end of the turn, inflict Bind by the effect’s Count, then remove the effect.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Operation": {
+    "name": "Surgery",
+    "desc": "Die when Count reaches 5.\nReduce Max HP by 20% (per Count).\nDeal 20% (per Count) more damage.\nAt the start of the turn, gain Haste by the effect’s Count.",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
   "ShamrockTakeDamageUp": {
     "name": "Gluttony Fragility",
     "desc": "Take more damage from Gluttony skills based on the effect’s Count for one turn. (Max 10)",
     "iconId": null,
     "buffType": "Negative"
+  },
+  "ThreeMirrorpartYiSang": {
+    "name": "Shattered World",
+    "desc": "- Max Stack: 1\n- Expires at Turn End\n- Take x1.2 damage from Burn (rounded down; except Unique Burn)\n- Take +10% damage from Yi Sang's Wrath and Gloom Base Attack Skills",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MlynarWaiting": {
+    "name": "Man in Scabbard",
+    "desc": "- Max Stack: 40\n- For every (Stack / 8), gain 1 Aggro (max 5; rounded down; affects the leftmost Skill Slot on the Dashboard)\n- For every (Stack / 20), gain 1 Protection (max 2; rounded down)\n- Gain 10 Stacks at Turn End\n※ Can gain up to 20 per turn",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Cianjing": {
+    "name": "Thunderer",
+    "desc": "- Turn Start: gain 1 Offense Level Up and 1 Defense Level Up\n- Turn End: lose 1 Stack\n- Max Stack: 5",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NebulizerInhale": {
+    "name": "Nebulizer β",
+    "desc": "- Max Stack: 5\n- This effect persists throughout the Encounter\n- When activating Pride A-Reson.: on Combat Start, apply 3 Poise and +3 Poise Count on self and (Stack) allies (prioritizes allies that gain or use Poise or Poise Count; among them, prioritize allies with the least Poise Potency)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberDamageUp": {
+    "name": "Sloth DMG Up",
+    "desc": "Deal more damage with Sloth skills based on the effect’s Count for one turn. (Max 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationContinue": {
+    "name": "Tremor - Everlasting",
+    "desc": "- When hit by Skills or Coin effects that trigger Tremor Burst, (Tremor Potency on self)% chance to trigger an additional Tremor Burst. (max 50%)\n- When hit by Skills or Coin effects that trigger Tremor Burst, (Tremor Count on self)% chance to trigger an additional Tremor Burst. (max 50%)\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n(Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ReleaseBreath": {
+    "name": "Shallow Exhale",
+    "desc": "- Max Value: 1\n- At 20+ Poise Potency, gain +1 Count as well whenever this unit gains Poise Potency with Skill and Coin effects\n- Expires at Turn End",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "HitTakeDamageDown": {
+    "name": "Blunt Protection",
+    "desc": "Take less damage from Blunt skills based on the effect’s Count for one turn. (Max 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MentalSystemResultDecrease_Typo": {
+    "name": "SP Loss Efficiency",
+    "desc": "Amount of SP lost due to the Identity's 'Base factors decreasing Sanity(SP)'",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ThirstyRose": {
+    "name": "Polydipsic Rose",
+    "desc": "- Max Value: 5\n- Turn End: at 10+ Bleed Potency, take Lust damage equal to 1% of this unit's max HP. (max 30)\n- Turn End: reduced by 1",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IDMicroChip": {
+    "name": "Resident Reg. Microchip",
+    "desc": "- Max Stack: 2\n- Take +10% damage from Wrath and Envy Skills\n- On Clash Lose, gain 1 Burn (3 times per turn)\n- Turn End: Lose 1 Stack",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AmberTakeDamageUp": {
+    "name": "Sloth Fragility",
+    "desc": "Take more damage from Sloth skills based on the effect’s Count for one turn. (Max 10)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CentipedePoison": {
+    "name": "Centipede Venom",
+    "desc": "- Max Stack: 20\n- Turn End: gain (Stack / 4) Defense Level Down next turn (rounded down)\n- Turn End: take Gluttony damage equal to Stack, and halve the Stack (rounded down)\nUpon death, transfers to this unit's ally(for Focused Encounters, a different Part) with none or the least Centipede Venom Stacks.",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ForwardToTheKing": {
+    "name": "Before the King",
+    "desc": "When this unit's attack with 1 Atk Weight hits, inflict 50% of the resulting Coin value On Hit as (Affinity/Attack Type of the Attack Skill used to hit) damage against 2 other attackable enemies with the least HP.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "HoldingBreath": {
+    "name": "Deep Inhale",
+    "desc": "- Max Stack: 20\n- On Crit, at 15+ Poise Potency and 5+ Poise Count, consume (Poise Potency on self / 5) Poise Potency to deal +(Poise Potency consumed x 4)% damage on Critical Hit and lose 1 Stack",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AccumulatedPastSinner": {
+    "name": "Accumulated Past",
+    "desc": "- Max Stack: 12\n- Turn Start: gain 1 Clash Power Up and 1 Offense Level Up for every 3 Stack",
+    "iconId": "AccumulatedPast",
+    "buffType": "Positive"
+  },
+  "MentalSystemResultIncrease_Typo": {
+    "name": "SP Heal Efficiency",
+    "desc": "Amount of SP healed due to the Identity's 'Base factors increasing Sanity(SP)'",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "SeniorCianjing": {
+    "name": "Higher Thunderer",
+    "desc": "- Turn Start: gain 2 Offense Level Up and 2 Defense Level Up\n- Turn End: lose 1 Stack\n- Max Stack: 5",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ShamrockResultUp": {
+    "name": "Gluttony Power Up",
+    "desc": "Gluttony Skills gain final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberResultUp": {
+    "name": "Sloth Power Up",
+    "desc": "Sloth skills gain final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FreishutzOutisEgoBullet_5th": {
+    "name": "The Fifth Magic Bullet",
+    "desc": "- Deal +30% damage\n- Before Attack: gain +4 Atk Weight\n- On Hit, inflict 10 Burn; then, inflict 4 Offense Level down and 4 Defense Level Down next turn",
+    "iconId": null,
+    "buffType": "Positive"
   },
   "FreishutzOutisEgoBullet_7th": {
     "name": "The Seventh Magic Bullet",
@@ -1715,11 +1829,71 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "ForwardToTheKing": {
-    "name": "Before the King",
-    "desc": "When this unit's attack with 1 Atk Weight hits, inflict 50% of the resulting Coin value On Hit as (Affinity/Attack Type of the Attack Skill used to hit) damage against 2 other attackable enemies with the least HP.",
+  "FreishutzOutisEgoBullet_2nd": {
+    "name": "The Second Magic Bullet",
+    "desc": "- Deal +10% damage\n- Deal damage to targets other than the main target (max targets: 4); the main target takes 0 damage\n- On Hit, inflict 3 Paralyze",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "MaxHpMultiplier": {
+    "name": "Max HP Up",
+    "desc": "Raise the Max HP by 10% per Count.",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationCrack": {
+    "name": "Tremor - Fracture",
+    "desc": "- When Staggered, and when the sum of Tremor Potency and Count adds up to 20 or higher, raise Stagger Level by 1\n- Cannot exceed maximum Stagger Level with this effect\n\nWhen hit by attacks that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\nTurn End: reduce the Count by 1\n(Interacts the same way as normal Tremor does to effects that raises or reduces Tremor Potency/Count)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_1st": {
+    "name": "The First Magic Bullet",
+    "desc": "- Deals +20% damage\n- Raise the target's Stagger Threshold by damage dealt (max 30)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Snare": {
+    "name": "Lasso",
+    "desc": "- Max Value: 3\n- Turn End: gain Rupture Potency equal to this unit's current Speed value (max 5), and gain 1 Bind next turn\n- Turn End: reduced by 1",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "NiddleEGO": {
+    "name": "Needle",
+    "desc": "- Unique Bleed\n- When taking Envy damage, gain +1 Bleed Count and reduce this effect's Stack by 1\n- Turn End: Gain 1 Bleed and reduce this effect's Stack by 1",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MagicalGirlResponse": {
+    "name": "Magical Girl's Chant",
+    "desc": "- Max Stack: 2\n- When gaining this effect, gain 1 Attack Power Up and 1 Damage Up\n- This unit's Attack Skills that gain or consume Charge Count gain Final Power +1 and deal +10% damage\n- Reduced by 1 at Turn End",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ParryingResultDown": {
+    "name": "Clash Power Down",
+    "desc": "In a Clash, lose Clash Power equal to the value",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationSpring": {
+    "name": "Tremor - Clockwinding",
+    "desc": "- Max Speed + 2\n- Consume Tremor Count on self to inflict 1 more of Tremor Potency or Count when inflicting them with this unit's Skill or Coin effects\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n- (Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberTakeDamageDown": {
+    "name": "Sloth Protection",
+    "desc": "Take less damage from Sloth skills based on the effect’s Count for one turn. (Max 10)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Curse": {
+    "name": "Curse",
+    "desc": "Turn End: Next turn, randomly gain one of the following, then reduce this effect’s Count by 1.\n1 Attack Power Down/1 Defense Power Down/2 Offense Level Down/2 Defense Level Down.",
+    "iconId": null,
+    "buffType": "Negative"
   },
   "CuredFilm": {
     "name": "Hardened Shell-Barrier",
@@ -1733,147 +1907,15 @@
     "iconId": null,
     "buffType": "Neutral"
   },
-  "RyoshuEGOPF": {
-    "name": "Entangled Life [羅生]",
-    "desc": "Max Stack: 999\n- Gain 1 Stack for every HP damage dealt by Ryōshū's Skills\n- Deal +1% damage with Base Skills for every 33 Stack (max 10%)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
   "ResultReduction": {
     "name": "Power Down",
     "desc": "All skills lose final Power by the effect’s Count for one turn.",
     "iconId": null,
     "buffType": "Negative"
   },
-  "BirdCage": {
-    "name": "Searing Birdcage",
-    "desc": "Max Stack: 5\nIf this unit has Burn, Wrath Resistance +0.1 for every Stack (cannot exceed 2.0 Wrath Resistance with this effect)\nTurn End: gain Bind equal to Stack next turn\nTurn End: halve Stack (rounded down)\n※ Cannot gain additional Stacks of this effect while it is already active",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "GainSinStockAdder": {
-    "name": "E.G.O Resource Amp",
-    "desc": "Increases the amount of E.G.O resources earned from skills by the effect’s Count for one turn.",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NebulizerExhale": {
-    "name": "Nebulizer α",
-    "desc": "- Max Stack: 5\n- This effect persists throughout the Encounter\n- Combat Start: on all allies, including this unit, apply 1 Poise Potency and +1 Poise Count",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AmberTakeDamageUp": {
-    "name": "Sloth Fragility",
-    "desc": "Take more damage from Sloth skills based on the effect’s Count for one turn. (Max 10)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "FreishutzOutisEgoBullet_2nd": {
-    "name": "The Second Magic Bullet",
-    "desc": "- Deal +10% damage\n- Deal damage to targets other than the main target (max targets: 4); the main target takes 0 damage\n- On Hit, inflict 3 Paralyze",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "PinkRibbon_Ishmael": {
-    "name": "Pink Ribbons",
-    "desc": "Count increases by 1 whenever the affected unit tosses an attack skill Coin.\nAt the end of the turn, inflict Bind by the effect’s Count, then remove the effect.",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IDMicroChip": {
-    "name": "Resident Reg. Microchip",
-    "desc": "- Max Stack: 2\n- Take +10% damage from Wrath and Envy Skills\n- On Clash Lose, gain 1 Burn (3 times per turn)\n- Turn End: Lose 1 Stack",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "SeniorCianjing": {
-    "name": "Higher Thunderer",
-    "desc": "- Turn Start: gain 2 Offense Level Up and 2 Defense Level Up\n- Turn End: lose 1 Stack\n- Max Stack: 5",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ThirstyRose": {
-    "name": "Polydipsic Rose",
-    "desc": "- Max Value: 5\n- Turn End: at 10+ Bleed Potency, take Lust damage equal to 1% of this unit's max HP. (max 30)\n- Turn End: reduced by 1",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IndigoDamageUp": {
-    "name": "Pride DMG Up",
-    "desc": "Deal more damage with Pride skills based on the effect’s Count for one turn. (Max 10)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_6th": {
-    "name": "The Sixth Magic Bullet",
-    "desc": "- Before Attack: gain +6 Atk Weight\n- On Hit, raise the target's Stagger Threshold by damage dealt (max 30)\n- Reuse the Coin for every 7 Burn on the main target (2 times max)\n- Plus Coin Skill Base Power -16\n- Minus Coin Skill Base Power -22\n - Plus Coin Power -8\n - Minus Coin Power -12",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AccumulatedPastSinner": {
-    "name": "Accumulated Past",
-    "desc": "- Max Stack: 12\n- Turn Start: gain 1 Clash Power Up and 1 Offense Level Up for every 3 Stack",
-    "iconId": "AccumulatedPast",
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_3rd": {
-    "name": "The Third Magic Bullet",
-    "desc": "- Deal +20% damage\n- Before Attack: gain +2 Atk Weight\n- On Hit, inflict 2 Attack Power Down and 10 Burn",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "UninvitedGuestPersonality": {
-    "name": "The Uninvited",
-    "desc": "- Max Value: 2\n- Upon death, the last attacker heals 3 SP; then, a random ally without this effect gains 2 Stacks of this effect.\n- Take +0.5% damage for every Sinking on self (max 10%; for Focused Encounters, count Sinking on each Part separately)\n- Turn End: reduced by 1",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "YesdragonNodie": {
-    "name": "Denial [不許]",
-    "desc": "When this unit takes damage that brings their HP down to 0: this unit's HP does not drop below 1; recover from Stagger due to damage.\nIf the above effect activated, dies at Turn End.\nExpires upon death, Retreat, or Turn End",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "EntangledCurseTalisman": {
-    "name": "Twisted Curse Talisman",
-    "desc": "- Max Stack: 10\n- Expires at Turn End\n- At 10+ Stack, when taking 30+ damage from a Skill: gain +1 Rupture Count; take Gluttony damage equal to Rupture Potency on self (once per turn)\n- When this effect expires, gain (Stack / 4) Attack Power Down next turn (max 2)\n※ Cannot gain additional Stacks of this effect while it is already active",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "Snare": {
-    "name": "Lasso",
-    "desc": "- Max Value: 3\n- Turn End: gain Rupture Potency equal to this unit's current Speed value (max 5), and gain 1 Bind next turn\n- Turn End: reduced by 1",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "HoldingBreath": {
-    "name": "Deep Inhale",
-    "desc": "- Max Stack: 20\n- On Crit, at 15+ Poise Potency and 5+ Poise Count, consume (Poise Potency on self / 5) Poise Potency to deal +(Poise Potency consumed x 4)% damage on Critical Hit and lose 1 Stack",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VibrationContinue": {
-    "name": "Tremor - Everlasting",
-    "desc": "- When hit by Skills or Coin effects that trigger Tremor Burst, (Tremor Potency on self)% chance to trigger an additional Tremor Burst. (max 50%)\n- When hit by Skills or Coin effects that trigger Tremor Burst, (Tremor Count on self)% chance to trigger an additional Tremor Burst. (max 50%)\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n(Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "DragonLance": {
-    "name": "Flower-burying Wedge [埋花櫼]",
-    "desc": "Base Stack: 0\nMax Stack: 3\n- All Coins on this unit's leftmost Base Attack Skill on the Dashboard become Unbreakable Coins\n- Turn Start: gain 2 Offense Level Up and 2 Defense Level Down for every Stack\n- Turn Start: at 3+ Stack, gain 1 Tarnished Blood (once per Encounter)\n- Turn End: gain 1 Stack\n※ Cannot raise the effect's Stack by any other means than the ones above\n- Expires upon death or Retreat\n\n- When this unit takes damage that brings their HP down to 0: instead of letting this unit's HP drop below 1, or becoming Staggered or Defeated, use the 'Tears of the Tarnished Blood - The End' Skill at the very end of that turn. Remove the Flower-burying Wedge when the Skill ends.\nWhen this unit takes damage that brings their HP down to 1 at Turn End, use 'Tears of the Tarnished Blood - The End' Skill based on this unit's Speed next turn",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_4th": {
-    "name": "The Fourth Magic Bullet",
-    "desc": "- Deal +30% damage\n- Before Attack: gain +3 Atk Weight\n- On Hit, raise the target's Stagger Threshold by damage dealt (max 20); then, inflict 3 Fragility next turn",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ParryingResultDown": {
-    "name": "Clash Power Down",
-    "desc": "In a Clash, lose Clash Power equal to the value",
+  "RoseWedge": {
+    "name": "Rose Wedge",
+    "desc": "- Max Potency: 10\n- Max Count: 4\n- Gain 1 Potency every time this unit takes 10 Bleed damage\n- When gaining Bleed or 'Unique Bleed' from getting hit, gain 2 Bleed and inflict 1 Bleed against the Attacker. (5 times per turn)\n· At 10 Potency, gain +1 Bleed Count as well when triggering the above effect.\n- Turn End: lose 1 Count\n- Combat End: at 10 Potency or 1 Count, this effect expires, and this unit takes (Potency x 10) Lust damage.\n- If the unit inflicted with this effect dies, or when this effect expires: increase Bloodfeast by (Potency x 10), and deal (Potency x 2) Lust damage against all of its allies (min 1)",
     "iconId": null,
     "buffType": "Negative"
   },
@@ -1883,57 +1925,51 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "MaxHpMultiplier": {
-    "name": "Max HP Up",
-    "desc": "Raise the Max HP by 10% per Count.",
+  "FreishutzOutisEgoBullet_4th": {
+    "name": "The Fourth Magic Bullet",
+    "desc": "- Deal +30% damage\n- Before Attack: gain +3 Atk Weight\n- On Hit, raise the target's Stagger Threshold by damage dealt (max 20); then, inflict 3 Fragility next turn",
     "iconId": null,
     "buffType": "Positive"
   },
-  "EmittedCurrent": {
-    "name": "Spark Discharge",
-    "desc": "When hit, the attacker gains +1 Charge Count; when hit with a Gloom attack, gain +1 Rupture Count, then reduce Count by 1",
+  "UninvitedGuestPersonality": {
+    "name": "The Uninvited",
+    "desc": "- Max Value: 2\n- Upon death, the last attacker heals 3 SP; then, a random ally without this effect gains 2 Stacks of this effect.\n- Take +0.5% damage for every Sinking on self (max 10%; for Focused Encounters, count Sinking on each Part separately)\n- Turn End: reduced by 1",
     "iconId": null,
     "buffType": "Negative"
   },
-  "FreishutzOutisEgoBullet_1st": {
-    "name": "The First Magic Bullet",
-    "desc": "- Deals +20% damage\n- Raise the target's Stagger Threshold by damage dealt (max 30)",
+  "TakeHpHealIncrease": {
+    "name": "HP Healing Boost",
+    "desc": "HP healed by Passives, Skill effects, or Coin effects increases proportionally to the value of this effect. (Max 5)",
     "iconId": null,
     "buffType": "Positive"
   },
-  "MentalSystemResultIncrease_Typo": {
-    "name": "SP Heal Efficiency",
-    "desc": "Amount of SP healed due to the Identity's 'Base factors increasing Sanity(SP)'",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "ShamrockResultUp": {
-    "name": "Gluttony Power Up",
-    "desc": "Gluttony Skills gain final Power by the effect’s Count for one turn.",
+  "BloodArmorCasting": {
+    "name": "Hardblood Cast",
+    "desc": "- Max Stack: 3\n- When clashing against enemies with Bleed or Unique Bleed, Clash Power +1\n- When consuming Bloodfeast with an Attack Skill, if there isn't enough Bloodfeast, consume 1 HP for every 1 missing Bloodfeast to generate it before consuming it (the damage from this effect does not Stagger or reduce this unit's HP below 1)\n- Reduced by 1 at Turn End",
     "iconId": null,
     "buffType": "Positive"
   },
-  "ThreeMirrorpartYiSang": {
-    "name": "Shattered World",
-    "desc": "- Max Stack: 1\n- Expires at Turn End\n- Take x1.2 damage from Burn (rounded down; except Unique Burn)\n- Take +10% damage from Yi Sang's Wrath and Gloom Base Attack Skills",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IndigoTakeDamageUp": {
-    "name": "Pride Fragility",
-    "desc": "Take more damage from Pride skills based on the effect’s Count for one turn. (Max 10)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "Cianjing": {
-    "name": "Thunderer",
-    "desc": "- Turn Start: gain 1 Offense Level Up and 1 Defense Level Up\n- Turn End: lose 1 Stack\n- Max Stack: 5",
+  "ChoSuperCharge": {
+    "name": "Near-light Superbattery",
+    "desc": "- Max Stack: 100\n- When consuming Charge Count, add the amount consumed to this buff's Stack\n- Max Charge Count Cap +10\n- Gain 1 Charge Count when allies gain Charge Potency or Count\n- When this unit consumes Charge Count with its Skills, consume the same amount of Charge Count 1 more time (when there isn't enough Charge Count, consume as much as available)\n- Deal +10% damage for every 10 Stack\n- Enemies gain +0.1 Resistance against this unit's attacks for every 20 Stack (max +0.5 Resist; does not activate against Staggered enemies)\n- When the Identity with this effect dies, the buff transfers to the ally who is second earliest to this unit in the Deployment order. The Stack carries over as well.\n- This effect works on 'Unique Charge' as well.",
     "iconId": null,
     "buffType": "Positive"
   },
-  "MagicalGirlResponse": {
-    "name": "Magical Girl's Chant",
-    "desc": "- Max Stack: 2\n- When gaining this effect, gain 1 Attack Power Up and 1 Damage Up\n- This unit's Attack Skills that gain or consume Charge Count gain Final Power +1 and deal +10% damage\n- Reduced by 1 at Turn End",
+  "Zazen": {
+    "name": "Dhyāna",
+    "desc": "- Max Stack: 108\n- Deal +1% damage for every Stack",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmergencyChargeForceField": {
+    "name": "Emergency Barrier Battery",
+    "desc": "- Max Stack: 7\n- When Staggered, consume all Emergency Barrier Battery Stack and gain Charge Barrier by the Stack consumed",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "TraumaShield": {
+    "name": "Trauma Shield",
+    "desc": "- Reduce SP damage from enemies by 80%\n- Reduce Sinking damage taken by 80%\n- Reduced by 1 at Turn End",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1949,11 +1985,17 @@
     "iconId": null,
     "buffType": "Neutral"
   },
-  "WaveSinking": {
-    "name": "Reflux",
-    "desc": "- Max Stack: 3\nWhen hit, gain Sinking Potency equal to Stack\n\nTurn End: if this unit has -30 or less SP, activate the following effects (for units without SP, activates at 60+ Sinking Potency)\n- Take (Sinking Potency on self x Stack) Gloom damage\n- Inflict 1 Reflux against 2 other targets with the least SP (for Abnormalities, Parts); then, deal (Sinking Potency x Stack) Gloom damage to both targets, respectively\nIf the unit with Reflux dies, transfer its Reflux Stack to its ally with the highest Reflux stack",
+  "ShareCharge": {
+    "name": "Self Resonance Circuitry",
+    "desc": "Total sum of Charge Count currently owned by all allies\n\nOn Hit with a Skill: deal +(sum of charge count on all allies / 3)% damage\nAll allies gain 1 Offense Level Up for every 100 cumulative Charge Count consumed by allies",
     "iconId": null,
-    "buffType": "Negative"
+    "buffType": "Neutral"
+  },
+  "ScarletResultUp": {
+    "name": "Lust Power Up",
+    "desc": "Lust Skills gain Final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
   },
   "KnightBless": {
     "name": "Blessing",
@@ -1961,69 +2003,9 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "BloodArmorCasting": {
-    "name": "Hardblood Cast",
-    "desc": "- Max Stack: 3\n- When clashing against enemies with Bleed or Unique Bleed, Clash Power +1\n- When consuming Bloodfeast with an Attack Skill, if there isn't enough Bloodfeast, consume 1 HP for every 1 missing Bloodfeast to generate it before consuming it (the damage from this effect does not Stagger or reduce this unit's HP below 1)\n- Reduced by 1 at Turn End",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VerEmergencyCandy": {
-    "name": "Backup Candy",
-    "desc": "Turn End: at less than 60% HP...\nHeal 30% HP, heal 15 SP, lose 1 Backup Candy, and 1 Hunger\nAt 0 Stack, apply 1 Incandescent Indulgence, then expires",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VibrationDistribution": {
-    "name": "Tremor - Distribution",
-    "desc": "- Turn End: Gain ((sum of all allies' Tremor Count) / (# of surviving allies)) Offense Level Up next turn (max 5)\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n- (Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "GiftCannon": {
-    "name": "Firepower",
-    "desc": "- Max Stack: 10\n- Deal +10% damage for every Stack",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "EmergencyChargeForceField": {
-    "name": "Emergency Barrier Battery",
-    "desc": "- Max Stack: 7\n- When Staggered, consume all Emergency Barrier Battery Stack and gain Charge Barrier by the Stack consumed",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ChoSuperCharge": {
-    "name": "Near-light Superbattery",
-    "desc": "- Max Stack: 100\n- When consuming Charge Count, add the amount consumed to this buff's Stack\n- Max Charge Count Cap +10\n- Gain 1 Charge Count when allies gain Charge Potency or Count\n- When this unit consumes Charge Count with its Skills, consume the same amount of Charge Count 1 more time (when there isn't enough Charge Count, consume as much as available)\n- Deal +10% damage for every 10 Stack\n- Enemies gain +0.1 Resistance against this unit's attacks for every 20 Stack (max +0.5 Resist; does not activate against Staggered enemies)\n- When the Identity with this effect dies, the buff transfers to the ally who is second earliest to this unit in the Deployment order. The Stack carries over as well.\n- This effect works on 'Unique Charge' as well.",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "SkillPowerUp": {
-    "name": "Base Power Up",
-    "desc": "Raise the Base Power of Skills by the effect's Count.",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "TraumaShield": {
-    "name": "Trauma Shield",
-    "desc": "- Reduce SP damage from enemies by 80%\n- Reduce Sinking damage taken by 80%\n- Reduced by 1 at Turn End",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NervousImpairment": {
-    "name": "Nervous Impairment",
-    "desc": "- Max Stack : 30\n- At 30 Stack, become Staggered; then, take fixed damage equal to 25% HP, and remove this effect",
-    "iconId": null,
-    "buffType": "Negative"
-  },
   "GiftGlass": {
     "name": "Delicateness",
     "desc": "- Max Stack: 10\n- Take +10% damage for every Stack",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "VioletResistDown": {
-    "name": "Envy Resist Down",
-    "desc": "Increase Envy Resistance based on Stack.\n(0.1 per Stack)",
     "iconId": null,
     "buffType": "Negative"
   },
@@ -2033,21 +2015,15 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "ShareCharge": {
-    "name": "Self Resonance Circuitry",
-    "desc": "Total sum of Charge Count currently owned by all allies\n\nOn Hit with a Skill: deal +(sum of charge count on all allies / 3)% damage\nAll allies gain 1 Offense Level Up for every 100 cumulative Charge Count consumed by allies",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "Zazen": {
-    "name": "Dhyāna",
-    "desc": "- Max Stack: 108\n- Deal +1% damage for every Stack",
+  "VerEmergencyCandy": {
+    "name": "Backup Candy",
+    "desc": "Turn End: at less than 60% HP...\nHeal 30% HP, heal 15 SP, lose 1 Backup Candy, and 1 Hunger\nAt 0 Stack, apply 1 Incandescent Indulgence, then expires",
     "iconId": null,
     "buffType": "Positive"
   },
-  "ScarletResultUp": {
-    "name": "Lust Power Up",
-    "desc": "Lust Skills gain Final Power by the effect’s Count for one turn.",
+  "SkillPowerUp": {
+    "name": "Base Power Up",
+    "desc": "Raise the Base Power of Skills by the effect's Count.",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -2057,15 +2033,39 @@
     "iconId": null,
     "buffType": "Positive"
   },
+  "NervousImpairment": {
+    "name": "Nervous Impairment",
+    "desc": "- Max Stack : 30\n- At 30 Stack, become Staggered; then, take fixed damage equal to 25% HP, and remove this effect",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VibrationDistribution": {
+    "name": "Tremor - Distribution",
+    "desc": "- Turn End: Gain ((sum of all allies' Tremor Count) / (# of surviving allies)) Offense Level Up next turn (max 5)\n- When hit by Skills that trigger Tremor Burst, raise the Stagger Threshold by the effect's Potency\n- Turn End: reduce the Count by 1\n- (Interacts the same way as normal Tremor does to effects that raise or reduce Tremor Potency/Count)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "WaveSinking": {
+    "name": "Reflux",
+    "desc": "- Max Stack: 3\nWhen hit, gain Sinking Potency equal to Stack\n\nTurn End: if this unit has -30 or less SP, activate the following effects (for units without SP, activates at 60+ Sinking Potency)\n- Take (Sinking Potency on self x Stack) Gloom damage\n- Inflict 1 Reflux against 2 other targets with the least SP (for Abnormalities, Parts); then, deal (Sinking Potency x Stack) Gloom damage to both targets, respectively\nIf the unit with Reflux dies, transfer its Reflux Stack to its ally with the highest Reflux stack",
+    "iconId": null,
+    "buffType": "Negative"
+  },
   "RequestedTarget": {
     "name": "Requested Target",
     "desc": "+0.2 Resistance to Attack Types with 1.5 or less Resistance. If the target with this effect is defeated, gain 1 E.G.O resource for all Affinities, and the unit that defeated the target heals 10 SP",
     "iconId": null,
     "buffType": "Negative"
   },
-  "TakeHpHealIncrease": {
-    "name": "HP Healing Boost",
-    "desc": "HP healed by Passives, Skill effects, or Coin effects increases proportionally to the value of this effect. (Max 5)",
+  "VioletResistDown": {
+    "name": "Envy Resist Down",
+    "desc": "Increase Envy Resistance based on Stack.\n(0.1 per Stack)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GiftCannon": {
+    "name": "Firepower",
+    "desc": "- Max Stack: 10\n- Deal +10% damage for every Stack",
     "iconId": null,
     "buffType": "Positive"
   }

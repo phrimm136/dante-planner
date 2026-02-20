@@ -1,0 +1,9 @@
+{
+  "name": "被盗的收尾人杂志",
+  "descs": [
+    "回合开始时，使自身获得1层[HitResultUp]\n\n若激活嫉妒完全共鸣，则战斗开始时使自身获得1层[HitDamageUp]\n\n若属于中指的友方单位不低于4名，则关卡开始时随机对1名敌方单位施加[RetaliationBook]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

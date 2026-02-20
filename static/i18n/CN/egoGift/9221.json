@@ -1,0 +1,9 @@
+{
+  "name": "热丝武器",
+  "descs": [
+    "嫉妒技能或反击技能命中时，对目标施加1层[Laceration]或1层[Combustion](每回合最多3次)\n\n战斗中，敌方单位的[Laceration]层数降至1层以下时，若其[Combustion]层数不低于2层，则改为减少[Combustion]层数而非[Laceration]层数(每回合最多3次)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}
