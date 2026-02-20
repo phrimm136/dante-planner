@@ -246,6 +246,12 @@
       "reportReceived": "收到举报"
     }
   },
+  "announcements": {
+    "title": "公告",
+    "viewAll": "查看全部",
+    "backToList": "返回",
+    "noAnnouncements": "暂无公告"
+  },
   "moderation": {
     "accountSuspended": "您的账号已被封禁。原因: {{reason}}",
     "accountSuspendedNoReason": "您的账号已被封禁",
