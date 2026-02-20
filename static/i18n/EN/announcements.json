@@ -1,4 +1,8 @@
 {
+  "2026-02-20-01": {
+    "title": "Notice of Changes to Mirror Dungeon Plan E.G.O Gift Behavior",
+    "body": "We are informing you of changes to E.G.O Gift behavior in Mirror Dungeon Plans with today's update.\n- Previous: Changes to the per-floor E.G.O Gift list would also modify the universal E.G.O Gift list, and the viewer's E.G.O Gift list showed only per-floor E.G.O Gifts.\n- Updated: Changes to the per-floor E.G.O Gift list no longer affect the universal E.G.O Gift list, and the viewer's E.G.O Gift list now shows both universal and per-floor E.G.O Gifts.\n\nDuplicate E.G.O Gifts within a plan appear only once in the viewer's list, but are still affected by the highlight and completion indicators triggered by different Theme Packs. To prevent unintended behavior changes, we kindly ask you to rewrite your E.G.O Gift lists. We apologize for any inconvenience."
+  },
   "2026-02-19-01": {
     "title": "2026/02/19 Update",
     "body": "Reflecting the Limbus Company update from February 19, 2026.\n\nUpdate notes:\n- Added The House of Spiders: The Index Nursefather (Yi Sang) data\n- Mirror of Names and Spiders Normal difficulty update\n- Japanese/Chinese text corrections applied\n\nKnown issues:\n- An issue has been identified where Mirror of Eternity plans fail validation on first upload. A migration path for previous Mirror Dungeon plans will be provided alongside the Hard mode update, along with a popup to prompt version upgrades when validation fails."
