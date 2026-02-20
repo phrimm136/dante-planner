@@ -1,0 +1,27 @@
+category,term_id,KR,EN,JP,CN
+sinner,YiSang,이상,Yi Sang,イサン,李箱
+sinner,Faust,파우스트,Faust,ファウスト,浮士德
+sinner,DonQuixote,돈키호테,Don Quixote,ドン・キホーテ,堂吉诃德
+sinner,Ryoshu,료슈,Ryōshu,リョーシュー,良秀
+sinner,Meursault,뫼르소,Meursault,ムルソー,默尔索
+sinner,HongLu,홍루,Hong Lu,ホンルー,洪露
+sinner,Heathcliff,히스클리프,Heathcliff,ヒースクリフ,希斯克利夫
+sinner,Ishmael,이스마엘,Ishmael,イシュメール,以实玛利
+sinner,Rodion,로쟈,Rodion,ロージャ,罗佳
+sinner,Sinclair,싱클레어,Sinclair,シンクレア,辛克莱
+sinner,Outis,오티스,Outis,オーティス,奥蒂斯
+sinner,Gregor,그레고르,Gregor,グレゴール,格里高尔
+game_term,identity,인격,Identity,人格,人格
+game_term,ego,E.G.O,E.G.O,E.G.O,E.G.O
+game_term,ego_gift,E.G.O 기프트,E.G.O Gifts,E.G.Oギフト,E.G.O饰品
+mirror_dungeon,mirrordungeon_name_1,시작의 거울,Mirror of the Beginning,始まりの鏡,起始之镜
+mirror_dungeon,mirrordungeon_name_2,거울의 거울,Mirror of Mirrors,鏡の鏡,镜中之镜
+mirror_dungeon,mirrordungeon_name_3,호수의 거울,Mirror of the Lake,湖の鏡,湖之镜
+mirror_dungeon,mirrordungeon_name_4,폭풍의 거울,Mirror of the Wuthering,嵐の鏡,呼啸之镜
+mirror_dungeon,mirrordungeon_name_5,꿈결의 거울,Mirror of the Dreaming,夢心地の鏡,梦中之镜
+mirror_dungeon,mirrordungeon_name_6,영생의 거울,Mirror of Immortality,永生の鏡,永生之镜
+mirror_dungeon,mirrordungeon_name_7,이름과 거미의 거울,Mirror of Names and Spiders,名と蜘蛛の鏡,名与蛛之镜
+difficulty,normal,노말,Normal,ノーマル,普通
+difficulty,hard,하드,Hard,ハード,困难
+difficulty,parallel,평행중첩,Parallel Superposition,平行重畳,平行叠加
+difficulty,parallel_extreme,평행중첩 EXTREME,Parallel Superposition EXTREME,平行重畳EXTREME,平行叠加模式
