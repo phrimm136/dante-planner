@@ -73,31 +73,11 @@ APPLYING: [patterns copied]
 
 ---
 
-## Domain Context (Auto-Loaded)
+## Domain Context
 
-**Context loads automatically based on file path:**
+Rules in `.claude/rules/` load automatically via `paths` glob matching.
 
-### Frontend (`frontend/`)
-
-- **Domain CLAUDE.md:** `frontend/CLAUDE.md` (always read first)
-- **Pattern Rules:** Auto-load from `.claude/rules/frontend/` based on file type
-  - Components: `components/{core,styling,i18n,composition,state}.md`
-  - Hooks: `data/{queries,schemas,stale-time}.md`
-  - Routes: `routing/{core,navigation}.md`
-  - Tests: `testing/{component-tests,hook-tests}.md`
-
-### Backend (`backend/`)
-
-- **Domain CLAUDE.md:** `backend/CLAUDE.md` (always read first)
-- **Pattern Rules:** Auto-load from `.claude/rules/backend/` based on file type
-  - Controllers: `controllers/{core,dto,validation,http-status}.md`
-  - Services: `services/{core,transactions,repositories}.md`
-  - Security: `security/{auth,cors}.md`
-  - Async: `async/{sse,exceptions}.md`
-  - Config: `config/{properties,logging}.md`
-  - Tests: `testing/{unit-tests,controller-tests,repository-tests}.md`
-
-**Remaining Skills** (manual invocation only):
+**Skills** (manual invocation only):
 - `error-tracking`: Sentry error tracking setup
 - `route-tester`: Test authenticated routes
 
@@ -105,7 +85,7 @@ APPLYING: [patterns copied]
 
 ## Code Review
 
-Run `code-architecture-reviewer` agent when all tasks complete.
+Run `code-review-orchestrator` agent when all tasks complete.
 See `/task-run` for detailed review workflow.
 
 Verdicts: REJECT / NEEDS WORK / ACCEPTABLE
