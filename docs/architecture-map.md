@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-02-19 (02b11c37: add MD7 Mirror Dungeon support)
+> **Last Updated:** 2026-02-20 (555357e0: add home page announcement section)
 
 ---
 
@@ -12,7 +12,7 @@
 
 | Feature | Core Files | Supporting Files |
 |---------|------------|------------------|
-| **Home Page** | `routes/HomePage.tsx` | `hooks/useHomePageData.ts`, `components/home/BannerSection.tsx` (carousel with auto-advance), `components/home/RecentlyReleasedSection.tsx` (mixed Identity/EGO cards grouped by date), `components/home/CommunityPlansSection.tsx` (Latest/Recommended tabs, ErrorBoundary with story-based fallback), `components/home/CommunityPlansErrorFallback.tsx` (E618B.json Faust connection message), `lib/formatDate.ts` (formatEntityReleaseDate) |
+| **Home Page** | `routes/HomePage.tsx` | `hooks/useHomePageData.ts`, `components/home/BannerSection.tsx` (carousel with auto-advance), `components/home/AnnouncementContent.tsx` (orchestrator; Suspense boundary; returns null when empty), `components/home/AnnouncementSection.tsx` (preview list + title deep-links; exports AnnouncementSkeleton), `components/home/AnnouncementDialog.tsx` (two-state list/detail; inner AnnouncementDialogContent owns selection state), `hooks/useAnnouncementData.ts` (dual-query spec+i18n, expiry filter, sort), `static/data/announcements.json` (spec), `static/i18n/*/announcements.json` (per-language content), `components/home/RecentlyReleasedSection.tsx` (mixed Identity/EGO cards grouped by date), `components/home/CommunityPlansSection.tsx` (Latest/Recommended tabs, ErrorBoundary with story-based fallback), `components/home/CommunityPlansErrorFallback.tsx` (E618B.json Faust connection message), `lib/formatDate.ts` (formatEntityReleaseDate, formatAnnouncementDate) |
 | **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `hooks/useSearchMappings.ts`, `components/identity/*` |
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (EGOGiftCard, EGOGiftTooltip, EGOGiftTooltipContent, GiftNameI18n, EnhancementsPanelI18n, RecipeSection for granular Suspense) |
