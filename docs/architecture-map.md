@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-02-19 (02b11c37: add MD7 Mirror Dungeon support)
+> **Last Updated:** 2026-02-20 (00d924f5: add MDC request correlation with persistent WARN/ERROR logging)
 
 ---
 
@@ -55,6 +55,7 @@
 | **Moderation System** | `service/ModerationService.java`, `controller/ModerationController.java` | `entity/ModerationAction.java` (immutable audit trail), `repository/ModerationActionRepository.java`, `dto/moderation/BanRequest.java` (reason required), `dto/moderation/TimeoutRequest.java`, `dto/moderation/TimeoutResponse.java`, `dto/moderation/ModerationActionDto.java`, `exception/UserBannedException.java`, `entity/User.java` (bannedAt, bannedBy, isBanned), `entity/Planner.java` (takenDownAt), `config/RateLimitConfig.java` (20/min moderation limit) |
 | **Vote Immutability** | `entity/PlannerVote.java` (immutable voteType), `entity/PlannerCommentVote.java` (immutable voteType) | `exception/VoteAlreadyExistsException.java`, `service/PlannerService.java` (409 on re-vote), `service/CommentService.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
+| **Observability / MDC** | N/A | `security/MdcLoggingFilter.java` (injects requestId, userId, method, path into SLF4J MDC; runs after JwtAuthenticationFilter; CRLF-sanitized path; FilterRegistrationBean prevents double-registration), `resources/logback-spring.xml` (prod: WARN+ JSON rolling file via LogstashEncoder + AsyncAppender, INFO+ console with MDC keys; dev: colored console only) |
 | **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` (MethodArgumentTypeMismatchException: null-safe type logging, UUID validation returns 404) | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java`, `exception/CommentNotFoundException.java`, `exception/CommentForbiddenException.java` |
 | **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java`, `util/GameConstants.java` (level/uptie/threadspin bounds) |

@@ -47,6 +47,51 @@ get_alarm_thresholds() {
     echo "70 209715200 85 10"
 }
 
+# Ensure EC2 instance role has CloudWatch Logs write permissions for awslogs driver.
+# Without this, the Docker daemon silently drops container logs — no error surfaced.
+setup_cloudwatch_logs_iam() {
+    log_info "Configuring IAM permissions for CloudWatch Logs (awslogs driver)"
+
+    ROLE_NAME=$(aws ec2 describe-instances \
+        --instance-ids "$INSTANCE_ID" \
+        --region "$AWS_REGION" \
+        --query 'Reservations[0].Instances[0].IamInstanceProfile.Arn' \
+        --output text 2>/dev/null | sed 's|.*/||' | sed 's/-instance-profile$//' || true)
+
+    if [ -z "$ROLE_NAME" ] || [ "$ROLE_NAME" = "None" ]; then
+        log_error "No IAM role attached to instance $INSTANCE_ID"
+        log_error "Attach an IAM role with CloudWatch Logs permissions, then re-run"
+        exit 1
+    fi
+
+    log_info "Instance role: $ROLE_NAME"
+
+    # CloudWatchAgentServerPolicy covers both awslogs driver and CloudWatch Agent metrics
+    aws iam attach-role-policy \
+        --role-name "$ROLE_NAME" \
+        --policy-arn "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy" \
+        --region "$AWS_REGION" 2>/dev/null \
+        && log_info "CloudWatchAgentServerPolicy attached" \
+        || log_info "CloudWatchAgentServerPolicy already attached (idempotent)"
+}
+
+# Set 30-day retention on all /ecs/danteplanner/* log groups (idempotent)
+setup_log_retention() {
+    log_info "Setting CloudWatch log retention: 30 days"
+    local LOG_GROUPS=(
+        "/ecs/danteplanner/backend"
+        "/ecs/danteplanner/nginx"
+        "/ecs/danteplanner/mysql"
+    )
+    for LOG_GROUP in "${LOG_GROUPS[@]}"; do
+        aws logs put-retention-policy \
+            --log-group-name "$LOG_GROUP" \
+            --retention-in-days 30 \
+            --region "$AWS_REGION" 2>/dev/null || log_warn "Could not set retention on $LOG_GROUP (may not exist yet)"
+        log_info "Retention: $LOG_GROUP → 30 days"
+    done
+}
+
 # Create SNS topic (idempotent)
 setup_sns_topic() {
     log_info "Setting up SNS topic: $SNS_TOPIC_NAME"
@@ -268,6 +313,8 @@ print_summary() {
     echo "  - Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx"
     echo "  - Metric Filter: HTTP5xxErrors on nginx logs"
     echo "  - S3 Logging: $S3_BACKUP_BUCKET -> $S3_LOGS_BUCKET"
+    echo "  - IAM: CloudWatchAgentServerPolicy attached to instance role"
+    echo "  - Log Retention: 30 days on all /ecs/danteplanner/* log groups"
     echo ""
     echo "View in AWS Console:"
     echo "  https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#alarmsV2:"
@@ -282,6 +329,7 @@ main() {
     log_info "Starting CloudWatch setup for DantePlanner"
 
     validate_params
+    setup_cloudwatch_logs_iam   # must run before awslogs driver can deliver logs
 
     # setup_sns_topic sets TOPIC_ARN as global variable
     setup_sns_topic || { log_error "SNS setup failed"; exit 1; }
@@ -293,6 +341,7 @@ main() {
     fi
 
     setup_metric_filter
+    setup_log_retention
     create_alarms "$TOPIC_ARN"
     setup_s3_logging
 
