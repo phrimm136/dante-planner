@@ -30,7 +30,7 @@ Glob: [files from user request or recent changes]
 
 ### Step 2: Launch Reviewers in Parallel
 
-Use Task tool to launch ALL reviewers simultaneously:
+Use subagent to launch ALL reviewers simultaneously:
 
 ```
 Task: code-security-reviewer - Review [files]
