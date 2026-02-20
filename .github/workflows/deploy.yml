@@ -27,36 +27,8 @@ env:
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
-  # 1. Backend 테스트 (Frontend는 Cloudflare에서 처리)
-  test-backend:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-      - name: Run backend tests
-        working-directory: ./backend
-        run: ./mvnw test -q
-  update-dependency-graph:
-    needs: [test-backend]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v6
-      - name: Update Github Dependency Graph
-        uses: advanced-security/maven-dependency-submission-action@v5
-        with:
-          # This ensures the scan uses your wrapper if possible
-          ignore-maven-wrapper: false
-
-  # 2. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
+  # 1. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
-    needs: [update-dependency-graph]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -93,7 +65,7 @@ jobs:
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
 
-  # 3. EC2 배포 (SSM을 통한 자동화)
+  # 2. EC2 배포 (SSM을 통한 자동화)
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
@@ -198,7 +170,7 @@ jobs:
             exit 1
           fi
 
-  # 4. Health Check (SSM을 통해 localhost에서 확인)
+  # 3. Health Check (SSM을 통해 localhost에서 확인)
   health-check:
     needs: deploy
     runs-on: ubuntu-latest
@@ -247,7 +219,7 @@ jobs:
             exit 1
           fi
 
-  # 5. Rollback (health-check 실패 시)
+  # 4. Rollback (health-check 실패 시)
   rollback:
     needs: health-check
     if: failure()
@@ -296,7 +268,7 @@ jobs:
             exit 1
           fi
 
-  # 6. CloudWatch Setup (one-time, manual trigger only)
+  # 5. CloudWatch Setup (one-time, manual trigger only)
   setup-cloudwatch:
     needs: health-check
     if: ${{ github.event.inputs.setup_cloudwatch == 'true' }}
