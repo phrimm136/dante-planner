@@ -411,6 +411,19 @@
                 "adversarialMode": true
             }
         },
+        "add-announcement": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "Add a new announcement to all 5 JSON files with auto-translation",
+            "promptTriggers": {
+                "keywords": ["add announcement", "new announcement", "write announcement", "공지"],
+                "intentPatterns": [
+                    "(add|write|create|post).*?announcement",
+                    "announcement.*?(add|write|create|new)"
+                ]
+            }
+        },
         "findings-sync": {
             "type": "domain",
             "enforcement": "block",
