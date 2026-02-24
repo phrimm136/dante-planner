@@ -155,6 +155,22 @@ class PlannerContentValidatorTest {
     }
 
     /**
+     * Setup mocks for tests where floor gift affordability fails.
+     * All other IDs are valid; only isGiftAffordableForThemePack returns false.
+     */
+    private void setupMocksForUnaffordableGifts() {
+        when(gameDataRegistry.hasIdentity(anyString())).thenReturn(true);
+        when(gameDataRegistry.hasEgo(anyString())).thenReturn(true);
+        when(gameDataRegistry.hasEgoGift(anyString())).thenReturn(true);
+        when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
+        when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(false);
+        when(gameDataRegistry.hasStartBuff(anyString())).thenReturn(true);
+        when(gameDataRegistry.hasStartGiftKeyword(anyString())).thenReturn(true);
+        when(gameDataRegistry.getStartGiftPool(anyString())).thenReturn(Set.of("9001", "9009", "9103"));
+        when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
+    }
+
+    /**
      * Creates minimal valid planner content with all required fields.
      * Equipment keys are 2-digit 1-indexed ("01"-"12").
      * EGOs are keyed by type (e.g., "ZAYIN").
@@ -1288,6 +1304,146 @@ class PlannerContentValidatorTest {
                     "\"floorSelections\": [{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}, {\"themePackId\": \"1002\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}]"
             );
             assertDoesNotThrow(() -> validator.validate(content, "5F"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Granular Error Codes")
+    class GranularErrorCodeTests {
+
+        @Test
+        @DisplayName("Gift not affordable for theme pack should produce GIFT_NOT_AFFORDABLE sub-error")
+        void validate_GiftNotAffordable_ProducesGiftNotAffordableCode() {
+            setupMocksForUnaffordableGifts();
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(createValidContent(), "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "GIFT_NOT_AFFORDABLE".equals(e.code())),
+                    "Expected GIFT_NOT_AFFORDABLE in sub-errors");
+        }
+
+        @Test
+        @DisplayName("Duplicate gift ID in floor giftIds should produce DUPLICATE_VALUE sub-error")
+        void validate_DuplicateFloorGiftId_ProducesDuplicateValueCode() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "\"giftIds\": [\"9002\"]",
+                    "\"giftIds\": [\"9002\", \"9002\"]"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
+                    "Expected DUPLICATE_VALUE in sub-errors");
+        }
+
+        @Test
+        @DisplayName("Duplicate base ID in selectedBuffIds should produce DUPLICATE_VALUE sub-error")
+        void validate_DuplicateBuffBaseId_ProducesDuplicateValueCode() {
+            setupMocksForValidIds();
+            // 100 and 200 share base ID 0 (100 % 100 == 0, 200 % 100 == 0)
+            String content = createValidContent().replace(
+                    "\"selectedBuffIds\": [100, 201]",
+                    "\"selectedBuffIds\": [100, 200]"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
+                    "Expected DUPLICATE_VALUE in sub-errors");
+        }
+
+        @Test
+        @DisplayName("Duplicate gift ID in selectedGiftIds should produce DUPLICATE_VALUE sub-error")
+        void validate_DuplicateSelectedGiftId_ProducesDuplicateValueCode() {
+            setupMocksForValidIds();
+            String content = createValidContent().replace(
+                    "\"selectedGiftIds\": [\"9001\"]",
+                    "\"selectedGiftIds\": [\"9001\", \"9001\"]"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "DUPLICATE_VALUE".equals(e.code())),
+                    "Expected DUPLICATE_VALUE in sub-errors");
+        }
+
+        @Test
+        @DisplayName("Floor N having themePackId when floor N-1 lacks it should produce INVALID_SEQUENCE sub-error")
+        void validate_FloorPrerequisiteViolation_ProducesInvalidSequenceCode() {
+            setupMocksForValidIds();
+            // Floor 0 has null themePackId; floor 1 has one → prerequisite violation
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                    "{\"themePackId\": null, \"difficulty\": 0, \"giftIds\": []}, {\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": []}"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_SEQUENCE".equals(e.code())),
+                    "Expected INVALID_SEQUENCE in sub-errors");
+        }
+
+        @Test
+        @DisplayName("selectedGiftIds present without selectedGiftKeyword should produce INVALID_SEQUENCE sub-error")
+        void validate_GiftsWithoutKeyword_ProducesInvalidSequenceCode() {
+            // No start gift keyword mocks needed: validateStartGiftIds returns early on null keyword
+            setupMocksForValidIdsWithoutGifts();
+            String content = createValidContent().replace(
+                    "\"selectedGiftKeyword\": \"Combustion\"",
+                    "\"selectedGiftKeyword\": null"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_SEQUENCE".equals(e.code())),
+                    "Expected INVALID_SEQUENCE in sub-errors");
+        }
+    }
+
+    @Nested
+    @DisplayName("Multi-Error Collection")
+    class MultiErrorCollectionTests {
+
+        @Test
+        @DisplayName("Two independent errors should both appear in sub-errors of combined exception")
+        void validate_TwoIndependentErrors_CollectsBothInSubErrors() {
+            setupMocksForUnaffordableGifts();
+            // deploymentOrder[0] = 99 is OOB (0–11) → VALUE_OUT_OF_RANGE
+            // floor giftIds[0] is not affordable → GIFT_NOT_AFFORDABLE
+            String content = createValidContent().replace(
+                    "\"deploymentOrder\": [0, 1, 2, 3, 4, 5]",
+                    "\"deploymentOrder\": [99]"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertEquals("VALIDATION_ERROR", ex.getErrorCode());
+            assertTrue(ex.getSubErrors().size() >= 2, "Expected at least 2 sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())),
+                    "Expected VALUE_OUT_OF_RANGE in sub-errors");
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "GIFT_NOT_AFFORDABLE".equals(e.code())),
+                    "Expected GIFT_NOT_AFFORDABLE in sub-errors");
+        }
+
+        @Test
+        @DisplayName("Single validation error should produce combined exception with exactly one sub-error")
+        void validate_SingleError_ProducesCombinedExceptionWithOneSubError() {
+            setupMocksForUnaffordableGifts();
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(createValidContent(), "5F"));
+
+            assertEquals("VALIDATION_ERROR", ex.getErrorCode());
+            assertEquals(1, ex.getSubErrors().size());
+            assertEquals("GIFT_NOT_AFFORDABLE", ex.getSubErrors().get(0).code());
         }
     }
 
