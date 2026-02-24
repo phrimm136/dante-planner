@@ -222,7 +222,8 @@
           "description": "发布即表示您同意将此计划上传到服务器并向所有用户公开。如果您不希望继续，请按取消按钮。",
           "confirm": "同意并发布",
           "cancel": "取消"
-        }
+        },
+        "themePackEgoGiftInconsistency": "在主题包 {{pack}} 中无法获取 E.G.O 礼物 {{gifts}}。请重置列表后重新设置。"
       },
       "conflict": {
         "title": "在其他设备上已修改",
@@ -260,6 +261,9 @@
         "deletedComment": "此评论已被删除。",
         "modified": "已编辑",
         "updatedAt": "{{date}}编辑"
+      },
+      "validation": {
+        "corruptedState": "计划数据似乎已损坏。请刷新页面后重试。"
       }
     },
     "plannerList": {
