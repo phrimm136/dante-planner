@@ -6,6 +6,7 @@
  */
 
 import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX } from '@/lib/constants'
+import { getBaseGiftId } from '@/lib/egoGiftEncoding'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
@@ -74,7 +75,8 @@ export function getUnaffordableGiftIds(
   egoGiftSpec: Record<string, EGOGiftSpec>
 ): string[] {
   return Array.from(giftIds).filter((giftId) => {
-    const gift = egoGiftSpec[giftId]
+    const baseGiftId = getBaseGiftId(giftId)
+    const gift = egoGiftSpec[baseGiftId]
     if (!gift) return false // Skip non-existent gifts
     return !isGiftAffordableForThemePack(gift, themePackId)
   })
@@ -183,6 +185,13 @@ export interface DifficultyValidationError extends ValidationError {
 }
 
 /**
+ * Title validation error (strict/publish mode only)
+ */
+export interface TitleValidationError extends ValidationError {
+  code: 'MISSING_TITLE'
+}
+
+/**
  * Union type of all validation errors
  */
 export type PlannerValidationError =
@@ -194,6 +203,45 @@ export type PlannerValidationError =
   | StartGiftValidationError
   | FloorValidationError
   | DifficultyValidationError
+  | TitleValidationError
+
+// ============================================================================
+// Error → i18n Mapping
+// ============================================================================
+
+/**
+ * Maps a structured validation error to an i18n key + params for toast display
+ *
+ * Structural errors (equipment, deployment, skill EA, gift IDs, buffs, start gifts)
+ * indicate corrupted planner state — the user cannot meaningfully act on them, so
+ * they collapse to a single generic key. Actionable errors (title, theme pack,
+ * difficulty, affordability) get their own specific keys.
+ */
+export function toUserFriendlyError(
+  error: PlannerValidationError
+): { key: string; params?: Record<string, string> } {
+  switch (error.code) {
+    case 'MISSING_TITLE':
+      return { key: 'pages.plannerMD.publish.missingTitle' }
+    case 'FLOOR_MISSING_THEME_PACK':
+      return { key: 'pages.plannerMD.publish.missingThemePack' }
+    case 'FLOOR_UNAFFORDABLE_GIFT': {
+      const floorError = error as FloorValidationError
+      const ctx = floorError.context as { giftNames?: string; themePackId?: string } | undefined
+      return {
+        key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
+        params: {
+          pack: ctx?.themePackId ?? '',
+          gifts: ctx?.giftNames ?? '',
+        },
+      }
+    }
+    case 'DIFFICULTY_INVALID_FOR_CATEGORY':
+      return { key: 'pages.plannerMD.publish.requiresHardMode' }
+    default:
+      return { key: 'pages.plannerMD.validation.corruptedState' }
+  }
+}
 
 // ============================================================================
 // Validation Functions
@@ -817,12 +865,18 @@ function validateFloorGiftAffordability(
  * }
  */
 export function validatePlannerForSave(
+  title: string | undefined,
   content: MDPlannerContent,
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>
 ): { isValid: boolean; errors: PlannerValidationError[] } {
   const errors: PlannerValidationError[] = []
+
+  // 0. Title validation (strict mode — required for publish)
+  if (!title || title.trim() === '') {
+    errors.push({ code: 'MISSING_TITLE', message: 'Title is required for publishing', field: 'title' })
+  }
 
   // 1. Equipment validation
   errors.push(...validateEquipment(content.equipment))
@@ -868,72 +922,64 @@ export function validatePlannerForSave(
 }
 
 /**
- * User-friendly validation for publish/save operations
- * Returns i18n error details if validation fails, null if valid
+ * Non-strict validation for sync/draft-save operations
+ * Runs all structural checks but allows missing title and missing theme packs.
+ * Returns the first error as an i18n key+params, or null if valid.
  *
- * Checks:
- * 1. Title is not empty
- * 2. All floors have theme pack selected
- * 3. 10F/15F categories don't have Normal difficulty on floors 1-5
- * 4. Floor gifts are affordable for selected theme pack
+ * Mirrors BE relaxed mode: title and theme packs are optional; all other checks
+ * (equipment, deployment, skill EA, gift IDs, start buffs, start gifts,
+ * floor prerequisites, gift affordability) run identically to strict mode.
  *
- * @param title - Planner title
- * @param floorSelections - Floor selections with theme packs, difficulty, and gift IDs
- * @param category - MD category
+ * @param content - MD planner content to validate
+ * @param category - MD category (5F, 10F, or 15F)
  * @param egoGiftSpec - EGO Gift spec data (optional, skips affordability check if not provided)
  * @param egoGiftI18n - EGO Gift i18n names (optional, uses IDs if not provided)
  * @returns Object with i18n key and params, or null if valid
  */
 export function validatePlannerUserFriendly(
-  title: string | undefined,
-  floorSelections: { themePackId: string | null; difficulty: number; giftIds: Set<string> | string[] }[],
+  content: MDPlannerContent,
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>
 ): { key: string; params?: Record<string, string> } | null {
-  // Check title
-  if (!title || title.trim() === '') {
-    return { key: 'pages.plannerMD.publish.missingTitle' }
-  }
+  const errors: PlannerValidationError[] = []
 
-  // Check theme packs for all floors
+  // 1. Equipment validation
+  errors.push(...validateEquipment(content.equipment))
+
+  // 2. Deployment order validation
+  errors.push(...validateDeploymentOrder(content.deploymentOrder))
+
+  // 3. Skill EA state validation
+  errors.push(...validateSkillEAState(content.skillEAState))
+
+  // 4. Gift IDs validation (all three arrays)
+  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds'))
+  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds'))
+  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds'))
+
+  // 5. Start buffs validation
+  errors.push(...validateStartBuffIds(content.selectedBuffIds))
+
+  // 6. Start gifts validation
+  errors.push(...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds))
+
+  // 7. Floor selections validation (non-strict: theme packs optional)
   const floorCount = FLOOR_COUNTS[category]
-  const hasAllThemePacks = floorSelections
-    .slice(0, floorCount)
-    .every((floor) => floor.themePackId !== null)
+  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(floor => ({
+    ...floor,
+    giftIds: new Set(floor.giftIds)
+  }))
+  const floorErrors = validateFloorThemePacksForSave(deserializedFloorSelections, floorCount)
+  // Filter out FLOOR_MISSING_THEME_PACK — theme packs are optional in non-strict mode.
+  // Prerequisites and duplicates still fire when a floor *does* have a pack.
+  errors.push(...floorErrors.filter(e => e.code !== 'FLOOR_MISSING_THEME_PACK'))
 
-  if (!hasAllThemePacks) {
-    return { key: 'pages.plannerMD.publish.missingThemePack' }
-  }
-
-  // Check difficulty for 10F/15F (floors 1-5 must not be Normal)
-  if (category !== '5F') {
-    const hasNormalDifficulty = floorSelections
-      .slice(0, 5)
-      .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
-
-    if (hasNormalDifficulty) {
-      return { key: 'pages.plannerMD.publish.requiresHardMode' }
-    }
-  }
-
-  // Check gift affordability (if egoGiftSpec is provided)
+  // 8. Gift affordability (validateFloorGiftAffordability already guards on themePackId being set)
   if (egoGiftSpec) {
-    for (let i = 0; i < floorCount; i++) {
-      const floor = floorSelections[i]
-      if (!floor?.themePackId) continue
-
-      const giftIds = floor.giftIds instanceof Set ? floor.giftIds : new Set(floor.giftIds)
-      const { names } = getUnaffordableGiftNames(giftIds, floor.themePackId, egoGiftSpec, egoGiftI18n ?? {})
-
-      if (names.length > 0) {
-        return {
-          key: 'pages.plannerMD.gifts.unaffordableWarning',
-          params: { floor: String(i + 1), gifts: names.join(', ') },
-        }
-      }
-    }
+    errors.push(...validateFloorGiftAffordability(deserializedFloorSelections, floorCount, egoGiftSpec, egoGiftI18n))
   }
 
-  return null
+  if (errors.length === 0) return null
+  return toUserFriendlyError(errors[0])
 }
