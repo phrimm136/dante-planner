@@ -168,9 +168,10 @@ public class GlobalExceptionHandler {
      * User-fixable error codes that are safe to expose to clients.
      * These help users understand how to fix their content.
      *
-     * <p>All other error codes (INVALID_JSON, MISSING_REQUIRED_FIELD, UNKNOWN_FIELD,
-     * INVALID_CATEGORY, INVALID_FIELD_TYPE, INVALID_ID_REFERENCE) are structural
-     * validation errors that reveal API schema details and are mapped to generic
+     * <p>All other error codes (MISSING_REQUIRED_FIELD, UNKNOWN_FIELD,
+     * INVALID_CATEGORY, INVALID_FIELD_TYPE, INVALID_ID_REFERENCE,
+     * VALUE_OUT_OF_RANGE, DUPLICATE_VALUE, INVALID_SEQUENCE, GIFT_NOT_AFFORDABLE)
+     * are structural validation errors that reveal API schema details and are mapped to generic
      * VALIDATION_ERROR to prevent information disclosure and schema probing attacks.</p>
      */
     private static final java.util.Set<String> USER_FACING_ERROR_CODES = java.util.Set.of(
@@ -181,20 +182,21 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PlannerValidationException.class)
     public ResponseEntity<ErrorResponse> handlePlannerValidation(PlannerValidationException ex) {
-        log.warn("Planner validation error [{}]: {} | content: {}",
-            ex.getErrorCode(), ex.getMessage(), truncate(ex.getFailedContent()));
-
-        // Return granular error codes for user-fixable issues
-        // Return generic code for structural issues to prevent information disclosure
         if (USER_FACING_ERROR_CODES.contains(ex.getErrorCode())) {
+            log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
         }
 
-        // Track structural validation errors - may indicate API probing attempts
-        Sentry.captureException(ex);
+        // Multi-error: log each sub-error individually for CloudWatch searchability
+        if (!ex.getSubErrors().isEmpty()) {
+            ex.getSubErrors().forEach(e ->
+                log.warn("Planner validation error [{}]: {}", e.code(), e.message()));
+        } else {
+            log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+        }
 
-        // Generic error for structural validation to prevent probing
+        Sentry.captureException(ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", "Invalid planner content structure"));
     }
