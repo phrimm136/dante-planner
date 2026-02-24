@@ -223,7 +223,8 @@
           "description": "公開することにより、このプランがサーバーにアップロードされ、すべてのユーザーに公開されることに同意します。これを望まない場合は、キャンセルボタンを押してください。",
           "confirm": "同意して公開",
           "cancel": "キャンセル"
-        }
+        },
+        "themePackEgoGiftInconsistency": "テーマパック {{pack}} では E.G.O ギフト {{gifts}} を獲得できません。リストをリセットして再設定してください。"
       },
       "conflict": {
         "title": "別のデバイスで変更されました",
@@ -261,6 +262,9 @@
         "deletedComment": "このコメントは削除されました。",
         "modified": "編集済み",
         "updatedAt": "{{date}}に編集"
+      },
+      "validation": {
+        "corruptedState": "プランナーのデータが破損しているようです。ページを更新してもう一度お試しください。"
       }
     },
     "plannerList": {

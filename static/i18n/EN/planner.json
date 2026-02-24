@@ -223,7 +223,8 @@
           "description": "By publishing, you agree that this plan will be uploaded to the server and made public to all users. If you do not wish to proceed, please press the cancel button.",
           "confirm": "Agree and Publish",
           "cancel": "Cancel"
-        }
+        },
+        "themePackEgoGiftInconsistency": "E.G.O Gifts {{gifts}} cannot be obtained in theme pack {{pack}}. Please reset the list and set them again."
       },
       "conflict": {
         "title": "Changed on Another Device",
@@ -264,6 +265,9 @@
         "deletedComment": "This comment has been deleted.",
         "modified": "modified",
         "updatedAt": "updated {{date}}"
+      },
+      "validation": {
+        "corruptedState": "Planner data appears corrupted. Please refresh and try again."
       }
     },
     "plannerList": {

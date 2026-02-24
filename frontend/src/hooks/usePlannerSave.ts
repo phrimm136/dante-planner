@@ -9,12 +9,12 @@ import { serializeSets } from '@/schemas/PlannerSchemas'
 import { ConflictError, BannedError, TimedOutError } from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
-import { validatePlannerUserFriendly } from '@/lib/plannerHelpers'
+import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
 import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
-import type { SaveablePlanner, ConflictState, ConflictResolutionChoice, PlannerConfig, PlannerContent } from '@/types/PlannerTypes'
+import type { SaveablePlanner, ConflictState, ConflictResolutionChoice, PlannerConfig, PlannerContent, MDPlannerContent } from '@/types/PlannerTypes'
 
 /**
  * SSR safety check
@@ -388,23 +388,38 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       status
     )
 
-    // User-friendly validation for published planners (MD only)
-    if (isCurrentlyPublished && plannerType === 'MIRROR_DUNGEON') {
-      const validationError = validatePlannerUserFriendly(
-        currentState.title,
-        currentState.floorSelections,
-        currentState.category,
-        egoGiftSpec,
-        egoGiftI18n
-      )
-      if (validationError) {
-        // Serialize error info as JSON for later parsing
-        const errorMessage = JSON.stringify({ key: validationError.key, params: validationError.params })
+    // Two-tier validation for MD planners (non-strict for draft, strict for published)
+    if (plannerType === 'MIRROR_DUNGEON') {
+      const throwValidationError = (friendly: { key: string; params?: Record<string, string> }) => {
+        const errorMessage = JSON.stringify({ key: friendly.key, params: friendly.params })
         const error = new Error(errorMessage)
         ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).code = 'userFriendlyValidation'
-        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nKey = validationError.key
-        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nParams = validationError.params
+        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nKey = friendly.key
+        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nParams = friendly.params
         throw error
+      }
+
+      const content = saveable.content as MDPlannerContent
+
+      if (isCurrentlyPublished) {
+        // Strict: title + theme packs required, full difficulty enforced
+        const { isValid, errors } = validatePlannerForSave(
+          currentState.title,
+          content,
+          currentState.category,
+          egoGiftSpec,
+          egoGiftI18n
+        )
+        if (!isValid) throwValidationError(toUserFriendlyError(errors[0]))
+      } else {
+        // Non-strict: structural checks only, title/theme packs optional
+        const validationError = validatePlannerUserFriendly(
+          content,
+          currentState.category,
+          egoGiftSpec,
+          egoGiftI18n
+        )
+        if (validationError) throwValidationError(validationError)
       }
     }
 

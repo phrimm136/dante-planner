@@ -38,7 +38,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { I18N_LOCALE_MAP, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, RECOMMENDED_THRESHOLD } from '@/lib/constants'
-import { validatePlannerUserFriendly } from '@/lib/plannerHelpers'
+import { validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
 
 import type { MDCategory } from '@/lib/constants'
 import type { PublishedPlannerDetail } from '@/types/PlannerListTypes'
@@ -196,15 +196,16 @@ export function PlannerDetailHeader({
     if (!savedPlanner.metadata.published && savedPlanner.config.type === 'MIRROR_DUNGEON') {
       const content = savedPlanner.content as MDPlannerContent
       const category = savedPlanner.config.category as MDCategory
-      const error = validatePlannerUserFriendly(
+      const { isValid, errors } = validatePlannerForSave(
         savedPlanner.metadata.title,
-        content.floorSelections,
+        content,
         category,
         egoGiftSpec,
         egoGiftI18n
       )
-      if (error) {
-        toast.error(t(error.key, error.params))
+      if (!isValid) {
+        const friendly = toUserFriendlyError(errors[0])
+        toast.error(t(friendly.key, friendly.params))
         return
       }
     }
@@ -258,6 +259,23 @@ export function PlannerDetailHeader({
     setShowPublishWarning(false)
 
     try {
+      // Validate before upload (strict: title + theme packs required)
+      const content = savedPlanner.content as MDPlannerContent
+      const category = savedPlanner.config.category as MDCategory
+      const { isValid, errors } = validatePlannerForSave(
+        savedPlanner.metadata.title,
+        content,
+        category,
+        egoGiftSpec,
+        egoGiftI18n
+      )
+      if (!isValid) {
+        const friendly = toUserFriendlyError(errors[0])
+        toast.error(t(friendly.key, friendly.params))
+        setIsUploadingForPublish(false)
+        return
+      }
+
       // Step 1: Upload plan to server (force sync even though sync is disabled)
       await syncAdapter.syncToServer(savedPlanner)
 
