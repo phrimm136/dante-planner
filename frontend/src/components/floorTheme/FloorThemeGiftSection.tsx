@@ -79,10 +79,12 @@ export function FloorThemeGiftSection({
       // Preserve existing gifts
       const existingGifts = floorSelections[floorIndex]?.giftIds ?? new Set<string>()
 
-      // Check for unaffordable gifts after theme pack change
+      // Remove gifts that are unaffordable for the new theme pack
+      let newGiftIds = existingGifts
       if (existingGifts.size > 0) {
-        const { names } = getUnaffordableGiftNames(existingGifts, packId, egoGiftSpec, egoGiftI18n)
+        const { ids, names } = getUnaffordableGiftNames(existingGifts, packId, egoGiftSpec, egoGiftI18n)
         if (names.length > 0) {
+          newGiftIds = new Set([...existingGifts].filter(id => !ids.includes(id)))
           toast.warning(t('pages.plannerMD.gifts.unaffordableWarning', { floor: floorNumber, gifts: names.join(', ') }))
         }
       }
@@ -90,7 +92,7 @@ export function FloorThemeGiftSection({
       updateFloorSelection(floorIndex, {
         themePackId: packId,
         difficulty,
-        giftIds: existingGifts,
+        giftIds: newGiftIds,
       })
     }
   }

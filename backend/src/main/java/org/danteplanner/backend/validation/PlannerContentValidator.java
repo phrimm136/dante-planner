@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 import org.danteplanner.backend.util.GameConstants;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -31,6 +33,9 @@ public class PlannerContentValidator {
     private static final String ERROR_INVALID_FIELD_TYPE = "INVALID_FIELD_TYPE";
     private static final String ERROR_INVALID_ID_REFERENCE = "INVALID_ID_REFERENCE";
     private static final String ERROR_VALUE_OUT_OF_RANGE = "VALUE_OUT_OF_RANGE";
+    private static final String ERROR_DUPLICATE_VALUE = "DUPLICATE_VALUE";
+    private static final String ERROR_INVALID_SEQUENCE = "INVALID_SEQUENCE";
+    private static final String ERROR_GIFT_NOT_AFFORDABLE = "GIFT_NOT_AFFORDABLE";
 
     // Externalized configuration for size limits
     private final int maxContentSizeBytes;
@@ -90,6 +95,10 @@ public class PlannerContentValidator {
     // Thread-local flag for strict mode (publish vs save)
     private final ThreadLocal<Boolean> currentStrictMode = ThreadLocal.withInitial(() -> false);
 
+    // Thread-local error collector for multi-error reporting
+    private final ThreadLocal<List<PlannerValidationException>> currentErrors =
+            ThreadLocal.withInitial(ArrayList::new);
+
     public PlannerContentValidator(
             ObjectMapper objectMapper,
             GameDataRegistry gameDataRegistry,
@@ -136,6 +145,7 @@ public class PlannerContentValidator {
         validateContentSize(content);
         validateCategory(category);
 
+        currentErrors.set(new ArrayList<>());
         try {
             this.currentStrictMode.set(strictMode);
             JsonNode root = parseJson(content);
@@ -160,8 +170,14 @@ public class PlannerContentValidator {
             validateStartBuffIds(root);
             validateStartGiftIds(root);
 
+            List<PlannerValidationException> errors = currentErrors.get();
+            if (!errors.isEmpty()) {
+                throw PlannerValidationException.combined(errors);
+            }
+
             return root;
         } finally {
+            this.currentErrors.remove();
             this.currentStrictMode.remove();
         }
     }
@@ -204,6 +220,24 @@ public class PlannerContentValidator {
                 String.format("Field '%s' has wrong type, expected %s", field, expectedType));
     }
 
+    private static final int MAX_VALUE_LOG_LENGTH = 100;
+
+    private static String truncateValue(String s) {
+        if (s == null) return "null";
+        return s.length() <= MAX_VALUE_LOG_LENGTH ? s : s.substring(0, MAX_VALUE_LOG_LENGTH) + "…";
+    }
+
+    private PlannerValidationException invalidFieldTypeError(String field, String expectedType, JsonNode actual) {
+        String actualDesc;
+        if (actual == null || actual.isNull())    actualDesc = "null";
+        else if (actual.isTextual())              actualDesc = "string \"" + truncateValue(actual.asText()) + "\"";
+        else if (actual.isNumber())               actualDesc = "number " + actual;
+        else if (actual.isBoolean())              actualDesc = "boolean " + actual.asBoolean();
+        else                                      actualDesc = actual.getNodeType().toString().toLowerCase();
+        return new PlannerValidationException(ERROR_INVALID_FIELD_TYPE,
+                String.format("Field '%s' must be %s, got %s", field, expectedType, actualDesc));
+    }
+
     private PlannerValidationException invalidIdReferenceError(String context, String id) {
         return new PlannerValidationException(ERROR_INVALID_ID_REFERENCE,
                 String.format("%s ID '%s' not found or invalid", context, id));
@@ -214,12 +248,22 @@ public class PlannerContentValidator {
                 String.format("%s value %d is out of range [%d-%d]", field, value, min, max));
     }
 
-    /**
-     * Generic validation error for cases not covered by specific error codes.
-     * Used for structural validation failures (equipment structure, EGO types, skill slots, etc.).
-     */
-    private PlannerValidationException validationError() {
-        return new PlannerValidationException("INVALID_JSON", "Validation failed");
+    private PlannerValidationException duplicateValueError(String field, String value) {
+        return new PlannerValidationException(ERROR_DUPLICATE_VALUE,
+                String.format("Duplicate value '%s' in %s", value, field));
+    }
+
+    private PlannerValidationException invalidSequenceError(String detail) {
+        return new PlannerValidationException(ERROR_INVALID_SEQUENCE, "Invalid sequence: " + detail);
+    }
+
+    private PlannerValidationException giftNotAffordableError(String giftId, String themePackId) {
+        return new PlannerValidationException(ERROR_GIFT_NOT_AFFORDABLE,
+                String.format("Gift '%s' is not affordable for theme pack '%s'", giftId, themePackId));
+    }
+
+    private void addError(PlannerValidationException ex) {
+        currentErrors.get().add(ex);
     }
 
     private void validateContentSize(String content) {
@@ -311,7 +355,7 @@ public class PlannerContentValidator {
             JsonNode node = root.get("selectedGiftKeyword");
             if (!node.isTextual() && !node.isNull()) {
                 log.warn("Validation failed: 'selectedGiftKeyword' wrong type");
-                throw validationError();
+                addError(invalidFieldTypeError("selectedGiftKeyword", "string or null", node));
             }
         }
     }
@@ -320,7 +364,7 @@ public class PlannerContentValidator {
         JsonNode node = root.get(field);
         if (node != null && !check.test(node)) {
             log.warn("Validation failed: '{}' wrong type (expected {})", field, expected);
-            throw validationError();
+            addError(invalidFieldTypeError(field, expected, node));
         }
     }
 
@@ -356,13 +400,15 @@ public class PlannerContentValidator {
                 int index = Integer.parseInt(key);
                 if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
                     log.warn("Validation failed: equipment index '{}' out of range", index);
-                    throw validationError();
+                    addError(valueOutOfRangeError("equipment key", index, MIN_EQUIPMENT_SINNER, MAX_EQUIPMENT_SINNER));
+                    continue;
                 }
                 // Normalize to 2-digit format for completeness check
                 presentKeys.add(String.format("%02d", index));
             } catch (NumberFormatException e) {
                 log.warn("Validation failed: equipment key '{}' not an integer", key);
-                throw validationError();
+                addError(invalidFieldTypeError("equipment key '" + key + "'", "integer"));
+                continue;
             }
         }
 
@@ -371,7 +417,8 @@ public class PlannerContentValidator {
         missingSinners.removeAll(presentKeys);
         if (!missingSinners.isEmpty()) {
             log.warn("Validation failed: missing sinners in equipment - {}", missingSinners);
-            throw validationError();
+            addError(missingRequiredFieldError(missingSinners));
+            return;
         }
 
         // Validate each sinner has identity and ZAYIN EGO
@@ -383,7 +430,8 @@ public class PlannerContentValidator {
             }
             if (sinnerEquipment == null || !sinnerEquipment.isObject()) {
                 log.warn("Validation failed: equipment[{}] is not an object", sinnerKey);
-                throw validationError();
+                addError(invalidFieldTypeError("equipment[" + sinnerKey + "]", "object"));
+                continue;
             }
 
             validateSinnerHasIdentity(sinnerKey, sinnerEquipment);
@@ -395,13 +443,14 @@ public class PlannerContentValidator {
         JsonNode identity = sinnerEquipment.get("identity");
         if (identity == null || !identity.isObject()) {
             log.warn("Validation failed: equipment[{}] missing identity", sinnerKey);
-            throw validationError();
+            addError(invalidFieldTypeError("equipment[" + sinnerKey + "].identity", "object"));
+            return;
         }
 
         JsonNode idNode = identity.get("id");
         if (idNode == null || !idNode.isTextual() || idNode.asText().isBlank()) {
             log.warn("Validation failed: equipment[{}].identity missing id", sinnerKey);
-            throw validationError();
+            addError(invalidFieldTypeError("equipment[" + sinnerKey + "].identity.id", "non-empty string"));
         }
     }
 
@@ -409,7 +458,8 @@ public class PlannerContentValidator {
         JsonNode egos = sinnerEquipment.get("egos");
         if (egos == null || !egos.isObject()) {
             log.warn("Validation failed: equipment[{}] missing egos", sinnerKey);
-            throw validationError();
+            addError(invalidFieldTypeError("equipment[" + sinnerKey + "].egos", "object"));
+            return;
         }
 
         // Validate EGO types: max 5, unique, from valid set
@@ -419,13 +469,14 @@ public class PlannerContentValidator {
         JsonNode zayinEgo = egos.get(REQUIRED_EGO_TYPE);
         if (zayinEgo == null || !zayinEgo.isObject()) {
             log.warn("Validation failed: equipment[{}] missing {} EGO", sinnerKey, REQUIRED_EGO_TYPE);
-            throw validationError();
+            addError(missingRequiredFieldError(Set.of("equipment[" + sinnerKey + "].egos.ZAYIN")));
+            return;
         }
 
         JsonNode idNode = zayinEgo.get("id");
         if (idNode == null || !idNode.isTextual() || idNode.asText().isBlank()) {
             log.warn("Validation failed: equipment[{}].egos.{} missing id", sinnerKey, REQUIRED_EGO_TYPE);
-            throw validationError();
+            addError(invalidFieldTypeError("equipment[" + sinnerKey + "].egos.ZAYIN.id", "non-empty string"));
         }
     }
 
@@ -439,20 +490,23 @@ public class PlannerContentValidator {
             // Check valid EGO type
             if (!VALID_EGO_TYPES.contains(egoType)) {
                 log.warn("Validation failed: equipment[{}].egos has invalid type '{}'", sinnerKey, egoType);
-                throw validationError();
+                addError(invalidFieldTypeError("equipment[" + sinnerKey + "].egos." + egoType,
+                        "valid EGO type (ZAYIN/TETH/HE/WAW/ALEPH)"));
+                continue;
             }
 
-            // Check for duplicates
+            // Check for duplicates (HashSet.add returns false on duplicate)
             if (!seenTypes.add(egoType)) {
                 log.warn("Validation failed: equipment[{}].egos has duplicate type '{}'", sinnerKey, egoType);
-                throw validationError();
+                addError(duplicateValueError("equipment[" + sinnerKey + "].egos", egoType));
             }
         }
 
         // Max 5 EGO types
         if (seenTypes.size() > VALID_EGO_TYPES.size()) {
             log.warn("Validation failed: equipment[{}].egos has more than {} EGO types", sinnerKey, VALID_EGO_TYPES.size());
-            throw validationError();
+            addError(valueOutOfRangeError("equipment[" + sinnerKey + "].egos count",
+                    seenTypes.size(), 1, VALID_EGO_TYPES.size()));
         }
     }
 
@@ -466,13 +520,15 @@ public class PlannerContentValidator {
             JsonNode node = order.get(i);
             if (!node.isNumber()) {
                 log.warn("Validation failed: deploymentOrder[{}] not a number", i);
-                throw validationError();
+                addError(invalidFieldTypeError("deploymentOrder[" + i + "]", "number", node));
+                continue;
             }
 
             int index = node.asInt();
             if (index < MIN_DEPLOYMENT_SINNER || index > MAX_DEPLOYMENT_SINNER) {
                 log.warn("Validation failed: deploymentOrder[{}]={} out of range", i, index);
-                throw validationError();
+                addError(valueOutOfRangeError("deploymentOrder[" + i + "]", index,
+                        MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
             }
         }
     }
@@ -486,7 +542,8 @@ public class PlannerContentValidator {
 
         if (!skillEAState.isObject()) {
             log.warn("Validation failed: skillEAState is not an object");
-            throw validationError();
+            addError(invalidFieldTypeError("skillEAState", "object", skillEAState));
+            return;
         }
 
         // Collect present sinner keys
@@ -498,12 +555,15 @@ public class PlannerContentValidator {
                 int index = Integer.parseInt(key);
                 if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
                     log.warn("Validation failed: skillEAState key '{}' out of range", key);
-                    throw validationError();
+                    addError(valueOutOfRangeError("skillEAState key", index,
+                            MIN_EQUIPMENT_SINNER, MAX_EQUIPMENT_SINNER));
+                    continue;
                 }
                 presentKeys.add(String.format("%02d", index));
             } catch (NumberFormatException e) {
                 log.warn("Validation failed: skillEAState key '{}' not an integer", key);
-                throw validationError();
+                addError(invalidFieldTypeError("skillEAState key '" + key + "'", "integer"));
+                continue;
             }
         }
 
@@ -512,7 +572,8 @@ public class PlannerContentValidator {
         missingSinners.removeAll(presentKeys);
         if (!missingSinners.isEmpty()) {
             log.warn("Validation failed: missing sinners in skillEAState - {}", missingSinners);
-            throw validationError();
+            addError(missingRequiredFieldError(missingSinners));
+            return;
         }
 
         // Validate each sinner's skill slots sum to SKILL_EA_TOTAL
@@ -523,7 +584,8 @@ public class PlannerContentValidator {
             }
             if (sinnerSkills == null || !sinnerSkills.isObject()) {
                 log.warn("Validation failed: skillEAState[{}] is not an object", sinnerKey);
-                throw validationError();
+                addError(invalidFieldTypeError("skillEAState[" + sinnerKey + "]", "object"));
+                continue;
             }
 
             // Validate skill slot keys and calculate total
@@ -536,26 +598,30 @@ public class PlannerContentValidator {
                 // Check valid skill slot key (0, 1, 2)
                 if (!VALID_SKILL_SLOTS.contains(slotKey)) {
                     log.warn("Validation failed: skillEAState[{}] has invalid slot key '{}'", sinnerKey, slotKey);
-                    throw validationError();
+                    addError(invalidFieldTypeError("skillEAState[" + sinnerKey + "] slot '" + slotKey + "'", "0, 1, or 2"));
+                    continue;
                 }
 
                 // Check for duplicates
                 if (!seenSlots.add(slotKey)) {
                     log.warn("Validation failed: skillEAState[{}] has duplicate slot key '{}'", sinnerKey, slotKey);
-                    throw validationError();
+                    addError(duplicateValueError("skillEAState[" + sinnerKey + "]", slotKey));
+                    continue;
                 }
 
                 JsonNode slotValue = sinnerSkills.get(slotKey);
                 if (!slotValue.isNumber()) {
                     log.warn("Validation failed: skillEAState[{}][{}] is not a number", sinnerKey, slotKey);
-                    throw validationError();
+                    addError(invalidFieldTypeError("skillEAState[" + sinnerKey + "][" + slotKey + "]", "number", slotValue));
+                    continue;
                 }
                 total += slotValue.asInt();
             }
 
             if (total != SKILL_EA_TOTAL) {
                 log.warn("Validation failed: skillEAState[{}] total {} != {}", sinnerKey, total, SKILL_EA_TOTAL);
-                throw validationError();
+                addError(valueOutOfRangeError("skillEAState[" + sinnerKey + "] total", total,
+                        SKILL_EA_TOTAL, SKILL_EA_TOTAL));
             }
         }
     }
@@ -595,13 +661,15 @@ public class PlannerContentValidator {
         // Check ID exists in game data
         if (!gameDataRegistry.hasIdentity(identityId)) {
             log.warn("Validation failed: identity ID '{}' not found in game data", identityId);
-            throw validationError();
+            addError(invalidIdReferenceError("identity", identityId));
+            return;
         }
 
         // Check sinner-ID consistency
         if (!sinnerIdValidator.validateMatch(sinnerKey, identityId)) {
             log.warn("Validation failed: identity ID '{}' does not match sinner key '{}'", identityId, sinnerKey);
-            throw validationError();
+            addError(invalidIdReferenceError("identity for sinner " + sinnerKey, identityId));
+            return;
         }
 
         // Validate level range
@@ -650,13 +718,15 @@ public class PlannerContentValidator {
             // Check ID exists in game data
             if (!gameDataRegistry.hasEgo(egoId)) {
                 log.warn("Validation failed: EGO ID '{}' not found in game data", egoId);
-                throw validationError();
+                addError(invalidIdReferenceError("EGO", egoId));
+                continue;
             }
 
             // Check sinner-ID consistency
             if (!sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
                 log.warn("Validation failed: EGO ID '{}' does not match sinner key '{}'", egoId, sinnerKey);
-                throw validationError();
+                addError(invalidIdReferenceError("EGO for sinner " + sinnerKey, egoId));
+                continue;
             }
 
             // Validate threadspin range
@@ -692,7 +762,8 @@ public class PlannerContentValidator {
             // Strict type check: all elements must be strings
             if (!node.isTextual()) {
                 log.warn("Validation failed: {}[{}] is not a string", fieldName, i);
-                throw validationError();
+                addError(invalidFieldTypeError(fieldName + "[" + i + "]", "string", node));
+                continue;
             }
 
             String giftId = node.asText();
@@ -700,13 +771,14 @@ public class PlannerContentValidator {
             // Check for duplicates
             if (!seenGiftIds.add(giftId)) {
                 log.warn("Validation failed: {}[{}] has duplicate gift ID '{}'", fieldName, i, giftId);
-                throw validationError();
+                addError(duplicateValueError(fieldName, giftId));
+                continue;
             }
 
             // Check if gift exists in game data
             if (!gameDataRegistry.hasEgoGift(giftId)) {
                 log.warn("Validation failed: {}[{}] gift ID '{}' not found in game data", fieldName, i, giftId);
-                throw validationError();
+                addError(invalidIdReferenceError(fieldName, giftId));
             }
         }
     }
@@ -744,13 +816,15 @@ public class PlannerContentValidator {
                 // Strict mode (publish): Theme pack is REQUIRED for all active floors
                 if (!hasThemePack) {
                     log.warn("Validation failed: floorSelections[{}] must have a themePackId for publish", i);
-                    throw validationError();
+                    addError(missingRequiredFieldError(Set.of("floorSelections[" + i + "].themePackId")));
+                    continue;
                 }
 
                 String themePackId = themePackNode.asText();
                 if (themePackId.isEmpty() || !gameDataRegistry.hasThemePack(themePackId)) {
                     log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
-                    throw validationError();
+                    addError(invalidIdReferenceError("floorSelections[" + i + "].themePackId", themePackId));
+                    continue;
                 }
 
                 // Validate difficulty based on category and floor
@@ -762,25 +836,25 @@ public class PlannerContentValidator {
                         // 5F: All floors must be Normal(0) or Hard(1)
                         if (difficulty != 0 && difficulty != 1) {
                             log.warn("Validation failed: floorSelections[{}] must be Normal or Hard for 5F category", i);
-                            throw validationError();
+                            addError(valueOutOfRangeError("floorSelections[" + i + "].difficulty", difficulty, 0, 1));
                         }
                     }
                     case "10F" -> {
                         // 10F: All floors (1-10) must be Hard(1)
                         if (difficulty != 1) {
                             log.warn("Validation failed: floorSelections[{}] must be Hard for 10F category", i);
-                            throw validationError();
+                            addError(valueOutOfRangeError("floorSelections[" + i + "].difficulty", difficulty, 1, 1));
                         }
                     }
                     case "15F" -> {
                         // 15F: Floors 1-10 must be Hard(1), Floors 11-15 must be Extreme(3)
                         if (i < 10 && difficulty != 1) {
                             log.warn("Validation failed: floorSelections[{}] must be Hard for 15F category", i);
-                            throw validationError();
+                            addError(valueOutOfRangeError("floorSelections[" + i + "].difficulty", difficulty, 1, 1));
                         }
                         if (i >= 10 && difficulty != 3) {
                             log.warn("Validation failed: floorSelections[{}] must be Extreme for 15F category", i);
-                            throw validationError();
+                            addError(valueOutOfRangeError("floorSelections[" + i + "].difficulty", difficulty, 3, 3));
                         }
                     }
                 }
@@ -789,7 +863,8 @@ public class PlannerContentValidator {
                 String themePackId = themePackNode.asText();
                 if (!themePackId.isEmpty() && !gameDataRegistry.hasThemePack(themePackId)) {
                     log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
-                    throw validationError();
+                    addError(invalidIdReferenceError("floorSelections[" + i + "].themePackId", themePackId));
+                    continue;
                 }
             }
 
@@ -802,7 +877,7 @@ public class PlannerContentValidator {
                             && previousThemePackNode.isTextual() && !previousThemePackNode.asText().isEmpty();
                     if (!previousHasThemePack) {
                         log.warn("Validation failed: floorSelections[{}] cannot have themePackId because floor {} is missing one", i, i - 1);
-                        throw validationError();
+                        addError(invalidSequenceError("floorSelections[" + i + "] requires themePackId in floorSelections[" + (i - 1) + "]"));
                     }
                 }
             }
@@ -818,7 +893,8 @@ public class PlannerContentValidator {
                     // Strict type check: all elements must be strings
                     if (!giftNode.isTextual()) {
                         log.warn("Validation failed: floorSelections[{}].giftIds[{}] is not a string", i, j);
-                        throw validationError();
+                        addError(invalidFieldTypeError("floorSelections[" + i + "].giftIds[" + j + "]", "string", giftNode));
+                        continue;
                     }
 
                     String giftId = giftNode.asText();
@@ -826,20 +902,22 @@ public class PlannerContentValidator {
                     // Check for duplicates within this floor
                     if (!seenFloorGiftIds.add(giftId)) {
                         log.warn("Validation failed: floorSelections[{}].giftIds has duplicate '{}'", i, giftId);
-                        throw validationError();
+                        addError(duplicateValueError("floorSelections[" + i + "].giftIds", giftId));
+                        continue;
                     }
 
                     // Check if gift exists in game data
                     if (!gameDataRegistry.hasEgoGift(giftId)) {
                         log.warn("Validation failed: floorSelections[{}].giftIds[{}] '{}' not found", i, j, giftId);
-                        throw validationError();
+                        addError(invalidIdReferenceError("floorSelections[" + i + "].giftIds", giftId));
+                        continue;
                     }
 
                     // Check if gift is affordable for this theme pack
                     String themePackId = themePackNode.asText();
                     if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
                         log.warn("Validation failed: floorSelections[{}].giftIds[{}] '{}' not affordable for theme pack '{}'", i, j, giftId, themePackId);
-                        throw validationError();
+                        addError(giftNotAffordableError(giftId, themePackId));
                     }
                 }
             }
@@ -869,7 +947,8 @@ public class PlannerContentValidator {
         if (buffIds.size() > MAX_START_BUFFS) {
             log.warn("Validation failed: selectedBuffIds has {} items, max is {}",
                     buffIds.size(), MAX_START_BUFFS);
-            throw validationError();
+            addError(valueOutOfRangeError("selectedBuffIds count", buffIds.size(), 0, MAX_START_BUFFS));
+            return;
         }
 
         // Track base IDs to detect duplicates with different enhancements
@@ -879,7 +958,8 @@ public class PlannerContentValidator {
             JsonNode node = buffIds.get(i);
             if (!node.isNumber()) {
                 log.warn("Validation failed: selectedBuffIds[{}] is not a number", i);
-                throw validationError();
+                addError(invalidFieldTypeError("selectedBuffIds[" + i + "]", "number", node));
+                continue;
             }
 
             int buffId = node.asInt();
@@ -887,7 +967,8 @@ public class PlannerContentValidator {
             // Check ID exists in game data
             if (!gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
                 log.warn("Validation failed: selectedBuffIds[{}] buff ID '{}' not found in game data", i, buffId);
-                throw validationError();
+                addError(invalidIdReferenceError("selectedBuffIds", String.valueOf(buffId)));
+                continue;
             }
 
             // Extract base ID (00-09 part)
@@ -895,14 +976,16 @@ public class PlannerContentValidator {
             if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
                 log.warn("Validation failed: selectedBuffIds[{}] buff ID '{}' has invalid base ID '{}'",
                         i, buffId, baseId);
-                throw validationError();
+                addError(valueOutOfRangeError("selectedBuffIds[" + i + "] base ID", baseId,
+                        MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
+                continue;
             }
 
             // Check for duplicate base IDs (different enhancements of same buff)
             if (!seenBaseIds.add(baseId)) {
                 log.warn("Validation failed: selectedBuffIds has duplicate base ID '{}' (buff ID '{}')",
                         baseId, buffId);
-                throw validationError();
+                addError(duplicateValueError("selectedBuffIds base IDs", String.valueOf(baseId)));
             }
         }
     }
@@ -928,7 +1011,7 @@ public class PlannerContentValidator {
             // If no keyword, selectedGiftIds must be empty or absent
             if (giftIdsNode != null && giftIdsNode.isArray() && giftIdsNode.size() > 0) {
                 log.warn("Validation failed: selectedGiftIds has items but selectedGiftKeyword is null");
-                throw validationError();
+                addError(invalidSequenceError("selectedGiftIds requires selectedGiftKeyword"));
             }
             return;
         }
@@ -938,7 +1021,8 @@ public class PlannerContentValidator {
         // Keyword is present, validate it exists
         if (!gameDataRegistry.hasStartGiftKeyword(keyword)) {
             log.warn("Validation failed: selectedGiftKeyword '{}' is not a valid keyword", keyword);
-            throw validationError();
+            addError(invalidIdReferenceError("selectedGiftKeyword", keyword));
+            return;
         }
 
         // Get the pool for this keyword
@@ -952,7 +1036,8 @@ public class PlannerContentValidator {
                 JsonNode node = giftIdsNode.get(i);
                 if (!node.isTextual()) {
                     log.warn("Validation failed: selectedGiftIds[{}] is not a string", i);
-                    throw validationError();
+                    addError(invalidFieldTypeError("selectedGiftIds[" + i + "]", "string", node));
+                    continue;
                 }
 
                 String giftId = node.asText();
@@ -960,14 +1045,15 @@ public class PlannerContentValidator {
                 // Check for duplicates
                 if (!seenGiftIds.add(giftId)) {
                     log.warn("Validation failed: selectedGiftIds has duplicate gift ID '{}'", giftId);
-                    throw validationError();
+                    addError(duplicateValueError("selectedGiftIds", giftId));
+                    continue;
                 }
 
                 // Check gift belongs to keyword pool
                 if (!pool.contains(giftId)) {
                     log.warn("Validation failed: selectedGiftIds[{}] gift '{}' not in keyword '{}' pool",
                             i, giftId, keyword);
-                    throw validationError();
+                    addError(invalidIdReferenceError("selectedGiftIds (not in keyword '" + keyword + "' pool)", giftId));
                 }
             }
         }
