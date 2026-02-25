@@ -142,8 +142,6 @@ export const PublishedPlannerDetailSchema = PublicPlannerSchema.extend({
   status: PlannerStatusSchema,
   /** Server sync version for optimistic locking */
   syncVersion: z.number().int().positive(),
-  /** Device identifier (optional) */
-  deviceId: z.string().optional(),
   /** Subscription status for authenticated users (null if not authenticated) */
   isSubscribed: z.boolean().nullable(),
   /** Report status for authenticated users (null if not authenticated) */
