@@ -181,7 +181,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * @return Optional of locked planner (empty if not found or deleted)
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT p FROM Planner p WHERE p.id = :plannerId AND p.deletedAt IS NULL")
+    @Query("SELECT p FROM Planner p JOIN FETCH p.user WHERE p.id = :plannerId AND p.deletedAt IS NULL")
     Optional<Planner> findByIdForUpdate(@Param("plannerId") UUID plannerId);
 
     // ==================== Search Operations ====================
