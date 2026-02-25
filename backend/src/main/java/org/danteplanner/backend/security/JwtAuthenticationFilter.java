@@ -26,6 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.DispatcherType;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.util.List;
@@ -100,6 +101,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        // MdcLoggingFilter runs after this filter (to read authenticated userId).
+        // Set method+path early so WARN/ERROR logs from this filter include request context.
+        MDC.put("method", request.getMethod());
+        MDC.put("path", request.getRequestURI().replaceAll("[\r\n]", "_"));
 
         String token = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
 
