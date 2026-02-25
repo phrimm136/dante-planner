@@ -256,6 +256,12 @@ export function BatchConflictDialog({
                   {' | '}
                   {t('pages.plannerMD.batchConflict.serverModified', 'Server')}: {formatDate(conflict.serverPlanner.metadata.lastModifiedAt)}
                 </p>
+                {/* Notification that copy won't be published */}
+                {conflict.localPlanner.metadata.published && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
+                  </p>
+                )}
                 {/* Buttons */}
                 <div className="flex gap-1">
                   <ChoiceButton
