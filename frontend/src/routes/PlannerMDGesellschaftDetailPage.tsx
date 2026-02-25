@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useRef } from 'react'
 import { Link, useNavigate, useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
@@ -16,7 +16,6 @@ import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery } from '@/hooks/usePublishedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { usePlannerViewMutation } from '@/hooks/usePlannerViewMutation'
 import { useMDGesellschaftFilters } from '@/hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -56,7 +55,6 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { t } = useTranslation(['planner', 'common'])
   const navigate = useNavigate()
   const commentsRef = useRef<HTMLDivElement>(null)
-  const viewRecordedRef = useRef<string | null>(null)
 
   // Load published planner from API via Suspense query
   // Returns both apiData (for header/footer) and planner (for viewer)
@@ -68,16 +66,6 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
 
   // URL search params for list section
   const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
-
-  // Record view on page load (fire-and-forget, backend handles deduplication)
-  // Use ref to prevent StrictMode double-invocation and component remount duplicates
-  const recordView = usePlannerViewMutation()
-
-  useEffect(() => {
-    if (viewRecordedRef.current === plannerId) return
-    viewRecordedRef.current = plannerId
-    recordView.mutate(plannerId)
-  }, [plannerId])
 
   // Determine ownership by comparing author username with current user's username
   const isOwner = isAuthenticated && user !== null && (

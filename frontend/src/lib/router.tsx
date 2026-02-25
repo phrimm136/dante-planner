@@ -6,8 +6,10 @@ import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/GlobalLayout'
 import i18n from '@/lib/i18n'
 import { ApiClient } from '@/lib/api'
+import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
+import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/hooks/usePublishedPlannerQuery'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
@@ -193,8 +195,12 @@ const plannerMDGesellschaftDetailRoute = createRoute({
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
   },
   loader: async ({ params }) => {
-    const data = await ApiClient.get(`/api/planner/md/published/${params.id}`)
-    return { title: (data as { title?: string }).title || getUntitledPlaceholder() }
+    const result = await queryClient.fetchQuery({
+      queryKey: publishedPlannerQueryKeys.detail(params.id),
+      queryFn: () => fetchPublishedPlanner(params.id),
+      staleTime: 5 * 60 * 1000,
+    })
+    return { title: result.apiData.title || getUntitledPlaceholder() }
   },
   head: ({ loaderData }) => ({
     meta: [{ title: `${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],

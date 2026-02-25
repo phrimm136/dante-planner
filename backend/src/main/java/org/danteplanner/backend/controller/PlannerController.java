@@ -401,48 +401,28 @@ public class PlannerController {
     }
 
     /**
-     * Record a view for a published planner and return updated view count.
-     *
-     * <p>This endpoint is public and does not require authentication.
-     * Views are deduplicated daily based on UTC date: same viewer on same UTC day counts once.
-     * For authenticated users, deduplication is based on userId.
-     * For anonymous users, deduplication is based on IP + User-Agent hash.</p>
-     *
-     * @param request the HTTP request (for IP and User-Agent extraction)
-     * @param userId  optional authenticated user ID (null for anonymous)
-     * @param id      the planner ID to record view for
-     * @return ViewCountResponse with updated count, or 404 if planner not found/not published
-     */
-    @PostMapping("/{id}/view")
-    public ResponseEntity<ViewCountResponse> recordView(
-            HttpServletRequest request,
-            @AuthenticationPrincipal Long userId,
-            @PathVariable UUID id) {
-
-        String clientIp = ClientIpResolver.resolve(request, securityProperties);
-        String userAgent = request.getHeader("User-Agent");
-        log.debug("Recording view for planner {} from IP {}", id, clientIp);
-        int viewCount = plannerService.recordView(id, userId, clientIp, userAgent);
-        return ResponseEntity.ok(new ViewCountResponse(viewCount));
-    }
-
-    /**
      * Get a single published planner by ID.
      *
      * <p>This endpoint is public and does not require authentication.
+     * Records a view for the planner in the same request (daily deduplication applies).
+     * The response includes the already-updated view count.
      * If the user is authenticated, includes their vote, bookmark, and subscription state.</p>
      *
-     * @param id     the planner ID
-     * @param userId optional authenticated user ID (null for anonymous)
-     * @return the public planner response with user context
+     * @param request the HTTP request (for IP and User-Agent extraction used in view deduplication)
+     * @param id      the planner ID
+     * @param userId  optional authenticated user ID (null for anonymous)
+     * @return the public planner response with user context and updated view count
      */
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
+            HttpServletRequest request,
             @PathVariable UUID id,
             @AuthenticationPrincipal Long userId) {
 
+        String clientIp = ClientIpResolver.resolve(request, securityProperties);
+        String userAgent = request.getHeader("User-Agent");
         log.debug("Fetching published planner {} for userId {}", id, userId);
-        PublishedPlannerDetailResponse response = plannerService.getPublishedPlanner(id, userId);
+        PublishedPlannerDetailResponse response = plannerService.getPublishedPlanner(id, userId, clientIp, userAgent);
         return ResponseEntity.ok(response);
     }
 
