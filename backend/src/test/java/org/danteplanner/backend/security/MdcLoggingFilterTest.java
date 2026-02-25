@@ -52,7 +52,7 @@ class MdcLoggingFilterTest {
     class ShouldNotFilterTests {
 
         @Test
-        @DisplayName("Returns true for ASYNC dispatch — avoids spurious requestId on SSE continuations")
+        @DisplayName("Returns true for ASYNC dispatch — avoids double MDC population on SSE continuations")
         void shouldNotFilter_asyncDispatch_returnsTrue() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.ASYNC);
 
@@ -183,24 +183,6 @@ class MdcLoggingFilterTest {
                     .isEqualTo("/api/planner__FAKE LOG ENTRY");
         }
 
-        @Test
-        @DisplayName("requestId is a valid UUID")
-        void doFilterInternal_requestId_isValidUuid() throws Exception {
-            when(request.getMethod()).thenReturn("GET");
-            when(request.getRequestURI()).thenReturn("/api/planner/md/published");
-
-            String[] capturedRequestId = new String[1];
-            doAnswer(invocation -> {
-                capturedRequestId[0] = MDC.get("requestId");
-                return null;
-            }).when(filterChain).doFilter(request, response);
-
-            filter.doFilterInternal(request, response, filterChain);
-
-            assertThat(capturedRequestId[0])
-                    .isNotNull()
-                    .matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
-        }
     }
 
     @Nested
@@ -215,7 +197,7 @@ class MdcLoggingFilterTest {
 
             boolean[] wasPopulatedDuringChain = {false};
             doAnswer(invocation -> {
-                wasPopulatedDuringChain[0] = MDC.get("requestId") != null;
+                wasPopulatedDuringChain[0] = MDC.get("path") != null;
                 return null;
             }).when(filterChain).doFilter(request, response);
 

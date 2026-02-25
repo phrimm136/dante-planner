@@ -79,6 +79,9 @@ class JwtAuthenticationFilterTest {
         objectMapper = new ObjectMapper();
         filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator);
         SecurityContextHolder.clearContext();
+        // doFilterInternal now reads method+path at the top for MDC — stub to avoid NPE
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getRequestURI()).thenReturn("/test");
     }
 
     private TokenClaims createValidClaims(Long userId) {
