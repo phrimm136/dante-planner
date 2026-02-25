@@ -13,11 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.UUID;
 
 /**
  * Populates SLF4J MDC with per-request context so every WARN/ERROR log entry
- * automatically carries requestId, userId, method, and path.
+ * automatically carries userId, method, and path.
  * Must run after JwtAuthenticationFilter so SecurityContext is populated.
  */
 @Component
@@ -27,8 +26,7 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
     /**
      * Skip MDC population for ASYNC dispatch (SSE continuations).
      * MDC is thread-local; async continuations run on a different thread
-     * where the MDC is already empty. Re-running would generate a spurious
-     * second requestId.
+     * where the MDC is already empty.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -43,7 +41,6 @@ public class MdcLoggingFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        MDC.put("requestId", UUID.randomUUID().toString());
         if (authentication != null && authentication.getPrincipal() instanceof Long) {
             MDC.put("userId", String.valueOf(authentication.getPrincipal()));
         } else {
