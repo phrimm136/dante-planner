@@ -32,13 +32,16 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
     echo "Test/typecheck/build output should be redirected to /tmp" >&2
     echo "and use grep for analysis." >&2
     echo "" >&2
-    echo "Pattern:" >&2
+    echo "Test Pattern:" >&2
     echo "  yarn test run 2>&1 > /tmp/fe-test-\$(date +%Y%m%d-%H%M%S).txt; echo \"EXIT: $?\"" >&2
     echo "  yarn typecheck 2>&1 > /tmp/fe-typecheck-\$(date +%Y%m%d-%H%M%S).txt; echo \"EXIT: $?\"" >&2
     echo "  yarn build 2>&1 > /tmp/fe-build-\$(date +%Y%m%d-%H%M%S).txt; echo \"EXIT: $?\"" >&2
+    echo "Read Patthern:" >&2
+    echo "ls /tmp/<prefix>*.txt | sort | tail -1 | xargs grep -E \"<pattern>\" | tail -20" >&2
     echo "" >&2
     echo "WHY: Large output gets truncated in stdout." >&2
     echo "Redirecting to /tmp preserves full output for analysis." >&2
+    echo "And it prevents the session from repetitively running tests to get test context" >&2
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
 
     exit 2
