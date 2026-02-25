@@ -39,6 +39,61 @@ export const publishedPlannerQueryKeys = {
 }
 
 // ============================================================================
+// Query Function (exported for use in route loaders)
+// ============================================================================
+
+/**
+ * Fetches a published planner by ID and parses it into the query result shape.
+ * Exported so route loaders can prefetch into the TanStack Query cache,
+ * preventing a duplicate network request when the component mounts.
+ */
+export async function fetchPublishedPlanner(plannerId: string): Promise<PublishedPlannerQueryResult> {
+  const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
+  const result = PublishedPlannerDetailSchema.safeParse(data)
+
+  if (!result.success) {
+    console.error('Published planner response validation failed:', result.error)
+    throw new Error('Invalid published planner response from server')
+  }
+
+  const apiData = result.data
+
+  // Parse content JSON and construct SaveablePlanner
+  // Server is trusted source - no frontend validation needed
+  const contentData = JSON.parse(apiData.content)
+  const metadata = {
+    id: apiData.id,
+    title: apiData.title,
+    status: apiData.status,
+    schemaVersion: apiData.schemaVersion,
+    contentVersion: apiData.contentVersion,
+    plannerType: apiData.plannerType,
+    syncVersion: apiData.syncVersion,
+    createdAt: apiData.createdAt,
+    lastModifiedAt: apiData.lastModifiedAt ?? apiData.createdAt,
+    savedAt: apiData.createdAt,
+    userId: null,
+    deviceId: apiData.deviceId ?? 'published',
+    published: true,
+  }
+
+  // Type narrowing based on plannerType
+  const planner: SaveablePlanner = apiData.plannerType === 'MIRROR_DUNGEON'
+    ? {
+        metadata,
+        config: { type: 'MIRROR_DUNGEON', category: apiData.category },
+        content: contentData as MDPlannerContent,
+      }
+    : {
+        metadata,
+        config: { type: 'REFRACTED_RAILWAY', category: apiData.category as RRCategory },
+        content: contentData as RRPlannerContent,
+      }
+
+  return { apiData, planner }
+}
+
+// ============================================================================
 // Main Hook
 // ============================================================================
 
@@ -67,51 +122,7 @@ export const publishedPlannerQueryKeys = {
 export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQueryResult {
   const query = useSuspenseQuery({
     queryKey: publishedPlannerQueryKeys.detail(plannerId),
-    queryFn: async (): Promise<PublishedPlannerQueryResult> => {
-      const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
-      const result = PublishedPlannerDetailSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Published planner response validation failed:', result.error)
-        throw new Error('Invalid published planner response from server')
-      }
-
-      const apiData = result.data
-
-      // Parse content JSON and construct SaveablePlanner
-      // Server is trusted source - no frontend validation needed
-      const contentData = JSON.parse(apiData.content)
-      const metadata = {
-        id: apiData.id,
-        title: apiData.title,
-        status: apiData.status,
-        schemaVersion: apiData.schemaVersion,
-        contentVersion: apiData.contentVersion,
-        plannerType: apiData.plannerType,
-        syncVersion: apiData.syncVersion,
-        createdAt: apiData.createdAt,
-        lastModifiedAt: apiData.lastModifiedAt ?? apiData.createdAt,
-        savedAt: apiData.createdAt,
-        userId: null,
-        deviceId: apiData.deviceId ?? 'published',
-        published: true,
-      }
-
-      // Type narrowing based on plannerType
-      const planner: SaveablePlanner = apiData.plannerType === 'MIRROR_DUNGEON'
-        ? {
-            metadata,
-            config: { type: 'MIRROR_DUNGEON', category: apiData.category },
-            content: contentData as MDPlannerContent,
-          }
-        : {
-            metadata,
-            config: { type: 'REFRACTED_RAILWAY', category: apiData.category as RRCategory },
-            content: contentData as RRPlannerContent,
-          }
-
-      return { apiData, planner }
-    },
+    queryFn: () => fetchPublishedPlanner(plannerId),
     staleTime: 5 * 60 * 1000, // 5 minutes - planner content changes infrequently
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   })

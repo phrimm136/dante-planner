@@ -783,67 +783,6 @@ public class PlannerService {
         log.debug("Incremented view count for planner {}", plannerId);
     }
 
-    /**
-     * Record a view for a published planner with daily deduplication.
-     * Same viewer (authenticated or anonymous) can only count once per day.
-     *
-     * @param plannerId the planner ID
-     * @param userId    authenticated user ID (null for anonymous)
-     * @param ipAddress viewer's IP address (used for anonymous viewers)
-     * @param userAgent viewer's User-Agent header (used for anonymous viewers)
-     * @throws PlannerNotFoundException if planner not found or not published
-     */
-    @Transactional
-    public int recordView(UUID plannerId, Long userId, String ipAddress, String userAgent) {
-        // Acquire exclusive lock on planner row FIRST to prevent deadlock
-        // This ensures consistent lock ordering: planners table → planner_views table
-        Planner planner = plannerRepository.findByIdForUpdate(plannerId)
-            .orElseThrow(() -> new PlannerNotFoundException(plannerId));
-
-        // Verify planner is published (only published planners can be viewed)
-        if (!Boolean.TRUE.equals(planner.getPublished())) {
-            throw new PlannerNotFoundException(plannerId);
-        }
-
-        // Compute viewer hash based on authentication status
-        String viewerHash;
-        if (userId != null) {
-            viewerHash = ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId);
-        } else {
-            viewerHash = ViewerHashUtil.hashForAnonymousUser(ipAddress, userAgent, plannerId);
-        }
-
-        // Get current UTC date for daily deduplication
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
-
-        // Check if view already exists for today (deduplication based on UTC date)
-        if (plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(plannerId, viewerHash, today)) {
-            log.debug("Duplicate view for planner {} by viewer hash {} on {}", plannerId, viewerHash.substring(0, 8), today);
-            return planner.getViewCount();
-        }
-
-        // Record new view - will flush at transaction commit
-        // Pessimistic lock ensures concurrent requests wait for commit
-        // Wrap in try-catch to handle race condition from duplicate key constraint
-        try {
-            PlannerView view = new PlannerView(plannerId, viewerHash, today);
-            plannerViewRepository.save(view);
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            // Duplicate key - another request already inserted this view (race condition)
-            // This is expected and safe to ignore - the view was counted by the other request
-            log.debug("Race condition: duplicate view for planner {} by viewer hash {} - ignoring",
-                    plannerId, viewerHash.substring(0, 8));
-            return planner.getViewCount();
-        }
-
-        // Atomically increment view count
-        plannerRepository.incrementViewCount(plannerId);
-        log.debug("Recorded new view for planner {} by viewer hash {}", plannerId, viewerHash.substring(0, 8));
-
-        // Return updated count (optimistic - planner entity not refreshed, but we know it incremented by 1)
-        return planner.getViewCount() + 1;
-    }
-
     // ==================== User Context Methods ====================
 
     /**
@@ -966,17 +905,53 @@ public class PlannerService {
     }
 
     /**
-     * Get a single published planner with full content and user context.
+     * Get a single published planner with full content, user context, and view recording.
+     *
+     * <p>Records a view in the same transaction using daily deduplication:
+     * same viewer (by userId or IP+UA hash) counts at most once per UTC day.
+     * The response reflects the already-updated view count so no follow-up
+     * refetch is needed by the caller.</p>
      *
      * @param plannerId the planner ID
      * @param userId    optional user ID for vote/bookmark/subscription context (null for anonymous)
-     * @return the published planner detail response with content and user context
+     * @param clientIp  viewer's IP address (used for anonymous deduplication)
+     * @param userAgent viewer's User-Agent header (used for anonymous deduplication)
+     * @return the published planner detail response with content, user context, and updated view count
      * @throws PlannerNotFoundException if planner not found or not published
      */
-    @Transactional(readOnly = true)
-    public PublishedPlannerDetailResponse getPublishedPlanner(UUID plannerId, Long userId) {
-        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+    @Transactional
+    public PublishedPlannerDetailResponse getPublishedPlanner(
+            UUID plannerId, Long userId, String clientIp, String userAgent) {
+        // Acquire write lock upfront — consistent lock ordering prevents deadlock
+        // with concurrent view increments (planners → planner_views)
+        Planner planner = plannerRepository.findByIdForUpdate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        if (!Boolean.TRUE.equals(planner.getPublished())) {
+            throw new PlannerNotFoundException(plannerId);
+        }
+
+        // Record view with daily deduplication
+        String viewerHash = userId != null
+                ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
+                : ViewerHashUtil.hashForAnonymousUser(clientIp, userAgent, plannerId);
+
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        int viewCount = planner.getViewCount();
+
+        if (!plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(plannerId, viewerHash, today)) {
+            try {
+                plannerViewRepository.save(new PlannerView(plannerId, viewerHash, today));
+                plannerRepository.incrementViewCount(plannerId);
+                viewCount = planner.getViewCount() + 1;
+                log.debug("Recorded new view for planner {} by viewer hash {}", plannerId, viewerHash.substring(0, 8));
+            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                // Race condition: another concurrent request already inserted this view
+                log.debug("Race condition: duplicate view for planner {} - ignoring", plannerId);
+            }
+        } else {
+            log.debug("Duplicate view for planner {} by viewer hash {} on {}", plannerId, viewerHash.substring(0, 8), today);
+        }
 
         // Get comment count (excluding soft-deleted comments)
         long commentCount = commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId);
@@ -991,7 +966,7 @@ public class PlannerService {
 
         if (userId == null) {
             return PublishedPlannerDetailResponse.fromEntity(
-                    planner, null, null, null, null, commentCount, ownerNotificationsEnabled);
+                    planner, null, null, null, null, commentCount, ownerNotificationsEnabled, viewCount);
         }
 
         Boolean hasUpvoted = hasUpvoted(plannerId, userId);
@@ -1001,7 +976,7 @@ public class PlannerService {
 
         return PublishedPlannerDetailResponse.fromEntity(
                 planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,
-                commentCount, ownerNotificationsEnabled);
+                commentCount, ownerNotificationsEnabled, viewCount);
     }
 
     /**

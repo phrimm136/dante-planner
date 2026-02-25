@@ -69,6 +69,24 @@ public class PublishedPlannerDetailResponse {
             Boolean hasReported,
             Long commentCount,
             Boolean ownerNotificationsEnabled) {
+        return fromEntity(planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,
+                commentCount, ownerNotificationsEnabled, planner.getViewCount());
+    }
+
+    /**
+     * Create a PublishedPlannerDetailResponse with an explicit view count.
+     * Used when the view count has been updated atomically in the same request
+     * (the in-memory entity still holds the pre-increment value).
+     */
+    public static PublishedPlannerDetailResponse fromEntity(
+            Planner planner,
+            Boolean hasUpvoted,
+            Boolean isBookmarked,
+            Boolean isSubscribed,
+            Boolean hasReported,
+            Long commentCount,
+            Boolean ownerNotificationsEnabled,
+            int viewCount) {
         return PublishedPlannerDetailResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -78,7 +96,7 @@ public class PublishedPlannerDetailResponse {
                 .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
                 .upvotes(planner.getUpvotes())
-                .viewCount(planner.getViewCount())
+                .viewCount(viewCount)
                 .createdAt(planner.getCreatedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .hasUpvoted(hasUpvoted)
