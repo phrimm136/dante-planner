@@ -50,6 +50,7 @@ export function PersonalPlannerList({
     pendingConflicts,
     resolveConflicts,
     isResolvingConflicts,
+    conflictResolutionError,
   } = useMDUserPlannersData({
     category,
     page,
@@ -98,6 +99,7 @@ export function PersonalPlannerList({
         conflicts={pendingConflicts}
         onResolve={resolveConflicts}
         isResolving={isResolvingConflicts}
+        error={conflictResolutionError}
       />
 
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
