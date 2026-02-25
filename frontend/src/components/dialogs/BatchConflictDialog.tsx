@@ -46,6 +46,8 @@ export interface BatchConflictDialogProps {
   onResolve: (resolutions: ConflictResolution[]) => void
   /** Whether resolution is in progress */
   isResolving?: boolean
+  /** Validation error from last resolution attempt (i18n key + optional params) */
+  error?: { key: string; params?: Record<string, string> } | null
 }
 
 /**
@@ -90,6 +92,7 @@ export function BatchConflictDialog({
   conflicts,
   onResolve,
   isResolving = false,
+  error = null,
 }: BatchConflictDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
 
@@ -276,7 +279,12 @@ export function BatchConflictDialog({
           })}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col">
+          {error && (
+            <p className="text-sm text-destructive">
+              {t(error.key, { ns: 'planner', ...error.params })}
+            </p>
+          )}
           <Button onClick={handleResolveAll} disabled={isResolving}>
             {t('pages.plannerMD.batchConflict.resolveAll', 'Resolve All')}
           </Button>
