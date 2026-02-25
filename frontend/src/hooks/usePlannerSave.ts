@@ -356,6 +356,19 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   /**
+   * Throws a user-friendly validation error with i18n key and params.
+   * Used in both performSave and resolveConflict to surface validation failures.
+   */
+  const throwValidationError = (friendly: { key: string; params?: Record<string, string> }) => {
+    const errorMessage = JSON.stringify({ key: friendly.key, params: friendly.params })
+    const error = new Error(errorMessage)
+    ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).code = 'userFriendlyValidation'
+    ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nKey = friendly.key
+    ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nParams = friendly.params
+    throw error
+  }
+
+  /**
    * Core save logic for manual save
    * - Always saves to IndexedDB via SaveAdapter
    * - If authenticated AND syncEnabled, also syncs to server via SyncAdapter
@@ -390,15 +403,6 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     // Two-tier validation for MD planners (non-strict for draft, strict for published)
     if (plannerType === 'MIRROR_DUNGEON') {
-      const throwValidationError = (friendly: { key: string; params?: Record<string, string> }) => {
-        const errorMessage = JSON.stringify({ key: friendly.key, params: friendly.params })
-        const error = new Error(errorMessage)
-        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).code = 'userFriendlyValidation'
-        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nKey = friendly.key
-        ;(error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }).i18nParams = friendly.params
-        throw error
-      }
-
       const content = saveable.content as MDPlannerContent
 
       if (isCurrentlyPublished) {
@@ -658,6 +662,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           false, // new copy is not published
           'saved' // mark as saved since we're syncing immediately
         )
+
+        // Validate copy content before saving/syncing (same content as currentState)
+        if (plannerType === 'MIRROR_DUNGEON' && egoGiftSpec) {
+          const content = newPlanner.content as MDPlannerContent
+          const validationError = validatePlannerUserFriendly(content, currentState.category, egoGiftSpec, egoGiftI18n)
+          if (validationError) throwValidationError(validationError)
+        }
 
         // Track whether copy was saved for cleanup on failure
         let copySavedToLocal = false

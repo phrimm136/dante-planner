@@ -18,8 +18,10 @@ import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useAuthQuery } from './useAuthQuery'
 import { useUserSettingsQuery } from './useUserSettings'
+import { useEGOGiftListData } from './useEGOGiftListData'
+import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
 
-import type { PlannerSummary, SaveablePlanner } from '@/types/PlannerTypes'
+import type { PlannerSummary, SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 import type { ConflictItem, ConflictResolution } from '@/components/dialogs/BatchConflictDialog'
 import type { MDCategory } from '@/lib/constants'
 
@@ -75,6 +77,8 @@ export interface MDUserPlannersResult {
   resolveConflicts: (resolutions: ConflictResolution[]) => Promise<void>
   /** Whether conflict resolution is in progress */
   isResolvingConflicts: boolean
+  /** Validation or sync error from last conflict resolution attempt */
+  conflictResolutionError: { key: string; params?: Record<string, string> } | null
 }
 
 // ============================================================================
@@ -138,6 +142,10 @@ export function useMDUserPlannersData(
   // Conflict resolution state
   const [pendingConflicts, setPendingConflicts] = useState<ConflictItem[]>([])
   const [isResolvingConflicts, setIsResolvingConflicts] = useState(false)
+  const [conflictResolutionError, setConflictResolutionError] = useState<{ key: string; params?: Record<string, string> } | null>(null)
+
+  // EGO Gift spec for affordability validation in conflict resolution
+  const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   // Query: Local planners only (fast initial render)
   const { data: allPlanners } = useSuspenseQuery(
@@ -290,6 +298,31 @@ export function useMDUserPlannersData(
   }, [allPlanners, category, search, page])
 
   /**
+   * Validate a local planner's content before syncing to server.
+   * Mirrors performSave: strict when published, non-strict otherwise.
+   * Throws a typed error if invalid, to be caught by resolveConflicts outer catch.
+   */
+  const validateBeforeSync = (planner: SaveablePlanner) => {
+    if (planner.config.type !== 'MIRROR_DUNGEON' || !egoGiftSpec) return
+    const content = planner.content as MDPlannerContent
+    const { category } = planner.config
+    const { title, published } = planner.metadata
+
+    let friendlyError: { key: string; params?: Record<string, string> } | null = null
+
+    if (published) {
+      const { isValid, errors } = validatePlannerForSave(title, content, category, egoGiftSpec, egoGiftI18n)
+      if (!isValid) friendlyError = toUserFriendlyError(errors[0])
+    } else {
+      friendlyError = validatePlannerUserFriendly(content, category, egoGiftSpec, egoGiftI18n)
+    }
+
+    if (friendlyError) {
+      throw Object.assign(new Error('validationFailed'), { code: 'validationFailed', friendlyError })
+    }
+  }
+
+  /**
    * Resolve batch conflicts based on user choices
    * Pattern: mirrors usePlannerSave.resolveConflict() but for multiple items
    */
@@ -297,64 +330,72 @@ export function useMDUserPlannersData(
     if (resolutions.length === 0) return
 
     setIsResolvingConflicts(true)
+    setConflictResolutionError(null)
 
     try {
       for (const resolution of resolutions) {
         const conflict = pendingConflicts.find((c) => c.id === resolution.id)
         if (!conflict) continue
 
-        try {
-          if (resolution.choice === 'overwrite') {
-            // Keep local draft, force push to server
-            await syncAdapter.syncToServer(conflict.localPlanner, true)
-            // Update local with saved status
-            const saved: SaveablePlanner = {
-              ...conflict.localPlanner,
-              metadata: {
-                ...conflict.localPlanner.metadata,
-                status: 'saved',
-                savedAt: new Date().toISOString(),
-              },
-            }
-            await saveAdapter.saveToLocal(saved)
-          } else if (resolution.choice === 'discard') {
-            // Use server version, discard local draft
-            await saveAdapter.saveToLocal(conflict.serverPlanner)
-          } else if (resolution.choice === 'both') {
-            // Keep both: create copy of local, then use server for original
-            const copyId = crypto.randomUUID()
-            const deviceId = await saveAdapter.getOrCreateDeviceId()
-            const copy: SaveablePlanner = {
-              ...conflict.localPlanner,
-              metadata: {
-                ...conflict.localPlanner.metadata,
-                id: copyId,
-                title: `${conflict.localPlanner.metadata.title} (Copy)`,
-                status: 'saved',
-                syncVersion: 1,
-                deviceId,
-                createdAt: new Date().toISOString(),
-                lastModifiedAt: new Date().toISOString(),
-                savedAt: new Date().toISOString(),
-              },
-            }
-            await saveAdapter.saveToLocal(copy)
-            await syncAdapter.syncToServer(copy)
-            // Use server version for original
-            await saveAdapter.saveToLocal(conflict.serverPlanner)
+        if (resolution.choice === 'overwrite') {
+          // Validate before syncing local draft to server
+          validateBeforeSync(conflict.localPlanner)
+          // Keep local draft, force push to server
+          await syncAdapter.syncToServer(conflict.localPlanner, true)
+          // Update local with saved status
+          const saved: SaveablePlanner = {
+            ...conflict.localPlanner,
+            metadata: {
+              ...conflict.localPlanner.metadata,
+              status: 'saved',
+              savedAt: new Date().toISOString(),
+            },
           }
-        } catch (error) {
-          console.error(`Failed to resolve conflict for ${resolution.id}:`, error)
+          await saveAdapter.saveToLocal(saved)
+        } else if (resolution.choice === 'discard') {
+          // Use server version, discard local draft
+          await saveAdapter.saveToLocal(conflict.serverPlanner)
+        } else if (resolution.choice === 'both') {
+          // Keep both: create copy of local, then use server for original
+          const copyId = crypto.randomUUID()
+          const deviceId = await saveAdapter.getOrCreateDeviceId()
+          const copy: SaveablePlanner = {
+            ...conflict.localPlanner,
+            metadata: {
+              ...conflict.localPlanner.metadata,
+              id: copyId,
+              title: `${conflict.localPlanner.metadata.title} (Copy)`,
+              status: 'saved',
+              syncVersion: 1,
+              deviceId,
+              createdAt: new Date().toISOString(),
+              lastModifiedAt: new Date().toISOString(),
+              savedAt: new Date().toISOString(),
+            },
+          }
+          // Validate copy before syncing (same content as localPlanner)
+          validateBeforeSync(copy)
+          await saveAdapter.saveToLocal(copy)
+          await syncAdapter.syncToServer(copy)
+          // Use server version for original
+          await saveAdapter.saveToLocal(conflict.serverPlanner)
         }
       }
 
-      // Clear conflicts and update cache directly (avoids re-suspension)
+      // Only clear conflicts after ALL resolutions succeed
       setPendingConflicts([])
       const updatedLocal = await saveAdapter.listLocal()
       queryClient.setQueryData(
         userPlannersQueryKeys.list(isAuthenticated),
         updatedLocal
       )
+    } catch (error) {
+      const e = error as { code?: string; friendlyError?: { key: string; params?: Record<string, string> } }
+      if (e.code === 'validationFailed' && e.friendlyError) {
+        setConflictResolutionError(e.friendlyError)
+      } else {
+        console.error('Conflict resolution failed:', error)
+      }
     } finally {
       setIsResolvingConflicts(false)
     }
@@ -368,6 +409,7 @@ export function useMDUserPlannersData(
     pendingConflicts,
     resolveConflicts,
     isResolvingConflicts,
+    conflictResolutionError,
   }
 }
 
