@@ -238,7 +238,8 @@
         "copySuffix": "{{title}} (コピー)",
         "overwriteSuccess": "変更がサーバーに保存されました",
         "discardSuccess": "サーバーバージョンを読み込みました",
-        "keepBothSuccess": "コピーが作成されました"
+        "keepBothSuccess": "コピーが作成されました",
+        "keepBothUnpublished": "コピーは公開されません"
       },
       "batchConflict": {
         "title": "別のデバイスで変更されました",

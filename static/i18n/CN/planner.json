@@ -237,7 +237,8 @@
         "copySuffix": "{{title}} (副本)",
         "overwriteSuccess": "更改已保存到服务器",
         "discardSuccess": "已加载服务器版本",
-        "keepBothSuccess": "副本已创建"
+        "keepBothSuccess": "副本已创建",
+        "keepBothUnpublished": "副本不会被公开"
       },
       "batchConflict": {
         "title": "在其他设备上已修改",

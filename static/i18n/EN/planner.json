@@ -238,7 +238,8 @@
         "copySuffix": "{{title}} (Copy)",
         "overwriteSuccess": "Server updated with your changes",
         "discardSuccess": "Server version loaded",
-        "keepBothSuccess": "Copy created successfully"
+        "keepBothSuccess": "Copy created successfully",
+        "keepBothUnpublished": "The copy will not be published"
       },
       "batchConflict": {
         "title": "Changed on Another Device",
