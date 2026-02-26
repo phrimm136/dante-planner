@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense, startTransition, useCallback, useRef } f
 import { useNavigate } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
 import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
+import { publishedPlannerQueryKeys } from '@/hooks/usePublishedPlannerQuery'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
@@ -487,6 +488,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       toast.success(t('pages.plannerMD.save.success'))
       queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
       if (isPublished) {
+        queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
         void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
       } else {
         void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
@@ -507,6 +509,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       toast.success(t('pages.plannerMD.save.success'))
       queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
       if (isPublished) {
+        queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
         void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
       } else {
         void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
@@ -536,6 +539,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       if (choice !== 'both') {
         queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
         if (isPublished) {
+          queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
           void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
         } else {
           void navigate({ to: '/planner/md/$id', params: { id: plannerId } })

@@ -16,6 +16,7 @@ import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery } from '@/hooks/usePublishedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useUserSettingsQuery } from '@/hooks/useUserSettings'
 import { useMDGesellschaftFilters } from '@/hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -64,6 +65,10 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { data: user } = useAuthQuery()
   const isAuthenticated = user !== null
 
+  // Get sync setting — needed for Apply Latest Mirror handler
+  const { data: userSettings } = useUserSettingsQuery()
+  const syncEnabled = userSettings?.syncEnabled
+
   // URL search params for list section
   const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
 
@@ -108,6 +113,8 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         planner={apiData}
         isOwner={isOwner}
         isAuthenticated={isAuthenticated}
+        syncEnabled={syncEnabled}
+        savedPlannerData={isOwner ? planner : undefined}
         onEdit={isOwner ? handleEdit : undefined}
         onCommentClick={scrollToComments}
       />
