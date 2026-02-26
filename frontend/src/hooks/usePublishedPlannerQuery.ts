@@ -73,7 +73,7 @@ export async function fetchPublishedPlanner(plannerId: string): Promise<Publishe
     lastModifiedAt: apiData.lastModifiedAt ?? apiData.createdAt,
     savedAt: apiData.createdAt,
     userId: null,
-    deviceId: apiData.deviceId ?? 'published',
+    deviceId: 'published',
     published: true,
   }
 

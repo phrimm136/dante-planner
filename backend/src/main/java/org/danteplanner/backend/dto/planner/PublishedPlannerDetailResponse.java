@@ -39,7 +39,6 @@ public class PublishedPlannerDetailResponse {
     private Integer contentVersion;
     private String status;
     private Long syncVersion;
-    private String deviceId;
 
     // Subscription and report status
     private Boolean isSubscribed;
@@ -106,7 +105,6 @@ public class PublishedPlannerDetailResponse {
                 .contentVersion(planner.getContentVersion())
                 .status(planner.getStatus())
                 .syncVersion(planner.getSyncVersion())
-                .deviceId(planner.getDeviceId())
                 .isSubscribed(isSubscribed)
                 .hasReported(hasReported)
                 .commentCount(commentCount)
