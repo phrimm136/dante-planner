@@ -282,6 +282,9 @@ public class PlannerService {
                 // Re-validate existing content against new category (strict if published)
                 contentValidator.validate(planner.getContent(), planner.getCategory(), planner.getPublished());
             }
+            if (req.getContentVersion() != null) {
+                planner.setContentVersion(req.getContentVersion());
+            }
             if (req.getSelectedKeywords() != null) {
                 planner.setSelectedKeywords(req.getSelectedKeywords());
             }

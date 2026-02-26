@@ -636,6 +636,23 @@ class PlannerControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @DisplayName("Should persist updated contentVersion on upsert update")
+        void updatePlanner_contentVersionUpdated_PersistsNewVersion() throws Exception {
+            Planner planner = createTestPlanner(testUser); // contentVersion = 6
+
+            UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
+            request.setContentVersion(7);
+
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.contentVersion").value(7));
+        }
     }
 
     @Nested

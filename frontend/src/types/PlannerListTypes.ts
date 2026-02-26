@@ -182,8 +182,6 @@ export interface PublishedPlannerDetail extends PublicPlanner {
   status: PlannerStatus
   /** Server sync version for optimistic locking */
   syncVersion: number
-  /** Device identifier (optional) */
-  deviceId?: string
   /** Subscription status for authenticated users (null if not authenticated) */
   isSubscribed: boolean | null
   /** Report status for authenticated users (null if not authenticated) */
