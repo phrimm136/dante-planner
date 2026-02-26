@@ -124,6 +124,12 @@ export function ConflictResolutionDialog({
           </div>
         )}
 
+        {(localPlanner?.metadata.published || serverPlanner?.metadata.published) && (
+          <p className="text-xs text-muted-foreground">
+            {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
+          </p>
+        )}
+
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"

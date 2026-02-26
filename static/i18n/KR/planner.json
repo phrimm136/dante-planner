@@ -238,7 +238,8 @@
         "copySuffix": "{{title}} (복사본)",
         "overwriteSuccess": "변경사항이 서버에 저장되었습니다",
         "discardSuccess": "서버 버전을 불러왔습니다",
-        "keepBothSuccess": "복사본이 생성되었습니다"
+        "keepBothSuccess": "복사본이 생성되었습니다",
+        "keepBothUnpublished": "복사본은 공개되지 않습니다"
       },
       "batchConflict": {
         "title": "다른 기기에서 변경되었습니다",
