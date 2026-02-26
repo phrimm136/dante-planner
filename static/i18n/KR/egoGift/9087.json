@@ -2,8 +2,8 @@
   "name": "타오르는 지성",
   "descs": [
     "[Combustion] 효과로 적을 처치하였다면 다음 턴 시작 시, [Combustion] 위력을 부여하는 스킬을 보유한 아군 인격 둘이 [AttackDmgUp] 1 얻음.",
-    "[Combustion] 효과로 적을 처치하였다면 다음 턴 시작 시, [Combustion] 위력을 부여하는 스킬을 보유한 아군 인격 둘이 <style=\"upgradeHighlight\">[AttackDmgUp] 2 얻음.</style>",
-    "[Combustion] 효과로 적을 처치하였다면 다음 턴 시작 시, [Combustion] 위력을 부여하는 스킬을 보유한 <style=\"upgradeHighlight\">아군 인격 셋</style>이 [AttackDmgUp] 2 얻음."
+    "[Combustion] 효과로 적을 처치하였다면 다음 턴 시작 시, [Combustion] 위력을 부여하는 스킬을 보유한 아군 인격 둘이 [AttackDmgUp] 2 얻음.",
+    "[Combustion] 효과로 적을 처치하였다면 다음 턴 시작 시, [Combustion] 위력을 부여하는 스킬을 보유한 아군 인격 셋이 [AttackDmgUp] 2 얻음."
   ],
   "obtain": "Shop"
 }

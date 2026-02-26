@@ -2,8 +2,8 @@
   "name": "Clasped Sculpture",
   "descs": [
     "[Effects apply only to #3, #4 Deployed Identities]\n\nIf there are 2+ remaining Coins after a Clash using a Blunt Skill, deal +10% damage; if there are 3+ remaining Coins, deal +20% damage; if there are 4+ remaining Coins, deal +40% damage.",
-    "[Effects apply only to #3, #4, and <style=\"upgradeHighlight\">#5</style> Deployed Identities]\n\nIf there are 2+ remaining Coins after a Clash using a Blunt Skill, deal +10% damage; if there are 3+ remaining Coins, deal +20% damage; if there are 4+ remaining Coins, deal +40% damage.",
-    "[Effects apply only to #3, #4, #5, and <style=\"upgradeHighlight\">#6</style> Deployed Identities]\n\nIf there are 2+ remaining Coins after a Clash using a Blunt Skill, deal <style=\"upgradeHighlight\">+12.5%</style> damage; if there are 3+ remaining Coins, deal <style=\"upgradeHighlight\">+25%</style> damage; if there are 4+ remaining Coins, deal <style=\"upgradeHighlight\">+50%</style> damage."
+    "[Effects apply only to #3, #4, and #5 Deployed Identities]\n\nIf there are 2+ remaining Coins after a Clash using a Blunt Skill, deal +10% damage; if there are 3+ remaining Coins, deal +20% damage; if there are 4+ remaining Coins, deal +40% damage.",
+    "[Effects apply only to #3, #4, #5, and #6 Deployed Identities]\n\nIf there are 2+ remaining Coins after a Clash using a Blunt Skill, deal +12.5% damage; if there are 3+ remaining Coins, deal +25% damage; if there are 4+ remaining Coins, deal +50% damage."
   ],
   "obtain": "Shop"
 }

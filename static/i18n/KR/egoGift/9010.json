@@ -2,8 +2,8 @@
   "name": "블러디 가젯",
   "descs": [
     "턴 시작 시, 무작위 아군 하나가 [AttackDmgUp] 2 얻음.\n\n색욕 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 [AttackDmgUp] 1 추가로 얻음.",
-    "턴 시작 시, 무작위 아군 하나가 [AttackDmgUp] 2 얻음.\n\n색욕 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 <style=\"upgradeHighlight\">[AttackDmgUp] 2</style> 추가로 얻음.",
-    "턴 시작 시, <style=\"upgradeHighlight\">무작위 아군 둘</style>이 [AttackDmgUp] 2 얻음.\n\n색욕 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 [AttackDmgUp] 2 추가로 얻음."
+    "턴 시작 시, 무작위 아군 하나가 [AttackDmgUp] 2 얻음.\n\n색욕 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 [AttackDmgUp] 2 추가로 얻음.",
+    "턴 시작 시, 무작위 아군 둘이 [AttackDmgUp] 2 얻음.\n\n색욕 속성 공격 스킬을 보유한 아군에게 우선으로 적용되며, 이 경우에는 [AttackDmgUp] 2 추가로 얻음."
   ],
   "obtain": "Shop"
 }

@@ -2,8 +2,8 @@
   "name": "White Gossypium",
   "descs": [
     "Turn Start: If there are Staggered enemies, un-Stagger enemies. Then, inflict (8 + Stagger LV x 4) [Laceration] Potency and (8 + Stagger LV x4)/2 [AttackDown] on them. (Activates once per enemy per Encounter. Does not activate against certain enemies that do not recover from Stagger)",
-    "Turn Start: If there are Staggered enemies, un-Stagger enemies. Then, inflict <style=\"upgradeHighlight\">(10 + Stagger LV x 5) [Laceration] Potency</style> and <style=\"upgradeHighlight\">(10 + Stagger LV x 5)</style> [AttackDown]. (Activates once per enemy per Encounter. Does not activate against certain enemies that do not recover from Stagger)",
-    "Turn Start: If there are Staggered enemies, un-Stagger enemies. Then, inflict <style=\"upgradeHighlight\">(12 + Stagger LV x 6) [Laceration] Potency</style> and <style=\"upgradeHighlight\">(12 + Stagger LV x 6)</style> [AttackDown] and <style=\"upgradeHighlight\">[DefenseDown]</style> on them. (Activates once per enemy per Encounter. Does not activate against certain enemies that do not recover from Stagger)"
+    "Turn Start: If there are Staggered enemies, un-Stagger enemies. Then, inflict (10 + Stagger LV x 5) [Laceration] Potency and (10 + Stagger LV x 5) [AttackDown]. (Activates once per enemy per Encounter. Does not activate against certain enemies that do not recover from Stagger)",
+    "Turn Start: If there are Staggered enemies, un-Stagger enemies. Then, inflict (12 + Stagger LV x 6) [Laceration] Potency and (12 + Stagger LV x 6) [AttackDown] and [DefenseDown] on them. (Activates once per enemy per Encounter. Does not activate against certain enemies that do not recover from Stagger)"
   ],
   "obtain": "Shop"
 }

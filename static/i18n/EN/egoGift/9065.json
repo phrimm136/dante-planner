@@ -2,8 +2,8 @@
   "name": "Artistic Sense",
   "descs": [
     "Deal +35% damage against enemies suffering negative effects (Low Morale, Panic) from SP loss.\n\nIf the Skill inflicts [Sinking] Potency or Count(including Unique 'Sinking'), deal +10% damage in addition to the above.\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective.",
-    "<style=\"upgradeHighlight\">Deal +40% damage against enemies with less than 0 SP.</style>\n\nIf the Skill inflicts [Sinking] Potency or Count(including Unique 'Sinking'), deal +<style=\"upgradeHighlight\">10</style>% damage in addition to the above.\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective.",
-    "<style=\"upgradeHighlight\">Deal +50% damage against enemies without SP or with less than 0 SP.</style>\n\nIf the Skill inflicts [Sinking] Potency or Count(including Unique 'Sinking'), deal +<style=\"upgradeHighlight\">10</style>% damage in addition to the above.\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective."
+    "Deal +40% damage against enemies with less than 0 SP.\n\nIf the Skill inflicts [Sinking] Potency or Count(including Unique 'Sinking'), deal +10% damage in addition to the above.\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective.",
+    "Deal +50% damage against enemies without SP or with less than 0 SP.\n\nIf the Skill inflicts [Sinking] Potency or Count(including Unique 'Sinking'), deal +10% damage in addition to the above.\n\nWhen [Sinking]'s effect applies to enemies without Sanity, the Affinity of the damage inflicted changes to whatever is the most effective."
   ],
   "obtain": "Shop"
 }

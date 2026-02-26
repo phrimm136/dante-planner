@@ -2,8 +2,8 @@
   "name": "재에서 재로",
   "descs": [
     "전투 시작 시 모든 적(환상체일 경우, 모든 부위)이 [Combustion] 또는 특수 화상에 걸린 경우, 적 전체(환상체일 경우, 모든 부위)에게 [Combustion] 위력 2 부여.",
-    "전투 시작 시 <style=\"upgradeHighlight\">[Combustion] 또는 특수 화상에 걸린 적 전체(환상체일 경우, 모든 부위)에게</style> [Combustion] 위력 2 부여.",
-    "전투 시작 시 적 <style=\"upgradeHighlight\">전체(환상체일 경우, 모든 부위)에게 [Combustion] 위력 3</style> 부여."
+    "전투 시작 시 [Combustion] 또는 특수 화상에 걸린 적 전체(환상체일 경우, 모든 부위)에게 [Combustion] 위력 2 부여.",
+    "전투 시작 시 적 전체(환상체일 경우, 모든 부위)에게 [Combustion] 위력 3 부여."
   ],
   "obtain": "Shop"
 }

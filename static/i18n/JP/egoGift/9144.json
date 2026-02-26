@@ -2,8 +2,8 @@
   "name": "かつての祝福",
   "descs": [
     "[編成6番人格専用効果]\n\n貫通スキルを使用して敵に的中したとき、次のターンに[Agility]1, [PenetrateDamageUp]1を得る(1ターンにつき1回)\n\n該当スキルで敵を討伐時、次のターンに[Agility]1を追加で得る(1ターンにつき1回)",
-    "[編成<style=\"upgradeHighlight\">5</style>・6番人格専用効果]\n\n貫通スキルを使用して敵に的中したとき、次のターンに[Agility]1, [PenetrateDamageUp]1を得る(人格ごとに1ターンにつき1回)\n\n該当スキルで敵を討伐時、次のターンに[Agility]1, <style=\"upgradeHighlight\">[PenetrateDamageUp] 1</style>を追加で得る(人格ごとに1ターンにつき1回)",
-    "[編成5・6番人格専用効果]\n\n貫通スキルを使用して敵に的中したとき、次のターンに[Agility]1, [PenetrateDamageUp]1を得る(人格ごとに1ターンにつき<style=\"upgradeHighlight\">2</style>回)\n\n該当スキルで敵を討伐時、次のターンに[Agility]1, [PenetrateDamageUp]<style=\"upgradeHighlight\">2</style>を追加で得る(人格ごとに1ターンにつき1回)"
+    "[編成5・6番人格専用効果]\n\n貫通スキルを使用して敵に的中したとき、次のターンに[Agility]1, [PenetrateDamageUp]1を得る(人格ごとに1ターンにつき1回)\n\n該当スキルで敵を討伐時、次のターンに[Agility]1, [PenetrateDamageUp] 1を追加で得る(人格ごとに1ターンにつき1回)",
+    "[編成5・6番人格専用効果]\n\n貫通スキルを使用して敵に的中したとき、次のターンに[Agility]1, [PenetrateDamageUp]1を得る(人格ごとに1ターンにつき2回)\n\n該当スキルで敵を討伐時、次のターンに[Agility]1, [PenetrateDamageUp]2を追加で得る(人格ごとに1ターンにつき1回)"
   ],
   "obtain": "Shop"
 }

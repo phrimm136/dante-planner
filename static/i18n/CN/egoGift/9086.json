@@ -2,8 +2,8 @@
   "name": "残响",
   "descs": [
     "回合结束时，对[Vibration]强度不低于10级的全体敌方单位(或异想体的对应部位)在下回合施加2层[Binding]。若该单位的[Vibration]强度不低于20级，则改为施加2层[Binding]与1层[Paralysis]。",
-    "回合结束时，对[Vibration]强度不低于<style=\"upgradeHighlight\">8</style>级的全体敌方单位(或异想体的对应部位)在下回合施加2层[Binding]与<style=\"upgradeHighlight\">2层[DefenseDown]</style>。若该单位的[Vibration]强度不低于<style=\"upgradeHighlight\">15</style>级，则改为施加2层[Binding]，1层[Paralysis]，以及<style=\"upgradeHighlight\">2层[DefenseDown]</style>。",
-    "回合结束时，对[Vibration]强度不低于<style=\"upgradeHighlight\">5</style>级的全体敌方单位(或异想体的对应部位)在下回合施加2层[Binding]与<style=\"upgradeHighlight\">3层[DefenseDown]</style>。若该单位的[Vibration]强度不低于<style=\"upgradeHighlight\">10</style>级，则改为施加2层[Binding]，1层[Paralysis]，以及<style=\"upgradeHighlight\">4层[DefenseDown]</style>。"
+    "回合结束时，对[Vibration]强度不低于8级的全体敌方单位(或异想体的对应部位)在下回合施加2层[Binding]与2层[DefenseDown]。若该单位的[Vibration]强度不低于15级，则改为施加2层[Binding]，1层[Paralysis]，以及2层[DefenseDown]。",
+    "回合结束时，对[Vibration]强度不低于5级的全体敌方单位(或异想体的对应部位)在下回合施加2层[Binding]与3层[DefenseDown]。若该单位的[Vibration]强度不低于10级，则改为施加2层[Binding]，1层[Paralysis]，以及4层[DefenseDown]。"
   ],
   "obtain": "Shop"
 }

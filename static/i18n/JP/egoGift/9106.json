@@ -2,8 +2,8 @@
   "name": "抑留された讃頌",
   "descs": [
     "戦闘開始時、全ての敵(幻想体の場合は全部位)が[Laceration]状態なら、次のターンに全味方が[Agility]1を得る。",
-    "戦闘開始時、全ての敵(幻想体の場合は全部位)が[Laceration]状態なら、次のターンに全味方が[Agility]1, <style=\"upgradeHighlight\">[AttackDmgUp]1</style>を得る。",
-    "戦闘開始時、全ての敵(幻想体の場合は全部位)が[Laceration]状態なら、次のターンに全味方が[Agility] <style=\"upgradeHighlight\">2</style>,[AttackDmgUp]1, <style=\"upgradeHighlight\">[AttackUp]2</style> を得る。"
+    "戦闘開始時、全ての敵(幻想体の場合は全部位)が[Laceration]状態なら、次のターンに全味方が[Agility]1, [AttackDmgUp]1を得る。",
+    "戦闘開始時、全ての敵(幻想体の場合は全部位)が[Laceration]状態なら、次のターンに全味方が[Agility] 2,[AttackDmgUp]1, [AttackUp]2 を得る。"
   ],
   "obtain": "Shop"
 }

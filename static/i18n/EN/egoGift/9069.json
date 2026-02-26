@@ -2,8 +2,8 @@
   "name": "Wrist Guards",
   "descs": [
     "Turn Start: allies with 5+ ([Charge] Count + 'Unique Charge') gain 1 [AttackDmgUp].\n\nIf the ally has Pride Affinity Attack Skills, gain 2 [AttackDmgUp] instead.",
-    "Turn Start: allies with <style=\"upgradeHighlight\">3+ ([Charge] Count + 'Unique Charge')</style> gain 1 [AttackDmgUp].\n\nIf the ally has Pride Affinity Attack Skills, gain 2 [AttackDmgUp] instead.",
-    "Turn Start: allies with <style=\"upgradeHighlight\">([Charge] Count + 'Unique Charge') gain 2 [AttackDmgUp]</style>.\n\nIf the ally has Pride Affinity Attack Skills, gain <style=\"upgradeHighlight\">3 [AttackDmgUp] instead.</style>"
+    "Turn Start: allies with 3+ ([Charge] Count + 'Unique Charge') gain 1 [AttackDmgUp].\n\nIf the ally has Pride Affinity Attack Skills, gain 2 [AttackDmgUp] instead.",
+    "Turn Start: allies with ([Charge] Count + 'Unique Charge') gain 2 [AttackDmgUp].\n\nIf the ally has Pride Affinity Attack Skills, gain 3 [AttackDmgUp] instead."
   ],
   "obtain": "Shop"
 }

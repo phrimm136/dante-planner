@@ -2068,5 +2068,35 @@
     "desc": "- 최댓값: 10\n- 수치 1당 가하는 피해량 +10%",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "GreatAesthetics": {
+    "name": "훌륭한 미감",
+    "desc": "- 더하기 코인 스킬의 코인 위력 +1\n- 빼기 코인 스킬의 기본 위력 +(4/코인 수)\n- 스킬 피해량 +30%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Inspire": {
+    "name": "영감",
+    "desc": "그림 재료를 보유한 대상 공격 시 피해량 +10%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ObjectOfExploration": {
+    "name": "탐구 대상",
+    "desc": "특정 조건 만족 시, ‘그림 재료’로 교체됨",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "PaintingMaterial": {
+    "name": "그림 재료",
+    "desc": "출혈을 보유(집중 전투일 경우 부위마다 별도로 판정)하고 있으면, 색욕 속성 받는 피해량 +10%",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AzureResultUp": {
+    "name": "우울 위력 증가",
+    "desc": "이번 턴 동안 우울 속성 스킬의 최종 위력 수치만큼 증가",
+    "iconId": null,
+    "buffType": "Positive"
   }
 }

@@ -2068,5 +2068,35 @@
     "desc": "- 最大值：10\n- 每带有1层本效果，使自身造成的伤害+10%",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "GreatAesthetics": {
+    "name": "卓越的美感",
+    "desc": "- 加算硬币技能的硬币威力+1\n- 减算硬币技能的基础威力+(4/硬币数)\n- 技能造成的伤害+30%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Inspire": {
+    "name": "灵感",
+    "desc": "对带有绘画材料 的目标造成的伤害+10%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ObjectOfExploration": {
+    "name": "探究对象",
+    "desc": "满足特定条件时，转化为“绘画材料”",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "PaintingMaterial": {
+    "name": "绘画材料",
+    "desc": "若自身带有流血 ，则使自身受到来自色欲技能的伤害+10%",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AzureResultUp": {
+    "name": "忧郁威力提升",
+    "desc": "本回合内基于本效果的层数提高忧郁技能的最终威力",
+    "iconId": null,
+    "buffType": "Positive"
   }
 }

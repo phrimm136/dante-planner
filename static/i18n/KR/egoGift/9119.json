@@ -2,8 +2,8 @@
   "name": "해진 우산",
   "descs": [
     "[편성 1번, 2번 인격 전용 효과]\n\n[Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 사용하여 합 승리 시, 대상 적에게 [Burst] 횟수 2 부여 (인격 별로 턴 당 1회).\n\n대상이 [Burst] 상태가 아닐 경우, 효과가 강화되어 [Burst] 위력 3, [Burst] 횟수 2 부여.",
-    "[편성 1번, 2번, <style=\"upgradeHighlight\">3번</style> 인격 전용 효과]\n\n[Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 사용하여 합 승리 시, 대상 적에게 <style=\"upgradeHighlight\">[Burst] 위력 2</style>, [Burst] 횟수 2 부여 (인격 별로 턴 당 1회).\n\n대상이 [Burst] 상태가 아닐 경우, 효과가 강화되어 [Burst] 위력 <style=\"upgradeHighlight\">4</style>, [Burst] 횟수 2 부여.",
-    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n[Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 사용하여 합 승리 시, 대상 적에게 [Burst] 위력 <style=\"upgradeHighlight\">4</style>, [Burst] 횟수 2 부여 (인격 별로 턴 당 1회).\n\n대상이 [Burst] 상태가 아닐 경우, 효과가 강화되어 [Burst] 위력 <style=\"upgradeHighlight\">6</style>, [Burst] 횟수 <style=\"upgradeHighlight\">3</style>부여."
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n[Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 사용하여 합 승리 시, 대상 적에게 [Burst] 위력 2, [Burst] 횟수 2 부여 (인격 별로 턴 당 1회).\n\n대상이 [Burst] 상태가 아닐 경우, 효과가 강화되어 [Burst] 위력 4, [Burst] 횟수 2 부여.",
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n[Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 사용하여 합 승리 시, 대상 적에게 [Burst] 위력 4, [Burst] 횟수 2 부여 (인격 별로 턴 당 1회).\n\n대상이 [Burst] 상태가 아닐 경우, 효과가 강화되어 [Burst] 위력 6, [Burst] 횟수 3부여."
   ],
   "obtain": "Shop"
 }

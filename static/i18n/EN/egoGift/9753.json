@@ -2,8 +2,8 @@
   "name": "Metronome",
   "descs": [
     "In odd-numbered turns, all allies gain 1 [AttackDmgUp]. In even-numbered turns, all allies gain 1 [Protection].",
-    "In odd-numbered turns, all allies gain 1 [AttackDmgUp]. In even-numbered turns, all allies gain 1 [Protection] <style=\"upgradeHighlight\">and 1 [DefenseUp]</style>.",
-    "In odd-numbered turns, all allies gain 1 [AttackDmgUp] <style=\"upgradeHighlight\">and 1 [AttackUp]</style>. In even-numbered turns, all allies gain 1 [Protection] and 1 [DefenseUp]."
+    "In odd-numbered turns, all allies gain 1 [AttackDmgUp]. In even-numbered turns, all allies gain 1 [Protection] and 1 [DefenseUp].",
+    "In odd-numbered turns, all allies gain 1 [AttackDmgUp] and 1 [AttackUp]. In even-numbered turns, all allies gain 1 [Protection] and 1 [DefenseUp]."
   ],
   "obtain": "Shop"
 }

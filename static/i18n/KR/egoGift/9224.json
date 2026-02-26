@@ -1,0 +1,9 @@
+{
+  "name": "수작",
+  "descs": [
+    "약지 소속 인격이 [Inspire]을 얻음\n\n[Inspire]을 보유한 약지 소속 인격의 공격 스킬이 적중한 적에게 [ObjectOfExploration] 부여\n- 적이 [ObjectOfExploration]를 이미 보유했을 시, [ObjectOfExploration]이 [PaintingMaterial]로 교체됨\n\n[PaintingMaterial]가 있는 대상을 [Inspire]이 있는 약지 소속 인원이 처치했으면,\n해당 약지 소속 인원이 [Inspire]을 잃고 [GreatAesthetics]을 얻음",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

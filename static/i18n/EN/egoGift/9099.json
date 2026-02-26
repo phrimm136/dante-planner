@@ -2,8 +2,8 @@
   "name": "Material Interference Force Field",
   "descs": [
     "First Turn Start of a wave: all allies gain 3 [ChargeForceField].",
-    "First Turn Start of a wave: all allies gain <style=\"upgradeHighlight\">5 [ChargeForceField].</style>",
-    "First Turn Start of a wave: all allies gain <style=\"upgradeHighlight\">7 [ChargeForceField].</style>"
+    "First Turn Start of a wave: all allies gain 5 [ChargeForceField].",
+    "First Turn Start of a wave: all allies gain 7 [ChargeForceField]."
   ],
   "obtain": "Shop"
 }

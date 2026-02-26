@@ -2,8 +2,8 @@
   "name": "震荡手环",
   "descs": [
     "使用技能命中敌方单位时，下回合使其增加1级[Vibration]强度。\n\n若该技能为暴怒技能，则改为使其增加2级[Vibration]强度。",
-    "使用技能命中敌方单位时，下回合使其增加1级[Vibration]强度。\n\n若该技能为暴怒技能，则改为使其<style=\"upgradeHighlight\">增加3级[Vibration]强度。</style>",
-    "使用技能命中敌方单位时，下回合使其<style=\"upgradeHighlight\">增加2级[Vibration]强度。</style>\n\n若该技能为暴怒技能，则改为使其<style=\"upgradeHighlight\">增加4级[Vibration]强度。</style>"
+    "使用技能命中敌方单位时，下回合使其增加1级[Vibration]强度。\n\n若该技能为暴怒技能，则改为使其增加3级[Vibration]强度。",
+    "使用技能命中敌方单位时，下回合使其增加2级[Vibration]强度。\n\n若该技能为暴怒技能，则改为使其增加4级[Vibration]强度。"
   ],
   "obtain": "Shop"
 }

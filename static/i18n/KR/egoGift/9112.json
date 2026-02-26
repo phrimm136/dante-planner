@@ -2,8 +2,8 @@
   "name": "극독성 외피",
   "descs": [
     "[Vibration] 위력 또는 [Vibration] 횟수를 부여하는 스킬(본인 또는 아군을 대상으로 하는 경우 포함)을 사용하여 합 승리 시, (남은 코인 수/2)만큼 대상 적에게 [Vibration] 위력 부여",
-    "[Vibration] 위력 또는 [Vibration] 횟수를 부여하는 스킬(본인 또는 아군을 대상으로 하는 경우 포함)을 사용하여 합 승리 시, <style=\"upgradeHighlight\">남은 코인 수</style>만큼 대상 적에게 [Vibration] 위력 부여",
-    "[Vibration] 위력 또는 [Vibration] 횟수를 부여하는 스킬(본인 또는 아군을 대상으로 하는 경우 포함)을 사용하여 합 승리 시, 남은 코인 수만큼 대상 적에게 [Vibration] 위력과 <style=\"upgradeHighlight\">(남은 코인 수/2)만큼 [Vibration] 횟수</style> 부여"
+    "[Vibration] 위력 또는 [Vibration] 횟수를 부여하는 스킬(본인 또는 아군을 대상으로 하는 경우 포함)을 사용하여 합 승리 시, 남은 코인 수만큼 대상 적에게 [Vibration] 위력 부여",
+    "[Vibration] 위력 또는 [Vibration] 횟수를 부여하는 스킬(본인 또는 아군을 대상으로 하는 경우 포함)을 사용하여 합 승리 시, 남은 코인 수만큼 대상 적에게 [Vibration] 위력과 (남은 코인 수/2)만큼 [Vibration] 횟수 부여"
   ],
   "obtain": "Shop"
 }

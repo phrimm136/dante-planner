@@ -1,0 +1,9 @@
+{
+  "name": "熱せられたハンマー",
+  "descs": [
+    "敵に[VibrationIgnition]がある場合、下記の効果を適用\n- 基本スキル的中時、[Combustion]威力1を付与 (スキルごとに最大3回)\n- 基本スキル的中時、[VibrationIgnition]が15以上なら、[Combustion]回数が1増加 (スキルごとに最大2回)\n- [Combustion]3につき、[VibrationExplosion]による混乱区間前進量 +1% (最大15%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

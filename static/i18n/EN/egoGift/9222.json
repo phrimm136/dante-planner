@@ -1,0 +1,9 @@
+{
+  "name": "Pure-white Canvas",
+  "descs": [
+    "On Hit with Plus Coin Attack Skills against an enemy with 15+ [Laceration], heal 3 SP (once per turn for each Identity)\n- If said Identity or target has 3+ types of negative effects, heal 6 SP instead",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

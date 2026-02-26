@@ -2,8 +2,8 @@
   "name": "녹슨 커터 나이프",
   "descs": [
     "흐트러짐 상태가 아닌 적에게 스킬 효과로 [Laceration] 위력 또는 특수 출혈을 부여할 때마다 대상에게 [Laceration] 위력 1, [Laceration] 횟수 1 부여.\n\n색욕 속성 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 3, [Laceration] 횟수 1 부여.",
-    "스킬 효과로 [Laceration] 위력 또는 특수 출혈을 부여할 때마다 대상에게 <style=\"upgradeHighlight\">[Laceration] 위력 2</style>, [Laceration] 횟수 1 부여.\n\n색욕 속성 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 3, [Laceration] 횟수 1 부여.",
-    "스킬 효과로 [Laceration] 위력 또는 특수 출혈을 부여할 때마다 대상에게 <style=\"upgradeHighlight\">[Laceration] 위력 3</style>, [Laceration] 횟수 1 부여.\n\n색욕 속성 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 3, <style=\"upgradeHighlight\">[Laceration] 횟수 2 부여.</style>"
+    "스킬 효과로 [Laceration] 위력 또는 특수 출혈을 부여할 때마다 대상에게 [Laceration] 위력 2, [Laceration] 횟수 1 부여.\n\n색욕 속성 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 3, [Laceration] 횟수 1 부여.",
+    "스킬 효과로 [Laceration] 위력 또는 특수 출혈을 부여할 때마다 대상에게 [Laceration] 위력 3, [Laceration] 횟수 1 부여.\n\n색욕 속성 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 3, [Laceration] 횟수 2 부여."
   ],
   "obtain": "Shop"
 }

@@ -1,0 +1,9 @@
+{
+  "name": "Providence of the Prescript",
+  "descs": [
+    "Identities that inflicted [Sinking], [Sinking] Count, or 'Unique Sinking', gain 3 [Breath] or +2 [Breath] Count at Turn Start (once per turn per Identity)\n\nDuring the Encounter, if an Identity has gained [Breath] 3 times due to the above effect, starting from the next turn, the said Sinner deals +30% damage on Critical Hit",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

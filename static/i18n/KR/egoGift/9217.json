@@ -1,0 +1,9 @@
+{
+  "name": "누군가의 단말기",
+  "descs": [
+    "공격 종료 시 [IndexPrescriptTargetToEnemy]이 사망했으면, [IndexPrescriptTargetToEnemy]을 처치한 아군이 다음 턴에 [AzureResultUp] 1 얻고 생존한 무작위 적 1명의 [Sinking] 횟수 3 증가 (턴당 1회)\n- [IndexPrescriptTargetToEnemy]을 처치한 아군이 검지 소속 인격이면, [AzureResultUp] 대신 다음 턴에 [Enhancement] 1 얻음. (턴당 1회)\n\n턴 종료 시 검지 소속이면, 최대 체력의 (보유한 [KarmaOfIndexAlly] 수치)%만큼 피해를 입음.\n(이 효과로 흐트러짐 상태가 되지 않으며, 최대 체력의 20% 미만으로 체력이 감소하지 않음)\n이후 해당 효과로 피해를 입은 인격이 다음 턴에 (보유한 [KarmaOfIndexAlly] 수치/5) 만큼 [ResultEnhancement] 얻음 (최대 2)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

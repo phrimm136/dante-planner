@@ -2068,5 +2068,35 @@
     "desc": "- 最大値: 10\n- 数値1につき与ダメージ量 +10%",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "GreatAesthetics": {
+    "name": "素晴らしい美感",
+    "desc": "- 加算コインスキルのコイン威力 +1\n- 減算コインスキルの基本威力 +(4 ÷ コイン数)\n- スキルのダメージ量 +30%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Inspire": {
+    "name": "着想",
+    "desc": "絵の材料を保有した対象を攻撃時、ダメージ量 +10%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ObjectOfExploration": {
+    "name": "探求対象",
+    "desc": "特定条件を満たしたとき、「絵の材料」に変わる",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "PaintingMaterial": {
+    "name": "絵の材料",
+    "desc": "出血を保有(集中戦闘の場合、部位別に判定)していれば、色欲属性による被ダメージ量 +10%",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AzureResultUp": {
+    "name": "憂鬱威力増加",
+    "desc": "このターンの間、憂鬱属性スキルの最終威力が数値だけ増加",
+    "iconId": null,
+    "buffType": "Positive"
   }
 }

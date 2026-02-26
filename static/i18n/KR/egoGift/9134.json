@@ -2,8 +2,8 @@
   "name": "순찰용 손전등",
   "descs": [
     "[편성 1번, 2번 인격 전용 효과]\n\n턴 시작 시 효과 적용 대상 인격이 [Charge] 횟수 또는 특수 충전을 획득하거나 소모하는 스킬을 보유하였다면, [ChargeForceField] 상태일 때 대상의 스킬 1 합 위력 +1, 피해량 +10%.\n\n턴 종료 시 효과 적용 대상 인격이 [ChargeForceField]을 보유하지 않았다면 다음 턴에 [ChargeForceField] 2 부여.",
-    "[편성 1번, 2번, <style=\"upgradeHighlight\">3번</style> 인격 전용 효과]\n\n턴 시작 시 효과 적용 대상 인격이 [Charge] 횟수 또는 특수 충전을 획득하거나 소모하는 스킬을 보유하였다면, [ChargeForceField] 상태일 때, 아군의 스킬 1 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">15</style>%.\n\n턴 종료 시 효과 적용 대상 인격이 [ChargeForceField]을 보유하지 않았다면 다음 턴에 [ChargeForceField] <style=\"upgradeHighlight\">3</style> 부여.",
-    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n턴 시작 시 효과 적용 대상 인격이 [Charge] 횟수 또는 특수 충전을 획득하거나 소모하는 스킬을 보유하였다면, [ChargeForceField] 상태일 때, 아군의 스킬 1 합 위력 +1, 피해량 +<style=\"upgradeHighlight\">25</style>%.\n\n턴 종료 시 효과 적용 대상 인격이 [ChargeForceField]을 보유하지 않았다면 다음 턴에 [ChargeForceField] <style=\"upgradeHighlight\">4</style> 부여."
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n턴 시작 시 효과 적용 대상 인격이 [Charge] 횟수 또는 특수 충전을 획득하거나 소모하는 스킬을 보유하였다면, [ChargeForceField] 상태일 때, 아군의 스킬 1 합 위력 +1, 피해량 +15%.\n\n턴 종료 시 효과 적용 대상 인격이 [ChargeForceField]을 보유하지 않았다면 다음 턴에 [ChargeForceField] 3 부여.",
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n턴 시작 시 효과 적용 대상 인격이 [Charge] 횟수 또는 특수 충전을 획득하거나 소모하는 스킬을 보유하였다면, [ChargeForceField] 상태일 때, 아군의 스킬 1 합 위력 +1, 피해량 +25%.\n\n턴 종료 시 효과 적용 대상 인격이 [ChargeForceField]을 보유하지 않았다면 다음 턴에 [ChargeForceField] 4 부여."
   ],
   "obtain": "Shop"
 }

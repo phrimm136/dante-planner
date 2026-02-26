@@ -2,8 +2,8 @@
   "name": "Shaoxing Wine",
   "descs": [
     "[Effects apply only to #2 Deployed Identity]\n\nDeal +1% damage for every 1% missing HP on self (max 10%)",
-    "[Effects apply only to #2 <style=\"upgradeHighlight\">and #4 Deployed Identities</style>]\n\nDeal +1% damage for every 1% missing HP on self (max 10%)",
-    "[Effects apply only to #2 ,#4, <style=\"upgradeHighlight\">and #6</style> Deployed Identities]\n\nDeal +1% damage for every 1% missing HP on self (max 10%)"
+    "[Effects apply only to #2 and #4 Deployed Identities]\n\nDeal +1% damage for every 1% missing HP on self (max 10%)",
+    "[Effects apply only to #2 ,#4, and #6 Deployed Identities]\n\nDeal +1% damage for every 1% missing HP on self (max 10%)"
   ],
   "obtain": "Shop"
 }

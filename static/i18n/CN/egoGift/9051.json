@@ -2,8 +2,8 @@
   "name": "石冢",
   "descs": [
     "友方单位通过技能效果获得的[Breath]强度变为1.5倍。\n\n若友方单位使用了怠惰技能击杀了敌方单位，则下回合开始时使其增加2级[Breath]强度并获得2层[Breath]。(每回合最多1次)",
-    "友方单位通过技能效果获得的[Breath]强度变为1.5倍。\n\n<style=\"upgradeHighlight\">若友方单位击杀了敌方单位</style>，则下回合开始时使其<style=\"upgradeHighlight\">增加3级[Breath]强度</style>并获得2层[Breath](每回合最多1次)。",
-    "友方单位通过技能效果<style=\"upgradeHighlight\">获得的[Breath]强度变为2倍</style>。\n\n若友方单位击杀了敌方单位，则下回合开始时使其<style=\"upgradeHighlight\">增加4级[Breath]强度</style>并获得2层[Breath](每回合最多1次)。"
+    "友方单位通过技能效果获得的[Breath]强度变为1.5倍。\n\n若友方单位击杀了敌方单位，则下回合开始时使其增加3级[Breath]强度并获得2层[Breath](每回合最多1次)。",
+    "友方单位通过技能效果获得的[Breath]强度变为2倍。\n\n若友方单位击杀了敌方单位，则下回合开始时使其增加4级[Breath]强度并获得2层[Breath](每回合最多1次)。"
   ],
   "obtain": "Shop"
 }

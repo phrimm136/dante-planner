@@ -2,8 +2,8 @@
   "name": "부적 묶음",
   "descs": [
     "스킬을 사용하여 적에게 적중 시 12 이상의 체력 피해를 입혔다면, 대상에게 [Burst] 위력 2 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Burst] 위력 4 부여.",
-    "스킬을 사용하여 적에게 적중 시 12 이상의 체력 피해를 입혔다면, 대상에게 <style=\"upgradeHighlight\">[Burst] 위력 3</style> 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 <style=\"upgradeHighlight\">[Burst] 위력 5</style> 부여.",
-    "스킬을 사용하여 <style=\"upgradeHighlight\">적에게 적중 시 1 이상의 체력 피해를 입혔다면</style>, 대상에게 [Burst] 위력 3 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Burst] 위력 5 부여, <style=\"upgradeHighlight\">[Burst] 횟수 1 증가.</style>"
+    "스킬을 사용하여 적에게 적중 시 12 이상의 체력 피해를 입혔다면, 대상에게 [Burst] 위력 3 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Burst] 위력 5 부여.",
+    "스킬을 사용하여 적에게 적중 시 1 이상의 체력 피해를 입혔다면, 대상에게 [Burst] 위력 3 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Burst] 위력 5 부여, [Burst] 횟수 1 증가."
   ],
   "obtain": "Shop"
 }

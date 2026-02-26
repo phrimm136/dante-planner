@@ -2,8 +2,8 @@
   "name": "交织的时间",
   "descs": [
     "使敌方单位[Switch_Vibration]或[FusionVibration]时，使其[VibrationExplosion](每回合每名友方单位最多1次)",
-    "使敌方单位[Switch_Vibration]或[FusionVibration]时，使其[VibrationExplosion](每回合每名友方单位最多<style=\"upgradeHighlight\">2</style>次)",
-    "使敌方单位[Switch_Vibration]或[FusionVibration]时，使其[VibrationExplosion](每回合每名友方单位最多<style=\"upgradeHighlight\">3</style>次)"
+    "使敌方单位[Switch_Vibration]或[FusionVibration]时，使其[VibrationExplosion](每回合每名友方单位最多2次)",
+    "使敌方单位[Switch_Vibration]或[FusionVibration]时，使其[VibrationExplosion](每回合每名友方单位最多3次)"
   ],
   "obtain": "Shop"
 }

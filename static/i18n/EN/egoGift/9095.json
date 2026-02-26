@@ -2,8 +2,8 @@
   "name": "Broken Compass",
   "descs": [
     "First Turn Start of a wave: randomly inflict (5 + (# of enemies x 3)) [Sinking] Count between all enemies (or all Abnormality parts).\n(For Abnormalities, only the Core counts as an enemy)",
-    "First Turn Start of a wave: randomly inflict <style=\"upgradeHighlight\">(10 + (# of enemies x 3)) [Sinking] Count</style> between all enemies (or all Abnormality parts).\n(For Abnormalities, only the Core counts as an enemy).",
-    "First Turn Start of a wave: randomly inflict <style=\"upgradeHighlight\">(10 + (# of enemies x 4)) [Sinking] Count</style> between all enemies (or all Abnormality parts).\n(For Abnormalities, only the Core counts as an enemy)."
+    "First Turn Start of a wave: randomly inflict (10 + (# of enemies x 3)) [Sinking] Count between all enemies (or all Abnormality parts).\n(For Abnormalities, only the Core counts as an enemy).",
+    "First Turn Start of a wave: randomly inflict (10 + (# of enemies x 4)) [Sinking] Count between all enemies (or all Abnormality parts).\n(For Abnormalities, only the Core counts as an enemy)."
   ],
   "obtain": "Shop"
 }

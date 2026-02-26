@@ -2,8 +2,8 @@
   "name": "Scalpel",
   "descs": [
     "[Effects apply only to the #4 Deployed Identity]\n\nTurn End: Identity with Slash Attack Skills gain (# of Slash Attack Skills they have) [Agility] next turn. (e.g. An Identity with S1 Slash, S2 Slash, and S3 Slash would gain 3 [Agility] next turn. E.G.O Skills and Counters don't count)",
-    "[Effects apply only to the #4 Deployed Identity]\n\nTurn End: Identity with Slash Attack Skills gain (<style=\"upgradeHighlight\">1 +</style> # of Slash Attack Skills they have) [Agility] next turn. (e.g. An Identity with S1 Slash, S2 Slash, and S3 Slash would gain 4 [Agility] next turn. E.G.O Skills and Counters don't count)",
-    "[Effects apply only to the #4<style=\"upgradeHighlight\">, #5</style> Deployed Identities]\n\nTurn End: Identity with Slash Attack Skills gain (1 + # of Slash Attack Skills they have) [Agility] next turn. (e.g. An Identity with S1 Slash, S2 Slash, and S3 Slash would gain 4 [Agility] next turn. E.G.O Skills and Counters don't count)"
+    "[Effects apply only to the #4 Deployed Identity]\n\nTurn End: Identity with Slash Attack Skills gain (1 + # of Slash Attack Skills they have) [Agility] next turn. (e.g. An Identity with S1 Slash, S2 Slash, and S3 Slash would gain 4 [Agility] next turn. E.G.O Skills and Counters don't count)",
+    "[Effects apply only to the #4, #5 Deployed Identities]\n\nTurn End: Identity with Slash Attack Skills gain (1 + # of Slash Attack Skills they have) [Agility] next turn. (e.g. An Identity with S1 Slash, S2 Slash, and S3 Slash would gain 4 [Agility] next turn. E.G.O Skills and Counters don't count)"
   ],
   "obtain": "Shop"
 }

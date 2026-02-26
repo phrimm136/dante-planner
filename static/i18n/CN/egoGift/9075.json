@@ -2,8 +2,8 @@
   "name": "充能式手套",
   "descs": [
     "最大[Charge]层数+10\n\n关卡开始时，使全体友方单位获得5层[Charge]。\n\n回合开始时，使全体友方单位获得2层[Charge]。\n\n[第1顺位友方单位专属] 关卡开始时，获得1层[ChoSuperCharge]",
-    "最大[Charge]层数+10\n\n关卡开始时，使全体友方单位<style=\"upgradeHighlight\">获得6层[Charge]。</style>\n\n回合开始时，使全体友方单位<style=\"upgradeHighlight\">获得3层[Charge]。</style>\n\n[第1顺位友方单位专属] 关卡开始时，获得<style=\"upgradeHighlight\">10</style>层[ChoSuperCharge] ",
-    "最大[Charge]层数+10\n\n关卡开始时，使全体友方单位<style=\"upgradeHighlight\">获得8层[Charge]。</style>\n\n回合开始时，使全体友方单位<style=\"upgradeHighlight\">获得4层[Charge]。</style>\n\n[第1顺位友方单位专属] 关卡开始时，获得<style=\"upgradeHighlight\">20</style>层[ChoSuperCharge] "
+    "最大[Charge]层数+10\n\n关卡开始时，使全体友方单位获得6层[Charge]。\n\n回合开始时，使全体友方单位获得3层[Charge]。\n\n[第1顺位友方单位专属] 关卡开始时，获得10层[ChoSuperCharge] ",
+    "最大[Charge]层数+10\n\n关卡开始时，使全体友方单位获得8层[Charge]。\n\n回合开始时，使全体友方单位获得4层[Charge]。\n\n[第1顺位友方单位专属] 关卡开始时，获得20层[ChoSuperCharge] "
   ],
   "obtain": "Shop"
 }

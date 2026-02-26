@@ -2,8 +2,8 @@
   "name": "Ragged Umbrella",
   "descs": [
     "[Effects apply only to #1, #2 Deployed Identities]\n\nWhen winning a Clash using a Skill that inflicts [Burst] Potency or Count, inflict +2 [Burst] Count against the target (once per turn per Identity)\n\nIf the target doesn't have [Burst], inflict 3 [Burst] Potency and +2 [Burst] Count instead.",
-    "[Effects apply only to #1, #2, and <style=\"upgradeHighlight\">#3</style> Deployed Identities]\n\nWhen winning a Clash using a Skill that inflicts [Burst] Potency or Count, inflict <style=\"upgradeHighlight\">2 [Burst] Potency</style> and +2 [Burst] Count against the target (once per turn per Identity)\n\nIf the target doesn't have [Burst], inflict <style=\"upgradeHighlight\">4</style> [Burst] Potency and +2 [Burst] Count instead.",
-    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nWhen winning a Clash using a Skill that inflicts [Burst] Potency or Count, inflict <style=\"upgradeHighlight\">4</style> [Burst] Potency and +2 [Burst] Count against the target (once per turn per Identity)\n\nIf the target doesn't have [Burst], inflict <style=\"upgradeHighlight\">6</style> [Burst] Potency and +<style=\"upgradeHighlight\">3</style> [Burst] Count instead."
+    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nWhen winning a Clash using a Skill that inflicts [Burst] Potency or Count, inflict 2 [Burst] Potency and +2 [Burst] Count against the target (once per turn per Identity)\n\nIf the target doesn't have [Burst], inflict 4 [Burst] Potency and +2 [Burst] Count instead.",
+    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nWhen winning a Clash using a Skill that inflicts [Burst] Potency or Count, inflict 4 [Burst] Potency and +2 [Burst] Count against the target (once per turn per Identity)\n\nIf the target doesn't have [Burst], inflict 6 [Burst] Potency and +3 [Burst] Count instead."
   ],
   "obtain": "Shop"
 }

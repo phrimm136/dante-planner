@@ -2,8 +2,8 @@
   "name": "Crown of Roses",
   "descs": [
     "Turn Start: inflict 4 [Burst] Potency on a random enemy(or all Abnormality parts).\n\nWhen activating Gluttony Absolute Resonance, inflict 2 [Burst] Potency on all enemies at Combat Start.",
-    "Turn Start: inflict 4 [Burst] Potency on <style=\"upgradeHighlight\">2 random enemies</style>(or all Abnormality parts).\n\nWhen activating Gluttony Absolute Resonance, inflict <style=\"upgradeHighlight\">3 [Burst] Potency</style> on all enemies at Combat Start.",
-    "Turn Start: inflict 4 [Burst] Potency on <style=\"upgradeHighlight\">3 random enemies</style>(or all Abnormality parts).\n\nWhen activating Gluttony Absolute Resonance, inflict <style=\"upgradeHighlight\">4 [Burst] Potency</style> on all enemies at Combat Start."
+    "Turn Start: inflict 4 [Burst] Potency on 2 random enemies(or all Abnormality parts).\n\nWhen activating Gluttony Absolute Resonance, inflict 3 [Burst] Potency on all enemies at Combat Start.",
+    "Turn Start: inflict 4 [Burst] Potency on 3 random enemies(or all Abnormality parts).\n\nWhen activating Gluttony Absolute Resonance, inflict 4 [Burst] Potency on all enemies at Combat Start."
   ],
   "obtain": "Shop"
 }

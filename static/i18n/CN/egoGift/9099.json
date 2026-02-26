@@ -2,8 +2,8 @@
   "name": "物理屏蔽力场",
   "descs": [
     "波次的首个回合开始时，使全体友方单位获得3层[ChargeForceField]。",
-    "波次的首个回合开始时，使全体友方单位<style=\"upgradeHighlight\">获得5层[ChargeForceField]。</style>",
-    "波次的首个回合开始时，使全体友方单位<style=\"upgradeHighlight\">获得7层[ChargeForceField]。</style>"
+    "波次的首个回合开始时，使全体友方单位获得5层[ChargeForceField]。",
+    "波次的首个回合开始时，使全体友方单位获得7层[ChargeForceField]。"
   ],
   "obtain": "Shop"
 }

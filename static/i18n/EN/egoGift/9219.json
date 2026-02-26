@@ -1,0 +1,9 @@
+{
+  "name": "Omni-tool",
+  "descs": [
+    "When Skills of the same Attack Type hit an enemy 12 times, the enemy gains +0.1 Resistance against that Attack Type (3 times per Encounter per enemy/Abnormality Parts; this effect cannot raise Resistance value over 2.0)",
+    "When Skills of the same Attack Type hit an enemy 9 times, the enemy gains +0.1 Resistance against that Attack Type (3 times per Encounter per enemy/Abnormality Parts; this effect cannot raise Resistance value over 2.0)",
+    "When Skills of the same Attack Type hit an enemy 6 times, the enemy gains +0.1 Resistance against that Attack Type (3 times per Encounter per enemy/Abnormality Parts; this effect cannot raise Resistance value over 2.0)"
+  ],
+  "obtain": "Shop"
+}

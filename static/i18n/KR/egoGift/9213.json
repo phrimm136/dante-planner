@@ -1,0 +1,9 @@
+{
+  "name": "미니어처 대관람차",
+  "descs": [
+    "혈귀인 모든 아군의 기본 스킬 코인 위력 +1, 자신의 ([BloodDinner_Accumulation] / 10)%만큼 스킬 피해량 증가\n\n턴 종료 시, [Laceration]을 보유한 아군 중 가장 체력이 적은 인격 2명이 자신의 최대 체력의 5%만큼 체력을 회복하고 다음 턴 시작시 [SwirlingBloodPersonality] 10 얻음\n\n적 처치시, 해당 적의 (본체 최대 체력/10)만큼 [BloodDinner] 생성 (최대 50)\n\n턴 종료시 이번 턴에 사망한 아군이 있으면, 다음 턴에 모든 아군이 [Enhancement] 2 얻음\n\n적이 증원되는 전투에서 새로운 적이 등장하면, 전투 시작 시 해당 적에게 [Laceration] 5, [Laceration] 횟수 3 부여.\n아군에 <혈귀>가 있다면, 적이 증원될 때 모든 적의 [Laceration]을 2회 발동시키고, 모든 적의 [Laceration] 횟수 2 감소",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

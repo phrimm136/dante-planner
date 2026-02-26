@@ -2,8 +2,8 @@
   "name": "ブラッディー・ガジェット",
   "descs": [
     "ターン開始時、ランダムな味方1名が[AttackDmgUp]2を得る。\n\n色欲属性の攻撃スキルを保有する味方へ優先的に適用され、この場合は[AttackDmgUp]1を追加で得る。",
-    "ターン開始時、ランダムな味方1名が[AttackDmgUp]2を得る。\n\n色欲属性の攻撃スキルを保有する味方へ優先的に適用され、この場合は<style=\"upgradeHighlight\">[AttackDmgUp]2</style>を追加で得る。",
-    "ターン開始時、<style=\"upgradeHighlight\">ランダムな味方2名</style>が[AttackDmgUp]2を得る。\n\n色欲属性の攻撃スキルを保有する味方へ優先的に適用され、この場合は[AttackDmgUp]2を追加で得る。"
+    "ターン開始時、ランダムな味方1名が[AttackDmgUp]2を得る。\n\n色欲属性の攻撃スキルを保有する味方へ優先的に適用され、この場合は[AttackDmgUp]2を追加で得る。",
+    "ターン開始時、ランダムな味方2名が[AttackDmgUp]2を得る。\n\n色欲属性の攻撃スキルを保有する味方へ優先的に適用され、この場合は[AttackDmgUp]2を追加で得る。"
   ],
   "obtain": "Shop"
 }

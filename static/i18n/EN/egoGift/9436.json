@@ -1,7 +1,7 @@
 {
   "name": "Refraction Glass Pod",
   "descs": [
-    "Regular Encounters) On Hit against enemies with 10+ (sum of [Sinking] Count and Potency):\nif the target is at -45 SP, deal (([Sinking] Potency on target) / 2) Gloom damage (once per Skill)\n\nFocused Encounters) On Hit against enemies with 10+ (sum of [Sinking] Count and Potency):\ndeal (([Sinking] Potency on target) / 2) Gloom damage (once per Skill)\n\nIf the Skill that hit an enemy inflicts [Sinking](including [Sinking] Count and Unique <noparse>Sinking</noparse>), instead of dealing ([Sinking] Potency on target / 2) Gloom damage, deal ([Sinking] Potency on target) Gloom damage\n(Each turn, this applies only to the first Sinking-inflicting Skill that hits)",
+    "Regular Encounters) On Hit against enemies with 10+ (sum of [Sinking] Count and Potency):\nif the target is at -45 SP, deal (([Sinking] Potency on target) / 2) Gloom damage (once per Skill)\n\nFocused Encounters) On Hit against enemies with 10+ (sum of [Sinking] Count and Potency):\ndeal (([Sinking] Potency on target) / 2) Gloom damage (once per Skill)\n\nIf the Skill that hit an enemy inflicts [Sinking](including [Sinking] Count and Unique Sinking), instead of dealing ([Sinking] Potency on target / 2) Gloom damage, deal ([Sinking] Potency on target) Gloom damage\n(Each turn, this applies only to the first Sinking-inflicting Skill that hits)",
     "",
     ""
   ],

@@ -2,8 +2,8 @@
   "name": "Hellterfly’s Dream",
   "descs": [
     "When applying [Combustion] Potency or 'Unique Burn' to an enemy with [Combustion] or 'Unique Burn', randomly inflict a total of 3 [Combustion] Potency between all enemies.\n\nWhen activating Wrath Absolute Resonance, randomly inflict a total of 5 [Combustion] Potency between all enemies at Combat Start.",
-    "When applying [Combustion] Potency or 'Unique Burn' to an enemy with [Combustion] or 'Unique Burn', randomly inflict a total of <style=\"upgradeHighlight\">4 [Combustion] Potency</style> between all enemies.\n\nWhen activating Wrath Absolute Resonance, randomly inflict a total of <style=\"upgradeHighlight\">6 [Combustion] Potency</style> between all enemies at Combat Start.",
-    "When applying [Combustion] Potency or 'Unique Burn' to an enemy with [Combustion] or 'Unique Burn', randomly inflict a total of <style=\"upgradeHighlight\">5 [Combustion]</style> between all enemies.\n\nWhen activating <style=\"upgradeHighlight\">Wrath Resonance</style>, randomly inflict a total of <style=\"upgradeHighlight\">8 [Combustion] Potency</style> between all enemies at Combat Start."
+    "When applying [Combustion] Potency or 'Unique Burn' to an enemy with [Combustion] or 'Unique Burn', randomly inflict a total of 4 [Combustion] Potency between all enemies.\n\nWhen activating Wrath Absolute Resonance, randomly inflict a total of 6 [Combustion] Potency between all enemies at Combat Start.",
+    "When applying [Combustion] Potency or 'Unique Burn' to an enemy with [Combustion] or 'Unique Burn', randomly inflict a total of 5 [Combustion] between all enemies.\n\nWhen activating Wrath Resonance, randomly inflict a total of 8 [Combustion] Potency between all enemies at Combat Start."
   ],
   "obtain": "Shop"
 }

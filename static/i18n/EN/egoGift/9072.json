@@ -2,8 +2,8 @@
   "name": "Lightning Rod",
   "descs": [
     "Encounter Start: all allies gain +3 [Charge] Count.\n\nIf two or more participating allies have Envy Affinity Attack Skills, all allies gain +5 [Charge] Count instead.",
-    "Encounter Start: all allies gain <style=\"upgradeHighlight\">+4 [Charge] Count.</style>\n\nIf two or more participating allies have Envy Affinity Attack Skills, all allies gain <style=\"upgradeHighlight\">+6 [Charge] Count</style> instead.",
-    "Encounter Start: all allies gain <style=\"upgradeHighlight\">+5 [Charge] Count.</style>\n\nIf two or more participating allies have Envy Affinity Attack Skills, all allies gain <style=\"upgradeHighlight\">+7 [Charge] Count</style> instead."
+    "Encounter Start: all allies gain +4 [Charge] Count.\n\nIf two or more participating allies have Envy Affinity Attack Skills, all allies gain +6 [Charge] Count instead.",
+    "Encounter Start: all allies gain +5 [Charge] Count.\n\nIf two or more participating allies have Envy Affinity Attack Skills, all allies gain +7 [Charge] Count instead."
   ],
   "obtain": "Shop"
 }

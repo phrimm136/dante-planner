@@ -2,8 +2,8 @@
   "name": "酸味的酒香",
   "descs": [
     "[第1、第2顺位友方单位专属]\n\n增加[Vibration]强度或施加[Vibration]层数技能(包括对自身施加的技能)的攻击等级+2\n\n若主要目标带有[Vibration]且陷入混乱，则使技能造成的伤害+(混乱阶段×7.5)%\n\n增加[Vibration]强度或施加[Vibration]层数的技能则改为造成的伤害+(混乱阶段×15)%",
-    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n增加[Vibration]强度或施加[Vibration]层数技能(包括对自身施加的技能)的攻击等级+2\n\n若主要目标带有[Vibration]且陷入混乱，则使技能造成的伤害+(混乱阶段×<style=\"upgradeHighlight\">10</style>)%\n\n增加[Vibration]强度或施加[Vibration]层数的技能则改为造成的伤害+(混乱阶段×<style=\"upgradeHighlight\">20</style>)%",
-    "[第1、第2、第3顺位友方单位专属]\n\n增加[Vibration]强度或施加[Vibration]层数技能(包括对自身施加的技能)的攻击等级+<style=\"upgradeHighlight\">3</style>\n\n若主要目标带有[Vibration]且陷入混乱，则使技能造成的伤害+(混乱阶段×<style=\"upgradeHighlight\">12.5</style>)%\n\n增加[Vibration]强度或施加[Vibration]层数的技能则改为造成的伤害+(混乱阶段×<style=\"upgradeHighlight\">25</style>)%"
+    "[第1、第2、第3顺位友方单位专属]\n\n增加[Vibration]强度或施加[Vibration]层数技能(包括对自身施加的技能)的攻击等级+2\n\n若主要目标带有[Vibration]且陷入混乱，则使技能造成的伤害+(混乱阶段×10)%\n\n增加[Vibration]强度或施加[Vibration]层数的技能则改为造成的伤害+(混乱阶段×20)%",
+    "[第1、第2、第3顺位友方单位专属]\n\n增加[Vibration]强度或施加[Vibration]层数技能(包括对自身施加的技能)的攻击等级+3\n\n若主要目标带有[Vibration]且陷入混乱，则使技能造成的伤害+(混乱阶段×12.5)%\n\n增加[Vibration]强度或施加[Vibration]层数的技能则改为造成的伤害+(混乱阶段×25)%"
   ],
   "obtain": "Shop"
 }

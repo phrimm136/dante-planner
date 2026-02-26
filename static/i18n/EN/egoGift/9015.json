@@ -2,8 +2,8 @@
   "name": "Blood, Sweat, and Tears",
   "descs": [
     "Skills deal +10% damage to Staggered enemies.\n\nIf the Skill inflicts Tremor Potency, Tremor Count, triggers Amplitude Conversion, Tremor Burst, or Amplitude Entanglement, or if the Skill's Affinity was Sloth, deal +20% damage instead.",
-    "Skills deal <style=\"upgradeHighlight\">+12.5% damage</style> to Staggered enemies.\n\nIf the Skill inflicts Tremor Potency, Tremor Count, triggers Amplitude Conversion, Tremor Burst, or Amplitude Entanglement, or if the Skill's Affinity was Sloth, deal <style=\"upgradeHighlight\">+25% damage</style> instead.",
-    "Skills deal <style=\"upgradeHighlight\">+15% damage</style> to Staggered enemies.\n\nIf the Skill inflicts Tremor Potency, Tremor Count, triggers Amplitude Conversion, Tremor Burst, or Amplitude Entanglement, or if the Skill's Affinity was Sloth, deal <style=\"upgradeHighlight\">+30% damage</style> instead."
+    "Skills deal +12.5% damage to Staggered enemies.\n\nIf the Skill inflicts Tremor Potency, Tremor Count, triggers Amplitude Conversion, Tremor Burst, or Amplitude Entanglement, or if the Skill's Affinity was Sloth, deal +25% damage instead.",
+    "Skills deal +15% damage to Staggered enemies.\n\nIf the Skill inflicts Tremor Potency, Tremor Count, triggers Amplitude Conversion, Tremor Burst, or Amplitude Entanglement, or if the Skill's Affinity was Sloth, deal +30% damage instead."
   ],
   "obtain": "Shop"
 }

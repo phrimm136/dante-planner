@@ -2,8 +2,8 @@
   "name": "明镜止水",
   "descs": [
     "友方单位的暴击倍率从1.2倍增加至1.7倍。\n\n若因暴击消耗了[Breath]层数，则下回合使该单位获得10层[AttackUp]。(每回合每名友方单位最多生效1次)",
-    "友方单位的暴击倍率从1.2倍<style=\"upgradeHighlight\">增加至2倍</style>\n\n若因暴击消耗了[Breath]层数，则下回合使该单位<style=\"upgradeHighlight\">获得12层[AttackUp]</style>。(每回合每名友方单位最多生效1次)",
-    "友方单位的暴击倍率从1.2倍<style=\"upgradeHighlight\">增加至2.5倍</style>\n\n若因暴击消耗了[Breath]层数，则下回合使该单位<style=\"upgradeHighlight\">获得15层[AttackUp]</style>。(每回合每名友方单位最多生效1次)"
+    "友方单位的暴击倍率从1.2倍增加至2倍\n\n若因暴击消耗了[Breath]层数，则下回合使该单位获得12层[AttackUp]。(每回合每名友方单位最多生效1次)",
+    "友方单位的暴击倍率从1.2倍增加至2.5倍\n\n若因暴击消耗了[Breath]层数，则下回合使该单位获得15层[AttackUp]。(每回合每名友方单位最多生效1次)"
   ],
   "obtain": "Shop"
 }

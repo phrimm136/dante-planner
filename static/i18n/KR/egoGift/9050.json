@@ -2,8 +2,8 @@
   "name": "붉게 물든 목화",
   "descs": [
     "스테이지 첫 턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 [Laceration] 위력 1, [Laceration] 횟수 15 부여.\n\n턴 시작 시 [Laceration] 상태인 적의 공격 레벨과 방어 레벨이 이번 턴 동안 ([Laceration] 위력 / 3)만큼 감소 ([Laceration] 위력 30 스택 시, 효과 최대).",
-    "<style=\"upgradeHighlight\">웨이브 첫 턴 시작 시</style>, 모든 적(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Laceration] 위력 2</style>, [Laceration] 횟수 15 부여.\n\n턴 시작 시 [Laceration] 상태인 적의 공격 레벨과 방어 레벨이 이번 턴 동안 ([Laceration] 위력 / 3)만큼 감소 ([Laceration] 위력 30 스택 시, 효과 최대).",
-    "웨이브 첫 턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 <style=\"upgradeHighlight\">[Laceration] 위력 4, [Laceration] 횟수 20 부여.</style>\n\n턴 시작 시 [Laceration] 상태인 적의 공격 레벨과 방어 레벨이 이번 턴 동안 <style=\"upgradeHighlight\">([Laceration] 위력 / 2)만큼 감소</style> ([Laceration] 위력 30 스택 시, 효과 최대)."
+    "웨이브 첫 턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 [Laceration] 위력 2, [Laceration] 횟수 15 부여.\n\n턴 시작 시 [Laceration] 상태인 적의 공격 레벨과 방어 레벨이 이번 턴 동안 ([Laceration] 위력 / 3)만큼 감소 ([Laceration] 위력 30 스택 시, 효과 최대).",
+    "웨이브 첫 턴 시작 시, 모든 적(환상체일 경우, 모든 부위)에게 [Laceration] 위력 4, [Laceration] 횟수 20 부여.\n\n턴 시작 시 [Laceration] 상태인 적의 공격 레벨과 방어 레벨이 이번 턴 동안 ([Laceration] 위력 / 2)만큼 감소 ([Laceration] 위력 30 스택 시, 효과 최대)."
   ],
   "obtain": "Shop"
 }

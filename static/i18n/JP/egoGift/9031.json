@@ -2,8 +2,8 @@
   "name": "ニクシー・ダイバージェンス",
   "descs": [
     "ステージの1ターン目が開始時、敵全体(幻想体の場合は全部位)へ[Vibration]威力4, [Vibration]回数4を付与。\n\n嫉妬属性スキルが敵に的中時、対象へ[Vibration]威力2を付与。",
-    "<style=\"upgradeHighlight\">ウェーブの最初のターンが開始時</style>、敵全体(幻想体の場合は全部位)へ[Vibration]威力4, [Vibration]回数4を付与。\n\n嫉妬属性スキルが敵に的中時、対象へ[Vibration]威力2を付与。",
-    "ウェーブの最初のターンが開始時、敵全体(幻想体の場合は全部位)へ<style=\"upgradeHighlight\">[Vibration]威力5, [Vibration]回数5を付与。</style>\n\n嫉妬属性スキルが敵に的中時、対象へ<style=\"upgradeHighlight\">[Vibration]威力3を付与。</style>"
+    "ウェーブの最初のターンが開始時、敵全体(幻想体の場合は全部位)へ[Vibration]威力4, [Vibration]回数4を付与。\n\n嫉妬属性スキルが敵に的中時、対象へ[Vibration]威力2を付与。",
+    "ウェーブの最初のターンが開始時、敵全体(幻想体の場合は全部位)へ[Vibration]威力5, [Vibration]回数5を付与。\n\n嫉妬属性スキルが敵に的中時、対象へ[Vibration]威力3を付与。"
   ],
   "obtain": "Shop"
 }

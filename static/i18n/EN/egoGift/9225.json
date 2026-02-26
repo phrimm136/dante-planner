@@ -1,0 +1,9 @@
+{
+  "name": "The Spider's Thread",
+  "descs": [
+    "Allies who use Defense Skill deal +10% damage with Skill 3 next turn (once per turn)",
+    "Allies who use Defense Skill deal +15% damage with Skill 3 next turn (once per turn)",
+    "Allies who use Defense Skill deal +20% damage with Skill 3 next turn (once per turn)"
+  ],
+  "obtain": "Shop"
+}

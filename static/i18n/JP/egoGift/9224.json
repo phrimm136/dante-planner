@@ -1,0 +1,9 @@
+{
+  "name": "秀作",
+  "descs": [
+    "薬指所属人格が[Inspire]を得る\n\n[Inspire]を保有した薬指所属人格の攻撃スキルが的中した敵に[ObjectOfExploration]を付与\n- 敵が[ObjectOfExploration]を既に保有しているとき、[ObjectOfExploration]が[PaintingMaterial]に入れ替わる\n\n[PaintingMaterial]がある対象を[Inspire]を持つ薬指所属人格が倒したなら、\nその薬指所属人員が[Inspire]を失って、[GreatAesthetics]を得る",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

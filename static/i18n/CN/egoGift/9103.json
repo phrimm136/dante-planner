@@ -2,8 +2,8 @@
   "name": "郁火",
   "descs": [
     "通过技能效果使带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度，对其施加[Combustion]层数或施加特殊烧伤时，下回合使自身获得1层[Agility]。(每个技能最多1次，每回合最多2次)\n\n若该友方单位带有[Agility]，则改为获得1层[Agility]与2层[AttackUp]。",
-    "通过技能效果使带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度，对其施加[Combustion]层数或施加特殊烧伤时，下回合使自身获得1层[Agility]。(每个技能最多1次，每回合最多3次)\n\n若该友方单位带有[Agility]，则改为获得<style=\"upgradeHighlight\">2层[Agility]</style>与2层[AttackUp]。",
-    "通过技能效果使带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度，对其施加[Combustion]层数或施加特殊烧伤时，下回合使自身获得1层[Agility]。(每个技能最多1次，每回合最多3次)\n\n若该友方单位带有[Agility]，则改为获得2层[Agility]，2层[AttackUp]与<style=\"upgradeHighlight\">2层伤害强化 </style>。"
+    "通过技能效果使带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度，对其施加[Combustion]层数或施加特殊烧伤时，下回合使自身获得1层[Agility]。(每个技能最多1次，每回合最多3次)\n\n若该友方单位带有[Agility]，则改为获得2层[Agility]与2层[AttackUp]。",
+    "通过技能效果使带有[Combustion]或特殊烧伤的敌方单位增加[Combustion]强度，对其施加[Combustion]层数或施加特殊烧伤时，下回合使自身获得1层[Agility]。(每个技能最多1次，每回合最多3次)\n\n若该友方单位带有[Agility]，则改为获得2层[Agility]，2层[AttackUp]与2层伤害强化 。"
   ],
   "obtain": "Shop"
 }

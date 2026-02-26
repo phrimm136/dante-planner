@@ -2,8 +2,8 @@
   "name": "Butler Style Binding Arts",
   "descs": [
     "Turn Start: inflict 1 [Binding] against the enemy who recovered from Stagger last turn\n\nOn Hit from an ally with the highest HP percentage: if the target is Staggered, deal +7.5% damage for every Stagger Level.",
-    "Turn Start: inflict <style=\"upgradeHighlight\">2</style> [Binding] against the enemy who recovered from Stagger last turn\n\nOn Hit from an ally with the highest HP percentage: if the target is Staggered, deal +<style=\"upgradeHighlight\">10%</style> damage for every Stagger Level.",
-    "Turn Start: inflict <style=\"upgradeHighlight\">3</style> [Binding] against the enemy who recovered from Stagger last turn\n\nOn Hit from an ally with the highest HP percentage: if the target is Staggered, deal +<style=\"upgradeHighlight\">12.5%</style> damage for every Stagger Level."
+    "Turn Start: inflict 2 [Binding] against the enemy who recovered from Stagger last turn\n\nOn Hit from an ally with the highest HP percentage: if the target is Staggered, deal +10% damage for every Stagger Level.",
+    "Turn Start: inflict 3 [Binding] against the enemy who recovered from Stagger last turn\n\nOn Hit from an ally with the highest HP percentage: if the target is Staggered, deal +12.5% damage for every Stagger Level."
   ],
   "obtain": "Shop"
 }

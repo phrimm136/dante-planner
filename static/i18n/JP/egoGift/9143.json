@@ -2,8 +2,8 @@
   "name": "木工用の大釘",
   "descs": [
     "[編成4番人格専用効果]\n\n貫通攻撃スキルを2つ以上保有している場合、ターン開始時に[PenetrateDamageUp]1を得る",
-    "[編成4番人格専用効果]\n\n貫通攻撃スキルを2つ以上保有している場合、ターン開始時に[PenetrateDamageUp]<style=\"upgradeHighlight\">2</style>を得る",
-    "[編成4・<style=\"upgradeHighlight\">5</style>番人格専用効果]\n\n貫通攻撃スキルを2つ以上保有している場合、ターン開始時に[PenetrateDamageUp]2を得る"
+    "[編成4番人格専用効果]\n\n貫通攻撃スキルを2つ以上保有している場合、ターン開始時に[PenetrateDamageUp]2を得る",
+    "[編成4・5番人格専用効果]\n\n貫通攻撃スキルを2つ以上保有している場合、ターン開始時に[PenetrateDamageUp]2を得る"
   ],
   "obtain": "Shop"
 }

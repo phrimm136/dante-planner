@@ -2,8 +2,8 @@
   "name": "Torn Bandolier",
   "descs": [
     "Pierce Skills gain Clash Power +1\n\nSkills that consume [Bullet] deal +(40/# of Coins)% damage\n\nIf the unit is out of [Bullet], gain 2 [Bullet] at the next Turn Start (once per Encounter per Identity)",
-    "Pierce Skills gain Clash Power +1 <style=\"upgradeHighlight\">and deal +5% damage</style>\n\nSkills that consume [Bullet] deal +(<style=\"upgradeHighlight\">50</style>/# of Coins)% damage\n\nIf the unit is out of [Bullet], gain 2 [Bullet] at the next Turn Start (once per Encounter per Identity)",
-    "Pierce Skills gain Clash Power +1 and deal <style=\"upgradeHighlight\">+10%</style> damage\n\nSkills that consume [Bullet] deal +(<style=\"upgradeHighlight\">60</style>/# of Coins)% damage\n\nIf the unit is out of [Bullet], gain 2 [Bullet] at the next Turn Start (once per Encounter per Identity)"
+    "Pierce Skills gain Clash Power +1 and deal +5% damage\n\nSkills that consume [Bullet] deal +(50/# of Coins)% damage\n\nIf the unit is out of [Bullet], gain 2 [Bullet] at the next Turn Start (once per Encounter per Identity)",
+    "Pierce Skills gain Clash Power +1 and deal +10% damage\n\nSkills that consume [Bullet] deal +(60/# of Coins)% damage\n\nIf the unit is out of [Bullet], gain 2 [Bullet] at the next Turn Start (once per Encounter per Identity)"
   ],
   "obtain": "Shop"
 }

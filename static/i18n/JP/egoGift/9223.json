@@ -1,0 +1,9 @@
+{
+  "name": "凡作",
+  "descs": [
+    "薬指所属人格が[Inspire]を得る\n\n[Inspire]を保有した薬指所属人格の色欲属性、または斬撃属性スキルが的中した敵に、次のターンにて[ObjectOfExploration]を付与\n- 敵が[ObjectOfExploration]を既に保有しているとき、[ObjectOfExploration]が[PaintingMaterial]に入れ替わる\n\n[PaintingMaterial]がある対象を[Inspire]を持つ薬指所属人員が倒したなら、次のターンに[PlusCoinValueUp]1を得る (1ターンにつき1回)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

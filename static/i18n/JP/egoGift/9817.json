@@ -2,8 +2,8 @@
   "name": "青い星の欠片",
   "descs": [
     "士気低下またはパニック状態の敵のスキル最終威力 -1 (精神力が無い敵は[Sinking]威力が25以上のときに発動)\n- 該当する敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与するスキルでダメージを与える場合、[DefenseDown]2を付与 (1ターンにつき最大2回)",
-    "士気低下またはパニック状態の敵のスキル最終威力 <style=\"upgradeHighlight\">-2</style> (精神力が無い敵は[Sinking]威力が<style=\"upgradeHighlight\">15</style>以上のときに発動)\n- 該当する敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与するスキルでダメージを与える場合、[DefenseDown]<style=\"upgradeHighlight\">3</style>を付与 (1ターンにつき最大2回)",
-    "士気低下またはパニック状態の敵のスキル最終威力 <style=\"upgradeHighlight\">-3</style> (精神力が無い敵は[Sinking]威力が<style=\"upgradeHighlight\">10</style>以上のときに発動)\n- 該当する敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与するスキルでダメージを与える場合、[DefenseDown]3を付与 (1ターンにつき最大<style=\"upgradeHighlight\">3</style>回)"
+    "士気低下またはパニック状態の敵のスキル最終威力 -2 (精神力が無い敵は[Sinking]威力が15以上のときに発動)\n- 該当する敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与するスキルでダメージを与える場合、[DefenseDown]3を付与 (1ターンにつき最大2回)",
+    "士気低下またはパニック状態の敵のスキル最終威力 -3 (精神力が無い敵は[Sinking]威力が10以上のときに発動)\n- 該当する敵に[Sinking]威力、[Sinking]回数または特殊沈潜を付与するスキルでダメージを与える場合、[DefenseDown]3を付与 (1ターンにつき最大3回)"
   ],
   "obtain": "Shop"
 }

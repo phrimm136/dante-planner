@@ -2,8 +2,8 @@
   "name": "무정전 전원장치",
   "descs": [
     "턴 종료 시 [Charge] 횟수가 3 미만인 경우에는 다음 턴 시작 시 [Charge] 횟수 3 증가. (특수 충전을 포함)\n\n턴 종료 시 [Charge] 횟수가 3 이상인 경우에는 다음 턴 시작 시 [AttackDmgUp] 1 얻음. (특수 충전을 포함)",
-    "턴 종료 시 [Charge] 횟수가 <style=\"upgradeHighlight\">4</style> 미만인 경우에는 다음 턴 시작 시 [Charge] 횟수 3 증가. (특수 충전을 포함)\n\n턴 종료 시 [Charge] 횟수가 <style=\"upgradeHighlight\">4</style> 이상인 경우에는 다음 턴 시작 시 [AttackDmgUp] 1 얻음. (특수 충전을 포함)",
-    "턴 종료 시 [Charge] 횟수가 <style=\"upgradeHighlight\">5</style> 미만인 경우에는 다음 턴 시작 시 [Charge] 횟수 <style=\"upgradeHighlight\">4</style> 증가. (특수 충전을 포함)\n\n턴 종료 시 [Charge] 횟수가 <style=\"upgradeHighlight\">5</style> 이상인 경우에는 다음 턴 시작 시 [AttackDmgUp] <style=\"upgradeHighlight\">2</style> 얻음. (특수 충전을 포함)"
+    "턴 종료 시 [Charge] 횟수가 4 미만인 경우에는 다음 턴 시작 시 [Charge] 횟수 3 증가. (특수 충전을 포함)\n\n턴 종료 시 [Charge] 횟수가 4 이상인 경우에는 다음 턴 시작 시 [AttackDmgUp] 1 얻음. (특수 충전을 포함)",
+    "턴 종료 시 [Charge] 횟수가 5 미만인 경우에는 다음 턴 시작 시 [Charge] 횟수 4 증가. (특수 충전을 포함)\n\n턴 종료 시 [Charge] 횟수가 5 이상인 경우에는 다음 턴 시작 시 [AttackDmgUp] 2 얻음. (특수 충전을 포함)"
   ],
   "obtain": "Shop"
 }

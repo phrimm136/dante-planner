@@ -2068,5 +2068,35 @@
     "desc": "- Max Stack: 10\n- Deal +10% damage for every Stack",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "GreatAesthetics": {
+    "name": "Exquisite Aesthetics",
+    "desc": "- Plus Coin Skills gain Coin Power +1\n- Minus Coin Skills gain Base Power +(4 / # of Coins)\n- Deal +30% damage with Skills",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Inspire": {
+    "name": "Spark of Inspiration",
+    "desc": "Deal +10% damage against targets with Art Medium",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ObjectOfExploration": {
+    "name": "Curio",
+    "desc": "When certain conditions are fulfilled, replace this effect with 'Art Medium'",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "PaintingMaterial": {
+    "name": "Art Medium",
+    "desc": "If this unit has Bleed (in Focused Encounters, count Bleed on each Part separately), take +10% damage from Lust Skills",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "AzureResultUp": {
+    "name": "Gloom Power Up",
+    "desc": "Gloom Skills gain final Power by the effect’s Count for one turn.",
+    "iconId": null,
+    "buffType": "Positive"
   }
 }

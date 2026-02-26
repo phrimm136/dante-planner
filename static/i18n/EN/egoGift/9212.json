@@ -1,0 +1,9 @@
+{
+  "name": "The End of all Evil",
+  "descs": [
+    "Activates when there are 3 or more The Pequod-faction Identities (counting Backup units)\n\nOn Hit with an Attack Skill against enemies with [Laceration]: 50% chance to gain 3 [Breath] or +2 [Breath] Count (3 times per turn for each character)\n\nOn Crit: 80% chance to not consume [Breath] Count (once per turn for each character; including E.G.O Skills and Counter Skills)\nOn Crit Heads Hit with a Base Skill: Inflict +1 more of the negative effect with that Coin (once per turn for each character; including Counter Skills and excluding E.G.O Skills)\n\nIf #1 Deployed Identity kills an enemy, The Pequod-faction Identities gain 1 [PenetrateResultUp], 1 [Protection], and 1 [CriticalDamageUp] each turn for the rest of this Encounter (max 3 times per Encounter)\n\nIf one of The Pequod-faction Identities attacks and hits an enemy, heal 7 SP for The Pequod-faction Identity with the earliest Deployment order (once per Skill)\nWhen an ally kills an enemy, heal 15 SP for The Pequod-faction Identity with the earliest Deployment order if said Identity lost SP",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -2,8 +2,8 @@
   "name": "가시 올가미",
   "descs": [
     "턴 종료 시, 모든 적에게 현재 속도만큼 [Burst] 위력을 부여.\n\n색욕 완전 공명을 발동하였다면 전투 시작 시, 무작위 적 하나에게 [Burst] 위력 3, [Burst] 횟수 3 부여.",
-    "턴 종료 시, 모든 적에게 <style=\"upgradeHighlight\">(현재 속도 +1)만큼</style> [Burst] 위력을 부여.\n\n색욕 완전 공명을 발동하였다면 전투 시작 시, 무작위 적 하나에게 <style=\"upgradeHighlight\">[Burst] 위력 4</style>, [Burst] 횟수 3 부여.",
-    "턴 종료 시, 모든 적에게 <style=\"upgradeHighlight\">(현재 속도 +2)만큼</style> [Burst] 위력을 부여.\n\n색욕 완전 공명을 발동하였다면 전투 시작 시, 무작위 적 하나에게 <style=\"upgradeHighlight\">[Burst] 위력 5, [Burst] 횟수 4 부여.</style>"
+    "턴 종료 시, 모든 적에게 (현재 속도 +1)만큼 [Burst] 위력을 부여.\n\n색욕 완전 공명을 발동하였다면 전투 시작 시, 무작위 적 하나에게 [Burst] 위력 4, [Burst] 횟수 3 부여.",
+    "턴 종료 시, 모든 적에게 (현재 속도 +2)만큼 [Burst] 위력을 부여.\n\n색욕 완전 공명을 발동하였다면 전투 시작 시, 무작위 적 하나에게 [Burst] 위력 5, [Burst] 횟수 4 부여."
   ],
   "obtain": "Shop"
 }

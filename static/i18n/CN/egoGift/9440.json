@@ -2,7 +2,7 @@
   "name": "游行的面具",
   "descs": [
     "遭遇战中新的敌方单位增援时，战斗开始时使其增加3级[Laceration]强度并对其施加2层[Laceration]。\n\n若友方单位中存在<血魔>，则新的敌方单位增援时触发全体敌方单位的[Laceration]1次，并使全体敌方单位的[Laceration]层数减少1层",
-    "遭遇战中新的敌方单位增援时，战斗开始时使其增加<style=\"upgradeHighlight\">5</style>级[Laceration]强度并对其施加<style=\"upgradeHighlight\">3</style>层[Laceration]。\n\n若友方单位中存在<血魔>，则新的敌方单位增援时触发全体敌方单位的[Laceration]1次，并使全体敌方单位的[Laceration]层数减少1层",
+    "遭遇战中新的敌方单位增援时，战斗开始时使其增加5级[Laceration]强度并对其施加3层[Laceration]。\n\n若友方单位中存在<血魔>，则新的敌方单位增援时触发全体敌方单位的[Laceration]1次，并使全体敌方单位的[Laceration]层数减少1层",
     ""
   ],
   "obtain": "Shop"

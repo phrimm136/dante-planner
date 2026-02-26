@@ -2,8 +2,8 @@
   "name": "棘の投げ縄",
   "descs": [
     "ターン終了時、すべての敵に現在の速度だけ[Burst]威力を付与。\n\n色欲完全共鳴を発動した場合は戦闘開始時、ランダムな敵1名に[Burst]威力3, [Burst]回数3を付与。",
-    "ターン終了時、すべての敵に<style=\"upgradeHighlight\">現在の(速度 +1)だけ</style>[Burst]威力を付与。\n\n色欲完全共鳴を発動した場合は戦闘開始時、ランダムな敵1名に<style=\"upgradeHighlight\">[Burst]威力4</style>, [Burst]回数3を付与。",
-    "ターン終了時、すべての敵に<style=\"upgradeHighlight\">現在の(速度 +2)だけ</style>[Burst]威力を付与。\n\n色欲完全共鳴を発動した場合は戦闘開始時、ランダムな敵1名に<style=\"upgradeHighlight\">[Burst]威力5, [Burst]回数4を付与。</style>"
+    "ターン終了時、すべての敵に現在の(速度 +1)だけ[Burst]威力を付与。\n\n色欲完全共鳴を発動した場合は戦闘開始時、ランダムな敵1名に[Burst]威力4, [Burst]回数3を付与。",
+    "ターン終了時、すべての敵に現在の(速度 +2)だけ[Burst]威力を付与。\n\n色欲完全共鳴を発動した場合は戦闘開始時、ランダムな敵1名に[Burst]威力5, [Burst]回数4を付与。"
   ],
   "obtain": "Shop"
 }

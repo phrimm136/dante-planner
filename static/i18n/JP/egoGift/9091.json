@@ -2,8 +2,8 @@
   "name": "真実の鐘",
   "descs": [
     "[VibrationExplosion]が適用された敵へ、このターンにて[Vulnerable]1を付与。(攻撃スキルを使用して[VibrationExplosion]時、スキルごとに最大1回)",
-    "[VibrationExplosion]が適用された敵へ、<style=\"upgradeHighlight\">このターンと次のターンにて</style>[Vulnerable]1を付与。(攻撃スキルを使用して[VibrationExplosion]時、スキルごとに最大1回)",
-    "[VibrationExplosion]が適用された敵へ、このターンと次のターンにて<style=\"upgradeHighlight\">[Vulnerable]2を付与。</style>(攻撃スキルを使用して[VibrationExplosion]時、スキルごとに最大1回)"
+    "[VibrationExplosion]が適用された敵へ、このターンと次のターンにて[Vulnerable]1を付与。(攻撃スキルを使用して[VibrationExplosion]時、スキルごとに最大1回)",
+    "[VibrationExplosion]が適用された敵へ、このターンと次のターンにて[Vulnerable]2を付与。(攻撃スキルを使用して[VibrationExplosion]時、スキルごとに最大1回)"
   ],
   "obtain": "Shop"
 }

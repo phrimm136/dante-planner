@@ -1,0 +1,9 @@
+{
+  "name": "Golden Hour",
+  "descs": [
+    "Min & Max Speed +3 for all allies\nFinal Power +2 when using Skills against slower targets with 4+ Speed difference\nOn Hit against an enemy, inflict 1 Bind next turn (4 times per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

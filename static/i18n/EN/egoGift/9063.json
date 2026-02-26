@@ -2,8 +2,8 @@
   "name": "Pendant of Nostalgia",
   "descs": [
     "Combat Start: a random ally gains 3 [Breath] Potency. (Prioritizes Identities with Attack Skills that gain [Breath] Counts)\n\nPrioritizes allies with Gloom Affinity Attack Skills; those allies gain 3 [Breath] Potency and +2 [Breath] Count.",
-    "Combat Start: a random ally gains <style=\"upgradeHighlight\">4 [Breath] Potency</style>. (Prioritizes Identities with Attack Skills that gain [Breath] Counts)\n\nPrioritizes allies with Gloom Affinity Attack Skills; those allies gain <style=\"upgradeHighlight\">4 [Breath] Potency and +3 [Breath] Count.</style>",
-    "Combat Start: <style=\"upgradeHighlight\">two random allies</style> gain 4 [Breath] Potency. (Prioritizes Identities with Attack Skills that gain [Breath] Counts)\n\nPrioritizes allies with Gloom Affinity Attack Skills; those allies gain 4 [Breath] Potency and +3 [Breath] Count."
+    "Combat Start: a random ally gains 4 [Breath] Potency. (Prioritizes Identities with Attack Skills that gain [Breath] Counts)\n\nPrioritizes allies with Gloom Affinity Attack Skills; those allies gain 4 [Breath] Potency and +3 [Breath] Count.",
+    "Combat Start: two random allies gain 4 [Breath] Potency. (Prioritizes Identities with Attack Skills that gain [Breath] Counts)\n\nPrioritizes allies with Gloom Affinity Attack Skills; those allies gain 4 [Breath] Potency and +3 [Breath] Count."
   ],
   "obtain": "Shop"
 }

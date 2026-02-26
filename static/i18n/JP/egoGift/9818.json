@@ -2,8 +2,8 @@
   "name": "残された次元ガントレット",
   "descs": [
     "[Charge]回数または特殊充電を消耗するスキルで敵にダメージを与えたなら、このターンの間、その敵の物理耐性のうち最も低い値 +0.1 (1ターンにつき1回)",
-    "[Charge]回数または特殊充電を消耗するスキルで敵にダメージを与えたなら、このターンの間、その敵の物理耐性のうち最も低い値 +0.1 (1ターンにつき1回)\n<style=\"upgradeHighlight\">- 追加で[VioletResistDown]1を付与</style>",
-    "[Charge]回数または特殊充電を消耗するスキルで敵にダメージを与えたなら、このターンの間、その敵の物理耐性のうち最も低い値 +0.1 (1ターンにつき<style=\"upgradeHighlight\">2</style>回)\n- 追加で[VioletResistDown]1, <style=\"upgradeHighlight\">[AzureResistDown]1を付与</style>"
+    "[Charge]回数または特殊充電を消耗するスキルで敵にダメージを与えたなら、このターンの間、その敵の物理耐性のうち最も低い値 +0.1 (1ターンにつき1回)\n- 追加で[VioletResistDown]1を付与",
+    "[Charge]回数または特殊充電を消耗するスキルで敵にダメージを与えたなら、このターンの間、その敵の物理耐性のうち最も低い値 +0.1 (1ターンにつき2回)\n- 追加で[VioletResistDown]1, [AzureResistDown]1を付与"
   ],
   "obtain": "Shop"
 }

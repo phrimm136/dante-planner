@@ -2,8 +2,8 @@
   "name": "Temporal Bridle",
   "descs": [
     "Turn Start: units with a Blunt Attack Skill(except E.G.O Skills) gain 1 [AttackUp].\n\nUnits with 2+ Blunt Attack Skills gain 1 [AttackUp] and 1 [HitDamageUp] instead.\n\nUnits with 2+ Blunt Attack Skills that use Minus Coins gain 2 [AttackUp] and 2 [HitDamageUp] instead.",
-    "Turn Start: Units with Blunt Attack Skills(except E.G.O Skills) gain <style=\"upgradeHighlight\">2</style> [AttackUp] at Turn Start.\n\nUnits with 2+ Blunt Attack Skills gain <style=\"upgradeHighlight\">2</style> [AttackUp] and 1 [HitDamageUp] instead.\n\nUnits with 2+ Blunt Attack Skills that use Minus Coins gain <style=\"upgradeHighlight\">3</style> [AttackUp] and 2 [HitDamageUp] instead.",
-    "Turn Start: Units with Blunt Attack Skills(except E.G.O Skills) gain 2 [AttackUp] and <style=\"upgradeHighlight\">1 [HitDamageUp]</style> at Turn Start.\n\nUnits with 2+ Blunt Attack Skills gain 2 [AttackUp] and <style=\"upgradeHighlight\">2</style> [HitDamageUp] instead.\n\nUnits with 2+ Blunt Attack Skills that use Minus Coins gain 3 [AttackUp] and <style=\"upgradeHighlight\">3</style> [HitDamageUp] instead."
+    "Turn Start: Units with Blunt Attack Skills(except E.G.O Skills) gain 2 [AttackUp] at Turn Start.\n\nUnits with 2+ Blunt Attack Skills gain 2 [AttackUp] and 1 [HitDamageUp] instead.\n\nUnits with 2+ Blunt Attack Skills that use Minus Coins gain 3 [AttackUp] and 2 [HitDamageUp] instead.",
+    "Turn Start: Units with Blunt Attack Skills(except E.G.O Skills) gain 2 [AttackUp] and 1 [HitDamageUp] at Turn Start.\n\nUnits with 2+ Blunt Attack Skills gain 2 [AttackUp] and 2 [HitDamageUp] instead.\n\nUnits with 2+ Blunt Attack Skills that use Minus Coins gain 3 [AttackUp] and 3 [HitDamageUp] instead."
   ],
   "obtain": "Shop"
 }

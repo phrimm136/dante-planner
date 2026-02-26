@@ -2,8 +2,8 @@
   "name": "인연 조각",
   "descs": [
     "획득 시, 편성 인격의 레벨 5 증가.",
-    "획득 시, 편성 인격의 <style=\"upgradeHighlight\">레벨 7 증가.</style>",
-    "획득 시, 편성 인격의 <style=\"upgradeHighlight\">레벨 10 증가.</style>"
+    "획득 시, 편성 인격의 레벨 7 증가.",
+    "획득 시, 편성 인격의 레벨 10 증가."
   ],
   "obtain": "Shop"
 }

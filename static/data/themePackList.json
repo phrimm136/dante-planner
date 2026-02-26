@@ -532,6 +532,69 @@
       "textColor": "b60000"
     }
   },
+  "1025": {
+    "exceptionConditions": [
+      {
+        "dungeonIdx": 1,
+        "selectableFloors": [
+          4
+        ]
+      },
+      {
+        "dungeonIdx": 2
+      }
+    ],
+    "specificEgoGiftPool": [
+      9214,
+      9215
+    ],
+    "themePackConfig": {
+      "textColor": "b60000"
+    }
+  },
+  "1026": {
+    "exceptionConditions": [
+      {
+        "dungeonIdx": 1,
+        "selectableFloors": [
+          4
+        ]
+      },
+      {
+        "dungeonIdx": 2
+      }
+    ],
+    "specificEgoGiftPool": [
+      9222,
+      9223,
+      9225,
+      9226
+    ],
+    "themePackConfig": {
+      "textColor": "b60000"
+    }
+  },
+  "1027": {
+    "exceptionConditions": [
+      {
+        "dungeonIdx": 1,
+        "selectableFloors": [
+          4
+        ]
+      },
+      {
+        "dungeonIdx": 2
+      }
+    ],
+    "specificEgoGiftPool": [
+      9217,
+      9218,
+      9219
+    ],
+    "themePackConfig": {
+      "textColor": "b60000"
+    }
+  },
   "1101": {
     "exceptionConditions": [
       {

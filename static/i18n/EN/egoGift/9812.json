@@ -2,8 +2,8 @@
   "name": "Interlinked Time",
   "descs": [
     "When triggering [Switch_Vibration] or [FusionVibration], trigger [VibrationExplosion] on target (once per turn per Identity)",
-    "When triggering [Switch_Vibration] or [FusionVibration], trigger [VibrationExplosion] on target (<style=\"upgradeHighlight\">2 times</style> per turn per Identity)",
-    "When triggering [Switch_Vibration] or [FusionVibration], trigger [VibrationExplosion] on target (<style=\"upgradeHighlight\">3</style> times per turn per Identity)"
+    "When triggering [Switch_Vibration] or [FusionVibration], trigger [VibrationExplosion] on target (2 times per turn per Identity)",
+    "When triggering [Switch_Vibration] or [FusionVibration], trigger [VibrationExplosion] on target (3 times per turn per Identity)"
   ],
   "obtain": "Shop"
 }

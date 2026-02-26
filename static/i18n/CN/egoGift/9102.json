@@ -2,8 +2,8 @@
   "name": "偏振光",
   "descs": [
     "若友方单位的理智值高于目标至少30点，则使该友方单位增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能造成的伤害+7.5%(未带有理智值的敌方单位以理智值为0点计算)",
-    "若友方单位的理智值高于目标至少<style=\"upgradeHighlight\">25</style>点，则使该友方单位增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能<style=\"upgradeHighlight\">造成的伤害+12.5%</style>(未带有理智值的敌方单位以理智值为0点计算)",
-    "若友方单位的理智值高于目标至少<style=\"upgradeHighlight\">15</style>点，则使该友方单位增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能<style=\"upgradeHighlight\">造成的伤害+20%</style>(未带有理智值的敌方单位以理智值为0点计算)"
+    "若友方单位的理智值高于目标至少25点，则使该友方单位增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能造成的伤害+12.5%(未带有理智值的敌方单位以理智值为0点计算)",
+    "若友方单位的理智值高于目标至少15点，则使该友方单位增加[Combustion]强度，施加[Combustion]层数或施加特殊烧伤的技能造成的伤害+20%(未带有理智值的敌方单位以理智值为0点计算)"
   ],
   "obtain": "Shop"
 }
