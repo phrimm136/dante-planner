@@ -2,8 +2,8 @@
   "name": "Tangled Bundle",
   "descs": [
     "When the ally with the fastest Speed deals damage to an enemy with a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', deal +12.5% damage.",
-    "When <style=\"upgradeHighlight\">2</style> allies with the fastest Speed deals damage to an enemy with a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', deal <style=\"upgradeHighlight\">+15%</style> damage.",
-    "When <style=\"upgradeHighlight\">3</style> allies with the fastest Speed deals damage to an enemy with a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', deal <style=\"upgradeHighlight\">+20%</style> damage."
+    "When 2 allies with the fastest Speed deals damage to an enemy with a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', deal +15% damage.",
+    "When 3 allies with the fastest Speed deals damage to an enemy with a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', deal +20% damage."
   ],
   "obtain": "Shop"
 }

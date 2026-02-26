@@ -2,8 +2,8 @@
   "name": "Awe",
   "descs": [
     "[Effects apply only to #1, #2 Deployed Identities]\n\nWhen using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', and if the main target has 7+ [Laceration] Count, deal +10% damage",
-    "[Effects apply only to #1, #2, and <style=\"upgradeHighlight\">#3</style> Deployed Identities]\n\nWhen using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', and if the main target has 5+ [Laceration] Count, deal <style=\"upgradeHighlight\">+15%</style> damage",
-    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nWhen using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', and if the main target has 3+ [Laceration] Count, deal <style=\"upgradeHighlight\">+20%</style> damage"
+    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nWhen using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', and if the main target has 5+ [Laceration] Count, deal +15% damage",
+    "[Effects apply only to #1, #2, and #3 Deployed Identities]\n\nWhen using a Skill that inflicts [Laceration] Potency, Count, or 'Unique Bleed', and if the main target has 3+ [Laceration] Count, deal +20% damage"
   ],
   "obtain": "Shop"
 }

@@ -2,8 +2,8 @@
   "name": "Pain of Stifled Rage",
   "descs": [
     "When inflicting [Combustion] Potency, Count, or 'Unique Burn' with a Skill effect to an enemy that has [Combustion] or 'Unique Burn', gain 1 [Agility] next turn. (once per Skill, 2 times per turn)\n\nIf the affected unit already has [Agility], gain 1 [Agility] and 2 [AttackUp] instead.",
-    "When inflicting [Combustion] Potency, Count, or 'Unique Burn' with a Skill effect to an enemy that has [Combustion] or 'Unique Burn', gain 1 [Agility] next turn. (once per Skill, 3 times per turn)\n\nIf the affected unit already has [Agility], gain <style=\"upgradeHighlight\">2 [Agility]</style> and 2 [AttackUp] instead.",
-    "When inflicting [Combustion] Potency, Count, or 'Unique Burn' with a Skill effect to an enemy that has [Combustion] or 'Unique Burn', gain 1 [Agility] next turn. (once per Skill, 3 times per turn)\n\nIf the affected unit already has [Agility], gain 2 [Agility], 2 [AttackUp], and <style=\"upgradeHighlight\">2 [AttackDmgUp]</style> instead."
+    "When inflicting [Combustion] Potency, Count, or 'Unique Burn' with a Skill effect to an enemy that has [Combustion] or 'Unique Burn', gain 1 [Agility] next turn. (once per Skill, 3 times per turn)\n\nIf the affected unit already has [Agility], gain 2 [Agility] and 2 [AttackUp] instead.",
+    "When inflicting [Combustion] Potency, Count, or 'Unique Burn' with a Skill effect to an enemy that has [Combustion] or 'Unique Burn', gain 1 [Agility] next turn. (once per Skill, 3 times per turn)\n\nIf the affected unit already has [Agility], gain 2 [Agility], 2 [AttackUp], and 2 [AttackDmgUp] instead."
   ],
   "obtain": "Shop"
 }

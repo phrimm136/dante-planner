@@ -2,8 +2,8 @@
   "name": "蛇の抜け殻",
   "descs": [
     "ターン開始時、全味方が[DefenseUp]2を得る。\n各味方が(自分の[DefenseUp] ÷ 4)だけ攻撃レベルが増加する。(最大10)",
-    "ターン開始時、全味方が[DefenseUp]<style=\"upgradeHighlight\">4</style>を得る。\n各味方が(自分の[DefenseUp] ÷ <style=\"upgradeHighlight\">3</style>)だけ攻撃レベルが増加する。(最大10)",
-    "ターン開始時、全味方が[DefenseUp]4を得る。\n各味方が(自分の[DefenseUp] ÷ <style=\"upgradeHighlight\">2</style>)だけ攻撃レベルが増加する。(最大10)"
+    "ターン開始時、全味方が[DefenseUp]4を得る。\n各味方が(自分の[DefenseUp] ÷ 3)だけ攻撃レベルが増加する。(最大10)",
+    "ターン開始時、全味方が[DefenseUp]4を得る。\n各味方が(自分の[DefenseUp] ÷ 2)だけ攻撃レベルが増加する。(最大10)"
   ],
   "obtain": "Shop"
 }

@@ -226,6 +226,15 @@
         },
         "themePackEgoGiftInconsistency": "テーマパック {{pack}} では E.G.O ギフト {{gifts}} を獲得できません。リストをリセットして再設定してください。"
       },
+      "applyLatestMirror": {
+        "button": "最新の鏡を適用",
+        "title": "最新の鏡ダンジョンを適用",
+        "description": "このプランは以前の鏡ダンジョン用に作成されました。最新の鏡ダンジョンを適用すると、星の加護・スタートE.G.Oギフト・E.G.Oギフト観測の内容が最新のものに切り替わります。選択した項目は変更されません。この操作は取り消せません。",
+        "confirm": "適用",
+        "applying": "適用中...",
+        "success": "最新の鏡ダンジョンに更新しました",
+        "failed": "最新の鏡ダンジョンの適用に失敗しました"
+      },
       "conflict": {
         "title": "別のデバイスで変更されました",
         "description": "このプランは別のデバイスまたはタブで変更されました。デバイス間の変更が同期されていません。",
@@ -238,7 +247,8 @@
         "copySuffix": "{{title}} (コピー)",
         "overwriteSuccess": "変更がサーバーに保存されました",
         "discardSuccess": "サーバーバージョンを読み込みました",
-        "keepBothSuccess": "コピーが作成されました"
+        "keepBothSuccess": "コピーが作成されました",
+        "keepBothUnpublished": "コピーは公開されません"
       },
       "batchConflict": {
         "title": "別のデバイスで変更されました",

@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Bell,
   BellOff,
+  ChevronsRight,
   Edit,
   Eye,
   MessageSquare,
@@ -19,6 +20,7 @@ import { toast } from 'sonner'
 import { BannedError, TimedOutError } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ApplyLatestMirrorDialog } from './ApplyLatestMirrorDialog'
 import { CopyUrlButton } from './CopyUrlButton'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { ModeratorDeleteDialog } from './ModeratorDeleteDialog'
@@ -30,8 +32,10 @@ import { usePlannerDelete } from '@/hooks/usePlannerDelete'
 import { useModeratorPlannerDelete } from '@/hooks/useModeratorPlannerDelete'
 import { usePlannerPublish } from '@/hooks/usePlannerPublish'
 import { useToggleOwnerNotifications } from '@/hooks/usePlannerOwnerNotifications'
+import { usePlannerConfig } from '@/hooks/usePlannerConfig'
 import { usePlannerStorage } from '@/hooks/usePlannerStorage'
 import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
+import { publishedPlannerQueryKeys } from '@/hooks/usePublishedPlannerQuery'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerSyncAdapter } from '@/hooks/usePlannerSyncAdapter'
 import { useQueryClient } from '@tanstack/react-query'
@@ -55,6 +59,8 @@ interface PlannerDetailHeaderProps {
   isAuthenticated: boolean
   /** Whether sync is enabled (null = not chosen, true = enabled, false = disabled) */
   syncEnabled?: boolean | null
+  /** Parsed SaveablePlanner for the published variant owner — enables Apply Latest Mirror */
+  savedPlannerData?: SaveablePlanner
   /** Callback when edit is clicked */
   onEdit?: () => void
   /** Callback when delete is confirmed (optional, uses internal mutation if not provided) */
@@ -93,6 +99,7 @@ export function PlannerDetailHeader({
   isOwner,
   isAuthenticated,
   syncEnabled,
+  savedPlannerData,
   onEdit,
   onDelete,
   onCommentClick,
@@ -107,6 +114,8 @@ export function PlannerDetailHeader({
   const [showModeratorDeleteDialog, setShowModeratorDeleteDialog] = useState(false)
   const [showPublishWarning, setShowPublishWarning] = useState(false)
   const [isUploadingForPublish, setIsUploadingForPublish] = useState(false)
+  const [showApplyLatestMirrorDialog, setShowApplyLatestMirrorDialog] = useState(false)
+  const [isApplyingLatestMirror, setIsApplyingLatestMirror] = useState(false)
 
   const subscriptionMutation = usePlannerSubscription()
   const deleteMutation = usePlannerDelete()
@@ -117,6 +126,7 @@ export function PlannerDetailHeader({
   const syncAdapter = usePlannerSyncAdapter()
   const queryClient = useQueryClient()
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
+  const config = usePlannerConfig()
 
   // Type guards
   const isPublished = variant === 'published'
@@ -187,6 +197,50 @@ export function PlannerDetailHeader({
         },
       }
     )
+  }
+
+  const handleApplyLatestMirror = async () => {
+    const plannerToUpdate = savedPlannerData ?? savedPlanner
+    if (!plannerToUpdate || !plannerId) return
+
+    setIsApplyingLatestMirror(true)
+    setShowApplyLatestMirrorDialog(false)
+
+    try {
+      const updatedPlanner: SaveablePlanner = {
+        ...plannerToUpdate,
+        metadata: {
+          ...plannerToUpdate.metadata,
+          contentVersion: config.mdCurrentVersion,
+        },
+      }
+
+      if (isAuthenticated && (syncEnabled === true || !!plannerToUpdate.metadata.published)) {
+        // Sync to server — response is source of truth (carries server-bumped syncVersion)
+        const synced = await syncAdapter.syncToServer(updatedPlanner)
+        await savePlanner(synced)
+      } else {
+        // Local-only save (personal, sync disabled / unauthenticated)
+        // syncVersion unchanged — server-assigned, must not drift without server confirmation
+        await savePlanner(updatedPlanner)
+      }
+
+      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
+      void queryClient.invalidateQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
+
+      toast.success(t('pages.plannerMD.applyLatestMirror.success'))
+    } catch (error) {
+      console.error('Failed to apply latest mirror:', error)
+      if (error instanceof BannedError) {
+        toast.error(t('moderation.banned', { ns: 'common' }))
+      } else if (error instanceof TimedOutError) {
+        toast.error(t('moderation.timedOut', { ns: 'common' }))
+      } else {
+        toast.error(t('pages.plannerMD.applyLatestMirror.failed'))
+      }
+    } finally {
+      setIsApplyingLatestMirror(false)
+    }
   }
 
   const handlePublishToggle = () => {
@@ -396,6 +450,17 @@ export function PlannerDetailHeader({
           <h1 className="text-2xl font-bold">{publishedPlanner.title || t('untitled')}</h1>
 
           <div className="flex items-center gap-1 shrink-0">
+            {isOwner && savedPlannerData && savedPlannerData.metadata.contentVersion < config.mdCurrentVersion && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowApplyLatestMirrorDialog(true)}
+                disabled={isApplyingLatestMirror}
+              >
+                <ChevronsRight className="size-4" />
+                <span className="hidden lg:inline">{t('pages.plannerMD.applyLatestMirror.button')}</span>
+              </Button>
+            )}
             {isOwner && onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <Edit className="size-4" />
@@ -499,6 +564,14 @@ export function PlannerDetailHeader({
           plannerTitle={publishedPlanner.title || t('untitled')}
           onConfirm={handleDeleteConfirm}
           isPending={deleteMutation.isPending}
+        />
+
+        {/* Apply Latest Mirror Dialog */}
+        <ApplyLatestMirrorDialog
+          open={showApplyLatestMirrorDialog}
+          onOpenChange={setShowApplyLatestMirrorDialog}
+          onConfirm={() => { void handleApplyLatestMirror() }}
+          isPending={isApplyingLatestMirror}
         />
 
         {/* Moderator Delete Dialog */}
@@ -617,6 +690,17 @@ export function PlannerDetailHeader({
           </h1>
 
           <div className="flex items-center gap-1 shrink-0">
+            {savedPlanner.metadata.contentVersion < config.mdCurrentVersion && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowApplyLatestMirrorDialog(true)}
+                disabled={isApplyingLatestMirror}
+              >
+                <ChevronsRight className="size-4" />
+                <span className="hidden lg:inline">{t('pages.plannerMD.applyLatestMirror.button')}</span>
+              </Button>
+            )}
             {onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <Edit className="size-4" />
@@ -660,6 +744,14 @@ export function PlannerDetailHeader({
           plannerTitle={savedPlanner.metadata.title || t('untitled')}
           onConfirm={handleDeleteConfirm}
           isPending={deleteMutation.isPending}
+        />
+
+        {/* Apply Latest Mirror Dialog */}
+        <ApplyLatestMirrorDialog
+          open={showApplyLatestMirrorDialog}
+          onOpenChange={setShowApplyLatestMirrorDialog}
+          onConfirm={() => { void handleApplyLatestMirror() }}
+          isPending={isApplyingLatestMirror}
         />
 
         {/* Publish Sync-Off Warning Dialog */}

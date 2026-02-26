@@ -2,8 +2,8 @@
   "name": "물리 간섭 보호장",
   "descs": [
     "웨이브 첫 턴 시작 시, 모든 아군이 [ChargeForceField] 3 얻음.",
-    "웨이브 첫 턴 시작 시, 모든 아군이 <style=\"upgradeHighlight\">[ChargeForceField] 5 얻음.</style>",
-    "웨이브 첫 턴 시작 시, 모든 아군이 <style=\"upgradeHighlight\">[ChargeForceField] 7 얻음.</style>"
+    "웨이브 첫 턴 시작 시, 모든 아군이 [ChargeForceField] 5 얻음.",
+    "웨이브 첫 턴 시작 시, 모든 아군이 [ChargeForceField] 7 얻음."
   ],
   "obtain": "Shop"
 }

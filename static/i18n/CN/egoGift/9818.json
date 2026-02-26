@@ -2,8 +2,8 @@
   "name": "被遗落的次元护手",
   "descs": [
     "消耗[Charge]层数或特殊充能的技能对敌方单位造成伤害时，本回合使其物理抗性中最低的抗性+0.1(每回合最多1次)",
-    "消耗[Charge]层数或特殊充能的技能对敌方单位造成伤害时，本回合使其物理抗性中最低的抗性+0.1(每回合最多1次)\n<style=\"upgradeHighlight\">- 并对其施加1层[VioletResistDown]</style>",
-    "消耗[Charge]层数或特殊充能的技能对敌方单位造成伤害时，本回合使其物理抗性中最低的抗性+0.1(每回合最多<style=\"upgradeHighlight\">2</style>次)\n- 并对其施加1层[VioletResistDown]<style=\"upgradeHighlight\">与1层[AzureResistDown]</style>"
+    "消耗[Charge]层数或特殊充能的技能对敌方单位造成伤害时，本回合使其物理抗性中最低的抗性+0.1(每回合最多1次)\n- 并对其施加1层[VioletResistDown]",
+    "消耗[Charge]层数或特殊充能的技能对敌方单位造成伤害时，本回合使其物理抗性中最低的抗性+0.1(每回合最多2次)\n- 并对其施加1层[VioletResistDown]与1层[AzureResistDown]"
   ],
   "obtain": "Shop"
 }

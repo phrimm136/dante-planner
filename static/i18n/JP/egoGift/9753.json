@@ -2,8 +2,8 @@
   "name": "メトロノーム",
   "descs": [
     "奇数ターンなら、全味方が[AttackDmgUp]1を得る。偶数ターンなら、全味方が[Protection]1を得る。",
-    "奇数ターンなら、全味方が[AttackDmgUp]1を得る。偶数ターンなら、全味方が[Protection]1, <style=\"upgradeHighlight\">[DefenseUp]1</style>を得る。",
-    "奇数ターンなら、全味方が[AttackDmgUp]1, <style=\"upgradeHighlight\">[AttackUp]1</style>を得る。偶数ターンなら、全味方が[Protection]1, [DefenseUp]1を得る。"
+    "奇数ターンなら、全味方が[AttackDmgUp]1を得る。偶数ターンなら、全味方が[Protection]1, [DefenseUp]1を得る。",
+    "奇数ターンなら、全味方が[AttackDmgUp]1, [AttackUp]1を得る。偶数ターンなら、全味方が[Protection]1, [DefenseUp]1を得る。"
   ],
   "obtain": "Shop"
 }

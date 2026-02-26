@@ -2,8 +2,8 @@
   "name": "Melted Paraffin",
   "descs": [
     "When winning a Clash with a Skill that inflicts [Combustion] Potency, Count, or 'Unique Burn', inflict (# of remaining Coins/2) [Combustion] Potency on the target.",
-    "When winning a Clash with a Skill that inflicts [Combustion] Potency, Count, or 'Unique Burn', inflict <style=\"upgradeHighlight\">(# of remaining Coins/2 + 1)</style> [Combustion] Potency on the target.",
-    "When winning a Clash with a Skill that inflicts [Combustion] Potency, Count, or 'Unique Burn', inflict <style=\"upgradeHighlight\">(# of remaining Coins + 1)</style> [Combustion] Potency on the target."
+    "When winning a Clash with a Skill that inflicts [Combustion] Potency, Count, or 'Unique Burn', inflict (# of remaining Coins/2 + 1) [Combustion] Potency on the target.",
+    "When winning a Clash with a Skill that inflicts [Combustion] Potency, Count, or 'Unique Burn', inflict (# of remaining Coins + 1) [Combustion] Potency on the target."
   ],
   "obtain": "Shop"
 }

@@ -2,8 +2,8 @@
   "name": "Fiery Down",
   "descs": [
     "When hitting an enemy with a Lust Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict 3 [Combustion] Potency.\n\nTurn Start: If the enemy has 20+ [Combustion] Potency, (Current [Combustion] Potency on enemy) x2",
-    "When hitting an enemy with a Lust Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', <style=\"upgradeHighlight\">inflict 4 [Combustion] Potency</style>.\n\nTurn Start: If the enemy has 20+ [Combustion] Potency, (Current [Combustion] Potency on enemy) x2",
-    "When hitting an enemy with a Lust Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict 4 [Combustion] Potency.\n\nTurn Start: If the enemy has 20+ [Combustion] Potency, <style=\"upgradeHighlight\">(Current [Combustion] Potency on enemy) x2.5</style>"
+    "When hitting an enemy with a Lust Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict 4 [Combustion] Potency.\n\nTurn Start: If the enemy has 20+ [Combustion] Potency, (Current [Combustion] Potency on enemy) x2",
+    "When hitting an enemy with a Lust Affinity Skill or a Skill that inflicts [Combustion] Potency or 'Unique Burn', inflict 4 [Combustion] Potency.\n\nTurn Start: If the enemy has 20+ [Combustion] Potency, (Current [Combustion] Potency on enemy) x2.5"
   ],
   "obtain": "Shop"
 }

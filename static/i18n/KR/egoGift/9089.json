@@ -2,8 +2,8 @@
   "name": "녹슨 입마개",
   "descs": [
     "스킬을 사용하여 적에게 적중 시 12 이상의 체력 피해를 입혔다면, 대상에게 [Laceration] 위력 2 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 4 부여.",
-    "스킬을 사용하여 적에게 적중 시 12 이상의 체력 피해를 입혔다면, 대상에게 <style=\"upgradeHighlight\">[Laceration] 위력 3 부여.</style>\n\n참격 스킬을 사용할 경우, 효과가 강화되어 <style=\"upgradeHighlight\">[Laceration] 위력 5 부여.</style>",
-    "스킬을 사용하여 적에게 <style=\"upgradeHighlight\">적중 시 1 이상의 체력 피해를 입혔다면</style>, 대상에게 [Laceration] 위력 3 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 5, <style=\"upgradeHighlight\">[Laceration] 횟수 1 부여.</style>"
+    "스킬을 사용하여 적에게 적중 시 12 이상의 체력 피해를 입혔다면, 대상에게 [Laceration] 위력 3 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 5 부여.",
+    "스킬을 사용하여 적에게 적중 시 1 이상의 체력 피해를 입혔다면, 대상에게 [Laceration] 위력 3 부여.\n\n참격 스킬을 사용할 경우, 효과가 강화되어 [Laceration] 위력 5, [Laceration] 횟수 1 부여."
   ],
   "obtain": "Shop"
 }

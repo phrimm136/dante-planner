@@ -2,8 +2,8 @@
   "name": "Green Spirit",
   "descs": [
     "After hitting a non-Staggered enemy by using a Gluttony Affinity Skill, or inflicting [Vibration] Potency using Skill effects, randomly inflict a total of 4 [Vibration] Potency between all enemies(or all Abnormality parts).",
-    "After hitting a non-Staggered enemy by using a Gluttony Affinity Skill, or inflicting [Vibration] Potency using Skill effects, randomly inflict a total of <style=\"upgradeHighlight\">6 [Vibration] Potency</style> between all enemies(or all Abnormality parts).",
-    "After hitting a non-Staggered enemy by using a Gluttony Affinity Skill, or inflicting [Vibration] Potency using Skill effects, randomly inflict a total of <style=\"upgradeHighlight\">8 [Vibration] Potency</style> between all enemies(or all Abnormality parts)."
+    "After hitting a non-Staggered enemy by using a Gluttony Affinity Skill, or inflicting [Vibration] Potency using Skill effects, randomly inflict a total of 6 [Vibration] Potency between all enemies(or all Abnormality parts).",
+    "After hitting a non-Staggered enemy by using a Gluttony Affinity Skill, or inflicting [Vibration] Potency using Skill effects, randomly inflict a total of 8 [Vibration] Potency between all enemies(or all Abnormality parts)."
   ],
   "obtain": "Shop"
 }

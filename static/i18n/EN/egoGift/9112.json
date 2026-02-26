@@ -2,8 +2,8 @@
   "name": "Venomous Skin",
   "descs": [
     "When winning a Clash with a Skill that applies(including on self) [Vibration] Potency or Count, inflict (# of remaining Coins/2) [Vibration] Potency on the target.",
-    "When winning a Clash with a Skill that applies(including on self) [Vibration] Potency or Count, inflict <style=\"upgradeHighlight\">(# of remaining Coins)</style> [Vibration] Potency on the target.",
-    "When winning a Clash with a Skill that applies(including on self) [Vibration] Potency or Count, inflict (# of remaining Coins) [Vibration] Potency and <style=\"upgradeHighlight\">(# of remaining Coins/2) [Vibration] Count</style> on the target."
+    "When winning a Clash with a Skill that applies(including on self) [Vibration] Potency or Count, inflict (# of remaining Coins) [Vibration] Potency on the target.",
+    "When winning a Clash with a Skill that applies(including on self) [Vibration] Potency or Count, inflict (# of remaining Coins) [Vibration] Potency and (# of remaining Coins/2) [Vibration] Count on the target."
   ],
   "obtain": "Shop"
 }

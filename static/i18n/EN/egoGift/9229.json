@@ -1,0 +1,9 @@
+{
+  "name": "Tarnished Gauntlet",
+  "descs": [
+    "This E.G.O Gift changes after 6 Encounter wins\n{0}\n\nMin & Max Speed -5 for all allies (this effect cannot reduce Speed below 1)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

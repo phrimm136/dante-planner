@@ -2,8 +2,8 @@
   "name": "Entanglement Override Sequencer",
   "descs": [
     "At Turn Start, for 1 Identity with the most [Vibration] Count, trigger [FusionVibration] to convert their [Vibration] to [VibrationDistribution]",
-    "At Turn Start, for <style=\"upgradeHighlight\">2 Identities</style> with the most [Vibration] Count, trigger [FusionVibration] to convert their [Vibration] to [VibrationDistribution]",
-    "At Turn Start, for <style=\"upgradeHighlight\">3 </style>Identities with the most [Vibration] Count, trigger [FusionVibration] to convert their [Vibration] to [VibrationDistribution]"
+    "At Turn Start, for 2 Identities with the most [Vibration] Count, trigger [FusionVibration] to convert their [Vibration] to [VibrationDistribution]",
+    "At Turn Start, for 3 Identities with the most [Vibration] Count, trigger [FusionVibration] to convert their [Vibration] to [VibrationDistribution]"
   ],
   "obtain": "Shop"
 }

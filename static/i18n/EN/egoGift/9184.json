@@ -1,7 +1,7 @@
 {
   "name": "T-5 Perpetual Motion Machine",
   "descs": [
-    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that gain [Charge] Count or 'Unique Charge'. (except E.G.O Skills; except Backup Units)\n\nTurn Start: at less than 3 [Charge] Count, gain +5 [Charge] Count.\nTurn Start: at 5+ [Charge] Count, gain +2 min/max Speed, 1 [Enhancement], and 2 [AttackDmgUp]. (including 'Unique Charge')\n\nAll allies on the field gain [ShareCharge] at Turn Start.\n\nAfter Attack with a Skill 3 that consumes or gains [Charge] Count on self: if the target is defeated, or if the ally who used the Skill is at 3+ [Charge], they add 1 Skill 3 to the list of Skills for the next upcoming turn. (once per turn for each ally; including 'Unique Charge')",
+    "Turn Start: This Gift activates for the whole Encounter when 5 or more Identities have Attack Skills that gain [Charge] Count or 'Unique Charge'. (except E.G.O Skills; except Backup Units)\n\nTurn Start: At less than 3 [Charge] Count, gain +5 [Charge] Count.\nTurn Start: At 5+ [Charge] Count, gain +2 min/max Speed, 1 [Enhancement], and 2 [AttackDmgUp]. (including 'Unique Charge')\n\nAll allies on the field gain [ShareCharge] at Turn Start.\n\nAttack End with a Skill 3 that consumes or gains [Charge] Count on self: If the target is defeated, or if the ally who used the Skill is at 3+ [Charge], they add 1 Skill 3 to the list of Skills for the next upcoming turn. (once per turn for each ally; including 'Unique Charge')",
     "",
     ""
   ],

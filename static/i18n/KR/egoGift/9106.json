@@ -2,8 +2,8 @@
   "name": "억류된 찬송",
   "descs": [
     "전투 시작 시 모든 적(환상체일 경우, 모든 부위)이 [Laceration]에 걸린 경우, 다음 턴에 모든 아군이 [Agility] 1 얻음.",
-    "전투 시작 시 모든 적(환상체일 경우, 모든 부위)이 [Laceration]에 걸린 경우, 다음 턴에 모든 아군이 [Agility] 1, <style=\"upgradeHighlight\">[AttackDmgUp] 1</style> 얻음.",
-    "전투 시작 시 모든 적(환상체일 경우, 모든 부위)이 [Laceration]에 걸린 경우, 다음 턴에 모든 아군이 [Agility] <style=\"upgradeHighlight\">2</style>, [AttackDmgUp] 1, <style=\"upgradeHighlight\">[AttackUp] 2</style> 얻음."
+    "전투 시작 시 모든 적(환상체일 경우, 모든 부위)이 [Laceration]에 걸린 경우, 다음 턴에 모든 아군이 [Agility] 1, [AttackDmgUp] 1 얻음.",
+    "전투 시작 시 모든 적(환상체일 경우, 모든 부위)이 [Laceration]에 걸린 경우, 다음 턴에 모든 아군이 [Agility] 2, [AttackDmgUp] 1, [AttackUp] 2 얻음."
   ],
   "obtain": "Shop"
 }

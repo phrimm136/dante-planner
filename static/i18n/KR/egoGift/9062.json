@@ -2,8 +2,8 @@
   "name": "이력서",
   "descs": [
     "턴 종료 시, [Charge] 횟수와 특수 충전을 합하여 7 이상 보유한 아군이 다음 턴에 [Agility] 1 얻음.\n\n우울 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 다음 턴에 [Agility] 2, [ResultEnhancement] 1 얻음.",
-    "턴 종료 시, [Charge] 횟수와 특수 충전을 합하여 7 이상 보유한 아군이 다음 턴에 <style=\"upgradeHighlight\">[Agility] 2 얻음.</style>\n\n우울 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 다음 턴에 <style=\"upgradeHighlight\">[Agility] 3</style>, [ResultEnhancement] 1 얻음.",
-    "턴 종료 시, [Charge] 횟수와 특수 충전을 합하여 7 이상 보유한 아군이 다음 턴에 <style=\"upgradeHighlight\">[Agility] 3 얻음.</style>\n\n우울 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 다음 턴에 <style=\"upgradeHighlight\">[Agility] 4</style>, [ResultEnhancement] 1 얻음."
+    "턴 종료 시, [Charge] 횟수와 특수 충전을 합하여 7 이상 보유한 아군이 다음 턴에 [Agility] 2 얻음.\n\n우울 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 다음 턴에 [Agility] 3, [ResultEnhancement] 1 얻음.",
+    "턴 종료 시, [Charge] 횟수와 특수 충전을 합하여 7 이상 보유한 아군이 다음 턴에 [Agility] 3 얻음.\n\n우울 속성 공격 스킬을 보유한 아군의 경우, 효과가 강화되어 다음 턴에 [Agility] 4, [ResultEnhancement] 1 얻음."
   ],
   "obtain": "Shop"
 }

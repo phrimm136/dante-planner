@@ -5,5 +5,8 @@
   ],
   "keyword": "Vibration",
   "price": 248,
-  "themePack": []
+  "themePack": [
+    "1025"
+  ],
+  "maxEnhancement": 0
 }

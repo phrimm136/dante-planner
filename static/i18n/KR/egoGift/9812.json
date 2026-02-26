@@ -2,8 +2,8 @@
   "name": "엇낀 시간",
   "descs": [
     "적에게 [Switch_Vibration] 혹은 [FusionVibration] 시킬 경우, 대상에게 [VibrationExplosion] (인격마다 턴 당 1회)",
-    "적에게 [Switch_Vibration] 혹은 [FusionVibration] 시킬 경우, 대상에게 [VibrationExplosion] (인격마다 턴 당 <style=\"upgradeHighlight\">2</style>회)",
-    "적에게 [Switch_Vibration] 혹은 [FusionVibration] 시킬 경우, 대상에게 [VibrationExplosion] (인격마다 턴 당 <style=\"upgradeHighlight\">3</style>회)"
+    "적에게 [Switch_Vibration] 혹은 [FusionVibration] 시킬 경우, 대상에게 [VibrationExplosion] (인격마다 턴 당 2회)",
+    "적에게 [Switch_Vibration] 혹은 [FusionVibration] 시킬 경우, 대상에게 [VibrationExplosion] (인격마다 턴 당 3회)"
   ],
   "obtain": "Shop"
 }

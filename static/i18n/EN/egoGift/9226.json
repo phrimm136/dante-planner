@@ -1,0 +1,9 @@
+{
+  "name": "Someone's Azure Blade",
+  "descs": [
+    "Combat Start: Allies with Shield gain 1 [CriticalDamageUp]\nOn Crit with ally Skill, said ally gains Shield equal to ([Breath] / 5) for the next turn (max 15)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

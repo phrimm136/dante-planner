@@ -2,8 +2,8 @@
   "name": "Contempt of the Gaze of Contempt",
   "descs": [
     "[Effects apply only to #6 Deployed Identity]\n\nCombat Start: deal +10% damage for every enemy Attack Skill targeting this unit (max 20%)\n\nCombat Start: when targeted by 2+ Attack Skills, deal (# of Skills targeting this unit) fixed HP & SP damage against all enemies targeting this unit. (max 3; this effect does not hurt allies)",
-    "[Effects apply only to #6 Deployed Identity]\n\nCombat Start: deal +10% damage for every enemy Attack Skill targeting this unit (max 20%)\n\nCombat Start: when targeted by 2+ Attack Skills, deal <style=\"upgradeHighlight\">(# of Skills targeting this unit x 2)</style> fixed HP & SP damage against all enemies targeting this unit. (max <style=\"upgradeHighlight\">5</style>; this effect does not hurt allies)",
-    "[Effects apply only to <style=\"upgradeHighlight\">#1</style> and #6 Deployed Identities]\n\nCombat Start: deal +10% damage for every enemy Attack Skill targeting this unit (max <style=\"upgradeHighlight\">30</style>%)\n\nCombat Start: when targeted by 2+ Attack Skills, deal (# of Skills targeting this unit x 2) fixed HP & SP damage against all enemies targeting this unit. (max <style=\"upgradeHighlight\">10</style>; this effect does not hurt allies)"
+    "[Effects apply only to #6 Deployed Identity]\n\nCombat Start: deal +10% damage for every enemy Attack Skill targeting this unit (max 20%)\n\nCombat Start: when targeted by 2+ Attack Skills, deal (# of Skills targeting this unit x 2) fixed HP & SP damage against all enemies targeting this unit. (max 5; this effect does not hurt allies)",
+    "[Effects apply only to #1 and #6 Deployed Identities]\n\nCombat Start: deal +10% damage for every enemy Attack Skill targeting this unit (max 30%)\n\nCombat Start: when targeted by 2+ Attack Skills, deal (# of Skills targeting this unit x 2) fixed HP & SP damage against all enemies targeting this unit. (max 10; this effect does not hurt allies)"
   ],
   "obtain": "Shop"
 }

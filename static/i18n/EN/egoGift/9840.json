@@ -1,7 +1,7 @@
 {
   "name": "W Corp. Standard Issue Cap",
   "descs": [
-    "After using a Skill that gains [Charge] Count or <noparse>Unique Charge</noparse>, gain [EmergencyChargeForceField] equal to the Count gained (max 7 per Identity)",
+    "After using a Skill that gains [Charge] Count or Unique Charge, gain [EmergencyChargeForceField] equal to the Count gained (max 7 per Identity)",
     "",
     ""
   ],

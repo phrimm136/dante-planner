@@ -1,0 +1,9 @@
+{
+  "name": "Someone's Device",
+  "descs": [
+    "Attack End: If [IndexPrescriptTargetToEnemy] is killed, the Identity who attacked and killed [IndexPrescriptTargetToEnemy] gains 1 [AzureResultUp] next turn; inflict +3 [Sinking] Count to 1 random surviving enemy (once per turn)\n- If the unit that killed [IndexPrescriptTargetToEnemy] is in The Index faction, gain 1 [Enhancement] instead of [AzureResultUp] next turn (once per turn)\n\nTurn End: The Index faction units take ([KarmaOfIndexAlly] Stack on self)% HP damage.\n(Does not get Staggered due to this effect; this damage does not reduce the allies' HP below 20% HP)\nThen, Identities who took damage due to the above effect gain ([KarmaOfIndexAlly] Stack on self / 5) [ResultEnhancement] next turn (max 2)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

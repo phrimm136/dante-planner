@@ -2,8 +2,8 @@
   "name": "破损的雨伞",
   "descs": [
     "[第1、第2顺位友方单位专属]\n\n增加[Burst]强度或施加[Burst]层数的攻击技能拼点胜利时，对目标施加2层[Burst](每回合每名友方单位最多1次)\n\n若目标未带有[Burst]，则改为使其增加3级[Burst]强度并对其施加2层[Burst]。",
-    "[第1、第2、<style=\"upgradeHighlight\">第3</style>顺位友方单位专属]\n\n增加[Burst]强度或施加[Burst]层数的攻击技能拼点胜利时，使目标增加<style=\"upgradeHighlight\">2级[Burst]强度</style>并对其施加2层[Burst](每回合每名友方单位最多1次)\n\n若目标未带有[Burst]，则改为使其<style=\"upgradeHighlight\">增加4级[Burst]强度</style>并对其施加2层[Burst]。",
-    "[第1、第2、第3顺位友方单位专属]\n\n增加[Burst]强度或施加[Burst]层数的攻击技能拼点胜利时，使目标增加<style=\"upgradeHighlight\">4级[Burst]强度</style>并对其施加2层[Burst](每回合每名友方单位最多1次)\n\n若目标未带有[Burst]，则改为使其<style=\"upgradeHighlight\">增加6级[Burst]强度</style>并对其<style=\"upgradeHighlight\">施加3层[Burst]</style>。"
+    "[第1、第2、第3顺位友方单位专属]\n\n增加[Burst]强度或施加[Burst]层数的攻击技能拼点胜利时，使目标增加2级[Burst]强度并对其施加2层[Burst](每回合每名友方单位最多1次)\n\n若目标未带有[Burst]，则改为使其增加4级[Burst]强度并对其施加2层[Burst]。",
+    "[第1、第2、第3顺位友方单位专属]\n\n增加[Burst]强度或施加[Burst]层数的攻击技能拼点胜利时，使目标增加4级[Burst]强度并对其施加2层[Burst](每回合每名友方单位最多1次)\n\n若目标未带有[Burst]，则改为使其增加6级[Burst]强度并对其施加3层[Burst]。"
   ],
   "obtain": "Shop"
 }

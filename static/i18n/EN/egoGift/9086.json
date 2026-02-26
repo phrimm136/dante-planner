@@ -2,8 +2,8 @@
   "name": "Reverberation",
   "descs": [
     "Turn End: Inflict 2 [Binding] to enemies (for Abnormalities, their Parts) with 10+ [Vibration] Potency.\n\nIf the target has 20+ [Vibration] Potency, apply 2 [Binding] and 1 [Paralysis] instead.",
-    "Turn End: Inflict 2 [Binding] and <style=\"upgradeHighlight\">2 [DefenseDown]</style> to enemies (for Abnormalities, their Parts) with <style=\"upgradeHighlight\">8</style>+ [Vibration] Potency.\n\nIf the target has <style=\"upgradeHighlight\">15</style>+ [Vibration] Potency, apply 2 [Binding], 1 [Paralysis], <style=\"upgradeHighlight\">and 2 [DefenseDown]</style> instead.",
-    "Turn End: Inflict 2 [Binding] and <style=\"upgradeHighlight\">3</style> [DefenseDown] to enemies (for Abnormalities, their Parts) with <style=\"upgradeHighlight\">5</style>+ [Vibration] Potency.\n\nIf the target has <style=\"upgradeHighlight\">10</style>+ [Vibration] Potency, apply 2 [Binding], 1 [Paralysis], and <style=\"upgradeHighlight\">4</style> [DefenseDown] instead."
+    "Turn End: Inflict 2 [Binding] and 2 [DefenseDown] to enemies (for Abnormalities, their Parts) with 8+ [Vibration] Potency.\n\nIf the target has 15+ [Vibration] Potency, apply 2 [Binding], 1 [Paralysis], and 2 [DefenseDown] instead.",
+    "Turn End: Inflict 2 [Binding] and 3 [DefenseDown] to enemies (for Abnormalities, their Parts) with 5+ [Vibration] Potency.\n\nIf the target has 10+ [Vibration] Potency, apply 2 [Binding], 1 [Paralysis], and 4 [DefenseDown] instead."
   ],
   "obtain": "Shop"
 }

@@ -2221,7 +2221,9 @@
     ],
     "keyword": "Vibration",
     "attributeType": "SCARLET",
-    "themePack": [],
+    "themePack": [
+      "1025"
+    ],
     "maxEnhancement": 0
   },
   "9215": {
@@ -2230,7 +2232,9 @@
     ],
     "keyword": "Combustion",
     "attributeType": "CRIMSON",
-    "themePack": [],
+    "themePack": [
+      "1025"
+    ],
     "maxEnhancement": 0
   },
   "9216": {
@@ -2257,7 +2261,9 @@
     ],
     "keyword": "Sinking",
     "attributeType": "INDIGO",
-    "themePack": [],
+    "themePack": [
+      "1027"
+    ],
     "maxEnhancement": 0
   },
   "9218": {
@@ -2266,7 +2272,9 @@
     ],
     "keyword": "Breath",
     "attributeType": "AZURE",
-    "themePack": [],
+    "themePack": [
+      "1027"
+    ],
     "maxEnhancement": 0
   },
   "9219": {
@@ -2275,8 +2283,10 @@
     ],
     "keyword": "None",
     "attributeType": "AZURE",
-    "themePack": [],
-    "maxEnhancement": 0
+    "themePack": [
+      "1027"
+    ],
+    "maxEnhancement": 2
   },
   "9220": {
     "tag": [
@@ -2306,7 +2316,9 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": [],
+    "themePack": [
+      "1026"
+    ],
     "maxEnhancement": 0
   },
   "9223": {
@@ -2315,7 +2327,9 @@
     ],
     "keyword": "Laceration",
     "attributeType": "SCARLET",
-    "themePack": [],
+    "themePack": [
+      "1026"
+    ],
     "maxEnhancement": 0
   },
   "9224": {
@@ -2342,8 +2356,10 @@
     ],
     "keyword": "None",
     "attributeType": "INDIGO",
-    "themePack": [],
-    "maxEnhancement": 0
+    "themePack": [
+      "1026"
+    ],
+    "maxEnhancement": 2
   },
   "9226": {
     "tag": [
@@ -2351,7 +2367,9 @@
     ],
     "keyword": "Breath",
     "attributeType": "AZURE",
-    "themePack": [],
+    "themePack": [
+      "1026"
+    ],
     "maxEnhancement": 0
   },
   "9227": {

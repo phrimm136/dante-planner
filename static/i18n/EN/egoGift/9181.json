@@ -1,7 +1,7 @@
 {
   "name": "Miniature Telepole",
   "descs": [
-    "After Attack with a Skill Attack that consumed 7+ [Charge] Count on self: if the target is defeated, gain ([Charge] Count consumed by the Skill / 4) [Charge] Count (including 'Unique Charge')",
+    "Attack End with a Skill Attack that consumed 7+ [Charge] Count on self: if the target is defeated, gain ([Charge] Count consumed by the Skill / 4) [Charge] Count (including 'Unique Charge')",
     "",
     ""
   ],

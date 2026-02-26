@@ -2,8 +2,8 @@
   "name": "Snake Slough",
   "descs": [
     "Turn Start: all allies gain 2 [DefenseUp].\nEach ally gains ([DefenseUp] on self / 4) Offense Level. (max 10)",
-    "Turn Start: all allies gain <style=\"upgradeHighlight\">4</style> [DefenseUp].\nEach ally gains ([DefenseUp] on self / <style=\"upgradeHighlight\">3</style>) Offense Level. (max 10)",
-    "Turn Start: all allies gain 4 [DefenseUp].\nEach ally gains ([DefenseUp] on self / <style=\"upgradeHighlight\">2</style>) Offense Level. (max 10)"
+    "Turn Start: all allies gain 4 [DefenseUp].\nEach ally gains ([DefenseUp] on self / 3) Offense Level. (max 10)",
+    "Turn Start: all allies gain 4 [DefenseUp].\nEach ally gains ([DefenseUp] on self / 2) Offense Level. (max 10)"
   ],
   "obtain": "Shop"
 }

@@ -1,0 +1,9 @@
+{
+  "name": "誰かの端末機",
+  "descs": [
+    "攻撃終了時に[IndexPrescriptTargetToEnemy]が死亡したなら、[IndexPrescriptTargetToEnemy]を倒した味方が次のターンに[AzureResultUp]1を得て生存したランダムな敵1名の[Sinking]回数が3増加 (1ターンにつき1回)\n- [IndexPrescriptTargetToEnemy]を倒した味方が人差し指所属なら、[AzureResultUp]の代わりに次のターンにて[Enhancement]1を得る (1ターンにつき1回)\n\nターン終了時に人差し指所属なら、体力最大値の(保有した[KarmaOfIndexAlly]数値)%だけダメージを受ける\n(この効果で混乱状態にならず、体力が最大値の20%未満に下がらない)\n以降、当該効果でダメージを受けた人格が次のターンに(保有した[KarmaOfIndexAlly]数値÷5)だけ[ResultEnhancement]を得る (最大2)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

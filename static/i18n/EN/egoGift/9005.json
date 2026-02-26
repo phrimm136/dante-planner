@@ -2,8 +2,8 @@
   "name": "Wound Clerid",
   "descs": [
     "When hitting an enemy with a Skill that inflicts [Laceration] Potency or 'Unique Bleed', inflict 4 [Laceration] Potency.",
-    "When <style=\"upgradeHighlight\">hitting an enemy with a Skill that inflicts [Laceration] Potency or 'Unique Bleed', or with a Wrath Affinity Skill</style>, <style=\"upgradeHighlight\">inflict 5 [Laceration] Potency</style>.",
-    "When hitting an enemy with a Skill that inflicts [Laceration] Potency or 'Unique Bleed', or with a Wrath Affinity Skill, <style=\"upgradeHighlight\">inflict 5 [Laceration] Potency and +1 [Laceration] Count</style>."
+    "When hitting an enemy with a Skill that inflicts [Laceration] Potency or 'Unique Bleed', or with a Wrath Affinity Skill, inflict 5 [Laceration] Potency.",
+    "When hitting an enemy with a Skill that inflicts [Laceration] Potency or 'Unique Bleed', or with a Wrath Affinity Skill, inflict 5 [Laceration] Potency and +1 [Laceration] Count."
   ],
   "obtain": "Shop"
 }

@@ -1,0 +1,9 @@
+{
+  "name": "Exquisite Artwork",
+  "descs": [
+    "The Ring-faction Identities gain [Inspire]\n\nIf The Ring-faction Identity with [Inspire] hits an enemy, inflict [ObjectOfExploration] on said enemy\n- If the enemy already has [ObjectOfExploration], replace [ObjectOfExploration] with [PaintingMaterial]\n\nIf The Ring-faction Identity with [Inspire] kills an enemy that has [PaintingMaterial], said Identity loses [Inspire] and gains [GreatAesthetics]",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

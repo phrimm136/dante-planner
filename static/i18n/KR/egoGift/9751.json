@@ -2,8 +2,8 @@
   "name": "뱀 허물",
   "descs": [
     "턴 시작시, 모든 아군이 [DefenseUp] 2 얻음.\n각 아군이 (자신의 [DefenseUp]/4)만큼 공격 레벨이 증가함. (최대 10)",
-    "턴 시작시, 모든 아군이 [DefenseUp] <style=\"upgradeHighlight\">4</style> 얻음.\n각 아군이 (자신의 [DefenseUp]/<style=\"upgradeHighlight\">3</style>)만큼 공격 레벨이 증가함. (최대 10)",
-    "턴 시작시, 모든 아군이 [DefenseUp] 4 얻음.\n각 아군이 (자신의 [DefenseUp]/<style=\"upgradeHighlight\">2</style>)만큼 공격 레벨이 증가함. (최대 10)"
+    "턴 시작시, 모든 아군이 [DefenseUp] 4 얻음.\n각 아군이 (자신의 [DefenseUp]/3)만큼 공격 레벨이 증가함. (최대 10)",
+    "턴 시작시, 모든 아군이 [DefenseUp] 4 얻음.\n각 아군이 (자신의 [DefenseUp]/2)만큼 공격 레벨이 증가함. (최대 10)"
   ],
   "obtain": "Shop"
 }

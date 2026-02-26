@@ -2,8 +2,8 @@
   "name": "유연 화약",
   "descs": [
     "[편성 1번, 2번 인격 전용 효과]\n\n턴 종료 시 이번 턴에 [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 한 번이라도 사용하였다면, 다음 턴에 [Agility] 1 얻음.\n\n자신의 속도가 6 이상이면, [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬의 피해량 +12.5%",
-    "[편성 1번, 2번, <style=\"upgradeHighlight\">3번</style> 인격 전용 효과]\n\n턴 종료 시 이번 턴에 [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 한 번이라도 사용하였다면, 다음 턴에 [Agility] 1 얻음.\n\n자신의 속도가 <style=\"upgradeHighlight\">5</style> 이상이면, [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬의 피해량 +<style=\"upgradeHighlight\">15</style>%",
-    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n턴 종료 시 이번 턴에 [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 한 번이라도 사용하였다면, 다음 턴에 [Agility] <style=\"upgradeHighlight\">1 ~ 2</style> 얻음.\n\n자신의 속도가 <style=\"upgradeHighlight\">4</style> 이상이면, [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬의 피해량 +<style=\"upgradeHighlight\">20</style>%"
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n턴 종료 시 이번 턴에 [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 한 번이라도 사용하였다면, 다음 턴에 [Agility] 1 얻음.\n\n자신의 속도가 5 이상이면, [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬의 피해량 +15%",
+    "[편성 1번, 2번, 3번 인격 전용 효과]\n\n턴 종료 시 이번 턴에 [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬을 한 번이라도 사용하였다면, 다음 턴에 [Agility] 1 ~ 2 얻음.\n\n자신의 속도가 4 이상이면, [Burst] 위력 또는 [Burst] 횟수를 부여하는 공격 스킬의 피해량 +20%"
   ],
   "obtain": "Shop"
 }

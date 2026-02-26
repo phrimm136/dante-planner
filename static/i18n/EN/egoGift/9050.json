@@ -2,8 +2,8 @@
   "name": "Red-stained Gossypium",
   "descs": [
     "First Turn Start of an Encounter: inflict 1 [Laceration] Potency and +15 [Laceration] Count to all enemies (or all Abnormality parts).\n\nTurn Start: enemies with [Laceration] Potency lose ([Laceration] Potency/3) 'Offense Level' and 'Defense Level' for the turn. (Maxes out at 30 [Laceration] Potency stack)",
-    "<style=\"upgradeHighlight\">First Turn Start of a wave</style>: inflict <style=\"upgradeHighlight\">2 [Laceration] Potency</style> and +15 [Laceration] Count to all enemies (or all Abnormality parts).\n\nTurn Start: enemies with [Laceration] lose ([Laceration] Potency/3) 'Offense Level' and 'Defense Level' for the turn. (Maxes out at 30 [Laceration] Potency stack)",
-    "First Turn Start of a wave: inflict <style=\"upgradeHighlight\">4 [Laceration] Potency and +20 [Laceration] Count</style> to all enemies (or all Abnormality parts).\n\nTurn Start: enemies with [Laceration] lose <style=\"upgradeHighlight\">([Laceration] Potency/2)</style> 'Offense Level' and 'Defense Level' for the turn. (Maxes out at 30 [Laceration] Potency stack)"
+    "First Turn Start of a wave: inflict 2 [Laceration] Potency and +15 [Laceration] Count to all enemies (or all Abnormality parts).\n\nTurn Start: enemies with [Laceration] lose ([Laceration] Potency/3) 'Offense Level' and 'Defense Level' for the turn. (Maxes out at 30 [Laceration] Potency stack)",
+    "First Turn Start of a wave: inflict 4 [Laceration] Potency and +20 [Laceration] Count to all enemies (or all Abnormality parts).\n\nTurn Start: enemies with [Laceration] lose ([Laceration] Potency/2) 'Offense Level' and 'Defense Level' for the turn. (Maxes out at 30 [Laceration] Potency stack)"
   ],
   "obtain": "Shop"
 }

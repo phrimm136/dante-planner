@@ -2,8 +2,8 @@
   "name": "畏敬の念",
   "descs": [
     "[編成1・2番人格専用効果]\n\n[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用する場合、メイン攻撃対象の[Laceration]回数が7以上ならダメージ量 +10%",
-    "[編成1・2・<style=\"upgradeHighlight\">3</style>番人格専用効果]\n\n[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用する場合、メイン攻撃対象の[Laceration]回数が5以上ならダメージ量 +<style=\"upgradeHighlight\">15</style>%",
-    "[編成1・2・3番人格専用効果]\n\n[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用する場合、メイン攻撃対象の[Laceration]回数が3以上ならダメージ量 +<style=\"upgradeHighlight\">20</style>%"
+    "[編成1・2・3番人格専用効果]\n\n[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用する場合、メイン攻撃対象の[Laceration]回数が5以上ならダメージ量 +15%",
+    "[編成1・2・3番人格専用効果]\n\n[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用する場合、メイン攻撃対象の[Laceration]回数が3以上ならダメージ量 +20%"
   ],
   "obtain": "Shop"
 }

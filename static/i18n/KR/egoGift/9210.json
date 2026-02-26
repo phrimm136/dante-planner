@@ -2,8 +2,8 @@
   "name": "연육 망치",
   "descs": [
     "[편성 4번 인격 전용 효과]\n\n타격 공격 스킬을 2개 이상 보유한 경우, 턴 시작 시 [ParryingResultUp] 1 얻음",
-    "[편성 4번 인격 전용 효과]\n\n타격 공격 스킬을 2개 이상 보유한 경우, 턴 시작 시 [ParryingResultUp] <style=\"upgradeHighlight\">2</style> 얻음",
-    "[편성 4번, <style=\"upgradeHighlight\">5번</style> 인격 전용 효과]\n\n타격 공격 스킬을 2개 이상 보유한 경우, 턴 시작 시 [ParryingResultUp] 2 얻음"
+    "[편성 4번 인격 전용 효과]\n\n타격 공격 스킬을 2개 이상 보유한 경우, 턴 시작 시 [ParryingResultUp] 2 얻음",
+    "[편성 4번, 5번 인격 전용 효과]\n\n타격 공격 스킬을 2개 이상 보유한 경우, 턴 시작 시 [ParryingResultUp] 2 얻음"
   ],
   "obtain": "Shop"
 }

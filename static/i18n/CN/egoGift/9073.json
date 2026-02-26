@@ -2,8 +2,8 @@
   "name": "内啡肽试剂组",
   "descs": [
     "通过技能效果增加[Breath]强度时，额外增加1级[Breath]强度并获得1层[Breath]。\n\n若该技能为嫉妒技能，则改为额外增加2级[Breath]强度并获得2层[Breath]。",
-    "通过技能效果增加[Breath]强度时，额外<style=\"upgradeHighlight\">增加2级[Breath]强度并获得2层[Breath]。</style>\n\n若该技能为嫉妒技能，则改为额外<style=\"upgradeHighlight\">增加3级[Breath]强度并获得3层[Breath]。</style>",
-    "通过技能效果增加[Breath]强度时，额外<style=\"upgradeHighlight\">增加3级[Breath]强度并获得3层[Breath]。</style>\n\n若该技能为嫉妒技能，则改为额外<style=\"upgradeHighlight\">增加4级[Breath]强度并获得4层[Breath]。</style>"
+    "通过技能效果增加[Breath]强度时，额外增加2级[Breath]强度并获得2层[Breath]。\n\n若该技能为嫉妒技能，则改为额外增加3级[Breath]强度并获得3层[Breath]。",
+    "通过技能效果增加[Breath]强度时，额外增加3级[Breath]强度并获得3层[Breath]。\n\n若该技能为嫉妒技能，则改为额外增加4级[Breath]强度并获得4层[Breath]。"
   ],
   "obtain": "Shop"
 }

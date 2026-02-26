@@ -1,0 +1,9 @@
+{
+  "name": "Average Artwork",
+  "descs": [
+    "The Ring-faction Identities gain [Inspire]\n\nIf The Ring-faction Identity with [Inspire] hits an enemy with Lust or Slash Skills, inflict [ObjectOfExploration] on said enemy next turn\n- If the enemy already has [ObjectOfExploration], replace [ObjectOfExploration] with [PaintingMaterial]\n\nIf The Ring-faction Identity with [Inspire] kills an enemy that has [PaintingMaterial], said Identity gains 1 [PlusCoinValueUp] next turn (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

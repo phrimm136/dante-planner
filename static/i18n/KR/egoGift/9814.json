@@ -2,8 +2,8 @@
   "name": "강제 얽힘 시퀀스 장치",
   "descs": [
     "턴 시작 시 [Vibration] 횟수가 가장 많은 인격 1명의 [Vibration]을 [VibrationDistribution]로 [FusionVibration]",
-    "턴 시작 시 [Vibration] 횟수가 가장 많은 인격 <style=\"upgradeHighlight\">2</style>명의 [Vibration]을 [VibrationDistribution]로 [FusionVibration]",
-    "턴 시작 시 [Vibration] 횟수가 가장 많은 인격 <style=\"upgradeHighlight\">3</style>명의 [Vibration]을 [VibrationDistribution]로 [FusionVibration]"
+    "턴 시작 시 [Vibration] 횟수가 가장 많은 인격 2명의 [Vibration]을 [VibrationDistribution]로 [FusionVibration]",
+    "턴 시작 시 [Vibration] 횟수가 가장 많은 인격 3명의 [Vibration]을 [VibrationDistribution]로 [FusionVibration]"
   ],
   "obtain": "Shop"
 }

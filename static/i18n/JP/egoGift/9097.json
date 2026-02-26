@@ -2,8 +2,8 @@
   "name": "飾られた蹄鉄",
   "descs": [
     "ターン開始時、[Breath]威力状態ではないランダムな味方1名へ[Breath]威力2を付与。\n\n全味方が[Breath]状態の場合、効果が変更されて全味方へ[Breath]回数1を付与。",
-    "ターン開始時、[Breath]威力を持たないランダムな味方1名へ<style=\"upgradeHighlight\">[Breath]威力3を付与。</style>\n\n全味方が[Breath]状態の場合、効果が変更されて全味方へ<style=\"upgradeHighlight\">[Breath]回数2を付与。</style>",
-    "ターン開始時、[Breath]威力を持たない<style=\"upgradeHighlight\">ランダムな味方2名</style>へ[Breath]威力3を付与。\n\n全味方が[Breath]状態の場合、効果が変更されて全味方へ<style=\"upgradeHighlight\">[Breath]回数3を付与。</style>"
+    "ターン開始時、[Breath]威力を持たないランダムな味方1名へ[Breath]威力3を付与。\n\n全味方が[Breath]状態の場合、効果が変更されて全味方へ[Breath]回数2を付与。",
+    "ターン開始時、[Breath]威力を持たないランダムな味方2名へ[Breath]威力3を付与。\n\n全味方が[Breath]状態の場合、効果が変更されて全味方へ[Breath]回数3を付与。"
   ],
   "obtain": "Shop"
 }

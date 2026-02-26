@@ -1,0 +1,9 @@
+{
+  "name": "Searing Hammer",
+  "descs": [
+    "If the enemy has [VibrationIgnition], apply the following effects:\n- On Base Skill Hit, inflict 1 [Combustion] (3 times per Skill)\n- On Base Skill Hit, if the enemy has 15+ [VibrationIgnition], inflict +1 [Combustion] Count (2 times per Skill)\n- For every 3 [Combustion], +1% to Stagger Threshold raised by [VibrationExplosion] (max 15%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

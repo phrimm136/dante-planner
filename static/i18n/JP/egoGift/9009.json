@@ -2,8 +2,8 @@
   "name": "灼熱の羽毛",
   "descs": [
     "[Combustion]威力または特殊火傷を付与するスキルまたは色欲属性のスキルが敵に的中時、対象へ[Combustion]威力3を付与。\n\nターン開始時、[Combustion]威力20以上を保有した敵の場合、[Combustion]威力が2倍に増加。",
-    "[Combustion]威力または特殊火傷を付与するスキルまたは色欲属性のスキルが敵に的中時、対象へ<style=\"upgradeHighlight\">[Combustion]威力4</style>を付与。\n\nターン開始時、[Combustion]威力20以上を保有した敵の場合、[Combustion]威力が2倍に増加。",
-    "[Combustion]威力または特殊火傷を付与するスキルまたは色欲属性のスキルが敵に的中時、対象へ[Combustion]威力4を付与。\n\nターン開始時、[Combustion]威力20以上を保有した敵の場合、<style=\"upgradeHighlight\">[Combustion]威力が2.5倍</style>に増加。"
+    "[Combustion]威力または特殊火傷を付与するスキルまたは色欲属性のスキルが敵に的中時、対象へ[Combustion]威力4を付与。\n\nターン開始時、[Combustion]威力20以上を保有した敵の場合、[Combustion]威力が2倍に増加。",
+    "[Combustion]威力または特殊火傷を付与するスキルまたは色欲属性のスキルが敵に的中時、対象へ[Combustion]威力4を付与。\n\nターン開始時、[Combustion]威力20以上を保有した敵の場合、[Combustion]威力が2.5倍に増加。"
   ],
   "obtain": "Shop"
 }

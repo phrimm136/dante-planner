@@ -2,8 +2,8 @@
   "name": "파란 별조각",
   "descs": [
     "사기저하 또는 패닉 상태인 적의 스킬 최종 위력 -1 (정신력이 없는 적은 [Sinking] 위력이 25 이상일 때 발동)\n- 해당 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 스킬로 피해를 입힐 경우, [DefenseDown] 2 부여 (턴당 최대 2회)",
-    "사기저하 또는 패닉 상태인 적의 스킬 최종 위력 <style=\"upgradeHighlight\">-2</style> (정신력이 없는 적은 [Sinking] 위력이 <style=\"upgradeHighlight\">15</style> 이상일 때 발동)\n- 해당 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 스킬로 피해를 입힐 경우, [DefenseDown] <style=\"upgradeHighlight\">3</style> 부여 (턴당 최대 2회)",
-    "사기저하 또는 패닉 상태인 적의 스킬 최종 위력 <style=\"upgradeHighlight\">-3</style> (정신력이 없는 적은 [Sinking] 위력이 <style=\"upgradeHighlight\">10</style> 이상일 때 발동)\n- 해당 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 스킬로 피해를 입힐 경우, [DefenseDown] 3 부여 (턴당 최대 <style=\"upgradeHighlight\">3</style>회)"
+    "사기저하 또는 패닉 상태인 적의 스킬 최종 위력 -2 (정신력이 없는 적은 [Sinking] 위력이 15 이상일 때 발동)\n- 해당 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 스킬로 피해를 입힐 경우, [DefenseDown] 3 부여 (턴당 최대 2회)",
+    "사기저하 또는 패닉 상태인 적의 스킬 최종 위력 -3 (정신력이 없는 적은 [Sinking] 위력이 10 이상일 때 발동)\n- 해당 적에게 [Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 스킬로 피해를 입힐 경우, [DefenseDown] 3 부여 (턴당 최대 3회)"
   ],
   "obtain": "Shop"
 }

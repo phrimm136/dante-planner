@@ -2,8 +2,8 @@
   "name": "炎鳞",
   "descs": [
     "回合结束时，使带有[Combustion]的敌方单位消耗一半[Combustion]层数并对其额外造成(其[Combustion]强度×消耗的[Combustion]层数)点暴怒伤害。(最多消耗5层[Combustion])\n\n下回合使其防御等级减少(炎鳞消耗的[Combustion]层数)级(最多减少3级)",
-    "回合结束时，使带有[Combustion]的敌方单位消耗一半[Combustion]层数并对其额外造成(其[Combustion]强度×消耗的[Combustion]层数)点暴怒伤害。<style=\"upgradeHighlight\">(最多消耗7层[Combustion])</style>\n\n下回合使其防御等级减少(炎鳞消耗的[Combustion]层数)级<style=\"upgradeHighlight\">(最多减少5级)</style>",
-    "回合结束时，使带有[Combustion]的敌方单位消耗一半[Combustion]层数并对其额外造成(其[Combustion]强度×消耗的[Combustion]层数)点暴怒伤害。<style=\"upgradeHighlight\">(最多消耗10层[Combustion])</style>\n\n下回合使其防御等级减少(炎鳞消耗的[Combustion]层数)级<style=\"upgradeHighlight\">(最多减少8级)</style>"
+    "回合结束时，使带有[Combustion]的敌方单位消耗一半[Combustion]层数并对其额外造成(其[Combustion]强度×消耗的[Combustion]层数)点暴怒伤害。(最多消耗7层[Combustion])\n\n下回合使其防御等级减少(炎鳞消耗的[Combustion]层数)级(最多减少5级)",
+    "回合结束时，使带有[Combustion]的敌方单位消耗一半[Combustion]层数并对其额外造成(其[Combustion]强度×消耗的[Combustion]层数)点暴怒伤害。(最多消耗10层[Combustion])\n\n下回合使其防御等级减少(炎鳞消耗的[Combustion]层数)级(最多减少8级)"
   ],
   "obtain": "Shop"
 }

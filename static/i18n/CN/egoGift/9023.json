@@ -2,8 +2,8 @@
   "name": "雷击木",
   "descs": [
     "通过技能效果增加[Burst]强度时，使目标增加1级[Burst]强度并对其施加1层[Burst]。",
-    "通过技能效果增加[Burst]强度时，使目标<style=\"upgradeHighlight\">增加2级[Burst]强度</style>并对其施加1层[Burst]。",
-    "通过技能效果增加[Burst]强度时，使目标<style=\"upgradeHighlight\">增加3级[Burst]强度</style>并对其施加1层[Burst]。\n\n<style=\"upgradeHighlight\">若该技能为忧郁技能，则改为使目标增加3级[Burst]强度并对其施加2层[Burst]。</style>"
+    "通过技能效果增加[Burst]强度时，使目标增加2级[Burst]强度并对其施加1层[Burst]。",
+    "通过技能效果增加[Burst]强度时，使目标增加3级[Burst]强度并对其施加1层[Burst]。\n\n若该技能为忧郁技能，则改为使目标增加3级[Burst]强度并对其施加2层[Burst]。"
   ],
   "obtain": "Shop"
 }

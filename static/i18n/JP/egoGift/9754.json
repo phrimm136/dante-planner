@@ -2,8 +2,8 @@
   "name": "くびき",
   "descs": [
     "ステージ開始時、(現在の階層 × 2)%だけ全味方の体力最大値が増加(最大20%)",
-    "ステージ開始時、(現在の階層 × <style=\"upgradeHighlight\">3</style>)%だけ全味方の体力最大値が増加(最大<style=\"upgradeHighlight\">30</style>%)",
-    "ステージ開始時、(現在の階層 × <style=\"upgradeHighlight\">5</style>)%だけ全味方の体力最大値が増加(最大<style=\"upgradeHighlight\">50</style>%)"
+    "ステージ開始時、(現在の階層 × 3)%だけ全味方の体力最大値が増加(最大30%)",
+    "ステージ開始時、(現在の階層 × 5)%だけ全味方の体力最大値が増加(最大50%)"
   ],
   "obtain": "Shop"
 }

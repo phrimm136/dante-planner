@@ -2,8 +2,8 @@
   "name": "저주 인형",
   "descs": [
     "턴 시작 시, 적 전체에게 3만큼 질투 피해를 입힘.\n\n대상의 체력이 33% 미만이면 [ResultReduction] 1 부여.",
-    "턴 시작 시, 적 전체에게 <style=\"upgradeHighlight\">4만큼 질투 피해</style>를 입힘.\n\n대상의 <style=\"upgradeHighlight\">체력이 50% 미만이면</style> [ResultReduction] 1 부여.",
-    "턴 시작 시, 적 전체에게 <style=\"upgradeHighlight\">5만큼 질투 피해</style>를 입힘.\n\n대상의 체력이 50% 미만이면 <style=\"upgradeHighlight\">[ResultReduction] 2 부여.</style>"
+    "턴 시작 시, 적 전체에게 4만큼 질투 피해를 입힘.\n\n대상의 체력이 50% 미만이면 [ResultReduction] 1 부여.",
+    "턴 시작 시, 적 전체에게 5만큼 질투 피해를 입힘.\n\n대상의 체력이 50% 미만이면 [ResultReduction] 2 부여."
   ],
   "obtain": "Shop"
 }

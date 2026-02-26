@@ -2,8 +2,8 @@
   "name": "絡み合った時間",
   "descs": [
     "敵へ[Switch_Vibration]または[FusionVibration]させる場合、対象を[VibrationExplosion] (人格ごとに1ターンにつき1回)",
-    "敵へ[Switch_Vibration]または[FusionVibration]させる場合、対象を[VibrationExplosion] (人格ごとに1ターンにつき<style=\"upgradeHighlight\">2</style>回)",
-    "敵へ[Switch_Vibration]または[FusionVibration]させる場合、対象を[VibrationExplosion] (人格ごとに1ターンにつき<style=\"upgradeHighlight\">3</style>回)"
+    "敵へ[Switch_Vibration]または[FusionVibration]させる場合、対象を[VibrationExplosion] (人格ごとに1ターンにつき2回)",
+    "敵へ[Switch_Vibration]または[FusionVibration]させる場合、対象を[VibrationExplosion] (人格ごとに1ターンにつき3回)"
   ],
   "obtain": "Shop"
 }

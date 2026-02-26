@@ -226,6 +226,15 @@
         },
         "themePackEgoGiftInconsistency": "E.G.O Gifts {{gifts}} cannot be obtained in theme pack {{pack}}. Please reset the list and set them again."
       },
+      "applyLatestMirror": {
+        "button": "Apply Latest Mirror",
+        "title": "Apply Latest Mirror",
+        "description": "This plan was built for a previous Mirror Dungeon. Applying the latest Mirror to it will switch the start buffs, starting EGO gifts, and EGO gift observation pool to the newest ones — your selections will not change. This cannot be undone.",
+        "confirm": "Apply",
+        "applying": "Applying...",
+        "success": "Plan updated to the latest Mirror Dungeon",
+        "failed": "Failed to apply the latest Mirror Dungeon"
+      },
       "conflict": {
         "title": "Changed on Another Device",
         "description": "This plan was modified on another device or tab. Changes between devices haven't been synced.",
@@ -238,7 +247,8 @@
         "copySuffix": "{{title}} (Copy)",
         "overwriteSuccess": "Server updated with your changes",
         "discardSuccess": "Server version loaded",
-        "keepBothSuccess": "Copy created successfully"
+        "keepBothSuccess": "Copy created successfully",
+        "keepBothUnpublished": "The copy will not be published"
       },
       "batchConflict": {
         "title": "Changed on Another Device",

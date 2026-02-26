@@ -2,8 +2,8 @@
   "name": "有煙火薬",
   "descs": [
     "[編成1・2番人格専用効果]\n\nターン終了時、今回のターンに[Burst]威力または[Burst]回数を付与する攻撃スキルを一度でも使用した場合、次のターンに[Agility]1を得る。\n\n自分の速度が6以上の場合、[Burst]威力または[Burst]回数を付与する攻撃スキルのダメージ量 +12.5%",
-    "[編成1・2・<style=\"upgradeHighlight\">3</style>番人格専用効果]\n\nターン終了時、今回のターンに[Burst]威力または[Burst]回数を付与する攻撃スキルを一度でも使用した場合、次のターンに[Agility]1を得る。\n\n自分の速度が<style=\"upgradeHighlight\">5</style>以上の場合、[Burst]威力または[Burst]回数を付与する攻撃スキルのダメージ量 +<style=\"upgradeHighlight\">15</style>%",
-    "[編成1・2・3番人格専用効果]\n\nターン終了時、今回のターンに[Burst]威力または[Burst]回数を付与する攻撃スキルを一度でも使用した場合、次のターンに[Agility]<style=\"upgradeHighlight\">1～2</style> を得る。\n\n自分の速度が<style=\"upgradeHighlight\">4</style>以上の場合、[Burst]威力または[Burst]回数を付与する攻撃スキルのダメージ量 +<style=\"upgradeHighlight\">20</style>%"
+    "[編成1・2・3番人格専用効果]\n\nターン終了時、今回のターンに[Burst]威力または[Burst]回数を付与する攻撃スキルを一度でも使用した場合、次のターンに[Agility]1を得る。\n\n自分の速度が5以上の場合、[Burst]威力または[Burst]回数を付与する攻撃スキルのダメージ量 +15%",
+    "[編成1・2・3番人格専用効果]\n\nターン終了時、今回のターンに[Burst]威力または[Burst]回数を付与する攻撃スキルを一度でも使用した場合、次のターンに[Agility]1～2 を得る。\n\n自分の速度が4以上の場合、[Burst]威力または[Burst]回数を付与する攻撃スキルのダメージ量 +20%"
   ],
   "obtain": "Shop"
 }

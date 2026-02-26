@@ -2,8 +2,8 @@
   "name": "Endorphin Kit",
   "descs": [
     "When gaining [Breath] Potency from Skill effects, gain 1 [Breath] Potency and +1 [Breath] Count.\n\nIf the Skill's Affinity was Envy, the ally gains 2 [Breath] Potency and +2 [Breath] Count instead.",
-    "When gaining [Breath] Potency from Skill effects, gain <style=\"upgradeHighlight\">2 [Breath] Potency and +2 [Breath] Count</style>.\n\nIf the Skill's Affinity was Envy, the ally <style=\"upgradeHighlight\">gains 3 [Breath] Potency and +3 [Breath] Count</style> instead.",
-    "When gaining [Breath] Potency from Skill effects, gain <style=\"upgradeHighlight\">3 [Breath] Potency and +3 [Breath] Count</style>.\n\nIf the Skill's Affinity was Envy, the ally <style=\"upgradeHighlight\">gains 4 [Breath] Potency and +4 [Breath] Count</style> instead."
+    "When gaining [Breath] Potency from Skill effects, gain 2 [Breath] Potency and +2 [Breath] Count.\n\nIf the Skill's Affinity was Envy, the ally gains 3 [Breath] Potency and +3 [Breath] Count instead.",
+    "When gaining [Breath] Potency from Skill effects, gain 3 [Breath] Potency and +3 [Breath] Count.\n\nIf the Skill's Affinity was Envy, the ally gains 4 [Breath] Potency and +4 [Breath] Count instead."
   ],
   "obtain": "Shop"
 }

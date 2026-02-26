@@ -2,8 +2,8 @@
   "name": "縛り付けた枷",
   "descs": [
     "速度が最も高い味方が[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用して敵にダメージを与えた場合、ダメージ量 +12.5%",
-    "速度が最も高い味方<style=\"upgradeHighlight\">2名</style>が[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用して敵にダメージを与えた場合、ダメージ量 +<style=\"upgradeHighlight\">15</style>%",
-    "速度が最も高い味方<style=\"upgradeHighlight\">3名</style>が[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用して敵にダメージを与えた場合、ダメージ量 +<style=\"upgradeHighlight\">20</style>%"
+    "速度が最も高い味方2名が[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用して敵にダメージを与えた場合、ダメージ量 +15%",
+    "速度が最も高い味方3名が[Laceration]威力、[Laceration]回数、または特殊出血を与えるスキルを使用して敵にダメージを与えた場合、ダメージ量 +20%"
   ],
   "obtain": "Shop"
 }

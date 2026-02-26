@@ -1,0 +1,9 @@
+{
+  "name": "달궈진 망치",
+  "descs": [
+    "적에게 [VibrationIgnition]이 있을 경우 다음 효과 적용\n- 기본 스킬 적중 시 [Combustion] 위력 1 부여 (스킬당 최대 3회)\n- 기본 스킬 적중 시 [VibrationIgnition]이 15 이상이면, [Combustion] 횟수 1 증가 (스킬당 최대 2회)\n- [Combustion] 3당, [VibrationExplosion]로 인한 흐트러짐 손상 +1% (최대 15%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

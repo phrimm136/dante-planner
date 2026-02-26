@@ -2,8 +2,8 @@
   "name": "잔향",
   "descs": [
     "턴 종료 시, [Vibration] 위력을 10 이상 보유한 적(환상체일 경우, 해당 부위)에게 다음 턴에 [Binding] 2 부여. 대상이 [Vibration] 위력을 20 이상 보유한 경우, 효과가 강화되어 [Binding] 2, [Paralysis] 1 부여.",
-    "턴 종료 시, [Vibration] 위력을 <style=\"upgradeHighlight\">8</style> 이상 보유한 적(환상체일 경우, 해당 부위)에게 다음 턴에 [Binding] 2, <style=\"upgradeHighlight\">[DefenseDown] 2</style> 부여. 대상이 [Vibration] 위력을 <style=\"upgradeHighlight\">15</style> 이상 보유한 경우, 효과가 강화되어 [Binding] 2, [Paralysis] 1, <style=\"upgradeHighlight\">[DefenseDown] 2</style> 부여.",
-    "턴 종료 시, [Vibration] 위력을 <style=\"upgradeHighlight\">5</style> 이상 보유한 적(환상체일 경우, 해당 부위)에게 다음 턴에 [Binding] 2, [DefenseDown] <style=\"upgradeHighlight\">3</style> 부여. 대상이 [Vibration] 위력을 <style=\"upgradeHighlight\">10</style> 이상 보유한 경우, 효과가 강화되어 [Binding] 2, [Paralysis] 1, [DefenseDown] <style=\"upgradeHighlight\">4</style> 부여."
+    "턴 종료 시, [Vibration] 위력을 8 이상 보유한 적(환상체일 경우, 해당 부위)에게 다음 턴에 [Binding] 2, [DefenseDown] 2 부여. 대상이 [Vibration] 위력을 15 이상 보유한 경우, 효과가 강화되어 [Binding] 2, [Paralysis] 1, [DefenseDown] 2 부여.",
+    "턴 종료 시, [Vibration] 위력을 5 이상 보유한 적(환상체일 경우, 해당 부위)에게 다음 턴에 [Binding] 2, [DefenseDown] 3 부여. 대상이 [Vibration] 위력을 10 이상 보유한 경우, 효과가 강화되어 [Binding] 2, [Paralysis] 1, [DefenseDown] 4 부여."
   ],
   "obtain": "Shop"
 }

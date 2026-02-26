@@ -2,8 +2,8 @@
   "name": "Burning Intellect",
   "descs": [
     "After defeating an enemy with a [Combustion] effect, 2 allies with Skills that inflict [Combustion] Potency gains 1 [AttackDmgUp] at the next Turn Start.",
-    "After defeating an enemy with a [Combustion] effect, 2 allies with Skills that inflict [Combustion] Potency gains <style=\"upgradeHighlight\">2 [AttackDmgUp]</style> at the next Turn Start.",
-    "After defeating an enemy with a [Combustion] effect, <style=\"upgradeHighlight\">3 allies</style> with Skills that inflict [Combustion] Potency gains 2 [AttackDmgUp] at the next Turn Start."
+    "After defeating an enemy with a [Combustion] effect, 2 allies with Skills that inflict [Combustion] Potency gains 2 [AttackDmgUp] at the next Turn Start.",
+    "After defeating an enemy with a [Combustion] effect, 3 allies with Skills that inflict [Combustion] Potency gains 2 [AttackDmgUp] at the next Turn Start."
   ],
   "obtain": "Shop"
 }

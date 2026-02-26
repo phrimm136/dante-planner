@@ -1,0 +1,9 @@
+{
+  "name": "Miniature Ferris Wheel",
+  "descs": [
+    "All Bloodfiend allies: Base Skill Coin Power +1, deal +([BloodDinner_Accumulation] / 10)% Skill damage\n\nTurn End: Among allies with [Laceration], 2 allies with the least HP heal 5% HP and gain 10 [SwirlingBloodPersonality] at next Turn Start\n\nOn enemy Kill, increase [BloodDinner] by (enemy Core max HP / 10) (max 50)\n\nTurn End: If an ally died this turn, all allies gain 2 [Enhancement] next turn\n\nIn Encounters where backup enemies appear: When new enemies appear, inflict 5 [Laceration] and +3 [Laceration] Count against them at Combat Start.\nIf there is a  among allies: When new enemies enter the battle, activate [Laceration] on all enemies twice and reduce their [Laceration] Count by 2",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

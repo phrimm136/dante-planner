@@ -2,8 +2,8 @@
   "name": "巫毒娃娃",
   "descs": [
     "回合开始时，对全体敌方单位造成3点固定嫉妒伤害。\n\n对现存体力低于33%的敌方单位施加1层[ResultReduction]。",
-    "回合开始时，对全体敌方单位造成<style=\"upgradeHighlight\">4点固定嫉妒伤害</style>。\n\n对<style=\"upgradeHighlight\">现存体力低于50%</style>的敌方单位施加1层[ResultReduction]。",
-    "回合开始时，对全体敌方单位造成<style=\"upgradeHighlight\">5点固定嫉妒伤害</style>。\n\n对现存体力低于50%的敌方单位<style=\"upgradeHighlight\">施加2层[ResultReduction]</style>。"
+    "回合开始时，对全体敌方单位造成4点固定嫉妒伤害。\n\n对现存体力低于50%的敌方单位施加1层[ResultReduction]。",
+    "回合开始时，对全体敌方单位造成5点固定嫉妒伤害。\n\n对现存体力低于50%的敌方单位施加2层[ResultReduction]。"
   ],
   "obtain": "Shop"
 }

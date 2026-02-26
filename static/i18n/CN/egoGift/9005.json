@@ -2,8 +2,8 @@
   "name": "嗜伤甲虫",
   "descs": [
     "使用增加[Laceration]强度或施加特殊流血的技能对敌方单位造成伤害时，使目标增加4级[Laceration]强度。",
-    "使用<style=\"upgradeHighlight\">增加[Laceration]强度或施加特殊流血的技能或暴怒技能</style>对敌方单位造成伤害时，使目标<style=\"upgradeHighlight\">增加5级[Laceration]强度</style>。",
-    "使用增加[Laceration]强度或施加特殊流血的技能或暴怒技能对敌方单位造成伤害时，使目标增加5级[Laceration]强度<style=\"upgradeHighlight\">并对其施加1层[Laceration]</style>。"
+    "使用增加[Laceration]强度或施加特殊流血的技能或暴怒技能对敌方单位造成伤害时，使目标增加5级[Laceration]强度。",
+    "使用增加[Laceration]强度或施加特殊流血的技能或暴怒技能对敌方单位造成伤害时，使目标增加5级[Laceration]强度并对其施加1层[Laceration]。"
   ],
   "obtain": "Shop"
 }

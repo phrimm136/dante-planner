@@ -2,8 +2,8 @@
   "name": "진동형 팔찌",
   "descs": [
     "스킬을 사용하여 적에게 적중 시, 다음 턴에 대상에게 [Vibration] 위력 1 부여.\n\n분노 속성 스킬을 사용할 경우, 효과가 강화되어 [Vibration] 위력 2 부여.",
-    "스킬을 사용하여 적에게 적중 시, 다음 턴에 대상에게 [Vibration] 위력 1 부여.\n\n분노 속성 스킬을 사용할 경우, 효과가 강화되어 <style=\"upgradeHighlight\">[Vibration] 위력 3 부여.</style>",
-    "스킬을 사용하여 적에게 적중 시, 다음 턴에 대상에게 <style=\"upgradeHighlight\">[Vibration] 위력 2 부여.</style>\n\n분노 속성 스킬을 사용할 경우, 효과가 강화되어 <style=\"upgradeHighlight\">[Vibration] 위력 4 부여.</style>"
+    "스킬을 사용하여 적에게 적중 시, 다음 턴에 대상에게 [Vibration] 위력 1 부여.\n\n분노 속성 스킬을 사용할 경우, 효과가 강화되어 [Vibration] 위력 3 부여.",
+    "스킬을 사용하여 적에게 적중 시, 다음 턴에 대상에게 [Vibration] 위력 2 부여.\n\n분노 속성 스킬을 사용할 경우, 효과가 강화되어 [Vibration] 위력 4 부여."
   ],
   "obtain": "Shop"
 }

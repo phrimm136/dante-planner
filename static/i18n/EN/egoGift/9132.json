@@ -2,8 +2,8 @@
   "name": "UPS System",
   "descs": [
     "Turn End: If at less than 3 [Charge] Count, gain +3 [Charge] Count next Turn Start. (including 'Unique Charge')\n\nTurn End: If at 3+ [Charge] Count, gain 1 [AttackDmgUp] next Turn Start. (including 'Unique Charge')",
-    "Turn End: If at less than <style=\"upgradeHighlight\">4</style> [Charge] Count, gain +3 [Charge] Count next Turn Start. (including 'Unique Charge')\n\nTurn End: If at <style=\"upgradeHighlight\">4+</style> [Charge] Count, gain 1 [AttackDmgUp] next Turn Start. (including 'Unique Charge')",
-    "Turn End: If at less than <style=\"upgradeHighlight\">5</style> [Charge] Count, gain <style=\"upgradeHighlight\">+4</style> [Charge] Count next Turn Start. (including 'Unique Charge')\n\nTurn End: If at <style=\"upgradeHighlight\">5+</style> [Charge] Count, gain <style=\"upgradeHighlight\">2</style> [AttackDmgUp] next Turn Start. (including 'Unique Charge')"
+    "Turn End: If at less than 4 [Charge] Count, gain +3 [Charge] Count next Turn Start. (including 'Unique Charge')\n\nTurn End: If at 4+ [Charge] Count, gain 1 [AttackDmgUp] next Turn Start. (including 'Unique Charge')",
+    "Turn End: If at less than 5 [Charge] Count, gain +4 [Charge] Count next Turn Start. (including 'Unique Charge')\n\nTurn End: If at 5+ [Charge] Count, gain 2 [AttackDmgUp] next Turn Start. (including 'Unique Charge')"
   ],
   "obtain": "Shop"
 }

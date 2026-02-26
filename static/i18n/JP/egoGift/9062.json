@@ -2,8 +2,8 @@
   "name": "履歴書",
   "descs": [
     "ターン終了時、[Charge]回数と特殊充電を合計で7以上保有した味方が次のターンに[Agility]1を得る。\n\n憂鬱属性攻撃スキルを保有する味方の場合、効果が強化され次のターンに[Agility]2, [ResultEnhancement]1を得る。",
-    "ターン終了時、[Charge]回数と特殊充電を合計で7以上保有した味方が次のターンに<style=\"upgradeHighlight\">[Agility]2を得る。</style>\n\n憂鬱属性攻撃スキルを保有する味方の場合、効果が強化され次のターンに<style=\"upgradeHighlight\">[Agility]3</style>, [ResultEnhancement]1を得る。",
-    "ターン終了時、[Charge]回数と特殊充電を合計で7以上保有した味方が次のターンに<style=\"upgradeHighlight\">[Agility]3を得る。</style>\n\n憂鬱属性攻撃スキルを保有する味方の場合、効果が強化され次のターンに<style=\"upgradeHighlight\">[Agility]4</style>, [ResultEnhancement]1を得る。"
+    "ターン終了時、[Charge]回数と特殊充電を合計で7以上保有した味方が次のターンに[Agility]2を得る。\n\n憂鬱属性攻撃スキルを保有する味方の場合、効果が強化され次のターンに[Agility]3, [ResultEnhancement]1を得る。",
+    "ターン終了時、[Charge]回数と特殊充電を合計で7以上保有した味方が次のターンに[Agility]3を得る。\n\n憂鬱属性攻撃スキルを保有する味方の場合、効果が強化され次のターンに[Agility]4, [ResultEnhancement]1を得る。"
   ],
   "obtain": "Shop"
 }

@@ -2,8 +2,8 @@
   "name": "Nebulizer",
   "descs": [
     "First Turn Start of an Encounter: all allies gain 4 [Breath] Potency and +4 [Breath] Count.\n\nWhen activating Pride Absolute Resonance, all allies gain 2 [Breath] Potency and +2 [Breath] Count at Combat Start.\n- [Cannot Stack] When Thoracalgia Ryōshū E.G.O Passive 「Breath」 activates, this effect does not activate",
-    "<style=\"upgradeHighlight\">First Turn Start of a wave</style>: All allies gain <style=\"upgradeHighlight\">5 [Breath] Potency</style> and +4 [Breath] Count.\n\nWhen activating Pride Absolute Resonance, all allies gain <style=\"upgradeHighlight\">3 [Breath] Potency</style> and +2 [Breath] Count.\n- [Cannot Stack] When Thoracalgia Ryōshū E.G.O Passive 「Breath」 activates, this effect does not activate",
-    "First Turn Start of a wave: all allies gain 5 [Breath] Potency and <style=\"upgradeHighlight\">+5 [Breath] Count</style>.\n\nWhen activating <style=\"upgradeHighlight\">Pride Resonance</style>, all allies gain 3 [Breath] Potency and <style=\"upgradeHighlight\">+3 [Breath] Count</style> at Combat Start.\n- [Cannot Stack] When Thoracalgia Ryōshū E.G.O Passive 「Breath」 activates, this effect does not activate"
+    "First Turn Start of a wave: All allies gain 5 [Breath] Potency and +4 [Breath] Count.\n\nWhen activating Pride Absolute Resonance, all allies gain 3 [Breath] Potency and +2 [Breath] Count.\n- [Cannot Stack] When Thoracalgia Ryōshū E.G.O Passive 「Breath」 activates, this effect does not activate",
+    "First Turn Start of a wave: all allies gain 5 [Breath] Potency and +5 [Breath] Count.\n\nWhen activating Pride Resonance, all allies gain 3 [Breath] Potency and +3 [Breath] Count at Combat Start.\n- [Cannot Stack] When Thoracalgia Ryōshū E.G.O Passive 「Breath」 activates, this effect does not activate"
   ],
   "obtain": "Shop"
 }

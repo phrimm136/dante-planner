@@ -2,8 +2,8 @@
   "name": "Glimpse of Flames",
   "descs": [
     "Turn End: consume half of [Combustion] Count on enemies with [Combustion] to deal ([Combustion] Potency x consumed [Combustion] Count) bonus Wrath damage. (can consume up to 5 [Combustion] Count)\n\nTargets lose ([Combustion] Count consumed by Glimpse of Flames) Defense Levels for the next turn. (max 3)",
-    "Turn End: consume half of [Combustion] Count on enemies with [Combustion] to deal ([Combustion] Potency x consumed [Combustion] Count) bonus Wrath damage. <style=\"upgradeHighlight\">(can consume up to 7 [Combustion] Count)</style>\n\nTargets lose ([Combustion] Count consumed by Glimpse of Flames) Defense Levels for the next turn. <style=\"upgradeHighlight\">(max 5)</style>",
-    "Turn End: consume half of [Combustion] Count on enemies with [Combustion] to deal ([Combustion] Potency x consumed [Combustion] Count) bonus Wrath damage. <style=\"upgradeHighlight\">(can consume up to 10 [Combustion] Count)</style>\n\nTargets lose ([Combustion] Count consumed by Glimpse of Flames) Defense Levels for the next turn. <style=\"upgradeHighlight\">(max 8)</style>"
+    "Turn End: consume half of [Combustion] Count on enemies with [Combustion] to deal ([Combustion] Potency x consumed [Combustion] Count) bonus Wrath damage. (can consume up to 7 [Combustion] Count)\n\nTargets lose ([Combustion] Count consumed by Glimpse of Flames) Defense Levels for the next turn. (max 5)",
+    "Turn End: consume half of [Combustion] Count on enemies with [Combustion] to deal ([Combustion] Potency x consumed [Combustion] Count) bonus Wrath damage. (can consume up to 10 [Combustion] Count)\n\nTargets lose ([Combustion] Count consumed by Glimpse of Flames) Defense Levels for the next turn. (max 8)"
   ],
   "obtain": "Shop"
 }

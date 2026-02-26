@@ -2,8 +2,8 @@
   "name": "Polarization",
   "descs": [
     "If the ally has 30 or more SP than the target, deal +7.5% damage with Skills that inflict [Combustion] Potency, Count, or 'Unique Burn'. (For enemies without SP, their 'SP' counts as 0)",
-    "If the ally has <style=\"upgradeHighlight\">25</style> or more SP than the target, deal <style=\"upgradeHighlight\">+12.5%</style> damage with Skills that inflict [Combustion] Potency, Count, or 'Unique Burn'. (For enemies without SP, their 'SP' counts as 0)",
-    "If the ally has <style=\"upgradeHighlight\">15</style> or more SP than the target, deal <style=\"upgradeHighlight\">+20%</style> damage with Skills that inflict [Combustion] Potency, Count, or 'Unique Burn'. (For enemies without SP, their 'SP' counts as 0)"
+    "If the ally has 25 or more SP than the target, deal +12.5% damage with Skills that inflict [Combustion] Potency, Count, or 'Unique Burn'. (For enemies without SP, their 'SP' counts as 0)",
+    "If the ally has 15 or more SP than the target, deal +20% damage with Skills that inflict [Combustion] Potency, Count, or 'Unique Burn'. (For enemies without SP, their 'SP' counts as 0)"
   ],
   "obtain": "Shop"
 }

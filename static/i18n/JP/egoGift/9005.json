@@ -2,8 +2,8 @@
   "name": "キズモドキ",
   "descs": [
     "[Laceration]威力または特殊出血を付与するスキルを使用して敵へ的中時、対象へ[Laceration]威力4を付与。",
-    "<style=\"upgradeHighlight\">[Laceration]威力または特殊出血を付与するスキル、または憤怒属性のスキル</style>が敵へ的中時、対象へ<style=\"upgradeHighlight\">[Laceration]威力5</style>付与。",
-    "[Laceration]威力または特殊出血を付与するスキル、または憤怒属性のスキルが敵に的中時、対象へ[Laceration]威力5, <style=\"upgradeHighlight\">[Laceration]回数1を付与。</style>"
+    "[Laceration]威力または特殊出血を付与するスキル、または憤怒属性のスキルが敵へ的中時、対象へ[Laceration]威力5付与。",
+    "[Laceration]威力または特殊出血を付与するスキル、または憤怒属性のスキルが敵に的中時、対象へ[Laceration]威力5, [Laceration]回数1を付与。"
   ],
   "obtain": "Shop"
 }

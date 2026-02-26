@@ -1,0 +1,9 @@
+{
+  "name": "Potentialities",
+  "descs": [
+    "When Staggered due to damage, recover from Stagger; then gain Shield equal to 50% of Max HP and remove 1 random removable negative effect on self (excluding forced Staggers, 2 times per Encounter)\n\nGain 20 Poise at the start of the next turn after activating the above effect (once per turn)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

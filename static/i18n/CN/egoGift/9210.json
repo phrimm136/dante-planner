@@ -2,8 +2,8 @@
   "name": "嫩肉锤",
   "descs": [
     "[第4顺位友方单位专属]\n\n若自身拥有不低于2个打击攻击技能，则回合开始时使自身获得1层[ParryingResultUp]",
-    "[第4顺位友方单位专属]\n\n若自身拥有不低于2个打击攻击技能，则回合开始时使自身获得<style=\"upgradeHighlight\">2</style>层[ParryingResultUp]",
-    "[第4、<style=\"upgradeHighlight\">第5</style>顺位友方单位专属]\n\n若自身拥有不低于2个打击攻击技能，则回合开始时使自身获得2层[ParryingResultUp]"
+    "[第4顺位友方单位专属]\n\n若自身拥有不低于2个打击攻击技能，则回合开始时使自身获得2层[ParryingResultUp]",
+    "[第4、第5顺位友方单位专属]\n\n若自身拥有不低于2个打击攻击技能，则回合开始时使自身获得2层[ParryingResultUp]"
   ],
   "obtain": "Shop"
 }

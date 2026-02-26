@@ -2,8 +2,8 @@
   "name": "False Halo",
   "descs": [
     "On Hit, gain 1 [Zazen]. (2 times per Skill)\nIf this unit was hit by an enemy Skill this turn, gain +1 more [Zazen] each time.",
-    "On Hit, gain 1 [Zazen]. (<style=\"upgradeHighlight\">3</style> times per Skill)\nIf this unit was hit by an enemy Skill this turn, gain +1 more [Zazen] each time.",
-    "On Hit, gain <style=\"upgradeHighlight\">2</style> [Zazen]. (3 times per Skill)\nIf this unit was hit by an enemy Skill this turn, gain +1 more [Zazen] each time."
+    "On Hit, gain 1 [Zazen]. (3 times per Skill)\nIf this unit was hit by an enemy Skill this turn, gain +1 more [Zazen] each time.",
+    "On Hit, gain 2 [Zazen]. (3 times per Skill)\nIf this unit was hit by an enemy Skill this turn, gain +1 more [Zazen] each time."
   ],
   "obtain": "Shop"
 }

@@ -2,8 +2,8 @@
   "name": "损坏的小提琴",
   "descs": [
     "[第5、第6顺位友方单位专属]\n\n若现存体力不高于45%，则拼点胜利时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n若现存体力不高于20%，则改为使用技能时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)",
-    "[第5、第6顺位友方单位专属]\n\n若现存体力不高于<style=\"upgradeHighlight\">65%</style>，则拼点胜利时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n若现存体力不高于<style=\"upgradeHighlight\">40%</style>，则改为使用技能时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n<style=\"upgradeHighlight\">拼点胜利且拼点次数不低于5次时，使拼点胜利的技能造成的伤害+(拼点次数×2)%(最多+20%)</style>",
-    "[第5、第6顺位友方单位专属]\n\n若现存体力不高于65%，则拼点胜利时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n若现存体力不高于40%，则改为使用技能时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n拼点胜利且拼点次数不低于5次时，使拼点胜利的技能造成的伤害<style=\"upgradeHighlight\">+(拼点次数×3)%(最多+30%)</style>"
+    "[第5、第6顺位友方单位专属]\n\n若现存体力不高于65%，则拼点胜利时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n若现存体力不高于40%，则改为使用技能时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n拼点胜利且拼点次数不低于5次时，使拼点胜利的技能造成的伤害+(拼点次数×2)%(最多+20%)",
+    "[第5、第6顺位友方单位专属]\n\n若现存体力不高于65%，则拼点胜利时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n若现存体力不高于40%，则改为使用技能时使自身获得1层[AttackUp]与1层[TakeHpHealIncrease](每回合每名单位最多2次)\n\n拼点胜利且拼点次数不低于5次时，使拼点胜利的技能造成的伤害+(拼点次数×3)%(最多+30%)"
   ],
   "obtain": "Shop"
 }

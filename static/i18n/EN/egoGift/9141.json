@@ -2,8 +2,8 @@
   "name": "Moment of Sentencing",
   "descs": [
     "[Effects apply only to #3, #4 Deployed Identities]\n\nUnopposed Slash Skills deal +10% damage\n\nClash Win: Slash Skills deal +(40/# of remaining Coins)% damage",
-    "[Effects apply only to #3, #4, and <style=\"upgradeHighlight\">#5</style> Deployed Identities]\n\nUnopposed Slash Skills deal +10% damage\n\nClash Win: Slash Skills deal +(40/# of remaining Coins)% damage",
-    "[Effects apply only to #3, #4, #5, and <style=\"upgradeHighlight\">#6</style> Deployed Identities]\n\nUnopposed Slash Skills deal <style=\"upgradeHighlight\">+12.5%</style> damage\n\nClash Win: Slash Skills deal +(<style=\"upgradeHighlight\">50</style>/# of remaining Coins)% damage"
+    "[Effects apply only to #3, #4, and #5 Deployed Identities]\n\nUnopposed Slash Skills deal +10% damage\n\nClash Win: Slash Skills deal +(40/# of remaining Coins)% damage",
+    "[Effects apply only to #3, #4, #5, and #6 Deployed Identities]\n\nUnopposed Slash Skills deal +12.5% damage\n\nClash Win: Slash Skills deal +(50/# of remaining Coins)% damage"
   ],
   "obtain": "Shop"
 }

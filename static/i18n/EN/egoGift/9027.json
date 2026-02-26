@@ -2,8 +2,8 @@
   "name": "Lowest Star",
   "descs": [
     "When hitting an enemy with a Blunt Skill or a Pride Affinity Skill, inflict 2 fixed SP damage on target.\n\nAllies with less than 0 SP deal +10% damage.",
-    "When hitting an enemy with a Blunt Skill or a Pride Affinity Skill, inflict <style=\"upgradeHighlight\">3 fixed SP damage on target</style>.\n\nAllies with less than 0 SP deal <style=\"upgradeHighlight\">+15% damage</style>.",
-    "When hitting an enemy with a Blunt Skill or a Pride Affinity Skill, inflict <style=\"upgradeHighlight\">5 fixed SP damage on target</style>.\n\nAllies with less than 0 SP deal +<style=\"upgradeHighlight\">25% damage</style>."
+    "When hitting an enemy with a Blunt Skill or a Pride Affinity Skill, inflict 3 fixed SP damage on target.\n\nAllies with less than 0 SP deal +15% damage.",
+    "When hitting an enemy with a Blunt Skill or a Pride Affinity Skill, inflict 5 fixed SP damage on target.\n\nAllies with less than 0 SP deal +25% damage."
   ],
   "obtain": "Shop"
 }

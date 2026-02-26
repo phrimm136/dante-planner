@@ -2,8 +2,8 @@
   "name": "형광색 램프",
   "descs": [
     "턴 종료 시 [Burst] 상태인 적의 수(환상체일 경우, 모든 부위)+1만큼, 다음 턴에 무작위 아군 하나에게 [AttackDmgUp] 1, [Agility] 1 효과 중 하나를 부여.",
-    "턴 종료 시 [Burst] 상태인 <style=\"upgradeHighlight\">적의 수(환상체일 경우, 모든 부위)+3만큼</style>, 다음 턴에 무작위 아군 하나에게 [AttackDmgUp] 1, [Agility] 1 효과 중 하나를 부여.",
-    "턴 종료 시 [Burst] 상태인 적의 수(환상체일 경우, 모든 부위)+3만큼, 다음 턴에 무작위 아군 하나에게 <style=\"upgradeHighlight\">[AttackDmgUp] 1, [Agility] 1 효과를 부여.</style>"
+    "턴 종료 시 [Burst] 상태인 적의 수(환상체일 경우, 모든 부위)+3만큼, 다음 턴에 무작위 아군 하나에게 [AttackDmgUp] 1, [Agility] 1 효과 중 하나를 부여.",
+    "턴 종료 시 [Burst] 상태인 적의 수(환상체일 경우, 모든 부위)+3만큼, 다음 턴에 무작위 아군 하나에게 [AttackDmgUp] 1, [Agility] 1 효과를 부여."
   ],
   "obtain": "Shop"
 }

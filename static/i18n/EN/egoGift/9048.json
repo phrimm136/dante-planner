@@ -2,8 +2,8 @@
   "name": "Rusted Cutting Knife",
   "descs": [
     "When inflicting [Laceration] Potency or 'Unique Bleed' with Skill effects against non-Staggered enemies, inflict 1 [Laceration] Potency and +1 [Laceration] Count.\n\nIf the Skill's Affinity was Lust, inflict 3 [Laceration] Potency and +1 [Laceration] Count instead.",
-    "When inflicting [Laceration] Potency or 'Unique Bleed' with Skill effects, inflict <style=\"upgradeHighlight\">2 [Laceration] Potency</style> and +1 [Laceration] Count.\n\nIf the Skill's Affinity was Lust, inflict 3 [Laceration] Potency and +1 [Laceration] Count instead.",
-    "When inflicting [Laceration] Potency or 'Unique Bleed' with Skill effects, inflict <style=\"upgradeHighlight\">3 [Laceration] Potency</style> and +1 [Laceration] Count.\n\nIf the Skill's Affinity was Lust, inflict 3 [Laceration] Potency and <style=\"upgradeHighlight\">+2 [Laceration] Count</style> instead."
+    "When inflicting [Laceration] Potency or 'Unique Bleed' with Skill effects, inflict 2 [Laceration] Potency and +1 [Laceration] Count.\n\nIf the Skill's Affinity was Lust, inflict 3 [Laceration] Potency and +1 [Laceration] Count instead.",
+    "When inflicting [Laceration] Potency or 'Unique Bleed' with Skill effects, inflict 3 [Laceration] Potency and +1 [Laceration] Count.\n\nIf the Skill's Affinity was Lust, inflict 3 [Laceration] Potency and +2 [Laceration] Count instead."
   ],
   "obtain": "Shop"
 }

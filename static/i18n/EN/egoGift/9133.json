@@ -2,8 +2,8 @@
   "name": "Uncapped Defibrilator",
   "descs": [
     "Turn End: heal HP and SP equal to the sum of [Charge] Count and 'Unique Charge' consumed by Attack Skills this turn.\n\nIf this unit has 50%- remaining HP, boost the heal amount by x1.5.",
-    "Turn End: heal HP and SP equal to <style=\"upgradeHighlight\">(the sum of [Charge] Count and 'Unique Charge' consumed by Attack Skills this turn + 1)</style>.\n\nIf this unit has 50%- remaining HP, boost the heal amount by <style=\"upgradeHighlight\">x2</style>.",
-    "Turn End: heal HP and SP equal to (the sum of [Charge] Count and 'Unique Charge' consumed by Attack Skills this turn <style=\"upgradeHighlight\">+ 2</style>).\n\nIf this unit has <style=\"upgradeHighlight\">75</style>%- remaining HP, boost the heal amount by x2."
+    "Turn End: heal HP and SP equal to (the sum of [Charge] Count and 'Unique Charge' consumed by Attack Skills this turn + 1).\n\nIf this unit has 50%- remaining HP, boost the heal amount by x2.",
+    "Turn End: heal HP and SP equal to (the sum of [Charge] Count and 'Unique Charge' consumed by Attack Skills this turn + 2).\n\nIf this unit has 75%- remaining HP, boost the heal amount by x2."
   ],
   "obtain": "Shop"
 }
