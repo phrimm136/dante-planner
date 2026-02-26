@@ -8,9 +8,30 @@ description: Create and manage Claude Code skills. Use when creating skills, mod
 ## Rules
 
 - **Under 500 lines** - Use reference files for details
-- **Include trigger keywords in description** - Max 1024 chars
+- **Include trigger keywords in description** - Max 1024 chars, no XML brackets
 - **Lowercase hyphenated names** - `my-new-skill`
-- **Test before documenting** - Verify patterns work
+- **Three-level disclosure** - L1: frontmatter, L2: SKILL.md, L3: `references/`
+- **Test before documenting** - Verify trigger + functional + comparison
+
+## Three-Level Disclosure
+
+| Level | Location | Loads When | Purpose |
+|-------|----------|------------|---------|
+| L1 | YAML frontmatter | Always (every request) | Trigger detection only |
+| L2 | SKILL.md body | Skill matches | Instructions + templates |
+| L3 | `references/*.md` | Explicitly linked | Deep detail, tables, examples |
+
+## Folder Structure
+
+```
+skill-name/
+├── SKILL.md            (required — L1 + L2)
+├── references/         (optional — L3 detail files)
+│   ├── trigger-guide.md
+│   └── test-patterns.md
+├── scripts/            (optional — executable helpers)
+└── assets/             (optional — images, data files)
+```
 
 ## Skill File Template
 
@@ -39,6 +60,8 @@ description: Brief description with trigger keywords.
 \`\`\`
 
 ## Reference
+- Triggers: `references/trigger-guide.md`
+- Tests: `references/test-patterns.md`
 - Pattern: `ExistingFile.tsx`
 - Why: `docs/learning/topic.md`
 ```
@@ -64,47 +87,33 @@ description: Brief description with trigger keywords.
 }
 ```
 
-## Trigger Types
+See `references/trigger-guide.md` for full trigger types, enforcement levels, priority levels, and `agentConfig` fields.
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| keywords | Explicit mentions | `["component", "UI"]` |
-| intentPatterns | Action detection (regex) | `"(create\|add).*?page"` |
-| pathPatterns | File location (glob) | `"src/**/*.tsx"` |
-| contentPatterns | File content (regex) | `"@sentry"` |
+## Testing
 
-## Enforcement Levels
+Three areas — run in order:
 
-| Level | Effect | Use Case |
-|-------|--------|----------|
-| `block` | Prevents Edit/Write | Critical guardrails |
-| `suggest` | Injects reminder | Best practices |
-| `warn` | Low priority hint | Rarely used |
-
-## Priority Levels
-
-| Priority | Behavior |
-|----------|----------|
-| `critical` | Always trigger |
-| `high` | Most matches |
-| `medium` | Clear matches |
-| `low` | Explicit only |
-
-## Test Commands
+1. **Trigger** — skill loads for right prompts, skips unrelated ones
+2. **Functional** — correct output when skill activates (checklist)
+3. **Comparison** — skill vs. baseline improvement (new skills only)
 
 ```bash
-# Test UserPromptSubmit
+# Trigger test
 echo '{"prompt":"your test prompt"}' | npx tsx .claude/hooks/skill-activation-prompt.ts
 
 # Validate JSON
 jq . .claude/skills/skill-rules.json
 ```
 
+See `references/test-patterns.md` for functional checklist and comparison test table.
+
 ## File Locations
 
 | File | Purpose |
 |------|---------|
-| `.claude/skills/{name}/SKILL.md` | Skill content |
+| `.claude/skills/{name}/SKILL.md` | Skill content (L1 + L2) |
+| `.claude/skills/{name}/references/` | Detail files (L3) |
+| `.claude/skills/{name}/scripts/` | Helper scripts |
 | `.claude/skills/skill-rules.json` | Trigger config |
 | `.claude/hooks/` | Hook implementations |
 | `.claude/settings.json` | Hook registration |
@@ -113,4 +122,6 @@ jq . .claude/skills/skill-rules.json
 
 - Config: `.claude/skills/skill-rules.json`
 - Hooks: `.claude/hooks/skill-activation-prompt.ts`
+- Triggers: `references/trigger-guide.md`
+- Tests: `references/test-patterns.md`
 - Why: `docs/learning/skill-development.md`
