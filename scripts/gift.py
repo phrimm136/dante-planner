@@ -34,6 +34,12 @@ COMMON_DATA_PATTERN = "../raw/Json/*mirror-dungeon-common-data*.json"
 LUNAR_MEMORY_ID = 9083
 PLACEHOLDER_OBTAIN = "Shop"
 
+# Unity rich text formatting tags to strip (preserve game terminology like <호수의 존재>)
+UNITY_TAG_RE = re.compile(
+    r'</?(?:color|font|size|style|link|mark|noparse|b|i|u|s)(?:[^>]*)?>|<sprite[^>]*>',
+    re.IGNORECASE
+)
+
 # --- 공용 함수 ---
 
 def load_json(path):
@@ -47,6 +53,13 @@ def save_json(path, data):
         os.makedirs(dir_name, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def strip_tags(text: str) -> str:
+    """Strip Unity formatting tags, preserve game terminology."""
+    if not text:
+        return ""
+    return UNITY_TAG_RE.sub("", text)
 
 
 # =============================================================================
@@ -200,9 +213,9 @@ def step_desc():
                     }
 
                 if stage == 0:
-                    gifts[base_id]["name"] = entry.get("name", "")
+                    gifts[base_id]["name"] = strip_tags(entry.get("name", ""))
 
-                gifts[base_id]["descs"][stage] = entry.get("desc", "")
+                gifts[base_id]["descs"][stage] = strip_tags(entry.get("desc", ""))
 
         count = 0
         for base_id, gift in gifts.items():
