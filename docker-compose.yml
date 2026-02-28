@@ -18,6 +18,9 @@ services:
       - --innodb-buffer-pool-size=256M
       - --max-connections=50
       - --innodb-log-file-size=64M
+      - --slow-query-log=ON
+      - --long-query-time=0.001
+      - --log-output=TABLE
     deploy:
       resources:
         limits:
