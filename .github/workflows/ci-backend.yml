@@ -51,59 +51,15 @@ jobs:
       pull-requests: write
       actions: read
     steps:
-      - uses: actions/github-script@v8
-        env:
-          TEST_RESULT: ${{ needs.test-backend.result }}
-          BUILD_RESULT: ${{ needs.build-backend.result }}
+      - uses: actions/checkout@v6
         with:
-          script: |
-            const icon = r => ({success:'✅',failure:'❌',skipped:'⏭️',cancelled:'🚫'}[r] ?? '❓');
-            const rows = [
-              ['Test',  process.env.TEST_RESULT],
-              ['Build', process.env.BUILD_RESULT],
-            ].map(([n, r]) => `| ${n} | ${icon(r)} \`${r}\` |`).join('\n');
-
-            const { data: { jobs } } = await github.rest.actions.listJobsForWorkflowRun({
-              owner: context.repo.owner, repo: context.repo.repo, run_id: context.runId,
-            });
-            const failedJob  = jobs.find(j => j.conclusion === 'failure');
-            const failedStep = failedJob?.steps?.find(s => s.conclusion === 'failure');
-
-            let logBlock = '';
-            if (failedJob) {
-              try {
-                const resp = await github.request(
-                  'GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs',
-                  { owner: context.repo.owner, repo: context.repo.repo, job_id: failedJob.id }
-                );
-                const snippet = String(resp.data)
-                  .split('\n')
-                  .map(l => l.replace(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z /, ''))
-                  .filter(l => l.trim() && !l.startsWith('##['))
-                  .slice(-25).join('\n');
-                logBlock = `\n<details>\n<summary>Log snippet</summary>\n\n\`\`\`\n${snippet}\n\`\`\`\n</details>`;
-              } catch { logBlock = '\n> Log unavailable'; }
-            }
-
-            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const jobUrl = failedJob ? `${runUrl}/job/${failedJob.id}` : null;
-            const failedLine = failedJob
-              ? `\n**Failed:** ${failedJob.name}${failedStep ? ` → ${failedStep.name}` : ''}`
-              : '';
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: [
-                '## ❌ CI Failed — Backend',
-                '',
-                '| Job | Status |',
-                '|-----|--------|',
-                rows,
-                failedLine,
-                logBlock,
-                '',
-                jobUrl ? `[→ Failed job](${jobUrl}) · [→ Full run](${runUrl})` : `[→ View run](${runUrl})`,
-              ].join('\n'),
-            });
+          sparse-checkout: .github/actions
+      - uses: ./.github/actions/notify-ci-failure
+        with:
+          title: CI Failed — Backend
+          pr-number: ${{ github.event.pull_request.number }}
+          jobs-json: |
+            [
+              {"name": "Test", "result": "${{ needs.test-backend.result }}"},
+              {"name": "Build", "result": "${{ needs.build-backend.result }}"}
+            ]
