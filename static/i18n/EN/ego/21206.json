@@ -53,7 +53,7 @@
   "passives": {
     "2120611": {
       "name": "If I Could Go Back...",
-      "desc": "After Attack: If the target is defeated after this unit's attack, gain 1 E.G.O resource for the least-owned E.G.O resource.\nGain 1 additional E.G.O resource for every 5 ([Sinking] Potency + Count) (max 3)\n(If there are 2 or more \"least-owned E.G.O resource\", select 1 of those Affinities at random to gain an E.G.O resource)"
+      "desc": "Attack End: If the target is defeated after this unit's attack, gain 1 E.G.O resource for the least-owned E.G.O resource.\nGain 1 additional E.G.O resource for every 5 ([Sinking] Potency + Count) (max 3)\n(If there are 2 or more \"least-owned E.G.O resource\", select 1 of those Affinities at random to gain an E.G.O resource)"
     }
   }
 }

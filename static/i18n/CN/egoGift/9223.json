@@ -1,0 +1,9 @@
+{
+  "name": "凡作",
+  "descs": [
+    "使属于环指的友方单位获得[Inspire]\n\n带有[Inspire]且属于环指的友方单位的色欲或斩击技能命中敌方单位时，下回合对该敌方单位施加[ObjectOfExploration]\n- 若敌方单位带有[ObjectOfExploration]，则使其[ObjectOfExploration]转化为[PaintingMaterial]\n\n带有[Inspire]且属于环指的友方单位击杀带有[PaintingMaterial]的敌方单位时，下回合使该友方单位获得1层[PlusCoinValueUp](每回合最多1次)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

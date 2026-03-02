@@ -109,7 +109,7 @@
     },
     "1060821": {
       "name": "Enlightenment",
-      "desc": "After Attack: If the target is in a staggered or defeated state by an attack from 1 ally with the least SP, the ally heals 7 SP."
+      "desc": "Attack End: If the target is in a staggered or defeated state by an attack from 1 ally with the least SP, the ally heals 7 SP."
     }
   }
 }

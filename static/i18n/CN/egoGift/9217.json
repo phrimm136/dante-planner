@@ -1,0 +1,9 @@
+{
+  "name": "某人的终端",
+  "descs": [
+    "攻击结束时，若[IndexPrescriptTargetToEnemy]阵亡，则使击杀[IndexPrescriptTargetToEnemy]的友方单位在下回合获得1层[AzureResultUp]；随机对1名存活的敌方单位施加3层[Sinking](每回合最多1次)\n- 若击杀[IndexPrescriptTargetToEnemy]的友方单位属于食指，则改为下回合获得1层[Enhancement]，而非[AzureResultUp](每回合最多1次)\n\n回合结束时，对属于食指的友方单位造成其体力上限(其[KarmaOfIndexAlly]层数)%的伤害\n(不会因该效果而陷入混乱，且不会使友方单位的体力降至体力上限的20%以下)\n下回合使受到以上伤害的友方单位获得(其[KarmaOfIndexAlly]层数/5)层[ResultEnhancement](最多2层)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

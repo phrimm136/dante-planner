@@ -103,7 +103,7 @@
       "name": "Variant Sancho Hardblood Arts 6 - Whip",
       "descs": [
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) After Attack, consume 10 [BloodArmorPersonalityFirst]",
+          "desc": "On Hit with this Skill: Heal 50% of the HP damage dealt (max 20)\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) Attack End: Consume 10 [BloodArmorPersonalityFirst]",
           "coinDescs": [
             "",
             "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
@@ -111,7 +111,7 @@
           ]
         },
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) After Attack, consume 10 [BloodArmorPersonalityFirst]",
+          "desc": "On Hit with this Skill: Heal 50% of the HP damage dealt (max 20)\n[WhenUse] If target has 6+ [Laceration], Coin Power +1\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) Attack End: Consume 10 [BloodArmorPersonalityFirst]",
           "coinDescs": [
             "",
             "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
@@ -120,7 +120,7 @@
         },
         {},
         {
-          "desc": "On Hit with this Skill: heal 50% of the HP damage dealt (max 20)\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) After Attack, consume 10 [BloodArmorPersonalityFirst]",
+          "desc": "On Hit with this Skill: Heal 50% of the HP damage dealt (max 20)\n[WhenUse] Coin Power +1 for every 6 [Laceration] on target (max 2)\n[WhenUse] Gain 20 [Laceration]\n[WhenUse] Inflict +1 more [Laceration] On Hit for every 10 [BloodArmorPersonalityFirst]. (max 2) Attack End: Consume 10 [BloodArmorPersonalityFirst]",
           "coinDescs": [
             "",
             "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
@@ -221,7 +221,7 @@
     },
     "1031004": {
       "name": "Armadura de Sangre",
-      "desc": "After Attack: if the enemy is defeated, increase [BloodDinner] by 10% of the target's max HP (100 per turn; for Focused Encounters, if the Part is broken)\nGain 1 [AttackDmgUp] next turn for every 15% missing HP at Turn End (max 3)\nIf an ally is about to be defeated from [Laceration] damage, prevent them from being defeated from Bleed damage for the turn (once per Encounter for each Identity)"
+      "desc": "Attack End: If the enemy is defeated, increase [BloodDinner] by 10% of the target's max HP (100 per turn; for Focused Encounters, if the Part is broken)\nGain 1 [AttackDmgUp] next turn for every 15% missing HP at Turn End (max 3)\nIf an ally is about to be defeated from [Laceration] damage, prevent them from being defeated from Bleed damage for the turn (once per Encounter for each Identity)"
     },
     "1031021": {
       "name": "‘Feed your repressed hunger, my Family’",
