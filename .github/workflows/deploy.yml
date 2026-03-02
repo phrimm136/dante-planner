@@ -6,6 +6,7 @@ on:
     paths:
       - 'backend/**'
       - 'nginx/**'
+      - 'mysql/**'
       - 'docker-compose.yml'
       - 'scripts/deploy/**'
       - '.github/workflows/deploy.yml'
