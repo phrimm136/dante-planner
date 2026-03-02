@@ -54,7 +54,7 @@ services:
     volumes:
       - ./static/data:/app/data:ro
       - ${JWT_KEYS_PATH:-./jwt-keys}:/app/keys:ro
-      - ./logs/backend:/app/logs
+      - ${BACKEND_LOGS_PATH:-/home/ec2-user/logs/backend}:/app/logs
     environment:
       GAME_DATA_PATH: /app/data
       MYSQL_HOST: mysql

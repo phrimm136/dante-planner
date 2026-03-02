@@ -1,6 +1,6 @@
 #!/bin/bash
 # Update Cloudflare IP ranges for security group or application config
-# Run via cron: 0 3 * * * /opt/danteplanner/scripts/update-cloudflare-ips.sh
+# Run via cron: 0 3 * * * /opt/danteplanner/scripts/ops/update-cloudflare-ips.sh
 #
 # This script fetches current Cloudflare IP ranges and can:
 # 1. Update AWS Security Group (if SG_ID is set)

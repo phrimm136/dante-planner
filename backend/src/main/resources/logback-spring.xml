@@ -2,14 +2,17 @@
 <configuration>
 
     <!-- ═══════════════════════════════════════════════════════════
-         PRODUCTION: Console (WARN+) + Rolling JSON file (WARN+)
-         awslogs Docker driver captures all stdout — console threshold
-         controls what reaches CloudWatch.
+         PRODUCTION:
+           Console (WARN+) → stdout → awslogs → CloudWatch
+           File    (INFO+) → /app/logs/backend.log (host-mounted)
+         awslogs captures stdout only — console threshold is the
+         CloudWatch gate; INFO goes to file only, invisible to
+         `docker compose logs`.
          ═══════════════════════════════════════════════════════════ -->
     <springProfile name="prod">
         <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-        <!-- Console: plain text WARN+ → stdout → awslogs → CloudWatch -->
+        <!-- Console: WARN+ only → stdout → awslogs → CloudWatch -->
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>WARN</level>
@@ -19,14 +22,14 @@
             </encoder>
         </appender>
 
-        <!-- File: structured JSON for WARN+ log analysis; rolled daily or at 50MB -->
+        <!-- File: INFO+ structured JSON for analysis; rolled daily or at 50MB -->
         <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <file>/app/logs/backend.log</file>
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>WARN</level>
+                <level>INFO</level>
             </filter>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>/app/logs/backend.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <fileNamePattern>/app/logs/backend.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
                 <maxFileSize>50MB</maxFileSize>
                 <maxHistory>30</maxHistory>
                 <totalSizeCap>1GB</totalSizeCap>
@@ -34,8 +37,8 @@
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         </appender>
 
-        <!-- Async wrapper: non-blocking writes; discardingThreshold=0 is safe because
-             FILE_JSON already filters to WARN+, preventing INFO-volume queue pressure -->
+        <!-- Async wrapper: non-blocking writes; discardingThreshold=0 ensures no
+             INFO events are silently dropped even under high-volume logging -->
         <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
             <appender-ref ref="FILE_JSON"/>
             <queueSize>512</queueSize>
