@@ -175,6 +175,45 @@ setup_metric_filter() {
     log_info "Metric filter created for HTTP 5xx errors"
 }
 
+# Create metric filters for ERROR and WARN events from backend logs
+setup_error_metric_filters() {
+    log_info "Setting up ERROR/WARN metric filters on backend logs"
+
+    local LOG_GROUP="/ecs/danteplanner/backend"
+
+    if ! aws logs describe-log-groups \
+        --log-group-name-prefix "$LOG_GROUP" \
+        --region "$AWS_REGION" \
+        --query "logGroups[?logGroupName=='$LOG_GROUP']" \
+        --output text | grep -q "$LOG_GROUP"; then
+        log_warn "Log group $LOG_GROUP not found. Will be created on first deploy."
+        return 0
+    fi
+
+    # Backend console format (plain text, %5level):
+    #   "YYYY-MM-DD HH:mm:ss.SSS ERROR [userId] method path [thread] logger - msg"
+    # Substring filters match the level field in this format.
+    aws logs put-metric-filter \
+        --log-group-name "$LOG_GROUP" \
+        --filter-name "BackendErrors" \
+        --filter-pattern '"ERROR"' \
+        --metric-transformations \
+            metricName=BackendErrorCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
+        --region "$AWS_REGION"
+    log_info "Metric filter created: BackendErrorCount"
+
+    # %5level pads WARN to " WARN" (leading space). Include the space to reduce
+    # false positives from message content that contains the word "WARN".
+    aws logs put-metric-filter \
+        --log-group-name "$LOG_GROUP" \
+        --filter-name "BackendWarnings" \
+        --filter-pattern '" WARN"' \
+        --metric-transformations \
+            metricName=BackendWarnCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
+        --region "$AWS_REGION"
+    log_info "Metric filter created: BackendWarnCount"
+}
+
 # Create CloudWatch alarms
 create_alarms() {
     local TOPIC_ARN="$1"
@@ -255,6 +294,43 @@ create_alarms() {
         --treat-missing-data notBreaching \
         --region "$AWS_REGION"
 
+    # Alarm 5: Any Backend Error — fires immediately on a single ERROR event
+    log_info "Creating backend error alarm (immediate)..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-BackendErrors" \
+        --alarm-description "Any backend application ERROR event" \
+        --namespace "$NAMESPACE" \
+        --metric-name "BackendErrorCount" \
+        --statistic Sum \
+        --period 60 \
+        --threshold 0 \
+        --comparison-operator GreaterThanThreshold \
+        --evaluation-periods 1 \
+        --datapoints-to-alarm 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data notBreaching \
+        --region "$AWS_REGION"
+
+    # Alarm 6: Successive Backend Warnings — fires when WARNs appear in 3 of 5
+    # consecutive 1-minute windows, avoiding noise from isolated warnings.
+    log_info "Creating successive backend warnings alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-BackendWarnings" \
+        --alarm-description "Backend WARN events in 3 of the last 5 one-minute periods" \
+        --namespace "$NAMESPACE" \
+        --metric-name "BackendWarnCount" \
+        --statistic Sum \
+        --period 60 \
+        --threshold 0 \
+        --comparison-operator GreaterThanThreshold \
+        --evaluation-periods 5 \
+        --datapoints-to-alarm 3 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data notBreaching \
+        --region "$AWS_REGION"
+
     log_info "All alarms created successfully"
 }
 
@@ -301,6 +377,90 @@ setup_s3_logging() {
     log_info "S3 access logging enabled"
 }
 
+# Create CloudWatch Dashboard with metric and log insights widgets
+# Layout (24-col grid):
+#   Row 1 (y=0, h=6): CPU & Memory (w=12) | Error & Warning Rates (w=12)
+#   Row 2 (y=6, h=4): Alarm Status bar     (w=24)
+#   Row 3 (y=10,h=12): Log Insights — recent ERROR/WARN entries (w=24)
+setup_dashboard() {
+    log_info "Creating CloudWatch dashboard: DantePlanner"
+
+    local ACCOUNT_ID
+    ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+    aws cloudwatch put-dashboard \
+        --dashboard-name "DantePlanner" \
+        --region "$AWS_REGION" \
+        --dashboard-body "$(cat <<EOF
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0, "y": 0, "width": 12, "height": 6,
+      "properties": {
+        "title": "CPU & Memory",
+        "metrics": [
+          ["$NAMESPACE", "cpu_usage_user",   "InstanceId", "$INSTANCE_ID"],
+          ["$NAMESPACE", "mem_used_percent", "InstanceId", "$INSTANCE_ID"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "max": 100 } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 0, "width": 12, "height": 6,
+      "properties": {
+        "title": "Error & Warning Rates",
+        "metrics": [
+          ["$NAMESPACE", "BackendErrorCount", { "color": "#d62728", "label": "Errors" }],
+          ["$NAMESPACE", "BackendWarnCount",  { "color": "#ff7f0e", "label": "Warnings" }],
+          ["$NAMESPACE", "HTTP5xxCount",      { "color": "#9467bd", "label": "HTTP 5xx" }]
+        ],
+        "period": 60,
+        "stat": "Sum",
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0 } }
+      }
+    },
+    {
+      "type": "alarm",
+      "x": 0, "y": 6, "width": 24, "height": 4,
+      "properties": {
+        "title": "Alarm Status",
+        "alarms": [
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighCPU",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-LowMemory",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighDisk",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HTTP5xx",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendErrors",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendWarnings"
+        ]
+      }
+    },
+    {
+      "type": "log",
+      "x": 0, "y": 10, "width": 24, "height": 12,
+      "properties": {
+        "title": "Recent Backend Errors & Warnings",
+        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, @message | filter @message like /ERROR|WARN/ | sort @timestamp desc | limit 50",
+        "region": "$AWS_REGION",
+        "view": "table"
+      }
+    }
+  ]
+}
+EOF
+)"
+
+    log_info "Dashboard created: DantePlanner"
+    log_info "View: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner"
+}
+
 # Print summary
 print_summary() {
     echo ""
@@ -310,14 +470,16 @@ print_summary() {
     echo ""
     echo "Created Resources:"
     echo "  - SNS Topic: $SNS_TOPIC_NAME"
-    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx"
-    echo "  - Metric Filter: HTTP5xxErrors on nginx logs"
+    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx, BackendErrors, BackendWarnings"
+    echo "  - Metric Filters: HTTP5xxErrors (nginx), BackendErrors, BackendWarnings (backend)"
+    echo "  - Dashboard: DantePlanner (metrics + alarm status + log insights)"
     echo "  - S3 Logging: $S3_BACKUP_BUCKET -> $S3_LOGS_BUCKET"
     echo "  - IAM: CloudWatchAgentServerPolicy attached to instance role"
     echo "  - Log Retention: 30 days on all /ecs/danteplanner/* log groups"
     echo ""
     echo "View in AWS Console:"
-    echo "  https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#alarmsV2:"
+    echo "  Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner"
+    echo "  Alarms:    https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#alarmsV2:"
     echo ""
     if [ -n "$ALERT_EMAIL" ]; then
         echo "IMPORTANT: Confirm email subscription in your inbox"
@@ -341,9 +503,11 @@ main() {
     fi
 
     setup_metric_filter
+    setup_error_metric_filters
     setup_log_retention
     create_alarms "$TOPIC_ARN"
     setup_s3_logging
+    setup_dashboard
 
     print_summary
 }

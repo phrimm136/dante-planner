@@ -15,8 +15,8 @@ sed -i '/# >>> danteplanner aliases >>>/,/# <<< danteplanner aliases <<</d' "$BA
   echo "alias dp-logs='cd /opt/danteplanner && docker compose logs -f'"
   echo "alias dp-status='cd /opt/danteplanner && docker compose ps'"
   echo "alias dp-restart='cd /opt/danteplanner && docker compose restart'"
-  echo "alias dp-backup='/opt/danteplanner/scripts/aws-backup.sh'"
-  echo "alias dp-cfips='/opt/danteplanner/scripts/update-cloudflare-ips.sh'"
+  echo "alias dp-backup='/opt/danteplanner/scripts/ops/aws-backup.sh'"
+  echo "alias dp-cfips='/opt/danteplanner/scripts/ops/update-cloudflare-ips.sh'"
   echo "alias dp-deploy='cd /opt/danteplanner && git pull && docker compose pull && docker compose up -d'"
   echo ''
   echo '# Welcome message'

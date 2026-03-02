@@ -304,8 +304,8 @@ jobs:
           export S3_LOGS_BUCKET="danteplanner-logs"
 
           # Run the setup script
-          chmod +x scripts/setup-cloudwatch-alarms.sh
-          ./scripts/setup-cloudwatch-alarms.sh
+          chmod +x scripts/ops/setup-cloudwatch-alarms.sh
+          ./scripts/ops/setup-cloudwatch-alarms.sh
           INNER_BATCH
           EOF
 
