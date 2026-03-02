@@ -15,8 +15,8 @@ if [[ -z "$command" ]]; then
 fi
 
 # Patterns that indicate test/typecheck/build commands
-# Matches: yarn test, yarn typecheck, yarn build, vitest, tsc -b, ./mvnw test, ./mvnw compile, ./gradlew test
-if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vitest(\s|$)|tsc(\s|$)|\./(mvnw|gradlew)\s+(test|compile|build))'; then
+# Matches: yarn test, yarn typecheck, yarn build, vitest, tsc -b, ./gradlew test, ./gradlew compile, ./gradlew build
+if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vitest(\s|$)|tsc(\s|$)|\./gradlew\s+(test|compile|build))'; then
 
     # Check if output is redirected to /tmp with date suffix
     if echo "$command" | grep -qF '> /tmp/' && echo "$command" | grep -qF '$(date +%Y%m%d-%H%M%S)'; then

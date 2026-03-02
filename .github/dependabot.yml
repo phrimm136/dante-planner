@@ -15,8 +15,8 @@ updates:
         patterns:
           - "*" # Combines multiple FE updates into one PR to reduce CI load
 
-  # 2. Backend: Java (Maven)
-  - package-ecosystem: "maven"
+  # 2. Backend: Java (Gradle)
+  - package-ecosystem: "gradle"
     directory: "/backend"
     schedule:
       interval: "weekly"
