@@ -51,6 +51,40 @@ class PublicPlannerResponseTest {
     }
 
     @Nested
+    @DisplayName("commentCount Tests")
+    class CommentCountTests {
+
+        @Test
+        @DisplayName("commentCount is null when fromEntity called without setter")
+        void fromEntity_CommentCountIsNullByDefault() {
+            User user = createTestUser("test@example.com");
+            Planner planner = createTestPlanner(user);
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
+            assertNull(response.getCommentCount());
+        }
+
+        @Test
+        @DisplayName("setCommentCount stores the value correctly")
+        void setCommentCount_StoresValue() {
+            User user = createTestUser("test@example.com");
+            Planner planner = createTestPlanner(user);
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
+            response.setCommentCount(7L);
+            assertEquals(7L, response.getCommentCount());
+        }
+
+        @Test
+        @DisplayName("setCommentCount with zero is valid")
+        void setCommentCount_Zero_IsValid() {
+            User user = createTestUser("test@example.com");
+            Planner planner = createTestPlanner(user);
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
+            response.setCommentCount(0L);
+            assertEquals(0L, response.getCommentCount());
+        }
+    }
+
+    @Nested
     @DisplayName("fromEntity Field Mapping Tests")
     class FieldMappingTests {
 

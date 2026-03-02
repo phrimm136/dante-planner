@@ -60,6 +60,8 @@ export const PublicPlannerSchema = z.object({
   hasUpvoted: z.boolean().nullable(),
   /** Whether current user has bookmarked (null if not authenticated) */
   isBookmarked: z.boolean().nullable(),
+  /** Total non-deleted comment count */
+  commentCount: z.number().int().min(0),
 })
 
 /**

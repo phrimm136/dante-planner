@@ -17,7 +17,7 @@ import {
 
 import { toast } from 'sonner'
 
-import { BannedError, TimedOutError } from '@/lib/api'
+import { BannedError, NotFoundError, TimedOutError } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ApplyLatestMirrorDialog } from './ApplyLatestMirrorDialog'
@@ -36,6 +36,7 @@ import { usePlannerConfig } from '@/hooks/usePlannerConfig'
 import { usePlannerStorage } from '@/hooks/usePlannerStorage'
 import { plannerQueryKeys } from '@/hooks/useSavedPlannerQuery'
 import { publishedPlannerQueryKeys } from '@/hooks/usePublishedPlannerQuery'
+import { userPlannersQueryKeys } from '@/hooks/useMDUserPlannersData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { usePlannerSyncAdapter } from '@/hooks/usePlannerSyncAdapter'
 import { useQueryClient } from '@tanstack/react-query'
@@ -122,7 +123,7 @@ export function PlannerDetailHeader({
   const moderatorDeleteMutation = useModeratorPlannerDelete()
   const publishMutation = usePlannerPublish()
   const ownerNotificationMutation = useToggleOwnerNotifications()
-  const { savePlanner } = usePlannerStorage()
+  const { savePlanner, deletePlanner } = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
   const queryClient = useQueryClient()
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
@@ -158,17 +159,26 @@ export function PlannerDetailHeader({
   const handleDeleteConfirm = () => {
     if (onDelete) {
       onDelete()
-    } else if (plannerId) {
-      deleteMutation.mutate(plannerId, {
-        onSuccess: () => {
-          // Close dialog first, then navigate after animation completes
-          setShowDeleteDialog(false)
-          setTimeout(() => {
-            void navigate({ to: isPublished ? '/planner/md/gesellschaft' : '/planner/md' })
-          }, 150)
-        },
-      })
+      return
     }
+    if (!plannerId) return
+
+    const cleanup = () => {
+      void deletePlanner(plannerId)
+      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
+      setShowDeleteDialog(false)
+      setTimeout(() => {
+        void navigate({ to: isPublished ? '/planner/md/gesellschaft' : '/planner/md' })
+      }, 150)
+    }
+
+    deleteMutation.mutate(plannerId, {
+      onSuccess: cleanup,
+      onError: (error) => {
+        // Planner not on server (local-only or already deleted) — still clean up locally
+        if (error instanceof NotFoundError) cleanup()
+      },
+    })
   }
 
   const handleModeratorDeleteConfirm = (reason: string) => {
@@ -264,8 +274,8 @@ export function PlannerDetailHeader({
       }
     }
 
-    // Check if sync is disabled and user is trying to publish (not unpublish)
-    if (syncEnabled === false && !savedPlanner.metadata.published) {
+    // Check if sync is not enabled and user is trying to publish (not unpublish)
+    if (syncEnabled !== true && !savedPlanner.metadata.published) {
       // Show warning dialog for sync-off publish
       setShowPublishWarning(true)
       return

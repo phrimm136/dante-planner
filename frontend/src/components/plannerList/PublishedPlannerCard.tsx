@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ThumbsUp, Eye, Bookmark, Star, Clock } from 'lucide-react'
+import { ThumbsUp, Eye, Bookmark, Star, Clock, MessageSquare } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
@@ -60,6 +60,7 @@ export function PublishedPlannerCard({
     upvotes,
     // downvotes,  // TODO: Add when backend supports it
     viewCount,
+    commentCount,
     authorUsernameEpithet,
     authorUsernameSuffix,
     createdAt,
@@ -164,6 +165,12 @@ export function PublishedPlannerCard({
         <span className="flex items-center gap-1">
           <Eye className="size-3" />
           {viewCount}
+        </span>
+
+        {/* Comments */}
+        <span className="flex items-center gap-1">
+          <MessageSquare className="size-3" />
+          {commentCount}
         </span>
       </div>
 
