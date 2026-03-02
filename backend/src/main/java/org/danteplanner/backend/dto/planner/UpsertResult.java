@@ -9,7 +9,7 @@ package org.danteplanner.backend.dto.planner;
  *
  * <p>Not exposed in API - controller extracts response for client.
  */
-public record UpsertResult(PlannerResponse response, boolean created) {
+public record UpsertResult(PlannerResponse response, boolean isCreated) {
 
     /**
      * Create result for a newly created planner.

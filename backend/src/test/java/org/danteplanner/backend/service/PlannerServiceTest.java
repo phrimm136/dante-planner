@@ -1598,4 +1598,70 @@ class PlannerServiceTest {
             verify(plannerRepository).save(any());
         }
     }
+
+    @Nested
+    @DisplayName("Upsert Soft-Delete Guard Tests")
+    class UpsertSoftDeleteGuardTests {
+
+        private UpsertPlannerRequest buildRequest() {
+            UpsertPlannerRequest request = new UpsertPlannerRequest();
+            request.setTitle("Test Planner");
+            request.setPlannerType(PlannerType.MIRROR_DUNGEON);
+            request.setCategory("5F");
+            request.setContent("{}");
+            request.setContentVersion(1);
+            return request;
+        }
+
+        @Test
+        @DisplayName("Should throw PlannerNotFoundException when user's own planner is soft-deleted")
+        void upsertPlanner_softDeletedByUser_throwsPlannerNotFoundException() {
+            // Arrange
+            UUID plannerId = UUID.randomUUID();
+            UpsertPlannerRequest request = buildRequest();
+
+            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsByIdAndUserId(plannerId, testUser.getId()))
+                    .thenReturn(true);
+
+            // Act & Assert
+            assertThrows(
+                    PlannerNotFoundException.class,
+                    () -> plannerService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
+            );
+            verify(plannerRepository, never()).save(any());
+            verify(plannerRepository, never()).countByUserIdAndDeletedAtIsNull(any());
+        }
+
+        @Test
+        @DisplayName("Should proceed to create when planner UUID is genuinely new")
+        void upsertPlanner_genuinelyNewUUID_proceeds() {
+            // Arrange
+            UUID plannerId = UUID.randomUUID();
+            UpsertPlannerRequest request = buildRequest();
+
+            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsByIdAndUserId(plannerId, testUser.getId()))
+                    .thenReturn(false);
+            when(plannerRepository.existsByIdAndDeletedAtIsNull(plannerId))
+                    .thenReturn(false);
+            when(userRepository.findById(testUser.getId()))
+                    .thenReturn(Optional.of(testUser));
+            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId()))
+                    .thenReturn(0L);
+            when(plannerRepository.save(any(Planner.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // Act
+            UpsertResult result = plannerService.upsertPlanner(
+                    testUser.getId(), deviceId, plannerId, request, false);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.isCreated());
+            verify(plannerRepository).save(any());
+        }
+    }
 }
