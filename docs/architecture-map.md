@@ -2,7 +2,7 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
-> **Last Updated:** 2026-02-26 (d5875a81: Apply Latest Mirror — FE sync logic + BE contentVersion persistence fix)
+> **Last Updated:** 2026-03-02 (749c6521: add observability pipeline and reorganize ops scripts)
 
 ---
 
@@ -55,7 +55,7 @@
 | **Moderation System** | `service/ModerationService.java`, `controller/ModerationController.java` | `entity/ModerationAction.java` (immutable audit trail), `repository/ModerationActionRepository.java`, `dto/moderation/BanRequest.java` (reason required), `dto/moderation/TimeoutRequest.java`, `dto/moderation/TimeoutResponse.java`, `dto/moderation/ModerationActionDto.java`, `exception/UserBannedException.java`, `entity/User.java` (bannedAt, bannedBy, isBanned), `entity/Planner.java` (takenDownAt), `config/RateLimitConfig.java` (20/min moderation limit) |
 | **Vote Immutability** | `entity/PlannerVote.java` (immutable voteType), `entity/PlannerCommentVote.java` (immutable voteType) | `exception/VoteAlreadyExistsException.java`, `service/PlannerService.java` (409 on re-vote), `service/CommentService.java` |
 | **Configuration** | `config/SecurityConfig.java`, `config/WebConfig.java` | `config/CorsConfig.java`, `config/SecurityProperties.java`, `config/DeviceIdArgumentResolver.java`, `config/RateLimitConfig.java` |
-| **Observability / MDC** | N/A | `security/MdcLoggingFilter.java` (injects requestId, userId, method, path into SLF4J MDC; runs after JwtAuthenticationFilter; CRLF-sanitized path; FilterRegistrationBean prevents double-registration), `resources/logback-spring.xml` (prod: WARN+ JSON rolling file via LogstashEncoder + AsyncAppender, INFO+ console with MDC keys; dev: colored console only) |
+| **Observability / MDC** | N/A | `security/MdcLoggingFilter.java` (injects requestId, userId, method, path into SLF4J MDC; runs after JwtAuthenticationFilter; CRLF-sanitized path; FilterRegistrationBean prevents double-registration), `resources/logback-spring.xml` (prod: WARN+ to stdout→CloudWatch via awslogs, INFO+ to host-mounted rolling file at ~/logs/backend/; dev: colored console only) |
 | **Security Utilities** | `util/ClientIpResolver.java` | `config/SecurityProperties.java` (trusted proxy IPs) |
 | **Exception Handling** | `exception/GlobalExceptionHandler.java` (MethodArgumentTypeMismatchException: null-safe type logging, UUID validation returns 404) | `exception/PlannerNotFoundException.java`, `exception/PlannerConflictException.java`, `exception/PlannerForbiddenException.java`, `exception/PlannerValidationException.java`, `exception/UserNotFoundException.java`, `exception/AccountDeletedException.java`, `exception/RateLimitExceededException.java`, `exception/CommentNotFoundException.java`, `exception/CommentForbiddenException.java` |
 | **Validation** | `validation/PlannerContentValidator.java`, `validation/ContentVersionValidator.java` | `validation/SinnerIdValidator.java`, `validation/GameDataRegistry.java`, `util/GameConstants.java` (level/uptie/threadspin bounds) |
@@ -1002,7 +1002,7 @@ dto/planner/PublicPlannerResponse.java (shows authorUsernameKeyword + Suffix)
 | `nginx/nginx.conf` | High | All HTTP routing, SSL termination |
 | `nginx/locations.conf` | High | All proxy routes (shared by HTTP/HTTPS) |
 | `.github/workflows/deploy.yml` | High | CI/CD pipeline, CloudWatch setup |
-| `scripts/setup-cloudwatch-alarms.sh` | Medium | CloudWatch monitoring infrastructure |
+| `scripts/ops/setup-cloudwatch-alarms.sh` | Medium | CloudWatch monitoring infrastructure (alarms, dashboard, metric filters) |
 
 ### Safe to Modify (Isolated)
 
@@ -1160,13 +1160,17 @@ interface VoteRequest {
 **Monitoring & Observability:**
 - CloudWatch Agent collects EC2 metrics (CPU, memory, disk, network) → `DantePlanner` namespace
 - CloudWatch Logs via awslogs Docker driver → `/ecs/danteplanner/{service}`
-- CloudWatch Alarms: HighCPU (>70%), LowMemory (<200MB), HighDisk (>85%), HTTP5xx (>10/5min)
-- SNS topic `danteplanner-alerts` for email notifications
-- S3 access logging: `danteplanner-backups` → `danteplanner-logs`
+- CloudWatch Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx, BackendErrors (any ERROR → immediate), BackendWarnings (successive WARNs → 3/5 windows)
+- CloudWatch Dashboard `DantePlanner`: CPU/memory metrics, error/warn rate graph, alarm status, log insights for recent ERROR/WARN
+- Metric filters on `/ecs/danteplanner/backend`: BackendErrorCount (`"ERROR"`), BackendWarnCount (`" WARN"`)
+- SNS topic `danteplanner-alerts` for email/Discord-channel notifications
+- S3 log sync: backend log files hourly to `danteplanner-logs/backend/` via cron
+- Log split: WARN+ → CloudWatch (awslogs stdout), INFO+ → `~/logs/backend/` (host-mounted volume)
 
 **Key Monitoring Files:**
-- `scripts/cloudwatch-agent-config.json` - EC2 metrics + file log collection
-- `scripts/setup-cloudwatch-alarms.sh` - Idempotent alarm/SNS/S3 logging setup
+- `scripts/ops/cloudwatch-agent-config.json` - EC2 metrics + file log collection
+- `scripts/ops/setup-cloudwatch-alarms.sh` - Idempotent alarm/SNS/dashboard/metric-filter setup
+- `scripts/ops/sync-logs.sh` - Hourly S3 sync of host-mounted backend logs
 - `.github/workflows/deploy.yml` - `setup_cloudwatch` workflow_dispatch input
 
 **Secrets Management:**
