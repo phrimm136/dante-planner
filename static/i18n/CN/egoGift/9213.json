@@ -1,0 +1,9 @@
+{
+  "name": "微型摩天轮",
+  "descs": [
+    "使全体属于血魔的友方单位基础技能的硬币威力+1，自身技能造成的伤害+(自身的[BloodDinner_Accumulation]/10)%\n\n回合结束时，使带有[Laceration]的友方单位中现存体力最低的2名友方单位恢复其体力上限5%的体力并在下回合使其获得10层[SwirlingBloodPersonality]\n\n击杀敌方单位时，获得(其本体体力上限/10)层[BloodDinner](最多50层)\n\n回合结束时，若本回合有友方单位阵亡，则下回合使全体友方单位获得2层[Enhancement]\n\n遭遇战中新的敌方单位增援时，战斗开始时使其增加5级[Laceration]强度并对其施加3层[Laceration]。\n若友方单位中存在<血魔>，则新的敌方单位增援时触发全体敌方单位的[Laceration]2次，并使全体敌方单位的[Laceration]层数减少2层",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

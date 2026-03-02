@@ -145,7 +145,7 @@
     },
     "1051303": {
       "name": "Responsibility of a Former Prince",
-      "desc": "Turn Start: the following effects activate for La Manchaland Identities with max [BloodArmorMeursault] Stack\n· Gain 1 [FocusOnActing]\n· When Staggered due to damage, recover from Stagger; then, consume all [BloodArmorMeursault] on self (once per Stage per Identity; unless it's a forced Stagger)\n\nIf The Princess of La Manchaland Rodion is on the field, she and The Prince of La Manchaland Meursault both deal +15% damage with their Skill 3 (including Empowered Skills)"
+      "desc": "Turn Start: the following effects activate for La Manchaland Identities with max [BloodArmorMeursault] Stack\n· Gain 1 [FocusOnActing]\n· When Staggered due to damage, recover from Stagger; then, consume all [BloodArmorMeursault] on self (once per Stage per Identity; excluding forced Staggers)\n\nIf The Princess of La Manchaland Rodion is on the field, she and The Prince of La Manchaland Meursault both deal +15% damage with their Skill 3 (including Empowered Skills)"
     },
     "1051321": {
       "name": "Flood the Chalice",

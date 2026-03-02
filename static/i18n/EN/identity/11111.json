@@ -118,7 +118,7 @@
     },
     "1111121": {
       "name": "Don Quixote Hardblood Arts 8: Scissors",
-      "desc": "1 ally with the fastest Speed: if the enemy is killed After Attack, heal 10 HP (2 times per turn)\n1 ally with the fastest Speed: if the enemy is killed After Attack, inflict +1 [Laceration] Count when inflicting [Laceration] Potency with Skill or Coin effects for the next turn (3 times per turn)"
+      "desc": "1 ally with the fastest Speed: If the enemy is killed at Attack End, heal 10 HP (2 times per turn)\n1 ally with the fastest Speed: If the enemy is killed at Attack End, inflict +1 [Laceration] Count when inflicting [Laceration] Potency with Skill or Coin effects for the next turn (3 times per turn)"
     }
   }
 }

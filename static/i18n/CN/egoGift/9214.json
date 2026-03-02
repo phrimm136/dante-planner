@@ -1,0 +1,9 @@
+{
+  "name": "加热锤",
+  "descs": [
+    "若敌方单位带有[VibrationIgnition]，则触发以下效果\n- 基础技能命中时，使其增加1级[Combustion]强度(每个技能最多3次)\n- 基础技能命中时，若其[VibrationIgnition]强度不低于15级，则对其施加1层[Combustion](每个技能最多2次)\n- 其每带有3级[Combustion]，使其受到[VibrationExplosion]时造成的混乱阈值前移量+1%(最多+15%)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

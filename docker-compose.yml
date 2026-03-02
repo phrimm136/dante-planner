@@ -1,6 +1,8 @@
 services:
   mysql:
-    image: mysql:8.0
+    build:
+      context: ./mysql
+    image: danteplanner-mysql:local
     container_name: danteplanner-mysql
     restart: unless-stopped
     environment:

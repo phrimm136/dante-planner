@@ -111,7 +111,7 @@
     },
     "1011011": {
       "name": "Fire.IShallFire.",
-      "desc": "After Attack: if this unit killed the target with its Skill, [ReloadLament]\nWhen this unit gains [BulletLament], gain 2 [Agility] next turn (once per turn)"
+      "desc": "Attack End: If this unit killed the target with its Skill, [ReloadLament]\nWhen this unit gains [BulletLament], gain 2 [Agility] next turn (once per turn)"
     },
     "1011021": {
       "name": "Hand of Salvation",

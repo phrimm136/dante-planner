@@ -1,4 +1,8 @@
 {
+  "2026-03-02-01": {
+    "title": "March 2, 2026 Update",
+    "body": "Applied Chinese translations for the Limbus Company 260226 update\nUpdated the published plan list to display the comment count for each plan\nFixed an issue where local plans were not being deleted properly\n- The plan had already been deleted on the server. The logic has been updated to delete the local plan regardless of server-side deletion status."
+  },
   "2026-02-26-01": {
     "title": "2026/02/26 Update",
     "body": "Reflecting the Limbus Company update from February 26, 2026.\n- New E.G.O Gifts added\n- New Theme Pack added\nAdded the ability to update Mirror Dungeon plans from a previous version to the current version.\n- You can update the version from each plan's detail page.\nFixed an issue where plan changes were not immediately reflected when editing a plan at /planner/md/gesellschaft/{id}."

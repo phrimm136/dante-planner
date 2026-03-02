@@ -104,7 +104,7 @@
     },
     "1011321": {
       "name": "Designate Target",
-      "desc": "When the ally with the slowest Speed attacked an ally: After Attack, gain 1 [AttackDmgUp] next turn (2 times per turn)\n- If the attacked ally is killed by this attack, gain 1 [AttackDmgUp] for the whole Encounter instead (max 2 per Stage per Identity)\n- Can gain only up to 2 [AttackDmgUp] from the above effect."
+      "desc": "When the ally with the slowest Speed attacked an ally, Attack End: Gain 1 [AttackDmgUp] next turn (2 times per turn)\n- If the attacked ally is killed by this attack, gain 1 [AttackDmgUp] for the whole Encounter instead (max 2 per Stage per Identity)\n- Can gain only up to 2 [AttackDmgUp] from the above effect."
     }
   }
 }

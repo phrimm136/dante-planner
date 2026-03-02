@@ -106,7 +106,7 @@
   "passives": {
     "1080801": {
       "name": "Captain of the Pequod",
-      "desc": "After Attack: if the enemy is defeated after this unit's attack,\n- gain [HeatedGasHarpoon] next turn.\n- 1 other ally with the least SP heals 7 SP.\n- If the ally is from The Pequod, heal an additional 5 SP."
+      "desc": "Attack End: If the enemy is defeated after this unit's attack,\n- gain [HeatedGasHarpoon] next turn.\n- 1 other ally with the least SP heals 7 SP.\n- If the ally is from The Pequod, heal an additional 5 SP."
     },
     "1080802": {
       "name": "Hour of the Hunt",
@@ -114,7 +114,7 @@
     },
     "1080811": {
       "name": "Captain of the Pequod",
-      "desc": "- After Attack: if the enemy is defeated after this unit's attack,\n- gain 4 [Breath], +2 [Breath] Count. Then, gain [OverHeatedGasHarpoon] next turn.\n- 2 other allies with the least SP heal 7 SP and gain 4 [Breath].\n- If the allies are from The Pequod, heal an additional 5 SP. Then, once per turn, apply 1 [PenetrateResultUp] next turn."
+      "desc": "- Attack End: If the enemy is defeated after this unit's attack,\n- gain 4 [Breath], +2 [Breath] Count. Then, gain [OverHeatedGasHarpoon] next turn.\n- 2 other allies with the least SP heal 7 SP and gain 4 [Breath].\n- If the allies are from The Pequod, heal an additional 5 SP. Then, once per turn, apply 1 [PenetrateResultUp] next turn."
     },
     "1080821": {
       "name": "Captain's Orders",
@@ -122,7 +122,7 @@
     },
     "1080831": {
       "name": "Captain's Orders",
-      "desc": "After Attack: 1 ally with the highest SP gains 2 [Breath] and +2 [Breath] Count when the target is defeated after that unit's attack (2 times per turn)"
+      "desc": "Attack End: 1 ally with the highest SP gains 2 [Breath] and +2 [Breath] Count when the target is defeated after that unit's attack (2 times per turn)"
     }
   }
 }

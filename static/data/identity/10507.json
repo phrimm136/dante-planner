@@ -140,7 +140,8 @@
           {},
           {},
           {
-            "defaultValue": 4
+            "defaultValue": 4,
+            "scale": 4
           }
         ]
       }
