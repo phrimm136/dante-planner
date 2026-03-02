@@ -424,6 +424,23 @@
                 ]
             }
         },
+        "commit-message": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "high",
+            "description": "Commit message style guide following Spring Framework convention",
+            "promptTriggers": {
+                "keywords": [
+                    "commit",
+                    "git commit",
+                    "commit message"
+                ],
+                "intentPatterns": [
+                    "(create|make|write|do).*?commit",
+                    "commit.*?(change|code|work|fix|feat)"
+                ]
+            }
+        },
         "findings-sync": {
             "type": "domain",
             "enforcement": "block",
