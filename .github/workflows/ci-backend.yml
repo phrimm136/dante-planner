@@ -20,11 +20,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven
+          cache: gradle
 
       - name: BE Test
         working-directory: ./backend
-        run: ./mvnw test -q
+        run: ./gradlew test -q
   build-backend:
     needs: [test-backend]
     runs-on: ubuntu-latest

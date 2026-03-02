@@ -6,6 +6,7 @@ import org.danteplanner.backend.entity.Notification;
 import org.danteplanner.backend.entity.NotificationType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.repository.NotificationRepository;
+import org.danteplanner.backend.repository.PlannerRepository;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.service.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -45,6 +46,9 @@ class NotificationControllerTest {
     private NotificationRepository notificationRepository;
 
     @Autowired
+    private PlannerRepository plannerRepository;
+
+    @Autowired
     private JwtTokenService jwtTokenService;
 
     private User testUser;
@@ -55,6 +59,7 @@ class NotificationControllerTest {
     @BeforeEach
     void setUp() {
         notificationRepository.deleteAll();
+        plannerRepository.deleteAll();
         userRepository.findAll().stream()
                 .filter(u -> u.getId() != 0L)
                 .forEach(userRepository::delete);
