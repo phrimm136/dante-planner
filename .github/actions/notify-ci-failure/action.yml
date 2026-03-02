@@ -1,0 +1,119 @@
+name: Notify CI Failure
+description: Post a failure comment on the associated PR with log snippet from the failed step
+
+inputs:
+  title:
+    description: 'Comment title (e.g., "CI Failed — Backend")'
+    required: true
+  jobs-json:
+    description: 'JSON array of [{name, result}] for the status table'
+    required: true
+  pr-number:
+    description: 'PR number. If empty, looks up via commit SHA'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/github-script@v8
+      env:
+        INPUT_TITLE: ${{ inputs.title }}
+        INPUT_JOBS_JSON: ${{ inputs.jobs-json }}
+        INPUT_PR_NUMBER: ${{ inputs.pr-number }}
+      with:
+        script: |
+          // Resolve PR number
+          let prNumber = parseInt(process.env.INPUT_PR_NUMBER, 10);
+          if (!prNumber) {
+            const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner, repo: context.repo.repo, commit_sha: context.sha,
+            });
+            if (!prs.data.length) return;
+            prNumber = prs.data[0].number;
+          }
+
+          // Build status table
+          const icon = r => ({success:'✅',failure:'❌',skipped:'⏭️',cancelled:'🚫'}[r] ?? '❓');
+          const jobEntries = JSON.parse(process.env.INPUT_JOBS_JSON);
+          const rows = jobEntries
+            .map(({name, result}) => `| ${name} | ${icon(result)} \`${result}\` |`)
+            .join('\n');
+
+          // Find the failed job and step
+          const { data: { jobs } } = await github.rest.actions.listJobsForWorkflowRun({
+            owner: context.repo.owner, repo: context.repo.repo, run_id: context.runId,
+          });
+          const failedJob  = jobs.find(j => j.conclusion === 'failure');
+          const failedStep = failedJob?.steps?.find(s => s.conclusion === 'failure');
+
+          // Extract log snippet from the failed step's section
+          let logBlock = '';
+          if (failedJob) {
+            try {
+              const resp = await github.request(
+                'GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs',
+                { owner: context.repo.owner, repo: context.repo.repo, job_id: failedJob.id }
+              );
+              const lines = String(resp.data).split('\n').map(l =>
+                l.replace(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z /, '')
+              );
+
+              // Parse log into step sections by ##[group] markers
+              let snippet = '';
+              if (failedStep) {
+                const sections = [];
+                let current = { name: '', lines: [] };
+                for (const l of lines) {
+                  if (l.startsWith('##[group]')) {
+                    current = { name: l.replace('##[group]', ''), lines: [] };
+                    sections.push(current);
+                  } else if (!l.startsWith('##[') && l.trim()) {
+                    current.lines.push(l);
+                  }
+                }
+                const match = sections.find(s => s.name.includes(failedStep.name));
+                if (match) {
+                  snippet = match.lines.slice(-30).join('\n');
+                }
+              }
+
+              // Fallback: skip post-job cleanup lines
+              if (!snippet) {
+                const mainLines = [];
+                let inPost = false;
+                for (const l of lines) {
+                  if (l.startsWith('##[group]Post ') || l.startsWith('##[group]Complete job')) inPost = true;
+                  else if (l.startsWith('##[group]')) inPost = false;
+                  if (!inPost && !l.startsWith('##[') && l.trim()) mainLines.push(l);
+                }
+                snippet = mainLines.slice(-25).join('\n');
+              }
+
+              logBlock = `\n<details>\n<summary>Log snippet</summary>\n\n\`\`\`\n${snippet}\n\`\`\`\n</details>`;
+            } catch { logBlock = '\n> Log unavailable'; }
+          }
+
+          // Build URLs and post comment
+          const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          const jobUrl = failedJob ? `${runUrl}/job/${failedJob.id}` : null;
+          const failedLine = failedJob
+            ? `\n**Failed:** ${failedJob.name}${failedStep ? ` → ${failedStep.name}` : ''}`
+            : '';
+
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: prNumber,
+            body: [
+              `## ❌ ${process.env.INPUT_TITLE}`,
+              '',
+              '| Job | Status |',
+              '|-----|--------|',
+              rows,
+              failedLine,
+              logBlock,
+              '',
+              jobUrl ? `[→ Failed job](${jobUrl}) · [→ Full run](${runUrl})` : `[→ View run](${runUrl})`,
+            ].join('\n'),
+          });
