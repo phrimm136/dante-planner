@@ -77,6 +77,21 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
     long countByPlannerIdAndDeletedAtIsNull(UUID plannerId);
 
     /**
+     * Batch count non-deleted comments grouped by planner ID.
+     * Used for list views to avoid N+1 queries when displaying comment counts.
+     *
+     * @param plannerIds list of planner IDs to count comments for
+     * @return list of [plannerId, count] pairs
+     */
+    @Query("""
+        SELECT c.plannerId, COUNT(c)
+        FROM PlannerComment c
+        WHERE c.plannerId IN :plannerIds AND c.deletedAt IS NULL
+        GROUP BY c.plannerId
+        """)
+    List<Object[]> countByPlannerIdsGrouped(@Param("plannerIds") List<UUID> plannerIds);
+
+    /**
      * Find a comment by its public UUID.
      * Used for resolving frontend UUIDs to internal entities.
      *

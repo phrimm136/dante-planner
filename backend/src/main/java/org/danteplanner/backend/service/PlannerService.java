@@ -861,7 +861,7 @@ public class PlannerService {
     }
 
     /**
-     * Map planners to responses with user context (votes and bookmarks).
+     * Map planners to responses with user context (votes, bookmarks, and comment counts).
      * Uses batch queries to prevent N+1 query issues.
      *
      * @param planners the page of planners
@@ -869,15 +869,20 @@ public class PlannerService {
      * @return page of public planner responses with user context
      */
     private Page<PublicPlannerResponse> mapPlannersWithUserContext(Page<Planner> planners, Long userId) {
-        if (userId == null) {
-            // Anonymous user - no vote/bookmark context needed
-            return planners.map(PublicPlannerResponse::fromEntity);
-        }
-
-        // Batch fetch all votes and bookmarks for this user and page of planners
+        // Batch fetch comment counts for all planners on this page (guest and authenticated)
         List<UUID> plannerIds = planners.getContent().stream()
                 .map(Planner::getId)
                 .collect(Collectors.toList());
+        Map<UUID, Long> commentCountMap = batchFetchCommentCounts(plannerIds);
+
+        if (userId == null) {
+            // Anonymous user - no vote/bookmark context needed
+            return planners.map(planner -> {
+                PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
+                response.setCommentCount(commentCountMap.getOrDefault(planner.getId(), 0L));
+                return response;
+            });
+        }
 
         // Batch query: 1 query for all votes (immutable - no deleted_at check needed)
         Set<UUID> upvotedIds = plannerVoteRepository
@@ -897,8 +902,27 @@ public class PlannerService {
         return planners.map(planner -> {
             Boolean hasUpvoted = upvotedIds.contains(planner.getId());
             Boolean isBookmarked = bookmarkedIds.contains(planner.getId());
-            return PublicPlannerResponse.fromEntity(planner, hasUpvoted, isBookmarked);
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner, hasUpvoted, isBookmarked);
+            response.setCommentCount(commentCountMap.getOrDefault(planner.getId(), 0L));
+            return response;
         });
+    }
+
+    /**
+     * Batch fetch comment counts for a list of planner IDs.
+     *
+     * @param plannerIds list of planner IDs
+     * @return map of planner ID to non-deleted comment count
+     */
+    private Map<UUID, Long> batchFetchCommentCounts(List<UUID> plannerIds) {
+        if (plannerIds.isEmpty()) {
+            return Map.of();
+        }
+        return commentRepository.countByPlannerIdsGrouped(plannerIds).stream()
+                .collect(Collectors.toMap(
+                        row -> (UUID) row[0],
+                        row -> (Long) row[1]
+                ));
     }
 
     /**

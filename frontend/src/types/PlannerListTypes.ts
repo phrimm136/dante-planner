@@ -99,6 +99,8 @@ export interface PublicPlanner {
   hasUpvoted: boolean | null
   /** Whether current user has bookmarked this planner (null if not authenticated) */
   isBookmarked: boolean | null
+  /** Total non-deleted comment count */
+  commentCount: number
 }
 
 /**

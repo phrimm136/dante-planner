@@ -52,6 +52,11 @@ public class PublicPlannerResponse {
     private Boolean isBookmarked;
 
     /**
+     * Total non-deleted comment count for this planner.
+     */
+    private Long commentCount;
+
+    /**
      * Create a PublicPlannerResponse from a Planner entity.
      *
      * <p>Author username is extracted from the planner's user entity.
