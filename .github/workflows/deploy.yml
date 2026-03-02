@@ -402,7 +402,7 @@ jobs:
             }
 
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const jobUrl = failedJob ? `${runUrl}/jobs/${failedJob.id}` : null;
+            const jobUrl = failedJob ? `${runUrl}/job/${failedJob.id}` : null;
             const failedLine = failedJob
               ? `\n**Failed:** ${failedJob.name}${failedStep ? ` → ${failedStep.name}` : ''}`
               : '';
