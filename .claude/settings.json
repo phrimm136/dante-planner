@@ -42,7 +42,6 @@
       "Bash(curl:*)",
       "Bash(python3:*)",
       "Bash(./gradlew:*)",
-      "Bash(./mvnw:*)",
       "Bash(file:*)",
       "Bash(xargs:*)",
       "Bash(cd:*)"
