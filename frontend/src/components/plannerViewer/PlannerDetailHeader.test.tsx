@@ -3,11 +3,13 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { PlannerDetailHeader } from './PlannerDetailHeader'
+import { NotFoundError } from '@/lib/api'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 
 // ── Router ────────────────────────────────────────────────────
+const mockNavigate = vi.fn()
 vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mockNavigate,
 }))
 
 // ── i18n ─────────────────────────────────────────────────────
@@ -31,6 +33,7 @@ vi.mock('sonner', () => ({
 vi.mock('@/lib/api', () => ({
   BannedError: class BannedError extends Error {},
   TimedOutError: class TimedOutError extends Error {},
+  NotFoundError: class NotFoundError extends Error {},
 }))
 
 // ── Child dialogs ─────────────────────────────────────────────
@@ -51,9 +54,15 @@ vi.mock('./ApplyLatestMirrorDialog', () => ({
     ) : null,
 }))
 vi.mock('./CopyUrlButton', () => ({ CopyUrlButton: () => null }))
-vi.mock('./DeleteConfirmDialog', () => ({ DeleteConfirmDialog: () => null }))
+vi.mock('./DeleteConfirmDialog', () => ({
+  DeleteConfirmDialog: ({ open, onConfirm }: { open: boolean; onConfirm: () => void }) =>
+    open ? <button data-testid="confirm-delete" onClick={onConfirm}>Confirm Delete</button> : null,
+}))
 vi.mock('./ModeratorDeleteDialog', () => ({ ModeratorDeleteDialog: () => null }))
-vi.mock('./PublishSyncOffWarningDialog', () => ({ PublishSyncOffWarningDialog: () => null }))
+vi.mock('./PublishSyncOffWarningDialog', () => ({
+  PublishSyncOffWarningDialog: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="publish-sync-warning" /> : null,
+}))
 
 // ── Auth ──────────────────────────────────────────────────────
 vi.mock('@/hooks/useAuthQuery', () => ({
@@ -64,8 +73,9 @@ vi.mock('@/hooks/useAuthQuery', () => ({
 
 // ── Storage ───────────────────────────────────────────────────
 const mockSavePlanner = vi.fn().mockResolvedValue({ success: true })
+const mockDeletePlanner = vi.fn().mockResolvedValue(undefined)
 vi.mock('@/hooks/usePlannerStorage', () => ({
-  usePlannerStorage: () => ({ savePlanner: mockSavePlanner }),
+  usePlannerStorage: () => ({ savePlanner: mockSavePlanner, deletePlanner: mockDeletePlanner }),
 }))
 
 // ── Sync adapter ──────────────────────────────────────────────
@@ -89,14 +99,23 @@ vi.mock('@/hooks/usePlannerConfig', () => ({
 vi.mock('@/hooks/usePlannerSubscription', () => ({
   usePlannerSubscription: () => ({ mutate: vi.fn(), isPending: false }),
 }))
+const mockDeleteMutate = vi.fn()
 vi.mock('@/hooks/usePlannerDelete', () => ({
-  usePlannerDelete: () => ({ mutate: vi.fn(), isPending: false }),
+  usePlannerDelete: () => ({ mutate: mockDeleteMutate, isPending: false }),
 }))
 vi.mock('@/hooks/useModeratorPlannerDelete', () => ({
   useModeratorPlannerDelete: () => ({ mutate: vi.fn(), isPending: false }),
 }))
+const mockPublishMutate = vi.fn()
 vi.mock('@/hooks/usePlannerPublish', () => ({
-  usePlannerPublish: () => ({ mutate: vi.fn(), isPending: false }),
+  usePlannerPublish: () => ({ mutate: mockPublishMutate, isPending: false }),
+}))
+
+// ── Planner helpers (validation) ──────────────────────────────
+vi.mock('@/lib/plannerHelpers', () => ({
+  validatePlannerForSave: () => ({ isValid: true, errors: [] }),
+  validatePlannerUserFriendly: () => null,
+  toUserFriendlyError: (e: unknown) => ({ key: 'error.key', params: {} }),
 }))
 vi.mock('@/hooks/usePlannerOwnerNotifications', () => ({
   useToggleOwnerNotifications: () => ({ mutate: vi.fn(), isPending: false }),
@@ -365,6 +384,182 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           })
         )
       })
+    })
+  })
+})
+
+// ────────────────────────────────────────────────────────────────
+// Delete with local cleanup tests
+// ────────────────────────────────────────────────────────────────
+
+describe('PlannerDetailHeader – delete with local cleanup', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockDeletePlanner.mockResolvedValue(undefined)
+  })
+
+  async function openAndConfirmDelete() {
+    fireEvent.click(screen.getByText('pages.plannerList.contextMenu.delete'))
+    fireEvent.click(await screen.findByTestId('confirm-delete'))
+  }
+
+  it('calls deletePlanner locally on successful server delete', async () => {
+    mockDeleteMutate.mockImplementation(
+      (_id: string, callbacks?: { onSuccess?: () => void }) => {
+        callbacks?.onSuccess?.()
+      }
+    )
+
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner()}
+        isOwner={true}
+        isAuthenticated={true}
+      />,
+      { wrapper }
+    )
+
+    await openAndConfirmDelete()
+
+    await waitFor(() => {
+      expect(mockDeletePlanner).toHaveBeenCalledWith(PLANNER_ID)
+    })
+  })
+
+  it('calls deletePlanner locally and navigates when server returns 404', async () => {
+    mockDeleteMutate.mockImplementation(
+      (_id: string, callbacks?: { onError?: (e: Error) => void }) => {
+        callbacks?.onError?.(new NotFoundError('not found'))
+      }
+    )
+
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner()}
+        isOwner={true}
+        isAuthenticated={true}
+      />,
+      { wrapper }
+    )
+
+    await openAndConfirmDelete()
+
+    await waitFor(() => {
+      expect(mockDeletePlanner).toHaveBeenCalledWith(PLANNER_ID)
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({ to: '/planner/md' })
+      )
+    })
+  })
+
+  it('does not delete locally or navigate on non-404 server errors', async () => {
+    mockDeleteMutate.mockImplementation(
+      (_id: string, callbacks?: { onError?: (e: Error) => void }) => {
+        callbacks?.onError?.(new Error('Internal server error'))
+      }
+    )
+
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner()}
+        isOwner={true}
+        isAuthenticated={true}
+      />,
+      { wrapper }
+    )
+
+    await openAndConfirmDelete()
+
+    await waitFor(() => {
+      expect(mockDeletePlanner).not.toHaveBeenCalled()
+      expect(mockNavigate).not.toHaveBeenCalled()
+    })
+  })
+})
+
+// ────────────────────────────────────────────────────────────────
+// Publish sync guard tests
+// ────────────────────────────────────────────────────────────────
+
+describe('PlannerDetailHeader – publish sync guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockPublishMutate.mockImplementation(vi.fn())
+  })
+
+  function clickPublishButton() {
+    fireEvent.click(screen.getByText('pages.plannerMD.publish.button'))
+  }
+
+  it('shows sync-off warning when syncEnabled is null (not configured)', async () => {
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: false })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={null}
+      />,
+      { wrapper }
+    )
+
+    clickPublishButton()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('publish-sync-warning')).toBeDefined()
+      expect(mockPublishMutate).not.toHaveBeenCalled()
+    })
+  })
+
+  it('shows sync-off warning when syncEnabled is false', async () => {
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: false })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={false}
+      />,
+      { wrapper }
+    )
+
+    clickPublishButton()
+
+    await waitFor(() => {
+      expect(screen.getByTestId('publish-sync-warning')).toBeDefined()
+      expect(mockPublishMutate).not.toHaveBeenCalled()
+    })
+  })
+
+  it('calls publishMutation directly when syncEnabled is true', async () => {
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: false })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={true}
+      />,
+      { wrapper }
+    )
+
+    clickPublishButton()
+
+    await waitFor(() => {
+      expect(mockPublishMutate).toHaveBeenCalledWith(
+        PLANNER_ID,
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      )
+      expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
     })
   })
 })

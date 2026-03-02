@@ -13,7 +13,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
 
 // ============================================================================
 // Main Hook
@@ -54,9 +53,8 @@ export function usePlannerDelete() {
       // 204 No Content - no response body needed
     },
     onSuccess: () => {
-      // Invalidate all planner list queries (both community and personal)
+      // Invalidate community list (server-side concern)
       void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
-      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
     },
     onError: (error) => {
       console.error('Delete failed:', error)

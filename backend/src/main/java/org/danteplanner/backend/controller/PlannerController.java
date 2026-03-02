@@ -169,7 +169,7 @@ public class PlannerController {
         log.info("Upserting planner {} for user {}, force={}", id, userId, force);
         UpsertResult result = plannerService.upsertPlanner(userId, deviceId, id, request, force);
 
-        HttpStatus status = result.created() ? HttpStatus.CREATED : HttpStatus.OK;
+        HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(status).body(result.response());
     }
 

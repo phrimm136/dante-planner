@@ -307,6 +307,12 @@ public class PlannerService {
             return UpsertResult.updated(PlannerResponse.fromEntity(saved));
         }
 
+        // Check if user's own planner was soft-deleted (prevents PRIMARY KEY collision)
+        if (plannerRepository.existsByIdAndUserId(id, userId)) {
+            log.warn("Planner {} is soft-deleted for user {} - cannot recreate", id, userId);
+            throw new PlannerNotFoundException(id);
+        }
+
         // Check if planner exists for another user (prevents ID collision)
         if (plannerRepository.existsByIdAndDeletedAtIsNull(id)) {
             log.warn("Planner {} exists but belongs to another user (ID collision)", id);
