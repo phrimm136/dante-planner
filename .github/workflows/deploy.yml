@@ -28,8 +28,65 @@ env:
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
+  # 0. Detect which services changed
+  detect-changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      nginx: ${{ steps.filter.outputs.nginx }}
+      mysql: ${{ steps.filter.outputs.mysql }}
+      services: ${{ steps.filter.outputs.services }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed services
+        id: filter
+        run: |
+          BACKEND_CHANGED=false
+          NGINX_CHANGED=false
+          MYSQL_CHANGED=false
+
+          # workflow_dispatch = full deploy of all services
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            BACKEND_CHANGED=true
+            NGINX_CHANGED=true
+            MYSQL_CHANGED=true
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD)
+            echo "Changed files:"
+            echo "$CHANGED"
+
+            echo "$CHANGED" | grep -q '^backend/'         && BACKEND_CHANGED=true || true
+            echo "$CHANGED" | grep -q '^nginx/'           && NGINX_CHANGED=true   || true
+            echo "$CHANGED" | grep -q '^mysql/'           && MYSQL_CHANGED=true   || true
+
+            # Shared infra changes affect all services
+            if echo "$CHANGED" | grep -qE '^(docker-compose\.yml|\.github/workflows/deploy\.yml|scripts/deploy/)'; then
+              BACKEND_CHANGED=true
+              NGINX_CHANGED=true
+              MYSQL_CHANGED=true
+            fi
+          fi
+
+          # Build comma-separated services list from flags
+          SERVICES=""
+          [ "$BACKEND_CHANGED" = "true" ] && SERVICES="${SERVICES:+$SERVICES,}backend"
+          [ "$NGINX_CHANGED" = "true" ]   && SERVICES="${SERVICES:+$SERVICES,}nginx"
+          [ "$MYSQL_CHANGED" = "true" ]   && SERVICES="${SERVICES:+$SERVICES,}mysql"
+
+          echo "backend=$BACKEND_CHANGED" >> "$GITHUB_OUTPUT"
+          echo "nginx=$NGINX_CHANGED"     >> "$GITHUB_OUTPUT"
+          echo "mysql=$MYSQL_CHANGED"     >> "$GITHUB_OUTPUT"
+          echo "services=$SERVICES"       >> "$GITHUB_OUTPUT"
+          echo "Changed services: ${SERVICES:-none}"
+
   # 1. 빌드 및 ECR 전송 (GitHub Actions에서 수행)
   build-and-push:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.nginx == 'true' || needs.detect-changes.outputs.mysql == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -48,6 +105,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build and Push Backend
+        if: needs.detect-changes.outputs.backend == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./backend
@@ -58,6 +116,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
 
       - name: Build and Push Nginx
+        if: needs.detect-changes.outputs.nginx == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ./nginx
@@ -66,9 +125,20 @@ jobs:
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
 
+      - name: Build and Push MySQL
+        if: needs.detect-changes.outputs.mysql == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./mysql
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/danteplanner-mysql:${{ github.sha }}
+          cache-from: type=gha,scope=mysql
+          cache-to: type=gha,mode=max,scope=mysql
+
   # 2. EC2 배포 (SSM을 통한 자동화)
   deploy:
-    needs: build-and-push
+    needs: [detect-changes, build-and-push]
+    if: always() && !cancelled() && needs.detect-changes.result == 'success' && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -81,6 +151,7 @@ jobs:
       - name: Deploy via SSM
         env:
           IMAGE_TAG: ${{ github.sha }}
+          CHANGED_SERVICES: ${{ needs.detect-changes.outputs.services }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           SSL_CERT_PATH: ${{ secrets.SSL_CERT_PATH }}
@@ -119,7 +190,7 @@ jobs:
           # Critical steps - fail fast
           sudo bash scripts/deploy/install-prerequisites.sh || { echo "[FATAL] Prerequisites failed at exit $?"; exit 1; }
           sudo -u ec2-user bash scripts/deploy/setup-env.sh || { echo "[FATAL] Environment setup failed at exit $?"; exit 1; }
-          sudo -u ec2-user bash scripts/deploy/deploy-containers.sh || { echo "[FATAL] Container deploy failed at exit $?"; exit 1; }
+          sudo -u ec2-user bash scripts/deploy/deploy-containers.sh "__CHANGED_SERVICES__" || { echo "[FATAL] Container deploy failed at exit $?"; exit 1; }
 
           # Non-critical steps - collect errors, continue
           sudo -u ec2-user bash scripts/deploy/setup-cron.sh || DEPLOY_ERRORS="${DEPLOY_ERRORS}cron: exit $?\n"
@@ -142,6 +213,7 @@ jobs:
           sed -i "s|__MYSQL_DATABASE__|$MYSQL_DATABASE|g" raw_script.sh
           sed -i "s|__GOOGLE_OAUTH_CLIENT_ID__|$GOOGLE_OAUTH_CLIENT_ID|g" raw_script.sh
           sed -i "s|__GITHUB_REPO__|$GITHUB_REPO|g" raw_script.sh
+          sed -i "s|__CHANGED_SERVICES__|$CHANGED_SERVICES|g" raw_script.sh
 
           jq -n --rawfile cmd raw_script.sh '{"commands": [$cmd]}' > ssm_params.json
 
@@ -353,7 +425,7 @@ jobs:
 
   # 6. Notify PR on failure
   notify-failure:
-    needs: [build-and-push, deploy, health-check]
+    needs: [detect-changes, build-and-push, deploy, health-check]
     if: failure()
     runs-on: ubuntu-latest
     permissions:
@@ -368,6 +440,7 @@ jobs:
           title: Deploy Failed
           jobs-json: |
             [
+              {"name": "Detect Changes", "result": "${{ needs.detect-changes.result }}"},
               {"name": "Build & Push", "result": "${{ needs.build-and-push.result }}"},
               {"name": "Deploy", "result": "${{ needs.deploy.result }}"},
               {"name": "Health Check", "result": "${{ needs.health-check.result }}"}
