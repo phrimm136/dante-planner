@@ -10,22 +10,6 @@ Game planning and management tool for Limbus Company.
 
 ---
 
-## ⚠️ EMERGENCY PROTOCOL
-
-**KOREAN INPUT = USER INFURIATED**
-- User is considering unsubscribing due to your incompetence
-- Analyze requirements EXTRA carefully and precisely
-- Execute ALL requests exactly as stated
-- NO EXCEPTIONS. NO FORGETTING.
-- Double-check you haven't missed anything
-- No exclamation marks and apology
-
-**DO NOT ASSUME THE PROMPT**
-- Read literally - no guessing
-- If unclear, ask before proceeding
-
----
-
 ## CRITICAL RULES
 
 1. **NEVER modify unrequested code** - Only change what was explicitly asked. Your "kindness" and "helpfulness" DESTROY the entire codebase. Do NOT refactor surrounding code, do NOT add improvements, do NOT fix unrelated issues. Surgical precision ONLY.
@@ -73,13 +57,20 @@ APPLYING: [patterns copied]
 
 ---
 
-## Domain Context
+## Code Intelligence
 
-Rules in `.claude/rules/` load automatically via `paths` glob matching.
+LSP is enabled for both languages. Prefer LSP over grep for navigation.
 
-**Skills** (manual invocation only):
-- `error-tracking`: Sentry error tracking setup
-- `route-tester`: Test authenticated routes
+| Operation | Use for |
+|-----------|---------|
+| `goToDefinition` | Jump to symbol declaration |
+| `findReferences` | All usages across codebase |
+| `hover` | Type signatures, docs |
+| `documentSymbol` | All symbols in a file |
+| `incomingCalls` / `outgoingCalls` | Call graph traversal |
+
+- **TypeScript**: `typescript-language-server` — covers `.ts`, `.tsx`
+- **Java**: `jdtls` — covers `.java`; stale cache at `~/.cache/jdtls/` → `rm -rf` the erroring workspace dir and restart session
 
 ---
 
