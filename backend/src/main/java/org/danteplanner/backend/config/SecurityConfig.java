@@ -94,10 +94,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/planner/md/published/{id}").permitAll()
                 .requestMatchers("/api/planner/md/recommended").permitAll()
 
-                // Public view recording endpoint (anonymous tracking allowed)
-                // Note: Spring Security 7 uses PathPattern syntax - {id} for path variables, not Ant-style *
-                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/planner/md/{id}/view").permitAll()
-
                 // Public user endpoints (association list for settings page)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/user/associations").permitAll()
 
