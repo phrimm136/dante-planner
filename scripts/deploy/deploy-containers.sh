@@ -6,6 +6,15 @@ trap 'echo "[ERROR] $SCRIPT_NAME failed at line $LINENO (exit code: $?)" >&2; ex
 DEPLOY_DIR="/opt/danteplanner"
 cd "$DEPLOY_DIR"
 
+CHANGED_SERVICES="${1:-}"
+
+if [ -z "$CHANGED_SERVICES" ]; then
+  echo "No services to update, skipping container deploy"
+  exit 0
+fi
+
+service_changed() { echo "$CHANGED_SERVICES" | tr ',' '\n' | grep -qx "$1"; }
+
 # Load .env for AWS credentials
 # shellcheck source=/dev/null
 source .env
@@ -15,18 +24,23 @@ aws ecr get-login-password --region "$AWS_REGION" | \
   docker login --username AWS --password-stdin \
   "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 
-docker compose build mysql
-docker compose pull --ignore-buildable
+# Pull only changed services from ECR
+PULL_ARGS=""
+service_changed "backend" && PULL_ARGS="$PULL_ARGS backend"
+service_changed "nginx"   && PULL_ARGS="$PULL_ARGS nginx"
+service_changed "mysql"   && PULL_ARGS="$PULL_ARGS mysql"
+[ -n "$PULL_ARGS" ] && docker compose pull $PULL_ARGS
 
-# Rolling Update: nginx first (serves maintenance page), then backend
-# Minimizes downtime - nginx stays up to respond with 503 during backend restart
-docker compose up -d --no-deps --force-recreate nginx
-sleep 2
-docker compose up -d --no-deps --force-recreate backend
-docker compose up -d --no-deps mysql
+# Rolling update: nginx first (serves 503 during backend restart), then backend, then mysql
+if service_changed "nginx"; then
+  docker compose up -d --no-deps --force-recreate nginx
+  sleep 2
+fi
+service_changed "backend" && docker compose up -d --no-deps --force-recreate backend
+service_changed "mysql"   && docker compose up -d --no-deps --force-recreate mysql
 
 # Cleanup orphaned containers and old images
 docker compose up -d --remove-orphans
 docker image prune -f --filter "until=720h"  # 30 days
 
-echo "Container deploy complete"
+echo "Container deploy complete: $CHANGED_SERVICES"
