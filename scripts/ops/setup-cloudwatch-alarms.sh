@@ -79,7 +79,6 @@ setup_cloudwatch_logs_iam() {
 setup_log_retention() {
     log_info "Setting CloudWatch log retention: 30 days"
     local LOG_GROUPS=(
-        "/ecs/danteplanner/backend"
         "/ecs/danteplanner/nginx"
         "/ecs/danteplanner/mysql"
     )
@@ -90,6 +89,12 @@ setup_log_retention() {
             --region "$AWS_REGION" 2>/dev/null || log_warn "Could not set retention on $LOG_GROUP (may not exist yet)"
         log_info "Retention: $LOG_GROUP → 30 days"
     done
+
+    aws logs put-retention-policy \
+        --log-group-name "/ecs/danteplanner/backend" \
+        --retention-in-days 90 \
+        --region "$AWS_REGION" 2>/dev/null || log_warn "Could not set retention on /ecs/danteplanner/backend (may not exist yet)"
+    log_info "Retention: /ecs/danteplanner/backend → 90 days"
 }
 
 # Create SNS topic (idempotent)
@@ -167,7 +172,7 @@ setup_metric_filter() {
     aws logs put-metric-filter \
         --log-group-name "$LOG_GROUP" \
         --filter-name "HTTP5xxErrors" \
-        --filter-pattern '[ip, id, user, timestamp, request, status=5*, size, ...]' \
+        --filter-pattern '{ $.status > 499 }' \
         --metric-transformations \
             metricName=HTTP5xxCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
         --region "$AWS_REGION"
@@ -175,9 +180,11 @@ setup_metric_filter() {
     log_info "Metric filter created for HTTP 5xx errors"
 }
 
-# Create metric filters for ERROR and WARN events from backend logs
+# Create metric filters for ERROR and WARN events from JSON backend logs.
+# Targets /ecs/danteplanner/backend (LogstashEncoder JSON, INFO+, via awslogs).
+# Uses CloudWatch JSON pattern syntax: { $.field = "value" }
 setup_error_metric_filters() {
-    log_info "Setting up ERROR/WARN metric filters on backend logs"
+    log_info "Setting up ERROR/WARN metric filters on /ecs/danteplanner/backend"
 
     local LOG_GROUP="/ecs/danteplanner/backend"
 
@@ -190,28 +197,52 @@ setup_error_metric_filters() {
         return 0
     fi
 
-    # Backend console format (plain text, %5level):
-    #   "YYYY-MM-DD HH:mm:ss.SSS ERROR [userId] method path [thread] logger - msg"
-    # Substring filters match the level field in this format.
     aws logs put-metric-filter \
         --log-group-name "$LOG_GROUP" \
         --filter-name "BackendErrors" \
-        --filter-pattern '"ERROR"' \
+        --filter-pattern '{ $.level = "ERROR" }' \
         --metric-transformations \
             metricName=BackendErrorCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
         --region "$AWS_REGION"
     log_info "Metric filter created: BackendErrorCount"
 
-    # %5level pads WARN to " WARN" (leading space). Include the space to reduce
-    # false positives from message content that contains the word "WARN".
     aws logs put-metric-filter \
         --log-group-name "$LOG_GROUP" \
         --filter-name "BackendWarnings" \
-        --filter-pattern '" WARN"' \
+        --filter-pattern '{ $.level = "WARN" }' \
         --metric-transformations \
             metricName=BackendWarnCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
         --region "$AWS_REGION"
     log_info "Metric filter created: BackendWarnCount"
+}
+
+# Heartbeat metric filter on JSON log group — counts every log event.
+# Used by the BackendSilence alarm: if the server stops logging for 5 minutes,
+# treat-missing-data=breaching fires the alarm even with no data points.
+setup_heartbeat_filter() {
+    log_info "Setting up heartbeat metric filter on /ecs/danteplanner/backend"
+
+    local LOG_GROUP="/ecs/danteplanner/backend"
+
+    if ! aws logs describe-log-groups \
+        --log-group-name-prefix "$LOG_GROUP" \
+        --region "$AWS_REGION" \
+        --query "logGroups[?logGroupName=='$LOG_GROUP']" \
+        --output text | grep -q "$LOG_GROUP"; then
+        log_warn "Log group $LOG_GROUP not found. Will be created on first deploy."
+        return 0
+    fi
+
+    # Empty filter-pattern matches every log event
+    aws logs put-metric-filter \
+        --log-group-name "$LOG_GROUP" \
+        --filter-name "BackendHeartbeat" \
+        --filter-pattern "" \
+        --metric-transformations \
+            metricName=BackendLogCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
+        --region "$AWS_REGION"
+
+    log_info "Metric filter created: BackendLogCount (heartbeat)"
 }
 
 # Create CloudWatch alarms
@@ -331,6 +362,25 @@ create_alarms() {
         --treat-missing-data notBreaching \
         --region "$AWS_REGION"
 
+    # Alarm 7: Backend Silence — fires when server produces no logs for 5 minutes.
+    # treat-missing-data=breaching means a CW Agent outage also triggers this alarm,
+    # which is correct: both cases (app crash and agent failure) need attention.
+    log_info "Creating backend silence alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-BackendSilence" \
+        --alarm-description "No backend log events for 5 minutes — possible crash or CW Agent failure" \
+        --namespace "$NAMESPACE" \
+        --metric-name "BackendLogCount" \
+        --statistic Sum \
+        --period 300 \
+        --threshold 1 \
+        --comparison-operator LessThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data breaching \
+        --region "$AWS_REGION"
+
     log_info "All alarms created successfully"
 }
 
@@ -438,7 +488,8 @@ setup_dashboard() {
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighDisk",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HTTP5xx",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendErrors",
-          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendWarnings"
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendWarnings",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendSilence"
         ]
       }
     },
@@ -447,7 +498,7 @@ setup_dashboard() {
       "x": 0, "y": 10, "width": 24, "height": 12,
       "properties": {
         "title": "Recent Backend Errors & Warnings",
-        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, @message | filter @message like /ERROR|WARN/ | sort @timestamp desc | limit 50",
+        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, message, userId, path | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
         "region": "$AWS_REGION",
         "view": "table"
       }
@@ -461,6 +512,167 @@ EOF
     log_info "View: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner"
 }
 
+# Create saved CloudWatch Insights queries for JSON backend logs.
+# Log group /ecs/danteplanner/backend receives LogstashEncoder JSON via awslogs driver.
+# CloudWatch Insights auto-parses top-level JSON fields — no parse() needed.
+setup_insights_queries() {
+    log_info "Creating CloudWatch Insights saved queries for /ecs/danteplanner/backend"
+
+    local LOG_GROUP="/ecs/danteplanner/backend"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/RecentErrors" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'fields @timestamp, level, message, userId, path, logger_name
+| filter level = "ERROR"
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/ExceptionsWithStackTrace" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'fields @timestamp, message, stack_trace, userId, path
+| filter ispresent(stack_trace)
+| sort @timestamp desc
+| limit 50' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/ErrorsByEndpoint" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'filter level = "ERROR"
+| stats count(*) as errorCount by path
+| sort errorCount desc' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/RecentWarnings" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'fields @timestamp, message, userId, path
+| filter level = "WARN"
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/UserActivity" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'filter ispresent(userId) and userId != "guest"
+| stats count(*) as requestCount by userId, path
+| sort requestCount desc' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/ErrorWarningRateOverTime" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'filter level = "ERROR" or level = "WARN"
+| stats count(*) as total,
+        sum(level = "ERROR") as errors,
+        sum(level = "WARN") as warnings
+    by bin(5m)
+| sort @timestamp desc' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/AuthSecurityEvents" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'filter logger_name like /[Ss]ecurity/ or logger_name like /[Aa]uth/ or logger_name like /[Jj]wt/
+| fields @timestamp, level, message, userId, path, logger_name
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/DatabaseErrors" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'filter logger_name like /hibernate/ or logger_name like /jpa/ or logger_name like /datasource/ or logger_name like /jdbc/
+| fields @timestamp, level, message, logger_name
+| filter level = "ERROR" or level = "WARN"
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Backend/LogGapTimeline" \
+        --log-group-names "$LOG_GROUP" \
+        --query-string 'stats count(*) as events by bin(1m)
+| sort @timestamp asc' \
+        --region "$AWS_REGION"
+
+    log_info "Saved 9 Insights queries under DantePlanner/Backend/"
+
+    # ── Nginx (JSON access log, /ecs/danteplanner/nginx) ──────────────────────
+    # Mixed log group: JSON access lines + plain-text error lines.
+    # ispresent(status) restricts each query to JSON access log events only.
+    local NGINX_LOG_GROUP="/ecs/danteplanner/nginx"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Nginx/HTTP5xxErrors" \
+        --log-group-names "$NGINX_LOG_GROUP" \
+        --query-string 'filter ispresent(status) and status > 499
+| fields @timestamp, status, method, uri, remote_addr, upstream_response_time
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Nginx/SlowestEndpoints" \
+        --log-group-names "$NGINX_LOG_GROUP" \
+        --query-string 'filter ispresent(request_time)
+| stats avg(request_time) as avg_ms,
+        max(request_time) as max_ms,
+        count(*) as requests
+    by uri
+| sort avg_ms desc
+| limit 20' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Nginx/TrafficByEndpoint" \
+        --log-group-names "$NGINX_LOG_GROUP" \
+        --query-string 'filter ispresent(status)
+| stats count(*) as requests, sum(bytes_sent) as total_bytes by uri, method
+| sort requests desc
+| limit 30' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/Nginx/StatusCodeDistribution" \
+        --log-group-names "$NGINX_LOG_GROUP" \
+        --query-string 'filter ispresent(status)
+| stats count(*) as requests by status
+| sort status asc' \
+        --region "$AWS_REGION"
+
+    log_info "Saved 4 Insights queries under DantePlanner/Nginx/"
+
+    # ── MySQL (plain-text error log, /ecs/danteplanner/mysql) ─────────────────
+    # MySQL JSON logging (log_sink_json) is not used: the component writes to
+    # a hostname-named file, not stderr, so it does not reach the awslogs driver.
+    local MYSQL_LOG_GROUP="/ecs/danteplanner/mysql"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/MySQL/Errors" \
+        --log-group-names "$MYSQL_LOG_GROUP" \
+        --query-string 'filter @message like /\[ERROR\]/
+| fields @timestamp, @message
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    aws logs put-query-definition \
+        --name "DantePlanner/MySQL/Warnings" \
+        --log-group-names "$MYSQL_LOG_GROUP" \
+        --query-string 'filter @message like /\[Warning\]/
+| fields @timestamp, @message
+| sort @timestamp desc
+| limit 100' \
+        --region "$AWS_REGION"
+
+    log_info "Saved 2 Insights queries under DantePlanner/MySQL/"
+}
+
 # Print summary
 print_summary() {
     echo ""
@@ -470,12 +682,13 @@ print_summary() {
     echo ""
     echo "Created Resources:"
     echo "  - SNS Topic: $SNS_TOPIC_NAME"
-    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx, BackendErrors, BackendWarnings"
-    echo "  - Metric Filters: HTTP5xxErrors (nginx), BackendErrors, BackendWarnings (backend)"
-    echo "  - Dashboard: DantePlanner (metrics + alarm status + log insights)"
+    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx, BackendErrors, BackendWarnings, BackendSilence"
+    echo "  - Metric Filters: HTTP5xxErrors (nginx), BackendErrors, BackendWarnings, BackendHeartbeat (backend)"
+    echo "  - Dashboard: DantePlanner (metrics + 7 alarms + log insights from /ecs/danteplanner/backend)"
+    echo "  - Insights Queries (15): 9 backend, 4 nginx, 2 mysql"
     echo "  - S3 Logging: $S3_BACKUP_BUCKET -> $S3_LOGS_BUCKET"
     echo "  - IAM: CloudWatchAgentServerPolicy attached to instance role"
-    echo "  - Log Retention: 30 days on all /ecs/danteplanner/* log groups"
+    echo "  - Log Retention: backend 90 days, nginx/mysql 30 days"
     echo ""
     echo "View in AWS Console:"
     echo "  Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner"
@@ -504,10 +717,12 @@ main() {
 
     setup_metric_filter
     setup_error_metric_filters
+    setup_heartbeat_filter
     setup_log_retention
     create_alarms "$TOPIC_ARN"
     setup_s3_logging
     setup_dashboard
+    setup_insights_queries
 
     print_summary
 }

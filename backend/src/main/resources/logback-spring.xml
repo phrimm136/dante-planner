@@ -3,51 +3,20 @@
 
     <!-- ═══════════════════════════════════════════════════════════
          PRODUCTION:
-           Console (WARN+) → stdout → awslogs → CloudWatch
-           File    (INFO+) → /app/logs/backend.log (host-mounted)
-         awslogs captures stdout only — console threshold is the
-         CloudWatch gate; INFO goes to file only, invisible to
-         `docker compose logs`.
+           Console (INFO+) → stdout → awslogs → CloudWatch
+                             /ecs/danteplanner/backend
+                             exported daily to S3 by export-cloudwatch-logs.sh
          ═══════════════════════════════════════════════════════════ -->
     <springProfile name="prod">
         <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-        <!-- Console: WARN+ only → stdout → awslogs → CloudWatch -->
+        <!-- Console: INFO+ JSON → stdout → awslogs → CloudWatch -->
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>WARN</level>
-            </filter>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [%X{userId:-guest}] %X{method:- } %X{path:-?} [%thread] %logger{36} - %msg%n</pattern>
-            </encoder>
-        </appender>
-
-        <!-- File: INFO+ structured JSON for analysis; rolled daily or at 50MB -->
-        <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <file>/app/logs/backend.log</file>
-            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>INFO</level>
-            </filter>
-            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>/app/logs/backend.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-                <maxFileSize>50MB</maxFileSize>
-                <maxHistory>30</maxHistory>
-                <totalSizeCap>1GB</totalSizeCap>
-            </rollingPolicy>
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
         </appender>
 
-        <!-- Async wrapper: non-blocking writes; discardingThreshold=0 ensures no
-             INFO events are silently dropped even under high-volume logging -->
-        <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
-            <appender-ref ref="FILE_JSON"/>
-            <queueSize>512</queueSize>
-            <discardingThreshold>0</discardingThreshold>
-        </appender>
-
-        <root level="WARN">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ASYNC_FILE"/>
         </root>
     </springProfile>
 
