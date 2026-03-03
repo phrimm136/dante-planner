@@ -4,6 +4,10 @@ FROM gradle:8.12-jdk21 AS builder
 WORKDIR /app
 
 COPY build.gradle.kts settings.gradle.kts ./
+
+RUN --mount=type=cache,target=/root/.gradle \
+    gradle dependencies --no-daemon
+
 COPY src ./src
 
 RUN --mount=type=cache,target=/root/.gradle \
