@@ -2432,6 +2432,117 @@
     "themePack": [],
     "maxEnhancement": 0
   },
+  "9233": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "AZURE",
+    "themePack": [
+      "1124"
+    ],
+    "maxEnhancement": 0
+  },
+  "9234": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1124"
+    ],
+    "maxEnhancement": 0
+  },
+  "9235": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Penetrate",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0,
+    "recipe": {
+      "materials": [
+        [
+          9233,
+          9234,
+          9145
+        ]
+      ]
+    }
+  },
+  "9236": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1124"
+    ],
+    "maxEnhancement": 2
+  },
+  "9237": {
+    "tag": [
+      "TIER_2"
+    ],
+    "keyword": "Laceration",
+    "attributeType": "SCARLET",
+    "themePack": [
+      "1124"
+    ],
+    "maxEnhancement": 2
+  },
+  "9238": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "INDIGO",
+    "themePack": [
+      "1124"
+    ],
+    "maxEnhancement": 0
+  },
+  "9239": {
+    "tag": [
+      "TIER_4"
+    ],
+    "keyword": "Sinking",
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0,
+    "recipe": {
+      "materials": [
+        [
+          9144,
+          9086,
+          9238
+        ]
+      ]
+    }
+  },
+  "9240": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": "Combustion",
+    "attributeType": "CRIMSON",
+    "themePack": [
+      "1124"
+    ],
+    "maxEnhancement": 0
+  },
+  "9241": {
+    "tag": [
+      "TIER_3"
+    ],
+    "keyword": null,
+    "attributeType": "INDIGO",
+    "themePack": [],
+    "maxEnhancement": 0
+  },
   "9403": {
     "tag": [
       "TIER_2"

@@ -46,7 +46,7 @@
         },
         {},
         {
-          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計6につき、コイン威力 +1(最大2)\n[WhenUse] 自分の[Breath]回数が2増加",
+          "desc": "[WhenUse] 自分の[Breath]威力と対象の[Burst]威力の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]回数が2増加",
           "coinDescs": [
             "[OnSucceedAttack] [Burst]回数が2増加",
             "[OnSucceedAttack] (対象の[Burst] ÷ 5) + 2だけ[Breath]を得る (最大6, 小数点切り捨て)",

@@ -1,0 +1,124 @@
+{
+  "name": "ロボトミーE.G.O::\nホーネット【改造】",
+  "skills": {
+    "1051401": {
+      "name": "威嚇射撃",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Combustion]2を付与",
+            "[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 自分の[MeursaultSporeBulletLong]が最大値なら、的中時に[PenetrateTakeDamageUp]1を付与 (1ターンにつき1回)\n[WhenUse] 対象の[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Combustion]2を付与",
+            "[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]1を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "対象の[MeursaultBeeSpore]5につき、ダメージ量 +10% (最大30%)\n[BeforeUse] 自分の[MeursaultSporeBulletLong]が最大値なら、的中時に[PenetrateTakeDamageUp]1を付与 (1ターンにつき1回)\n[WhenUse] 対象の[Combustion]と[Laceration]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Combustion]2を付与",
+            "[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]2を付与"
+          ]
+        }
+      ]
+    },
+    "1051402": {
+      "name": "E.G.O変調 - 散弾",
+      "descs": [
+        {
+          "desc": "サブターゲットへの与ダメージ量 -50%",
+          "coinDescs": [
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Combustion]回数が1増加",
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Laceration]回数が1増加",
+            "[MeursaultSporeBulletShort]を1消耗"
+          ]
+        },
+        {
+          "desc": "サブターゲットへの与ダメージ量 -50%\n対象の[MeursaultBeeSpore]5につき、ダメージ量 +7% (最大21%)\n[WhenUse] メインターゲットの[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Combustion]回数が1増加",
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "[MeursaultSporeBulletShort]を1消耗"
+          ]
+        },
+        {},
+        {
+          "desc": "サブターゲットへの与ダメージ量 -50%\n対象の[MeursaultBeeSpore]5につき、ダメージ量 +15% (最大45%)\n[WhenUse] メインターゲットの[Combustion]と[Laceration]の合計が6以上なら、コイン威力 +1\n[WhenUse] 自分に[MeursaultWorkerBee]があるなら、マッチ威力 +1\n[WhenUse] 自分の[MeursaultWorkerBee]だけ、最終コインから[SuperCoin]に変更される\n[EndSkill] 自分の[MeursaultSporeBulletLong]が1個以下なら、[MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Combustion]回数が1増加",
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Laceration]回数が2増加",
+            "[MeursaultSporeBulletShort]を1消耗\n[OnSucceedAttack] [Combustion]回数が1増加"
+          ]
+        }
+      ]
+    },
+    "1051403": {
+      "name": "臨床実験 - 粉塵灼熱",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "対象の[MeursaultBeeSpore]5につき、ダメージ量 +5% (最大15%)\n[WhenUse] メインターゲットの[Combustion]と[Laceration]の合計6につき、コイン威力 +1 (最大2)\n[EndSkill] [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "このコインは1名の対象にのみ的中する (メインターゲットに優先適用)\n[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Combustion]2を付与",
+            "このコインは1名の対象にのみ的中する (メインターゲットに優先適用)\n[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]2を付与",
+            "このコインは1名の対象にのみ的中する (メインターゲットに優先適用)\n[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]1を付与",
+            "[SuperCoin]\n[MeursaultSporeBulletShort]を1消耗\nサブターゲットへの与ダメージ量 -50%\n[UnBrokenCoinOnSucceedAttack] 対象の[MeursaultBeeSpore]が最大値なら、下記の効果を適用\n- ([Combustion]威力 × [MeursaultBeeSpore]数値 ÷ 10)だけ憤怒ダメージ (小数点切り捨て)\nこの効果で憤怒ダメージを与えたなら、[Combustion]が発動したものとみなす\n- [Combustion]回数が1減少\n- [MeursaultBeeSpore]が消滅\n[OnSucceedAttack] [Combustion]回数が1増加、[Laceration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "このスキルの攻撃加重値よりも少ない攻撃対象1名につき、ダメージ量 +50% (集中戦闘の場合は部位で判定)\n対象の[MeursaultBeeSpore]5につき、ダメージ量 +10% (最大30%)\n[BeforeUse] 自分の[MeursaultSporeBulletLong]が2以下なら、精神力を6消耗して[MeursaultSporeBulletLong]を3得る\n[WhenUse] メインターゲットの[Combustion]と[Laceration]の合計6につき、コイン威力 +1 (最大3)\n[WhenUse] 自分に[MeursaultWorkerBee]があるなら、マッチ威力 +1\n[WhenUse] 自分の[MeursaultWorkerBee]だけ、3枚目のコインから[SuperCoin]に変更される\n[WhenUse] 自分の[MeursaultWorkerBee]が3なら、加重値 +1\n[EndSkill] [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "このコインは1名の対象にのみ的中する (メインターゲットに優先適用)\n[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Combustion]3を付与",
+            "このコインは1名の対象にのみ的中する (メインターゲットに優先適用)\n[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]2を付与",
+            "このコインは1名の対象にのみ的中する (メインターゲットに優先適用)\n[MeursaultSporeBulletLong]を1消耗\n[OnSucceedAttack] [Laceration]2を付与",
+            "[SuperCoin]\n[MeursaultSporeBulletShort]を1消耗\nサブターゲットへの与ダメージ量 -50%\n自分の[MeursaultWorkerBee]1につき、このコインのダメージ量 +5%(最大15%)\n[UnBrokenCoinOnSucceedAttack] 対象の[MeursaultBeeSpore]が最大値なら、下記の効果を適用\n- ([Combustion]威力 × [MeursaultBeeSpore]数値 ÷ 10)だけ憤怒ダメージ (小数点切り捨て)\nこの効果で憤怒ダメージを与えたなら、[Combustion]が発動したものとみなす\n- [Combustion]回数が1減少\n- [MeursaultBeeSpore]が消滅\n[OnSucceedAttack] [Combustion]回数が1増加、[Laceration]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1051404": {
+      "name": "胞子補充",
+      "descs": [
+        {
+          "desc": "[StartBattle] [MeursaultSporeBulletReloading] (1ターンにつき1回)\n[OnSucceedEvade] 自分の体力を10回復 (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [MeursaultSporeBulletReloading] (1ターンにつき1回)\n[WhenUseEvade] 攻撃者の[Combustion]と[Laceration]の合計6につき、コイン威力 +1 (最大3)\n[OnSucceedEvade] 自分の体力を10回復 (1ターンにつき1回)\n- [MeursaultWorkerBee]を保有しているなら、数値1につき5ずつ回復量が増加",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051401": {
+      "name": "胞子拡散",
+      "desc": "[MeursaultBeeSpore]を保有した敵を討伐時、次のターンの間付与する[MeursaultBeeSpore]数値が2倍になる"
+    },
+    "1051411": {
+      "name": "胞子拡散",
+      "desc": "[MeursaultBeeSpore]を保有した敵を討伐時、下記の効果を適用\n- 次のターンの間付与する[MeursaultBeeSpore]数値が2倍になる\n- 基本攻撃スキルで討伐時、(そのスキルで消耗する胞子弾 ÷ 2)だけ胞子弾を得る (小数点切り上げ、スキルごとに1回)"
+    },
+    "1051402": {
+      "name": "E.G.O変調 / 胞子弾",
+      "desc": "常時適用: [MeursaultSporeBulletLong]10個、[MeursaultSporeBulletShort]6個を保有\n\n胞子弾を消耗するコインが的中時、\n- [MeursaultSporeBulletLong]を消耗したなら、[MeursaultBeeSpore]2を付与\n- [MeursaultSporeBulletShort]を消耗したなら、[MeursaultBeeSpore]3を付与\n- この効果はスキルでマイナス効果を付与するものとして扱われる\n\n[MeursaultSporeBulletShort]を消耗するコインを使用する前、[MeursaultSporeBulletShort]が無いなら\n精神力2, [MeursaultSporeBulletLong]2を消耗して[MeursaultSporeBulletShort]1を得る\nスキル使用中に胞子弾が不足した場合、次のコインを全てキャンセルして[MeursaultSporeBulletReloading]\n\n[MeursaultBeeSpore]を持つ対象が死亡時、[MeursaultWorkerBee]1を得る"
+    },
+    "1051421": {
+      "name": "働き蜂",
+      "desc": "味方の貫通属性基本攻撃スキル終了時、その攻撃で与えた体力ダメージ量の10%だけ体力を回復 (戦闘ごとに最大2回発動可能)\n- このターンの間、スキルスロットに装着した全ての基本攻撃スキルが貫通属性なら、ターン終了時に全味方の精神力を10回復"
+    }
+  }
+}

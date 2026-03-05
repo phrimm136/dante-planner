@@ -1,0 +1,124 @@
+{
+  "name": "로보토미 E.G.O::\n호넷【변조】",
+  "skills": {
+    "1051401": {
+      "name": "위협 사격",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] 자신의 [MeursaultSporeBulletLong]이 최댓값이면, 적중 시 [PenetrateTakeDamageUp] 1 부여 (턴당 1회)\n[WhenUse] 대상의 [Combustion]과 [Laceration]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 1 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "대상의 [MeursaultBeeSpore] 5당 피해량 +10% (최대 30%)\n[BeforeUse] 자신의 [MeursaultSporeBulletLong]이 최댓값이면, 적중 시 [PenetrateTakeDamageUp] 1 부여 (턴당 1회)\n[WhenUse] 대상의 [Combustion]과 [Laceration]의 합 6당 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 2 부여"
+          ]
+        }
+      ]
+    },
+    "1051402": {
+      "name": "E.G.O 변조 - 산탄",
+      "descs": [
+        {
+          "desc": "서브 타겟에게 가하는 피해량 -50%",
+          "coinDescs": [
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Laceration] 횟수 1 증가",
+            "[MeursaultSporeBulletShort] 1 소모"
+          ]
+        },
+        {
+          "desc": "서브 타겟에게 가하는 피해량 -50%\n대상의 [MeursaultBeeSpore] 5당 피해량 +7% (최대 21%)\n[WhenUse] 메인 타겟의 [Combustion]과 [Laceration]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[MeursaultSporeBulletShort] 1 소모"
+          ]
+        },
+        {},
+        {
+          "desc": "서브 타겟에게 가하는 피해량 -50%\n대상의 [MeursaultBeeSpore] 5당 피해량 +15% (최대 45%)\n[WhenUse] 메인 타겟의 [Combustion]과 [Laceration]의 합이 6 이상이면, 코인 위력 +1\n[WhenUse] 자신에게 [MeursaultWorkerBee]이 있으면, 합 위력 +1\n[WhenUse] 자신의 [MeursaultWorkerBee]만큼 마지막 코인부터 [SuperCoin]으로 변경됨\n[EndSkill] 자신의 [MeursaultSporeBulletLong]이 1개 이하면, [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Combustion] 횟수 1 증가",
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Laceration] 횟수 2 증가",
+            "[MeursaultSporeBulletShort] 1 소모\n[OnSucceedAttack] [Combustion] 횟수 1 증가"
+          ]
+        }
+      ]
+    },
+    "1051403": {
+      "name": "임상 시험 - 분진 작열",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "대상의 [MeursaultBeeSpore] 5당 피해량 +5% (최대 15%)\n[WhenUse] 메인 타겟의 [Combustion]과 [Laceration]의 합 6당 코인 위력 +1 (최대 2)\n[EndSkill] [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "이 코인은 1명의 대상에게만 적중함 (메인 타겟 우선 적용)\n[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Combustion] 2 부여",
+            "이 코인은 1명의 대상에게만 적중함 (메인 타겟 우선 적용)\n[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 2 부여",
+            "이 코인은 1명의 대상에게만 적중함 (메인 타겟 우선 적용)\n[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 1 부여",
+            "[SuperCoin]\n[MeursaultSporeBulletShort] 1 소모\n서브 타겟에게 가하는 피해량 -50%\n\n[UnBrokenCoinOnSucceedAttack] 대상의 [MeursaultBeeSpore]가 최댓값이면, 아래 효과 적용\n- ([Combustion] 위력 x [MeursaultBeeSpore] 수치 / 10) 만큼 분노 피해 (소수점 버림)\n이 효과로 분노 피해를 입혔으면, [Combustion]이 발동한 것으로 취급함\n-[Combustion] 횟수 1 감소\n-[MeursaultBeeSpore] 소멸\n\n[OnSucceedAttack] [Combustion] 횟수 1 증가, [Laceration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "이 스킬 공격 가중치보다 낮은 공격 대상 1당 피해량 +50% (집중 전투인 경우, 부위로 판정)\n대상의 [MeursaultBeeSpore] 5당 피해량 +10% (최대 30%)\n[BeforeUse] 자신의 [MeursaultSporeBulletLong]이 2 이하면, 정신력 6 소모하여 [MeursaultSporeBulletLong] 3 얻음\n[WhenUse] 메인 타겟의 [Combustion]과 [Laceration]의 합 6당 코인 위력 +1 (최대 3)\n[WhenUse] 자신에게 [MeursaultWorkerBee]이 있으면, 합 위력 +1\n[WhenUse] 자신의 [MeursaultWorkerBee]만큼 3코인부터 [SuperCoin]으로 변경됨\n[WhenUse] 자신의 [MeursaultWorkerBee]이 3이면, 가중치 +1\n[EndSkill] [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "이 코인은 1명의 대상에게만 적중함 (메인 타겟 우선 적용)\n[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Combustion] 3 부여",
+            "이 코인은 1명의 대상에게만 적중함 (메인 타겟 우선 적용)\n[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 2 부여",
+            "이 코인은 1명의 대상에게만 적중함 (메인 타겟 우선 적용)\n[MeursaultSporeBulletLong] 1 소모\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[MeursaultSporeBulletShort] 1 소모\n서브 타겟에게 가하는 피해량 -50%\n자신의 [MeursaultWorkerBee] 1당 이 코인 피해량 +5% (최대 15%)\n\n[UnBrokenCoinOnSucceedAttack] 대상의 [MeursaultBeeSpore]가 최댓값이면, 아래 효과 적용\n- ([Combustion] 위력 x [MeursaultBeeSpore] 수치 / 10) 만큼 분노 피해 (소수점 버림)\n이 효과로 분노 피해를 입혔으면, [Combustion]이 발동한 것으로 취급함\n-[Combustion] 횟수 1 감소\n-[MeursaultBeeSpore] 소멸\n\n[OnSucceedAttack] [Combustion] 횟수 1 증가, [Laceration] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1051404": {
+      "name": "포자 보충",
+      "descs": [
+        {
+          "desc": "[StartBattle] [MeursaultSporeBulletReloading] (턴당 1회)\n[OnSucceedEvade] 자신의 체력 10 회복 (턴당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [MeursaultSporeBulletReloading] (턴당 1회)\n[WhenUseEvade] 공격자의 [Combustion]과 [Laceration]의 합 6당 코인 위력 +1 (최대 3)\n[OnSucceedEvade] 자신의 체력 10 회복 (턴당 1회)\n- [MeursaultWorkerBee] 보유 중이면, 수치당 5씩 회복량 추가",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051401": {
+      "name": "포자 확산",
+      "desc": "[MeursaultBeeSpore]를 보유한 적 처치 시, 다음 턴 동안 부여하는 [MeursaultBeeSpore] 수치가 2배가 됨"
+    },
+    "1051411": {
+      "name": "포자 확산",
+      "desc": "[MeursaultBeeSpore]를 보유한 적 처치 시, 아래 효과 적용\n- 다음 턴 동안 부여하는 [MeursaultBeeSpore] 수치가 2배가 됨\n- 기본 공격 스킬로 처치 시 (해당 스킬에서 소모하는 포자탄 / 2)만큼 포자탄 획득 (소수점 올림, 스킬당 1회)"
+    },
+    "1051402": {
+      "name": "E.G.O 변조 / 포자탄",
+      "desc": "상시 적용: [MeursaultSporeBulletLong] 10개, [MeursaultSporeBulletShort] 6개 보유\n\n포자탄을 소모하는 코인 적중 시\n- [MeursaultSporeBulletLong]을 소모했으면, [MeursaultBeeSpore] 2 부여\n- [MeursaultSporeBulletShort]을 소모했으면, [MeursaultBeeSpore] 3 부여\n- 이 효과는 스킬에서 부정적인 효과를 부여하는 것으로 취급됨\n\n[MeursaultSporeBulletShort]을 소모하는 코인 사용 전 [MeursaultSporeBulletShort]이 없으면,\n정신력 2, [MeursaultSporeBulletLong] 2 소모하여, [MeursaultSporeBulletShort] 1 얻음\n\n스킬 사용 중 포자탄이 부족하면, 다음 코인을 모두 취소하고 [MeursaultSporeBulletReloading]\n\n[MeursaultBeeSpore]가 있는 대상 사망 시 [MeursaultWorkerBee] 1 얻음"
+    },
+    "1051421": {
+      "name": "일벌",
+      "desc": "아군의 관통 속성 기본 공격 스킬 종료시, 해당 공격으로 입힌 체력 피해량의 10% 만큼 체력 회복 (전투당 최대 2번 발동 가능)\n- 이번 턴 동안 스킬 슬롯에 장착한 모든 기본 공격 스킬이 관통 속성이면, 턴 종료시 모든 아군 정신력 10 회복"
+    }
+  }
+}

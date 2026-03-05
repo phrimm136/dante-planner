@@ -1577,17 +1577,23 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "AccumulatedPastSinner": {
-    "name": "累积的过去",
-    "desc": "- 最大值：12\n- 回合开始时，本效果层数每有3层，使自身获得1层拼点威力提升 与1层攻击等级提升 ",
-    "iconId": "AccumulatedPast",
+  "IndigoTakeDamageUp": {
+    "name": "傲慢易损",
+    "desc": "一回合内基于本效果层数增加受到来自傲慢技能的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_3rd": {
+    "name": "第三发魔弹",
+    "desc": "- 造成的伤害+20%\n- 攻击前，攻击容量+2\n- 命中时，对目标施加2层虚弱 并使其增加10级烧伤 强度",
+    "iconId": null,
     "buffType": "Positive"
   },
-  "ShieldManagerCryingToad": {
-    "name": "泪珠",
-    "desc": "- 本效果视作“护盾管理”效果\n- 回合结束时，本效果的层数减少1层\n- 若自身带有泪珠 ，则回合结束时自身不会失去护盾(除非护盾因受到伤害或效果而消耗)\n- 若受泪珠 影响的护盾因受到伤害而被破坏，则随机对攻击者施加沉沦 ，其强度与层数共计4点\n- 自身获得的护盾可叠加，带有泪珠 时，自身带有的护盾不能超过体力上限的60%",
+  "BirdCage": {
+    "name": "炙热鸟笼",
+    "desc": "- 最大值：5\n- 若自身带有烧伤 ，则每层本效果使自身的暴怒抗性+0.1(本效果不会使暴怒抗性超过2.0)\n- 回合结束时，下回合对自身施加相当于本效果层数的束缚 \n- 回合结束时，本效果层数减半(向下取整)\n※ 带有本效果时，本效果层数不会额外获得",
     "iconId": null,
-    "buffType": "Neutral"
+    "buffType": "Negative"
   },
   "GainSinStockAdder": {
     "name": "E.G.O资源获取量提升",
@@ -1595,11 +1601,11 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "MentalSystemResultIncrease_Typo": {
-    "name": "理智值恢复效率",
-    "desc": "人格理智值增加条件下的理智值增加量",
+  "NebulizerExhale": {
+    "name": "雾化吸入器α",
+    "desc": "- 最大值：5\n- 本效果在本场战斗期间维持\n- 战斗开始时，使包括自身在内全体友方单位增加1级呼吸法 强度并获得1层呼吸法 ",
     "iconId": null,
-    "buffType": "Neutral"
+    "buffType": "Positive"
   },
   "NiddleEGO": {
     "name": "针",
@@ -1607,15 +1613,27 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "CentipedePoison": {
-    "name": "百足剧毒",
-    "desc": "- 最大值：20\n- 回合结束时，下回合对自身施加(本效果层数/4)层防御等级降低 (向下取整)\n- 回合结束时，自身受到相当于本效果层数的暴食伤害，并使本效果层数减半(向下取整)\n阵亡时，将本效果施加给自身未带有百足剧毒 或百足剧毒 层数最低的友方单位(若是集中遭遇战，则改为部位)",
+  "ScarletDamageUp": {
+    "name": "色欲伤害强化",
+    "desc": "一回合内基于本效果层数提高色欲技能造成的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EntangledCurseTalisman": {
+    "name": "纠缠不休的咒符",
+    "desc": "- 最大值：10\n- 回合结束时解除\n-  若本效果层数不低于10层，则自身受到不低于30点来自技能的伤害时，对自身施加1层破裂 ；受到相当于自身破裂 强度的暴食伤害(每回合最多1次)\n- 本效果解除时，下回合对自身施加(本效果层数/4)层虚弱 (最多2层)\n※带有本效果时，本效果层数不会额外获得",
     "iconId": null,
     "buffType": "Negative"
   },
-  "VibrationContinue": {
-    "name": "震颤-永恒",
-    "desc": "- 受到造成震颤引爆 的技能或硬币效果的攻击时，以(自身的震颤 强度)%的概率额外震颤引爆 1次。(最多50%概率)\n- 受到造成震颤引爆 的技能或硬币效果的攻击时，以(自身的震颤 层数)%的概率额外震颤引爆 1次。(最多50%概率)\n- 受到造成震颤引爆 的攻击时，混乱阈值前移等同于本效果强度的数值。\n- 回合结束时，本效果的层数减少1层。\n(本效果强度与层数的增减同样受普通震颤影响)",
+  "RyoshuEGOPF": {
+    "name": "罗生",
+    "desc": "最大值：999\n- 良秀的技能每造成1点伤害，获得1层本效果\n- 本效果层数每有33层，使自身基础技能造成的伤害+1%(最多+10%)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "Curse": {
+    "name": "诅咒",
+    "desc": "回合结束时，下回合随机施加以下效果，随后使本效果的层数减少1层。随机效果包括1层虚弱 ，1层破绽 ，2层攻击等级降低 ，2层防御等级降低 。",
     "iconId": null,
     "buffType": "Negative"
   },
@@ -1625,147 +1643,15 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "ResultReduction": {
-    "name": "威力降低",
-    "desc": "一回合内技能的最终威力降低等同于本效果层数的数值。",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IDMicroChip": {
-    "name": "居民登记微芯片",
-    "desc": "- 最大值：2\n- 使自身受到来自暴怒与嫉妒技能的伤害+10%\n- 拼点失败时，使自身增加1级烧伤 强度(每回合最多3次)\n- 回合结束时，使本效果的层数减少1层",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "AmberTakeDamageUp": {
-    "name": "怠惰易损",
-    "desc": "一回合内基于本效果层数增加受到来自怠惰技能的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "ThreeMirrorpartYiSang": {
-    "name": "破碎的世界",
-    "desc": "- 最大值：1\n- 回合结束时解除\n- 受到的烧伤 伤害×1.2(向下取整，不包括特殊烧伤)\n- 受到来自李箱的暴怒属性与忧郁属性基础攻击技能的伤害+10%",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "AmberTakeDamageDown": {
-    "name": "怠惰守护",
-    "desc": "一回合内基于本效果层数减少受到来自怠惰技能的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VibrationSpring": {
-    "name": "震颤-上弦",
-    "desc": "- 最大速度值+2\n- 通过自身的技能或硬币效果增加震颤 强度或施加震颤 层数时，消耗自身的1层震颤 并使增加的震颤 强度或施加的震颤 层数额外+1\n- 受到造成震颤引爆 的攻击时，混乱阈值前移等同于本效果强度的数值\n- 回合结束时，本效果的层数减少1层\n- (本效果强度与层数的增减同样受普通震颤 影响)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_6th": {
-    "name": "第六发魔弹",
-    "desc": "- 攻击前，攻击容量+6\n- 命中时，使目标的混乱阈值前移造成伤害量的数值(最多30)\n- 主要目标每带有7级烧伤 强度，重复使用硬币1次(最多2次)\n- 加算硬币技能的基础威力-16\n- 减算硬币技能的基础威力-22\n - 加算硬币威力-8\n - 减算硬币威力-12",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "IndigoDamageUp": {
-    "name": "傲慢伤害强化",
-    "desc": "一回合内基于本效果层数提高傲慢技能造成的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "UninvitedGuestPersonality": {
-    "name": "不速之客",
-    "desc": "- 最大值：2\n- 自身阵亡时，使最后的攻击者恢复3点理智值，然后随机对未带有本效果的友方单位施加2层本效果\n- 自身每带有1级沉沦 强度，受到的伤害+0.5%(最大10%，集中遭遇战中各部位单独计算)\n- 回合结束时，本效果的层数减少1层",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "ShamrockResultUp": {
-    "name": "暴食威力提升",
-    "desc": "本回合内，暴食属性技能的最终威力根据本层数相应增加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ParryingResultDown": {
-    "name": "拼点威力降低",
-    "desc": "拼点时，拼点威力减少等同于本效果层数的数值",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "CrimsonTakeDamageUp": {
-    "name": "暴怒易损",
-    "desc": "一回合内基于本效果层数增加受到来自暴怒技能的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "Snare": {
-    "name": "套索",
-    "desc": "- 最大值：3\n- 回合结束时，根据自身的速度值相应使自身增加破裂 强度(最多5)，下回合对自身施加1层束缚 \n- 回合结束时，本效果的层数减少1层",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "FreishutzOutisEgoBullet_7th": {
-    "name": "第七发魔弹",
-    "desc": "- 造成的伤害+200%\n- 目标每失去1%体力，使造成的伤害+2.5%(最多+200%)\n- 攻击前，若目标或自身的突刺抗性低于2.0，则仅在本次攻击期间将其变为“致命”(×2.0)\n- 攻击结束后，自身阵亡",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "Operation": {
-    "name": "手术",
-    "desc": "在层数达到5层时直接阵亡。\n每层减少20%体力上限。\n每层增加20%造成的伤害。\n回合开始时，使自身获得与本效果层数相同的迅捷 。",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "RoseWedge": {
-    "name": "玫瑰之楔",
-    "desc": "- 强度最大值：10\n- 层数最大值：4\n- 自身每受到10点流血 伤害，则使自身增加1级本效果强度。\n- 每次因技能效果在受到攻击时获得流血 或特殊流血时，使自身增加2级流血 强度并使攻击者增加1级流血 强度。(每回合最多5次)\n· 本效果的强度为10级时，触发此效果时额外施加1层流血 。\n- 回合结束时，本效果的层数减少1层。\n- 战斗结束时，若本效果的强度为10级或层数为1，则移除本效果，并受到(强度×10)点色欲伤害。\n- 若带有本效果的单位阵亡或本效果被移除，则获得(强度×10)层血宴 ，并对全体友方单位造成(强度×2)点色欲伤害(最少1点)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "IndigoTakeDamageUp": {
-    "name": "傲慢易损",
-    "desc": "一回合内基于本效果层数增加受到来自傲慢技能的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "MlynarWaiting": {
-    "name": "鞘中人",
-    "desc": "- 最大值：40\n- 每带有8层本效果，使自身的挑衅值 +1(最多+5，向下取整，适用于仪表盘上位于最左侧的行动槽)\n- 每带有20层本效果，使自身获得1层守护 (最多2层，向下取整)\n- 回合结束时，本效果层数增加10层\n※每回合最多获得20层",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "AmberResultUp": {
-    "name": "怠惰威力提升",
-    "desc": "本回合内，怠惰属性技能的最终威力根据本层数相应增加",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ForwardToTheKing": {
-    "name": "御前",
-    "desc": "攻击容量为1的自身攻击命中时，对除自身攻击目标外现存体力最低的2名敌方单位造成硬币结果值50%且与本次攻击属性相同的伤害。",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "HitTakeDamageDown": {
-    "name": "打击守护",
-    "desc": "一回合内基于本效果层数减少受到来自打击技能的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
   "Muckworm": {
     "name": "蛆虫",
     "desc": "回合结束时，受到数值等同于本效果层数的暴食伤害并施加1层流血 ，随后使本效果的层数减少1层。",
     "iconId": null,
     "buffType": "Negative"
   },
-  "EntangledCurseTalisman": {
-    "name": "纠缠不休的咒符",
-    "desc": "- 最大值：10\n- 回合结束时解除\n-  若本效果层数不低于10层，则自身受到不低于30点来自技能的伤害时，对自身施加1层破裂 ；受到相当于自身破裂 强度的暴食伤害(每回合最多1次)\n- 本效果解除时，下回合对自身施加(本效果层数/4)层虚弱 (最多2层)\n※带有本效果时，本效果层数不会额外获得",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "ScarletDamageUp": {
-    "name": "色欲伤害强化",
-    "desc": "一回合内基于本效果层数提高色欲技能造成的伤害。(最多10层)",
+  "ShamrockResultUp": {
+    "name": "暴食威力提升",
+    "desc": "本回合内，暴食属性技能的最终威力根据本层数相应增加",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1781,33 +1667,9 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "MentalSystemResultDecrease_Typo": {
-    "name": "理智值减少效率",
-    "desc": "人格基础理智值减少条件下的理智值减少量",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "ReleaseBreath": {
-    "name": "急促喘息",
-    "desc": "- 最大值：1\n- 若自身的呼吸法 强度不低于20级，则通过自身的技能或硬币效果使自身增加呼吸法 强度时，额外获得1层呼吸法 \n- 回合结束时解除",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "NebulizerInhale": {
-    "name": "雾化吸入器β",
-    "desc": "- 最大值：5\n- 本效果在本场战斗期间维持\n- 激活傲慢完全共鸣时，战斗开始时，使自身与(本效果层数)名友方单位增加3级呼吸法 强度并获得3层呼吸法 (优先使拥有增加呼吸法 强度或获得呼吸法 层数且呼吸法 强度最低的单位获得)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_3rd": {
-    "name": "第三发魔弹",
-    "desc": "- 造成的伤害+20%\n- 攻击前，攻击容量+2\n- 命中时，对目标施加2层虚弱 并使其增加10级烧伤 强度",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "MaxHpMultiplier": {
-    "name": "体力上限提升",
-    "desc": "每层效果增加10%体力上限",
+  "FreishutzOutisEgoBullet_6th": {
+    "name": "第六发魔弹",
+    "desc": "- 攻击前，攻击容量+6\n- 命中时，使目标的混乱阈值前移造成伤害量的数值(最多30)\n- 主要目标每带有7级烧伤 强度，重复使用硬币1次(最多2次)\n- 加算硬币技能的基础威力-16\n- 减算硬币技能的基础威力-22\n - 加算硬币威力-8\n - 减算硬币威力-12",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1817,99 +1679,27 @@
     "iconId": null,
     "buffType": "Positive"
   },
+  "AccumulatedPastSinner": {
+    "name": "累积的过去",
+    "desc": "- 最大值：12\n- 回合开始时，本效果层数每有3层，使自身获得1层拼点威力提升 与1层攻击等级提升 ",
+    "iconId": "AccumulatedPast",
+    "buffType": "Positive"
+  },
+  "AmberResultUp": {
+    "name": "怠惰威力提升",
+    "desc": "本回合内，怠惰属性技能的最终威力根据本层数相应增加",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "FreishutzOutisEgoBullet_7th": {
+    "name": "第七发魔弹",
+    "desc": "- 造成的伤害+200%\n- 目标每失去1%体力，使造成的伤害+2.5%(最多+200%)\n- 攻击前，若目标或自身的突刺抗性低于2.0，则仅在本次攻击期间将其变为“致命”(×2.0)\n- 攻击结束后，自身阵亡",
+    "iconId": null,
+    "buffType": "Positive"
+  },
   "FreishutzOutisEgoBullet_4th": {
     "name": "第四发魔弹",
     "desc": "- 造成的伤害+30%\n- 攻击前，攻击容量+3\n- 命中时，使目标的混乱阈值前移造成伤害量的数值(最多20)，并在下回合对目标施加3层易损 ",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "YesdragonNodie": {
-    "name": "不许",
-    "desc": "受到使自身体力降至0点的伤害时，本回合自身体力不会低于1点，解除自身因受到伤害而陷入的混乱\n触发以上效果时，回合结束时自身阵亡\n阵亡或撤退后解除本效果",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ShamrockTakeDamageUp": {
-    "name": "暴食易损",
-    "desc": "一回合内基于本效果层数增加受到来自暴食技能的伤害。(最多10层)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "ThirstyRose": {
-    "name": "饥渴的玫瑰",
-    "desc": "- 最大值：5\n- 回合结束时，若自身带有的流血 强度不低于10级，则受到自身体力上限1%的色欲伤害。(最多30)\n- 回合结束时，本效果的层数减少1层",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "RyoshuEGOPF": {
-    "name": "罗生",
-    "desc": "最大值：999\n- 良秀的技能每造成1点伤害，获得1层本效果\n- 本效果层数每有33层，使自身基础技能造成的伤害+1%(最多+10%)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "NebulizerExhale": {
-    "name": "雾化吸入器α",
-    "desc": "- 最大值：5\n- 本效果在本场战斗期间维持\n- 战斗开始时，使包括自身在内全体友方单位增加1级呼吸法 强度并获得1层呼吸法 ",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "FreishutzOutisEgoBullet_5th": {
-    "name": "第五发魔弹",
-    "desc": "- 造成的伤害+30%\n- 攻击前，攻击容量+4\n- 命中时，使目标增加10级烧伤 强度，并在下回合对其施加4层攻击等级降低 与4层防御等级降低 ",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "YesdragonSelf": {
-    "name": "葬花针",
-    "desc": "最大值：20\n- 回合结束时或受到攻击时，获得1层本效果\n- 每带有5层本效果，使自身增加1级攻击等级\n- 带有本效果的单位阵亡时，对全体敌方单位造成相当于本效果层数的暴食伤害并使全体敌方单位增加5级破裂 强度\n- 阵亡或撤退后解除本效果",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "MagicalGirlResponse": {
-    "name": "魔法少女的咏唱",
-    "desc": "- 最大值：2\n- 自身获得本效果时，使自身获得1层强壮 与1层伤害强化 \n- 自身获得或消耗充能 层数的攻击技能的最终威力+1，造成的伤害+10%\n- 回合结束时，本效果层数减少1层",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "BirdCage": {
-    "name": "炙热鸟笼",
-    "desc": "- 最大值：5\n- 若自身带有烧伤 ，则每层本效果使自身的暴怒抗性+0.1(本效果不会使暴怒抗性超过2.0)\n- 回合结束时，下回合对自身施加相当于本效果层数的束缚 \n- 回合结束时，本效果层数减半(向下取整)\n※ 带有本效果时，本效果层数不会额外获得",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "DragonLance": {
-    "name": "葬花楔",
-    "desc": "基础值：0\n最大值：3\n- 使仪表盘上自身位于最左侧的基础攻击技能的所有硬币转化为不可摧毁的硬币 \n- 回合开始时，每带有1层本效果，使自身获得2层攻击等级提升 并对自身施加2层防御等级降低 \n- 回合开始时，若本效果层数为3层，则使自身获得1层污血 (每场战斗最多1次)\n- 回合结束时，获得1层本效果\n※ 仅能通过以上效果增加本效果层数\n- 阵亡或撤退时解除本效果\n\n- 受到使自身体力降至0点的伤害时，本回合自身体力不会低于1点，解除自身因受到伤害而陷入的混乱\n本回合自身不会陷入混乱或阵亡，在该回合最后使用技能“污血泣泪-终”。该技能结束后解除葬花楔 \n回合结束时受到使自身体力降至1点的伤害时，下回合根据速度值使用技能“污血泣泪-终”",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ForwardToTheBoundKing": {
-    "name": "缚王御前",
-    "desc": "攻击容量为1的自身攻击命中时，对除自身攻击目标外现存体力最低的2名敌方单位造成硬币结果值100%且与本次攻击属性相同的伤害。",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "PinkRibbon_Ishmael": {
-    "name": "粉红丝带",
-    "desc": "本回合内，每次掷出攻击技能硬币时使本效果的层数增加1层。\n回合结束时，施加与本效果层数相同的束缚 ，随后解除本效果。",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "CuredFilm": {
-    "name": "硬化屏障",
-    "desc": "- 回合开始时，使自身获得(本效果层数/3)层防御等级提升 (最多3层，向下取整)\n- 受到敌方单位的攻击前，消耗自身一半的硬化屏障 层数，并使自身获得层数相当于消耗量的守护 (每回合最多1次，向上取整)\n- 回合结束时，本效果层数减少3层\n- 最大值：10",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "Curse": {
-    "name": "诅咒",
-    "desc": "回合结束时，下回合随机施加以下效果，随后使本效果的层数减少1层。随机效果包括1层虚弱 ，1层破绽 ，2层攻击等级降低 ，2层防御等级降低 。",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "FreishutzOutisEgoBullet_2nd": {
-    "name": "第二发魔弹",
-    "desc": "- 造成的伤害+10%\n- 仅对除主要目标以外的目标造成伤害(目标数：最多4名)，对主要目标造成的伤害变为0点\n- 命中时，对目标施加3层麻痹 ",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1919,9 +1709,39 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "EmittedCurrent": {
-    "name": "电流释放",
-    "desc": "受到攻击时，攻击者获得1层充能 ；受到忧郁属性技能攻击时，对自身施加1层破裂 ，随后本效果的层数减少1层。",
+  "Snare": {
+    "name": "套索",
+    "desc": "- 最大值：3\n- 回合结束时，根据自身的速度值相应使自身增加破裂 强度(最多5)，下回合对自身施加1层束缚 \n- 回合结束时，本效果的层数减少1层",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MagicalGirlResponse": {
+    "name": "魔法少女的咏唱",
+    "desc": "- 最大值：2\n- 自身获得本效果时，使自身获得1层强壮 与1层伤害强化 \n- 自身获得或消耗充能 层数的攻击技能的最终威力+1，造成的伤害+10%\n- 回合结束时，本效果层数减少1层",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ShamrockTakeDamageUp": {
+    "name": "暴食易损",
+    "desc": "一回合内基于本效果层数增加受到来自暴食技能的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Operation": {
+    "name": "手术",
+    "desc": "在层数达到5层时直接阵亡。\n每层减少20%体力上限。\n每层增加20%造成的伤害。\n回合开始时，使自身获得与本效果层数相同的迅捷 。",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "ThreeMirrorpartYiSang": {
+    "name": "破碎的世界",
+    "desc": "- 最大值：1\n- 回合结束时解除\n- 受到的烧伤 伤害×1.2(向下取整，不包括特殊烧伤)\n- 受到来自李箱的暴怒属性与忧郁属性基础攻击技能的伤害+10%",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ResultReduction": {
+    "name": "威力降低",
+    "desc": "一回合内技能的最终威力降低等同于本效果层数的数值。",
     "iconId": null,
     "buffType": "Negative"
   },
@@ -1931,9 +1751,237 @@
     "iconId": null,
     "buffType": "Positive"
   },
+  "YesdragonSelf": {
+    "name": "葬花针",
+    "desc": "最大值：20\n- 回合结束时或受到攻击时，获得1层本效果\n- 每带有5层本效果，使自身增加1级攻击等级\n- 带有本效果的单位阵亡时，对全体敌方单位造成相当于本效果层数的暴食伤害并使全体敌方单位增加5级破裂 强度\n- 阵亡或撤退后解除本效果",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CrimsonTakeDamageUp": {
+    "name": "暴怒易损",
+    "desc": "一回合内基于本效果层数增加受到来自暴怒技能的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "MlynarWaiting": {
+    "name": "鞘中人",
+    "desc": "- 最大值：40\n- 每带有8层本效果，使自身的挑衅值 +1(最多+5，向下取整，适用于仪表盘上位于最左侧的行动槽)\n- 每带有20层本效果，使自身获得1层守护 (最多2层，向下取整)\n- 回合结束时，本效果层数增加10层\n※每回合最多获得20层",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberTakeDamageDown": {
+    "name": "怠惰守护",
+    "desc": "一回合内基于本效果层数减少受到来自怠惰技能的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
   "SeniorCianjing": {
     "name": "大弦惊",
     "desc": "- 回合开始时，使自身获得2层攻击等级提升 与2层防御等级提升 \n- 回合结束时，本效果层数减少1层\n- 最大值：5",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ReleaseBreath": {
+    "name": "急促喘息",
+    "desc": "- 最大值：1\n- 若自身的呼吸法 强度不低于20级，则通过自身的技能或硬币效果使自身增加呼吸法 强度时，额外获得1层呼吸法 \n- 回合结束时解除",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "YesdragonNodie": {
+    "name": "不许",
+    "desc": "受到使自身体力降至0点的伤害时，本回合自身体力不会低于1点，解除自身因受到伤害而陷入的混乱\n触发以上效果时，回合结束时自身阵亡\n阵亡或撤退后解除本效果",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "PinkRibbon_Ishmael": {
+    "name": "粉红丝带",
+    "desc": "本回合内，每次掷出攻击技能硬币时使本效果的层数增加1层。\n回合结束时，施加与本效果层数相同的束缚 ，随后解除本效果。",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ThirstyRose": {
+    "name": "饥渴的玫瑰",
+    "desc": "- 最大值：5\n- 回合结束时，若自身带有的流血 强度不低于10级，则受到自身体力上限1%的色欲伤害。(最多30)\n- 回合结束时，本效果的层数减少1层",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "CentipedePoison": {
+    "name": "百足剧毒",
+    "desc": "- 最大值：20\n- 回合结束时，下回合对自身施加(本效果层数/4)层防御等级降低 (向下取整)\n- 回合结束时，自身受到相当于本效果层数的暴食伤害，并使本效果层数减半(向下取整)\n阵亡时，将本效果施加给自身未带有百足剧毒 或百足剧毒 层数最低的友方单位(若是集中遭遇战，则改为部位)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_2nd": {
+    "name": "第二发魔弹",
+    "desc": "- 造成的伤害+10%\n- 仅对除主要目标以外的目标造成伤害(目标数：最多4名)，对主要目标造成的伤害变为0点\n- 命中时，对目标施加3层麻痹 ",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "AmberTakeDamageUp": {
+    "name": "怠惰易损",
+    "desc": "一回合内基于本效果层数增加受到来自怠惰技能的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "HitTakeDamageDown": {
+    "name": "打击守护",
+    "desc": "一回合内基于本效果层数减少受到来自打击技能的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "IndigoDamageUp": {
+    "name": "傲慢伤害强化",
+    "desc": "一回合内基于本效果层数提高傲慢技能造成的伤害。(最多10层)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ParryingResultDown": {
+    "name": "拼点威力降低",
+    "desc": "拼点时，拼点威力减少等同于本效果层数的数值",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "FreishutzOutisEgoBullet_5th": {
+    "name": "第五发魔弹",
+    "desc": "- 造成的伤害+30%\n- 攻击前，攻击容量+4\n- 命中时，使目标增加10级烧伤 强度，并在下回合对其施加4层攻击等级降低 与4层防御等级降低 ",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MaxHpMultiplier": {
+    "name": "体力上限提升",
+    "desc": "每层效果增加10%体力上限",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "VibrationSpring": {
+    "name": "震颤-上弦",
+    "desc": "- 最大速度值+2\n- 通过自身的技能或硬币效果增加震颤 强度或施加震颤 层数时，消耗自身的1层震颤 并使增加的震颤 强度或施加的震颤 层数额外+1\n- 受到造成震颤引爆 的攻击时，混乱阈值前移等同于本效果强度的数值\n- 回合结束时，本效果的层数减少1层\n- (本效果强度与层数的增减同样受普通震颤 影响)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MentalSystemResultDecrease_Typo": {
+    "name": "理智值减少效率",
+    "desc": "人格基础理智值减少条件下的理智值减少量",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "VibrationContinue": {
+    "name": "震颤-永恒",
+    "desc": "- 受到造成震颤引爆 的技能或硬币效果的攻击时，以(自身的震颤 强度)%的概率额外震颤引爆 1次。(最多50%概率)\n- 受到造成震颤引爆 的技能或硬币效果的攻击时，以(自身的震颤 层数)%的概率额外震颤引爆 1次。(最多50%概率)\n- 受到造成震颤引爆 的攻击时，混乱阈值前移等同于本效果强度的数值。\n- 回合结束时，本效果的层数减少1层。\n(本效果强度与层数的增减同样受普通震颤影响)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "IDMicroChip": {
+    "name": "居民登记微芯片",
+    "desc": "- 最大值：2\n- 使自身受到来自暴怒与嫉妒技能的伤害+10%\n- 拼点失败时，使自身增加1级烧伤 强度(每回合最多3次)\n- 回合结束时，使本效果的层数减少1层",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ForwardToTheBoundKing": {
+    "name": "缚王御前",
+    "desc": "攻击容量为1的自身攻击命中时，对除自身攻击目标外现存体力最低的2名敌方单位造成硬币结果值100%且与本次攻击属性相同的伤害。",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "DragonLance": {
+    "name": "葬花楔",
+    "desc": "基础值：0\n最大值：3\n- 使仪表盘上自身位于最左侧的基础攻击技能的所有硬币转化为不可摧毁的硬币 \n- 回合开始时，每带有1层本效果，使自身获得2层攻击等级提升 并对自身施加2层防御等级降低 \n- 回合开始时，若本效果层数为3层，则使自身获得1层污血 (每场战斗最多1次)\n- 回合结束时，获得1层本效果\n※ 仅能通过以上效果增加本效果层数\n- 阵亡或撤退时解除本效果\n\n- 受到使自身体力降至0点的伤害时，本回合自身体力不会低于1点，解除自身因受到伤害而陷入的混乱\n本回合自身不会陷入混乱或阵亡，在该回合最后使用技能“污血泣泪-终”。该技能结束后解除葬花楔 \n回合结束时受到使自身体力降至1点的伤害时，下回合根据速度值使用技能“污血泣泪-终”",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "CuredFilm": {
+    "name": "硬化屏障",
+    "desc": "- 回合开始时，使自身获得(本效果层数/3)层防御等级提升 (最多3层，向下取整)\n- 受到敌方单位的攻击前，消耗自身一半的硬化屏障 层数，并使自身获得层数相当于消耗量的守护 (每回合最多1次，向上取整)\n- 回合结束时，本效果层数减少3层\n- 最大值：10",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NebulizerInhale": {
+    "name": "雾化吸入器β",
+    "desc": "- 最大值：5\n- 本效果在本场战斗期间维持\n- 激活傲慢完全共鸣时，战斗开始时，使自身与(本效果层数)名友方单位增加3级呼吸法 强度并获得3层呼吸法 (优先使拥有增加呼吸法 强度或获得呼吸法 层数且呼吸法 强度最低的单位获得)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "MentalSystemResultIncrease_Typo": {
+    "name": "理智值恢复效率",
+    "desc": "人格理智值增加条件下的理智值增加量",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "UninvitedGuestPersonality": {
+    "name": "不速之客",
+    "desc": "- 最大值：2\n- 自身阵亡时，使最后的攻击者恢复3点理智值，然后随机对未带有本效果的友方单位施加2层本效果\n- 自身每带有1级沉沦 强度，受到的伤害+0.5%(最大10%，集中遭遇战中各部位单独计算)\n- 回合结束时，本效果的层数减少1层",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "RoseWedge": {
+    "name": "玫瑰之楔",
+    "desc": "- 强度最大值：10\n- 层数最大值：4\n- 自身每受到10点流血 伤害，则使自身增加1级本效果强度。\n- 每次因技能效果在受到攻击时获得流血 或特殊流血时，使自身增加2级流血 强度并使攻击者增加1级流血 强度。(每回合最多5次)\n· 本效果的强度为10级时，触发此效果时额外施加1层流血 。\n- 回合结束时，本效果的层数减少1层。\n- 战斗结束时，若本效果的强度为10级或层数为1，则移除本效果，并受到(强度×10)点色欲伤害。\n- 若带有本效果的单位阵亡或本效果被移除，则获得(强度×10)层血宴 ，并对全体友方单位造成(强度×2)点色欲伤害(最少1点)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "ForwardToTheKing": {
+    "name": "御前",
+    "desc": "攻击容量为1的自身攻击命中时，对除自身攻击目标外现存体力最低的2名敌方单位造成硬币结果值50%且与本次攻击属性相同的伤害。",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ShieldManagerCryingToad": {
+    "name": "泪珠",
+    "desc": "- 本效果视作“护盾管理”效果\n- 回合结束时，本效果的层数减少1层\n- 若自身带有泪珠 ，则回合结束时自身不会失去护盾(除非护盾因受到伤害或效果而消耗)\n- 若受泪珠 影响的护盾因受到伤害而被破坏，则随机对攻击者施加沉沦 ，其强度与层数共计4点\n- 自身获得的护盾可叠加，带有泪珠 时，自身带有的护盾不能超过体力上限的60%",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "EmittedCurrent": {
+    "name": "电流释放",
+    "desc": "受到攻击时，攻击者获得1层充能 ；受到忧郁属性技能攻击时，对自身施加1层破裂 ，随后本效果的层数减少1层。",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "GreatAesthetics": {
+    "name": "卓越的美感",
+    "desc": "- 加算硬币技能的硬币威力+1\n- 减算硬币技能的基础威力+(4/硬币数)\n- 技能造成的伤害+30%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "RoseThorn": {
+    "name": "贪食棘",
+    "desc": "最大值：9\n\n回合结束时，对自身施加层数相当于色欲共鸣数的流血 ，贪食棘 层数减少1层。(最大流血 层数施加量：5)\n\n对带有本效果的单位增加的流血 强度超过99级时，获得层数相当于溢出流血 强度的血宴 ，并在下回合对其施加层数相当于获得的血宴 层数的防御等级降低 (最大防御等级降低施加量：5)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "VioletResistDown": {
+    "name": "嫉妒抗性弱化",
+    "desc": "目标的嫉妒抗性增加(每层0.1)",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "WaveSinking": {
+    "name": "逆流",
+    "desc": "- 最大值：3\n受到攻击时，使自身增加相当于本效果层数的沉沦 强度\n\n回合结束时，若自身的理智值不高于-30点，则触发以下效果(未带有理智值的单位改为沉沦 强度不低于60级时触发)\n- 自身受到(自身的沉沦 强度×本效果层数)点忧郁伤害\n- 对除自身以外理智值最低的2名目标(若是异想体，则改为部位)施加1层逆流 ，并对其造成(其沉沦 强度×本效果层数)点忧郁伤害\n- 若自身带有逆流 时阵亡，则将自身的逆流层数施加给逆流层数最高的1名友方单位",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "TakeHpHealIncrease": {
+    "name": "体力恢复提升",
+    "desc": "提升被动技能，技能，硬币效果提供的体力恢复效果(最多+5)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "GiftGlass": {
+    "name": "易碎",
+    "desc": "- 最大值：10\n- 每带有1层本效果，使自身受到的伤害+10%",
+    "iconId": null,
+    "buffType": "Negative"
+  },
+  "Zazen": {
+    "name": "禅那",
+    "desc": "- 最大值：108\n- 每带有1层本效果，造成的伤害+1%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "EmergencyChargeForceField": {
+    "name": "应急力场电池",
+    "desc": "- 最大值：7\n- 自身陷入混乱时，消耗所有应急力场电池 并使自身获得相当于消耗量的充能力场 ",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -1943,11 +1991,47 @@
     "iconId": null,
     "buffType": "Positive"
   },
-  "BloodArmorCasting": {
-    "name": "硬血铸造",
-    "desc": "- 最大值：3\n- 与带有流血 或特殊流血的敌方单位进行拼点时，使自身的拼点威力+1\n- 攻击技能消耗血宴 时，若血宴 不足，则每相差1层，消耗自身1点体力以生成消耗的血宴 (自身不会因本效果受到的伤害而陷入混乱或使体力低于1点)\n- 回合结束时，本效果层数减少1层",
+  "ScarletResultUp": {
+    "name": "色欲威力提升",
+    "desc": "本回合内基于本效果的层数提高色欲技能的最终威力",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "SkillPowerUp": {
+    "name": "基础威力提升",
+    "desc": "基于本效果的层数提高技能的基础威力",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ChoSuperCharge": {
+    "name": "超亚光蓄能",
+    "desc": "- 最大值：100\n- 自身消耗充能 层数时，获得层数相当于消耗量的本效果\n- 最大充能 层数+10\n- 友方单位增加充能 强度或获得充能 层数时，使自身获得1层充能 \n- 自身通过技能消耗充能 层数时，额外消耗1次相同层数的充能 (若充能 层数不足，则尽可能消耗所有充能 层数)\n- 每带有10层本效果，使自身造成的伤害+10%\n- 自身攻击时，自身每带有20层本效果，使敌方单位的抗性+0.1(最多+0.5，不对陷入混乱的敌方单位生效)\n- 带有本效果的人格阵亡时，将本效果转移给当前参战人员中第二优先编入的友方单位，保留本效果层数\n- 本效果适用于特殊充能",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "GiftCannon": {
+    "name": "火力",
+    "desc": "- 最大值：10\n- 每带有1层本效果，使自身造成的伤害+10%",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "KnightBless": {
+    "name": "加护",
+    "desc": "- 回合开始时，使自身获得2层守护 \n- 使自身高于1的物理抗性变为1(不包括陷入混乱)",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "TraumaShield": {
+    "name": "精神屏蔽力场",
+    "desc": "- 受到来自敌方单位的理智伤害-80%\n- 受到的沉沦 伤害-80%\n- 回合结束时，使本效果的层数减少1层",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "RequestedTarget": {
+    "name": "委托目标",
+    "desc": "斩击、突刺与打击抗性中不高于1.5的抗性+0.2。击杀带有本效果的目标时，获得所有属性的E.G.O资源各1个并使击杀者恢复10点理智值",
+    "iconId": null,
+    "buffType": "Negative"
   },
   "VibrationNesting": {
     "name": "震颤-叠加",
@@ -1955,11 +2039,35 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "Inspire": {
-    "name": "灵感",
-    "desc": "对带有绘画材料 的目标造成的伤害+10%",
+  "VerEmergencyCandy": {
+    "name": "备用糖果",
+    "desc": "回合结束时，若现存体力不高于体力上限的60%\n则使自身恢复体力上限30%的体力，恢复15点理智值，自身的备用糖果 层数减少1层，自身的饥饿 层数减少1层\n若本效果层数为0层，则使自身获得1层光辉的饱腹感 并解除本效果",
     "iconId": null,
     "buffType": "Positive"
+  },
+  "AzureResultUp": {
+    "name": "忧郁威力提升",
+    "desc": "本回合内基于本效果的层数提高忧郁技能的最终威力",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "ShareCharge": {
+    "name": "自谐振电路",
+    "desc": "当前全体友方单位带有的充能 层数之和\n\n技能命中时造成的伤害+(当前友方单位的充能 层数之和/3)%\n每当友方单位累计消耗100层充能 时，使全体友方单位获得1层攻击等级提升 ",
+    "iconId": null,
+    "buffType": "Neutral"
+  },
+  "BloodArmorCasting": {
+    "name": "硬血铸造",
+    "desc": "- 最大值：3\n- 与带有流血 或特殊流血的敌方单位进行拼点时，使自身的拼点威力+1\n- 攻击技能消耗血宴 时，若血宴 不足，则每相差1层，消耗自身1点体力以生成消耗的血宴 (自身不会因本效果受到的伤害而陷入混乱或使体力低于1点)\n- 回合结束时，本效果层数减少1层",
+    "iconId": null,
+    "buffType": "Positive"
+  },
+  "NervousImpairment": {
+    "name": "神经损伤",
+    "desc": "- 最大值：30\n- 若本效果层数为30层，则使自身陷入混乱并受到体力上限25%的固定伤害，并解除本效果",
+    "iconId": null,
+    "buffType": "Negative"
   },
   "VerHunger": {
     "name": "饥饿",
@@ -1973,57 +2081,9 @@
     "iconId": null,
     "buffType": "Neutral"
   },
-  "EmergencyChargeForceField": {
-    "name": "应急力场电池",
-    "desc": "- 最大值：7\n- 自身陷入混乱时，消耗所有应急力场电池 并使自身获得相当于消耗量的充能力场 ",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VioletResistDown": {
-    "name": "嫉妒抗性弱化",
-    "desc": "目标的嫉妒抗性增加(每层0.1)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "AzureResultUp": {
-    "name": "忧郁威力提升",
-    "desc": "本回合内基于本效果的层数提高忧郁技能的最终威力",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "SkillPowerUp": {
-    "name": "基础威力提升",
-    "desc": "基于本效果的层数提高技能的基础威力",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "VerEmergencyCandy": {
-    "name": "备用糖果",
-    "desc": "回合结束时，若现存体力不高于体力上限的60%\n则使自身恢复体力上限30%的体力，恢复15点理智值，自身的备用糖果 层数减少1层，自身的饥饿 层数减少1层\n若本效果层数为0层，则使自身获得1层光辉的饱腹感 并解除本效果",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "Zazen": {
-    "name": "禅那",
-    "desc": "- 最大值：108\n- 每带有1层本效果，造成的伤害+1%",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "GreatAesthetics": {
-    "name": "卓越的美感",
-    "desc": "- 加算硬币技能的硬币威力+1\n- 减算硬币技能的基础威力+(4/硬币数)\n- 技能造成的伤害+30%",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "TraumaShield": {
-    "name": "精神屏蔽力场",
-    "desc": "- 受到来自敌方单位的理智伤害-80%\n- 受到的沉沦 伤害-80%\n- 回合结束时，使本效果的层数减少1层",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "GiftCannon": {
-    "name": "火力",
-    "desc": "- 最大值：10\n- 每带有1层本效果，使自身造成的伤害+10%",
+  "Inspire": {
+    "name": "灵感",
+    "desc": "对带有绘画材料 的目标造成的伤害+10%",
     "iconId": null,
     "buffType": "Positive"
   },
@@ -2033,70 +2093,10 @@
     "iconId": null,
     "buffType": "Negative"
   },
-  "TakeHpHealIncrease": {
-    "name": "体力恢复提升",
-    "desc": "提升被动技能，技能，硬币效果提供的体力恢复效果(最多+5)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ScarletResultUp": {
-    "name": "色欲威力提升",
-    "desc": "本回合内基于本效果的层数提高色欲技能的最终威力",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "ChoSuperCharge": {
-    "name": "超亚光蓄能",
-    "desc": "- 最大值：100\n- 自身消耗充能 层数时，获得层数相当于消耗量的本效果\n- 最大充能 层数+10\n- 友方单位增加充能 强度或获得充能 层数时，使自身获得1层充能 \n- 自身通过技能消耗充能 层数时，额外消耗1次相同层数的充能 (若充能 层数不足，则尽可能消耗所有充能 层数)\n- 每带有10层本效果，使自身造成的伤害+10%\n- 自身攻击时，自身每带有20层本效果，使敌方单位的抗性+0.1(最多+0.5，不对陷入混乱的敌方单位生效)\n- 带有本效果的人格阵亡时，将本效果转移给当前参战人员中第二优先编入的友方单位，保留本效果层数\n- 本效果适用于特殊充能",
-    "iconId": null,
-    "buffType": "Positive"
-  },
-  "RoseThorn": {
-    "name": "贪食棘",
-    "desc": "最大值：9\n\n回合结束时，对自身施加层数相当于色欲共鸣数的流血 ，贪食棘 层数减少1层。(最大流血 层数施加量：5)\n\n对带有本效果的单位增加的流血 强度超过99级时，获得层数相当于溢出流血 强度的血宴 ，并在下回合对其施加层数相当于获得的血宴 层数的防御等级降低 (最大防御等级降低施加量：5)",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "NervousImpairment": {
-    "name": "神经损伤",
-    "desc": "- 最大值：30\n- 若本效果层数为30层，则使自身陷入混乱并受到体力上限25%的固定伤害，并解除本效果",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "KnightBless": {
-    "name": "加护",
-    "desc": "- 回合开始时，使自身获得2层守护 \n- 使自身高于1的物理抗性变为1(不包括陷入混乱)",
-    "iconId": null,
-    "buffType": "Positive"
-  },
   "VibrationDistribution": {
     "name": "震颤-分配",
     "desc": "- 回合结束时，下回合使自身获得(全体友方单位震颤 层数之和/友方单位存活数)层攻击等级提升 (最多5层)\n- 受到造成震颤引爆 的攻击时，混乱阈值前移等同于本效果强度的数值\n- 回合结束后，本效果的层数减少1层\n(本效果强度与层数的增减同样受普通震颤影响)",
     "iconId": null,
     "buffType": "Positive"
-  },
-  "ShareCharge": {
-    "name": "自谐振电路",
-    "desc": "当前全体友方单位带有的充能 层数之和\n\n技能命中时造成的伤害+(当前友方单位的充能 层数之和/3)%\n每当友方单位累计消耗100层充能 时，使全体友方单位获得1层攻击等级提升 ",
-    "iconId": null,
-    "buffType": "Neutral"
-  },
-  "RequestedTarget": {
-    "name": "委托目标",
-    "desc": "斩击、突刺与打击抗性中不高于1.5的抗性+0.2。击杀带有本效果的目标时，获得所有属性的E.G.O资源各1个并使击杀者恢复10点理智值",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "WaveSinking": {
-    "name": "逆流",
-    "desc": "- 最大值：3\n受到攻击时，使自身增加相当于本效果层数的沉沦 强度\n\n回合结束时，若自身的理智值不高于-30点，则触发以下效果(未带有理智值的单位改为沉沦 强度不低于60级时触发)\n- 自身受到(自身的沉沦 强度×本效果层数)点忧郁伤害\n- 对除自身以外理智值最低的2名目标(若是异想体，则改为部位)施加1层逆流 ，并对其造成(其沉沦 强度×本效果层数)点忧郁伤害\n- 若自身带有逆流 时阵亡，则将自身的逆流层数施加给逆流层数最高的1名友方单位",
-    "iconId": null,
-    "buffType": "Negative"
-  },
-  "GiftGlass": {
-    "name": "易碎",
-    "desc": "- 最大值：10\n- 每带有1层本效果，使自身受到的伤害+10%",
-    "iconId": null,
-    "buffType": "Negative"
   }
 }

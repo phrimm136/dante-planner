@@ -1216,6 +1216,38 @@
       "textColor": "2c9af7"
     }
   },
+  "1124": {
+    "exceptionConditions": [
+      {
+        "dungeonIdx": 0,
+        "selectableFloors": [
+          3,
+          4
+        ]
+      },
+      {
+        "dungeonIdx": 1,
+        "selectableFloors": [
+          3,
+          4
+        ]
+      },
+      {
+        "dungeonIdx": 2
+      }
+    ],
+    "specificEgoGiftPool": [
+      9233,
+      9234,
+      9236,
+      9237,
+      9238,
+      9240
+    ],
+    "themePackConfig": {
+      "textColor": "eb9010"
+    }
+  },
   "1201": {
     "exceptionConditions": [
       {

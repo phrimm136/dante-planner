@@ -1,0 +1,19 @@
+{
+  "attributeType": "INDIGO",
+  "tag": [
+    "TIER_4"
+  ],
+  "keyword": "Penetrate",
+  "price": 400,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9233,
+        9234,
+        9145
+      ]
+    ]
+  },
+  "maxEnhancement": 0
+}

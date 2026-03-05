@@ -87,11 +87,20 @@
             "scale": 5,
             "coinString": "CC"
           },
-          {},
+          {
+            "additionalSkillKeywordList": [
+              "AddBullet"
+            ]
+          },
           {
             "scale": 6
           },
-          {}
+          {
+            "additionalSkillKeywordList": [
+              "AddBullet",
+              "CommonReload"
+            ]
+          }
         ]
       }
     ],
@@ -111,6 +120,9 @@
             "mpUsage": 0,
             "skillLevelCorrection": 5,
             "defaultValue": 4,
+            "additionalSkillKeywordList": [
+              "CommonReload"
+            ],
             "scale": 3
           },
           {
@@ -131,6 +143,9 @@
             "mpUsage": 0,
             "skillLevelCorrection": 1,
             "defaultValue": 10,
+            "additionalSkillKeywordList": [
+              "CommonReload"
+            ],
             "scale": 4,
             "coinString": "C"
           },

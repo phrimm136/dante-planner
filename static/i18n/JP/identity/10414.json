@@ -1,0 +1,152 @@
+{
+  "name": "ロボトミーE.G.O::\n残香・寂しさ",
+  "skills": {
+    "1041401": {
+      "name": "ばぁん。ばぁん。",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Vibration]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Vibration]2を付与"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]と[Sinking]の合計6につき、コイン威力 +1 (最大2)",
+          "coinDescs": [
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Vibration]3を付与"
+          ]
+        }
+      ]
+    },
+    "1041402": {
+      "name": "空虚より咲き出す香り",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]2を付与\n[OnSucceedAttack] [Vibration]回数が1増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]2を付与\n[OnSucceedAttack] [Vibration]回数が1増加"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Vibration]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Sinking]回数が2増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]3を付与\n[OnSucceedAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]3を付与\n[OnSucceedAttack] [Vibration]回数が2増加"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]と[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[AlriuneEGOThey]1につき、ダメージ量 +1%",
+          "coinDescs": [
+            "[BulletGodok]を1消耗\n[OnSucceedAttack] [Sinking]回数が3増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]3を付与\n[OnSucceedAttack] [Vibration]回数が2増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]3を付与\n[OnSucceedAttack] [Vibration]回数が2増加"
+          ]
+        }
+      ]
+    },
+    "1041403": {
+      "name": "満開",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 対象の[Vibration]と[Sinking]の合計が6以上なら、コイン威力 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AlriuneEGOThey]1を付与\n[OnSucceedAttack] [Sinking]回数が3増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]1を付与\n[OnSucceedAttack] [Sinking]4を付与",
+            "[OnSucceedAttack] [AlriuneEGOThey]2を付与\n[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 対象の[Vibration]と[Sinking]の合計6につき、コイン威力 +1 (最大2)\n[WhenUse] 対象の[AlriuneEGOThey]1につき、ダメージ量 +1%",
+          "coinDescs": [
+            "[OnSucceedAttack] [AlriuneEGOThey]1を付与\n[OnSucceedAttack] [Sinking]回数が3増加",
+            "[OnSucceedAttack] [AlriuneEGOThey]1を付与\n[OnSucceedAttack] [Sinking]4を付与",
+            "[OnSucceedAttack] [AlriuneEGOThey]2を付与\n[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象の[Sinking]だけ憂鬱ダメージ"
+          ]
+        }
+      ]
+    },
+    "1041404": {
+      "name": "芸・観・時",
+      "descs": [
+        {
+          "desc": "[EndBattle] [AlriuneEGOWe]10を得る (1ターンにつき1回)\n[EndBattle] 次のターンに[Vulnerable]2, [Enhancement]2を得る (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[EndBattle] [AlriuneEGOWe]10を得る (1ターンにつき1回)\n[EndBattle] 次のターンに[Vulnerable]2, [Enhancement]2を得る (1ターンにつき1回)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1041405": {
+      "name": "止まらない物語",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n[WideAreaRampage]\nこのスキルで[GodokPanicType]を付与するとき、対象がこのターンに、あるいは次のターンに付与される[GodokPanicType]があるなら、代わりに[VibrationExplosion]。対象の[Vibration]回数が1減少",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking]回数が1増加\n[OnSucceedAttack] 次のターンに[GodokPanicType]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] 次のターンに[GodokPanicType]2を付与",
+            "[OnSucceedAttack] [Vibration]2を付与\n[OnSucceedAttack] 次のターンに[GodokPanicType]2を付与"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1041406": {
+      "name": "恍惚とした終末",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\nこのスキルは外部効果で再使用できない\nこのスキルの攻撃加重値よりも少ない攻撃対象1につき、ダメージ量 +30% (集中戦闘の場合は部位で判定)\n[WhenUse] 全対象の[AlriuneEGOThey]の合計5につき、最終威力 +1 (最大6)\n\n[EndSkill] 自分の[AlriuneEGOWe]消滅",
+          "coinDescs": [
+            "[OnSucceedAttack] [AlriuneEGOThey]5を付与\n[OnSucceedAttack] [Sinking]3を付与\n[OnSucceedAttack] [Vibration]3を付与\n[OnSucceedAttack] [VibrationExplosion]。対象の[Vibration]回数が1減少\n[OnSucceedAttack] 対象の[Sinking]だけ憂鬱ダメージ"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1041401": {
+      "name": "枯れない花",
+      "desc": "敵が[Sinking]ダメージを受ければ、[AlriuneEGOWe]1を得る\n敵に付与された[AlriuneEGOThey]だけ[AlriuneEGOWe]を得る\n[VibrationExplosion]発生時、[AlriuneEGOWe]2を得る"
+    },
+    "1041402": {
+      "name": "満たされない空虚",
+      "desc": "常時適用 : [BulletGodok]を6個保有\n\n[BulletGodok]が1以上のとき、自分または味方の攻撃スキル終了時に敵の精神力が\n-40未満か混乱状態なら「ばぁん。ばぁん。」で一方攻撃 (1ターンにつき1回)\n\n自分の攻撃終了時に[BulletGodok]が0なら、対象を「止まらない物語」で一方攻撃して精神力を10消耗し、[FullReload]"
+    },
+    "1041411": {
+      "name": "枯れない花",
+      "desc": "敵が[Sinking]ダメージを受ければ、[AlriuneEGOWe]1を得る\n敵に付与される[AlriuneEGOThey]だけ[AlriuneEGOWe]を得る\n[VibrationExplosion]発生時、[AlriuneEGOWe]2を得る\n\n自分の攻撃終了時、自分の[AlriuneEGOWe]が30以上なら、[AlriuneEGOThey]が最も高い対象へ「恍惚とした終末」を発動\n\n混乱した対象への与ダメージ量 +(対象の[AlriuneEGOThey])%\n\nこのターンに自分の体力を最大値の10%以上失ったなら、体力を最大値の3%, 精神力を10回復 (1ターンにつき1回)"
+    },
+    "1041421": {
+      "name": "春の誕生",
+      "desc": "速度が最も高い味方1名が[Sinking]威力・回数、または特殊沈潜[TabExplain]を付与するスキルで敵に的中時、[Vibration]2を付与して[VibrationExplosion]。対象の[Vibration]回数が1減少 (1ターンにつき1回) "
+    }
+  }
+}

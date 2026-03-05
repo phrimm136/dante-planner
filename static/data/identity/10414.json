@@ -1,0 +1,242 @@
+{
+  "updatedDate": 20260305,
+  "skillKeywordList": [
+    "Sinking",
+    "Vibration"
+  ],
+  "panicType": 9999,
+  "rank": 3,
+  "hp": {
+    "defaultStat": 75,
+    "incrementByLevel": 2.17
+  },
+  "defCorrection": 0,
+  "minSpeedList": [
+    3,
+    3,
+    3,
+    3
+  ],
+  "maxSpeedList": [
+    5,
+    6,
+    7,
+    7
+  ],
+  "season": 9108,
+  "unitKeywordList": [
+    "SMALL",
+    "EGO_EQUIPMENT",
+    "LOBOTOMY_HEAD",
+    "L_CORP"
+  ],
+  "staggerList": [
+    65,
+    35
+  ],
+  "ResistInfo": {
+    "SLASH": 1,
+    "PENETRATE": 0.5,
+    "HIT": 2
+  },
+  "mentalConditionInfo": {
+    "add": [
+      "OnWinDuelAsParryingCountMultiply10AndPlus20Percent",
+      "OnKillEnemyAsLevelRatioMultiply10",
+      "OnKillEnemyByOtherAllyAsLevelRatioMultiply5"
+    ],
+    "min": [
+      "OnDieAllyAsLevelRatio10"
+    ]
+  },
+  "skills": {
+    "skill1": [
+      {
+        "id": 1041401,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 3,
+            "coinString": "CC"
+          },
+          {
+            "scale": 3
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 4,
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1041405,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "AMBER",
+            "atkType": "PENETRATE",
+            "targetNum": 3,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 9,
+            "scale": 1,
+            "coinString": "CCC"
+          },
+          {},
+          {},
+          {}
+        ]
+      }
+    ],
+    "skill2": [
+      {
+        "id": 1041402,
+        "skillTier": 2,
+        "skillData": [
+          {
+            "attributeType": "VIOLET",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 2,
+            "defaultValue": 3,
+            "scale": 4,
+            "coinString": "CCC"
+          },
+          {
+            "scale": 4
+          },
+          {
+            "defaultValue": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      }
+    ],
+    "skill3": [
+      {
+        "id": 1041403,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "CCC"
+          },
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 5,
+            "specialDuelIndex": 0,
+            "scale": 4
+          },
+          {
+            "scale": 4
+          }
+        ]
+      },
+      {
+        "id": 1041406,
+        "skillTier": 3,
+        "skillData": [
+          {
+            "coinString": "C"
+          },
+          {},
+          {
+            "attributeType": "AZURE",
+            "atkType": "PENETRATE",
+            "targetNum": 3,
+            "mpUsage": 0,
+            "skillLevelCorrection": 5,
+            "defaultValue": 12,
+            "specialDuelIndex": 0,
+            "scale": 7
+          },
+          {}
+        ]
+      }
+    ],
+    "skillDef": [
+      {
+        "id": 1041404,
+        "skillTier": 1,
+        "skillData": [
+          {
+            "attributeType": "NEUTRAL",
+            "atkType": "NONE",
+            "targetNum": 1,
+            "mpUsage": 0,
+            "skillLevelCorrection": 3,
+            "defaultValue": 4,
+            "scale": 10,
+            "coinString": "C"
+          },
+          {},
+          {},
+          {
+            "attributeType": "AZURE",
+            "iconID": "1041404_4"
+          }
+        ]
+      }
+    ]
+  },
+  "passives": {
+    "battlePassiveList": [
+      [
+        1041402,
+        1041401
+      ],
+      [],
+      [
+        1041402,
+        1041411
+      ],
+      []
+    ],
+    "supportPassiveList": [
+      [],
+      [],
+      [
+        1041421
+      ],
+      []
+    ],
+    "conditions": {
+      "1041401": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 1,
+          "AZURE": 2
+        }
+      },
+      "1041411": {
+        "type": "STOCK",
+        "values": {
+          "AMBER": 1,
+          "AZURE": 2
+        }
+      },
+      "1041421": {
+        "type": "RESONANCE",
+        "values": {
+          "AMBER": 3
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Beak-shaped Necklace",
+  "descs": [
+    "On Use with a Skill that gains or spends [Bullet]: Gain 1 [Agility] and 1 [Enhancement] next turn (once per turn per Identity)\n- For Skills that inflict [Laceration] Potency, Count, or 'Unique Bleed', deal +(20 / # of Coins)% damage",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

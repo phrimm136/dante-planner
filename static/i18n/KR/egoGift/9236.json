@@ -1,0 +1,9 @@
+{
+  "name": "하모닉스",
+  "descs": [
+    "이번 턴에 아군 또는 적 사망 시 모든 캐릭터가 다음 턴에 [Vulnerable] 1 얻음 (웨이브당 1회)\n- 효과를 발동한 다음 턴에 아군이 합 승리 시 모든 아군의 [Vulnerable] 1 감소하고 모든 적에게 [Laceration] 4 부여, [Laceration] 횟수 2 증가 (턴당 1회)",
+    "이번 턴에 아군 또는 적 사망 시 모든 캐릭터가 다음 턴에 [Vulnerable] 2 얻음 (웨이브당 1회)\n- 효과를 발동한 다음 턴에 아군이 합 승리 시 모든 아군의 [Vulnerable] 1 감소하고 모든 적에게 [Laceration] 4 부여, [Laceration] 횟수 2 증가 (턴당 2회)",
+    "이번 턴에 아군 또는 적 사망 시 모든 캐릭터가 다음 턴에 [Vulnerable] 3 얻음 (웨이브당 1회)\n- 효과를 발동한 다음 턴에 아군이 합 승리 시 모든 아군의 [Vulnerable] 1 감소하고 모든 적에게 [Laceration] 4 부여, [Laceration] 횟수 2 증가 (턴당 3회)"
+  ],
+  "obtain": "Shop"
+}

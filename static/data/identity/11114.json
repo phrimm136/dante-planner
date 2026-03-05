@@ -115,6 +115,9 @@
             "specialDuelIndex": 0,
             "skillLevelCorrection": 3,
             "defaultValue": 6,
+            "additionalSkillKeywordList": [
+              "CommonReload"
+            ],
             "scale": 4
           },
           {

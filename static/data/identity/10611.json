@@ -226,6 +226,9 @@
             "mpUsage": 0,
             "skillLevelCorrection": 0,
             "defaultValue": 5,
+            "additionalSkillKeywordList": [
+              "CommonReload"
+            ],
             "scale": 4,
             "coinString": "CC"
           },

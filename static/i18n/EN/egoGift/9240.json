@@ -1,0 +1,9 @@
+{
+  "name": "Royal Jelly Perfume",
+  "descs": [
+    "[Effects apply only to #6 Deployed Identity]\n\nEncounter Start: Gain [QueenBeepheromone]\n\nTake -15% damage from enemies with [Combustion]\n\nTurn End: Inflict [QueenBeeMark] next turn against the enemy(in Focused Encounters, the Part) that dealt the most damage to this unit\n- If allies did not take any damage from enemies, inflict [QueenBeeMark] next turn against 1 random enemy(in Focused Encounters, a Part)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "桃色の花びらの束",
+  "descs": [
+    "貫通スキルを使用して敵へ的中時、次のターンに[Agility]1, [PenetrateDamageUp]1を得る (人格別に1ターンにつき2回)\n- 当該スキルで敵討伐時、次のターンに[Agility]1, [PenetrateDamageUp]2を追加で得る (人格別に1ターンにつき1回)\n\n[Sinking]威力・[Sinking]回数、または特殊沈潜を付与するスキルを敵へ的中時、[PinkPetals]2を付与\n- 敵の[Sinking]威力5につき、[PinkPetals]1を追加で付与 (最大4)\n- 敵の[PinkPetals]数値が10以上なら、攻撃的中時に[Vibration]2を付与 (1ターンにつき3回)\n\nターン終了時、[Sinking]と[Vibration]威力の合計5以上保有した敵(幻想体の場合、その部位)へ次のターンに[Binding]2, [DefenseDown]3を付与\n- 対象が[Sinking]と[Vibration]威力の合計が10以上なら、効果が強化されて[Binding]2, [Paralysis]1, [DefenseDown]4を付与\n\nターン終了時、全ての敵に[PinkPetals]があるなら、次のターンに全味方が[Enhancement]1を得る",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

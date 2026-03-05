@@ -1,0 +1,9 @@
+{
+  "name": "Walking Bass",
+  "descs": [
+    "[Effects apply only to #3 Deployed Identity]\n\nTurn Start: Gain 1 [TensionUp]\n\nOn Hit, 25% chance to apply 1 [TensionUp] on self and 1 random ally\n- If it was a Skill that inflicts [Laceration] or [Combustion](includes Potency, Count, and Unique variants), raise the chance to 50%",
+    "[Effects apply only to #3, #4 Deployed Identities]\n\nTurn Start: Gain 1 [TensionUp]\n\nOn Hit, 25% chance to apply 1 [TensionUp] on self and 1 random ally\n- If it was a Skill that inflicts [Laceration] or [Combustion](includes Potency, Count, and Unique variants), raise the chance to 75%",
+    "[Effects apply only to #3, #4 Deployed Identities]\n\nTurn Start: Gain 1 [TensionUp]\n\nOn Hit, 25% chance to apply 1 [TensionUp] on self and 2 random allies\n- If it was a Skill that inflicts [Laceration] or [Combustion](includes Potency, Count, and Unique variants), raise the chance to 100%"
+  ],
+  "obtain": "Shop"
+}

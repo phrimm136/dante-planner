@@ -68,7 +68,7 @@
           ]
         },
         {
-          "desc": "対象に[MarkOfButler]があればマッチ威力 +1\n対象の速度が自分より低ければ、対象との速度差2につきコイン威力 +1(最大2)\n[WhenUse] 自分の[Breath]回数が7増加",
+          "desc": "対象に[MarkOfButler]があればマッチ威力 +1\n対象の速度が自分より低ければ、対象との速度差2につきコイン威力 +1 (最大2)\n[WhenUse] 自分の[Breath]回数が7増加",
           "coinDescs": [
             "[OnSucceedAttack] [Breath]5を得る\n[OnSucceedAttack] 次のターンに[Binding]1を付与\n[OnSucceedAttack] ダメージ量の30%混乱区間を前進 \n[CriticalOnSucceedAttack] [MarkOfButler]1を付与",
             "[OnSucceedAttack] 対象が混乱状態なら、クリティカルダメージ量 +40% \n[OnSucceedAttack] [MarkOfButler]2を付与\n[EnemyKill] [MarkOfButler]があるランダムな対象へ、スキルを1回再使用\n(再使用時は発動しない。[MarkOfButler]がある対象がいない場合は発動しない)"

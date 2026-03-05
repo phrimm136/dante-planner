@@ -1325,6 +1325,31 @@
       "PENETRATE"
     ]
   },
+  "10414": {
+    "updateDate": 20260305,
+    "skillKeywordList": [
+      "Sinking",
+      "Vibration"
+    ],
+    "season": 9108,
+    "rank": 3,
+    "unitKeywordList": [
+      "SMALL",
+      "EGO_EQUIPMENT",
+      "LOBOTOMY_HEAD",
+      "L_CORP"
+    ],
+    "attributeType": [
+      "AMBER",
+      "VIOLET",
+      "AZURE"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
+    ]
+  },
   "10501": {
     "updateDate": 20230227,
     "skillKeywordList": [
@@ -1628,6 +1653,31 @@
       "SLASH",
       "SLASH",
       "SLASH"
+    ]
+  },
+  "10514": {
+    "updateDate": 20260305,
+    "skillKeywordList": [
+      "Combustion",
+      "Laceration"
+    ],
+    "season": 9108,
+    "rank": 3,
+    "unitKeywordList": [
+      "LOBOTOMY_HEAD",
+      "EGO_EQUIPMENT",
+      "SMALL",
+      "L_CORP"
+    ],
+    "attributeType": [
+      "SCARLET",
+      "CRIMSON",
+      "CRIMSON"
+    ],
+    "atkType": [
+      "PENETRATE",
+      "PENETRATE",
+      "PENETRATE"
     ]
   },
   "10601": {
