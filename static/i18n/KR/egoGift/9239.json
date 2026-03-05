@@ -1,0 +1,9 @@
+{
+  "name": "분홍빛 꽃잎다발",
+  "descs": [
+    "관통 스킬을 사용하여 적에게 적중 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 1 얻음 (인격별 턴당 2회)\n- 해당 스킬로 적 처치 시, 다음 턴에 [Agility] 1, [PenetrateDamageUp] 2 추가로 얻음 (인격별 턴당 1회)\n\n[Sinking] 위력, [Sinking] 횟수 또는 특수 침잠을 부여하는 스킬로 적에게 공격 적중 시, [PinkPetals] 2 부여\n- 적의 [Sinking] 위력 5당, [PinkPetals] 1 추가 부여 (최대 4)\n- 적의 [PinkPetals] 수치가 10 이상이면, 공격 적중 시 [Vibration] 2 부여 (턴당 3회)\n\n턴 종료 시, [Sinking]과 [Vibration] 위력의 합 5 이상 보유한 적(환상체일 경우, 해당 부위)에게 다음 턴에 [Binding] 2, [DefenseDown] 3 부여\n- 대상이 [Sinking]과 [Vibration] 위력의 합이 10 이상이면, 효과가 강화되어 [Binding] 2, [Paralysis] 1, [DefenseDown] 4 부여\n\n턴 종료 시 모든 적에게 [PinkPetals]이 있을 경우, 다음 턴에 모든 아군이 [Enhancement] 1 얻음",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

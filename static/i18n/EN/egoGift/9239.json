@@ -1,0 +1,9 @@
+{
+  "name": "Pink Bouquet",
+  "descs": [
+    "On Hit with a Pierce Skill against an enemy: Gain 1 [Agility] and 1 [PenetrateDamageUp] next turn (2 times per turn per Identity)\n- On enemy Kill with the said Skill: gain 1 additional [Agility] and 2 additional [PenetrateDamageUp] next turn (once per turn per Identity)\n\nOn Hit by an ally with a Skill that inflicts [Sinking] Potency, Count, or 'Unique Sinking', inflict 2 [PinkPetals]\n- Inflict 1 additional [PinkPetals] for every 5 [Sinking] on the enemy (max 4)\n- If the enemy has 10+ [PinkPetals] Stack, inflict 2 [Vibration] On Hit (3 times per turn)\n\nTurn End: Inflict 2 [Binding] and 3 [DefenseDown] next turn against enemies(for Abnormalities, Parts) with 5+ ([Sinking] + [Vibration])\n- If target has 10+ ([Sinking] + [Vibration]), inflict 2 [Binding], 1 [Paralysis], and 4 [DefenseDown] instead\n\nTurn End: If all enemies have remaining [PinkPetals] Stack, all allies gain 1 [Enhancement] next turn",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Desperado",
+  "descs": [
+    "This E.G.O Gift's effects are enhanced based on the number of Identities in the Team loadout with Attack Skills that gain or spend [Bullet] (except E.G.O Skills; counts all units in the Team)\n\n- At 2+...\nOn Use with a Skill that gains or spends [Bullet]: Gain 2 [Agility] and 4 [AttackUp] next turn (once per Identity per turn)\n\n- At 5+...\nSkills used by Identities that gain or spend [Bullet]: Clash Power +1, deal +10% damage\nSkills that gain or spend [Bullet]: Deal +(100 / # of Coins)% damage\nIf an affected unit is out of [Bullet], gain 4 [Bullet] at the next Turn Start (once per Identity per Encounter)\n\n- At 8+...\nTurn Start: Apply 1 [DesperadoBuff] to Identities that gain or spend [Bullet]\n• If the affected unit did not spend [Bullet] last turn, apply 1 additional [DesperadoBuff]\nCombat End: deal (total sum of [DesperadoBuff] on all allies x 3) Pierce damage to 1 random enemy (max 30)\n• Then, repeat the above effect (number of Identities in the Team that gain or spend [Bullet] - 1) times",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

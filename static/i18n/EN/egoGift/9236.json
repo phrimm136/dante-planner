@@ -1,0 +1,9 @@
+{
+  "name": "Harmonics",
+  "descs": [
+    "When an ally or an enemy dies in a turn, all units gain 1 [Vulnerable] next turn (once per Wave)\n- On ally Clash Win in the same turn where all units gained [Vulnerable] due to the above effect, all allies lose 1 [Vulnerable] and inflict 4 [Laceration] and +2 [Laceration] Count against all enemies (once per turn)",
+    "When an ally or an enemy dies in a turn, all units gain 2 [Vulnerable] next turn (once per Wave)\n- On ally Clash Win in the same turn where all units gained [Vulnerable] due to the above effect, all allies lose 1 [Vulnerable] and inflict 4 [Laceration] and +2 [Laceration] Count against all enemies (2 times per turn)",
+    "When an ally or an enemy dies in a turn, all units gain 3 [Vulnerable] next turn (once per Wave)\n- On ally Clash Win in the same turn where all units gained [Vulnerable] due to the above effect, all allies lose 1 [Vulnerable] and inflict 4 [Laceration] and +2 [Laceration] Count against all enemies (3 times per turn)"
+  ],
+  "obtain": "Shop"
+}

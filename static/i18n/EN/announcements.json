@@ -1,4 +1,8 @@
 {
+  "2026-03-06-01": {
+    "title": "March 6, 2026 Update",
+    "body": "Reflecting the Limbus Company 250305 update.\n- Added Identity, E.G.O, E.G.O Gifts, and Theme Pack related to the 8th Walpurgis Night\n\n* The update was delayed due to personal reasons. We will build an in-game content reflection pipeline in the near future. We apologize for the inconvenience."
+  },
   "2026-03-02-01": {
     "title": "March 2, 2026 Update",
     "body": "Applied Chinese translations for the Limbus Company 260226 update\nUpdated the published plan list to display the comment count for each plan\nFixed an issue where local plans were not being deleted properly\n- The plan had already been deleted on the server. The logic has been updated to delete the local plan regardless of server-side deletion status."

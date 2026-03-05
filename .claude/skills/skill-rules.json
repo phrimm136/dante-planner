@@ -1,6 +1,6 @@
 {
-    "version": "2.0",
-    "description": "Skill activation triggers for Claude Code. Controls when skills automatically suggest or block actions.",
+    "version": "3.0",
+    "description": "Skill activation triggers. v3: removed phantom fe-*/be-* entries (no SKILL.md), tightened overly broad keywords, changed enforcement to suggest.",
     "skills": {
         "skill-developer": {
             "type": "domain",
@@ -14,7 +14,6 @@
                     "add skill",
                     "skill triggers",
                     "skill rules",
-                    "hook system",
                     "skill development",
                     "skill-rules.json"
                 ],
@@ -23,270 +22,18 @@
                     "(create|add|modify|build).*?skill",
                     "skill.*?(work|trigger|activate|system)"
                 ]
-            }
-        },
-        "fe-component": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "high",
-            "description": "React component patterns: React Compiler, TypeScript, Suspense, shadcn/ui + Tailwind",
-            "promptTriggers": {
-                "keywords": [
-                    "component",
-                    "react component",
-                    "UI",
-                    "modal",
-                    "dialog",
-                    "shadcn",
-                    "styling",
-                    "tailwind"
-                ],
-                "intentPatterns": [
-                    "(create|add|make|build|update|modify|edit).*?(component|UI|modal|dialog)",
-                    "(style|design|layout).*?(component|UI)"
-                ]
             },
             "fileTriggers": {
                 "pathPatterns": [
-                    "frontend/src/components/**/*.tsx"
-                ],
-                "pathExclusions": [
-                    "**/*.test.tsx"
-                ]
-            }
-        },
-        "fe-data": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "high",
-            "description": "Data fetching: TanStack Query, Zod validation, schemas",
-            "promptTriggers": {
-                "keywords": [
-                    "tanstack query",
-                    "useSuspenseQuery",
-                    "data fetching",
-                    "zod schema",
-                    "schema",
-                    "hook",
-                    "validation"
-                ],
-                "intentPatterns": [
-                    "(create|add|write).*?(hook|schema|type)",
-                    "(fetch|load|query).*?data"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "frontend/src/hooks/**/*.ts",
-                    "frontend/src/schemas/**/*.ts",
-                    "frontend/src/types/**/*.ts"
-                ]
-            }
-        },
-        "fe-routing": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "high",
-            "description": "TanStack Router: pages, routes, navigation",
-            "promptTriggers": {
-                "keywords": [
-                    "page",
-                    "route",
-                    "routing",
-                    "navigation",
-                    "tanstack router"
-                ],
-                "intentPatterns": [
-                    "(create|add|make|build).*?(page|route)",
-                    "(how to|best practice).*?(route|navigation)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "frontend/src/routes/**/*.tsx"
-                ]
-            }
-        },
-        "fe-testing": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "medium",
-            "description": "Frontend testing: Vitest, React Testing Library",
-            "promptTriggers": {
-                "keywords": [
-                    "frontend test",
-                    "component test",
-                    "vitest",
-                    "react testing library"
-                ],
-                "intentPatterns": [
-                    "(write|create|add).*?(test|spec).*?(component|hook|frontend)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "frontend/src/**/*.test.tsx",
-                    "frontend/src/**/*.test.ts"
-                ]
-            }
-        },
-        "be-controller": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "high",
-            "description": "Spring Boot REST controllers: endpoints, validation, DTOs",
-            "promptTriggers": {
-                "keywords": [
-                    "controller",
-                    "endpoint",
-                    "REST API",
-                    "request mapping",
-                    "request body",
-                    "path variable"
-                ],
-                "intentPatterns": [
-                    "(create|add|implement).*?(controller|endpoint|API)",
-                    "(add|implement).*?validation"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "backend/**/*Controller.java",
-                    "backend/**/dto/**/*.java"
-                ]
-            }
-        },
-        "be-service": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "high",
-            "description": "Spring Boot services and repositories: business logic, JPA",
-            "promptTriggers": {
-                "keywords": [
-                    "service",
-                    "repository",
-                    "business logic",
-                    "transaction",
-                    "JPA",
-                    "entity"
-                ],
-                "intentPatterns": [
-                    "(create|add|implement).*?(service|repository)",
-                    "(implement|add).*?business logic"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "backend/**/*Service.java",
-                    "backend/**/*Repository.java",
-                    "backend/**/domain/**/*.java"
-                ]
-            }
-        },
-        "be-security": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "high",
-            "description": "Spring Security: authentication, authorization, JWT",
-            "promptTriggers": {
-                "keywords": [
-                    "security",
-                    "authentication",
-                    "authorization",
-                    "JWT",
-                    "token",
-                    "CORS",
-                    "login"
-                ],
-                "intentPatterns": [
-                    "(implement|add|setup).*?(security|auth|login)",
-                    "(configure|setup).*?(JWT|CORS)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "backend/**/security/**/*.java"
-                ]
-            }
-        },
-        "be-async": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "medium",
-            "description": "Async processing, SSE, exception handling",
-            "promptTriggers": {
-                "keywords": [
-                    "SSE",
-                    "server-sent events",
-                    "async",
-                    "exception handler",
-                    "error handling",
-                    "global exception"
-                ],
-                "intentPatterns": [
-                    "(implement|add|setup).*?(SSE|exception handler)",
-                    "(handle|catch).*?(error|exception)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "backend/**/*Sse*.java",
-                    "backend/**/exception/**/*.java"
-                ]
-            }
-        },
-        "be-testing": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "medium",
-            "description": "Backend testing: JUnit, Mockito, MockMvc",
-            "promptTriggers": {
-                "keywords": [
-                    "backend test",
-                    "unit test",
-                    "integration test",
-                    "mockito",
-                    "junit"
-                ],
-                "intentPatterns": [
-                    "(write|create|add).*?test.*?(service|controller|repository)"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "backend/**/*Test.java"
-                ]
-            }
-        },
-        "be-config": {
-            "type": "guardrail",
-            "enforcement": "block",
-            "priority": "medium",
-            "description": "Spring Boot configuration: properties, profiles, actuator",
-            "promptTriggers": {
-                "keywords": [
-                    "configuration",
-                    "properties",
-                    "application.properties",
-                    "profile",
-                    "actuator",
-                    "monitoring"
-                ],
-                "intentPatterns": [
-                    "(configure|setup).*?(properties|profile|actuator)",
-                    "(add|setup).*?monitoring"
-                ]
-            },
-            "fileTriggers": {
-                "pathPatterns": [
-                    "backend/**/config/**/*.java",
-                    "backend/**/application*.properties"
+                    ".claude/skills/**/*",
+                    ".claude/hooks/**/*",
+                    ".claude/settings.json"
                 ]
             }
         },
         "route-tester": {
             "type": "domain",
-            "enforcement": "block",
+            "enforcement": "suggest",
             "priority": "high",
             "description": "Testing authenticated API routes with JWT cookie-based auth",
             "promptTriggers": {
@@ -321,31 +68,26 @@
         },
         "error-tracking": {
             "type": "domain",
-            "enforcement": "block",
+            "enforcement": "suggest",
             "priority": "high",
             "description": "Sentry error tracking and performance monitoring patterns",
             "promptTriggers": {
                 "keywords": [
-                    "error handling",
-                    "exception",
                     "sentry",
                     "error tracking",
                     "captureException",
-                    "monitoring",
                     "performance tracking"
                 ],
                 "intentPatterns": [
-                    "(add|create|implement|setup).*?(error handling|sentry|error tracking)",
-                    "(fix|handle|catch).*?(error|exception)",
-                    "(how to|best practice).*?(error|sentry|monitoring)"
+                    "(add|create|implement|setup).*?(sentry|error tracking)",
+                    "(how to|best practice).*?(sentry|monitoring)"
                 ]
             },
             "fileTriggers": {
                 "pathPatterns": [
                     "**/instrument.ts",
                     "**/sentry*.ts",
-                    "**/*Controller.ts",
-                    "**/*Service.ts"
+                    "backend/**/exception/**/*.java"
                 ],
                 "contentPatterns": [
                     "@sentry",
@@ -357,58 +99,41 @@
         },
         "web-research-specialist": {
             "type": "agent",
-            "enforcement": "block",
+            "enforcement": "suggest",
             "priority": "medium",
             "description": "Community workaround research - use instead of WebSearch for debugging issues",
             "promptTriggers": {
                 "keywords": [
                     "workaround",
-                    "bug fix",
                     "known issue",
-                    "doesn't work",
-                    "not working",
-                    "why isn't",
                     "community solution",
                     "github issue",
                     "stackoverflow"
                 ],
                 "intentPatterns": [
                     "(find|search|look for).*?(workaround|fix|solution|issue)",
-                    "(why|how come).*?(not working|doesn't work|broken)",
                     "(anyone|others).*?(solved|fixed|encountered)",
                     "is this a (bug|known issue)"
                 ]
-            },
-            "agentConfig": {
-                "preferOverWebSearch": true,
-                "useContext7ForDocs": true
             }
         },
-        "code-architecture-reviewer": {
+        "code-review-orchestrator": {
             "type": "agent",
-            "enforcement": "block",
+            "enforcement": "suggest",
             "priority": "high",
-            "description": "Adversarial code reviewer - finds bugs and violations the author missed",
+            "description": "Meta-reviewer that launches security, performance, reliability, and consistency reviewers in parallel",
             "promptTriggers": {
                 "keywords": [
-                    "review",
                     "code review",
                     "check my code",
-                    "is this good",
-                    "any issues",
                     "find bugs",
-                    "what's wrong"
+                    "review my changes"
                 ],
                 "intentPatterns": [
-                    "(review|check|examine).*?(code|component|implementation)",
-                    "is (this|my).*?(good|correct|okay|right)",
+                    "(review|check|examine).*?(code|component|implementation|changes)",
                     "(find|look for|any).*?(bugs|issues|problems)",
                     "what('s| is) wrong with"
                 ]
-            },
-            "agentConfig": {
-                "runAfterCodeWrite": true,
-                "adversarialMode": true
             }
         },
         "add-announcement": {
@@ -421,6 +146,11 @@
                 "intentPatterns": [
                     "(add|write|create|post).*?announcement",
                     "announcement.*?(add|write|create|new)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "static/data/announcements*.json"
                 ]
             }
         },
@@ -443,7 +173,7 @@
         },
         "findings-sync": {
             "type": "domain",
-            "enforcement": "block",
+            "enforcement": "suggest",
             "priority": "medium",
             "description": "Synchronize patterns from findings.md to skill documentation",
             "promptTriggers": {
@@ -451,7 +181,6 @@
                     "findings sync",
                     "sync findings",
                     "update specs",
-                    "update skills",
                     "consolidate learnings"
                 ],
                 "intentPatterns": [
@@ -468,20 +197,8 @@
     },
     "notes": {
         "enforcement_types": {
-            "suggest": "Skill suggestion appears but doesn't block execution",
-            "block": "Requires skill to be used before proceeding (guardrail)",
-            "warn": "Shows warning but allows proceeding",
-            "none": "Disabled/deprecated skill"
+            "suggest": "Skill suggestion appears but doesn't block execution"
         },
-        "priority_levels": {
-            "critical": "Highest - Always trigger when matched",
-            "high": "Important - Trigger for most matches",
-            "medium": "Moderate - Trigger for clear matches",
-            "low": "Optional - Trigger only for explicit matches"
-        },
-        "migration_v2": {
-            "split_skills": "Large monolithic skills split into task-specific ones",
-            "multiple_matches": "Multiple skills can match simultaneously"
-        }
+        "v3_changelog": "Removed 9 phantom entries (fe-component, fe-data, fe-routing, fe-testing, be-controller, be-service, be-security, be-async, be-testing, be-config) — no SKILL.md existed. Changed all enforcement to suggest. Tightened keywords: removed 'hook', 'review', 'error handling', 'exception', 'validation', 'UI', 'component' and other overly broad terms that caused false-positive matches."
     }
 }

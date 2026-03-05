@@ -1,0 +1,152 @@
+{
+  "name": "로보토미 E.G.O::\n잔향・외로움",
+  "skills": {
+    "1041401": {
+      "name": "탕. 탕.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]과 [Sinking]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Vibration] 2 부여"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]과 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)",
+          "coinDescs": [
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Vibration] 3 부여"
+          ]
+        }
+      ]
+    },
+    "1041402": {
+      "name": "공허에 피어나는 향기",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 2 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 2 부여\n[OnSucceedAttack] [Vibration] 횟수 1 증가"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]과 [Sinking]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Sinking] 횟수 2 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 3 부여\n[OnSucceedAttack] [Vibration] 횟수 2 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 3 부여\n[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]과 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [AlriuneEGOThey] 1당, 피해량 +1%",
+          "coinDescs": [
+            "[BulletGodok] 1 소모\n[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 3 부여\n[OnSucceedAttack] [Vibration] 횟수 2 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 3 부여\n[OnSucceedAttack] [Vibration] 횟수 2 증가"
+          ]
+        }
+      ]
+    },
+    "1041403": {
+      "name": "만개",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]과 [Sinking]의 합이 6 이상이면, 코인 위력 +1",
+          "coinDescs": [
+            "[OnSucceedAttack] [AlriuneEGOThey] 1 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 1 부여\n[OnSucceedAttack] [Sinking] 4 부여",
+            "[OnSucceedAttack] [AlriuneEGOThey] 2 부여\n[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소"
+          ]
+        },
+        {
+          "desc": "[WhenUse] 대상의 [Vibration]과 [Sinking]의 합 6당, 코인 위력 +1 (최대 2)\n[WhenUse] 대상의 [AlriuneEGOThey] 1당, 피해량 +1%",
+          "coinDescs": [
+            "[OnSucceedAttack] [AlriuneEGOThey] 1 부여\n[OnSucceedAttack] [Sinking] 횟수 3 증가",
+            "[OnSucceedAttack] [AlriuneEGOThey] 1 부여\n[OnSucceedAttack] [Sinking] 4 부여",
+            "[OnSucceedAttack] [AlriuneEGOThey] 2 부여\n[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상의 [Sinking]만큼 우울 피해"
+          ]
+        }
+      ]
+    },
+    "1041404": {
+      "name": "예.감.시.",
+      "descs": [
+        {
+          "desc": "[EndBattle] [AlriuneEGOWe] 10 얻음 (턴당 1회)\n[EndBattle] 다음 턴에 [Vulnerable] 2, [Enhancement] 2 얻음 (턴당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[EndBattle] [AlriuneEGOWe] 10 얻음 (턴당 1회)\n[EndBattle] 다음 턴에 [Vulnerable] 2, [Enhancement] 2 얻음 (턴당 1회)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1041405": {
+      "name": "멈추지 않는 이야기",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n[WideAreaRampage]\n이 스킬에서 [GodokPanicType]을 부여할 때, 대상이 이번 턴 또는 다음 턴에 부여될 [GodokPanicType]이 있으면 대신 [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Sinking] 횟수 1 증가\n[OnSucceedAttack] 다음 턴에 [GodokPanicType] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] 다음 턴에 [GodokPanicType] 2 부여",
+            "[OnSucceedAttack] [Vibration] 2 부여\n[OnSucceedAttack] 다음 턴에 [GodokPanicType] 2 부여"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1041406": {
+      "name": "황홀한 종말",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\n이 스킬은 외부 효과로 재사용할 수 없음\n이 스킬 공격 가중치보다 낮은 공격 대상 1당, 피해량 +30% (집중 전투인 경우, 부위로 판정)\n[WhenUse] 모든 대상의 [AlriuneEGOThey] 합 5당 최종 위력 +1 (최대 6)\n\n[EndSkill] 자신의 [AlriuneEGOWe] 소멸",
+          "coinDescs": [
+            "[OnSucceedAttack] [AlriuneEGOThey] 5 부여\n[OnSucceedAttack] [Sinking] 3 부여\n[OnSucceedAttack] [Vibration] 3 부여\n[OnSucceedAttack] [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소\n[OnSucceedAttack] 대상의 [Sinking]만큼 우울 피해"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1041401": {
+      "name": "시들지 않는 꽃",
+      "desc": "적이 [Sinking] 피해를 받으면 [AlriuneEGOWe] 1 얻음\n적에게 부여된 [AlriuneEGOThey]만큼 [AlriuneEGOWe] 얻음\n[VibrationExplosion] 발생 시, [AlriuneEGOWe] 2 얻음"
+    },
+    "1041402": {
+      "name": "채워지지 않는 공허",
+      "desc": "상시 적용 : [BulletGodok] 6개 보유\n\n[BulletGodok]이 1 이상일 때, 자신 또는 아군의 공격 종료시 적의 정신력이\n-40미만이거나 흐트러짐 상태면 '탕. 탕.'으로 일방공격 (턴당 1회)\n\n자신의 공격 종료시 [BulletGodok]이 0이면, 대상을 '멈추지 않는 이야기'로 일방공격하고 정신력을 10 소모하여 [FullReload]"
+    },
+    "1041411": {
+      "name": "시들지 않는 꽃",
+      "desc": "적이 [Sinking] 피해를 받으면 [AlriuneEGOWe] 1 얻음\n적에게 부여되는 [AlriuneEGOThey]만큼 [AlriuneEGOWe] 얻음\n[VibrationExplosion] 발생 시, [AlriuneEGOWe] 2 얻음\n\n자신의 공격 스킬 종료시, 자신의 [AlriuneEGOWe]이 30 이상이면, [AlriuneEGOThey]이 가장 높은 대상에게 '황홀한 종말' 발동\n\n흐트러진 대상에게 가하는 피해량 +(대상의 [AlriuneEGOThey])%\n\n이번 턴에 자신의 체력을 최대 체력의 10% 이상 잃으면, 최대 체력의 3%, 정신력 10 회복 (턴당 1회)"
+    },
+    "1041421": {
+      "name": "봄의 탄생",
+      "desc": "속도가 가장 빠른 아군 1명이 [Sinking] 위력, 횟수 또는 특수 침잠[TabExplain]을 부여하는 스킬로 적에게 적중 시 [Vibration]을 2 부여하고, [VibrationExplosion]. 대상의 [Vibration] 횟수 1 감소 (턴당 1회) "
+    }
+  }
+}

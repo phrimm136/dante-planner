@@ -1,0 +1,71 @@
+{
+  "name": "Harmony",
+  "skills": {
+    "2100911": {
+      "name": "Harmony",
+      "descs": [
+        {
+          "desc": "Clash Power +1 for every 2 ([Laceration] + [Combustion]) on the main target (max 6)\nDeal more damage based on missing HP on self (max 10%)\nDeal -50% damage against sub-targets\n[TargetKill] All allies gain 2 [ThatIsRhythm] next turn (once per Skill)\n[EndSkill] Heal 8 SP for (1 + highest Reson.) other allies with the least SP (max 4 units)\n[EndSkill] For 2 turns, lose 8 SP at Combat End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttackHead] At 10%+ HP, take 4 ~ 8 HP damage (once per Coin)\n- Then, Reuse this Coin (4 times per Skill)\n- This damage does not Stagger or reduce this unit's HP below 1\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] A random ally gains 1 [ThatIsRhythm] next turn (once per Coin)"
+          ]
+        },
+        {},
+        {
+          "desc": "Clash Power +1 for every 2 ([Laceration] + [Combustion]) on the main target (max 8)\nDeal more damage based on missing HP on self (max 15%)\nDeal -50% damage against sub-targets\n[TargetKill] All allies gain 2 [ThatIsRhythm] next turn (once per Skill)\n[EndSkill] Heal 10 SP for (1 + highest Reson.) other allies with the least SP (max 4 units)\n[EndSkill] For 2 turns, lose 8 SP at Combat End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttackHead] At 10%+ HP, take 4 ~ 8 HP damage (once per Coin)\n- Then, Reuse this Coin (4 times per Skill)\n- This damage does not Stagger or reduce this unit's HP below 1\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] A random ally gains 1 ~ 2 [ThatIsRhythm] next turn (once per Coin)"
+          ]
+        },
+        {
+          "desc": "Clash Power +1 for every 2 ([Laceration] + [Combustion]) on the main target (max 10)\nDeal more damage based on missing HP on self (max 20%)\nDeal -50% damage against sub-targets\n[TargetKill] All allies gain 2 [ThatIsRhythm] next turn (once per Skill)\n[EndSkill] Heal 12 SP for (1 + highest Reson.) other allies with the least SP (max 4 units)\n[EndSkill] For 2 turns, lose 8 SP at Combat End",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[OnSucceedAttackHead] At 10%+ HP, take 4 ~ 8 HP damage (once per Coin)\n- Then, Reuse this Coin (4 times per Skill)\n- This damage does not Stagger or reduce this unit's HP below 1\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] A random ally gains 1 ~ 3 [ThatIsRhythm] next turn (once per Coin)"
+          ]
+        }
+      ]
+    },
+    "2100921": {
+      "name": "Harmony",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nClash Power +1 for every 2 ([Laceration] + [Combustion]) on the main target (max 6)\nDeal more damage based on missing HP on self (max 10%)\nDeal -50% damage against sub-targets\n[BeforeAttack] Gain Atk Weight equal to (highest Reson. / 2) (max 2; rounded down)\n[BeforeAttack] Base Power -2 for every Cracked Coin (max -6)\n[EndSkill] Heal 10 SP for 4 other allies with the least SP\n[EndSkill] All allies gain 2 [ThatIsRhythm], 1 [CrimsonDamageUp], 1 [ScarletDamageUp], 1 [VioletDamageUp], 1 [Vulnerable] next turn\n- If target was killed, activate the effect above once more",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[SuperCoin]\n[OnSucceedAttack] At 10%+ HP, take 10 ~ 20 HP damage (once per Coin)\n- Then, Reuse this Coin if the sum of HP lost due to this effect is less than 50 (4 times per Skill)\n- This damage does not Stagger or reduce this unit's HP below 1\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] A random ally gains 1 [ThatIsRhythm] next turn (once per Coin)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nClash Power +1 for every 2 ([Laceration] + [Combustion]) on the main target (max 8)\nDeal more damage based on missing HP on self (max 15%)\nDeal -50% damage against sub-targets\n[BeforeAttack] Gain Atk Weight equal to (highest Reson. / 2) (max 2; rounded down)\n[BeforeAttack] Base Power -2 for every Cracked Coin (max -6)\n[EndSkill] Heal 12 SP for 4 other allies with the least SP\n[EndSkill] All allies gain 2 [ThatIsRhythm], 1 [CrimsonDamageUp], 1 [ScarletDamageUp], 1 [VioletDamageUp], 1 [Vulnerable] next turn\n- If target was killed, activate the effect above once more",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[SuperCoin]\n[OnSucceedAttack] At 10%+ HP, take 10 ~ 20 HP damage (once per Coin)\n- Then, Reuse this Coin if the sum of HP lost due to this effect is less than 50 (4 times per Skill)\n- This damage does not Stagger or reduce this unit's HP below 1\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] A random ally gains 1 ~ 2 [ThatIsRhythm] next turn (once per Coin)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\nTargets randomly\nClash Power +1 for every 2 ([Laceration] + [Combustion]) on the main target (max 10)\nDeal more damage based on missing HP on self (max 20%)\nDeal -50% damage against sub-targets\n[BeforeAttack] Gain Atk Weight equal to (highest Reson. / 2) (max 2; rounded down)\n[BeforeAttack] Base Power -2 for every Cracked Coin (max -6)\n[EndSkill] Heal 15 SP for 4 other allies with the least SP\n[EndSkill] All allies gain 2 [ThatIsRhythm], 1 [CrimsonDamageUp], 1 [ScarletDamageUp], 1 [VioletDamageUp], 1 [Vulnerable] next turn\n- If target was killed, activate the effect above once more",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "[SuperCoin]\n[OnSucceedAttack] At 10%+ HP, take 10 ~ 20 HP damage (once per Coin)\n- Then, Reuse this Coin if the sum of HP lost due to this effect is less than 50 (4 times per Skill)\n- This damage does not Stagger or reduce this unit's HP below 1\n[OnSucceedAttack] Inflict 1 [Combustion]\n[OnSucceedAttack] Inflict 1 [Laceration]\n[OnSucceedAttack] A random ally gains 1 ~ 3 [ThatIsRhythm] next turn (once per Coin)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100911": {
+      "name": "That... was Indeed a Rhythm",
+      "desc": "Turn Start: Gain 2 [ThatIsRhythm]\n\nOn Target Kill: This unit heals 5% HP and 5 SP (once per turn)\n- If target was killed by E.G.O Skill - Harmony, double the amount this effect heals\n\nTurn End: If this unit lost SP this turn, heal (4 + sum of [Combustion] and [Laceration] on all enemies / 10) SP (max 10; rounded down)"
+    }
+  }
+}

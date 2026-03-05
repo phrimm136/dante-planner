@@ -1,0 +1,9 @@
+{
+  "name": "Still-warm Coffee",
+  "descs": [
+    "[Effects apply only to #1 Deployed Identity]\n\nTurn End after using an Attack Skill: Heal 5 SP\n- Then, if the affected unit is at max HP and is a Lobotomy Corp. Identity, gain 1 [PlusCoinValueUp] next turn",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

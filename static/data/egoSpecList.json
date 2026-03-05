@@ -1710,6 +1710,29 @@
       "Burst"
     ]
   },
+  "21009": {
+    "updateDate": 20260305,
+    "egoType": "HE",
+    "season": 9108,
+    "requirements": {
+      "CRIMSON": 3,
+      "SCARLET": 2,
+      "AMBER": 1,
+      "INDIGO": 1,
+      "VIOLET": 1
+    },
+    "attributeType": [
+      "CRIMSON"
+    ],
+    "atkType": [
+      "SLASH",
+      "SLASH"
+    ],
+    "skillKeywordList": [
+      "Combustion",
+      "Laceration"
+    ]
+  },
   "21101": {
     "updateDate": 20230227,
     "egoType": "ZAYIN",

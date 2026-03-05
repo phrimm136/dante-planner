@@ -1,4 +1,4 @@
-# LimbusPlanner
+# Dante's Planner
 
 Game planning and management tool for Limbus Company.
 

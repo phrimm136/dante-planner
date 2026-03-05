@@ -1,0 +1,9 @@
+{
+  "name": "Pink Petals",
+  "descs": [
+    "On Hit by an ally with a Skill that inflicts [Sinking] Potency, Count, or 'Unique Sinking', inflict 1 [PinkPetals]\n- Inflict 1 additional [PinkPetals] for every 5 [Sinking] on the enemy (max 4)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

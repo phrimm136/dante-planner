@@ -1,0 +1,71 @@
+{
+  "name": "하모니",
+  "skills": {
+    "2100911": {
+      "name": "하모니",
+      "descs": [
+        {
+          "desc": "메인 타겟의 [Laceration]과 [Combustion]의 합 2당, 합 위력 +1 (최대 6)\n자신의 잃은 체력 비율만큼 피해량 증가 (최대 10%)\n서브 타겟에게 가하는 피해량 -50%\n[TargetKill] 모든 아군이 다음 턴에 [ThatIsRhythm] 2 얻음 (스킬당 1회)\n[EndSkill] 자신을 제외한 정신력이 가장 낮은 아군 (1 + 최대 공명 수)명의 정신력 8 회복 (최대 4명)\n[EndSkill] 2턴 동안 전투 종료 시 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttackHead] 자신의 체력이 10% 이상이면, 4 ~ 8 만큼 체력 피해 입음 (코인당 1회)\n- 이후 이 코인 재사용 (스킬당 최대 4회)\n- 이 효과로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 무작위 아군 1명이 다음 턴에 [ThatIsRhythm] 1 얻음 (코인당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "메인 타겟의 [Laceration]과 [Combustion]의 합 2당, 합 위력 +1 (최대 8)\n자신의 잃은 체력 비율만큼 피해량 증가 (최대 15%)\n서브 타겟에게 가하는 피해량 -50%\n[TargetKill] 모든 아군이 다음 턴에 [ThatIsRhythm] 2 얻음 (스킬당 1회)\n[EndSkill] 자신을 제외한 정신력이 가장 낮은 아군 (1 + 최대 공명 수)명의 정신력 10 회복 (최대 4명)\n[EndSkill] 2턴 동안 전투 종료 시 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttackHead] 자신의 체력이 10% 이상이면, 4 ~ 8 만큼 체력 피해 입음 (코인당 1회)\n- 이후 이 코인 재사용 (스킬당 최대 4회)\n- 이 효과로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 무작위 아군 1명이 다음 턴에 [ThatIsRhythm] 1 ~ 2 얻음 (코인당 1회)"
+          ]
+        },
+        {
+          "desc": "메인 타겟의 [Laceration]과 [Combustion]의 합 2당, 합 위력 +1 (최대 10)\n자신의 잃은 체력 비율만큼 피해량 증가 (최대 20%)\n서브 타겟에게 가하는 피해량 -50%\n[TargetKill] 모든 아군이 다음 턴에 [ThatIsRhythm] 2 얻음 (스킬당 1회)\n[EndSkill] 자신을 제외한 정신력이 가장 낮은 아군 (1 + 최대 공명 수)명의 정신력 12 회복 (최대 4명)\n[EndSkill] 2턴 동안 전투 종료 시 정신력 8 감소",
+          "coinDescs": [
+            "[OnSucceedAttack] [Laceration] 2 부여",
+            "[OnSucceedAttack] [Combustion] 2 부여",
+            "[OnSucceedAttackHead] 자신의 체력이 10% 이상이면, 4 ~ 8 만큼 체력 피해 입음 (코인당 1회)\n- 이후 이 코인 재사용 (스킬당 최대 4회)\n- 이 효과로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 무작위 아군 1명이 다음 턴에 [ThatIsRhythm] 1 ~ 3 얻음 (코인당 1회)"
+          ]
+        }
+      ]
+    },
+    "2100921": {
+      "name": "하모니",
+      "descs": [
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Laceration]과 [Combustion]의 합 2당, 합 위력 +1 (최대 6)\n자신의 잃은 체력 비율만큼 피해량 증가 (최대 10%)\n서브 타겟에게 가하는 피해량 -50%\n[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 2, 소수점 버림)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -2 (최대 -6)\n[EndSkill] 정신력이 가장 낮은 아군 4명의 정신력 10 회복\n[EndSkill] 모든 아군이 다음 턴에 [ThatIsRhythm] 2, [CrimsonDamageUp] 1, [ScarletDamageUp] 1, [VioletDamageUp] 1, [Vulnerable] 1 얻음\n- 대상을 처치했으면, 이 효과 한 번 더 발동",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 자신의 체력이 10% 이상이면, 10 ~ 20 만큼 체력 피해 입음 (코인당 1회)\n- 이후 이 효과로 소모된 체력의 합이 50미만이면, 이 코인 재사용 (스킬당 최대 4회)\n- 이 효과로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 무작위 아군 1명이 다음 턴에 [ThatIsRhythm] 1 얻음 (코인당 1회)"
+          ]
+        },
+        {},
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Laceration]과 [Combustion]의 합 2당, 합 위력 +1 (최대 8)\n자신의 잃은 체력 비율만큼 피해량 증가 (최대 15%)\n서브 타겟에게 가하는 피해량 -50%\n[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 2, 소수점 버림)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -2 (최대 -6)\n[EndSkill] 정신력이 가장 낮은 아군 4명의 정신력 12 회복\n[EndSkill] 모든 아군이 다음 턴에 [ThatIsRhythm] 2, [CrimsonDamageUp] 1, [ScarletDamageUp] 1, [VioletDamageUp] 1, [Vulnerable] 1 얻음\n- 대상을 처치했으면, 이 효과 한 번 더 발동",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 자신의 체력이 10% 이상이면, 10 ~ 20 만큼 체력 피해 입음 (코인당 1회)\n- 이후 이 효과로 소모된 체력의 합이 50미만이면, 이 코인 재사용 (스킬당 최대 4회)\n- 이 효과로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 무작위 아군 1명이 다음 턴에 [ThatIsRhythm] 1 ~ 2 얻음 (코인당 1회)"
+          ]
+        },
+        {
+          "desc": "[CantIdentify]\n무작위 대상 공격\n메인 타겟의 [Laceration]과 [Combustion]의 합 2당, 합 위력 +1 (최대 10)\n자신의 잃은 체력 비율만큼 피해량 증가 (최대 20%)\n서브 타겟에게 가하는 피해량 -50%\n[BeforeAttack] (최대 공명 수 / 2)만큼 공격 가중치 증가 (최대 2, 소수점 버림)\n[BeforeAttack] 파괴된 코인 수당 기본 위력 -2 (최대 -6)\n[EndSkill] 정신력이 가장 낮은 아군 4명의 정신력 15 회복\n[EndSkill] 모든 아군이 다음 턴에 [ThatIsRhythm] 2, [CrimsonDamageUp] 1, [ScarletDamageUp] 1, [VioletDamageUp] 1, [Vulnerable] 1 얻음\n- 대상을 처치했으면, 이 효과 한 번 더 발동",
+          "coinDescs": [
+            "[SuperCoin]\n[OnSucceedAttack] [Laceration] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] [Combustion] 2 부여",
+            "[SuperCoin]\n[OnSucceedAttack] 자신의 체력이 10% 이상이면, 10 ~ 20 만큼 체력 피해 입음 (코인당 1회)\n- 이후 이 효과로 소모된 체력의 합이 50미만이면, 이 코인 재사용 (스킬당 최대 4회)\n- 이 효과로 흐트러짐 상태가 되거나 체력이 1 미만으로 감소하지 않음\n[OnSucceedAttack] [Combustion] 1 부여\n[OnSucceedAttack] [Laceration] 1 부여\n[OnSucceedAttack] 무작위 아군 1명이 다음 턴에 [ThatIsRhythm] 1 ~ 3 얻음 (코인당 1회)"
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "2100911": {
+      "name": "그건, 리듬이었어요",
+      "desc": "턴 시작 시 [ThatIsRhythm] 2 얻음\n\n대상 처치 시 자신의 체력을 최대 체력의 5%만큼 회복하고, 자신의 정신력 5 회복 (턴당 1회)\n- E.G.O 스킬 - 하모니로 처치했으면 위 효과가 2배로 적용됨\n\n이번 턴에 자신의 정신력이 감소했으면, 턴 종료 시 자신의 정신력을 (4 + 적 전체의 [Combustion]과 [Laceration] 위력의 합 / 10)만큼 회복 (최대 10, 소수점 버림)"
+    }
+  }
+}

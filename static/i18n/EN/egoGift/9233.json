@@ -1,0 +1,9 @@
+{
+  "name": "Staticky Two-way Radio",
+  "descs": [
+    "On Use with a Skill that gains or spends [Bullet]: Gain 1 [Agility] and 2 [AttackUp] next turn (once per turn per Identity)\n- For Skills that inflict [Sinking] Potency, Count, or 'Unique Sinking', deal +(20 / # of Coins)% damage",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

@@ -1,0 +1,124 @@
+{
+  "name": "Lobotomy E.G.O::\nHornet 【Alteration】",
+  "skills": {
+    "1051401": {
+      "name": "Warning Shot",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Spend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Spend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {
+          "desc": "[BeforeUse] At max [MeursaultSporeBulletLong], inflict 1 [PenetrateTakeDamageUp] On Hit (once per turn)\n[WhenUse] If target has 6+ ([Combustion] + [Laceration]), Coin Power +1",
+          "coinDescs": [
+            "Spend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Spend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 1 [Laceration]"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal +10% damage for every 5 [MeursaultBeeSpore] on target (max 30%)\n[BeforeUse] At max [MeursaultSporeBulletLong], inflict 1 [PenetrateTakeDamageUp] On Hit (once per turn)\n[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Laceration]) on target (max 2)",
+          "coinDescs": [
+            "Spend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "Spend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Laceration]"
+          ]
+        }
+      ]
+    },
+    "1051402": {
+      "name": "E.G.O Alteration - Buckshot",
+      "descs": [
+        {
+          "desc": "Deal -50% damage against sub-targets",
+          "coinDescs": [
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +1 [Laceration] Count",
+            "Spend 1 [MeursaultSporeBulletShort]"
+          ]
+        },
+        {
+          "desc": "Deal -50% damage against sub-targets\nDeal +7% damage for every 5 [MeursaultBeeSpore] on target (max 21%)\n[WhenUse] If the main target has 6+ ([Combustion] + [Laceration]), Coin Power +1",
+          "coinDescs": [
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "Spend 1 [MeursaultSporeBulletShort]"
+          ]
+        },
+        {},
+        {
+          "desc": "Deal -50% damage against sub-targets\nDeal +15% damage for every 5 [MeursaultBeeSpore] on target (max 45%)\n[WhenUse] If the main target has 6+ ([Combustion] + [Laceration]), Coin Power +1\n[WhenUse] If this unit has [MeursaultWorkerBee], Clash Power +1\n[WhenUse] Convert Coins equal to [MeursaultWorkerBee] into [SuperCoin]s, beginning with the final Coin\n[EndSkill] At 1 or fewer [MeursaultSporeBulletLong], [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +1 [Combustion] Count",
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +2 [Laceration] Count",
+            "Spend 1 [MeursaultSporeBulletShort]\n[OnSucceedAttack] Inflict +1 [Combustion] Count"
+          ]
+        }
+      ]
+    },
+    "1051403": {
+      "name": "Field Test - Dust Spark",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "Deal +5% damage for every 5 [MeursaultBeeSpore] on target (max 15%)\n[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Laceration]) on the main target (max 2)\n[EndSkill] [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "This Coin hits only a single Target (prioritizes the main target)\nSpend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Combustion]",
+            "This Coin hits only a single Target (prioritizes the main target)\nSpend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "This Coin hits only a single Target (prioritizes the main target)\nSpend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 1 [Laceration]",
+            "[SuperCoin]\nSpend 1 [MeursaultSporeBulletShort]\nDeal -50% damage against sub-targets\n\n[UnBrokenCoinOnSucceedAttack] If target's [MeursaultBeeSpore] is at max Stack, activate the following:\n- Deal ([Combustion] Potency x [MeursaultBeeSpore] Stack / 10) Wrath damage (rounded down)\n  - Dealing Wrath damage with this effect counts as activating [Combustion]\n- Target loses 1 [Combustion] Count\n- [MeursaultBeeSpore] on target expires\n\n[OnSucceedAttack] Inflict +1 [Combustion] Count and +1 [Laceration] Count"
+          ]
+        },
+        {
+          "desc": "Deal +50% damage for every excess Atk Weight beyond the # of actual targets (for Focused Encounters, the part)\nDeal +10% damage for every 5 [MeursaultBeeSpore] on target (max 30%)\n[BeforeUse] At 2 or fewer [MeursaultSporeBulletLong], consume 6 SP to gain 3 [MeursaultSporeBulletLong]\n[WhenUse] Coin Power +1 for every 6 ([Combustion] + [Laceration]) on the main target (max 3)\n[WhenUse] If this unit has [MeursaultWorkerBee], Clash Power +1\n[WhenUse] Convert Coins equal to [MeursaultWorkerBee] into [SuperCoin]s, beginning with the 3rd Coin\n[WhenUse] At 3 [MeursaultWorkerBee], gain Atk Weight +1\n[EndSkill] [MeursaultSporeBulletReloading]",
+          "coinDescs": [
+            "This Coin hits only a single Target (prioritizes the main target)\nSpend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 3 [Combustion]",
+            "This Coin hits only a single Target (prioritizes the main target)\nSpend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "This Coin hits only a single Target (prioritizes the main target)\nSpend 1 [MeursaultSporeBulletLong]\n[OnSucceedAttack] Inflict 2 [Laceration]",
+            "[SuperCoin]\nSpend 1 [MeursaultSporeBulletShort]\nDeal -50% damage against sub-targets\nThis Coin deals +5% damage for every [MeursaultWorkerBee] on self (max 15%)\n\n[UnBrokenCoinOnSucceedAttack] If target's [MeursaultBeeSpore] is at max Stack, activate the following:\n- Deal ([Combustion] Potency x [MeursaultBeeSpore] Stack / 10) Wrath damage (rounded down)\n  - Dealing Wrath damage with this effect counts as activating [Combustion]\n- Target loses 1 [Combustion] Count\n- [MeursaultBeeSpore] on target expires\n\n[OnSucceedAttack] Inflict +1 [Combustion] Count and +2 [Laceration] Count"
+          ]
+        }
+      ]
+    },
+    "1051404": {
+      "name": "Spore Germination",
+      "descs": [
+        {
+          "desc": "[StartBattle][MeursaultSporeBulletReloading] (once per turn)\n[OnSucceedEvade] Heal 10 HP (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[StartBattle] [MeursaultSporeBulletReloading] (once per turn)\n[WhenUseEvade] Coin Power +1 for every 6 ([Combustion] + [Laceration]) on the attacker (max 3)\n[OnSucceedEvade] Heal 10 HP (once per turn)\n- If this unit has [MeursaultWorkerBee], heal an additional 5 HP for every Stack",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "passives": {
+    "1051401": {
+      "name": "Spore Diffusion",
+      "desc": "On Kill against targets with [MeursaultBeeSpore], inflict double the [MeursaultBeeSpore] for the next turn"
+    },
+    "1051411": {
+      "name": "Spore Diffusion",
+      "desc": "On Kill against targets with [MeursaultBeeSpore], gain the following effects:\n- Inflict double the [MeursaultBeeSpore] for the next turn\n- On Kill with a Base Attack Skill, gain (Spore Round the Skill spends / 2) Spore Round (rounded up; once per Skill)"
+    },
+    "1051402": {
+      "name": "E.G.O Alteration / Spore Round",
+      "desc": "Always Active: Begin Encounters with 10 [MeursaultSporeBulletLong] and 6 [MeursaultSporeBulletShort]\n\nOn Hit with Coins that spend Spore Round:\n- If [MeursaultSporeBulletLong] was spent, inflict 2 [MeursaultBeeSpore]\n- If [MeursaultSporeBulletShort] was spent, inflict 3 [MeursaultBeeSpore]\n- This counts as \"inflicting negative effects with the Skill\"\n\nBefore Coin Use of a Coin that spends [MeursaultSporeBulletShort], if this unit does not have [MeursaultSporeBulletShort], consume 2 SP and 2 [MeursaultSporeBulletLong] to gain 1 [MeursaultSporeBulletShort]\n\nIf this unit runs out of Spore Round mid-Skill, cancel all subsequent Coins and [MeursaultSporeBulletReloading]\n\nWhen targets with [MeursaultBeeSpore] are killed, gain 1 [MeursaultWorkerBee]"
+    },
+    "1051421": {
+      "name": "Worker Bee",
+      "desc": "Ally Pierce Base Attack Skill End: The said ally heals HP equal to 10% of HP damage dealt with the attack (2 times per Encounter)\n- For this turn, if all Base Attack Skills equipped on allied Skill Slots are Pierce Skills, all allies heal 10 SP at Turn End"
+    }
+  }
+}

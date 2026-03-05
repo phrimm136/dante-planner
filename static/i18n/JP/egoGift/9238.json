@@ -1,0 +1,9 @@
+{
+  "name": "桃色の花びら",
+  "descs": [
+    "味方が[Sinking]威力・[Sinking]回数または特殊沈潜を付与するスキルで敵へ攻撃的中時、[PinkPetals]1を付与\n- 敵の[Sinking]威力5につき、[PinkPetals]1を追加で付与 (最大4)",
+    "",
+    ""
+  ],
+  "obtain": "Shop"
+}

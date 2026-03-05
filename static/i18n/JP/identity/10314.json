@@ -219,7 +219,7 @@
     },
     "1031404": {
       "name": "解禁/開花 E.G.O::代行",
-      "desc": "ターン終了時に[BlessingOfIndexPrescriptAlly]が3/6/9なら、[UnlockBuffAlly_1]/[UnlockBuffAlly_2]/[UnlockBuffAlly_3]を得る\n\n[UnlockBuffAlly_1]を得るなら、精神力を15消耗して開花E.G.O::代行状態になる\n- 精神力が消耗する前に精神力が25まで増加して(増加した精神力 ÷ 5)だけ[KarmaOfIndexAlly]を得る (小数点繰り上げ)\n- 以降、ターン開始時に[UnlockBuff_Base]があるかつ精神力が25以上なら、\n精神力を15消耗して当該状態になる\n\n開花E.G.O::代行状態になるとき、\n- そのターンの混乱を解除\n(解除できない混乱なら、この状態になれない)\n- 当該状態の時、[Blandishment]を得る\n\nターン開始時に精神力が0以下なら、この状態が解除される"
+      "desc": "ターン終了時に[BlessingOfIndexPrescriptAlly]が3/6/9なら、[UnlockBuffAlly_1]/[UnlockBuffAlly_2]/[UnlockBuffAlly_3]を得る\n\n[UnlockBuffAlly_1]を得るなら、精神力を15消耗して開花E.G.O::代行状態になる\n- 精神力が消耗する前に精神力が25まで増加して(増加した精神力 ÷ 5)だけ[KarmaOfIndexAlly]を得る (小数点切り上げ)\n- 以降、ターン開始時に[UnlockBuff_Base]があるかつ精神力が25以上なら、\n精神力を15消耗して当該状態になる\n\n開花E.G.O::代行状態になるとき、\n- そのターンの混乱を解除\n(解除できない混乱なら、この状態になれない)\n- 当該状態の時、[Blandishment]を得る\n\nターン開始時に精神力が0以下なら、この状態が解除される"
     },
     "1031401": {
       "name": "やはり魔法のピピ様は当人が望むことを分かってくれるのだな！",

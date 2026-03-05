@@ -1,0 +1,19 @@
+{
+  "attributeType": "INDIGO",
+  "tag": [
+    "TIER_4"
+  ],
+  "keyword": "Sinking",
+  "price": 400,
+  "themePack": [],
+  "recipe": {
+    "materials": [
+      [
+        9144,
+        9086,
+        9238
+      ]
+    ]
+  },
+  "maxEnhancement": 0
+}

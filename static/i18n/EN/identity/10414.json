@@ -1,0 +1,152 @@
+{
+  "name": "Lobotomy E.G.O::\nFaint Aroma & Solitude",
+  "skills": {
+    "1041401": {
+      "name": "Bang. Bang.",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ ([Vibration] + [Sinking]), Coin Power +1",
+          "coinDescs": [
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict 2 [Vibration]"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 6 ([Vibration] + [Sinking]) on target (max 2)",
+          "coinDescs": [
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict 3 [Vibration]"
+          ]
+        }
+      ]
+    },
+    "1041402": {
+      "name": "Blossoming Fragrance in the Void",
+      "descs": [
+        {
+          "desc": "",
+          "coinDescs": [
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 2 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +1 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 2 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +1 [Vibration] Count"
+          ]
+        },
+        {
+          "desc": "[WhenUse] If target has 6+ ([Vibration] + [Sinking]), Coin Power +1",
+          "coinDescs": [
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict +2 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 3 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +2 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 3 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +2 [Vibration] Count"
+          ]
+        },
+        {},
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 6 ([Vibration] + [Sinking]) on target (max 2)\n[WhenUse] Deal +1% damage for every [AlriuneEGOThey] on target",
+          "coinDescs": [
+            "Spend 1 [BulletGodok]\n[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 3 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +2 [Vibration] Count",
+            "[OnSucceedAttack] Inflict 3 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +2 [Vibration] Count"
+          ]
+        }
+      ]
+    },
+    "1041403": {
+      "name": "Full Bloom",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[WhenUse] If target has 6+ ([Vibration] + [Sinking]), Coin Power +1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict 4 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1"
+          ]
+        },
+        {
+          "desc": "[WhenUse] Coin Power +1 for every 6 ([Vibration] + [Sinking]) on target (max 2)\n[WhenUse] Deal +1% damage for every [AlriuneEGOThey] on target",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 1 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict +3 [Sinking] Count",
+            "[OnSucceedAttack] Inflict 1 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict 4 [Sinking]",
+            "[OnSucceedAttack] Inflict 2 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] Deal Gloom damage equal to [Sinking] on target"
+          ]
+        }
+      ]
+    },
+    "1041404": {
+      "name": "A.A.T.",
+      "descs": [
+        {
+          "desc": "[EndBattle] Gain 10 [AlriuneEGOWe] (once per turn)\n[EndBattle] Gain 2 [Vulnerable] and 2 [Enhancement] next turn (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        },
+        {},
+        {},
+        {
+          "desc": "[EndBattle] Gain 10 [AlriuneEGOWe] (once per turn)\n[EndBattle] Gain 2 [Vulnerable] and 2 [Enhancement] next turn (once per turn)",
+          "coinDescs": [
+            ""
+          ]
+        }
+      ]
+    },
+    "1041405": {
+      "name": "Stories that Never Cease",
+      "descs": [
+        {
+          "desc": "[CantDuel]\n[WideAreaRampage]\nWhen this Skill inflicts [GodokPanicType], if the target already has [GodokPanicType] this turn, or will be inflicted with [GodokPanicType] next turn, trigger [VibrationExplosion] instead; then, reduce target's [Vibration] Count by 1",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict +1 [Sinking] Count\n[OnSucceedAttack] Inflict 2 [GodokPanicType] next turn",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 2 [GodokPanicType] next turn",
+            "[OnSucceedAttack] Inflict 2 [Vibration]\n[OnSucceedAttack] Inflict 2 [GodokPanicType] next turn"
+          ]
+        },
+        {},
+        {},
+        {}
+      ]
+    },
+    "1041406": {
+      "name": "Magnificent End",
+      "descs": [
+        {},
+        {},
+        {
+          "desc": "[CantDuel]\nExternal effects cannot trigger this Skill to be Reused\nDeal +30% damage for every excess Atk Weight beyond the number of actual targets (in Focused Encounters, the Part)\n[WhenUse] Final Power +1 for every 5 (sum of [AlriuneEGOThey] on all targets) (max 6)\n\n[EndSkill] Lose all [AlriuneEGOWe] on self",
+          "coinDescs": [
+            "[OnSucceedAttack] Inflict 5 [AlriuneEGOThey]\n[OnSucceedAttack] Inflict 3 [Sinking]\n[OnSucceedAttack] Inflict 3 [Vibration]\n[OnSucceedAttack] Trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1\n[OnSucceedAttack] Deal Gloom damage equal to [Sinking] on target"
+          ]
+        },
+        {}
+      ]
+    }
+  },
+  "passives": {
+    "1041401": {
+      "name": "Unwithering Flower",
+      "desc": "Gain 1 [AlriuneEGOWe] if the enemy takes [Sinking] damage\nGain [AlriuneEGOWe] equal to [AlriuneEGOThey] inflicted every time enemies gain [AlriuneEGOThey]\nGain 2 [AlriuneEGOWe] every time Tremor Burst is triggered regardless of the unit"
+    },
+    "1041402": {
+      "name": "A Void that Cannot be Filled",
+      "desc": "Always Active: Begin Encounters with 6 [BulletGodok]\n\nAt 1+ [BulletGodok], if the enemy has less than -40 SP or is Staggered at this unit or an ally's Attack End, use 'Bang. Bang.' as an Unopposed Attack (once per turn)\n\nAttack End: At 0 [BulletGodok], use 'Stories that Never Cease' as an Unopposed Attack against the target and consume 10 SP to [FullReload]"
+    },
+    "1041411": {
+      "name": "Unwithering Flower",
+      "desc": "Gain 1 [AlriuneEGOWe] if the enemy takes [Sinking] damage\nGain [AlriuneEGOWe] equal to [AlriuneEGOThey] inflicted every time enemies gain [AlriuneEGOThey]\nGain 2 [AlriuneEGOWe] every time Tremor Burst is triggered regardless of the unit\n\nAttack Skill End: At 30+ [AlriuneEGOWe], use 'Magnificent End' against the target with the highest [AlriuneEGOThey] Stack\n\nDeal +([AlriuneEGOThey] on the target)% damage against Staggered targets\n\nIf this unit lost 10%+ HP this turn, heal 3% HP and 10 SP (once per turn)"
+    },
+    "1041421": {
+      "name": "Spring's Genesis",
+      "desc": "When the ally with the fastest Speed hits an enemy with a Skill that inflicts [Sinking] Potency, Count, or 'Unique Sinking', inflict 2 [Vibration] and trigger [VibrationExplosion]; then, reduce target's [Vibration] Count by 1 (once per turn)"
+    }
+  }
+}
