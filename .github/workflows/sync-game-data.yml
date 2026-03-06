@@ -1,0 +1,110 @@
+name: Sync Game Data
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'static/**'
+
+concurrency:
+  group: sync-game-data
+  cancel-in-progress: true
+
+jobs:
+  # Skip if backend also changed (deploy.yml will restart the container, which reloads data via @PostConstruct)
+  check-skip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - name: Check if backend changed in same commit
+        id: check
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q '^backend/'; then
+            echo "Backend also changed — deploy.yml handles reload"
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  sync:
+    needs: check-skip
+    if: needs.check-skip.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Pull latest static data and refresh backend
+        env:
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          cat <<'EOF' > sync_script.sh
+          set -euo pipefail
+
+          cd /opt/danteplanner
+
+          # Pull latest changes (clean state, consistent with deploy.yml)
+          sudo -u ec2-user git -C /opt/danteplanner fetch origin main
+          sudo -u ec2-user git -C /opt/danteplanner reset --hard origin/main
+
+          # Fetch API key from SSM Parameter Store (single source of truth)
+          INTERNAL_API_KEY=$(aws ssm get-parameter --name "INTERNAL_API_KEY" --with-decryption --query "Parameter.Value" --output text --region "__AWS_REGION__")
+
+          # Trigger backend game data reload via docker exec
+          RESPONSE=$(docker exec danteplanner-backend curl -sf \
+            -X POST \
+            -H "X-Internal-Api-Key: $INTERNAL_API_KEY" \
+            http://localhost:8080/api/internal/refresh-game-data)
+
+          echo "Backend response: $RESPONSE"
+
+          # Verify populated status
+          if echo "$RESPONSE" | grep -q '"populated":"true"'; then
+            echo "Game data refresh successful"
+          else
+            echo "Game data refresh returned unexpected status"
+            exit 1
+          fi
+          EOF
+
+          sed -i "s|__AWS_REGION__|$AWS_REGION|g" sync_script.sh
+
+          jq -n --rawfile cmd sync_script.sh '{"commands": [$cmd]}' > ssm_params.json
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters file://ssm_params.json \
+            --query "Command.CommandId" --output text)
+
+          echo "Command ID: $COMMAND_ID"
+
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID" || true
+
+          INVOCATION_RESULT=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID")
+
+          STATUS=$(echo "$INVOCATION_RESULT" | jq -r '.Status')
+          echo "--- STDOUT ---"
+          echo "$INVOCATION_RESULT" | jq -r '.StandardOutputContent'
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "--- ERROR LOG ---"
+            echo "$INVOCATION_RESULT" | jq -r '.StandardErrorContent'
+            exit 1
+          fi

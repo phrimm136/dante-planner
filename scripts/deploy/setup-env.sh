@@ -38,6 +38,7 @@ fi
 MYSQL_PASSWORD=$(aws ssm get-parameter --name "MYSQL_PASSWORD" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 SENTRY_DSN=$(aws ssm get-parameter --name "SENTRY_DSN" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
+INTERNAL_API_KEY=$(aws ssm get-parameter --name "INTERNAL_API_KEY" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 
 # Fetch JWT keys from SSM and write to files
 mkdir -p "$DEPLOY_DIR/jwt-keys"
@@ -68,6 +69,7 @@ JWT_PUBLIC_KEY_PATH=/app/keys/public_key.pem
 JWT_ENCRYPTION_KEY=$JWT_ENCRYPTION_KEY
 SENTRY_DSN=$SENTRY_DSN
 TRUSTED_PROXY_IPS=172.16.0.0/12
+INTERNAL_API_KEY=$INTERNAL_API_KEY
 CORS_ALLOWED_ORIGINS=https://dante-planner.com
 ENV_EOF
 
