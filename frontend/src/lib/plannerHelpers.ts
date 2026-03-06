@@ -98,7 +98,7 @@ export function getUnaffordableGiftNames(
   egoGiftI18n: Record<string, string>
 ): { ids: string[]; names: string[] } {
   const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
-  const names = ids.map(id => egoGiftI18n[id] ?? id)
+  const names = ids.map(id => egoGiftI18n[getBaseGiftId(id)] ?? id)
   return { ids, names }
 }
 
@@ -826,7 +826,7 @@ function validateFloorGiftAffordability(
       if (unaffordableIds.length === 0) return []
 
       const floorNumber = i + 1
-      const giftNames = unaffordableIds.map(id => egoGiftI18n?.[id] ?? id).join(', ')
+      const giftNames = unaffordableIds.map(id => egoGiftI18n?.[getBaseGiftId(id)] ?? id).join(', ')
 
       return [{
         code: 'FLOOR_UNAFFORDABLE_GIFT' as const,
