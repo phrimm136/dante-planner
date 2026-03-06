@@ -1,0 +1,3 @@
+[submodule "static"]
+	path = static
+	url = git@github.com:phrimm136/danteplanner-static.git

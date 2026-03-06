@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'static/**'
+      - 'static'
+      - '.github/workflows/sync-game-data.yml'
 
 concurrency:
   group: sync-game-data
@@ -22,11 +23,11 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Check if backend changed in same commit
+      - name: Check if deploy will restart containers
         id: check
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q '^backend/'; then
-            echo "Backend also changed — deploy.yml handles reload"
+          if git diff --name-only HEAD~1 HEAD | grep -qE '^(backend/|\.github/workflows/deploy\.yml)'; then
+            echo "Deploy will restart containers — skip sync"
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
             echo "should_run=true" >> "$GITHUB_OUTPUT"
@@ -56,8 +57,11 @@ jobs:
           cd /opt/danteplanner
 
           # Pull latest changes (clean state, consistent with deploy.yml)
+          sudo -u ec2-user git -C /opt/danteplanner config --remove-section url."https://x-access-token" 2>/dev/null || true
+          sudo -u ec2-user git -C /opt/danteplanner remote set-url origin git@github.com:phrimm136/dante-planner.git
           sudo -u ec2-user git -C /opt/danteplanner fetch origin main
           sudo -u ec2-user git -C /opt/danteplanner reset --hard origin/main
+          sudo -u ec2-user git -C /opt/danteplanner submodule update --init
 
           # Fetch API key from SSM Parameter Store (single source of truth)
           INTERNAL_API_KEY=$(aws ssm get-parameter --name "INTERNAL_API_KEY" --with-decryption --query "Parameter.Value" --output text --region "__AWS_REGION__")

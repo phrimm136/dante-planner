@@ -8,6 +8,19 @@ import path from 'path'
 import fs from 'fs'
 import type { Plugin } from 'vite'
 
+// Plugin to exclude scripts/ from publicDir output
+function excludeScriptsFromPublic(): Plugin {
+  return {
+    name: 'exclude-scripts-from-public',
+    writeBundle() {
+      const scriptsDir = path.resolve(__dirname, 'dist/scripts')
+      if (fs.existsSync(scriptsDir)) {
+        fs.rmSync(scriptsDir, { recursive: true })
+      }
+    },
+  }
+}
+
 // Plugin to return 404 for missing static files (images, data, i18n)
 function staticFile404Plugin(): Plugin {
   return {
@@ -35,6 +48,7 @@ function staticFile404Plugin(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    excludeScriptsFromPublic(),
     staticFile404Plugin(),
     // tanstackRouter plugin disabled - using programmatic routing in lib/router.tsx instead
     // tanstackRouter({

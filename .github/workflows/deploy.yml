@@ -166,12 +166,17 @@ jobs:
 
           # Bootstrap: install git if needed (root), then update source as ec2-user
           command -v git &> /dev/null || yum install -y git
+          chown -R ec2-user:ec2-user /opt/danteplanner
           if [ ! -d "/opt/danteplanner/.git" ]; then
-            sudo -u ec2-user git clone https://github.com/__GITHUB_REPO__ /opt/danteplanner
+            sudo -u ec2-user git init
+            sudo -u ec2-user git remote add origin git@github.com:__GITHUB_REPO__.git
           else
-            sudo -u ec2-user git -C /opt/danteplanner fetch origin main
-            sudo -u ec2-user git -C /opt/danteplanner reset --hard origin/main
+            sudo -u ec2-user git config --remove-section url."https://x-access-token" 2>/dev/null || true
+            sudo -u ec2-user git remote set-url origin git@github.com:__GITHUB_REPO__.git
           fi
+          sudo -u ec2-user git fetch origin main
+          sudo -u ec2-user git reset --hard origin/main
+          sudo -u ec2-user git submodule update --init
 
           # Write deploy config (GitHub secrets -> temp file for scripts)
           cat > /tmp/deploy-config.env <<CONFIG
