@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.annotation.PostConstruct;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Map;
 
 /**
@@ -29,6 +33,13 @@ public class InternalController {
     @Value("${internal.api-key:}")
     private String apiKey;
 
+    @PostConstruct
+    void validateApiKey() {
+        if (apiKey.isBlank()) {
+            log.warn("internal.api-key is not configured — /api/internal endpoints will reject all requests");
+        }
+    }
+
     /**
      * Reload game data from static JSON files.
      *
@@ -39,7 +50,9 @@ public class InternalController {
     public ResponseEntity<Map<String, String>> refreshGameData(
             @RequestHeader("X-Internal-Api-Key") String providedKey) {
 
-        if (apiKey.isEmpty() || !apiKey.equals(providedKey)) {
+        if (apiKey.isBlank() || !MessageDigest.isEqual(
+                apiKey.getBytes(StandardCharsets.UTF_8),
+                providedKey.getBytes(StandardCharsets.UTF_8))) {
             log.warn("Unauthorized refresh-game-data attempt");
             return ResponseEntity.status(403)
                     .body(Map.of("error", "Invalid API key"));

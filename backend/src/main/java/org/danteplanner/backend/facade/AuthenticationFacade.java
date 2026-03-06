@@ -95,7 +95,7 @@ public class AuthenticationFacade {
                 user = deletedUser.get();
                 lifecycleService.reactivateAccount(user.getId());
                 reactivated = true;
-                log.info("Reactivated soft-deleted account for user: {}", user.getEmail());
+                log.info("Reactivated soft-deleted account for user: {}", user.getId());
             } else if (deletedUser.isPresent()) {
                 // User exists but not deleted - use as-is
                 user = deletedUser.get();
@@ -117,8 +117,8 @@ public class AuthenticationFacade {
         String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String refreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
 
-        log.info("User authenticated successfully via {}: {} (reactivated: {})",
-                providerName, user.getEmail(), reactivated);
+        log.info("User authenticated successfully via {}: userId={} (reactivated: {})",
+                providerName, user.getId(), reactivated);
         return new AuthResult(user, accessToken, refreshToken, reactivated);
     }
 
@@ -164,7 +164,7 @@ public class AuthenticationFacade {
         String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String newRefreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
 
-        log.info("Token refreshed successfully for user: {}", user.getEmail());
+        log.info("Token refreshed successfully for user: {}", user.getId());
         return new AuthResult(user, newAccessToken, newRefreshToken, false);
     }
 
