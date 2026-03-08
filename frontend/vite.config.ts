@@ -7,6 +7,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 import fs from 'fs'
 import type { Plugin } from 'vite'
+import { hashStaticPlugin } from './vite-plugin-hash-static'
 
 // Plugin to exclude scripts/ from publicDir output
 function excludeScriptsFromPublic(): Plugin {
@@ -50,6 +51,7 @@ export default defineConfig({
   plugins: [
     excludeScriptsFromPublic(),
     staticFile404Plugin(),
+    hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
     // tanstackRouter plugin disabled - using programmatic routing in lib/router.tsx instead
     // tanstackRouter({
     //   autoCodeSplitting: true,
@@ -84,10 +86,17 @@ export default defineConfig({
       },
     },
   },
+  json: {
+    namedExports: false,
+    stringify: true,
+  },
   publicDir: '../static',
   build: {
     rollupOptions: {
       output: {
+        entryFileNames: 'a/[hash:12].js',
+        chunkFileNames: 'a/[hash:12].js',
+        assetFileNames: 'a/[hash:12][extname]',
         manualChunks: {
           // Core React - rarely changes, cache long-term
           'react-vendor': ['react', 'react-dom'],
