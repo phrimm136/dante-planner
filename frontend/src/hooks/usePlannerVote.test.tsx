@@ -12,11 +12,24 @@ import React from 'react'
 import { usePlannerVote } from './usePlannerVote'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
-// Mock the API client
+// Mock the API client — must include ConflictError since the hook imports it
+const { MockConflictError } = vi.hoisted(() => {
+  class MockConflictError extends Error {
+    readonly serverVersion: number
+    constructor(message: string, serverVersion: number) {
+      super(message)
+      this.name = 'ConflictError'
+      this.serverVersion = serverVersion
+    }
+  }
+  return { MockConflictError }
+})
+
 vi.mock('@/lib/api', () => ({
   ApiClient: {
     post: vi.fn(),
   },
+  ConflictError: MockConflictError,
 }))
 
 // Import after mocking
