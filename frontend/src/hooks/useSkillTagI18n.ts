@@ -14,10 +14,8 @@ function createSkillTagQueryOptions(language: string) {
   return queryOptions({
     queryKey: skillTagQueryKeys.byLanguage(language),
     queryFn: async () => {
-      const response = await fetch(`/i18n/${language}/skillTag.json`)
-      if (!response.ok) throw new Error(`Failed to fetch skillTag.json: ${response.status}`)
-      const data: unknown = await response.json()
-      const result = SkillTagSchema.safeParse(data)
+      const module = await import(`@static/i18n/${language}/skillTag.json`)
+      const result = SkillTagSchema.safeParse(module.default)
 
       if (!result.success) {
         if (import.meta.env.DEV) {

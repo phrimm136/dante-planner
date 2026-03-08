@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
+import { getHPIconPath, getSpeedIconPath, getDefenseLevelIconPath } from '@/lib/assetPaths'
+
 interface StatusPanelProps {
   hp: number
   minSpeed: number
@@ -19,14 +21,14 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
       <div className="grid grid-cols-3">
         {/* HP */}
         <div className="flex flex-col items-center gap-1">
-          <img src="/images/UI/identity/hp.webp" alt="HP" className="w-6 h-6 object-contain" />
+          <img src={getHPIconPath()} alt="HP" className="w-6 h-6 object-contain" />
           <span className="text-xs tabular-nums">{hp}</span>
         </div>
 
         {/* Speed */}
         <div className="flex flex-col items-center gap-1">
           <img
-            src="/images/UI/identity/speed.webp"
+            src={getSpeedIconPath()}
             alt="Speed"
             className="w-6 h-6 object-contain"
           />
@@ -38,7 +40,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
         {/* Defense */}
         <div className="flex flex-col items-center gap-1">
           <img
-            src="/images/UI/identity/defense.webp"
+            src={getDefenseLevelIconPath()}
             alt="Defense"
             className="w-6 h-6 object-contain"
           />

@@ -1,3 +1,4 @@
+import { getTiptapPlaceholderPath } from './assetPaths'
 import type { Node as PMNode } from "@tiptap/pm/model"
 import type { Transaction } from "@tiptap/pm/state"
 import {
@@ -384,7 +385,7 @@ export const handleImageUpload = async (
     onProgress?.({ progress })
   }
 
-  return "/images/tiptap-ui-placeholder-image.jpg"
+  return getTiptapPlaceholderPath()
 }
 
 type ProtocolOptions = {

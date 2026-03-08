@@ -6,8 +6,8 @@ import { NotFoundError } from '@/lib/api'
 import NotFoundPage from '@/routes/NotFoundPage'
 
 interface ErrorFallbackProps {
-  error: Error
-  resetErrorBoundary: () => void
+  error: unknown
+  resetErrorBoundary: (...args: unknown[]) => void
 }
 
 /**
@@ -29,9 +29,11 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
     return <NotFoundPage />
   }
 
+  const errorObj = error instanceof Error ? error : new Error(String(error))
+
   // In dev: show actual error for debugging
   // In production: show generic user-friendly message
-  const errorMessage = isDev ? error.message : t('errors.generic.message')
+  const errorMessage = isDev ? errorObj.message : t('errors.generic.message')
 
   return (
     <div className="container mx-auto p-8 min-h-screen flex items-center justify-center">
@@ -40,13 +42,13 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
           {t('errors.generic.title')}
         </h2>
         <p className="text-muted-foreground mb-4">{errorMessage}</p>
-        {isDev && error.stack && (
+        {isDev && errorObj.stack && (
           <details className="mt-4 text-left">
             <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
               {t('errors.stackTrace')}
             </summary>
             <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">
-              {error.stack}
+              {errorObj.stack}
             </pre>
           </details>
         )}
@@ -71,7 +73,7 @@ export function ErrorBoundary({ children }: ErrorBoundaryProps) {
   return (
     <ReactErrorBoundary
       FallbackComponent={ErrorFallback}
-      onError={(error: Error, info: ErrorInfo) => {
+      onError={(error: unknown, info: ErrorInfo) => {
         console.error('Error boundary caught error:', error, info)
       }}
       onReset={() => {

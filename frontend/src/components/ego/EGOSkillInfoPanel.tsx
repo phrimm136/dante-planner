@@ -7,6 +7,7 @@ import { getDisplayFontForNumeric } from '@/lib/utils'
 import { CoinDisplay } from '@/components/identity/CoinDisplay'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import type { EGOSkillDataEntry } from '@/types/EGOTypes'
+import { getAttackLevelIconPath } from '@/lib/assetPaths'
 
 interface EGOSkillInfoPanelProps {
   skillName: string
@@ -58,7 +59,7 @@ export function EGOSkillInfoPanel({
         {/* Level */}
         <div className="flex items-center gap-1">
           <img
-            src="/images/UI/identity/attack.webp"
+            src={getAttackLevelIconPath()}
             alt="Attack"
             className="w-4 h-4"
           />
@@ -116,7 +117,7 @@ export function EGOSkillInfoPanelWithSuspense({
       <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-sm">
         <div className="flex items-center gap-2">
           <img
-            src="/images/UI/identity/attack.webp"
+            src={getAttackLevelIconPath()}
             alt="Attack"
             className="w-11 h-11"
           />

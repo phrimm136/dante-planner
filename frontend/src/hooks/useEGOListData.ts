@@ -14,10 +14,8 @@ function createEGOSpecListQueryOptions() {
   return queryOptions({
     queryKey: egoListQueryKeys.spec(),
     queryFn: async () => {
-      const response = await fetch('/data/egoSpecList.json')
-      if (!response.ok) throw new Error(`Failed to fetch egoSpecList: ${response.status}`)
-      const data: unknown = await response.json()
-      const result = EGOSpecListSchema.safeParse(data)
+      const module = await import('@static/data/egoSpecList.json')
+      const result = EGOSpecListSchema.safeParse(module.default)
       if (!result.success) {
         throw new Error(`[ego specList] Validation failed: ${result.error.message}`)
       }
@@ -32,10 +30,8 @@ function createEGONameListQueryOptions(language: string) {
   return queryOptions({
     queryKey: egoListQueryKeys.i18n(language),
     queryFn: async () => {
-      const response = await fetch(`/i18n/${language}/egoNameList.json`)
-      if (!response.ok) throw new Error(`Failed to fetch egoNameList: ${response.status}`)
-      const data: unknown = await response.json()
-      const result = EGONameListSchema.safeParse(data)
+      const module = await import(`@static/i18n/${language}/egoNameList.json`)
+      const result = EGONameListSchema.safeParse(module.default)
       if (!result.success) {
         throw new Error(`[ego nameList / ${language}] Validation failed: ${result.error.message}`)
       }

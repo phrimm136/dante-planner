@@ -7,6 +7,9 @@ import {
   getSinnerIconPath,
   getSinnerBGPath,
   getButtonOnHoverPath,
+  getButtonBasePath,
+  getButtonSwapImagePath,
+  getButtonExpandImagePath,
 } from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
@@ -121,7 +124,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             disabled={!canShowGacksung}
             className="group relative w-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundImage: 'url(/images/UI/common/button.webp)',
+              backgroundImage: `url(${getButtonBasePath()})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
@@ -132,7 +135,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 group-disabled:group-hover:opacity-0 group-disabled:group-active:opacity-0 transition-opacity pointer-events-none scale-115"
             />
             <img
-              src="/images/UI/common/buttonSwapImage.webp"
+              src={getButtonSwapImagePath()}
               alt={t('a11y.swapImage')}
               className="relative w-full h-full object-contain p-2"
             />
@@ -143,7 +146,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
             onClick={handleExpandImage}
             className="group relative w-12 h-12"
             style={{
-              backgroundImage: 'url(/images/UI/common/button.webp)',
+              backgroundImage: `url(${getButtonBasePath()})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
@@ -154,7 +157,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none scale-115"
             />
             <img
-              src="/images/UI/common/buttonExpandImage.webp"
+              src={getButtonExpandImagePath()}
               alt={t('a11y.expandImage')}
               className="relative w-full h-full object-contain p-2"
             />

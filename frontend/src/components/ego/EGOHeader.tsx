@@ -6,6 +6,8 @@ import {
   getSinnerIconPath,
   getSinnerBGPath,
   getButtonOnHoverPath,
+  getButtonBasePath,
+  getButtonExpandImagePath,
 } from '@/lib/assetPaths'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/lib/constants'
@@ -96,7 +98,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
             onClick={handleExpandImage}
             className="group relative w-12 h-12"
             style={{
-              backgroundImage: 'url(/images/UI/common/button.webp)',
+              backgroundImage: `url(${getButtonBasePath()})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
             }}
@@ -107,7 +109,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
               className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity pointer-events-none scale-115"
             />
             <img
-              src="/images/UI/common/buttonExpandImage.webp"
+              src={getButtonExpandImagePath()}
               alt={t('a11y.expandImage')}
               className="relative w-full h-full object-contain p-2"
             />
