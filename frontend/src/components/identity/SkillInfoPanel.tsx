@@ -7,7 +7,7 @@ import { getDisplayFontForNumeric } from '@/lib/utils'
 import { CoinDisplay } from './CoinDisplay'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import type { IdentitySkillDataEntry } from '@/types/IdentityTypes'
-import { getAttackWeightIconPath } from '@/lib/assetPaths'
+import { getAttackWeightIconPath, getAttackLevelIconPath, getDefenseLevelIconPath } from '@/lib/assetPaths'
 
 interface SkillInfoPanelProps {
   skillName: string
@@ -63,11 +63,7 @@ export function SkillInfoPanel({
         {/* Level */}
         <div className="flex items-center gap-1">
           <img
-            src={
-              isDefenseSkill
-                ? '/images/UI/identity/defense.webp'
-                : '/images/UI/identity/attack.webp'
-            }
+            src={isDefenseSkill ? getDefenseLevelIconPath() : getAttackLevelIconPath()}
             alt={isDefenseSkill ? 'Defense' : 'Attack'}
             className="w-10 h-10"
           />
@@ -129,7 +125,7 @@ export function SkillInfoPanelWithSuspense({
       <div className="flex items-center gap-3 text-sm">
         <div className="flex items-center gap-2">
           <img
-            src={isDefenseSkill ? '/images/UI/identity/defense.webp' : '/images/UI/identity/attack.webp'}
+            src={isDefenseSkill ? getDefenseLevelIconPath() : getAttackLevelIconPath()}
             alt={isDefenseSkill ? 'Defense' : 'Attack'}
             className="w-11 h-11"
           />

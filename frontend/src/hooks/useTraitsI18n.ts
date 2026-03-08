@@ -13,10 +13,8 @@ function createTraitsI18nQueryOptions(language: string) {
   return queryOptions({
     queryKey: traitsI18nQueryKeys.i18n(language),
     queryFn: async () => {
-      const response = await fetch(`/i18n/${language}/unitKeywords.json`)
-      if (!response.ok) throw new Error(`Failed to fetch unitKeywords.json: ${response.status}`)
-      const data: unknown = await response.json()
-      const result = UnitKeywordsSchema.safeParse(data)
+      const module = await import(`@static/i18n/${language}/unitKeywords.json`)
+      const result = UnitKeywordsSchema.safeParse(module.default)
       if (!result.success) {
         throw new Error(`[traits i18n / ${language}] Validation failed: ${result.error.message}`)
       }

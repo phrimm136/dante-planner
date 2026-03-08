@@ -16,28 +16,20 @@ function createKeywordMatchQueryOptions(language: string) {
   return queryOptions({
     queryKey: searchMappingsQueryKeys.keywordMatch(language),
     queryFn: async (): Promise<KeywordMatch> => {
+      let module: { default: unknown }
       try {
-        const response = await fetch(`/i18n/${language}/keywordMatch.json`)
-        // File doesn't exist for this language - return empty object
-        if (response.status === 404) {
-          return {}
-        }
-        if (!response.ok) throw new Error(`Failed to fetch keywordMatch.json: ${response.status}`)
-        const data: unknown = await response.json()
-        const result = KeywordMatchSchema.safeParse(data)
-
-        if (!result.success) {
-          if (import.meta.env.DEV) {
-            console.error('[keywordMatch] Validation failed:', result.error.issues)
-          }
-          throw new Error(`[keywordMatch / ${language}] Invalid data structure`)
-        }
-
-        return result.data
-      } catch (error) {
-        // Re-throw validation errors
-        throw error
+        module = await import(`@static/i18n/${language}/keywordMatch.json`)
+      } catch {
+        return {}
       }
+      const result = KeywordMatchSchema.safeParse(module.default)
+      if (!result.success) {
+        if (import.meta.env.DEV) {
+          console.error('[keywordMatch] Validation failed:', result.error.issues)
+        }
+        throw new Error(`[keywordMatch / ${language}] Invalid data structure`)
+      }
+      return result.data
     },
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days - i18n data rarely changes
     placeholderData: keepPreviousData,
@@ -49,28 +41,20 @@ function createUnitKeywordsQueryOptions(language: string) {
   return queryOptions({
     queryKey: searchMappingsQueryKeys.unitKeywords(language),
     queryFn: async (): Promise<UnitKeywords> => {
+      let module: { default: unknown }
       try {
-        const response = await fetch(`/i18n/${language}/unitKeywords.json`)
-        // File doesn't exist for this language - return empty object
-        if (response.status === 404) {
-          return {}
-        }
-        if (!response.ok) throw new Error(`Failed to fetch unitKeywords.json: ${response.status}`)
-        const data: unknown = await response.json()
-        const result = UnitKeywordsSchema.safeParse(data)
-
-        if (!result.success) {
-          if (import.meta.env.DEV) {
-            console.error('[unitKeywords] Validation failed:', result.error.issues)
-          }
-          throw new Error(`[unitKeywords / ${language}] Invalid data structure`)
-        }
-
-        return result.data
-      } catch (error) {
-        // Re-throw validation errors
-        throw error
+        module = await import(`@static/i18n/${language}/unitKeywords.json`)
+      } catch {
+        return {}
       }
+      const result = UnitKeywordsSchema.safeParse(module.default)
+      if (!result.success) {
+        if (import.meta.env.DEV) {
+          console.error('[unitKeywords] Validation failed:', result.error.issues)
+        }
+        throw new Error(`[unitKeywords / ${language}] Invalid data structure`)
+      }
+      return result.data
     },
     staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days - i18n data rarely changes
     placeholderData: keepPreviousData,
