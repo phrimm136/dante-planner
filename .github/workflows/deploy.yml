@@ -11,12 +11,6 @@ on:
       - 'scripts/deploy/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
-    inputs:
-      setup_cloudwatch:
-        description: 'Run CloudWatch alarms setup (one-time)'
-        required: false
-        default: 'false'
-        type: boolean
 
 concurrency:
   group: production-deploy
@@ -346,89 +340,7 @@ jobs:
             exit 1
           fi
 
-  # 5. CloudWatch Setup (one-time, manual trigger only)
-  setup-cloudwatch:
-    needs: health-check
-    if: ${{ github.event.inputs.setup_cloudwatch == 'true' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup CloudWatch alarms via SSM
-        env:
-          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
-        run: |
-          echo "Setting up CloudWatch alarms and S3 logging..."
-
-          cat <<'EOF' > cloudwatch_script.sh
-          cd /opt/danteplanner
-          sudo -u ec2-user bash -e <<'INNER_BATCH'
-          cd /opt/danteplanner
-
-          # Export environment for the script
-          export AWS_REGION="__AWS_REGION__"
-          export EC2_INSTANCE_ID="__INSTANCE_ID__"
-          export ALERT_EMAIL="__ALERT_EMAIL__"
-          export S3_BACKUP_BUCKET="danteplanner-backups"
-          export S3_LOGS_BUCKET="danteplanner-logs"
-
-          # Run the setup script
-          chmod +x scripts/ops/setup-cloudwatch-alarms.sh
-          ./scripts/ops/setup-cloudwatch-alarms.sh
-          INNER_BATCH
-          EOF
-
-          # Replace placeholders with actual values
-          sed -i "s|__AWS_REGION__|$AWS_REGION|g" cloudwatch_script.sh
-          sed -i "s|__INSTANCE_ID__|$INSTANCE_ID|g" cloudwatch_script.sh
-          sed -i "s|__ALERT_EMAIL__|$ALERT_EMAIL|g" cloudwatch_script.sh
-
-          jq -n --rawfile cmd cloudwatch_script.sh '{"commands": [$cmd]}' > cloudwatch_params.json
-
-          RAW_COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "$INSTANCE_ID" \
-            --document-name "AWS-RunShellScript" \
-            --parameters file://cloudwatch_params.json \
-            --query "Command.CommandId" --output text)
-
-          COMMAND_ID=$(echo $RAW_COMMAND_ID | tr -d '"' | tr -d ' ')
-          CLEAN_INSTANCE_ID=$(echo "$INSTANCE_ID" | tr -d '"' | tr -d ' ')
-
-          echo "Command ID: $COMMAND_ID"
-
-          aws ssm wait command-executed \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$CLEAN_INSTANCE_ID" || true
-
-          RESULT=$(aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$CLEAN_INSTANCE_ID")
-
-          STATUS=$(echo "$RESULT" | jq -r '.Status')
-          echo "Status: $STATUS"
-
-          # Always show stdout
-          echo "--- STDOUT ---"
-          echo "$RESULT" | jq -r '.StandardOutputContent'
-
-          if [ "$STATUS" != "Success" ]; then
-            echo "--- STDERR ---"
-            echo "$RESULT" | jq -r '.StandardErrorContent'
-            exit 1
-          fi
-
-          echo ""
-          echo "CloudWatch setup completed successfully"
-
-  # 6. Notify PR on failure
+  # 5. Notify PR on failure
   notify-failure:
     needs: [detect-changes, build-and-push, deploy, health-check]
     if: failure()
