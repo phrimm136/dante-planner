@@ -253,38 +253,11 @@ export function PlannerDetailHeader({
     }
   }
 
-  const handlePublishToggle = () => {
+  const callPublishMutation = (wasPublished: boolean) => {
     if (!plannerId || !savedPlanner) return
 
-    // Only validate when publishing (not unpublishing)
-    if (!savedPlanner.metadata.published && savedPlanner.config.type === 'MIRROR_DUNGEON') {
-      const content = savedPlanner.content as MDPlannerContent
-      const category = savedPlanner.config.category as MDCategory
-      const { isValid, errors } = validatePlannerForSave(
-        savedPlanner.metadata.title,
-        content,
-        category,
-        egoGiftSpec,
-        egoGiftI18n
-      )
-      if (!isValid) {
-        const friendly = toUserFriendlyError(errors[0])
-        toast.error(t(friendly.key, friendly.params))
-        return
-      }
-    }
-
-    // Check if sync is not enabled and user is trying to publish (not unpublish)
-    if (syncEnabled !== true && !savedPlanner.metadata.published) {
-      // Show warning dialog for sync-off publish
-      setShowPublishWarning(true)
-      return
-    }
-
-    // Normal publish flow (sync enabled or unpublishing)
     publishMutation.mutate(plannerId, {
       onSuccess: async (response) => {
-        // Update local storage with new publish state
         const updatedPlanner: SaveablePlanner = {
           ...savedPlanner,
           metadata: {
@@ -294,15 +267,14 @@ export function PlannerDetailHeader({
         }
         await savePlanner(updatedPlanner)
 
-        // Invalidate query to refetch updated planner
         void queryClient.invalidateQueries({
           queryKey: plannerQueryKeys.detail(plannerId),
         })
 
-        const wasPublished = savedPlanner.metadata.published
         toast.success(
           t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success')
         )
+        setIsUploadingForPublish(false)
       },
       onError: (error) => {
         if (error instanceof BannedError) {
@@ -312,18 +284,22 @@ export function PlannerDetailHeader({
         } else {
           toast.error(t('pages.plannerMD.publish.failed'))
         }
+        setIsUploadingForPublish(false)
       },
     })
   }
 
-  const handlePublishWithUpload = async () => {
+  const handlePublishToggle = () => {
     if (!plannerId || !savedPlanner) return
 
-    setIsUploadingForPublish(true)
-    setShowPublishWarning(false)
+    // Unpublishing — ensure plan is on server, then toggle
+    if (savedPlanner.metadata.published) {
+      void handlePublishWithUpload(true)
+      return
+    }
 
-    try {
-      // Validate before upload (strict: title + theme packs required)
+    // Only validate when publishing
+    if (savedPlanner.config.type === 'MIRROR_DUNGEON') {
       const content = savedPlanner.content as MDPlannerContent
       const category = savedPlanner.config.category as MDCategory
       const { isValid, errors } = validatePlannerForSave(
@@ -336,50 +312,35 @@ export function PlannerDetailHeader({
       if (!isValid) {
         const friendly = toUserFriendlyError(errors[0])
         toast.error(t(friendly.key, friendly.params))
-        setIsUploadingForPublish(false)
         return
       }
+    }
 
-      // Step 1: Upload plan to server (force sync even though sync is disabled)
+    // Sync disabled — show warning dialog (handlePublishWithUpload called on confirm)
+    if (syncEnabled !== true) {
+      setShowPublishWarning(true)
+      return
+    }
+
+    // Sync enabled — upload then publish
+    handlePublishWithUpload()
+  }
+
+  const handlePublishWithUpload = async (wasPublished = false) => {
+    if (!plannerId || !savedPlanner) return
+
+    setIsUploadingForPublish(true)
+    setShowPublishWarning(false)
+
+    try {
       await syncAdapter.syncToServer(savedPlanner)
-
-      // Step 2: Call publish API
-      publishMutation.mutate(plannerId, {
-        onSuccess: async (response) => {
-          // Update local storage with new publish state
-          const updatedPlanner: SaveablePlanner = {
-            ...savedPlanner,
-            metadata: {
-              ...savedPlanner.metadata,
-              published: response.published,
-            },
-          }
-          await savePlanner(updatedPlanner)
-
-          // Invalidate query to refetch updated planner
-          void queryClient.invalidateQueries({
-            queryKey: plannerQueryKeys.detail(plannerId),
-          })
-
-          toast.success(t('pages.plannerMD.publish.success'))
-          setIsUploadingForPublish(false)
-        },
-        onError: (error) => {
-          if (error instanceof BannedError) {
-            toast.error(t('moderation.banned', { ns: 'common' }))
-          } else if (error instanceof TimedOutError) {
-            toast.error(t('moderation.timedOut', { ns: 'common' }))
-          } else {
-            toast.error(t('pages.plannerMD.publish.failed'))
-          }
-          setIsUploadingForPublish(false)
-        },
-      })
+      callPublishMutation(wasPublished)
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
       toast.error(t('pages.plannerMD.publish.uploadFailed'))
       setIsUploadingForPublish(false)
     }
+    return
   }
 
   // Format dates with i18n locale

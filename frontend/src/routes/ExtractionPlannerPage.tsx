@@ -19,17 +19,18 @@ import { ExtractionCalculator } from '@/components/extraction/ExtractionCalculat
  * Error fallback component for calculator errors
  */
 function ErrorFallback({ error, resetErrorBoundary }: {
-  error: Error
+  error: unknown
   resetErrorBoundary: () => void
 }) {
   const { t } = useTranslation('common')
+  const message = error instanceof Error ? error.message : String(error)
 
   return (
     <div className="bg-destructive/10 border border-destructive rounded-md text-center">
       <h2 className="text-lg font-semibold text-destructive mb-2">
         {t('errors.generic.title')}
       </h2>
-      <p className="text-muted-foreground mb-4">{error.message}</p>
+      <p className="text-muted-foreground mb-4">{message}</p>
       <button
         onClick={resetErrorBoundary}
         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
