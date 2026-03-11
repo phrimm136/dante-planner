@@ -1,8 +1,8 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "4.0.3"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "4.4.1.3373"
+    id("org.sonarqube") version "7.2.3.7755"
     id("org.owasp.dependencycheck") version "12.2.0"
     jacoco
 }
@@ -39,9 +39,9 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
 
-    implementation("io.jsonwebtoken:jjwt-api:0.12.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
+    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
     runtimeOnly("com.mysql:mysql-connector-j")
 
@@ -54,16 +54,16 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
-    implementation("org.jsoup:jsoup:1.17.2")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:7.3.0")
-    implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+    implementation("org.jsoup:jsoup:1.22.1")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.34.1")
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("com.h2database:h2")
-    testImplementation("org.testcontainers:testcontainers:1.21.3")
-    testImplementation("org.testcontainers:mysql:1.21.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.21.3")
+    testImplementation("org.testcontainers:testcontainers:2.0.3")
+    testImplementation("org.testcontainers:mysql:2.0.3")
+    testImplementation("org.testcontainers:junit-jupiter:2.0.3")
 }
 
 tasks.withType<Test> {
