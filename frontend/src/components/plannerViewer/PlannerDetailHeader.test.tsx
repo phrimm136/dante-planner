@@ -539,7 +539,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     })
   })
 
-  it('calls publishMutation directly when syncEnabled is true', async () => {
+  it('uploads then publishes when syncEnabled is true', async () => {
+    mockSyncToServer.mockResolvedValue(syncedPlanner)
     const { wrapper } = createWrapper()
     render(
       <PlannerDetailHeader
@@ -555,11 +556,130 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     clickPublishButton()
 
     await waitFor(() => {
+      expect(mockSyncToServer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({ id: PLANNER_ID }),
+        })
+      )
       expect(mockPublishMutate).toHaveBeenCalledWith(
         PLANNER_ID,
         expect.objectContaining({ onSuccess: expect.any(Function) })
       )
       expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
+    })
+  })
+
+  it('does not call publishMutation if syncToServer fails', async () => {
+    mockSyncToServer.mockRejectedValue(new Error('Network error'))
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: false })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={true}
+      />,
+      { wrapper }
+    )
+
+    clickPublishButton()
+
+    await waitFor(() => {
+      expect(mockSyncToServer).toHaveBeenCalled()
+      expect(mockPublishMutate).not.toHaveBeenCalled()
+    })
+  })
+})
+
+// ────────────────────────────────────────────────────────────────
+// Unpublish upload guard tests
+// ────────────────────────────────────────────────────────────────
+
+describe('PlannerDetailHeader – unpublish upload guard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockSyncToServer.mockResolvedValue(syncedPlanner)
+    mockPublishMutate.mockImplementation(vi.fn())
+  })
+
+  function clickUnpublishButton() {
+    fireEvent.click(screen.getByText('pages.plannerMD.publish.unpublish'))
+  }
+
+  it('uploads to server before unpublishing when sync is enabled', async () => {
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: true })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={true}
+      />,
+      { wrapper }
+    )
+
+    clickUnpublishButton()
+
+    await waitFor(() => {
+      expect(mockSyncToServer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({ id: PLANNER_ID, published: true }),
+        })
+      )
+      expect(mockPublishMutate).toHaveBeenCalledWith(
+        PLANNER_ID,
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      )
+    })
+  })
+
+  it('uploads to server before unpublishing when sync is off', async () => {
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: true })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={false}
+      />,
+      { wrapper }
+    )
+
+    clickUnpublishButton()
+
+    await waitFor(() => {
+      expect(mockSyncToServer).toHaveBeenCalled()
+      expect(mockPublishMutate).toHaveBeenCalledWith(
+        PLANNER_ID,
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      )
+      // No warning dialog for unpublish
+      expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
+    })
+  })
+
+  it('does not call publishMutation if upload fails during unpublish', async () => {
+    mockSyncToServer.mockRejectedValue(new Error('Upload failed'))
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: true })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={true}
+      />,
+      { wrapper }
+    )
+
+    clickUnpublishButton()
+
+    await waitFor(() => {
+      expect(mockSyncToServer).toHaveBeenCalled()
+      expect(mockPublishMutate).not.toHaveBeenCalled()
     })
   })
 })
