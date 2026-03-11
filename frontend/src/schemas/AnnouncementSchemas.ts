@@ -43,7 +43,7 @@ export const AnnouncementI18nEntrySchema = z.object({
 /**
  * Full i18n file schema: Record<id, { title, body }>
  */
-export const AnnouncementI18nSchema = z.record(AnnouncementI18nEntrySchema)
+export const AnnouncementI18nSchema = z.record(z.string(), AnnouncementI18nEntrySchema)
 
 // ============================================================================
 // Inferred Types
