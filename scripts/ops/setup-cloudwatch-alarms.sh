@@ -498,7 +498,7 @@ setup_dashboard() {
       "x": 0, "y": 10, "width": 24, "height": 12,
       "properties": {
         "title": "Recent Backend Errors & Warnings",
-        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, message, userId, path | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
+        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, method, message, userId, path | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
         "region": "$AWS_REGION",
         "view": "table"
       }
