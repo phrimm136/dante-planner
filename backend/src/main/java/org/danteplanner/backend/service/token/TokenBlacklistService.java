@@ -39,17 +39,27 @@ public class TokenBlacklistService {
     private static final int MAX_BLACKLIST_SIZE = 100_000;
 
     /**
+     * Grace period for rotation-blacklisted tokens (milliseconds).
+     * Concurrent requests carrying the same refresh token are allowed
+     * within this window during token rotation. Logout-blacklisted
+     * tokens bypass this grace period entirely.
+     */
+    private static final long ROTATION_GRACE_PERIOD_MS = 5_000;
+
+    /**
      * Refresh token expiry in milliseconds (injected from config).
      * Used to calculate TTL for user invalidation entries.
      */
     @Value("${jwt.refresh-token-expiry:604800000}")
     private long refreshTokenExpiry;
 
+    private record BlacklistEntry(long expiryTime, long blacklistedAt, boolean immediate) {}
+
     /**
-     * Maps token hash to expiration timestamp (milliseconds).
+     * Maps token hash to blacklist entry.
      * Entries are lazily cleaned on access.
      */
-    private final ConcurrentHashMap<String, Long> blacklist = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, BlacklistEntry> blacklist = new ConcurrentHashMap<>();
 
     /**
      * Maps userId to the timestamp when all their tokens were invalidated.
@@ -58,13 +68,29 @@ public class TokenBlacklistService {
     private final ConcurrentHashMap<Long, Long> userInvalidationTimes = new ConcurrentHashMap<>();
 
     /**
-     * Adds a token to the blacklist.
-     * The token will remain blacklisted until its original expiry time.
+     * Adds a token to the blacklist with immediate effect.
+     * Used for logout — no grace period, token is rejected instantly.
      *
      * @param token the token to blacklist
      * @param expiry the token's expiration date (entries auto-expire after this)
      */
     public void blacklistToken(String token, Date expiry) {
+        addToBlacklist(token, expiry, true);
+    }
+
+    /**
+     * Adds a token to the blacklist with a grace period.
+     * Used during refresh token rotation — concurrent requests carrying
+     * the same token are allowed within {@link #ROTATION_GRACE_PERIOD_MS}.
+     *
+     * @param token the token to blacklist
+     * @param expiry the token's expiration date (entries auto-expire after this)
+     */
+    public void blacklistTokenForRotation(String token, Date expiry) {
+        addToBlacklist(token, expiry, false);
+    }
+
+    private void addToBlacklist(String token, Date expiry, boolean immediate) {
         if (token == null || expiry == null) {
             return;
         }
@@ -74,14 +100,13 @@ public class TokenBlacklistService {
             cleanupExpired();
             if (blacklist.size() >= MAX_BLACKLIST_SIZE) {
                 log.warn("Token blacklist at capacity ({}), forcing cleanup", MAX_BLACKLIST_SIZE);
-                // Remove oldest 10% to make room
-                long cutoff = System.currentTimeMillis() + 60_000; // entries expiring within 1 min
-                blacklist.entrySet().removeIf(e -> e.getValue() < cutoff);
+                long cutoff = System.currentTimeMillis() + 60_000;
+                blacklist.entrySet().removeIf(e -> e.getValue().expiryTime() < cutoff);
             }
         }
 
         String hash = hashToken(token);
-        blacklist.put(hash, expiry.getTime());
+        blacklist.put(hash, new BlacklistEntry(expiry.getTime(), System.currentTimeMillis(), immediate));
     }
 
     /**
@@ -97,15 +122,24 @@ public class TokenBlacklistService {
         }
 
         String hash = hashToken(token);
-        Long expiryTime = blacklist.get(hash);
+        BlacklistEntry entry = blacklist.get(hash);
 
-        if (expiryTime == null) {
+        if (entry == null) {
             return false;
         }
 
+        long now = System.currentTimeMillis();
+
         // Lazy cleanup: remove expired entries
-        if (System.currentTimeMillis() > expiryTime) {
+        if (now > entry.expiryTime()) {
             blacklist.remove(hash);
+            return false;
+        }
+
+        // Rotation grace period: allow concurrent requests using the same
+        // refresh token within the window. Logout-blacklisted tokens (immediate)
+        // bypass this and are rejected instantly.
+        if (!entry.immediate() && now - entry.blacklistedAt() < ROTATION_GRACE_PERIOD_MS) {
             return false;
         }
 
@@ -186,7 +220,7 @@ public class TokenBlacklistService {
     public void cleanupExpired() {
         int sizeBefore = blacklist.size();
         long now = System.currentTimeMillis();
-        blacklist.entrySet().removeIf(entry -> entry.getValue() < now);
+        blacklist.entrySet().removeIf(entry -> entry.getValue().expiryTime() < now);
         int removed = sizeBefore - blacklist.size();
         if (removed > 0) {
             log.debug("Token blacklist cleanup: removed {} expired entries, {} remaining", removed, blacklist.size());
