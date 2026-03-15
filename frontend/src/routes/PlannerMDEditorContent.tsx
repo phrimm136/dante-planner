@@ -10,7 +10,7 @@ import { publishedPlannerQueryKeys } from '@/hooks/usePublishedPlannerQuery'
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save } from 'lucide-react'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 

@@ -15,7 +15,7 @@ import {
   Upload,
 } from 'lucide-react'
 
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import { BannedError, NotFoundError, TimedOutError } from '@/lib/api'
 import { Button } from '@/components/ui/button'
