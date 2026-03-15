@@ -150,8 +150,8 @@ public class AuthenticationFacade {
             throw new InvalidTokenException(InvalidTokenException.Reason.REVOKED);
         }
 
-        // Blacklist old refresh token (rotation)
-        tokenBlacklistService.blacklistToken(refreshToken, claims.expiration());
+        // Blacklist old refresh token (rotation — grace period allows concurrent requests)
+        tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
 
         // Get user and check if deleted
         User user = userService.findById(claims.userId());

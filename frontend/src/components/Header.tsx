@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { HeaderNav } from '@/components/HeaderNav'
 import { env } from '@/lib/env'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import {
   generateState,
   generateCodeVerifier,
