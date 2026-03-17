@@ -38,7 +38,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
             "9154",
             // Synergy keywords
             "Assemble", "KnowledgeExplored", "AaCePcBt", "SwordPlayOfTheHomeland",
-            "EchoOfMansion", "TimeSuspend", "ChargeLoad", "BloodDinner",
+            "EchoOfMansion", "TimeSuspend", "EmergencyChargeForceField", "BloodDinner",
             "BlackCloud", "RetaliationBook", "HeishouSynergy"
     );
 
