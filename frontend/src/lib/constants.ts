@@ -224,7 +224,7 @@ export const SYNERGY_KEYWORDS = [
   'SwordPlayOfTheHomeland',
   'EchoOfMansion',
   'TimeSuspend',
-  'ChargeLoad',
+  'EmergencyChargeForceField',
   'BloodDinner',
   'BlackCloud',
   'RetaliationBook',
