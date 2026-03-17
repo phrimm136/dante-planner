@@ -154,20 +154,23 @@
                 ]
             }
         },
-        "commit-message": {
+        "commit-process": {
             "type": "domain",
             "enforcement": "suggest",
             "priority": "high",
-            "description": "Commit message style guide following Spring Framework convention",
+            "description": "Full commit workflow — validation, branch, message, staging, checkout",
             "promptTriggers": {
                 "keywords": [
                     "commit",
                     "git commit",
-                    "commit message"
+                    "commit message",
+                    "ready to commit",
+                    "wrap this up"
                 ],
                 "intentPatterns": [
                     "(create|make|write|do).*?commit",
-                    "commit.*?(change|code|work|fix|feat)"
+                    "commit.*?(change|code|work|fix|feat)",
+                    "(finalize|stage|prepare).*?(commit|branch|PR)"
                 ]
             }
         },

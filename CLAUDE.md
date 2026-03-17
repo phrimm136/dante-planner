@@ -85,10 +85,7 @@ Verdicts: REJECT / NEEDS WORK / ACCEPTABLE
 
 ## Git Workflow
 
-- Format: `type: description` (e.g., `feat: add identity card`)
-- One logical change per commit
-- Only commit when tests/builds pass
-- **NO Claude signature** - Do not add "Co-Authored-By: Claude" to commits
+See `commit-process` skill for the full workflow (validation, branching, message writing, staging, checkout).
 
 ---
 
