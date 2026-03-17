@@ -1,12 +1,13 @@
 import { toast as sonnerToast, type ExternalToast } from 'sonner'
 import i18n from '@/lib/i18n'
+import { linkifyText } from '@/components/common/LinkifyText'
 
 function toastError(message: string | React.ReactNode, options?: ExternalToast) {
   return sonnerToast.error(message, {
     ...options,
     description: options?.description
       ? options.description
-      : i18n.t('errors.contactOnRepeat'),
+      : linkifyText(i18n.t('errors.contactOnRepeat')),
   })
 }
 

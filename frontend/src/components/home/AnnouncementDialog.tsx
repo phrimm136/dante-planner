@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import type { Announcement } from '@/types/AnnouncementTypes'
+import { linkifyText } from '@/components/common/LinkifyText'
 
 // ============================================================================
 // Inner Content Component
@@ -48,7 +49,7 @@ function AnnouncementDialogContent({ announcements, initialSelectedId }: Announc
         </Button>
         <h3 className="text-base font-semibold">{selected.title}</h3>
         <p className="text-sm text-muted-foreground">{selected.formattedDate}</p>
-        <p className="whitespace-pre-wrap text-sm mt-2">{selected.body}</p>
+        <p className="whitespace-pre-wrap text-sm mt-2">{linkifyText(selected.body)}</p>
       </div>
     )
   }

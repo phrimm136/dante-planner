@@ -82,6 +82,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
         <IdentityCard
           identity={displayIdentity}
           uptie={equipment.identity.uptie}
+          level={equipment.identity.level}
           isSelected={deploymentOrder !== null}
           overlay={deploymentOverlay}
         />

@@ -13,4 +13,5 @@ export interface Announcement {
   formattedDate: string
   title: string
   body: string
+  permanent: boolean
 }

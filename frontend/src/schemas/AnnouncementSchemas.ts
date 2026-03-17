@@ -21,6 +21,7 @@ export const AnnouncementSpecSchema = z.object({
   id: z.string(),
   date: dateString,
   expiresAt: dateString.optional(),
+  permanent: z.boolean().optional(),
 }).strict()
 
 /**
