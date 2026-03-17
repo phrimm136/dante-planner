@@ -88,11 +88,15 @@ export function useAnnouncementData(): Announcement[] {
       formattedDate: formatAnnouncementDate(spec.date, i18n.language),
       title: i18nEntry.title,
       body: i18nEntry.body,
+      permanent: spec.permanent ?? false,
     })
   }
 
-  // Sort newest-first — ISO date strings sort lexicographically = correct result
-  announcements.sort((a, b) => b.date.localeCompare(a.date))
+  // Partition: regular (newest-first), then permanent (newest-first)
+  const regular = announcements.filter((a) => !a.permanent)
+  const permanent = announcements.filter((a) => a.permanent)
+  regular.sort((a, b) => b.date.localeCompare(a.date))
+  permanent.sort((a, b) => b.date.localeCompare(a.date))
 
-  return announcements
+  return [...regular, ...permanent]
 }

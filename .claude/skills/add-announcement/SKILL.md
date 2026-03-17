@@ -12,48 +12,85 @@ Ask the user for:
 - **Korean body** (`kr_body`)
 - **Date** — default today `YYYY-MM-DD` if not provided
 - **expiresAt** (`YYYY-MM-DD`) — optional, skip if not provided
+- **permanent** (`boolean`) — optional, skip if not provided
+
 
 ## Step 2 — Generate ID
 
 **Format:** `{date}-{NN}` where NN is a zero-padded 2-digit incremental counter.
 
+The date used in the ID depends on announcement type:
+- **Regular announcements:** Use the provided date (or today)
+- **Permanent announcements:** Use `1970-01-01`
+
 To determine NN:
 1. Read `static/data/announcements.json`
-2. The array is newest-first — inspect the `id` of the first entry
-3. If the first entry's date matches today's date, increment its counter; otherwise start at `01`
-4. Example: existing `"2026-02-20-02"` → new ID is `"2026-02-20-03"`
+2. Search the entire array for entries whose `id` starts with the target date prefix
+3. If matches exist, increment the highest counter; otherwise start at `01`
+4. Example: existing `"1970-01-01-01"` → new permanent ID is `"1970-01-01-02"`
 
-## Step 3 — Translate
+## Step 3 — Refine Korean Text
 
-Before translating, read the term dictionary at `.claude/skills/add-announcement/terms.csv`.
+Before translating, refine the raw Korean input to match the tone and style of existing announcements:
+1. Read recent entries in `static/i18n/KR/announcements.json` to learn the established style
+2. Read the term dictionary at `.claude/skills/add-announcement/terms.csv` and correct any game terms to their canonical Korean forms (e.g., `EGO 기프트` → `E.G.O 기프트`)
+3. Rewrite `kr_title` and `kr_body` to match that style (sentence structure, formality, formatting)
+4. Present the refined Korean text to the user for approval before proceeding to translation
+
+Do NOT proceed to translation until the user approves the refined Korean text.
+
+## Step 4 — Translate
+
+Read the term dictionary at `.claude/skills/add-announcement/terms.csv` (if not already read in Step 3).
 It contains canonical translations for:
 - Sinner names (12 characters)
 - Game terms: 인격 → Identity/人格/人格, E.G.O 기프트 → E.G.O Gifts/E.G.Oギフト/E.G.O饰品, E.G.O
 - Mirror dungeon names (mirrors 1–7)
-- Difficulty modes: 일반/Normal/ノーマル/普通, 어려움/Hard/ハード/困难, 평행중첩, etc.
+- Difficulty modes: 노말/Normal/ノーマル/普通, 어려움/Hard/ハード/困难, 평행중첩, etc.
 
-For identity names, EGO names, and EGO gift names — read the name list files directly:
-- `static/i18n/{lang}/identityNameList.json` (lang: KR, EN, JP, CN)
-- `static/i18n/{lang}/egoNameList.json`
-- `static/i18n/{lang}/egoGiftNameList.json`
-
-These files use numeric IDs as keys. Identify which IDs appear in the Korean text, then read the corresponding entries in EN/JP/CN files.
+For in-game terms like identity names, EGO names, and EGO gift names — read the subsection.
 
 Translate `kr_title` and `kr_body` into EN, CN, JP using the dictionaries above for all game-specific terms. Use natural-sounding language for surrounding prose.
 
-## Step 4 — Write All 5 Files
+### In-game term syntax
+
+In the input, `[[{category}:{name}]]` marks an in-game term. Find its id or internal representation in the KR i18n files, then use that key to look up translations in EN/JP/CN.
+
+| Category | Lookup file (`static/i18n/KR/`) | Key format |
+|----------|--------------------------------|------------|
+| `id` | `identityNameList.json` | numeric id |
+| `ego` | `egoNameList.json` | numeric id |
+| `gift` | `egoGiftNameList.json` | numeric id |
+| `keyword` | `battleKeywords.json` | PascalCase id |
+| `themepack` | `themePack.json` | numeric id |
+
+**Example:** `[[keyword:부하]]` → search `battleKeywords.json` for entry with `"name"` containing `부하` → find key `ChargeLoad` → look up `ChargeLoad` in EN/JP/CN `battleKeywords.json` → `부하/Load/負荷/载荷`
+
+## Step 5 — Write All 5 Files
 
 Read each file before editing. JSON must remain valid (no trailing commas).
 
 ### `static/data/announcements.json`
-Prepend a new object at index 0 (newest-first):
+
+**Regular announcements:** Prepend a new object at index 0 (newest-first):
 ```json
 {
   "id": "<generated-id>",
   "date": "<date>"
 }
 ```
+
+**Permanent announcements:** Append at the end of the array. Use date `1970-01-01`.
+```json
+{
+  "id": "<generated-id>",
+  "date": "1970-01-01",
+  "permanent": true
+}
+```
+
 Include `"expiresAt": "<date>"` only if provided.
+Include `"permanent": true` only if provided.
 
 ### `static/i18n/KR/announcements.json`
 Add key `"<id>": { "title": "<kr_title>", "body": "<kr_body>" }` alongside existing entries.
@@ -67,6 +104,6 @@ Add key `"<id>": { "title": "<cn_title>", "body": "<cn_body>" }`.
 ### `static/i18n/JP/announcements.json`
 Add key `"<id>": { "title": "<jp_title>", "body": "<jp_body>" }`.
 
-## Step 5 — Confirm
+## Step 6 — Confirm
 
 List all 5 files changed and display the generated ID.

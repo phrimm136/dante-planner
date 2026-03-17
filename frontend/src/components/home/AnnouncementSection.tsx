@@ -40,7 +40,9 @@ interface AnnouncementSectionProps {
 
 export function AnnouncementSection({ announcements, onViewAll, onOpenAnnouncement }: AnnouncementSectionProps) {
   const { t } = useTranslation('common')
-  const preview = announcements.slice(0, ANNOUNCEMENT_PREVIEW_COUNT)
+  const regular = announcements.filter((a) => !a.permanent)
+  const permanent = announcements.filter((a) => a.permanent)
+  const preview = [...regular.slice(0, ANNOUNCEMENT_PREVIEW_COUNT), ...permanent]
 
   return (
     <section className="flex flex-col gap-4">
