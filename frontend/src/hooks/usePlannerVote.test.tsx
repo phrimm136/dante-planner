@@ -13,11 +13,15 @@ import { usePlannerVote } from './usePlannerVote'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // Mock the API client
-vi.mock('@/lib/api', () => ({
-  ApiClient: {
-    post: vi.fn(),
-  },
-}))
+vi.mock('@/lib/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/api')>()
+  return {
+    ...actual,
+    ApiClient: {
+      post: vi.fn(),
+    },
+  }
+})
 
 // Import after mocking
 import { ApiClient } from '@/lib/api'

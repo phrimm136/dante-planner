@@ -19,6 +19,10 @@ vi.mock('@/lib/i18n', () => ({
   },
 }))
 
+vi.mock('@/components/common/LinkifyText', () => ({
+  linkifyText: (text: string) => text,
+}))
+
 vi.mock('sonner', () => {
   const toastFn = Object.assign(vi.fn(), {
     error: vi.fn(),
