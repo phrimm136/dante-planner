@@ -229,6 +229,7 @@ export const SYNERGY_KEYWORDS = [
   'BlackCloud',
   'RetaliationBook',
   'HeishouSynergy',
+  'Bullet',
 ] as const
 
 /**
