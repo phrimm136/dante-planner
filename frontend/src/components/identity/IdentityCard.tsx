@@ -20,6 +20,8 @@ interface IdentityCardProps {
   identity: IdentityListItem
   /** Override uptie level for image display (uses gacksung at 3+) */
   uptie?: number
+  /** Override level display (defaults to MAX_LEVEL) */
+  level?: number
   /** Dim the entire card (selected/equipped state) */
   isSelected?: boolean
   /** Show highlight frame (hover state) */
@@ -54,6 +56,7 @@ interface IdentityCardProps {
 export function IdentityCard({
   identity,
   uptie = 4,
+  level = MAX_LEVEL,
   isSelected = false,
   isHighlighted: _isHighlighted = false,
   overlay,
@@ -127,7 +130,7 @@ export function IdentityCard({
         <div className="absolute bottom-3 right-5 flex flex-col items-end pointer-events-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
           {/* Level */}
           <div className="text-[24px] mb-[2px]" style={{ fontFamily: getDisplayFontForNumeric() }}>
-            {`Lv. ${MAX_LEVEL}`}
+            {`Lv. ${level}`}
           </div>
           {/* Name - suspends independently for granular loading */}
           <span>
