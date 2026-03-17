@@ -1,5 +1,5 @@
 import { useSuspenseQuery, useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/lib/toast';
 import i18n from '@/lib/i18n';
 import { ApiClient } from '@/lib/api';
 import { UserSchema, type User } from '@/schemas/AuthSchemas';

@@ -3,7 +3,7 @@ import { Suspense, useId, useState } from 'react'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button'

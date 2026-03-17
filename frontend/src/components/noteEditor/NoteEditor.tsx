@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, memo } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import StarterKit from '@tiptap/starter-kit'
 
 import { cn, calculateByteLength } from '@/lib/utils'

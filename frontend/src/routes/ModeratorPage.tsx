@@ -9,7 +9,7 @@ import { BanDialog, TimeoutDialog, UnbanDialog, ClearTimeoutDialog } from '@/com
 import { Button } from '@/components/ui/button'
 import { formatUsername } from '@/lib/formatUsername'
 import { formatRelativeTime } from '@/lib/formatDate'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 
 import type { UserForMod, ModerationAction } from '@/types/ModeratorTypes'
 

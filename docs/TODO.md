@@ -386,3 +386,60 @@ void ivUniqueness_1MillionTokens() {
 - Compliance requirement: SOC2, PCI-DSS, HIPAA
 - Funding round: Investor security audit
 - Detected breach: Emergency key rotation needed
+
+---
+
+## Refresh Token Family Tracking (Deferred)
+
+**Status:** DEFERRED
+**Priority:** Low (grace period + frontend request queue handles the race condition)
+**Effort:** 2-3 days
+**Context:** Investigated as approach #4 for the refresh token rotation race condition. Approaches #2 (5s grace period on blacklist) and #3 (frontend request queue) were implemented instead.
+
+### Problem Addressed
+
+Refresh token rotation race condition: SPA fires concurrent requests after access token expiry, all carrying the same refresh token R1. Server auto-refresh is transparent (no 401 exposed to FE during normal refresh). Request A blacklists R1 and rotates; concurrent requests B/C/D find R1 blacklisted and proceed as unauthenticated, producing endpoint-level 401s.
+
+### What Family Tracking Would Add
+
+Assign a `familyId` (UUID) at login. On rotation, new refresh token inherits the `familyId` with incremented `generation`. The blacklist tracks `(tokenHash, familyId, generation)`.
+
+**Behavior:**
+- Predecessor token (generation N-1) used concurrently → allowed
+- Token from generation N-3 replayed → replay attack detected → invalidate entire family
+- Logout → invalidate family immediately
+
+**Data Model:**
+```java
+public record TokenFamily(String familyId, long userId, int currentGeneration, long createdAt) {}
+
+// JWT refresh token claims:
+// "fid": "uuid-family-id"
+// "gen": 3
+
+// Server-side:
+// ConcurrentHashMap<String, TokenFamily> families (familyId → family state)
+```
+
+**Files Requiring Changes:**
+- `TokenBlacklistService.java` — family map, generation validation
+- `TokenGenerator.java` — embed familyId + generation in refresh token claims
+- `TokenValidator.java` / `TokenClaims.java` — extract family claims
+- `JwtAuthenticationFilter.java` — family-aware rotation logic
+- `AuthenticationFacade.java` — family creation at login, family invalidation at logout
+
+**Pros over Current Fix (Grace Period + Queue):**
+- Structural concurrency tolerance (generation-based) vs time-based (5s window)
+- Replay detection triggers full invalidation — attacker loses access
+- Scales to distributed systems without clock-skew sensitivity
+
+**Cons:**
+- ~150+ lines across 4-5 files vs ~30 lines for grace period
+- 3+ concurrent requests can trigger false "replay detected" → user logout
+- In-memory family tracking has same single-server limitation
+- JWT payload grows (familyId + generation claims)
+
+**When to Implement:**
+- Moving to distributed deployment (Redis-backed blacklist)
+- Security audit requires replay detection
+- Targeted token theft becomes a realistic threat for this app's user base

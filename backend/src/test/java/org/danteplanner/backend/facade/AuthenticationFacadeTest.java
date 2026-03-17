@@ -263,8 +263,8 @@ class AuthenticationFacadeTest {
             assertEquals("new-refresh-token", result.refreshToken());
             assertFalse(result.reactivated());
 
-            // Verify old token blacklisted
-            verify(tokenBlacklistService).blacklistToken(oldRefreshToken, expiration);
+            // Verify old token blacklisted (rotation with grace period)
+            verify(tokenBlacklistService).blacklistTokenForRotation(oldRefreshToken, expiration);
         }
 
         @Test
@@ -382,8 +382,8 @@ class AuthenticationFacadeTest {
 
             assertEquals(testUser.getId(), exception.getUserId());
 
-            // Verify old token was blacklisted before the check
-            verify(tokenBlacklistService).blacklistToken(refreshToken, expiration);
+            // Verify old token was blacklisted before the check (rotation with grace period)
+            verify(tokenBlacklistService).blacklistTokenForRotation(refreshToken, expiration);
 
             // Verify no new tokens generated
             verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());

@@ -348,6 +348,18 @@ describe('toUserFriendlyError', () => {
     expect(result.params?.gifts).toBe('Gift A, Gift B')
   })
 
+  it('GIFT_UNKNOWN_ID → unknownGiftId key with floor and gifts params', () => {
+    const result = toUserFriendlyError({
+      code: 'GIFT_UNKNOWN_ID',
+      message: '',
+      floorNumber: 2,
+      context: { giftIds: ['2029', '2030'] },
+    })
+    expect(result.key).toBe('pages.plannerMD.validation.unknownGiftId')
+    expect(result.params?.floor).toBe('2')
+    expect(result.params?.gifts).toBe('2029, 2030')
+  })
+
   it('DIFFICULTY_INVALID_FOR_CATEGORY → requiresHardMode key', () => {
     const result = toUserFriendlyError({ code: 'DIFFICULTY_INVALID_FOR_CATEGORY', message: '' })
     expect(result.key).toBe('pages.plannerMD.publish.requiresHardMode')
@@ -451,6 +463,43 @@ describe('validateGiftIdArray', () => {
     const errors = validateGiftIdArray(['9001', '9002', '9001'], 'comprehensiveGiftIds')
     expect(errors.some(e => e.code === 'GIFT_DUPLICATE_ID')).toBe(true)
     expect(errors[0].field).toContain('comprehensiveGiftIds')
+  })
+
+  it('unknown gift ID returns GIFT_UNKNOWN_ID when egoGiftSpec is provided', () => {
+    const spec: Record<string, EGOGiftSpec> = {
+      '9001': { themePack: [] } as unknown as EGOGiftSpec,
+    }
+    const errors = validateGiftIdArray(['9001', '9999'], 'selectedGiftIds', spec)
+    expect(errors).toHaveLength(1)
+    expect(errors[0].code).toBe('GIFT_UNKNOWN_ID')
+    expect(errors[0].context?.giftId).toBe('9999')
+  })
+
+  it('all valid gift IDs return no errors when egoGiftSpec is provided', () => {
+    const spec: Record<string, EGOGiftSpec> = {
+      '9001': { themePack: [] } as unknown as EGOGiftSpec,
+      '9002': { themePack: [] } as unknown as EGOGiftSpec,
+    }
+    expect(validateGiftIdArray(['9001', '9002'], 'selectedGiftIds', spec)).toHaveLength(0)
+  })
+
+  it('enhanced gift ID resolves to base ID for existence check', () => {
+    const spec: Record<string, EGOGiftSpec> = {
+      '9220': { themePack: [] } as unknown as EGOGiftSpec,
+    }
+    expect(validateGiftIdArray(['19220'], 'selectedGiftIds', spec)).toHaveLength(0)
+  })
+
+  it('duplicate is reported before unknown for the same ID', () => {
+    const spec: Record<string, EGOGiftSpec> = {}
+    const errors = validateGiftIdArray(['9999', '9999'], 'selectedGiftIds', spec)
+    expect(errors).toHaveLength(2)
+    expect(errors[0].code).toBe('GIFT_UNKNOWN_ID')
+    expect(errors[1].code).toBe('GIFT_DUPLICATE_ID')
+  })
+
+  it('skips existence check when egoGiftSpec is not provided', () => {
+    expect(validateGiftIdArray(['9999'], 'selectedGiftIds')).toHaveLength(0)
   })
 })
 
@@ -614,6 +663,77 @@ describe('validatePlannerForSave – gift affordability', () => {
 })
 
 // ============================================================================
+// validatePlannerForSave – gift existence (GIFT_UNKNOWN_ID)
+// ============================================================================
+
+describe('validatePlannerForSave – gift existence', () => {
+  const spec: Record<string, EGOGiftSpec> = {
+    '9001': { themePack: [] } as unknown as EGOGiftSpec,
+    '9220': { themePack: ['1024'] } as unknown as EGOGiftSpec,
+  }
+
+  it('unknown floor gift ID returns GIFT_UNKNOWN_ID', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['2029']
+
+    const { isValid, errors } = validatePlannerForSave('My Plan', content, '5F', spec)
+    expect(isValid).toBe(false)
+    const err = errors.find(e => e.code === 'GIFT_UNKNOWN_ID') as FloorValidationError
+    expect(err).toBeDefined()
+    expect(err.floorNumber).toBe(1)
+    expect((err.context?.giftIds as string[])).toContain('2029')
+  })
+
+  it('multiple unknown IDs on one floor produce a single GIFT_UNKNOWN_ID error listing all', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['2029', '2030']
+
+    const { errors } = validatePlannerForSave('My Plan', content, '5F', spec)
+    const unknownErrors = errors.filter(e => e.code === 'GIFT_UNKNOWN_ID')
+    expect(unknownErrors).toHaveLength(1)
+    expect((unknownErrors[0] as FloorValidationError).context?.giftIds as string[]).toHaveLength(2)
+  })
+
+  it('unknown IDs on two separate floors produce one GIFT_UNKNOWN_ID error per floor', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['2029']
+    content.floorSelections[1].giftIds = ['2030']
+
+    const { errors } = validatePlannerForSave('My Plan', content, '5F', spec)
+    const unknownErrors = errors.filter(e => e.code === 'GIFT_UNKNOWN_ID')
+    expect(unknownErrors).toHaveLength(2)
+    expect((unknownErrors[0] as FloorValidationError).floorNumber).toBe(1)
+    expect((unknownErrors[1] as FloorValidationError).floorNumber).toBe(2)
+  })
+
+  it('valid floor gift IDs return no GIFT_UNKNOWN_ID errors', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['9001', '9220']
+
+    const { errors } = validatePlannerForSave('My Plan', content, '5F', spec)
+    expect(errors.filter(e => e.code === 'GIFT_UNKNOWN_ID')).toHaveLength(0)
+  })
+
+  it('existence check is skipped when egoGiftSpec is not provided', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['2029']
+
+    const { isValid } = validatePlannerForSave('My Plan', content, '5F')
+    expect(isValid).toBe(true)
+  })
+
+  it('unknown gift in top-level selectedGiftIds returns GIFT_UNKNOWN_ID', () => {
+    const content = makeValidContent('5F')
+    content.selectedGiftKeyword = 'someKeyword'
+    content.selectedGiftIds = ['9999']
+
+    const { isValid, errors } = validatePlannerForSave('My Plan', content, '5F', spec)
+    expect(isValid).toBe(false)
+    expect(errors.some(e => e.code === 'GIFT_UNKNOWN_ID')).toBe(true)
+  })
+})
+
+// ============================================================================
 // validatePlannerForSave – individual validator propagation
 // ============================================================================
 
@@ -729,5 +849,89 @@ describe('validatePlannerUserFriendly – additional cases', () => {
     content.floorSelections[1].themePackId = content.floorSelections[0].themePackId // duplicate
     const result = validatePlannerUserFriendly(content, '5F')
     expect(result?.key).toBe('pages.plannerMD.validation.corruptedState')
+  })
+
+  it('unknown floor gift ID returns unknownGiftId i18n key', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['2029']
+
+    const result = validatePlannerUserFriendly(content, '5F', spec)
+    expect(result?.key).toBe('pages.plannerMD.validation.unknownGiftId')
+    expect(result?.params?.floor).toBe('1')
+    expect(result?.params?.gifts).toContain('2029')
+  })
+
+  it('existence error is reported before affordability error', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].giftIds = ['2029', '9220']
+
+    const result = validatePlannerUserFriendly(content, '5F', spec)
+    expect(result?.key).toBe('pages.plannerMD.validation.unknownGiftId')
+  })
+})
+
+// ============================================================================
+// validatePlannerUserFriendly – gift affordability (FLOOR_UNAFFORDABLE_GIFT)
+// ============================================================================
+
+describe('validatePlannerUserFriendly – gift affordability', () => {
+  const spec: Record<string, EGOGiftSpec> = {
+    '9220': { themePack: ['1024'] } as unknown as EGOGiftSpec,
+    '9221': { themePack: ['1024'] } as unknown as EGOGiftSpec,
+    '9001': { themePack: [] } as unknown as EGOGiftSpec,
+  }
+  const i18n: Record<string, string> = { '9220': 'Dream-Eating Tapir', '9221': 'Pulsating Husk' }
+
+  it('unaffordable gift returns themePackEgoGiftInconsistency with pack and gift name', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].giftIds = ['9220']
+
+    const result = validatePlannerUserFriendly(content, '5F', spec, i18n)
+    expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
+    expect(result?.params?.gifts).toContain('Dream-Eating Tapir')
+    expect(result?.params?.pack).toBe('1110')
+  })
+
+  it('gift on correct pack returns null', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].themePackId = '1024'
+    content.floorSelections[0].giftIds = ['9220']
+
+    expect(validatePlannerUserFriendly(content, '5F', spec)).toBeNull()
+  })
+
+  it('universal gift on any pack returns null', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['9001']
+
+    expect(validatePlannerUserFriendly(content, '5F', spec)).toBeNull()
+  })
+
+  it('multiple unaffordable gifts on one floor lists all names', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].themePackId = '1110'
+    content.floorSelections[0].giftIds = ['9220', '9221']
+
+    const result = validatePlannerUserFriendly(content, '5F', spec, i18n)
+    expect(result?.key).toBe('pages.plannerMD.publish.themePackEgoGiftInconsistency')
+    expect(result?.params?.gifts).toContain('Dream-Eating Tapir')
+    expect(result?.params?.gifts).toContain('Pulsating Husk')
+  })
+
+  it('floor without theme pack skips affordability check', () => {
+    const content = makeValidContent('5F')
+    for (const floor of content.floorSelections) floor.themePackId = null
+    content.floorSelections[0].giftIds = ['9220']
+
+    expect(validatePlannerUserFriendly(content, '5F', spec)).toBeNull()
+  })
+
+  it('affordability check skipped without egoGiftSpec', () => {
+    const content = makeValidContent('5F')
+    content.floorSelections[0].giftIds = ['9220']
+
+    expect(validatePlannerUserFriendly(content, '5F')).toBeNull()
   })
 })

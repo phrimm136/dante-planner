@@ -27,3 +27,6 @@ difficulty,normal,노말,Normal,ノーマル,普通
 difficulty,hard,하드,Hard,ハード,困难
 difficulty,parallel,평행중첩,Parallel Superposition,平行重畳,平行叠加
 difficulty,parallel_extreme,평행중첩 EXTREME,Parallel Superposition EXTREME,平行重畳EXTREME,平行叠加模式
+deck,deployed,출전,Deployed,出撃,出战
+deck,backup,대기,Backup,待機,待命
+deck,formation,편성,Team,編成,编队

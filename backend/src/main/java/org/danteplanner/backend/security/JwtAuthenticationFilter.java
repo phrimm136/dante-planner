@@ -267,8 +267,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             User user = activeUser.get();
 
-            // Blacklist old refresh token (rotation for security)
-            tokenBlacklistService.blacklistToken(refreshToken, claims.expiration());
+            // Blacklist old refresh token (rotation — grace period allows concurrent requests)
+            tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
 
             // Generate new tokens (fetch fresh role from user entity)
             String newAccessToken = tokenGenerator.generateAccessToken(

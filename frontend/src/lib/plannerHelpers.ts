@@ -77,7 +77,7 @@ export function getUnaffordableGiftIds(
   return Array.from(giftIds).filter((giftId) => {
     const baseGiftId = getBaseGiftId(giftId)
     const gift = egoGiftSpec[baseGiftId]
-    if (!gift) return false // Skip non-existent gifts
+    if (!gift) return false
     return !isGiftAffordableForThemePack(gift, themePackId)
   })
 }
@@ -145,7 +145,7 @@ export interface SkillEAValidationError extends ValidationError {
  * Gift IDs validation error
  */
 export interface GiftValidationError extends ValidationError {
-  code: 'GIFT_DUPLICATE_ID'
+  code: 'GIFT_DUPLICATE_ID' | 'GIFT_UNKNOWN_ID'
 }
 
 /**
@@ -166,7 +166,7 @@ export interface StartGiftValidationError extends ValidationError {
  * Floor validation error (extended from existing)
  */
 export interface FloorValidationError extends ValidationError {
-  code: 'FLOOR_MISSING_THEME_PACK' | 'FLOOR_PREREQUISITE_VIOLATION' | 'FLOOR_DUPLICATE_GIFT_ID' | 'FLOOR_DUPLICATE_THEME_PACK' | 'FLOOR_UNAFFORDABLE_GIFT'
+  code: 'FLOOR_MISSING_THEME_PACK' | 'FLOOR_PREREQUISITE_VIOLATION' | 'FLOOR_DUPLICATE_GIFT_ID' | 'FLOOR_DUPLICATE_THEME_PACK' | 'FLOOR_UNAFFORDABLE_GIFT' | 'GIFT_UNKNOWN_ID'
   /** 0-indexed floor that failed validation */
   floorIndex?: number
   /** 1-indexed floor number for display */
@@ -233,6 +233,17 @@ export function toUserFriendlyError(
         params: {
           pack: ctx?.themePackId ?? '',
           gifts: ctx?.giftNames ?? '',
+        },
+      }
+    }
+    case 'GIFT_UNKNOWN_ID': {
+      const floorError = error as FloorValidationError
+      const ctx = floorError.context as { giftIds?: string[] } | undefined
+      return {
+        key: 'pages.plannerMD.validation.unknownGiftId',
+        params: {
+          floor: String(floorError.floorNumber ?? ''),
+          gifts: ctx?.giftIds?.join(', ') ?? '',
         },
       }
     }
@@ -462,9 +473,13 @@ export function validateSkillEAState(skillEAState: Record<string, SkillEAState>)
 }
 
 /**
- * Validate gift ID array for duplicates
+ * Validate gift ID array for duplicates and existence
  */
-export function validateGiftIdArray(giftIds: string[], fieldName: string): GiftValidationError[] {
+export function validateGiftIdArray(
+  giftIds: string[],
+  fieldName: string,
+  egoGiftSpec?: Record<string, EGOGiftSpec>
+): GiftValidationError[] {
   const errors: GiftValidationError[] = []
   const seen = new Set<string>()
 
@@ -477,8 +492,21 @@ export function validateGiftIdArray(giftIds: string[], fieldName: string): GiftV
         field: `${fieldName}[${i}]`,
         context: { giftId, index: i },
       })
+      continue
     }
     seen.add(giftId)
+
+    if (egoGiftSpec) {
+      const baseId = getBaseGiftId(giftId)
+      if (!(baseId in egoGiftSpec)) {
+        errors.push({
+          code: 'GIFT_UNKNOWN_ID',
+          message: `Gift ID '${giftId}' not found in ${fieldName}`,
+          field: `${fieldName}[${i}]`,
+          context: { giftId },
+        })
+      }
+    }
   }
 
   return errors
@@ -802,13 +830,47 @@ function validateFloorDifficulties(
 }
 
 /**
- * Validates that all selected ego gifts are affordable for their floor's theme pack
+ * Validates that all selected ego gift IDs exist in the spec list
  *
  * @param floorSelections - Floor selections to validate
  * @param floorCount - Number of active floors based on category
- * @param egoGiftSpec - EGO Gift spec data
- * @param egoGiftI18n - EGO Gift i18n name map (optional, uses IDs if not provided)
- * @returns Array of validation errors (one per floor with unaffordable gifts, listing gift names)
+ * @param egoGiftSpec - EGO Gift spec data keyed by gift ID
+ * @returns Array of validation errors (one per floor with unknown gift IDs)
+ */
+function validateFloorGiftExistence(
+  floorSelections: FloorThemeSelection[],
+  floorCount: number,
+  egoGiftSpec: Record<string, EGOGiftSpec>
+): FloorValidationError[] {
+  return floorSelections
+    .slice(0, floorCount)
+    .flatMap((floor, i) => {
+      const unknownIds: string[] = []
+
+      for (const giftId of floor.giftIds) {
+        const baseId = getBaseGiftId(giftId)
+        if (!(baseId in egoGiftSpec)) {
+          unknownIds.push(giftId)
+        }
+      }
+
+      if (unknownIds.length === 0) return []
+
+      const floorNumber = i + 1
+      return [{
+        code: 'GIFT_UNKNOWN_ID' as const,
+        message: `Floor ${floorNumber}: unknown gift ID(s): ${unknownIds.join(', ')}`,
+        field: `floorSelections[${i}].giftIds`,
+        floorIndex: i,
+        floorNumber,
+        context: { giftIds: unknownIds },
+      }]
+    })
+}
+
+/**
+ * Validates that all selected ego gifts are affordable for their floor's theme pack.
+ * Assumes all gift IDs exist in the spec (run validateFloorGiftExistence first).
  */
 function validateFloorGiftAffordability(
   floorSelections: FloorThemeSelection[],
@@ -888,9 +950,9 @@ export function validatePlannerForSave(
   errors.push(...validateSkillEAState(content.skillEAState))
 
   // 4. Gift IDs validation (all three arrays)
-  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds'))
-  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds'))
-  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds'))
+  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
+  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
+  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec))
 
   // 5. Start buffs validation
   errors.push(...validateStartBuffIds(content.selectedBuffIds))
@@ -910,7 +972,12 @@ export function validatePlannerForSave(
   // 8. Difficulty validation (full rules based on category)
   errors.push(...validateFloorDifficulties(deserializedFloorSelections, category, floorCount))
 
-  // 9. Gift affordability validation (if egoGiftSpec is provided)
+  // 9. Gift existence validation (if egoGiftSpec is provided)
+  if (egoGiftSpec) {
+    errors.push(...validateFloorGiftExistence(deserializedFloorSelections, floorCount, egoGiftSpec))
+  }
+
+  // 10. Gift affordability validation (if egoGiftSpec is provided; assumes existence check passed)
   if (egoGiftSpec) {
     errors.push(...validateFloorGiftAffordability(deserializedFloorSelections, floorCount, egoGiftSpec, egoGiftI18n))
   }
@@ -954,9 +1021,9 @@ export function validatePlannerUserFriendly(
   errors.push(...validateSkillEAState(content.skillEAState))
 
   // 4. Gift IDs validation (all three arrays)
-  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds'))
-  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds'))
-  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds'))
+  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
+  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
+  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec))
 
   // 5. Start buffs validation
   errors.push(...validateStartBuffIds(content.selectedBuffIds))
@@ -975,7 +1042,12 @@ export function validatePlannerUserFriendly(
   // Prerequisites and duplicates still fire when a floor *does* have a pack.
   errors.push(...floorErrors.filter(e => e.code !== 'FLOOR_MISSING_THEME_PACK'))
 
-  // 8. Gift affordability (validateFloorGiftAffordability already guards on themePackId being set)
+  // 8. Gift existence validation
+  if (egoGiftSpec) {
+    errors.push(...validateFloorGiftExistence(deserializedFloorSelections, floorCount, egoGiftSpec))
+  }
+
+  // 9. Gift affordability (assumes existence check passed; guards on themePackId being set)
   if (egoGiftSpec) {
     errors.push(...validateFloorGiftAffordability(deserializedFloorSelections, floorCount, egoGiftSpec, egoGiftI18n))
   }
