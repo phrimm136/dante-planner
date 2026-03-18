@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PlannerEditorStoreProvider } from '@/stores/usePlannerEditorStore'
-import { PlannerMDEditorContent } from './PlannerMDEditorContent'
+import { PlannerMDEditorContent } from '@/components/planner/PlannerMDEditorContent'
 
 /**
  * Page-level skeleton for initial data load
