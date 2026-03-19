@@ -51,7 +51,7 @@ public class Planner {
 
     @Column(name = "schema_version", nullable = false)
     @Builder.Default
-    private Integer schemaVersion = 1;
+    private Integer schemaVersion = 2;
 
     @Column(name = "content_version", nullable = false)
     private Integer contentVersion;

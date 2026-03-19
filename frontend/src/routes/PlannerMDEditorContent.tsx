@@ -660,6 +660,15 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           </div>
         </div>
 
+        <PlannerSection title={t('pages.plannerMD.introduction')}>
+          <NoteEditor
+            value={sectionNotes.intro}
+            onChange={(content) => { handleSectionNoteChange('intro', content); }}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            maxBytes={MAX_NOTE_BYTES}
+          />
+        </PlannerSection>
+
         {visibleSections >= 1 && (
           <>
             <Suspense
@@ -941,6 +950,15 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             </Suspense>
           </PlannerSection>
         )}
+
+        <PlannerSection title={t('pages.plannerMD.closingNotes')}>
+          <NoteEditor
+            value={sectionNotes.outro}
+            onChange={(content) => { handleSectionNoteChange('outro', content); }}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            maxBytes={MAX_NOTE_BYTES}
+          />
+        </PlannerSection>
 
         <div className="flex justify-end gap-2 pt-6 border-t">
           <Button onClick={handleSave} disabled={isSaving} variant="outline">

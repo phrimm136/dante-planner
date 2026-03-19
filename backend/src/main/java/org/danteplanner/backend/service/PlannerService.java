@@ -70,6 +70,7 @@ public class PlannerService {
 
     private final int maxPlannersPerUser;
     private final int recommendedThreshold;
+    private final int currentSchemaVersion;
 
     public PlannerService(
             PlannerRepository plannerRepository,
@@ -87,7 +88,8 @@ public class PlannerService {
             SseService notificationSseService,
             NotificationService notificationService,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
-            @Value("${planner.recommended-threshold}") int recommendedThreshold) {
+            @Value("${planner.recommended-threshold}") int recommendedThreshold,
+            @Value("${planner.schema-version}") int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
@@ -104,6 +106,7 @@ public class PlannerService {
         this.notificationService = notificationService;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.recommendedThreshold = recommendedThreshold;
+        this.currentSchemaVersion = currentSchemaVersion;
     }
 
     /**
@@ -297,6 +300,7 @@ public class PlannerService {
                 planner.setTakenDownAt(originalTakenDownAt);
             }
 
+            planner.setSchemaVersion(currentSchemaVersion);
             planner.setSyncVersion(planner.getSyncVersion() + 1);
             planner.setSavedAt(Instant.now());
 

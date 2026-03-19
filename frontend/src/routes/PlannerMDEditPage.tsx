@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { PlannerNotFound } from '@/components/common/PlannerNotFound'
-import { PlannerEditorStoreProvider } from '@/stores/usePlannerEditorStore'
+import { PlannerEditorStoreProvider, createDefaultSectionNotes } from '@/stores/usePlannerEditorStore'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
 import { PlannerMDEditorContent } from './PlannerMDEditorContent'
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
@@ -91,12 +91,17 @@ function PlannerEditContent({ id }: { id: string }) {
     observationGiftIds: deserialized.observationGiftIds,
     selectedGiftKeyword: content.selectedGiftKeyword,
     skillEAState: content.skillEAState,
-    sectionNotes: Object.fromEntries(
-      Object.entries(content.sectionNotes).map(([key, note]) => [
-        key,
-        { content: note.content },
-      ])
-    ),
+    sectionNotes: {
+      ...createDefaultSectionNotes(),
+      ...(content.sectionNotes
+        ? Object.fromEntries(
+            Object.entries(content.sectionNotes).map(([key, note]) => [
+              key,
+              { content: note?.content ?? '' },
+            ])
+          )
+        : {}),
+    },
   }
 
   // key forces remount when planner ID changes (e.g., after "Keep Both" navigation)

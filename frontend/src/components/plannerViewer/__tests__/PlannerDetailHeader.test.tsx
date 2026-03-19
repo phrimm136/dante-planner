@@ -89,7 +89,7 @@ const CURRENT_VERSION = 7
 vi.mock('@/hooks/usePlannerConfig', () => ({
   usePlannerConfig: () => ({
     mdCurrentVersion: CURRENT_VERSION,
-    schemaVersion: 1,
+    schemaVersion: 2,
     mdAvailableVersions: [6, 7],
     rrAvailableVersions: [1],
   }),
@@ -171,7 +171,7 @@ const syncedPlanner: SaveablePlanner = {
     id: PLANNER_ID,
     title: 'Test Plan',
     status: 'saved',
-    schemaVersion: 1,
+    schemaVersion: 2,
     contentVersion: CURRENT_VERSION,
     plannerType: 'MIRROR_DUNGEON',
     syncVersion: 2,
@@ -193,7 +193,7 @@ function makePlanner(
       id: PLANNER_ID,
       title: 'Test Plan',
       status: 'saved',
-      schemaVersion: 1,
+      schemaVersion: 2,
       contentVersion: 6, // behind CURRENT_VERSION — makes button visible
       plannerType: 'MIRROR_DUNGEON',
       syncVersion: 1,

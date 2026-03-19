@@ -75,12 +75,14 @@ export function createDefaultFloorSelections(): FloorThemeSelection[] {
  */
 export function createDefaultSectionNotes(): Record<string, NoteContent> {
   const notes: Record<string, NoteContent> = {
+    intro: createEmptyNoteContent(),
     deckBuilder: createEmptyNoteContent(),
     startBuffs: createEmptyNoteContent(),
     startGifts: createEmptyNoteContent(),
     observation: createEmptyNoteContent(),
     skillReplacement: createEmptyNoteContent(),
     comprehensiveGifts: createEmptyNoteContent(),
+    outro: createEmptyNoteContent(),
   }
   for (let i = 0; i < 15; i++) {
     notes[`floor-${i}`] = createEmptyNoteContent()
@@ -356,14 +358,18 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
               deckFilterState: createDefaultDeckFilterState(),
 
               // Cold state - section notes need conversion
-              sectionNotes: content.sectionNotes
-                ? Object.fromEntries(
-                    Object.entries(content.sectionNotes).map(([key, note]) => [
-                      key,
-                      { content: note?.content ?? '' },
-                    ])
-                  )
-                : createDefaultSectionNotes(),
+              // Merge with defaults to backfill missing keys (e.g., intro/outro for v1 plans)
+              sectionNotes: {
+                ...createDefaultSectionNotes(),
+                ...(content.sectionNotes
+                  ? Object.fromEntries(
+                      Object.entries(content.sectionNotes).map(([key, note]) => [
+                        key,
+                        { content: note?.content ?? '' },
+                      ])
+                    )
+                  : {}),
+              },
             },
             false,
             'initializeFromPlanner'

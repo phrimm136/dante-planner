@@ -200,7 +200,7 @@ describe('TrackerModeViewer', () => {
       metadata: {
         id: 'planner-1',
         status: 'draft',
-        schemaVersion: 1,
+        schemaVersion: 2,
         contentVersion: 6,
         plannerType: 'MIRROR_DUNGEON',
         syncVersion: 1,
