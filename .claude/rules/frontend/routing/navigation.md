@@ -1,7 +1,6 @@
 ---
 paths:
   - "frontend/src/routes/**/*.tsx"
-  - "frontend/src/components/**/*.tsx"
 ---
 
 # Navigation Patterns

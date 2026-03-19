@@ -1,16 +1,9 @@
 ---
 paths:
-  - "frontend/**/*.test.tsx"
-  - "frontend/**/*.spec.tsx"
+  - "frontend/src/components/**/__tests__/**"
 ---
 
 # Component Testing Patterns
-
-## Mandatory Rules
-
-- **Test behavior, not implementation** - User interactions, not internal state
-- **Use `screen` queries** - Not container queries
-- **Wrap state updates** - Use RTL's async utilities
 
 ## Template
 
@@ -35,18 +28,4 @@ describe('Card', () => {
     expect(onSelect).toHaveBeenCalledWith({ id: '1', name: 'Test' })
   })
 })
-```
-
-## Mocking
-
-```typescript
-// Mock fetch
-vi.spyOn(global, 'fetch').mockResolvedValue({
-  json: () => Promise.resolve({ id: '1', name: 'Test' })
-} as Response)
-
-// Mock module
-vi.mock('@/lib/api', () => ({
-  fetchEntity: vi.fn(() => Promise.resolve({ id: '1' }))
-}))
 ```

@@ -8,9 +8,23 @@ paths:
 
 ## Mandatory Rules
 
-- **Use `/api/` prefix** - All endpoints start with `/api/`
-- **Constructor injection** - Use `@RequiredArgsConstructor`, not `@Autowired`
-- **No business logic** - Delegate to Service layer
+- **Use `/api/` prefix** — all endpoints start with `/api/`
+- **Constructor injection** — use `@RequiredArgsConstructor`, not `@Autowired`
+- **No business logic** — delegate to Service layer
+- **Always return `ResponseEntity<T>`** — not raw entity or bare DTO
+
+## Endpoint Naming
+
+- Nouns, not verbs: `/api/planners`, not `/api/getPlanner`
+- Lowercase with hyphens: `/api/planner-configs`
+- Collections plural: `/api/planners`
+- Sub-resources: `/api/planners/{id}/comments`
+- Non-CRUD actions as noun suffix on POST: `/api/planners/{id}/publish`
+
+## Versioning
+
+- URL path versioning when needed: `/api/v1/`, `/api/v2/`
+- Add versioning when a breaking change is imminent, not speculatively
 
 ## Forbidden Patterns
 
@@ -19,6 +33,9 @@ paths:
 | `@RequestMapping("/users")` | `@RequestMapping("/api/users")` |
 | `@Autowired` field | `@RequiredArgsConstructor` + final |
 | Business logic in controller | Move to Service |
+| `.get()` on Optional in controller | Throw in Service, let GlobalExceptionHandler map |
+| Reading `HttpServletRequest` for business data | Only for infrastructure concerns (IP, User-Agent) |
+| Mixing SSE and REST in same controller | Separate controllers |
 
 ## Template
 
