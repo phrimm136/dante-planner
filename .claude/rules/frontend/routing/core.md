@@ -8,9 +8,10 @@ paths:
 
 ## Mandatory Rules
 
-- **Code-based routes** - No file-based routing
-- **Validate params early** - Before calling data hooks
-- **Suspense at page level** - Wrap content components
+- **Code-based routes** — no file-based routing
+- **Validate params early** — before calling data hooks
+- **Use `useSuspenseQuery`** in route components — loader guarantees data exists
+- **Define `queryOptions` factories** alongside their hooks
 
 ## Route Definition
 
@@ -29,24 +30,48 @@ export const routeTree = rootRoute.addChildren([identityDetailRoute])
 export const router = createRouter({ routeTree })
 ```
 
-## Page Template
+## Data Loading Decision Tree
 
-```typescript
-import { useParams } from '@tanstack/react-router'
+```
+Route needs data?
+  YES → Does data block the page render?
+    YES → ensureQueryData in loader (blocks navigation until ready)
+    NO  → prefetchQuery in loader (non-blocking, shows fallback)
+  NO → No loader needed
 
-export function IdentityDetailPage() {
-  const { id } = useParams({ strict: false })
-
-  if (!id) return <ErrorState message="No ID" />
-
-  return (
-    <ErrorBoundary fallback={<ErrorState />}>
-      <Suspense fallback={<LoadingState />}>
-        <IdentityDetailContent id={id} />
-      </Suspense>
-    </ErrorBoundary>
-  )
-}
+Component reads data?
+  Loader prefetched → useSuspenseQuery (no loading flash)
+  No loader         → useQuery (shows loading state)
+  Speculative        → prefetchQuery on hover/focus
 ```
 
-**Reference:** `IdentityDetailPage.tsx`, `EGODetailPage.tsx`
+- `ensureQueryData` respects `staleTime` — won't refetch if cache is fresh
+- `prefetchQuery` fires and forgets — good for secondary data
+- `defer` + `Await` — slow secondary data that should not block render
+
+## Code Splitting
+
+- TanStack Router `autoCodeSplitting` splits `component` automatically
+- Do NOT re-export the component from the route file — breaks splitting
+- Lazy load heavy sub-components with `React.lazy()` inside route components
+
+## Layout Patterns
+
+```
+Route grouping:
+  (auth)/     → pathless group, shared layout, no URL segment
+  _layout.tsx → shared layout for a URL segment
+  __root.tsx  → root layout, global providers
+```
+
+- Prefer flat routes with `()` grouping over deep nesting for unrelated sections
+- Co-locate layout with its route group
+
+## Forbidden Patterns
+
+| Forbidden | Use Instead |
+|---|---|
+| Fetch data in `useEffect` | Loaders or query hooks |
+| Duplicate loader logic in component | Loader prefetches, component reads cache |
+| Plain `useQuery` after prefetch | `useSuspenseQuery` (avoids unnecessary loading) |
+| Deep route nesting for unrelated sections | Flat routes with `()` grouping |

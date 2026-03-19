@@ -5,6 +5,24 @@ paths:
 
 # Controller Testing Patterns
 
+## Test Type Selection
+
+| Annotation | Database | Speed | Use When |
+|---|---|---|---|
+| `@WebMvcTest` + `@MockBean` | None | Fast | Testing HTTP/JSON behavior only |
+| `@SpringBootTest` + `@AutoConfigureMockMvc` | Real (test profile) | Slow | Full integration with DB |
+
+## Naming Convention
+
+```
+methodName_WhenCondition_ExpectedBehavior
+getUser_WhenExists_Returns200
+createUser_WithInvalidData_Returns400
+delete_WhenNotOwner_Returns403
+```
+
+Use `@Nested` + `@DisplayName` to group by method/scenario.
+
 ## Template
 
 ```java
@@ -28,7 +46,6 @@ class UserControllerTest {
 
     @Test
     void createUser_WithInvalidData_Returns400() throws Exception {
-        // Jakarta Validation triggers on @Valid @RequestBody
         mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"\", \"email\": \"invalid\"}"))

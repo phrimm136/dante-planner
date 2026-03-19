@@ -8,10 +8,22 @@ paths:
 
 ## Mandatory Rules
 
-- **`@Transactional` on class** - Default for service classes
-- **`readOnly = true` for queries** - Optimize read operations
-- **Use `.orElseThrow()`** - Never `.get()` on Optional
-- **Constructor injection** - `@RequiredArgsConstructor`
+- **`@Transactional` on class** — default for service classes
+- **`readOnly = true` for queries** — optimize read operations
+- **Use `.orElseThrow()`** — never `.get()` on Optional
+- **Constructor injection** — `@RequiredArgsConstructor`
+
+## Service Composition
+
+- One Service = one business domain (Single Responsibility)
+- Cross-domain operations: inject the other Service, not its Repository
+- Complex workflows: use `ApplicationEventPublisher` over deep service chains
+
+## Error Handling
+
+- Throw domain-specific exceptions: `PlannerNotFoundException`, `PlannerForbiddenException`
+- Never catch-and-swallow — let `GlobalExceptionHandler` translate to HTTP
+- Business validation (ownership check, limit check) belongs in Service, not Controller
 
 ## Forbidden Patterns
 
@@ -19,6 +31,9 @@ paths:
 |-----------|-------------|
 | `optional.get()` | `.orElseThrow(() -> new NotFoundException())` |
 | `@Transactional` on private | Only on public methods |
+| External API calls inside `@Transactional` | Move outside transaction |
+| Catching and swallowing exceptions | Let GlobalExceptionHandler handle |
+| Reaching into another Service's Repository | Inject the other Service |
 
 ## Template
 

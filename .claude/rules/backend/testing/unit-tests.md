@@ -8,8 +8,22 @@ paths:
 
 ## Mandatory Rules
 
-- **Test behavior, not implementation** - Public API, not internals
-- **Mock at boundaries** - External services, not internals
+- **Test behavior, not implementation** — public API, not internals
+- **Mock at boundaries** — external services, not internals
+
+## Naming Convention
+
+```
+methodName_WhenCondition_ExpectedBehavior
+findById_WhenExists_ReturnsUser
+findById_WhenNotExists_ThrowsNotFound
+castVote_WhenAlreadyVoted_Returns409
+```
+
+## Test Data Patterns
+
+- Use a `TestDataFactory` static helper for building reusable entities
+- For deterministic ordering: `entity.setCreatedAt(now.minusSeconds(10))` — never `Thread.sleep()`
 
 ## Template
 
