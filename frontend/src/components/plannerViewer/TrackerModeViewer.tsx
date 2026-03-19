@@ -20,12 +20,14 @@ import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 import { SkillReplacementSection } from '@/components/skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
+import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '@/hooks/useTrackerState'
 import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
 import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
 import { DEFAULT_SKILL_EA } from '@/lib/constants'
+import { isNoteEmpty } from '@/lib/noteUtils'
 import { cn } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '@/lib/deckCode'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
@@ -135,6 +137,18 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
   return (
     <div className="bg-background rounded-lg space-y-2">
+      {/* Intro */}
+      {content.sectionNotes?.intro && !isNoteEmpty(content.sectionNotes.intro) && (
+        <PlannerSection title={t('pages.plannerMD.introduction')}>
+          <NoteEditor
+            value={content.sectionNotes.intro}
+            onChange={() => {}}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            readOnly={true}
+          />
+        </PlannerSection>
+      )}
+
       {/* Section 0: Deck Builder - Equipment read-only, deployment editable */}
       <div className={cn('transition-opacity duration-200', visibleSections[0] ? 'opacity-100' : 'opacity-0')}>
         <Suspense
@@ -297,6 +311,18 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           </div>
         </div>
       </div>
+
+      {/* Outro */}
+      {content.sectionNotes?.outro && !isNoteEmpty(content.sectionNotes.outro) && (
+        <PlannerSection title={t('pages.plannerMD.closingNotes')}>
+          <NoteEditor
+            value={content.sectionNotes.outro}
+            onChange={() => {}}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            readOnly={true}
+          />
+        </PlannerSection>
+      )}
 
       {/* Section Note Dialogs */}
       <SectionNoteDialog

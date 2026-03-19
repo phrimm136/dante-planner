@@ -26,7 +26,7 @@ import { ApiClient } from '@/lib/api'
  * - rrAvailableVersions: available Refracted Railway versions (for REFRACTED_RAILWAY planners)
  */
 const mockConfigResponse = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   mdCurrentVersion: 7,
   mdAvailableVersions: [6, 7],
   rrAvailableVersions: [1, 5],
@@ -69,7 +69,7 @@ describe('PlannerConfigSchema', () => {
     const result = PlannerConfigSchema.safeParse(mockConfigResponse)
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.schemaVersion).toBe(1)
+      expect(result.data.schemaVersion).toBe(2)
       expect(result.data.mdCurrentVersion).toBe(7)
       expect(result.data.rrAvailableVersions).toEqual([1, 5])
     }

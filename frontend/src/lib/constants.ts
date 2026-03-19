@@ -571,7 +571,7 @@ export const AUTO_SAVE_DEBOUNCE_MS = 1000
  * Current planner schema version for migration support
  * Increment when planner data structure changes
  */
-export const PLANNER_SCHEMA_VERSION = 1
+export const PLANNER_SCHEMA_VERSION = 2
 
 /**
  * Current export file format version for migration support

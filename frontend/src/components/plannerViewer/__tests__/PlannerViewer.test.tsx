@@ -61,7 +61,7 @@ describe('PlannerViewer', () => {
       id: '550e8400-e29b-41d4-a716-446655440000',
       title: 'Test Planner',
       status: 'draft',
-      schemaVersion: 1,
+      schemaVersion: 2,
       contentVersion: 6,
       plannerType: 'MIRROR_DUNGEON',
       syncVersion: 1,

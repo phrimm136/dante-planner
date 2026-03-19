@@ -67,7 +67,7 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
       id: '550e8400-e29b-41d4-a716-446655440000',
       title: configType === 'MIRROR_DUNGEON' ? 'Test MD Planner' : 'Test RR Planner',
       status: 'draft' as const,
-      schemaVersion: 1,
+      schemaVersion: 2,
       contentVersion: 6,
       plannerType: configType,
       syncVersion: 1,

@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dialog'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { NoteContent } from '@/types/NoteEditorTypes'
+import { isNoteEmpty } from '@/lib/noteUtils'
 
 interface FloorNoteDialogProps {
   open: boolean
@@ -31,9 +32,7 @@ export function FloorNoteDialog({
 }: FloorNoteDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const isEmpty =
-    !noteContent.content ||
-    (noteContent.content.type === 'doc' && (!noteContent.content.content || noteContent.content.content.length === 0))
+  const isEmpty = isNoteEmpty(noteContent)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
