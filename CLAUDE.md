@@ -14,16 +14,14 @@ Game planning and management tool for Limbus Company.
 
 1. **NEVER modify unrequested code** - Only change what was explicitly asked. Your "kindness" and "helpfulness" DESTROY the entire codebase. Do NOT refactor surrounding code, do NOT add improvements, do NOT fix unrelated issues. Surgical precision ONLY.
 2. **NEVER hardcode values** - Use constants files
-3. **NEVER skip pattern check** - Read similar files first
+3. **ALWAYS follow existing patterns** - Read similar files first, then match. Consistency over cleverness.
 4. **NEVER mix concerns** - Separate layers
 5. **ALWAYS validate data** - Zod (FE), Jakarta Validation (BE)
-6. **ALWAYS follow existing patterns** - Consistency over cleverness
-7. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
-8. **BUG FIX - When the user is compalining about a bug: Read working → Read broken → State root cause → THEN fix**
-9. **BE CONCISE** - No unnecessary explanations or verbose output
-10. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
-11. **NEVER circumvent errors** - Always resolve errors; do not bypass or work around them
-12. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
+6. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
+7. **BUG FIX** - Read working → Read broken → State root cause → Resolve. NEVER circumvent or bypass errors.
+8. **BE CONCISE** - No unnecessary explanations or verbose output
+9. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
+10. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
 
 ---
 
@@ -59,15 +57,15 @@ APPLYING: [patterns copied]
 
 ## Code Intelligence
 
-LSP is enabled for both languages. Prefer LSP over grep for navigation.
+Prefer LSP over Grep/Read for code navigation — it's faster, precise, and avoids reading entire files:
+- `workspaceSymbol` to find where something is defined
+- `findReferences` to see all usages across the codebase
+- `goToDefinition` / `goToImplementation` to jump to source
+- `hover` for type info without reading the file
 
-| Operation | Use for |
-|-----------|---------|
-| `goToDefinition` | Jump to symbol declaration |
-| `findReferences` | All usages across codebase |
-| `hover` | Type signatures, docs |
-| `documentSymbol` | All symbols in a file |
-| `incomingCalls` / `outgoingCalls` | Call graph traversal |
+Use Grep only when LSP isn't available or for text/pattern searches (comments, strings, config).
+
+After writing or editing code, check LSP diagnostics and fix errors before proceeding.
 
 - **TypeScript**: `typescript-language-server` — covers `.ts`, `.tsx`
 - **Java**: `jdtls` — covers `.java`; stale cache at `~/.cache/jdtls/` → `rm -rf` the erroring workspace dir and restart session

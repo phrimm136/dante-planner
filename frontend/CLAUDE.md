@@ -2,7 +2,7 @@
 
 **Tech Stack:** React 19 + TypeScript + TanStack Query + Zustand + Zod + shadcn/ui + Tailwind CSS + React Compiler
 
-**Package Manager:** Yarn (NEVER use npm in frontend/)
+**Package Manager:** Yarn
 
 ---
 
