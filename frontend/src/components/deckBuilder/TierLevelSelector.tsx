@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL } from '@/lib/constants'
 import type { UptieTier, ThreadspinTier } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
+import { getEGOTierIconPath } from '@/lib/assetPaths'
 
 interface TierLevelSelectorProps {
   mode: 'identity' | 'ego'
@@ -24,8 +25,8 @@ interface TierLevelSelectorProps {
 const UPTIE_TIERS: UptieTier[] = [1, 2, 3, 4]
 const THREADSPIN_TIERS: ThreadspinTier[] = [1, 2, 3, 4]
 
-// Get tier icon path
-const getTierIconPath = (tier: number) => `/images/UI/common/tier${tier}.webp`
+// Get tier icon path — delegates to centralized asset helper
+const getTierIconPath = (tier: number) => getEGOTierIconPath(tier)
 
 // Inner component props (without children)
 interface TierLevelSelectorInnerProps {

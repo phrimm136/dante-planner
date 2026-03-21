@@ -3,7 +3,7 @@ import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { SkillData } from './SinnerGrid'
-import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath } from '@/lib/assetPaths'
+import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath, getSelectedIndicatorPath, getBackupIndicatorPath } from '@/lib/assetPaths'
 import { IdentityCard } from '@/components/identity/IdentityCard'
 import colorCode from '@static/data/colorCode.json'
 import { getDisplayFontForNumeric } from '@/lib/utils'
@@ -50,7 +50,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
           {deploymentOrder}
         </span>
         <img
-          src={isDeployed ? '/images/UI/formation/selected.webp' : '/images/UI/formation/backup.webp'}
+          src={isDeployed ? getSelectedIndicatorPath() : getBackupIndicatorPath()}
           alt={isDeployed ? 'Selected' : 'Backup'}
           className="w-37 object-contain"
         />

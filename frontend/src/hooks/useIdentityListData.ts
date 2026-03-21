@@ -14,10 +14,8 @@ function createIdentitySpecListQueryOptions() {
   return queryOptions({
     queryKey: identityListQueryKeys.spec(),
     queryFn: async () => {
-      const response = await fetch('/data/identitySpecList.json')
-      if (!response.ok) throw new Error(`Failed to fetch identitySpecList: ${response.status}`)
-      const data: unknown = await response.json()
-      const result = IdentitySpecListSchema.safeParse(data)
+      const module = await import('@static/data/identitySpecList.json')
+      const result = IdentitySpecListSchema.safeParse(module.default)
       if (!result.success) {
         throw new Error(`[identity specList] Validation failed: ${result.error.message}`)
       }
@@ -32,10 +30,8 @@ function createIdentityNameListQueryOptions(language: string) {
   return queryOptions({
     queryKey: identityListQueryKeys.i18n(language),
     queryFn: async () => {
-      const response = await fetch(`/i18n/${language}/identityNameList.json`)
-      if (!response.ok) throw new Error(`Failed to fetch identityNameList: ${response.status}`)
-      const data: unknown = await response.json()
-      const result = IdentityNameListSchema.safeParse(data)
+      const module = await import(`@static/i18n/${language}/identityNameList.json`)
+      const result = IdentityNameListSchema.safeParse(module.default)
       if (!result.success) {
         throw new Error(`[identity nameList / ${language}] Validation failed: ${result.error.message}`)
       }

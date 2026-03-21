@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Suspense, useEffect, useState } from 'react'
 import { Languages, Settings, User, LogOut, Bell } from 'lucide-react'
 import { cn, getDisplayFontForLabel } from '@/lib/utils'
+import { getLogoPath } from '@/lib/assetPaths'
 import { formatUsername } from '@/lib/formatUsername'
 
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
@@ -301,7 +302,7 @@ export function Header() {
             className="flex rounded-lg pr-2 items-center gap-2 no-underline group hover:bg-accent transition-colors"
           >
             <img
-              src="/images/logo/LCMC.webp"
+              src={getLogoPath()}
               alt={t('limbusCompany')}
               className="h-8 w-8"
             />

@@ -7,7 +7,7 @@ import NotFoundPage from '@/routes/NotFoundPage'
 
 interface ErrorFallbackProps {
   error: unknown
-  resetErrorBoundary: () => void
+  resetErrorBoundary: (...args: unknown[]) => void
 }
 
 /**
