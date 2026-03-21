@@ -6,6 +6,10 @@ paths:
 
 # Component Core Patterns
 
+## Mandatory Rules
+
+- **No business logic in components** — extract to custom hooks
+
 ## Forbidden Patterns
 
 | Forbidden | Use Instead |
@@ -13,6 +17,7 @@ paths:
 | `React.FC<Props>` | `function Component(props: Props)` |
 | `memo()`, `useCallback()`, `useMemo()` without profiling | Let React Compiler optimize first; use manual optimization ONLY with explicit intent, user approval, and measured performance benefit |
 | `if (loading) return <Spinner />` | `<Suspense fallback={...}>` |
+| Business logic in component body | Extract to custom hook |
 
 ## Template
 

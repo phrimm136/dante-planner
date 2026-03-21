@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dialog'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { NoteContent } from '@/types/NoteEditorTypes'
+import { isNoteEmpty } from '@/lib/noteUtils'
 
 interface SectionNoteDialogProps {
   open: boolean
@@ -35,9 +36,7 @@ export function SectionNoteDialog({
 }: SectionNoteDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const isEmpty =
-    !noteContent.content ||
-    (noteContent.content.type === 'doc' && (!noteContent.content.content || noteContent.content.content.length === 0))
+  const isEmpty = isNoteEmpty(noteContent)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

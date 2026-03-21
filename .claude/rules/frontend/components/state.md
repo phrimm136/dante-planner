@@ -6,32 +6,61 @@ paths:
 
 # Component State Management Patterns
 
+## Decision Tree
+
+```
+Is this data from the server?
+  YES → TanStack Query (useQuery / useMutation)
+  NO  → Is it local to one component?
+    YES → useState / useReducer
+    NO  → Shared across 2-3 nearby components?
+      YES → Prop drilling or Context
+      NO  → Global, persistent, or complex client state?
+        YES → Zustand
+```
+
 ## State Type Selection
 
-| State Type | Solution |
-|------------|----------|
-| Server data (API) | TanStack Query |
-| Complex shared UI state | Zustand with selectors |
-| Theme, i18n | Context (existing) |
-| Local component state | `useState` |
+| State Type | Solution | Examples |
+|---|---|---|
+| Server data (API) | TanStack Query | API responses, cache, optimistic updates |
+| Local UI state | `useState` | Modal open, tab selection, form draft |
+| Theme, i18n | Context (existing) | Stable, rarely-changing data |
+| Complex shared UI state | Zustand with selectors | Planner equipment, SSE status, user prefs |
 
-## Zustand Pattern (prevents re-render cascade)
+## Zustand Rules
 
 ```typescript
-// GOOD: Only re-renders when this slice changes
+// GOOD: Atomic selector — only re-renders when this slice changes
 const equipment = usePlannerStore((s) => s.equipment[sinner])
 const setEquipment = usePlannerStore((s) => s.setEquipment)
 
 // BAD: Re-renders on ANY store change
 const store = usePlannerStore()
+
+// BAD: Object literal selector — new reference every render
+const { user, token } = useAuthStore()
 ```
 
-## Provider + Consumer (theme, i18n only)
+- Use atomic selectors: `useStore(s => s.field)` not `useStore()`
+- Export custom hooks (`useAuthStore`, `useSseStore`) not the raw store
+- Do NOT put server data in Zustand — that's TanStack Query's job
+- Do NOT mutate state outside store actions
 
-```typescript
-<ThemeProvider>
-  <App />  {/* useTheme() anywhere inside */}
-</ThemeProvider>
-```
+## Context Rules
+
+- Context is for stable, rarely-changing data: theme, locale, auth user info
+- Context triggers re-renders for ALL consumers on any change
+- Do NOT put frequently-changing state in Context
+- Break large providers: `useAuth` (hook) + `AuthContext` (context) + `AuthGuard` (boundary)
+
+## Forbidden Patterns
+
+| Forbidden | Use Instead |
+|---|---|
+| API data in Zustand | TanStack Query |
+| `useStore()` without selector | `useStore(s => s.field)` |
+| Frequent state in Context | Zustand with selectors |
+| Prop drilling 3+ levels | Context or Zustand |
 
 **Reference:** `stores/usePlannerStore.ts`

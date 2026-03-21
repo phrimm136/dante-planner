@@ -1,6 +1,8 @@
 # BACKEND DEVELOPMENT GUIDELINES
 
-**Tech Stack:** Spring Boot + Java + JPA/Hibernate + Bean Validation (JSR-380) + PostgreSQL
+**Tech Stack:** Spring Boot + Java + JPA/Hibernate + Bean Validation (JSR-380) + MySQL
+
+**Build Tool:** Gradle via `./gradlew`
 
 ---
 

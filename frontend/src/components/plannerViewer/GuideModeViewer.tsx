@@ -15,6 +15,7 @@ import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
 import type { SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
 import { FLOOR_COUNTS } from '@/lib/constants'
 import type { MDCategory } from '@/lib/constants'
+import { isNoteEmpty } from '@/lib/noteUtils'
 import { deserializeSets } from '@/schemas/PlannerSchemas'
 
 const SECTION_COUNT = 7
@@ -51,6 +52,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
 
   return (
     <div className="bg-background rounded-lg space-y-2">
+      {/* Intro */}
+      {content.sectionNotes?.intro && !isNoteEmpty(content.sectionNotes.intro) && (
+        <PlannerSection title={t('pages.plannerMD.introduction')}>
+          <NoteEditor
+            value={content.sectionNotes.intro}
+            onChange={() => {}}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            readOnly={true}
+          />
+        </PlannerSection>
+      )}
+
       {/* Section 0: Deck Builder */}
       {visibleSections[0] && (
         <Suspense
@@ -78,7 +91,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           />
         </Suspense>
       )}
-      {visibleSections[0] && (
+      {visibleSections[0] && !isNoteEmpty(content.sectionNotes.deckBuilder) && (
         <NoteEditor
           value={content.sectionNotes.deckBuilder}
           onChange={() => {}}
@@ -104,7 +117,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           />
         </Suspense>
       )}
-      {visibleSections[1] && (
+      {visibleSections[1] && !isNoteEmpty(content.sectionNotes.startBuffs) && (
         <NoteEditor
           value={content.sectionNotes.startBuffs}
           onChange={() => {}}
@@ -130,7 +143,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           />
         </Suspense>
       )}
-      {visibleSections[2] && (
+      {visibleSections[2] && !isNoteEmpty(content.sectionNotes.startGifts) && (
         <NoteEditor
           value={content.sectionNotes.startGifts}
           onChange={() => {}}
@@ -163,7 +176,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           <EGOGiftObservationSummary mdVersion={planner.metadata.contentVersion} selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
         </Suspense>
       )}
-      {visibleSections[3] && (
+      {visibleSections[3] && !isNoteEmpty(content.sectionNotes.observation) && (
         <NoteEditor
           value={content.sectionNotes.observation}
           onChange={() => {}}
@@ -203,7 +216,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           />
         </Suspense>
       )}
-      {visibleSections[4] && (
+      {visibleSections[4] && !isNoteEmpty(content.sectionNotes.skillReplacement) && (
         <NoteEditor
           value={content.sectionNotes.skillReplacement}
           onChange={() => {}}
@@ -229,7 +242,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
           </Suspense>
         </PlannerSection>
       )}
-      {visibleSections[5] && (
+      {visibleSections[5] && !isNoteEmpty(content.sectionNotes.comprehensiveGifts) && (
         <NoteEditor
           value={content.sectionNotes.comprehensiveGifts}
           onChange={() => {}}
@@ -251,6 +264,18 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
             floorCount={floorCount}
           />
         </Suspense>
+      )}
+
+      {/* Outro */}
+      {content.sectionNotes?.outro && !isNoteEmpty(content.sectionNotes.outro) && (
+        <PlannerSection title={t('pages.plannerMD.closingNotes')}>
+          <NoteEditor
+            value={content.sectionNotes.outro}
+            onChange={() => {}}
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            readOnly={true}
+          />
+        </PlannerSection>
       )}
     </div>
   )

@@ -224,7 +224,7 @@ class PlannerControllerTest {
                     .andExpect(jsonPath("$.category").value("5F"))
                     .andExpect(jsonPath("$.status").value("draft"))
                     .andExpect(jsonPath("$.syncVersion").value(1))
-                    .andExpect(jsonPath("$.schemaVersion").value(1))
+                    .andExpect(jsonPath("$.schemaVersion").value(2))
                     .andExpect(jsonPath("$.contentVersion").value(7))
                     .andExpect(jsonPath("$.plannerType").value("MIRROR_DUNGEON"));
         }
@@ -868,7 +868,7 @@ class PlannerControllerTest {
             mockMvc.perform(get("/api/planner/md/config"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.schemaVersion").isNumber())
-                    .andExpect(jsonPath("$.schemaVersion").value(1))
+                    .andExpect(jsonPath("$.schemaVersion").value(2))
                     .andExpect(jsonPath("$.mdCurrentVersion").isNumber())
                     .andExpect(jsonPath("$.rrAvailableVersions").isArray());
         }

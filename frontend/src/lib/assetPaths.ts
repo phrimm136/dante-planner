@@ -1,5 +1,6 @@
 import { AFFINITIES, ATK_TYPES } from './constants'
 import type { SkillAttributeType } from './constants'
+import { resolveAsset } from './assetManifest'
 
 /**
  * Removes bracket notation from strings used in game data
@@ -15,7 +16,7 @@ export function parseBracketNotation(valueWithBrackets: string): string {
  * @returns Selected indicator path
  */
 export function getSelectedIndicatorPath(): string {
-  return `/images/UI/formation/selected.webp`
+  return resolveAsset(`/images/UI/formation/selected.webp`)
 }
 
 /**
@@ -23,9 +24,9 @@ export function getSelectedIndicatorPath(): string {
  */
 export function getIdentityInfoImagePath(identityId: string, identityUptie = 4): string {
   if (identityUptie < 3 || identityId.endsWith('01')) {
-    return `/images/identity/${identityId}/${identityId}_normal_info.webp`
+    return resolveAsset(`/images/identity/${identityId}/${identityId}_normal_info.webp`)
   }
-  return `/images/identity/${identityId}/${identityId}_gacksung_info.webp`
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_gacksung_info.webp`)
 }
 
 /**
@@ -33,16 +34,16 @@ export function getIdentityInfoImagePath(identityId: string, identityUptie = 4):
  */
 export function getIdentityProfileImagePath(identityId: string, identityUptie = 4): string {
   if (identityUptie < 3) {
-    return `/images/identity/${identityId}/${identityId}_normal_profile.webp`
+    return resolveAsset(`/images/identity/${identityId}/${identityId}_normal_profile.webp`)
   }
-  return `/images/identity/${identityId}/${identityId}_gacksung_profile.webp`
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_gacksung_profile.webp`)
 }
 
 /**
  * Gets the fallback image path for an identity card (normal_info)
  */
 export function getIdentityImageFallbackPath(identityId: string): string {
-  return `/images/identity/${identityId}/${identityId}_normal_info.webp`
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_normal_info.webp`)
 }
 
 /**
@@ -51,7 +52,7 @@ export function getIdentityImageFallbackPath(identityId: string): string {
  * @param uptie - Uptie level (1-4), defaults to 4
  */
 export function getUptieFramePath(rank: number, uptie = 4): string {
-  return `/images/UI/formation/${String(rank)}Rank${String(uptie)}UptieFrame.webp`
+  return resolveAsset(`/images/UI/formation/${String(rank)}Rank${String(uptie)}UptieFrame.webp`)
 }
 
 /**
@@ -59,14 +60,14 @@ export function getUptieFramePath(rank: number, uptie = 4): string {
  * @returns Identity frame highlight path
  */
 export function getIdentityFrameHighlightPath(): string {
-  return `/images/UI/formation/identityFrameHighlight.webp`
+  return resolveAsset(`/images/UI/formation/identityFrameHighlight.webp`)
 }
 
 /**
  * Gets the image path for sinner background based on rank
  */
 export function getSinnerBGPath(rank: number): string {
-  return `/images/UI/formation/${String(rank)}RankSinnerBG.webp`
+  return resolveAsset(`/images/UI/formation/${String(rank)}RankSinnerBG.webp`)
 }
 
 /**
@@ -74,7 +75,7 @@ export function getSinnerBGPath(rank: number): string {
  * Expects PascalCase sinner name (e.g., "YiSang")
  */
 export function getSinnerIconPath(sinner: string): string {
-  return `/images/icon/sinners/${sinner}.webp`
+  return resolveAsset(`/images/icon/sinners/${sinner}.webp`)
 }
 
 /**
@@ -82,7 +83,7 @@ export function getSinnerIconPath(sinner: string): string {
  * Expects PascalCase sin name (e.g., "Wrath", "Lust")
  */
 export function getSinIconPath(sin: string): string {
-  return `/images/icon/sin/${sin}.webp`
+  return resolveAsset(`/images/icon/sin/${sin}.webp`)
 }
 
 /**
@@ -90,7 +91,7 @@ export function getSinIconPath(sin: string): string {
  * Expects PascalCase keyword (e.g., "Rupture")
  */
 export function getStatusEffectIconPath(keyword: string): string {
-  return `/images/icon/statusEffect/${keyword}.webp`
+  return resolveAsset(`/images/icon/statusEffect/${keyword}.webp`)
 }
 
 /**
@@ -130,7 +131,7 @@ export function getResistanceInfo(value: number): ResistanceInfo {
  * Gets rarity icon path based on grade
  */
 export function getRarityIconPath(grade: number): string {
-  return `/images/UI/identity/rarity${String(grade)}.webp`
+  return resolveAsset(`/images/UI/identity/rarity${String(grade)}.webp`)
 }
 
 /**
@@ -140,7 +141,7 @@ export function getIdentityDetailImagePath(
   identityId: string,
   variant: 'gacksung' | 'normal' = 'gacksung'
 ): string {
-  return `/images/identity/${identityId}/${identityId}_${variant}.webp`
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_${variant}.webp`)
 }
 
 /**
@@ -151,7 +152,7 @@ export function getIdentityDetailImagePath(
  */
 export function getSkillImagePath(identityId: string, skillId: string): string {
   // Strip _4 suffix if present (legacy uptie4 format no longer used)
-  return `/images/identity/${identityId}/${skillId}.webp`
+  return resolveAsset(`/images/identity/${identityId}/${skillId}.webp`)
 }
 
 /**
@@ -163,7 +164,7 @@ export function getSkillImagePath(identityId: string, skillId: string): string {
 export function getSkillImagePathFromIconID(iconID: string): string {
   // Strip _4 suffix if present
   const identityId = iconID.slice(0, 5)
-  return `/images/identity/${identityId}/${iconID}.webp`
+  return resolveAsset(`/images/identity/${identityId}/${iconID}.webp`)
 }
 
 /**
@@ -177,7 +178,7 @@ export function getSkillFramePath(attributeType: SkillAttributeType | undefined,
   const attr = attributeType ?? 'NEUTRAL'
   // Clamp tier to 1-3 range
   const frameLevel = Math.max(1, Math.min(3, skillTier))
-  return `/images/UI/skillFrame/${attr}${String(frameLevel)}.webp`
+  return resolveAsset(`/images/UI/skillFrame/${attr}${String(frameLevel)}.webp`)
 }
 
 /**
@@ -190,7 +191,7 @@ export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefine
   const attr = attributeType ?? 'NEUTRAL'
   // Clamp tier to 1-3 range
   const frameLevel = Math.max(1, Math.min(3, skillTier))
-  return `/images/UI/skillFrame/${attr}${String(frameLevel)}BG.webp`
+  return resolveAsset(`/images/UI/skillFrame/${attr}${String(frameLevel)}BG.webp`)
 }
 
 /**
@@ -200,7 +201,7 @@ export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefine
  */
 export function getAttackTypeIconPath(atkType: string): string {
   const atkTypeCapital = atkType[0].toUpperCase() + atkType.slice(1).toLowerCase()
-  return `/images/UI/common/${atkTypeCapital}.webp`
+  return resolveAsset(`/images/UI/common/${atkTypeCapital}.webp`)
 }
 
 /**
@@ -209,7 +210,7 @@ export function getAttackTypeIconPath(atkType: string): string {
  * @returns Attack type frame path
  */
 export function getAttackTypeFramePath(attributeType: SkillAttributeType): string {
-  return `/images/UI/skillFrame/attackType${attributeType}.webp`
+  return resolveAsset(`/images/UI/skillFrame/attackType${attributeType}.webp`)
 }
 
 /**
@@ -218,7 +219,7 @@ export function getAttackTypeFramePath(attributeType: SkillAttributeType): strin
  * @returns Attack type frame background path
  */
 export function getAttackTypeFrameBGPath(attributeType: SkillAttributeType): string {
-  return `/images/UI/skillFrame/attackTypeBG${attributeType}.webp`
+  return resolveAsset(`/images/UI/skillFrame/attackTypeBG${attributeType}.webp`)
 }
 
 /**
@@ -228,7 +229,7 @@ export function getAttackTypeFrameBGPath(attributeType: SkillAttributeType): str
  */
 export function getCoinIconPath(coinType: 'C' | 'U'): string {
   const iconName = coinType === 'U' ? 'superCoin' : 'coin'
-  return `/images/icon/${iconName}.webp`
+  return resolveAsset(`/images/icon/${iconName}.webp`)
 }
 
 /**
@@ -237,7 +238,7 @@ export function getCoinIconPath(coinType: 'C' | 'U'): string {
  * @returns Coin icon path for descriptions
  */
 export function getCoinDescIconPath(coinIndex: number): string {
-  return `/images/UI/common/coin${String(coinIndex + 1)}.webp`
+  return resolveAsset(`/images/UI/common/coin${String(coinIndex + 1)}.webp`)
 }
 
 /**
@@ -250,7 +251,7 @@ export function getCoinDescIconPath(coinIndex: number): string {
  * @returns EGO image path
  */
 export function getEGOImagePath(egoId: string): string {
-  return `/images/ego/${egoId}/${egoId}_cg.webp`
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`)
 }
 
 /**
@@ -260,7 +261,7 @@ export function getEGOImagePath(egoId: string): string {
  * @returns EGO profile image path
  */
 export function getEGOProfileImagePath(egoId: string): string {
-  return `/images/ego/${egoId}/${egoId}_awaken_profile.webp`
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_awaken_profile.webp`)
 }
 
 /**
@@ -268,7 +269,7 @@ export function getEGOProfileImagePath(egoId: string): string {
  * @returns EGO frame path
  */
 export function getEGOFramePath(): string {
-  return `/images/UI/formation/egoFrame.webp`
+  return resolveAsset(`/images/UI/formation/egoFrame.webp`)
 }
 
 /**
@@ -276,7 +277,7 @@ export function getEGOFramePath(): string {
  * @returns EGO frame highlight path
  */
 export function getEGOFrameHighlightPath(): string {
-  return `/images/UI/formation/egoFrameHighlight.webp`
+  return resolveAsset(`/images/UI/formation/egoFrameHighlight.webp`)
 }
 
 /**
@@ -285,7 +286,7 @@ export function getEGOFrameHighlightPath(): string {
  * @returns Rank icon path
  */
 export function getEGORankIconPath(rank: string): string {
-  return `/images/UI/ego/${rank}.webp`
+  return resolveAsset(`/images/UI/ego/${rank}.webp`)
 }
 
 /**
@@ -294,7 +295,7 @@ export function getEGORankIconPath(rank: string): string {
  * @returns Small rank icon path
  */
 export function getEGOSmallRankIconPath(rank: string): string {
-  return `/images/icon/ego/${rank}.webp`
+  return resolveAsset(`/images/icon/ego/${rank}.webp`)
 }
 
 /**
@@ -303,7 +304,7 @@ export function getEGOSmallRankIconPath(rank: string): string {
  * @returns Tier icon path
  */
 export function getEGOTierIconPath(tier: number): string {
-  return `/images/UI/common/tier${String(tier)}.webp`
+  return resolveAsset(`/images/UI/common/tier${String(tier)}.webp`)
 }
 
 /**
@@ -312,7 +313,7 @@ export function getEGOTierIconPath(tier: number): string {
  * @returns EGO info panel path
  */
 export function getEGOInfoPanelPath(attribute: string): string {
-  return `/images/UI/formation/egoInfoPanel${attribute}.webp`
+  return resolveAsset(`/images/UI/formation/egoInfoPanel${attribute}.webp`)
 }
 
 /**
@@ -323,7 +324,7 @@ export function getEGOInfoPanelPath(attribute: string): string {
  */
 export function getEGOSkillImagePath(egoId: string, skillType: 'awaken' | 'erosion'): string {
   const imageFileName = skillType === 'awaken' ? 'awaken_profile.webp' : 'erosion_profile.webp'
-  return `/images/ego/${egoId}/${egoId}_${imageFileName}`
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_${imageFileName}`)
 }
 
 /**
@@ -332,7 +333,7 @@ export function getEGOSkillImagePath(egoId: string, skillType: 'awaken' | 'erosi
  * @returns EGO character image path
  */
 export function getEGODetailImagePath(egoId: string): string {
-  return `/images/ego/${egoId}/${egoId}_cg.webp`
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`)
 }
 
 /**
@@ -345,7 +346,7 @@ export function getEGODetailImagePath(egoId: string): string {
  * @returns Gift icon path
  */
 export function getEGOGiftIconPath(giftId: string): string {
-  return `/images/icon/egoGift/${giftId}.webp`
+  return resolveAsset(`/images/icon/egoGift/${giftId}.webp`)
 }
 
 /**
@@ -354,7 +355,7 @@ export function getEGOGiftIconPath(giftId: string): string {
  * @returns Enhancement icon path
  */
 export function getEGOGiftEnhancementIconPath(level: number): string {
-  return `/images/UI/egoGift/enhancement${String(level)}.webp`
+  return resolveAsset(`/images/UI/egoGift/enhancement${String(level)}.webp`)
 }
 
 /**
@@ -362,7 +363,7 @@ export function getEGOGiftEnhancementIconPath(level: number): string {
  * @returns Cost icon path
  */
 export function getEGOGiftCostIconPath(): string {
-  return `/images/UI/egoGift/cost.webp`
+  return resolveAsset(`/images/UI/egoGift/cost.webp`)
 }
 
 /**
@@ -370,7 +371,7 @@ export function getEGOGiftCostIconPath(): string {
  * @returns Background image path
  */
 export function getEGOGiftBackgroundPath(): string {
-  return `/images/UI/egoGift/bg.webp`
+  return resolveAsset(`/images/UI/egoGift/bg.webp`)
 }
 
 /**
@@ -378,7 +379,7 @@ export function getEGOGiftBackgroundPath(): string {
  * @returns Hover overlay path
  */
 export function getEGOGiftOnHoverPath(): string {
-  return `/images/UI/egoGift/onHover.webp`
+  return resolveAsset(`/images/UI/egoGift/onHover.webp`)
 }
 
 /**
@@ -386,7 +387,7 @@ export function getEGOGiftOnHoverPath(): string {
  * @returns Enhanced background path
  */
 export function getEGOGiftEnhancedBackgroundPath(): string {
-  return `/images/UI/egoGift/bgEnhanced.webp`
+  return resolveAsset(`/images/UI/egoGift/bgEnhanced.webp`)
 }
 
 /**
@@ -394,7 +395,7 @@ export function getEGOGiftEnhancedBackgroundPath(): string {
  * @returns Enhanced background level 2 path
  */
 export function getEGOGiftEnhanced2BackgroundPath(): string {
-  return `/images/UI/egoGift/bgEnhanced2.webp`
+  return resolveAsset(`/images/UI/egoGift/bgEnhanced2.webp`)
 }
 
 /**
@@ -402,7 +403,7 @@ export function getEGOGiftEnhanced2BackgroundPath(): string {
  * @returns Tier EX icon path
  */
 export function getEGOGiftTierEXPath(): string {
-  return `/images/UI/egoGift/tierEX.webp`
+  return resolveAsset(`/images/UI/egoGift/tierEX.webp`)
 }
 
 /**
@@ -436,7 +437,7 @@ export function getKeywordIconPath(keyword: string): string {
 
   // Check if keyword is an attack type
   if ((ATK_TYPES as readonly string[]).includes(keyword.toUpperCase())) {
-    return `/images/UI/egoGift/${keyword}.webp`
+    return resolveAsset(`/images/UI/egoGift/${keyword}.webp`)
   }
 
   // Check if keyword is an ego gift
@@ -456,7 +457,7 @@ export function getKeywordIconPath(keyword: string): string {
  */
 export function getAffinityIconPath(affinity: string): string {
   const sinName = AFFINITY_TO_SIN_NAME[affinity] || affinity
-  return `/images/icon/sin/${sinName}.webp`
+  return resolveAsset(`/images/icon/sin/${sinName}.webp`)
 }
 
 /**
@@ -470,7 +471,7 @@ export function getAffinityIconPath(affinity: string): string {
  * @returns Buff icon path
  */
 export function getStartBuffIconPath(baseId: number, version: number): string {
-  return `/images/UI/MD${String(version)}/StartBuffIcon_${String(baseId)}.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/StartBuffIcon_${String(baseId)}.webp`)
 }
 
 /**
@@ -479,7 +480,7 @@ export function getStartBuffIconPath(baseId: number, version: number): string {
  * @returns Pane background path
  */
 export function getStartBuffPanePath(version: number): string {
-  return `/images/UI/MD${String(version)}/startBuffPane.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffPane.webp`)
 }
 
 /**
@@ -488,7 +489,7 @@ export function getStartBuffPanePath(version: number): string {
  * @returns Highlight overlay path
  */
 export function getStartBuffHighlightPath(version: number): string {
-  return `/images/UI/MD${String(version)}/startBuffHighlight.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffHighlight.webp`)
 }
 
 /**
@@ -496,7 +497,7 @@ export function getStartBuffHighlightPath(version: number): string {
  * @returns Star light path
  */
 export function getStartBuffStarLightPath(): string {
-  return `/images/UI/MD/starLight.webp`
+  return resolveAsset(`/images/UI/MD/starLight.webp`)
 }
 
 /**
@@ -507,9 +508,9 @@ export function getStartBuffStarLightPath(): string {
  */
 export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2, version: number): string {
   if (level === 0) {
-    return `/images/UI/MD${String(version)}/startBuffEnhancementUnselected.webp`
+    return resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancementUnselected.webp`)
   }
-  return `/images/UI/MD${String(version)}/startBuffEnhancement${String(level)}Selected.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancement${String(level)}Selected.webp`)
 }
 
 /**
@@ -520,7 +521,7 @@ export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2, version: number)
  * @returns Overlay image path
  */
 export function getStartBuffEnhancementOverlayPath(version: number): string {
-  return `/images/UI/MD${String(version)}/startBuffEnhancementSelected.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancementSelected.webp`)
 }
 
 /**
@@ -530,9 +531,9 @@ export function getStartBuffEnhancementOverlayPath(version: number): string {
  */
 export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
   if (level === 0) {
-    return `/images/UI/MD/startBuffEnhancementIcon.webp`
+    return resolveAsset(`/images/UI/MD/startBuffEnhancementIcon.webp`)
   }
-  return `/images/UI/egoGift/enhancement${String(level)}.webp`
+  return resolveAsset(`/images/UI/egoGift/enhancement${String(level)}.webp`)
 }
 
 /**
@@ -541,7 +542,7 @@ export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
  * @returns Mini card background path
  */
 export function getStartBuffMiniPath(version: number): string {
-  return `/images/UI/MD${String(version)}/startBuffMini.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffMini.webp`)
 }
 
 /**
@@ -550,7 +551,7 @@ export function getStartBuffMiniPath(version: number): string {
  * @returns Mini card highlight path
  */
 export function getStartBuffMiniHighlightPath(version: number): string {
-  return `/images/UI/MD${String(version)}/startBuffMiniHighlight.webp`
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffMiniHighlight.webp`)
 }
 
 /**
@@ -564,7 +565,7 @@ export function getStartBuffMiniHighlightPath(version: number): string {
  * @returns Composed theme pack image path
  */
 export function getThemePackImagePath(packId: string): string {
-  return `/images/themePack/${packId}.webp`
+  return resolveAsset(`/images/themePack/${packId}.webp`)
 }
 
 /**
@@ -572,7 +573,7 @@ export function getThemePackImagePath(packId: string): string {
  * @returns Hover highlight path
  */
 export function getThemePackHoverHighlightPath(): string {
-  return '/images/UI/themePack/onHover.webp'
+  return resolveAsset('/images/UI/themePack/onHover.webp')
 }
 
 /**
@@ -580,7 +581,7 @@ export function getThemePackHoverHighlightPath(): string {
  * @returns Select highlight path
  */
 export function getThemePackSelectHighlightPath(): string {
-  return '/images/UI/themePack/onSelect.webp'
+  return resolveAsset('/images/UI/themePack/onSelect.webp')
 }
 
 /**
@@ -588,7 +589,7 @@ export function getThemePackSelectHighlightPath(): string {
  * @returns Extreme highlight path
  */
 export function getThemePackExtremeHighlightPath(): string {
-  return '/images/UI/themePack/extremeHighlight.webp'
+  return resolveAsset('/images/UI/themePack/extremeHighlight.webp')
 }
 
 /**
@@ -597,7 +598,7 @@ export function getThemePackExtremeHighlightPath(): string {
  * @Returns Icon path
  */
 export function getEGOTypeIconPath(egoType: string): string {
-  return `/images/icon/ego/${egoType}.webp`
+  return resolveAsset(`/images/icon/ego/${egoType}.webp`)
 }
 
 /**
@@ -611,7 +612,7 @@ export function getEGOTypeIconPath(egoType: string): string {
  * @returns Battle keyword icon path
  */
 export function getBattleKeywordIconPath(iconIdOrKey: string): string {
-  return `/images/icon/battleKeywords/${iconIdOrKey}.webp`
+  return resolveAsset(`/images/icon/battleKeywords/${iconIdOrKey}.webp`)
 }
 
 /**
@@ -624,7 +625,7 @@ export function getBattleKeywordIconPath(iconIdOrKey: string): string {
  * @returns Panic icon path
  */
 export function getPanicIconPath(panicType: number): string {
-  return `/images/icon/sanity/${String(panicType)}.webp`
+  return resolveAsset(`/images/icon/sanity/${String(panicType)}.webp`)
 }
 
 /**
@@ -632,7 +633,7 @@ export function getPanicIconPath(panicType: number): string {
  * @returns Identity passive count icon path
  */
 export function getIdentityPassiveCountIconPath(): string {
-  return `/images/UI/identity/passiveCount.webp`
+  return resolveAsset(`/images/UI/identity/passiveCount.webp`)
 }
 
 /**
@@ -640,7 +641,7 @@ export function getIdentityPassiveCountIconPath(): string {
  * @returns Attack weight icon path
  */
 export function getAttackWeightIconPath(): string {
-  return `/images/UI/common/atkWeight.webp`
+  return resolveAsset(`/images/UI/common/atkWeight.webp`)
 }
 
 /**
@@ -652,7 +653,7 @@ export function getAttackWeightIconPath(): string {
  * @returns Banner image path
  */
 export function getBannerImagePath(): string {
-  return `/images/banner/MD.webp`
+  return resolveAsset(`/images/banner/MD.webp`)
 }
 
 /**
@@ -660,7 +661,7 @@ export function getBannerImagePath(): string {
  * @returns Lock icon path
  */
 export function getLockIconPath(): string {
-  return `/images/UI/common/lock.webp`
+  return resolveAsset(`/images/UI/common/lock.webp`)
 }
 
 /**
@@ -668,7 +669,7 @@ export function getLockIconPath(): string {
  * @returns Sanity increment icon path
  */
 export function getSanityIncIconPath(): string {
-  return `/images/UI/identity/sanityInc.webp`
+  return resolveAsset(`/images/UI/identity/sanityInc.webp`)
 }
 
 /**
@@ -676,7 +677,7 @@ export function getSanityIncIconPath(): string {
  * @returns Sanity decrement icon path
  */
 export function getSanityDecIconPath(): string {
-  return `/images/UI/identity/sanityDec.webp`
+  return resolveAsset(`/images/UI/identity/sanityDec.webp`)
 }
 
 /**
@@ -684,7 +685,7 @@ export function getSanityDecIconPath(): string {
  * @returns Button base background path
  */
 export function getButtonBasePath(): string {
-  return `/images/UI/common/button.webp`
+  return resolveAsset(`/images/UI/common/button.webp`)
 }
 
 /**
@@ -692,7 +693,7 @@ export function getButtonBasePath(): string {
  * @returns Button hover overlay path
  */
 export function getButtonOnHoverPath(): string {
-  return `/images/UI/common/buttonOnHover.webp`
+  return resolveAsset(`/images/UI/common/buttonOnHover.webp`)
 }
 
 /**
@@ -700,5 +701,109 @@ export function getButtonOnHoverPath(): string {
  * @returns Button selected overlay path
  */
 export function getButtonSelectedPath(): string {
-  return `/images/UI/common/buttonSelected.webp`
+  return resolveAsset(`/images/UI/common/buttonSelected.webp`)
+}
+
+/**
+ * Gets button expand image icon path
+ * @returns Button expand image icon path
+ */
+export function getButtonExpandImagePath(): string {
+  return resolveAsset(`/images/UI/common/buttonExpandImage.webp`)
+}
+
+/**
+ * Gets button swap image icon path
+ * @returns Button swap image icon path
+ */
+export function getButtonSwapImagePath(): string {
+  return resolveAsset(`/images/UI/common/buttonSwapImage.webp`)
+}
+
+/**
+ * Gets attack level icon path (sword icon for skill panels)
+ * @returns Attack level icon path
+ */
+export function getAttackLevelIconPath(): string {
+  return resolveAsset(`/images/UI/identity/attack.webp`)
+}
+
+/**
+ * Gets defense level icon path (shield icon for skill panels)
+ * @returns Defense level icon path
+ */
+export function getDefenseLevelIconPath(): string {
+  return resolveAsset(`/images/UI/identity/defense.webp`)
+}
+
+/**
+ * Gets HP stat icon path
+ * @returns HP icon path
+ */
+export function getHPIconPath(): string {
+  return resolveAsset(`/images/UI/identity/hp.webp`)
+}
+
+/**
+ * Gets speed stat icon path
+ * @returns Speed icon path
+ */
+export function getSpeedIconPath(): string {
+  return resolveAsset(`/images/UI/identity/speed.webp`)
+}
+
+/**
+ * Gets slash resistance icon path
+ * @returns Slash resistance icon path
+ */
+export function getSlashResistIconPath(): string {
+  return resolveAsset(`/images/UI/identity/SLASH.webp`)
+}
+
+/**
+ * Gets pierce resistance icon path
+ * @returns Pierce resistance icon path
+ */
+export function getPierceResistIconPath(): string {
+  return resolveAsset(`/images/UI/identity/PENETRATE.webp`)
+}
+
+/**
+ * Gets blunt resistance icon path
+ * @returns Blunt resistance icon path
+ */
+export function getBluntResistIconPath(): string {
+  return resolveAsset(`/images/UI/identity/HIT.webp`)
+}
+
+/**
+ * Gets EGO Gift selection highlight overlay path
+ * @returns EGO Gift select highlight path
+ */
+export function getEGOGiftSelectHighlightPath(): string {
+  return resolveAsset(`/images/UI/egoGift/onSelect.webp`)
+}
+
+/**
+ * Gets backup formation indicator path
+ * @returns Backup indicator path
+ */
+export function getBackupIndicatorPath(): string {
+  return resolveAsset(`/images/UI/formation/backup.webp`)
+}
+
+/**
+ * Gets app logo path
+ * @returns Logo image path
+ */
+export function getLogoPath(): string {
+  return resolveAsset(`/images/logo/LCMC.webp`)
+}
+
+/**
+ * Gets tiptap editor placeholder image path
+ * @returns Placeholder image path
+ */
+export function getTiptapPlaceholderPath(): string {
+  return resolveAsset(`/images/tiptap-ui-placeholder-image.jpg`)
 }

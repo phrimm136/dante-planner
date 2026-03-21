@@ -1,5 +1,5 @@
 import { Suspense, memo } from 'react'
-import { getEGOGiftIconPath, getEGOGiftOnHoverPath } from '@/lib/assetPaths'
+import { getEGOGiftIconPath, getEGOGiftOnHoverPath, getEGOGiftSelectHighlightPath } from '@/lib/assetPaths'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
@@ -103,7 +103,7 @@ export const EGOGiftCard = memo(function EGOGiftCard({
         {/* Selection highlight overlay */}
         {isSelected && (
           <img
-            src="/images/UI/egoGift/onSelect.webp"
+            src={getEGOGiftSelectHighlightPath()}
             alt="Selected"
             className="absolute inset-0 w-full h-full object-contain pointer-events-none"
             loading="lazy"

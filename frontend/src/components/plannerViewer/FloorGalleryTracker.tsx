@@ -6,6 +6,7 @@ import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
+import { isNoteEmpty } from '@/lib/noteUtils'
 
 interface FloorGalleryTrackerProps {
   floorSelections: SerializableFloorSelection[]
@@ -49,12 +50,14 @@ export function FloorGalleryTracker({
                 floorSelectionsOverride={deserializedFloorSelections}
                 readOnly={true}
               />
-              <NoteEditor
-                value={sectionNotes[floorNoteKey]}
-                onChange={() => {}}
-                placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-                readOnly={true}
-              />
+              {!isNoteEmpty(sectionNotes[floorNoteKey]) && (
+                <NoteEditor
+                  value={sectionNotes[floorNoteKey]}
+                  onChange={() => {}}
+                  placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+                  readOnly={true}
+                />
+              )}
             </div>
           )
         })}

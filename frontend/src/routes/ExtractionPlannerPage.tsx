@@ -20,17 +20,17 @@ import { ExtractionCalculator } from '@/components/extraction/ExtractionCalculat
  */
 function ErrorFallback({ error, resetErrorBoundary }: {
   error: unknown
-  resetErrorBoundary: () => void
+  resetErrorBoundary: (...args: unknown[]) => void
 }) {
   const { t } = useTranslation('common')
-  const message = error instanceof Error ? error.message : String(error)
+  const errorMessage = error instanceof Error ? error.message : String(error)
 
   return (
     <div className="bg-destructive/10 border border-destructive rounded-md text-center">
       <h2 className="text-lg font-semibold text-destructive mb-2">
         {t('errors.generic.title')}
       </h2>
-      <p className="text-muted-foreground mb-4">{message}</p>
+      <p className="text-muted-foreground mb-4">{errorMessage}</p>
       <button
         onClick={resetErrorBoundary}
         className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"

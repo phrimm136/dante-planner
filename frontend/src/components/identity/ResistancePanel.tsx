@@ -1,6 +1,11 @@
 import { useTranslation } from 'react-i18next'
 
-import { getResistanceInfo } from '@/lib/assetPaths'
+import {
+  getResistanceInfo,
+  getSlashResistIconPath,
+  getPierceResistIconPath,
+  getBluntResistIconPath,
+} from '@/lib/assetPaths'
 
 interface ResistancePanelProps {
   slash: number
@@ -21,7 +26,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         {/* Slash */}
         <div className="flex flex-col items-center gap-2">
           <img
-            src="/images/UI/identity/SLASH.webp"
+            src={getSlashResistIconPath()}
             alt="Slash"
             className="w-6 h-6 object-contain"
           />
@@ -36,7 +41,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         {/* Pierce */}
         <div className="flex flex-col items-center gap-2">
           <img
-            src="/images/UI/identity/PENETRATE.webp"
+            src={getPierceResistIconPath()}
             alt="Pierce"
             className="w-6 h-6 object-contain"
           />
@@ -51,7 +56,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
         {/* Blunt */}
         <div className="flex flex-col items-center gap-2">
           <img
-            src="/images/UI/identity/HIT.webp"
+            src={getBluntResistIconPath()}
             alt="Blunt"
             className="w-6 h-6 object-contain"
           />
