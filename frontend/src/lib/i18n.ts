@@ -62,8 +62,6 @@ i18n
       escapeValue: false, // React already escapes
     },
 
-    showSupportNotice: false,
-
     react: {
       useSuspense: false,
     },

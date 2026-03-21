@@ -115,6 +115,9 @@ class PlannerServiceTest {
     @Value("${planner.recommended-threshold}")
     private int recommendedThreshold;
 
+    @Value("${planner.schema-version}")
+    private int currentSchemaVersion;
+
     private User testUser;
     private UUID deviceId;
 
@@ -140,7 +143,8 @@ class PlannerServiceTest {
                 notificationSseService,
                 notificationService,
                 maxPlannersPerUser,
-                recommendedThreshold
+                recommendedThreshold,
+                currentSchemaVersion
         );
 
         testUser = User.builder()
