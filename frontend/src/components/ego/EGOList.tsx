@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { EGOListItem, EGOType } from '@/types/EGOTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useEGOListI18nDeferred } from '@/hooks/useEGOListData'
-import type { Season } from '@/lib/constants'
+import type { Season, SkillAttributeType, AtkType } from '@/lib/constants'
 import { CARD_GRID } from '@/lib/constants'
 import { sortEGOByDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
@@ -16,8 +16,8 @@ interface EGOListProps {
   egos: EGOListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
-  selectedAttributes: Set<string>
-  selectedAtkTypes: Set<string>
+  selectedAttributes: Set<SkillAttributeType>
+  selectedAtkTypes: Set<AtkType>
   selectedEGOTypes: Set<EGOType>
   selectedSeasons: Set<Season>
   searchQuery: string
@@ -88,16 +88,20 @@ export function EGOList({
         if (!hasAllKeywords) continue
       }
 
-      // Skill attribute filter - EGO must have at least one selected attribute
+      // Skill attribute filter - AND logic (EGO must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
-        const hasAttribute = ego.attributeTypes.some((attr) => selectedAttributes.has(attr))
-        if (!hasAttribute) continue
+        const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
+          ego.attributeTypes.includes(attr)
+        )
+        if (!hasAllAttributes) continue
       }
 
-      // Attack type filter - EGO must have at least one selected attack type
+      // Attack type filter - AND logic (EGO must have ALL selected attack types)
       if (selectedAtkTypes.size > 0) {
-        const hasAtkType = ego.atkTypes.some((atkType) => selectedAtkTypes.has(atkType))
-        if (!hasAtkType) continue
+        const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
+          ego.atkTypes.includes(atkType)
+        )
+        if (!hasAllAtkTypes) continue
       }
 
       // EGO type filter - EGO must match one of selected types

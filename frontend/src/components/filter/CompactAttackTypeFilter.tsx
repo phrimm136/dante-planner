@@ -1,10 +1,10 @@
 import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { ATK_TYPES } from '@/lib/constants'
+import { ATK_TYPES, type AtkType } from '@/lib/constants'
 import { getAttackTypeIconPath } from '@/lib/assetPaths'
 
 interface CompactAttackTypeFilterProps {
-  selectedTypes: Set<string>
-  onSelectionChange: (types: Set<string>) => void
+  selectedTypes: Set<AtkType>
+  onSelectionChange: (types: Set<AtkType>) => void
 }
 
 /**

@@ -6,7 +6,7 @@ import { SearchBar } from '@/components/common/SearchBar'
 import { EGOList } from '@/components/ego/EGOList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { Season } from '@/lib/constants'
+import type { Season, SkillAttributeType, AtkType } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/lib/filterUtils'
 import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
@@ -37,8 +37,8 @@ function EGOCardGrid({
   spec: z.infer<typeof EGOSpecListSchema>
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
-  selectedAttributes: Set<string>
-  selectedAtkTypes: Set<string>
+  selectedAttributes: Set<SkillAttributeType>
+  selectedAtkTypes: Set<AtkType>
   selectedEGOTypes: Set<EGOType>
   selectedSeasons: Set<Season>
   searchQuery: string
@@ -84,8 +84,8 @@ function EGOPageShell() {
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
-  const [selectedAttributes, setSelectedAttributes] = useState<Set<string>>(new Set())
-  const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<string>>(new Set())
+  const [selectedAttributes, setSelectedAttributes] = useState<Set<SkillAttributeType>>(new Set())
+  const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<AtkType>>(new Set())
   const [selectedEGOTypes, setSelectedEGOTypes] = useState<Set<EGOType>>(new Set())
   const [selectedSeasons, setSelectedSeasons] = useState<Set<Season>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')

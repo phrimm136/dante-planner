@@ -4,7 +4,7 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { IdentitySpecListSchema } from '@/schemas'
 import type { z } from 'zod'
-import type { Season } from '@/lib/constants'
+import type { Season, SkillAttributeType, AtkType } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/lib/filterUtils'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 import { FilterSection } from '@/components/filter/FilterSection'
@@ -38,8 +38,8 @@ function IdentityCardGrid({
   spec: z.infer<typeof IdentitySpecListSchema>
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
-  selectedAttributes: Set<string>
-  selectedAtkTypes: Set<string>
+  selectedAttributes: Set<SkillAttributeType>
+  selectedAtkTypes: Set<AtkType>
   selectedRaritys: Set<number>
   selectedSeasons: Set<Season>
   selectedUnitKeywords: Set<string>
@@ -88,8 +88,8 @@ function IdentityPageShell() {
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
-  const [selectedAttributes, setSelectedAttributes] = useState<Set<string>>(new Set())
-  const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<string>>(new Set())
+  const [selectedAttributes, setSelectedAttributes] = useState<Set<SkillAttributeType>>(new Set())
+  const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<AtkType>>(new Set())
   const [selectedRaritys, setSelectedRaritys] = useState<Set<number>>(new Set())
   const [selectedSeasons, setSelectedSeasons] = useState<Set<Season>>(new Set())
   const [selectedUnitKeywords, setSelectedUnitKeywords] = useState<Set<string>>(new Set())
