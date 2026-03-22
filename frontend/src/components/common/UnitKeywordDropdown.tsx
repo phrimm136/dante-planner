@@ -1,6 +1,5 @@
-import { useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useVirtualizer } from '@tanstack/react-virtual'
 import { ChevronDown } from 'lucide-react'
 import {
   DropdownMenu,
@@ -20,8 +19,24 @@ interface UnitKeywordDropdownProps {
 // Prevent dropdown from closing when selecting items
 const preventClose = (e: Event) => { e.preventDefault() }
 
-// Estimated item height for virtualizer (measured from Radix checkbox item)
-const ITEM_HEIGHT = 32
+/**
+ * Parse Unity rich text tags (color, strikethrough) to React elements.
+ * Same pattern as TraitsI18n.tsx:parseUnityRichText + renderTrait.
+ */
+function formatUnitKeywordLabel(label: string) {
+  const colorMatch = label.match(/<color=([^>]+)>/)
+  if (!colorMatch) return label
+
+  const color = colorMatch[1]
+  let text = label.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
+  const hasStrikethrough = text.includes('<s>')
+  if (hasStrikethrough) {
+    text = text.replace(/<s>/g, '').replace(/<\/s>/g, '')
+  }
+
+  const content = hasStrikethrough ? <s>{text}</s> : text
+  return <span style={{ color }}>{content}</span>
+}
 
 /**
  * Individual unit keyword checkbox item
@@ -44,7 +59,7 @@ function UnitKeywordItem({
       onCheckedChange={() => onToggle(unitKeyword)}
       onSelect={preventClose}
     >
-      {label}
+      {formatUnitKeywordLabel(label)}
     </DropdownMenuCheckboxItem>
   )
 }
@@ -57,13 +72,7 @@ function UnitKeywordItem({
  *
  * Fetches i18n data internally - wrap in Suspense boundary.
  *
- * Pattern: Follows IconFilter.tsx container styling with dropdown
- *
- * Performance: Virtualized rendering with TanStack Virtual
- * - Only renders ~15 visible items instead of all 85
- * - Dramatically reduces initial render time (<50ms)
- * - Maintains smooth 60fps scrolling
- * - Trade-off: Radix keyboard navigation (arrow keys) won't work across all items
+ * Pattern: Follows SeasonDropdown / IconFilter.tsx container styling with dropdown
  */
 export function UnitKeywordDropdown({
   selectedUnitKeywords,
@@ -71,7 +80,32 @@ export function UnitKeywordDropdown({
 }: UnitKeywordDropdownProps) {
   const { t } = useTranslation(['database', 'common'])
   const { unitKeywordsI18n } = useFilterI18nData()
-  const parentRef = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(false)
+  const [displayCount, setDisplayCount] = useState(0)
+
+  // Sort associations alphabetically by localized display name
+  const sortedAssociations = [...ASSOCIATIONS].sort((a, b) => {
+    const labelA = (unitKeywordsI18n[a] || a).replace(/<[^>]+>/g, '')
+    const labelB = (unitKeywordsI18n[b] || b).replace(/<[^>]+>/g, '')
+    return labelA.localeCompare(labelB)
+  })
+
+  useEffect(() => {
+    if (!open) {
+      setDisplayCount(0)
+      return
+    }
+    setDisplayCount(15)
+  }, [open])
+
+  useEffect(() => {
+    if (displayCount > 0 && displayCount < ASSOCIATIONS.length) {
+      const rafId = requestAnimationFrame(() => {
+        setDisplayCount((prev) => Math.min(prev + 20, ASSOCIATIONS.length))
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [displayCount])
 
   const toggleUnitKeyword = (unitKeyword: string) => {
     const newSelection = new Set(selectedUnitKeywords)
@@ -85,16 +119,8 @@ export function UnitKeywordDropdown({
 
   const selectedCount = selectedUnitKeywords.size
 
-  // Setup virtualizer to render only visible items
-  const virtualizer = useVirtualizer({
-    count: ASSOCIATIONS.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => ITEM_HEIGHT,
-    overscan: 5, // Render 5 extra items above/below viewport for smoother scrolling
-  })
-
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
@@ -110,50 +136,16 @@ export function UnitKeywordDropdown({
           <ChevronDown className="size-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] overflow-hidden">
-        {/* Virtualized scroll container */}
-        <div
-          ref={parentRef}
-          className="overflow-y-auto"
-          style={{ height: '300px', contain: 'strict' }} // Performance hint for browser
-        >
-          {/* Total height container - creates scrollbar based on all 85 items */}
-          <div
-            style={{
-              height: `${virtualizer.getTotalSize()}px`,
-              width: '100%',
-              position: 'relative',
-            }}
-          >
-            {/* Render only visible items */}
-            {virtualizer.getVirtualItems().map((virtualItem) => {
-              const unitKeyword = ASSOCIATIONS[virtualItem.index]
-              const label = unitKeywordsI18n[unitKeyword] || unitKeyword
-
-              return (
-                <div
-                  key={virtualItem.key}
-                  data-index={virtualItem.index}
-                  ref={virtualizer.measureElement} // Measure actual height for accuracy
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualItem.start}px)`,
-                  }}
-                >
-                  <UnitKeywordItem
-                    unitKeyword={unitKeyword}
-                    label={label}
-                    isSelected={selectedUnitKeywords.has(unitKeyword)}
-                    onToggle={toggleUnitKeyword}
-                  />
-                </div>
-              )
-            })}
-          </div>
-        </div>
+      <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] overflow-y-auto">
+        {sortedAssociations.slice(0, displayCount).map((unitKeyword) => (
+          <UnitKeywordItem
+            key={unitKeyword}
+            unitKeyword={unitKeyword}
+            label={unitKeywordsI18n[unitKeyword] || unitKeyword}
+            isSelected={selectedUnitKeywords.has(unitKeyword)}
+            onToggle={toggleUnitKeyword}
+          />
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
