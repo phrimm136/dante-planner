@@ -1,7 +1,7 @@
 /**
- * EGOList.test.tsx
+ * IdentityList.test.tsx
  *
- * Tests for EGOList component with non-suspending search mappings.
+ * Tests for IdentityList component with non-suspending search mappings.
  * Verifies filtering behavior and graceful handling of loading state.
  */
 
@@ -9,8 +9,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
-import { EGOList } from '../EGOList'
-import type { EGOListItem } from '@/types/EGOTypes'
+import { IdentityList } from '../IdentityList'
+import type { IdentityListItem } from '@/types/IdentityTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({
@@ -21,15 +21,13 @@ vi.mock('@tanstack/react-router', () => ({
 
 // Mock asset paths
 vi.mock('@/lib/assetPaths', () => ({
-  getEGOImagePath: (id: string) => `/mock/ego/${id}.png`,
-  getEGOFramePath: () => '/mock/frame.png',
-  getEGOFrameHighlightPath: () => '/mock/frame-highlight.png',
-  getEGORankIconPath: () => '/mock/rank.png',
-  getEGOSmallRankIconPath: () => '/mock/small-rank.png',
-  getEGOTierIconPath: () => '/mock/tier.png',
-  getEGOInfoPanelPath: () => '/mock/panel.png',
-  getSinnerIconPath: () => '/mock/sinner.png',
+  getIdentityInfoImagePath: (id: string) => `/mock/identity/${id}.png`,
+  getIdentityImageFallbackPath: (id: string) => `/mock/identity/${id}-fallback.png`,
+  getUptieFramePath: () => '/mock/uptie-frame.png',
+  getIdentityFrameHighlightPath: () => '/mock/frame-highlight.png',
   getSinnerBGPath: () => '/mock/sinner-bg.png',
+  getSinnerIconPath: () => '/mock/sinner.png',
+  getRarityIconPath: () => '/mock/rarity.png',
 }))
 
 // Mock search mappings - non-suspending version
@@ -37,48 +35,51 @@ vi.mock('@/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: vi.fn(),
 }))
 
-// Mock EGOListI18n for EGOName component
-vi.mock('@/hooks/useEGOListData', () => ({
-  useEGOListI18n: () => ({
-    '20101': 'Test EGO 1',
-    '20201': 'Test EGO 2',
-    '20301': 'Test EGO 3',
+// Mock IdentityListI18n for IdentityName component
+vi.mock('@/hooks/useIdentityListData', () => ({
+  useIdentityListI18n: () => ({
+    '10101': 'Test Identity 1',
+    '10201': 'Test Identity 2',
+    '10301': 'Test Identity 3',
   }),
-  useEGOListI18nDeferred: () => ({
-    '20101': 'Test EGO 1',
-    '20201': 'Test EGO 2',
-    '20301': 'Test EGO 3',
+  useIdentityListI18nDeferred: () => ({
+    '10101': 'Test Identity 1',
+    '10201': 'Test Identity 2',
+    '10301': 'Test Identity 3',
   }),
 }))
 
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 
-const mockEGOs: EGOListItem[] = [
+const mockIdentities: IdentityListItem[] = [
   {
-    id: '20101',
-    name: 'Test EGO 1',
-    egoType: 'ZAYIN',
+    id: '10101',
+    name: 'Test Identity 1',
+    rank: 3,
     skillKeywordList: ['Burst', 'Combustion'],
+    unitKeywordList: ['TheBlueReverberation'],
     attributeTypes: ['CRIMSON', 'AZURE'],
     atkTypes: ['SLASH', 'PENETRATE'],
     updateDate: 20240101,
     season: 1,
   },
   {
-    id: '20201',
-    name: 'Test EGO 2',
-    egoType: 'TETH',
+    id: '10201',
+    name: 'Test Identity 2',
+    rank: 2,
     skillKeywordList: ['Charge'],
+    unitKeywordList: ['SevenAssociation'],
     attributeTypes: ['AZURE'],
     atkTypes: ['PENETRATE'],
     updateDate: 20240102,
     season: 2,
   },
   {
-    id: '20301',
-    name: 'Test EGO 3',
-    egoType: 'HE',
+    id: '10301',
+    name: 'Test Identity 3',
+    rank: 3,
     skillKeywordList: ['Burst'],
+    unitKeywordList: ['TheBlueReverberation'],
     attributeTypes: ['VIOLET'],
     atkTypes: ['HIT'],
     updateDate: 20240103,
@@ -104,7 +105,7 @@ function createWrapper() {
   }
 }
 
-describe('EGOList', () => {
+describe('IdentityList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Default: return empty mappings (loading state)
@@ -115,232 +116,282 @@ describe('EGOList', () => {
   })
 
   describe('rendering', () => {
-    it('renders all EGOs when no filters applied', () => {
+    it('renders all identities when no filters applied', () => {
       render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      // All EGOs should be visible (ResponsiveCardGrid renders twice: mobile + desktop)
       const cards = screen.getAllByRole('link')
-      expect(cards).toHaveLength(3) // Single unified grid
+      expect(cards).toHaveLength(3)
     })
 
-    it('shows empty state when no EGOs match filters', () => {
+    it('shows empty state when no identities match filters', () => {
       render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set(['NonExistentSinner'])}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      expect(screen.getByText(/No E\.G\.Os match/)).toBeInTheDocument()
+      expect(screen.getByText(/No Identities match/)).toBeInTheDocument()
     })
   })
 
   describe('filtering', () => {
-    it('filters by EGO type', () => {
-      const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set(['ZAYIN'])}
-          selectedSeasons={new Set()}
-          searchQuery=""
-        />,
-        { wrapper: createWrapper() }
-      )
-
-      // Only ZAYIN EGOs should be visible (hidden class is on parent div)
-      // Count wrapper divs with hidden class
-      const hiddenWrappers = container.querySelectorAll('div.hidden > a[role="link"]')
-      const allCards = container.querySelectorAll('a[role="link"]')
-
-      expect(allCards.length).toBe(3) // Single unified grid
-      expect(hiddenWrappers.length).toBe(2) // 2 hidden in single grid
-    })
-
     it('filters by skill attribute with AND logic (single)', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['AZURE'])}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      // EGOs with AZURE: 20101 (CRIMSON+AZURE) and 20201 (AZURE)
+      // Identities with AZURE: 10101 (CRIMSON+AZURE) and 10201 (AZURE)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
       expect(totalCards.length).toBe(3)
-      expect(hiddenCards.length).toBe(1) // VIOLET (20301) hidden
+      expect(hiddenCards.length).toBe(1) // VIOLET (10301) hidden
     })
 
     it('filters by skill attribute with AND logic (multiple)', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      // Only 20101 has BOTH CRIMSON and AZURE
+      // Only 10101 has BOTH CRIMSON and AZURE
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
       expect(totalCards.length).toBe(3)
-      expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden
+      expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
 
     it('filters by attack type with AND logic (single)', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['PENETRATE'])}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      // EGOs with PENETRATE: 20101 (SLASH+PENETRATE) and 20201 (PENETRATE)
+      // Identities with PENETRATE: 10101 (SLASH+PENETRATE) and 10201 (PENETRATE)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
       expect(totalCards.length).toBe(3)
-      expect(hiddenCards.length).toBe(1) // HIT (20301) hidden
+      expect(hiddenCards.length).toBe(1) // HIT (10301) hidden
     })
 
     it('filters by attack type with AND logic (multiple)', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      // Only 20101 has BOTH SLASH and PENETRATE
+      // Only 10101 has BOTH SLASH and PENETRATE
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
       expect(totalCards.length).toBe(3)
-      expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden
+      expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
 
-    it('filters by season', () => {
+    it('filters by rarity', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set([1])}
+          selectedRaritys={new Set([3])}
+          selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
-      // Season 1 EGOs only (hidden class is on parent div)
+      // Rank 3: 10101 and 10301
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(3) // Single unified grid
-      expect(hiddenCards.length).toBe(1) // Season 2 (20201) should be hidden
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(1) // 10201 (rank 2) hidden
+    })
+
+    it('filters by season', () => {
+      const { container } = render(
+        <IdentityList
+          identities={mockIdentities}
+          selectedSinners={new Set()}
+          selectedKeywords={new Set()}
+          selectedAttributes={new Set()}
+          selectedAtkTypes={new Set()}
+          selectedRaritys={new Set()}
+          selectedSeasons={new Set([1])}
+          selectedUnitKeywords={new Set()}
+          searchQuery=""
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      // Season 1: 10101 and 10301
+      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(1) // Season 2 (10201) hidden
+    })
+
+    it('filters by unit keyword', () => {
+      const { container } = render(
+        <IdentityList
+          identities={mockIdentities}
+          selectedSinners={new Set()}
+          selectedKeywords={new Set()}
+          selectedAttributes={new Set()}
+          selectedAtkTypes={new Set()}
+          selectedRaritys={new Set()}
+          selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set(['SevenAssociation'])}
+          searchQuery=""
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      // Only 10201 has SevenAssociation
+      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(2) // 10101 and 10301 hidden
+    })
+
+    it('filters by keyword with AND logic', () => {
+      const { container } = render(
+        <IdentityList
+          identities={mockIdentities}
+          selectedSinners={new Set()}
+          selectedKeywords={new Set(['Burst', 'Combustion'])}
+          selectedAttributes={new Set()}
+          selectedAtkTypes={new Set()}
+          selectedRaritys={new Set()}
+          selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
+          searchQuery=""
+        />,
+        { wrapper: createWrapper() }
+      )
+
+      // Only 10101 has BOTH Burst and Combustion
+      const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
+      const totalCards = container.querySelectorAll('a[role="link"]')
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
 
     it('applies AND logic between filter types', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set(['SLASH'])}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
         { wrapper: createWrapper() }
       )
 
       // Must have CRIMSON attribute AND SLASH attack type
-      // Only 20101 has both (CRIMSON+AZURE attributes, SLASH+PENETRATE attacks)
+      // Only 10101 has both
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
       expect(totalCards.length).toBe(3)
-      expect(hiddenCards.length).toBe(2) // 20201 and 20301 hidden
+      expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
   })
 
   describe('search with deferred mappings', () => {
     it('returns no results when mappings are loading (empty)', () => {
-      // Mappings are empty (loading state)
       vi.mocked(useSearchMappingsDeferred).mockReturnValue({
         keywordToValue: new Map(),
         unitKeywordToValue: new Map(),
       })
 
       render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery="rupture"
         />,
         { wrapper: createWrapper() }
       )
 
-      // Search returns no results when mappings are loading
-      expect(screen.getByText(/No E\.G\.Os match/)).toBeInTheDocument()
+      expect(screen.getByText(/No Identities match/)).toBeInTheDocument()
     })
 
     it('filters by keyword search when mappings are loaded', () => {
-      // Mappings are loaded
       vi.mocked(useSearchMappingsDeferred).mockReturnValue({
         keywordToValue: new Map([
           ['rupture', ['Burst']],
@@ -351,24 +402,25 @@ describe('EGOList', () => {
       })
 
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery="rupture"
         />,
         { wrapper: createWrapper() }
       )
 
-      // EGOs with Burst keyword should be visible (hidden class is on parent div)
+      // Identities with Burst keyword: 10101 and 10301
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(3) // Single unified grid
-      expect(hiddenCards.length).toBe(1) // 20101 and 20301 have 'Burst', so only 20201 hidden × 2 grids
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(1) // 10201 hidden
     })
 
     it('search is case-insensitive', () => {
@@ -380,14 +432,15 @@ describe('EGOList', () => {
       })
 
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery="CHARGE"
         />,
         { wrapper: createWrapper() }
@@ -395,8 +448,8 @@ describe('EGOList', () => {
 
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(3) // Single unified grid
-      expect(hiddenCards.length).toBe(2) // Only 'CHARGE' (20201) matches, 20101 and 20301 hidden
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(2) // Only 10201 matches
     })
   })
 
@@ -410,24 +463,26 @@ describe('EGOList', () => {
       })
 
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
+        <IdentityList
+          identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
-          selectedAttributes={new Set()}
+          selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set(['ZAYIN'])}
+          selectedRaritys={new Set()}
           selectedSeasons={new Set()}
+          selectedUnitKeywords={new Set()}
           searchQuery="rupture"
         />,
         { wrapper: createWrapper() }
       )
 
-      // Must match ZAYIN type AND have Burst keyword (hidden class is on parent div)
+      // Must have CRIMSON attribute AND match "rupture" search (Burst keyword)
+      // Only 10101 has both
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
-      expect(totalCards.length).toBe(3) // Single unified grid
-      expect(hiddenCards.length).toBe(2) // Only 20101 matches both filters, 20201 and 20301 hidden
+      expect(totalCards.length).toBe(3)
+      expect(hiddenCards.length).toBe(2) // 10201 and 10301 hidden
     })
   })
 })

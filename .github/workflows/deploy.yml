@@ -96,11 +96,11 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and Push Backend
         if: needs.detect-changes.outputs.backend == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           file: ./backend/Dockerfile
@@ -111,7 +111,7 @@ jobs:
 
       - name: Build and Push Nginx
         if: needs.detect-changes.outputs.nginx == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./nginx
           push: true
@@ -121,7 +121,7 @@ jobs:
 
       - name: Build and Push MySQL
         if: needs.detect-changes.outputs.mysql == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./mysql
           push: true

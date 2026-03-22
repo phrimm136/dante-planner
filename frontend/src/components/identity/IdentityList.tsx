@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useIdentityListI18nDeferred } from '@/hooks/useIdentityListData'
-import { CARD_GRID, type Season } from '@/lib/constants'
+import { CARD_GRID, type Season, type SkillAttributeType, type AtkType } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
@@ -15,8 +15,8 @@ interface IdentityListProps {
   identities: IdentityListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
-  selectedAttributes: Set<string>
-  selectedAtkTypes: Set<string>
+  selectedAttributes: Set<SkillAttributeType>
+  selectedAtkTypes: Set<AtkType>
   selectedRaritys: Set<number>
   selectedSeasons: Set<Season>
   selectedUnitKeywords: Set<string>
@@ -33,8 +33,8 @@ interface IdentityListProps {
  * - All filter types use AND between each other
  * - Sinner: OR logic (any selected sinner)
  * - Keyword: AND logic (must have ALL selected keywords)
- * - Attribute: OR logic (any selected attribute)
- * - Attack Type: OR logic (any selected attack type)
+ * - Attribute: AND logic (must have ALL selected attributes)
+ * - Attack Type: AND logic (must have ALL selected attack types)
  * - Rank: OR logic (any selected rank)
  * - Season: OR logic (any selected season)
  * - Association: OR logic (any selected association)
@@ -104,20 +104,20 @@ export function IdentityList({
         if (!hasAllKeywords) continue
       }
 
-      // Attribute filter - OR logic (identity has ANY selected attribute)
+      // Attribute filter - AND logic (identity must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
-        const hasAnyAttribute = identity.attributeTypes.some((attr) =>
-          selectedAttributes.has(attr)
+        const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
+          identity.attributeTypes.includes(attr)
         )
-        if (!hasAnyAttribute) continue
+        if (!hasAllAttributes) continue
       }
 
-      // Attack type filter - OR logic (identity has ANY selected attack type)
+      // Attack type filter - AND logic (identity must have ALL selected attack types)
       if (selectedAtkTypes.size > 0) {
-        const hasAnyAtkType = identity.atkTypes.some((atkType) =>
-          selectedAtkTypes.has(atkType)
+        const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
+          identity.atkTypes.includes(atkType)
         )
-        if (!hasAnyAtkType) continue
+        if (!hasAllAtkTypes) continue
       }
 
       // Rarity filter - OR logic (identity rarity matches ANY selected rarity)

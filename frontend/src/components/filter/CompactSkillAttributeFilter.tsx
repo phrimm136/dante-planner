@@ -1,10 +1,10 @@
 import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { AFFINITIES } from '@/lib/constants'
+import { AFFINITIES, type SkillAttributeType } from '@/lib/constants'
 import { getAffinityIconPath } from '@/lib/assetPaths'
 
 interface CompactSkillAttributeFilterProps {
-  selectedAttributes: Set<string>
-  onSelectionChange: (attributes: Set<string>) => void
+  selectedAttributes: Set<SkillAttributeType>
+  onSelectionChange: (attributes: Set<SkillAttributeType>) => void
 }
 
 /**

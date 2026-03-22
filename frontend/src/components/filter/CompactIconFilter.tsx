@@ -2,12 +2,12 @@ import { getKeywordDisplayName } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
 
-interface CompactIconFilterProps {
-  options: readonly string[]
-  selectedOptions: Set<string>
-  onSelectionChange: (options: Set<string>) => void
+interface CompactIconFilterProps<T extends string = string> {
+  options: readonly T[]
+  selectedOptions: Set<T>
+  onSelectionChange: (options: Set<T>) => void
   /** Icon path getter - if undefined, renders text labels instead of icons */
-  getIconPath?: (option: string) => string
+  getIconPath?: (option: T) => string
   /** Label getter for text mode (defaults to getKeywordDisplayName) */
   getLabel?: (option: string) => string
   /** Size variant: 'sm' for 24px icons, 'md' for 32px icons */
@@ -35,7 +35,7 @@ interface CompactIconFilterProps {
  * Pattern: Follows IconFilter.tsx logic
  * Used in: FilterSidebar for compact filter display
  */
-export function CompactIconFilter({
+export function CompactIconFilter<T extends string>({
   options,
   selectedOptions,
   onSelectionChange,
@@ -45,11 +45,11 @@ export function CompactIconFilter({
   columns,
   flexIcons = false,
   children,
-}: CompactIconFilterProps) {
+}: CompactIconFilterProps<T>) {
   // Determine mode: icon vs text
   const isTextMode = !getIconPath
   const resolveLabel = getLabel ?? getKeywordDisplayName
-  const toggleOption = (option: string) => {
+  const toggleOption = (option: T) => {
     const newSelection = new Set(selectedOptions)
     if (newSelection.has(option)) {
       newSelection.delete(option)
