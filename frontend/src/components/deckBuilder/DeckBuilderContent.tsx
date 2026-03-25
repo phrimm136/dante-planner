@@ -199,6 +199,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       skillKeywordList: specData.skillKeywordList,
       attributeTypes: specData.attributeType,
       atkTypes: specData.atkType,
+      defenseTypes: specData.defenseType,
       season: specData.season,
     }))
   }, [identitySpec, identityI18n])
