@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   getThemePackImagePath,
   getThemePackHoverHighlightPath,
+  getThemePackSelectHighlightPath,
   getThemePackExtremeHighlightPath,
 } from '@/lib/assetPaths'
 import { cn, getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
@@ -24,6 +25,8 @@ interface ThemePackCardProps {
   specialName?: string
   /** Enable hover highlight overlay (for selection contexts) */
   enableHoverHighlight?: boolean
+  /** Show persistent select highlight (for click-to-pin focus) */
+  isSelected?: boolean
   /** Custom overlay content (e.g., selected indicator) */
   overlay?: ReactNode
   className?: string
@@ -39,6 +42,7 @@ export function ThemePackCard({
   packName,
   specialName,
   enableHoverHighlight = false,
+  isSelected = false,
   overlay,
   className,
 }: ThemePackCardProps) {
@@ -65,8 +69,18 @@ export function ThemePackCard({
         className="w-full h-auto"
       />
 
-      {/* Layer 2: Hover highlight overlay - fills container */}
-      {enableHoverHighlight && (
+      {/* Layer 2: Select highlight overlay */}
+      {isSelected && (
+        <img
+          src={isExtreme ? getThemePackExtremeHighlightPath() : getThemePackSelectHighlightPath()}
+          alt=""
+          className="absolute max-w-none object-fill pointer-events-none"
+          style={isExtreme ? extremeStyle : normalStyle}
+        />
+      )}
+
+      {/* Layer 3: Hover highlight overlay */}
+      {(enableHoverHighlight || isSelected) && (
         <img
           src={isExtreme ? getThemePackExtremeHighlightPath() : getThemePackHoverHighlightPath()}
           alt=""
@@ -75,7 +89,7 @@ export function ThemePackCard({
         />
       )}
 
-      {/* Layer 3: Theme pack name */}
+      {/* Layer 4: Theme pack name */}
       <div
         className={`absolute left-0 right-0 flex justify-center items-center pointer-events-none ${!isExtreme ? 'translate-x-[3px]' : '-translate-x-[3px]'} leading-4`}
         style={{ top: !isExtreme ? '72%' : '76.8%', height: !isExtreme ? 60 : 71 }}
@@ -92,7 +106,7 @@ export function ThemePackCard({
         />
       </div>
 
-      {/* Layer 4: Custom overlay */}
+      {/* Layer 5: Custom overlay */}
       {overlay}
     </div>
   )
