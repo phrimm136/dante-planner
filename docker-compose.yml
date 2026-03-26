@@ -50,7 +50,7 @@ services:
       args:
         JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
     container_name: danteplanner-backend
-    restart: unless-stopped
+    restart: "no"
     volumes:
       - ./static/data:/app/data:ro
       - ${JWT_KEYS_PATH:-./jwt-keys}:/app/keys:ro

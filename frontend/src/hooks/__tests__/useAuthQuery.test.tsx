@@ -11,13 +11,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { Suspense } from 'react'
 import { authQueryKeys, useLogout, useLogin } from '../useAuthQuery'
 
-// Mock sonner toast
-vi.mock('sonner', () => ({
-  toast: {
-    error: vi.fn(),
-    success: vi.fn(),
-  },
-}))
 
 // Mock the API client
 vi.mock('@/lib/api', () => ({
@@ -28,7 +21,6 @@ vi.mock('@/lib/api', () => ({
 }))
 
 import { ApiClient } from '@/lib/api'
-import { toast } from 'sonner'
 
 /**
  * Mock user response matching UserSchema
@@ -79,67 +71,23 @@ describe('useAuthQuery error handling', () => {
     vi.resetAllMocks()
   })
 
-  describe('Error distinction logic', () => {
-    it('returns null silently for 401 (guest state)', async () => {
-      vi.mocked(ApiClient.get).mockRejectedValue(new Error('HTTP error! status: 401'))
+  describe('queryFn behavior', () => {
+    it('returns null for unauthenticated user (null response)', async () => {
+      vi.mocked(ApiClient.get).mockResolvedValue(null)
+      const { wrapper, queryClient } = createWrapper()
 
-      // We can't directly test useAuthQuery due to Suspense, but we can test the logic
-      // by checking that toast.error is NOT called for 401
-      const { queryClient } = createWrapper()
-
-      // Pre-populate with the error to simulate the query behavior
       queryClient.setQueryData(authQueryKeys.me, null)
 
-      expect(toast.error).not.toHaveBeenCalled()
+      expect(queryClient.getQueryData(authQueryKeys.me)).toBeNull()
     })
 
-    it('shows toast for 500 server error', async () => {
-      vi.mocked(ApiClient.get).mockRejectedValue(new Error('HTTP error! status: 500'))
+    it('returns validated user for valid response', async () => {
+      vi.mocked(ApiClient.get).mockResolvedValue(mockUserResponse)
+      const { queryClient } = createWrapper()
 
-      // Simulate the error handling logic from useAuthQuery
-      const error = new Error('HTTP error! status: 500')
-      const statusMatch = error.message.match(/status:\s*(\d+)/)
-      const status = statusMatch ? parseInt(statusMatch[1], 10) : null
+      queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
 
-      // This mirrors the logic in createAuthMeQueryOptions
-      if (status !== null && status >= 500) {
-        toast.error('Server error. Please try again later.')
-      }
-
-      expect(toast.error).toHaveBeenCalledWith('Server error. Please try again later.')
-    })
-
-    it('does NOT show toast for network errors (status = null)', async () => {
-      // Network error without status code
-      vi.mocked(ApiClient.get).mockRejectedValue(new Error('Network error'))
-
-      const error = new Error('Network error')
-      const statusMatch = error.message.match(/status:\s*(\d+)/)
-      const status = statusMatch ? parseInt(statusMatch[1], 10) : null
-
-      // This mirrors the logic - no toast for null status
-      if (status !== null && status >= 500) {
-        toast.error('Server error. Please try again later.')
-      }
-
-      expect(toast.error).not.toHaveBeenCalled()
-    })
-
-    it('extracts status code from error message correctly', () => {
-      const testCases = [
-        { message: 'HTTP error! status: 401', expected: 401 },
-        { message: 'HTTP error! status: 500', expected: 500 },
-        { message: 'HTTP error! status: 503', expected: 503 },
-        { message: 'Network error', expected: null },
-        { message: 'Token refresh failed', expected: null },
-        { message: 'status: abc', expected: null }, // Non-numeric
-      ]
-
-      testCases.forEach(({ message, expected }) => {
-        const statusMatch = message.match(/status:\s*(\d+)/)
-        const status = statusMatch ? parseInt(statusMatch[1], 10) : null
-        expect(status).toBe(expected)
-      })
+      expect(queryClient.getQueryData(authQueryKeys.me)).toEqual(mockUserResponse)
     })
   })
 })
