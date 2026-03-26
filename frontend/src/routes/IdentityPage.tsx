@@ -4,7 +4,7 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { IdentitySpecListSchema } from '@/schemas'
 import type { z } from 'zod'
-import type { Season, SkillAttributeType, AtkType } from '@/lib/constants'
+import type { Season, SkillAttributeType, AtkType, DefType } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/lib/filterUtils'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 import { FilterSection } from '@/components/filter/FilterSection'
@@ -12,6 +12,7 @@ import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
 import { CompactKeywordFilter } from '@/components/filter/CompactKeywordFilter'
 import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAttributeFilter'
 import { CompactAttackTypeFilter } from '@/components/filter/CompactAttackTypeFilter'
+import { CompactDefenseTypeFilter } from '@/components/filter/CompactDefenseTypeFilter'
 import { CompactRarityFilter } from '@/components/filter/CompactRarityFilter'
 import { SeasonDropdown } from '@/components/common/SeasonDropdown'
 import { UnitKeywordDropdown } from '@/components/common/UnitKeywordDropdown'
@@ -30,6 +31,7 @@ function IdentityCardGrid({
   selectedKeywords,
   selectedAttributes,
   selectedAtkTypes,
+  selectedDefTypes,
   selectedRaritys,
   selectedSeasons,
   selectedUnitKeywords,
@@ -40,6 +42,7 @@ function IdentityCardGrid({
   selectedKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
+  selectedDefTypes: Set<DefType>
   selectedRaritys: Set<number>
   selectedSeasons: Set<Season>
   selectedUnitKeywords: Set<string>
@@ -56,6 +59,7 @@ function IdentityCardGrid({
         skillKeywordList: specData.skillKeywordList,
         attributeTypes: specData.attributeType,
         atkTypes: specData.atkType,
+        defenseTypes: specData.defenseType,
         updateDate: specData.updateDate,
         season: specData.season,
       })),
@@ -69,6 +73,7 @@ function IdentityCardGrid({
       selectedKeywords={selectedKeywords}
       selectedAttributes={selectedAttributes}
       selectedAtkTypes={selectedAtkTypes}
+      selectedDefTypes={selectedDefTypes}
       selectedRaritys={selectedRaritys}
       selectedSeasons={selectedSeasons}
       selectedUnitKeywords={selectedUnitKeywords}
@@ -90,6 +95,7 @@ function IdentityPageShell() {
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
   const [selectedAttributes, setSelectedAttributes] = useState<Set<SkillAttributeType>>(new Set())
   const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<AtkType>>(new Set())
+  const [selectedDefTypes, setSelectedDefTypes] = useState<Set<DefType>>(new Set())
   const [selectedRaritys, setSelectedRaritys] = useState<Set<number>>(new Set())
   const [selectedSeasons, setSelectedSeasons] = useState<Set<Season>>(new Set())
   const [selectedUnitKeywords, setSelectedUnitKeywords] = useState<Set<string>>(new Set())
@@ -101,6 +107,7 @@ function IdentityPageShell() {
     selectedKeywords,
     selectedAttributes,
     selectedAtkTypes,
+    selectedDefTypes,
     selectedRaritys,
     selectedSeasons,
     selectedUnitKeywords
@@ -112,6 +119,7 @@ function IdentityPageShell() {
     setSelectedKeywords(new Set())
     setSelectedAttributes(new Set())
     setSelectedAtkTypes(new Set())
+    setSelectedDefTypes(new Set())
     setSelectedRaritys(new Set())
     setSelectedSeasons(new Set())
     setSelectedUnitKeywords(new Set())
@@ -167,6 +175,17 @@ function IdentityPageShell() {
         <CompactAttackTypeFilter
           selectedTypes={selectedAtkTypes}
           onSelectionChange={setSelectedAtkTypes}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.defenseType', 'Defense Type')}
+        defaultExpanded={false}
+        activeCount={selectedDefTypes.size}
+      >
+        <CompactDefenseTypeFilter
+          selectedTypes={selectedDefTypes}
+          onSelectionChange={setSelectedDefTypes}
         />
       </FilterSection>
 
@@ -241,6 +260,7 @@ function IdentityPageShell() {
         selectedKeywords={selectedKeywords}
         selectedAttributes={selectedAttributes}
         selectedAtkTypes={selectedAtkTypes}
+        selectedDefTypes={selectedDefTypes}
         selectedRaritys={selectedRaritys}
         selectedSeasons={selectedSeasons}
         selectedUnitKeywords={selectedUnitKeywords}

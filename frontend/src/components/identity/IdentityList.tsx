@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
 import { useIdentityListI18nDeferred } from '@/hooks/useIdentityListData'
-import { CARD_GRID, type Season, type SkillAttributeType, type AtkType } from '@/lib/constants'
+import { CARD_GRID, type Season, type SkillAttributeType, type AtkType, type DefType } from '@/lib/constants'
 import { sortByReleaseDate } from '@/lib/entitySort'
 import { getSinnerFromId } from '@/lib/utils'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
@@ -17,6 +17,7 @@ interface IdentityListProps {
   selectedKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
+  selectedDefTypes: Set<DefType>
   selectedRaritys: Set<number>
   selectedSeasons: Set<Season>
   selectedUnitKeywords: Set<string>
@@ -46,6 +47,7 @@ export function IdentityList({
   selectedKeywords,
   selectedAttributes,
   selectedAtkTypes,
+  selectedDefTypes,
   selectedRaritys,
   selectedSeasons,
   selectedUnitKeywords,
@@ -120,6 +122,14 @@ export function IdentityList({
         if (!hasAllAtkTypes) continue
       }
 
+      // Defense type filter - AND logic (identity must have ALL selected defense types)
+      if (selectedDefTypes.size > 0) {
+        const hasAllDefTypes = Array.from(selectedDefTypes).every((defType) =>
+          identity.defenseTypes.includes(defType)
+        )
+        if (!hasAllDefTypes) continue
+      }
+
       // Rarity filter - OR logic (identity rarity matches ANY selected rarity)
       if (selectedRaritys.size > 0) {
         if (!selectedRaritys.has(identity.rank)) continue
@@ -176,6 +186,7 @@ export function IdentityList({
     selectedKeywords,
     selectedAttributes,
     selectedAtkTypes,
+    selectedDefTypes,
     selectedRaritys,
     selectedSeasons,
     selectedUnitKeywords,

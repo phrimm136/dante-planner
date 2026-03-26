@@ -142,6 +142,9 @@ export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
  */
 export type AtkType = typeof ATK_TYPES[number]
 
+export const DEF_TYPES = ['GUARD', 'EVADE', 'COUNTER', 'CLASHABLE_GUARD', 'CLASHABLE_COUNTER'] as const
+export type DefType = typeof DEF_TYPES[number]
+
 /**
  * EGO types (Hebrew letters from Lobotomy Corp lore)
  * Order: Lowest risk to highest risk

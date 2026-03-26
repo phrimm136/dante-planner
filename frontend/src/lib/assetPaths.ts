@@ -205,6 +205,19 @@ export function getAttackTypeIconPath(atkType: string): string {
 }
 
 /**
+ * Gets defense type icon path
+ * @param defType - Defense type (e.g., "EVADE", "CLASHABLE_GUARD")
+ * @returns Icon path
+ */
+export function getDefenseTypeIconPath(defType: string): string {
+  const filename = defType
+    .split('_')
+    .map((seg) => seg[0].toUpperCase() + seg.slice(1).toLowerCase())
+    .join('')
+  return resolveAsset(`/images/UI/identity/${filename}.webp`)
+}
+
+/**
  * Gets attack type frame path
  * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
  * @returns Attack type frame path

@@ -60,6 +60,7 @@ const mockIdentities: IdentityListItem[] = [
     unitKeywordList: ['TheBlueReverberation'],
     attributeTypes: ['CRIMSON', 'AZURE'],
     atkTypes: ['SLASH', 'PENETRATE'],
+    defenseTypes: ['GUARD'],
     updateDate: 20240101,
     season: 1,
   },
@@ -71,6 +72,7 @@ const mockIdentities: IdentityListItem[] = [
     unitKeywordList: ['SevenAssociation'],
     attributeTypes: ['AZURE'],
     atkTypes: ['PENETRATE'],
+    defenseTypes: ['EVADE'],
     updateDate: 20240102,
     season: 2,
   },
@@ -82,6 +84,7 @@ const mockIdentities: IdentityListItem[] = [
     unitKeywordList: ['TheBlueReverberation'],
     attributeTypes: ['VIOLET'],
     atkTypes: ['HIT'],
+    defenseTypes: ['COUNTER'],
     updateDate: 20240103,
     season: 1,
   },
@@ -124,6 +127,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -144,6 +148,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -165,6 +170,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['AZURE'])}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -188,6 +194,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -211,6 +218,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['PENETRATE'])}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -234,6 +242,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -257,6 +266,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set([3])}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -280,6 +290,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set([1])}
           selectedUnitKeywords={new Set()}
@@ -303,6 +314,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set(['SevenAssociation'])}
@@ -326,6 +338,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set(['Burst', 'Combustion'])}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -349,6 +362,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set(['SLASH'])}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -380,6 +394,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -408,6 +423,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -438,6 +454,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
@@ -469,6 +486,7 @@ describe('IdentityList', () => {
           selectedKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set()}
+          selectedDefTypes={new Set()}
           selectedRaritys={new Set()}
           selectedSeasons={new Set()}
           selectedUnitKeywords={new Set()}
