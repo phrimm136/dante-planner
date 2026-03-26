@@ -92,6 +92,32 @@ export class ForbiddenError extends Error {
   }
 }
 
+/**
+ * Custom error class for 503 during planned deploy
+ * Thrown when nginx returns SERVICE_UPDATING (maintenance flag present)
+ */
+export class ServiceUpdatingError extends Error {
+  readonly code = 'SERVICE_UPDATING';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'ServiceUpdatingError';
+  }
+}
+
+/**
+ * Custom error class for 503 during unexpected backend downtime
+ * Thrown when nginx returns BACKEND_UNAVAILABLE (no maintenance flag)
+ */
+export class BackendUnavailableError extends Error {
+  readonly code = 'BACKEND_UNAVAILABLE';
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'BackendUnavailableError';
+  }
+}
+
 export class ApiClient {
   static async fetch<T>(
     endpoint: string,
@@ -155,6 +181,23 @@ export class ApiClient {
         `Conflict: server version ${serverVersion}`,
         serverVersion
       );
+    }
+
+    // Handle 503 Service Unavailable - distinguish planned deploy vs crash
+    if (response.status === 503) {
+      let code = '';
+      let message = 'Service temporarily unavailable';
+      try {
+        const errorBody = (await response.json()) as ApiErrorResponse;
+        code = errorBody.code || '';
+        message = errorBody.message || message;
+      } catch {
+        // Body parsing failed, use defaults
+      }
+      if (code === 'SERVICE_UPDATING') {
+        throw new ServiceUpdatingError(message);
+      }
+      throw new BackendUnavailableError(message);
     }
 
     if (!response.ok) {
