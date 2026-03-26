@@ -50,6 +50,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const visibleSections = useProgressiveReveal(SECTION_COUNT)
   const [hoveredThemePackId, setHoveredThemePackId] = useState<string | null>(null)
+  const [focusedThemePackId, setFocusedThemePackId] = useState<string | null>(null)
+  const activeThemePackId = hoveredThemePackId ?? focusedThemePackId
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
@@ -285,7 +287,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                 <ComprehensiveGiftGridTracker
                   floorSelections={content.floorSelections}
                   comprehensiveGiftIds={content.comprehensiveGiftIds}
-                  hoveredThemePackId={hoveredThemePackId}
+                  hoveredThemePackId={activeThemePackId}
                   egoGiftDoneMarks={trackerState.egoGiftDoneMarks}
                   onToggleEgoGiftDone={toggleEgoGiftDoneMark}
                 />
@@ -305,6 +307,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                 sectionNotes={content.sectionNotes}
                 doneMarks={trackerState.doneMarks}
                 onTogglePackDone={togglePackDone}
+                focusedThemePackId={focusedThemePackId}
+                onFocusToggle={(packId) => setFocusedThemePackId((prev) => prev === packId ? null : packId)}
                 onHoverChange={setHoveredThemePackId}
               />
             </Suspense>

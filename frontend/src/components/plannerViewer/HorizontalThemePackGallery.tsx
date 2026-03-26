@@ -15,6 +15,8 @@ interface HorizontalThemePackGalleryProps {
   sectionNotes: Record<string, NoteContent>
   doneMarks: Record<number, Set<string>>
   onTogglePackDone: (floorIndex: number, themePackId: string, giftIds: string[]) => void
+  focusedThemePackId: string | null
+  onFocusToggle: (themePackId: string) => void
   onHoverChange: (themePackId: string | null) => void
 }
 
@@ -27,6 +29,8 @@ export function HorizontalThemePackGallery({
   sectionNotes,
   doneMarks,
   onTogglePackDone,
+  focusedThemePackId,
+  onFocusToggle,
   onHoverChange,
 }: HorizontalThemePackGalleryProps) {
   const { t, i18n: i18nInstance } = useTranslation(['planner', 'common'])
@@ -123,6 +127,8 @@ export function HorizontalThemePackGallery({
                     floorNumber={floorIndex + 1}
                     noteContent={getNoteContentForPack(packId)}
                     isDone={isDone}
+                    isFocused={focusedThemePackId === packId}
+                    onFocusToggle={() => onFocusToggle(packId)}
                     onToggleDone={() => onTogglePackDone(floorIndex, packId, giftIds)}
                     onHoverChange={(hovering) => onHoverChange(hovering ? packId : null)}
                   />
