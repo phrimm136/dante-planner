@@ -424,12 +424,23 @@ export const PASSIVE_INDICATOR_COLORS = {
 } as const
 
 /**
- * Planner types for different game content
- * - MIRROR_DUNGEON: Mirror Dungeon mode (single current version from backend)
- * - REFRACTED_RAILWAY: Refracted Railway mode (multiple parallel versions from backend)
+ * Planner configuration for version management
+ * Authoritative source: scripts/sync-planner-config.py
+ * Also kept in backend application.properties for server-side validation
  *
- * Version numbers are fetched from backend /api/planner/md/config endpoint
- * @see usePlannerConfig hook
+ * @see PlannerConfigSchema for runtime validation
+ */
+export const PLANNER_CONFIG = {
+  schemaVersion: 2,
+  mdCurrentVersion: 7,
+  mdAvailableVersions: [6, 7],
+  rrAvailableVersions: [1, 5],
+} as const
+
+/**
+ * Planner types for different game content
+ * - MIRROR_DUNGEON: Mirror Dungeon mode (single current version)
+ * - REFRACTED_RAILWAY: Refracted Railway mode (multiple parallel versions)
  */
 export const PLANNER_TYPES = ['MIRROR_DUNGEON', 'REFRACTED_RAILWAY'] as const
 
