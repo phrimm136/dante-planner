@@ -115,11 +115,23 @@ describe('matchesKeywordFilter', () => {
   })
 
   it('returns false when gift has no keyword but filter is active', () => {
+    // @ts-expect-error testing undefined input
     expect(matchesKeywordFilter(undefined, new Set(['Burn']))).toBe(false)
+    // @ts-expect-error testing undefined input
+    expect(matchesKeywordFilter(undefined, new Set(['None']))).toBe(false)
   })
 
   it('returns true when gift has no keyword and filter is empty', () => {
+    // @ts-expect-error testing undefined input
     expect(matchesKeywordFilter(undefined, new Set())).toBe(true)
+  })
+
+  it('returns true when gift has null keyword and None filter is selected', () => {
+    expect(matchesKeywordFilter(null, new Set(['None']))).toBe(true)
+  })
+
+  it('returns false when gift has null keyword but non-None filter is active', () => {
+    expect(matchesKeywordFilter(null, new Set(['Burn']))).toBe(false)
   })
 })
 
@@ -235,7 +247,7 @@ describe('cross-filter AND logic', () => {
   // Simulates how EGOGiftList combines filters
   function matchesAllFilters(
     gift: {
-      keyword?: string
+      keyword?: string | null
       hardOnly?: boolean
       extremeOnly?: boolean
       tag: readonly string[]
@@ -251,7 +263,7 @@ describe('cross-filter AND logic', () => {
     }
   ): boolean {
     return (
-      matchesKeywordFilter(gift.keyword, filters.keywords) &&
+      matchesKeywordFilter(gift.keyword ?? null, filters.keywords) &&
       matchesDifficultyFilter(gift, filters.difficulties) &&
       matchesTierFilter(gift.tag, filters.tiers) &&
       matchesThemePackFilter(gift.themePack, filters.themePacks) &&

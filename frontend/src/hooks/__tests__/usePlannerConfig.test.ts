@@ -2,158 +2,149 @@
  * usePlannerConfig.test.ts
  *
  * Tests for planner config hook.
- * Validates query key structure and config schema.
+ * Validates that the hook returns the static config from constants
+ * and that the config satisfies the schema.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { plannerConfigQueryKeys } from '../usePlannerConfig'
+import { describe, it, expect } from 'vitest'
+import { renderHook } from '@testing-library/react'
+import { usePlannerConfig } from '../usePlannerConfig'
+import { PLANNER_CONFIG } from '@/lib/constants'
 import { PlannerConfigSchema } from '@/schemas/PlannerSchemas'
 
-// Mock the API client
-vi.mock('@/lib/api', () => ({
-  ApiClient: {
-    get: vi.fn(),
-  },
-}))
-
-// Import after mocking
-import { ApiClient } from '@/lib/api'
-
-/**
- * Mock response data matching PlannerConfigSchema
- * - schemaVersion: data format version (for migration support)
- * - mdCurrentVersion: current Mirror Dungeon version (for MIRROR_DUNGEON planners)
- * - rrAvailableVersions: available Refracted Railway versions (for REFRACTED_RAILWAY planners)
- */
-const mockConfigResponse = {
-  schemaVersion: 2,
-  mdCurrentVersion: 7,
-  mdAvailableVersions: [6, 7],
-  rrAvailableVersions: [1, 5],
-}
-
-describe('usePlannerConfig - API calls', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    vi.mocked(ApiClient.get).mockResolvedValue(mockConfigResponse)
+describe('usePlannerConfig', () => {
+  it('returns PLANNER_CONFIG from constants', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    expect(result.current).toBe(PLANNER_CONFIG)
   })
 
-  afterEach(() => {
-    vi.resetAllMocks()
+  it('returns config matching PlannerConfigSchema', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    const parsed = PlannerConfigSchema.safeParse(result.current)
+    expect(parsed.success).toBe(true)
   })
 
-  it('mock is configured correctly for API testing', () => {
-    expect(ApiClient.get).toBeDefined()
-    expect(vi.mocked(ApiClient.get)).toBeDefined()
+  it('has positive schemaVersion', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    expect(result.current.schemaVersion).toBeGreaterThan(0)
   })
 
-  // Note: Full useSuspenseQuery testing requires Suspense boundaries.
-  // The query key factory tests below verify the query structure.
-})
-
-describe('plannerConfigQueryKeys', () => {
-  it('creates consistent config key', () => {
-    const key = plannerConfigQueryKeys.config
-    expect(key).toEqual(['planner', 'config'])
+  it('has positive mdCurrentVersion', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    expect(result.current.mdCurrentVersion).toBeGreaterThan(0)
   })
 
-  it('key is stable across multiple accesses', () => {
-    const key1 = plannerConfigQueryKeys.config
-    const key2 = plannerConfigQueryKeys.config
-    expect(key1).toEqual(key2)
+  it('has non-empty mdAvailableVersions', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    expect(result.current.mdAvailableVersions.length).toBeGreaterThan(0)
+  })
+
+  it('has non-empty rrAvailableVersions', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    expect(result.current.rrAvailableVersions.length).toBeGreaterThan(0)
+  })
+
+  it('includes mdCurrentVersion in mdAvailableVersions', () => {
+    const { result } = renderHook(() => usePlannerConfig())
+    expect(result.current.mdAvailableVersions).toContain(result.current.mdCurrentVersion)
   })
 })
 
 describe('PlannerConfigSchema', () => {
   it('validates correct config response', () => {
-    const result = PlannerConfigSchema.safeParse(mockConfigResponse)
+    const result = PlannerConfigSchema.safeParse({
+      schemaVersion: 2,
+      mdCurrentVersion: 7,
+      mdAvailableVersions: [6, 7],
+      rrAvailableVersions: [1, 5],
+    })
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.schemaVersion).toBe(2)
-      expect(result.data.mdCurrentVersion).toBe(7)
-      expect(result.data.rrAvailableVersions).toEqual([1, 5])
-    }
   })
 
   it('rejects config without schemaVersion', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       mdCurrentVersion: 6,
+      mdAvailableVersions: [6],
       rrAvailableVersions: [1, 5],
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
+    })
     expect(result.success).toBe(false)
   })
 
   it('rejects config without mdCurrentVersion', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       schemaVersion: 1,
+      mdAvailableVersions: [6],
       rrAvailableVersions: [1, 5],
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects config without mdAvailableVersions', () => {
+    const result = PlannerConfigSchema.safeParse({
+      schemaVersion: 1,
+      mdCurrentVersion: 6,
+      rrAvailableVersions: [1, 5],
+    })
     expect(result.success).toBe(false)
   })
 
   it('rejects config without rrAvailableVersions', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       schemaVersion: 1,
       mdCurrentVersion: 6,
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
+      mdAvailableVersions: [6],
+    })
     expect(result.success).toBe(false)
   })
 
   it('rejects non-positive schemaVersion', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       schemaVersion: 0,
       mdCurrentVersion: 6,
+      mdAvailableVersions: [6],
       rrAvailableVersions: [1, 5],
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
+    })
     expect(result.success).toBe(false)
   })
 
   it('rejects non-integer mdCurrentVersion', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       schemaVersion: 1,
       mdCurrentVersion: 6.5,
+      mdAvailableVersions: [6],
       rrAvailableVersions: [1, 5],
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects empty mdAvailableVersions array', () => {
+    const result = PlannerConfigSchema.safeParse({
+      schemaVersion: 1,
+      mdCurrentVersion: 6,
+      mdAvailableVersions: [],
+      rrAvailableVersions: [1, 5],
+    })
     expect(result.success).toBe(false)
   })
 
   it('rejects empty rrAvailableVersions array', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       schemaVersion: 1,
       mdCurrentVersion: 6,
+      mdAvailableVersions: [6],
       rrAvailableVersions: [],
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
-    // Schema requires at least 1 element
+    })
     expect(result.success).toBe(false)
   })
 
   it('rejects extra unknown fields (strict schema)', () => {
-    const invalidConfig = {
+    const result = PlannerConfigSchema.safeParse({
       schemaVersion: 1,
       mdCurrentVersion: 6,
+      mdAvailableVersions: [6],
       rrAvailableVersions: [1, 5],
       unknownField: 'should fail',
-    }
-    const result = PlannerConfigSchema.safeParse(invalidConfig)
+    })
     expect(result.success).toBe(false)
-  })
-})
-
-describe('usePlannerConfig query options', () => {
-  it('uses correct endpoint', () => {
-    const expectedUrl = '/api/planner/md/config'
-    expect(expectedUrl).toBe('/api/planner/md/config')
-  })
-
-  it('config endpoint is public (no auth required)', () => {
-    // This is a documentation test - the endpoint should be accessible without auth
-    // Actual behavior is tested in backend integration tests
-    expect(true).toBe(true)
   })
 })

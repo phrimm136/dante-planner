@@ -667,9 +667,9 @@ export const PlannerConfigSchema = z.object({
   /** Current Mirror Dungeon version (e.g., 7 for MD7) */
   mdCurrentVersion: z.number().int().positive(),
   /** Available Mirror Dungeon versions including legacy (e.g., [6, 7]) */
-  mdAvailableVersions: z.array(z.number().int().positive()).min(1),
+  mdAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
   /** Available Refracted Railway versions (e.g., [1, 5] for RR1 and RR5) */
-  rrAvailableVersions: z.array(z.number().int().positive()).min(1),
+  rrAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
 }).strict()
 
 /**

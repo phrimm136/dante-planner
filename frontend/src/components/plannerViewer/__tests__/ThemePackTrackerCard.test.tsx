@@ -25,8 +25,8 @@ vi.mock('react-i18next', async (importOriginal) => {
 
 // Mock ThemePackViewer to simplify testing
 vi.mock('@/components/floorTheme/ThemePackViewer', () => ({
-  ThemePackViewer: ({ packName, overlay, className }: { packName: string; overlay?: React.ReactNode; className?: string }) => (
-    <div data-testid="theme-pack-viewer" className={className ?? ''}>
+  ThemePackViewer: ({ packName, overlay, className, isSelected }: { packName: string; overlay?: React.ReactNode; className?: string; isSelected?: boolean }) => (
+    <div data-testid="theme-pack-viewer" className={className ?? ''} data-selected={isSelected ?? false}>
       <img src="/mock.webp" alt={packName} />
       <span>{packName}</span>
       {overlay}
@@ -120,6 +120,56 @@ describe('ThemePackTrackerCard', () => {
       fireEvent.mouseEnter(hoverTarget)
 
       expect(hoverTarget.innerHTML).toContain('svg')
+    })
+  })
+
+  describe('Focus Toggle', () => {
+    it('calls onFocusToggle when card is clicked', () => {
+      const onFocusToggle = vi.fn()
+
+      render(
+        <ThemePackTrackerCard
+          {...defaultProps}
+          onFocusToggle={onFocusToggle}
+        />
+      )
+
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      const clickTarget = viewer.parentElement!
+      fireEvent.click(clickTarget)
+      expect(onFocusToggle).toHaveBeenCalledOnce()
+    })
+
+    it('passes isFocused as isSelected to ThemePackViewer', () => {
+      render(
+        <ThemePackTrackerCard
+          {...defaultProps}
+          isFocused={true}
+        />
+      )
+
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      expect(viewer.getAttribute('data-selected')).toBe('true')
+    })
+
+    it('does not call onFocusToggle when done button is clicked', () => {
+      const onFocusToggle = vi.fn()
+
+      render(
+        <ThemePackTrackerCard
+          {...defaultProps}
+          onFocusToggle={onFocusToggle}
+        />
+      )
+
+      const viewer = screen.getByTestId('theme-pack-viewer')
+      const hoverTarget = viewer.parentElement!
+      fireEvent.mouseEnter(hoverTarget)
+
+      const buttons = screen.getAllByRole('button')
+      fireEvent.click(buttons[0])
+      // stopPropagation prevents the focus toggle from firing
+      expect(onFocusToggle).not.toHaveBeenCalled()
     })
   })
 

@@ -57,7 +57,8 @@ export function matchesKeywordFilter(
   selectedKeywords: Set<string>
 ): boolean {
   if (selectedKeywords.size === 0) return true
-  return giftKeyword !== null && selectedKeywords.has(giftKeyword)
+  if (giftKeyword === null) return selectedKeywords.has('None')
+  return selectedKeywords.has(giftKeyword)
 }
 
 /**

@@ -140,6 +140,9 @@ export const IdentityI18nSchema = z.object({
 // Attack type enum for spec list
 export const AtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 
+// Defense type enum for spec list
+export const DefenseTypeSchema = z.enum(['GUARD', 'EVADE', 'COUNTER', 'CLASHABLE_GUARD', 'CLASHABLE_COUNTER'])
+
 // Spec list item schema
 export const IdentitySpecListItemSchema = z.object({
   updateDate: z.number(),
@@ -149,6 +152,7 @@ export const IdentitySpecListItemSchema = z.object({
   unitKeywordList: z.array(z.string()),
   attributeType: z.array(AffinitySchema),
   atkType: z.array(AtkTypeSchema),
+  defenseType: z.array(DefenseTypeSchema),
 })
 
 // Record types for spec and name lists

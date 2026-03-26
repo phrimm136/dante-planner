@@ -17,6 +17,8 @@ interface ThemePackTrackerCardProps {
   noteContent: NoteContent
   isDone: boolean
   onToggleDone: () => void
+  isFocused?: boolean
+  onFocusToggle?: () => void
   onHoverChange?: (hovering: boolean) => void
 }
 
@@ -32,6 +34,8 @@ export function ThemePackTrackerCard({
   floorNumber,
   noteContent,
   isDone,
+  isFocused = false,
+  onFocusToggle,
   onToggleDone,
   onHoverChange,
 }: ThemePackTrackerCardProps) {
@@ -54,6 +58,7 @@ export function ThemePackTrackerCard({
       <div
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={onFocusToggle}
       >
         <ThemePackViewer
           packId={packId}
@@ -61,6 +66,7 @@ export function ThemePackTrackerCard({
           packName={packName}
           specialName={specialName}
           enableHoverHighlight
+          isSelected={isFocused}
           readOnly
           className={cn(isDone && 'brightness-50')}
           overlay={

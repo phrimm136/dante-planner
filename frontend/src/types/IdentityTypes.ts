@@ -1,4 +1,4 @@
-import type { AtkType, Season, SkillAttributeType } from '@/lib/constants'
+import type { AtkType, DefType, Season, SkillAttributeType } from '@/lib/constants'
 
 /**
  * Identity list item for list/grid views.
@@ -17,6 +17,8 @@ export interface IdentityListItem {
   attributeTypes: SkillAttributeType[]
   /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */
   atkTypes: AtkType[]
+  /** Defense types - e.g. ['GUARD'] or ['EVADE', 'COUNTER'] */
+  defenseTypes: DefType[]
   /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
   season: Season
 }
@@ -36,6 +38,8 @@ export interface Identity {
   attributeTypes: SkillAttributeType[]
   /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */
   atkTypes: AtkType[]
+  /** Defense types - e.g. ['GUARD'] or ['EVADE', 'COUNTER'] */
+  defenseTypes: DefType[]
   /** Season identifier (0=Standard, 1-6=Seasons, 8000=Collab, 9101+=Walpurgis) */
   season: Season
 }

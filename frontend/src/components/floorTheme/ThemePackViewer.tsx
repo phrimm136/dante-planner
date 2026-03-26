@@ -13,6 +13,7 @@ interface ThemePackViewerProps {
   onClick?: () => void
   readOnly?: boolean
   enableHoverHighlight?: boolean
+  isSelected?: boolean
   overlay?: ReactNode
   className?: string
 }
@@ -29,6 +30,7 @@ export function ThemePackViewer({
   onClick,
   readOnly = false,
   enableHoverHighlight = false,
+  isSelected = false,
   overlay,
   className,
 }: ThemePackViewerProps) {
@@ -41,6 +43,7 @@ export function ThemePackViewer({
           packName={packName}
           specialName={specialName}
           enableHoverHighlight={enableHoverHighlight}
+          isSelected={isSelected}
           overlay={overlay}
         />
       </div>

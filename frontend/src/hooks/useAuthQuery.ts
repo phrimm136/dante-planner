@@ -1,6 +1,4 @@
 import { useSuspenseQuery, useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
-import { toast } from '@/lib/toast';
-import i18n from '@/lib/i18n';
 import { ApiClient } from '@/lib/api';
 import { UserSchema, type User } from '@/schemas/AuthSchemas';
 
@@ -20,29 +18,16 @@ function createAuthMeQueryOptions() {
     queryKey: authQueryKeys.me,
     queryFn: async (): Promise<User | null> => {
       try {
-        const data = await ApiClient.get<User>('/api/auth/me');
+        const data = await ApiClient.get<User | null>('/api/auth/me');
+        if (data === null) return null;
         const result = UserSchema.safeParse(data);
         if (!result.success) {
           console.error('User validation failed:', result.error);
           return null;
         }
         return result.data;
-      } catch (error) {
-        // Extract status from error message (format: "HTTP error! status: XXX")
-        const statusMatch = error instanceof Error && error.message.match(/status:\s*(\d+)/);
-        const status = statusMatch ? parseInt(statusMatch[1], 10) : null;
-
-        // 401 = not authenticated (guest state) - expected, return null silently
-        if (status === 401) {
-          return null;
-        }
-
-        // 5xx server errors - show feedback (only for explicit 5xx status codes)
-        if (status !== null && status >= 500) {
-          toast.error(i18n.t('errors.serverError'));
-        }
-
-        // All other errors (network, redirect, unknown) - return null silently
+      } catch {
+        // Auth failure degrades to guest state — never crash the page
         return null;
       }
     },
