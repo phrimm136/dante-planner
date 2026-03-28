@@ -2,7 +2,13 @@
 
 > **Purpose:** Provide architectural context for AI-assisted development. Read this before diving into implementation details.
 >
+<<<<<<< HEAD
 > **Last Updated:** 2026-03-29 (83e69786: add Discord and Ko-fi side links next to announcements)
+||||||| parent of dd4a3fa5 (feat: add theme pack and abnormality event pages)
+> **Last Updated:** 2026-03-03 (30af2cbd: unify logging pipeline — awslogs + CloudWatch export for all services)
+=======
+> **Last Updated:** 2026-03-28 (9f802b58: add theme pack and abnormality event pages)
+>>>>>>> dd4a3fa5 (feat: add theme pack and abnormality event pages)
 
 ---
 
@@ -16,6 +22,8 @@
 | **Identity Browser** | `routes/IdentityPage.tsx`, `routes/IdentityDetailPage.tsx` | `hooks/useIdentityListData.ts`, `hooks/useSearchMappings.ts`, `components/identity/*` |
 | **EGO Browser** | `routes/EGOPage.tsx`, `routes/EGODetailPage.tsx` | `hooks/useEGOListData.ts`, `hooks/useEGODetailData.ts` (useEGODetailSpec, useEGODetailI18n), `hooks/useSearchMappings.ts`, `components/ego/*` (EGOHeaderI18n, SkillI18n, PassiveI18n for granular Suspense) |
 | **EGO Gift Browser** | `routes/EGOGiftPage.tsx`, `routes/EGOGiftDetailPage.tsx` | `hooks/useEGOGiftListData.ts`, `hooks/useEGOGiftDetailData.ts` (useEGOGiftDetailSpec, useEGOGiftDetailI18n), `hooks/useSearchMappings.ts`, `hooks/useThemePackListData.ts` (useThemePackI18n), `lib/egoGiftFilter.ts`, `components/egoGift/*` (EGOGiftCard, EGOGiftTooltip, EGOGiftTooltipContent, GiftNameI18n, EnhancementsPanelI18n, RecipeSection for granular Suspense) |
+| **Theme Pack Browser** | `routes/ThemePackPage.tsx`, `routes/ThemePackDetailPage.tsx` | `hooks/useThemePackListData.ts`, `hooks/useThemePackDetailData.ts`, `lib/themePackFilter.ts` (AND logic for difficulty/floor), `components/themePack/ThemePackCardLink.tsx`, `components/themePack/ThemePackList.tsx`, `components/filter/CompactDungeonDifficultyFilter.tsx`, `components/filter/CompactFloorFilter.tsx`, `components/filter/EgoGiftSearchDropdown.tsx` (shared with AbEvent) |
+| **Ab Event Browser** | `routes/AbEventPage.tsx`, `routes/AbEventDetailPage.tsx` | `hooks/useAbEventListData.ts`, `hooks/useAbEventDetailData.ts`, `lib/abEventFilter.ts`, `lib/abEventTextResolver.ts` (effect template resolution, condition rendering, adder info formatting), `components/abEvent/AbEventChoiceBranch.tsx` (recursive: ChoiceBranch → SubEventBlock → CoinTossSection with BranchCard/EffectList helpers), `components/abEvent/AbEventCard.tsx`, `components/abEvent/AbEventList.tsx`, `components/abEvent/CantSelectCondition.tsx`, `components/common/ColoredText.tsx` (unified Unity rich text parser, used by ThemePackCard, formatBuffDescription), `components/common/SearchableMultiSelect.tsx` (locale-sorted, progressive rendering) |
 | **Detail Page Layout** | `components/common/DetailPageLayout.tsx` | `DetailEntitySelector.tsx`, `DetailLeftPanel.tsx`, `DetailRightPanel.tsx`, `MobileDetailTabs.tsx`, `EntityMetaInfo.tsx` |
 | **Planner (MD)** | `routes/PlannerMDEditorContent.tsx` (shared), `routes/PlannerMDNewPage.tsx` (wrapper), `routes/PlannerMDEditPage.tsx` (wrapper), `routes/DeckBuilderPage.tsx` (standalone, ephemeral) | `stores/usePlannerEditorStore.tsx` (Zustand store with Hot/Warm/Cold slices, functional setState support for equipment/filters), `hooks/usePlannerStorage.ts`, `hooks/usePlannerConfig.ts` (version config), `hooks/useSavedPlannerQuery.ts` (edit mode), `components/deckBuilder/DeckBuilderContent.tsx` (reusable core, functional setState to prevent stale closures), `components/deckBuilder/DeckBuilderPane.tsx` (dialog wrapper), `components/deckBuilder/TierLevelSelector.tsx` (i18n, ID-based base ego detection), `components/startBuff/*` (Summary+EditPane pattern), `components/startGift/*` (Summary+EditPane pattern), `components/egoGift/EGOGiftObservation*` (Summary+EditPane pattern), `components/floorTheme/*`, `components/noteEditor/*` |
 | **Planner List** | `routes/PlannerMDPage.tsx` (personal), `routes/PlannerMDGesellschaftPage.tsx` (community, ErrorBoundary) | `hooks/useMDUserPlannersData.ts`, `hooks/useMDGesellschaftData.ts`, `hooks/useMDUserFilters.ts`, `hooks/useMDGesellschaftFilters.ts`, `types/MDPlannerListTypes.ts`, `components/plannerList/MDPlannerNavButtons.tsx`, `components/plannerList/MDPlannerToolbar.tsx`, `components/plannerList/PersonalPlannerCard.tsx`, `components/plannerList/PublishedPlannerCard.tsx`, `components/plannerList/PlannerCardContextMenu.tsx` (independent vote/fork mutation states), `components/home/CommunityPlansErrorFallback.tsx` (shared error fallback) |
@@ -23,7 +31,7 @@
 | **Extraction Calculator** | `routes/ExtractionPlannerPage.tsx`, `lib/extractionCalculator.ts` | `components/extraction/*`, `types/ExtractionTypes.ts` (featuredAnnouncerCount), `schemas/ExtractionSchemas.ts` |
 | **Planner Sync** | `hooks/usePlannerSync.ts`, `hooks/usePlannerSyncAdapter.ts` | `hooks/useSseConnection.ts`, `hooks/usePlannerMigration.ts`, `lib/plannerApi.ts`, `stores/useSseStore.ts` |
 | **Planner Save** | `hooks/usePlannerSave.ts`, `hooks/usePlannerSaveAdapter.ts` | `hooks/usePlannerStorage.ts` (IndexedDB), `hooks/useUserSettings.ts`, privacy-first (auto-save→local only, manual save→server when sync enabled) |
-| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
+| **Filter Sidebar** | `components/filter/FilterSidebar.tsx` | `FilterPageLayout.tsx`, `FilterSection.tsx`, `CompactIconFilter.tsx`, `SeasonDropdown.tsx`, `UnitKeywordDropdown.tsx`, `EgoGiftSearchDropdown.tsx` (shared ego gift filter), `CompactDungeonDifficultyFilter.tsx`, `CompactFloorFilter.tsx`, `lib/filterUtils.ts` (calculateActiveFilterCount) |
 | **Sanity Condition** | `lib/sanityConditionFormatter.ts` | `hooks/useSanityConditionData.ts` |
 | **Authentication** | `routes/auth/callback/google.tsx` | `lib/api.ts`, `hooks/useAuthQuery.ts` |
 | **SEO & Routing** | `lib/router.tsx` (HeadContent, route loaders for dynamic titles), `index.html` (meta tags, OG, Twitter Cards, visually-hidden SEO skeleton) | `scripts/generate-sitemap.ts` (build-time sitemap from static JSON), `static/robots.txt`, `static/sitemap.xml` (655 URLs) |
@@ -1084,6 +1092,9 @@ interface VoteRequest {
 | `egoGift/{id}.json` | EGO Gift details | `useEGOGiftDetailData` |
 | `egoGiftSpecList.json` | All EGO Gift specs (includes `recipe` field) | `useEGOGiftListData` |
 | `themePackList.json` | Floor theme packs | `useThemePackListData` |
+| `themePack/{id}.json` | Theme pack detail (nodeOption, exceptionConditions) | `useThemePackDetailData` |
+| `abEventSpecList.json` | Ab event specs (relatedEgoGifts, relatedThemePacks, hasImage) | `useAbEventListData` |
+| `abEvent/{id}.json` | Ab event mechanics (choices, selectionEvents, subEvents, conditionalResults, probabilityResults) | `useAbEventDetailData` |
 | `MD{version}/startBuffs.json` | Start buff data (versioned per MD) | `useStartBuffData` |
 | `MD{version}/startEgoGiftPools.json` | Start EGO gift pools (versioned per MD) | `useStartGiftPools` |
 | `MD{version}/egoGiftObservationData.json` | EGO gift observation data (versioned per MD) | `useEGOGiftObservationData` |
@@ -1098,6 +1109,8 @@ interface VoteRequest {
 | `egoGiftNameList.json` | EGO Gift names |
 | `keywordMatch.json` | Keyword translations (EN, KR, JP) |
 | `themePack.json` | Theme pack names |
+| `abEvent/{id}.json` | Ab event i18n (desc, options, selectionTexts, subEventTexts, choiceEffects) |
+| `abEvent/_shared.json` | Ab event shared resources (effects, targets, keywords, affinities, sinnerNames, identityNames) |
 | `sanityCondition.json` | Sanity condition templates |
 | `seasons.json` | Season names (loaded by SeasonDropdown via useFilterI18nData) |
 | `unitKeywords.json` | Unit keyword/affiliation names (loaded by UnitKeywordDropdown via useFilterI18nData) |

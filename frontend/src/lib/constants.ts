@@ -734,6 +734,8 @@ export const CARD_GRID = {
     SKILL_IMAGE: 128,
     /** SkillExchangePane: skill (128px) + gap (8px) + arrow (64px) + gap (8px) + skill (128px) + padding (16px) */
     SKILL_EXCHANGE: 352,
+    /** AbEventCard: ~3 columns on 1024px desktop (title above wide landscape image) */
+    AB_EVENT: 308,
   },
   /** Card heights in pixels - matches actual card component dimensions */
   HEIGHT: {
@@ -751,6 +753,8 @@ export const CARD_GRID = {
     START_BUFF: 320,
     /** ThemePackCard: h-104 (416px) */
     THEME_PACK: 416,
+    /** AbEventCard: title (~30px) + 3:2 image (~205px) = ~235px */
+    AB_EVENT: 235,
     /** Keyword icon container: h-16 (64px) */
     KEYWORD_ICON: 64,
     /** SinnerSkillCard: p-2 (8px) + image (96px) + gap-1 (4px) + skill row (28px) + p-2 (8px) = 144px */
@@ -923,6 +927,45 @@ export const EGO_GIFT_ATTRIBUTE_TYPES = AFFINITIES
  * EGO Gift attribute type (same as Affinity)
  */
 export type EGOGiftAttributeType = Affinity
+
+/**
+ * Theme pack dungeon difficulties for filtering
+ * Maps to dungeonIdx values in exceptionConditions
+ */
+export const THEME_PACK_DIFFICULTIES = [
+  DUNGEON_IDX.NORMAL,
+  DUNGEON_IDX.HARD,
+  DUNGEON_IDX.PARALLEL,
+  DUNGEON_IDX.EXTREME,
+] as const
+
+/**
+ * Display labels for theme pack dungeon difficulties
+ */
+export const THEME_PACK_DIFFICULTY_LABELS: Record<DungeonIdx, string> = {
+  [DUNGEON_IDX.NORMAL]: 'Normal',
+  [DUNGEON_IDX.HARD]: 'Hard',
+  [DUNGEON_IDX.PARALLEL]: 'Infinity',
+  [DUNGEON_IDX.EXTREME]: 'Extreme',
+}
+
+/**
+ * Theme pack selectable floors for filtering (0-indexed in data, display as 1F-5F)
+ */
+export const THEME_PACK_FLOORS = [0, 1, 2, 3, 4] as const
+
+export type ThemePackFloor = (typeof THEME_PACK_FLOORS)[number]
+
+/**
+ * Display labels for theme pack floors
+ */
+export const THEME_PACK_FLOOR_LABELS: Record<ThemePackFloor, string> = {
+  0: '1F',
+  1: '2F',
+  2: '3F',
+  3: '4F',
+  4: '5F',
+}
 
 /**
  * EGO Gift enhancement base costs by tier

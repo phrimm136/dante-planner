@@ -1,59 +1,9 @@
 import type { BuffEffect, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
 import { getKeywordName } from '@/hooks/useBattleKeywords'
 
-/**
- * Parses color tags and converts to React elements
- * @param text - Text with <color=#hex>content</color> tags
- * @returns Array of React elements with styled spans
- */
-export function parseColorTags(text: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = []
-  const openTagRegex = /<color=(#[0-9a-fA-F]{6})>/
-  let lastIndex = 0
-
-  while (lastIndex < text.length) {
-    const slice = text.slice(lastIndex)
-    const match = openTagRegex.exec(slice)
-    if (!match) {
-      parts.push(slice)
-      break
-    }
-
-    const tagStart = lastIndex + match.index
-    const color = match[1]
-    const contentStart = tagStart + match[0].length
-
-    if (tagStart > lastIndex) {
-      parts.push(text.slice(lastIndex, tagStart))
-    }
-
-    // Find matching </color> using depth counter to handle nesting
-    let depth = 1
-    let pos = contentStart
-    while (pos < text.length && depth > 0) {
-      if (text.startsWith('<color=', pos)) {
-        depth++
-        const gtIndex = text.indexOf('>', pos)
-        pos = gtIndex === -1 ? text.length : gtIndex + 1
-      } else if (text.startsWith('</color>', pos)) {
-        depth--
-        if (depth > 0) pos += '</color>'.length
-      } else {
-        pos++
-      }
-    }
-
-    parts.push(
-      <span key={tagStart} style={{ color }}>
-        {parseColorTags(text.slice(contentStart, pos))}
-      </span>
-    )
-
-    lastIndex = pos + '</color>'.length
-  }
-
-  return parts
-}
+// Re-export parseColorTags from the consolidated source
+import { parseColorTags } from '@/components/common/ColoredText'
+export { parseColorTags }
 
 /**
  * Replaces placeholders in text with effect values

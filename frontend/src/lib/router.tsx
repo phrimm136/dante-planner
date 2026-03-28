@@ -349,6 +349,74 @@ const egoGiftDetailRoute = createRoute({
   }),
 })
 
+// Theme Pack route - path: "/theme-pack" (Theme Pack browser page)
+const themePackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/theme-pack',
+  component: lazyRouteComponent(() => import('@/routes/ThemePackPage')),
+  pendingComponent: () => (
+    <div className="container mx-auto p-8">
+      <ListPageSkeleton preset="themePack" />
+    </div>
+  ),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.themePack') }],
+  }),
+})
+
+// Theme Pack detail route - path: "/theme-pack/$id"
+const themePackDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/theme-pack/$id',
+  component: lazyRouteComponent(() => import('@/routes/ThemePackDetailPage')),
+  pendingComponent: () => <DetailPageSkeleton preset="themePack" />,
+  loader: async ({ params }) => {
+    const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
+    const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
+    return { name }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? 'Theme Pack'} | Dante's Planner` }],
+  }),
+})
+
+// Ab Event route - path: "/ab-event" (Abnormality Event browser page)
+const abEventRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/ab-event',
+  component: lazyRouteComponent(() => import('@/routes/AbEventPage')),
+  pendingComponent: () => (
+    <div className="container mx-auto p-8">
+      <ListPageSkeleton preset="abEvent" />
+    </div>
+  ),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.abEvent') }],
+  }),
+})
+
+// Ab Event detail route - path: "/ab-event/$id"
+const abEventDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/ab-event/$id',
+  component: lazyRouteComponent(() => import('@/routes/AbEventDetailPage')),
+  pendingComponent: () => <DetailPageSkeleton preset="abEvent" />,
+  loader: async ({ params }) => {
+    try {
+      const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)
+      const data = module.default as { desc?: string }
+      const raw = (data.desc ?? '').replace(/\n/g, ' ')
+      const snippet = raw.length > 20 ? `${raw.slice(0, 20)}...` : raw
+      return { title: snippet || params.id }
+    } catch {
+      return { title: params.id }
+    }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.title ?? 'Abnormality Event'} | Dante's Planner` }],
+  }),
+})
+
 // Settings route - path: "/settings" (User settings page)
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -407,6 +475,10 @@ const routeTree = rootRoute.addChildren([
   egoDetailRoute,
   egoGiftRoute,
   egoGiftDetailRoute,
+  themePackRoute,
+  themePackDetailRoute,
+  abEventRoute,
+  abEventDetailRoute,
   plannerRoute,
   plannerMDRoute,
   plannerMDGesellschaftRoute,

@@ -47,7 +47,8 @@
       "Bash(./gradlew:*)",
       "Bash(file:*)",
       "Bash(xargs:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(rm -f /tmp/:*)"
     ],
     "defaultMode": "acceptEdits"
   },

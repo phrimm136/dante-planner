@@ -606,6 +606,15 @@ export function getThemePackExtremeHighlightPath(): string {
 }
 
 /**
+ * Gets abnormality event image path
+ * @param eventId - Event ID (e.g., "901001", "971055")
+ * @returns Event image path
+ */
+export function getAbEventImagePath(eventId: string): string {
+  return resolveAsset(`/images/abEvent/${eventId}.webp`)
+}
+
+/**
  * Gets EGO type icon path
  * @Param egoType - EGO Type (ZAYIN, TETH, HE, WAW, ALEPH)
  * @Returns Icon path

@@ -233,6 +233,9 @@
 
   /* Identity name color */
   --identity-name: oklch(0.8338 0.1701 88.93);
+
+  /* Ab event cant-select condition color */
+  --cant-select: #a16a3b;
 }
 
 @layer base {

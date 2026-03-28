@@ -47,3 +47,25 @@ export const ThemePackEntrySchema = z.object({
 
 // Theme pack list schema (Record keyed by pack ID)
 export const ThemePackListSchema = z.record(z.string(), ThemePackEntrySchema)
+
+// Node option schema (battle/event pools in individual theme pack files)
+const NodeOptionSchema = z.object({
+  bossPool: z.array(z.number()),
+  battlePool: z.array(z.number()),
+  abBattlePool: z.array(z.number()),
+  hardBattlePool: z.array(z.number()),
+  hardAbBattlePool: z.array(z.number()),
+  eventPool: z.array(z.number()),
+  specialEventPool: z.array(z.number()).optional(),
+})
+
+// Individual theme pack detail schema (full data from themePack/{id}.json)
+export const ThemePackDetailSchema = z.object({
+  exceptionConditions: z.array(ExceptionConditionSchema),
+  nodeOption: NodeOptionSchema,
+  egoGiftPool: z.array(z.number()),
+  specificEgoGiftPool: z.array(z.number()),
+  themePackConfig: ThemePackConfigSchema,
+})
+
+export type ThemePackDetail = z.infer<typeof ThemePackDetailSchema>

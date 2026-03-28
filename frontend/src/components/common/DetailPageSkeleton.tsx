@@ -116,6 +116,108 @@ const DETAIL_PRESETS = {
       </div>
     ),
   },
+  /**
+   * Theme Pack detail: Card image + difficulty/floor metadata (left)
+   * Specific gifts + events sections (right)
+   */
+  themePack: {
+    left: (
+      <div className="flex gap-4">
+        {/* Theme pack card image */}
+        <Skeleton className="w-60 h-104 rounded-lg shrink-0" />
+        {/* Metadata panel: difficulty + floors */}
+        <div className="flex-1 space-y-3">
+          <Skeleton className="h-5 w-20" />
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-16 rounded" />
+            <Skeleton className="h-6 w-16 rounded" />
+          </div>
+          <Skeleton className="h-5 w-16" />
+          <div className="flex gap-1">
+            <Skeleton className="h-6 w-10 rounded" />
+            <Skeleton className="h-6 w-10 rounded" />
+            <Skeleton className="h-6 w-10 rounded" />
+          </div>
+        </div>
+      </div>
+    ),
+    right: (
+      <div className="space-y-6">
+        {/* Section: Specific gifts */}
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-48" />
+          <div className="flex gap-3">
+            <Skeleton className="w-24 h-24 rounded" />
+            <Skeleton className="w-24 h-24 rounded" />
+            <Skeleton className="w-24 h-24 rounded" />
+          </div>
+        </div>
+        {/* Section: Exclusive events */}
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-48" />
+          <div className="flex gap-3">
+            <Skeleton className="w-40 h-28 rounded" />
+            <Skeleton className="w-40 h-28 rounded" />
+          </div>
+        </div>
+        {/* Section: All gifts */}
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-40" />
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <Skeleton key={i} className="w-24 h-24 rounded" />
+            ))}
+          </div>
+        </div>
+        {/* Section: All events */}
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-48" />
+          <div className="flex flex-wrap gap-3">
+            <Skeleton className="w-40 h-28 rounded" />
+            <Skeleton className="w-40 h-28 rounded" />
+            <Skeleton className="w-40 h-28 rounded" />
+          </div>
+        </div>
+      </div>
+    ),
+  },
+
+  /**
+   * Ab Event detail: Event image + related gifts/packs (left)
+   * Choice branches with effects (right)
+   */
+  abEvent: {
+    left: (
+      <div className="space-y-4">
+        {/* Event image (wide landscape) */}
+        <Skeleton className="w-full aspect-[3/2] rounded-lg" />
+        {/* Related EGO gifts */}
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-32" />
+          <div className="flex gap-2">
+            <Skeleton className="w-24 h-24 rounded" />
+            <Skeleton className="w-24 h-24 rounded" />
+          </div>
+        </div>
+        {/* Related theme packs */}
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-36" />
+        </div>
+      </div>
+    ),
+    right: (
+      <div className="space-y-4">
+        {/* Event description */}
+        <Skeleton className="h-24 rounded-lg" />
+        {/* Choice branches */}
+        <Skeleton className="h-32 rounded-lg" />
+        <Skeleton className="h-40 rounded-lg" />
+        <Skeleton className="h-32 rounded-lg" />
+      </div>
+    ),
+  },
 } as const
 
 type DetailPreset = keyof typeof DETAIL_PRESETS

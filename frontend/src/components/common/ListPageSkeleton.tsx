@@ -30,6 +30,20 @@ const CARD_PRESETS = {
     clipPath: undefined,
     mobileScale: 0.8,
   },
+  /** ThemePackCard: w-60 (240px) × h-104 (416px), tall rectangle */
+  themePack: {
+    width: CARD_GRID.WIDTH.THEME_PACK,
+    height: CARD_GRID.HEIGHT.THEME_PACK,
+    clipPath: undefined,
+    mobileScale: 0.8,
+  },
+  /** AbEventCard: 308px wide, title + 3:2 image */
+  abEvent: {
+    width: CARD_GRID.WIDTH.AB_EVENT,
+    height: CARD_GRID.HEIGHT.AB_EVENT,
+    clipPath: undefined,
+    mobileScale: 0.8,
+  },
   /** PlannerCard: 280px × 160px, rounded rectangle */
   planner: {
     width: CARD_GRID.WIDTH.PLANNER,
