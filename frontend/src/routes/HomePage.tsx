@@ -19,6 +19,7 @@ import { LoadingState } from '@/components/common/LoadingState'
 import { BannerSection } from '@/components/home/BannerSection'
 import { AnnouncementContent } from '@/components/home/AnnouncementContent'
 import { AnnouncementSkeleton } from '@/components/home/AnnouncementSection'
+import { SideLinkSection } from '@/components/home/SideLinkSection'
 import { RecentlyReleasedSection } from '@/components/home/RecentlyReleasedSection'
 import { CommunityPlansSection } from '@/components/home/CommunityPlansSection'
 
@@ -51,11 +52,12 @@ function HomePageContent() {
         <BannerSection />
       </div>
 
-      {/* Announcement section */}
-      <div className="mb-8">
+      {/* Announcement + side links */}
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-[7fr_1fr] gap-4">
         <Suspense fallback={<AnnouncementSkeleton />}>
           <AnnouncementContent />
         </Suspense>
+        <SideLinkSection />
       </div>
 
       {/* Two-column layout: Recently Released + Community Plans */}

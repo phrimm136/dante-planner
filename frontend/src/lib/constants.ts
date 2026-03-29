@@ -22,6 +22,16 @@ export const SEARCH_DEBOUNCE_DELAY = 100
 export const BANNER_CAROUSEL_INTERVAL = 5000
 
 /**
+ * Discord server invite URL
+ */
+export const DISCORD_INVITE_URL = 'https://discord.gg/DMGGsP2EWS'
+
+/**
+ * Discord brand color (Blurple)
+ */
+export const DISCORD_BLURPLE = '#5865F2'
+
+/**
  * Filter sidebar width in pixels (desktop view)
  * Used by FilterSidebar component for consistent layout
  */
