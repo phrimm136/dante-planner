@@ -16,8 +16,6 @@ import { z } from 'zod'
 export const BattleKeywordEntrySchema = z.object({
   name: z.string(),
   desc: z.string(),
-  iconId: z.string().nullable(),
-  buffType: z.string(),
 }).strict()
 
 /**

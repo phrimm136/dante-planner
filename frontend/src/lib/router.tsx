@@ -10,8 +10,7 @@ import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/hooks/usePublishedPlannerQuery'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
-import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
+
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
 import NotFoundPage from '@/routes/NotFoundPage'
 
@@ -76,45 +75,7 @@ const mdGesellschaftSearchSchema = z.object({
   q: z.string().max(200).optional(),
 })
 
-// ============================================================================
-// Pending Components (Route Loading States)
-// ============================================================================
 
-/**
- * Pending components show while the route's JS bundle loads (lazyRouteComponent).
- * These wrap skeleton components with the same page structure (title, description)
- * as the actual page for a seamless loading experience.
- */
-
-// Identity list page loading state
-const IdentityPagePending = () => (
-  <div className="container mx-auto p-8">
-    <ListPageSkeleton preset="identity" />
-  </div>
-)
-
-// Identity detail page loading state
-const IdentityDetailPagePending = () => <DetailPageSkeleton preset="identity" />
-
-// EGO list page loading state
-const EGOPagePending = () => (
-  <div className="container mx-auto p-8">
-    <ListPageSkeleton preset="ego" />
-  </div>
-)
-
-// EGO detail page loading state
-const EGODetailPagePending = () => <DetailPageSkeleton preset="ego" />
-
-// EGO Gift list page loading state
-const EGOGiftPagePending = () => (
-  <div className="container mx-auto p-8">
-    <ListPageSkeleton preset="egoGift" />
-  </div>
-)
-
-// EGO Gift detail page loading state
-const EGOGiftDetailPagePending = () => <DetailPageSkeleton preset="egoGift" />
 
 // Root route - contains layout for all routes
 const rootRoute = createRootRoute({
@@ -273,7 +234,7 @@ const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
   component: lazyRouteComponent(() => import('@/routes/IdentityPage')),
-  pendingComponent: IdentityPagePending,
+
   head: () => ({
     meta: [{ title: pageTitle('header.nav.identity') }],
   }),
@@ -284,7 +245,7 @@ const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
   component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
-  pendingComponent: IdentityDetailPagePending,
+
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
     const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
@@ -300,7 +261,7 @@ const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
   component: lazyRouteComponent(() => import('@/routes/EGOPage')),
-  pendingComponent: EGOPagePending,
+
   head: () => ({
     meta: [{ title: pageTitle('header.nav.ego') }],
   }),
@@ -311,7 +272,7 @@ const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
   component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
-  pendingComponent: EGODetailPagePending,
+
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
     const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
@@ -327,7 +288,7 @@ const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftPage')),
-  pendingComponent: EGOGiftPagePending,
+
   head: () => ({
     meta: [{ title: pageTitle('header.nav.egoGift') }],
   }),
@@ -338,7 +299,7 @@ const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
   component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
-  pendingComponent: EGOGiftDetailPagePending,
+
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
     const name = (module.default as { name?: string }).name ?? params.id
@@ -349,6 +310,7 @@ const egoGiftDetailRoute = createRoute({
   }),
 })
 
+<<<<<<< HEAD
 // Theme Pack route - path: "/theme-pack" (Theme Pack browser page)
 const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -414,6 +376,32 @@ const abEventDetailRoute = createRoute({
   },
   head: ({ loaderData }) => ({
     meta: [{ title: `${loaderData?.title ?? 'Abnormality Event'} | Dante's Planner` }],
+||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
+=======
+// Keyword route - path: "/keyword" (Keyword browser page)
+const keywordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/keyword',
+  component: lazyRouteComponent(() => import('@/routes/KeywordPage')),
+  head: () => ({
+    meta: [{ title: pageTitle('header.nav.keyword') }],
+  }),
+})
+
+// Keyword detail route - path: "/keyword/$id" (Keyword detail page)
+const keywordDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/keyword/$id',
+  component: lazyRouteComponent(() => import('@/routes/KeywordDetailPage')),
+  loader: async ({ params }) => {
+    const module = await import(`@static/i18n/${i18n.language}/battleKeywords.json`)
+    const keywords = module.default as Record<string, { name?: string }>
+    const name = keywords[params.id]?.name ?? params.id
+    return { name }
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.name ?? 'Keyword'} | Dante's Planner` }],
+>>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
   }),
 })
 
@@ -475,10 +463,16 @@ const routeTree = rootRoute.addChildren([
   egoDetailRoute,
   egoGiftRoute,
   egoGiftDetailRoute,
+<<<<<<< HEAD
   themePackRoute,
   themePackDetailRoute,
   abEventRoute,
   abEventDetailRoute,
+||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
+=======
+  keywordRoute,
+  keywordDetailRoute,
+>>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
   plannerRoute,
   plannerMDRoute,
   plannerMDGesellschaftRoute,

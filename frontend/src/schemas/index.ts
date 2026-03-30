@@ -56,6 +56,13 @@ export {
   BattleKeywordsSchema,
 } from './BattleKeywordsSchemas'
 
+// Keyword spec schemas
+export {
+  BattleKeywordSpecEntrySchema,
+  BattleKeywordSpecListSchema,
+  BattleKeywordNameListSchema,
+} from './KeywordSchemas'
+
 // Skill Tag schemas
 export { SkillTagSchema } from './SkillTagSchemas'
 

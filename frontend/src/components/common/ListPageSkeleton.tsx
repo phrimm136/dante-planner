@@ -30,6 +30,7 @@ const CARD_PRESETS = {
     clipPath: undefined,
     mobileScale: 0.8,
   },
+<<<<<<< HEAD
   /** ThemePackCard: w-60 (240px) × h-104 (416px), tall rectangle */
   themePack: {
     width: CARD_GRID.WIDTH.THEME_PACK,
@@ -41,6 +42,13 @@ const CARD_PRESETS = {
   abEvent: {
     width: CARD_GRID.WIDTH.AB_EVENT,
     height: CARD_GRID.HEIGHT.AB_EVENT,
+||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
+=======
+  /** KeywordCard: 96px × 96px square icon (name rendered below by wrapper) */
+  keyword: {
+    width: CARD_GRID.WIDTH.KEYWORD,
+    height: CARD_GRID.WIDTH.KEYWORD,
+>>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
     clipPath: undefined,
     mobileScale: 0.8,
   },

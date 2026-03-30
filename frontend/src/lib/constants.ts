@@ -720,6 +720,8 @@ export const CARD_GRID = {
     EGO: 160,
     /** EGOGiftCard: 96px (from minmax in selection list) */
     EGO_GIFT: 96,
+    /** KeywordCard: 96px (matches EGO gift card width) */
+    KEYWORD: 96,
     /** PlannerCard: 280px for adequate text/metadata space */
     PLANNER: 280,
     /** StartBuffCard: w-68 (272px) */
@@ -747,6 +749,8 @@ export const CARD_GRID = {
     EGO: 196,
     /** EGOGiftCard: 96px */
     EGO_GIFT: 96,
+    /** KeywordCard: 120px (icon + name label) */
+    KEYWORD: 120,
     /** PlannerCard: varies by content */
     PLANNER: 0,
     /** DeckBuilderCard: identity (224px) + skill row (28px) + ego row (28px) + gaps */
@@ -787,6 +791,16 @@ export const CARD_GRID = {
  * Card width type for ResponsiveCardGrid
  */
 export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
+
+/**
+ * Buff type categories for battle keywords
+ */
+export const BUFF_TYPES = ['Positive', 'Negative', 'Neutral'] as const
+
+/**
+ * Buff type derived from BUFF_TYPES array
+ */
+export type BuffType = typeof BUFF_TYPES[number]
 
 /**
  * Start Buff card dimensions keyed by MD version.
