@@ -57,37 +57,48 @@ runs:
               );
               const lines = String(resp.data).split('\n').map(l =>
                 l.replace(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z /, '')
+                 .replace(/\x1b\[[0-9;]*m/g, '')
               );
 
-              // Parse log into step sections by ##[group] markers
-              let snippet = '';
-              if (failedStep) {
-                const sections = [];
-                let current = { name: '', lines: [] };
-                for (const l of lines) {
-                  if (l.startsWith('##[group]')) {
-                    current = { name: l.replace('##[group]', ''), lines: [] };
-                    sections.push(current);
-                  } else if (!l.startsWith('##[') && l.trim()) {
-                    current.lines.push(l);
-                  }
-                }
-                const match = sections.find(s => s.name.includes(failedStep.name));
-                if (match) {
-                  snippet = match.lines.slice(-30).join('\n');
+              // Parse log into step sections by ##[group]/##[endgroup] boundaries
+              const sections = [];
+              let current = null;
+              for (const l of lines) {
+                if (l.startsWith('##[group]')) {
+                  current = { name: l.replace('##[group]', ''), lines: [], hasError: false };
+                  sections.push(current);
+                } else if (l.startsWith('##[endgroup]')) {
+                  current = null;
+                } else if (l.startsWith('##[error]') && current) {
+                  current.hasError = true;
+                } else if (current && !l.startsWith('##[') && l.trim()) {
+                  current.lines.push(l);
                 }
               }
 
-              // Fallback: skip post-job cleanup lines
-              if (!snippet) {
-                const mainLines = [];
-                let inPost = false;
-                for (const l of lines) {
-                  if (l.startsWith('##[group]Post ') || l.startsWith('##[group]Complete job')) inPost = true;
-                  else if (l.startsWith('##[group]')) inPost = false;
-                  if (!inPost && !l.startsWith('##[') && l.trim()) mainLines.push(l);
+              const isCleanup = s => /^(Post |Complete job)/.test(s.name);
+              let snippet = '';
+
+              if (failedStep) {
+                // 1. Match by step name
+                const byName = sections.find(s => s.name.includes(failedStep.name));
+                // 2. Match by error marker (GitHub Actions emits ##[error] in the failed step's section)
+                const byError = !byName && sections.find(s => s.hasError && s.lines.length && !isCleanup(s));
+                const match = byName || byError;
+                if (match) {
+                  // For run steps, skip the script preamble (source lines + "shell: ..." metadata)
+                  const shellIdx = match.lines.findIndex(l => /^shell:\s/.test(l));
+                  const output = shellIdx >= 0 ? match.lines.slice(shellIdx + 1) : match.lines;
+                  snippet = output.slice(-30).join('\n');
                 }
-                snippet = mainLines.slice(-25).join('\n');
+              }
+
+              // Fallback: last non-cleanup section (most likely the failed step)
+              if (!snippet) {
+                const last = sections.filter(s => s.lines.length && !isCleanup(s)).pop();
+                if (last) {
+                  snippet = last.lines.slice(-30).join('\n');
+                }
               }
 
               logBlock = `\n<details>\n<summary>Log snippet</summary>\n\n\`\`\`\n${snippet}\n\`\`\`\n</details>`;

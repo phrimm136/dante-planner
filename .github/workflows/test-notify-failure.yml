@@ -1,0 +1,44 @@
+name: Test Notify Failure
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: 'PR number to post the failure comment on'
+        required: true
+        type: number
+
+jobs:
+  simulate-failure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Simulate real work
+        run: |
+          echo "Building application..."
+          echo "Running tests..."
+          echo "[ERROR] Connection refused: localhost:5432"
+          echo "org.postgresql.util.PSQLException: FATAL: database \"app\" does not exist"
+          echo "BUILD FAILED"
+          exit 1
+
+  notify-failure:
+    needs: [simulate-failure]
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout: .github/actions
+      - uses: ./.github/actions/notify-ci-failure
+        with:
+          title: "Test — Notify Failure"
+          pr-number: ${{ inputs.pr-number }}
+          jobs-json: |
+            [
+              {"name": "Simulate Failure", "result": "${{ needs.simulate-failure.result }}"}
+            ]
