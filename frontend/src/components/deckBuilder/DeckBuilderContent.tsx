@@ -12,7 +12,9 @@ import type { EGOListItem } from '@/types/EGOTypes'
 import type { Keyword } from '@/lib/constants'
 import { getSinnerFromId, getSinnerCodeFromId } from '@/lib/utils'
 import { getSelectedIndicatorPath } from '@/lib/assetPaths'
-import { SinnerGrid, type SkillData } from './SinnerGrid'
+import { type SkillData } from './SinnerGrid'
+import { CompactIdentityRow } from './CompactIdentityRow'
+import { CompactEgoGrid } from './CompactEgoGrid'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
 import { EntityToggle } from './EntityToggle'
@@ -549,14 +551,19 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     <div className="space-y-6">
       {/* Sinner Grid */}
       <div className={SECTION_STYLES.container}>
-        <SinnerGrid
-          equipment={equipment}
-          deploymentOrder={deploymentOrder}
-          identities={identities}
-          skillDataMap={skillDataMap}
-          egoAffinityMap={egoAffinityMap}
-          onToggleDeploy={handleToggleDeploy}
-        />
+        {filterState.entityMode === 'identity' ? (
+          <CompactIdentityRow
+            equipment={equipment}
+            deploymentOrder={deploymentOrder}
+            skillDataMap={skillDataMap}
+            onToggleDeploy={handleToggleDeploy}
+          />
+        ) : (
+          <CompactEgoGrid
+            equipment={equipment}
+            egoAffinityMap={egoAffinityMap}
+          />
+        )}
         {/* Status + Action Bar row */}
         <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
           <StatusViewer deckState={deckState} />

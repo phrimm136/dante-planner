@@ -736,6 +736,8 @@ export const CARD_GRID = {
     SKILL_EXCHANGE: 352,
     /** AbEventCard: ~3 columns on 1024px desktop (title above wide landscape image) */
     AB_EVENT: 308,
+    /** CompactIdentityRow: ~1440px dialog - 48px padding = 1392px, 12 items with 8px gaps (11 × 8 = 88px) = 1304px / 12 ≈ 108px, rounded to 96px for comfortable spacing */
+    COMPACT_IDENTITY: 96,
   },
   /** Card heights in pixels - matches actual card component dimensions */
   HEIGHT: {
@@ -765,6 +767,8 @@ export const CARD_GRID = {
     SKILL_EXCHANGE: 144,
     /** HomeIdentityCard/HomeEGOCard: h-28 (112px) + gap-1 (4px) + icons (20px) = ~136px */
     HOME_CARD: 136,
+    /** CompactIdentityRow: square portrait (96px) + gap (4px) + skill row (28px) = 128px */
+    COMPACT_IDENTITY: 128,
   },
   /** Default gap between cards in pixels (gap-4 = 16px) */
   DEFAULT_GAP: 16,
