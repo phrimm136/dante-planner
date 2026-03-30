@@ -36,13 +36,28 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
 
     # Check if output is redirected to /tmp with date suffix
     has_redirect=false
-    if echo "$command" | grep -qF '> /tmp/' && echo "$command" | grep -qF '$(date +%Y%m%d-%H%M%S)'; then
-        has_redirect=true
+    if echo "$command" | grep -qF '> /tmp/' && echo "$command" | grep -qF '$EPOCHSECONDS'; then
+        # Extract the part before > /tmp/ and check if it ends with a pipe
+        before_redirect=$(echo "$command" | sed 's|> /tmp/.*||')
+        if echo "$before_redirect" | grep -qE '\|\s*(grep|head|tail|awk|sed|wc)'; then
+            has_redirect=false
+        else
+            has_redirect=true
+        fi
     fi
 
-    # Check if a recent output file already exists (within last 10 minutes)
-    if [[ -n "$prefix" ]]; then
-        recent_file=$(find /tmp -name "${prefix}-*.txt" -mmin -10 -print 2>/dev/null | sort | tail -1)
+    # Skip "already exists" check if command deletes old files first or only reads results
+    if echo "$command" | grep -qE 'rm -f /tmp/'; then
+        # Command cleans up before re-running — allow it
+        :
+    elif echo "$command" | grep -qE '(xargs|grep|tail|head|cat)\s.*/tmp/'; then
+        # Command only reads/processes existing output — allow it
+        exit 0
+    fi
+
+    # Check if a recent output file already exists (within last 1 minute)
+    if [[ -n "$prefix" ]] && ! echo "$command" | grep -qE 'rm -f /tmp/'; then
+        recent_file=$(find /tmp -name "${prefix}-*.txt" -mmin -1 -print 2>/dev/null | sort | tail -1)
     fi
 
     # Block re-run if recent output exists — read it instead
@@ -72,14 +87,15 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
         echo "Command: $command" >&2
         echo "" >&2
         echo "Redirect pattern:" >&2
-        echo "  yarn test run > /tmp/fe-test-\$(date +%Y%m%d-%H%M%S).txt 2>&1; echo \"EXIT: \$?\"" >&2
-        echo "  yarn typecheck > /tmp/fe-typecheck-\$(date +%Y%m%d-%H%M%S).txt 2>&1; echo \"EXIT: \$?\"" >&2
-        echo "  yarn build > /tmp/fe-build-\$(date +%Y%m%d-%H%M%S).txt 2>&1; echo \"EXIT: \$?\"" >&2
+        echo '  yarn vitest run > /tmp/fe-test-$EPOCHSECONDS.txt 2>&1' >&2
+        echo '  yarn tsc --noEmit > /tmp/fe-typecheck-$EPOCHSECONDS.txt 2>&1' >&2
+        echo '  yarn build > /tmp/fe-build-$EPOCHSECONDS.txt 2>&1' >&2
         echo "" >&2
         echo "Then grep the latest file for errors — do not re-run to see output:" >&2
         echo "  ls /tmp/${prefix:-<prefix>}-*.txt | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
         echo "" >&2
         echo "WHY: Stdout gets truncated. Redirect preserves full output for analysis." >&2
+        echo "Do NOT pipe through grep/tail before redirecting — capture the full output first." >&2
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
         exit 2
     fi
