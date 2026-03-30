@@ -12,6 +12,7 @@ import { BatchConflictDialog } from '@/components/dialogs/BatchConflictDialog'
 
 import type { MDCategory } from '@/lib/constants'
 import type { PlannerSummary } from '@/types/PlannerTypes'
+import type { PlannerSearchFilters } from '@/types/PlannerSearchTypes'
 
 export interface PersonalPlannerListProps {
   /** MD category filter (optional) */
@@ -20,6 +21,8 @@ export interface PersonalPlannerListProps {
   page: number
   /** Search query for title filtering (optional) */
   search?: string
+  /** Content search filters for local filtering (optional) */
+  contentFilters?: PlannerSearchFilters
   /** Callback when page changes */
   onPageChange: (page: number) => void
 }
@@ -40,6 +43,7 @@ export function PersonalPlannerList({
   category,
   page,
   search,
+  contentFilters,
   onPageChange,
 }: PersonalPlannerListProps) {
   const {
@@ -55,6 +59,7 @@ export function PersonalPlannerList({
     category,
     page,
     search: search || undefined,
+    contentFilters,
   })
   // TODO: Add UI indicator when isSyncing is true
   void isSyncing
@@ -81,7 +86,15 @@ export function PersonalPlannerList({
   }, [displayCount, planners.length])
 
   // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search
+  const hasActiveFilters = !!category || !!search || !!(
+    contentFilters &&
+    (contentFilters.title !== null ||
+      contentFilters.keywords.length > 0 ||
+      contentFilters.identityIds.length > 0 ||
+      contentFilters.egoIds.length > 0 ||
+      contentFilters.giftIds.length > 0 ||
+      contentFilters.themePackIds.length > 0)
+  )
 
   // Calculate pagination
   const totalPages = calculatePlannerPages(totalCount)

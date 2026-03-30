@@ -35,6 +35,11 @@ export const gesellschaftQueryKeys = {
     size: number
     category?: MDCategory
     search?: string
+    keyword?: string
+    identity?: string
+    ego?: string
+    gift?: string
+    themePack?: string
   }) => [...gesellschaftQueryKeys.all, 'published', params] as const,
 
   /** Key for recommended planners (best) */
@@ -43,6 +48,11 @@ export const gesellschaftQueryKeys = {
     size: number
     category?: MDCategory
     search?: string
+    keyword?: string
+    identity?: string
+    ego?: string
+    gift?: string
+    themePack?: string
   }) => [...gesellschaftQueryKeys.all, 'recommended', params] as const,
 }
 
@@ -58,6 +68,11 @@ function createPublishedPlannersQueryOptions(params: {
   size: number
   category?: MDCategory
   search?: string
+  keyword?: string
+  identity?: string
+  ego?: string
+  gift?: string
+  themePack?: string
 }) {
   return queryOptions({
     queryKey: gesellschaftQueryKeys.published(params),
@@ -67,6 +82,11 @@ function createPublishedPlannersQueryOptions(params: {
       searchParams.append('size', String(params.size))
       if (params.category) searchParams.append('category', params.category)
       if (params.search) searchParams.append('q', params.search)
+      if (params.keyword) searchParams.append('keyword', params.keyword)
+      if (params.identity) searchParams.append('identity', params.identity)
+      if (params.ego) searchParams.append('ego', params.ego)
+      if (params.gift) searchParams.append('gift', params.gift)
+      if (params.themePack) searchParams.append('themePack', params.themePack)
 
       const data = await ApiClient.get(`/api/planner/md/published?${searchParams.toString()}`)
       const result = PaginatedPlannersSchema.safeParse(data)
@@ -89,6 +109,11 @@ function createRecommendedPlannersQueryOptions(params: {
   size: number
   category?: MDCategory
   search?: string
+  keyword?: string
+  identity?: string
+  ego?: string
+  gift?: string
+  themePack?: string
 }) {
   return queryOptions({
     queryKey: gesellschaftQueryKeys.recommended(params),
@@ -98,6 +123,11 @@ function createRecommendedPlannersQueryOptions(params: {
       searchParams.append('size', String(params.size))
       if (params.category) searchParams.append('category', params.category)
       if (params.search) searchParams.append('q', params.search)
+      if (params.keyword) searchParams.append('keyword', params.keyword)
+      if (params.identity) searchParams.append('identity', params.identity)
+      if (params.ego) searchParams.append('ego', params.ego)
+      if (params.gift) searchParams.append('gift', params.gift)
+      if (params.themePack) searchParams.append('themePack', params.themePack)
 
       const data = await ApiClient.get(`/api/planner/md/recommended?${searchParams.toString()}`)
       const result = PaginatedPlannersSchema.safeParse(data)
@@ -125,6 +155,16 @@ export interface UseMDGesellschaftDataOptions {
   category?: MDCategory
   /** Search query string */
   search?: string
+  /** Comma-separated keyword filter */
+  keyword?: string
+  /** Comma-separated identity ID filter */
+  identity?: string
+  /** Comma-separated EGO ID filter */
+  ego?: string
+  /** Comma-separated gift ID filter */
+  gift?: string
+  /** Comma-separated theme pack ID filter */
+  themePack?: string
 }
 
 // ============================================================================
@@ -152,7 +192,7 @@ export interface UseMDGesellschaftDataOptions {
  * ```
  */
 export function useMDGesellschaftData(options: UseMDGesellschaftDataOptions) {
-  const { mode, page, category, search } = options
+  const { mode, page, category, search, keyword, identity, ego, gift, themePack } = options
 
   if (mode === 'best') {
     return useSuspenseQuery(
@@ -161,6 +201,11 @@ export function useMDGesellschaftData(options: UseMDGesellschaftDataOptions) {
         size: PLANNER_LIST.PAGE_SIZE,
         category,
         search,
+        keyword,
+        identity,
+        ego,
+        gift,
+        themePack,
       })
     )
   }
@@ -171,6 +216,11 @@ export function useMDGesellschaftData(options: UseMDGesellschaftDataOptions) {
       size: PLANNER_LIST.PAGE_SIZE,
       category,
       search,
+      keyword,
+      identity,
+      ego,
+      gift,
+      themePack,
     })
   )
 }

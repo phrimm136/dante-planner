@@ -37,6 +37,16 @@ export interface UseMDGesellschaftFiltersResult {
   mode: MDGesellschaftMode
   /** Search query for title filtering */
   search: string
+  /** Raw comma-separated keyword filter from URL */
+  keyword: string | undefined
+  /** Raw comma-separated identity ID filter from URL */
+  identity: string | undefined
+  /** Raw comma-separated EGO ID filter from URL */
+  ego: string | undefined
+  /** Raw comma-separated gift ID filter from URL */
+  gift: string | undefined
+  /** Raw comma-separated theme pack ID filter from URL */
+  themePack: string | undefined
   /** Update one or more filter values */
   setFilters: (updates: Partial<MDGesellschaftSearchParams>) => void
   /** Reset all filters to defaults */
@@ -88,6 +98,11 @@ export function useMDGesellschaftFilters(): UseMDGesellschaftFiltersResult {
   const page = search?.page ?? DEFAULT_PAGE
   const mode = search?.mode ?? DEFAULT_MODE
   const searchQuery = search?.q ?? ''
+  const keyword = search?.keyword
+  const identity = search?.identity
+  const ego = search?.ego
+  const gift = search?.gift
+  const themePack = search?.themePack
 
   /**
    * Update filter values in URL
@@ -147,6 +162,11 @@ export function useMDGesellschaftFilters(): UseMDGesellschaftFiltersResult {
     page,
     mode,
     search: searchQuery,
+    keyword,
+    identity,
+    ego,
+    gift,
+    themePack,
     setFilters,
     clearFilters,
     resetPage,

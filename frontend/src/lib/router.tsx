@@ -57,6 +57,11 @@ const mdUserSearchSchema = z.object({
   category: z.enum(['5F', '10F', '15F']).optional(),
   page: z.coerce.number().int().min(0).default(mdUserDefaults.page),
   q: z.string().max(200).optional(),
+  keyword: z.string().max(500).optional(),
+  identity: z.string().max(500).optional(),
+  ego: z.string().max(500).optional(),
+  gift: z.string().max(500).optional(),
+  themePack: z.string().max(500).optional(),
 })
 
 const mdGesellschaftDefaults = {
@@ -73,6 +78,11 @@ const mdGesellschaftSearchSchema = z.object({
   page: z.coerce.number().int().min(0).default(mdGesellschaftDefaults.page),
   mode: z.enum(['published', 'best']).default(mdGesellschaftDefaults.mode),
   q: z.string().max(200).optional(),
+  keyword: z.string().max(500).optional(),
+  identity: z.string().max(500).optional(),
+  ego: z.string().max(500).optional(),
+  gift: z.string().max(500).optional(),
+  themePack: z.string().max(500).optional(),
 })
 
 
@@ -490,6 +500,40 @@ const routeTree = rootRoute.addChildren([
 ])
 
 // Create and export router instance
+/**
+ * Custom search serializer that preserves commas in query strings.
+ * Default encodeURIComponent encodes commas to %2C which is ugly for CSV params
+ * like ?identity=10101,10102. Commas are valid in query strings per RFC 3986.
+ */
+function stringifySearchWith(obj: Record<string, unknown>): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined || value === null || value === '') continue
+    params.set(key, String(value))
+  }
+  const str = params.toString()
+  if (!str) return ''
+  // Restore commas that URLSearchParams encoded
+  return '?' + str.replace(/%2C/gi, ',')
+}
+
+// Keys that should be parsed as numbers (pagination)
+const NUMERIC_SEARCH_KEYS = new Set(['page'])
+
+function parseSearchWith(searchStr: string): Record<string, unknown> {
+  const params = new URLSearchParams(searchStr.startsWith('?') ? searchStr.slice(1) : searchStr)
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of params.entries()) {
+    if (NUMERIC_SEARCH_KEYS.has(key)) {
+      const num = Number(value)
+      result[key] = Number.isFinite(num) ? num : value
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
+
 export const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFoundPage,
@@ -500,6 +544,8 @@ export const router = createRouter({
   defaultPendingMs: 0,
   // Minimum time to show pending component (prevents flash on very fast loads)
   defaultPendingMinMs: 200,
+  stringifySearch: stringifySearchWith,
+  parseSearch: parseSearchWith,
 })
 
 // Sync document.title when language changes.

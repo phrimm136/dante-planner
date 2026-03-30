@@ -68,6 +68,16 @@ export interface MDGesellschaftSearchParams {
   mode?: MDGesellschaftMode
   /** Search query for title filtering */
   q?: string
+  /** Comma-separated keyword names */
+  keyword?: string
+  /** Comma-separated identity IDs */
+  identity?: string
+  /** Comma-separated EGO IDs */
+  ego?: string
+  /** Comma-separated gift IDs */
+  gift?: string
+  /** Comma-separated theme pack IDs */
+  themePack?: string
 }
 
 // ============================================================================

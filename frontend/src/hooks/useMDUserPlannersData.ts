@@ -12,7 +12,7 @@
  */
 
 import { useMemo, useEffect, useRef, useState } from 'react'
-import { useSuspenseQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
 
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
@@ -21,7 +21,10 @@ import { useUserSettingsQuery } from './useUserSettings'
 import { useEGOGiftListData } from './useEGOGiftListData'
 import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
 
+import { matchesPlannerFilters } from '@/lib/plannerContentExtractors'
+
 import type { PlannerSummary, SaveablePlanner, MDPlannerContent } from '@/types/PlannerTypes'
+import type { PlannerSearchFilters } from '@/types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '@/components/dialogs/BatchConflictDialog'
 import type { MDCategory } from '@/lib/constants'
 
@@ -43,6 +46,10 @@ export const userPlannersQueryKeys = {
   /** Key for user's planner list (auth state for cache separation on login/logout) */
   list: (isAuthenticated: boolean) =>
     [...userPlannersQueryKeys.all, 'list', { isAuthenticated }] as const,
+
+  /** Key for user's full planner list with content (for content-based filtering) */
+  listFull: (isAuthenticated: boolean) =>
+    [...userPlannersQueryKeys.all, 'listFull', { isAuthenticated }] as const,
 }
 
 // ============================================================================
@@ -56,6 +63,8 @@ export interface UseMDUserPlannersDataOptions {
   page: number
   /** Search query for title filtering (optional) */
   search?: string
+  /** Content search filters for local filtering (optional) */
+  contentFilters?: PlannerSearchFilters
 }
 
 // ============================================================================
@@ -124,7 +133,17 @@ const PAGE_SIZE = 20
 export function useMDUserPlannersData(
   options: UseMDUserPlannersDataOptions
 ): MDUserPlannersResult {
-  const { category, page, search } = options
+  const { category, page, search, contentFilters } = options
+
+  // Whether content-based filters are active (requires full planner data)
+  const hasContentFilters = !!(
+    contentFilters &&
+    (contentFilters.keywords.length > 0 ||
+      contentFilters.identityIds.length > 0 ||
+      contentFilters.egoIds.length > 0 ||
+      contentFilters.giftIds.length > 0 ||
+      contentFilters.themePackIds.length > 0)
+  )
   const saveAdapter = usePlannerSaveAdapter()
   const syncAdapter = usePlannerSyncAdapter()
   const queryClient = useQueryClient()
@@ -155,6 +174,15 @@ export function useMDUserPlannersData(
       staleTime: 30 * 1000,
     })
   )
+
+  // Query: Full planners with content (for content-based filtering)
+  // Only fetched when content filters are active. For 1-5 plans, IndexedDB read is near-instant.
+  const { data: allFullPlanners } = useQuery({
+    queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
+    queryFn: () => saveAdapter.listLocalFull(),
+    staleTime: 30 * 1000,
+    enabled: hasContentFilters,
+  })
 
   // Background sync: Pull missing planners from server
   // Uses syncKey to run once per auth+sync state change
@@ -262,6 +290,10 @@ export function useMDUserPlannersData(
             userPlannersQueryKeys.list(isAuthenticated),
             updatedLocal
           )
+          // Invalidate full planners cache so content filters pick up synced data
+          void queryClient.invalidateQueries({
+            queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
+          })
         }
       } catch (error) {
         console.error('Background sync failed:', error)
@@ -282,7 +314,32 @@ export function useMDUserPlannersData(
   const { paginatedPlanners, totalCount } = useMemo(() => {
     const normalizedSearch = search?.toLowerCase().trim()
 
-    // Client-side filtering by category and search
+    // When content filters are active, filter against full planners using matchesPlannerFilters
+    // then map matched IDs back to summaries for consistent return type
+    if (hasContentFilters) {
+      // While full planners are loading, show empty to avoid flash of unfiltered results
+      if (!allFullPlanners) {
+        return { paginatedPlanners: [], totalCount: 0 }
+      }
+
+      const matchedIds = new Set(
+        allFullPlanners
+          .filter((p) => {
+            if (category && p.config.category !== category) return false
+            return matchesPlannerFilters(p, contentFilters!)
+          })
+          .map((p) => p.metadata.id)
+      )
+
+      const filtered = allPlanners.filter((p) => matchedIds.has(p.id))
+      const startIndex = page * PAGE_SIZE
+      return {
+        paginatedPlanners: filtered.slice(startIndex, startIndex + PAGE_SIZE),
+        totalCount: filtered.length,
+      }
+    }
+
+    // Client-side filtering by category and search (no content filters)
     const filtered = allPlanners.filter((p) => {
       if (category && p.category !== category) return false
       if (normalizedSearch && !p.title.toLowerCase().includes(normalizedSearch)) return false
@@ -295,7 +352,7 @@ export function useMDUserPlannersData(
       paginatedPlanners: filtered.slice(startIndex, startIndex + PAGE_SIZE),
       totalCount: filtered.length,
     }
-  }, [allPlanners, category, search, page])
+  }, [allPlanners, allFullPlanners, category, search, page, hasContentFilters, contentFilters])
 
   /**
    * Validate a local planner's content before syncing to server.
@@ -389,6 +446,9 @@ export function useMDUserPlannersData(
         userPlannersQueryKeys.list(isAuthenticated),
         updatedLocal
       )
+      void queryClient.invalidateQueries({
+        queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
+      })
     } catch (error) {
       const e = error as { code?: string; friendlyError?: { key: string; params?: Record<string, string> } }
       if (e.code === 'validationFailed' && e.friendlyError) {

@@ -30,7 +30,9 @@ import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
 import org.danteplanner.backend.util.ClientIpResolver;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.specification.PlannerSpecifications;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * REST controller for planner management operations.
@@ -62,6 +64,9 @@ public class PlannerController {
 
     @Value("${planner.rr.available-versions}")
     private String rrAvailableVersions;
+
+    @Value("${planner.recommended-threshold}")
+    private int recommendedThreshold;
 
     public PlannerController(
             PlannerService plannerService,
@@ -277,11 +282,25 @@ public class PlannerController {
             @RequestParam(defaultValue = "recent") String sort,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String identity,
+            @RequestParam(required = false) String ego,
+            @RequestParam(required = false) String gift,
+            @RequestParam(required = false) String themePack,
             @AuthenticationPrincipal Long userId) {
 
         Pageable pageable = createPageable(page, size, sort);
         log.debug("Fetching published planners, category: {}, search: {}, userId: {}, pagination: {}",
                 category, q, userId, pageable);
+
+        if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
+            Page<PublicPlannerResponse> planners = plannerService.searchPlanners(
+                    PlannerSpecifications.isPublished(), pageable, category, userId, q,
+                    parseCsv(keyword), parseCsv(identity), parseCsv(ego),
+                    parseCsv(gift), parseCsv(themePack));
+            return ResponseEntity.ok(planners);
+        }
+
         Page<PublicPlannerResponse> planners = plannerService.getPublishedPlanners(pageable, category, userId, q);
         return ResponseEntity.ok(planners);
     }
@@ -308,11 +327,25 @@ public class PlannerController {
             @RequestParam(defaultValue = "votes") String sort,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String identity,
+            @RequestParam(required = false) String ego,
+            @RequestParam(required = false) String gift,
+            @RequestParam(required = false) String themePack,
             @AuthenticationPrincipal Long userId) {
 
         Pageable pageable = createPageable(page, size, sort);
         log.debug("Fetching recommended planners, category: {}, search: {}, userId: {}, pagination: {}",
                 category, q, userId, pageable);
+
+        if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
+            Page<PublicPlannerResponse> planners = plannerService.searchPlanners(
+                    PlannerSpecifications.isRecommended(recommendedThreshold), pageable, category, userId, q,
+                    parseCsv(keyword), parseCsv(identity), parseCsv(ego),
+                    parseCsv(gift), parseCsv(themePack));
+            return ResponseEntity.ok(planners);
+        }
+
         Page<PublicPlannerResponse> planners = plannerService.getRecommendedPlanners(pageable, category, userId, q);
         return ResponseEntity.ok(planners);
     }
@@ -333,6 +366,20 @@ public class PlannerController {
             default -> "createdAt"; // "recent" or any other value
         };
         return PageRequest.of(page, Math.min(size, 100), Sort.by(direction, property));
+    }
+
+    private boolean hasStructuredFilters(String keyword, String identity, String ego, String gift, String themePack) {
+        return keyword != null || identity != null || ego != null || gift != null || themePack != null;
+    }
+
+    private List<String> parseCsv(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 
     /**

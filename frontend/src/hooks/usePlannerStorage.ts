@@ -96,6 +96,8 @@ export interface PlannerStorageOperations {
   loadPlanner: (id: string, options?: StorageOperationOptions) => Promise<SaveablePlanner | null>
   /** List all planners as summaries, sorted by lastModifiedAt (newest first) */
   listPlanners: () => Promise<PlannerSummary[]>
+  /** List all planners with full content, sorted by lastModifiedAt (newest first) */
+  listFullPlanners: () => Promise<SaveablePlanner[]>
   /** Delete a planner by ID */
   deletePlanner: (id: string) => Promise<void>
   /** Clear corrupted planner data by ID */
@@ -333,6 +335,65 @@ export function usePlannerStorage(): PlannerStorageOperations {
   }
 
   /**
+   * List all planners with full content, sorted by lastModifiedAt (newest first).
+   * Used for content-based filtering (personal plan search).
+   * Same cursor logic as listPlanners but returns full SaveablePlanner objects.
+   */
+  const listFullPlanners = async (): Promise<SaveablePlanner[]> => {
+    if (!isClient) return []
+
+    const deviceId = await getOrCreateDeviceId()
+
+    const db = await openDB()
+    if (!db) return []
+
+    const transaction = db.transaction('planner', 'readonly')
+    const store = transaction.objectStore('planner')
+
+    return new Promise((resolve) => {
+      const request = store.openCursor()
+      const results: SaveablePlanner[] = []
+
+      request.onsuccess = (event) => {
+        const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result
+        if (cursor) {
+          const key = cursor.key as string
+          const parsed = parseStorageKey(key)
+
+          if (
+            parsed?.deviceId === deviceId &&
+            parsed.prefix === PLANNER_STORAGE_KEYS.PLANNER &&
+            parsed.type === PLANNER_STORAGE_KEYS.MD
+          ) {
+            try {
+              const data = JSON.parse(cursor.value)
+              const validation = SaveablePlannerSchema.safeParse(data)
+
+              if (validation.success) {
+                results.push(validation.data as unknown as SaveablePlanner)
+              }
+            } catch {
+              // Skip invalid entries
+            }
+          }
+          cursor.continue()
+        } else {
+          results.sort(
+            (a, b) =>
+              new Date(b.metadata.lastModifiedAt).getTime() - new Date(a.metadata.lastModifiedAt).getTime()
+          )
+          resolve(results)
+        }
+      }
+
+      request.onerror = () => {
+        console.error('Failed to list full planners')
+        resolve([])
+      }
+    })
+  }
+
+  /**
    * Delete a planner by ID
    */
   const deletePlanner = async (id: string): Promise<void> => {
@@ -355,6 +416,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
       savePlanner,
       loadPlanner,
       listPlanners,
+      listFullPlanners,
       deletePlanner,
       clearCorruptedPlanner,
     }

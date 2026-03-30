@@ -104,6 +104,9 @@ class PlannerServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private PlannerIndexService plannerIndexService;
+
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -142,6 +145,7 @@ class PlannerServiceTest {
                 commentRepository,
                 notificationSseService,
                 notificationService,
+                plannerIndexService,
                 maxPlannersPerUser,
                 recommendedThreshold,
                 currentSchemaVersion
