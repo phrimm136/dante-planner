@@ -51,10 +51,13 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
 
       - name: FE Build
+        timeout-minutes: 10
         working-directory: ./frontend
         run: |
           yarn install --frozen-lockfile
           yarn build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
 
   notify-failure:
     needs: [test-frontend, build-frontend]
