@@ -160,6 +160,17 @@ git add <specific-files>
 
 Never `git add -A` or `git add .` — these risk pulling in unrelated work, secrets, or temp files.
 
+### Include related docs
+
+Before staging, check `git status` for untracked or modified files under `docs/` that were created as part of the same task — specs, plans, findings, research, reviews. These belong in the same commit as the code they document.
+
+```
+git status docs/
+git add docs/<relevant-subdirectory>/
+```
+
+If a doc predates the current task and was only coincidentally modified, leave it out — same rule as code.
+
 **One logical change per commit.** If your work spans multiple concerns (e.g., a bug fix + a refactor you noticed along the way), split them into separate commits on separate branches.
 
 Use a HEREDOC so the message formats correctly:
