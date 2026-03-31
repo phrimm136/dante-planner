@@ -320,7 +320,6 @@ const egoGiftDetailRoute = createRoute({
   }),
 })
 
-<<<<<<< HEAD
 // Theme Pack route - path: "/theme-pack" (Theme Pack browser page)
 const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -386,8 +385,9 @@ const abEventDetailRoute = createRoute({
   },
   head: ({ loaderData }) => ({
     meta: [{ title: `${loaderData?.title ?? 'Abnormality Event'} | Dante's Planner` }],
-||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
-=======
+  }),
+})
+
 // Keyword route - path: "/keyword" (Keyword browser page)
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -411,7 +411,6 @@ const keywordDetailRoute = createRoute({
   },
   head: ({ loaderData }) => ({
     meta: [{ title: `${loaderData?.name ?? 'Keyword'} | Dante's Planner` }],
->>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
   }),
 })
 
@@ -473,16 +472,12 @@ const routeTree = rootRoute.addChildren([
   egoDetailRoute,
   egoGiftRoute,
   egoGiftDetailRoute,
-<<<<<<< HEAD
   themePackRoute,
   themePackDetailRoute,
   abEventRoute,
   abEventDetailRoute,
-||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
-=======
   keywordRoute,
   keywordDetailRoute,
->>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
   plannerRoute,
   plannerMDRoute,
   plannerMDGesellschaftRoute,

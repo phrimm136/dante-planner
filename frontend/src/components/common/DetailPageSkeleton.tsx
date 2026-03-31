@@ -117,7 +117,6 @@ const DETAIL_PRESETS = {
     ),
   },
   /**
-<<<<<<< HEAD
    * Theme Pack detail: Card image + difficulty/floor metadata (left)
    * Specific gifts + events sections (right)
    */
@@ -216,8 +215,10 @@ const DETAIL_PRESETS = {
         <Skeleton className="h-32 rounded-lg" />
         <Skeleton className="h-40 rounded-lg" />
         <Skeleton className="h-32 rounded-lg" />
-||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
-=======
+      </div>
+    ),
+  },
+  /**
    * Keyword detail: Icon + name + backlinks panel (left)
    * Description panel (right)
    */
@@ -258,7 +259,6 @@ const DETAIL_PRESETS = {
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-2/3" />
         </div>
->>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
       </div>
     ),
   },

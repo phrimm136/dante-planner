@@ -24,13 +24,9 @@ const NAV_STRUCTURE = {
       { key: 'identity', path: '/identity', labelKey: 'header.nav.identity' },
       { key: 'ego', path: '/ego', labelKey: 'header.nav.ego' },
       { key: 'egoGift', path: '/ego-gift', labelKey: 'header.nav.egoGift' },
-<<<<<<< HEAD
       { key: 'themePack', path: '/theme-pack', labelKey: 'header.nav.themePack' },
       { key: 'abEvent', path: '/ab-event', labelKey: 'header.nav.abEvent' },
-||||||| parent of a56904e0 (feat: add keyword browser with list and detail pages)
-=======
       { key: 'keyword', path: '/keyword', labelKey: 'header.nav.keyword' },
->>>>>>> a56904e0 (feat: add keyword browser with list and detail pages)
     ],
   },
   planner: {
