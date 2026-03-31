@@ -66,24 +66,25 @@ function KeywordRelatedIdentities({ ids }: { ids: string[] }) {
       {ids.length === 0 ? (
         <div className="text-sm text-muted-foreground/60">-</div>
       ) : (
-        <ul className="space-y-1">
-          {ids.map((entityId) => {
+        <div className="text-sm">
+          {ids.map((entityId, idx) => {
             const sinnerKey = getSinnerFromId(entityId)
             const sinnerName = t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
             const identityName = (nameList[entityId] ?? entityId).replace(/\n/g, ' ')
             return (
-              <li key={entityId}>
+              <span key={entityId}>
+                {idx > 0 && ', '}
                 <Link
                   to="/identity/$id"
                   params={{ id: entityId }}
-                  className="text-sm text-foreground underline hover:text-primary transition-colors"
+                  className="hover:underline text-foreground"
                 >
                   {identityName} - {sinnerName}
                 </Link>
-              </li>
+              </span>
             )
           })}
-        </ul>
+        </div>
       )}
     </div>
   )
@@ -105,24 +106,25 @@ function KeywordRelatedEgos({ ids }: { ids: string[] }) {
       {ids.length === 0 ? (
         <div className="text-sm text-muted-foreground/60">-</div>
       ) : (
-        <ul className="space-y-1">
-          {ids.map((entityId) => {
+        <div className="text-sm">
+          {ids.map((entityId, idx) => {
             const sinnerKey = getSinnerFromId(entityId)
             const sinnerName = t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
             const egoName = (nameList[entityId] ?? entityId).replace(/\n/g, ' ')
             return (
-              <li key={entityId}>
+              <span key={entityId}>
+                {idx > 0 && ', '}
                 <Link
                   to="/ego/$id"
                   params={{ id: entityId }}
-                  className="text-sm text-foreground underline hover:text-primary transition-colors"
+                  className="hover:underline text-foreground"
                 >
                   {egoName} - {sinnerName}
                 </Link>
-              </li>
+              </span>
             )
           })}
-        </ul>
+        </div>
       )}
     </div>
   )
@@ -144,19 +146,20 @@ function KeywordRelatedEgoGifts({ ids }: { ids: string[] }) {
       {ids.length === 0 ? (
         <div className="text-sm text-muted-foreground/60">-</div>
       ) : (
-        <ul className="space-y-1">
-          {ids.map((entityId) => (
-            <li key={entityId}>
+        <div className="text-sm">
+          {ids.map((entityId, idx) => (
+            <span key={entityId}>
+              {idx > 0 && ', '}
               <Link
                 to="/ego-gift/$id"
                 params={{ id: entityId }}
-                className="text-sm text-foreground underline hover:text-primary transition-colors"
+                className="hover:underline text-foreground"
               >
                 {nameList[entityId] ?? entityId}
               </Link>
-            </li>
+            </span>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )

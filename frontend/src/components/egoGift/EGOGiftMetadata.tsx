@@ -11,6 +11,7 @@
  */
 
 import { Suspense } from 'react'
+import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import CostDisplay from '@/components/egoGift/CostDisplay'
@@ -56,19 +57,33 @@ function MetadataRow({
 }
 
 /**
- * Theme pack names display - suspends for i18n
+ * Theme pack names display - suspends for i18n.
+ * Renders comma-separated clickable links to theme pack detail pages.
  */
 function ThemePackDisplay({ themePack }: { themePack: string[] }) {
   const { t } = useTranslation(['database', 'common'])
   const themePackI18n = useThemePackI18n()
 
-  // Resolve theme pack names, show "General" if empty
-  const display =
-    themePack.length > 0
-      ? themePack.map((id) => themePackI18n[id]?.name ?? id).join(', ')
-      : t('egoGift.general', 'General')
+  if (themePack.length === 0) {
+    return <>{t('egoGift.general', 'General')}</>
+  }
 
-  return <>{display}</>
+  return (
+    <>
+      {themePack.map((id, idx) => (
+        <span key={id}>
+          {idx > 0 && ', '}
+          <Link
+            to="/theme-pack/$id"
+            params={{ id }}
+            className="hover:underline text-foreground"
+          >
+            {themePackI18n[id]?.name ?? id}
+          </Link>
+        </span>
+      ))}
+    </>
+  )
 }
 
 export function EGOGiftMetadata({
@@ -103,7 +118,7 @@ export function EGOGiftMetadata({
       </MetadataRow>
 
       {/* Theme Pack row - label visible, content suspends */}
-      <MetadataRow label={t('egoGift.themePack', 'Theme Pack')}>
+      <MetadataRow label={t('egoGift.relatedThemePack', 'Related Theme Pack')}>
         <Suspense fallback={<Skeleton className="h-4 w-24" />}>
           <ThemePackDisplay themePack={themePack} />
         </Suspense>

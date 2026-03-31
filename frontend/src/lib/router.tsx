@@ -325,11 +325,6 @@ const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack',
   component: lazyRouteComponent(() => import('@/routes/ThemePackPage')),
-  pendingComponent: () => (
-    <div className="container mx-auto p-8">
-      <ListPageSkeleton preset="themePack" />
-    </div>
-  ),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.themePack') }],
   }),
@@ -340,7 +335,6 @@ const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
   component: lazyRouteComponent(() => import('@/routes/ThemePackDetailPage')),
-  pendingComponent: () => <DetailPageSkeleton preset="themePack" />,
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
     const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
@@ -356,11 +350,6 @@ const abEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event',
   component: lazyRouteComponent(() => import('@/routes/AbEventPage')),
-  pendingComponent: () => (
-    <div className="container mx-auto p-8">
-      <ListPageSkeleton preset="abEvent" />
-    </div>
-  ),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.abEvent') }],
   }),
@@ -371,7 +360,6 @@ const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
   component: lazyRouteComponent(() => import('@/routes/AbEventDetailPage')),
-  pendingComponent: () => <DetailPageSkeleton preset="abEvent" />,
   loader: async ({ params }) => {
     try {
       const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)

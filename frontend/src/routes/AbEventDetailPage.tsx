@@ -96,16 +96,18 @@ function RelatedThemePacks({ packIds, label }: { packIds: string[]; label: strin
       <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
         {label}
       </div>
-      <div className="flex flex-col gap-1">
-        {packIds.map((id) => (
-          <Link
-            key={id}
-            to="/theme-pack/$id"
-            params={{ id }}
-            className="text-sm hover:underline text-foreground"
-          >
-            {themePackI18n[id]?.name ?? id}
-          </Link>
+      <div className="text-sm">
+        {packIds.map((id, idx) => (
+          <span key={id}>
+            {idx > 0 && ', '}
+            <Link
+              to="/theme-pack/$id"
+              params={{ id }}
+              className="hover:underline text-foreground"
+            >
+              {themePackI18n[id]?.name ?? id}
+            </Link>
+          </span>
         ))}
       </div>
     </div>
@@ -155,16 +157,19 @@ function AbEventDetailContent() {
         </div>
       )}
 
-      {specEntry && specEntry.relatedEgoGifts.length > 0 && (
-        <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-          <RelatedEgoGifts giftIds={specEntry.relatedEgoGifts} label={t('abEvent.relatedEgoGifts', 'Related EGO Gifts')} />
-        </Suspense>
-      )}
-
-      {specEntry && specEntry.relatedThemePacks.length > 0 && (
-        <Suspense fallback={<Skeleton className="h-12 w-full" />}>
-          <RelatedThemePacks packIds={specEntry.relatedThemePacks} label={t('abEvent.relatedThemePacks', 'Related Theme Packs')} />
-        </Suspense>
+      {specEntry && (specEntry.relatedEgoGifts.length > 0 || specEntry.relatedThemePacks.length > 0) && (
+        <div className="border rounded p-4 space-y-4">
+          {specEntry.relatedEgoGifts.length > 0 && (
+            <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+              <RelatedEgoGifts giftIds={specEntry.relatedEgoGifts} label={t('abEvent.relatedEgoGifts', 'Related EGO Gifts')} />
+            </Suspense>
+          )}
+          {specEntry.relatedThemePacks.length > 0 && (
+            <Suspense fallback={<Skeleton className="h-12 w-full" />}>
+              <RelatedThemePacks packIds={specEntry.relatedThemePacks} label={t('abEvent.relatedThemePacks', 'Related Theme Packs')} />
+            </Suspense>
+          )}
+        </div>
       )}
     </div>
   )

@@ -52,7 +52,7 @@ function DifficultyBadges({ conditions }: { conditions: ThemePackDetail['excepti
       {DUNGEON_DISPLAY.filter((d) => dungeonIdxSet.has(d.idx)).map((d) => (
         <span
           key={d.idx}
-          className="px-2 py-0.5 text-xs font-semibold rounded border border-border"
+          className="px-2 py-0.5 text-xs font-semibold rounded"
           style={{ color: DIFFICULTY_COLORS[d.label] }}
         >
           {d.label}
@@ -101,7 +101,7 @@ function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exceptionCo
             {group.floors.map((floor) => (
               <span
                 key={floor}
-                className="px-2 py-0.5 text-xs rounded border border-border"
+                className="px-2 py-0.5 text-xs rounded"
               >
                 {THEME_PACK_FLOOR_LABELS[floor as ThemePackFloor]}
               </span>
