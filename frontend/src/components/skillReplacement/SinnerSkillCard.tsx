@@ -1,5 +1,5 @@
 import { getIdentityProfileImagePath, getIdentityImageFallbackPath, getAttackTypeIconPath } from '@/lib/assetPaths'
-import { OFFENSIVE_SKILL_SLOTS } from '@/lib/constants'
+import { OFFENSIVE_SKILL_SLOTS, DEFAULT_SKILL_EA } from '@/lib/constants'
 import type { SkillEAState, UptieTier, SkillInfo } from '@/types/DeckTypes'
 import { cn } from '@/lib/utils'
 import colorCode from '@static/data/colorCode.json'
@@ -31,6 +31,10 @@ export function SinnerSkillCard({
   onClick,
   readOnly = false,
 }: SinnerSkillCardProps) {
+  const isDefaultEA = OFFENSIVE_SKILL_SLOTS.every((slot) => skillEA[slot] === DEFAULT_SKILL_EA[slot])
+  const matchesCurrentEA = currentEA !== undefined && OFFENSIVE_SKILL_SLOTS.every((slot) => skillEA[slot] === currentEA[slot])
+  const isDimmed = isDefaultEA || matchesCurrentEA
+
   return (
     <button
       onClick={readOnly ? undefined : onClick}
@@ -39,7 +43,8 @@ export function SinnerSkillCard({
         'flex flex-col items-center gap-1 p-2 rounded-lg',
         'bg-card',
         'transition-all',
-        !readOnly && 'selectable'
+        !readOnly && 'selectable',
+        isDimmed && 'opacity-60'
       )}
     >
       {/* Identity image */}
