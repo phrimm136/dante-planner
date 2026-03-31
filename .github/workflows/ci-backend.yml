@@ -2,7 +2,7 @@ name: CI Backend
 
 on:
   push:
-    branches: [main]
+    branches: [main, dependency]
     paths:
       - '.github/workflows/ci-backend.yml'
   pull_request:

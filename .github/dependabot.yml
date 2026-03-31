@@ -5,6 +5,7 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
+    target-branch: "dependency"
     open-pull-requests-limit: 10
     # Labels help your "Dependabot Helper" workflow identify these PRs
     labels:
@@ -20,6 +21,7 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
+    target-branch: "dependency"
     open-pull-requests-limit: 5
     labels:
       - "backend"
