@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { UnitKeywordDropdown } from '../UnitKeywordDropdown'
 import { ASSOCIATIONS } from '@/lib/constants'
 
-// Mock i18n - return key as translation, preserve initReactI18next for i18n setup
+// Mock i18n
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
@@ -26,7 +26,7 @@ vi.mock('@/hooks/useFilterI18nData', () => ({
   }),
 }))
 
-// Sorted by label (Label_KEY) to match component's localeCompare sort
+// Sorted by label to match SearchableMultiSelect's localeCompare sort
 const sorted = [...ASSOCIATIONS].sort((a, b) =>
   `Label_${a}`.localeCompare(`Label_${b}`)
 )
@@ -37,10 +37,11 @@ describe('UnitKeywordDropdown', () => {
     onSelectionChange: vi.fn(),
   }
 
-  it('renders trigger button with label', () => {
+  it('renders combobox trigger with label text', () => {
     render(<UnitKeywordDropdown {...defaultProps} />)
 
-    expect(screen.getByRole('button', { name: /unit keywords/i })).toBeInTheDocument()
+    expect(screen.getByRole('combobox')).toBeInTheDocument()
+    expect(screen.getByText('Unit Keywords')).toBeInTheDocument()
   })
 
   it('shows selected count when unit keywords are active', () => {
@@ -62,14 +63,14 @@ describe('UnitKeywordDropdown', () => {
     expect(screen.queryByText(/\(\d+\)/)).toBeNull()
   })
 
-  it('displays items when dropdown opens', async () => {
+  it('displays options when opened', async () => {
     const user = userEvent.setup()
     render(<UnitKeywordDropdown {...defaultProps} />)
 
-    await user.click(screen.getByRole('button', { name: /unit keywords/i }))
+    await user.click(screen.getByRole('combobox'))
 
-    expect(screen.getByText(`Label_${sorted[0]}`)).toBeInTheDocument()
-    expect(screen.getByText(`Label_${sorted[1]}`)).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) })).toBeInTheDocument()
   })
 
   it('calls onSelectionChange with added keyword on click', async () => {
@@ -83,8 +84,8 @@ describe('UnitKeywordDropdown', () => {
       />
     )
 
-    await user.click(screen.getByRole('button', { name: /unit keywords/i }))
-    await user.click(screen.getByText(`Label_${sorted[0]}`))
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }))
 
     expect(onSelectionChange).toHaveBeenCalledWith(new Set([sorted[0]]))
   })
@@ -101,36 +102,30 @@ describe('UnitKeywordDropdown', () => {
       />
     )
 
-    await user.click(screen.getByRole('button', { name: /unit keywords/i }))
-    await user.click(screen.getByText(`Label_${firstAssoc}`))
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${firstAssoc}`) }))
 
     expect(onSelectionChange).toHaveBeenCalledWith(new Set())
   })
 
-  it('keeps dropdown open after selecting an item', async () => {
+  it('keeps popover open after selecting an item', async () => {
     const user = userEvent.setup()
     render(<UnitKeywordDropdown {...defaultProps} />)
 
-    await user.click(screen.getByRole('button', { name: /unit keywords/i }))
-    await user.click(screen.getByText(`Label_${sorted[0]}`))
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }))
 
-    // Dropdown should remain open - other items still visible
-    expect(screen.getByText(`Label_${sorted[1]}`)).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) })).toBeInTheDocument()
   })
 
-  it('progressively renders all association items', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-    render(<UnitKeywordDropdown {...defaultProps} />)
+  it('displays element counts when provided', async () => {
+    const user = userEvent.setup()
+    const counts = { [sorted[0]]: 15 }
 
-    await user.click(screen.getByRole('button', { name: /unit keywords/i }))
+    render(<UnitKeywordDropdown {...defaultProps} counts={counts} />)
 
-    // Wait for progressive rendering to complete
-    await vi.waitFor(() => {
-      const menuItems = screen.getAllByRole('menuitemcheckbox')
-      expect(menuItems.length).toBe(ASSOCIATIONS.length)
-    })
+    await user.click(screen.getByRole('combobox'))
 
-    vi.useRealTimers()
+    expect(screen.getByText('15')).toBeInTheDocument()
   })
 })

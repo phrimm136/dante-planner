@@ -59,6 +59,7 @@ const mockEGOs: EGOListItem[] = [
     name: 'Test EGO 1',
     egoType: 'ZAYIN',
     skillKeywordList: ['Burst', 'Combustion'],
+    battleKeywordList: ['Burst', 'Combustion'],
     attributeTypes: ['CRIMSON', 'AZURE'],
     atkTypes: ['SLASH', 'PENETRATE'],
     updateDate: 20240101,
@@ -69,6 +70,7 @@ const mockEGOs: EGOListItem[] = [
     name: 'Test EGO 2',
     egoType: 'TETH',
     skillKeywordList: ['Charge'],
+    battleKeywordList: ['Charge'],
     attributeTypes: ['AZURE'],
     atkTypes: ['PENETRATE'],
     updateDate: 20240102,
@@ -79,6 +81,7 @@ const mockEGOs: EGOListItem[] = [
     name: 'Test EGO 3',
     egoType: 'HE',
     skillKeywordList: ['Burst'],
+    battleKeywordList: ['Burst'],
     attributeTypes: ['VIOLET'],
     atkTypes: ['HIT'],
     updateDate: 20240103,
@@ -121,6 +124,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -141,6 +145,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set(['NonExistentSinner'])}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -161,6 +166,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set(['ZAYIN'])}
@@ -185,6 +191,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['AZURE'])}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -207,6 +214,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -229,6 +237,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['PENETRATE'])}
           selectedEGOTypes={new Set()}
@@ -251,6 +260,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
           selectedEGOTypes={new Set()}
@@ -273,6 +283,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -295,6 +306,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set(['SLASH'])}
           selectedEGOTypes={new Set()}
@@ -326,6 +338,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -355,6 +368,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -384,6 +398,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set()}
@@ -414,6 +429,7 @@ describe('EGOList', () => {
           egos={mockEGOs}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedEGOTypes={new Set(['ZAYIN'])}

@@ -39,6 +39,7 @@ const EGOGiftRecipeSchema = z.union([MixedRecipeSchema, StandardRecipeSchema])
 export const EGOGiftSpecSchema = z.object({
   tag: tagArraySchema,
   keyword: z.string().nullable(),
+  battleKeywordList: z.array(z.string()),
   attributeType: z.string(),
   themePack: z.array(z.string()),
   maxEnhancement: z.union([z.literal(0), z.literal(1), z.literal(2)]),
@@ -51,6 +52,7 @@ export const EGOGiftSpecSchema = z.object({
 export const EGOGiftDataSchema = z.object({
   tag: tagArraySchema,
   keyword: z.string().nullable(),
+  battleKeywordList: z.array(z.string()).optional(),
   attributeType: z.string(),
   price: z.number(),
   themePack: z.array(z.string()),

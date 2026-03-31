@@ -60,7 +60,17 @@ export type StartBuffDataList = Record<string, StartBuffData>
 export type StartBuffI18n = Record<string, string>
 
 /**
- * Battle keyword entry from battleKeywords.json
+ * Battle keyword i18n entry from battleKeywords.json (name + desc only)
+ * Used internally by schemas and data hooks for validating the trimmed i18n file.
+ */
+export interface BattleKeywordI18nEntry {
+  name: string
+  desc: string
+}
+
+/**
+ * Merged battle keyword entry combining i18n (name, desc) with spec (iconId, buffType)
+ * This is the consumer-facing type returned by useBattleKeywords.
  */
 export interface BattleKeywordEntry {
   name: string

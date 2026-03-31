@@ -28,11 +28,13 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Button } from '@/components/ui/button'
 
 import { useMDGesellschaftFilters } from '@/hooks/useMDGesellschaftFilters'
+import { usePlannerSearchFilters } from '@/hooks/usePlannerSearchFilters'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
+import { PlannerFilterPane } from '@/components/plannerList/PlannerFilterPane'
 import { PublishedPlannerList } from '@/components/plannerList/PublishedPlannerList'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
@@ -56,8 +58,15 @@ function GesellschaftPageContent() {
     page,
     mode,
     search,
+    keyword,
+    identity,
+    ego,
+    gift,
+    themePack,
     setFilters,
   } = useMDGesellschaftFilters()
+
+  const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
   return (
     <div className="container mx-auto p-8">
@@ -88,11 +97,18 @@ function GesellschaftPageContent() {
       </div>
 
       {/* Category Filter Pills */}
-      <div className="mb-6">
+      <div className="mb-4">
         <PlannerListFilterPills
           selectedCategory={category}
           onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
         />
+      </div>
+
+      {/* Content Search Filter Pane */}
+      <div className="mb-4">
+        <Suspense fallback={null}>
+          <PlannerFilterPane filters={searchFilters} onFiltersChange={setSearchFilters} />
+        </Suspense>
       </div>
 
       {/* Content Grid with ErrorBoundary + Suspense for data loading */}
@@ -103,6 +119,11 @@ function GesellschaftPageContent() {
             category={category}
             page={page}
             search={search}
+            keyword={keyword}
+            identity={identity}
+            ego={ego}
+            gift={gift}
+            themePack={themePack}
             isAuthenticated={isAuthenticated}
             onPageChange={(p) => setFilters({ page: p })}
           />

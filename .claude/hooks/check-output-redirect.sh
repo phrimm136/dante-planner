@@ -34,7 +34,8 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
         prefix="be-build"
     fi
 
-    # Check if output is redirected to /tmp with date suffix
+    # Check if output is redirected to /tmp with epoch suffix
+    # Also reject piped redirects (e.g., yarn test | grep FAIL > /tmp/...) — full output must be captured
     has_redirect=false
     if echo "$command" | grep -qF '> /tmp/' && echo "$command" | grep -qF '$EPOCHSECONDS'; then
         # Extract the part before > /tmp/ and check if it ends with a pipe

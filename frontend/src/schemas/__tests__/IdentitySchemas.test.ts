@@ -25,6 +25,7 @@ describe('IdentitySpecListItemSchema with defenseType', () => {
   const baseSpec = {
     updateDate: 20260101,
     skillKeywordList: ['keyword1'],
+    battleKeywordList: ['keyword1'],
     season: 1,
     rank: 3,
     unitKeywordList: ['unit1'],

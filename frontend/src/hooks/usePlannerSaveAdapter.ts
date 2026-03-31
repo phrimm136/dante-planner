@@ -16,6 +16,8 @@ export interface PlannerSaveAdapterOperations {
   deleteFromLocal: (id: string) => Promise<void>
   /** List all local planners */
   listLocal: () => Promise<PlannerSummary[]>
+  /** List all local planners with full content (for content-based filtering) */
+  listLocalFull: () => Promise<SaveablePlanner[]>
   /** Get or create device ID */
   getOrCreateDeviceId: () => Promise<string>
 }
@@ -66,6 +68,10 @@ export function usePlannerSaveAdapter(): PlannerSaveAdapterOperations {
 
     listLocal: async (): Promise<PlannerSummary[]> => {
       return storage.listPlanners()
+    },
+
+    listLocalFull: async (): Promise<SaveablePlanner[]> => {
+      return storage.listFullPlanners()
     },
 
     getOrCreateDeviceId: async (): Promise<string> => {

@@ -21,6 +21,7 @@ import { EGOGiftCardLink } from './EGOGiftCardLink'
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]
   selectedKeywords: Set<string>
+  selectedBattleKeywords: Set<string>
   selectedDifficulties: Set<EGOGiftDifficulty>
   selectedTiers: Set<EGOGiftTier>
   selectedThemePacks: Set<string>
@@ -46,6 +47,7 @@ interface EGOGiftListProps {
 export function EGOGiftList({
   gifts,
   selectedKeywords,
+  selectedBattleKeywords,
   selectedDifficulties,
   selectedTiers,
   selectedThemePacks,
@@ -92,6 +94,15 @@ export function EGOGiftList({
       // Apply all filters using extracted utility functions
       // Each filter: OR logic within, AND logic across filter types
       if (!matchesKeywordFilter(gift.keyword, selectedKeywords)) continue
+
+      // Battle keyword filter - OR logic (gift must have ANY selected battle keyword)
+      if (selectedBattleKeywords.size > 0) {
+        const hasAnyBattleKeyword = (gift.battleKeywordList ?? []).some((keyword) =>
+          selectedBattleKeywords.has(keyword)
+        )
+        if (!hasAnyBattleKeyword) continue
+      }
+
       if (!matchesDifficultyFilter(gift, selectedDifficulties)) continue
       if (!matchesTierFilter(gift.tag, selectedTiers)) continue
       if (!matchesThemePackFilter(gift.themePack, selectedThemePacks)) continue
@@ -124,6 +135,7 @@ export function EGOGiftList({
   }, [
     sortedGifts,
     selectedKeywords,
+    selectedBattleKeywords,
     selectedDifficulties,
     selectedTiers,
     selectedThemePacks,

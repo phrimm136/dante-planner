@@ -24,11 +24,13 @@ import { PlusCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 import { useMDUserFilters } from '@/hooks/useMDUserFilters'
+import { usePlannerSearchFilters } from '@/hooks/usePlannerSearchFilters'
 
 import { MDPlannerNavButtons } from '@/components/plannerList/MDPlannerNavButtons'
 import { PersonalPlannerList } from '@/components/plannerList/PersonalPlannerList'
 import { MDPlannerToolbar } from '@/components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from '@/components/plannerList/PlannerListFilterPills'
+import { PlannerFilterPane } from '@/components/plannerList/PlannerFilterPane'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 
@@ -49,6 +51,8 @@ function PlannerMDPageContent() {
     search,
     setFilters,
   } = useMDUserFilters()
+
+  const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
   return (
     <div className="container mx-auto p-8">
@@ -76,11 +80,18 @@ function PlannerMDPageContent() {
       </div>
 
       {/* Category Filter Pills */}
-      <div className="mb-6">
+      <div className="mb-4">
         <PlannerListFilterPills
           selectedCategory={category}
           onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
         />
+      </div>
+
+      {/* Content Search Filter Pane */}
+      <div className="mb-4">
+        <Suspense fallback={null}>
+          <PlannerFilterPane filters={searchFilters} onFiltersChange={setSearchFilters} />
+        </Suspense>
       </div>
 
       {/* Content Grid with inner Suspense for data loading */}
@@ -89,6 +100,7 @@ function PlannerMDPageContent() {
           category={category}
           page={page}
           search={search}
+          contentFilters={searchFilters}
           onPageChange={(p) => setFilters({ page: p })}
         />
       </Suspense>

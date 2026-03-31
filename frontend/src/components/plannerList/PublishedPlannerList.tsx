@@ -21,6 +21,16 @@ export interface PublishedPlannerListProps {
   page: number
   /** Search query for title filtering (optional) */
   search?: string
+  /** Comma-separated keyword filter */
+  keyword?: string
+  /** Comma-separated identity ID filter */
+  identity?: string
+  /** Comma-separated EGO ID filter */
+  ego?: string
+  /** Comma-separated gift ID filter */
+  gift?: string
+  /** Comma-separated theme pack ID filter */
+  themePack?: string
   /** Whether user is authenticated (for bookmark display) */
   isAuthenticated: boolean
   /** Callback when page changes */
@@ -44,6 +54,11 @@ export function PublishedPlannerList({
   category,
   page,
   search,
+  keyword,
+  identity,
+  ego,
+  gift,
+  themePack,
   isAuthenticated,
   onPageChange,
 }: PublishedPlannerListProps) {
@@ -52,6 +67,11 @@ export function PublishedPlannerList({
     page,
     category,
     search: search || undefined,
+    keyword,
+    identity,
+    ego,
+    gift,
+    themePack,
   })
 
   const currentSearch = useSearch({ strict: false })
@@ -75,7 +95,7 @@ export function PublishedPlannerList({
   }, [displayCount, data.content.length])
 
   // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search || mode === 'best'
+  const hasActiveFilters = !!category || !!search || mode === 'best' || !!keyword || !!identity || !!ego || !!gift || !!themePack
 
   // Handle empty state
   if (data.content.length === 0) {

@@ -18,6 +18,7 @@
 | **Async/SSE** | SSE, Exceptions | `.claude/rules/backend/async/` |
 | **Config** | Properties, Logging | `.claude/rules/backend/config/` |
 | **Tests** | Unit, Controller, Repository Tests | `.claude/rules/backend/testing/` |
+| **Migrations** | Flyway, Seed, Strict Mode | `.claude/rules/backend/migrations.md` |
 
 **How it works:** Edit a controller → relevant rules load automatically (no manual skill loading)
 
@@ -149,6 +150,7 @@ Before using ANY hardcoded value (URLs, numbers, strings):
 - Migration files: `V{version}__{description}.sql` (e.g., `V001__create_user_table.sql`)
 - Migrations are immutable - NEVER edit existing migrations
 - Rollback strategy: Create new migration to revert changes
+- **Smoke-test seed:** When writing migrations that alter columns or modify data, update `backend/src/test/resources/db/seed/migration-test-seed.sql` — see `.claude/rules/backend/migrations.md` for details
 
 **N+1 Query Prevention:**
 - Use `@EntityGraph` or `JOIN FETCH` for eager loading collections

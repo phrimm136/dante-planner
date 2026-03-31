@@ -10,7 +10,8 @@ import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactEGOGiftKeywordFilter } from '@/components/egoGift/CompactEGOGiftKeywordFilter'
 import { CompactDifficultyFilter } from '@/components/egoGift/CompactDifficultyFilter'
 import { CompactTierFilter } from '@/components/egoGift/CompactTierFilter'
-import { ThemePackDropdown } from '@/components/common/ThemePackDropdown'
+import { ThemePackDropdown } from '@/components/filter/ThemePackDropdown'
+import { BattleKeywordDropdown } from '@/components/filter/BattleKeywordDropdown'
 import { CompactAttributeTypeFilter } from '@/components/filter/CompactAttributeTypeFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
@@ -24,6 +25,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 function EGOGiftCardGrid({
   spec,
   selectedKeywords,
+  selectedBattleKeywords,
   selectedDifficulties,
   selectedTiers,
   selectedThemePacks,
@@ -32,6 +34,7 @@ function EGOGiftCardGrid({
 }: {
   spec: z.infer<typeof EGOGiftSpecListSchema>
   selectedKeywords: Set<string>
+  selectedBattleKeywords: Set<string>
   selectedDifficulties: Set<EGOGiftDifficulty>
   selectedTiers: Set<EGOGiftTier>
   selectedThemePacks: Set<string>
@@ -46,6 +49,7 @@ function EGOGiftCardGrid({
         id,
         tag: specData.tag as EGOGiftListItem['tag'],
         keyword: specData.keyword,
+        battleKeywordList: specData.battleKeywordList,
         attributeType: specData.attributeType,
         themePack: specData.themePack,
         maxEnhancement: specData.maxEnhancement,
@@ -59,6 +63,7 @@ function EGOGiftCardGrid({
     <EGOGiftList
       gifts={gifts}
       selectedKeywords={selectedKeywords}
+      selectedBattleKeywords={selectedBattleKeywords}
       selectedDifficulties={selectedDifficulties}
       selectedTiers={selectedTiers}
       selectedThemePacks={selectedThemePacks}
@@ -78,6 +83,7 @@ function EGOGiftPageShell() {
 
   // Filter states
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [selectedBattleKeywords, setSelectedBattleKeywords] = useState<Set<string>>(new Set())
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<EGOGiftDifficulty>>(new Set())
   const [selectedTiers, setSelectedTiers] = useState<Set<EGOGiftTier>>(new Set())
   const [selectedThemePacks, setSelectedThemePacks] = useState<Set<string>>(new Set())
@@ -87,6 +93,7 @@ function EGOGiftPageShell() {
   // Reset all filters
   const handleResetAll = () => {
     setSelectedKeywords(new Set())
+    setSelectedBattleKeywords(new Set())
     setSelectedDifficulties(new Set())
     setSelectedTiers(new Set())
     setSelectedThemePacks(new Set())
@@ -98,6 +105,7 @@ function EGOGiftPageShell() {
   // Calculate active filter count for mobile badge
   const activeFilterCount =
     selectedKeywords.size +
+    selectedBattleKeywords.size +
     selectedDifficulties.size +
     selectedTiers.size +
     selectedThemePacks.size +
@@ -162,6 +170,19 @@ function EGOGiftPageShell() {
           />
         </Suspense>
       </FilterSection>
+
+      <FilterSection
+        title={t('filters.additionalKeyword', 'Additional Keywords')}
+        activeCount={selectedBattleKeywords.size}
+      >
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <BattleKeywordDropdown
+            entityType="egoGift"
+            selectedBattleKeywords={selectedBattleKeywords}
+            onSelectionChange={setSelectedBattleKeywords}
+          />
+        </Suspense>
+      </FilterSection>
     </>
   )
 
@@ -194,6 +215,7 @@ function EGOGiftPageShell() {
       <EGOGiftCardGrid
         spec={spec}
         selectedKeywords={selectedKeywords}
+        selectedBattleKeywords={selectedBattleKeywords}
         selectedDifficulties={selectedDifficulties}
         selectedTiers={selectedTiers}
         selectedThemePacks={selectedThemePacks}

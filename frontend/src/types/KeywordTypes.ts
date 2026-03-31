@@ -20,6 +20,29 @@ export type KeywordType = 'battleKeyword' | 'skillTag' | 'unknown'
 export type BuffType = 'Positive' | 'Negative' | 'Neutral' | string
 
 /**
+ * Spec entry for a battle keyword from battleKeywordSpecList.json
+ * Contains language-independent metadata and entity backlinks
+ */
+export interface BattleKeywordSpecEntry {
+  iconId: string | null
+  buffType: string
+  identities: string[]
+  egos: string[]
+  egoGifts: string[]
+}
+
+/**
+ * Merged list item for keyword browser display
+ * Combines spec data with optional i18n name
+ */
+export interface BattleKeywordListItem {
+  id: string
+  iconId: string | null
+  buffType: string
+  name?: string
+}
+
+/**
  * Resolved keyword with all data needed for rendering
  */
 export interface ResolvedKeyword {

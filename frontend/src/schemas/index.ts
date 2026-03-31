@@ -56,6 +56,13 @@ export {
   BattleKeywordsSchema,
 } from './BattleKeywordsSchemas'
 
+// Keyword spec schemas
+export {
+  BattleKeywordSpecEntrySchema,
+  BattleKeywordSpecListSchema,
+  BattleKeywordNameListSchema,
+} from './KeywordSchemas'
+
 // Skill Tag schemas
 export { SkillTagSchema } from './SkillTagSchemas'
 
@@ -68,6 +75,7 @@ export {
   ThemePackConfigSchema,
   ThemePackEntrySchema,
   ThemePackListSchema,
+  ThemePackDetailSchema,
   ThemePackI18nEntrySchema,
   ThemePackI18nSchema,
 } from './ThemePackSchemas'
@@ -107,3 +115,12 @@ export {
   PanicInfoEntrySchema,
   PanicInfoSchema,
 } from './PanicInfoSchemas'
+
+// AbEvent schemas
+export {
+  AbEventSpecListEntrySchema,
+  AbEventSpecListSchema,
+  AbEventDataSchema,
+  AbEventI18nSchema,
+  AbEventSharedSchema,
+} from './AbEventSchemas'

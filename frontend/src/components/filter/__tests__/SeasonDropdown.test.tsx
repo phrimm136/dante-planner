@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { SeasonDropdown } from '../SeasonDropdown'
 import { SEASONS, type Season } from '@/lib/constants'
 
-// Mock i18n - return key as translation, preserve initReactI18next for i18n setup
+// Mock i18n
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
@@ -32,10 +32,11 @@ describe('SeasonDropdown', () => {
     onSelectionChange: vi.fn(),
   }
 
-  it('renders trigger button with label', () => {
+  it('renders combobox trigger with label text', () => {
     render(<SeasonDropdown {...defaultProps} />)
 
-    expect(screen.getByRole('button', { name: /season/i })).toBeInTheDocument()
+    expect(screen.getByRole('combobox')).toBeInTheDocument()
+    expect(screen.getByText('Season')).toBeInTheDocument()
   })
 
   it('shows selected count when seasons are active', () => {
@@ -55,15 +56,28 @@ describe('SeasonDropdown', () => {
     expect(screen.queryByText(/\(\d+\)/)).toBeNull()
   })
 
-  it('displays season items when opened', async () => {
+  it('displays season options when opened', async () => {
     const user = userEvent.setup()
     render(<SeasonDropdown {...defaultProps} />)
 
-    await user.click(screen.getByRole('button', { name: /season/i }))
+    await user.click(screen.getByRole('combobox'))
 
-    // Radix renders in portal - all seasons should be visible
     for (const season of SEASONS) {
-      expect(screen.getByText(`Season ${season}`)).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: new RegExp(`Season ${season}`) })).toBeInTheDocument()
+    }
+  })
+
+  it('preserves season ID order (not alphabetical)', async () => {
+    const user = userEvent.setup()
+    render(<SeasonDropdown {...defaultProps} />)
+
+    await user.click(screen.getByRole('combobox'))
+
+    const options = screen.getAllByRole('option')
+    const labels = options.map((opt) => opt.textContent)
+
+    for (let i = 0; i < SEASONS.length; i++) {
+      expect(labels[i]).toContain(`Season ${SEASONS[i]}`)
     }
   })
 
@@ -78,8 +92,8 @@ describe('SeasonDropdown', () => {
       />
     )
 
-    await user.click(screen.getByRole('button', { name: /season/i }))
-    await user.click(screen.getByText(`Season ${SEASONS[0]}`))
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[0]}`) }))
 
     expect(onSelectionChange).toHaveBeenCalledWith(new Set([SEASONS[0]]))
   })
@@ -96,20 +110,30 @@ describe('SeasonDropdown', () => {
       />
     )
 
-    await user.click(screen.getByRole('button', { name: /season/i }))
-    await user.click(screen.getByText(`Season ${firstSeason}`))
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Season ${firstSeason}`) }))
 
     expect(onSelectionChange).toHaveBeenCalledWith(new Set())
   })
 
-  it('keeps dropdown open after selecting an item', async () => {
+  it('keeps popover open after selecting an item', async () => {
     const user = userEvent.setup()
     render(<SeasonDropdown {...defaultProps} />)
 
-    await user.click(screen.getByRole('button', { name: /season/i }))
-    await user.click(screen.getByText(`Season ${SEASONS[0]}`))
+    await user.click(screen.getByRole('combobox'))
+    await user.click(screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[0]}`) }))
 
-    // Dropdown should still be open - other items still visible
-    expect(screen.getByText(`Season ${SEASONS[1]}`)).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[1]}`) })).toBeInTheDocument()
+  })
+
+  it('displays element counts when provided', async () => {
+    const user = userEvent.setup()
+    const counts = { [String(SEASONS[0])]: 42 }
+
+    render(<SeasonDropdown {...defaultProps} counts={counts} />)
+
+    await user.click(screen.getByRole('combobox'))
+
+    expect(screen.getByText('42')).toBeInTheDocument()
   })
 })

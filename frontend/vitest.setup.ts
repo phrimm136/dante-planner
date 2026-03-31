@@ -41,5 +41,8 @@ globalThis.ResizeObserver = class ResizeObserver {
   unobserve() {}
 } as any
 
+// Mock scrollIntoView (used by cmdk Command component)
+Element.prototype.scrollIntoView = vi.fn()
+
 // Mock fetch for testing (simple implementation)
 globalThis.fetch = vi.fn() as any

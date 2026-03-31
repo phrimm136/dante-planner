@@ -24,6 +24,9 @@ const NAV_STRUCTURE = {
       { key: 'identity', path: '/identity', labelKey: 'header.nav.identity' },
       { key: 'ego', path: '/ego', labelKey: 'header.nav.ego' },
       { key: 'egoGift', path: '/ego-gift', labelKey: 'header.nav.egoGift' },
+      { key: 'themePack', path: '/theme-pack', labelKey: 'header.nav.themePack' },
+      { key: 'abEvent', path: '/ab-event', labelKey: 'header.nav.abEvent' },
+      { key: 'keyword', path: '/keyword', labelKey: 'header.nav.keyword' },
     ],
   },
   planner: {

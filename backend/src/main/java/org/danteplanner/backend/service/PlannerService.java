@@ -4,6 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.dto.planner.*;
+import org.danteplanner.backend.entity.ContentEntityType;
+import org.danteplanner.backend.specification.PlannerSpecifications;
+import org.springframework.data.jpa.domain.Specification;
 import org.danteplanner.backend.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
@@ -67,6 +70,7 @@ public class PlannerService {
     private final PlannerCommentRepository commentRepository;
     private final SseService notificationSseService;
     private final NotificationService notificationService;
+    private final PlannerIndexService plannerIndexService;
 
     private final int maxPlannersPerUser;
     private final int recommendedThreshold;
@@ -87,6 +91,7 @@ public class PlannerService {
             PlannerCommentRepository commentRepository,
             SseService notificationSseService,
             NotificationService notificationService,
+            PlannerIndexService plannerIndexService,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.recommended-threshold}") int recommendedThreshold,
             @Value("${planner.schema-version}") int currentSchemaVersion) {
@@ -104,6 +109,7 @@ public class PlannerService {
         this.commentRepository = commentRepository;
         this.notificationSseService = notificationSseService;
         this.notificationService = notificationService;
+        this.plannerIndexService = plannerIndexService;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.recommendedThreshold = recommendedThreshold;
         this.currentSchemaVersion = currentSchemaVersion;
@@ -307,6 +313,10 @@ public class PlannerService {
             Planner saved = plannerRepository.save(planner);
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
 
+            if (Boolean.TRUE.equals(saved.getPublished())) {
+                plannerIndexService.reindex(saved.getId(), saved.getContent());
+            }
+
             sseService.notifyPlannerUpdate(userId, deviceId, id, "updated");
             return UpsertResult.updated(PlannerResponse.fromEntity(saved));
         }
@@ -429,6 +439,10 @@ public class PlannerService {
         Planner saved = plannerRepository.save(planner);
         log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, saved.getSyncVersion());
 
+        if (Boolean.TRUE.equals(saved.getPublished())) {
+            plannerIndexService.reindex(saved.getId(), saved.getContent());
+        }
+
         // Notify other devices via SSE
         sseService.notifyPlannerUpdate(userId, deviceId, id, "updated");
 
@@ -453,6 +467,7 @@ public class PlannerService {
         // Auto-unpublish if published (subscriptions cascade at DB level)
         if (planner.getPublished()) {
             planner.setPublished(false);
+            plannerIndexService.deleteIndex(id);
             log.info("Auto-unpublished planner {} before deletion", id);
         }
 
@@ -610,6 +625,12 @@ public class PlannerService {
         boolean wasPublished = planner.getPublished();
         planner.setPublished(!wasPublished);
         Planner saved = plannerRepository.save(planner);
+
+        if (!wasPublished) {
+            plannerIndexService.reindex(plannerId, saved.getContent());
+        } else {
+            plannerIndexService.deleteIndex(plannerId);
+        }
 
         // Auto-subscribe owner when publishing (not unpublishing)
         if (!wasPublished && saved.getPublished()) {
@@ -861,6 +882,74 @@ public class PlannerService {
             }
         }
 
+        return mapPlannersWithUserContext(planners, userId);
+    }
+
+    /**
+     * Search published or recommended planners using composable Specifications.
+     * Applies AND semantics across all provided filters.
+     *
+     * @param baseSpec    base visibility spec (isPublished or isRecommended)
+     * @param pageable    pagination information
+     * @param category    optional category filter
+     * @param userId      optional user ID for vote/bookmark context
+     * @param q           optional title search term
+     * @param keywords    optional keyword names (AND-composed)
+     * @param identityIds optional identity IDs (AND-composed via EXISTS)
+     * @param egoIds      optional EGO IDs (AND-composed via EXISTS)
+     * @param giftIds     optional EGO gift IDs (AND-composed via EXISTS)
+     * @param themePackIds optional theme pack IDs (AND-composed via EXISTS)
+     * @return page of public planner responses with user context
+     */
+    @Transactional(readOnly = true)
+    public Page<PublicPlannerResponse> searchPlanners(
+            Specification<Planner> baseSpec,
+            Pageable pageable,
+            String category,
+            Long userId,
+            String q,
+            List<String> keywords,
+            List<String> identityIds,
+            List<String> egoIds,
+            List<String> giftIds,
+            List<String> themePackIds) {
+
+        Specification<Planner> spec = Specification.where(baseSpec)
+                .and(PlannerSpecifications.fetchUser());
+
+        if (category != null) {
+            spec = spec.and(PlannerSpecifications.hasCategory(category));
+        }
+        if (q != null && !q.isBlank()) {
+            spec = spec.and(PlannerSpecifications.titleContains(q.trim()));
+        }
+        if (keywords != null) {
+            for (String keyword : keywords) {
+                spec = spec.and(PlannerSpecifications.hasKeyword(keyword));
+            }
+        }
+        if (identityIds != null) {
+            for (String id : identityIds) {
+                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.IDENTITY, id));
+            }
+        }
+        if (egoIds != null) {
+            for (String id : egoIds) {
+                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.EGO, id));
+            }
+        }
+        if (giftIds != null) {
+            for (String id : giftIds) {
+                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.EGO_GIFT, id));
+            }
+        }
+        if (themePackIds != null) {
+            for (String id : themePackIds) {
+                spec = spec.and(PlannerSpecifications.hasContentEntity(ContentEntityType.THEME_PACK, id));
+            }
+        }
+
+        Page<Planner> planners = plannerRepository.findAll(spec, pageable);
         return mapPlannersWithUserContext(planners, userId);
     }
 

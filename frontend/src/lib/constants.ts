@@ -22,6 +22,16 @@ export const SEARCH_DEBOUNCE_DELAY = 100
 export const BANNER_CAROUSEL_INTERVAL = 5000
 
 /**
+ * Discord server invite URL
+ */
+export const DISCORD_INVITE_URL = 'https://discord.gg/DMGGsP2EWS'
+
+/**
+ * Discord brand color (Blurple)
+ */
+export const DISCORD_BLURPLE = '#5865F2'
+
+/**
  * Filter sidebar width in pixels (desktop view)
  * Used by FilterSidebar component for consistent layout
  */
@@ -232,7 +242,9 @@ export const SYNERGY_KEYWORDS = [
   'BlackCloud',
   'RetaliationBook',
   'HeishouSynergy',
+  'BlessingOfIndexPrescriptAlly',
   'Bullet',
+  'Inspire',
 ] as const
 
 /**
@@ -710,6 +722,8 @@ export const CARD_GRID = {
     EGO: 160,
     /** EGOGiftCard: 96px (from minmax in selection list) */
     EGO_GIFT: 96,
+    /** KeywordCard: 96px (matches EGO gift card width) */
+    KEYWORD: 96,
     /** PlannerCard: 280px for adequate text/metadata space */
     PLANNER: 280,
     /** StartBuffCard: w-68 (272px) */
@@ -724,6 +738,10 @@ export const CARD_GRID = {
     SKILL_IMAGE: 128,
     /** SkillExchangePane: skill (128px) + gap (8px) + arrow (64px) + gap (8px) + skill (128px) + padding (16px) */
     SKILL_EXCHANGE: 352,
+    /** AbEventCard: ~3 columns on 1024px desktop (title above wide landscape image) */
+    AB_EVENT: 308,
+    /** CompactIdentityRow: ~1440px dialog - 48px padding = 1392px, 12 items with 8px gaps (11 × 8 = 88px) = 1304px / 12 ≈ 108px, rounded to 96px for comfortable spacing */
+    COMPACT_IDENTITY: 96,
   },
   /** Card heights in pixels - matches actual card component dimensions */
   HEIGHT: {
@@ -733,6 +751,8 @@ export const CARD_GRID = {
     EGO: 196,
     /** EGOGiftCard: 96px */
     EGO_GIFT: 96,
+    /** KeywordCard: 120px (icon + name label) */
+    KEYWORD: 120,
     /** PlannerCard: varies by content */
     PLANNER: 0,
     /** DeckBuilderCard: identity (224px) + skill row (28px) + ego row (28px) + gaps */
@@ -741,6 +761,8 @@ export const CARD_GRID = {
     START_BUFF: 320,
     /** ThemePackCard: h-104 (416px) */
     THEME_PACK: 416,
+    /** AbEventCard: title (~30px) + 3:2 image (~205px) = ~235px */
+    AB_EVENT: 235,
     /** Keyword icon container: h-16 (64px) */
     KEYWORD_ICON: 64,
     /** SinnerSkillCard: p-2 (8px) + image (96px) + gap-1 (4px) + skill row (28px) + p-2 (8px) = 144px */
@@ -751,6 +773,8 @@ export const CARD_GRID = {
     SKILL_EXCHANGE: 144,
     /** HomeIdentityCard/HomeEGOCard: h-28 (112px) + gap-1 (4px) + icons (20px) = ~136px */
     HOME_CARD: 136,
+    /** CompactIdentityRow: square portrait (96px) + gap (4px) + skill row (28px) = 128px */
+    COMPACT_IDENTITY: 128,
   },
   /** Default gap between cards in pixels (gap-4 = 16px) */
   DEFAULT_GAP: 16,
@@ -769,6 +793,16 @@ export const CARD_GRID = {
  * Card width type for ResponsiveCardGrid
  */
 export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
+
+/**
+ * Buff type categories for battle keywords
+ */
+export const BUFF_TYPES = ['Positive', 'Negative', 'Neutral'] as const
+
+/**
+ * Buff type derived from BUFF_TYPES array
+ */
+export type BuffType = typeof BUFF_TYPES[number]
 
 /**
  * Start Buff card dimensions keyed by MD version.
@@ -913,6 +947,45 @@ export const EGO_GIFT_ATTRIBUTE_TYPES = AFFINITIES
  * EGO Gift attribute type (same as Affinity)
  */
 export type EGOGiftAttributeType = Affinity
+
+/**
+ * Theme pack dungeon difficulties for filtering
+ * Maps to dungeonIdx values in exceptionConditions
+ */
+export const THEME_PACK_DIFFICULTIES = [
+  DUNGEON_IDX.NORMAL,
+  DUNGEON_IDX.HARD,
+  DUNGEON_IDX.PARALLEL,
+  DUNGEON_IDX.EXTREME,
+] as const
+
+/**
+ * Display labels for theme pack dungeon difficulties
+ */
+export const THEME_PACK_DIFFICULTY_LABELS: Record<DungeonIdx, string> = {
+  [DUNGEON_IDX.NORMAL]: 'Normal',
+  [DUNGEON_IDX.HARD]: 'Hard',
+  [DUNGEON_IDX.PARALLEL]: 'Infinity',
+  [DUNGEON_IDX.EXTREME]: 'Extreme',
+}
+
+/**
+ * Theme pack selectable floors for filtering (0-indexed in data, display as 1F-5F)
+ */
+export const THEME_PACK_FLOORS = [0, 1, 2, 3, 4] as const
+
+export type ThemePackFloor = (typeof THEME_PACK_FLOORS)[number]
+
+/**
+ * Display labels for theme pack floors
+ */
+export const THEME_PACK_FLOOR_LABELS: Record<ThemePackFloor, string> = {
+  0: '1F',
+  1: '2F',
+  2: '3F',
+  3: '4F',
+  4: '5F',
+}
 
 /**
  * EGO Gift enhancement base costs by tier

@@ -1,0 +1,14 @@
+{
+  "totalPhases": 8,
+  "currentPhase": 8,
+  "phases": [
+    { "name": "BE Schema Foundation", "status": "done" },
+    { "name": "BE Index Population Service", "status": "done" },
+    { "name": "BE Search API with Specifications", "status": "done" },
+    { "name": "FE Foundation — Types, URL Params, Extraction", "status": "done" },
+    { "name": "FE i18n Keyword Data", "status": "done" },
+    { "name": "FE Filter Pane Component", "status": "done" },
+    { "name": "FE Published Plan Search Integration", "status": "done" },
+    { "name": "FE Personal Plan Search Integration", "status": "done" }
+  ]
+}

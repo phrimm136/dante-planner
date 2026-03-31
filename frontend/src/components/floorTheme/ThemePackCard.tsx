@@ -10,12 +10,8 @@ import { cn, getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/u
 import { isExtremePack } from '@/types/ThemePackTypes'
 import type { ThemePackEntry } from '@/types/ThemePackTypes'
 import { AutoSizeText } from '@/components/common/AutoSizeText'
+import { stripColorTags } from '@/components/common/ColoredText'
 import { parseColorTags } from '@/components/startBuff/formatBuffDescription'
-
-/** Strip color tags from text for measurement */
-function stripColorTags(text: string): string {
-  return text.replace(/<color=#[0-9a-fA-F]{6}>([^<]*)<\/color>/g, '$1')
-}
 
 interface ThemePackCardProps {
   packId: string

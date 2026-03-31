@@ -18,7 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Project constants
-import { CARD_GRID, DEFAULT_SKILL_EA } from '@/lib/constants'
+import { DEFAULT_SKILL_EA } from '@/lib/constants'
 
 // Project utilities (@/lib)
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '@/lib/deckCode'
@@ -38,21 +38,23 @@ import { useIdentityListSpec } from '@/hooks/useIdentityListData'
 import { useEGOListSpec } from '@/hooks/useEGOListData'
 
 // Project components (@/components)
-import { DeckBuilderContent } from '@/components/deckBuilder/DeckBuilderContent'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { DeckBuilderSummary } from '@/components/deckBuilder/DeckBuilderSummary'
+import { DeckBuilderPane } from '@/components/deckBuilder/DeckBuilderPane'
 
-/** Sinner mini-card dimensions (matches SinnerGrid portrait) */
-const SINNER_CARD = { width: 64, height: 80 }
+/** Sinner card dimensions for skeleton (matches SinnerGrid) */
+const SINNER_CARD = { width: 96, height: 128 }
 
 /**
- * Page-level skeleton for deck builder initial load
- * Matches actual DeckBuilderContent structure for seamless transition
+ * Page-level skeleton matching DeckBuilderSummary structure
  */
 function DeckBuilderPageSkeleton() {
   return (
     <div className="container mx-auto p-8">
-      <div className="space-y-6">
-        {/* Sinner grid placeholder */}
+      <div className="space-y-4">
+        {/* Section header */}
+        <Skeleton className="h-8 w-40" />
+
+        {/* SinnerGrid placeholder */}
         <div className="border-2 border-border rounded-lg p-4">
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -67,45 +69,15 @@ function DeckBuilderPageSkeleton() {
               />
             ))}
           </div>
-        </div>
 
-        {/* Status and action bar placeholder */}
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-          <Skeleton className="h-10 w-48" />
-          <div className="flex gap-2">
-            <Skeleton className="h-10 w-24" />
-            <Skeleton className="h-10 w-24" />
-            <Skeleton className="h-10 w-24" />
-          </div>
-        </div>
-
-        {/* Card grid section placeholder */}
-        <div className="border-2 border-border rounded-lg p-6 space-y-4">
-          {/* Toggle and filters */}
-          <div className="flex gap-4 justify-between flex-wrap">
-            <div className="flex gap-4 items-center flex-wrap">
-              <Skeleton className="h-10 w-32" />
-              <Skeleton className="h-10 w-32" />
-              <Skeleton className="h-10 w-32" />
-            </div>
-            <Skeleton className="h-10 w-48" />
-          </div>
-
-          {/* Card grid with actual card dimensions */}
-          <div className="bg-muted border border-border rounded-md p-6 max-h-[600px]">
-            <div className="pt-4">
-              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY}>
-                {Array.from({ length: 10 }).map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    style={{
-                      width: CARD_GRID.WIDTH.IDENTITY,
-                      height: 224,
-                      clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)',
-                    }}
-                  />
-                ))}
-              </ResponsiveCardGrid>
+          {/* Status + Action bar placeholder */}
+          <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+            <Skeleton className="h-20 w-full lg:w-96" />
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-24" />
             </div>
           </div>
         </div>
@@ -115,7 +87,8 @@ function DeckBuilderPageSkeleton() {
 }
 
 /**
- * Inner content component with store access and handlers
+ * Inner content component with store access and handlers.
+ * Uses Summary + Pane pattern: SinnerGrid viewer + Edit dialog.
  */
 function DeckBuilderPageContent() {
   const { t } = useTranslation(['planner', 'common'])
@@ -124,17 +97,21 @@ function DeckBuilderPageContent() {
   // Store actions
   const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
   const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
   const updateSinnerSkillEA = usePlannerEditorStore((s) => s.updateSinnerSkillEA)
 
   // Spec data for deck code decoding
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
 
+  // Pane (edit dialog) state
+  const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
+
   // Import dialog state
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
 
-  // Handlers (pattern from PlannerMDEditorContent)
+  // Handlers
   const handleExport = async () => {
     try {
       const { equipment, deploymentOrder } = storeApi.getState()
@@ -187,9 +164,32 @@ function DeckBuilderPageContent() {
     setDeploymentOrder([])
   }
 
+  const handleToggleDeploy = (sinnerIndex: number) => {
+    const currentIndex = deploymentOrder.indexOf(sinnerIndex)
+    if (currentIndex >= 0) {
+      const newOrder = [...deploymentOrder]
+      newOrder.splice(currentIndex, 1)
+      setDeploymentOrder(newOrder)
+    } else {
+      setDeploymentOrder([...deploymentOrder, sinnerIndex])
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
-      <DeckBuilderContent
+      {/* Summary view: SinnerGrid + StatusViewer + ActionBar */}
+      <DeckBuilderSummary
+        onToggleDeploy={handleToggleDeploy}
+        onImport={handleImport}
+        onExport={handleExport}
+        onResetOrder={handleResetOrder}
+        onEditDeck={() => setIsDeckPaneOpen(true)}
+      />
+
+      {/* Edit dialog: full card selection grid */}
+      <DeckBuilderPane
+        open={isDeckPaneOpen}
+        onOpenChange={setIsDeckPaneOpen}
         onImport={handleImport}
         onExport={handleExport}
         onResetOrder={handleResetOrder}
@@ -237,12 +237,10 @@ function DeckBuilderPageContent() {
 
 /**
  * Standalone deck builder page with ephemeral state.
+ * Uses Summary + Pane pattern: rich SinnerGrid viewer with Edit dialog.
  * State resets on navigation (fresh store per mount).
- * Uses useId() as key to guarantee store recreation on remount.
  */
 export default function DeckBuilderPage() {
-  // useId generates unique ID per component instance
-  // Forces fresh store when component remounts after navigation
   const storeKey = useId()
 
   return (
