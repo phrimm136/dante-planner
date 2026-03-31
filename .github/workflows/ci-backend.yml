@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - '.github/workflows/ci-backend.yml'
 
 jobs:
   test-backend:
@@ -29,6 +30,80 @@ jobs:
       - name: BE Test
         working-directory: ./backend
         run: ./gradlew test -q
+  test-migration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpass
+          MYSQL_DATABASE: danteplanner
+          MYSQL_USER: danteplanner
+          MYSQL_PASSWORD: danteplanner
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect new migrations
+        id: detect
+        run: |
+          MIGRATION_DIR="backend/src/main/resources/db/migration"
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/main...HEAD -- "${MIGRATION_DIR}/*.sql" || true)
+
+          if [ -z "$NEW_FILES" ]; then
+            echo "No new migration files detected"
+            echo "has_new=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "New migrations:"
+          echo "$NEW_FILES"
+          echo "has_new=true" >> "$GITHUB_OUTPUT"
+
+          # Write new migration filenames (basename) to a file for later filtering
+          echo "$NEW_FILES" | xargs -I{} basename {} > /tmp/new_migrations.txt
+
+      - name: Run existing migrations
+        if: steps.detect.outputs.has_new == 'true'
+        run: |
+          MIGRATION_DIR="backend/src/main/resources/db/migration"
+
+          for f in $(ls "${MIGRATION_DIR}"/*.sql | sort); do
+            BASENAME=$(basename "$f")
+            # Skip if this file is a new migration from the PR
+            if grep -qxF "$BASENAME" /tmp/new_migrations.txt 2>/dev/null; then
+              echo "SKIP (new): $BASENAME"
+              continue
+            fi
+            echo "RUN: $BASENAME"
+            mysql -h 127.0.0.1 -u danteplanner -pdanteplanner danteplanner < "$f"
+          done
+
+      - name: Run seed data
+        if: steps.detect.outputs.has_new == 'true'
+        run: |
+          mysql -h 127.0.0.1 -u danteplanner -pdanteplanner danteplanner \
+            < backend/src/test/resources/db/seed/test-migration-seed.sql
+
+      - name: Run new migrations
+        if: steps.detect.outputs.has_new == 'true'
+        run: |
+          MIGRATION_DIR="backend/src/main/resources/db/migration"
+
+          while IFS= read -r BASENAME; do
+            echo "TEST: $BASENAME"
+            mysql -h 127.0.0.1 -u danteplanner -pdanteplanner danteplanner \
+              < "${MIGRATION_DIR}/${BASENAME}"
+          done < /tmp/new_migrations.txt
+
   build-backend:
     needs: [test-backend]
     runs-on: ubuntu-latest
@@ -48,7 +123,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
 
   notify-failure:
-    needs: [test-backend, build-backend]
+    needs: [test-backend, test-migration, build-backend]
     if: failure() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -65,5 +140,6 @@ jobs:
           jobs-json: |
             [
               {"name": "Test", "result": "${{ needs.test-backend.result }}"},
+              {"name": "Migration", "result": "${{ needs.test-migration.result }}"},
               {"name": "Build", "result": "${{ needs.build-backend.result }}"}
             ]
