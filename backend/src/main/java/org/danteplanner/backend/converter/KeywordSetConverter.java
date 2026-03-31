@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * JPA AttributeConverter for MySQL SET column type.
  * Converts between Set<String> and comma-separated String for storage.
  *
- * Valid keywords (29 total):
+ * Valid keywords (31 total):
  * - Status effects: Combustion, Laceration, Vibration, Burst, Sinking, Breath, Charge
  * - Attack types: Slash, Penetrate, Hit
  * - Affinities: CRIMSON, SCARLET, AMBER, SHAMROCK, AZURE, INDIGO, VIOLET
@@ -40,7 +40,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
             "Assemble", "KnowledgeExplored", "AaCePcBt", "SwordPlayOfTheHomeland",
             "EchoOfMansion", "TimeSuspend", "EmergencyChargeForceField", "BloodDinner",
             "BlackCloud", "RetaliationBook", "HeishouSynergy",
-            "Bullet"
+            "Bullet", "BlessingOfIndexPrescriptAlly", "Inspire"
     );
 
     @Override
