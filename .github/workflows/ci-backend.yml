@@ -91,7 +91,7 @@ jobs:
         if: steps.detect.outputs.has_new == 'true'
         run: |
           mysql -h 127.0.0.1 -u danteplanner -pdanteplanner danteplanner \
-            < backend/src/test/resources/db/seed/test-migration-seed.sql
+            < backend/src/test/resources/db/seed/migration-test-seed.sql
 
       - name: Run new migrations
         if: steps.detect.outputs.has_new == 'true'
