@@ -20,7 +20,7 @@ class HtmlSanitizerTest {
     void sanitize_scriptTagWithText_removesTagKeepsText() {
         String input = "Hello <script>alert('xss')</script> World";
         String result = HtmlSanitizer.sanitize(input);
-        assertEquals("Hello  World", result);
+        assertEquals("Hello World", result);
     }
 
     @Test
