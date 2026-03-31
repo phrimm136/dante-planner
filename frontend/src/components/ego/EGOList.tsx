@@ -16,6 +16,7 @@ interface EGOListProps {
   egos: EGOListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
+  selectedBattleKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
   selectedEGOTypes: Set<EGOType>
@@ -33,6 +34,7 @@ export function EGOList({
   egos,
   selectedSinners,
   selectedKeywords,
+  selectedBattleKeywords,
   selectedAttributes,
   selectedAtkTypes,
   selectedEGOTypes,
@@ -88,6 +90,14 @@ export function EGOList({
         if (!hasAllKeywords) continue
       }
 
+      // Battle keyword filter - OR logic (EGO must have ANY selected battle keyword)
+      if (selectedBattleKeywords.size > 0) {
+        const hasAnyBattleKeyword = (ego.battleKeywordList ?? []).some((keyword) =>
+          selectedBattleKeywords.has(keyword)
+        )
+        if (!hasAnyBattleKeyword) continue
+      }
+
       // Skill attribute filter - AND logic (EGO must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
         const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
@@ -138,7 +148,7 @@ export function EGOList({
     }
 
     return ids
-  }, [sortedEGOs, selectedSinners, selectedKeywords, selectedAttributes, selectedAtkTypes, selectedEGOTypes, selectedSeasons, searchQuery, keywordToValue, egoNames])
+  }, [sortedEGOs, selectedSinners, selectedKeywords, selectedBattleKeywords, selectedAttributes, selectedAtkTypes, selectedEGOTypes, selectedSeasons, searchQuery, keywordToValue, egoNames])
 
   if (visibleIds.size === 0) {
     return (

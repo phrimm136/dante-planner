@@ -22,6 +22,7 @@ export interface EGOListItem {
   name?: string
   egoType: EGOType
   skillKeywordList: string[]
+  battleKeywordList?: string[]
   attributeTypes: SkillAttributeType[]
   atkTypes: AtkType[]
   updateDate: number

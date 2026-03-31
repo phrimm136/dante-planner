@@ -147,6 +147,7 @@ export const DefenseTypeSchema = z.enum(['GUARD', 'EVADE', 'COUNTER', 'CLASHABLE
 export const IdentitySpecListItemSchema = z.object({
   updateDate: z.number(),
   skillKeywordList: z.array(z.string()),
+  battleKeywordList: z.array(z.string()),
   season: z.number(),
   rank: z.number(),
   unitKeywordList: z.array(z.string()),

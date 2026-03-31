@@ -117,6 +117,7 @@ export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 export const EGOSpecListItemSchema = z.object({
   updateDate: z.number(),
   skillKeywordList: z.array(z.string()),
+  battleKeywordList: z.array(z.string()),
   season: z.number(),
   egoType: EgoTypeSchema,
   requirements: z.record(z.string(), z.number()),

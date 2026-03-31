@@ -15,6 +15,7 @@ interface IdentityListProps {
   identities: IdentityListItem[]
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
+  selectedBattleKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
   selectedDefTypes: Set<DefType>
@@ -45,6 +46,7 @@ export function IdentityList({
   identities,
   selectedSinners,
   selectedKeywords,
+  selectedBattleKeywords,
   selectedAttributes,
   selectedAtkTypes,
   selectedDefTypes,
@@ -104,6 +106,14 @@ export function IdentityList({
           identity.skillKeywordList.includes(selectedKeyword)
         )
         if (!hasAllKeywords) continue
+      }
+
+      // Battle keyword filter - OR logic (identity must have ANY selected battle keyword)
+      if (selectedBattleKeywords.size > 0) {
+        const hasAnyBattleKeyword = (identity.battleKeywordList ?? []).some((keyword) =>
+          selectedBattleKeywords.has(keyword)
+        )
+        if (!hasAnyBattleKeyword) continue
       }
 
       // Attribute filter - AND logic (identity must have ALL selected attributes)
@@ -184,6 +194,7 @@ export function IdentityList({
     sortedIdentities,
     selectedSinners,
     selectedKeywords,
+    selectedBattleKeywords,
     selectedAttributes,
     selectedAtkTypes,
     selectedDefTypes,

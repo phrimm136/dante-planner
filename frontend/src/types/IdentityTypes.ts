@@ -13,6 +13,7 @@ export interface IdentityListItem {
   updateDate: number
   unitKeywordList: string[]
   skillKeywordList: string[]
+  battleKeywordList?: string[]
   /** Skill attribute types (affinities) - e.g. ['AZURE', 'VIOLET', 'AMBER'] */
   attributeTypes: SkillAttributeType[]
   /** Attack types per skill - e.g. ['SLASH', 'PENETRATE', 'HIT'] */

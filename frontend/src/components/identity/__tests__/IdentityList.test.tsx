@@ -57,6 +57,7 @@ const mockIdentities: IdentityListItem[] = [
     name: 'Test Identity 1',
     rank: 3,
     skillKeywordList: ['Burst', 'Combustion'],
+    battleKeywordList: ['Burst', 'Combustion', 'Aggro'],
     unitKeywordList: ['TheBlueReverberation'],
     attributeTypes: ['CRIMSON', 'AZURE'],
     atkTypes: ['SLASH', 'PENETRATE'],
@@ -69,6 +70,7 @@ const mockIdentities: IdentityListItem[] = [
     name: 'Test Identity 2',
     rank: 2,
     skillKeywordList: ['Charge'],
+    battleKeywordList: ['Charge'],
     unitKeywordList: ['SevenAssociation'],
     attributeTypes: ['AZURE'],
     atkTypes: ['PENETRATE'],
@@ -81,6 +83,7 @@ const mockIdentities: IdentityListItem[] = [
     name: 'Test Identity 3',
     rank: 3,
     skillKeywordList: ['Burst'],
+    battleKeywordList: ['Burst', 'Aggro'],
     unitKeywordList: ['TheBlueReverberation'],
     attributeTypes: ['VIOLET'],
     atkTypes: ['HIT'],
@@ -125,6 +128,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -146,6 +150,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set(['NonExistentSinner'])}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -168,6 +173,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['AZURE'])}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -192,6 +198,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -216,6 +223,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['PENETRATE'])}
           selectedDefTypes={new Set()}
@@ -240,6 +248,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
           selectedDefTypes={new Set()}
@@ -264,6 +273,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -288,6 +298,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -312,6 +323,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -336,6 +348,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set(['Burst', 'Combustion'])}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -360,6 +373,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set(['SLASH'])}
           selectedDefTypes={new Set()}
@@ -392,6 +406,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -421,6 +436,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -452,6 +468,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set()}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}
@@ -484,6 +501,7 @@ describe('IdentityList', () => {
           identities={mockIdentities}
           selectedSinners={new Set()}
           selectedKeywords={new Set()}
+          selectedBattleKeywords={new Set()}
           selectedAttributes={new Set(['CRIMSON'])}
           selectedAtkTypes={new Set()}
           selectedDefTypes={new Set()}

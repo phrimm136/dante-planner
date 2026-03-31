@@ -18,14 +18,28 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import type { ReactNode } from 'react'
+
+interface SearchableMultiSelectOption {
+  value: string
+  /** Plain text label used for search matching */
+  label: string
+  /** Custom render content - falls back to label when omitted */
+  renderLabel?: ReactNode
+  /** Count displayed on the right side of the option */
+  count?: number
+}
+
 interface SearchableMultiSelectProps {
-  options: { value: string; label: string }[]
+  options: SearchableMultiSelectOption[]
   selectedValues: Set<string>
   onSelectionChange: (values: Set<string>) => void
   placeholder: string
   searchPlaceholder: string
   emptyMessage?: string
   className?: string
+  /** Sort options alphabetically by label using locale collation (default: true) */
+  sortByLabel?: boolean
 }
 
 const BATCH_SIZE = 50
@@ -42,15 +56,17 @@ export function SearchableMultiSelect({
   searchPlaceholder,
   emptyMessage = 'No results found.',
   className,
+  sortByLabel = true,
 }: SearchableMultiSelectProps) {
   const [open, setOpen] = useState(false)
   const { i18n } = useTranslation()
   const [displayCount, setDisplayCount] = useState(BATCH_SIZE)
 
   const sortedOptions = useMemo(() => {
+    if (!sortByLabel) return options
     const collator = new Intl.Collator(i18n.language, { sensitivity: 'base' })
     return [...options].sort((a, b) => collator.compare(a.label, b.label))
-  }, [options, i18n.language])
+  }, [options, i18n.language, sortByLabel])
 
   // Reset progressive count when popover opens
   useEffect(() => {
@@ -123,7 +139,14 @@ export function SearchableMultiSelect({
                         isSelected ? 'opacity-100' : 'opacity-0'
                       )}
                     />
-                    {option.label}
+                    <span className="flex items-center justify-between w-full">
+                      <span>{option.renderLabel ?? option.label}</span>
+                      {option.count != null && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {option.count}
+                        </span>
+                      )}
+                    </span>
                   </CommandItem>
                 )
               })}

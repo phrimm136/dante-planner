@@ -14,8 +14,9 @@ import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAtt
 import { CompactAttackTypeFilter } from '@/components/filter/CompactAttackTypeFilter'
 import { CompactDefenseTypeFilter } from '@/components/filter/CompactDefenseTypeFilter'
 import { CompactRarityFilter } from '@/components/filter/CompactRarityFilter'
-import { SeasonDropdown } from '@/components/common/SeasonDropdown'
-import { UnitKeywordDropdown } from '@/components/common/UnitKeywordDropdown'
+import { SeasonDropdown } from '@/components/filter/SeasonDropdown'
+import { UnitKeywordDropdown } from '@/components/filter/UnitKeywordDropdown'
+import { BattleKeywordDropdown } from '@/components/filter/BattleKeywordDropdown'
 import { SearchBar } from '@/components/common/SearchBar'
 import { IdentityList } from '@/components/identity/IdentityList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
@@ -29,6 +30,7 @@ function IdentityCardGrid({
   spec,
   selectedSinners,
   selectedKeywords,
+  selectedBattleKeywords,
   selectedAttributes,
   selectedAtkTypes,
   selectedDefTypes,
@@ -40,6 +42,7 @@ function IdentityCardGrid({
   spec: z.infer<typeof IdentitySpecListSchema>
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
+  selectedBattleKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
   selectedDefTypes: Set<DefType>
@@ -57,6 +60,7 @@ function IdentityCardGrid({
         rank: specData.rank,
         unitKeywordList: specData.unitKeywordList,
         skillKeywordList: specData.skillKeywordList,
+        battleKeywordList: specData.battleKeywordList,
         attributeTypes: specData.attributeType,
         atkTypes: specData.atkType,
         defenseTypes: specData.defenseType,
@@ -71,6 +75,7 @@ function IdentityCardGrid({
       identities={identities}
       selectedSinners={selectedSinners}
       selectedKeywords={selectedKeywords}
+      selectedBattleKeywords={selectedBattleKeywords}
       selectedAttributes={selectedAttributes}
       selectedAtkTypes={selectedAtkTypes}
       selectedDefTypes={selectedDefTypes}
@@ -90,9 +95,24 @@ function IdentityPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useIdentityListSpec()
 
+  // Compute counts for dropdown display
+  const { seasonCounts, unitKeywordCounts } = useMemo(() => {
+    const sc: Record<string, number> = {}
+    const ukc: Record<string, number> = {}
+    for (const entry of Object.values(spec)) {
+      const key = String(entry.season)
+      sc[key] = (sc[key] ?? 0) + 1
+      for (const kw of entry.unitKeywordList) {
+        ukc[kw] = (ukc[kw] ?? 0) + 1
+      }
+    }
+    return { seasonCounts: sc, unitKeywordCounts: ukc }
+  }, [spec])
+
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [selectedBattleKeywords, setSelectedBattleKeywords] = useState<Set<string>>(new Set())
   const [selectedAttributes, setSelectedAttributes] = useState<Set<SkillAttributeType>>(new Set())
   const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<AtkType>>(new Set())
   const [selectedDefTypes, setSelectedDefTypes] = useState<Set<DefType>>(new Set())
@@ -105,6 +125,7 @@ function IdentityPageShell() {
   const activeFilterCount = calculateActiveFilterCount(
     selectedSinners,
     selectedKeywords,
+    selectedBattleKeywords,
     selectedAttributes,
     selectedAtkTypes,
     selectedDefTypes,
@@ -117,6 +138,7 @@ function IdentityPageShell() {
   const handleResetAll = () => {
     setSelectedSinners(new Set())
     setSelectedKeywords(new Set())
+    setSelectedBattleKeywords(new Set())
     setSelectedAttributes(new Set())
     setSelectedAtkTypes(new Set())
     setSelectedDefTypes(new Set())
@@ -209,6 +231,7 @@ function IdentityPageShell() {
           <SeasonDropdown
             selectedSeasons={selectedSeasons}
             onSelectionChange={setSelectedSeasons}
+            counts={seasonCounts}
           />
         </Suspense>
       </FilterSection>
@@ -222,6 +245,21 @@ function IdentityPageShell() {
           <UnitKeywordDropdown
             selectedUnitKeywords={selectedUnitKeywords}
             onSelectionChange={setSelectedUnitKeywords}
+            counts={unitKeywordCounts}
+          />
+        </Suspense>
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.additionalKeyword', 'Additional Keywords')}
+        defaultExpanded={false}
+        activeCount={selectedBattleKeywords.size}
+      >
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <BattleKeywordDropdown
+            entityType="identity"
+            selectedBattleKeywords={selectedBattleKeywords}
+            onSelectionChange={setSelectedBattleKeywords}
           />
         </Suspense>
       </FilterSection>
@@ -258,6 +296,7 @@ function IdentityPageShell() {
         spec={spec}
         selectedSinners={selectedSinners}
         selectedKeywords={selectedKeywords}
+        selectedBattleKeywords={selectedBattleKeywords}
         selectedAttributes={selectedAttributes}
         selectedAtkTypes={selectedAtkTypes}
         selectedDefTypes={selectedDefTypes}

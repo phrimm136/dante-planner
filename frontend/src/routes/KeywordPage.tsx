@@ -7,7 +7,7 @@ import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactBuffTypeFilter } from '@/components/filter/CompactBuffTypeFilter'
 import { IdentitySearchDropdown } from '@/components/filter/IdentitySearchDropdown'
 import { EGOSearchDropdown } from '@/components/filter/EGOSearchDropdown'
-import { EGOGiftSearchDropdown } from '@/components/filter/EGOGiftSearchDropdown'
+import { EgoGiftSearchDropdown } from '@/components/filter/EgoGiftSearchDropdown'
 import { SearchBar } from '@/components/common/SearchBar'
 import { KeywordList } from '@/components/keyword/KeywordList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
@@ -136,7 +136,7 @@ function KeywordPageShell() {
         activeCount={selectedEgoGifts.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <EGOGiftSearchDropdown
+          <EgoGiftSearchDropdown
             selectedEgoGifts={selectedEgoGifts}
             onSelectionChange={setSelectedEgoGifts}
           />

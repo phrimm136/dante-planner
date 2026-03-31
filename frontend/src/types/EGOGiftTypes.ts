@@ -19,6 +19,7 @@ export type EGOGiftRecipe = StandardRecipe | MixedRecipe
 export interface EGOGiftSpec {
   tag: string[]
   keyword: string | null
+  battleKeywordList?: string[]
   attributeType: string
   themePack: string[]
   maxEnhancement: 0 | 1 | 2
@@ -59,6 +60,7 @@ export interface EGOGiftListItem {
   name?: string
   tag: string[]
   keyword: string | null
+  battleKeywordList?: string[]
   attributeType: string
   themePack: string[]
   maxEnhancement: 0 | 1 | 2

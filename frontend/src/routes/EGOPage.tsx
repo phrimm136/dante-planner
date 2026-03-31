@@ -14,7 +14,8 @@ import { CompactKeywordFilter } from '@/components/filter/CompactKeywordFilter'
 import { CompactAttackTypeFilter } from '@/components/filter/CompactAttackTypeFilter'
 import { CompactEGOTypeFilter } from '@/components/filter/CompactEGOTypeFilter'
 import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAttributeFilter'
-import { SeasonDropdown } from '@/components/common/SeasonDropdown'
+import { SeasonDropdown } from '@/components/filter/SeasonDropdown'
+import { BattleKeywordDropdown } from '@/components/filter/BattleKeywordDropdown'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 
 import type { z } from 'zod'
@@ -28,6 +29,7 @@ function EGOCardGrid({
   spec,
   selectedSinners,
   selectedKeywords,
+  selectedBattleKeywords,
   selectedAttributes,
   selectedAtkTypes,
   selectedEGOTypes,
@@ -37,6 +39,7 @@ function EGOCardGrid({
   spec: z.infer<typeof EGOSpecListSchema>
   selectedSinners: Set<string>
   selectedKeywords: Set<string>
+  selectedBattleKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
   selectedEGOTypes: Set<EGOType>
@@ -51,6 +54,7 @@ function EGOCardGrid({
         id,
         egoType: specData.egoType,
         skillKeywordList: specData.skillKeywordList,
+        battleKeywordList: specData.battleKeywordList,
         attributeTypes: specData.attributeType,
         atkTypes: specData.atkType,
         updateDate: specData.updateDate,
@@ -64,6 +68,7 @@ function EGOCardGrid({
       egos={egos}
       selectedSinners={selectedSinners}
       selectedKeywords={selectedKeywords}
+      selectedBattleKeywords={selectedBattleKeywords}
       selectedAttributes={selectedAttributes}
       selectedAtkTypes={selectedAtkTypes}
       selectedEGOTypes={selectedEGOTypes}
@@ -81,9 +86,19 @@ function EGOPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useEGOListSpec()
 
+  const seasonCounts = useMemo(() => {
+    const sc: Record<string, number> = {}
+    for (const entry of Object.values(spec)) {
+      const key = String(entry.season)
+      sc[key] = (sc[key] ?? 0) + 1
+    }
+    return sc
+  }, [spec])
+
   // Filter states
   const [selectedSinners, setSelectedSinners] = useState<Set<string>>(new Set())
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
+  const [selectedBattleKeywords, setSelectedBattleKeywords] = useState<Set<string>>(new Set())
   const [selectedAttributes, setSelectedAttributes] = useState<Set<SkillAttributeType>>(new Set())
   const [selectedAtkTypes, setSelectedAtkTypes] = useState<Set<AtkType>>(new Set())
   const [selectedEGOTypes, setSelectedEGOTypes] = useState<Set<EGOType>>(new Set())
@@ -94,6 +109,7 @@ function EGOPageShell() {
   const activeFilterCount = calculateActiveFilterCount(
     selectedSinners,
     selectedKeywords,
+    selectedBattleKeywords,
     selectedAttributes,
     selectedAtkTypes,
     selectedEGOTypes,
@@ -104,6 +120,7 @@ function EGOPageShell() {
   const handleResetAll = () => {
     setSelectedSinners(new Set())
     setSelectedKeywords(new Set())
+    setSelectedBattleKeywords(new Set())
     setSelectedAttributes(new Set())
     setSelectedAtkTypes(new Set())
     setSelectedEGOTypes(new Set())
@@ -183,6 +200,21 @@ function EGOPageShell() {
           <SeasonDropdown
             selectedSeasons={selectedSeasons}
             onSelectionChange={setSelectedSeasons}
+            counts={seasonCounts}
+          />
+        </Suspense>
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.additionalKeyword', 'Additional Keywords')}
+        defaultExpanded={false}
+        activeCount={selectedBattleKeywords.size}
+      >
+        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+          <BattleKeywordDropdown
+            entityType="ego"
+            selectedBattleKeywords={selectedBattleKeywords}
+            onSelectionChange={setSelectedBattleKeywords}
           />
         </Suspense>
       </FilterSection>
@@ -217,6 +249,7 @@ function EGOPageShell() {
           spec={spec}
           selectedSinners={selectedSinners}
           selectedKeywords={selectedKeywords}
+          selectedBattleKeywords={selectedBattleKeywords}
           selectedAttributes={selectedAttributes}
           selectedAtkTypes={selectedAtkTypes}
           selectedEGOTypes={selectedEGOTypes}
