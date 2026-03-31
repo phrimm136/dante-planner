@@ -97,41 +97,24 @@ export default defineConfig({
         entryFileNames: 'a/[hash:12].js',
         chunkFileNames: 'a/[hash:12].js',
         assetFileNames: 'a/[hash:12][extname]',
-        manualChunks: {
-          // Core React - rarely changes, cache long-term
-          'react-vendor': ['react', 'react-dom'],
-          // TanStack libraries - moderate change frequency
-          'tanstack': ['@tanstack/react-query', '@tanstack/react-router'],
-          // Radix UI primitives - rarely changes, large
-          'radix': [
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-collapsible',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-slot',
-            '@radix-ui/react-label',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-          ],
-          // i18n - rarely changes
-          'i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
-          // Icons - large, rarely changes
-          'icons': ['lucide-react'],
-          // Zod - validation library, used across app
-          'zod': ['zod'],
-          // Sonner - toast notifications
-          'sonner': ['sonner'],
-          // Tiptap editor - only used in Planner pages
-          'tiptap': [
-            '@tiptap/core',
-            '@tiptap/react',
-            '@tiptap/starter-kit',
-            '@tiptap/extension-image',
-            '@tiptap/extension-link',
-          ],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/'))
+            return 'react-vendor'
+          if (id.includes('@tanstack/react-query') || id.includes('@tanstack/react-router'))
+            return 'tanstack'
+          if (id.includes('@radix-ui/'))
+            return 'radix'
+          if (id.includes('i18next') || id.includes('react-i18next') || id.includes('i18next-browser-languagedetector'))
+            return 'i18n'
+          if (id.includes('lucide-react'))
+            return 'icons'
+          if (id.includes('node_modules/zod'))
+            return 'zod'
+          if (id.includes('node_modules/sonner'))
+            return 'sonner'
+          if (id.includes('@tiptap/'))
+            return 'tiptap'
         },
       },
     },
