@@ -20,10 +20,12 @@ repositories {
     mavenCentral()
 }
 
-// Override log4j to fix CVE-2025-68161
 dependencyManagement {
     imports {
+        // Override log4j to fix CVE-2025-68161
         mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
+        // Override Spring Security to fix CVE-2026-22732
+        mavenBom("org.springframework.security:spring-security-bom:6.5.9")
     }
 }
 
