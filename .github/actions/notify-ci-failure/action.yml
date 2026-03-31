@@ -86,9 +86,14 @@ runs:
                 const byError = !byName && sections.find(s => s.hasError && s.lines.length && !isCleanup(s));
                 const match = byName || byError;
                 if (match) {
-                  // For run steps, skip the script preamble (source lines + "shell: ..." metadata)
-                  const shellIdx = match.lines.findIndex(l => /^shell:\s/.test(l));
-                  const output = shellIdx >= 0 ? match.lines.slice(shellIdx + 1) : match.lines;
+                  // For run steps, skip the script preamble (source lines + "shell: ..." + "env: ..." metadata)
+                  const shellIdx = match.lines.findIndex(l => /^\s*shell:\s/.test(l));
+                  let preambleEnd = shellIdx >= 0 ? shellIdx + 1 : 0;
+                  // Skip env: block (indented key-value pairs following shell:)
+                  while (preambleEnd < match.lines.length && /^\s/.test(match.lines[preambleEnd])) {
+                    preambleEnd++;
+                  }
+                  const output = shellIdx >= 0 ? match.lines.slice(preambleEnd) : match.lines;
                   snippet = output.slice(-30).join('\n');
                 }
               }
