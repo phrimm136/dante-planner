@@ -19,13 +19,13 @@ export type EGOGiftRecipe = StandardRecipe | MixedRecipe
 export interface EGOGiftSpec {
   tag: string[]
   keyword: string | null
-  battleKeywordList?: string[]
+  battleKeywordList: string[]
   attributeType: string
   themePack: string[]
   maxEnhancement: 0 | 1 | 2
   hardOnly?: boolean
   extremeOnly?: boolean
-  recipe?: EGOGiftRecipe
+  fusioned?: boolean
 }
 
 // Raw data structure from static/data/egoGift/{id}.json
@@ -60,13 +60,13 @@ export interface EGOGiftListItem {
   name?: string
   tag: string[]
   keyword: string | null
-  battleKeywordList?: string[]
+  battleKeywordList: string[]
   attributeType: string
   themePack: string[]
   maxEnhancement: 0 | 1 | 2
   hardOnly?: boolean
   extremeOnly?: boolean
-  recipe?: EGOGiftRecipe
+  fusioned?: boolean
 }
 
 /**
@@ -83,7 +83,7 @@ export interface EGOGiftListItemWithName {
   maxEnhancement: 0 | 1 | 2
   hardOnly?: boolean
   extremeOnly?: boolean
-  recipe?: EGOGiftRecipe
+  fusioned?: boolean
 }
 
 export type EGOGiftSpecList = Record<string, EGOGiftSpec>

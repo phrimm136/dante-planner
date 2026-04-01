@@ -1,7 +1,7 @@
 import { useMemo, memo, useState, useEffect } from 'react'
 import { SINNERS, CARD_GRID, type Affinity, type AtkType } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
-import type { Identity } from '@/types/IdentityTypes'
+import type { Identity, IdentityListItem } from '@/types/IdentityTypes'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { SinnerDeckCard } from './SinnerDeckCard'
 
@@ -105,9 +105,9 @@ export const SinnerGrid = memo(function SinnerGrid({
 
   // Memoize identity lookup map - only recompute when identities change
   const identityMap = useMemo(() => {
-    const map: Record<string, Identity> = {}
+    const map: Record<string, IdentityListItem> = {}
     identities.forEach((id) => {
-      map[id.id] = id
+      map[id.id] = { ...id, battleKeywordList: (id as IdentityListItem).battleKeywordList ?? [] }
     })
     return map
   }, [identities])

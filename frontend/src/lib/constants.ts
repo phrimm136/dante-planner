@@ -938,6 +938,11 @@ export const EGO_GIFT_DIFFICULTIES = ['normal', 'hard', 'extreme'] as const
 export type EGOGiftDifficulty = (typeof EGO_GIFT_DIFFICULTIES)[number]
 
 /**
+ * Boolean filter options (N/Y) for toggle filters like fusioned, theme pack exclusive
+ */
+export const BOOLEAN_FILTER_OPTIONS = ['N', 'Y'] as const
+
+/**
  * EGO Gift attribute types for filtering
  * All 7 affinities - reuses AFFINITIES constant
  */

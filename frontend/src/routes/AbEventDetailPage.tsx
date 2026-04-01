@@ -68,6 +68,7 @@ function RelatedEgoGifts({ giftIds, label }: { giftIds: string[]; label: string 
                     id,
                     tag: giftSpec.tag,
                     keyword: giftSpec.keyword,
+                    battleKeywordList: giftSpec.battleKeywordList ?? [],
                     attributeType: giftSpec.attributeType,
                     themePack: giftSpec.themePack,
                     maxEnhancement: giftSpec.maxEnhancement,
