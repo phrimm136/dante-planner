@@ -136,13 +136,13 @@
                 ]
             }
         },
-        "add-announcement": {
+        "announcement": {
             "type": "domain",
             "enforcement": "suggest",
             "priority": "medium",
-            "description": "Add a new announcement to all 5 JSON files with auto-translation",
+            "description": "Add a new announcement to all 5 JSON files with auto-translation, commit, and tag",
             "promptTriggers": {
-                "keywords": ["add announcement", "new announcement", "write announcement", "공지"],
+                "keywords": ["add announcement", "new announcement", "write announcement", "announcement", "공지"],
                 "intentPatterns": [
                     "(add|write|create|post).*?announcement",
                     "announcement.*?(add|write|create|new)"
@@ -151,26 +151,6 @@
             "fileTriggers": {
                 "pathPatterns": [
                     "static/data/announcements*.json"
-                ]
-            }
-        },
-        "commit-process": {
-            "type": "domain",
-            "enforcement": "suggest",
-            "priority": "high",
-            "description": "Full commit workflow — validation, branch, message, staging, checkout",
-            "promptTriggers": {
-                "keywords": [
-                    "commit",
-                    "git commit",
-                    "commit message",
-                    "ready to commit",
-                    "wrap this up"
-                ],
-                "intentPatterns": [
-                    "(create|make|write|do).*?commit",
-                    "commit.*?(change|code|work|fix|feat)",
-                    "(finalize|stage|prepare).*?(commit|branch|PR)"
                 ]
             }
         },

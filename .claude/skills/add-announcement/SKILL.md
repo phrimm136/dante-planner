@@ -1,9 +1,9 @@
 ---
-name: add-announcement
-description: Add a new announcement to all 5 JSON files with auto-translation. Use when adding announcements, writing update notices, or posting new content.
+name: announcement
+description: Add a new announcement to all 5 JSON files with auto-translation, commit, and tag. Use when adding announcements, writing update notices, or posting new content.
 ---
 
-# Add Announcement Workflow
+# Announcement Workflow
 
 ## Step 1 — Gather Input
 
@@ -104,6 +104,31 @@ Add key `"<id>": { "title": "<cn_title>", "body": "<cn_body>" }`.
 ### `static/i18n/JP/announcements.json`
 Add key `"<id>": { "title": "<jp_title>", "body": "<jp_body>" }`.
 
-## Step 6 — Confirm
+## Step 6 — Commit and Tag
 
-List all 5 files changed and display the generated ID.
+1. **Commit in static submodule** (on `main`):
+```bash
+cd static
+git add data/announcements.json i18n/KR/announcements.json i18n/EN/announcements.json i18n/JP/announcements.json i18n/CN/announcements.json
+git commit -m "data: add <date> announcement"
+```
+
+2. **Commit submodule ref in supermodule** (on `dev`):
+```bash
+cd ..
+git add static
+git commit -m "data: add <date> announcement"
+```
+
+3. **Tag the supermodule commit** with format `v{YY}{MM}{DD}`:
+```bash
+git tag v<YYMMDD>
+git push origin v<YYMMDD>
+```
+Example: date `2026-04-01` → tag `v260401`.
+
+If the tag already exists (multiple announcements same day), append a sequential suffix: `v260401-2`.
+
+## Step 7 — Confirm
+
+List all 5 files changed, display the generated ID and tag name.
