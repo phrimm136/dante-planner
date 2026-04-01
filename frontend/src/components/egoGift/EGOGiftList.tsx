@@ -13,6 +13,8 @@ import {
   matchesTierFilter,
   matchesThemePackFilter,
   matchesAttributeTypeFilter,
+  matchesFusionedFilter,
+  matchesExclusiveFilter,
 } from '@/lib/egoGiftFilter'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
@@ -26,6 +28,8 @@ interface EGOGiftListProps {
   selectedTiers: Set<EGOGiftTier>
   selectedThemePacks: Set<string>
   selectedAttributeTypes: Set<EGOGiftAttributeType>
+  selectedFusioned: Set<string>
+  selectedExclusive: Set<string>
   searchQuery: string
 }
 
@@ -52,6 +56,8 @@ export function EGOGiftList({
   selectedTiers,
   selectedThemePacks,
   selectedAttributeTypes,
+  selectedFusioned,
+  selectedExclusive,
   searchQuery,
 }: EGOGiftListProps) {
   const { t } = useTranslation('database')
@@ -107,6 +113,8 @@ export function EGOGiftList({
       if (!matchesTierFilter(gift.tag, selectedTiers)) continue
       if (!matchesThemePackFilter(gift.themePack, selectedThemePacks)) continue
       if (!matchesAttributeTypeFilter(gift.attributeType, selectedAttributeTypes)) continue
+      if (!matchesFusionedFilter(gift.fusioned, selectedFusioned)) continue
+      if (!matchesExclusiveFilter(gift.themePack, selectedExclusive)) continue
 
       // Search filter - match name OR keyword (both deferred, no suspension)
       if (searchQuery) {
@@ -140,6 +148,8 @@ export function EGOGiftList({
     selectedTiers,
     selectedThemePacks,
     selectedAttributeTypes,
+    selectedFusioned,
+    selectedExclusive,
     searchQuery,
     keywordToValue,
     giftNames,

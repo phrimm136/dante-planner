@@ -14,6 +14,8 @@ import {
   matchesTierFilter,
   matchesThemePackFilter,
   matchesAttributeTypeFilter,
+  matchesFusionedFilter,
+  matchesExclusiveFilter,
 } from '../egoGiftFilter'
 
 describe('extractTier', () => {
@@ -243,6 +245,67 @@ describe('matchesAttributeTypeFilter', () => {
   })
 })
 
+describe('matchesFusionedFilter', () => {
+  it('returns true when no selection (empty filter)', () => {
+    expect(matchesFusionedFilter(true, new Set())).toBe(true)
+    expect(matchesFusionedFilter(undefined, new Set())).toBe(true)
+  })
+
+  it('returns true for fusioned gift when Y selected', () => {
+    expect(matchesFusionedFilter(true, new Set(['Y']))).toBe(true)
+  })
+
+  it('returns false for non-fusioned gift when Y selected', () => {
+    expect(matchesFusionedFilter(undefined, new Set(['Y']))).toBe(false)
+  })
+
+  it('returns true for non-fusioned gift when N selected', () => {
+    expect(matchesFusionedFilter(undefined, new Set(['N']))).toBe(true)
+  })
+
+  it('returns false for fusioned gift when N selected', () => {
+    expect(matchesFusionedFilter(true, new Set(['N']))).toBe(false)
+  })
+
+  it('returns true for any gift when both N and Y selected (OR logic)', () => {
+    expect(matchesFusionedFilter(true, new Set(['N', 'Y']))).toBe(true)
+    expect(matchesFusionedFilter(undefined, new Set(['N', 'Y']))).toBe(true)
+  })
+})
+
+describe('matchesExclusiveFilter', () => {
+  it('returns true when no selection (empty filter)', () => {
+    expect(matchesExclusiveFilter(['pack1'], new Set())).toBe(true)
+    expect(matchesExclusiveFilter([], new Set())).toBe(true)
+  })
+
+  it('returns true for exclusive gift when Y selected', () => {
+    expect(matchesExclusiveFilter(['pack1'], new Set(['Y']))).toBe(true)
+  })
+
+  it('returns false for non-exclusive gift when Y selected', () => {
+    expect(matchesExclusiveFilter([], new Set(['Y']))).toBe(false)
+  })
+
+  it('returns true for non-exclusive gift when N selected', () => {
+    expect(matchesExclusiveFilter([], new Set(['N']))).toBe(true)
+  })
+
+  it('returns false for exclusive gift when N selected', () => {
+    expect(matchesExclusiveFilter(['pack1'], new Set(['N']))).toBe(false)
+  })
+
+  it('returns true for any gift when both N and Y selected (OR logic)', () => {
+    expect(matchesExclusiveFilter(['pack1'], new Set(['N', 'Y']))).toBe(true)
+    expect(matchesExclusiveFilter([], new Set(['N', 'Y']))).toBe(true)
+  })
+
+  it('treats undefined themePack as non-exclusive', () => {
+    expect(matchesExclusiveFilter(undefined, new Set(['N']))).toBe(true)
+    expect(matchesExclusiveFilter(undefined, new Set(['Y']))).toBe(false)
+  })
+})
+
 describe('cross-filter AND logic', () => {
   // Simulates how EGOGiftList combines filters
   function matchesAllFilters(
@@ -253,6 +316,7 @@ describe('cross-filter AND logic', () => {
       tag: readonly string[]
       themePack?: readonly string[]
       attributeType?: string
+      fusioned?: boolean
     },
     filters: {
       keywords: Set<string>
@@ -260,6 +324,8 @@ describe('cross-filter AND logic', () => {
       tiers: Set<string>
       themePacks: Set<string>
       attributeTypes: Set<string>
+      fusioned: Set<string>
+      exclusive: Set<string>
     }
   ): boolean {
     return (
@@ -267,7 +333,9 @@ describe('cross-filter AND logic', () => {
       matchesDifficultyFilter(gift, filters.difficulties) &&
       matchesTierFilter(gift.tag, filters.tiers) &&
       matchesThemePackFilter(gift.themePack, filters.themePacks) &&
-      matchesAttributeTypeFilter(gift.attributeType, filters.attributeTypes)
+      matchesAttributeTypeFilter(gift.attributeType, filters.attributeTypes) &&
+      matchesFusionedFilter(gift.fusioned, filters.fusioned) &&
+      matchesExclusiveFilter(gift.themePack, filters.exclusive)
     )
   }
 
@@ -277,6 +345,7 @@ describe('cross-filter AND logic', () => {
     tag: ['TIER_3', 'GIFT'] as const,
     themePack: ['pack1'] as const,
     attributeType: 'CRIMSON',
+    fusioned: true,
   }
 
   const emptyFilters = {
@@ -285,6 +354,8 @@ describe('cross-filter AND logic', () => {
     tiers: new Set<string>(),
     themePacks: new Set<string>(),
     attributeTypes: new Set<string>(),
+    fusioned: new Set<string>(),
+    exclusive: new Set<string>(),
   }
 
   it('matches when all filters are empty', () => {
@@ -298,6 +369,8 @@ describe('cross-filter AND logic', () => {
       tiers: new Set(['III']),
       themePacks: new Set(['pack1']),
       attributeTypes: new Set(['CRIMSON']),
+      fusioned: new Set(['Y']),
+      exclusive: new Set(['Y']),
     }
     expect(matchesAllFilters(sampleGift, filters)).toBe(true)
   })
@@ -309,6 +382,8 @@ describe('cross-filter AND logic', () => {
       tiers: new Set(['III']),
       themePacks: new Set(['pack1']),
       attributeTypes: new Set(['CRIMSON']),
+      fusioned: new Set<string>(),
+      exclusive: new Set<string>(),
     }
     expect(matchesAllFilters(sampleGift, filters)).toBe(false)
   })

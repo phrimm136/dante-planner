@@ -5,6 +5,7 @@ import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EGOGiftSpecListSchema } from '@/schemas'
 import type { z } from 'zod'
 import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/lib/constants'
+import { BOOLEAN_FILTER_OPTIONS } from '@/lib/constants'
 import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
 import { FilterSection } from '@/components/filter/FilterSection'
 import { CompactEGOGiftKeywordFilter } from '@/components/egoGift/CompactEGOGiftKeywordFilter'
@@ -13,6 +14,7 @@ import { CompactTierFilter } from '@/components/egoGift/CompactTierFilter'
 import { ThemePackDropdown } from '@/components/filter/ThemePackDropdown'
 import { BattleKeywordDropdown } from '@/components/filter/BattleKeywordDropdown'
 import { CompactAttributeTypeFilter } from '@/components/filter/CompactAttributeTypeFilter'
+import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
 import { SearchBar } from '@/components/common/SearchBar'
 import { EGOGiftList } from '@/components/egoGift/EGOGiftList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
@@ -30,6 +32,8 @@ function EGOGiftCardGrid({
   selectedTiers,
   selectedThemePacks,
   selectedAttributeTypes,
+  selectedFusioned,
+  selectedExclusive,
   searchQuery,
 }: {
   spec: z.infer<typeof EGOGiftSpecListSchema>
@@ -39,6 +43,8 @@ function EGOGiftCardGrid({
   selectedTiers: Set<EGOGiftTier>
   selectedThemePacks: Set<string>
   selectedAttributeTypes: Set<EGOGiftAttributeType>
+  selectedFusioned: Set<string>
+  selectedExclusive: Set<string>
   searchQuery: string
 }) {
   // Build EGOGiftListItem array from spec directly
@@ -55,6 +61,7 @@ function EGOGiftCardGrid({
         maxEnhancement: specData.maxEnhancement,
         hardOnly: specData.hardOnly,
         extremeOnly: specData.extremeOnly,
+        fusioned: specData.fusioned,
       })),
     [spec]
   )
@@ -68,6 +75,8 @@ function EGOGiftCardGrid({
       selectedTiers={selectedTiers}
       selectedThemePacks={selectedThemePacks}
       selectedAttributeTypes={selectedAttributeTypes}
+      selectedFusioned={selectedFusioned}
+      selectedExclusive={selectedExclusive}
       searchQuery={searchQuery}
     />
   )
@@ -88,6 +97,8 @@ function EGOGiftPageShell() {
   const [selectedTiers, setSelectedTiers] = useState<Set<EGOGiftTier>>(new Set())
   const [selectedThemePacks, setSelectedThemePacks] = useState<Set<string>>(new Set())
   const [selectedAttributeTypes, setSelectedAttributeTypes] = useState<Set<EGOGiftAttributeType>>(new Set())
+  const [selectedFusioned, setSelectedFusioned] = useState<Set<string>>(new Set())
+  const [selectedExclusive, setSelectedExclusive] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Reset all filters
@@ -98,6 +109,8 @@ function EGOGiftPageShell() {
     setSelectedTiers(new Set())
     setSelectedThemePacks(new Set())
     setSelectedAttributeTypes(new Set())
+    setSelectedFusioned(new Set())
+    setSelectedExclusive(new Set())
     setSearchQuery('')
   }
 
@@ -109,7 +122,9 @@ function EGOGiftPageShell() {
     selectedDifficulties.size +
     selectedTiers.size +
     selectedThemePacks.size +
-    selectedAttributeTypes.size
+    selectedAttributeTypes.size +
+    selectedFusioned.size +
+    selectedExclusive.size
 
   // Primary filters (always visible on mobile): Keyword and Difficulty
   const primaryFilters = (
@@ -156,6 +171,32 @@ function EGOGiftPageShell() {
         <CompactAttributeTypeFilter
           selectedAttributeTypes={selectedAttributeTypes}
           onAttributeTypesChange={setSelectedAttributeTypes}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.fusioned', 'Fusioned')}
+        activeCount={selectedFusioned.size}
+      >
+        <CompactIconFilter
+          options={BOOLEAN_FILTER_OPTIONS}
+          selectedOptions={selectedFusioned}
+          onSelectionChange={setSelectedFusioned}
+          getLabel={(v) => v}
+          columns={5}
+        />
+      </FilterSection>
+
+      <FilterSection
+        title={t('filters.themePackExclusive', 'Theme Pack Exclusive')}
+        activeCount={selectedExclusive.size}
+      >
+        <CompactIconFilter
+          options={BOOLEAN_FILTER_OPTIONS}
+          selectedOptions={selectedExclusive}
+          onSelectionChange={setSelectedExclusive}
+          getLabel={(v) => v}
+          columns={5}
         />
       </FilterSection>
 
@@ -220,6 +261,8 @@ function EGOGiftPageShell() {
         selectedTiers={selectedTiers}
         selectedThemePacks={selectedThemePacks}
         selectedAttributeTypes={selectedAttributeTypes}
+        selectedFusioned={selectedFusioned}
+        selectedExclusive={selectedExclusive}
         searchQuery={searchQuery}
       />
     </FilterPageLayout>

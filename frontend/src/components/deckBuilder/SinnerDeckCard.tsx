@@ -66,6 +66,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
     updateDate: 0,
     unitKeywordList: [],
     skillKeywordList: [],
+    battleKeywordList: [],
     attributeTypes: [],
     atkTypes: [],
     defenseTypes: [],

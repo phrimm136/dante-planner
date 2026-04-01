@@ -65,6 +65,7 @@ export function ComprehensiveGiftSelectorPane({
       name: i18n[id] || id,
       tag: specData.tag as EGOGiftListItem['tag'],
       keyword: specData.keyword,
+      battleKeywordList: specData.battleKeywordList ?? [],
       attributeType: specData.attributeType,
       themePack: specData.themePack,
       maxEnhancement: specData.maxEnhancement,

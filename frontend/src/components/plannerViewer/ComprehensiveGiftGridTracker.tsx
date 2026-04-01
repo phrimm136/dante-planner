@@ -120,6 +120,7 @@ export function ComprehensiveGiftGridTracker({
           name: giftName,
           tag: giftSpec.tag as EGOGiftListItem['tag'],
           keyword: giftSpec.keyword,
+          battleKeywordList: giftSpec.battleKeywordList ?? [],
           attributeType: giftSpec.attributeType,
           themePack: giftSpec.themePack,
           maxEnhancement: giftSpec.maxEnhancement,

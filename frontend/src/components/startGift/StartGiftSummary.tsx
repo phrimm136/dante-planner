@@ -58,6 +58,7 @@ export function StartGiftSummary({
         name: giftName,
         tag: giftSpec?.tag || ['TIER_1'],
         keyword: giftSpec?.keyword || null,
+        battleKeywordList: giftSpec?.battleKeywordList ?? [],
         attributeType: giftSpec?.attributeType || 'CRIMSON',
         themePack: giftSpec?.themePack || [],
         maxEnhancement: giftSpec?.maxEnhancement ?? 0,

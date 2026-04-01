@@ -115,3 +115,35 @@ export function matchesAttributeTypeFilter(
   if (selectedAttributeTypes.size === 0) return true
   return attributeType !== undefined && selectedAttributeTypes.has(attributeType)
 }
+
+/**
+ * Check if a gift matches the fusioned filter
+ * Empty selection = no filter (returns true)
+ * OR logic: N = not fusioned, Y = fusioned
+ */
+export function matchesFusionedFilter(
+  fusioned: boolean | undefined,
+  selectedFusioned: Set<string>
+): boolean {
+  if (selectedFusioned.size === 0) return true
+  const isFusioned = fusioned === true
+  if (selectedFusioned.has('Y') && isFusioned) return true
+  if (selectedFusioned.has('N') && !isFusioned) return true
+  return false
+}
+
+/**
+ * Check if a gift matches the theme pack exclusive filter
+ * Empty selection = no filter (returns true)
+ * OR logic: N = not exclusive, Y = exclusive (has non-empty themePack)
+ */
+export function matchesExclusiveFilter(
+  themePacks: readonly string[] | undefined,
+  selectedExclusive: Set<string>
+): boolean {
+  if (selectedExclusive.size === 0) return true
+  const isExclusive = (themePacks ?? []).length > 0
+  if (selectedExclusive.has('Y') && isExclusive) return true
+  if (selectedExclusive.has('N') && !isExclusive) return true
+  return false
+}

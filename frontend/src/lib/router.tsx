@@ -372,7 +372,7 @@ const abEventDetailRoute = createRoute({
     }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.title ?? 'Abnormality Event'} | Dante's Planner` }],
+    meta: [{ title: `${loaderData?.title ?? 'Dungeon Event'} | Dante's Planner` }],
   }),
 })
 

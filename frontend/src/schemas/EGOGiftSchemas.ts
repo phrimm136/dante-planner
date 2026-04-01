@@ -45,6 +45,7 @@ export const EGOGiftSpecSchema = z.object({
   maxEnhancement: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   hardOnly: z.boolean().optional(),
   extremeOnly: z.boolean().optional(),
+  fusioned: z.boolean().optional(),
   recipe: EGOGiftRecipeSchema.optional(),
 }).strict()
 
@@ -80,7 +81,7 @@ export const EGOGiftListItemSchema = z.object({
   maxEnhancement: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   hardOnly: z.boolean().optional(),
   extremeOnly: z.boolean().optional(),
-  recipe: EGOGiftRecipeSchema.optional(),
+  fusioned: z.boolean().optional(),
 }).strict()
 
 // Record types for spec and name lists

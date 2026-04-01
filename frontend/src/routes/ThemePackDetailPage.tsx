@@ -173,6 +173,7 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
                   id,
                   tag: giftSpec.tag,
                   keyword: giftSpec.keyword,
+                  battleKeywordList: giftSpec.battleKeywordList ?? [],
                   attributeType: giftSpec.attributeType,
                   themePack: giftSpec.themePack,
                   maxEnhancement: giftSpec.maxEnhancement,
@@ -214,7 +215,7 @@ function ExclusiveEventsSection({
 
   return (
     <div className="space-y-3">
-      <SectionTitle>{t('themePack.exclusiveEvents', 'Exclusive Abnormality Events')}</SectionTitle>
+      <SectionTitle>{t('themePack.exclusiveEvents', 'Exclusive Dungeon Events')}</SectionTitle>
       <div className="flex flex-wrap gap-3">
         {exclusiveIds.map((eventId) => {
           const eid = String(eventId)
@@ -256,6 +257,7 @@ function AllEgoGifts({ giftIds }: { giftIds: number[] }) {
                 id,
                 tag: giftSpec.tag,
                 keyword: giftSpec.keyword,
+                battleKeywordList: giftSpec.battleKeywordList ?? [],
                 attributeType: giftSpec.attributeType,
                 themePack: giftSpec.themePack,
                 maxEnhancement: giftSpec.maxEnhancement,

@@ -68,6 +68,7 @@ export function DeckBuilderSummary({
       updateDate: specData.updateDate,
       unitKeywordList: specData.unitKeywordList,
       skillKeywordList: specData.skillKeywordList,
+      battleKeywordList: specData.battleKeywordList ?? [],
       attributeTypes: specData.attributeType,
       atkTypes: specData.atkType,
       defenseTypes: specData.defenseType,

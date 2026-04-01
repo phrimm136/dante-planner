@@ -88,6 +88,7 @@ export function ComprehensiveGiftSummary({
             name: i18n[giftId] || giftId,
             tag: giftSpec.tag as EGOGiftListItem['tag'],
             keyword: giftSpec.keyword,
+            battleKeywordList: giftSpec.battleKeywordList ?? [],
             attributeType: giftSpec.attributeType,
             themePack: giftSpec.themePack,
             maxEnhancement: giftSpec.maxEnhancement,

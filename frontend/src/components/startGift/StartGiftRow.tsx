@@ -75,6 +75,7 @@ export function StartGiftRow({
             name,
             tag: spec?.tag || ['TIER_1'],
             keyword: spec?.keyword || null,
+            battleKeywordList: spec?.battleKeywordList ?? [],
             attributeType: spec?.attributeType || 'CRIMSON',
             themePack: spec?.themePack || [],
             maxEnhancement: spec?.maxEnhancement ?? 0,
