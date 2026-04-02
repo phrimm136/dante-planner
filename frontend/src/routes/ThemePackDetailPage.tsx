@@ -92,12 +92,12 @@ function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exceptionCo
       {floorGroups.map((group) => (
         <div key={group.idx}>
           <div
-            className="text-xs font-medium mb-1"
+            className="px-2 text-xs font-medium mb-1"
             style={{ color: DIFFICULTY_COLORS[group.label] }}
           >
             {group.label}
           </div>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1 pl-2">
             {group.floors.map((floor) => (
               <span
                 key={floor}
@@ -163,6 +163,44 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
   return (
     <div className="flex flex-wrap gap-3">
       {allIds.map((id) => {
+        const giftSpec = spec[id]
+        if (!giftSpec) return null
+        return (
+          <Link key={id} to="/ego-gift/$id" params={{ id }}>
+            <div className="flex flex-col items-center gap-1">
+              <EGOGiftCard
+                gift={{
+                  id,
+                  tag: giftSpec.tag,
+                  keyword: giftSpec.keyword,
+                  battleKeywordList: giftSpec.battleKeywordList ?? [],
+                  attributeType: giftSpec.attributeType,
+                  themePack: giftSpec.themePack,
+                  maxEnhancement: giftSpec.maxEnhancement,
+                }}
+                enableHoverHighlight
+              />
+              <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
+                <EGOGiftName id={id} />
+              </span>
+            </div>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
+ * Fixed reward EGO gifts for hidden theme packs
+ */
+function FixedRewardEgoGifts({ giftIds }: { giftIds: number[] }) {
+  const { spec } = useEGOGiftListData()
+
+  return (
+    <div className="flex flex-wrap gap-3">
+      {giftIds.map((giftId) => {
+        const id = String(giftId)
         const giftSpec = spec[id]
         if (!giftSpec) return null
         return (
@@ -330,7 +368,7 @@ function ThemePackDetailContent() {
         </div>
       )}
 
-      {/* Difficulty + Floors */}
+      {/* Difficulty + Floors + Hidden Theme Rate */}
       <div className="flex-1 border rounded p-4 space-y-4">
         <div className="space-y-1">
           <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
@@ -344,6 +382,16 @@ function ThemePackDetailContent() {
           </div>
           <FloorDisplay conditions={spec.exceptionConditions} />
         </div>
+        {spec.hiddenThemeRate != null && (
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+              {t('themePack.hiddenThemeRate')}
+            </div>
+            <span className="px-2 py-0.5 text-sm">
+              {(spec.hiddenThemeRate * 100).toFixed(2)}%
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -356,6 +404,16 @@ function ThemePackDetailContent() {
 
   const rightColumn = (
     <div className="space-y-6">
+      {/* Fixed Reward EGO Gifts — hidden theme only */}
+      {spec.fixedRewardEgoGifts && spec.fixedRewardEgoGifts.length > 0 && (
+        <div className="space-y-3">
+          <SectionTitle>{t('themePack.fixedRewards')}</SectionTitle>
+          <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+            <FixedRewardEgoGifts giftIds={spec.fixedRewardEgoGifts} />
+          </Suspense>
+        </div>
+      )}
+
       {/* Specific EGO Gifts — skip if empty */}
       {spec.specificEgoGiftPool.length > 0 && (
         <div className="space-y-3">

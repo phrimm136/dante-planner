@@ -78,6 +78,45 @@ describe('ThemePackDetailSchema', () => {
     }
   })
 
+  it('accepts hidden theme fields', () => {
+    const result = ThemePackDetailSchema.safeParse({
+      exceptionConditions: [{ dungeonIdx: 1, selectableFloors: [2, 3, 4] }, { dungeonIdx: 2 }],
+      nodeOption: {
+        bossPool: [2070401], battlePool: [], abBattlePool: [],
+        hardBattlePool: [], hardAbBattlePool: [], eventPool: [971055],
+        specialEventPool: [971089],
+      },
+      egoGiftPool: [9003],
+      specificEgoGiftPool: [],
+      themePackConfig: { textColor: 'e5c6a0' },
+      hiddenThemeRate: 0.0002,
+      fixedRewardEgoGifts: [9242, 9083, 9082, 9081],
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.hiddenThemeRate).toBe(0.0002)
+      expect(result.data.fixedRewardEgoGifts).toEqual([9242, 9083, 9082, 9081])
+    }
+  })
+
+  it('accepts detail without hidden theme fields', () => {
+    const result = ThemePackDetailSchema.safeParse({
+      exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
+      nodeOption: {
+        bossPool: [], battlePool: [], abBattlePool: [],
+        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+      },
+      egoGiftPool: [],
+      specificEgoGiftPool: [],
+      themePackConfig: { textColor: 'af241c' },
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.hiddenThemeRate).toBeUndefined()
+      expect(result.data.fixedRewardEgoGifts).toBeUndefined()
+    }
+  })
+
   it('rejects invalid dungeonIdx', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 5 }],
@@ -100,6 +139,18 @@ describe('ThemePackListSchema', () => {
         exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
         specificEgoGiftPool: [],
         themePackConfig: { textColor: 'af241c' },
+      },
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts list entry with fixedRewardEgoGifts', () => {
+    const result = ThemePackListSchema.safeParse({
+      '3001': {
+        exceptionConditions: [{ dungeonIdx: 1, selectableFloors: [2, 3, 4] }],
+        specificEgoGiftPool: [9242],
+        themePackConfig: { textColor: 'e5c6a0' },
+        fixedRewardEgoGifts: [9242, 9083],
       },
     })
     expect(result.success).toBe(true)
