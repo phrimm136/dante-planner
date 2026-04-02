@@ -24,6 +24,7 @@ export interface ThemePackEntry {
   exceptionConditions: ExceptionCondition[]
   specificEgoGiftPool: number[]
   themePackConfig: ThemePackConfig
+  fixedRewardEgoGifts?: number[]
 }
 
 /**

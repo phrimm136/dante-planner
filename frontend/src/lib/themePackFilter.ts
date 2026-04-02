@@ -51,7 +51,7 @@ export function matchesEgoGiftFilter(
   selectedEgoGifts: Set<string>
 ): boolean {
   if (selectedEgoGifts.size === 0) return true
-  return entry.specificEgoGiftPool.some((giftId) =>
-    selectedEgoGifts.has(String(giftId))
-  )
+  if (entry.specificEgoGiftPool.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true
+  if (entry.fixedRewardEgoGifts?.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true
+  return false
 }

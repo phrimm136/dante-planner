@@ -43,6 +43,7 @@ export const ThemePackEntrySchema = z.object({
   exceptionConditions: z.array(ExceptionConditionSchema),
   specificEgoGiftPool: z.array(z.number()),
   themePackConfig: ThemePackConfigSchema,
+  fixedRewardEgoGifts: z.array(z.number()).optional(),
 }).strict()
 
 // Theme pack list schema (Record keyed by pack ID)
@@ -66,6 +67,8 @@ export const ThemePackDetailSchema = z.object({
   egoGiftPool: z.array(z.number()),
   specificEgoGiftPool: z.array(z.number()),
   themePackConfig: ThemePackConfigSchema,
+  hiddenThemeRate: z.number().optional(),
+  fixedRewardEgoGifts: z.array(z.number()).optional(),
 })
 
 export type ThemePackDetail = z.infer<typeof ThemePackDetailSchema>
