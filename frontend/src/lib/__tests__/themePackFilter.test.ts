@@ -101,4 +101,30 @@ describe('matchesEgoGiftFilter', () => {
   it('converts number IDs to string for comparison', () => {
     expect(matchesEgoGiftFilter(makeEntry(), new Set(['9404']))).toBe(true)
   })
+
+  it('matches gifts in fixedRewardEgoGifts', () => {
+    const hiddenPack = makeEntry({
+      specificEgoGiftPool: [],
+      fixedRewardEgoGifts: [9242, 9083],
+    })
+    expect(matchesEgoGiftFilter(hiddenPack, new Set(['9242']))).toBe(true)
+    expect(matchesEgoGiftFilter(hiddenPack, new Set(['9083']))).toBe(true)
+  })
+
+  it('does not match when gift is in neither pool', () => {
+    const hiddenPack = makeEntry({
+      specificEgoGiftPool: [9403],
+      fixedRewardEgoGifts: [9242],
+    })
+    expect(matchesEgoGiftFilter(hiddenPack, new Set(['9999']))).toBe(false)
+  })
+
+  it('matches across both specificEgoGiftPool and fixedRewardEgoGifts', () => {
+    const pack = makeEntry({
+      specificEgoGiftPool: [9403],
+      fixedRewardEgoGifts: [9242],
+    })
+    expect(matchesEgoGiftFilter(pack, new Set(['9403']))).toBe(true)
+    expect(matchesEgoGiftFilter(pack, new Set(['9242']))).toBe(true)
+  })
 })
