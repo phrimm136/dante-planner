@@ -52,6 +52,10 @@ jobs:
           export S3_BACKUP_BUCKET="danteplanner-backups"
           export S3_LOGS_BUCKET="danteplanner-logs"
 
+          # Install and start CloudWatch Agent (collects CPU, memory, disk metrics)
+          chmod +x scripts/ops/install-cloudwatch-agent.sh
+          sudo ./scripts/ops/install-cloudwatch-agent.sh
+
           # Run the setup script
           chmod +x scripts/ops/setup-cloudwatch-alarms.sh
           ./scripts/ops/setup-cloudwatch-alarms.sh
