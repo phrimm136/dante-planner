@@ -50,13 +50,6 @@ vi.mock('@/lib/oauth', () => ({
   storeOAuthParams: vi.fn(),
 }))
 
-// Mock env
-vi.mock('@/lib/env', () => ({
-  env: {
-    VITE_GOOGLE_CLIENT_ID: 'mock-client-id',
-  },
-}))
-
 // Mock sonner toast
 vi.mock('sonner', () => ({
   toast: {

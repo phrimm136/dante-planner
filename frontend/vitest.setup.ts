@@ -44,5 +44,16 @@ globalThis.ResizeObserver = class ResizeObserver {
 // Mock scrollIntoView (used by cmdk Command component)
 Element.prototype.scrollIntoView = vi.fn()
 
+// Mock env.ts to prevent Zod validation from requiring real env vars
+vi.mock('@/lib/env', () => ({
+  env: {
+    VITE_GOOGLE_CLIENT_ID: 'test-client-id',
+    VITE_API_BASE_URL: 'http://localhost:8080',
+    DEV: false,
+    PROD: false,
+    MODE: 'test',
+  },
+}))
+
 // Mock fetch for testing (simple implementation)
 globalThis.fetch = vi.fn() as any

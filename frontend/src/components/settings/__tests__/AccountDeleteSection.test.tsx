@@ -15,12 +15,6 @@ vi.mock('sonner', () => ({
   },
 }))
 
-vi.mock('@/lib/env', () => ({
-  env: {
-    VITE_GOOGLE_CLIENT_ID: 'test-client-id',
-  },
-}))
-
 vi.mock('@/lib/oauth', () => ({
   generateState: () => 'mock-state',
   generateCodeVerifier: () => 'mock-verifier',

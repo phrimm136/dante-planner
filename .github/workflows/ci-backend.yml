@@ -33,6 +33,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Restore file permissions
+        run: chmod +x backend/gradlew
+
       - name: BE Test
         working-directory: ./backend
         run: ./gradlew test -q
