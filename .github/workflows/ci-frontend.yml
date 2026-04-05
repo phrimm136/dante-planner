@@ -12,14 +12,20 @@ on:
       - '.github/workflows/ci-frontend.yml'
 
 jobs:
+  checkout:
+    uses: ./.github/workflows/checkout-submodules.yml
+    secrets:
+      STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
+
   test-frontend:
+    needs: checkout
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: webfactory/ssh-agent@v0.9.0
+      - uses: actions/download-artifact@v4
         with:
-          ssh-private-key: ${{ secrets.STATIC_DEPLOY_KEY }}
-      - run: git submodule update --init
+          name: repo-with-submodules
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
@@ -32,18 +38,16 @@ jobs:
         run: |
           yarn install --frozen-lockfile
           yarn test
-        env:
-          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
   build-frontend:
-    needs: [test-frontend]
+    needs: [checkout, test-frontend]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: webfactory/ssh-agent@v0.9.0
+      - uses: actions/download-artifact@v4
         with:
-          ssh-private-key: ${{ secrets.STATIC_DEPLOY_KEY }}
-      - run: git submodule update --init
+          name: repo-with-submodules
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
@@ -61,7 +65,7 @@ jobs:
           NODE_OPTIONS: '--max-old-space-size=6144'
 
   notify-failure:
-    needs: [test-frontend, build-frontend]
+    needs: [checkout, test-frontend, build-frontend]
     if: failure() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -77,6 +81,7 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
           jobs-json: |
             [
+              {"name": "Checkout", "result": "${{ needs.checkout.result }}"},
               {"name": "Test", "result": "${{ needs.test-frontend.result }}"},
               {"name": "Build", "result": "${{ needs.build-frontend.result }}"}
             ]

@@ -1,0 +1,13 @@
+# CI/CD and infrastructure
+.github/                @phrimm136
+scripts/deploy/         @phrimm136
+docker-compose.yml      @phrimm136
+
+# Package manifests (blocks postinstall/build script injection)
+frontend/package.json   @phrimm136
+backend/build.gradle    @phrimm136
+
+# Dockerfiles
+backend/Dockerfile      @phrimm136
+nginx/Dockerfile        @phrimm136
+mysql/Dockerfile        @phrimm136

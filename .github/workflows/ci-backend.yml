@@ -12,14 +12,20 @@ on:
       - '.github/workflows/ci-backend.yml'
 
 jobs:
+  checkout:
+    uses: ./.github/workflows/checkout-submodules.yml
+    secrets:
+      STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
+
   test-backend:
+    needs: checkout
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: webfactory/ssh-agent@v0.9.0
+      - uses: actions/download-artifact@v4
         with:
-          ssh-private-key: ${{ secrets.STATIC_DEPLOY_KEY }}
-      - run: git submodule update --init
+          name: repo-with-submodules
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
@@ -30,8 +36,11 @@ jobs:
       - name: BE Test
         working-directory: ./backend
         run: ./gradlew test -q
+
   test-migration:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     services:
       mysql:
         image: mysql:8.0
@@ -107,6 +116,8 @@ jobs:
   build-backend:
     needs: [test-backend]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       - name: Set up Docker Buildx
@@ -123,7 +134,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=backend
 
   notify-failure:
-    needs: [test-backend, test-migration, build-backend]
+    needs: [checkout, test-backend, test-migration, build-backend]
     if: failure() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -139,6 +150,7 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
           jobs-json: |
             [
+              {"name": "Checkout", "result": "${{ needs.checkout.result }}"},
               {"name": "Test", "result": "${{ needs.test-backend.result }}"},
               {"name": "Migration", "result": "${{ needs.test-migration.result }}"},
               {"name": "Build", "result": "${{ needs.build-backend.result }}"}
