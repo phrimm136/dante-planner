@@ -1,0 +1,31 @@
+name: Check PR Origin
+
+on:
+  workflow_call:
+    outputs:
+      is-internal:
+        description: Whether the PR is from the same repository
+        value: ${{ jobs.check.outputs.is-internal }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      is-internal: ${{ steps.origin.outputs.is-internal }}
+    steps:
+      - name: Check PR origin
+        id: origin
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          CURRENT_REPO: ${{ github.repository }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ]; then
+            echo "is-internal=true" >> "$GITHUB_OUTPUT"
+          elif [ "$PR_HEAD_REPO" = "$CURRENT_REPO" ]; then
+            echo "is-internal=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Skipping CI for external fork PR"
+            echo "is-internal=false" >> "$GITHUB_OUTPUT"
+          fi

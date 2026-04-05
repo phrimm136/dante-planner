@@ -6,13 +6,20 @@ on:
     paths:
       - '.github/workflows/ci-backend.yml'
   pull_request:
-    branches: [main, dev]
+    branches: [main, staging, dev]
     paths:
       - 'backend/**'
       - '.github/workflows/ci-backend.yml'
 
 jobs:
+  check-origin:
+    uses: ./.github/workflows/check-pr-origin.yml
+
   checkout:
+    needs: check-origin
+    if: >-
+      needs.check-origin.outputs.is-internal == 'true' ||
+      github.base_ref == 'dev'
     uses: ./.github/workflows/checkout-submodules.yml
     secrets:
       STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
@@ -41,6 +48,10 @@ jobs:
         run: ./gradlew test -q
 
   test-migration:
+    needs: check-origin
+    if: >-
+      needs.check-origin.outputs.is-internal == 'true' ||
+      github.base_ref == 'dev'
     runs-on: ubuntu-latest
     permissions:
       contents: read
