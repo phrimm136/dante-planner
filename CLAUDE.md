@@ -22,6 +22,7 @@ Game planning and management tool for Limbus Company.
 8. **BE CONCISE** - No unnecessary explanations or verbose output
 9. **NO inline annotations, NO throwaway code** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes. Don't write comments that restate what the function name already says. Don't add debug prints or verbose formatting you'll remove next edit. Write final-form code on the first Write.
 10. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
+11. **NEVER cd** - Use in-command directory flags (`--cwd`, `-p`, `-C`, etc.) to target subdirectories. `cd` confuses the session's working directory and compound commands with `cd` get blocked by security evaluation.
 
 ---
 
