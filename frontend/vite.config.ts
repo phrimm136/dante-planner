@@ -9,14 +9,39 @@ import fs from 'fs'
 import type { Plugin } from 'vite'
 import { hashStaticPlugin } from './vite-plugin-hash-static'
 
-// Plugin to exclude scripts/ from publicDir output
-function excludeScriptsFromPublic(): Plugin {
+const STATIC_ROOT = path.resolve(__dirname, '../static')
+const STATIC_WHITELIST = ['images', 'data', 'i18n']
+
+function serveWhitelistedStatic(): Plugin {
   return {
-    name: 'exclude-scripts-from-public',
+    name: 'serve-whitelisted-static',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split('?')[0] ?? ''
+        const segment = url.split('/')[1]
+        if (segment && STATIC_WHITELIST.includes(segment)) {
+          const filePath = path.join(STATIC_ROOT, url)
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            return res.end(fs.readFileSync(filePath))
+          }
+          res.statusCode = 404
+          res.end('Not found')
+          return
+        }
+        next()
+      })
+    },
     writeBundle() {
-      const scriptsDir = path.resolve(__dirname, 'dist/scripts')
-      if (fs.existsSync(scriptsDir)) {
-        fs.rmSync(scriptsDir, { recursive: true })
+      const distRoot = path.resolve(__dirname, 'dist')
+      for (const dir of STATIC_WHITELIST) {
+        const src = path.join(STATIC_ROOT, dir)
+        const dst = path.join(distRoot, dir)
+        if (fs.existsSync(src)) {
+          fs.cpSync(src, dst, {
+            recursive: true,
+            filter: (s) => !s.endsWith('.png'),
+          })
+        }
       }
     },
   }
@@ -49,7 +74,7 @@ function staticFile404Plugin(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    excludeScriptsFromPublic(),
+    serveWhitelistedStatic(),
     staticFile404Plugin(),
     hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
     // tanstackRouter plugin disabled - using programmatic routing in lib/router.tsx instead
@@ -90,7 +115,7 @@ export default defineConfig({
     namedExports: false,
     stringify: true,
   },
-  publicDir: '../static',
+  publicDir: false,
   build: {
     rollupOptions: {
       output: {
