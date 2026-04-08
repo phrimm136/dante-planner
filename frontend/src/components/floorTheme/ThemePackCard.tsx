@@ -54,7 +54,7 @@ export function ThemePackCard({
   return (
     <div
       className={cn(
-        'group relative w-60 h-104',
+        'group relative w-60 aspect-[416/684]',
         className
       )}
     >
@@ -87,16 +87,16 @@ export function ThemePackCard({
 
       {/* Layer 4: Theme pack name */}
       <div
-        className={`absolute left-0 right-0 flex justify-center items-center pointer-events-none ${!isExtreme ? 'translate-x-[3px]' : '-translate-x-[3px]'} leading-4`}
-        style={{ top: !isExtreme ? '72%' : '76.8%', height: !isExtreme ? 60 : 71 }}
+        className="absolute left-0 right-0 flex justify-center items-center pointer-events-none leading-4"
+        style={{ top: !isExtreme ? '74.586%' : '81.960%', height: !isExtreme ? '8.544%' : '10.010%' }}
       >
         <AutoSizeText
           text={specialName ? stripColorTags(specialName) : packName}
-          width={!isExtreme ? 180 : 170}
+          width={!isExtreme ? 168 : 154}
           className="text-center"
           style={{ ...displayStyle, ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }), filter: 'drop-shadow(1.2px 1.2px 0 rgba(0,0,0,0.9))' }}
-          minFontSize={!isExtreme ? 10 : 14}
-          maxFontSize={!isExtreme ? 25 : 28}
+          minFontSize={!isExtreme ? 15 : 15}
+          maxFontSize={!isExtreme ? 24 : 24}
           lineHeight={lineHeight}
           coloredContent={specialName ? parseColorTags(specialName) : undefined}
         />
