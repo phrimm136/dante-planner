@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
     id("org.owasp.dependencycheck") version "12.2.0"
@@ -25,7 +25,7 @@ dependencyManagement {
         // Override log4j to fix CVE-2025-68161
         mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
         // Override Spring Security to fix CVE-2026-22732
-        mavenBom("org.springframework.security:spring-security-bom:6.5.9")
+        mavenBom("org.springframework.security:spring-security-bom:7.0.4")
     }
 }
 
