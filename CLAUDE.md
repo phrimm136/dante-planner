@@ -20,7 +20,7 @@ Game planning and management tool for Limbus Company.
 6. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
 7. **BUG FIX** - Read working → Read broken → State root cause → Resolve. NEVER circumvent or bypass errors.
 8. **BE CONCISE** - No unnecessary explanations or verbose output
-9. **NO inline annotations** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes
+9. **NO inline annotations, NO throwaway code** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes. Don't write comments that restate what the function name already says. Don't add debug prints or verbose formatting you'll remove next edit. Write final-form code on the first Write.
 10. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
 
 ---
@@ -92,7 +92,7 @@ See `commit-process` skill for the full workflow (validation, branching, message
 | Domain | Alias | Resolves To |
 |--------|-------|-------------|
 | Frontend | `@/` | `frontend/src/` |
-| Frontend | `@static/` | `static/` |
+| Frontend | `@static/` | `static/` (has own `CLAUDE.md` — read before touching data, images, or UI layout) |
 | Backend | - | `org.danteplanner.backend.{domain}` |
 
 ---
