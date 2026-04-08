@@ -34,10 +34,10 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
         prefix="be-build"
     fi
 
-    # Check if output is redirected to /tmp with epoch suffix
+    # Check if output is redirected to /tmp
     # Also reject piped redirects (e.g., yarn test | grep FAIL > /tmp/...) — full output must be captured
     has_redirect=false
-    if echo "$command" | grep -qF '> /tmp/' && echo "$command" | grep -qF '$EPOCHSECONDS'; then
+    if echo "$command" | grep -qP '> /tmp/\S+\.(txt|log)'; then
         # Extract the part before > /tmp/ and check if it ends with a pipe
         before_redirect=$(echo "$command" | sed 's|> /tmp/.*||')
         if echo "$before_redirect" | grep -qE '\|\s*(grep|head|tail|awk|sed|wc)'; then
@@ -58,7 +58,7 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
 
     # Check if a recent output file already exists (within last 1 minute)
     if [[ -n "$prefix" ]] && ! echo "$command" | grep -qE 'rm -f /tmp/'; then
-        recent_file=$(find /tmp -name "${prefix}-*.txt" -mmin -1 -print 2>/dev/null | sort | tail -1)
+        recent_file=$(find /tmp -name "${prefix}-*.log" -mmin -1 -print 2>/dev/null | sort | tail -1)
     fi
 
     # Block re-run if recent output exists — read it instead
@@ -70,7 +70,7 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
         echo "Recent output: $recent_file" >&2
         echo "" >&2
         echo "Grep the file for errors instead of re-running the command:" >&2
-        echo "  ls /tmp/${prefix}-*.txt | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
+        echo "  ls /tmp/${prefix}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
         echo "" >&2
         echo "WHY: Re-running wastes time and context. The output is already captured." >&2
         echo "If you need a fresh run (e.g., after fixing failures), delete the old file first:" >&2
@@ -88,14 +88,16 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
         echo "Command: $command" >&2
         echo "" >&2
         echo "Redirect pattern:" >&2
-        echo '  yarn vitest run > /tmp/fe-test-$EPOCHSECONDS.txt 2>&1' >&2
-        echo '  yarn tsc --noEmit > /tmp/fe-typecheck-$EPOCHSECONDS.txt 2>&1' >&2
-        echo '  yarn build > /tmp/fe-build-$EPOCHSECONDS.txt 2>&1' >&2
+        echo '  yarn --cwd frontend vitest run > /tmp/fe-test-<session-id>-<suffix>.log 2>&1' >&2
+        echo '  yarn --cwd frontend tsc --noEmit > /tmp/fe-typecheck-<session-id>-<suffix>.log 2>&1' >&2
+        echo '  yarn --cwd frontend build > /tmp/fe-build-<session-id>-<suffix>.log 2>&1' >&2
+        echo '  ./gradlew -p backend test > /tmp/be-test-<session-id>-<suffix>.log 2>&1' >&2
         echo "" >&2
         echo "Then grep the latest file for errors — do not re-run to see output:" >&2
-        echo "  ls /tmp/${prefix:-<prefix>}-*.txt | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
+        echo "  ls /tmp/${prefix:-<prefix>}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
         echo "" >&2
         echo "WHY: Stdout gets truncated. Redirect preserves full output for analysis." >&2
+        echo "Use --cwd (yarn) or -p (gradlew) to set the working directory — do NOT cd into the directory." >&2
         echo "Do NOT pipe through grep/tail before redirecting — capture the full output first." >&2
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
         exit 2
