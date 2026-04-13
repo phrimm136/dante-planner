@@ -28,7 +28,7 @@
       "net": {
         "measurement": ["bytes_sent", "bytes_recv", "packets_sent", "packets_recv"],
         "metrics_collection_interval": 60,
-        "resources": ["eth0"]
+        "resources": ["ens5"]
       }
     },
     "append_dimensions": {

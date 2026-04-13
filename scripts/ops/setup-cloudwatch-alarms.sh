@@ -42,9 +42,11 @@ validate_params() {
 # - Disk: 85% leaves buffer for logs/temp files
 # - 5xx errors: 10 in 5min might be too sensitive for low-traffic periods
 get_alarm_thresholds() {
-    # Return values: CPU_THRESHOLD MEM_THRESHOLD_BYTES DISK_THRESHOLD HTTP5XX_THRESHOLD
-    # Implement your threshold logic here
-    echo "70 209715200 85 10"
+    # CPU% MEM_BYTES DISK% HTTP5xx NET_IN_BYTES NET_OUT_BYTES DISKIO_WRITE_BYTES
+    # Network/diskio thresholds are 5-minute Sum totals.
+    # Tuned for t3.medium serving JSON API only (static assets on Cloudflare),
+    # ~500 DAU / 100 peak concurrent. Revisit after observing baselines.
+    echo "70 209715200 85 10 52428800 209715200 524288000"
 }
 
 # Ensure EC2 instance role has CloudWatch Logs write permissions for awslogs driver.
@@ -250,18 +252,19 @@ create_alarms() {
     local TOPIC_ARN="$1"
 
     # Get thresholds from configuration function
-    read CPU_THRESHOLD MEM_THRESHOLD DISK_THRESHOLD HTTP5XX_THRESHOLD <<< $(get_alarm_thresholds)
+    read CPU_THRESHOLD MEM_THRESHOLD DISK_THRESHOLD HTTP5XX_THRESHOLD NET_IN_THRESHOLD NET_OUT_THRESHOLD DISKIO_WRITE_THRESHOLD <<< $(get_alarm_thresholds)
 
-    log_info "Creating alarms with thresholds: CPU>${CPU_THRESHOLD}%, Mem<${MEM_THRESHOLD}B, Disk>${DISK_THRESHOLD}%, 5xx>${HTTP5XX_THRESHOLD}"
+    log_info "Creating alarms with thresholds: CPU>${CPU_THRESHOLD}%, Mem<${MEM_THRESHOLD}B, Disk>${DISK_THRESHOLD}%, NetIn>${NET_IN_THRESHOLD}B/5m, NetOut>${NET_OUT_THRESHOLD}B/5m, DiskIOWrite>${DISKIO_WRITE_THRESHOLD}B/5m, 5xx>${HTTP5XX_THRESHOLD}"
 
     # Alarm 1: High CPU Usage
+    # cpu=cpu-total dimension required — CW Agent publishes aggregated series under this key when totalcpu: true
     log_info "Creating High CPU alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HighCPU" \
         --alarm-description "CPU usage exceeds ${CPU_THRESHOLD}% for 5 minutes" \
         --namespace "$NAMESPACE" \
         --metric-name "cpu_usage_user" \
-        --dimensions Name=InstanceId,Value="$INSTANCE_ID" \
+        --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=cpu,Value=cpu-total \
         --statistic Average \
         --period 300 \
         --threshold "$CPU_THRESHOLD" \
@@ -308,7 +311,62 @@ create_alarms() {
         --treat-missing-data notBreaching \
         --region "$AWS_REGION"
 
-    # Alarm 4: HTTP 5xx Errors
+    # Alarm 4: High Network In — catches scraping / brute force against API
+    log_info "Creating High Network In alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-HighNetworkIn" \
+        --alarm-description "Inbound bytes exceed ${NET_IN_THRESHOLD}B over 5 minutes" \
+        --namespace "$NAMESPACE" \
+        --metric-name "net_bytes_recv" \
+        --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=interface,Value=ens5 \
+        --statistic Sum \
+        --period 300 \
+        --threshold "$NET_IN_THRESHOLD" \
+        --comparison-operator GreaterThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data notBreaching \
+        --region "$AWS_REGION"
+
+    # Alarm 5: High Network Out — catches data exfiltration / runaway API responses
+    log_info "Creating High Network Out alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-HighNetworkOut" \
+        --alarm-description "Outbound bytes exceed ${NET_OUT_THRESHOLD}B over 5 minutes" \
+        --namespace "$NAMESPACE" \
+        --metric-name "net_bytes_sent" \
+        --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=interface,Value=ens5 \
+        --statistic Sum \
+        --period 300 \
+        --threshold "$NET_OUT_THRESHOLD" \
+        --comparison-operator GreaterThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data notBreaching \
+        --region "$AWS_REGION"
+
+    # Alarm 6: High Disk IO Write — catches log flooding or runaway DB writes
+    # name=nvme0n1 is the default EBS root device on t3.medium; update if the instance has more volumes
+    log_info "Creating High Disk IO Write alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-HighDiskIOWrite" \
+        --alarm-description "Disk write bytes exceed ${DISKIO_WRITE_THRESHOLD}B over 5 minutes" \
+        --namespace "$NAMESPACE" \
+        --metric-name "diskio_write_bytes" \
+        --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=name,Value=nvme0n1 \
+        --statistic Sum \
+        --period 300 \
+        --threshold "$DISKIO_WRITE_THRESHOLD" \
+        --comparison-operator GreaterThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data notBreaching \
+        --region "$AWS_REGION"
+
+    # Alarm 7: HTTP 5xx Errors
     log_info "Creating HTTP 5xx alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HTTP5xx" \
@@ -325,7 +383,7 @@ create_alarms() {
         --treat-missing-data notBreaching \
         --region "$AWS_REGION"
 
-    # Alarm 5: Any Backend Error — fires immediately on a single ERROR event
+    # Alarm 8: Any Backend Error — fires immediately on a single ERROR event
     log_info "Creating backend error alarm (immediate)..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-BackendErrors" \
@@ -343,7 +401,7 @@ create_alarms() {
         --treat-missing-data notBreaching \
         --region "$AWS_REGION"
 
-    # Alarm 6: Successive Backend Warnings — fires when WARNs appear in 3 of 5
+    # Alarm 9: Successive Backend Warnings — fires when WARNs appear in 3 of 5
     # consecutive 1-minute windows, avoiding noise from isolated warnings.
     log_info "Creating successive backend warnings alarm..."
     aws cloudwatch put-metric-alarm \
@@ -362,7 +420,7 @@ create_alarms() {
         --treat-missing-data notBreaching \
         --region "$AWS_REGION"
 
-    # Alarm 7: Backend Silence — fires when server produces no logs for 5 minutes.
+    # Alarm 10: Backend Silence — fires when server produces no logs for 5 minutes.
     # treat-missing-data=breaching means a CW Agent outage also triggers this alarm,
     # which is correct: both cases (app crash and agent failure) need attention.
     log_info "Creating backend silence alarm..."
@@ -448,16 +506,22 @@ setup_dashboard() {
       "type": "metric",
       "x": 0, "y": 0, "width": 12, "height": 6,
       "properties": {
-        "title": "CPU & Memory",
+        "title": "System Resources",
         "metrics": [
-          ["$NAMESPACE", "cpu_usage_user",   "InstanceId", "$INSTANCE_ID"],
-          ["$NAMESPACE", "mem_used_percent", "InstanceId", "$INSTANCE_ID"]
+          ["$NAMESPACE", "cpu_usage_user",    "InstanceId", "$INSTANCE_ID", "cpu", "cpu-total",                    { "label": "CPU %",  "yAxis": "left",  "stat": "Average" }],
+          ["$NAMESPACE", "mem_used_percent",  "InstanceId", "$INSTANCE_ID",                                         { "label": "Mem %",  "yAxis": "left",  "stat": "Average" }],
+          ["$NAMESPACE", "disk_used_percent", "InstanceId", "$INSTANCE_ID", "path", "/", "fstype", "xfs",           { "label": "Disk %", "yAxis": "left",  "stat": "Average" }],
+          ["$NAMESPACE", "net_bytes_recv",    "InstanceId", "$INSTANCE_ID", "interface", "ens5",                    { "label": "Net In (B/5m)",  "yAxis": "right", "stat": "Sum" }],
+          ["$NAMESPACE", "net_bytes_sent",    "InstanceId", "$INSTANCE_ID", "interface", "ens5",                    { "label": "Net Out (B/5m)", "yAxis": "right", "stat": "Sum" }],
+          ["$NAMESPACE", "diskio_write_bytes","InstanceId", "$INSTANCE_ID", "name", "nvme0n1",                      { "label": "Disk Write (B/5m)", "yAxis": "right", "stat": "Sum" }]
         ],
         "period": 300,
-        "stat": "Average",
         "region": "$AWS_REGION",
         "view": "timeSeries",
-        "yAxis": { "left": { "min": 0, "max": 100 } }
+        "yAxis": {
+          "left":  { "min": 0, "max": 100, "label": "Percent" },
+          "right": { "min": 0, "label": "Bytes" }
+        }
       }
     },
     {
@@ -486,6 +550,9 @@ setup_dashboard() {
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighCPU",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-LowMemory",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighDisk",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighNetworkIn",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighNetworkOut",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HighDiskIOWrite",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HTTP5xx",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendErrors",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendWarnings",
@@ -665,9 +732,9 @@ print_summary() {
     echo ""
     echo "Created Resources:"
     echo "  - SNS Topic: $SNS_TOPIC_NAME"
-    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HTTP5xx, BackendErrors, BackendWarnings, BackendSilence"
+    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HighNetworkIn, HighNetworkOut, HighDiskIOWrite, HTTP5xx, BackendErrors, BackendWarnings, BackendSilence"
     echo "  - Metric Filters: HTTP5xxErrors (nginx), BackendErrors, BackendWarnings, BackendHeartbeat (backend)"
-    echo "  - Dashboard: DantePlanner (metrics + 7 alarms + log insights from /ecs/danteplanner/backend)"
+    echo "  - Dashboard: DantePlanner (System Resources widget + 10 alarms + log insights from /ecs/danteplanner/backend)"
     echo "  - Insights Queries (15): 9 backend, 4 nginx, 2 mysql"
     echo "  - S3 Logging: $S3_BACKUP_BUCKET -> $S3_LOGS_BUCKET"
     echo "  - IAM: CloudWatchAgentServerPolicy attached to instance role"
