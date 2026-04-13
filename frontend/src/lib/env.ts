@@ -18,7 +18,9 @@ const envValidation = envSchema.safeParse(import.meta.env);
 
 if (!envValidation.success) {
   console.error('❌ Environment validation failed:', envValidation.error.format());
-  throw new Error('Invalid environment configuration. Check your .env file.');
+  if (import.meta.env.MODE !== 'test') {
+    throw new Error('Invalid environment configuration. Check your .env file.');
+  }
 }
 
 /**
@@ -31,4 +33,12 @@ if (!envValidation.success) {
  * const clientId = env.VITE_GOOGLE_CLIENT_ID; // Type-safe!
  * ```
  */
-export const env = envValidation.data;
+const testFallback = {
+  VITE_GOOGLE_CLIENT_ID: 'test-client-id',
+  VITE_API_BASE_URL: 'http://localhost:8080',
+  DEV: false,
+  PROD: false,
+  MODE: 'test',
+} as const;
+
+export const env = envValidation.success ? envValidation.data : testFallback;
