@@ -20,6 +20,9 @@ repositories {
     mavenCentral()
 }
 
+// Override tomcat to fix CLIENT_CERT auth bypass CVE
+extra["tomcat.version"] = "10.1.53"
+
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
