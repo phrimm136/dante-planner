@@ -9,6 +9,9 @@ on:
       - 'scripts/ops/**'
       - '.github/workflows/setup-cron.yml'
 
+permissions:
+  contents: read
+
 jobs:
   setup-cron:
     runs-on: ubuntu-latest
