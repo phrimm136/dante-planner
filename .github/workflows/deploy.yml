@@ -184,23 +184,12 @@ jobs:
           GITHUB_REPOSITORY=__GITHUB_REPO__
           CONFIG
 
-          DEPLOY_ERRORS=""
-
           # Critical steps - fail fast
           sudo bash scripts/deploy/install-prerequisites.sh || { echo "[FATAL] Prerequisites failed at exit $?"; exit 1; }
           sudo -u ec2-user bash scripts/deploy/setup-env.sh || { echo "[FATAL] Environment setup failed at exit $?"; exit 1; }
           sudo -u ec2-user bash scripts/deploy/deploy-containers.sh "__CHANGED_SERVICES__" || { echo "[FATAL] Container deploy failed at exit $?"; exit 1; }
 
-          # Non-critical steps - collect errors, continue
-          sudo -u ec2-user bash scripts/deploy/setup-cron.sh || DEPLOY_ERRORS="${DEPLOY_ERRORS}cron: exit $?\n"
-          sudo -u ec2-user bash scripts/deploy/setup-shell.sh || DEPLOY_ERRORS="${DEPLOY_ERRORS}shell: exit $?\n"
-
           rm -f /tmp/deploy-config.env
-
-          if [ -n "$DEPLOY_ERRORS" ]; then
-            echo "[WARN] Non-critical failures:"
-            echo -e "$DEPLOY_ERRORS"
-          fi
           EOF
 
           # Replace placeholders with actual values from env vars
