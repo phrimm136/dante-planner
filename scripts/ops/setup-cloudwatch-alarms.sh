@@ -439,6 +439,43 @@ create_alarms() {
         --treat-missing-data breaching \
         --region "$AWS_REGION"
 
+    # Alarm 11: MySQL Backup Silence — daily S3 dump must emit BackupSuccess once per 24h.
+    # breaching = missing datapoint treated as alarm, so a failed/absent cron fires immediately.
+    log_info "Creating MySQL backup silence alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-MysqlBackupSilence" \
+        --alarm-description "No successful MySQL backup in the last 24 hours" \
+        --namespace "$NAMESPACE" \
+        --metric-name "BackupSuccess" \
+        --dimensions Name=Job,Value=MysqlDump \
+        --statistic Sum \
+        --period 86400 \
+        --threshold 1 \
+        --comparison-operator LessThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data breaching \
+        --region "$AWS_REGION"
+
+    # Alarm 12: CloudWatch Log Export Silence — daily CW→S3 export heartbeat.
+    log_info "Creating CloudWatch export silence alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-CwExportSilence" \
+        --alarm-description "No successful CloudWatch log export in the last 24 hours" \
+        --namespace "$NAMESPACE" \
+        --metric-name "BackupSuccess" \
+        --dimensions Name=Job,Value=CwLogExport \
+        --statistic Sum \
+        --period 86400 \
+        --threshold 1 \
+        --comparison-operator LessThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data breaching \
+        --region "$AWS_REGION"
+
     log_info "All alarms created successfully"
 }
 
@@ -732,7 +769,7 @@ print_summary() {
     echo ""
     echo "Created Resources:"
     echo "  - SNS Topic: $SNS_TOPIC_NAME"
-    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HighNetworkIn, HighNetworkOut, HighDiskIOWrite, HTTP5xx, BackendErrors, BackendWarnings, BackendSilence"
+    echo "  - Alarms: HighCPU, LowMemory, HighDisk, HighNetworkIn, HighNetworkOut, HighDiskIOWrite, HTTP5xx, BackendErrors, BackendWarnings, BackendSilence, MysqlBackupSilence, CwExportSilence"
     echo "  - Metric Filters: HTTP5xxErrors (nginx), BackendErrors, BackendWarnings, BackendHeartbeat (backend)"
     echo "  - Dashboard: DantePlanner (System Resources widget + 10 alarms + log insights from /ecs/danteplanner/backend)"
     echo "  - Insights Queries (15): 9 backend, 4 nginx, 2 mysql"

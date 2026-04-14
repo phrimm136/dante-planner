@@ -84,4 +84,11 @@ for LOG_GROUP in "${LOG_GROUPS[@]}"; do
     wait_for_export "$TASK_ID" "$LOG_GROUP"
 done
 
+aws cloudwatch put-metric-data \
+    --namespace "DantePlanner" \
+    --metric-name "BackupSuccess" \
+    --dimensions "Job=CwLogExport" \
+    --value 1 \
+    --region "$AWS_DEFAULT_REGION"
+
 echo "[$(date -u)] CloudWatch log export complete"

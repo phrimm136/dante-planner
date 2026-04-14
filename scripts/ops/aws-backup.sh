@@ -12,8 +12,8 @@ set -euo pipefail
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 export AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION:-us-west-2}"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_DIR="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
+SCRIPT_DIR="$PROJECT_DIR/scripts/ops"
 BACKUP_DIR="/tmp/danteplanner-backups"
 S3_BUCKET="${S3_BACKUP_BUCKET:-danteplanner-backups}"
 RETENTION_DAYS=7
@@ -66,6 +66,13 @@ else
     echo "[$(date)] ERROR: S3 upload failed"
     exit 1
 fi
+
+aws cloudwatch put-metric-data \
+    --namespace "DantePlanner" \
+    --metric-name "BackupSuccess" \
+    --dimensions "Job=MysqlDump" \
+    --value 1 \
+    --region "$AWS_DEFAULT_REGION"
 
 # Clean up local backup
 rm -f "$BACKUP_FILE"
