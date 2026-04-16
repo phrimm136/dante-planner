@@ -1,9 +1,9 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
-    id("org.owasp.dependencycheck") version "12.2.0"
+    id("org.owasp.dependencycheck") version "12.2.1"
     jacoco
 }
 
@@ -28,7 +28,7 @@ dependencyManagement {
         // Override log4j to fix CVE-2025-68161
         mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
         // Override Spring Security to fix CVE-2026-22732
-        mavenBom("org.springframework.security:spring-security-bom:6.5.9")
+        mavenBom("org.springframework.security:spring-security-bom:7.0.4")
     }
 }
 
@@ -60,7 +60,7 @@ dependencies {
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("org.jsoup:jsoup:1.22.1")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.38.0")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
