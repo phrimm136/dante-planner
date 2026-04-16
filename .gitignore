@@ -18,6 +18,7 @@ logs/
 # Claude
 .claude/tsc-cache/
 .claude/logs/
+.claude/projects/
 .playwright-mcp/
 
 # Backup files

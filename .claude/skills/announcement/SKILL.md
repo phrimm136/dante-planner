@@ -123,12 +123,21 @@ git commit -m "data: add <date> announcement"
 3. **Tag the supermodule commit** with format `v{YY}{MM}{DD}`:
 ```bash
 git tag v<YYMMDD>
-git push origin v<YYMMDD>
 ```
 Example: date `2026-04-01` → tag `v260401`.
 
 If the tag already exists (multiple announcements same day), append a sequential suffix: `v260401-2`.
 
-## Step 7 — Confirm
+## Step 7 — Push
+
+Push the static submodule first, then the supermodule `dev` branch, then the tag. Submodule must go first so the pointer resolves for anyone pulling.
+
+```bash
+git -C static push origin main
+git push origin dev
+git push origin v<YYMMDD>
+```
+
+## Step 8 — Confirm
 
 List all 5 files changed, display the generated ID and tag name.
