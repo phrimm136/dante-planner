@@ -87,11 +87,20 @@ if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vi
         echo "" >&2
         echo "Command: $command" >&2
         echo "" >&2
-        echo "Redirect pattern:" >&2
-        echo '  yarn --cwd frontend vitest run > /tmp/fe-test-<session-id>-<suffix>.log 2>&1' >&2
-        echo '  yarn --cwd frontend tsc --noEmit > /tmp/fe-typecheck-<session-id>-<suffix>.log 2>&1' >&2
-        echo '  yarn --cwd frontend build > /tmp/fe-build-<session-id>-<suffix>.log 2>&1' >&2
-        echo '  ./gradlew -p backend test > /tmp/be-test-<session-id>-<suffix>.log 2>&1' >&2
+        echo "Redirect pattern (append && echo PASS / || echo FAIL so you can grep the result without using \$?):" >&2
+        echo '  yarn --cwd frontend vitest run > /tmp/fe-test-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/fe-test-<session-id>-<suffix>.log || echo FAIL >> /tmp/fe-test-<session-id>-<suffix>.log' >&2
+        echo '  yarn --cwd frontend tsc --noEmit > /tmp/fe-typecheck-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/fe-typecheck-<session-id>-<suffix>.log || echo FAIL >> /tmp/fe-typecheck-<session-id>-<suffix>.log' >&2
+        echo '  yarn --cwd frontend build > /tmp/fe-build-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/fe-build-<session-id>-<suffix>.log || echo FAIL >> /tmp/fe-build-<session-id>-<suffix>.log' >&2
+        echo '  ./gradlew -p backend test > /tmp/be-test-<session-id>-<suffix>.log 2>&1 && echo PASS >> /tmp/be-test-<session-id>-<suffix>.log || echo FAIL >> /tmp/be-test-<session-id>-<suffix>.log' >&2
+        echo "" >&2
+        echo "DO NOT use shell simple expansions for <session-id> or <suffix> — they trigger consent prompts and block the redirect:" >&2
+        echo '  BAD:  > /tmp/fe-test-$RANDOM-run.log' >&2
+        echo '  BAD:  > /tmp/fe-test-$(date +%s)-run.log' >&2
+        echo '  BAD:  > /tmp/fe-test-$$-run.log' >&2
+        echo '  GOOD: > /tmp/fe-test-s01-initial.log   (hardcoded literal token)' >&2
+        echo "" >&2
+        echo "DO NOT use \$? to check the exit code — it is a parameter expansion and also triggers a consent prompt." >&2
+        echo "Use the && echo PASS / || echo FAIL chain shown above, then grep the log for PASS/FAIL." >&2
         echo "" >&2
         echo "Then grep the latest file for errors — do not re-run to see output:" >&2
         echo "  ls /tmp/${prefix:-<prefix>}-*.log | sort | tail -1 | xargs grep -E 'FAIL|ERROR|error TS' | tail -30" >&2
