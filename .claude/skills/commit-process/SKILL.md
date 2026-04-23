@@ -29,7 +29,11 @@ docker compose -f backend/docker-compose.local.yml down -v
 
 If any check fails, diagnose and fix before proceeding. Do not skip checks — a "quick fix" that skips validation is how production breaks.
 
-## Step 2 — Create a Feature Branch
+## Step 2 — Prepare the Branch
+
+### Single-tree
+
+Create a feature branch from `dev`:
 
 ```
 git checkout -b <type>/<short-description>
@@ -47,6 +51,26 @@ git checkout -b <type>/<short-description>
 Branch names use lowercase kebab-case, under 40 characters. The name should make the PR's purpose obvious at a glance.
 
 **Examples:** `feat/add-identity-card`, `fix/refresh-token-rotation-race`, `data/v260317`
+
+### Worktree — sync with dev before committing
+
+The worktree's branch pre-exists from setup. Before committing, fast-forward it to `dev`'s current tip so your commits land linearly on top. While you were working, `dev` in the main worktree may have advanced; syncing now lets you resolve conflicts against the working tree (if any) rather than against pinned commits — and makes the later FF-merge in Step 5 trivial.
+
+```bash
+# Fetch latest dev from origin (in case the main worktree hasn't been updated)
+git -C <worktree-path> fetch origin dev:dev
+
+# Fast-forward the worktree branch to dev's tip
+git -C <worktree-path> merge --ff-only dev
+```
+
+`--ff-only` is mandatory (per `feedback_no_merge_commits`). If FF fails because you've already made local commits that diverge, rebase instead: `git -C <worktree-path> rebase dev`.
+
+After this step, your worktree branch == `dev`'s tip. New commits go on top linearly.
+
+**Why `dev:dev` fetch syntax:** it fetches origin's `dev` and updates your local `dev` ref directly, even though `dev` is checked out in the main worktree. You're not touching the main worktree's checkout — just aligning the ref to origin.
+
+**Why you can't `git checkout dev` inside the worktree:** a git worktree holds an exclusive checkout. `dev` is already checked out in the main worktree, so `git checkout dev` inside a feature worktree errors with "already checked out". Use `git -C <main-repo> ...` when you need to operate on dev directly.
 
 ## Step 3 — Write the Commit Message
 
@@ -183,10 +207,24 @@ EOF
 )"
 ```
 
-## Step 5 — Return to Main
+## Step 5 — Wrap Up
+
+### Single-tree
 
 ```
-git checkout main
+git checkout dev
 ```
 
 The feature branch is ready for PR creation (separate workflow).
+
+### Worktree — fast-forward dev from the main worktree
+
+Because Step 2 (Worktree variant) aligned the worktree branch with `dev` before committing, your commits now sit linearly on top of `dev`'s tip. Move `dev` forward to include them:
+
+```bash
+git -C <main-repo-path> merge --ff-only <worktree-branch-name>
+```
+
+`--ff-only` enforces a no-merge-commit, linear history. If it errors, someone pushed to `dev` between your Step 2 sync and now — re-run the Step 2 worktree sync (fetch + ff-merge dev into worktree) and try again.
+
+The worktree stays checked out on its branch; no need to return anywhere.
