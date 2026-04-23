@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 interface AbEventCardLinkProps {
   eventId: string
   hasImage: boolean
+  illustId?: string
   className?: string
 }
 
@@ -16,6 +17,7 @@ interface AbEventCardLinkProps {
 export const AbEventCardLink = memo(function AbEventCardLink({
   eventId,
   hasImage,
+  illustId,
   className,
 }: AbEventCardLinkProps) {
   return (
@@ -27,6 +29,7 @@ export const AbEventCardLink = memo(function AbEventCardLink({
       <AbEventCard
         eventId={eventId}
         hasImage={hasImage}
+        illustId={illustId}
         enableHoverHighlight
       />
     </Link>

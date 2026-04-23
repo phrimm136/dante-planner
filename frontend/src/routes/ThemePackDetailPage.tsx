@@ -265,6 +265,7 @@ function ExclusiveEventsSection({
                 <AbEventCard
                   eventId={eid}
                   hasImage={entry.hasImage}
+                  illustId={entry.illustId}
                   enableHoverHighlight
                 />
               </div>
@@ -327,6 +328,7 @@ function AllEvents({ eventPool }: { eventPool: number[] }) {
               <AbEventCard
                 eventId={eid}
                 hasImage={entry.hasImage}
+                illustId={entry.illustId}
                 enableHoverHighlight
               />
             </div>

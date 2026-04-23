@@ -25,4 +25,5 @@ export interface AbEventListItem {
   relatedEgoGifts: string[]
   relatedThemePacks: string[]
   hasImage: boolean
+  illustId?: string
 }

@@ -89,6 +89,7 @@ export function AbEventList({
             <AbEventCardLink
               eventId={eventId}
               hasImage={entry.hasImage}
+              illustId={entry.illustId}
             />
           </ScaledCardWrapper>
         ))}

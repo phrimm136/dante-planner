@@ -29,8 +29,16 @@ import type { AbEventChoice } from '@/schemas/AbEventSchemas'
 // Left Column Components
 // =============================================================================
 
-function EventImage({ eventId, hasImage }: { eventId: string; hasImage: boolean }) {
-  if (!hasImage) {
+function EventImage({
+  eventId,
+  hasImage,
+  illustId,
+}: {
+  eventId: string
+  hasImage: boolean
+  illustId?: string
+}) {
+  if (!hasImage && !illustId) {
     return (
       <div className="w-full aspect-[3/2] rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-sm">
         {eventId}
@@ -39,7 +47,7 @@ function EventImage({ eventId, hasImage }: { eventId: string; hasImage: boolean 
   }
   return (
     <img
-      src={getAbEventImagePath(eventId)}
+      src={getAbEventImagePath(illustId ?? eventId)}
       alt=""
       className="w-full rounded-lg"
     />
@@ -150,7 +158,7 @@ function AbEventDetailContent() {
 
   const leftColumn = (
     <div className="space-y-4">
-      <EventImage eventId={id} hasImage={specEntry?.hasImage ?? false} />
+      <EventImage eventId={id} hasImage={specEntry?.hasImage ?? false} illustId={specEntry?.illustId} />
 
       {i18n.desc && (
         <div className="text-sm text-muted-foreground whitespace-pre-line border rounded p-4">

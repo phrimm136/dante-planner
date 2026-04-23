@@ -15,6 +15,7 @@ export const AbEventSpecListEntrySchema = z.object({
   relatedEgoGifts: z.array(z.string()),
   relatedThemePacks: z.array(z.string()),
   hasImage: z.boolean(),
+  illustId: z.string().optional(),
 })
 
 export const AbEventSpecListSchema = z.record(z.string(), AbEventSpecListEntrySchema)
