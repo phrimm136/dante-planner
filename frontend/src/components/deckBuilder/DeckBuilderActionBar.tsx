@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Upload, Download, Edit } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -20,8 +21,11 @@ interface DeckBuilderActionBarProps {
  * Shared action bar for DeckBuilder Summary and Pane
  * Contains Import, Export, Reset Order buttons
  * Optionally shows "Edit Deck" button in Summary view
+ *
+ * memo: render only depends on boolean flags; callback identities
+ * change across parent renders but behavior is stable.
  */
-export function DeckBuilderActionBar({
+export const DeckBuilderActionBar = memo(function DeckBuilderActionBar({
   onImport,
   onExport,
   onResetOrder,
@@ -58,4 +62,10 @@ export function DeckBuilderActionBar({
       )}
     </div>
   )
-}
+}, (prev, next) => {
+  return (
+    prev.showEditDeck === next.showEditDeck &&
+    prev.trackerMode === next.trackerMode
+  )
+  // Callbacks excluded — identities change across parent renders, behavior stable.
+})

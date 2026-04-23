@@ -10,6 +10,7 @@ interface UnitKeywordDropdownProps {
   onSelectionChange: (unitKeywords: Set<string>) => void
   /** Entity count per unit keyword for display */
   counts?: Record<string, number>
+  className?: string
 }
 
 /**
@@ -45,6 +46,7 @@ export function UnitKeywordDropdown({
   selectedUnitKeywords,
   onSelectionChange,
   counts,
+  className,
 }: UnitKeywordDropdownProps) {
   const { t } = useTranslation(['database', 'common'])
   const { unitKeywordsI18n } = useFilterI18nData()
@@ -70,6 +72,7 @@ export function UnitKeywordDropdown({
       onSelectionChange={onSelectionChange}
       placeholder={t('filters.unitKeywords', 'Unit Keywords')}
       searchPlaceholder={t('filters.searchUnitKeywords', 'Search Unit Keywords...')}
+      className={className}
     />
   )
 }

@@ -13,12 +13,12 @@ export const EntityToggle = memo(function EntityToggle({ mode, onModeChange }: E
   const { t } = useTranslation('planner')
 
   return (
-    <div className="flex gap-1 p-2 h-14 bg-card border border-border rounded-md">
+    <div className="flex gap-1 p-1 bg-card border border-border rounded-md">
       <Button
         variant="ghost"
         size="sm"
         className={cn(
-          'flex-1 h-full transition-colors',
+          'transition-colors',
           mode === 'identity' && 'bg-background shadow-sm'
         )}
         onClick={() => { onModeChange('identity') }}
@@ -29,7 +29,7 @@ export const EntityToggle = memo(function EntityToggle({ mode, onModeChange }: E
         variant="ghost"
         size="sm"
         className={cn(
-          'flex-1 h-full transition-colors',
+          'transition-colors',
           mode === 'ego' && 'bg-background shadow-sm'
         )}
         onClick={() => { onModeChange('ego') }}

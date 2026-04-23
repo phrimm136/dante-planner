@@ -1,5 +1,5 @@
 import type { EGOType } from './EGOTypes'
-import type { Affinity, OffensiveSkillSlot, SkillAttributeType } from '@/lib/constants'
+import type { Affinity, AtkType, DefType, OffensiveSkillSlot, Season, SkillAttributeType } from '@/lib/constants'
 
 /**
  * Uptie tier for identities (1-4)
@@ -105,6 +105,22 @@ export interface DeckFilterState {
   selectedSinners: Set<string>
   /** Selected skill keywords for filtering */
   selectedKeywords: Set<string>
+  /** Selected skill attribute types (affinities) */
+  selectedAttributes: Set<SkillAttributeType>
+  /** Selected attack types */
+  selectedAtkTypes: Set<AtkType>
+  /** Selected defense types — applied in identity mode only */
+  selectedDefTypes: Set<DefType>
+  /** Selected identity ranks — applied in identity mode only */
+  selectedRaritys: Set<number>
+  /** Selected EGO types — applied in EGO mode only */
+  selectedEgoTypes: Set<EGOType>
+  /** Selected seasons */
+  selectedSeasons: Set<Season>
+  /** Selected unit keywords — applied in identity mode only */
+  selectedUnitKeywords: Set<string>
+  /** Selected additional (battle) keywords */
+  selectedBattleKeywords: Set<string>
   /** Free-text search query */
   searchQuery: string
 }

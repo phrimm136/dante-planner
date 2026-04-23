@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { SINNERS, CARD_GRID } from '@/lib/constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { SkillData } from './SinnerGrid'
@@ -24,8 +24,12 @@ const EMPTY_SKILL_DATA: SkillData = { affinities: [], atkTypes: [] }
  * Compact grid of 12 identity thumbnails for the deck builder Identity tab.
  * Each thumbnail shows profile portrait, uptie icon, level, deployment number,
  * and 3 skill affinity boxes with attack type icons.
+ *
+ * memo: parent `DeckBuilderContent` re-renders on card hover due to
+ * Compiler element-cache invalidation; shallow-equality memo here
+ * blocks that cascade when props haven't actually changed.
  */
-export function CompactIdentityRow({
+export const CompactIdentityRow = memo(function CompactIdentityRow({
   equipment,
   deploymentOrder,
   skillDataMap,
@@ -156,6 +160,15 @@ export function CompactIdentityRow({
       })}
     </div>
   )
-}
+}, (prev, next) => {
+  return (
+    prev.equipment === next.equipment &&
+    prev.deploymentOrder === next.deploymentOrder &&
+    prev.skillDataMap === next.skillDataMap &&
+    prev.readOnly === next.readOnly
+  )
+  // onToggleDeploy excluded — callback identity can change across parent renders,
+  // but behavior is stable. Matches TierLevelSelector.tsx:220 precedent.
+})
 
 export default CompactIdentityRow

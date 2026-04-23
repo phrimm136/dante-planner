@@ -1,31 +1,23 @@
-import { useMemo, startTransition, useState, useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES, CARD_GRID, EGO_TYPES } from '@/lib/constants'
+import { useMemo, useCallback, startTransition, useState, useEffect, useRef } from 'react'
+import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, SECTION_STYLES, EGO_TYPES } from '@/lib/constants'
 import { createDefaultDeckFilterState } from '@/stores/usePlannerEditorStore'
 import { useIdentityListData } from '@/hooks/useIdentityListData'
 import { useEGOListData } from '@/hooks/useEGOListData'
-import { useSearchMappings } from '@/hooks/useSearchMappings'
-import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
-import type { UptieTier, ThreadspinTier, DeckState, EntityMode, SinnerEquipment, DeckFilterState } from '@/types/DeckTypes'
+import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { usePlannerEditorStoreSafe, usePlannerEditorStoreApiSafe } from '@/stores/usePlannerEditorStore'
+import { matchesDeckFilter } from '@/lib/deckFilter'
+import type { UptieTier, ThreadspinTier, DeckState, SinnerEquipment, DeckFilterState } from '@/types/DeckTypes'
 import type { IdentityListItem } from '@/types/IdentityTypes'
 import type { EGOListItem } from '@/types/EGOTypes'
-import type { Keyword } from '@/lib/constants'
-import { getSinnerFromId, getSinnerCodeFromId } from '@/lib/utils'
-import { getSelectedIndicatorPath } from '@/lib/assetPaths'
+import { getSinnerCodeFromId } from '@/lib/utils'
 import { type SkillData } from './SinnerGrid'
 import { CompactIdentityRow } from './CompactIdentityRow'
 import { CompactEgoGrid } from './CompactEgoGrid'
 import { StatusViewer } from './StatusViewer'
 import { DeckBuilderActionBar } from './DeckBuilderActionBar'
-import { EntityToggle } from './EntityToggle'
-import { TierLevelSelector } from './TierLevelSelector'
-import { IdentityCard } from '@/components/identity/IdentityCard'
-import { EGOCard } from '@/components/ego/EGOCard'
-import { SinnerFilter } from '@/components/filter/SinnerFilter'
-import { KeywordFilter } from '@/components/filter/KeywordFilter'
-import { SearchBar } from '@/components/common/SearchBar'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { DeckFilterBar } from './DeckFilterBar'
+import { IdentityGrid } from './IdentityGrid'
+import { EgoGrid } from './EgoGrid'
 
 /** Base props shared by both modes */
 interface DeckBuilderContentBaseProps {
@@ -77,7 +69,6 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const storeDeploymentOrder = usePlannerEditorStoreSafe((s) => s.deploymentOrder)
   const storeSetDeploymentOrder = usePlannerEditorStoreSafe((s) => s.setDeploymentOrder)
   const storeFilterState = usePlannerEditorStoreSafe((s) => s.deckFilterState)
-  const storeSetFilterState = usePlannerEditorStoreSafe((s) => s.setDeckFilterState)
 
   // Use override if provided (tracker mode), otherwise use store (editor mode)
   const equipment = equipmentOverride ?? storeEquipment!
@@ -86,12 +77,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const setDeploymentOrder = setDeploymentOrderOverride ?? storeSetDeploymentOrder!
 
   // Filter state: Use local state in tracker mode, store in editor mode
-  const [localFilterState, setLocalFilterState] = useState<DeckFilterState>(createDefaultDeckFilterState)
+  const [localFilterState] = useState<DeckFilterState>(createDefaultDeckFilterState)
   const isOverrideMode = equipmentOverride !== undefined
   const filterState = isOverrideMode ? localFilterState : (storeFilterState ?? createDefaultDeckFilterState())
-  const setFilterState = isOverrideMode ? setLocalFilterState : (storeSetFilterState ?? (() => {}))
-
-  const { t } = useTranslation(['planner', 'common'])
 
   // Scroll position preservation
   const identityScrollRef = useRef<HTMLDivElement>(null)
@@ -157,19 +145,48 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const sortingEgoIds = sortingSnapshot?.egoIds ?? equippedEgoIds
 
 
-  // Progressive rendering - render items in batches to avoid blocking main thread
-  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE)
+  // Inactive tab renders nothing until after first paint; latches true until close
+  const [hasWarmedInactive, setHasWarmedInactive] = useState(false)
+
+  // Store API for imperative progressive-count updates (no subscription → no re-render here)
+  const storeApi = usePlannerEditorStoreApiSafe()
 
   // Determine if component is "active" for progressive loading
   const isActive = isDialogMode ? open : true
 
-  // Reset visible count only when component becomes active (not on filter changes)
-  // Filter changes use CSS hiding pattern instead of re-rendering
+  // Reset progressive state on unmount so the next mount starts cold.
+  // Cleanup runs when the dialog closes (DialogContent unmounts).
+  // Doing this on unmount (not on mount) ensures the next mount's first
+  // render already sees deckVisibleCount=BATCH_SIZE, avoiding a full-list
+  // render before a post-commit reset effect can fire.
   useEffect(() => {
-    if (isActive) {
-      setVisibleCount(BATCH_SIZE)
+    if (!isActive) return
+    setHasWarmedInactive(false)
+    return () => {
+      storeApi?.getState().setDeckVisibleCount(BATCH_SIZE)
     }
-  }, [isActive])
+  }, [isActive, storeApi])
+
+  // Warm up the inactive tab after first paint, then persist it for the session
+  useEffect(() => {
+    if (!isActive || hasWarmedInactive) return
+    const raf = requestAnimationFrame(() => {
+      const ric = (window as typeof window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+        cancelIdleCallback?: (id: number) => void
+      }).requestIdleCallback
+      if (ric) {
+        const id = ric(() => setHasWarmedInactive(true), { timeout: 500 })
+        return () => {
+          const cic = (window as typeof window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback
+          if (cic) cic(id)
+        }
+      }
+      const timer = setTimeout(() => setHasWarmedInactive(true), 100)
+      return () => clearTimeout(timer)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [isActive, hasWarmedInactive])
 
   // Restore scroll position after equipment changes
   // Effect runs after render, so DOM is ready - no rAF needed
@@ -249,7 +266,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
 
   // Sort identities ONCE (stable order - sorting doesn't change on filter)
   // Uses snapshot of equipped IDs to keep equipped items at top
-  const { keywordToValue, unitKeywordToValue } = useSearchMappings()
+  const searchMappings = useSearchMappingsDeferred()
 
   const sortedIdentities = useMemo(() => {
     return [...identities].sort((a, b) => {
@@ -292,98 +309,43 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const visibleIdentityIds = useMemo(() => {
     const ids = new Set<string>()
     for (const identity of sortedIdentities) {
-      // Sinner filter
-      if (filterState.selectedSinners.size > 0 && !filterState.selectedSinners.has(getSinnerFromId(identity.id))) {
-        continue
-      }
-      // Keyword filter
-      if (filterState.selectedKeywords.size > 0) {
-        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => identity.skillKeywordList.includes(kw))
-        if (!hasAllKeywords) continue
-      }
-      // Search filter
-      if (filterState.searchQuery) {
-        const lowerQuery = filterState.searchQuery.toLowerCase()
-        const nameMatch = identity.name?.toLowerCase().includes(lowerQuery) ?? false
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, internalCodes]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return internalCodes.some((code) => identity.skillKeywordList.includes(code))
-          }
-          return false
-        })
-        const unitKeywordMatch = Array.from(unitKeywordToValue.entries()).some(([naturalLang, internalCodes]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return internalCodes.some((code) => identity.unitKeywordList.includes(code))
-          }
-          return false
-        })
-        if (!nameMatch && !keywordMatch && !unitKeywordMatch) continue
-      }
+      if (!matchesDeckFilter(identity, filterState, 'identity', searchMappings)) continue
       ids.add(identity.id)
     }
     return ids
-  }, [sortedIdentities, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue, unitKeywordToValue])
+  }, [sortedIdentities, filterState, searchMappings])
 
   const visibleEgoIds = useMemo(() => {
     const ids = new Set<string>()
     for (const ego of sortedEgos) {
-      // Sinner filter
-      if (filterState.selectedSinners.size > 0 && !filterState.selectedSinners.has(getSinnerFromId(ego.id))) {
-        continue
-      }
-      // Keyword filter
-      if (filterState.selectedKeywords.size > 0) {
-        const hasAllKeywords = Array.from(filterState.selectedKeywords).every((kw) => ego.skillKeywordList.includes(kw as Keyword))
-        if (!hasAllKeywords) continue
-      }
-      // Search filter
-      if (filterState.searchQuery) {
-        const lowerQuery = filterState.searchQuery.toLowerCase()
-        const nameMatch = ego.name?.toLowerCase().includes(lowerQuery) ?? false
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, bracketedValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bv) => ego.skillKeywordList.includes(bv as Keyword))
-          }
-          return false
-        })
-        if (!nameMatch && !keywordMatch) continue
-      }
+      if (!matchesDeckFilter(ego, filterState, 'ego', searchMappings)) continue
       ids.add(ego.id)
     }
     return ids
-  }, [sortedEgos, filterState.selectedSinners, filterState.selectedKeywords, filterState.searchQuery, keywordToValue])
+  }, [sortedEgos, filterState, searchMappings])
 
   // Progressive rendering: render cards incrementally
   const totalIdentities = sortedIdentities.length
   const totalEgos = sortedEgos.length
 
-  // Progressive loading effect - load more items until all are visible
+  // Progressive loading via rAF chain - imperative store writes (no subscription here)
   useEffect(() => {
-    const totalCount = filterState.entityMode === 'identity' ? totalIdentities : totalEgos
-    if (visibleCount >= totalCount) return
+    if (!isActive || !storeApi) return
+    const totalCount = Math.max(totalIdentities, totalEgos)
+    let raf: number | null = null
 
-    let mounted = true
-    const frame = requestAnimationFrame(() => {
-      if (mounted) {
-        setVisibleCount((prev) => Math.min(prev + BATCH_SIZE, totalCount))
-      }
-    })
-
-    return () => {
-      mounted = false
-      cancelAnimationFrame(frame)
+    const tick = () => {
+      const current = storeApi.getState().deckVisibleCount
+      if (current >= totalCount) return
+      storeApi.getState().setDeckVisibleCount(Math.min(current + BATCH_SIZE, totalCount))
+      raf = requestAnimationFrame(tick)
     }
-  }, [visibleCount, totalIdentities, totalEgos, filterState.entityMode])
 
-  // Slice arrays for progressive rendering
-  const displayIdentities = useMemo(
-    () => sortedIdentities.slice(0, filterState.entityMode === 'identity' ? visibleCount : sortedIdentities.length),
-    [sortedIdentities, visibleCount, filterState.entityMode]
-  )
-  const displayEgos = useMemo(
-    () => sortedEgos.slice(0, filterState.entityMode === 'ego' ? visibleCount : sortedEgos.length),
-    [sortedEgos, visibleCount, filterState.entityMode]
-  )
+    raf = requestAnimationFrame(tick)
+    return () => {
+      if (raf !== null) cancelAnimationFrame(raf)
+    }
+  }, [isActive, totalIdentities, totalEgos, storeApi])
 
   // Construct deckState for StatusViewer
   const deckState: DeckState = useMemo(() => ({
@@ -402,7 +364,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   }, [egos])
 
   // Handlers
-  const handleToggleDeploy = (sinnerIndex: number) => {
+  const handleToggleDeploy = useCallback((sinnerIndex: number) => {
     startTransition(() => {
       const currentIndex = deploymentOrder.indexOf(sinnerIndex)
       if (currentIndex >= 0) {
@@ -413,7 +375,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
         setDeploymentOrder([...deploymentOrder, sinnerIndex])
       }
     })
-  }
+  }, [deploymentOrder, setDeploymentOrder])
 
   const handleEquipIdentity = (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
     // Save scroll position before state update
@@ -525,30 +487,6 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     })
   }
 
-  const handleEntityModeChange = (mode: EntityMode) => {
-    startTransition(() => {
-      setFilterState((prev) => ({ ...prev, entityMode: mode }))
-    })
-  }
-
-  const handleSinnersChange = (sinners: Set<string>) => {
-    startTransition(() => {
-      setFilterState((prev) => ({ ...prev, selectedSinners: sinners }))
-    })
-  }
-
-  const handleKeywordsChange = (keywords: Set<string>) => {
-    startTransition(() => {
-      setFilterState((prev) => ({ ...prev, selectedKeywords: keywords }))
-    })
-  }
-
-  const handleSearchChange = (query: string) => {
-    startTransition(() => {
-      setFilterState((prev) => ({ ...prev, searchQuery: query }))
-    })
-  }
-
   return (
     <div className="space-y-6">
       {/* Sinner Grid */}
@@ -579,110 +517,32 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
 
       {/* Entity Toggle and List */}
       <div className={`${SECTION_STYLES.container} space-y-4`}>
-        <div className="flex flex-col gap-3">
-          {/* Row 1: Toggle */}
-          <EntityToggle mode={filterState.entityMode} onModeChange={handleEntityModeChange} />
-          {/* Row 2: Filters */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <SinnerFilter
-              selectedSinners={filterState.selectedSinners}
-              onSelectionChange={handleSinnersChange}
-            />
-            <KeywordFilter
-              selectedKeywords={filterState.selectedKeywords}
-              onSelectionChange={handleKeywordsChange}
-            />
-          </div>
-          {/* Row 3: Search bar */}
-          <SearchBar
-            searchQuery={filterState.searchQuery}
-            onSearchChange={handleSearchChange}
-            placeholder={filterState.entityMode === 'identity'
-              ? t('deckBuilder.identitySearchPlaceholder')
-              : t('deckBuilder.egoSearchPlaceholder')}
-          />
-        </div>
+        <DeckFilterBar />
 
-        {/* Both tabs rendered, toggle visibility via CSS 'hidden' class */}
+        {/* Grids own their progressive-render state via deckVisibleCount store subscription */}
         {/* Cards are rendered once and filtered via CSS - no React reconciliation on filter changes */}
-        <div className={filterState.entityMode === 'identity' ? '' : 'hidden'}>
-          <div ref={identityScrollRef} className="bg-muted border border-border rounded-md p-3 lg:p-6 max-h-[600px] overflow-y-auto">
-            <div className="pt-4">
-              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.IDENTITY} cardHeight={CARD_GRID.HEIGHT.IDENTITY} mobileScale={0.8} gap={8}>
-                {displayIdentities.map((identity) => {
-                  const isSelected = equippedIdentityIds.has(identity.id)
-                  const isVisible = visibleIdentityIds.has(identity.id)
-                  return (
-                    <div key={identity.id} className={isVisible ? '' : 'hidden'}>
-                      <TierLevelSelector
-                        mode="identity"
-                        entityId={identity.id}
-                        currentUptie={4}
-                        currentLevel={MAX_LEVEL}
-                        isSelected={isSelected}
-                        onConfirm={handleEquipIdentity}
-                      >
-                        <ScaledCardWrapper mobileScale={0.8} cardWidth={CARD_GRID.WIDTH.IDENTITY} cardHeight={CARD_GRID.HEIGHT.IDENTITY}>
-                          <IdentityCard
-                            identity={identity}
-                            isSelected={isSelected}
-                            overlay={isSelected ? (
-                              <img
-                                src={getSelectedIndicatorPath()}
-                                alt="Selected"
-                                className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
-                              />
-                            ) : undefined}
-                          />
-                        </ScaledCardWrapper>
-                      </TierLevelSelector>
-                    </div>
-                  )
-                })}
-              </ResponsiveCardGrid>
-            </div>
-          </div>
-        </div>
+        {(filterState.entityMode === 'identity' || hasWarmedInactive) && (
+          <IdentityGrid
+            sortedIdentities={sortedIdentities}
+            visibleIds={visibleIdentityIds}
+            equippedIds={equippedIdentityIds}
+            onEquip={handleEquipIdentity}
+            scrollRef={identityScrollRef}
+            isActive={filterState.entityMode === 'identity'}
+          />
+        )}
 
-        <div className={filterState.entityMode === 'ego' ? '' : 'hidden'}>
-          <div ref={egoScrollRef} className="bg-muted border border-border rounded-md p-3 lg:p-6 max-h-[600px] overflow-y-auto">
-            <div className="pt-4">
-              <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO} cardHeight={CARD_GRID.HEIGHT.EGO} mobileScale={0.8} gap={8}>
-                {displayEgos.map((ego) => {
-                  const isSelected = equippedEgoIds.has(ego.id)
-                  const isVisible = visibleEgoIds.has(ego.id)
-                  return (
-                    <div key={ego.id} className={isVisible ? '' : 'hidden'}>
-                      <TierLevelSelector
-                        mode="ego"
-                        entityId={ego.id}
-                        currentThreadspin={4}
-                        isSelected={isSelected}
-                        egoType={ego.egoType}
-                        onConfirm={handleEquipEgo}
-                        onUnequip={handleUnequipEgo}
-                      >
-                        <ScaledCardWrapper mobileScale={0.8} cardWidth={CARD_GRID.WIDTH.EGO} cardHeight={CARD_GRID.HEIGHT.EGO}>
-                          <EGOCard
-                            ego={ego}
-                            isSelected={isSelected}
-                            overlay={isSelected ? (
-                              <img
-                                src={getSelectedIndicatorPath()}
-                                alt="Selected"
-                                className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                              />
-                            ) : undefined}
-                          />
-                        </ScaledCardWrapper>
-                      </TierLevelSelector>
-                    </div>
-                  )
-                })}
-              </ResponsiveCardGrid>
-            </div>
-          </div>
-        </div>
+        {(filterState.entityMode === 'ego' || hasWarmedInactive) && (
+          <EgoGrid
+            sortedEgos={sortedEgos}
+            visibleIds={visibleEgoIds}
+            equippedIds={equippedEgoIds}
+            onEquip={handleEquipEgo}
+            onUnequip={handleUnequipEgo}
+            scrollRef={egoScrollRef}
+            isActive={filterState.entityMode === 'ego'}
+          />
+        )}
       </div>
     </div>
   )

@@ -63,10 +63,11 @@ export function SearchableMultiSelect({
   const [displayCount, setDisplayCount] = useState(BATCH_SIZE)
 
   const sortedOptions = useMemo(() => {
+    if (!open) return options
     if (!sortByLabel) return options
     const collator = new Intl.Collator(i18n.language, { sensitivity: 'base' })
     return [...options].sort((a, b) => collator.compare(a.label, b.label))
-  }, [options, i18n.language, sortByLabel])
+  }, [open, options, i18n.language, sortByLabel])
 
   // Reset progressive count when popover opens
   useEffect(() => {

@@ -1,0 +1,11 @@
+{
+  "totalPhases": 5,
+  "currentPhase": 5,
+  "phases": [
+    { "name": "Extend DeckFilterState + store factory", "status": "done" },
+    { "name": "Predicate + filterUtils extension", "status": "done" },
+    { "name": "Shrink EntityToggle in place", "status": "done" },
+    { "name": "DeckFilterBar component", "status": "done" },
+    { "name": "Wire into DeckBuilderContent", "status": "done" }
+  ]
+}

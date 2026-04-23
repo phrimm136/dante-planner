@@ -98,6 +98,14 @@ export function createDefaultDeckFilterState(): DeckFilterState {
     entityMode: 'identity',
     selectedSinners: new Set(),
     selectedKeywords: new Set(),
+    selectedAttributes: new Set(),
+    selectedAtkTypes: new Set(),
+    selectedDefTypes: new Set(),
+    selectedRaritys: new Set(),
+    selectedEgoTypes: new Set(),
+    selectedSeasons: new Set(),
+    selectedUnitKeywords: new Set(),
+    selectedBattleKeywords: new Set(),
     searchQuery: '',
   }
 }
@@ -129,6 +137,8 @@ interface WarmState {
   selectedGiftKeyword: string | null
   skillEAState: Record<string, SkillEAState>
   deckFilterState: DeckFilterState
+  /** Progressive-render counter for deck builder grids. Isolated via atomic selector so rAF ticks don't cascade to sibling sections. */
+  deckVisibleCount: number
 }
 
 /**
@@ -173,6 +183,7 @@ export interface PlannerEditorActions {
   setSkillEAState: (state: Record<string, SkillEAState>) => void
   updateSinnerSkillEA: (sinnerId: string, state: SkillEAState) => void
   setDeckFilterState: (state: DeckFilterState | ((prev: DeckFilterState) => DeckFilterState)) => void
+  setDeckVisibleCount: (count: number | ((prev: number) => number)) => void
 
   // Cold state setters
   setTitle: (title: string) => void
@@ -217,6 +228,7 @@ const createInitialState = (overrides?: Partial<PlannerEditorState>): PlannerEdi
   selectedGiftKeyword: overrides?.selectedGiftKeyword ?? null,
   skillEAState: overrides?.skillEAState ?? createDefaultSkillEAState(),
   deckFilterState: overrides?.deckFilterState ?? createDefaultDeckFilterState(),
+  deckVisibleCount: overrides?.deckVisibleCount ?? 10,
 
   // Cold state
   title: overrides?.title ?? '',
@@ -304,6 +316,14 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
             set((s) => ({ deckFilterState: state(s.deckFilterState) }), false, 'setDeckFilterState')
           } else {
             set({ deckFilterState: state }, false, 'setDeckFilterState')
+          }
+        },
+
+        setDeckVisibleCount: (count) => {
+          if (typeof count === 'function') {
+            set((s) => ({ deckVisibleCount: count(s.deckVisibleCount) }), false, 'setDeckVisibleCount')
+          } else {
+            set({ deckVisibleCount: count }, false, 'setDeckVisibleCount')
           }
         },
 
@@ -520,6 +540,10 @@ export function usePlannerEditorStoreSafe<T>(selector: (state: PlannerEditorStor
  *
  * @returns Store API instance
  */
+export function usePlannerEditorStoreApiSafe(): StoreApi<PlannerEditorStore> | null {
+  return useContext(PlannerEditorStoreContext)
+}
+
 export function usePlannerEditorStoreApi(): StoreApi<PlannerEditorStore> {
   const store = useContext(PlannerEditorStoreContext)
 
@@ -608,6 +632,7 @@ export const useObservationGiftIds = () => usePlannerEditorStore((s) => s.observ
 export const useSelectedGiftKeyword = () => usePlannerEditorStore((s) => s.selectedGiftKeyword)
 export const useSkillEAState = () => usePlannerEditorStore((s) => s.skillEAState)
 export const useDeckFilterState = () => usePlannerEditorStore((s) => s.deckFilterState)
+export const useDeckVisibleCount = () => usePlannerEditorStore((s) => s.deckVisibleCount)
 
 // Cold state selectors
 export const usePlannerTitle = () => usePlannerEditorStore((s) => s.title)

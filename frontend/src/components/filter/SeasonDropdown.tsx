@@ -10,6 +10,7 @@ interface SeasonDropdownProps {
   onSelectionChange: (seasons: Set<Season>) => void
   /** Entity count per season ID for display */
   counts?: Record<string, number>
+  className?: string
 }
 
 /**
@@ -22,6 +23,7 @@ export function SeasonDropdown({
   selectedSeasons,
   onSelectionChange,
   counts,
+  className,
 }: SeasonDropdownProps) {
   const { t } = useTranslation(['database', 'common'])
   const { seasonsI18n } = useFilterI18nData()
@@ -54,6 +56,7 @@ export function SeasonDropdown({
       placeholder={t('filters.season', 'Season')}
       searchPlaceholder={t('filters.searchSeason', 'Search Seasons...')}
       sortByLabel={false}
+      className={className}
     />
   )
 }

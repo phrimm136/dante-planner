@@ -9,6 +9,11 @@ interface StatusViewerProps {
   deckState: DeckState
 }
 
+/**
+ * memo: inputs derived from equipment + deploymentOrder; custom comparator
+ * compares those refs directly so parent re-renders that produce a new
+ * deckState wrapper object (but same underlying refs) don't re-render us.
+ */
 export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) => {
   // Load spec data using hooks (React Query caches shared across components)
   const { spec: identitySpec } = useIdentityListData()
@@ -179,6 +184,12 @@ export const StatusViewer: React.FC<StatusViewerProps> = memo(({ deckState }) =>
       </div>
     </div>
   )
+}, (prev, next) => {
+  return (
+    prev.deckState.equipment === next.deckState.equipment &&
+    prev.deckState.deploymentOrder === next.deckState.deploymentOrder
+  )
+  // deploymentConfig is a literal with stable fields — no need to compare.
 })
 
 export default StatusViewer

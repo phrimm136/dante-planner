@@ -104,6 +104,34 @@ describe('calculateActiveFilterCount', () => {
       expect(result).toBe(12)
     })
 
+    it('calculates Deck Builder filter count (all 10 DeckFilterState sets)', () => {
+      const selectedSinners = new Set(['YiSang', 'Faust'])
+      const selectedKeywords = new Set(['Combustion'])
+      const selectedAttributes = new Set(['AZURE', 'VIOLET'])
+      const selectedAtkTypes = new Set(['SLASH'])
+      const selectedDefTypes = new Set(['GUARD', 'EVADE'])
+      const selectedRaritys = new Set([2, 3])
+      const selectedEgoTypes = new Set(['ALEPH'])
+      const selectedSeasons = new Set([1, 5])
+      const selectedUnitKeywords = new Set(['BLADE_LINEAGE'])
+      const selectedBattleKeywords = new Set(['Poise', 'Sinking'])
+
+      const result = calculateActiveFilterCount(
+        selectedSinners,
+        selectedKeywords,
+        selectedAttributes,
+        selectedAtkTypes,
+        selectedDefTypes,
+        selectedRaritys,
+        selectedEgoTypes,
+        selectedSeasons,
+        selectedUnitKeywords,
+        selectedBattleKeywords
+      )
+
+      expect(result).toBe(16)
+    })
+
     it('returns correct count regardless of argument order', () => {
       const setA = new Set([1, 2])
       const setB = new Set(['a', 'b', 'c'])

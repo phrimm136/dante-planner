@@ -10,6 +10,7 @@ interface BattleKeywordDropdownProps {
   entityType: EntityType
   selectedBattleKeywords: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
+  className?: string
 }
 
 /** Map entity type to the backlink field in BattleKeywordSpecEntry */
@@ -29,6 +30,7 @@ export function BattleKeywordDropdown({
   entityType,
   selectedBattleKeywords,
   onSelectionChange,
+  className,
 }: BattleKeywordDropdownProps) {
   const { t } = useTranslation(['database', 'common'])
   const spec = useKeywordListSpec()
@@ -55,6 +57,7 @@ export function BattleKeywordDropdown({
       onSelectionChange={onSelectionChange}
       placeholder={t('filters.additionalKeyword', 'Additional Keywords')}
       searchPlaceholder={t('filters.searchAdditionalKeyword', 'Search keywords...')}
+      className={className}
     />
   )
 }

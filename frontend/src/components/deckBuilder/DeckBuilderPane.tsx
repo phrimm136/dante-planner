@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -6,6 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { LoadingState } from '@/components/common/LoadingState'
 import { DeckBuilderContent } from './DeckBuilderContent'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 
@@ -59,18 +61,20 @@ export function DeckBuilderPane({
 
           {/* Scrollable content area with visual margin */}
           <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6">
-            <DeckBuilderContent
-              mode="dialog"
-              open={open}
-              onImport={onImport}
-              onExport={onExport}
-              onResetOrder={onResetOrder}
-              equipmentOverride={equipmentOverride}
-              deploymentOrderOverride={deploymentOrderOverride}
-              setEquipmentOverride={setEquipmentOverride}
-              setDeploymentOrderOverride={setDeploymentOrderOverride}
-              onIdentityChange={onIdentityChange}
-            />
+            <Suspense fallback={<LoadingState />}>
+              <DeckBuilderContent
+                mode="dialog"
+                open={open}
+                onImport={onImport}
+                onExport={onExport}
+                onResetOrder={onResetOrder}
+                equipmentOverride={equipmentOverride}
+                deploymentOrderOverride={deploymentOrderOverride}
+                setEquipmentOverride={setEquipmentOverride}
+                setDeploymentOrderOverride={setDeploymentOrderOverride}
+                onIdentityChange={onIdentityChange}
+              />
+            </Suspense>
           </div>
         </DialogContent>
     </Dialog>
