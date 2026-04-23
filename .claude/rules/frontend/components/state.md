@@ -27,6 +27,11 @@ Is this data from the server?
 | Local UI state | `useState` | Modal open, tab selection, form draft |
 | Theme, i18n | Context (existing) | Stable, rarely-changing data |
 | Complex shared UI state | Zustand with selectors | Planner equipment, SSE status, user prefs |
+| **High-frequency UI state** (per-frame, progressive counters, anything updated in `requestAnimationFrame` chains) | **Zustand with atomic selector; subscribers only** | Progressive-render counts, scroll ticks, animation frames |
+
+**Why high-frequency state must live in Zustand, not `useState`:** `useState` in a parent cascades re-renders through every child on each update, even memoized ones (reconciliation pass runs regardless). With Zustand, only the atomic selector's consumer re-renders — the parent stays frozen. For rAF-driven state updated ~60 times per second, this is the difference between the whole subtree reconciling 60× per second vs. one leaf component re-rendering 60× per second.
+
+Precedent: `deckVisibleCount` in `usePlannerEditorStore`, consumed only by `IdentityGrid` / `EgoGrid` via `useDeckVisibleCount()`. The progressive rAF chain in `DeckBuilderContent` writes via `storeApi.getState().setDeckVisibleCount(...)` imperatively — no React subscription in the writer's scope.
 
 ## Zustand Rules
 
