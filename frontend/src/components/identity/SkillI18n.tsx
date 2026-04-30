@@ -1,4 +1,4 @@
-import { SkillCardWithGranularI18n } from './SkillCard'
+import { SkillCardWithGranularI18n, getFirstDefinedUptie } from './SkillCard'
 import type { IdentitySkillEntry, Uptie } from '@/types/IdentityTypes'
 
 type SkillSlot = 'skill1' | 'skill2' | 'skill3' | 'skillDef'
@@ -12,8 +12,6 @@ interface SkillsSectionI18nProps {
   activeSkillSlot: SkillSlot
   /** Current uptie level (1-4) */
   uptieLevel: Uptie
-  /** Whether skill 3 is locked (uptie < 3) */
-  isSkill3Locked: boolean
   /** Function to convert slot to numeric slot number */
   getSkillSlotNumber: (slot: SkillSlot) => number
 }
@@ -21,21 +19,25 @@ interface SkillsSectionI18nProps {
 /**
  * Skill section with granular i18n Suspense.
  * Structure stays visible, only name/description suspends.
+ *
+ * Locking is per-skill: a card whose first defined uptie is above the
+ * currently selected uptie renders at its first defined level with a
+ * lock overlay. This generalizes the old "skill3 unlocks at uptie 3"
+ * rule to skills like 1061405 (uptie 2) and 1071505 (uptie 4).
  */
 export function SkillsSectionI18n({
   id,
   skills,
   activeSkillSlot,
   uptieLevel,
-  isSkill3Locked,
   getSkillSlotNumber,
 }: SkillsSectionI18nProps) {
-  const isCurrentSkillLocked = activeSkillSlot === 'skill3' && isSkill3Locked
-
   return (
     <div className="border rounded divide-y">
       {skills[activeSkillSlot].map((skill) => {
-        const displayUptie = isCurrentSkillLocked ? 3 as Uptie : uptieLevel
+        const firstDefinedUptie = getFirstDefinedUptie(skill.skillData)
+        const isLocked = uptieLevel < firstDefinedUptie
+        const displayUptie = isLocked ? firstDefinedUptie : uptieLevel
 
         return (
           <SkillCardWithGranularI18n
@@ -44,7 +46,7 @@ export function SkillsSectionI18n({
             skillSlot={getSkillSlotNumber(activeSkillSlot)}
             skillEntry={skill}
             uptie={displayUptie}
-            isLocked={isCurrentSkillLocked}
+            isLocked={isLocked}
           />
         )
       })}

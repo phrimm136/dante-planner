@@ -307,7 +307,6 @@ function IdentityDetailContent() {
         skills={identityData.skills}
         activeSkillSlot={activeSkillSlot}
         uptieLevel={uptieLevel}
-        isSkill3Locked={isSkill3Locked}
         getSkillSlotNumber={getSkillSlotNumber}
       />
     </div>

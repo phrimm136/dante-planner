@@ -30,6 +30,21 @@ function getMergedSkillData(
 }
 
 /**
+ * Smallest 1-based uptie at which the skill is first defined.
+ * Empty `{}` slots before that level mean "not yet introduced" (not "inherit"),
+ * so the renderer should lock and display this skill at its first defined level.
+ * Falls back to 1 when no slot has data — keeps the card visible rather than blank.
+ */
+export function getFirstDefinedUptie(skillData: IdentitySkillEntry['skillData']): Uptie {
+  for (let i = 0; i < skillData.length; i++) {
+    if (Object.keys(skillData[i]).length > 0) {
+      return (i + 1) as Uptie
+    }
+  }
+  return 1
+}
+
+/**
  * SkillCard with granular i18n Suspense.
  * Structure (image, stats) stays visible, only name/description suspends.
  */
