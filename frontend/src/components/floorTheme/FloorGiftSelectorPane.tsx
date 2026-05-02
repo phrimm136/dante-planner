@@ -12,7 +12,7 @@ import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { EGOGiftFilterBar } from '@/components/egoGift/EGOGiftFilterBar'
 import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
 import type { SortMode } from '@/components/common/Sorter'
-import { sortEGOGifts } from '@/lib/egoGiftSort'
+import { bucketAndSortFloorGifts } from '@/lib/floorGiftBucketing'
 import {
   encodeGiftSelection,
   findEncodedGiftId,
@@ -21,7 +21,6 @@ import {
 } from '@/lib/egoGiftEncoding'
 import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
 import type { EnhancementLevel, DungeonIdx } from '@/lib/constants'
-import { DUNGEON_IDX } from '@/lib/constants'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean
@@ -34,24 +33,13 @@ interface FloorGiftSelectorPaneProps {
 }
 
 /**
- * Gets gift IDs that are allowed for the floor based on theme pack
- */
-function getFilteredGiftIds(
-  spec: Record<string, { themePack: string[] }>,
-  themePackId: string
-): number[] {
-  const allowedIds: number[] = []
-  for (const [id, giftSpec] of Object.entries(spec)) {
-    const themePack = giftSpec.themePack
-    if (!themePack || themePack.length === 0 || themePack.includes(themePackId)) {
-      allowedIds.push(Number(id))
-    }
-  }
-  return allowedIds
-}
-
-/**
  * Dialog for selecting EGO gifts for a floor, filtered by theme pack.
+ *
+ * Bucketing (under themed-reachability semantics of `gift.themePack`):
+ *   1. themed to this pack (exclusive + recipe-derived themed fusions)
+ *   2. general AND directly in this pack's egoGiftPool
+ *   3. general but not in this pack's pool (random-fusion acquirable)
+ * Gifts themed to other packs only are hidden — genuinely unobtainable here.
  */
 export function FloorGiftSelectorPane({
   open,
@@ -80,11 +68,6 @@ export function FloorGiftSelectorPane({
     }
   }, [open])
 
-  // Get filtered gift IDs based on theme pack
-  const giftIdFilter = useMemo(() => {
-    return getFilteredGiftIds(spec, themePackId)
-  }, [spec, themePackId])
-
   // Convert to EGOGiftListItem array
   const gifts = useMemo<EGOGiftListItem[]>(() => {
     return Object.entries(spec).map(([id, specData]) => ({
@@ -107,26 +90,10 @@ export function FloorGiftSelectorPane({
     return new Map(Object.entries(spec))
   }, [spec])
 
-  // Sort gifts: filter by difficulty, then theme pack specific first, then universal
-  const sortedGifts = useMemo(() => {
-    const idSet = new Set(giftIdFilter.map(String))
-
-    // Filter by theme pack allowlist
-    const themeFiltered = gifts.filter((gift) => idSet.has(gift.id))
-
-    // Filter by difficulty: NORMAL < HARD < EXTREME
-    const difficultyFiltered = themeFiltered.filter((gift) => {
-      if (gift.extremeOnly && difficulty < DUNGEON_IDX.EXTREME) return false
-      if (gift.hardOnly && difficulty < DUNGEON_IDX.HARD) return false
-      return true
-    })
-
-    // Split: theme pack specific first, then universal
-    const themePackSpecific = difficultyFiltered.filter((g) => g.themePack?.includes(themePackId))
-    const universal = difficultyFiltered.filter((g) => !g.themePack || g.themePack.length === 0)
-
-    return [...sortEGOGifts(themePackSpecific, sortMode), ...sortEGOGifts(universal, sortMode)]
-  }, [gifts, giftIdFilter, sortMode, themePackId, difficulty])
+  const sortedGifts = useMemo(
+    () => bucketAndSortFloorGifts(gifts, themePackId, difficulty, sortMode),
+    [gifts, sortMode, themePackId, difficulty]
+  )
 
   // Use ref to always access latest state in stable callback
   const selectedGiftIdsRef = useRef(selectedGiftIds)
