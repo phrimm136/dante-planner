@@ -30,7 +30,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: repo-with-submodules
       - name: Setup Node
@@ -52,7 +52,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: repo-with-submodules
       - name: Setup Node
