@@ -187,7 +187,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
             )}
 
             {/* Equip/Unequip button */}
-            {mode === 'ego' && isSelected && !entityId.endsWith('01') && onUnequip ? (
+            {mode === 'ego' && isSelected && threadspin === currentThreadspin && !entityId.endsWith('01') && onUnequip ? (
               <button
                 type="button"
                 onClick={(e) => {

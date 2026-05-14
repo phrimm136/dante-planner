@@ -10,15 +10,26 @@ import {
   DUNGEON_IDX,
 } from '@/lib/constants'
 import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
+import egoSpecList from '@static/data/egoSpecList.json'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
 import type { MDCategory, DungeonIdx } from '@/lib/constants'
-import type { SinnerEquipment, SkillEAState, DeckFilterState } from '@/types/DeckTypes'
+import type { SinnerEquipment, SkillEAState, DeckFilterState, ThreadspinTier } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
 import type { PlannerState } from '@/hooks/usePlannerSave'
+
+const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
+  const lookup = egoSpecList as Record<string, { maxThreadspin: 4 | 5 }>
+  const out: Record<string, ThreadspinTier> = {}
+  SINNERS.forEach((_, index) => {
+    const id = `2${String(index + 1).padStart(2, '0')}01`
+    out[id] = lookup[id]?.maxThreadspin ?? 4
+  })
+  return out
+})()
 
 // ============================================================================
 // Default State Factories
@@ -38,7 +49,7 @@ export function createDefaultEquipment(): Record<string, SinnerEquipment> {
     equipment[sinnerCode] = {
       identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
       egos: {
-        ZAYIN: { id: defaultEgoId, threadspin: 4 },
+        ZAYIN: { id: defaultEgoId, threadspin: DEFAULT_ZAYIN_MAX_THREADSPIN[defaultEgoId] ?? 4 },
       },
     }
   })

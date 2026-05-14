@@ -101,6 +101,16 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     return ids
   }, [equipment])
 
+  const equippedThreadspinMap = useMemo(() => {
+    const map: Record<string, ThreadspinTier> = {}
+    Object.values(equipment).forEach((eq) => {
+      Object.values(eq.egos).forEach((ego) => {
+        if (ego) map[ego.id] = ego.threadspin
+      })
+    })
+    return map
+  }, [equipment])
+
   // Sorting snapshot - captured on mount/open for stable sorting during session
   // Equipped items stay at top even if user unequips them (prevents jarring re-sort)
   const [sortingSnapshot, setSortingSnapshot] = useState<{
@@ -456,6 +466,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       if (rank === 'ZAYIN') {
         const sinnerIdPart = sinnerCode.padStart(2, '0')
         const defaultEgoId = `2${sinnerIdPart}01`
+        const defaultMaxThreadspin = egoMap[defaultEgoId]?.maxThreadspin ?? 4
         setEquipment((prevEquipment: Record<string, SinnerEquipment>) => {
           const sinnerEquipment = prevEquipment[sinnerCode]
           if (!sinnerEquipment) return prevEquipment
@@ -465,7 +476,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
               ...sinnerEquipment,
               egos: {
                 ...sinnerEquipment.egos,
-                ZAYIN: { id: defaultEgoId, threadspin: 4 },
+                ZAYIN: { id: defaultEgoId, threadspin: defaultMaxThreadspin },
               },
             },
           }
@@ -538,6 +549,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
             sortedEgos={sortedEgos}
             visibleIds={visibleEgoIds}
             equippedIds={equippedEgoIds}
+            equippedThreadspinMap={equippedThreadspinMap}
             onEquip={handleEquipEgo}
             onUnequip={handleUnequipEgo}
             scrollRef={egoScrollRef}

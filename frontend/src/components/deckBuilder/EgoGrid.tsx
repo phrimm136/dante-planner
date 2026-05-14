@@ -14,6 +14,7 @@ interface EgoGridProps {
   sortedEgos: EGOListItem[]
   visibleIds: Set<string>
   equippedIds: Set<string>
+  equippedThreadspinMap: Record<string, ThreadspinTier>
   onEquip: (egoId: string, data: { threadspin?: ThreadspinTier }) => void
   onUnequip: (egoId: string) => void
   scrollRef: Ref<HTMLDivElement>
@@ -31,6 +32,7 @@ export function EgoGrid({
   sortedEgos,
   visibleIds,
   equippedIds,
+  equippedThreadspinMap,
   onEquip,
   onUnequip,
   scrollRef,
@@ -64,7 +66,7 @@ export function EgoGrid({
                   <TierLevelSelector
                     mode="ego"
                     entityId={ego.id}
-                    currentThreadspin={ego.maxThreadspin}
+                    currentThreadspin={equippedThreadspinMap[ego.id] ?? ego.maxThreadspin}
                     maxThreadspin={ego.maxThreadspin}
                     isSelected={isSelected}
                     egoType={ego.egoType}
