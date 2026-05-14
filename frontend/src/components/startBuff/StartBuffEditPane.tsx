@@ -220,7 +220,7 @@ export function StartBuffEditPane({
           ))}
         </div>
 
-        <div className="w-full scrollbar-hide">
+        <div className="w-full flex-1 min-h-0 overflow-y-auto scrollbar-hide">
           <div
             className="bg-muted grid gap-2 w-max mx-auto"
             style={{

@@ -49,6 +49,7 @@ export function FilterSidebar({
         className={cn(
           'hidden lg:block',
           'sticky top-4 self-start',
+          'max-h-[calc(100vh-2rem)] overflow-y-auto',
           'rounded-lg border bg-card p-3'
         )}
         style={{ width: `${FILTER_SIDEBAR_WIDTH}px`, minWidth: `${FILTER_SIDEBAR_WIDTH}px` }}
