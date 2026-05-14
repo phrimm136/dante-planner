@@ -26,6 +26,8 @@ interface DetailEntitySelectorProps {
   sticky?: boolean
   /** Tiers to disable (e.g., enhancement levels with empty descriptions) */
   disabledTiers?: number[]
+  /** Per-entity max tier override. Defaults to MAX_ENTITY_TIER[entityType]. */
+  maxTier?: number
 }
 
 /**
@@ -45,6 +47,7 @@ export function DetailEntitySelector({
   level = MAX_LEVEL,
   onLevelChange,
   sticky = false,
+  maxTier: maxTierOverride,
 }: DetailEntitySelectorProps) {
   const { t, i18n } = useTranslation('database')
   const [inputValue, setInputValue] = useState(String(level))
@@ -56,7 +59,7 @@ export function DetailEntitySelector({
   }, [level])
 
   const minTier = MIN_ENTITY_TIER[entityType]
-  const maxTier = MAX_ENTITY_TIER[entityType]
+  const maxTier = maxTierOverride ?? MAX_ENTITY_TIER[entityType]
 
   // Generate tier array based on entity type
   const tiers = Array.from({ length: maxTier - minTier + 1 }, (_, i) => minTier + i)

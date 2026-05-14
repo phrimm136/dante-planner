@@ -27,6 +27,7 @@ export interface EGOListItem {
   atkTypes: AtkType[]
   updateDate: number
   season: Season
+  maxThreadspin: 4 | 5
 }
 
 /**
@@ -50,14 +51,23 @@ export interface EGOSkillDataEntry {
 }
 
 /**
- * Skill data array for all 4 uptie levels [0, 1, 2, 3]
+ * Skill data array — 4 or 5 entries per threadspin levels (per-EGO).
+ * The 5-tuple branch matches EGOs with threadspin 5; the 4-tuple branch matches the rest.
  */
-export type EGOSkillDataTuple = [
-  EGOSkillDataEntry,
-  EGOSkillDataEntry,
-  EGOSkillDataEntry,
-  EGOSkillDataEntry
-]
+export type EGOSkillDataTuple =
+  | [
+      EGOSkillDataEntry,
+      EGOSkillDataEntry,
+      EGOSkillDataEntry,
+      EGOSkillDataEntry
+    ]
+  | [
+      EGOSkillDataEntry,
+      EGOSkillDataEntry,
+      EGOSkillDataEntry,
+      EGOSkillDataEntry,
+      EGOSkillDataEntry
+    ]
 
 export interface EGOSkillEntry {
   id: number
@@ -70,10 +80,12 @@ export interface EGOSkillsData {
 }
 
 /**
- * Passive list per uptie level [0, 1, 2, 3]
- * Each element is an array of passive ID strings active at that uptie
+ * Passive list per threadspin level — 4 or 5 entries (per-EGO).
+ * Each element is an array of passive ID strings active at that level.
  */
-export type EGOPassiveListTuple = [string[], string[], string[], string[]]
+export type EGOPassiveListTuple =
+  | [string[], string[], string[], string[]]
+  | [string[], string[], string[], string[], string[]]
 
 export interface EGOPassivesData {
   passiveList: EGOPassiveListTuple
@@ -87,6 +99,7 @@ export interface EGOData {
   requirements: Record<string, number>
   skills: EGOSkillsData
   passives: EGOPassivesData
+  maxThreadspin: 4 | 5
 }
 
 /**

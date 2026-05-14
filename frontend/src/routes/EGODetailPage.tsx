@@ -15,7 +15,6 @@ import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { SkillTabButton } from '@/components/identity/SkillTabButton'
 import { useEGODetailSpec } from '@/hooks/useEGODetailData'
-import { MAX_ENTITY_TIER } from '@/lib/constants'
 import type { Threadspin } from '@/types/EGOTypes'
 
 type SkillType = 'awaken' | 'erosion'
@@ -27,9 +26,6 @@ function EGODetailContent() {
   const { id } = useParams({ strict: false })
   const { t } = useTranslation(['database', 'common'])
   const [skillType, setSkillType] = useState<SkillType>('awaken')
-
-  // Controllable threadspin state
-  const [threadspin, setThreadspin] = useState<number>(MAX_ENTITY_TIER.ego)
 
   // Progressive rendering: render sections one-by-one
   // Sections: 1=Skills, 2=Passives
@@ -53,6 +49,9 @@ function EGODetailContent() {
 
   // Spec data only - no language key, won't re-suspend on language change
   const spec = useEGODetailSpec(id)
+
+  // Controllable threadspin state — defaults to this EGO's max.
+  const [threadspin, setThreadspin] = useState<number>(spec.maxThreadspin)
 
   // Cast to Threadspin type for component props
   const threadspinLevel = threadspin as Threadspin
@@ -126,6 +125,7 @@ function EGODetailContent() {
       entityType="ego"
       tier={threadspin}
       onTierChange={setThreadspin}
+      maxTier={spec.maxThreadspin}
       sticky
     />
   )

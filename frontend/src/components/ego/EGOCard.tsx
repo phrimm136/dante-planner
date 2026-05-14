@@ -13,7 +13,6 @@ import {
   getSinnerIconPath,
   getSinnerBGPath,
 } from '@/lib/assetPaths'
-import { EGO_DEFAULT_THREADSPIN_TIER } from '@/lib/constants'
 import { cn, getSinnerFromId } from '@/lib/utils'
 import { EGOName } from './EGOName'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -158,8 +157,8 @@ export function EGOCard({
           {/* Right: Tier Icon (stretched/tilted) */}
           <div className="items-center w-8 h-8 pl-1">
             <img
-              src={getEGOTierIconPath(EGO_DEFAULT_THREADSPIN_TIER)}
-              alt={`Tier ${EGO_DEFAULT_THREADSPIN_TIER}`}
+              src={getEGOTierIconPath(ego.maxThreadspin)}
+              alt={`Tier ${ego.maxThreadspin}`}
               loading="lazy"
               className="w-5 h-5 translate-x-2.5 translate-y-1 object-contain"
               style={{ transform: 'skewY(-20deg)' }}

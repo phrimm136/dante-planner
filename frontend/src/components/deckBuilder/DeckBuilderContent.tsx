@@ -235,6 +235,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       atkTypes: specData.atkType,
       updateDate: specData.updateDate,
       season: specData.season,
+      maxThreadspin: specData.maxThreadspin,
     }))
   }, [egoSpec, egoI18n])
 
@@ -431,7 +432,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
               ...sinnerEquipment.egos,
               [rank]: {
                 id: egoId,
-                threadspin: data.threadspin || 4,
+                threadspin: data.threadspin ?? ego.maxThreadspin,
               },
             },
           },

@@ -66,6 +66,11 @@ class PlannerContentValidatorTest {
                 sinnerIdValidator,
                 MAX_CONTENT_SIZE_BYTES,
                 MAX_NOTE_SIZE_BYTES);
+
+        // Default per-EGO max so existing tests reach gift/buff/etc. validations
+        // without stubbing maxThreadspin individually. Tests that exercise the
+        // per-EGO threadspin rule override this with a specific stub.
+        lenient().when(gameDataRegistry.getEgoMaxThreadspin(anyString())).thenReturn(4);
     }
 
     // ========================================================================
@@ -1492,6 +1497,50 @@ class PlannerContentValidatorTest {
             );
 
             assertDoesNotThrow(() -> validator.validate(content, "5F"));
+        }
+    }
+
+    @Nested
+    class ThreadspinPerEgoMaxTests {
+
+        @Test
+        @DisplayName("Should pass when threadspin equals the EGO's max (5 on a 5-cap EGO)")
+        void validate_Threadspin5OnFiveCapEgo_Passes() {
+            setupMocksForValidIds();
+            lenient().when(gameDataRegistry.getEgoMaxThreadspin("20101")).thenReturn(5);
+
+            String content = createValidContent().replace(
+                    "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
+                    "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 5}}"
+            );
+
+            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+        }
+
+        @Test
+        @DisplayName("Should fail when threadspin exceeds the EGO's per-EGO max")
+        void validate_Threadspin5OnFourCapEgo_Fails() {
+            setupMocksForValidIds();
+
+            String content = createValidContent().replace(
+                    "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
+                    "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 5}}"
+            );
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+            assertTrue(ex.getMessage().contains("threadspin"),
+                    "Exception message should mention threadspin: " + ex.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should fail when EGO id has no maxThreadspin in registry")
+        void validate_ThreadspinWithUnknownRegistryEntry_Fails() {
+            setupMocksForValidIds();
+            lenient().when(gameDataRegistry.getEgoMaxThreadspin(anyString())).thenReturn(null);
+
+            assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(createValidContent(), "5F"));
         }
     }
 }

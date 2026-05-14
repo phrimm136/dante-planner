@@ -19,10 +19,11 @@ public final class GameConstants {
     public static final int MAX_UPTIE = 4;
 
     /**
-     * EGO threadspin bounds (upgrade tier).
+     * EGO threadspin bounds (upgrade tier). MAX is the global ceiling;
+     * per-EGO max is looked up from GameDataRegistry.
      */
     public static final int MIN_THREADSPIN = 1;
-    public static final int MAX_THREADSPIN = 4;
+    public static final int MAX_THREADSPIN = 5;
 
     private GameConstants() {
         // Utility class - prevent instantiation

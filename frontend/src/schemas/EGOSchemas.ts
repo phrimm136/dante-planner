@@ -23,12 +23,21 @@ export const EGOSkillDataEntrySchema = z.object({
   coinString: z.string().optional(),
 })
 
-// Skill data tuple - 4 entries for uptie levels 0-3
-export const EGOSkillDataTupleSchema = z.tuple([
-  EGOSkillDataEntrySchema,
-  EGOSkillDataEntrySchema,
-  EGOSkillDataEntrySchema,
-  EGOSkillDataEntrySchema,
+// Skill data tuple - 4 or 5 entries (per-EGO threadspin levels)
+export const EGOSkillDataTupleSchema = z.union([
+  z.tuple([
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+  ]),
+  z.tuple([
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+    EGOSkillDataEntrySchema,
+  ]),
 ])
 
 // Skill entry schema
@@ -43,13 +52,22 @@ export const EGOSkillsDataSchema = z.object({
   erosion: z.array(EGOSkillEntrySchema),
 })
 
-// Passive list tuple - 4 entries for uptie levels 0-3
-// Each element is an array of passive ID strings active at that uptie
-export const EGOPassiveListTupleSchema = z.tuple([
-  z.array(z.string()),
-  z.array(z.string()),
-  z.array(z.string()),
-  z.array(z.string()),
+// Passive list tuple - 4 or 5 entries (per-EGO threadspin levels)
+// Each element is an array of passive ID strings active at that level
+export const EGOPassiveListTupleSchema = z.union([
+  z.tuple([
+    z.array(z.string()),
+    z.array(z.string()),
+    z.array(z.string()),
+    z.array(z.string()),
+  ]),
+  z.tuple([
+    z.array(z.string()),
+    z.array(z.string()),
+    z.array(z.string()),
+    z.array(z.string()),
+    z.array(z.string()),
+  ]),
 ])
 
 // Passives data schema
@@ -66,6 +84,7 @@ export const EGODataSchema = z.object({
   requirements: z.record(z.string(), z.number()),
   skills: EGOSkillsDataSchema,
   passives: EGOPassivesDataSchema,
+  maxThreadspin: z.number().int().min(4).max(5),
 })
 
 /**
@@ -123,6 +142,7 @@ export const EGOSpecListItemSchema = z.object({
   requirements: z.record(z.string(), z.number()),
   attributeType: z.array(AffinitySchema),
   atkType: z.array(EGOAtkTypeSchema),
+  maxThreadspin: z.number().int().min(4).max(5),
 })
 
 // Record types for spec and name lists

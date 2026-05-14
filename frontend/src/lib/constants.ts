@@ -274,12 +274,6 @@ export const DEFAULT_DEPLOYMENT_MAX = 7
 export const MAX_OBSERVABLE_GIFTS = 3
 
 /**
- * Default threadspin tier for EGO display (4 = max tier indicator)
- * Used in EGO cards when showing the tier icon
- */
-export const EGO_DEFAULT_THREADSPIN_TIER = 4
-
-/**
  * EGO Gift enhancement levels for comprehensive gift selection
  * 0 = base, 1 = +1, 2 = +2
  */
@@ -678,14 +672,15 @@ export const DETAIL_PAGE = {
 export type DetailEntityType = 'identity' | 'ego' | 'egoGift'
 
 /**
- * Maximum uptie/threadspin/enhancement levels by entity type
+ * Maximum uptie/threadspin/enhancement levels by entity type (global ceiling).
+ * Per-EGO threadspin max is carried by EGOListItem.maxThreadspin / EGOData.maxThreadspin.
  * - Identity: Uptie 1-4
- * - EGO: Threadspin 1-4
+ * - EGO: Threadspin 1-5
  * - EGO Gift: Enhancement 0-2 (displayed as base/+/++)
  */
 export const MAX_ENTITY_TIER: Record<DetailEntityType, number> = {
   identity: 4,
-  ego: 4,
+  ego: 5,
   egoGift: 2,
 }
 

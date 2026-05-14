@@ -59,6 +59,7 @@ function EGOCardGrid({
         atkTypes: specData.atkType,
         updateDate: specData.updateDate,
         season: specData.season,
+        maxThreadspin: specData.maxThreadspin,
       })),
     [spec]
   )

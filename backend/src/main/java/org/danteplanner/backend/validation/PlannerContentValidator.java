@@ -729,7 +729,7 @@ public class PlannerContentValidator {
                 continue;
             }
 
-            // Validate threadspin range
+            // Validate threadspin range — global ceiling then per-EGO ceiling.
             JsonNode threadspinNode = ego.get("threadspin");
             if (threadspinNode != null && threadspinNode.isNumber()) {
                 int threadspin = threadspinNode.asInt();
@@ -737,6 +737,19 @@ public class PlannerContentValidator {
                     log.warn("Validation failed: equipment[{}].egos.{}.threadspin {} out of range [{}-{}]",
                             sinnerKey, egoType, threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN);
                     throw valueOutOfRangeError("threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN);
+                }
+
+                Integer egoMax = gameDataRegistry.getEgoMaxThreadspin(egoId);
+                if (egoMax == null) {
+                    log.warn("Validation failed: EGO ID '{}' has no maxThreadspin in registry", egoId);
+                    addError(invalidIdReferenceError("EGO maxThreadspin", egoId));
+                    continue;
+                }
+                if (threadspin > egoMax) {
+                    log.warn("Validation failed: equipment[{}].egos.{}.threadspin {} exceeds EGO {} max {}",
+                            sinnerKey, egoType, threadspin, egoId, egoMax);
+                    addError(valueOutOfRangeError("threadspin for EGO " + egoId, threadspin, GameConstants.MIN_THREADSPIN, egoMax));
+                    continue;
                 }
             }
         }

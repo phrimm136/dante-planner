@@ -64,7 +64,8 @@ export function EgoGrid({
                   <TierLevelSelector
                     mode="ego"
                     entityId={ego.id}
-                    currentThreadspin={4}
+                    currentThreadspin={ego.maxThreadspin}
+                    maxThreadspin={ego.maxThreadspin}
                     isSelected={isSelected}
                     egoType={ego.egoType}
                     onConfirm={onEquip}

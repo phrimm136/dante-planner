@@ -17,7 +17,7 @@
  */
 
 import pako from 'pako'
-import { SINNERS } from './constants'
+import { SINNERS, MAX_LEVEL } from './constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
 import type { EGOType } from '@/types/EGOTypes'
 
@@ -155,7 +155,7 @@ export function encodeDeckCode(
 export function decodeDeckCode(
   code: string,
   identitySpecMap: Record<string, unknown>,
-  egoSpecMap: Record<string, unknown>
+  egoSpecMap: Record<string, { maxThreadspin: 4 | 5 }>
 ): DecodedDeck {
   const warnings: string[] = []
 
@@ -224,7 +224,7 @@ export function decodeDeckCode(
         } else {
           egos[rank] = {
             id: egoId,
-            threadspin: 4,
+            threadspin: egoSpecMap[egoId].maxThreadspin,
           }
         }
       }
@@ -236,7 +236,7 @@ export function decodeDeckCode(
         identity: {
           id: identityId,
           uptie: 4,
-          level: 55,
+          level: MAX_LEVEL,
         },
         egos,
       }
@@ -247,7 +247,7 @@ export function decodeDeckCode(
         identity: {
           id: defaultIdentityId,
           uptie: 4,
-          level: 55,
+          level: MAX_LEVEL,
         },
         egos,
       }
@@ -259,12 +259,12 @@ export function decodeDeckCode(
         identity: {
           id: defaultIdentityId,
           uptie: 4,
-          level: 55,
+          level: MAX_LEVEL,
         },
         egos: {
           ZAYIN: {
             id: defaultEgoId,
-            threadspin: 4,
+            threadspin: egoSpecMap[defaultEgoId]?.maxThreadspin ?? 4,
           },
         },
       }

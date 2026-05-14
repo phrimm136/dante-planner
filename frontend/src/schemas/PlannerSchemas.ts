@@ -104,13 +104,14 @@ const UptieTierSchema = z.union([
 ])
 
 /**
- * Threadspin tier schema - 1, 2, 3, or 4
+ * Threadspin tier schema - 1, 2, 3, 4, or 5
  */
 const ThreadspinTierSchema = z.union([
   z.literal(1),
   z.literal(2),
   z.literal(3),
   z.literal(4),
+  z.literal(5),
 ])
 
 /**

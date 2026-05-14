@@ -36,6 +36,7 @@ public class GameDataRegistry {
     private Set<String> startBuffIds = Set.of();
     private Map<String, Set<String>> startGiftPools = Map.of();
     private Map<String, List<String>> egoGiftThemePackMap = Map.of();
+    private Map<String, Integer> egoMaxThreadspin = Map.of();
 
     @PostConstruct
     public void init() {
@@ -55,9 +56,10 @@ public class GameDataRegistry {
         startBuffIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "MD6", "startBuffs.json")));
         startGiftPools = Map.copyOf(loader.loadStartGiftPools(Path.of(dataPath, "MD6", "startEgoGiftPools.json")));
         egoGiftThemePackMap = Map.copyOf(loader.loadEgoGiftThemePackMap(Path.of(dataPath, "egoGiftSpecList.json")));
+        egoMaxThreadspin = Map.copyOf(loader.loadEgoMaxThreadspin(Path.of(dataPath, "egoSpecList.json")));
 
-        log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, startBuffs: {}, giftPools: {}, giftThemePacks: {}",
-                identityIds.size(), egoIds.size(), egoGiftIds.size(), themePackIds.size(), startBuffIds.size(), startGiftPools.size(), egoGiftThemePackMap.size());
+        log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, startBuffs: {}, giftPools: {}, giftThemePacks: {}, egoMaxThreadspin: {}",
+                identityIds.size(), egoIds.size(), egoGiftIds.size(), themePackIds.size(), startBuffIds.size(), startGiftPools.size(), egoGiftThemePackMap.size(), egoMaxThreadspin.size());
     }
 
     public boolean hasIdentity(String id) {
@@ -66,6 +68,14 @@ public class GameDataRegistry {
 
     public boolean hasEgo(String id) {
         return egoIds.contains(id);
+    }
+
+    /**
+     * Get the per-EGO max threadspin (4 or 5). Returns null if the EGO id
+     * is unknown to the registry.
+     */
+    public Integer getEgoMaxThreadspin(String id) {
+        return egoMaxThreadspin.get(id);
     }
 
     /**

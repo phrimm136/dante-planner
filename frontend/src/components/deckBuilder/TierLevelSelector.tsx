@@ -13,6 +13,8 @@ interface TierLevelSelectorProps {
   currentLevel?: number
   isSelected?: boolean
   egoType?: EGOType
+  /** Per-EGO threadspin ceiling (4 or 5). Required for mode='ego', ignored otherwise. */
+  maxThreadspin?: ThreadspinTier
   onConfirm: (entityId: string, data: {
     uptie?: UptieTier
     threadspin?: ThreadspinTier
@@ -23,7 +25,6 @@ interface TierLevelSelectorProps {
 }
 
 const UPTIE_TIERS: UptieTier[] = [1, 2, 3, 4]
-const THREADSPIN_TIERS: ThreadspinTier[] = [1, 2, 3, 4]
 
 // Get tier icon path — delegates to centralized asset helper
 const getTierIconPath = (tier: number) => getEGOTierIconPath(tier)
@@ -37,6 +38,7 @@ interface TierLevelSelectorInnerProps {
   currentLevel: number
   isSelected: boolean
   egoType?: EGOType
+  maxThreadspin: ThreadspinTier
   onConfirm: (entityId: string, data: {
     uptie?: UptieTier
     threadspin?: ThreadspinTier
@@ -53,6 +55,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   currentThreadspin,
   currentLevel,
   isSelected,
+  maxThreadspin,
   onConfirm,
   onUnequip,
 }: TierLevelSelectorInnerProps) {
@@ -64,6 +67,11 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   const [uptie, setUptie] = useState<UptieTier>(currentUptie)
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)
   const [level, setLevel] = useState<number>(currentLevel)
+
+  const threadspinTiers = Array.from(
+    { length: maxThreadspin },
+    (_, i) => (i + 1) as ThreadspinTier
+  )
 
   // Handle clicks outside to close on mobile
   useEffect(() => {
@@ -135,7 +143,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
           <div className="flex flex-col items-center gap-2">
             {/* Uptie/Threadspin tier icons with background */}
             <div className="flex bg-black/70 rounded px-2 py-1 justify-center">
-              {(mode === 'identity' ? UPTIE_TIERS : THREADSPIN_TIERS).map((tier) => {
+              {(mode === 'identity' ? UPTIE_TIERS : threadspinTiers).map((tier) => {
                 const isSelected = mode === 'identity' ? uptie === tier : threadspin === tier
                 return (
                   <button
@@ -145,7 +153,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                       e.preventDefault()
                       e.stopPropagation()
                       if (mode === 'identity') {
-                        setUptie(tier)
+                        setUptie(tier as UptieTier)
                       } else {
                         setThreadspin(tier as ThreadspinTier)
                       }
@@ -215,7 +223,8 @@ function arePropsEqual(prev: TierLevelSelectorProps, next: TierLevelSelectorProp
     prev.currentUptie === next.currentUptie &&
     prev.currentThreadspin === next.currentThreadspin &&
     prev.currentLevel === next.currentLevel &&
-    prev.isSelected === next.isSelected
+    prev.isSelected === next.isSelected &&
+    prev.maxThreadspin === next.maxThreadspin
     // egoType excluded - no longer used in logic, entityId determines base ego
     // children intentionally excluded - isSelected tracks selection state
     // onConfirm/onUnequip excluded - callback identity changes but behavior is same
@@ -231,6 +240,7 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
   currentLevel = MAX_LEVEL,
   isSelected = false,
   egoType,
+  maxThreadspin = 4,
   onConfirm,
   onUnequip,
   children,
@@ -273,6 +283,7 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
           currentLevel={currentLevel}
           isSelected={isSelected}
           egoType={egoType}
+          maxThreadspin={maxThreadspin}
           onConfirm={onConfirm}
           onUnequip={onUnequip}
         />

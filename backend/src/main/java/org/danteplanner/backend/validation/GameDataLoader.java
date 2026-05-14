@@ -153,4 +153,46 @@ public class GameDataLoader {
 
         return themePackMap;
     }
+
+    /**
+     * Load per-EGO max threadspin from egoSpecList.json.
+     * Format: { "egoId": { ..., "maxThreadspin": 4|5 }, ... }
+     *
+     * @param filePath Path to the egoSpecList.json file
+     * @return Map of EGO ID to maxThreadspin, empty map if file doesn't exist
+     */
+    public Map<String, Integer> loadEgoMaxThreadspin(Path filePath) {
+        Map<String, Integer> maxThreadspinMap = new HashMap<>();
+
+        if (!Files.exists(filePath)) {
+            log.warn("EGO spec file not found: {}", filePath);
+            return maxThreadspinMap;
+        }
+
+        try {
+            String content = Files.readString(filePath);
+            JsonNode root = objectMapper.readTree(content);
+
+            if (root.isObject()) {
+                Iterator<String> egoIds = root.fieldNames();
+                while (egoIds.hasNext()) {
+                    String egoId = egoIds.next();
+                    JsonNode egoNode = root.get(egoId);
+
+                    if (egoNode.isObject()) {
+                        JsonNode maxNode = egoNode.get("maxThreadspin");
+                        if (maxNode != null && maxNode.isInt()) {
+                            maxThreadspinMap.put(egoId, maxNode.asInt());
+                        }
+                    }
+                }
+            }
+
+            log.debug("Loaded maxThreadspin for {} egos from {}", maxThreadspinMap.size(), filePath.getFileName());
+        } catch (IOException e) {
+            log.error("Failed to load ego max threadspin map: {}", filePath, e);
+        }
+
+        return maxThreadspinMap;
+    }
 }

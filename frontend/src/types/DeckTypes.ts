@@ -7,9 +7,9 @@ import type { Affinity, AtkType, DefType, OffensiveSkillSlot, Season, SkillAttri
 export type UptieTier = 1 | 2 | 3 | 4
 
 /**
- * Threadspin tier for EGOs (1-4)
+ * Threadspin tier for EGOs (1-5). Per-EGO max — most EGOs cap at 4; some at 5.
  */
-export type ThreadspinTier = 1 | 2 | 3 | 4
+export type ThreadspinTier = 1 | 2 | 3 | 4 | 5
 
 /**
  * Equipped identity configuration for a sinner

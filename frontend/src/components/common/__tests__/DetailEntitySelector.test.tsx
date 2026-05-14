@@ -108,7 +108,42 @@ describe('DetailEntitySelector', () => {
   })
 
   describe('EGO mode', () => {
-    it('renders all 4 threadspin buttons without level slider', () => {
+    it('renders 4 threadspin buttons for a 4-cap EGO without level slider', () => {
+      const onTierChange = vi.fn()
+
+      render(
+        <DetailEntitySelector
+          entityType="ego"
+          tier={4}
+          onTierChange={onTierChange}
+          maxTier={4}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 4/i })).toBeDefined()
+      expect(screen.queryByRole('button', { name: /tier 5/i })).toBeNull()
+      expect(screen.queryByRole('spinbutton')).toBeNull()
+    })
+
+    it('renders 5 threadspin buttons when maxTier={5}', () => {
+      const onTierChange = vi.fn()
+
+      render(
+        <DetailEntitySelector
+          entityType="ego"
+          tier={5}
+          onTierChange={onTierChange}
+          maxTier={5}
+        />
+      )
+
+      expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 4/i })).toBeDefined()
+      expect(screen.getByRole('button', { name: /tier 5/i })).toBeDefined()
+    })
+
+    it('falls back to the global MAX_ENTITY_TIER.ego (5) when no maxTier is passed', () => {
       const onTierChange = vi.fn()
 
       render(
@@ -119,12 +154,7 @@ describe('DetailEntitySelector', () => {
         />
       )
 
-      // Should have 4 tier buttons
-      expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
-      expect(screen.getByRole('button', { name: /tier 4/i })).toBeDefined()
-
-      // Should NOT have level input (EGO doesn't use level)
-      expect(screen.queryByRole('spinbutton')).toBeNull()
+      expect(screen.getByRole('button', { name: /tier 5/i })).toBeDefined()
     })
   })
 
