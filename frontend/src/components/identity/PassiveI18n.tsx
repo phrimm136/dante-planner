@@ -6,6 +6,7 @@ import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getAffinityIconPath, getIdentityPassiveCountIconPath, getLockIconPath } from '@/lib/assetPaths'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PassiveCondition {
@@ -18,6 +19,8 @@ interface PassiveCardProps {
   name: string
   /** Passive description */
   desc: string
+  /** Passive lore line; mirrors in-game `[Text]SkillInfoFlavor`-style TMP shown beneath the description */
+  flavor?: string
   /** Passive activation condition (affinity requirements) */
   condition?: PassiveCondition
   /** Whether this passive is locked (from higher tier) */
@@ -42,6 +45,7 @@ interface PassiveCardWithSuspenseProps {
 export function PassiveCard({
   name,
   desc,
+  flavor,
   condition,
   isLocked,
 }: PassiveCardProps) {
@@ -82,6 +86,15 @@ export function PassiveCard({
       <div className="text-sm">
         <FormattedDescription text={desc} />
       </div>
+      {flavor && (
+        <p
+          data-testid="passive-flavor"
+          className="text-sm italic whitespace-pre-line pt-1"
+          style={{ color: FLAVOR_TEXT_COLOR }}
+        >
+          {flavor}
+        </p>
+      )}
     </div>
   )
 }
@@ -152,6 +165,9 @@ export function PassiveCardWithSuspense({
           <PassiveDescContent id={id} passiveId={passiveId} />
         </Suspense>
       </div>
+      <Suspense fallback={null}>
+        <PassiveFlavorContent id={id} passiveId={passiveId} />
+      </Suspense>
     </div>
   )
 }
@@ -172,6 +188,26 @@ function PassiveDescContent({ id, passiveId }: { id: string; passiveId: number }
   const i18n = useIdentityDetailI18n(id)
   const passiveI18n = i18n.passives[String(passiveId)]
   return <FormattedDescription text={passiveI18n?.desc ?? ''} />
+}
+
+/**
+ * Internal: Fetches and renders passive flavor lore.
+ * Returns null when the passive has no flavor (most do not).
+ */
+function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: number }) {
+  const i18n = useIdentityDetailI18n(id)
+  const passiveI18n = i18n.passives[String(passiveId)]
+  const flavor = passiveI18n?.flavor
+  if (!flavor) return null
+  return (
+    <p
+      data-testid="passive-flavor"
+      className="text-sm italic whitespace-pre-line pt-1"
+      style={{ color: FLAVOR_TEXT_COLOR }}
+    >
+      {flavor}
+    </p>
+  )
 }
 
 /**

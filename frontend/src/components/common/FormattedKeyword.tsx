@@ -10,6 +10,7 @@
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/lib/assetPaths'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '@/types/KeywordTypes'
 
@@ -28,7 +29,7 @@ interface FormattedKeywordProps {
  * Unknown: Plain text with brackets [key]
  */
 export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) {
-  const { type, key, displayText, description, iconId, color } = keyword
+  const { type, key, displayText, description, flavor, iconId, color } = keyword
   // Icon error state kept for future use when icon loading is implemented
   const [_iconError, _setIconError] = useState(false)
 
@@ -100,6 +101,15 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
           {description && (
             <p className="text-sm whitespace-pre-line px-2">
               {description}
+            </p>
+          )}
+          {flavor && (
+            <p
+              data-testid="keyword-flavor"
+              className="text-xs italic whitespace-pre-line px-2"
+              style={{ color: FLAVOR_TEXT_COLOR }}
+            >
+              {flavor}
             </p>
           )}
         </div>

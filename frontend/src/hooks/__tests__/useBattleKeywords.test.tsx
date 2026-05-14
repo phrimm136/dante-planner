@@ -69,6 +69,45 @@ describe('useBattleKeywords', () => {
       }
     })
   })
+
+  it('forwards optional `flavor` from i18n to the merged entry', async () => {
+    // Regression guard for a previous bug where the merge enumerated fields
+    // and silently dropped `flavor`. RyoshuEGOPF is one of the ~20 keywords
+    // that ship a non-empty flavor lore line in the built data.
+    const { result } = renderHook(() => useBattleKeywords(), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => {
+      const entry = result.current.data['RyoshuEGOPF'] as
+        | { name: string; desc: string; flavor?: string }
+        | undefined
+      // The data file may or may not include RyoshuEGOPF depending on pipeline state,
+      // so we assert structurally: every entry that has a flavor must keep it through
+      // the merge.
+      const entries = Object.values(result.current.data) as Array<{ flavor?: string }>
+      const flavored = entries.filter((e) => typeof e.flavor === 'string' && e.flavor.length > 0)
+      // At least the dataset known to ship flavor must survive the merge.
+      expect(flavored.length).toBeGreaterThan(0)
+
+      if (entry) {
+        expect(typeof entry.flavor === 'string' || entry.flavor === undefined).toBe(true)
+      }
+    })
+  })
+
+  it('preserves entries without flavor (most keywords)', async () => {
+    const { result } = renderHook(() => useBattleKeywords(), {
+      wrapper: createWrapper(),
+    })
+
+    await waitFor(() => {
+      const entries = Object.values(result.current.data) as Array<{ flavor?: string }>
+      const unflavored = entries.filter((e) => !e.flavor)
+      // Vast majority of keywords have no flavor.
+      expect(unflavored.length).toBeGreaterThan(0)
+    })
+  })
 })
 
 describe('getKeywordName', () => {

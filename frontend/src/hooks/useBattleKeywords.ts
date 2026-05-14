@@ -71,6 +71,7 @@ export function useBattleKeywords(): { data: BattleKeywords } {
     merged[key] = {
       name: i18nEntry.name,
       desc: i18nEntry.desc,
+      flavor: i18nEntry.flavor,
       iconId: specEntry?.iconId ?? null,
       buffType: specEntry?.buffType ?? 'Neutral',
     }

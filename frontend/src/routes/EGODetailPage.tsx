@@ -15,6 +15,7 @@ import { DetailRightPanel } from '@/components/common/DetailRightPanel'
 import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
 import { SkillTabButton } from '@/components/identity/SkillTabButton'
 import { useEGODetailSpec } from '@/hooks/useEGODetailData'
+import { getEffectiveEgoPassives, getLockedEgoPassives } from '@/lib/egoPassiveSelection'
 import type { Threadspin } from '@/types/EGOTypes'
 
 type SkillType = 'awaken' | 'erosion'
@@ -56,43 +57,6 @@ function EGODetailContent() {
   // Cast to Threadspin type for component props
   const threadspinLevel = threadspin as Threadspin
 
-  /**
-   * Get effective passives at current threadspin level.
-   * Empty arrays mean "inherit from previous tier".
-   */
-  const getEffectivePassives = (passiveList: string[][], currentThreadspinIndex: number): string[] => {
-    for (let i = currentThreadspinIndex; i >= 0; i--) {
-      if (passiveList[i] && passiveList[i].length > 0) {
-        return passiveList[i]
-      }
-    }
-    return []
-  }
-
-  /**
-   * Get locked passives: passives from higher tiers not available at current tier.
-   * SIMPLIFIED from Identity - no variant filtering, just show all higher-tier passives.
-   */
-  const getLockedPassives = (
-    passiveList: string[][],
-    currentThreadspinIndex: number
-  ): string[] => {
-    const effectiveSet = new Set(getEffectivePassives(passiveList, currentThreadspinIndex))
-    const locked: string[] = []
-
-    for (let i = currentThreadspinIndex + 1; i < passiveList.length; i++) {
-      const tierPassives = passiveList[i]
-      if (!tierPassives) continue
-
-      for (const passiveId of tierPassives) {
-        if (!effectiveSet.has(passiveId)) {
-          locked.push(passiveId)
-        }
-      }
-    }
-
-    return locked
-  }
 
   // Check if erosion skills exist
   const hasErosion = spec.skills.erosion && spec.skills.erosion.length > 0
@@ -101,8 +65,8 @@ function EGODetailContent() {
   const threadspinIndex = threadspinLevel - 1
 
   // Get effective and locked passives for current threadspin
-  const effectivePassives = getEffectivePassives(spec.passives.passiveList, threadspinIndex)
-  const lockedPassives = getLockedPassives(spec.passives.passiveList, threadspinIndex)
+  const effectivePassives = getEffectiveEgoPassives(spec.passives.passiveList, threadspinIndex)
+  const lockedPassives = getLockedEgoPassives(spec.passives.passiveList, threadspinIndex)
 
   // Get attribute type for skill type tab (first skill's first data entry)
   const getSkillAttributeType = (skillTypeKey: SkillType): string | undefined => {

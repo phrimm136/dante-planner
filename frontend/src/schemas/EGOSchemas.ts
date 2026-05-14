@@ -98,8 +98,10 @@ export const EGOSkillDescEntrySchema = z.object({
 })
 
 // Skill i18n schema
+// `flavor` is forward-compat for when raw EGO data starts shipping it.
 export const EGOSkillI18nSchema = z.object({
   name: z.string(),
+  flavor: z.string().optional(),
   descs: z.array(EGOSkillDescEntrySchema),
 })
 
@@ -107,6 +109,7 @@ export const EGOSkillI18nSchema = z.object({
 export const EGOPassiveI18nSchema = z.object({
   name: z.string(),
   desc: z.string(),
+  flavor: z.string().optional(),
 })
 
 // Main EGO i18n schema

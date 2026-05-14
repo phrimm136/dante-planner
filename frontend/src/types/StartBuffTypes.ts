@@ -75,6 +75,7 @@ export interface BattleKeywordI18nEntry {
 export interface BattleKeywordEntry {
   name: string
   desc: string
+  flavor?: string
   iconId: string | null
   buffType: string
 }

@@ -115,8 +115,11 @@ export const IdentitySkillDescEntrySchema = z.object({
 })
 
 // Skill i18n schema
+// `flavor` is a per-skill lore line (not per uptie) — raw game data ships the
+// same flavor on every level entry, so we collapse it at the skill level.
 export const IdentitySkillI18nSchema = z.object({
   name: z.string(),
+  flavor: z.string().optional(),
   descs: z.array(IdentitySkillDescEntrySchema),
 })
 
@@ -124,6 +127,7 @@ export const IdentitySkillI18nSchema = z.object({
 export const IdentityPassiveI18nSchema = z.object({
   name: z.string(),
   desc: z.string(),
+  flavor: z.string().optional(),
 })
 
 // Main identity i18n schema

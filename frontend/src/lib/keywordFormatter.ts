@@ -179,6 +179,7 @@ export function resolveKeyword(
       key,
       displayText: keywordData.name,
       description: keywordData.desc,
+      flavor: keywordData.flavor,
       iconId: keywordData.iconId,
       buffType: keywordData.buffType,
       color,

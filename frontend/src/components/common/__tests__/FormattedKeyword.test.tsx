@@ -208,6 +208,61 @@ describe('FormattedKeyword', () => {
       expect(popover?.querySelector('p')).toBeNull()
     })
 
+    it('renders flavor lore line beneath the description', async () => {
+      const user = userEvent.setup()
+      const keywordWithFlavor: ResolvedKeyword = {
+        ...battleKeyword,
+        flavor: 'A weight that sinks the mind.',
+      }
+
+      render(<FormattedKeyword keyword={keywordWithFlavor} />)
+      await user.click(screen.getByRole('button'))
+
+      const flavor = await screen.findByTestId('keyword-flavor')
+      expect(flavor).toBeInTheDocument()
+      expect(flavor).toHaveTextContent('A weight that sinks the mind.')
+      expect(flavor).toHaveClass('italic')
+    })
+
+    it('flavor appears after the description in DOM order', async () => {
+      const user = userEvent.setup()
+      const keywordWithFlavor: ResolvedKeyword = {
+        ...battleKeyword,
+        description: 'Take damage at turn end',
+        flavor: 'Warmth that consumes from within.',
+      }
+
+      render(<FormattedKeyword keyword={keywordWithFlavor} />)
+      await user.click(screen.getByRole('button'))
+
+      const popover = document.body.querySelector('[data-slot="popover-content"]')!
+      const paragraphs = Array.from(popover.querySelectorAll('p'))
+      expect(paragraphs).toHaveLength(2)
+      expect(paragraphs[0]).toHaveTextContent('Take damage at turn end')
+      expect(paragraphs[1]).toHaveTextContent('Warmth that consumes from within.')
+    })
+
+    it('omits flavor element when flavor is absent', async () => {
+      const user = userEvent.setup()
+      render(<FormattedKeyword keyword={battleKeyword} />)
+      await user.click(screen.getByRole('button'))
+
+      expect(screen.queryByTestId('keyword-flavor')).not.toBeInTheDocument()
+    })
+
+    it('omits flavor element when flavor is an empty string', async () => {
+      const user = userEvent.setup()
+      const keywordEmptyFlavor: ResolvedKeyword = {
+        ...battleKeyword,
+        flavor: '',
+      }
+
+      render(<FormattedKeyword keyword={keywordEmptyFlavor} />)
+      await user.click(screen.getByRole('button'))
+
+      expect(screen.queryByTestId('keyword-flavor')).not.toBeInTheDocument()
+    })
+
     it('applies no animation classes', async () => {
       const user = userEvent.setup()
       render(<FormattedKeyword keyword={battleKeyword} />)

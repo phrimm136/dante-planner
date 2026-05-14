@@ -27,6 +27,32 @@ describe('BattleKeywordEntrySchema', () => {
     expect(result.success).toBe(false)
   })
 
+  it('accepts entry with optional flavor lore line', () => {
+    const result = BattleKeywordEntrySchema.safeParse({
+      name: 'Sinking',
+      desc: 'Reduces SP at turn end.',
+      flavor: 'A weight that sinks the mind.',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts entry without flavor (backward compatible)', () => {
+    const result = BattleKeywordEntrySchema.safeParse({
+      name: 'Sinking',
+      desc: 'Reduces SP at turn end.',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects entry with non-string flavor', () => {
+    const result = BattleKeywordEntrySchema.safeParse({
+      name: 'Sinking',
+      desc: 'Reduces SP at turn end.',
+      flavor: 42,
+    })
+    expect(result.success).toBe(false)
+  })
+
   it('rejects extra fields like iconId (strict mode)', () => {
     const result = BattleKeywordEntrySchema.safeParse({
       name: 'Sinking',

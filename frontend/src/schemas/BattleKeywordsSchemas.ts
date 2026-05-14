@@ -16,6 +16,7 @@ import { z } from 'zod'
 export const BattleKeywordEntrySchema = z.object({
   name: z.string(),
   desc: z.string(),
+  flavor: z.string().optional(),
 }).strict()
 
 /**

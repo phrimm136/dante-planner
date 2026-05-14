@@ -54,6 +54,8 @@ export interface ResolvedKeyword {
   displayText: string
   /** Description for popover (battle keywords only) */
   description?: string
+  /** Flavor lore line shown beneath the description (battle keywords only) */
+  flavor?: string
   /** Icon ID for image path (battle keywords only) */
   iconId?: string | null
   /** Buff type for color lookup (Positive/Negative/Neutral) */
@@ -84,6 +86,7 @@ export interface KeywordResolutionContext {
   battleKeywords: Record<string, {
     name: string
     desc: string
+    flavor?: string
     iconId: string | null
     buffType: string
   }>

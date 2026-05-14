@@ -113,12 +113,16 @@ export interface EGOSkillDescEntry {
 
 export interface EGOSkillI18n {
   name: string
+  /** Per-skill lore line; not per threadspin level. Forward-compat — raw EGO data does not yet ship it. */
+  flavor?: string
   descs: EGOSkillDescEntry[]
 }
 
 export interface EGOPassiveI18n {
   name: string
   desc: string
+  /** Lore line shown beneath the passive description. Forward-compat — raw EGO passive data does not yet ship it. */
+  flavor?: string
 }
 
 export interface EGOI18n {

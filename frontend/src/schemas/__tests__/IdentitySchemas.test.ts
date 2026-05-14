@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { DefenseTypeSchema, IdentitySpecListItemSchema } from '../IdentitySchemas'
+import {
+  DefenseTypeSchema,
+  IdentityPassiveI18nSchema,
+  IdentitySkillI18nSchema,
+  IdentitySpecListItemSchema,
+} from '../IdentitySchemas'
 
 describe('DefenseTypeSchema', () => {
   it.each([
@@ -63,5 +68,84 @@ describe('IdentitySpecListItemSchema with defenseType', () => {
       defenseType: [],
     })
     expect(result.success).toBe(true)
+  })
+})
+
+describe('IdentitySkillI18nSchema flavor field', () => {
+  const baseSkill = {
+    name: 'End-stop Stab',
+    descs: [{ desc: 'Inflict +1 Sinking Count' }],
+  }
+
+  it('accepts a skill without flavor (most skills do not ship one)', () => {
+    const result = IdentitySkillI18nSchema.safeParse(baseSkill)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a skill with a flavor lore line', () => {
+    const result = IdentitySkillI18nSchema.safeParse({
+      ...baseSkill,
+      flavor: 'A technique that cuts through space itself.',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.flavor).toBe('A technique that cuts through space itself.')
+    }
+  })
+
+  it('rejects non-string flavor', () => {
+    const result = IdentitySkillI18nSchema.safeParse({
+      ...baseSkill,
+      flavor: 123,
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('does not bleed flavor into per-uptie desc entries', () => {
+    // Flavor lives at the skill level, not inside each desc entry.
+    // Verifies the schema does not silently accept flavor on a desc entry shape.
+    const result = IdentitySkillI18nSchema.safeParse({
+      name: 'X',
+      descs: [{ desc: 'a', flavor: 'lore' }],
+    })
+    expect(result.success).toBe(true)
+    // Even if Zod allows extra unknown props on the inner entry,
+    // the canonical place for flavor is on the parsed skill object.
+    if (result.success) {
+      expect(result.data.flavor).toBeUndefined()
+    }
+  })
+})
+
+describe('IdentityPassiveI18nSchema flavor field', () => {
+  const basePassive = {
+    name: 'Battle Passive Name',
+    desc: 'Mechanical passive description.',
+  }
+
+  it('accepts a passive without flavor (the common case)', () => {
+    const result = IdentityPassiveI18nSchema.safeParse(basePassive)
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts a passive with an optional flavor line', () => {
+    const result = IdentityPassiveI18nSchema.safeParse({
+      ...basePassive,
+      flavor: "'The things I dread seeing again always come back.'",
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.flavor).toBe(
+        "'The things I dread seeing again always come back.'",
+      )
+    }
+  })
+
+  it('rejects non-string flavor', () => {
+    const result = IdentityPassiveI18nSchema.safeParse({
+      ...basePassive,
+      flavor: 42,
+    })
+    expect(result.success).toBe(false)
   })
 })

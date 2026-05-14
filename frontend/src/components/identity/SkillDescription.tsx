@@ -2,12 +2,15 @@ import { Suspense } from 'react'
 
 import { useIdentityDetailI18n } from '@/hooks/useIdentityDetailData'
 import { getCoinDescIconPath } from '@/lib/assetPaths'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { IdentitySkillDescEntry, Uptie } from '@/types/IdentityTypes'
 
 interface SkillDescriptionProps {
   descData: IdentitySkillDescEntry
+  /** Per-skill lore line — sibling to descData, since raw flavor is not per-uptie. */
+  flavor?: string
 }
 
 interface SkillDescriptionWithSuspenseProps {
@@ -22,8 +25,9 @@ interface SkillDescriptionWithSuspenseProps {
  * Layout:
  * 1. Skill description (desc)
  * 2. Coin descriptions (coinDescs) with numbered coin icons, tabbed
+ * 3. Flavor lore line (mirrors in-game `[Text]SkillInfoFlavor` TMP)
  */
-export function SkillDescription({ descData }: SkillDescriptionProps) {
+export function SkillDescription({ descData, flavor }: SkillDescriptionProps) {
   const { desc, coinDescs } = descData
 
   return (
@@ -55,6 +59,17 @@ export function SkillDescription({ descData }: SkillDescriptionProps) {
             )
           })}
         </div>
+      )}
+
+      {/* Flavor text — mirrors in-game [Text]SkillInfoFlavor TMP */}
+      {flavor && (
+        <p
+          data-testid="skill-flavor"
+          className="italic whitespace-pre-line pt-1"
+          style={{ color: FLAVOR_TEXT_COLOR }}
+        >
+          {flavor}
+        </p>
       )}
     </div>
   )
@@ -125,5 +140,5 @@ function SkillDescriptionContent({
   const skillI18n = i18n.skills[String(skillId)]
   const descData = getMergedSkillDesc(skillI18n?.descs ?? [], uptie)
 
-  return <SkillDescription descData={descData} />
+  return <SkillDescription descData={descData} flavor={skillI18n?.flavor} />
 }

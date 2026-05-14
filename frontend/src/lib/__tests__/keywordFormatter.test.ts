@@ -294,10 +294,35 @@ describe('resolveKeyword', () => {
         key: 'Sinking',
         displayText: 'Sinking',
         description: 'Each turn, lose HP equal to Sinking count.',
+        flavor: undefined,
         iconId: 'Sinking',
         buffType: 'Negative',
         color: '#ff0000',
       })
+    })
+
+    it('passes flavor through to ResolvedKeyword when source has it', () => {
+      const contextWithFlavor: KeywordResolutionContext = {
+        ...mockContext,
+        battleKeywords: {
+          ...mockBattleKeywords,
+          Sinking: {
+            ...mockBattleKeywords.Sinking,
+            flavor: 'A weight that sinks the mind.',
+          },
+        },
+      }
+
+      const result = resolveKeyword('Sinking', contextWithFlavor)
+
+      expect(result.type).toBe('battleKeyword')
+      expect(result.flavor).toBe('A weight that sinks the mind.')
+    })
+
+    it('leaves flavor undefined for keywords without a flavor source', () => {
+      const result = resolveKeyword('Burn', mockContext)
+      expect(result.type).toBe('battleKeyword')
+      expect(result.flavor).toBeUndefined()
     })
 
     it('returns battle keyword with null iconId', () => {

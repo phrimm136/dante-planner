@@ -3,6 +3,7 @@ import { useEGODetailI18n } from '@/hooks/useEGODetailData'
 import { FormattedDescription } from '@/components/common/FormattedDescription'
 import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface PassiveCardWithSuspenseProps {
@@ -37,6 +38,9 @@ export function PassiveCardWithSuspense({
           <PassiveDescContent id={id} passiveId={passiveId} />
         </Suspense>
       </div>
+      <Suspense fallback={null}>
+        <PassiveFlavorContent id={id} passiveId={passiveId} />
+      </Suspense>
     </div>
   )
 }
@@ -57,6 +61,26 @@ function PassiveDescContent({ id, passiveId }: { id: string; passiveId: string }
   const i18n = useEGODetailI18n(id)
   const passive = i18n.passives[passiveId]
   return <FormattedDescription text={passive?.desc ?? ''} />
+}
+
+/**
+ * Internal: Fetches and renders passive flavor lore.
+ * Returns null when the passive has no flavor (most do not).
+ */
+function PassiveFlavorContent({ id, passiveId }: { id: string; passiveId: string }) {
+  const i18n = useEGODetailI18n(id)
+  const passive = i18n.passives[passiveId]
+  const flavor = passive?.flavor
+  if (!flavor) return null
+  return (
+    <p
+      data-testid="passive-flavor"
+      className="text-sm italic whitespace-pre-line pt-1"
+      style={{ color: FLAVOR_TEXT_COLOR }}
+    >
+      {flavor}
+    </p>
+  )
 }
 
 /**

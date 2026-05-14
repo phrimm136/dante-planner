@@ -105,7 +105,7 @@ export function EGOSkillCard({
           coinString={coinString}
         />
       }
-      description={<SkillDescription descData={skillDescData} />}
+      description={<SkillDescription descData={skillDescData} flavor={skillI18n.flavor} />}
     />
   )
 }
@@ -193,5 +193,5 @@ function EGOSkillDescriptionContent({
   const skillI18n = i18n.skills[String(skillId)]
   const skillDescData = getSkillDesc(skillI18n.descs, threadspin)
 
-  return <SkillDescription descData={skillDescData} />
+  return <SkillDescription descData={skillDescData} flavor={skillI18n.flavor} />
 }

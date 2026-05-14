@@ -160,12 +160,16 @@ export interface IdentitySkillDescEntry {
 
 export interface IdentitySkillI18n {
   name: string
+  /** Per-skill lore line; not per uptie. */
+  flavor?: string
   descs: IdentitySkillDescEntry[]
 }
 
 export interface IdentityPassiveI18n {
   name: string
   desc: string
+  /** Lore line shown beneath the passive description. */
+  flavor?: string
 }
 
 export interface IdentityI18n {

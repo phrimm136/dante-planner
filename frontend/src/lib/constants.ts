@@ -430,6 +430,13 @@ export const PASSIVE_INDICATOR_COLORS = {
 } as const
 
 /**
+ * Flavor text color for skill / status-effect lore lines.
+ * Mirrors in-game `*FlavorGlow` TMP material face color used by
+ * `[Text]SkillInfoFlavor` and `[Text]BuffFlavor` GameObjects.
+ */
+export const FLAVOR_TEXT_COLOR = '#a16a3b'
+
+/**
  * Planner configuration for version management
  * Authoritative source: scripts/sync-planner-config.py
  * Also kept in backend application.properties for server-side validation
