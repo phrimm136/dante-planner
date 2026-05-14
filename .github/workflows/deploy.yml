@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Detect changed services
         id: filter
@@ -49,19 +49,28 @@ jobs:
             NGINX_CHANGED=true
             MYSQL_CHANGED=true
           else
-            CHANGED=$(git diff --name-only HEAD~1 HEAD)
-            echo "Changed files:"
-            echo "$CHANGED"
+            LAST_TAG=$(git describe --tags --match 'v*' --abbrev=0 HEAD^ 2>/dev/null || true)
 
-            echo "$CHANGED" | grep -q '^backend/'         && BACKEND_CHANGED=true || true
-            echo "$CHANGED" | grep -q '^nginx/'           && NGINX_CHANGED=true   || true
-            echo "$CHANGED" | grep -q '^mysql/'           && MYSQL_CHANGED=true   || true
-
-            # Shared infra changes affect all services
-            if echo "$CHANGED" | grep -qE '^(docker-compose\.yml|\.github/workflows/deploy\.yml|scripts/deploy/)'; then
+            if [ -z "$LAST_TAG" ]; then
+              echo "No prior release tag found - deploying all services"
               BACKEND_CHANGED=true
               NGINX_CHANGED=true
               MYSQL_CHANGED=true
+            else
+              echo "Diffing $LAST_TAG..HEAD"
+              CHANGED=$(git diff --name-only "$LAST_TAG" HEAD)
+              echo "Changed files:"
+              echo "$CHANGED"
+
+              echo "$CHANGED" | grep -q '^backend/'         && BACKEND_CHANGED=true || true
+              echo "$CHANGED" | grep -q '^nginx/'           && NGINX_CHANGED=true   || true
+              echo "$CHANGED" | grep -q '^mysql/'           && MYSQL_CHANGED=true   || true
+
+              if echo "$CHANGED" | grep -qE '^(docker-compose\.yml|\.github/workflows/deploy\.yml|scripts/deploy/)'; then
+                BACKEND_CHANGED=true
+                NGINX_CHANGED=true
+                MYSQL_CHANGED=true
+              fi
             fi
           fi
 
@@ -300,7 +309,44 @@ jobs:
             exit 1
           fi
 
-  # 4. Rollback (health-check 실패 시)
+  # 4. Tag deployed commit on success (idempotent if already tagged)
+  tag-release:
+    needs: health-check
+    if: needs.health-check.outputs.healthy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Tag deployed commit
+        env:
+          DEPLOYED_SHA: ${{ github.sha }}
+        run: |
+          DATE_TAG="v$(date -u +%y%m%d)"
+
+          if git rev-parse "$DATE_TAG" >/dev/null 2>&1 \
+             && [ "$(git rev-list -n1 "$DATE_TAG")" = "$DEPLOYED_SHA" ]; then
+            echo "$DATE_TAG already points to $DEPLOYED_SHA - nothing to do"
+            exit 0
+          fi
+
+          TAG="$DATE_TAG"
+          N=2
+          while git rev-parse "$TAG" >/dev/null 2>&1; do
+            TAG="${DATE_TAG}-${N}"
+            N=$((N+1))
+          done
+
+          git tag "$TAG" "$DEPLOYED_SHA"
+          git push origin "$TAG"
+          echo "Tagged $DEPLOYED_SHA as $TAG"
+
+  # 5. Rollback (health-check 실패 시)
   rollback:
     needs: health-check
     if: failure()
@@ -357,7 +403,7 @@ jobs:
             exit 1
           fi
 
-  # 5. Notify PR on failure
+  # 6. Notify PR on failure
   notify-failure:
     needs: [detect-changes, build-and-push, deploy, health-check]
     if: failure()
