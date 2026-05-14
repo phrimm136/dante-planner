@@ -84,7 +84,7 @@ export const EGODataSchema = z.object({
   requirements: z.record(z.string(), z.number()),
   skills: EGOSkillsDataSchema,
   passives: EGOPassivesDataSchema,
-  maxThreadspin: z.number().int().min(4).max(5),
+  maxThreadspin: z.union([z.literal(4), z.literal(5)]),
 })
 
 /**
@@ -142,7 +142,7 @@ export const EGOSpecListItemSchema = z.object({
   requirements: z.record(z.string(), z.number()),
   attributeType: z.array(AffinitySchema),
   atkType: z.array(EGOAtkTypeSchema),
-  maxThreadspin: z.number().int().min(4).max(5),
+  maxThreadspin: z.union([z.literal(4), z.literal(5)]),
 })
 
 // Record types for spec and name lists
