@@ -7,10 +7,11 @@
  * 3. Content rendering and controlled component pattern
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NoteEditor } from '../NoteEditor'
+import { calculateNoteByteLength } from '@/lib/noteUtils'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 
 // Mock i18next with initReactI18next for proper module loading
@@ -477,4 +478,132 @@ describe('NoteEditor - XSS Prevention', () => {
       })
     })
   })
+})
+
+describe('NoteEditor - paste byte limit', () => {
+  const emptyValue: NoteContent = {
+    content: { type: 'doc', content: [{ type: 'paragraph' }] },
+  }
+
+  // jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
+  // Range.getClientRects(), which returns empty and throws. Shim a zero rect.
+  const zeroRect = {
+    top: 0, left: 0, bottom: 0, right: 0, width: 0, height: 0, x: 0, y: 0,
+    toJSON: () => ({}),
+  } as DOMRect
+  let origBounding: typeof Range.prototype.getBoundingClientRect
+  let origClientRects: typeof Range.prototype.getClientRects
+
+  beforeAll(() => {
+    origBounding = Range.prototype.getBoundingClientRect
+    origClientRects = Range.prototype.getClientRects
+    Range.prototype.getBoundingClientRect = () => zeroRect
+    Range.prototype.getClientRects = () =>
+      ({
+        length: 1,
+        item: () => zeroRect,
+        0: zeroRect,
+        [Symbol.iterator]: () => [zeroRect][Symbol.iterator](),
+      }) as unknown as DOMRectList
+  })
+
+  afterAll(() => {
+    Range.prototype.getBoundingClientRect = origBounding
+    Range.prototype.getClientRects = origClientRects
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function pasteText(text: string) {
+    const contentEl = document.querySelector('.note-editor-content')
+    expect(contentEl).toBeTruthy()
+    const clipboardData = {
+      getData: (type: string) => (type === 'text/plain' ? text : ''),
+      types: ['text/plain'],
+      files: [],
+    }
+    fireEvent.paste(contentEl as Element, { clipboardData })
+  }
+
+  it('truncates an over-limit paste so the note stays within the cap', async () => {
+    const onChange = vi.fn()
+    render(
+      <NoteEditor value={emptyValue} onChange={onChange} maxBytes={400} />
+    )
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.click(container)
+
+    pasteText('x'.repeat(8000))
+
+    await waitFor(
+      () => {
+        expect(onChange).toHaveBeenCalled()
+        const calls = onChange.mock.calls
+        const last = calls[calls.length - 1][0] as NoteContent
+        expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(400)
+      },
+      { timeout: 2000 }
+    )
+  })
+
+  it('keeps an in-limit paste intact', async () => {
+    const onChange = vi.fn()
+    render(
+      <NoteEditor value={emptyValue} onChange={onChange} maxBytes={4096} />
+    )
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.click(container)
+
+    pasteText('hello world')
+
+    await waitFor(
+      () => {
+        expect(onChange).toHaveBeenCalled()
+        const calls = onChange.mock.calls
+        const last = calls[calls.length - 1][0] as NoteContent
+        expect(JSON.stringify(last.content)).toContain('hello world')
+        expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(4096)
+      },
+      { timeout: 2000 }
+    )
+  })
+
+  it('truncates right up to the cap — never over, fills the budget', async () => {
+    const onChange = vi.fn()
+    const cap = 300
+    render(
+      <NoteEditor value={emptyValue} onChange={onChange} maxBytes={cap} />
+    )
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.click(container)
+
+    // All-ASCII payload: 1 byte/char near the cut, so the largest fitting
+    // prefix lands within a couple bytes of the cap, and NEVER over it.
+    pasteText('z'.repeat(5000))
+
+    await waitFor(
+      () => {
+        expect(onChange).toHaveBeenCalled()
+        const calls = onChange.mock.calls
+        const last = calls[calls.length - 1][0] as NoteContent
+        const size = calculateNoteByteLength({ content: last.content })
+        expect(size).toBeLessThanOrEqual(cap)        // inclusive boundary: never exceeds
+        expect(size).toBeGreaterThan(cap - 5)        // truncated to fit, not under-cut
+      },
+      { timeout: 2000 }
+    )
+  })
+
+  // The over-cap external-load path (NoteEditor prop-sync uses
+  // editor.chain().setMeta(BYTE_LIMIT_BYPASS,true).setContent(...)) is covered
+  // deterministically at the Editor level in ByteLimitExtension.test.ts —
+  // exercising the exact call shape without jsdom/React/debounce flakiness.
 })

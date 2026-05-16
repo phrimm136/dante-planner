@@ -12,8 +12,11 @@ import {
   MDConfigSchema,
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
+  SaveablePlannerSchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
+import { validateNoteSizes } from '../../lib/plannerHelpers'
+import { MAX_NOTE_BYTES } from '../../lib/constants'
 
 // ============================================================================
 // Test Fixtures
@@ -357,5 +360,48 @@ describe('PlannerSchemas integration', () => {
     expect(validated.metadata.id).toBe(original.metadata.id)
     expect(validated.config.type).toBe(original.config.type)
     expect(validated.config.category).toBe(original.config.category)
+  })
+})
+
+// ============================================================================
+// Import path: storage stays tolerant, save is the gate
+// ============================================================================
+//
+// Local-JSON import persists via savePlanner -> SaveablePlannerSchema.safeParse.
+// SaveablePlannerSchema treats `content` as an opaque record, so an oversized
+// section note must NOT brick the import (the deliberate "tolerant storage"
+// decision). Enforcement happens later at the save boundary via
+// validateNoteSizes. This pins both halves of that contract together.
+
+describe('import path: oversized note tolerated by storage, gated at save', () => {
+  function oversizedSectionNotes() {
+    return {
+      intro: {
+        content: {
+          type: 'doc',
+          content: [
+            { type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(5000) }] },
+          ],
+        },
+      },
+    }
+  }
+
+  it('SaveablePlannerSchema accepts a planner whose note exceeds the cap', () => {
+    const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
+    ;(planner.content as { sectionNotes: unknown }).sectionNotes = oversizedSectionNotes()
+
+    // Import/persist must succeed — a strict refine here would discard the
+    // whole imported planner (the rejected design).
+    expect(SaveablePlannerSchema.safeParse(planner).success).toBe(true)
+  })
+
+  it('validateNoteSizes flags the same note so the save is blocked', () => {
+    const sectionNotes = oversizedSectionNotes()
+
+    expect(validateNoteSizes(sectionNotes)).toEqual({
+      key: 'pages.plannerMD.validation.noteTooLarge',
+      params: { section: 'intro', limit: String(MAX_NOTE_BYTES) },
+    })
   })
 })

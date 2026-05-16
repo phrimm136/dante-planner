@@ -19,8 +19,11 @@ import {
   validateFloorThemePacksForSave,
   validatePlannerForSave,
   validatePlannerUserFriendly,
+  validateNoteSizes,
   toUserFriendlyError,
 } from '../plannerHelpers'
+import { MAX_NOTE_BYTES } from '../constants'
+import { calculateNoteByteLength } from '../noteUtils'
 import type { FloorValidationError, DifficultyValidationError } from '../plannerHelpers'
 import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
@@ -933,5 +936,54 @@ describe('validatePlannerUserFriendly – gift affordability', () => {
     content.floorSelections[0].giftIds = ['9220']
 
     expect(validatePlannerUserFriendly(content, '5F')).toBeNull()
+  })
+})
+
+describe('validateNoteSizes', () => {
+  /** Builds a section note whose serialized size scales 1 byte per ASCII char. */
+  function noteWithText(text: string) {
+    return {
+      content: {
+        type: 'doc',
+        content: [
+          { type: 'paragraph', content: [{ type: 'text', text }] },
+        ],
+      },
+    }
+  }
+
+  const overhead = calculateNoteByteLength(noteWithText(''))
+
+  it('returns null when all notes are within the limit', () => {
+    expect(
+      validateNoteSizes({ intro: noteWithText('hello'), 'floor-0': noteWithText('') })
+    ).toBeNull()
+  })
+
+  it('returns null for an empty notes map', () => {
+    expect(validateNoteSizes({})).toBeNull()
+  })
+
+  it('accepts a note exactly at the byte limit', () => {
+    const atLimit = noteWithText('a'.repeat(MAX_NOTE_BYTES - overhead))
+    expect(calculateNoteByteLength(atLimit)).toBe(MAX_NOTE_BYTES)
+    expect(validateNoteSizes({ intro: atLimit })).toBeNull()
+  })
+
+  it('flags the offending section one byte over the limit', () => {
+    const overLimit = noteWithText('a'.repeat(MAX_NOTE_BYTES - overhead + 1))
+    const result = validateNoteSizes({ intro: noteWithText('ok'), deckBuilder: overLimit })
+
+    expect(result).toEqual({
+      key: 'pages.plannerMD.validation.noteTooLarge',
+      params: { section: 'deckBuilder', limit: String(MAX_NOTE_BYTES) },
+    })
+  })
+
+  it('measures multibyte content as UTF-8 bytes', () => {
+    const koreanCharCount = Math.ceil((MAX_NOTE_BYTES - overhead) / 3) + 1
+    const result = validateNoteSizes({ 'floor-3': noteWithText('가'.repeat(koreanCharCount)) })
+
+    expect(result?.params?.section).toBe('floor-3')
   })
 })

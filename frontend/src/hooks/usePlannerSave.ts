@@ -9,7 +9,7 @@ import { serializeSets } from '@/schemas/PlannerSchemas'
 import { ConflictError, BannedError, TimedOutError } from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
-import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
+import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError, validateNoteSizes } from '@/lib/plannerHelpers'
 import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
@@ -368,6 +368,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     throw error
   }
 
+
   /**
    * Core save logic for manual save
    * - Always saves to IndexedDB via SaveAdapter
@@ -404,6 +405,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     // Two-tier validation for MD planners (non-strict for draft, strict for published)
     if (plannerType === 'MIRROR_DUNGEON') {
       const content = saveable.content as MDPlannerContent
+
+      const noteSizeError = validateNoteSizes(content.sectionNotes)
+      if (noteSizeError) throwValidationError(noteSizeError)
 
       if (isCurrentlyPublished) {
         // Strict: title + theme packs required, full difficulty enforced
@@ -664,10 +668,14 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         )
 
         // Validate copy content before saving/syncing (same content as currentState)
-        if (plannerType === 'MIRROR_DUNGEON' && egoGiftSpec) {
+        if (plannerType === 'MIRROR_DUNGEON') {
           const content = newPlanner.content as MDPlannerContent
-          const validationError = validatePlannerUserFriendly(content, currentState.category, egoGiftSpec, egoGiftI18n)
-          if (validationError) throwValidationError(validationError)
+          const noteSizeError = validateNoteSizes(content.sectionNotes)
+          if (noteSizeError) throwValidationError(noteSizeError)
+          if (egoGiftSpec) {
+            const validationError = validatePlannerUserFriendly(content, currentState.category, egoGiftSpec, egoGiftI18n)
+            if (validationError) throwValidationError(validationError)
+          }
         }
 
         // Track whether copy was saved for cleanup on failure

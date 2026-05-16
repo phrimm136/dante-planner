@@ -5,8 +5,10 @@
  * Mirrors backend PlannerContentValidator validation rules.
  */
 
-import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX } from '@/lib/constants'
+import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX, MAX_NOTE_BYTES } from '@/lib/constants'
 import { getBaseGiftId } from '@/lib/egoGiftEncoding'
+import { measureDocBytes } from '@/lib/noteUtils'
+import type { JSONContent } from '@tiptap/core'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
@@ -1054,4 +1056,29 @@ export function validatePlannerUserFriendly(
 
   if (errors.length === 0) return null
   return toUserFriendlyError(errors[0])
+}
+
+/**
+ * Validates that no section note exceeds the byte cap.
+ *
+ * Returns the first offending section as a user-friendly error so save can be
+ * blocked with an actionable message, rather than relying on schema discard
+ * (which would silently drop the whole planner). The editor enforces the same
+ * cap on input; this is the save-time backstop for legacy oversized notes.
+ *
+ * @param sectionNotes - serialized section notes keyed by section identifier
+ * @returns user-friendly error for the first oversized note, or null if all fit
+ */
+export function validateNoteSizes(
+  sectionNotes: Record<string, { content: unknown }>
+): { key: string; params?: Record<string, string> } | null {
+  for (const [section, note] of Object.entries(sectionNotes ?? {})) {
+    if (measureDocBytes(note.content as JSONContent) > MAX_NOTE_BYTES) {
+      return {
+        key: 'pages.plannerMD.validation.noteTooLarge',
+        params: { section, limit: String(MAX_NOTE_BYTES) },
+      }
+    }
+  }
+  return null
 }
