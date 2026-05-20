@@ -1,9 +1,9 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "7.2.3.7755"
-    id("org.owasp.dependencycheck") version "12.2.0"
+    id("org.sonarqube") version "7.3.0.8198"
+    id("org.owasp.dependencycheck") version "12.2.2"
     jacoco
 }
 
@@ -26,9 +26,9 @@ extra["tomcat.version"] = "10.1.53"
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
-        mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
+        mavenBom("org.apache.logging.log4j:log4j-bom:2.26.0")
         // Override Spring Security to fix CVE-2026-22732
-        mavenBom("org.springframework.security:spring-security-bom:6.5.9")
+        mavenBom("org.springframework.security:spring-security-bom:7.0.5")
     }
 }
 
@@ -59,16 +59,16 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
-    implementation("org.jsoup:jsoup:1.22.1")
-    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
+    implementation("org.jsoup:jsoup:1.22.2")
+    implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.41.0")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("com.h2database:h2")
-    testImplementation("org.testcontainers:testcontainers:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-mysql:2.0.4")
-    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.4")
+    testImplementation("org.testcontainers:testcontainers:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-mysql:2.0.5")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.5")
 }
 
 tasks.withType<Test> {
