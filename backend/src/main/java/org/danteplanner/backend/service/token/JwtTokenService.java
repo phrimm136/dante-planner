@@ -27,6 +27,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * JWT token service implementing both generation and validation.
@@ -40,6 +41,9 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
     private static final String CLAIM_EMAIL = "email";
     private static final String CLAIM_TYPE = "type";
     private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_JTI = "jti";
+    private static final String CLAIM_FAMILY_ID = "family_id";
+    private static final String CLAIM_PARENT_JTI = "parent_jti";
     private static final String CLAIM_ENCRYPTED = "enc";
 
     private static final String AES_ALGORITHM = "AES/GCM/NoPadding";
@@ -92,16 +96,29 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
     @Override
     public String generateRefreshToken(Long userId, String email) {
+        return generateRefreshToken(userId, email, UUID.randomUUID().toString(), null);
+    }
+
+    @Override
+    public String generateRefreshToken(Long userId, String email, String familyId, String parentJti) {
         if (userId == null) {
             throw new IllegalArgumentException("userId must not be null");
         }
         if (email == null) {
             throw new IllegalArgumentException("email must not be null");
         }
+        if (familyId == null) {
+            throw new IllegalArgumentException("familyId must not be null");
+        }
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_USER_ID, userId);
         claims.put(CLAIM_TYPE, TokenClaims.TYPE_REFRESH);
+        claims.put(CLAIM_JTI, UUID.randomUUID().toString());
+        claims.put(CLAIM_FAMILY_ID, familyId);
+        if (parentJti != null) {
+            claims.put(CLAIM_PARENT_JTI, parentJti);
+        }
 
         return buildToken(claims, email, jwtProperties.getRefreshTokenExpiry());
     }
@@ -116,6 +133,9 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         String email = claims.getSubject();
         String type = claims.get(CLAIM_TYPE, String.class);
         String roleValue = claims.get(CLAIM_ROLE, String.class);
+        String jti = claims.get(CLAIM_JTI, String.class);
+        String familyId = claims.get(CLAIM_FAMILY_ID, String.class);
+        String parentJti = claims.get(CLAIM_PARENT_JTI, String.class);
 
         // Parse role - null for old tokens or refresh tokens (backward compat)
         UserRole role = null;
@@ -133,7 +153,10 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
                 type,
                 role,
                 claims.getIssuedAt(),
-                claims.getExpiration()
+                claims.getExpiration(),
+                jti,
+                familyId,
+                parentJti
         );
     }
 

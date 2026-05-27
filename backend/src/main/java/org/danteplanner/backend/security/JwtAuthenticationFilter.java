@@ -5,12 +5,15 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.InvalidTokenException;
 import org.danteplanner.backend.exception.TokenRevokedException;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
 import org.danteplanner.backend.service.UserService;
+import org.danteplanner.backend.service.token.RefreshRotationService;
+import org.danteplanner.backend.service.token.RotationResult;
 import org.danteplanner.backend.service.token.TokenBlacklistService;
 import org.danteplanner.backend.service.token.TokenClaims;
 import org.danteplanner.backend.service.token.TokenGenerator;
@@ -62,6 +65,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
     private final ObjectMapper objectMapper;
     private final TokenGenerator tokenGenerator;
+    private final RefreshRotationService refreshRotationService;
+    private final LineageRotationFlag lineageRotationFlag;
 
     public JwtAuthenticationFilter(
             TokenValidator tokenValidator,
@@ -69,7 +74,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             CookieUtils cookieUtils,
             UserService userService,
             ObjectMapper objectMapper,
-            TokenGenerator tokenGenerator
+            TokenGenerator tokenGenerator,
+            RefreshRotationService refreshRotationService,
+            LineageRotationFlag lineageRotationFlag
     ) {
         this.tokenValidator = tokenValidator;
         this.tokenBlacklistService = tokenBlacklistService;
@@ -77,6 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userService = userService;
         this.objectMapper = objectMapper;
         this.tokenGenerator = tokenGenerator;
+        this.refreshRotationService = refreshRotationService;
+        this.lineageRotationFlag = lineageRotationFlag;
     }
 
     /**
@@ -237,6 +246,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return false;
             }
 
+            if (lineageRotationFlag.isEnabled()) {
+                return attemptLineageRefresh(refreshToken, request, response);
+            }
+
             // Validate refresh token
             TokenClaims claims = tokenValidator.validateToken(refreshToken);
 
@@ -292,6 +305,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.debug("Auto-refresh failed: {}", e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Auto-refresh via the lineage rotation service (flag-on path).
+     *
+     * <p>Delegates the refresh-cookie rotation and theft detection to
+     * {@link RefreshRotationService}. On a successful rotation the access token is
+     * minted here with the user's current DB role and set as a cookie, and the
+     * request is authenticated. On a revoked family or rejection the auth context is
+     * cleared and {@code false} is returned so the request proceeds as a guest;
+     * {@code rotate} has already cleared cookies for a revoked family.</p>
+     *
+     * @param refreshToken the presented refresh JWT
+     * @param request      HTTP request for authentication details
+     * @param response     HTTP response to set new cookies
+     * @return true if rotation succeeded and authentication is set, false otherwise
+     */
+    private boolean attemptLineageRefresh(
+            String refreshToken,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        RotationResult result = refreshRotationService.rotate(refreshToken, response);
+
+        if (!(result instanceof RotationResult.Rotated rotated)) {
+            log.debug("Lineage auto-refresh did not rotate: {}", result.getClass().getSimpleName());
+            return false;
+        }
+
+        TokenClaims claims = rotated.claims();
+
+        Optional<User> activeUser = userService.findActiveById(claims.userId());
+        if (activeUser.isEmpty()) {
+            log.warn("Lineage auto-refresh for non-existent or deleted user: {}", claims.userId());
+            return false;
+        }
+
+        User user = activeUser.get();
+
+        String newAccessToken = tokenGenerator.generateAccessToken(
+                user.getId(), user.getEmail(), user.getRole()
+        );
+        cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken, 900);
+
+        setAuthentication(user.getId(), user.getRole(), request);
+
+        log.debug("Lineage auto-refreshed tokens for user: {}", user.getEmail());
+        return true;
     }
 
     /**

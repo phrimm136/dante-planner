@@ -83,6 +83,9 @@ public class SecurityConfig {
                 // ASYNC dispatch (SSE continuations) - already authenticated on initial request
                 .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
 
+                // Log out everywhere requires an authenticated session (must precede /api/auth/** permitAll)
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/logout-all").authenticated()
+
                 // Public endpoints: OAuth callbacks, health checks
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()

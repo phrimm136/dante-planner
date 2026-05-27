@@ -1,7 +1,11 @@
 package org.danteplanner.backend.exception;
 
 import io.sentry.Sentry;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,7 +22,10 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final CookieUtils cookieUtils;
 
     public record ErrorResponse(String code, String message) {}
 
@@ -63,6 +70,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
         Sentry.captureException(ex);
         log.warn("Token revoked: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
+    }
+
+    @ExceptionHandler(SessionRevokedException.class)
+    public ResponseEntity<ErrorResponse> handleSessionRevoked(SessionRevokedException ex, HttpServletResponse response) {
+        Sentry.captureException(ex);
+        log.warn("Session revoked: {}", ex.getMessage());
+        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
     }

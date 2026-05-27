@@ -178,6 +178,49 @@ class JwtTokenServiceTest {
     }
 
     @Nested
+    @DisplayName("Lineage Claims Tests")
+    class LineageClaimsTests {
+
+        @Test
+        @DisplayName("Refresh token via overload carries jti, family_id, parent_jti")
+        void givenFamilyAndParent_whenGenerateRefreshToken_thenCarriesAllLineageClaims() {
+            Long userId = 111L;
+            String email = "lineage@example.com";
+            String familyId = "fam-123";
+            String parentJti = "parent-jti-456";
+
+            String token = tokenService.generateRefreshToken(userId, email, familyId, parentJti);
+
+            TokenClaims claims = tokenService.validateToken(token);
+            assertNotNull(claims.jti());
+            assertEquals(familyId, claims.familyId());
+            assertEquals(parentJti, claims.parentJti());
+        }
+
+        @Test
+        @DisplayName("Refresh token via legacy signature carries jti and family_id, parent_jti null")
+        void givenLegacySignature_whenGenerateRefreshToken_thenCarriesJtiAndFamilyButNoParent() {
+            String token = tokenService.generateRefreshToken(222L, "legacy@example.com");
+
+            TokenClaims claims = tokenService.validateToken(token);
+            assertNotNull(claims.jti());
+            assertNotNull(claims.familyId());
+            assertNull(claims.parentJti());
+        }
+
+        @Test
+        @DisplayName("Access token carries no lineage claims")
+        void givenAccessToken_whenValidate_thenLineageClaimsNull() {
+            String token = tokenService.generateAccessToken(333L, "access@example.com", UserRole.NORMAL);
+
+            TokenClaims claims = tokenService.validateToken(token);
+            assertNull(claims.jti());
+            assertNull(claims.familyId());
+            assertNull(claims.parentJti());
+        }
+    }
+
+    @Nested
     @DisplayName("validateToken Tests")
     class ValidateTokenTests {
 

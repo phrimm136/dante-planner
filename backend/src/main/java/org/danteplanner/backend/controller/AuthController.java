@@ -138,6 +138,20 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/logout-all")
+    public ResponseEntity<Void> logoutAll(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) auth.getPrincipal();
+
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        authFacade.logoutAll(userId, accessToken);
+
+        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+
+        return ResponseEntity.noContent().build();
+    }
+
     /**
      * Sets auth cookies from authentication result.
      */

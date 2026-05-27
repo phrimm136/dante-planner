@@ -7,6 +7,7 @@ import { SyncSection } from '@/components/settings/SyncSection'
 import { PlannerExportImportSection } from '@/components/settings/PlannerExportImportSection'
 import { NotificationSection } from '@/components/settings/NotificationSection'
 import { AccountDeleteSection } from '@/components/settings/AccountDeleteSection'
+import { LogoutEverywhereSection } from '@/components/settings/LogoutEverywhereSection'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
@@ -53,6 +54,13 @@ function SettingsPageContent() {
       {isAuthenticated && (
         <section className="mt-8 rounded-lg border bg-card p-6">
           <NotificationSection />
+        </section>
+      )}
+
+      {/* Log out everywhere section - auth only */}
+      {isAuthenticated && (
+        <section className="mt-8 rounded-lg border bg-card p-6">
+          <LogoutEverywhereSection />
         </section>
       )}
 

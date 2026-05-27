@@ -13,6 +13,9 @@ import java.util.Date;
  * @param role user role (nullable for backward compat with old tokens, null = NORMAL)
  * @param issuedAt when the token was issued
  * @param expiration when the token expires
+ * @param jti unique refresh-token identifier; null for access and legacy tokens
+ * @param familyId rotation-lineage family identifier; null for access and legacy tokens
+ * @param parentJti parent token's jti; null for access, legacy, and initial-login tokens
  */
 public record TokenClaims(
         Long userId,
@@ -20,7 +23,10 @@ public record TokenClaims(
         String type,
         UserRole role,
         Date issuedAt,
-        Date expiration
+        Date expiration,
+        String jti,
+        String familyId,
+        String parentJti
 ) {
     public TokenClaims {
         if (userId == null) {
@@ -41,6 +47,14 @@ public record TokenClaims(
         if (expiration.before(issuedAt)) {
             throw new IllegalArgumentException("expiration must be after issuedAt");
         }
+    }
+
+    /**
+     * Convenience constructor for tokens without rotation-lineage claims
+     * (access tokens, legacy refresh tokens).
+     */
+    public TokenClaims(Long userId, String email, String type, UserRole role, Date issuedAt, Date expiration) {
+        this(userId, email, type, role, issuedAt, expiration, null, null, null);
     }
 
     /**

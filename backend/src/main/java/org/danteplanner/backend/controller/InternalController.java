@@ -2,12 +2,14 @@ package org.danteplanner.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.validation.GameDataRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.annotation.PostConstruct;
@@ -29,6 +31,7 @@ import java.util.Map;
 public class InternalController {
 
     private final GameDataRegistry gameDataRegistry;
+    private final LineageRotationFlag lineageRotationFlag;
 
     @Value("${internal.api-key:}")
     private String apiKey;
@@ -64,6 +67,35 @@ public class InternalController {
         return ResponseEntity.ok(Map.of(
                 "status", "ok",
                 "populated", String.valueOf(gameDataRegistry.isPopulated())
+        ));
+    }
+
+    /**
+     * Toggles the lineage-based refresh token rotation feature flag at runtime.
+     *
+     * <p>Flips {@link LineageRotationFlag} so the auth hot path switches rotation
+     * strategy without a container restart, letting the new lineage path be enabled or
+     * rolled back live.</p>
+     */
+    @PostMapping("/feature-flags/lineage-rotation")
+    public ResponseEntity<Map<String, String>> setLineageRotation(
+            @RequestHeader("X-Internal-Api-Key") String providedKey,
+            @RequestParam boolean enabled) {
+
+        if (apiKey.isBlank() || !MessageDigest.isEqual(
+                apiKey.getBytes(StandardCharsets.UTF_8),
+                providedKey.getBytes(StandardCharsets.UTF_8))) {
+            log.warn("Unauthorized lineage-rotation toggle attempt");
+            return ResponseEntity.status(403)
+                    .body(Map.of("error", "Invalid API key"));
+        }
+
+        lineageRotationFlag.setEnabled(enabled);
+        log.info("Lineage rotation flag set to {} via internal API", enabled);
+
+        return ResponseEntity.ok(Map.of(
+                "status", "ok",
+                "lineageRotationEnabled", String.valueOf(enabled)
         ));
     }
 }

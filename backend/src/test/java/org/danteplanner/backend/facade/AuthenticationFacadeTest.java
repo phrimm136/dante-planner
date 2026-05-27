@@ -1,5 +1,6 @@
 package org.danteplanner.backend.facade;
 
+import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.InvalidTokenException;
@@ -64,6 +65,18 @@ class AuthenticationFacadeTest {
     @Mock
     private OAuthProvider oauthProvider;
 
+    @Mock
+    private org.danteplanner.backend.service.token.RefreshRotationService refreshRotationService;
+
+    @Mock
+    private org.danteplanner.backend.util.CookieUtils cookieUtils;
+
+    @Mock
+    private org.danteplanner.backend.config.JwtProperties jwtProperties;
+
+    @Mock
+    private jakarta.servlet.http.HttpServletResponse response;
+
     private AuthenticationFacade authenticationFacade;
 
     private User testUser;
@@ -77,7 +90,11 @@ class AuthenticationFacadeTest {
                 tokenBlacklistService,
                 userService,
                 lifecycleService,
-                userRepository
+                userRepository,
+                refreshRotationService,
+                cookieUtils,
+                jwtProperties,
+                new LineageRotationFlag(false)
         );
 
         testUser = User.builder()
@@ -254,7 +271,7 @@ class AuthenticationFacadeTest {
                     .thenReturn("new-refresh-token");
 
             // Act
-            AuthenticationFacade.AuthResult result = authenticationFacade.refreshTokens(oldRefreshToken);
+            AuthenticationFacade.AuthResult result = authenticationFacade.refreshTokens(oldRefreshToken, response);
 
             // Assert
             assertNotNull(result);
@@ -286,7 +303,7 @@ class AuthenticationFacadeTest {
             // Act & Assert
             InvalidTokenException exception = assertThrows(
                     InvalidTokenException.class,
-                    () -> authenticationFacade.refreshTokens(accessToken)
+                    () -> authenticationFacade.refreshTokens(accessToken, response)
             );
 
             assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
@@ -316,7 +333,7 @@ class AuthenticationFacadeTest {
             // Act & Assert
             InvalidTokenException exception = assertThrows(
                     InvalidTokenException.class,
-                    () -> authenticationFacade.refreshTokens(blacklistedToken)
+                    () -> authenticationFacade.refreshTokens(blacklistedToken, response)
             );
 
             assertEquals(InvalidTokenException.Reason.REVOKED, exception.getReason());
@@ -337,7 +354,7 @@ class AuthenticationFacadeTest {
             // Act & Assert
             InvalidTokenException exception = assertThrows(
                     InvalidTokenException.class,
-                    () -> authenticationFacade.refreshTokens(expiredToken)
+                    () -> authenticationFacade.refreshTokens(expiredToken, response)
             );
 
             assertEquals(InvalidTokenException.Reason.EXPIRED, exception.getReason());
@@ -377,7 +394,7 @@ class AuthenticationFacadeTest {
             // Act & Assert
             org.danteplanner.backend.exception.AccountDeletedException exception = assertThrows(
                     org.danteplanner.backend.exception.AccountDeletedException.class,
-                    () -> authenticationFacade.refreshTokens(refreshToken)
+                    () -> authenticationFacade.refreshTokens(refreshToken, response)
             );
 
             assertEquals(testUser.getId(), exception.getUserId());

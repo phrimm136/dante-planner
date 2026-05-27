@@ -1,10 +1,13 @@
 package org.danteplanner.backend.facade;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.InvalidTokenException;
+import org.danteplanner.backend.exception.SessionRevokedException;
+import org.danteplanner.backend.config.JwtProperties;
+import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
 import org.danteplanner.backend.service.UserService;
@@ -12,10 +15,14 @@ import org.danteplanner.backend.service.oauth.OAuthProvider;
 import org.danteplanner.backend.service.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.service.oauth.OAuthTokens;
 import org.danteplanner.backend.service.oauth.OAuthUserInfo;
+import org.danteplanner.backend.service.token.RefreshRotationService;
+import org.danteplanner.backend.service.token.RotationResult;
 import org.danteplanner.backend.service.token.TokenBlacklistService;
 import org.danteplanner.backend.service.token.TokenClaims;
 import org.danteplanner.backend.service.token.TokenGenerator;
 import org.danteplanner.backend.service.token.TokenValidator;
+import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -27,7 +34,6 @@ import java.util.Optional;
  * Separates authentication logic from HTTP concerns in controller.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class AuthenticationFacade {
 
@@ -38,6 +44,36 @@ public class AuthenticationFacade {
     private final UserService userService;
     private final UserAccountLifecycleService lifecycleService;
     private final UserRepository userRepository;
+    private final RefreshRotationService refreshRotationService;
+    private final CookieUtils cookieUtils;
+    private final JwtProperties jwtProperties;
+    private final LineageRotationFlag lineageRotationFlag;
+
+    public AuthenticationFacade(
+            OAuthProviderRegistry providerRegistry,
+            TokenGenerator tokenGenerator,
+            TokenValidator tokenValidator,
+            TokenBlacklistService tokenBlacklistService,
+            UserService userService,
+            UserAccountLifecycleService lifecycleService,
+            UserRepository userRepository,
+            RefreshRotationService refreshRotationService,
+            CookieUtils cookieUtils,
+            JwtProperties jwtProperties,
+            LineageRotationFlag lineageRotationFlag
+    ) {
+        this.providerRegistry = providerRegistry;
+        this.tokenGenerator = tokenGenerator;
+        this.tokenValidator = tokenValidator;
+        this.tokenBlacklistService = tokenBlacklistService;
+        this.userService = userService;
+        this.lifecycleService = lifecycleService;
+        this.userRepository = userRepository;
+        this.refreshRotationService = refreshRotationService;
+        this.cookieUtils = cookieUtils;
+        this.jwtProperties = jwtProperties;
+        this.lineageRotationFlag = lineageRotationFlag;
+    }
 
     /**
      * Result of authentication containing user and token pair.
@@ -128,12 +164,18 @@ public class AuthenticationFacade {
      * Rejects refresh for deleted users.
      *
      * @param refreshToken Current refresh token
+     * @param response     HTTP response for setting rotated cookies (lineage path)
      * @return Authentication result with user and new tokens
      * @throws InvalidTokenException if refresh token is invalid or not a refresh token type
      * @throws AccountDeletedException if user account is soft-deleted
+     * @throws SessionRevokedException if the token's lineage family has been revoked
      */
-    public AuthResult refreshTokens(String refreshToken) {
+    public AuthResult refreshTokens(String refreshToken, HttpServletResponse response) {
         log.info("Processing token refresh");
+
+        if (lineageRotationFlag.isEnabled()) {
+            return refreshTokensWithLineage(refreshToken, response);
+        }
 
         // Validate refresh token
         TokenClaims claims = tokenValidator.validateToken(refreshToken);
@@ -169,6 +211,51 @@ public class AuthenticationFacade {
     }
 
     /**
+     * Refreshes tokens through the lineage rotation service (flag-on path).
+     *
+     * <p>Delegates rotation and theft detection to {@link RefreshRotationService},
+     * which sets the refresh cookie itself. On a successful rotation the access token
+     * is minted here with the user's current DB role and set as a cookie.</p>
+     *
+     * @param refreshToken the presented refresh token
+     * @param response     HTTP response the rotation service writes cookies to
+     * @return authentication result with user and new tokens
+     * @throws SessionRevokedException if the token's family has been revoked
+     * @throws InvalidTokenException   if the token is otherwise invalid
+     * @throws AccountDeletedException if the user account is soft-deleted
+     */
+    private AuthResult refreshTokensWithLineage(String refreshToken, HttpServletResponse response) {
+        RotationResult result = refreshRotationService.rotate(refreshToken, response);
+
+        if (result instanceof RotationResult.Revoked revoked) {
+            log.warn("Refresh rejected: family {} revoked", revoked.familyId());
+            throw new SessionRevokedException(revoked.familyId());
+        }
+        if (result instanceof RotationResult.Rejected rejected) {
+            if (rejected.reason() == RotationResult.Rejected.Reason.REVOKED_FAMILY) {
+                throw new SessionRevokedException(null);
+            }
+            throw new InvalidTokenException(InvalidTokenException.Reason.REVOKED);
+        }
+
+        RotationResult.Rotated rotated = (RotationResult.Rotated) result;
+        TokenClaims claims = rotated.claims();
+
+        User user = userService.findById(claims.userId());
+        if (user.isDeleted()) {
+            log.warn("Attempted token refresh for deleted user: {}", user.getId());
+            throw new AccountDeletedException(user.getId());
+        }
+
+        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
+                jwtProperties.getCookieExpirySeconds());
+
+        log.info("Token refreshed via lineage rotation for user: {}", user.getId());
+        return new AuthResult(user, newAccessToken, rotated.newRefreshJwt(), false);
+    }
+
+    /**
      * Logout user by blacklisting both tokens.
      *
      * @param accessToken  Access token to blacklist (nullable)
@@ -193,6 +280,9 @@ public class AuthenticationFacade {
             try {
                 TokenClaims refreshClaims = tokenValidator.validateToken(refreshToken);
                 tokenBlacklistService.blacklistToken(refreshToken, refreshClaims.expiration());
+                if (lineageRotationFlag.isEnabled() && refreshClaims.familyId() != null) {
+                    refreshRotationService.revokeFamily(refreshClaims.familyId());
+                }
             } catch (InvalidTokenException e) {
                 // Token already expired or invalid - no need to blacklist
                 log.debug("Refresh token already invalid, skipping blacklist");
@@ -200,6 +290,34 @@ public class AuthenticationFacade {
         }
 
         log.info("Logout completed");
+    }
+
+    /**
+     * Logs the user out of every device by invalidating all tokens issued for them.
+     *
+     * <p>Marks the user's tokens invalid via {@link TokenBlacklistService#invalidateUserTokens(Long)}
+     * so any token issued before now is rejected at the filter, and immediately blacklists the
+     * current request's access token (no grace period). Existing lineage rotation entries are left
+     * untouched — they become irrelevant because the user-wide invalidation check rejects them first.</p>
+     *
+     * @param userId      the authenticated user whose sessions are being terminated
+     * @param accessToken the current request's access token to blacklist immediately (nullable)
+     */
+    public void logoutAll(Long userId, String accessToken) {
+        log.info("Processing logout-all for user: {}", userId);
+
+        tokenBlacklistService.invalidateUserTokens(userId);
+
+        if (accessToken != null) {
+            try {
+                TokenClaims accessClaims = tokenValidator.validateToken(accessToken);
+                tokenBlacklistService.blacklistToken(accessToken, accessClaims.expiration());
+            } catch (InvalidTokenException e) {
+                log.debug("Access token already invalid, skipping blacklist");
+            }
+        }
+
+        log.info("Logout-all completed for user: {}", userId);
     }
 
 }

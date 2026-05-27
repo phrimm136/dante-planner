@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.AccountDeletedException;
@@ -63,6 +64,9 @@ class JwtAuthenticationFilterTest {
     private TokenGenerator tokenGenerator;
 
     @Mock
+    private org.danteplanner.backend.service.token.RefreshRotationService refreshRotationService;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
@@ -77,7 +81,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator);
+        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(false));
         SecurityContextHolder.clearContext();
         // doFilterInternal now reads method+path at the top for MDC — stub to avoid NPE
         when(request.getMethod()).thenReturn("GET");

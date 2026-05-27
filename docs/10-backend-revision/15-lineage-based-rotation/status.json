@@ -1,0 +1,22 @@
+{
+  "totalPhases": 7,
+  "currentPhase": 7,
+  "phases": [
+    { "name": "Data model + token claims", "status": "done" },
+    { "name": "RefreshRotationService core + metrics + cleanup", "status": "done" },
+    { "name": "Filter + facade integration (non-legacy)", "status": "done" },
+    { "name": "Legacy admission + config", "status": "done" },
+    { "name": "Log out everywhere backend", "status": "done" },
+    { "name": "Log out everywhere frontend + i18n", "status": "done" },
+    { "name": "Full verification", "status": "done" }
+  ],
+  "verification": {
+    "backendTests": "125 passed, 0 failures, 0 errors",
+    "frontendSettingsTests": "38 passed (4 files)",
+    "flagsDefault": "lineage-enabled=false, legacy-admit-enabled=true",
+    "i18nLocales": "EN/KR/JP/CN — 9/9 keys each, translated",
+    "fullSuites": "backend 841 passed / 15 skipped / 0 fail; frontend 5948 passed / 1 skipped / 0 fail",
+    "metricsExposure": "micrometer-registry-prometheus added; prometheus exposed in application.properties + application-prod.properties (actuator not publicly reachable, only /api/)",
+    "postBuildReview": "Adversarial review of RefreshRotationService. Fixed #1 lock-eviction race (-> 256 fixed lock stripes) and #2 access-token legacy-branch guard. Deferred #3/#4/#5 documented in review-findings.md for user decision. Full backend suite 840 passed / 0 fail after fixes."
+  }
+}

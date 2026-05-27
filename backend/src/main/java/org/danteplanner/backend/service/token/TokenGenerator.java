@@ -29,4 +29,17 @@ public interface TokenGenerator {
      * @return signed JWT refresh token string
      */
     String generateRefreshToken(Long userId, String email);
+
+    /**
+     * Generates a long-lived refresh token carrying rotation-lineage claims.
+     * A fresh {@code jti} is minted internally; {@code familyId} stays stable across
+     * a lineage and {@code parentJti} references the rotated-from token's jti.
+     *
+     * @param userId    unique user identifier to embed in token
+     * @param email     user email to embed in token subject
+     * @param familyId  stable family identifier shared across the rotation lineage
+     * @param parentJti jti of the parent token, or null for an initial-login token
+     * @return signed JWT refresh token string
+     */
+    String generateRefreshToken(Long userId, String email, String familyId, String parentJti);
 }
