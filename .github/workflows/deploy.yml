@@ -49,16 +49,16 @@ jobs:
             NGINX_CHANGED=true
             MYSQL_CHANGED=true
           else
-            LAST_TAG=$(git describe --tags --match 'v*' --abbrev=0 HEAD^ 2>/dev/null || true)
+            PREV_TAG=$(git tag --sort=-creatordate --list 'v*' --merged HEAD^ | sed -n '2p')
 
-            if [ -z "$LAST_TAG" ]; then
-              echo "No prior release tag found - deploying all services"
+            if [ -z "$PREV_TAG" ]; then
+              echo "Fewer than two prior release tags - deploying all services"
               BACKEND_CHANGED=true
               NGINX_CHANGED=true
               MYSQL_CHANGED=true
             else
-              echo "Diffing $LAST_TAG..HEAD"
-              CHANGED=$(git diff --name-only "$LAST_TAG" HEAD)
+              echo "Diffing $PREV_TAG..HEAD"
+              CHANGED=$(git diff --name-only "$PREV_TAG" HEAD)
               echo "Changed files:"
               echo "$CHANGED"
 
