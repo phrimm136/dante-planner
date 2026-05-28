@@ -582,6 +582,17 @@ export function getThemePackImagePath(packId: string): string {
 }
 
 /**
+ * Gets pre-composited featured boss panel image path
+ * These are pre-composited images (mask stencil + portrait + copper frame, no text)
+ * @param packId - Theme pack ID (e.g., "1001", "1002")
+ * @param portraitId - Portrait key (nameID or sdPortrait; number or string)
+ * @returns Featured boss panel image path
+ */
+export function getFeaturedBossImagePath(packId: string, portraitId: number | string): string {
+  return resolveAsset(`/images/featuredBoss/${packId}_${portraitId}.webp`)
+}
+
+/**
  * Gets theme pack hover highlight overlay path (for normal packs)
  * @returns Hover highlight path
  */

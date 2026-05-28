@@ -20,6 +20,7 @@ import { useThemePackDetailData } from '@/hooks/useThemePackDetailData'
 import { useThemePackListData } from '@/hooks/useThemePackListData'
 import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
 import { useAbEventListData } from '@/hooks/useAbEventListData'
+import { getFeaturedBossImagePath } from '@/lib/assetPaths'
 import {
   DUNGEON_IDX,
   DIFFICULTY_COLORS,
@@ -125,6 +126,40 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide border-b border-border pb-2">
       {children}
     </h2>
+  )
+}
+
+/**
+ * Featured boss panels — pre-composited webp per boss from the manifest.
+ * Self-contained: renders nothing when the roster is empty.
+ * Sources images only from manifest entries (never from showBossIds).
+ */
+export function FeaturedBoss({
+  packId,
+  bosses,
+}: {
+  packId: string
+  bosses: ThemePackDetail['featuredBosses']
+}) {
+  const { t } = useTranslation('database')
+
+  if (bosses.length === 0) return null
+
+  return (
+    <div className="space-y-3">
+      <SectionTitle>{t('themePack.featuredBoss')}</SectionTitle>
+      <div className="flex flex-wrap gap-3">
+        {bosses.map((boss) => (
+          <img
+            key={boss.portraitId}
+            src={getFeaturedBossImagePath(packId, boss.portraitId)}
+            loading="lazy"
+            alt=""
+            className="w-24"
+          />
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -406,6 +441,8 @@ function ThemePackDetailContent() {
 
   const rightColumn = (
     <div className="space-y-6">
+      <FeaturedBoss packId={id} bosses={spec.featuredBosses} />
+
       {/* Fixed Reward EGO Gifts — hidden theme only */}
       {spec.fixedRewardEgoGifts && spec.fixedRewardEgoGifts.length > 0 && (
         <div className="space-y-3">

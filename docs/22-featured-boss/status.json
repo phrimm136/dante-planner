@@ -1,0 +1,12 @@
+{
+  "totalPhases": 6,
+  "currentPhase": 6,
+  "phases": [
+    { "name": "Shared resolver + index fix + all-packs loop", "status": "done" },
+    { "name": "Manifest emission (theme_pack.py)", "status": "done" },
+    { "name": "Pipeline wiring (pipeline.py)", "status": "done" },
+    { "name": "i18n mine (database.json, trap-street suffix)", "status": "done" },
+    { "name": "Schema (ThemePackSchemas.ts)", "status": "done" },
+    { "name": "Frontend render (assetPaths + FeaturedBoss)", "status": "done" }
+  ]
+}

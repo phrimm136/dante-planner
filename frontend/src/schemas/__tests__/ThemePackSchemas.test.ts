@@ -19,6 +19,7 @@ describe('ThemePackDetailSchema', () => {
       egoGiftPool: [9001, 9002],
       specificEgoGiftPool: [9403, 9404],
       themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [{ unitId: 71001, portraitId: 91001 }],
     })
     expect(result.success).toBe(true)
   })
@@ -39,6 +40,7 @@ describe('ThemePackDetailSchema', () => {
       egoGiftPool: [],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: '5ce6ff' },
+      featuredBosses: [],
     })
     expect(result.success).toBe(true)
   })
@@ -53,6 +55,7 @@ describe('ThemePackDetailSchema', () => {
       egoGiftPool: [],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [],
     })
     expect(result.success).toBe(true)
     if (result.success) {
@@ -71,6 +74,7 @@ describe('ThemePackDetailSchema', () => {
       egoGiftPool: [],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [],
     })
     expect(result.success).toBe(true)
     if (result.success) {
@@ -89,6 +93,7 @@ describe('ThemePackDetailSchema', () => {
       egoGiftPool: [9003],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'e5c6a0' },
+      featuredBosses: [{ unitId: 70401, portraitId: 90401 }],
       hiddenThemeRate: 0.0002,
       fixedRewardEgoGifts: [9242, 9083, 9082, 9081],
     })
@@ -109,6 +114,7 @@ describe('ThemePackDetailSchema', () => {
       egoGiftPool: [],
       specificEgoGiftPool: [],
       themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [],
     })
     expect(result.success).toBe(true)
     if (result.success) {
@@ -120,6 +126,60 @@ describe('ThemePackDetailSchema', () => {
   it('rejects invalid dungeonIdx', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 5 }],
+      nodeOption: {
+        bossPool: [], battlePool: [], abBattlePool: [],
+        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+      },
+      egoGiftPool: [],
+      specificEgoGiftPool: [],
+      themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [],
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('accepts populated featuredBosses with numeric and string portraitId', () => {
+    const result = ThemePackDetailSchema.safeParse({
+      exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
+      nodeOption: {
+        bossPool: [], battlePool: [], abBattlePool: [],
+        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+      },
+      egoGiftPool: [],
+      specificEgoGiftPool: [],
+      themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [
+        { unitId: 71001, portraitId: 91001 },
+        { unitId: 1355, portraitId: '1355' },
+      ],
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.featuredBosses).toEqual([
+        { unitId: 71001, portraitId: 91001 },
+        { unitId: 1355, portraitId: '1355' },
+      ])
+    }
+  })
+
+  it('accepts empty featuredBosses', () => {
+    const result = ThemePackDetailSchema.safeParse({
+      exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
+      nodeOption: {
+        bossPool: [], battlePool: [], abBattlePool: [],
+        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+      },
+      egoGiftPool: [],
+      specificEgoGiftPool: [],
+      themePackConfig: { textColor: 'af241c' },
+      featuredBosses: [],
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects detail with featuredBosses omitted', () => {
+    const result = ThemePackDetailSchema.safeParse({
+      exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [], battlePool: [], abBattlePool: [],
         hardBattlePool: [], hardAbBattlePool: [], eventPool: [],

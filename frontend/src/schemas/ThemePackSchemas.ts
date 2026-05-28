@@ -49,6 +49,15 @@ export const ThemePackEntrySchema = z.object({
 // Theme pack list schema (Record keyed by pack ID)
 export const ThemePackListSchema = z.record(z.string(), ThemePackEntrySchema)
 
+// Featured boss schema (unitId + portrait reference for a theme pack's boss roster)
+// portraitId is a string when the source field is a string sdPortrait, number otherwise
+export const FeaturedBossSchema = z.object({
+  unitId: z.number(),
+  portraitId: z.union([z.number(), z.string()]),
+}).strict()
+
+export type FeaturedBoss = z.infer<typeof FeaturedBossSchema>
+
 // Node option schema (battle/event pools in individual theme pack files)
 const NodeOptionSchema = z.object({
   bossPool: z.array(z.number()),
@@ -67,6 +76,7 @@ export const ThemePackDetailSchema = z.object({
   egoGiftPool: z.array(z.number()),
   specificEgoGiftPool: z.array(z.number()),
   themePackConfig: ThemePackConfigSchema,
+  featuredBosses: z.array(FeaturedBossSchema),
   hiddenThemeRate: z.number().optional(),
   fixedRewardEgoGifts: z.array(z.number()).optional(),
 })
