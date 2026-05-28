@@ -1,48 +1,37 @@
 import type { ReactNode } from 'react'
 
 import { useTraitsI18n } from '@/hooks/useTraitsI18n'
+import { applyStrikethrough } from '@/lib/unityRichText'
 
 /** Keywords to skip in trait display (internal/visual only) */
 const HIDDEN_TRAITS = new Set(['BASE_APPEARANCE', 'SMALL'])
 
 interface ParsedTrait {
   key: string
+  /** Text with <color> stripped; may still contain <s>...</s> tags */
   text: string
   color?: string
-  strikethrough?: boolean
 }
 
 /**
- * Parse Unity-style rich text to structured data
- * e.g., "<color=#d40000><s>Jia Family</s></color>" -> { text: "Jia Family", color: "#d40000", strikethrough: true }
+ * Strip the outer <color=...> wrapper, leaving any inner <s> tags
+ * for {@link applyStrikethrough} to handle at render time.
+ *
+ * @example "<color=#d40000><s>Jia Family</s></color>"
+ *       -> { color: "#d40000", text: "<s>Jia Family</s>" }
  */
 function parseUnityRichText(key: string, input: string): ParsedTrait {
-  let text = input
-  let color: string | undefined
-  let strikethrough = false
+  const colorMatch = input.match(/<color=([^>]+)>/)
+  if (!colorMatch) return { key, text: input }
 
-  // Extract color
-  const colorMatch = text.match(/<color=([^>]+)>/)
-  if (colorMatch) {
-    color = colorMatch[1]
-    text = text.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
-  }
-
-  // Check for strikethrough
-  if (text.includes('<s>')) {
-    strikethrough = true
-    text = text.replace(/<s>/g, '').replace(/<\/s>/g, '')
-  }
-
-  return { key, text, color, strikethrough }
+  const color = colorMatch[1]
+  const text = input.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
+  return { key, text, color }
 }
 
-/** Render parsed trait as React element */
 function renderTrait(parsed: ParsedTrait): ReactNode {
-  const style = parsed.color ? { color: parsed.color } : undefined
-  const content = parsed.strikethrough ? <s>{parsed.text}</s> : parsed.text
-
-  return style ? <span style={style}>{content}</span> : content
+  const content = applyStrikethrough(parsed.text)
+  return parsed.color ? <span style={{ color: parsed.color }}>{content}</span> : content
 }
 
 interface TraitsI18nProps {

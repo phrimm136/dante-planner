@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 import { ASSOCIATIONS } from '@/lib/constants'
 import { useFilterI18nData } from '@/hooks/useFilterI18nData'
+import { applyStrikethrough } from '@/lib/unityRichText'
 import { SearchableMultiSelect } from '@/components/common/SearchableMultiSelect'
 
 interface UnitKeywordDropdownProps {
@@ -19,17 +20,11 @@ interface UnitKeywordDropdownProps {
  */
 function formatUnitKeywordLabel(label: string) {
   const colorMatch = label.match(/<color=([^>]+)>/)
-  if (!colorMatch) return label
+  if (!colorMatch) return applyStrikethrough(label)
 
   const color = colorMatch[1]
-  let text = label.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
-  const hasStrikethrough = text.includes('<s>')
-  if (hasStrikethrough) {
-    text = text.replace(/<s>/g, '').replace(/<\/s>/g, '')
-  }
-
-  const content = hasStrikethrough ? <s>{text}</s> : text
-  return <span style={{ color }}>{content}</span>
+  const text = label.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
+  return <span style={{ color }}>{applyStrikethrough(text)}</span>
 }
 
 /** Strip Unity rich text tags for plain text search */

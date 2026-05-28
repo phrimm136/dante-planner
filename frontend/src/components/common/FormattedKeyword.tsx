@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/lib/assetPaths'
 import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { applyStrikethrough } from '@/lib/unityRichText'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '@/types/KeywordTypes'
 
@@ -45,7 +46,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
         className={cn('font-medium', className)}
         style={{ color }}
       >
-        {displayText}
+        {applyStrikethrough(displayText)}
       </span>
     )
   }
@@ -75,7 +76,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
             aria-hidden="true"
             className="w-4 h-4 inline-block shrink-0"
           />
-          <span>{displayText}</span>
+          <span>{applyStrikethrough(displayText)}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -95,12 +96,12 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
               className="w-6 h-6 shrink-0"
             />
             <h4 className="font-bold text-lg">
-              {displayText}
+              {applyStrikethrough(displayText)}
             </h4>
           </div>
           {description && (
             <p className="text-sm whitespace-pre-line px-2">
-              {description}
+              {applyStrikethrough(description)}
             </p>
           )}
           {flavor && (
@@ -109,7 +110,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
               className="text-xs italic whitespace-pre-line px-2"
               style={{ color: FLAVOR_TEXT_COLOR }}
             >
-              {flavor}
+              {applyStrikethrough(flavor)}
             </p>
           )}
         </div>
