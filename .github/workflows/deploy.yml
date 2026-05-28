@@ -66,7 +66,7 @@ jobs:
               echo "$CHANGED" | grep -q '^nginx/'           && NGINX_CHANGED=true   || true
               echo "$CHANGED" | grep -q '^mysql/'           && MYSQL_CHANGED=true   || true
 
-              if echo "$CHANGED" | grep -qE '^(docker-compose\.yml|\.github/workflows/deploy\.yml|scripts/deploy/)'; then
+              if echo "$CHANGED" | grep -qE '^(docker-compose\.yml|scripts/deploy/)'; then
                 BACKEND_CHANGED=true
                 NGINX_CHANGED=true
                 MYSQL_CHANGED=true
