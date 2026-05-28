@@ -995,6 +995,17 @@ export const THEME_PACK_FLOOR_LABELS: Record<ThemePackFloor, string> = {
 }
 
 /**
+ * Absolute floor range per dungeon mode for packs that carry no
+ * selectableFloors entry. Infinity occupies 6-10F, Extreme 11-15F.
+ * Normal/Hard are intentionally absent — those modes use per-pack
+ * selectableFloors indexed into 1F-5F.
+ */
+export const DUNGEON_FIXED_FLOOR_RANGE: Partial<Record<DungeonIdx, readonly number[]>> = {
+  [DUNGEON_IDX.PARALLEL]: [6, 7, 8, 9, 10],
+  [DUNGEON_IDX.EXTREME]: [11, 12, 13, 14, 15],
+} as const
+
+/**
  * EGO Gift enhancement base costs by tier
  * Tier 5 and EX gifts cannot be enhanced
  * Level 1 (+) = base cost, Level 2 (++) = 2x base cost

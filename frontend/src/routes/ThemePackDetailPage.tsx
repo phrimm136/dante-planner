@@ -25,6 +25,7 @@ import {
   DUNGEON_IDX,
   DIFFICULTY_COLORS,
   DIFFICULTY_LABELS,
+  DUNGEON_FIXED_FLOOR_RANGE,
   THEME_PACK_FLOOR_LABELS,
 } from '@/lib/constants'
 import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/lib/constants'
@@ -65,24 +66,41 @@ function DifficultyBadges({ conditions }: { conditions: ThemePackDetail['excepti
 
 /**
  * Floor display grouped by difficulty.
- * Only shows Normal (0) and Hard (1) — Infinity/Extreme have no floor data.
+ * Normal/Hard read indexed floors from selectableFloors (mapped through
+ * THEME_PACK_FLOOR_LABELS). Infinity/Extreme synthesize their absolute
+ * 6-10F / 11-15F ranges from DUNGEON_FIXED_FLOOR_RANGE when no
+ * selectableFloors are present.
  */
-function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exceptionConditions'] }) {
+export function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exceptionConditions'] }) {
   const FLOOR_DIFFICULTIES: { idx: DungeonIdx; label: DifficultyLabel }[] = [
     { idx: DUNGEON_IDX.NORMAL, label: DIFFICULTY_LABELS.NORMAL },
     { idx: DUNGEON_IDX.HARD, label: DIFFICULTY_LABELS.HARD },
+    { idx: DUNGEON_IDX.PARALLEL, label: DIFFICULTY_LABELS.INFINITY_MIRROR },
+    { idx: DUNGEON_IDX.EXTREME, label: DIFFICULTY_LABELS.EXTREME_MIRROR },
   ]
 
   const floorGroups = FLOOR_DIFFICULTIES
     .map((d) => {
-      const conds = conditions.filter((c) => c.dungeonIdx === d.idx && c.selectableFloors)
-      const floors = new Set<number>()
+      const conds = conditions.filter((c) => c.dungeonIdx === d.idx)
+      if (conds.length === 0) return { ...d, floors: [] as string[] }
+
+      const indexed = new Set<number>()
       for (const c of conds) {
         for (const f of c.selectableFloors ?? []) {
-          floors.add(f)
+          indexed.add(f)
         }
       }
-      return { ...d, floors: Array.from(floors).sort() }
+
+      if (indexed.size > 0) {
+        const floors = Array.from(indexed)
+          .sort((a, b) => a - b)
+          .map((f) => THEME_PACK_FLOOR_LABELS[f as ThemePackFloor])
+        return { ...d, floors }
+      }
+
+      const fixedRange = DUNGEON_FIXED_FLOOR_RANGE[d.idx]
+      const floors = fixedRange ? fixedRange.map((n) => `${n}F`) : []
+      return { ...d, floors }
     })
     .filter((g) => g.floors.length > 0)
 
@@ -99,12 +117,9 @@ function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exceptionCo
             {group.label}
           </div>
           <div className="flex flex-wrap gap-1 pl-2">
-            {group.floors.map((floor) => (
-              <span
-                key={floor}
-                className="px-2 py-0.5 text-xs rounded"
-              >
-                {THEME_PACK_FLOOR_LABELS[floor as ThemePackFloor]}
+            {group.floors.map((label) => (
+              <span key={label} className="px-2 py-0.5 text-xs rounded">
+                {label}
               </span>
             ))}
           </div>
