@@ -26,7 +26,7 @@ jobs:
       - name: Check if deploy will restart containers
         id: check
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -qE '^(backend/|\.github/workflows/deploy\.yml)'; then
+          if git diff --name-only HEAD~1 HEAD | grep -q '^backend/'; then
             echo "Deploy will restart containers — skip sync"
             echo "should_run=false" >> "$GITHUB_OUTPUT"
           else
