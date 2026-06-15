@@ -198,6 +198,40 @@ class MySQLIntegrationTest {
     }
 
     @Nested
+    @DisplayName("Hard-Delete Vote Reassignment")
+    @Transactional
+    class HardDeleteVoteReassignmentTests {
+
+        @Test
+        @DisplayName("Reassigning to a sentinel that already voted on the same planner deletes the collision instead of violating the PK")
+        void reassignVotes_WhenSentinelAlreadyVotedSamePlanner_DeletesCollisionThenReassigns() {
+            User leaving = TestDataFactory.createTestUser(userRepository, "leaving@example.com");
+            User sentinel = TestDataFactory.createTestUser(userRepository, "sentinel@example.com");
+            Planner sharedPlanner = testPlanner;
+            Planner soloPlanner = TestDataFactory.createTestPlanner(plannerRepository, leaving, true);
+
+            // Sentinel and the leaving user both voted on sharedPlanner -> collision on (user_id, planner_id).
+            // The leaving user also voted on soloPlanner -> must be reassigned cleanly.
+            voteRepository.save(new PlannerVote(sentinel.getId(), sharedPlanner.getId(), VoteType.UP));
+            voteRepository.save(new PlannerVote(leaving.getId(), sharedPlanner.getId(), VoteType.UP));
+            voteRepository.save(new PlannerVote(leaving.getId(), soloPlanner.getId(), VoteType.UP));
+            entityManager.flush();
+            entityManager.clear();
+
+            // Replicates the hard-delete vote step: drop collisions, then reassign the rest.
+            voteRepository.deleteVotesCollidingWithSentinel(leaving.getId(), sentinel.getId());
+            voteRepository.reassignUserVotes(leaving.getId(), sentinel.getId());
+            entityManager.flush();
+            entityManager.clear();
+
+            assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), sharedPlanner.getId())).isEmpty();
+            assertThat(voteRepository.findByUserIdAndPlannerId(leaving.getId(), soloPlanner.getId())).isEmpty();
+            assertThat(voteRepository.findByUserIdAndPlannerId(sentinel.getId(), sharedPlanner.getId())).isPresent();
+            assertThat(voteRepository.findByUserIdAndPlannerId(sentinel.getId(), soloPlanner.getId())).isPresent();
+        }
+    }
+
+    @Nested
     @DisplayName("Timestamp Precision Tests")
     @Transactional
     class TimestampPrecisionTests {

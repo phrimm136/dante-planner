@@ -46,9 +46,33 @@ public interface PlannerCommentVoteRepository extends JpaRepository<PlannerComme
     );
 
     /**
+     * Delete the user's comment votes that collide with the sentinel user's existing votes.
+     * A collision occurs when both the user and the sentinel voted on the same comment;
+     * reassigning such a vote would violate the composite PRIMARY KEY (comment_id, user_id).
+     * Must run before {@link #reassignUserVotes} during hard-delete.
+     *
+     * <p>Native self-join DELETE: MySQL forbids a subquery on the delete target table
+     * (error 1093), which a JPQL {@code DELETE ... WHERE commentId IN (SELECT ...)} would emit.
+     *
+     * @param userId     the user ID whose colliding votes should be removed
+     * @param sentinelId the sentinel user ID to compare against
+     * @return the number of votes deleted
+     */
+    @Modifying(clearAutomatically = true)
+    @Query(value = "DELETE v FROM planner_comment_votes v "
+            + "JOIN planner_comment_votes s ON v.comment_id = s.comment_id "
+            + "WHERE v.user_id = :userId AND s.user_id = :sentinelId",
+            nativeQuery = true)
+    int deleteVotesCollidingWithSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+
+    /**
      * Reassign all comment votes from a user to the sentinel user.
-     * Used during hard-delete to preserve vote counts on comments.
-     * This preserves the voting history while anonymizing the voter.
+     * Used during hard-delete to anonymize the voter while keeping the vote rows.
+     * The comment's upvote count is a denormalized counter, independent of these rows,
+     * so the displayed count is unaffected.
+     *
+     * <p>Callers must first invoke {@link #deleteVotesCollidingWithSentinel} to remove
+     * votes that would duplicate an existing sentinel vote on the same comment.
      *
      * @param userId     the user ID whose votes should be reassigned
      * @param sentinelId the sentinel user ID to reassign votes to

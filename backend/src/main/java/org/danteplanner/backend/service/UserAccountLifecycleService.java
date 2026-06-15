@@ -29,7 +29,9 @@ import java.time.Instant;
 public class UserAccountLifecycleService {
 
     /**
-     * Sentinel user ID used to preserve vote counts after user deletion.
+     * Sentinel user that inherits a deleted user's votes and comments to anonymize them.
+     * Upvote counts are denormalized counter columns, independent of vote rows, so
+     * reassignment does not change them.
      * This user is created in the migration V009__add_user_soft_delete.sql.
      */
     public static final Long SENTINEL_USER_ID = 0L;
@@ -101,7 +103,8 @@ public class UserAccountLifecycleService {
 
     /**
      * Permanently delete a user and reassign their votes and comments to the sentinel user.
-     * This preserves vote counts and comment content while anonymizing the author.
+     * This anonymizes the author while preserving comment content. Upvote counts are
+     * denormalized counters, independent of vote rows, so they are unaffected.
      * CASCADE will delete the user's planners.
      *
      * @param user the user to permanently delete
@@ -110,11 +113,13 @@ public class UserAccountLifecycleService {
     public void performHardDelete(User user) {
         Long userId = user.getId();
 
-        // Reassign planner votes to sentinel user (preserves vote counts)
-        // Uses immutable vote pattern - votes remain but change user_id only
+        // Drop votes that collide with the sentinel's existing votes on the same target,
+        // then reassign the rest. Reassigning a collision would duplicate the composite PK.
+        // The displayed count lives in the denormalized counter, so it is unaffected.
+        plannerVoteRepository.deleteVotesCollidingWithSentinel(userId, SENTINEL_USER_ID);
         plannerVoteRepository.reassignUserVotes(userId, SENTINEL_USER_ID);
 
-        // Reassign comment votes to sentinel user (preserves vote counts)
+        plannerCommentVoteRepository.deleteVotesCollidingWithSentinel(userId, SENTINEL_USER_ID);
         plannerCommentVoteRepository.reassignUserVotes(userId, SENTINEL_USER_ID);
 
         // Reassign comments to sentinel user (preserves comment content)
