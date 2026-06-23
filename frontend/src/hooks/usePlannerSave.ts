@@ -9,6 +9,7 @@ import { serializeSets } from '@/schemas/PlannerSchemas'
 import { ConflictError, BannedError, TimedOutError } from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
+import { generateUUID } from '@/lib/uuid'
 import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError, validateNoteSizes } from '@/lib/plannerHelpers'
 import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
@@ -20,22 +21,6 @@ import type { SaveablePlanner, ConflictState, ConflictResolutionChoice, PlannerC
  * SSR safety check
  */
 const isClient = typeof window !== 'undefined'
-
-/**
- * Generates a UUID v4
- * Uses crypto.randomUUID if available, falls back to manual generation
- */
-function generateUUID(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  // Fallback for environments without crypto.randomUUID
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
 
 /**
  * Planner state interface matching PlannerMDNewPage state structure

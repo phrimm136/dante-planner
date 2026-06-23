@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
+import { generateUUID } from '@/lib/uuid'
 import { SaveablePlannerSchema } from '@/schemas/PlannerSchemas'
 import type { SaveablePlanner, PlannerSummary, MDPlannerContent } from '@/types/PlannerTypes'
 
@@ -8,22 +9,6 @@ import type { SaveablePlanner, PlannerSummary, MDPlannerContent } from '@/types/
  * SSR safety check
  */
 const isClient = typeof window !== 'undefined'
-
-/**
- * Generates a UUID v4
- * Uses crypto.randomUUID if available, falls back to manual generation
- */
-function generateUUID(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  // Fallback for environments without crypto.randomUUID
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0
-    const v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
 
 /**
  * Storage key builders for planner data
