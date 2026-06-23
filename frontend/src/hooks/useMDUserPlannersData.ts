@@ -53,6 +53,25 @@ export const userPlannersQueryKeys = {
 }
 
 // ============================================================================
+// Local-vs-server reconciliation
+// ============================================================================
+
+/**
+ * Decide whether a local planner that the server no longer has should be
+ * purged from IndexedDB. Defaults to the safe choice (keep) whenever local
+ * state is ambiguous or inconsistent.
+ *
+ * Purge only when two independent fields agree the row was previously saved
+ * to the server (status='saved' AND savedAt is set). All other shapes are
+ * preserved — drafts, never-synced rows, and inconsistent local state.
+ */
+export function shouldPurgeLocal(local: PlannerSummary): boolean {
+  if (local.savedAt === null) return false
+  if (local.status === 'draft') return false
+  return true
+}
+
+// ============================================================================
 // Hook Options Interface
 // ============================================================================
 
@@ -204,12 +223,15 @@ export function useMDUserPlannersData(
         const serverPlanners = await syncAdapter.listFromServer()
         const localPlanners = await saveAdapter.listLocal()
         const localMap = new Map(localPlanners.map((p) => [p.id, p]))
+        const serverIds = new Set(serverPlanners.map((p) => p.id))
 
         // Categorize planners:
         // 1. Auto-pull: Server-only OR (local saved + server newer)
         // 2. Conflict: Local DRAFT + server newer → needs user decision
+        // 3. Purge: Local-only AND already-server-saved → deleted on another device
         const plannersToPull: PlannerSummary[] = []
         const conflictServerPlanners: PlannerSummary[] = []
+        const plannersToPurge: PlannerSummary[] = []
 
         for (const sp of serverPlanners) {
           const local = localMap.get(sp.id)
@@ -237,6 +259,17 @@ export function useMDUserPlannersData(
           }
         }
 
+        // Reconcile local-only rows: a planner present locally but absent on the
+        // server was deleted on another device. Only purge when local state has
+        // two independent witnesses that it was previously synced — status='saved'
+        // AND savedAt is set. Drafts and never-synced rows are preserved.
+        for (const local of localPlanners) {
+          if (serverIds.has(local.id)) continue
+          if (shouldPurgeLocal(local)) {
+            plannersToPurge.push(local)
+          }
+        }
+
         // Mark as synced even if nothing to pull
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
@@ -258,6 +291,20 @@ export function useMDUserPlannersData(
           } catch (error) {
             console.error(`Failed to fetch planner ${serverPlanner.id}:`, error)
           }
+        }
+
+        // Purge local rows the server no longer has. Idempotent IndexedDB delete.
+        let purgedCount = 0
+        for (const local of plannersToPurge) {
+          try {
+            await saveAdapter.deleteFromLocal(local.id)
+            purgedCount++
+          } catch (error) {
+            console.error(`Failed to purge local planner ${local.id}:`, error)
+          }
+        }
+        if (purgedCount > 0) {
+          console.log(`Reconciled local IndexedDB: purged ${purgedCount} server-deleted planner(s)`)
         }
 
         // Build conflict items if any conflicts detected
@@ -284,7 +331,7 @@ export function useMDUserPlannersData(
         }
 
         // Directly update cache with synced planners (avoids re-suspension)
-        if (syncedCount > 0) {
+        if (syncedCount > 0 || purgedCount > 0) {
           const updatedLocal = await saveAdapter.listLocal()
           queryClient.setQueryData(
             userPlannersQueryKeys.list(isAuthenticated),
