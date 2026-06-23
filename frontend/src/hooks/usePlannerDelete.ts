@@ -11,7 +11,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient } from '@/lib/api'
+import { ApiClient, NotFoundError } from '@/lib/api'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // ============================================================================
@@ -49,8 +49,15 @@ export function usePlannerDelete() {
 
   return useMutation({
     mutationFn: async (plannerId: string): Promise<void> => {
-      await ApiClient.delete(`/api/planner/md/${plannerId}`)
-      // 204 No Content - no response body needed
+      try {
+        await ApiClient.delete(`/api/planner/md/${plannerId}`)
+      } catch (error) {
+        // 404 means the row is already gone (retry after a successful first DELETE,
+        // or a concurrent delete from another device). Treat as success so callers
+        // see a consistent post-delete state.
+        if (error instanceof NotFoundError) return
+        throw error
+      }
     },
     onSuccess: () => {
       // Invalidate community list (server-side concern)

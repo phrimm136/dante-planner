@@ -13,14 +13,18 @@ import { usePlannerDelete } from '../usePlannerDelete'
 import { gesellschaftQueryKeys } from '../useMDGesellschaftData'
 
 // Mock the API client
-vi.mock('@/lib/api', () => ({
-  ApiClient: {
-    delete: vi.fn(),
-  },
-}))
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return {
+    ...actual,
+    ApiClient: {
+      delete: vi.fn(),
+    },
+  }
+})
 
 // Import after mocking
-import { ApiClient } from '@/lib/api'
+import { ApiClient, NotFoundError } from '@/lib/api'
 
 /**
  * Create a wrapper component with QueryClientProvider
@@ -122,6 +126,28 @@ describe('usePlannerDelete', () => {
       })
 
       expect(invalidateSpy).not.toHaveBeenCalled()
+    })
+
+    it('treats 404 NotFoundError as success (idempotent delete)', async () => {
+      vi.mocked(ApiClient.delete).mockRejectedValue(new NotFoundError('Resource not found'))
+      const { wrapper, queryClient } = createWrapper()
+
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+      const onSuccessCallback = vi.fn()
+
+      const { result } = renderHook(() => usePlannerDelete(), { wrapper })
+
+      await act(async () => {
+        await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000', {
+          onSuccess: onSuccessCallback,
+        })
+      })
+
+      expect(result.current.isError).toBe(false)
+      expect(onSuccessCallback).toHaveBeenCalled()
+      await waitFor(() => {
+        expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: gesellschaftQueryKeys.all })
+      })
     })
   })
 
