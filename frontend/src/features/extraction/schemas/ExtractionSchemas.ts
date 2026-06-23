@@ -71,10 +71,12 @@ export const ExtractionTargetSchema = z.object({
 export const ExtractionInputSchema = z.object({
   /** Number of pulls (0 to reasonable max) */
   plannedPulls: z.number().int().min(0).max(10000),
-  /** Number of featured 3-star Identities (1+) */
-  featuredThreeStarCount: z.number().int().min(1).max(20),
+  /** Number of featured 3-star Identities (0+; 0 on an EGO-only banner) */
+  featuredThreeStarCount: z.number().int().min(0).max(20),
   /** Number of featured EGO (0+, can be 0 if all collected) */
   featuredEgoCount: z.number().int().min(0).max(20),
+  /** Number of featured Announcers (0+; most banners have none) */
+  featuredAnnouncerCount: z.number().int().min(0).max(20),
   /** Banner modifiers */
   modifiers: BannerModifiersSchema,
   /** Target configurations */
@@ -110,6 +112,26 @@ export const ExtractionInputSchema = z.object({
     return true
   },
   { message: 'Cannot have Announcer target when banner has no Announcer' }
+).refine(
+  (data) => {
+    // 3-star target requires featuredThreeStarCount > 0 (EGO-only banners feature 0)
+    const hasThreeStarTarget = data.targets.some((t) => t.type === 'threeStarId')
+    if (hasThreeStarTarget && data.featuredThreeStarCount === 0) {
+      return false
+    }
+    return true
+  },
+  { message: 'Cannot have a 3-star target when featuredThreeStarCount is 0' }
+).refine(
+  (data) => {
+    // Announcer target requires featuredAnnouncerCount > 0 (guards the rate division)
+    const hasAnnouncerTarget = data.targets.some((t) => t.type === 'announcer')
+    if (hasAnnouncerTarget && data.featuredAnnouncerCount === 0) {
+      return false
+    }
+    return true
+  },
+  { message: 'Cannot have an Announcer target when featuredAnnouncerCount is 0' }
 )
 
 // ============================================================================
@@ -130,6 +152,13 @@ export const TargetProbabilitySchema = z.object({
   pityApplies: z.boolean(),
 }).strict()
 
+export const SuccessiveProbabilitySchema = z.object({
+  /** Number of items */
+  count: z.number().int().min(0),
+  /** Probability of obtaining at least this many items */
+  probability: z.number().min(0).max(1),
+}).strict()
+
 /**
  * Complete extraction result schema
  */
@@ -138,6 +167,14 @@ export const ExtractionResultSchema = z.object({
   targetResults: z.array(TargetProbabilitySchema),
   /** Any target probability (0-1) */
   anyTargetProbability: z.number().min(0).max(1),
+  /** All target probability (0-1) */
+  allTargetProbability: z.number().min(0).max(1),
+  /** Successive probabilities: P(n), P(n-1), ..., P(1) with pity applied */
+  successiveProbabilities: z.array(SuccessiveProbabilitySchema),
+  /** Total items wanted (sum of all target wanted counts) */
+  totalItemsWanted: z.number().int().min(0),
+  /** Number of pity triggers available (floor(totalPulls / 200)) */
+  pityCount: z.number().int().min(0),
   /** Total lunacy cost */
   lunacyCost: z.number().int().min(0),
   /** Pulls until pity */
@@ -161,25 +198,3 @@ export const EffectiveRatesSchema = z.object({
   /** Total EGO rate */
   egoTotal: z.number().min(0).max(1),
 }).strict()
-
-// ============================================================================
-// Type Exports (inferred from schemas)
-// ============================================================================
-
-/** Inferred type for ExtractionTargetType */
-export type ExtractionTargetTypeInferred = z.infer<typeof ExtractionTargetTypeSchema>
-
-/** Inferred type for BannerModifiers */
-export type BannerModifiersInferred = z.infer<typeof BannerModifiersSchema>
-
-/** Inferred type for ExtractionTarget */
-export type ExtractionTargetInferred = z.infer<typeof ExtractionTargetSchema>
-
-/** Inferred type for ExtractionInput */
-export type ExtractionInputInferred = z.infer<typeof ExtractionInputSchema>
-
-/** Inferred type for ExtractionResult */
-export type ExtractionResultInferred = z.infer<typeof ExtractionResultSchema>
-
-/** Inferred type for EffectiveRates */
-export type EffectiveRatesInferred = z.infer<typeof EffectiveRatesSchema>

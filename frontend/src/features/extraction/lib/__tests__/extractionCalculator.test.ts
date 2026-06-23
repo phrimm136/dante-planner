@@ -23,7 +23,7 @@ import {
   calculateSuccessiveTargetProbabilities,
 } from '../extractionCalculator'
 import { EXTRACTION_RATES } from '@/lib/constants'
-import type { ExtractionInput, ExtractionTarget } from '@/types/ExtractionTypes'
+import type { ExtractionInput, ExtractionTarget } from '../../types/ExtractionTypes'
 
 describe('getEffectiveRates', () => {
   it('returns standard rates when no modifiers', () => {

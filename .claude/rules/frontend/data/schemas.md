@@ -96,9 +96,20 @@ const validated = validateData(data, EntityDataSchema)  // Throws if invalid
 
 ## File Organization
 
+**Shared** schemas/types (used across multiple features) live at the top level:
+
 ```
 src/schemas/IdentitySchemas.ts   # Zod schemas
 src/types/IdentityTypes.ts       # z.infer<> re-exports and internal types
 ```
 
-**Reference:** `@/lib/validation`, `IdentitySchemas.ts`, `EGOGiftSchemas.ts`
+**Feature-specific** schemas/types live inside the feature slice, same shape:
+
+```
+src/features/extraction/schemas/ExtractionSchemas.ts   # Zod schemas
+src/features/extraction/types/ExtractionTypes.ts       # z.infer<> of those schemas
+```
+
+Decide by fan-in: many consumers → shared/top-level; one feature → inside that feature.
+
+**Reference:** `@/lib/validation`, `IdentitySchemas.ts`, `EGOGiftSchemas.ts`, `features/extraction/`

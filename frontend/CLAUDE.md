@@ -115,6 +115,7 @@ Before using ANY hardcoded value (colors, numbers, strings):
 | Constants | `lib/constants.ts` (MAX_LEVEL, SINNERS, AFFINITIES, etc.) |
 | Styling utilities | `lib/utils.ts` (cn function) |
 | Validation utilities | `lib/validation.ts` (validateData) |
+| Feature-first slice (self-contained feature) | `features/extraction/` — colocates `components/lib/schemas/types`, exposes a public API via `index.ts` |
 
 ---
 

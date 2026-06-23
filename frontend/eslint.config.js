@@ -23,4 +23,46 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+
+  // ── Feature-first import boundaries (enforced by lint, not by convention) ──
+  // Order matters: the global public-API rule is first; the stricter shared/
+  // feature rules come AFTER so they override it for those files (flat config
+  // resolves a repeated rule by "last match wins", and ban-all subsumes deep-ban).
+
+  // (c) Public API only — reach a feature through its index, never an internal path.
+  {
+    files: ['**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@/features/*/**'],
+          message: 'Import a feature via its public API (@/features/<name>), not an internal path.',
+        }],
+      }],
+    },
+  },
+  // (b) Unidirectional flow — shared layers must not depend on features.
+  {
+    files: ['src/components/**', 'src/hooks/**', 'src/lib/**', 'src/schemas/**', 'src/types/**', 'src/stores/**'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@/features/*', '@/features/*/**'],
+          message: 'Shared layers must not import features (dependency flows shared → features → app).',
+        }],
+      }],
+    },
+  },
+  // (a) Feature isolation — no feature imports another; use relative paths within a feature.
+  {
+    files: ['src/features/**'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@/features/*', '@/features/*/**'],
+          message: 'A feature must not import another feature; use relative imports internally and compose at the app/route layer.',
+        }],
+      }],
+    },
+  },
 ])

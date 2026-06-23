@@ -27,7 +27,7 @@ import type {
   ExtractionTarget,
   ExtractionTargetType,
   TargetProbability,
-} from '@/types/ExtractionTypes'
+} from '../types/ExtractionTypes'
 
 /**
  * Get the appropriate rate table based on banner modifiers

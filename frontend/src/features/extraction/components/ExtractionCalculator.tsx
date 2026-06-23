@@ -19,8 +19,8 @@ import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { ExtractionInputs } from './ExtractionInputs'
 import { ExtractionResults } from './ExtractionResults'
-import { calculateExtraction } from '@/lib/extractionCalculator'
-import type { ExtractionInput, ExtractionTarget } from '@/types/ExtractionTypes'
+import { calculateExtraction } from '../lib/extractionCalculator'
+import type { ExtractionInput, ExtractionTarget } from '../types/ExtractionTypes'
 
 /** Default values for initial state - start empty */
 const DEFAULT_STATE = {
