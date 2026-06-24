@@ -12,7 +12,7 @@ import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
 import { DUNGEON_IDX, type DungeonIdx, type MDCategory } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { canSelectFloorThemePack, getUnaffordableGiftNames } from '@/lib/plannerHelpers'
+import { canSelectFloorThemePack, getUnaffordableGiftNames } from '@/lib/plannerRules'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import {
   Tooltip,

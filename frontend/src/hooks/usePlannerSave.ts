@@ -10,7 +10,8 @@ import { ConflictError, BannedError, TimedOutError } from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
-import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError, validateNoteSizes } from '@/lib/plannerHelpers'
+import { validatePlannerForDraftSave, validatePlannerForPublish, validateNoteSizes } from '@/lib/plannerValidation'
+import { toUserFriendlyError } from '@/lib/plannerValidationErrors'
 import type { MDCategory, PlannerType } from '@/lib/constants'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
@@ -396,7 +397,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
       if (isCurrentlyPublished) {
         // Strict: title + theme packs required, full difficulty enforced
-        const { isValid, errors } = validatePlannerForSave(
+        const { isValid, errors } = validatePlannerForPublish(
           currentState.title,
           content,
           currentState.category,
@@ -406,7 +407,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         if (!isValid) throwValidationError(toUserFriendlyError(errors[0]))
       } else {
         // Non-strict: structural checks only, title/theme packs optional
-        const validationError = validatePlannerUserFriendly(
+        const validationError = validatePlannerForDraftSave(
           content,
           currentState.category,
           egoGiftSpec,
@@ -658,7 +659,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           const noteSizeError = validateNoteSizes(content.sectionNotes)
           if (noteSizeError) throwValidationError(noteSizeError)
           if (egoGiftSpec) {
-            const validationError = validatePlannerUserFriendly(content, currentState.category, egoGiftSpec, egoGiftI18n)
+            const validationError = validatePlannerForDraftSave(content, currentState.category, egoGiftSpec, egoGiftI18n)
             if (validationError) throwValidationError(validationError)
           }
         }

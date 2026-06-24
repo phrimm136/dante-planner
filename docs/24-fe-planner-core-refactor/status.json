@@ -1,0 +1,15 @@
+{
+  "totalPhases": 4,
+  "currentPhase": 4,
+  "baseline": { "testFiles": 112, "testsPassed": 6040, "testsSkipped": 1 },
+  "afterPhase1": { "testFiles": 114, "testsPassed": 6073, "testsSkipped": 1 },
+  "final": { "testFiles": 117, "testsPassed": 6074, "testsSkipped": 1 },
+  "afterReview": { "testFiles": 117, "testsPassed": 6080, "testsSkipped": 1, "note": "+6 golden-master coverage tests (resolveConflict ordering x4, deckFilterState reset, floorSelections Set round-trip)" },
+  "phases": [
+    { "name": "Characterization tests (safety net)", "status": "done" },
+    { "name": "Rename the validator pair", "status": "done" },
+    { "name": "Split plannerHelpers.ts into 3 modules", "status": "done" },
+    { "name": "MSW policy (infra + smoke test + doc)", "status": "done" }
+  ],
+  "notes": "tsc -b exit 0; grep gates zero. One pre-existing concurrency flake (PlannerDetailHeader 'delete with local cleanup' mockNavigate waitFor race; same class as StartBuffCardMD6 teardown) — passes in isolation and on rerun, not a regression. eslint . crashes pre-existing on untouched files (await-thenable parserOptions config error) — unrelated to this work."
+}

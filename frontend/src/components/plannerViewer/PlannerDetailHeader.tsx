@@ -43,7 +43,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
 import { getKeywordIconPath } from '@/lib/assetPaths'
 import { I18N_LOCALE_MAP, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, RECOMMENDED_THRESHOLD } from '@/lib/constants'
-import { validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
+import { validatePlannerForPublish } from '@/lib/plannerValidation'
+import { toUserFriendlyError } from '@/lib/plannerValidationErrors'
 
 import type { MDCategory } from '@/lib/constants'
 import type { PublishedPlannerDetail } from '@/types/PlannerListTypes'
@@ -302,7 +303,7 @@ export function PlannerDetailHeader({
     if (savedPlanner.config.type === 'MIRROR_DUNGEON') {
       const content = savedPlanner.content as MDPlannerContent
       const category = savedPlanner.config.category as MDCategory
-      const { isValid, errors } = validatePlannerForSave(
+      const { isValid, errors } = validatePlannerForPublish(
         savedPlanner.metadata.title,
         content,
         category,

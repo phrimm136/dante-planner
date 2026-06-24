@@ -19,7 +19,8 @@ import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useAuthQuery } from './useAuthQuery'
 import { useUserSettingsQuery } from './useUserSettings'
 import { useEGOGiftListData } from './useEGOGiftListData'
-import { validatePlannerUserFriendly, validatePlannerForSave, toUserFriendlyError } from '@/lib/plannerHelpers'
+import { validatePlannerForDraftSave, validatePlannerForPublish } from '@/lib/plannerValidation'
+import { toUserFriendlyError } from '@/lib/plannerValidationErrors'
 
 import { matchesPlannerFilters } from '@/lib/plannerContentExtractors'
 
@@ -415,10 +416,10 @@ export function useMDUserPlannersData(
     let friendlyError: { key: string; params?: Record<string, string> } | null = null
 
     if (published) {
-      const { isValid, errors } = validatePlannerForSave(title, content, category, egoGiftSpec, egoGiftI18n)
+      const { isValid, errors } = validatePlannerForPublish(title, content, category, egoGiftSpec, egoGiftI18n)
       if (!isValid) friendlyError = toUserFriendlyError(errors[0])
     } else {
-      friendlyError = validatePlannerUserFriendly(content, category, egoGiftSpec, egoGiftI18n)
+      friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
     }
 
     if (friendlyError) {

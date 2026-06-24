@@ -15,7 +15,7 @@ import {
   SaveablePlannerSchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
-import { validateNoteSizes } from '../../lib/plannerHelpers'
+import { validateNoteSizes } from '../../lib/plannerValidation'
 import { MAX_NOTE_BYTES } from '../../lib/constants'
 
 // ============================================================================

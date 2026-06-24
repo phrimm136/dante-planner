@@ -1,19 +1,33 @@
 /**
- * Planner Utilities
+ * Planner Validation
  *
- * Pure functions for planner-related validation and checks.
- * Mirrors backend PlannerContentValidator validation rules.
+ * Validation functions for planner content, covering equipment, deployment,
+ * skill EA, gift IDs, start buffs, start gifts, floor theme packs, difficulty,
+ * and note sizes. Mirrors backend PlannerContentValidator validation rules.
  */
 
 import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX, MAX_NOTE_BYTES } from '@/lib/constants'
 import { getBaseGiftId } from '@/lib/egoGiftEncoding'
 import { measureDocBytes } from '@/lib/noteUtils'
+import { getUnaffordableGiftIds } from '@/lib/plannerRules'
+import { toUserFriendlyError } from '@/lib/plannerValidationErrors'
 import type { JSONContent } from '@tiptap/core'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
 import type { FloorThemeSelection } from '@/types/ThemePackTypes'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { MDCategory } from '@/lib/constants'
 import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
+import type {
+  PlannerValidationError,
+  EquipmentValidationError,
+  DeploymentValidationError,
+  SkillEAValidationError,
+  GiftValidationError,
+  BuffValidationError,
+  StartGiftValidationError,
+  FloorValidationError,
+  DifficultyValidationError,
+} from '@/lib/plannerValidationErrors'
 
 // ============================================================================
 // Constants (Match Backend Validation Rules)
@@ -43,218 +57,6 @@ const SKILL_EA_TOTAL = 6
 const MAX_START_BUFFS = 10
 const MIN_BUFF_BASE_ID = 0
 const MAX_BUFF_BASE_ID = 9
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Check if an EGO Gift is affordable for a specific theme pack
- *
- * @param gift - EGO Gift spec data
- * @param themePackId - Theme pack ID to check
- * @returns true if gift is available for this theme pack
- *
- * Rules:
- * - If gift.themePack is empty array → available in ALL theme packs (universal)
- * - If gift.themePack has values → only available in those specific packs
- */
-export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: string): boolean {
-  return gift.themePack.length === 0 || gift.themePack.includes(themePackId)
-}
-
-/**
- * Get list of unaffordable gift IDs for a specific floor and theme pack
- *
- * @param giftIds - Selected gift IDs for this floor
- * @param themePackId - Theme pack ID for this floor
- * @param egoGiftSpec - EGO Gift spec data
- * @returns Array of gift IDs that are not affordable for this theme pack
- */
-export function getUnaffordableGiftIds(
-  giftIds: Set<string>,
-  themePackId: string,
-  egoGiftSpec: Record<string, EGOGiftSpec>
-): string[] {
-  return Array.from(giftIds).filter((giftId) => {
-    const baseGiftId = getBaseGiftId(giftId)
-    const gift = egoGiftSpec[baseGiftId]
-    if (!gift) return false
-    return !isGiftAffordableForThemePack(gift, themePackId)
-  })
-}
-
-/**
- * Get list of unaffordable gift names for a specific floor and theme pack
- *
- * @param giftIds - Selected gift IDs for this floor
- * @param themePackId - Theme pack ID for this floor
- * @param egoGiftSpec - EGO Gift spec data
- * @param egoGiftI18n - EGO Gift i18n name map
- * @returns Object with arrays of unaffordable gift IDs and their names
- */
-export function getUnaffordableGiftNames(
-  giftIds: Set<string>,
-  themePackId: string,
-  egoGiftSpec: Record<string, EGOGiftSpec>,
-  egoGiftI18n: Record<string, string>
-): { ids: string[]; names: string[] } {
-  const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
-  const names = ids.map(id => egoGiftI18n[getBaseGiftId(id)] ?? id)
-  return { ids, names }
-}
-
-// ============================================================================
-// Validation Error Types
-// ============================================================================
-
-/**
- * Base validation error with context
- */
-export interface ValidationError {
-  /** Error code for programmatic handling */
-  code: string
-  /** Human-readable error message */
-  message: string
-  /** Optional field path for locating the error */
-  field?: string
-  /** Optional additional context */
-  context?: Record<string, unknown>
-}
-
-/**
- * Equipment validation error
- */
-export interface EquipmentValidationError extends ValidationError {
-  code: 'EQUIPMENT_MISSING_SINNER' | 'EQUIPMENT_MISSING_IDENTITY' | 'EQUIPMENT_MISSING_ZAYIN' | 'EQUIPMENT_INVALID_EGO_TYPES' | 'EQUIPMENT_INVALID_ID_FORMAT'
-}
-
-/**
- * Deployment order validation error
- */
-export interface DeploymentValidationError extends ValidationError {
-  code: 'DEPLOYMENT_INVALID_INDEX'
-}
-
-/**
- * Skill EA validation error
- */
-export interface SkillEAValidationError extends ValidationError {
-  code: 'SKILL_EA_MISSING_SINNER' | 'SKILL_EA_INVALID_SLOT' | 'SKILL_EA_DUPLICATE_SLOT' | 'SKILL_EA_INVALID_TOTAL'
-}
-
-/**
- * Gift IDs validation error
- */
-export interface GiftValidationError extends ValidationError {
-  code: 'GIFT_DUPLICATE_ID' | 'GIFT_UNKNOWN_ID'
-}
-
-/**
- * Start buff validation error
- */
-export interface BuffValidationError extends ValidationError {
-  code: 'BUFF_EXCEEDS_MAX' | 'BUFF_DUPLICATE_BASE_ID' | 'BUFF_INVALID_FORMAT'
-}
-
-/**
- * Start gift validation error
- */
-export interface StartGiftValidationError extends ValidationError {
-  code: 'START_GIFT_NO_KEYWORD_BUT_HAS_GIFTS' | 'START_GIFT_DUPLICATE_ID'
-}
-
-/**
- * Floor validation error (extended from existing)
- */
-export interface FloorValidationError extends ValidationError {
-  code: 'FLOOR_MISSING_THEME_PACK' | 'FLOOR_PREREQUISITE_VIOLATION' | 'FLOOR_DUPLICATE_GIFT_ID' | 'FLOOR_DUPLICATE_THEME_PACK' | 'FLOOR_UNAFFORDABLE_GIFT' | 'GIFT_UNKNOWN_ID'
-  /** 0-indexed floor that failed validation */
-  floorIndex?: number
-  /** 1-indexed floor number for display */
-  floorNumber?: number
-}
-
-/**
- * Difficulty validation error (for published planners)
- */
-export interface DifficultyValidationError extends ValidationError {
-  code: 'DIFFICULTY_INVALID_FOR_CATEGORY'
-  /** 0-indexed floor that failed validation */
-  floorIndex?: number
-  /** 1-indexed floor number for display */
-  floorNumber?: number
-}
-
-/**
- * Title validation error (strict/publish mode only)
- */
-export interface TitleValidationError extends ValidationError {
-  code: 'MISSING_TITLE'
-}
-
-/**
- * Union type of all validation errors
- */
-export type PlannerValidationError =
-  | EquipmentValidationError
-  | DeploymentValidationError
-  | SkillEAValidationError
-  | GiftValidationError
-  | BuffValidationError
-  | StartGiftValidationError
-  | FloorValidationError
-  | DifficultyValidationError
-  | TitleValidationError
-
-// ============================================================================
-// Error → i18n Mapping
-// ============================================================================
-
-/**
- * Maps a structured validation error to an i18n key + params for toast display
- *
- * Structural errors (equipment, deployment, skill EA, gift IDs, buffs, start gifts)
- * indicate corrupted planner state — the user cannot meaningfully act on them, so
- * they collapse to a single generic key. Actionable errors (title, theme pack,
- * difficulty, affordability) get their own specific keys.
- */
-export function toUserFriendlyError(
-  error: PlannerValidationError
-): { key: string; params?: Record<string, string> } {
-  switch (error.code) {
-    case 'MISSING_TITLE':
-      return { key: 'pages.plannerMD.publish.missingTitle' }
-    case 'FLOOR_MISSING_THEME_PACK':
-      return { key: 'pages.plannerMD.publish.missingThemePack' }
-    case 'FLOOR_UNAFFORDABLE_GIFT': {
-      const floorError = error as FloorValidationError
-      const ctx = floorError.context as { giftNames?: string; themePackId?: string } | undefined
-      return {
-        key: 'pages.plannerMD.publish.themePackEgoGiftInconsistency',
-        params: {
-          pack: ctx?.themePackId ?? '',
-          gifts: ctx?.giftNames ?? '',
-        },
-      }
-    }
-    case 'GIFT_UNKNOWN_ID': {
-      const floorError = error as FloorValidationError
-      const ctx = floorError.context as { giftIds?: string[] } | undefined
-      return {
-        key: 'pages.plannerMD.validation.unknownGiftId',
-        params: {
-          floor: String(floorError.floorNumber ?? ''),
-          gifts: ctx?.giftIds?.join(', ') ?? '',
-        },
-      }
-    }
-    case 'DIFFICULTY_INVALID_FOR_CATEGORY':
-      return { key: 'pages.plannerMD.publish.requiresHardMode' }
-    default:
-      return { key: 'pages.plannerMD.validation.corruptedState' }
-  }
-}
 
 // ============================================================================
 // Validation Functions
@@ -610,42 +412,6 @@ export function validateStartGiftSelection(
 }
 
 /**
- * Checks if a floor's theme pack selector should be enabled based on previous floor state
- *
- * Rules:
- * - Floor 1 (index 0): Always enabled (no prerequisites)
- * - Floors 2-15: Enabled only if the previous floor has a theme pack selected
- *
- * @param floorIndex - 0-indexed floor position (0 for floor 1, 1 for floor 2, etc.)
- * @param floorSelections - Array of all floor selections
- * @returns true if theme pack selector should be enabled, false if disabled
- *
- * @example
- * // Floor 1 is always enabled
- * canSelectFloorThemePack(0, floors) // Returns true
- *
- * @example
- * // Floor 2 enabled only if floor 1 has theme pack
- * const floors = [{ themePackId: '123', ... }, { themePackId: null, ... }]
- * canSelectFloorThemePack(1, floors) // Returns true (floor 1 has pack)
- *
- * @example
- * // Floor 3 disabled if floor 2 has no theme pack
- * const floors = [{ ... }, { themePackId: null, ... }, { ... }]
- * canSelectFloorThemePack(2, floors) // Returns false (floor 2 has no pack)
- */
-export function canSelectFloorThemePack(
-  floorIndex: number,
-  floorSelections: FloorThemeSelection[]
-): boolean {
-  // First floor always enabled
-  if (floorIndex === 0) return true
-
-  // Other floors require previous floor to have a theme pack
-  return floorSelections[floorIndex - 1].themePackId !== null
-}
-
-/**
  * Validates that all floor theme pack selections meet save requirements
  *
  * Rules enforced:
@@ -921,14 +687,14 @@ function validateFloorGiftAffordability(
  * @returns Object with isValid flag and array of all validation errors
  *
  * @example
- * const result = validatePlannerForSave(plannerContent, '5F')
+ * const result = validatePlannerForPublish('My Plan', plannerContent, '5F')
  * if (!result.isValid) {
  *   console.error('Validation failed:', result.errors)
  *   // Show first error to user
  *   toast.error(result.errors[0].message)
  * }
  */
-export function validatePlannerForSave(
+export function validatePlannerForPublish(
   title: string | undefined,
   content: MDPlannerContent,
   category: MDCategory,
@@ -1005,7 +771,7 @@ export function validatePlannerForSave(
  * @param egoGiftI18n - EGO Gift i18n names (optional, uses IDs if not provided)
  * @returns Object with i18n key and params, or null if valid
  */
-export function validatePlannerUserFriendly(
+export function validatePlannerForDraftSave(
   content: MDPlannerContent,
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
