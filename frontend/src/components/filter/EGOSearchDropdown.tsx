@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEGOListData } from '@/hooks/useEGOListData'
+import { useEGOListData } from '@/pages/ego'
 import { SearchableMultiSelect } from '@/components/common/SearchableMultiSelect'
 import { getSinnerFromId } from '@/lib/utils'
 

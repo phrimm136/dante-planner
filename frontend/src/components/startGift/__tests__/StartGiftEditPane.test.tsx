@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftEditPane } from '../StartGiftEditPane'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -98,7 +98,7 @@ vi.mock('@/hooks/useStartGiftPools', () => ({
   }),
 }))
 
-vi.mock('@/hooks/useEGOGiftListData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: mockSpec,
     i18n: mockI18n,

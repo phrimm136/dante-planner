@@ -1,10 +1,10 @@
 import { memo } from 'react'
 import type { SinnerEquipment } from '@/types/DeckTypes'
-import type { EGOType } from '@/types/EGOTypes'
-import type { IdentityListItem } from '@/types/IdentityTypes'
+import type { EGOType } from '@/pages/ego'
+import type { IdentityListItem } from '@/pages/identity'
 import type { SkillData } from './SinnerGrid'
 import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath, getSelectedIndicatorPath, getBackupIndicatorPath } from '@/lib/assetPaths'
-import { IdentityCard } from '@/components/identity/IdentityCard'
+import { IdentityCard } from '@/pages/identity'
 import colorCode from '@static/data/colorCode.json'
 import { getDisplayFontForNumeric } from '@/lib/utils'
 

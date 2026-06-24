@@ -5,9 +5,9 @@ import { getSelectedIndicatorPath } from '@/lib/assetPaths'
 import { useDeckVisibleCount } from '@/stores/usePlannerEditorStore'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { EGOCard } from '@/components/ego/EGOCard'
+import { EGOCard } from '@/pages/ego'
 import { TierLevelSelector } from './TierLevelSelector'
-import type { EGOListItem } from '@/types/EGOTypes'
+import type { EGOListItem } from '@/pages/ego'
 import type { ThreadspinTier } from '@/types/DeckTypes'
 
 interface EgoGridProps {

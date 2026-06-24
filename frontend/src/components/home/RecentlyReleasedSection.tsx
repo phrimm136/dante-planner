@@ -13,8 +13,8 @@ import { useTranslation } from 'react-i18next'
 import { ArrowRight } from 'lucide-react'
 
 import { Skeleton } from '@/components/ui/skeleton'
-import { useIdentityListI18n } from '@/hooks/useIdentityListData'
-import { useEGOListI18n } from '@/hooks/useEGOListData'
+import { useIdentityListI18n } from '@/pages/identity'
+import { useEGOListI18n } from '@/pages/ego'
 import {
   getIdentityProfileImagePath,
   getIdentityImageFallbackPath,

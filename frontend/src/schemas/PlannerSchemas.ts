@@ -3,7 +3,7 @@ import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, RR_CATEGORIES, PLANNER_TYPES } f
 import type { DungeonIdx } from '@/lib/constants'
 import { JSONContentSchema } from './NoteEditorSchemas'
 import type { SerializableFloorSelection, SaveablePlanner, MDPlannerContent, RRPlannerContent } from '@/types/PlannerTypes'
-import { EgoTypeSchema } from './EGOSchemas'
+import { EgoTypeSchema } from '@/pages/ego'
 
 /**
  * Planner Schemas

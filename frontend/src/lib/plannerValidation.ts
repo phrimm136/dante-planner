@@ -13,10 +13,10 @@ import { getUnaffordableGiftIds } from '@/lib/plannerRules'
 import { toUserFriendlyError } from '@/lib/plannerValidationErrors'
 import type { JSONContent } from '@tiptap/core'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { FloorThemeSelection } from '@/pages/themePack'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 import type { MDCategory } from '@/lib/constants'
-import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec } from '@/pages/egoGift'
 import type {
   PlannerValidationError,
   EquipmentValidationError,

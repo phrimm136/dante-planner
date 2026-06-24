@@ -4,7 +4,7 @@ import { PlannerSection } from '@/components/common/PlannerSection'
 import { FloorThemeGiftSection } from '@/components/floorTheme/FloorThemeGiftSection'
 import { NoteEditor } from '@/components/noteEditor/NoteEditor'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 import { isNoteEmpty } from '@/lib/noteUtils'
 

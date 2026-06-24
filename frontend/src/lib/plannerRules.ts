@@ -6,8 +6,8 @@
  */
 
 import { getBaseGiftId } from '@/lib/egoGiftEncoding'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
-import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
+import type { FloorThemeSelection } from '@/pages/themePack'
+import type { EGOGiftSpec } from '@/pages/egoGift'
 
 /**
  * Check if an EGO Gift is affordable for a specific theme pack

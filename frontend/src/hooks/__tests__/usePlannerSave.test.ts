@@ -63,7 +63,7 @@ vi.mock('../useAuthQuery', () => ({
   useAuthQuery: () => mockUseAuthQuery(),
 }))
 
-vi.mock('../useEGOGiftListData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({ spec: {}, i18n: {} }),
 }))
 

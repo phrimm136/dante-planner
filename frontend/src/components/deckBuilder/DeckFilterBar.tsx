@@ -16,7 +16,7 @@ import {
 } from '@/stores/usePlannerEditorStore'
 
 import type { EntityMode } from '@/types/DeckTypes'
-import type { EGOType } from '@/types/EGOTypes'
+import type { EGOType } from '@/pages/ego'
 
 import { SearchBar } from '@/components/common/SearchBar'
 import { FilterSection } from '@/components/filter/FilterSection'

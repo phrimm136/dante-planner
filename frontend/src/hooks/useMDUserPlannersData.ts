@@ -18,7 +18,7 @@ import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useAuthQuery } from './useAuthQuery'
 import { useUserSettingsQuery } from './useUserSettings'
-import { useEGOGiftListData } from './useEGOGiftListData'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '@/lib/plannerValidation'
 import { toUserFriendlyError } from '@/lib/plannerValidationErrors'
 

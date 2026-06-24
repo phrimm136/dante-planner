@@ -24,43 +24,34 @@ export default defineConfig([
     },
   },
 
-  // ── Feature-first import boundaries (enforced by lint, not by convention) ──
-  // Order matters: the global public-API rule is first; the stricter shared/
-  // feature rules come AFTER so they override it for those files (flat config
-  // resolves a repeated rule by "last match wins", and ban-all subsumes deep-ban).
-
-  // (c) Public API only — reach a feature through its index, never an internal path.
+  // ── Page-slice import boundary (the only structural rule) ──
+  // The app is organized as page slices under src/pages/<name> (plus the
+  // legacy features/extraction slice). Reach a slice only through its public
+  // API (src/pages/<name>/index.ts), never a deep internal path. Cross-page
+  // reuse is allowed and expected — a component owned by one page is imported
+  // by another via that page's public API. No directional or sibling bans:
+  // the slices form a DAG by discipline, not by lint.
   {
     files: ['**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
+          group: ['@/pages/*/**', '@/features/*/**'],
+          message: 'Import a page slice via its public API (@/pages/<name>), not a deep internal path.',
+        }],
+      }],
+    },
+  },
+  // The router is the composition root: it lazy-imports each page's route
+  // component by its module path for code-splitting, which is a deep import by
+  // design. Allow deep @/pages imports here, but keep the deep-feature ban.
+  {
+    files: ['src/lib/router.tsx'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
           group: ['@/features/*/**'],
-          message: 'Import a feature via its public API (@/features/<name>), not an internal path.',
-        }],
-      }],
-    },
-  },
-  // (b) Unidirectional flow — shared layers must not depend on features.
-  {
-    files: ['src/components/**', 'src/hooks/**', 'src/lib/**', 'src/schemas/**', 'src/types/**', 'src/stores/**'],
-    rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['@/features/*', '@/features/*/**'],
-          message: 'Shared layers must not import features (dependency flows shared → features → app).',
-        }],
-      }],
-    },
-  },
-  // (a) Feature isolation — no feature imports another; use relative paths within a feature.
-  {
-    files: ['src/features/**'],
-    rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['@/features/*', '@/features/*/**'],
-          message: 'A feature must not import another feature; use relative imports internally and compose at the app/route layer.',
+          message: 'Import a feature via its public API (@/features/<name>), not a deep internal path.',
         }],
       }],
     },

@@ -8,8 +8,8 @@
  */
 
 import type { DeckFilterState, EntityMode } from '@/types/DeckTypes'
-import type { IdentityListItem } from '@/types/IdentityTypes'
-import type { EGOListItem } from '@/types/EGOTypes'
+import type { IdentityListItem } from '@/pages/identity'
+import type { EGOListItem } from '@/pages/ego'
 import type { SearchMappings } from '@/hooks/useSearchMappings'
 import type { Keyword } from '@/lib/constants'
 import { getSinnerFromId } from '@/lib/utils'

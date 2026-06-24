@@ -1,7 +1,7 @@
 import { SINNERS } from '@/lib/constants'
 import { getEGOImagePath, getEGOTypeIconPath } from '@/lib/assetPaths'
 import type { SinnerEquipment } from '@/types/DeckTypes'
-import type { EGOType } from '@/types/EGOTypes'
+import type { EGOType } from '@/pages/ego'
 import colorCode from '@static/data/colorCode.json'
 
 interface CompactEgoGridProps {

@@ -8,13 +8,13 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '@/hooks/useStartGiftPools'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { useStartBuffData } from '@/hooks/useStartBuffData'
 import { usePlannerEditorStore } from '@/stores/usePlannerEditorStore'
 import type { MDVersion } from '@/lib/constants'
 import { calculateMaxGiftSelection } from '@/lib/startGiftCalculator'
 import { StartGiftRow } from './StartGiftRow'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 
 interface StartGiftEditPaneProps {
   open: boolean

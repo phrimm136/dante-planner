@@ -11,7 +11,7 @@ import { PlannerMDEditorContent } from '@/components/planner/PlannerMDEditorCont
 import { useSavedPlannerQuery } from '@/hooks/useSavedPlannerQuery'
 import type { MDCategory } from '@/lib/constants'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { FloorThemeSelection } from '@/pages/themePack'
 import type { PlannerEditorState } from '@/stores/usePlannerEditorStore'
 
 /**

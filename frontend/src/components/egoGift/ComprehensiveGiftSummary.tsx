@@ -2,17 +2,17 @@ import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
-import { sortEGOGifts } from '@/lib/egoGiftSort'
+import { sortEGOGifts } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel } from '@/lib/constants'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
+import { EGOGiftCard } from '@/pages/egoGift'
+import { EGOGiftTooltip } from '@/pages/egoGift'
 
 interface ComprehensiveGiftSummaryProps {
   onClick: () => void

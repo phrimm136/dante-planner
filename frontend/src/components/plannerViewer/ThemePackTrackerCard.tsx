@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ThemePackViewer } from '@/components/floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { cn } from '@/lib/utils'
-import type { ThemePackEntry } from '@/types/ThemePackTypes'
+import type { ThemePackEntry } from '@/pages/themePack'
 import type { NoteContent } from '@/types/NoteEditorTypes'
 
 interface ThemePackTrackerCardProps {

@@ -1,4 +1,4 @@
-import type { EGOType } from './EGOTypes'
+import type { EGOType } from '@/pages/ego'
 import type { Affinity, AtkType, DefType, OffensiveSkillSlot, Season, SkillAttributeType } from '@/lib/constants'
 
 /**

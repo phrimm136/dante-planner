@@ -27,10 +27,10 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/component
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 
-import { useIdentityListSpec, useIdentityListI18n } from '@/hooks/useIdentityListData'
-import { useEGOListSpec, useEGOListI18n } from '@/hooks/useEGOListData'
-import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/hooks/useEGOGiftListData'
-import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { useIdentityListSpec, useIdentityListI18n } from '@/pages/identity'
+import { useEGOListSpec, useEGOListI18n } from '@/pages/ego'
+import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
+import { useThemePackListData } from '@/pages/themePack'
 import { usePlannerKeywordsI18nDeferred } from '@/hooks/usePlannerKeywordsI18n'
 
 import { PLANNER_KEYWORDS, SINNERS } from '@/lib/constants'

@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationSummary } from '../EGOGiftObservationSummary'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -74,13 +74,13 @@ const mockI18n: EGOGiftNameList = {
   '9003': 'Tremor Gift',
 }
 
-vi.mock('@/hooks/useEGOGiftObservationData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftObservationData', () => ({
   useEGOGiftObservationData: (_version: number) => ({
     data: mockObservationData,
   }),
 }))
 
-vi.mock('@/hooks/useEGOGiftListData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: mockSpec,
     i18n: mockI18n,
@@ -107,7 +107,7 @@ vi.mock('@/components/common/StarlightCostDisplay', () => ({
 }))
 
 // Mock EGOGiftCard to simplify testing
-vi.mock('../EGOGiftCard', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
   EGOGiftCard: ({ gift, isSelected }: { gift: { id: string; name: string }; isSelected?: boolean }) => (
     <div data-testid={`gift-card-${gift.id}`} data-selected={isSelected}>
       {gift.name}

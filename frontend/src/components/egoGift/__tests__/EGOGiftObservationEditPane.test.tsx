@@ -10,7 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationEditPane } from '../EGOGiftObservationEditPane'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -78,13 +78,13 @@ const mockI18n: EGOGiftNameList = {
   '9002': 'Bleeding Gift',
 }
 
-vi.mock('@/hooks/useEGOGiftObservationData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftObservationData', () => ({
   useEGOGiftObservationData: (_version: number) => ({
     data: mockObservationData,
   }),
 }))
 
-vi.mock('@/hooks/useEGOGiftListData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: mockSpec,
     i18n: mockI18n,
@@ -106,7 +106,7 @@ vi.mock('@/components/common/Sorter', () => ({
 }))
 
 // Mock EGOGiftKeywordFilter
-vi.mock('../EGOGiftKeywordFilter', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftKeywordFilter', () => ({
   EGOGiftKeywordFilter: () => <div data-testid="keyword-filter" />,
 }))
 
@@ -116,12 +116,12 @@ vi.mock('@/components/common/SearchBar', () => ({
 }))
 
 // Mock EGOGiftSelectionList
-vi.mock('../EGOGiftSelectionList', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftSelectionList', () => ({
   EGOGiftSelectionList: () => <div data-testid="selection-list" data-max="3" />,
 }))
 
 // Mock EGOGiftObservationSelection
-vi.mock('../EGOGiftObservationSelection', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftObservationSelection', () => ({
   EGOGiftObservationSelection: () => <div data-testid="selected-gifts" />,
 }))
 

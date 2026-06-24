@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { ThemePackCard } from './ThemePackCard'
-import type { ThemePackEntry } from '@/types/ThemePackTypes'
+import { ThemePackCard } from '@/pages/themePack'
+import type { ThemePackEntry } from '@/pages/themePack'
 
 interface ThemePackViewerProps {
   packId: string

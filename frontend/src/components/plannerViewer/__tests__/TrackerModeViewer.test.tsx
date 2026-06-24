@@ -119,11 +119,11 @@ vi.mock('@/components/ui/skeleton', () => ({
 }))
 
 // Mock identity and EGO hooks
-vi.mock('@/hooks/useIdentityListData', () => ({
+vi.mock('@/pages/identity/hooks/useIdentityListData', () => ({
   useIdentityListSpec: () => ({}),
 }))
 
-vi.mock('@/hooks/useEGOListData', () => ({
+vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
   useEGOListSpec: () => ({}),
 }))
 

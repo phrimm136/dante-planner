@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftSummary } from '../StartGiftSummary'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -62,7 +62,7 @@ vi.mock('@/stores/usePlannerEditorStore', () => ({
   },
 }))
 
-vi.mock('@/hooks/useEGOGiftListData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: mockSpec,
     i18n: mockI18n,
@@ -80,7 +80,7 @@ vi.mock('@/components/common/PlannerSection', () => ({
 }))
 
 // Mock EGOGiftCard to simplify testing
-vi.mock('@/components/egoGift/EGOGiftCard', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
   EGOGiftCard: ({ gift }: { gift: { id: string; name: string } }) => (
     <div data-testid={`gift-card-${gift.id}`}>{gift.name}</div>
   ),

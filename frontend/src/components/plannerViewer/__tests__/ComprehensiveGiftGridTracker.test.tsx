@@ -5,7 +5,7 @@ import { ComprehensiveGiftGridTracker } from '../ComprehensiveGiftGridTracker'
 import type { SerializableFloorSelection } from '@/types/PlannerTypes'
 
 // Mock hooks
-vi.mock('@/hooks/useEGOGiftListData', () => ({
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: {
       gift1: {
@@ -44,13 +44,13 @@ vi.mock('@/hooks/useSearchMappings', () => ({
   }),
 }))
 
-vi.mock('@/components/egoGift/EGOGiftCard', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
   EGOGiftCard: ({ gift }: { gift: { id: string } }) => (
     <div data-testid={`gift-card-${gift.id}`} />
   ),
 }))
 
-vi.mock('@/components/egoGift/EGOGiftTooltip', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftTooltip', () => ({
   EGOGiftTooltip: ({ children }: { children: JSX.Element }) => children,
 }))
 

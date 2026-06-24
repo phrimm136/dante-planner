@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/shallow'
-import { useThemePackListData } from '@/hooks/useThemePackListData'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useThemePackListData } from '@/pages/themePack'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { toast } from 'sonner'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
@@ -20,7 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { FloorThemeSelection } from '@/pages/themePack'
 
 interface FloorThemeGiftSectionProps {
   floorNumber: number // 1-indexed (1-15)

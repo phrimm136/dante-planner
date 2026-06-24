@@ -19,25 +19,35 @@ import {
   IdentityI18nSchema,
   IdentitySpecListSchema,
   IdentityNameListSchema,
+} from '@/pages/identity'
+import {
   EGODataSchema,
   EGOI18nSchema,
   EGOSpecListSchema,
   EGONameListSchema,
+} from '@/pages/ego'
+import {
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
+} from '@/pages/egoGift'
+import {
   ThemePackDetailSchema,
   ThemePackListSchema,
   ThemePackI18nSchema,
+} from '@/pages/themePack'
+import {
   BattleKeywordsSchema,
   BattleKeywordSpecListSchema,
+  ColorCodeMapSchema,
+} from '../index'
+import {
   AbEventSpecListSchema,
   AbEventDataSchema,
   AbEventI18nSchema,
   AbEventSharedSchema,
-  ColorCodeMapSchema,
-} from '../index'
+} from '@/pages/abEvent'
 
 const STATIC_DIR = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../../static')
 const DATA_DIR = path.join(STATIC_DIR, 'data')

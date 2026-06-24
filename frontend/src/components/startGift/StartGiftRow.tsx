@@ -1,7 +1,7 @@
 import { getKeywordIconPath } from '@/lib/assetPaths'
-import type { EGOGiftSpec, EGOGiftNameList } from '@/types/EGOGiftTypes'
-import { EGOGiftCard } from '@/components/egoGift/EGOGiftCard'
-import { EGOGiftTooltip } from '@/components/egoGift/EGOGiftTooltip'
+import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { EGOGiftCard } from '@/pages/egoGift'
+import { EGOGiftTooltip } from '@/pages/egoGift'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { CARD_GRID } from '@/lib/constants'
 

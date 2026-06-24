@@ -1,15 +1,15 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftObservationData } from '@/hooks/useEGOGiftObservationData'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useEGOGiftObservationData } from '@/pages/egoGift'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStoreSafe } from '@/stores/usePlannerEditorStore'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/pages/egoGift'
 import { PlannerSection } from '@/components/common/PlannerSection'
 import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { EGOGiftCard } from './EGOGiftCard'
+import { EGOGiftCard } from '@/pages/egoGift'
 
 interface EGOGiftObservationSummaryProps {
   mdVersion: number

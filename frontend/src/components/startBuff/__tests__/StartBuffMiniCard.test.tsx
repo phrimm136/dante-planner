@@ -10,12 +10,13 @@ vi.mock('@/lib/assetPaths', () => ({
 }))
 
 // Mock constants
-vi.mock('@/lib/constants', () => ({
+vi.mock('@/lib/constants', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/constants')>()),
   MD_ACCENT_COLORS: { 6: '#00ffcc', 7: '#b00000' },
 }))
 
 // Mock EGOGiftEnhancementIndicator to track when it's rendered
-vi.mock('@/components/egoGift/EGOGiftEnhancementIndicator', () => ({
+vi.mock('@/pages/egoGift/components/EGOGiftEnhancementIndicator', () => ({
   EGOGiftEnhancementIndicator: ({ enhancement }: { enhancement: number }) => {
     if (enhancement === 0) return null
     return <div data-testid="enhancement-indicator" data-enhancement={enhancement}>+{enhancement}</div>

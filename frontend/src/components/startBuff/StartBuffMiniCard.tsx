@@ -1,7 +1,7 @@
 import { getStartBuffIconPath, getStartBuffMiniPath, getStartBuffMiniHighlightPath } from '@/lib/assetPaths'
 import { MD_ACCENT_COLORS } from '@/lib/constants'
 import { getEnhancementFromBuffId, getBaseIdFromBuffId, getEnhancementSuffix } from '@/types/StartBuffTypes'
-import { EGOGiftEnhancementIndicator } from '@/components/egoGift/EGOGiftEnhancementIndicator'
+import { EGOGiftEnhancementIndicator } from '@/pages/egoGift'
 import { useTranslation } from 'react-i18next'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
 import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'

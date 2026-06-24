@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 
-import { useIdentityListSpec } from '@/hooks/useIdentityListData'
-import { useEGOListSpec } from '@/hooks/useEGOListData'
+import { useIdentityListSpec } from '@/pages/identity'
+import { useEGOListSpec } from '@/pages/ego'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
 import { formatEntityReleaseDate } from '@/lib/formatDate'
 
@@ -19,7 +19,7 @@ const MAX_RECENT_ITEMS = 16
  */
 const MAX_DATE_GROUPS = 4
 
-import type { EGOType } from '@/types/EGOTypes'
+import type { EGOType } from '@/pages/ego'
 
 /** Identity data needed for card display */
 export interface RecentIdentityData {

@@ -2,7 +2,7 @@ import React, { useState, memo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL } from '@/lib/constants'
 import type { UptieTier, ThreadspinTier } from '@/types/DeckTypes'
-import type { EGOType } from '@/types/EGOTypes'
+import type { EGOType } from '@/pages/ego'
 import { getEGOTierIconPath } from '@/lib/assetPaths'
 
 interface TierLevelSelectorProps {

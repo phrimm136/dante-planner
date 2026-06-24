@@ -1,8 +1,8 @@
 import React, { useMemo, memo } from 'react'
 import { AFFINITIES, STATUS_EFFECTS } from '@/lib/constants'
 import { getAffinityIconPath, getBattleKeywordIconPath } from '@/lib/assetPaths'
-import { useIdentityListData } from '@/hooks/useIdentityListData'
-import { useEGOListData } from '@/hooks/useEGOListData'
+import { useIdentityListData } from '@/pages/identity'
+import { useEGOListData } from '@/pages/ego'
 import type { DeckState, AffinityCount, KeywordCount } from '@/types/DeckTypes'
 
 interface StatusViewerProps {

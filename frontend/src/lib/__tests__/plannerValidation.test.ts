@@ -22,8 +22,8 @@ import {
 import { MAX_NOTE_BYTES } from '../constants'
 import { calculateNoteByteLength } from '../noteUtils'
 import type { FloorValidationError, DifficultyValidationError } from '../plannerValidationErrors'
-import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
-import type { FloorThemeSelection } from '@/types/ThemePackTypes'
+import type { EGOGiftSpec } from '@/pages/egoGift'
+import type { FloorThemeSelection } from '@/pages/themePack'
 import type { MDPlannerContent } from '@/types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '@/types/DeckTypes'
 

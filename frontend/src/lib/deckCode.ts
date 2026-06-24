@@ -19,7 +19,7 @@
 import pako from 'pako'
 import { SINNERS, MAX_LEVEL } from './constants'
 import type { SinnerEquipment } from '@/types/DeckTypes'
-import type { EGOType } from '@/types/EGOTypes'
+import type { EGOType } from '@/pages/ego'
 
 const BITS_PER_SINNER = 46
 const TOTAL_BITS = 560

@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { isGiftAffordableForThemePack, getUnaffordableGiftIds } from '../plannerRules'
-import type { EGOGiftSpec } from '@/types/EGOGiftTypes'
+import type { EGOGiftSpec } from '@/pages/egoGift'
 
 // ============================================================================
 // Fixtures

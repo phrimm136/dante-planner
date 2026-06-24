@@ -8,9 +8,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
-import { EGOGiftFilterBar } from '@/components/egoGift/EGOGiftFilterBar'
-import { EGOGiftSelectionList } from '@/components/egoGift/EGOGiftSelectionList'
+import { useEGOGiftListData } from '@/pages/egoGift'
+import { EGOGiftFilterBar } from '@/pages/egoGift'
+import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/components/common/Sorter'
 import { bucketAndSortFloorGifts } from '@/lib/floorGiftBucketing'
 import {
@@ -19,7 +19,7 @@ import {
   decodeGiftSelection,
   getCascadeIngredients,
 } from '@/lib/egoGiftEncoding'
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel, DungeonIdx } from '@/lib/constants'
 
 interface FloorGiftSelectorPaneProps {

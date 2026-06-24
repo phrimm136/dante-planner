@@ -5,9 +5,9 @@ import { getSelectedIndicatorPath } from '@/lib/assetPaths'
 import { useDeckVisibleCount } from '@/stores/usePlannerEditorStore'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { IdentityCard } from '@/components/identity/IdentityCard'
+import { IdentityCard } from '@/pages/identity'
 import { TierLevelSelector } from './TierLevelSelector'
-import type { IdentityListItem } from '@/types/IdentityTypes'
+import type { IdentityListItem } from '@/pages/identity'
 import type { UptieTier } from '@/types/DeckTypes'
 
 interface IdentityGridProps {

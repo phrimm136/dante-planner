@@ -9,8 +9,8 @@
 import { describe, it, expect } from 'vitest'
 import { matchesDeckFilter } from '../deckFilter'
 import type { DeckFilterState, EntityMode } from '@/types/DeckTypes'
-import type { IdentityListItem } from '@/types/IdentityTypes'
-import type { EGOListItem } from '@/types/EGOTypes'
+import type { IdentityListItem } from '@/pages/identity'
+import type { EGOListItem } from '@/pages/ego'
 import type { SearchMappings } from '@/hooks/useSearchMappings'
 
 const EMPTY_MAPPINGS: SearchMappings = {

@@ -243,7 +243,7 @@ const extractionPlannerRoute = createRoute({
 const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
-  component: lazyRouteComponent(() => import('@/routes/IdentityPage')),
+  component: lazyRouteComponent(() => import('@/pages/identity/IdentityPage')),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.identity') }],
@@ -254,7 +254,7 @@ const identityRoute = createRoute({
 const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
-  component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/identity/IdentityDetailPage')),
 
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
@@ -270,7 +270,7 @@ const identityDetailRoute = createRoute({
 const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
-  component: lazyRouteComponent(() => import('@/routes/EGOPage')),
+  component: lazyRouteComponent(() => import('@/pages/ego/EGOPage')),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.ego') }],
@@ -281,7 +281,7 @@ const egoRoute = createRoute({
 const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
-  component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/ego/EGODetailPage')),
 
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
@@ -297,7 +297,7 @@ const egoDetailRoute = createRoute({
 const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
-  component: lazyRouteComponent(() => import('@/routes/EGOGiftPage')),
+  component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftPage')),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.egoGift') }],
@@ -308,7 +308,7 @@ const egoGiftRoute = createRoute({
 const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
-  component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftDetailPage')),
 
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
@@ -324,7 +324,7 @@ const egoGiftDetailRoute = createRoute({
 const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack',
-  component: lazyRouteComponent(() => import('@/routes/ThemePackPage')),
+  component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.themePack') }],
   }),
@@ -334,7 +334,7 @@ const themePackRoute = createRoute({
 const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
-  component: lazyRouteComponent(() => import('@/routes/ThemePackDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackDetailPage')),
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
     const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
@@ -349,7 +349,7 @@ const themePackDetailRoute = createRoute({
 const abEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event',
-  component: lazyRouteComponent(() => import('@/routes/AbEventPage')),
+  component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.abEvent') }],
   }),
@@ -359,7 +359,7 @@ const abEventRoute = createRoute({
 const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
-  component: lazyRouteComponent(() => import('@/routes/AbEventDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventDetailPage')),
   loader: async ({ params }) => {
     try {
       const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)

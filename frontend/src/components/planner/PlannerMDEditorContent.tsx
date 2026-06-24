@@ -51,8 +51,8 @@ import {
 } from '@/stores/usePlannerEditorStore'
 
 // Project hooks
-import { useIdentityListSpec } from '@/hooks/useIdentityListData'
-import { useEGOListSpec } from '@/hooks/useEGOListData'
+import { useIdentityListSpec } from '@/pages/identity'
+import { useEGOListSpec } from '@/pages/ego'
 import { usePlannerSave } from '@/hooks/usePlannerSave'
 import { usePlannerConfig } from '@/hooks/usePlannerConfig'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'

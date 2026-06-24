@@ -5,50 +5,18 @@
  * Import schemas from this file for runtime validation.
  *
  * @example
- * import { IdentityDataSchema, EGODataSchema } from '@/schemas'
- * const result = IdentityDataSchema.safeParse(data)
+ * import { EGOGiftDataSchema } from '@/schemas'
+ * const result = EGOGiftDataSchema.safeParse(data)
  */
 
 // Shared schemas
 export { SinSchema, PassiveI18nSchema } from './SharedSchemas'
-
-// Identity schemas
-export {
-  IdentityDataSchema,
-  IdentityI18nSchema,
-  IdentitySpecListSchema,
-  IdentityNameListSchema,
-} from './IdentitySchemas'
-
-// EGO schemas
-export {
-  EGODataSchema,
-  EGOI18nSchema,
-  EGOSpecListSchema,
-  EGONameListSchema,
-} from './EGOSchemas'
-
-// EGO Gift schemas
-export {
-  EGOGiftSpecSchema,
-  EGOGiftDataSchema,
-  EGOGiftI18nSchema,
-  EGOGiftListItemSchema,
-  EGOGiftSpecListSchema,
-  EGOGiftNameListSchema,
-} from './EGOGiftSchemas'
 
 // Color Code schemas
 export { ColorCodeMapSchema } from './ColorCodeSchemas'
 
 // Start Gift schemas
 export { StartEgoGiftPoolsSchema } from './StartGiftSchemas'
-
-// EGO Gift Observation schemas
-export {
-  EGOGiftObservationCostSchema,
-  EGOGiftObservationDataSchema,
-} from './EGOGiftObservationSchemas'
 
 // Battle Keywords schemas
 export {
@@ -68,17 +36,6 @@ export { SkillTagSchema } from './SkillTagSchemas'
 
 // Auth schemas
 export { UserSchema } from './AuthSchemas'
-
-// Theme Pack schemas
-export {
-  ExceptionConditionSchema,
-  ThemePackConfigSchema,
-  ThemePackEntrySchema,
-  ThemePackListSchema,
-  ThemePackDetailSchema,
-  ThemePackI18nEntrySchema,
-  ThemePackI18nSchema,
-} from './ThemePackSchemas'
 
 // Planner schemas - EXCLUDED from barrel to avoid bundling Tiptap
 // Import directly: import { ... } from '@/schemas/PlannerSchemas'
@@ -103,12 +60,3 @@ export {
   PanicInfoEntrySchema,
   PanicInfoSchema,
 } from './PanicInfoSchemas'
-
-// AbEvent schemas
-export {
-  AbEventSpecListEntrySchema,
-  AbEventSpecListSchema,
-  AbEventDataSchema,
-  AbEventI18nSchema,
-  AbEventSharedSchema,
-} from './AbEventSchemas'

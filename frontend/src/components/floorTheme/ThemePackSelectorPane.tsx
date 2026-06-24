@@ -11,14 +11,14 @@ import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
 import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, CARD_GRID, type DungeonIdx, type MDCategory } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
-import type { ThemePackList, ThemePackEntry } from '@/types/ThemePackTypes'
+import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
 
 interface ThemePackSelectorPaneProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   floorNumber: number // 1-indexed floor (1-15)
   previousFloorDifficulty: DungeonIdx | null // null for floor 1
-  themePackList: ThemePackList
+  themePackList: ThemePackListType
   themePackI18n: Record<string, { name: string; specialName?: string }>
   onSelect: (packId: string, difficulty: DungeonIdx) => void
   /** Set of theme pack IDs already used on other floors (to prevent duplicates) */
@@ -66,7 +66,7 @@ function getAvailableDifficulties(
  * Excludes theme packs that are already used on other floors
  */
 function filterThemePacks(
-  themePackList: ThemePackList,
+  themePackList: ThemePackListType,
   floorNumber: number,
   difficulty: DungeonIdx,
   usedThemePackIds: Set<string>

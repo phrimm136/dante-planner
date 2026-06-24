@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useThemePackListData } from '@/hooks/useThemePackListData'
+import { useThemePackListData } from '@/pages/themePack'
 import { SearchableMultiSelect } from '@/components/common/SearchableMultiSelect'
 
 interface ThemePackDropdownProps {
