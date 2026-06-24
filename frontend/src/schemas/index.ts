@@ -16,7 +16,6 @@ export { SinSchema, PassiveI18nSchema } from './SharedSchemas'
 export { ColorCodeMapSchema } from './ColorCodeSchemas'
 
 // Start Gift schemas
-export { StartEgoGiftPoolsSchema } from './StartGiftSchemas'
 
 // Battle Keywords schemas
 export {
@@ -37,8 +36,7 @@ export { SkillTagSchema } from './SkillTagSchemas'
 // Auth schemas
 export { UserSchema } from './AuthSchemas'
 
-// Planner schemas - EXCLUDED from barrel to avoid bundling Tiptap
-// Import directly: import { ... } from '@/schemas/PlannerSchemas'
+// Planner schemas live inside the planner page slice; reach them via '@/pages/planner'
 
 // Note Editor schemas - EXCLUDED from barrel to avoid bundling Tiptap
 // Import directly: import { ... } from '@/schemas/NoteEditorSchemas'

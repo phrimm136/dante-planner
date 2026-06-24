@@ -15,15 +15,15 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
-import { PublishedPlannerCard } from '@/components/plannerList/PublishedPlannerCard'
+import { PublishedPlannerCard } from '@/pages/planner'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
 import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
 
-import { useMDGesellschaftData } from '@/hooks/useMDGesellschaftData'
+import { useMDGesellschaftData } from '@/pages/planner'
 import { CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
-import type { MDGesellschaftMode } from '@/types/MDPlannerListTypes'
+import type { MDGesellschaftMode } from '@/pages/planner'
 
 /** Number of plans to show on home page */
 const HOME_PLANS_LIMIT = 5

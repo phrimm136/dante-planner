@@ -42,11 +42,13 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock PublishedPlannerCard
-vi.mock('@/components/plannerList/PublishedPlannerCard', () => ({
+// Mock the planner public API (PublishedPlannerCard + useMDGesellschaftData)
+const mockUseMDGesellschaftData = vi.fn()
+vi.mock('@/pages/planner', () => ({
   PublishedPlannerCard: ({ planner }: { planner: { id: string; title: string } }) => (
     <div data-testid={`planner-card-${planner.id}`}>{planner.title}</div>
   ),
+  useMDGesellschaftData: (...args: unknown[]) => mockUseMDGesellschaftData(...args),
 }))
 
 // Mock ResponsiveCardGrid
@@ -54,12 +56,6 @@ vi.mock('@/components/common/ResponsiveCardGrid', () => ({
   ResponsiveCardGrid: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="card-grid">{children}</div>
   ),
-}))
-
-// Mock useMDGesellschaftData hook
-const mockUseMDGesellschaftData = vi.fn()
-vi.mock('@/hooks/useMDGesellschaftData', () => ({
-  useMDGesellschaftData: (...args: unknown[]) => mockUseMDGesellschaftData(...args),
 }))
 
 describe('CommunityPlansSection', () => {

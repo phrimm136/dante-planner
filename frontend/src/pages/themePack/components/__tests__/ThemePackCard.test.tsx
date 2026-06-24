@@ -24,7 +24,8 @@ vi.mock('@/components/common/AutoSizeText', () => ({
   AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
-vi.mock('@/components/startBuff/formatBuffDescription', () => ({
+vi.mock('@/components/common/ColoredText', async (importActual) => ({
+  ...(await importActual<typeof import('@/components/common/ColoredText')>()),
   parseColorTags: (text: string) => text,
 }))
 

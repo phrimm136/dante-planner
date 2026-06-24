@@ -8,7 +8,7 @@ import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
-import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/hooks/usePublishedPlannerQuery'
+import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/pages/planner/hooks/usePublishedPlannerQuery'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
@@ -121,7 +121,7 @@ const indexRoute = createRoute({
 const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
-  component: lazyRouteComponent(() => import('@/routes/PlannerPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.planner.title') }],
   }),
@@ -131,7 +131,7 @@ const plannerRoute = createRoute({
 const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDPage')),
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
@@ -145,7 +145,7 @@ const plannerMDRoute = createRoute({
 const plannerMDGesellschaftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftPage')),
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
@@ -159,7 +159,7 @@ const plannerMDGesellschaftRoute = createRoute({
 const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftDetailPage')),
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
@@ -181,7 +181,7 @@ const plannerMDGesellschaftDetailRoute = createRoute({
 const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDNewPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDNewPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.plannerMD.newPlan', 'planner') }],
   }),
@@ -191,7 +191,7 @@ const plannerMDNewRoute = createRoute({
 const deckBuilderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/deck',
-  component: lazyRouteComponent(() => import('@/routes/DeckBuilderPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/DeckBuilderPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.deckBuilder') }],
   }),
@@ -201,7 +201,7 @@ const deckBuilderRoute = createRoute({
 const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDDetailPage')),
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
@@ -219,7 +219,7 @@ const plannerMDDetailRoute = createRoute({
 const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDEditPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDEditPage')),
   loader: async ({ params }) => {
     const title = await loadPlannerTitle(params.id)
     return { title }

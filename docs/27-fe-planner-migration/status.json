@@ -1,0 +1,14 @@
+{
+  "totalPhases": 4,
+  "currentPhase": 4,
+  "ssotDecision": "SKIPPED (user decision 2026-06-25, after investigation). NOT a z.infer conversion at all: (1) composites SaveablePlanner/PlannerContent/PlannerExportItem/ExportEnvelope can't be z.infer'd — SaveablePlannerSchema types content as z.record(unknown) for two-step validation; (2) planner is an internal data model (schema = validation gate, not type definition), unlike codex slices that parse external JSON; (3) z.infer would drop ~120 per-field JSDoc comments. Matches codex boundary-vs-assembled precedent (abEvent/types is 0% z.infer). Residual type<->schema drift accepted as a TODO; agreed future mitigation if revisited = assertion-based drift guard (Equal<z.infer<Schema>,Interface>), NOT z.infer. See meme todo-planner-type-schema-drift-is-a.",
+  "commitStrategy": "deferred — single bulk commit after all phases + verification (user-initiated)",
+  "committedAs": "e67a6914 refactor: migrate planner vertical into a pages/planner slice (185 files, +830/-370)",
+  "gates": ["yarn --cwd frontend tsc -b", "yarn --cwd frontend vitest run", "boundary probe", "vite build chunk-diff"],
+  "phases": [
+    { "name": "Phase 0: Prep — remove cross-edge + scaffold", "status": "done" },
+    { "name": "Phase 1: Mass relocation + import rewrite", "status": "done" },
+    { "name": "Phase 2: SSOT conversion", "status": "skipped (see ssotDecision)" },
+    { "name": "Phase 3: Invariant gates", "status": "done" }
+  ]
+}

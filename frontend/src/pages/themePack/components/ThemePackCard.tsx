@@ -10,8 +10,7 @@ import { cn, getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/u
 import { isExtremePack } from '../types/ThemePackTypes'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
 import { AutoSizeText } from '@/components/common/AutoSizeText'
-import { stripColorTags } from '@/components/common/ColoredText'
-import { parseColorTags } from '@/components/startBuff/formatBuffDescription'
+import { parseColorTags, stripColorTags } from '@/components/common/ColoredText'
 
 interface ThemePackCardProps {
   packId: string
