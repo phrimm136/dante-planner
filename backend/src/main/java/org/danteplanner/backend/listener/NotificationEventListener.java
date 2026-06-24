@@ -16,7 +16,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
  * This pattern decouples notification creation from business logic and prevents
  * long-running operations (notification writes) from holding transaction locks.
  *
- * @see org.danteplanner.backend.service.PlannerService#castVote
+ * @see org.danteplanner.backend.service.PlannerEngagementService#castVote
  */
 @Component
 @RequiredArgsConstructor

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
@@ -59,7 +60,7 @@ class ModerationServiceTest {
                 .id(1L)
                 .publicId(UUID.randomUUID())
                 .email("admin@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("admin-123")
                 .usernameEpithet("ADMIN")
                 .usernameSuffix("adm01")
@@ -70,7 +71,7 @@ class ModerationServiceTest {
                 .id(2L)
                 .publicId(UUID.randomUUID())
                 .email("mod@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("mod-123")
                 .usernameEpithet("MOD")
                 .usernameSuffix("mod01")
@@ -81,7 +82,7 @@ class ModerationServiceTest {
                 .id(3L)
                 .publicId(UUID.randomUUID())
                 .email("user@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("user-123")
                 .usernameEpithet("USER")
                 .usernameSuffix("usr01")
@@ -152,7 +153,7 @@ class ModerationServiceTest {
             User targetAdmin = User.builder()
                     .id(5L)
                     .email("admin2@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("admin2-123")
                     .usernameEpithet("ADMIN2")
                     .usernameSuffix("adm02")
@@ -180,7 +181,7 @@ class ModerationServiceTest {
             User otherModerator = User.builder()
                     .id(4L)
                     .email("mod2@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("mod2-123")
                     .usernameEpithet("MOD2")
                     .usernameSuffix("mod02")

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.repository;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.config.TestDataInitializer;
@@ -238,7 +239,7 @@ class PlannerRepositoryConstraintTest {
 
             User user1 = User.builder()
                     .email("user1@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-1")
                     .usernameEpithet("TEST")
                     .usernameSuffix(suffix)
@@ -250,7 +251,7 @@ class PlannerRepositoryConstraintTest {
             assertThatThrownBy(() -> {
                 User user2 = User.builder()
                         .email("user2@example.com")
-                        .provider("google")
+                        .provider(AuthProviderType.GOOGLE)
                         .providerId("google-2")
                         .usernameEpithet("TEST")
                         .usernameSuffix(suffix)
@@ -266,7 +267,7 @@ class PlannerRepositoryConstraintTest {
         void uniqueConstraint_DuplicateProviderAndProviderId_ThrowsException() {
             User user1 = User.builder()
                     .email("user1@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-123")
                     .usernameEpithet("TEST")
                     .usernameSuffix("00001")
@@ -278,7 +279,7 @@ class PlannerRepositoryConstraintTest {
             assertThatThrownBy(() -> {
                 User user2 = User.builder()
                         .email("user2@example.com")
-                        .provider("google")
+                        .provider(AuthProviderType.GOOGLE)
                         .providerId("google-123")
                         .usernameEpithet("TEST")
                         .usernameSuffix("00002")
@@ -294,7 +295,7 @@ class PlannerRepositoryConstraintTest {
         void uniqueConstraint_DifferentProviderSameProviderId_Allowed() {
             User user1 = User.builder()
                     .email("user1@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("123")
                     .usernameEpithet("TEST")
                     .usernameSuffix("00001")
@@ -304,7 +305,7 @@ class PlannerRepositoryConstraintTest {
 
             User user2 = User.builder()
                     .email("user2@example.com")
-                    .provider("apple")
+                    .provider(AuthProviderType.APPLE)
                     .providerId("123")
                     .usernameEpithet("TEST")
                     .usernameSuffix("00002")
@@ -387,7 +388,7 @@ class PlannerRepositoryConstraintTest {
             assertThatThrownBy(() -> {
                 User user = User.builder()
                         .email(null)
-                        .provider("google")
+                        .provider(AuthProviderType.GOOGLE)
                         .providerId("google-123")
                         .usernameEpithet("TEST")
                         .usernameSuffix("test1")
@@ -421,7 +422,7 @@ class PlannerRepositoryConstraintTest {
             assertThatThrownBy(() -> {
                 User user = User.builder()
                         .email("test@example.com")
-                        .provider("google")
+                        .provider(AuthProviderType.GOOGLE)
                         .providerId(null)
                         .usernameEpithet("TEST")
                         .usernameSuffix("test1")

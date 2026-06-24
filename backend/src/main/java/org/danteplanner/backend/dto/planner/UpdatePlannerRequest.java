@@ -2,6 +2,7 @@ package org.danteplanner.backend.dto.planner;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.danteplanner.backend.entity.PlannerStatus;
 
 @Data
 public class UpdatePlannerRequest {
@@ -14,7 +15,7 @@ public class UpdatePlannerRequest {
     /**
      * Updated status. If null, status is not updated.
      */
-    private String status;
+    private PlannerStatus status;
 
     /**
      * Updated category. If null, category is not updated.

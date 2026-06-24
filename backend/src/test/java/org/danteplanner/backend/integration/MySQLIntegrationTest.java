@@ -1,15 +1,19 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.entity.*;
 import org.danteplanner.backend.repository.*;
+import org.danteplanner.backend.service.PlannerEngagementService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -20,8 +24,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -62,6 +70,11 @@ class MySQLIntegrationTest {
         registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", mysqlContainer::getUsername);
         registry.add("spring.datasource.password", mysqlContainer::getPassword);
+        // Flyway has explicit url/user/password in application.properties; without
+        // pointing them at the container it connects to the production DB and fails.
+        registry.add("spring.flyway.url", mysqlContainer::getJdbcUrl);
+        registry.add("spring.flyway.user", mysqlContainer::getUsername);
+        registry.add("spring.flyway.password", mysqlContainer::getPassword);
     }
 
     @Autowired
@@ -75,6 +88,12 @@ class MySQLIntegrationTest {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private PlannerEngagementService plannerEngagementService;
+
+    @Value("${planner.recommended-threshold}")
+    private int recommendedThreshold;
 
     @Autowired
     private EntityManager entityManager;
@@ -143,6 +162,90 @@ class MySQLIntegrationTest {
     }
 
     @Nested
+    @DisplayName("Concurrent castVote Through Service")
+    class ConcurrentCastVoteTests {
+
+        @Test
+        @DisplayName("N concurrent castVote() calls: upvotes == vote rows and exactly one recommended notification")
+        void concurrentCastVote_throughService_atomicCountAndSingleNotification() throws InterruptedException {
+            // Seed to one below the threshold sequentially (no notification yet), then run a
+            // concurrent burst that crosses it — many burst transactions read upvotes==threshold-1,
+            // so the CAS (trySetRecommendedNotified) must dedupe them to exactly one notification.
+            int seedVotes = recommendedThreshold - 1;
+            int burstVoters = 11;
+            int totalVoters = seedVotes + burstVoters;
+            List<User> users = IntStream.range(0, totalVoters)
+                    .mapToObj(i -> TestDataFactory.createTestUser(userRepository, "voter" + i + "@example.com"))
+                    .collect(Collectors.toList());
+
+            for (int i = 0; i < seedVotes; i++) {
+                plannerEngagementService.castVote(users.get(i).getId(), testPlanner.getId(), VoteType.UP);
+            }
+            assertThat(notificationRepository.count()).isZero();
+
+            ExecutorService executor = Executors.newFixedThreadPool(burstVoters);
+            CountDownLatch startLatch = new CountDownLatch(1);
+            CountDownLatch doneLatch = new CountDownLatch(burstVoters);
+            List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
+
+            for (int i = seedVotes; i < totalVoters; i++) {
+                User voter = users.get(i);
+                executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                        castVoteWithDeadlockRetry(voter.getId(), testPlanner.getId());
+                    } catch (Throwable t) {
+                        failures.add(t);
+                    } finally {
+                        doneLatch.countDown();
+                    }
+                });
+            }
+
+            startLatch.countDown();
+            boolean completed = doneLatch.await(30, TimeUnit.SECONDS);
+            executor.shutdown();
+
+            assertThat(completed).isTrue();
+            assertThat(failures).isEmpty();
+
+            // Atomic increment: the denormalized counter equals the real vote-row count (no lost update)
+            long voteRows = voteRepository.count();
+            Planner reloaded = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            assertThat(voteRows).isEqualTo(totalVoters);
+            assertThat(reloaded.getUpvotes()).isEqualTo(totalVoters);
+
+            // CAS gate: the recommended-threshold notification fires exactly once
+            long recommendedNotifications = notificationRepository.findAll().stream()
+                    .filter(n -> n.getUserId().equals(testUser.getId()))
+                    .filter(n -> n.getNotificationType() == NotificationType.PLANNER_RECOMMENDED)
+                    .count();
+            assertThat(recommendedNotifications).isEqualTo(1);
+        }
+
+        // Concurrent votes deadlock on the planner_votes FK + upvotes update (InnoDB
+        // lock upgrade); production maps this to a retryable error, so retry like a client.
+        private void castVoteWithDeadlockRetry(Long userId, UUID plannerId) {
+            for (int attempt = 1; ; attempt++) {
+                try {
+                    plannerEngagementService.castVote(userId, plannerId, VoteType.UP);
+                    return;
+                } catch (CannotAcquireLockException deadlock) {
+                    if (attempt >= 25) {
+                        throw deadlock;
+                    }
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("MySQL Constraint Validation")
     @Transactional
     class ConstraintValidationTests {
@@ -171,7 +274,7 @@ class MySQLIntegrationTest {
             // Create user with specific provider ID
             User user1 = User.builder()
                     .email("user1@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("duplicate-provider-id")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("00001")
@@ -183,7 +286,7 @@ class MySQLIntegrationTest {
             // Try to create another user with same provider+providerId
             User user2 = User.builder()
                     .email("user2@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("duplicate-provider-id")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("00002")
@@ -194,6 +297,57 @@ class MySQLIntegrationTest {
                 entityManager.flush();
             })
                     .hasMessageContaining("Duplicate entry"); // MySQL-specific error message
+        }
+
+        @Test
+        @DisplayName("GOOGLE persists as lowercase 'google' in the provider VARCHAR column and reads back as GOOGLE")
+        void authProviderType_Google_RoundTripsThroughVarcharColumn() {
+            User user = User.builder()
+                    .email("provider-roundtrip@example.com")
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("roundtrip-provider-id")
+                    .usernameEpithet("W_CORP")
+                    .usernameSuffix("00003")
+                    .build();
+            userRepository.save(user);
+            entityManager.flush();
+            entityManager.clear();
+
+            String rawColumn = (String) entityManager.createNativeQuery(
+                            "SELECT provider FROM users WHERE id = ?")
+                    .setParameter(1, user.getId())
+                    .getSingleResult();
+            assertThat(rawColumn).isEqualTo("google");
+
+            User reloaded = userRepository.findByProviderAndProviderId(
+                    AuthProviderType.GOOGLE, "roundtrip-provider-id").orElseThrow();
+            assertThat(reloaded.getProvider()).isEqualTo(AuthProviderType.GOOGLE);
+        }
+    }
+
+    @Nested
+    @DisplayName("PlannerStatus ENUM Round-Trip")
+    @Transactional
+    class PlannerStatusEnumTests {
+
+        @Test
+        @DisplayName("SAVED persists as lowercase 'saved' in the ENUM column and reads back as SAVED")
+        void plannerStatus_Saved_RoundTripsThroughEnumColumn() {
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
+            planner.setStatus(PlannerStatus.SAVED);
+            plannerRepository.save(planner);
+            entityManager.flush();
+            entityManager.clear();
+
+            String hexId = planner.getId().toString().replace("-", "");
+            String rawColumn = (String) entityManager.createNativeQuery(
+                            "SELECT status FROM planners WHERE id = UNHEX(?)")
+                    .setParameter(1, hexId)
+                    .getSingleResult();
+            assertThat(rawColumn).isEqualTo("saved");
+
+            Planner reloaded = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertThat(reloaded.getStatus()).isEqualTo(PlannerStatus.SAVED);
         }
     }
 
@@ -239,24 +393,20 @@ class MySQLIntegrationTest {
         @Test
         @DisplayName("Microsecond precision preserved in timestamp ordering")
         void timestamp_MicrosecondPrecision_Preserved() {
-            // Use deterministic timestamps for reliable ordering
-            Instant base = Instant.now();
+            // created_at is @PrePersist-assigned and updatable=false, so set
+            // deterministic microsecond-spaced values via native SQL to verify the
+            // TIMESTAMP(6) column preserves sub-second ordering (V042).
+            Instant base = Instant.now().truncatedTo(ChronoUnit.MILLIS);
             Notification n1 = createNotification("content-1");
-            n1.setCreatedAt(base);
-            notificationRepository.save(n1);
-
             Notification n2 = createNotification("content-2");
-            n2.setCreatedAt(base.plusMillis(10));
-            notificationRepository.save(n2);
-
             Notification n3 = createNotification("content-3");
-            n3.setCreatedAt(base.plusMillis(20));
-            notificationRepository.save(n3);
-
             entityManager.flush();
+
+            overrideCreatedAt(n1.getId(), base);
+            overrideCreatedAt(n2.getId(), base.plusNanos(10_000));
+            overrideCreatedAt(n3.getId(), base.plusNanos(20_000));
             entityManager.clear();
 
-            // Retrieve and verify ordering preserved
             List<Notification> notifications = notificationRepository.findAll();
             notifications.sort(Comparator.comparing(Notification::getCreatedAt));
 
@@ -265,9 +415,17 @@ class MySQLIntegrationTest {
             assertThat(notifications.get(1).getId()).isEqualTo(n2.getId());
             assertThat(notifications.get(2).getId()).isEqualTo(n3.getId());
 
-            // Verify timestamps are distinct
+            // Sub-second differences survive the round-trip through TIMESTAMP(6)
             assertThat(notifications.get(0).getCreatedAt()).isBefore(notifications.get(1).getCreatedAt());
             assertThat(notifications.get(1).getCreatedAt()).isBefore(notifications.get(2).getCreatedAt());
+        }
+
+        private void overrideCreatedAt(Long id, Instant value) {
+            entityManager.createNativeQuery(
+                            "UPDATE notifications SET created_at = ? WHERE id = ?")
+                    .setParameter(1, java.sql.Timestamp.from(value))
+                    .setParameter(2, id)
+                    .executeUpdate();
         }
 
         private Notification createNotification(String contentId) {

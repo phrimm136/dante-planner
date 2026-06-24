@@ -1,5 +1,6 @@
 package org.danteplanner.backend.dto.planner;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.User;
 import org.junit.jupiter.api.DisplayName;
@@ -125,7 +126,7 @@ class PublicPlannerResponseTest {
         return User.builder()
                 .id(1L)
                 .email(email)
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet(TEST_KEYWORD)
                 .usernameSuffix(TEST_SUFFIX)

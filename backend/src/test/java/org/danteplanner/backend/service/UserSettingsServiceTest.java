@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.dto.user.UpdateUserSettingsRequest;
 import org.danteplanner.backend.dto.user.UserSettingsResponse;
 import org.danteplanner.backend.entity.User;
@@ -48,7 +49,7 @@ class UserSettingsServiceTest {
         testUser = User.builder()
                 .id(123L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")

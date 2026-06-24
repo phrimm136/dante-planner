@@ -1,5 +1,6 @@
 package org.danteplanner.backend.security;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -103,7 +104,7 @@ class JwtAuthenticationFilterTest {
         return User.builder()
                 .id(id)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + id)
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("tst" + String.format("%02d", id % 100))

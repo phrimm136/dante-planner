@@ -69,20 +69,7 @@ public class PublicPlannerResponse {
      * @return the public planner response DTO
      */
     public static PublicPlannerResponse fromEntity(Planner planner) {
-        return PublicPlannerResponse.builder()
-                .id(planner.getId())
-                .title(planner.getTitle())
-                .category(planner.getCategory())
-                .contentVersion(planner.getContentVersion())
-                .plannerType(planner.getPlannerType())
-                .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
-                .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
-                .upvotes(planner.getUpvotes())
-                .createdAt(planner.getCreatedAt())
-                .viewCount(planner.getViewCount())
-                .lastModifiedAt(planner.getLastModifiedAt())
-                .build();
+        return commonBuilder(planner).build();
     }
 
     /**
@@ -94,6 +81,13 @@ public class PublicPlannerResponse {
      * @return the public planner response DTO with user context
      */
     public static PublicPlannerResponse fromEntity(Planner planner, Boolean hasUpvoted, Boolean isBookmarked) {
+        return commonBuilder(planner)
+                .hasUpvoted(hasUpvoted)
+                .isBookmarked(isBookmarked)
+                .build();
+    }
+
+    private static PublicPlannerResponseBuilder commonBuilder(Planner planner) {
         return PublicPlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -106,9 +100,6 @@ public class PublicPlannerResponse {
                 .upvotes(planner.getUpvotes())
                 .createdAt(planner.getCreatedAt())
                 .viewCount(planner.getViewCount())
-                .lastModifiedAt(planner.getLastModifiedAt())
-                .hasUpvoted(hasUpvoted)
-                .isBookmarked(isBookmarked)
-                .build();
+                .lastModifiedAt(planner.getLastModifiedAt());
     }
 }

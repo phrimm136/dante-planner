@@ -1,5 +1,6 @@
 package org.danteplanner.backend.scheduler;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.repository.UserRepository;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
@@ -44,7 +45,7 @@ class UserCleanupSchedulerTest {
         User user = User.builder()
                 .id(id)
                 .email("user" + id + "@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + id)
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("tst" + String.format("%02d", id % 100))

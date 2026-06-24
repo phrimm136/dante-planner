@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 
 @Data
@@ -27,7 +28,7 @@ public class UpsertPlannerRequest {
     /**
      * Status of the planner. Optional - if null, existing status is kept (update) or defaults to "draft" (create).
      */
-    private String status;
+    private PlannerStatus status;
 
     @NotNull(message = "Content is required")
     private String content;

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -7,7 +8,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.entity.*;
 import org.danteplanner.backend.repository.*;
 import org.danteplanner.backend.service.NotificationService;
-import org.danteplanner.backend.service.PlannerService;
+import org.danteplanner.backend.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class VoteNotificationFlowTest {
 
     @Autowired
-    private PlannerService plannerService;
+    private PlannerEngagementService plannerEngagementService;
 
     @Autowired
     private NotificationService notificationService;
@@ -92,7 +93,7 @@ class VoteNotificationFlowTest {
         // Create planner owner
         plannerOwner = User.builder()
                 .email("owner@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-owner")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("own01")
@@ -102,7 +103,7 @@ class VoteNotificationFlowTest {
         // Create voters
         voter1 = User.builder()
                 .email("voter1@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-voter1")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("vot01")
@@ -111,7 +112,7 @@ class VoteNotificationFlowTest {
 
         voter2 = User.builder()
                 .email("voter2@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-voter2")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("vot02")
@@ -120,7 +121,7 @@ class VoteNotificationFlowTest {
 
         voter3 = User.builder()
                 .email("voter3@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-voter3")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("vot03")
@@ -133,7 +134,7 @@ class VoteNotificationFlowTest {
                 .user(plannerOwner)
                 .title("Test Planner for Notification")
                 .category("5F")
-                .status("published")
+                .status(PlannerStatus.SAVED)
                 .content("{\"data\":\"test\"}")
                 .published(true)
                 .upvotes(0)
@@ -174,7 +175,7 @@ class VoteNotificationFlowTest {
         assertEquals(0, notificationsBefore);
 
         // Act - Cast vote that crosses threshold
-        plannerService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
+        plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger AFTER_COMMIT listener, then start new transaction for assertions
         commitAndStartNewTransaction();
@@ -206,7 +207,7 @@ class VoteNotificationFlowTest {
         entityManager.clear();
 
         // Act - Cast vote that doesn't cross threshold
-        plannerService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
+        plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger any listeners, then start new transaction for assertions
         commitAndStartNewTransaction();
@@ -231,7 +232,7 @@ class VoteNotificationFlowTest {
         entityManager.clear();
 
         // Act - Cast vote that exactly meets threshold
-        plannerService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
+        plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger AFTER_COMMIT listener
         commitAndStartNewTransaction();
@@ -259,7 +260,7 @@ class VoteNotificationFlowTest {
         for (int i = 0; i < 5; i++) {
             User voter = User.builder()
                     .email("concurrent" + i + "@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-concurrent-" + i)
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("conc" + i)
@@ -280,7 +281,7 @@ class VoteNotificationFlowTest {
             results.add(executor.submit(() -> {
                 try {
                     latch.await(); // Wait for signal to start all threads simultaneously
-                    plannerService.castVote(voter.getId(), testPlanner.getId(), VoteType.UP);
+                    plannerEngagementService.castVote(voter.getId(), testPlanner.getId(), VoteType.UP);
                     return null;
                 } catch (Exception e) {
                     return e;
@@ -339,7 +340,7 @@ class VoteNotificationFlowTest {
         assertEquals(1, notificationsBefore);
 
         // Act - Cast another upvote (still above threshold)
-        plannerService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
+        plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit and verify
         commitAndStartNewTransaction();
@@ -366,7 +367,7 @@ class VoteNotificationFlowTest {
         notificationRepository.save(existingNotification);
 
         // Act - Cast additional upvote
-        plannerService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
+        plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit and verify
         commitAndStartNewTransaction();
@@ -389,7 +390,7 @@ class VoteNotificationFlowTest {
         entityManager.clear();
 
         // Act - Cast vote crossing threshold
-        plannerService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
+        plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger AFTER_COMMIT listener
         commitAndStartNewTransaction();

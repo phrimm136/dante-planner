@@ -3,6 +3,9 @@ package org.danteplanner.backend.entity;
 import jakarta.persistence.*;
 import org.springframework.data.domain.Persistable;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -37,6 +40,7 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
     private UUID plannerId;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "vote_type", nullable = false)
     private final VoteType voteType;
 

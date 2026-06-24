@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 
 import lombok.Builder;
@@ -37,7 +38,7 @@ public class PublishedPlannerDetailResponse {
     private String content;
     private Integer schemaVersion;
     private Integer contentVersion;
-    private String status;
+    private PlannerStatus status;
     private Long syncVersion;
 
     // Subscription and report status

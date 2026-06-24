@@ -3,6 +3,9 @@ package org.danteplanner.backend.entity;
 import jakarta.persistence.*;
 import org.springframework.data.domain.Persistable;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.util.UUID;
 
 /**
@@ -20,6 +23,7 @@ public class PlannerContentIndex implements Persistable<PlannerContentIndexId> {
 
     @Id
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "entity_type", nullable = false)
     private ContentEntityType entityType;
 

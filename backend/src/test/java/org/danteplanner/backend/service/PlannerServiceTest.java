@@ -1,9 +1,11 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.dto.planner.*;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.PlannerBookmark;
@@ -110,7 +112,11 @@ class PlannerServiceTest {
     @Spy
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private PlannerService plannerService;
+    private PlannerCommandService commandService;
+    private PlannerQueryService queryService;
+    private PlannerPublishingService publishingService;
+    private PublishedPlannerQueryService publishedQueryService;
+    private PlannerEngagementService engagementService;
 
     @Value("${planner.max-per-user}")
     private int maxPlannersPerUser;
@@ -129,32 +135,58 @@ class PlannerServiceTest {
         // Initialize Mockito mocks
         MockitoAnnotations.openMocks(this);
 
-        // Construct service with property values from application-test.properties
-        plannerService = new PlannerService(
+        // Construct the split services with property values from application-test.properties.
+        // The access guard is a real collaborator wired to the mocked repositories, so the
+        // guard logic (moved verbatim from PlannerService) is still driven by the same mocks.
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userRepository, plannerRepository);
+
+        commandService = new PlannerCommandService(
+                plannerRepository,
+                sseService,
+                contentValidator,
+                contentVersionValidator,
+                plannerIndexService,
+                accessGuard,
+                maxPlannersPerUser,
+                currentSchemaVersion
+        );
+
+        queryService = new PlannerQueryService(plannerRepository, accessGuard);
+
+        publishingService = new PlannerPublishingService(
+                plannerRepository,
+                contentValidator,
+                plannerIndexService,
+                subscriptionService,
+                notificationSseService,
+                notificationService,
+                accessGuard
+        );
+
+        engagementService = new PlannerEngagementService(
+                plannerRepository,
+                plannerVoteRepository,
+                plannerBookmarkRepository,
+                eventPublisher,
+                recommendedThreshold
+        );
+
+        publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerViewRepository,
-                userRepository,
-                sseService,
-                contentValidator,
-                contentVersionValidator,
-                eventPublisher,
+                commentRepository,
                 subscriptionService,
                 reportService,
-                commentRepository,
-                notificationSseService,
-                notificationService,
-                plannerIndexService,
-                maxPlannersPerUser,
-                recommendedThreshold,
-                currentSchemaVersion
+                engagementService,
+                recommendedThreshold
         );
 
         testUser = User.builder()
                 .id(1L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -171,7 +203,7 @@ class PlannerServiceTest {
         request.setId(UUID.randomUUID().toString());
         request.setCategory("5F");
         request.setTitle("Test Planner");
-        request.setStatus("draft");
+        request.setStatus(PlannerStatus.DRAFT);
         request.setContent("{\"data\": \"test\"}");
         request.setContentVersion(6);
         request.setPlannerType(PlannerType.MIRROR_DUNGEON);
@@ -184,7 +216,7 @@ class PlannerServiceTest {
                 .user(testUser)
                 .title("Test Planner")
                 .category("5F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content("{\"data\": \"test\"}")
                 .syncVersion(1L)
                 .schemaVersion(1)
@@ -203,37 +235,37 @@ class PlannerServiceTest {
         @Test
         @DisplayName("Should return true for valid MD category with MIRROR_DUNGEON type")
         void isValidCategory_ValidMdCategory_ReturnsTrue() {
-            assertTrue(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "5F"));
-            assertTrue(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "10F"));
-            assertTrue(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "15F"));
+            assertTrue(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "5F"));
+            assertTrue(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "10F"));
+            assertTrue(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "15F"));
         }
 
         @Test
         @DisplayName("Should return true for valid RR category with REFRACTED_RAILWAY type")
         void isValidCategory_ValidRrCategory_ReturnsTrue() {
-            assertTrue(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"));
+            assertTrue(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"));
         }
 
         @Test
         @DisplayName("Should return false for invalid category")
         void isValidCategory_InvalidCategory_ReturnsFalse() {
-            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "INVALID"));
-            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, ""));
-            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, null));
+            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "INVALID"));
+            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, ""));
+            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, null));
         }
 
         @Test
         @DisplayName("Should return false when MD category used with RR type")
         void isValidCategory_MdCategoryWithRrType_ReturnsFalse() {
-            assertFalse(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "5F"));
-            assertFalse(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "10F"));
-            assertFalse(plannerService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "15F"));
+            assertFalse(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "5F"));
+            assertFalse(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "10F"));
+            assertFalse(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "15F"));
         }
 
         @Test
         @DisplayName("Should return false when RR category used with MD type")
         void isValidCategory_RrCategoryWithMdType_ReturnsFalse() {
-            assertFalse(plannerService.isValidCategory(PlannerType.MIRROR_DUNGEON, "RR_PLACEHOLDER"));
+            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "RR_PLACEHOLDER"));
         }
     }
 
@@ -257,7 +289,7 @@ class PlannerServiceTest {
             });
 
             // Act
-            PlannerResponse response = plannerService.createPlanner(testUser.getId(), deviceId, request);
+            PlannerResponse response = commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert
             assertNotNull(response);
@@ -278,7 +310,7 @@ class PlannerServiceTest {
             // Act & Assert
             PlannerLimitExceededException exception = assertThrows(
                     PlannerLimitExceededException.class,
-                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
+                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
             );
 
             assertTrue(exception.getMessage().contains(String.valueOf(maxPlannersPerUser)));
@@ -299,7 +331,7 @@ class PlannerServiceTest {
             // Act & Assert
             UserNotFoundException exception = assertThrows(
                     UserNotFoundException.class,
-                    () -> plannerService.createPlanner(nonExistentUserId, deviceId, request)
+                    () -> commandService.createPlanner(nonExistentUserId, deviceId, request)
             );
 
             assertEquals(nonExistentUserId, exception.getUserId());
@@ -327,7 +359,7 @@ class PlannerServiceTest {
             });
 
             // Act
-            plannerService.createPlanner(testUser.getId(), deviceId, request);
+            commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert
             assertEquals("Untitled", plannerCaptor.getValue().getTitle());
@@ -349,7 +381,7 @@ class PlannerServiceTest {
             });
 
             // Act
-            plannerService.createPlanner(testUser.getId(), deviceId, request);
+            commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Assert - verify validation happens
             verify(contentValidator).validate(request.getContent(), request.getCategory());
@@ -368,7 +400,7 @@ class PlannerServiceTest {
             // Act & Assert
             PlannerValidationException exception = assertThrows(
                     PlannerValidationException.class,
-                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
+                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
             );
 
             assertEquals("INVALID_CONTENT_VERSION", exception.getErrorCode());
@@ -393,7 +425,7 @@ class PlannerServiceTest {
                     .thenReturn(plannerPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = plannerService.getPlanners(testUser.getId(), pageable);
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
 
             // Assert
             assertEquals(2, result.getTotalElements());
@@ -411,7 +443,7 @@ class PlannerServiceTest {
                     .thenReturn(emptyPage);
 
             // Act
-            Page<PlannerSummaryResponse> result = plannerService.getPlanners(testUser.getId(), pageable);
+            Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
 
             // Assert
             assertEquals(0, result.getTotalElements());
@@ -432,7 +464,7 @@ class PlannerServiceTest {
                     .thenReturn(Optional.of(planner));
 
             // Act
-            PlannerResponse response = plannerService.getPlanner(testUser.getId(), planner.getId());
+            PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.getId());
 
             // Assert
             assertNotNull(response);
@@ -451,7 +483,7 @@ class PlannerServiceTest {
             // Act & Assert
             PlannerNotFoundException exception = assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.getPlanner(testUser.getId(), plannerId)
+                    () -> queryService.getPlanner(testUser.getId(), plannerId)
             );
 
             assertTrue(exception.getMessage().contains(plannerId.toString()));
@@ -478,7 +510,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse response = plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+            PlannerResponse response = commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
             // Assert
             assertEquals(6L, response.getSyncVersion());
@@ -503,7 +535,7 @@ class PlannerServiceTest {
             // Act & Assert
             PlannerConflictException exception = assertThrows(
                     PlannerConflictException.class,
-                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
+                    () -> commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
             );
 
             assertEquals(5L, exception.getActualVersion());
@@ -525,7 +557,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.updatePlanner(testUser.getId(), deviceId, plannerId, request, false)
+                    () -> commandService.updatePlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
         }
 
@@ -544,7 +576,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+            commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
             // Assert - uses planner's category when request.category is null
             verify(contentValidator).validate(request.getContent(), planner.getCategory(), planner.getPublished());
@@ -556,7 +588,7 @@ class PlannerServiceTest {
             // Arrange
             Planner planner = createTestPlanner();
             planner.setTitle("Original Title");
-            planner.setStatus("draft");
+            planner.setStatus(PlannerStatus.DRAFT);
 
             UpdatePlannerRequest request = new UpdatePlannerRequest();
             request.setSyncVersion(planner.getSyncVersion());
@@ -568,11 +600,11 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse response = plannerService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+            PlannerResponse response = commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
             // Assert
             assertEquals("New Title", response.getTitle());
-            assertEquals("draft", response.getStatus()); // Original status preserved
+            assertEquals(PlannerStatus.DRAFT, response.getStatus()); // Original status preserved
         }
     }
 
@@ -592,7 +624,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            plannerService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+            commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
 
             // Assert
             assertNotNull(planner.getDeletedAt());
@@ -612,7 +644,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.deletePlanner(testUser.getId(), deviceId, plannerId)
+                    () -> commandService.deletePlanner(testUser.getId(), deviceId, plannerId)
             );
 
             verify(plannerRepository, never()).save(any());
@@ -632,7 +664,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            plannerService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+            commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
 
             // Assert
             assertFalse(planner.getPublished()); // Auto-unpublished
@@ -652,7 +684,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            plannerService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+            commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
 
             // Assert
             assertFalse(planner.getPublished()); // Still unpublished
@@ -690,7 +722,7 @@ class PlannerServiceTest {
             });
 
             // Act
-            ImportPlannersResponse response = plannerService.importPlanners(testUser.getId(), importRequest);
+            ImportPlannersResponse response = commandService.importPlanners(testUser.getId(), importRequest);
 
             // Assert
             assertEquals(3, response.getImported());
@@ -717,7 +749,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerLimitExceededException.class,
-                    () -> plannerService.importPlanners(testUser.getId(), importRequest)
+                    () -> commandService.importPlanners(testUser.getId(), importRequest)
             );
 
             verify(plannerRepository, never()).save(any());
@@ -740,7 +772,7 @@ class PlannerServiceTest {
             // Act & Assert
             UserNotFoundException exception = assertThrows(
                     UserNotFoundException.class,
-                    () -> plannerService.importPlanners(nonExistentUserId, importRequest)
+                    () -> commandService.importPlanners(nonExistentUserId, importRequest)
             );
 
             assertEquals(nonExistentUserId, exception.getUserId());
@@ -771,7 +803,7 @@ class PlannerServiceTest {
             });
 
             // Act
-            ImportPlannersResponse response = plannerService.importPlanners(testUser.getId(), importRequest);
+            ImportPlannersResponse response = commandService.importPlanners(testUser.getId(), importRequest);
 
             // Assert
             assertEquals(5, response.getImported());
@@ -799,7 +831,7 @@ class PlannerServiceTest {
             });
 
             // Act & Assert - should not throw
-            assertDoesNotThrow(() -> plannerService.createPlanner(testUser.getId(), deviceId, request));
+            assertDoesNotThrow(() -> commandService.createPlanner(testUser.getId(), deviceId, request));
             verify(plannerRepository).save(any(Planner.class));
         }
 
@@ -813,7 +845,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerLimitExceededException.class,
-                    () -> plannerService.createPlanner(testUser.getId(), deviceId, request)
+                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
             );
 
             verify(plannerRepository, never()).save(any());
@@ -836,7 +868,7 @@ class PlannerServiceTest {
                 return planner;
             });
 
-            plannerService.createPlanner(testUser.getId(), deviceId, request);
+            commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Verify that the correct method is called (the one that excludes deleted)
             verify(plannerRepository).countByUserIdAndDeletedAtIsNull(testUser.getId());
@@ -859,7 +891,7 @@ class PlannerServiceTest {
             when(plannerRepository.saveAndFlush(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
             assertTrue(result.getPublished());
@@ -877,7 +909,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
             assertFalse(result.getPublished());
@@ -890,7 +922,7 @@ class PlannerServiceTest {
             User otherUser = User.builder()
                     .id(999L)
                     .email("other@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-999")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("test2")
@@ -903,7 +935,7 @@ class PlannerServiceTest {
             // Act & Assert
             PlannerForbiddenException exception = assertThrows(
                     PlannerForbiddenException.class,
-                    () -> plannerService.togglePublish(testUser.getId(), planner.getId())
+                    () -> publishingService.togglePublish(testUser.getId(), planner.getId())
             );
 
             assertEquals(planner.getId(), exception.getPlannerId());
@@ -920,7 +952,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.togglePublish(testUser.getId(), nonExistentId)
+                    () -> publishingService.togglePublish(testUser.getId(), nonExistentId)
             );
         }
 
@@ -936,7 +968,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.togglePublish(testUser.getId(), planner.getId())
+                    () -> publishingService.togglePublish(testUser.getId(), planner.getId())
             );
         }
 
@@ -952,7 +984,7 @@ class PlannerServiceTest {
             when(plannerRepository.saveAndFlush(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
             assertTrue(result.getPublished());
@@ -970,7 +1002,7 @@ class PlannerServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = plannerService.togglePublish(testUser.getId(), planner.getId());
+            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
             assertFalse(result.getPublished());
@@ -1008,7 +1040,7 @@ class PlannerServiceTest {
                     .thenReturn(plannerPage);
 
             // Act
-            Page<PublicPlannerResponse> result = plannerService.getPublishedPlanners(pageable, null);
+            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
 
             // Assert
             assertEquals(2, result.getTotalElements());
@@ -1028,7 +1060,7 @@ class PlannerServiceTest {
                     .thenReturn(plannerPage);
 
             // Act
-            Page<PublicPlannerResponse> result = plannerService.getPublishedPlanners(pageable, category);
+            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, category);
 
             // Assert
             assertEquals(1, result.getTotalElements());
@@ -1046,7 +1078,7 @@ class PlannerServiceTest {
                     .thenReturn(emptyPage);
 
             // Act
-            Page<PublicPlannerResponse> result = plannerService.getPublishedPlanners(pageable, null);
+            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
 
             // Assert
             assertEquals(0, result.getTotalElements());
@@ -1081,7 +1113,7 @@ class PlannerServiceTest {
                     .thenReturn(plannerPage);
 
             // Act
-            Page<PublicPlannerResponse> result = plannerService.getRecommendedPlanners(pageable, null);
+            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
 
             // Assert
             assertEquals(2, result.getTotalElements());
@@ -1100,7 +1132,7 @@ class PlannerServiceTest {
                     .thenReturn(plannerPage);
 
             // Act
-            Page<PublicPlannerResponse> result = plannerService.getRecommendedPlanners(pageable, category);
+            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, category);
 
             // Assert
             assertEquals(1, result.getTotalElements());
@@ -1119,7 +1151,7 @@ class PlannerServiceTest {
                     .thenReturn(emptyPage);
 
             // Act
-            Page<PublicPlannerResponse> result = plannerService.getRecommendedPlanners(pageable, null);
+            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
 
             // Assert
             assertTrue(result.getContent().isEmpty());
@@ -1151,7 +1183,7 @@ class PlannerServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            BookmarkResponse response = plannerService.toggleBookmark(testUser.getId(), plannerId);
+            BookmarkResponse response = engagementService.toggleBookmark(testUser.getId(), plannerId);
 
             // Assert
             assertTrue(response.isBookmarked());
@@ -1174,7 +1206,7 @@ class PlannerServiceTest {
                     .thenReturn(Optional.of(existingBookmark));
 
             // Act
-            BookmarkResponse response = plannerService.toggleBookmark(testUser.getId(), plannerId);
+            BookmarkResponse response = engagementService.toggleBookmark(testUser.getId(), plannerId);
 
             // Assert
             assertFalse(response.isBookmarked());
@@ -1194,7 +1226,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.toggleBookmark(testUser.getId(), nonExistentId)
+                    () -> engagementService.toggleBookmark(testUser.getId(), nonExistentId)
             );
 
             verify(plannerBookmarkRepository, never()).findByUserIdAndPlannerId(any(), any());
@@ -1213,7 +1245,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.toggleBookmark(testUser.getId(), plannerId)
+                    () -> engagementService.toggleBookmark(testUser.getId(), plannerId)
             );
         }
     }
@@ -1230,7 +1262,7 @@ class PlannerServiceTest {
             when(plannerRepository.incrementViewCount(plannerId)).thenReturn(1);
 
             // Act
-            plannerService.incrementViewCount(plannerId);
+            publishedQueryService.incrementViewCount(plannerId);
 
             // Assert
             verify(plannerRepository).incrementViewCount(plannerId);
@@ -1246,7 +1278,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.incrementViewCount(nonExistentId)
+                    () -> publishedQueryService.incrementViewCount(nonExistentId)
             );
         }
 
@@ -1260,7 +1292,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.incrementViewCount(deletedPlannerId)
+                    () -> publishedQueryService.incrementViewCount(deletedPlannerId)
             );
         }
     }
@@ -1293,7 +1325,7 @@ class PlannerServiceTest {
             // Act & Assert
             org.danteplanner.backend.exception.VoteAlreadyExistsException exception = assertThrows(
                     org.danteplanner.backend.exception.VoteAlreadyExistsException.class,
-                    () -> plannerService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP)
+                    () -> engagementService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP)
             );
 
             assertEquals(plannerId, exception.getPlannerId());
@@ -1315,7 +1347,7 @@ class PlannerServiceTest {
             // Act & Assert
             IllegalArgumentException exception = assertThrows(
                     IllegalArgumentException.class,
-                    () -> plannerService.castVote(testUser.getId(), plannerId, null)
+                    () -> engagementService.castVote(testUser.getId(), plannerId, null)
             );
 
             assertTrue(exception.getMessage().contains("Vote type cannot be null"));
@@ -1345,7 +1377,7 @@ class PlannerServiceTest {
 
             // Act
             org.danteplanner.backend.dto.planner.VoteResponse response =
-                    plannerService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP);
+                    engagementService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.entity.VoteType.UP);
 
             // Assert
             assertEquals(6, response.getUpvoteCount());
@@ -1403,7 +1435,7 @@ class PlannerServiceTest {
 
             // Act
             PublishedPlannerDetailResponse result =
-                    plannerService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
+                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
             verify(plannerViewRepository).save(any(PlannerView.class));
@@ -1421,7 +1453,7 @@ class PlannerServiceTest {
 
             // Act
             PublishedPlannerDetailResponse result =
-                    plannerService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
+                    publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
             verify(plannerViewRepository).save(any(PlannerView.class));
@@ -1442,7 +1474,7 @@ class PlannerServiceTest {
 
             // Act
             PublishedPlannerDetailResponse result =
-                    plannerService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
+                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
             verify(plannerViewRepository, never()).save(any());
@@ -1461,7 +1493,7 @@ class PlannerServiceTest {
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
-                    () -> plannerService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
+                    () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
 
             verify(plannerViewRepository, never()).existsByPlannerIdAndViewerHashAndViewDate(any(), any(), any());
             verify(plannerViewRepository, never()).save(any());
@@ -1477,7 +1509,7 @@ class PlannerServiceTest {
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
-                    () -> plannerService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
+                    () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
         }
 
         @Test
@@ -1489,7 +1521,7 @@ class PlannerServiceTest {
 
             // Act & Assert - should not throw
             assertDoesNotThrow(() ->
-                    plannerService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null));
+                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null));
 
             verify(plannerViewRepository).save(any(PlannerView.class));
         }
@@ -1505,7 +1537,7 @@ class PlannerServiceTest {
             ArgumentCaptor<PlannerView> anonCaptor = ArgumentCaptor.forClass(PlannerView.class);
 
             // Act - anonymous first
-            plannerService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
+            publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
             verify(plannerViewRepository).save(anonCaptor.capture());
 
             // Reset mock for authenticated call
@@ -1518,7 +1550,7 @@ class PlannerServiceTest {
             ArgumentCaptor<PlannerView> authCaptor = ArgumentCaptor.forClass(PlannerView.class);
 
             // Act - authenticated
-            plannerService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
+            publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
             verify(plannerViewRepository).save(authCaptor.capture());
 
             // Assert - hashes must differ
@@ -1552,7 +1584,7 @@ class PlannerServiceTest {
             // Act & Assert
             org.danteplanner.backend.exception.UserBannedException exception = assertThrows(
                     org.danteplanner.backend.exception.UserBannedException.class,
-                    () -> plannerService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
+                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
             assertEquals(testUser.getId(), exception.getUserId());
             verify(plannerRepository, never()).save(any());
@@ -1572,7 +1604,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     org.danteplanner.backend.exception.UserBannedException.class,
-                    () -> plannerService.togglePublish(testUser.getId(), plannerId)
+                    () -> publishingService.togglePublish(testUser.getId(), plannerId)
             );
             verify(plannerRepository, never()).save(any());
         }
@@ -1598,7 +1630,7 @@ class PlannerServiceTest {
             UUID plannerId = UUID.randomUUID();
 
             // Act
-            org.danteplanner.backend.dto.planner.UpsertResult result = plannerService.upsertPlanner(
+            org.danteplanner.backend.dto.planner.UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, false);
 
             // Assert
@@ -1636,7 +1668,7 @@ class PlannerServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> plannerService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
+                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
             verify(plannerRepository, never()).save(any());
             verify(plannerRepository, never()).countByUserIdAndDeletedAtIsNull(any());
@@ -1663,7 +1695,7 @@ class PlannerServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            UpsertResult result = plannerService.upsertPlanner(
+            UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, false);
 
             // Assert

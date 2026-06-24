@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.danteplanner.backend.converter.AuthProviderTypeConverter;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -32,8 +34,9 @@ public class User {
     @Column(nullable = false)
     private String email;
 
+    @Convert(converter = AuthProviderTypeConverter.class)
     @Column(nullable = false)
-    private String provider; // "google" or "apple"
+    private AuthProviderType provider; // "google" or "apple"
 
     @Column(nullable = false)
     private String providerId; // OAuth provider's user ID

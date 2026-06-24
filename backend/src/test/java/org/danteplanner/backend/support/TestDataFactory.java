@@ -1,6 +1,8 @@
 package org.danteplanner.backend.support;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
@@ -44,7 +46,7 @@ public class TestDataFactory {
     public static User createTestUser(UserRepository userRepository, String email) {
         User user = User.builder()
                 .email(email)
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + UUID.randomUUID())
                 .usernameEpithet("W_CORP")
                 .usernameSuffix(UUID.randomUUID().toString().substring(0, 5))
@@ -55,7 +57,7 @@ public class TestDataFactory {
     public static User createAdmin(UserRepository userRepository, String email) {
         User admin = User.builder()
                 .email(email)
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + UUID.randomUUID())
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("a" + UUID.randomUUID().toString().substring(0, 4))
@@ -67,7 +69,7 @@ public class TestDataFactory {
     public static User createModerator(UserRepository userRepository, String email) {
         User moderator = User.builder()
                 .email(email)
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + UUID.randomUUID())
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("m" + UUID.randomUUID().toString().substring(0, 4))
@@ -82,7 +84,7 @@ public class TestDataFactory {
                 .user(owner)
                 .title("Test Planner")
                 .category("5F")
-                .status(published ? "published" : "draft")
+                .status(published ? PlannerStatus.SAVED : PlannerStatus.DRAFT)
                 .content(VALID_CONTENT)
                 .syncVersion(1L)
                 .schemaVersion(1)

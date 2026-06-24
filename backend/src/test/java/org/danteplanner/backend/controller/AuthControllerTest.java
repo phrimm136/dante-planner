@@ -1,5 +1,6 @@
 package org.danteplanner.backend.controller;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.config.TestDataInitializer;
@@ -152,7 +153,7 @@ class AuthControllerTest {
                     .id(123L)
                     .publicId(mockPublicId)
                     .email("newuser@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-new-123")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("test1")
@@ -289,7 +290,7 @@ class AuthControllerTest {
                     .id(456L)
                     .publicId(UUID.randomUUID())
                     .email("secure@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-456")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("test2")

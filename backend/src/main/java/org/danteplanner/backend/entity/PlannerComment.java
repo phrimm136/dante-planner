@@ -2,6 +2,9 @@ package org.danteplanner.backend.entity;
 
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -19,8 +22,8 @@ import java.util.UUID;
        })
 public class PlannerComment {
 
-    /** Unlimited depth - frontend handles visual flattening */
-    public static final int MAX_DEPTH = Integer.MAX_VALUE;
+    /** Capped at the TINYINT column ceiling; frontend handles visual flattening */
+    public static final int MAX_DEPTH = 127;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,6 +45,7 @@ public class PlannerComment {
     private String content;
 
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.TINYINT)
     private int depth;
 
     @Column(name = "upvote_count", nullable = false)

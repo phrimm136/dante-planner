@@ -1,13 +1,16 @@
 package org.danteplanner.backend.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import org.danteplanner.backend.converter.KeywordSetConverter;
+import org.danteplanner.backend.converter.PlannerStatusConverter;
 
 import java.time.Instant;
 import java.util.Set;
@@ -39,12 +42,13 @@ public class Planner {
     private String title = "Untitled";
 
     @Column(nullable = false, length = 50)
-    @Pattern(regexp = "^(5F|10F|15F|RR_PLACEHOLDER)$", message = "Invalid category")
     private String category;
 
     @Column(nullable = false)
+    @Convert(converter = PlannerStatusConverter.class)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Builder.Default
-    private String status = "draft";
+    private PlannerStatus status = PlannerStatus.DRAFT;
 
     @Column(columnDefinition = "JSON", nullable = false)
     private String content;
@@ -57,6 +61,7 @@ public class Planner {
     private Integer contentVersion;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "planner_type", nullable = false)
     private PlannerType plannerType;
 
@@ -90,6 +95,7 @@ public class Planner {
 
     @Column(name = "selected_keywords")
     @Convert(converter = KeywordSetConverter.class)
+    @JdbcTypeCode(SqlTypes.CHAR)
     private Set<String> selectedKeywords;
 
     @Column(name = "view_count", nullable = false)
@@ -160,5 +166,15 @@ public class Planner {
      */
     public void softDelete() {
         this.deletedAt = Instant.now();
+    }
+
+    /**
+     * Check if this planner is owned by the given user.
+     *
+     * @param userId the user ID to check ownership against
+     * @return true if this planner belongs to the user, false otherwise
+     */
+    public boolean isOwnedBy(Long userId) {
+        return user.getId().equals(userId);
     }
 }

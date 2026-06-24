@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Notification type enum for user notification system.
  */
-public enum NotificationType {
+public enum NotificationType implements ValuedEnum {
     PLANNER_RECOMMENDED("PLANNER_RECOMMENDED"),
     PLANNER_PUBLISHED("PLANNER_PUBLISHED"),
     COMMENT_RECEIVED("COMMENT_RECEIVED"),
@@ -26,11 +26,6 @@ public enum NotificationType {
 
     @JsonCreator
     public static NotificationType fromValue(String value) {
-        for (NotificationType type : NotificationType.values()) {
-            if (type.value.equals(value)) {
-                return type;
-            }
-        }
-        throw new IllegalArgumentException("Unknown NotificationType value: " + value);
+        return EnumLookup.fromValue(NotificationType.class, value);
     }
 }

@@ -141,3 +141,17 @@
 - `feedback_minimal_edits.md`: followed — only changed deck visualization section, left all other DeckBuilderContent code untouched
 - `feedback_no_inline_annotations.md`: followed — no "changed from X" comments in code
 - SEARCH LOG / PATTERN LOG convention: code-writer agents followed it; main conversation skipped it during manual fixes (acceptable for small targeted edits)
+
+## 2026-06-24 — Backend DDD/DDIA refactor (B0–B12)
+
+**Graduated:**
+- (none new — the relevant feedback was already in the harness)
+
+**Evolved:**
+- `.claude/rules/backend/migrations.md`: added a "Schema-Truth Tier (`ddl-auto=validate`)" section — MySQL ENUM/SET→`@JdbcTypeCode(CHAR)`, Flyway-on-container wiring, sentinel-row totality for `@Convert` enums, AFTER_COMMIT writes need `REQUIRES_NEW`, drift decision policy, and the "Gradle doesn't capture app logs → bisect by assertion" debugging note. New convention emerged this session and was absent from the rules.
+
+**Validated:**
+- `CLAUDE.md:84` ("Behavior-preserving refactors — diff findings against the original / `git show HEAD`"): used directly to classify ~20 reviewer findings; 3 reviewer "the original was better" guesses were all wrong vs HEAD. Rule working as intended — kept surgical precision.
+- `feedback_filter_reviewer_findings.md`: followed — every review finding validated against code/HEAD before acting; one real regression fixed, rest skipped with stated per-finding verdicts.
+- `check-output-redirect.sh` hook: enforced the `/tmp` literal-token redirect discipline throughout (caught the first probe run).
+- code-writer subagents: completed Phases 1–5 with SEARCH/PATTERN logs; orchestrator-level verification (full `./gradlew test`) caught nothing they missed — the verify-each-phase-myself discipline held.
