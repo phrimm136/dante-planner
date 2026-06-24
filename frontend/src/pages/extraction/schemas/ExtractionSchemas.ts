@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { EXTRACTION_RATES } from '@/lib/constants'
+import { EXTRACTION_RATES } from '../lib/extractionRates'
 
 /**
  * Extraction Schemas

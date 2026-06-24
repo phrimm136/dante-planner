@@ -13,7 +13,7 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
-import { ExtractionCalculator } from '@/features/extraction'
+import { ExtractionCalculator } from '@/pages/extraction'
 
 /**
  * Error fallback component for calculator errors

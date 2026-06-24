@@ -16,7 +16,8 @@
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { SECTION_STYLES, EXTRACTION_RATES } from '@/lib/constants'
+import { SECTION_STYLES } from '@/lib/constants'
+import { EXTRACTION_RATES } from '../lib/extractionRates'
 import { cn } from '@/lib/utils'
 
 /** Input limits - centralized for maintainability */

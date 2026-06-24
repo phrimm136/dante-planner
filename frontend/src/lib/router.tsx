@@ -233,7 +233,7 @@ const plannerMDEditRoute = createRoute({
 const extractionPlannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/extraction',
-  component: lazyRouteComponent(() => import('@/routes/ExtractionPlannerPage')),
+  component: lazyRouteComponent(() => import('@/pages/extraction/ExtractionPlannerPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.extraction') }],
   }),

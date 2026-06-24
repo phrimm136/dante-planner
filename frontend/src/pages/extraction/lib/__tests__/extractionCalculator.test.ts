@@ -22,7 +22,7 @@ import {
   convolveDistributions,
   calculateSuccessiveTargetProbabilities,
 } from '../extractionCalculator'
-import { EXTRACTION_RATES } from '@/lib/constants'
+import { EXTRACTION_RATES } from '../extractionRates'
 import type { ExtractionInput, ExtractionTarget } from '../../types/ExtractionTypes'
 
 describe('getEffectiveRates', () => {

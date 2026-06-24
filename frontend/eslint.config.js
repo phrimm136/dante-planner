@@ -25,18 +25,17 @@ export default defineConfig([
   },
 
   // ── Page-slice import boundary (the only structural rule) ──
-  // The app is organized as page slices under src/pages/<name> (plus the
-  // legacy features/extraction slice). Reach a slice only through its public
-  // API (src/pages/<name>/index.ts), never a deep internal path. Cross-page
-  // reuse is allowed and expected — a component owned by one page is imported
-  // by another via that page's public API. No directional or sibling bans:
-  // the slices form a DAG by discipline, not by lint.
+  // The app is organized as page slices under src/pages/<name>. Reach a slice
+  // only through its public API (src/pages/<name>/index.ts), never a deep
+  // internal path. Cross-page reuse is allowed and expected — a component owned
+  // by one page is imported by another via that page's public API. No
+  // directional or sibling bans: the slices form a DAG by discipline, not by lint.
   {
     files: ['**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@/pages/*/**', '@/features/*/**'],
+          group: ['@/pages/*/**'],
           message: 'Import a page slice via its public API (@/pages/<name>), not a deep internal path.',
         }],
       }],
@@ -44,16 +43,11 @@ export default defineConfig([
   },
   // The router is the composition root: it lazy-imports each page's route
   // component by its module path for code-splitting, which is a deep import by
-  // design. Allow deep @/pages imports here, but keep the deep-feature ban.
+  // design, so the page deep-import ban does not apply here.
   {
     files: ['src/lib/router.tsx'],
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['@/features/*/**'],
-          message: 'Import a feature via its public API (@/features/<name>), not a deep internal path.',
-        }],
-      }],
+      'no-restricted-imports': 'off',
     },
   },
 ])

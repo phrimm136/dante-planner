@@ -18,7 +18,7 @@
  * @see constants.ts for EXTRACTION_RATES
  */
 
-import { EXTRACTION_RATES, type ExtractionRateTable } from '@/lib/constants'
+import { EXTRACTION_RATES, type ExtractionRateTable } from './extractionRates'
 import type {
   BannerModifiers,
   EffectiveRates,
