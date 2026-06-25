@@ -16,14 +16,14 @@ import { useTranslation } from 'react-i18next'
 
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { LoadingState } from '@/components/common/LoadingState'
-import { BannerSection } from '@/components/home/BannerSection'
-import { AnnouncementContent } from '@/components/home/AnnouncementContent'
-import { AnnouncementSkeleton } from '@/components/home/AnnouncementSection'
-import { SideLinkSection } from '@/components/home/SideLinkSection'
-import { RecentlyReleasedSection } from '@/components/home/RecentlyReleasedSection'
-import { CommunityPlansSection } from '@/components/home/CommunityPlansSection'
+import { BannerSection } from './components/BannerSection'
+import { AnnouncementContent } from './components/AnnouncementContent'
+import { AnnouncementSkeleton } from './components/AnnouncementSection'
+import { SideLinkSection } from './components/SideLinkSection'
+import { RecentlyReleasedSection } from './components/RecentlyReleasedSection'
+import { CommunityPlansSection } from './components/CommunityPlansSection'
 
-import { useRecentlyReleasedData } from '@/hooks/useHomePageData'
+import { useRecentlyReleasedData } from './hooks/useHomePageData'
 
 // ============================================================================
 // Inner Content Component

@@ -9,7 +9,7 @@ import { IdentitySearchDropdown } from '@/components/filter/IdentitySearchDropdo
 import { EGOSearchDropdown } from '@/components/filter/EGOSearchDropdown'
 import { EgoGiftSearchDropdown } from '@/components/filter/EgoGiftSearchDropdown'
 import { SearchBar } from '@/components/common/SearchBar'
-import { KeywordList } from '@/components/keyword/KeywordList'
+import { KeywordList } from './components/KeywordList'
 import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 

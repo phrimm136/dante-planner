@@ -2,12 +2,12 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { UsernameSection } from '@/components/settings/UsernameSection'
-import { SyncSection } from '@/components/settings/SyncSection'
+import { UsernameSection } from './components/UsernameSection'
+import { SyncSection } from './components/SyncSection'
 import { PlannerExportImportSection } from '@/pages/planner'
-import { NotificationSection } from '@/components/settings/NotificationSection'
-import { AccountDeleteSection } from '@/components/settings/AccountDeleteSection'
-import { LogoutEverywhereSection } from '@/components/settings/LogoutEverywhereSection'
+import { NotificationSection } from './components/NotificationSection'
+import { AccountDeleteSection } from './components/AccountDeleteSection'
+import { LogoutEverywhereSection } from './components/LogoutEverywhereSection'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**

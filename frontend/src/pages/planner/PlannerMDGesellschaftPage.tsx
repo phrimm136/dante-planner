@@ -38,7 +38,7 @@ import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
 import { LoadingState } from '@/components/common/LoadingState'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
-import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
+import { CommunityPlansErrorFallback } from '@/components/common/CommunityPlansErrorFallback'
 
 // ============================================================================
 // Page Content Component

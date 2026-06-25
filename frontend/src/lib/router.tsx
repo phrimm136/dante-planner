@@ -12,7 +12,7 @@ import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/pages/planne
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
-import NotFoundPage from '@/routes/NotFoundPage'
+import NotFoundPage from '@/components/common/NotFoundPage'
 
 // Note: All route components are lazy loaded for code splitting
 // Each route will load its JS bundle only when navigated to
@@ -111,7 +111,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: lazyRouteComponent(() => import('@/routes/HomePage')),
+  component: lazyRouteComponent(() => import('@/pages/home/HomePage')),
   head: () => ({
     meta: [{ title: "Dante's Planner - Limbus Company Database and Planning Tool" }],
   }),
@@ -380,7 +380,7 @@ const abEventDetailRoute = createRoute({
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
-  component: lazyRouteComponent(() => import('@/routes/KeywordPage')),
+  component: lazyRouteComponent(() => import('@/pages/keyword/KeywordPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.keyword') }],
   }),
@@ -390,7 +390,7 @@ const keywordRoute = createRoute({
 const keywordDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword/$id',
-  component: lazyRouteComponent(() => import('@/routes/KeywordDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/keyword/KeywordDetailPage')),
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/battleKeywords.json`)
     const keywords = module.default as Record<string, { name?: string }>
@@ -406,7 +406,7 @@ const keywordDetailRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
-  component: lazyRouteComponent(() => import('@/routes/SettingsPage')),
+  component: lazyRouteComponent(() => import('@/pages/settings/SettingsPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.settings.settings') }],
   }),
@@ -416,7 +416,7 @@ const settingsRoute = createRoute({
 const moderationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/moderation',
-  component: lazyRouteComponent(() => import('@/routes/ModeratorPage')),
+  component: lazyRouteComponent(() => import('@/pages/moderator/ModeratorPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.moderator') }],
   }),
@@ -426,7 +426,7 @@ const moderationRoute = createRoute({
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/privacy',
-  component: lazyRouteComponent(() => import('@/routes/PrivacyPage')),
+  component: lazyRouteComponent(() => import('@/pages/legal/PrivacyPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.privacy.title') }],
   }),
@@ -436,7 +436,7 @@ const privacyRoute = createRoute({
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/terms',
-  component: lazyRouteComponent(() => import('@/routes/TermsPage')),
+  component: lazyRouteComponent(() => import('@/pages/legal/TermsPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.terms.title') }],
   }),

@@ -1,0 +1,18 @@
+{
+  "totalPhases": 7,
+  "currentPhase": 7,
+  "phases": [
+    { "name": "NotFoundPage -> components/common", "status": "done" },
+    { "name": "legal slice (privacy + terms + LegalPage)", "status": "done" },
+    { "name": "home slice", "status": "done" },
+    { "name": "settings slice", "status": "done" },
+    { "name": "moderator slice", "status": "done" },
+    { "name": "keyword slice", "status": "done" },
+    { "name": "full-suite verification", "status": "done" }
+  ],
+  "buildTimeCorrections": [
+    "CommunityPlansErrorFallback.tsx: spec assumed home-owned, but components/comment + 2 planner pages consume it via BanDialog/home — grep found it is consumed by planner (PlannerMDGesellschaft{,Detail}Page). Per dual-consumer rule it was relocated to components/common/ instead of pages/home/.",
+    "BanDialog.tsx: spec listed it as moving into pages/moderator/, but components/comment/CommentSection imports CommentDeleteDialog from it. Per dual-consumer rule it STAYS in components/moderation/; ModeratorPage imports it from the shared path unchanged.",
+    "yarn lint is pre-existingly broken in this env (await-thenable typed-linting rule lacks parserOptions.project; fails on untouched App.tsx). Boundary invariant verified via grep instead: no deep @/pages/*/** import statements outside router.tsx."
+  ]
+}

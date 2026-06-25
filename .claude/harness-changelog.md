@@ -155,3 +155,18 @@
 - `feedback_filter_reviewer_findings.md`: followed — every review finding validated against code/HEAD before acting; one real regression fixed, rest skipped with stated per-finding verdicts.
 - `check-output-redirect.sh` hook: enforced the `/tmp` literal-token redirect discipline throughout (caught the first probe run).
 - code-writer subagents: completed Phases 1–5 with SEARCH/PATTERN logs; orchestrator-level verification (full `./gradlew test`) caught nothing they missed — the verify-each-phase-myself discipline held.
+
+## 2026-06-25 — FE app-shell & utility pages migration (docs/28)
+
+**Graduated:**
+- New convention → `.claude/rules/frontend/architecture/page-slice-migration.md`: created a page-slice migration playbook (grep-for-external-consumers-first / dual-consumer-stays-shared, `git mv` directly not via agents, relative intra-slice imports, `vi.mock` repointing, per-phase `tsc`+grep verify). This is the 4th slice migration and the mechanics recurred each time with no rule capturing them.
+
+**Evolved:**
+- (none — existing boundary rules in `frontend/CLAUDE.md` + the page-slice invariant memories were sufficient; the gap was procedural, addressed by the new rule above.)
+
+**Validated:**
+- Per-move full-`src` grep + `tsc -b` per phase: caught BOTH dual-consumers the spec missed (`CommunityPlansErrorFallback`, `BanDialog`) before they shipped broken imports. The discipline is the load-bearing safety net for faithful moves.
+- Advisor steer "execute the moves yourself, not via code-writer agents": followed; every move landed as a clean `R`/`RM` rename with import-only diffs, zero content drift.
+- `feedback_filter_reviewer_findings.md`: followed — the reviewer's 3 Minor findings were each validated and dispositioned (all pre-existing/out-of-scope, none applied), with stated per-finding verdicts.
+- `reference_code_review_orchestrator_overflow.md`: applied — skipped the 5-way orchestrator on a ~50-file diff, used a single focused `code-architecture-reviewer` instead; returned a clean ACCEPTABLE with file:line findings.
+- `check-output-redirect.sh`: enforced `/tmp` literal-session-id redirect for every tsc/vitest run.

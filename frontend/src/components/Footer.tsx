@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { DiscordIcon } from '@/components/icons/DiscordIcon'
+import { CONTACT_EMAIL } from '@/lib/constants'
 
 export function Footer() {
   const { t } = useTranslation()
@@ -37,7 +38,7 @@ export function Footer() {
           </Link>
           <span className="text-muted-foreground/50">·</span>
           <a
-            href="mailto:contact@dante-planner.com"
+            href={`mailto:${CONTACT_EMAIL}`}
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
             {t('footer.links.contact')}

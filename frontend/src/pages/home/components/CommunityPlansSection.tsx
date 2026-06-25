@@ -17,7 +17,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PublishedPlannerCard } from '@/pages/planner'
 import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
+import { CommunityPlansErrorFallback } from '@/components/common/CommunityPlansErrorFallback'
 
 import { useMDGesellschaftData } from '@/pages/planner'
 import { CARD_GRID } from '@/lib/constants'

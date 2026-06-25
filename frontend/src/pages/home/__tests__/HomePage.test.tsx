@@ -25,24 +25,24 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Mock home page data hook to avoid Suspense issues
-vi.mock('@/hooks/useHomePageData', () => ({
+vi.mock('@/pages/home/hooks/useHomePageData', () => ({
   useRecentlyReleasedData: () => ({
     dateGroups: [],
   }),
 }))
 
 // Mock BannerSection to simplify tests
-vi.mock('@/components/home/BannerSection', () => ({
+vi.mock('@/pages/home/components/BannerSection', () => ({
   BannerSection: () => <div data-testid="banner-section">Banner</div>,
 }))
 
 // Mock RecentlyReleasedSection
-vi.mock('@/components/home/RecentlyReleasedSection', () => ({
+vi.mock('@/pages/home/components/RecentlyReleasedSection', () => ({
   RecentlyReleasedSection: () => <div data-testid="recently-released">Recently Released</div>,
 }))
 
 // Mock CommunityPlansSection
-vi.mock('@/components/home/CommunityPlansSection', () => ({
+vi.mock('@/pages/home/components/CommunityPlansSection', () => ({
   CommunityPlansSection: () => <div data-testid="community-plans">Community Plans</div>,
 }))
 

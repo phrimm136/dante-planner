@@ -13,7 +13,7 @@ import { PublishedPlannerList } from './components/plannerList/PublishedPlannerL
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
-import { CommunityPlansErrorFallback } from '@/components/home/CommunityPlansErrorFallback'
+import { CommunityPlansErrorFallback } from '@/components/common/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery } from './hooks/usePublishedPlannerQuery'
 import { useAuthQuery } from '@/hooks/useAuthQuery'
 import { useUserSettingsQuery } from '@/hooks/useUserSettings'

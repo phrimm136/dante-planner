@@ -3,15 +3,15 @@ import { useTranslation } from 'react-i18next'
 import { Shield, Ban, Clock, UserCheck } from 'lucide-react'
 
 import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useModeratorUsers, useModerationHistory } from '@/hooks/useModeratorData'
-import { useBanUser, useUnbanUser, useTimeoutUser, useUntimeoutUser } from '@/hooks/useModeratorMutations'
+import { useModeratorUsers, useModerationHistory } from './hooks/useModeratorData'
+import { useBanUser, useUnbanUser, useTimeoutUser, useUntimeoutUser } from './hooks/useModeratorMutations'
 import { BanDialog, TimeoutDialog, UnbanDialog, ClearTimeoutDialog } from '@/components/moderation/BanDialog'
 import { Button } from '@/components/ui/button'
 import { formatUsername } from '@/lib/formatUsername'
 import { formatRelativeTime } from '@/lib/formatDate'
 import { toast } from '@/lib/toast'
 
-import type { UserForMod, ModerationAction } from '@/types/ModeratorTypes'
+import type { UserForMod, ModerationAction } from './types/ModeratorTypes'
 
 /**
  * User table row with action buttons

@@ -1115,3 +1115,8 @@ export const PROGRESSIVE_REVEAL = {
  * Number of announcements shown as preview on the home page
  */
 export const ANNOUNCEMENT_PREVIEW_COUNT = 5
+
+/**
+ * Contact email shown in the footer and legal pages
+ */
+export const CONTACT_EMAIL = 'contact@dante-planner.com'

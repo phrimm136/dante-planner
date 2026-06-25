@@ -26,7 +26,7 @@ import {
 import { cn, getSinnerFromId } from '@/lib/utils'
 import { getSeasonColor } from '@/lib/colorUtils'
 
-import type { DateGroup, RecentEntity } from '@/hooks/useHomePageData'
+import type { DateGroup, RecentEntity } from '../hooks/useHomePageData'
 
 // ============================================================================
 // Helpers

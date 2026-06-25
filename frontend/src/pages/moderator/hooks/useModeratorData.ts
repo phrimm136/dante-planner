@@ -10,9 +10,9 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
-import { UserForModSchema, ModerationActionSchema } from '@/schemas/ModeratorSchemas'
+import { UserForModSchema, ModerationActionSchema } from '../schemas/ModeratorSchemas'
 
-import type { UserForMod, ModerationAction } from '@/types/ModeratorTypes'
+import type { UserForMod, ModerationAction } from '../types/ModeratorTypes'
 
 // ============================================================================
 // Query Key Factory
