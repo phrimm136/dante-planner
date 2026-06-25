@@ -8,6 +8,7 @@ import org.danteplanner.backend.util.CookieConstants;
 import org.danteplanner.backend.util.CookieUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -217,6 +218,13 @@ public class GlobalExceptionHandler {
         Sentry.captureException(ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", "Invalid planner content structure"));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        log.warn("Unreadable request body");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse("VALIDATION_ERROR", "Invalid request body"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -3,7 +3,7 @@ package org.danteplanner.backend.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum UserRole {
+public enum UserRole implements ValuedEnum {
     NORMAL("NORMAL", 1),
     MODERATOR("MODERATOR", 2),
     ADMIN("ADMIN", 3);
@@ -27,12 +27,7 @@ public enum UserRole {
 
     @JsonCreator
     public static UserRole fromValue(String value) {
-        for (UserRole role : UserRole.values()) {
-            if (role.value.equals(value)) {
-                return role;
-            }
-        }
-        throw new IllegalArgumentException("Unknown UserRole value: " + value);
+        return EnumLookup.fromValue(UserRole.class, value);
     }
 
     /**
@@ -42,12 +37,7 @@ public enum UserRole {
      * @return true if valid, false otherwise
      */
     public static boolean isValid(String value) {
-        for (UserRole role : UserRole.values()) {
-            if (role.value.equals(value)) {
-                return true;
-            }
-        }
-        return false;
+        return EnumLookup.isValid(UserRole.class, value);
     }
 
     /**

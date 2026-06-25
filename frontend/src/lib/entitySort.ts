@@ -1,5 +1,5 @@
 import { EGO_TYPES } from '@/lib/constants'
-import type { EGOType } from '@/types/EGOTypes'
+import type { EGOType } from '@/pages/ego'
 
 /**
  * Sort Identity entities by release date

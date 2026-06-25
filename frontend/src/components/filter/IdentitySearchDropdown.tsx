@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useIdentityListData } from '@/hooks/useIdentityListData'
+import { useIdentityListData } from '@/pages/identity'
 import { SearchableMultiSelect } from '@/components/common/SearchableMultiSelect'
 import { getSinnerFromId } from '@/lib/utils'
 

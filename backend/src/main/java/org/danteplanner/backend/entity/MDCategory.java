@@ -3,7 +3,7 @@ package org.danteplanner.backend.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum MDCategory {
+public enum MDCategory implements ValuedEnum {
     F5("5F"),
     F10("10F"),
     F15("15F");
@@ -21,12 +21,7 @@ public enum MDCategory {
 
     @JsonCreator
     public static MDCategory fromValue(String value) {
-        for (MDCategory category : MDCategory.values()) {
-            if (category.value.equals(value)) {
-                return category;
-            }
-        }
-        throw new IllegalArgumentException("Unknown MDCategory value: " + value);
+        return EnumLookup.fromValue(MDCategory.class, value);
     }
 
     /**
@@ -36,11 +31,6 @@ public enum MDCategory {
      * @return true if valid, false otherwise
      */
     public static boolean isValid(String value) {
-        for (MDCategory category : MDCategory.values()) {
-            if (category.value.equals(value)) {
-                return true;
-            }
-        }
-        return false;
+        return EnumLookup.isValid(MDCategory.class, value);
     }
 }

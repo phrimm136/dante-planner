@@ -123,10 +123,20 @@ export class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...(options.headers as Record<string, string>),
-    };
+    const method = (options.method ?? 'GET').toUpperCase();
+    const callerHeaders = (options.headers as Record<string, string> | undefined) ?? {};
+    const headers: Record<string, string> = { ...callerHeaders };
+
+    // Bodyless GET/HEAD must stay CORS "simple" — a request Content-Type would force a
+    // preflight OPTIONS that blocks the cold-load request burst.
+    const isBodylessMethod = method === 'GET' || method === 'HEAD';
+    const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const callerSetContentType = Object.keys(callerHeaders).some(
+      (key) => key.toLowerCase() === 'content-type'
+    );
+    if (!isBodylessMethod && !isFormDataBody && !callerSetContentType) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,

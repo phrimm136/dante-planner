@@ -1,5 +1,5 @@
 import type { EnhancementLevel } from './constants'
-import type { EGOGiftRecipe } from '@/types/EGOGiftTypes'
+import type { EGOGiftRecipe } from '@/pages/egoGift'
 
 /**
  * Encodes a gift selection into a numeric string format

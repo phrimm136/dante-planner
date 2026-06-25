@@ -6,6 +6,7 @@ import org.danteplanner.backend.dto.planner.NotificationResponse;
 import org.danteplanner.backend.dto.planner.UnreadCountResponse;
 import org.danteplanner.backend.entity.Notification;
 import org.danteplanner.backend.entity.NotificationType;
+import org.danteplanner.backend.entity.SseEventType;
 import org.danteplanner.backend.repository.NotificationRepository;
 import org.danteplanner.backend.repository.UserSettingsRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -133,6 +134,7 @@ public class NotificationService {
      * @param plannerTitle   the planner title for display
      * @param plannerOwnerId the planner owner to notify
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notifyPlannerRecommended(UUID plannerId, String plannerTitle, Long plannerOwnerId) {
         try {
             Notification notification = new Notification(
@@ -147,7 +149,7 @@ public class NotificationService {
             Notification saved = notificationRepository.save(notification);
             log.info("Created PLANNER_RECOMMENDED notification for user {} on planner {}", plannerOwnerId, plannerId);
 
-            pushNotification(plannerOwnerId, "notify:recommended", saved);
+            pushNotification(plannerOwnerId, SseEventType.NOTIFY_RECOMMENDED.getValue(), saved);
         } catch (DataIntegrityViolationException e) {
             log.debug("Duplicate PLANNER_RECOMMENDED notification prevented for user {} on planner {}",
                     plannerOwnerId, plannerId);
@@ -198,7 +200,7 @@ public class NotificationService {
             log.info("Created COMMENT_RECEIVED notification for user {} on planner {} (comment {})",
                     plannerOwnerId, plannerId, commentId);
 
-            pushNotification(plannerOwnerId, "notify:comment", saved);
+            pushNotification(plannerOwnerId, SseEventType.NOTIFY_COMMENT.getValue(), saved);
         } catch (DataIntegrityViolationException e) {
             log.debug("Duplicate COMMENT_RECEIVED notification prevented for user {} on comment {}",
                     plannerOwnerId, commentId);
@@ -249,7 +251,7 @@ public class NotificationService {
             log.info("Created REPLY_RECEIVED notification for user {} on planner {} (reply {})",
                     parentAuthorId, plannerId, replyId);
 
-            pushNotification(parentAuthorId, "notify:comment", saved);
+            pushNotification(parentAuthorId, SseEventType.NOTIFY_COMMENT.getValue(), saved);
         } catch (DataIntegrityViolationException e) {
             log.debug("Duplicate REPLY_RECEIVED notification prevented for user {} on reply {}",
                     parentAuthorId, replyId);

@@ -3,6 +3,7 @@ package org.danteplanner.backend.dto.planner;
 import lombok.Builder;
 import lombok.Data;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 
 import java.time.Instant;
@@ -15,7 +16,7 @@ public class PlannerResponse {
     private UUID id;
     private String title;
     private String category;
-    private String status;
+    private PlannerStatus status;
     private String content;
     private Integer schemaVersion;
     private Integer contentVersion;

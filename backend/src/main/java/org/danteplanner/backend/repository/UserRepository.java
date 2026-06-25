@@ -2,6 +2,7 @@ package org.danteplanner.backend.repository;
 
 import jakarta.persistence.LockModeType;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +18,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByProviderAndProviderId(String provider, String providerId);
+    Optional<User> findByProviderAndProviderId(AuthProviderType provider, String providerId);
 
     /**
      * Find an active (non-deleted) user by OAuth provider credentials.
@@ -27,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param providerId the provider's user ID
      * @return the active user if found
      */
-    Optional<User> findByProviderAndProviderIdAndDeletedAtIsNull(String provider, String providerId);
+    Optional<User> findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType provider, String providerId);
 
     /**
      * Find users scheduled for permanent deletion before the cutoff time.

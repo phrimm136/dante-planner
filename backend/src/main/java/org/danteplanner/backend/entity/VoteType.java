@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Vote type enum for planner voting system.
  * Only UP (upvote) is supported.
  */
-public enum VoteType {
+public enum VoteType implements ValuedEnum {
     UP("UP");
 
     private final String value;
@@ -23,11 +23,6 @@ public enum VoteType {
 
     @JsonCreator
     public static VoteType fromValue(String value) {
-        for (VoteType type : VoteType.values()) {
-            if (type.value.equals(value)) {
-                return type;
-            }
-        }
-        throw new IllegalArgumentException("Unknown VoteType value: " + value);
+        return EnumLookup.fromValue(VoteType.class, value);
     }
 }

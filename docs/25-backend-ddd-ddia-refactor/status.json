@@ -1,0 +1,13 @@
+{
+  "totalPhases": 7,
+  "currentPhase": 6,
+  "phases": [
+    { "name": "Phase 0: Step 0 — Test infrastructure (schema-truth tier, drift resolution, query-count, concurrent castVote, ArchUnit, jacoco gate)", "status": "done" },
+    { "name": "Phase 1: B3+B4+B5 — DRY/EnumLookup, SseEventType, Planner.isOwnedBy", "status": "done" },
+    { "name": "Phase 2: B1+B9+B10 — PlannerStatus enum + 400 handler, category de-Pattern, DTO dedup", "status": "done" },
+    { "name": "Phase 3: B7 — split PlannerContentValidator", "status": "done" },
+    { "name": "Phase 4: B6 — split PlannerService", "status": "done" },
+    { "name": "Phase 5: B2 — AuthProviderType enum", "status": "done" },
+    { "name": "Phase 6: B12 — package-by-feature", "status": "skipped (cosmetic reorg; deferred by user decision)" }
+  ]
+}

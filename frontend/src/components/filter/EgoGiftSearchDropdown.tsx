@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useEGOGiftListData } from '@/hooks/useEGOGiftListData'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { SearchableMultiSelect } from '@/components/common/SearchableMultiSelect'
 
 /**

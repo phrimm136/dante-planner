@@ -1,0 +1,100 @@
+import { SkillImageComposite } from './SkillImageComposite'
+import { SkillInfoPanelWithSuspense } from './SkillInfoPanel'
+import { SkillDescriptionWithSuspense } from '@/components/common/SkillDescription'
+import { SkillCardLayout } from '@/components/common/SkillCardLayout'
+import { getLockIconPath } from '@/lib/assetPaths'
+import { cn } from '@/lib/utils'
+import type { IdentitySkillEntry, IdentitySkillDataEntry, Uptie } from '../types/IdentityTypes'
+
+interface SkillCardWithGranularI18nProps {
+  identityId: string
+  skillSlot: number
+  skillEntry: IdentitySkillEntry
+  uptie: Uptie
+  isLocked?: boolean
+}
+
+/**
+ * Get merged skill data for a specific uptie level.
+ * Earlier uptie levels provide base values, later levels override.
+ */
+function getMergedSkillData(
+  skillData: IdentitySkillEntry['skillData'],
+  uptie: Uptie
+): IdentitySkillDataEntry {
+  const merged: IdentitySkillDataEntry = {}
+  for (let i = 0; i < uptie; i++) {
+    Object.assign(merged, skillData[i])
+  }
+  return merged
+}
+
+/**
+ * Smallest 1-based uptie at which the skill is first defined.
+ * Empty `{}` slots before that level mean "not yet introduced" (not "inherit"),
+ * so the renderer should lock and display this skill at its first defined level.
+ * Falls back to 1 when no slot has data — keeps the card visible rather than blank.
+ */
+export function getFirstDefinedUptie(skillData: IdentitySkillEntry['skillData']): Uptie {
+  for (let i = 0; i < skillData.length; i++) {
+    if (Object.keys(skillData[i]).length > 0) {
+      return (i + 1) as Uptie
+    }
+  }
+  return 1
+}
+
+/**
+ * SkillCard with granular i18n Suspense.
+ * Structure (image, stats) stays visible, only name/description suspends.
+ */
+export function SkillCardWithGranularI18n({
+  identityId,
+  skillSlot,
+  skillEntry,
+  uptie,
+  isLocked = false,
+}: SkillCardWithGranularI18nProps) {
+  const mergedData = getMergedSkillData(skillEntry.skillData, uptie)
+  const isDefenseSkill = mergedData.atkType === 'NONE' || !mergedData.atkType
+  const coinString = mergedData.coinString ?? ''
+  const textId = skillEntry.textID ?? skillEntry.id
+
+  return (
+    <div className={cn('relative', isLocked && 'opacity-50')}>
+      <SkillCardLayout
+        imageComposite={
+          <SkillImageComposite
+            identityId={identityId}
+            skillId={skillEntry.id}
+            skillTier={skillEntry.skillTier ?? skillSlot}
+            skillData={mergedData}
+          />
+        }
+        infoPanel={
+          <SkillInfoPanelWithSuspense
+            identityId={identityId}
+            skillId={textId}
+            skillData={mergedData}
+            coinString={coinString}
+            isDefenseSkill={isDefenseSkill}
+          />
+        }
+        description={
+          <SkillDescriptionWithSuspense
+            identityId={identityId}
+            skillId={textId}
+            uptie={uptie}
+          />
+        }
+      />
+      {isLocked && (
+        <img
+          src={getLockIconPath()}
+          alt=""
+          className="absolute right-8 bottom-8 -z-10 h-30 brightness-20"
+        />
+      )}
+    </div>
+  )
+}

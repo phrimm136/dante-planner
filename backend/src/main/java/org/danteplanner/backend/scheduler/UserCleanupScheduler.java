@@ -29,7 +29,8 @@ public class UserCleanupScheduler {
     /**
      * Find and permanently delete all users whose grace period has expired.
      * Each user's votes are reassigned to the sentinel user before deletion
-     * to preserve vote counts on planners.
+     * to anonymize the voter. Upvote counts are denormalized counters, so they
+     * are unaffected by the reassignment.
      */
     @Scheduled(cron = "${app.user.cleanup.cron:0 0 3 * * *}")
     public void cleanupExpiredUsers() {

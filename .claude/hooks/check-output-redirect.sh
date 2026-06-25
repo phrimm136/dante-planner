@@ -14,23 +14,32 @@ if [[ -z "$command" ]]; then
     exit 0
 fi
 
+# Build a normalized "scan" copy of the command for tool detection only, so a
+# tool name passed as DATA is never mistaken for an INVOCATION. Three passes,
+# in order (heredoc first, since its body may hold unbalanced quotes):
+#   1. drop heredoc bodies      — `git commit -m "$(cat <<'EOF' ... tsc ... EOF)"`
+#   2. drop quoted spans        — `meme add "... yarn lint ..."`, `git commit -m "fix yarn test"`
+#   3. drop --cwd/-C <dir> flags — so `yarn --cwd frontend test` reads as `yarn test`
+# Redirect detection below still uses the raw $command (the `> /tmp/...` is unquoted).
+scan=$(printf '%s' "$command" | perl -0777 -pe "s/<<-?\x27?(\w+)\x27?.*?\n\1//gs; s/\x27[^\x27]*\x27//g; s/\x22[^\x22]*\x22//g; s/\s--cwd\s+\S+//g; s/\s-C\s+\S+//g" 2>/dev/null || printf '%s' "$command")
+
 # Patterns that indicate test/typecheck/build commands
 # Matches: yarn test, yarn typecheck, yarn build, vitest, tsc -b, ./gradlew test, ./gradlew compile, ./gradlew build
-if echo "$command" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vitest(\s|$)|tsc(\s|$)|\./gradlew\s+(test|compile|build))'; then
+if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vitest(\s|$)|tsc(\s|$)|\./gradlew\s+(test|compile|build))'; then
 
     # Determine the output prefix for this command type
     prefix=""
-    if echo "$command" | grep -qE 'yarn\s+typecheck|tsc(\s|$)'; then
+    if echo "$scan" | grep -qE 'yarn\s+typecheck|tsc(\s|$)'; then
         prefix="fe-typecheck"
-    elif echo "$command" | grep -qE 'yarn\s+test|vitest(\s|$)'; then
+    elif echo "$scan" | grep -qE 'yarn\s+test|vitest(\s|$)'; then
         prefix="fe-test"
-    elif echo "$command" | grep -qE 'yarn\s+build'; then
+    elif echo "$scan" | grep -qE 'yarn\s+build'; then
         prefix="fe-build"
-    elif echo "$command" | grep -qE 'yarn\s+lint'; then
+    elif echo "$scan" | grep -qE 'yarn\s+lint'; then
         prefix="fe-lint"
-    elif echo "$command" | grep -qE 'gradlew\s+test'; then
+    elif echo "$scan" | grep -qE 'gradlew\s+test'; then
         prefix="be-test"
-    elif echo "$command" | grep -qE 'gradlew\s+(build|compile)'; then
+    elif echo "$scan" | grep -qE 'gradlew\s+(build|compile)'; then
         prefix="be-build"
     fi
 

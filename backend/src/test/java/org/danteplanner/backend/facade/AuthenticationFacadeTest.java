@@ -1,5 +1,6 @@
 package org.danteplanner.backend.facade;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
@@ -100,7 +101,7 @@ class AuthenticationFacadeTest {
         testUser = User.builder()
                 .id(123L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -126,7 +127,7 @@ class AuthenticationFacadeTest {
             when(providerRegistry.getProvider(providerName)).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(code, redirectUri, codeVerifier)).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
-            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123"))
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123"))
                     .thenReturn(Optional.of(testUser));
             when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
                     .thenReturn("jwt-access-token");
@@ -149,7 +150,7 @@ class AuthenticationFacadeTest {
             verify(providerRegistry).getProvider(providerName);
             verify(oauthProvider).exchangeCodeForTokens(code, redirectUri, codeVerifier);
             verify(oauthProvider).getUserInfo(any(OAuthTokens.class));
-            verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(providerName, "google-123");
+            verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123");
             verify(tokenGenerator).generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class));
             verify(tokenGenerator).generateRefreshToken(testUser.getId(), testUser.getEmail());
         }
@@ -211,7 +212,7 @@ class AuthenticationFacadeTest {
             User deletedUser = User.builder()
                     .id(456L)
                     .email("deleted@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("deleted-123")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("test2")
@@ -224,9 +225,9 @@ class AuthenticationFacadeTest {
             when(providerRegistry.getProvider("google")).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
-            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull("google", "deleted-123"))
+            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "deleted-123"))
                     .thenReturn(Optional.empty());
-            when(userRepository.findByProviderAndProviderId("google", "deleted-123"))
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, "deleted-123"))
                     .thenReturn(Optional.of(deletedUser));
             when(tokenGenerator.generateAccessToken(any(), any(), any())).thenReturn("access");
             when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
@@ -380,7 +381,7 @@ class AuthenticationFacadeTest {
             User deletedUser = User.builder()
                     .id(testUser.getId())
                     .email(testUser.getEmail())
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("google-123")
                     .usernameEpithet("W_CORP")
                     .usernameSuffix("test3")

@@ -3,6 +3,9 @@ package org.danteplanner.backend.entity;
 import jakarta.persistence.*;
 import org.springframework.data.domain.Persistable;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -23,7 +26,9 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
      * User ID who cast the vote.
      * IMMUTABILITY EXCEPTION: This field is normally immutable, but can be updated
      * via {@link org.danteplanner.backend.repository.PlannerVoteRepository#reassignUserVotes}
-     * during user hard-delete to preserve vote counts while anonymizing the voter.
+     * during user hard-delete to anonymize the voter. The planner's upvote count is the
+     * denormalized {@code planners.upvotes} counter, independent of these rows, so the
+     * displayed count is unaffected by reassignment.
      * Never modify directly outside of reassignment operations.
      */
     @Id
@@ -35,6 +40,7 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
     private UUID plannerId;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "vote_type", nullable = false)
     private final VoteType voteType;
 

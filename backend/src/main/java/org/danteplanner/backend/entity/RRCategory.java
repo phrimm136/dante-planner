@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Refracted Railway category enum.
  * Placeholder for future RR-specific categories.
  */
-public enum RRCategory {
+public enum RRCategory implements ValuedEnum {
     RR_PLACEHOLDER("RR_PLACEHOLDER");
 
     private final String value;
@@ -23,12 +23,7 @@ public enum RRCategory {
 
     @JsonCreator
     public static RRCategory fromValue(String value) {
-        for (RRCategory category : RRCategory.values()) {
-            if (category.value.equals(value)) {
-                return category;
-            }
-        }
-        throw new IllegalArgumentException("Unknown RRCategory value: " + value);
+        return EnumLookup.fromValue(RRCategory.class, value);
     }
 
     /**
@@ -38,11 +33,6 @@ public enum RRCategory {
      * @return true if valid, false otherwise
      */
     public static boolean isValid(String value) {
-        for (RRCategory category : RRCategory.values()) {
-            if (category.value.equals(value)) {
-                return true;
-            }
-        }
-        return false;
+        return EnumLookup.isValid(RRCategory.class, value);
     }
 }

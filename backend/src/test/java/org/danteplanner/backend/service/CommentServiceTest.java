@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.dto.comment.CommentTreeNode;
 import org.danteplanner.backend.dto.comment.CreateCommentResponse;
 import org.danteplanner.backend.dto.comment.UpdateCommentResponse;
@@ -79,7 +80,7 @@ class CommentServiceTest {
         testUser = User.builder()
                 .id(1L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("test-123")
                 .usernameEpithet("TEST")
                 .usernameSuffix("tst01")
@@ -89,7 +90,7 @@ class CommentServiceTest {
         otherUser = User.builder()
                 .id(2L)
                 .email("other@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("other-123")
                 .usernameEpithet("OTHER")
                 .usernameSuffix("oth01")

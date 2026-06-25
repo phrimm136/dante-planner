@@ -6,7 +6,9 @@ import org.danteplanner.backend.dto.planner.UpsertPlannerRequest;
 import org.danteplanner.backend.dto.planner.ImportPlannersRequest;
 import org.danteplanner.backend.dto.planner.VoteRequest;
 import org.danteplanner.backend.entity.VoteType;
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.PlannerView;
 import org.danteplanner.backend.entity.User;
@@ -95,7 +97,7 @@ class PlannerControllerTest {
         // Create test users
         testUser = User.builder()
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -104,7 +106,7 @@ class PlannerControllerTest {
 
         otherUser = User.builder()
                 .email("other@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-456")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test2")
@@ -165,7 +167,7 @@ class PlannerControllerTest {
         request.setId(UUID.randomUUID().toString());
         request.setCategory("5F");
         request.setTitle("Test Planner");
-        request.setStatus("draft");
+        request.setStatus(PlannerStatus.DRAFT);
         request.setContent(VALID_CONTENT);
         request.setContentVersion(7);
         request.setPlannerType(PlannerType.MIRROR_DUNGEON);
@@ -193,7 +195,7 @@ class PlannerControllerTest {
                 .user(user)
                 .title("Test Planner")
                 .category("5F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content(VALID_CONTENT)
                 .syncVersion(1L)
                 .schemaVersion(1)
@@ -254,6 +256,23 @@ class PlannerControllerTest {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
+        @DisplayName("Should return 400 generic without echoing the invalid status value")
+        void createPlanner_InvalidStatus_Returns400WithoutEcho() throws Exception {
+            UpsertPlannerRequest request = createValidPlannerRequest();
+            String body = objectMapper.writeValueAsString(request)
+                    .replace("\"status\":\"draft\"", "\"status\":\"garbage\"");
+
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+                            .cookie(accessTokenCookie())
+                            .cookie(deviceIdCookie())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(body))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                    .andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("garbage"))));
         }
 
         @Test
@@ -982,7 +1001,7 @@ class PlannerControllerTest {
                     .user(user)
                     .title(title)
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)
@@ -1024,7 +1043,7 @@ class PlannerControllerTest {
                     .user(testUser)
                     .title("F10 Planner")
                     .category("10F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)
@@ -1074,7 +1093,7 @@ class PlannerControllerTest {
                     .user(user)
                     .title(title)
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(upvotes)
@@ -1185,7 +1204,7 @@ class PlannerControllerTest {
                     .user(testUser)
                     .title("Published Planner")
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
@@ -1217,7 +1236,7 @@ class PlannerControllerTest {
                     .user(otherUser)  // Created by other user so test user can vote
                     .title("Votable Planner")
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
@@ -1327,7 +1346,7 @@ class PlannerControllerTest {
                     .user(otherUser)  // Created by other user so test user can bookmark
                     .title("Bookmarkable Planner")
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(5)
@@ -1417,7 +1436,7 @@ class PlannerControllerTest {
                     .user(testUser)
                     .title("My Published Planner")
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)
@@ -1494,7 +1513,7 @@ class PlannerControllerTest {
                     .user(user)
                     .title("View Test Planner")
                     .category("5F")
-                    .status("published")
+                    .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
                     .upvotes(0)

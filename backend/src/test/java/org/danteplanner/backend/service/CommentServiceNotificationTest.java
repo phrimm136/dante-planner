@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.dto.comment.CreateCommentRequest;
 import org.danteplanner.backend.entity.*;
 import org.danteplanner.backend.repository.PlannerCommentRepository;
@@ -73,7 +74,7 @@ class CommentServiceNotificationTest {
         owner = User.builder()
                 .id(OWNER_ID)
                 .email("owner@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("owner-123")
                 .usernameEpithet("OWNER")
                 .usernameSuffix("own01")
@@ -83,7 +84,7 @@ class CommentServiceNotificationTest {
         commenter = User.builder()
                 .id(COMMENTER_ID)
                 .email("commenter@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("commenter-123")
                 .usernameEpithet("COMMENTER")
                 .usernameSuffix("com01")
@@ -93,7 +94,7 @@ class CommentServiceNotificationTest {
         parentAuthor = User.builder()
                 .id(PARENT_AUTHOR_ID)
                 .email("parent@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("parent-123")
                 .usernameEpithet("PARENT")
                 .usernameSuffix("par01")
@@ -105,7 +106,7 @@ class CommentServiceNotificationTest {
                 .user(owner)
                 .title("Test Planner")
                 .category("5F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content("{}")
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .contentVersion(6)

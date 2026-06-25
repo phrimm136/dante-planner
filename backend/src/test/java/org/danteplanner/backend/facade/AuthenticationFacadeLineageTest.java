@@ -1,5 +1,6 @@
 package org.danteplanner.backend.facade;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.config.JwtProperties;
 import org.danteplanner.backend.config.LineageRotationFlag;
@@ -94,7 +95,7 @@ class AuthenticationFacadeLineageTest {
         testUser = User.builder()
                 .id(123L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("tst01")

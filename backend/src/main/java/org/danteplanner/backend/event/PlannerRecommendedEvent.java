@@ -12,7 +12,7 @@ import java.util.UUID;
  * This event is published AFTER the vote transaction commits to avoid holding transaction locks
  * during notification creation.
  *
- * @see org.danteplanner.backend.service.PlannerService#castVote
+ * @see org.danteplanner.backend.service.PlannerEngagementService#castVote
  * @see org.danteplanner.backend.listener.NotificationEventListener
  */
 @Getter

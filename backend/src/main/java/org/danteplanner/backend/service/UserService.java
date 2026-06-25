@@ -2,6 +2,7 @@ package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.config.EpithetConfig;
 import org.danteplanner.backend.dto.UserDto;
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.ModerationAction;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UsernameGenerationException;
@@ -45,10 +46,11 @@ public class UserService {
 
     @Transactional
     public User findOrCreateUser(String provider, Map<String, String> userInfo) {
+        AuthProviderType providerType = AuthProviderType.fromValue(provider);
         String providerId = userInfo.get("id");
 
-        return userRepository.findByProviderAndProviderId(provider, providerId)
-                .orElseGet(() -> createUserWithUniqueUsername(provider, userInfo));
+        return userRepository.findByProviderAndProviderId(providerType, providerId)
+                .orElseGet(() -> createUserWithUniqueUsername(providerType, userInfo));
     }
 
     /**
@@ -57,7 +59,7 @@ public class UserService {
      *
      * @throws UsernameGenerationException if unable to generate unique username after max retries
      */
-    private User createUserWithUniqueUsername(String provider, Map<String, String> userInfo) {
+    private User createUserWithUniqueUsername(AuthProviderType provider, Map<String, String> userInfo) {
         for (int attempt = 1; attempt <= MAX_USERNAME_RETRIES; attempt++) {
             UsernameComponents username = usernameGenerator.generate();
 

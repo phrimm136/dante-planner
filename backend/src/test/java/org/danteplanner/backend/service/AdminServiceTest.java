@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.UserNotFoundException;
@@ -45,7 +46,7 @@ class AdminServiceTest {
         adminUser = User.builder()
                 .id(1L)
                 .email("admin@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("admin-123")
                 .usernameEpithet("ADMIN")
                 .usernameSuffix("adm01")
@@ -55,7 +56,7 @@ class AdminServiceTest {
         moderatorUser = User.builder()
                 .id(2L)
                 .email("mod@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("mod-123")
                 .usernameEpithet("MOD")
                 .usernameSuffix("mod01")
@@ -65,7 +66,7 @@ class AdminServiceTest {
         normalUser = User.builder()
                 .id(3L)
                 .email("user@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("user-123")
                 .usernameEpithet("USER")
                 .usernameSuffix("usr01")
@@ -138,7 +139,7 @@ class AdminServiceTest {
             User otherModerator = User.builder()
                     .id(4L)
                     .email("mod2@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("mod2-123")
                     .usernameEpithet("MOD2")
                     .usernameSuffix("mod02")
@@ -202,7 +203,7 @@ class AdminServiceTest {
             User otherAdmin = User.builder()
                     .id(5L)
                     .email("admin2@example.com")
-                    .provider("google")
+                    .provider(AuthProviderType.GOOGLE)
                     .providerId("admin2-123")
                     .usernameEpithet("ADMIN2")
                     .usernameSuffix("adm02")

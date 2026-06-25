@@ -1,8 +1,8 @@
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { SortMode } from '@/components/common/Sorter'
 import type { DungeonIdx } from './constants'
 import { DUNGEON_IDX } from './constants'
-import { sortEGOGifts } from './egoGiftSort'
+import { sortEGOGifts } from '@/pages/egoGift'
 
 /**
  * Bucket and sort gifts for a floor's selector dialog.

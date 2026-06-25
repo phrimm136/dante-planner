@@ -2,6 +2,7 @@ package org.danteplanner.backend.facade;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.InvalidTokenException;
@@ -112,11 +113,12 @@ public class AuthenticationFacade {
         OAuthUserInfo userInfo = provider.getUserInfo(oauthTokens);
 
         String providerId = userInfo.providerId();
+        AuthProviderType providerType = AuthProviderType.fromValue(providerName);
         boolean reactivated = false;
 
         // 1. Try to find active user
         Optional<User> activeUser = userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(
-                providerName, providerId);
+                providerType, providerId);
 
         User user;
         if (activeUser.isPresent()) {
@@ -124,7 +126,7 @@ public class AuthenticationFacade {
             user = activeUser.get();
         } else {
             // 2. Try to find soft-deleted user (for reactivation)
-            Optional<User> deletedUser = userRepository.findByProviderAndProviderId(providerName, providerId);
+            Optional<User> deletedUser = userRepository.findByProviderAndProviderId(providerType, providerId);
 
             if (deletedUser.isPresent() && deletedUser.get().isDeleted()) {
                 // Reactivate the soft-deleted account

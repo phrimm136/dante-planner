@@ -8,11 +8,11 @@ import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
-import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/hooks/usePublishedPlannerQuery'
+import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/pages/planner/hooks/usePublishedPlannerQuery'
 import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
 
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
-import NotFoundPage from '@/routes/NotFoundPage'
+import NotFoundPage from '@/components/common/NotFoundPage'
 
 // Note: All route components are lazy loaded for code splitting
 // Each route will load its JS bundle only when navigated to
@@ -111,7 +111,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: lazyRouteComponent(() => import('@/routes/HomePage')),
+  component: lazyRouteComponent(() => import('@/pages/home/HomePage')),
   head: () => ({
     meta: [{ title: "Dante's Planner - Limbus Company Database and Planning Tool" }],
   }),
@@ -121,7 +121,7 @@ const indexRoute = createRoute({
 const plannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner',
-  component: lazyRouteComponent(() => import('@/routes/PlannerPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.planner.title') }],
   }),
@@ -131,7 +131,7 @@ const plannerRoute = createRoute({
 const plannerMDRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDPage')),
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
@@ -145,7 +145,7 @@ const plannerMDRoute = createRoute({
 const plannerMDGesellschaftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftPage')),
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
@@ -159,7 +159,7 @@ const plannerMDGesellschaftRoute = createRoute({
 const plannerMDGesellschaftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/gesellschaft/$id',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDGesellschaftDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDGesellschaftDetailPage')),
   validateSearch: zodValidator(mdGesellschaftSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
@@ -181,7 +181,7 @@ const plannerMDGesellschaftDetailRoute = createRoute({
 const plannerMDNewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/new',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDNewPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDNewPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.plannerMD.newPlan', 'planner') }],
   }),
@@ -191,7 +191,7 @@ const plannerMDNewRoute = createRoute({
 const deckBuilderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/deck',
-  component: lazyRouteComponent(() => import('@/routes/DeckBuilderPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/DeckBuilderPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.deckBuilder') }],
   }),
@@ -201,7 +201,7 @@ const deckBuilderRoute = createRoute({
 const plannerMDDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDDetailPage')),
   validateSearch: zodValidator(mdUserSearchSchema),
   search: {
     middlewares: [stripSearchParams(mdUserDefaults)],
@@ -219,7 +219,7 @@ const plannerMDDetailRoute = createRoute({
 const plannerMDEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/md/$id/edit',
-  component: lazyRouteComponent(() => import('@/routes/PlannerMDEditPage')),
+  component: lazyRouteComponent(() => import('@/pages/planner/PlannerMDEditPage')),
   loader: async ({ params }) => {
     const title = await loadPlannerTitle(params.id)
     return { title }
@@ -233,7 +233,7 @@ const plannerMDEditRoute = createRoute({
 const extractionPlannerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/planner/extraction',
-  component: lazyRouteComponent(() => import('@/routes/ExtractionPlannerPage')),
+  component: lazyRouteComponent(() => import('@/pages/extraction/ExtractionPlannerPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.extraction') }],
   }),
@@ -243,7 +243,7 @@ const extractionPlannerRoute = createRoute({
 const identityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity',
-  component: lazyRouteComponent(() => import('@/routes/IdentityPage')),
+  component: lazyRouteComponent(() => import('@/pages/identity/IdentityPage')),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.identity') }],
@@ -254,7 +254,7 @@ const identityRoute = createRoute({
 const identityDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/identity/$id',
-  component: lazyRouteComponent(() => import('@/routes/IdentityDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/identity/IdentityDetailPage')),
 
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
@@ -270,7 +270,7 @@ const identityDetailRoute = createRoute({
 const egoRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego',
-  component: lazyRouteComponent(() => import('@/routes/EGOPage')),
+  component: lazyRouteComponent(() => import('@/pages/ego/EGOPage')),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.ego') }],
@@ -281,7 +281,7 @@ const egoRoute = createRoute({
 const egoDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego/$id',
-  component: lazyRouteComponent(() => import('@/routes/EGODetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/ego/EGODetailPage')),
 
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
@@ -297,7 +297,7 @@ const egoDetailRoute = createRoute({
 const egoGiftRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift',
-  component: lazyRouteComponent(() => import('@/routes/EGOGiftPage')),
+  component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftPage')),
 
   head: () => ({
     meta: [{ title: pageTitle('header.nav.egoGift') }],
@@ -308,7 +308,7 @@ const egoGiftRoute = createRoute({
 const egoGiftDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ego-gift/$id',
-  component: lazyRouteComponent(() => import('@/routes/EGOGiftDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/egoGift/EGOGiftDetailPage')),
 
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
@@ -324,7 +324,7 @@ const egoGiftDetailRoute = createRoute({
 const themePackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack',
-  component: lazyRouteComponent(() => import('@/routes/ThemePackPage')),
+  component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.themePack') }],
   }),
@@ -334,7 +334,7 @@ const themePackRoute = createRoute({
 const themePackDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/theme-pack/$id',
-  component: lazyRouteComponent(() => import('@/routes/ThemePackDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/themePack/ThemePackDetailPage')),
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
     const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
@@ -349,7 +349,7 @@ const themePackDetailRoute = createRoute({
 const abEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event',
-  component: lazyRouteComponent(() => import('@/routes/AbEventPage')),
+  component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.abEvent') }],
   }),
@@ -359,7 +359,7 @@ const abEventRoute = createRoute({
 const abEventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/ab-event/$id',
-  component: lazyRouteComponent(() => import('@/routes/AbEventDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/abEvent/AbEventDetailPage')),
   loader: async ({ params }) => {
     try {
       const module = await import(`@static/i18n/${i18n.language}/abEvent/${params.id}.json`)
@@ -380,7 +380,7 @@ const abEventDetailRoute = createRoute({
 const keywordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword',
-  component: lazyRouteComponent(() => import('@/routes/KeywordPage')),
+  component: lazyRouteComponent(() => import('@/pages/keyword/KeywordPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.keyword') }],
   }),
@@ -390,7 +390,7 @@ const keywordRoute = createRoute({
 const keywordDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/keyword/$id',
-  component: lazyRouteComponent(() => import('@/routes/KeywordDetailPage')),
+  component: lazyRouteComponent(() => import('@/pages/keyword/KeywordDetailPage')),
   loader: async ({ params }) => {
     const module = await import(`@static/i18n/${i18n.language}/battleKeywords.json`)
     const keywords = module.default as Record<string, { name?: string }>
@@ -406,7 +406,7 @@ const keywordDetailRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
-  component: lazyRouteComponent(() => import('@/routes/SettingsPage')),
+  component: lazyRouteComponent(() => import('@/pages/settings/SettingsPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.settings.settings') }],
   }),
@@ -416,7 +416,7 @@ const settingsRoute = createRoute({
 const moderationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/moderation',
-  component: lazyRouteComponent(() => import('@/routes/ModeratorPage')),
+  component: lazyRouteComponent(() => import('@/pages/moderator/ModeratorPage')),
   head: () => ({
     meta: [{ title: pageTitle('header.nav.moderator') }],
   }),
@@ -426,7 +426,7 @@ const moderationRoute = createRoute({
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/privacy',
-  component: lazyRouteComponent(() => import('@/routes/PrivacyPage')),
+  component: lazyRouteComponent(() => import('@/pages/legal/PrivacyPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.privacy.title') }],
   }),
@@ -436,7 +436,7 @@ const privacyRoute = createRoute({
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/terms',
-  component: lazyRouteComponent(() => import('@/routes/TermsPage')),
+  component: lazyRouteComponent(() => import('@/pages/legal/TermsPage')),
   head: () => ({
     meta: [{ title: pageTitle('pages.terms.title') }],
   }),

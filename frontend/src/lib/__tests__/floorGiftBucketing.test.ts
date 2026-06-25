@@ -21,7 +21,7 @@
 import { describe, it, expect } from 'vitest'
 import { bucketAndSortFloorGifts } from '../floorGiftBucketing'
 import { DUNGEON_IDX } from '../constants'
-import type { EGOGiftListItem } from '@/types/EGOGiftTypes'
+import type { EGOGiftListItem } from '@/pages/egoGift'
 
 function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGiftListItem {
   return {

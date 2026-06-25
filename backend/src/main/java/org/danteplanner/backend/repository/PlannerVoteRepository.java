@@ -40,9 +40,36 @@ public interface PlannerVoteRepository extends JpaRepository<PlannerVote, Planne
     List<PlannerVote> findByUserIdAndPlannerIdIn(Long userId, List<UUID> plannerIds);
 
     /**
+     * Delete the user's votes that collide with the sentinel user's existing votes.
+     * A collision occurs when both the user and the sentinel voted on the same planner;
+     * reassigning such a vote would violate the composite PRIMARY KEY (user_id, planner_id).
+     * Must run before {@link #reassignUserVotes} during hard-delete.
+     *
+     * <p>The planner's upvote count is the denormalized {@code planners.upvotes} column,
+     * so removing a duplicate vote row does not change the displayed count.
+     *
+     * <p>Native self-join DELETE: MySQL forbids a subquery on the delete target table
+     * (error 1093), which a JPQL {@code DELETE ... WHERE plannerId IN (SELECT ...)} would emit.
+     *
+     * @param userId     the user ID whose colliding votes should be removed
+     * @param sentinelId the sentinel user ID to compare against
+     * @return the number of votes deleted
+     */
+    @Modifying(clearAutomatically = true)
+    @Query(value = "DELETE v FROM planner_votes v "
+            + "JOIN planner_votes s ON v.planner_id = s.planner_id "
+            + "WHERE v.user_id = :userId AND s.user_id = :sentinelId",
+            nativeQuery = true)
+    int deleteVotesCollidingWithSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+
+    /**
      * Reassign all votes from a user to the sentinel user.
-     * Used during hard-delete to preserve vote counts on planners.
-     * This preserves the voting history while anonymizing the voter.
+     * Used during hard-delete to anonymize the voter while keeping the vote rows.
+     * The planner's upvote count is the denormalized {@code planners.upvotes} counter,
+     * independent of these rows, so the displayed count is unaffected.
+     *
+     * <p>Callers must first invoke {@link #deleteVotesCollidingWithSentinel} to remove
+     * votes that would duplicate an existing sentinel vote on the same planner.
      *
      * @param userId     the user ID whose votes should be reassigned
      * @param sentinelId the sentinel user ID to reassign votes to

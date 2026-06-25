@@ -1,0 +1,13 @@
+{
+  "model": "page-slice (pivoted from entity/feature/shared tiers)",
+  "commitStrategy": "deferred — single bulk commit after all phases + review",
+  "currentPhase": "done",
+  "committedAs": "19fdfb8 refactor: migrate game-noun verticals into page slices",
+  "phases": [
+    { "name": "Phase A: Architecture pivot — entities/ -> pages/, single public-API lint rule", "status": "done" },
+    { "name": "Phase B: Complete pages/themePack slice", "status": "done" },
+    { "name": "Phase C: Move list+detail route components into the 5 slices, rewire router", "status": "done" },
+    { "name": "Phase D: Verify + boundary probe (page model)", "status": "done" },
+    { "name": "Phase E: Docs + bulk commit", "status": "done" }
+  ]
+}

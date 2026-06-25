@@ -1,7 +1,9 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.Planner;
 import org.danteplanner.backend.entity.PlannerReport;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.PlannerNotFoundException;
@@ -52,7 +54,7 @@ class PlannerReportServiceTest {
         testUser = User.builder()
                 .id(1L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -65,7 +67,7 @@ class PlannerReportServiceTest {
                 .user(testUser)
                 .title("Published Planner")
                 .category("5F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content("{\"data\": \"test\"}")
                 .contentVersion(6)
                 .plannerType(PlannerType.MIRROR_DUNGEON)

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.security;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -101,7 +102,7 @@ class JwtAuthenticationFilterLineageTest {
         return User.builder()
                 .id(id)
                 .email("user@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-" + id)
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("usr" + String.format("%02d", id % 100))

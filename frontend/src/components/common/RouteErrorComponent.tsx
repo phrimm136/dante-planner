@@ -1,10 +1,10 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from '@tanstack/react-router'
-import { PlannerNotFound } from '@/components/common/PlannerNotFound'
+import { PlannerNotFound } from '@/pages/planner'
 import { Button } from '@/components/ui/button'
 import { NotFoundError } from '@/lib/api'
-import NotFoundPage from '@/routes/NotFoundPage'
+import NotFoundPage from './NotFoundPage'
 
 /**
  * RouteErrorComponent - Error component for TanStack Router

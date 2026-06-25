@@ -7,10 +7,14 @@ import org.danteplanner.backend.config.DeviceId;
 import org.danteplanner.backend.config.RateLimitConfig;
 import org.danteplanner.backend.config.SecurityProperties;
 import org.danteplanner.backend.dto.planner.*;
+import org.danteplanner.backend.service.PlannerCommandService;
+import org.danteplanner.backend.service.PlannerEngagementService;
+import org.danteplanner.backend.service.PlannerPublishingService;
+import org.danteplanner.backend.service.PlannerQueryService;
 import org.danteplanner.backend.service.PlannerReportService;
-import org.danteplanner.backend.service.PlannerService;
 import org.danteplanner.backend.service.PlannerSubscriptionService;
 import org.danteplanner.backend.service.PlannerSyncEventService;
+import org.danteplanner.backend.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.service.SseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,10 +49,13 @@ import org.springframework.data.jpa.domain.Specification;
 @Slf4j
 public class PlannerController {
 
-    private final PlannerService plannerService;
+    private final PlannerCommandService plannerCommandService;
+    private final PlannerQueryService plannerQueryService;
+    private final PlannerPublishingService plannerPublishingService;
+    private final PublishedPlannerQueryService publishedPlannerQueryService;
+    private final PlannerEngagementService plannerEngagementService;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
-    private final PlannerSyncEventService plannerSyncEventService;
     private final SseService sseService;
     private final RateLimitConfig rateLimitConfig;
     private final SecurityProperties securityProperties;
@@ -69,17 +76,23 @@ public class PlannerController {
     private int recommendedThreshold;
 
     public PlannerController(
-            PlannerService plannerService,
+            PlannerCommandService plannerCommandService,
+            PlannerQueryService plannerQueryService,
+            PlannerPublishingService plannerPublishingService,
+            PublishedPlannerQueryService publishedPlannerQueryService,
+            PlannerEngagementService plannerEngagementService,
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
-            PlannerSyncEventService plannerSyncEventService,
             SseService sseService,
             RateLimitConfig rateLimitConfig,
             SecurityProperties securityProperties) {
-        this.plannerService = plannerService;
+        this.plannerCommandService = plannerCommandService;
+        this.plannerQueryService = plannerQueryService;
+        this.plannerPublishingService = plannerPublishingService;
+        this.publishedPlannerQueryService = publishedPlannerQueryService;
+        this.plannerEngagementService = plannerEngagementService;
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
-        this.plannerSyncEventService = plannerSyncEventService;
         this.sseService = sseService;
         this.rateLimitConfig = rateLimitConfig;
         this.securityProperties = securityProperties;
@@ -128,7 +141,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "list");
         log.debug("Fetching planners for user {} with pagination: {}", userId, pageable);
-        Page<PlannerSummaryResponse> planners = plannerService.getPlanners(userId, pageable);
+        Page<PlannerSummaryResponse> planners = plannerQueryService.getPlanners(userId, pageable);
         return ResponseEntity.ok(planners);
     }
 
@@ -146,7 +159,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "get");
         log.debug("Fetching planner {} for user {}", id, userId);
-        PlannerResponse response = plannerService.getPlanner(userId, id);
+        PlannerResponse response = plannerQueryService.getPlanner(userId, id);
         return ResponseEntity.ok(response);
     }
 
@@ -172,7 +185,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "upsert");
         log.info("Upserting planner {} for user {}, force={}", id, userId, force);
-        UpsertResult result = plannerService.upsertPlanner(userId, deviceId, id, request, force);
+        UpsertResult result = plannerCommandService.upsertPlanner(userId, deviceId, id, request, force);
 
         HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
         return ResponseEntity.status(status).body(result.response());
@@ -194,7 +207,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "delete");
         log.info("Deleting planner {} for user {}", id, userId);
-        plannerService.deletePlanner(userId, deviceId, id);
+        plannerCommandService.deletePlanner(userId, deviceId, id);
         return ResponseEntity.noContent().build();
     }
 
@@ -214,7 +227,7 @@ public class PlannerController {
             @Valid @RequestBody ToggleOwnerNotificationsRequest request) {
 
         log.info("User {} toggling owner notifications for planner {}", userId, id);
-        ToggleOwnerNotificationsResponse response = plannerService.toggleOwnerNotifications(userId, id, request.enabled());
+        ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(userId, id, request.enabled());
         return ResponseEntity.ok(response);
     }
 
@@ -234,7 +247,7 @@ public class PlannerController {
 
         rateLimitConfig.checkImportLimit(userId);
         log.info("Importing {} planners for user {}", request.getPlanners().size(), userId);
-        ImportPlannersResponse response = plannerService.importPlanners(userId, request);
+        ImportPlannersResponse response = plannerCommandService.importPlanners(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -294,14 +307,14 @@ public class PlannerController {
                 category, q, userId, pageable);
 
         if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
-            Page<PublicPlannerResponse> planners = plannerService.searchPlanners(
+            Page<PublicPlannerResponse> planners = publishedPlannerQueryService.searchPlanners(
                     PlannerSpecifications.isPublished(), pageable, category, userId, q,
                     parseCsv(keyword), parseCsv(identity), parseCsv(ego),
                     parseCsv(gift), parseCsv(themePack));
             return ResponseEntity.ok(planners);
         }
 
-        Page<PublicPlannerResponse> planners = plannerService.getPublishedPlanners(pageable, category, userId, q);
+        Page<PublicPlannerResponse> planners = publishedPlannerQueryService.getPublishedPlanners(pageable, category, userId, q);
         return ResponseEntity.ok(planners);
     }
 
@@ -339,14 +352,14 @@ public class PlannerController {
                 category, q, userId, pageable);
 
         if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
-            Page<PublicPlannerResponse> planners = plannerService.searchPlanners(
+            Page<PublicPlannerResponse> planners = publishedPlannerQueryService.searchPlanners(
                     PlannerSpecifications.isRecommended(recommendedThreshold), pageable, category, userId, q,
                     parseCsv(keyword), parseCsv(identity), parseCsv(ego),
                     parseCsv(gift), parseCsv(themePack));
             return ResponseEntity.ok(planners);
         }
 
-        Page<PublicPlannerResponse> planners = plannerService.getRecommendedPlanners(pageable, category, userId, q);
+        Page<PublicPlannerResponse> planners = publishedPlannerQueryService.getRecommendedPlanners(pageable, category, userId, q);
         return ResponseEntity.ok(planners);
     }
 
@@ -399,7 +412,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "publish");
         log.info("Toggling publish status for planner {} by user {}", id, userId);
-        Planner planner = plannerService.togglePublish(userId, id);
+        Planner planner = plannerPublishingService.togglePublish(userId, id);
         return ResponseEntity.ok(PlannerResponse.fromEntity(planner));
     }
 
@@ -422,7 +435,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "vote");
         log.info("User {} casting immutable upvote on planner {}", userId, id);
-        VoteResponse response = plannerService.castVote(userId, id, request.getVoteType());
+        VoteResponse response = plannerEngagementService.castVote(userId, id, request.getVoteType());
         return ResponseEntity.ok(response);
     }
 
@@ -443,7 +456,7 @@ public class PlannerController {
 
         rateLimitConfig.checkCrudLimit(userId, "bookmark");
         log.info("User {} toggling bookmark on planner {}", userId, id);
-        BookmarkResponse response = plannerService.toggleBookmark(userId, id);
+        BookmarkResponse response = plannerEngagementService.toggleBookmark(userId, id);
         return ResponseEntity.ok(response);
     }
 
@@ -469,7 +482,7 @@ public class PlannerController {
         String clientIp = ClientIpResolver.resolve(request, securityProperties);
         String userAgent = request.getHeader("User-Agent");
         log.debug("Fetching published planner {} for userId {}", id, userId);
-        PublishedPlannerDetailResponse response = plannerService.getPublishedPlanner(id, userId, clientIp, userAgent);
+        PublishedPlannerDetailResponse response = publishedPlannerQueryService.getPublishedPlanner(id, userId, clientIp, userAgent);
         return ResponseEntity.ok(response);
     }
 

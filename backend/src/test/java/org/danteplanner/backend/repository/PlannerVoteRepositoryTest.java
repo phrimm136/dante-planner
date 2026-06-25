@@ -1,7 +1,9 @@
 package org.danteplanner.backend.repository;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.PlannerVote;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.entity.VoteType;
@@ -58,7 +60,7 @@ class PlannerVoteRepositoryTest {
         // Create test user
         testUser = User.builder()
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -71,7 +73,7 @@ class PlannerVoteRepositoryTest {
                 .user(testUser)
                 .title("Test Planner")
                 .category("5F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content("{\"data\":\"test\"}")
                 .published(true)
                 .upvotes(0)
@@ -120,7 +122,7 @@ class PlannerVoteRepositoryTest {
         // Arrange - Create another user
         User secondUser = User.builder()
                 .email("second@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-456")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test2")
@@ -154,7 +156,7 @@ class PlannerVoteRepositoryTest {
                 .user(testUser)
                 .title("Second Planner")
                 .category("10F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content("{\"data\":\"test2\"}")
                 .published(true)
                 .upvotes(0)

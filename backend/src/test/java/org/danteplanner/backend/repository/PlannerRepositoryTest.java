@@ -1,9 +1,11 @@
 package org.danteplanner.backend.repository;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.entity.Planner;
+import org.danteplanner.backend.entity.PlannerStatus;
 import org.danteplanner.backend.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +54,7 @@ class PlannerRepositoryTest {
         // Create test user
         testUser = User.builder()
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -65,7 +67,7 @@ class PlannerRepositoryTest {
                 .user(testUser)
                 .title("Test Planner")
                 .category("5F")
-                .status("draft")
+                .status(PlannerStatus.DRAFT)
                 .content("{\"data\":\"test\"}")
                 .published(true)
                 .upvotes(0)

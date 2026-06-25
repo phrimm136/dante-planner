@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 
+import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
@@ -61,7 +62,7 @@ class UserAccountLifecycleServiceTest {
         testUser = User.builder()
                 .id(123L)
                 .email("test@example.com")
-                .provider("google")
+                .provider(AuthProviderType.GOOGLE)
                 .providerId("google-123")
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
@@ -300,6 +301,29 @@ class UserAccountLifecycleServiceTest {
             inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             inOrder.verify(userRepository).delete(testUser);
+        }
+
+        @Test
+        @DisplayName("Should delete colliding votes before reassigning to sentinel")
+        void performHardDelete_deletesCollidingVotesBeforeReassign() {
+            // Arrange
+            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(2);
+            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(1);
+            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
+                    .thenReturn(0);
+            doNothing().when(userRepository).delete(testUser);
+
+            // Act
+            lifecycleService.performHardDelete(testUser);
+
+            // Assert - collision deletion must precede reassignment to avoid duplicate PK
+            var inOrder = inOrder(plannerVoteRepository, plannerCommentVoteRepository);
+            inOrder.verify(plannerVoteRepository).deleteVotesCollidingWithSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerCommentVoteRepository).deleteVotesCollidingWithSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
         }
     }
 }

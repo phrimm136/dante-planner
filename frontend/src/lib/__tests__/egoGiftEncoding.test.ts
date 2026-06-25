@@ -16,7 +16,7 @@ import {
   buildSelectionLookup,
   getCascadeIngredients,
 } from '../egoGiftEncoding'
-import type { EGOGiftRecipe } from '@/types/EGOGiftTypes'
+import type { EGOGiftRecipe } from '@/pages/egoGift'
 
 describe('encodeGiftSelection', () => {
   it('returns just giftId when enhancement is 0', () => {

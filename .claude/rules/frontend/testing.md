@@ -22,7 +22,24 @@ Favor integration over unit tests. Test behavior from the user's perspective.
 - **Use `screen` queries** — not container queries
 - **Query by role/label/text** — never by CSS class or component name
 - **Wrap state updates** — use RTL's async utilities
-- **Mock at network level** (MSW) for integration tests, not function level
+- **Mock at the right boundary** — see the Hybrid Mocking Policy below
+
+## Hybrid Mocking Policy
+
+Choose the mock by the boundary the test crosses. Do not mock the network for a
+test whose subject is pure state.
+
+| Subject under test | Boundary | Mock with |
+|---|---|---|
+| Integration / component that hits the network | HTTP | MSW — register per-test handlers via `server.use(...)`; default handlers in `src/test-utils/handlers.ts` |
+| Pure state / Zustand store | none | `renderHook`, no mocks — assert state transitions directly |
+| Orchestration hook (composes adapters) | injected adapter | Fake the injected adapter (`vi.mock` the adapter module); do not mock `fetch` |
+
+MSW lifecycle is scoped per network-level test file (`beforeAll(server.listen)`
+/ `afterEach(server.resetHandlers)` / `afterAll(server.close)`), because
+`vitest.setup.ts` installs a suite-wide `globalThis.fetch = vi.fn()` that
+state/adapter tests rely on. A network test restores that mock in its own
+`afterAll`. See `src/test-utils/mswServer.ts`.
 
 ## Query Priority (Testing Library)
 

@@ -106,15 +106,16 @@ Before using ANY hardcoded value (colors, numbers, strings):
 |------------------|-------------------|
 | Data fetching hook | `hooks/useEntityListData.ts`, `hooks/useEntityDetailData.ts` |
 | Zustand store | `stores/usePlannerStore.ts` |
-| Card component | `components/identity/IdentityCard.tsx`, `components/egoGift/EGOGiftCard.tsx` |
-| Detail page | `routes/IdentityDetailPage.tsx`, `routes/EGODetailPage.tsx` |
-| List page | `routes/IdentityPage.tsx`, `routes/EGOGiftPage.tsx` |
-| Type definitions | `types/IdentityTypes.ts`, `types/EGOGiftTypes.ts` |
-| Zod schemas | `schemas/IdentitySchemas.ts`, `schemas/EGOGiftSchemas.ts` |
+| Card component | `pages/identity/components/IdentityCard.tsx`, `pages/egoGift/components/EGOGiftCard.tsx` |
+| Detail page | `pages/identity/IdentityDetailPage.tsx`, `pages/ego/EGODetailPage.tsx` |
+| List page | `pages/identity/IdentityPage.tsx`, `pages/egoGift/EGOGiftPage.tsx` |
+| Type definitions | `pages/identity/types/IdentityTypes.ts`, `pages/egoGift/types/EGOGiftTypes.ts` |
+| Zod schemas | `pages/identity/schemas/IdentitySchemas.ts`, `pages/egoGift/schemas/EGOGiftSchemas.ts` |
 | Asset paths | `lib/assetPaths.ts` (ALL helper functions) |
 | Constants | `lib/constants.ts` (MAX_LEVEL, SINNERS, AFFINITIES, etc.) |
 | Styling utilities | `lib/utils.ts` (cn function) |
 | Validation utilities | `lib/validation.ts` (validateData) |
+| Page slice (game-noun page) | `pages/<noun>/` — colocates list+detail route components, `components/hooks/lib/types/schemas`, exposes a public API via `index.ts`. Reach a slice only via `@/pages/<noun>`; cross-page reuse is allowed. |
 
 ---
 

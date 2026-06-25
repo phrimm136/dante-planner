@@ -3,7 +3,7 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { NotFoundError } from '@/lib/api'
-import NotFoundPage from '@/routes/NotFoundPage'
+import NotFoundPage from './NotFoundPage'
 
 interface ErrorFallbackProps {
   error: unknown

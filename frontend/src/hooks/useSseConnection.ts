@@ -1,19 +1,20 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { plannerApi } from '@/lib/plannerApi'
+import { plannerApi } from '@/pages/planner'
 import i18n from '@/lib/i18n'
 import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
 import { showBrowserNotification, isTabHidden } from '@/lib/browserNotification'
 import { formatUsername } from '@/lib/formatUsername'
 import { showNotificationToast } from '@/components/notifications/NotificationToast'
-import { PlannerSseEventSchema } from '@/schemas/PlannerSchemas'
+import { PlannerSseEventSchema } from '@/pages/planner'
 import { SseNotificationEventSchema, SsePublishedEventSchema } from '@/schemas/NotificationSchemas'
 import { useSseStore } from '@/stores/useSseStore'
 import { useAuthQueryNonBlocking } from './useAuthQuery'
 import { useUserSettingsQuery } from './useUserSettings'
-import { plannerQueryKeys } from './usePlannerSync'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { usePlannerSaveAdapter } from '@/pages/planner'
+import { plannerQueryKeys } from '@/pages/planner'
+import { userPlannersQueryKeys } from '@/pages/planner'
 import { notificationQueryKeys } from './useNotificationsQuery'
 
 import type { SseNotificationEvent } from '@/schemas/NotificationSchemas'
@@ -121,13 +122,28 @@ export function useSseConnection(): void {
   const incrementReconnectAttempts = useSseStore((s) => s.incrementReconnectAttempts)
   const resetReconnectAttempts = useSseStore((s) => s.resetReconnectAttempts)
 
+  // Stable across renders (useMemo with empty deps in usePlannerStorage),
+  // so safe to list in handler deps without triggering effect re-runs.
+  const saveAdapter = usePlannerSaveAdapter()
+
   /**
-   * Handle SSE planner update event
+   * Handle SSE planner update event.
+   *
+   * On 'deleted', purge the row from IndexedDB so a stale local copy can't
+   * trigger an upsert against the soft-deleted server row on next edit.
+   * The underlying IndexedDB delete is idempotent — safe if the row is
+   * already absent (e.g. self-originated event echoed back).
    */
   const handlePlannerUpdate = useCallback(
     (event: MessageEvent) => {
       try {
         const data = PlannerSseEventSchema.parse(JSON.parse(event.data as string))
+
+        if (data.type === 'deleted') {
+          void saveAdapter.deleteFromLocal(data.plannerId).catch((e) => {
+            console.error('Failed to purge local planner after SSE delete:', e)
+          })
+        }
 
         // Invalidate relevant caches
         void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
@@ -141,7 +157,7 @@ export function useSseConnection(): void {
         console.error('Failed to parse SSE planner-update event:', e)
       }
     },
-    [queryClient, setLastEventTime]
+    [queryClient, setLastEventTime, saveAdapter]
   )
 
   /**
