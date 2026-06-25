@@ -4,6 +4,7 @@ import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.converter.KeywordSetConverter;
 import org.danteplanner.backend.entity.*;
 import org.danteplanner.backend.repository.*;
 import org.danteplanner.backend.service.PlannerEngagementService;
@@ -28,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
@@ -435,6 +437,28 @@ class MySQLIntegrationTest {
                     NotificationType.COMMENT_RECEIVED
             );
             return notificationRepository.save(notification);
+        }
+    }
+
+    @Nested
+    @DisplayName("SelectedKeywords SET Column")
+    class SelectedKeywordsTests {
+
+        @Test
+        @DisplayName("planner persists and restores every FE keyword through the real SET column")
+        void saveAllKeywords_roundTripsThroughSetColumn() {
+            // The full set joins to ~375 chars; only the MySQL SET(...) column (bitmask
+            // storage) holds it. H2's converter-backed VARCHAR(255) cannot, which is why
+            // this empirical all-keywords save lives in the containerized tier.
+            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
+            planner.setSelectedKeywords(new HashSet<>(KeywordSetConverter.VALID_KEYWORDS));
+            plannerRepository.save(planner);
+
+            // No surrounding @Transactional: save commits in its own session, so this
+            // findById re-reads from the DB and exercises the converter's read path.
+            Planner reloaded = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertThat(reloaded.getSelectedKeywords())
+                    .containsExactlyInAnyOrderElementsOf(KeywordSetConverter.VALID_KEYWORDS);
         }
     }
 }

@@ -40,7 +40,8 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
             "Assemble", "KnowledgeExplored", "AaCePcBt", "SwordPlayOfTheHomeland",
             "EchoOfMansion", "TimeSuspend", "EmergencyChargeForceField", "BloodDinner",
             "BlackCloud", "RetaliationBook", "HeishouSynergy",
-            "Bullet", "BlessingOfIndexPrescriptAlly", "Inspire"
+            "Bullet", "BlessingOfIndexPrescriptAlly", "Inspire",
+            "AccelBullet", "SojiRyoshuEntangle"
     );
 
     @Override
