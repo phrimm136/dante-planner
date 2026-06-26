@@ -1,27 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./korean-font-coverage.css";
 
 /* ==========================================================================
    Font Face Declarations
+
+   KOTRA Bold and S-Core Dream are declared in korean-font-coverage.css
+   (generated) with a unicode-range that excludes their blank Hangul glyphs.
    ========================================================================== */
-
-/* KOTRA Bold - Korean display font */
-@font-face {
-  font-family: 'KOTRA_BOLD';
-  src: url('../assets/fonts/KOTRA_BOLD.ttf');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* S-Core Dream Medium - Korean body font */
-@font-face {
-  font-family: 'S-Core Dream';
-  src: url('../assets/fonts/S-Core_Dream_OTF/SCDream5.otf') format('opentype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
 
 /* Mikodacs Regular - Stylized display font */
 @font-face {
