@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
  * - Path: "/" (available to entire domain)
  * - SameSite: Lax (CSRF protection while allowing external link navigation)
  *
- * <p>SameSite=Lax allows cookies on top-level navigation (clicking links)
- * but blocks them for embedded requests and form POSTs. This is safe because
- * all GET endpoints in this application are read-only.</p>
+ * <p>SameSite=Lax allows cookies on top-level navigation (clicking links) but blocks them for
+ * embedded requests and cross-site form POSTs. It is a belt-and-suspenders layer alongside the
+ * double-submit CSRF filter ({@code CsrfDoubleSubmitFilter}); it is not the sole CSRF defense.</p>
  */
 @Component
 public class CookieUtils {
@@ -58,8 +58,27 @@ public class CookieUtils {
      * @param maxAgeSeconds cookie lifetime in seconds
      */
     public void setCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        response.addCookie(buildCookie(name, value, maxAgeSeconds, true));
+    }
+
+    /**
+     * Sets a secure, JavaScript-readable (non-HttpOnly) cookie.
+     * Used for the double-submit CSRF token, which the SPA must read and echo
+     * back in the {@code X-CSRF-Token} header. Secure/SameSite/domain/path match
+     * {@link #setCookie}.
+     *
+     * @param response HTTP response to add cookie to
+     * @param name cookie name
+     * @param value cookie value
+     * @param maxAgeSeconds cookie lifetime in seconds
+     */
+    public void setReadableCookie(HttpServletResponse response, String name, String value, int maxAgeSeconds) {
+        response.addCookie(buildCookie(name, value, maxAgeSeconds, false));
+    }
+
+    private Cookie buildCookie(String name, String value, int maxAgeSeconds, boolean httpOnly) {
         Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(httpOnly);
         cookie.setSecure(secureCookies);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
@@ -67,7 +86,7 @@ public class CookieUtils {
         if (cookieDomain != null && !cookieDomain.isEmpty()) {
             cookie.setDomain(cookieDomain);
         }
-        response.addCookie(cookie);
+        return cookie;
     }
 
     /**

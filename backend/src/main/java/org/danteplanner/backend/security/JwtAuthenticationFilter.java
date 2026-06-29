@@ -54,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * - Logout: Should work even with expired/invalid tokens
      */
     private static final Set<String> EXCLUDED_PATHS = Set.of(
+            "/api/auth/google/start",
             "/api/auth/google/callback",
             "/api/auth/apple/callback",
             "/api/auth/logout"
@@ -285,10 +286,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Generate new tokens (fetch fresh role from user entity)
             String newAccessToken = tokenGenerator.generateAccessToken(
-                    user.getId(), user.getEmail(), user.getRole()
+                    user.getId(), user.getRole()
             );
             String newRefreshToken = tokenGenerator.generateRefreshToken(
-                    user.getId(), user.getEmail()
+                    user.getId()
             );
 
             // Set new cookies (15 minutes for access, 7 days for refresh)
@@ -345,7 +346,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         User user = activeUser.get();
 
         String newAccessToken = tokenGenerator.generateAccessToken(
-                user.getId(), user.getEmail(), user.getRole()
+                user.getId(), user.getRole()
         );
         cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken, 900);
 

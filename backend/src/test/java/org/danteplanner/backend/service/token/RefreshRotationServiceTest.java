@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service.token;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.JwtProperties;
@@ -68,7 +67,7 @@ class RefreshRotationServiceTest {
         jwtProperties.setAccessTokenExpiry(900000L);
         jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
 
-        tokenService = new JwtTokenService(jwtProperties, new ObjectMapper());
+        tokenService = new JwtTokenService(jwtProperties);
         cookieUtils = new CookieUtils(true, "", "Lax");
         meterRegistry = new SimpleMeterRegistry();
 
@@ -77,7 +76,7 @@ class RefreshRotationServiceTest {
     }
 
     private String freshLoginToken() {
-        return tokenService.generateRefreshToken(USER_ID, EMAIL, UUID.randomUUID().toString(), null);
+        return tokenService.generateRefreshToken(USER_ID, UUID.randomUUID().toString(), null);
     }
 
     private MockHttpServletResponse newResponse() {
@@ -264,7 +263,7 @@ class RefreshRotationServiceTest {
         @Test
         @DisplayName("Access token is rejected as INVALID and mints nothing even with legacy admit on")
         void accessToken_rejectedEvenWhenLegacyAdmitOn() {
-            String accessToken = tokenService.generateAccessToken(USER_ID, EMAIL, UserRole.NORMAL);
+            String accessToken = tokenService.generateAccessToken(USER_ID, UserRole.NORMAL);
 
             RotationResult result = rotationService.rotate(accessToken, newResponse());
 

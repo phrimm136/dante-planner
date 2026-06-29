@@ -118,7 +118,7 @@ class AuthenticationFacadeLineageTest {
         when(refreshRotationService.rotate(eq(oldRefresh), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
+        when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
         when(jwtProperties.getCookieExpirySeconds()).thenReturn(604800);
 
@@ -142,7 +142,7 @@ class AuthenticationFacadeLineageTest {
         SessionRevokedException ex = assertThrows(SessionRevokedException.class,
                 () -> facade.refreshTokens(stolen, response));
         assertEquals("fam-theft", ex.getFamilyId());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test

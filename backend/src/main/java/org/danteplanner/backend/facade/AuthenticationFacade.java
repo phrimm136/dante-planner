@@ -152,8 +152,8 @@ public class AuthenticationFacade {
         tokenBlacklistService.clearUserInvalidation(user.getId());
 
         // Generate JWT tokens
-        String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
-        String refreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
+        String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
+        String refreshToken = tokenGenerator.generateRefreshToken(user.getId());
 
         log.info("User authenticated successfully via {}: userId={} (reactivated: {})",
                 providerName, user.getId(), reactivated);
@@ -205,8 +205,8 @@ public class AuthenticationFacade {
         }
 
         // Generate new tokens (fetch fresh role from user entity)
-        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
-        String newRefreshToken = tokenGenerator.generateRefreshToken(user.getId(), user.getEmail());
+        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
+        String newRefreshToken = tokenGenerator.generateRefreshToken(user.getId());
 
         log.info("Token refreshed successfully for user: {}", user.getId());
         return new AuthResult(user, newAccessToken, newRefreshToken, false);
@@ -249,7 +249,7 @@ public class AuthenticationFacade {
             throw new AccountDeletedException(user.getId());
         }
 
-        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
         cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
                 jwtProperties.getCookieExpirySeconds());
 

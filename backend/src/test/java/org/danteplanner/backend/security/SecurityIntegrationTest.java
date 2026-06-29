@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 /**
  * Integration tests for security boundaries that controller tests cannot reach.
@@ -164,7 +165,7 @@ class SecurityIntegrationTest {
         void adminEndpoint_RegularUser_Returns403() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))
@@ -176,7 +177,7 @@ class SecurityIntegrationTest {
         void adminEndpoint_AdminUser_Returns200() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))

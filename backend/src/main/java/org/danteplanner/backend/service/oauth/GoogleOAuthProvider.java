@@ -18,6 +18,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Google OAuth provider implementation.
@@ -35,6 +36,9 @@ public class GoogleOAuthProvider implements OAuthProvider {
         "https://oauth2.googleapis.com/token";
     private static final String USER_INFO_URL =
         "https://www.googleapis.com/oauth2/v2/userinfo";
+    private static final String AUTHORIZE_URL =
+        "https://accounts.google.com/o/oauth2/v2/auth";
+    private static final String SCOPE = "openid email";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -43,6 +47,21 @@ public class GoogleOAuthProvider implements OAuthProvider {
     @Override
     public String getProviderName() {
         return PROVIDER_NAME;
+    }
+
+    @Override
+    public String buildAuthorizationUrl(String state, String codeChallenge) {
+        return UriComponentsBuilder.fromUriString(AUTHORIZE_URL)
+            .queryParam("client_id", oAuthProperties.getGoogle().getClientId())
+            .queryParam("redirect_uri", oAuthProperties.getGoogle().getRedirectUri())
+            .queryParam("response_type", "code")
+            .queryParam("scope", SCOPE)
+            .queryParam("state", state)
+            .queryParam("code_challenge", codeChallenge)
+            .queryParam("code_challenge_method", "S256")
+            .build()
+            .encode()
+            .toUriString();
     }
 
     @Override

@@ -44,6 +44,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 /**
  * Integration tests for PlannerController.
@@ -114,8 +115,8 @@ class PlannerControllerTest {
         otherUser = userRepository.save(otherUser);
 
         // Generate JWT tokens
-        accessToken = jwtTokenService.generateAccessToken(testUser.getId(), testUser.getEmail(), UserRole.NORMAL);
-        otherUserAccessToken = jwtTokenService.generateAccessToken(otherUser.getId(), otherUser.getEmail(), UserRole.NORMAL);
+        accessToken = jwtTokenService.generateAccessToken(testUser.getId(), UserRole.NORMAL);
+        otherUserAccessToken = jwtTokenService.generateAccessToken(otherUser.getId(), UserRole.NORMAL);
 
         // Generate device ID
         deviceId = UUID.randomUUID();
@@ -215,7 +216,7 @@ class PlannerControllerTest {
         void createPlanner_ValidData_Returns201() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -236,7 +237,7 @@ class PlannerControllerTest {
         void createPlanner_NoAuth_Returns401() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -249,7 +250,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setCategory(null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -265,7 +266,7 @@ class PlannerControllerTest {
             String body = objectMapper.writeValueAsString(request)
                     .replace("\"status\":\"draft\"", "\"status\":\"garbage\"");
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -281,7 +282,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setContent(null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -302,7 +303,7 @@ class PlannerControllerTest {
             );
             request.setContent(largeContent);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -323,7 +324,7 @@ class PlannerControllerTest {
             );
             request.setContent(contentWithLargeNote);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -338,7 +339,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setContentVersion(null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -353,7 +354,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setPlannerType(null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -368,7 +369,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request.setContentVersion(0);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -387,7 +388,7 @@ class PlannerControllerTest {
 
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -404,7 +405,7 @@ class PlannerControllerTest {
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -422,7 +423,7 @@ class PlannerControllerTest {
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -574,7 +575,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
             request.setTitle("Updated Title");
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -593,7 +594,7 @@ class PlannerControllerTest {
             request.setTitle("Updated Title");
             request.setSyncVersion(999L); // Wrong version
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -611,7 +612,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(otherUserPlanner);
             request.setTitle("Updated Title");
 
-            mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -632,7 +633,7 @@ class PlannerControllerTest {
                 largeTitle
             ));
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -649,7 +650,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
             request.setTitle("Updated Title");
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -664,7 +665,7 @@ class PlannerControllerTest {
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
             request.setContentVersion(7);
 
-            mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -683,7 +684,7 @@ class PlannerControllerTest {
         void deletePlanner_Success_SoftDeletes() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(delete("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie()))
                     .andExpect(status().isNoContent());
@@ -699,7 +700,7 @@ class PlannerControllerTest {
         void deletePlanner_OwnedByOtherUser_Returns404() throws Exception {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
-            mockMvc.perform(delete("/api/planner/md/{id}", otherUserPlanner.getId())
+            mockMvc.perform(delete("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie()))
                     .andExpect(status().isNotFound())
@@ -711,7 +712,7 @@ class PlannerControllerTest {
         void deletePlanner_NotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
-            mockMvc.perform(delete("/api/planner/md/{id}", nonExistentId)
+            mockMvc.perform(delete("/api/planner/md/{id}", nonExistentId).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie()))
                     .andExpect(status().isNotFound())
@@ -723,7 +724,7 @@ class PlannerControllerTest {
         void deletePlanner_NoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(delete("/api/planner/md/{id}", planner.getId())
+            mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(deviceIdCookie()))
                     .andExpect(status().isUnauthorized());
         }
@@ -746,7 +747,7 @@ class PlannerControllerTest {
             ImportPlannersRequest request = new ImportPlannersRequest();
             request.setPlanners(planners);
 
-            mockMvc.perform(post("/api/planner/md/import")
+            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -775,7 +776,7 @@ class PlannerControllerTest {
             ImportPlannersRequest request = new ImportPlannersRequest();
             request.setPlanners(planners);
 
-            mockMvc.perform(post("/api/planner/md/import")
+            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -796,7 +797,7 @@ class PlannerControllerTest {
             ImportPlannersRequest request = new ImportPlannersRequest();
             request.setPlanners(planners);
 
-            mockMvc.perform(post("/api/planner/md/import")
+            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -813,7 +814,7 @@ class PlannerControllerTest {
             ImportPlannersRequest request = new ImportPlannersRequest();
             request.setPlanners(planners);
 
-            mockMvc.perform(post("/api/planner/md/import")
+            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
@@ -842,7 +843,7 @@ class PlannerControllerTest {
             UUID randomId = UUID.randomUUID();
 
             // PUT /api/planner/md/{id} (upsert)
-            mockMvc.perform(put("/api/planner/md/{id}", randomId)
+            mockMvc.perform(put("/api/planner/md/{id}", randomId).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnauthorized());
@@ -856,17 +857,17 @@ class PlannerControllerTest {
                     .andExpect(status().isUnauthorized());
 
             // PUT /api/planner/md/{id}
-            mockMvc.perform(put("/api/planner/md/{id}", randomId)
+            mockMvc.perform(put("/api/planner/md/{id}", randomId).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnauthorized());
 
             // DELETE /api/planner/md/{id}
-            mockMvc.perform(delete("/api/planner/md/{id}", randomId))
+            mockMvc.perform(delete("/api/planner/md/{id}", randomId).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
 
             // POST /api/planner/md/import
-            mockMvc.perform(post("/api/planner/md/import")
+            mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnauthorized());
@@ -919,7 +920,7 @@ class PlannerControllerTest {
             // 100th planner should succeed
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -941,7 +942,7 @@ class PlannerControllerTest {
             // 101st planner should fail
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -967,7 +968,7 @@ class PlannerControllerTest {
             // Now should be able to create one more
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -982,7 +983,7 @@ class PlannerControllerTest {
             // Use VALID_CONTENT which is already well under 50KB
             request.setContent(VALID_CONTENT);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId())
+            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1151,7 +1152,7 @@ class PlannerControllerTest {
             assertFalse(planner.getPublished());
 
             // Act & Assert - Toggle to published
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(planner.getId().toString()))
@@ -1169,7 +1170,7 @@ class PlannerControllerTest {
             Planner planner = createTestPlanner(testUser);
 
             // Act & Assert - Other user attempts to toggle
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .cookie(new Cookie("accessToken", otherUserAccessToken)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
@@ -1180,7 +1181,7 @@ class PlannerControllerTest {
         void togglePublish_NoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()))
+            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -1189,7 +1190,7 @@ class PlannerControllerTest {
         void togglePublish_NotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
-            mockMvc.perform(put("/api/planner/md/{id}/publish", nonExistentId)
+            mockMvc.perform(put("/api/planner/md/{id}/publish", nonExistentId).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -1219,7 +1220,7 @@ class PlannerControllerTest {
             assertTrue(planner.getPublished());
 
             // Act & Assert - Toggle to unpublished
-            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId())
+            mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(false));
@@ -1259,7 +1260,7 @@ class PlannerControllerTest {
             request.setVoteType(VoteType.UP);
 
             // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -1280,7 +1281,7 @@ class PlannerControllerTest {
             removeRequest.setVoteType(null);
 
             // Act & Assert - votes are permanent, null voteType is rejected
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(removeRequest)))
@@ -1295,7 +1296,7 @@ class PlannerControllerTest {
             VoteRequest request = new VoteRequest();
             request.setVoteType(VoteType.UP);
 
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized());
@@ -1308,7 +1309,7 @@ class PlannerControllerTest {
             VoteRequest request = new VoteRequest();
             request.setVoteType(VoteType.UP);
 
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", nonExistentId)
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", nonExistentId).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -1327,7 +1328,7 @@ class PlannerControllerTest {
             request.setVoteType(VoteType.UP);
 
             // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -1367,7 +1368,7 @@ class PlannerControllerTest {
             Planner planner = createPublishedPlanner();
 
             // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
@@ -1381,13 +1382,13 @@ class PlannerControllerTest {
             Planner planner = createPublishedPlanner();
 
             // First, add bookmark
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.bookmarked").value(true));
 
             // Act & Assert - Toggle again to remove
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.plannerId").value(planner.getId().toString()))
@@ -1399,7 +1400,7 @@ class PlannerControllerTest {
         void toggleBookmark_NoAuth_Returns401() throws Exception {
             Planner planner = createPublishedPlanner();
 
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()))
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -1408,7 +1409,7 @@ class PlannerControllerTest {
         void toggleBookmark_PlannerNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", nonExistentId)
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", nonExistentId).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -1422,7 +1423,7 @@ class PlannerControllerTest {
             assertFalse(planner.getPublished());
 
             // Act & Assert
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound());
         }
@@ -1450,7 +1451,7 @@ class PlannerControllerTest {
             plannerRepository.save(planner);
 
             // Act & Assert - Can bookmark own planner
-            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId())
+            mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.bookmarked").value(true));
@@ -1494,7 +1495,7 @@ class PlannerControllerTest {
         @DisplayName("Should return 404 for malformed UUID on other UUID endpoints")
         void otherUuidEndpoints_MalformedUuid_Returns404() throws Exception {
             // Test /api/planner/md/{id}/upvote (requires auth but should fail on UUID first)
-            mockMvc.perform(post("/api/planner/md/{id}/upvote", "invalid-uuid")
+            mockMvc.perform(post("/api/planner/md/{id}/upvote", "invalid-uuid").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"voteType\":\"UP\"}")
                             .cookie(accessTokenCookie()))

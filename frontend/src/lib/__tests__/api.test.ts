@@ -308,4 +308,64 @@ describe('ApiClient', () => {
       expect(sentHeaders()['Content-Type']).toBe('text/plain')
     })
   })
+
+  describe('CSRF double-submit header', () => {
+    const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
+    const sentHeaders = () =>
+      ((mockFetch.mock.calls[0][1] as RequestInit).headers ?? {}) as Record<string, string>
+
+    let cookieValue = ''
+    beforeEach(() => {
+      cookieValue = ''
+      Object.defineProperty(document, 'cookie', {
+        configurable: true,
+        get: () => cookieValue,
+      })
+    })
+
+    it('attaches X-CSRF-Token from the csrf cookie on a POST request', async () => {
+      cookieValue = 'foo=bar; csrf=token-abc123; baz=qux'
+      mockFetch.mockResolvedValue(okJson())
+
+      await ApiClient.post('/api/planner', { name: 'Test' })
+
+      expect(sentHeaders()['X-CSRF-Token']).toBe('token-abc123')
+    })
+
+    it('does not attach X-CSRF-Token on a GET request', async () => {
+      cookieValue = 'csrf=token-abc123'
+      mockFetch.mockResolvedValue(okJson())
+
+      await ApiClient.get('/api/auth/me')
+
+      expect(sentHeaders()).not.toHaveProperty('X-CSRF-Token')
+    })
+
+    it('attaches no header when the csrf cookie is absent', async () => {
+      cookieValue = 'foo=bar'
+      mockFetch.mockResolvedValue(okJson())
+
+      await ApiClient.post('/api/planner', { name: 'Test' })
+
+      expect(sentHeaders()).not.toHaveProperty('X-CSRF-Token')
+    })
+
+    it('selects csrf, not a cookie whose name merely ends with csrf', async () => {
+      cookieValue = 'mycsrf=fake; csrf=real-token'
+      mockFetch.mockResolvedValue(okJson())
+
+      await ApiClient.post('/api/planner', { name: 'Test' })
+
+      expect(sentHeaders()['X-CSRF-Token']).toBe('real-token')
+    })
+
+    it('preserves "=" characters in the cookie value', async () => {
+      cookieValue = 'csrf=abc=def=='
+      mockFetch.mockResolvedValue(okJson())
+
+      await ApiClient.post('/api/planner', { name: 'Test' })
+
+      expect(sentHeaders()['X-CSRF-Token']).toBe('abc=def==')
+    })
+  })
 })

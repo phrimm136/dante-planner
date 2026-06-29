@@ -1,5 +1,6 @@
 package org.danteplanner.backend.config;
 
+import org.danteplanner.backend.security.CsrfDoubleSubmitFilter;
 import org.danteplanner.backend.security.CustomAuthenticationEntryPoint;
 import org.danteplanner.backend.security.JwtAuthenticationFilter;
 import org.danteplanner.backend.security.MdcLoggingFilter;
@@ -21,15 +22,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final CsrfDoubleSubmitFilter csrfDoubleSubmitFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final MdcLoggingFilter mdcLoggingFilter;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     public SecurityConfig(
+            CsrfDoubleSubmitFilter csrfDoubleSubmitFilter,
             JwtAuthenticationFilter jwtAuthenticationFilter,
             MdcLoggingFilter mdcLoggingFilter,
             CustomAuthenticationEntryPoint authenticationEntryPoint
     ) {
+        this.csrfDoubleSubmitFilter = csrfDoubleSubmitFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.mdcLoggingFilter = mdcLoggingFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
@@ -63,10 +67,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // CSRF: Disabled - SameSite=Lax cookies provide CSRF protection.
-            // Lax allows cookies on top-level GET navigation (clicking links) but blocks
-            // embedded requests and cross-site POSTs. Safe because all GET endpoints are read-only.
-            // See: CookieUtils.setCookie() sets SameSite=Lax on all auth cookies.
+            // CSRF: Spring's built-in CSRF is disabled; we enforce our own self-enforcing
+            // double-submit cookie via CsrfDoubleSubmitFilter (registered below). SameSite=Lax
+            // stays as a belt-and-suspenders layer on the auth cookies.
             .csrf(AbstractHttpConfigurer::disable)
 
             // CORS: Allow frontend origin to make API calls
@@ -117,6 +120,9 @@ public class SecurityConfig {
 
             // Add JWT filter before Spring Security's authentication filter
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            // CSRF double-submit enforcement runs before authentication so unsafe
+            // requests are rejected ahead of any token validation
+            .addFilterBefore(csrfDoubleSubmitFilter, JwtAuthenticationFilter.class)
             // MDC runs after JWT so SecurityContext is populated and userId is available
             .addFilterAfter(mdcLoggingFilter, JwtAuthenticationFilter.class)
 

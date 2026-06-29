@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { Suspense } from 'react'
-import { authQueryKeys, useLogout, useLogin } from '../useAuthQuery'
+import { authQueryKeys, useLogout } from '../useAuthQuery'
 
 
 // Mock the API client
@@ -156,96 +156,6 @@ describe('useLogout', () => {
     await act(async () => {
       try {
         await result.current.mutateAsync()
-      } catch {
-        // Expected
-      }
-    })
-
-    await waitFor(() => {
-      expect(result.current.isError).toBe(true)
-    })
-  })
-})
-
-describe('useLogin', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  afterEach(() => {
-    vi.resetAllMocks()
-  })
-
-  it('calls correct API endpoint with credentials', async () => {
-    vi.mocked(ApiClient.post).mockResolvedValue(mockUserResponse)
-    const { wrapper } = createWrapper()
-
-    const { result } = renderHook(() => useLogin(), { wrapper })
-
-    const credentials = { code: 'auth_code_123', codeVerifier: 'verifier_456' }
-    await act(async () => {
-      await result.current.mutateAsync(credentials)
-    })
-
-    expect(ApiClient.post).toHaveBeenCalledWith('/api/auth/google/callback', {
-      code: 'auth_code_123',
-      codeVerifier: 'verifier_456',
-      provider: 'google',
-    })
-  })
-
-  it('updates auth cache with user data on success', async () => {
-    vi.mocked(ApiClient.post).mockResolvedValue(mockUserResponse)
-    const { wrapper, queryClient } = createWrapper()
-
-    const { result } = renderHook(() => useLogin(), { wrapper })
-
-    await act(async () => {
-      await result.current.mutateAsync({ code: 'code', codeVerifier: 'verifier' })
-    })
-
-    await waitFor(() => {
-      expect(queryClient.getQueryData(authQueryKeys.me)).toEqual(mockUserResponse)
-    })
-  })
-
-  it('returns user data on success', async () => {
-    vi.mocked(ApiClient.post).mockResolvedValue(mockUserResponse)
-    const { wrapper } = createWrapper()
-
-    const { result } = renderHook(() => useLogin(), { wrapper })
-
-    let response
-    await act(async () => {
-      response = await result.current.mutateAsync({ code: 'code', codeVerifier: 'verifier' })
-    })
-
-    expect(response).toEqual(mockUserResponse)
-  })
-
-  it('throws error for invalid user data from server', async () => {
-    // Invalid response missing required fields
-    vi.mocked(ApiClient.post).mockResolvedValue({ invalid: 'data' })
-    const { wrapper } = createWrapper()
-
-    const { result } = renderHook(() => useLogin(), { wrapper })
-
-    await act(async () => {
-      await expect(
-        result.current.mutateAsync({ code: 'code', codeVerifier: 'verifier' })
-      ).rejects.toThrow('Invalid user data received from server')
-    })
-  })
-
-  it('sets isError on API failure', async () => {
-    vi.mocked(ApiClient.post).mockRejectedValue(new Error('Login failed'))
-    const { wrapper } = createWrapper()
-
-    const { result } = renderHook(() => useLogin(), { wrapper })
-
-    await act(async () => {
-      try {
-        await result.current.mutateAsync({ code: 'code', codeVerifier: 'verifier' })
       } catch {
         // Expected
       }

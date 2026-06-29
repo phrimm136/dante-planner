@@ -1,6 +1,5 @@
 package org.danteplanner.backend.service.token;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.JwtProperties;
 import org.danteplanner.backend.entity.UserRole;
 import org.danteplanner.backend.exception.InvalidTokenException;
@@ -13,8 +12,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for JwtTokenService.
  *
  * <p>Tests JWT token generation and validation including
- * claims extraction, expiration handling, and signature verification.</p>
+ * claims extraction, expiration handling, and signature verification.
+ * Tokens carry minimized cleartext claims with {@code sub}=userId; no
+ * email and no encrypted claim blob.</p>
  */
 class JwtTokenServiceTest {
 
@@ -33,7 +32,6 @@ class JwtTokenServiceTest {
     private JwtProperties jwtProperties;
     private KeyPair testKeyPair;
     private byte[] testAesKey;
-    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -55,8 +53,13 @@ class JwtTokenServiceTest {
         jwtProperties.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
         jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
 
-        objectMapper = new ObjectMapper();
-        tokenService = new JwtTokenService(jwtProperties, objectMapper);
+        tokenService = new JwtTokenService(jwtProperties);
+    }
+
+    private static String decodePayload(String token) {
+        String[] parts = token.split("\\.");
+        assertEquals(3, parts.length, "JWT should have 3 parts");
+        return new String(Base64.getUrlDecoder().decode(parts[1]));
     }
 
     @Nested
@@ -68,16 +71,15 @@ class JwtTokenServiceTest {
         void givenValidInput_whenGenerateAccessToken_thenContainsCorrectClaims() {
             // Arrange
             Long userId = 123L;
-            String email = "test@example.com";
 
             // Act
-            String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
+            String token = tokenService.generateAccessToken(userId, UserRole.NORMAL);
 
             // Assert
             assertNotNull(token);
             TokenClaims claims = tokenService.validateToken(token);
             assertEquals(userId, claims.userId());
-            assertEquals(email, claims.email());
+            assertNull(claims.email());
             assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
             assertEquals(UserRole.NORMAL, claims.role());
             assertTrue(claims.isAccessToken());
@@ -89,10 +91,9 @@ class JwtTokenServiceTest {
         void givenValidInput_whenGenerateAccessToken_thenHasCorrectExpiration() {
             // Arrange
             Long userId = 123L;
-            String email = "test@example.com";
 
             // Act
-            String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
+            String token = tokenService.generateAccessToken(userId, UserRole.NORMAL);
 
             // Assert - expiration should be in the future
             TokenClaims claims = tokenService.validateToken(token);
@@ -116,11 +117,10 @@ class JwtTokenServiceTest {
         void givenValidInput_whenGenerateAccessToken_thenSetsIssuedAt() {
             // Arrange
             Long userId = 123L;
-            String email = "test@example.com";
             long beforeGeneration = System.currentTimeMillis();
 
             // Act
-            String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
+            String token = tokenService.generateAccessToken(userId, UserRole.NORMAL);
             long afterGeneration = System.currentTimeMillis();
 
             // Assert
@@ -142,16 +142,15 @@ class JwtTokenServiceTest {
         void givenValidInput_whenGenerateRefreshToken_thenContainsCorrectClaims() {
             // Arrange
             Long userId = 456L;
-            String email = "refresh@example.com";
 
             // Act
-            String token = tokenService.generateRefreshToken(userId, email);
+            String token = tokenService.generateRefreshToken(userId);
 
             // Assert
             assertNotNull(token);
             TokenClaims claims = tokenService.validateToken(token);
             assertEquals(userId, claims.userId());
-            assertEquals(email, claims.email());
+            assertNull(claims.email());
             assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
             assertTrue(claims.isRefreshToken());
             assertFalse(claims.isAccessToken());
@@ -162,11 +161,10 @@ class JwtTokenServiceTest {
         void givenAccessAndRefreshTokens_whenCompareExpiration_thenRefreshLonger() {
             // Arrange
             Long userId = 123L;
-            String email = "test@example.com";
 
             // Act
-            String accessToken = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
-            String refreshToken = tokenService.generateRefreshToken(userId, email);
+            String accessToken = tokenService.generateAccessToken(userId, UserRole.NORMAL);
+            String refreshToken = tokenService.generateRefreshToken(userId);
 
             // Assert
             TokenClaims accessClaims = tokenService.validateToken(accessToken);
@@ -185,11 +183,10 @@ class JwtTokenServiceTest {
         @DisplayName("Refresh token via overload carries jti, family_id, parent_jti")
         void givenFamilyAndParent_whenGenerateRefreshToken_thenCarriesAllLineageClaims() {
             Long userId = 111L;
-            String email = "lineage@example.com";
             String familyId = "fam-123";
             String parentJti = "parent-jti-456";
 
-            String token = tokenService.generateRefreshToken(userId, email, familyId, parentJti);
+            String token = tokenService.generateRefreshToken(userId, familyId, parentJti);
 
             TokenClaims claims = tokenService.validateToken(token);
             assertNotNull(claims.jti());
@@ -198,9 +195,9 @@ class JwtTokenServiceTest {
         }
 
         @Test
-        @DisplayName("Refresh token via legacy signature carries jti and family_id, parent_jti null")
-        void givenLegacySignature_whenGenerateRefreshToken_thenCarriesJtiAndFamilyButNoParent() {
-            String token = tokenService.generateRefreshToken(222L, "legacy@example.com");
+        @DisplayName("Refresh token via login signature carries jti and family_id, parent_jti null")
+        void givenLoginSignature_whenGenerateRefreshToken_thenCarriesJtiAndFamilyButNoParent() {
+            String token = tokenService.generateRefreshToken(222L);
 
             TokenClaims claims = tokenService.validateToken(token);
             assertNotNull(claims.jti());
@@ -211,7 +208,7 @@ class JwtTokenServiceTest {
         @Test
         @DisplayName("Access token carries no lineage claims")
         void givenAccessToken_whenValidate_thenLineageClaimsNull() {
-            String token = tokenService.generateAccessToken(333L, "access@example.com", UserRole.NORMAL);
+            String token = tokenService.generateAccessToken(333L, UserRole.NORMAL);
 
             TokenClaims claims = tokenService.validateToken(token);
             assertNull(claims.jti());
@@ -229,8 +226,7 @@ class JwtTokenServiceTest {
         void givenValidToken_whenValidate_thenReturnsClaims() {
             // Arrange
             Long userId = 789L;
-            String email = "valid@example.com";
-            String token = tokenService.generateAccessToken(userId, email, UserRole.MODERATOR);
+            String token = tokenService.generateAccessToken(userId, UserRole.MODERATOR);
 
             // Act
             TokenClaims claims = tokenService.validateToken(token);
@@ -238,7 +234,7 @@ class JwtTokenServiceTest {
             // Assert
             assertNotNull(claims);
             assertEquals(userId, claims.userId());
-            assertEquals(email, claims.email());
+            assertNull(claims.email());
             assertNotNull(claims.issuedAt());
             assertNotNull(claims.expiration());
         }
@@ -253,9 +249,9 @@ class JwtTokenServiceTest {
             shortExpiryProps.setEncryptionKeyBytes(testAesKey);
             shortExpiryProps.setAccessTokenExpiry(1L); // 1ms expiry
             shortExpiryProps.setRefreshTokenExpiry(1L);
-            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps, objectMapper);
+            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps);
 
-            String token = shortExpiryService.generateAccessToken(123L, "expired@example.com", UserRole.NORMAL);
+            String token = shortExpiryService.generateAccessToken(123L, UserRole.NORMAL);
 
             // Wait for token to expire
             try {
@@ -286,9 +282,9 @@ class JwtTokenServiceTest {
             differentKeyProps.setEncryptionKeyBytes(testAesKey);
             differentKeyProps.setAccessTokenExpiry(ACCESS_TOKEN_EXPIRY);
             differentKeyProps.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
-            JwtTokenService differentService = new JwtTokenService(differentKeyProps, objectMapper);
+            JwtTokenService differentService = new JwtTokenService(differentKeyProps);
 
-            String tokenWithDifferentSignature = differentService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
+            String tokenWithDifferentSignature = differentService.generateAccessToken(123L, UserRole.NORMAL);
 
             // Act & Assert
             InvalidTokenException exception = assertThrows(
@@ -325,6 +321,45 @@ class JwtTokenServiceTest {
             );
             assertEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
         }
+
+        @Test
+        @DisplayName("Should throw MALFORMED for non-numeric subject")
+        void givenNonNumericSubject_whenValidate_thenThrowsMalformed() {
+            // Arrange - sign a token whose subject is not a numeric userId
+            String token = io.jsonwebtoken.Jwts.builder()
+                    .subject("not-a-number")
+                    .claim("type", TokenClaims.TYPE_ACCESS)
+                    .issuedAt(new java.util.Date())
+                    .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .compact();
+
+            // Act & Assert
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("Should throw MISSING_CLAIMS for absent subject")
+        void givenAbsentSubject_whenValidate_thenThrowsMissingClaims() {
+            // Arrange - sign a token with no subject
+            String token = io.jsonwebtoken.Jwts.builder()
+                    .claim("type", TokenClaims.TYPE_ACCESS)
+                    .issuedAt(new java.util.Date())
+                    .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .compact();
+
+            // Act & Assert
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.MISSING_CLAIMS, exception.getReason());
+        }
     }
 
     @Nested
@@ -336,7 +371,7 @@ class JwtTokenServiceTest {
         void givenValidToken_whenGetUserId_thenReturnsUserId() {
             // Arrange
             Long expectedUserId = 42L;
-            String token = tokenService.generateAccessToken(expectedUserId, "user@example.com", UserRole.NORMAL);
+            String token = tokenService.generateAccessToken(expectedUserId, UserRole.NORMAL);
 
             // Act
             Long actualUserId = tokenService.getUserIdFromToken(token);
@@ -367,7 +402,7 @@ class JwtTokenServiceTest {
         @DisplayName("Should return false for valid non-expired token")
         void givenValidToken_whenCheckExpired_thenReturnsFalse() {
             // Arrange
-            String token = tokenService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
+            String token = tokenService.generateAccessToken(123L, UserRole.NORMAL);
 
             // Act
             boolean expired = tokenService.isTokenExpired(token);
@@ -386,9 +421,9 @@ class JwtTokenServiceTest {
             shortExpiryProps.setEncryptionKeyBytes(testAesKey);
             shortExpiryProps.setAccessTokenExpiry(1L);
             shortExpiryProps.setRefreshTokenExpiry(1L);
-            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps, objectMapper);
+            JwtTokenService shortExpiryService = new JwtTokenService(shortExpiryProps);
 
-            String token = shortExpiryService.generateAccessToken(123L, "test@example.com", UserRole.NORMAL);
+            String token = shortExpiryService.generateAccessToken(123L, UserRole.NORMAL);
 
             // Wait for expiration
             try {
@@ -419,25 +454,6 @@ class JwtTokenServiceTest {
     }
 
     @Nested
-    @DisplayName("getEmailFromToken Tests")
-    class GetEmailFromTokenTests {
-
-        @Test
-        @DisplayName("Should return email from valid token")
-        void givenValidToken_whenGetEmail_thenReturnsEmail() {
-            // Arrange
-            String expectedEmail = "email@example.com";
-            String token = tokenService.generateAccessToken(123L, expectedEmail, UserRole.NORMAL);
-
-            // Act
-            String actualEmail = tokenService.getEmailFromToken(token);
-
-            // Assert
-            assertEquals(expectedEmail, actualEmail);
-        }
-    }
-
-    @Nested
     @DisplayName("getTokenType Tests")
     class GetTokenTypeTests {
 
@@ -445,7 +461,7 @@ class JwtTokenServiceTest {
         @DisplayName("Should return 'access' for access token")
         void givenAccessToken_whenGetType_thenReturnsAccess() {
             // Arrange
-            String token = tokenService.generateAccessToken(123L, "test@example.com", UserRole.ADMIN);
+            String token = tokenService.generateAccessToken(123L, UserRole.ADMIN);
 
             // Act
             String type = tokenService.getTokenType(token);
@@ -458,7 +474,7 @@ class JwtTokenServiceTest {
         @DisplayName("Should return 'refresh' for refresh token")
         void givenRefreshToken_whenGetType_thenReturnsRefresh() {
             // Arrange
-            String token = tokenService.generateRefreshToken(123L, "test@example.com");
+            String token = tokenService.generateRefreshToken(123L);
 
             // Act
             String type = tokenService.getTokenType(token);
@@ -469,49 +485,43 @@ class JwtTokenServiceTest {
     }
 
     @Nested
-    @DisplayName("Encryption Security Tests")
-    class EncryptionSecurityTests {
+    @DisplayName("Minimized Claims Security Tests")
+    class MinimizedClaimsSecurityTests {
 
         @Test
-        @DisplayName("Should not expose userId in JWT payload (only encrypted)")
-        void givenGeneratedToken_whenInspectPayload_thenClaimsEncrypted() {
+        @DisplayName("Access token sub is the numeric userId in plaintext, no email, no enc")
+        void givenAccessToken_whenInspectPayload_thenSubIsUserIdAndNoEmailOrEnc() {
             // Arrange
-            String token = tokenService.generateAccessToken(12345L, "secret@example.com", UserRole.ADMIN);
+            String token = tokenService.generateAccessToken(12345L, UserRole.ADMIN);
 
-            // Act - extract middle segment (payload) and decode
-            String[] parts = token.split("\\.");
-            assertEquals(3, parts.length, "JWT should have 3 parts");
+            // Act
+            String payload = decodePayload(token);
 
-            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
-
-            // Assert - payload should contain "enc" field but NOT custom claims in plaintext
-            // Note: "sub" (email) is outside encryption per design (JJWT validates exp before decryption)
-            assertTrue(payload.contains("enc"), "Payload should contain encrypted claims field");
-            assertTrue(payload.contains("sub"), "Payload should contain subject (email) - required for JJWT exp validation");
-            assertFalse(payload.contains("12345"), "Payload should not contain userId in plaintext");
-            assertFalse(payload.contains("userId"), "Payload should not contain userId field name in plaintext");
-            assertFalse(payload.contains("ADMIN"), "Payload should not contain role in plaintext");
+            // Assert
+            assertTrue(payload.contains("\"sub\":\"12345\""), "sub should be the numeric userId");
+            assertFalse(payload.contains("enc"), "Payload must not contain an encrypted claim blob");
+            assertFalse(payload.contains("email"), "Payload must not contain email");
+            assertFalse(payload.contains("@"), "Payload must not contain an email address");
+            assertTrue(payload.contains(UserRole.ADMIN.getValue()), "role should be present in cleartext");
         }
 
         @Test
-        @DisplayName("Should generate unique IVs for identical claims")
-        void givenIdenticalClaims_whenGenerate100Times_thenAllTokensDistinct() {
+        @DisplayName("Refresh token sub is userId, carries lineage claims, no email, no enc")
+        void givenRefreshToken_whenInspectPayload_thenSubIsUserIdAndNoEmailOrEnc() {
             // Arrange
-            Set<String> encryptedPayloads = new HashSet<>();
-            Long userId = 999L;
-            String email = "test@example.com";
+            String token = tokenService.generateRefreshToken(67890L, "fam-1", "parent-jti");
 
-            // Act - generate 100 tokens with identical claims
-            for (int i = 0; i < 100; i++) {
-                String token = tokenService.generateAccessToken(userId, email, UserRole.NORMAL);
-                String[] parts = token.split("\\.");
-                String payload = parts[1]; // Base64-encoded payload
-                encryptedPayloads.add(payload);
-            }
+            // Act
+            String payload = decodePayload(token);
+            TokenClaims claims = tokenService.validateToken(token);
 
-            // Assert - all 100 payloads should be unique (different IVs)
-            assertEquals(100, encryptedPayloads.size(),
-                    "All 100 tokens should have distinct encrypted payloads due to unique IVs");
+            // Assert
+            assertTrue(payload.contains("\"sub\":\"67890\""), "sub should be the numeric userId");
+            assertFalse(payload.contains("enc"), "Payload must not contain an encrypted claim blob");
+            assertFalse(payload.contains("email"), "Payload must not contain email");
+            assertNotNull(claims.jti());
+            assertEquals("fam-1", claims.familyId());
+            assertEquals("parent-jti", claims.parentJti());
         }
     }
 }

@@ -97,6 +97,6 @@ public class TestDataFactory {
     }
 
     public static String generateAccessToken(JwtTokenService jwtTokenService, User user) {
-        return jwtTokenService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        return jwtTokenService.generateAccessToken(user.getId(), user.getRole());
     }
 }

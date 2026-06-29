@@ -19,6 +19,15 @@ public interface OAuthProvider {
     String getProviderName();
 
     /**
+     * Build the provider's authorization URL for the server-side BFF redirect flow.
+     *
+     * @param state         opaque CSRF / login-fixation guard echoed back on the callback
+     * @param codeChallenge PKCE S256 code challenge
+     * @return absolute authorization URL to 302-redirect the browser to
+     */
+    String buildAuthorizationUrl(String state, String codeChallenge);
+
+    /**
      * Exchange authorization code for OAuth tokens.
      *
      * @param code         Authorization code from OAuth callback

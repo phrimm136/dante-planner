@@ -249,7 +249,7 @@ public class RefreshRotationService {
         String familyId = claims.familyId();
 
         String successorJwt = tokenGenerator.generateRefreshToken(
-                claims.userId(), claims.email(), familyId, jti);
+                claims.userId(), familyId, jti);
         TokenClaims successorClaims = tokenValidator.validateToken(successorJwt);
         String successorJti = successorClaims.jti();
 

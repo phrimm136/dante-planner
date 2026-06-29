@@ -123,8 +123,8 @@ class JwtAuthenticationFilterLineageTest {
         when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
         when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), any(Long.class))).thenReturn(false);
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
-        when(tokenGenerator.generateAccessToken(eq(userId), any(), any())).thenReturn("new.access");
-        when(tokenGenerator.generateRefreshToken(eq(userId), any())).thenReturn("new.refresh");
+        when(tokenGenerator.generateAccessToken(eq(userId), any())).thenReturn("new.access");
+        when(tokenGenerator.generateRefreshToken(eq(userId))).thenReturn("new.refresh");
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -148,7 +148,7 @@ class JwtAuthenticationFilterLineageTest {
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
-        when(tokenGenerator.generateAccessToken(eq(userId), eq(user.getEmail()), any(UserRole.class)))
+        when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
 
         filter.doFilterInternal(request, response, filterChain);
@@ -175,7 +175,7 @@ class JwtAuthenticationFilterLineageTest {
         verify(refreshRotationService).rotate(refreshToken, response);
         verify(filterChain).doFilter(request, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
@@ -192,7 +192,7 @@ class JwtAuthenticationFilterLineageTest {
         filter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
@@ -210,7 +210,7 @@ class JwtAuthenticationFilterLineageTest {
 
         verify(refreshRotationService).rotate(refreshToken, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
@@ -227,7 +227,7 @@ class JwtAuthenticationFilterLineageTest {
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
-        when(tokenGenerator.generateAccessToken(eq(userId), eq(user.getEmail()), any(UserRole.class)))
+        when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
 
         filter.doFilterInternal(request, response, filterChain);
@@ -252,7 +252,7 @@ class JwtAuthenticationFilterLineageTest {
 
         verify(refreshRotationService).rotate(refreshToken, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test
@@ -272,7 +272,7 @@ class JwtAuthenticationFilterLineageTest {
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
-        when(tokenGenerator.generateAccessToken(eq(userId), eq(user.getEmail()), any(UserRole.class)))
+        when(tokenGenerator.generateAccessToken(eq(userId), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
 
         filter.doFilterInternal(request, response, filterChain);

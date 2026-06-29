@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 /**
  * Integration tests for ban enforcement across the full stack.
@@ -117,7 +118,7 @@ class BanEnforcementIntegrationTest {
                 """.formatted(plannerId);
 
         // Act & Assert
-        mockMvc.perform(put("/api/planner/md/" + plannerId)
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
@@ -139,7 +140,7 @@ class BanEnforcementIntegrationTest {
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
         // Act & Assert
-        mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish")
+        mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish").with(withCsrf())
                         .cookie(userCookie()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("USER_BANNED")));
@@ -165,7 +166,7 @@ class BanEnforcementIntegrationTest {
                 """;
 
         // Act & Assert
-        mockMvc.perform(post("/api/planner/" + planner.getId() + "/comments")
+        mockMvc.perform(post("/api/planner/" + planner.getId() + "/comments").with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
@@ -257,7 +258,7 @@ class BanEnforcementIntegrationTest {
                 """.formatted(plannerId);
 
         // Act & Assert - timeout is checked first, so USER_TIMED_OUT
-        mockMvc.perform(put("/api/planner/md/" + plannerId)
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))

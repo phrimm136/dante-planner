@@ -3,6 +3,26 @@ import { queryClient } from './queryClient';
 
 const API_BASE_URL = env.VITE_API_BASE_URL;
 
+/** Readable cookie holding the double-submit CSRF token (set by the backend). */
+const CSRF_COOKIE_NAME = 'csrf';
+/** Request header that must echo the CSRF cookie on state-changing requests. */
+const CSRF_HEADER_NAME = 'X-CSRF-Token';
+
+/**
+ * Read the readable `csrf` cookie for double-submit CSRF protection.
+ *
+ * SSR-safe: returns null on the server where `document` is undefined.
+ */
+function readCsrfToken(): string | null {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+  const match = document.cookie.match(
+    new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`)
+  );
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 /**
  * Error response for version conflicts (HTTP 409)
  * Used for optimistic locking during planner sync
@@ -136,6 +156,15 @@ export class ApiClient {
     );
     if (!isBodylessMethod && !isFormDataBody && !callerSetContentType) {
       headers['Content-Type'] = 'application/json';
+    }
+
+    // Double-submit CSRF: echo the readable `csrf` cookie on state-changing
+    // methods. GET/HEAD stay header-free to remain CORS "simple" requests.
+    if (!isBodylessMethod) {
+      const csrfToken = readCsrfToken();
+      if (csrfToken) {
+        headers[CSRF_HEADER_NAME] = csrfToken;
+      }
     }
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

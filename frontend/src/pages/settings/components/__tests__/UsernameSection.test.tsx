@@ -42,14 +42,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-// Mock oauth functions
-vi.mock('@/lib/oauth', () => ({
-  generateState: () => 'mock-state',
-  generateCodeVerifier: () => 'mock-verifier',
-  generateCodeChallenge: () => Promise.resolve('mock-challenge'),
-  storeOAuthParams: vi.fn(),
-}))
-
 // Mock sonner toast
 vi.mock('sonner', () => ({
   toast: {

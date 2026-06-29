@@ -1,15 +1,13 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { Languages, Settings, User, LogOut, Bell } from 'lucide-react'
 import { cn, getDisplayFontForLabel } from '@/lib/utils'
 import { getLogoPath } from '@/lib/assetPaths'
 import { formatUsername } from '@/lib/formatUsername'
 
 import { GoogleIcon } from '@/components/icons/GoogleIcon'
-import { useAuthQuery, useLogout, useLogin } from '@/hooks/useAuthQuery'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
-import { useFirstLoginStore } from '@/stores/useFirstLoginStore'
+import { useAuthQuery, useLogout } from '@/hooks/useAuthQuery'
 import { useUnreadCountQuery } from '@/hooks/useUnreadCountQuery'
 import { NotificationDialog } from '@/components/notifications/NotificationDialog'
 import { Button } from '@/components/ui/button'
@@ -23,14 +21,8 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { HeaderNav } from '@/components/HeaderNav'
-import { env } from '@/lib/env'
 import { toast } from '@/lib/toast'
-import {
-  generateState,
-  generateCodeVerifier,
-  generateCodeChallenge,
-  storeOAuthParams,
-} from '@/lib/oauth'
+import { startGoogleLogin } from '@/hooks/useGoogleLogin'
 
 /**
  * UnreadBadge - Renders unread notification count badge on User icon.
@@ -62,104 +54,8 @@ function AuthSection() {
   const { t, i18n } = useTranslation(['common'])
   const { data: user } = useAuthQuery()
   const logout = useLogout()
-  const login = useLogin()
-  const { refetch: refetchSettings } = useUserSettingsQuery()
-  const openSyncChoiceDialog = useFirstLoginStore((s) => s.openSyncChoiceDialog)
 
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false)
-
-  // Listen for OAuth popup messages
-  useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) {
-        console.warn('Rejected message from unauthorized origin:', event.origin)
-        return
-      }
-
-      if (!event.data || typeof event.data !== 'object') {
-        return
-      }
-
-      if (event.data.type === 'GOOGLE_AUTH_SUCCESS') {
-        const { code, codeVerifier, checkFirstLogin } = event.data
-
-        if (!code || typeof code !== 'string') {
-          console.error('Invalid auth code format')
-          toast.error(t('header.auth.invalidResponse'))
-          return
-        }
-
-        if (!codeVerifier || typeof codeVerifier !== 'string') {
-          console.error('Missing code verifier')
-          toast.error(t('header.auth.securityFailed'))
-          return
-        }
-
-        try {
-          await login.mutateAsync({ code, codeVerifier })
-          toast.success(t('header.auth.successLogin'))
-
-          if (checkFirstLogin) {
-            const { data: freshSettings } = await refetchSettings()
-            if (freshSettings?.syncEnabled === null) {
-              openSyncChoiceDialog()
-            }
-          }
-        } catch (error) {
-          console.error('Login failed:', error)
-          toast.error(t('header.auth.loginFailed'))
-        }
-      }
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => {
-      window.removeEventListener('message', handleMessage)
-    }
-  }, [login, refetchSettings, openSyncChoiceDialog])
-
-  const handleGoogleLogin = async () => {
-    try {
-      const state = generateState()
-      const codeVerifier = generateCodeVerifier()
-      const codeChallenge = await generateCodeChallenge(codeVerifier)
-
-      storeOAuthParams(state, codeVerifier)
-
-      const clientId = env.VITE_GOOGLE_CLIENT_ID
-      const redirectUri = `${window.location.origin}/auth/callback/google`
-      const scope = 'openid email'
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(scope)}&` +
-        `state=${state}&` +
-        `code_challenge=${codeChallenge}&` +
-        `code_challenge_method=S256`
-
-      const width = 500
-      const height = 600
-      const left = (window.screen.width - width) / 2
-      const top = (window.screen.height - height) / 2
-
-      const popup = window.open(
-        authUrl,
-        'Google Sign-In',
-        `width=${width},height=${height},left=${left},top=${top},popup=yes`
-      )
-
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error(t('header.auth.popupBlocked'))
-        console.warn('Popup blocked, falling back to full-page redirect')
-        window.location.href = authUrl
-      }
-    } catch (error) {
-      console.error('Failed to initiate OAuth flow:', error)
-      toast.error(t('header.auth.loginFailed'))
-    }
-  }
 
   return (
     <>
@@ -197,7 +93,7 @@ function AuthSection() {
               <DropdownMenuItem asChild>
                 <button
                   className="w-full cursor-pointer flex items-center gap-2"
-                  onClick={handleGoogleLogin}
+                  onClick={startGoogleLogin}
                 >
                   <GoogleIcon className="h-4 w-4" />
                   {t('header.auth.googleLogin')}

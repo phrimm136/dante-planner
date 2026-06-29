@@ -15,13 +15,6 @@ vi.mock('sonner', () => ({
   },
 }))
 
-vi.mock('@/lib/oauth', () => ({
-  generateState: () => 'mock-state',
-  generateCodeVerifier: () => 'mock-verifier',
-  generateCodeChallenge: () => Promise.resolve('mock-challenge'),
-  storeOAuthParams: vi.fn(),
-}))
-
 const mockMutate = vi.fn()
 const mockSetQueryData = vi.fn()
 

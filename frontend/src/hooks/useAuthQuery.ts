@@ -81,62 +81,6 @@ export function useAuthQueryNonBlocking() {
 }
 
 /**
- * Login credentials with PKCE code verifier
- */
-export interface LoginCredentials {
-  code: string;
-  codeVerifier: string;
-}
-
-/**
- * Hook for Google OAuth login mutation with PKCE support
- *
- * @example
- * ```tsx
- * function GoogleCallback() {
- *   const login = useLogin();
- *
- *   useEffect(() => {
- *     const params = new URLSearchParams(window.location.search);
- *     const code = params.get('code');
- *     const codeVerifier = getStoredCodeVerifier();
- *
- *     if (code && codeVerifier) {
- *       login.mutate({ code, codeVerifier });
- *     }
- *   }, []);
- * }
- * ```
- */
-export function useLogin() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (credentials: LoginCredentials): Promise<User> => {
-      const data = await ApiClient.post<User>('/api/auth/google/callback', {
-        code: credentials.code,
-        codeVerifier: credentials.codeVerifier,
-        provider: 'google',
-      });
-
-      const result = UserSchema.safeParse(data);
-      if (!result.success) {
-        console.error('User validation failed:', result.error);
-        throw new Error('Invalid user data received from server');
-      }
-      return result.data;
-    },
-    onSuccess: (user) => {
-      // Update auth query cache
-      queryClient.setQueryData(authQueryKeys.me, user);
-    },
-    onError: (error) => {
-      console.error('Login failed:', error);
-    },
-  });
-}
-
-/**
  * Hook for logout mutation
  *
  * @example

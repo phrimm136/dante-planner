@@ -129,9 +129,9 @@ class AuthenticationFacadeTest {
             when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123"))
                     .thenReturn(Optional.of(testUser));
-            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
+            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
                     .thenReturn("jwt-access-token");
-            when(tokenGenerator.generateRefreshToken(testUser.getId(), testUser.getEmail()))
+            when(tokenGenerator.generateRefreshToken(testUser.getId()))
                     .thenReturn("jwt-refresh-token");
 
             // Act
@@ -151,8 +151,8 @@ class AuthenticationFacadeTest {
             verify(oauthProvider).exchangeCodeForTokens(code, redirectUri, codeVerifier);
             verify(oauthProvider).getUserInfo(any(OAuthTokens.class));
             verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123");
-            verify(tokenGenerator).generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class));
-            verify(tokenGenerator).generateRefreshToken(testUser.getId(), testUser.getEmail());
+            verify(tokenGenerator).generateAccessToken(eq(testUser.getId()), any(UserRole.class));
+            verify(tokenGenerator).generateRefreshToken(testUser.getId());
         }
 
         @Test
@@ -171,8 +171,8 @@ class AuthenticationFacadeTest {
             );
 
             // Verify no tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
-            verify(tokenGenerator, never()).generateRefreshToken(any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateRefreshToken(any());
         }
 
         @Test
@@ -190,8 +190,8 @@ class AuthenticationFacadeTest {
             when(userRepository.findByProviderAndProviderId(any(), any()))
                     .thenReturn(Optional.empty());
             when(userService.findOrCreateUser(any(), any())).thenReturn(testUser);
-            when(tokenGenerator.generateAccessToken(any(), any(), any())).thenReturn("access");
-            when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
+            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
+            when(tokenGenerator.generateRefreshToken(any())).thenReturn("refresh");
 
             // Act
             AuthenticationFacade.AuthResult result = authenticationFacade.authenticateWithOAuth(
@@ -229,8 +229,8 @@ class AuthenticationFacadeTest {
                     .thenReturn(Optional.empty());
             when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, "deleted-123"))
                     .thenReturn(Optional.of(deletedUser));
-            when(tokenGenerator.generateAccessToken(any(), any(), any())).thenReturn("access");
-            when(tokenGenerator.generateRefreshToken(any(), any())).thenReturn("refresh");
+            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
+            when(tokenGenerator.generateRefreshToken(any())).thenReturn("refresh");
 
             // Act
             AuthenticationFacade.AuthResult result = authenticationFacade.authenticateWithOAuth(
@@ -266,9 +266,9 @@ class AuthenticationFacadeTest {
             when(tokenValidator.validateToken(oldRefreshToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(oldRefreshToken)).thenReturn(false);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
+            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
                     .thenReturn("new-access-token");
-            when(tokenGenerator.generateRefreshToken(testUser.getId(), testUser.getEmail()))
+            when(tokenGenerator.generateRefreshToken(testUser.getId()))
                     .thenReturn("new-refresh-token");
 
             // Act
@@ -310,7 +310,7 @@ class AuthenticationFacadeTest {
             assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
 
             // Verify no tokens generated and no blacklist
-            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any());
             verify(tokenBlacklistService, never()).blacklistToken(any(), any());
         }
 
@@ -340,7 +340,7 @@ class AuthenticationFacadeTest {
             assertEquals(InvalidTokenException.Reason.REVOKED, exception.getReason());
 
             // Verify no tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any());
         }
 
         @Test
@@ -404,8 +404,8 @@ class AuthenticationFacadeTest {
             verify(tokenBlacklistService).blacklistTokenForRotation(refreshToken, expiration);
 
             // Verify no new tokens generated
-            verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
-            verify(tokenGenerator, never()).generateRefreshToken(any(), any());
+            verify(tokenGenerator, never()).generateAccessToken(any(), any());
+            verify(tokenGenerator, never()).generateRefreshToken(any());
         }
     }
 

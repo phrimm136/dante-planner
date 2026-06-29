@@ -7,8 +7,8 @@ import java.util.Date;
 /**
  * Immutable value object containing parsed JWT token claims.
  *
- * @param userId user identifier from token
- * @param email user email from token subject
+ * @param userId user identifier from token subject
+ * @param email always null; email is no longer carried in tokens
  * @param type token type ("access" or "refresh")
  * @param role user role (nullable for backward compat with old tokens, null = NORMAL)
  * @param issuedAt when the token was issued
@@ -31,9 +31,6 @@ public record TokenClaims(
     public TokenClaims {
         if (userId == null) {
             throw new IllegalArgumentException("userId must not be null");
-        }
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("email must not be null or blank");
         }
         if (type == null || type.isBlank()) {
             throw new IllegalArgumentException("type must not be null or blank");

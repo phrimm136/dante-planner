@@ -7,7 +7,6 @@ import { z } from 'zod';
  * Vite replaces import.meta.env references with actual values during build.
  */
 const envSchema = z.object({
-  VITE_GOOGLE_CLIENT_ID: z.string().min(1, 'Google Client ID is required'),
   VITE_API_BASE_URL: z.string().url().optional().default('http://localhost:8080'),
   DEV: z.boolean(),
   PROD: z.boolean(),
@@ -30,11 +29,10 @@ if (!envValidation.success) {
  * ```typescript
  * import { env } from '@/lib/env';
  *
- * const clientId = env.VITE_GOOGLE_CLIENT_ID; // Type-safe!
+ * const apiBaseUrl = env.VITE_API_BASE_URL; // Type-safe!
  * ```
  */
 const testFallback = {
-  VITE_GOOGLE_CLIENT_ID: 'test-client-id',
   VITE_API_BASE_URL: 'http://localhost:8080',
   DEV: false,
   PROD: false,

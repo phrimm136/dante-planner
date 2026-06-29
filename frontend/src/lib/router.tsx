@@ -442,13 +442,6 @@ const termsRoute = createRoute({
   }),
 })
 
-// Google OAuth callback route - path: "/auth/callback/google"
-const googleCallbackRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/auth/callback/google',
-  component: lazyRouteComponent(() => import('@/routes/auth/callback/google')),
-})
-
 // Create route tree
 // Note: TanStack Router handles route specificity automatically
 // More specific routes like /planner/md/new will match before /planner/md
@@ -479,7 +472,6 @@ const routeTree = rootRoute.addChildren([
   moderationRoute,
   privacyRoute,
   termsRoute,
-  googleCallbackRoute,
 ])
 
 // Create and export router instance
