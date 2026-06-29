@@ -245,7 +245,7 @@ export const SYNERGY_KEYWORDS = [
   'BlessingOfIndexPrescriptAlly',
   'Bullet',
   'Inspire',
-  'AccelBullet',
+  '9828',
   'SojiRyoshuEntangle',
 ] as const
 

@@ -18,10 +18,28 @@ description: Add a selectable planner keyword end-to-end across FE, BE, and i18n
 | Mechanic name | "Acceleration Round" | `battleKeywords.json` | **no — wrong source** |
 | Faction label (displayed) | "The Thumb" | `unitKeywords.json` → `plannerKeywords.json` | yes — the label |
 
+### The join-key id doubles as the icon source
+
+`getKeywordIconPath` in `frontend/src/lib/assetPaths.ts` branches on the **shape** of the
+`keyword-id` — there is no separate icon field:
+
+| keyword-id shape | Example | Icon resolved from |
+|---|---|---|
+| 4-digit numeric (ego-gift id) | `9828`, `9154` | `/images/icon/egoGift/{id}.webp` |
+| any other string (battle keyword) | `AccelBullet` | `/images/icon/battleKeywords/{id}.webp` |
+
+So to give a keyword an **ego-gift icon**, the join-key id you register *is* the 4-digit
+ego-gift id. Before using one, confirm both exist: the icon asset
+`static/images/icon/egoGift/{id}.webp` **and** a matching `{id}` entry in
+`static/data/egoGiftSpecList.json`. The faction label still comes from a `unit-keyword-id`
+(Step 2) — only the icon source changes.
+
 ## Step 1 — Gather input
 - The user supplies one or more **`keyword-id` ↔ `unit-keyword-id` pairs**
   (e.g. `AccelBullet ↔ THUMB_FINGER`, `SojiRyoshuEntangle ↔ SPIDER_HOUSE`).
-  - `keyword-id` = the internal battle-keyword id (the join key added to every layer).
+  - `keyword-id` = the join key added to every layer. It is **either** a battle-keyword id
+    (`AccelBullet`) **or** a 4-digit ego-gift id (`9828`) — the shape decides the icon
+    (see "The join-key id doubles as the icon source" above).
   - `unit-keyword-id` = the faction key in `unitKeywords.json` whose label is displayed.
 - **Target array is always `SYNERGY_KEYWORDS`** in `frontend/src/lib/constants.ts`.
   `KEYWORD_ORDER` and `AFFINITIES` are **never** modified by this skill.
@@ -52,6 +70,30 @@ Append each `keyword-id` to all three:
 
 - `V{next}`: list `backend/src/main/resources/db/migration/`, take the highest `V###`, add 1.
 - Copy the SET body from the latest keyword migration and append — never remove a member (Flyway is append-only; see Gotchas).
+
+### Variant — renaming or replacing a keyword id (e.g. swap the icon)
+
+Replacing an existing id (changing its icon = changing the join-key id, e.g.
+`AccelBullet` → `9828`) is **not** a pure append: the old id must be removed from all three
+layers so `KeywordParityTest` stays satisfied. In the converter and `SYNERGY_KEYWORDS` just
+swap the value in place. The DB migration is the trap — a MySQL `SET` `MODIFY` re-maps rows
+**by value**, so dropping a member silently deletes it from existing rows. Use the proven
+three-step add→migrate→remove pattern (model it on `V038__rename_charge_load_keyword.sql`):
+
+1. `ALTER … MODIFY` the SET to add the new id while **keeping** the old one.
+2. `UPDATE` existing rows with the boundary-safe replace (copy V038's `UPDATE` verbatim, just
+   substitute the two ids):
+   ```sql
+   UPDATE planners
+   SET selected_keywords = TRIM(BOTH ',' FROM
+       REPLACE(CONCAT(',', selected_keywords, ','), ',OLD_ID,', ',NEW_ID,'))
+   WHERE FIND_IN_SET('OLD_ID', selected_keywords) > 0;
+   ```
+3. `ALTER … MODIFY` the SET again to the final definition with the old id removed.
+
+If the old id is still a valid id in another domain (e.g. `AccelBullet` remains a battle
+keyword used by identities), you are only removing its **planner-keyword registration** —
+leave its battle-keyword data in `static/` untouched.
 
 ## Step 4 — Edit the 4 i18n label files by hand  *(static submodule)*
 Add a `"<keyword-id>": { "label": "<exact-bytes-from-Step-2>" }` entry to each:
