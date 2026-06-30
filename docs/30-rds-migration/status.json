@@ -1,0 +1,11 @@
+{
+  "totalPhases": 5,
+  "currentPhase": 2,
+  "phases": [
+    { "name": "Phase 1: Terraform terraform/rds/ module", "status": "done", "executor": "agent", "note": "module written; leak-scanned clean; terraform validate/plan deferred to operator (no creds/binary here)" },
+    { "name": "Phase 2: Provision + establish replication", "status": "pending", "executor": "operator" },
+    { "name": "Phase 3: Prepare Commit 2 cutover diff (no merge)", "status": "pending", "executor": "operator" },
+    { "name": "Phase 4: Cutover", "status": "pending", "executor": "operator" },
+    { "name": "Phase 5: Decommission", "status": "pending", "executor": "operator" }
+  ]
+}

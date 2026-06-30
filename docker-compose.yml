@@ -12,8 +12,12 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
-    # ports:
-    #   - "3306:3306"  # Not exposed - backend accesses via internal network
+    # Temporary: RDS pulls binlog replication from this source, so 3306 must be reachable.
+    # Binds the EC2 private IP only (SG-gated to the RDS subnet); defaults to localhost when
+    # SOURCE_PRIVATE_IP is unset so non-migration runs never expose MySQL. Remove at cutover —
+    # see docs/30-rds-migration/runbook.md 0.5 (expose) / 0.8 (tear down).
+    ports:
+      - "${SOURCE_PRIVATE_IP:-127.0.0.1}:3306:3306"
     networks:
       - danteplanner-network
     command:
