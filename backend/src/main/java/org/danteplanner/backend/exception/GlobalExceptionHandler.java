@@ -312,6 +312,40 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle the database being briefly unreachable (RDS maintenance reboot, failover, network blip).
+     *
+     * <p>When the DB is down, HikariCP cannot hand out a connection. Spring surfaces this as one of
+     * two unrelated hierarchies depending on WHERE the connection was needed: a query that runs
+     * outside a transaction yields DataAccessResourceFailureException (CannotGetJdbcConnectionException
+     * is a subclass); a {@code @Transactional} method fails at transaction-begin and yields
+     * CannotCreateTransactionException (a TransactionException, NOT a DataAccessException). Both mean
+     * the same thing — the DB is unreachable — so both map to 503 here. This is transient and
+     * self-healing — the pool reconnects when the DB returns. Deliberately NOT sent to Sentry: it is
+     * expected during the weekly single-AZ
+     * maintenance window and would otherwise alert-storm. Scoped to the resource-failure branch
+     * only, so query/constraint bugs keep their own handlers and are never masked as 503.</p>
+     *
+     * <p>The point of returning 503 (not letting it fall to the catch-all 500) is the edge contract:
+     * nginx has {@code proxy_intercept_errors on; error_page 502 503 504 = @backend_error}, so it
+     * rewrites any backend 5xx body to {@code BACKEND_UNAVAILABLE} (or {@code SERVICE_UPDATING}).
+     * A 500 would NOT be intercepted and would leak through as a raw INTERNAL_ERROR. So this handler
+     * exists to (a) emit 503 so nginx maps it cleanly to BACKEND_UNAVAILABLE for the client, and
+     * (b) keep it out of Sentry. The {@code DB_UNAVAILABLE} code below is internal-only (logs /
+     * direct backend access); external clients always see BACKEND_UNAVAILABLE.</p>
+     */
+    @ExceptionHandler({
+            org.springframework.dao.DataAccessResourceFailureException.class,
+            org.springframework.transaction.CannotCreateTransactionException.class
+    })
+    public ResponseEntity<ErrorResponse> handleDatabaseUnavailable(
+            org.springframework.core.NestedRuntimeException ex) {
+        log.warn("Database unavailable (transient): {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Retry-After", "10")
+            .body(new ErrorResponse("DB_UNAVAILABLE", "Database temporarily unavailable, please retry"));
+    }
+
+    /**
      * Handle SSE client disconnections (broken pipe, connection reset).
      *
      * <p>When clients disconnect from SSE endpoints (browser close, network interruption),

@@ -5,6 +5,7 @@ import org.danteplanner.backend.entity.User;
 import org.danteplanner.backend.exception.UserNotFoundException;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.service.token.TokenBlacklistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +44,9 @@ class UserAccountLifecycleServiceTest {
     @Mock
     private org.danteplanner.backend.repository.PlannerCommentVoteRepository plannerCommentVoteRepository;
 
+    @Mock
+    private TokenBlacklistService tokenBlacklistService;
+
     private UserAccountLifecycleService lifecycleService;
 
     private static final int GRACE_PERIOD_DAYS = 30;
@@ -56,6 +60,7 @@ class UserAccountLifecycleServiceTest {
                 plannerVoteRepository,
                 plannerCommentRepository,
                 plannerCommentVoteRepository,
+                tokenBlacklistService,
                 GRACE_PERIOD_DAYS
         );
 
@@ -96,6 +101,8 @@ class UserAccountLifecycleServiceTest {
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
 
             verify(userRepository).save(testUser);
+            // Fix 3: deletion must push token invalidation (filter no longer does a DB lookup)
+            verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 
         @Test
@@ -113,6 +120,7 @@ class UserAccountLifecycleServiceTest {
             // Assert
             assertEquals(existingScheduledAt, scheduledDate);
             verify(userRepository, never()).save(any()); // No save on idempotent call
+            verify(tokenBlacklistService, never()).invalidateUserTokens(any()); // No re-invalidation
         }
 
         @Test

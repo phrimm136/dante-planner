@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.config.LineageRotationFlag;
 import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.AccountDeletedException;
 import org.danteplanner.backend.exception.InvalidTokenException;
 import org.danteplanner.backend.exception.TokenRevokedException;
 import org.danteplanner.backend.service.UserAccountLifecycleService;
@@ -20,6 +19,8 @@ import org.danteplanner.backend.service.token.TokenGenerator;
 import org.danteplanner.backend.service.token.TokenValidator;
 import org.danteplanner.backend.util.CookieConstants;
 import org.danteplanner.backend.util.CookieUtils;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -123,7 +124,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // This handles cookie expiry (MaxAge) vs token expiry (JWT) desync
             // If refresh succeeds, setAuthentication() is called and request proceeds as authenticated
             // If refresh fails, SecurityContext remains empty and request proceeds as guest
-            attemptAutoRefresh(request, response);
+            try {
+                attemptAutoRefresh(request, response);
+            } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
+                writeDbUnavailable(response);
+                return;
+            }
             filterChain.doFilter(request, response);
             return;
         }
@@ -152,26 +158,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                // Check if user exists and is not deleted
-                Optional<User> activeUser = userService.findActiveById(userId);
-                if (activeUser.isEmpty()) {
-                    // User may be deleted - check if they exist at all
-                    try {
-                        User user = userService.findById(userId);
-                        if (user.isDeleted()) {
-                            throw new AccountDeletedException(userId);
-                        }
-                    } catch (Exception e) {
-                        if (e instanceof AccountDeletedException) {
-                            throw e;
-                        }
-                        // User not found at all - token is invalid
-                        logSecurityEvent("USER_NOT_FOUND", request);
-                        filterChain.doFilter(request, response);
-                        return;
-                    }
-                }
-
+                // Authenticate from token claims alone — no per-request DB lookup.
+                // Deleted users are rejected by the in-memory isUserTokenInvalidated check
+                // above (deleteAccount() calls invalidateUserTokens; demotion/logout-all too),
+                // so auth keeps working when the DB is briefly unavailable (maintenance window).
                 // Get role from token claims (default NORMAL for backward compat with old tokens)
                 UserRole role = claims.getEffectiveRole();
                 List<SimpleGrantedAuthority> authorities = List.of(
@@ -187,15 +177,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logSecurityEvent("TOKEN_REVOKED", request);
             // Don't try refresh for revoked tokens - revocation should be respected
             SecurityContextHolder.clearContext();
-        } catch (AccountDeletedException e) {
-            logSecurityEvent("ACCOUNT_DELETED", request);
-            // Don't try refresh for deleted accounts
-            SecurityContextHolder.clearContext();
         } catch (InvalidTokenException e) {
             // Try auto-refresh if token is expired
             if (e.getReason() == InvalidTokenException.Reason.EXPIRED) {
                 log.debug("Access token expired, attempting auto-refresh");
-                boolean refreshed = attemptAutoRefresh(request, response);
+                boolean refreshed;
+                try {
+                    refreshed = attemptAutoRefresh(request, response);
+                } catch (DataAccessResourceFailureException | CannotCreateTransactionException dbEx) {
+                    writeDbUnavailable(response);
+                    return;
+                }
                 if (!refreshed) {
                     // Refresh failed - clear any partial auth state
                     SecurityContextHolder.clearContext();
@@ -302,6 +294,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.debug("Auto-refreshed tokens for user: {}", user.getEmail());
             return true;
 
+        } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
+            // DB unreachable during refresh (query-time or transaction-begin) — propagate so the
+            // caller returns 503 instead of silently downgrading the user to a guest session.
+            throw e;
         } catch (Exception e) {
             log.debug("Auto-refresh failed: {}", e.getMessage());
             return false;
@@ -404,5 +400,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.getWriter().write(
                 objectMapper.writeValueAsString(Map.of("error", code, "message", message))
         );
+    }
+
+    /**
+     * Short-circuits with 503 when the DB is unreachable during token refresh.
+     * nginx rewrites the body to BACKEND_UNAVAILABLE for external clients; the point is
+     * the 503 status (transient, retryable) instead of a 500 or a silent guest downgrade.
+     */
+    private void writeDbUnavailable(HttpServletResponse response) throws IOException {
+        SecurityContextHolder.clearContext();
+        writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                "DB_UNAVAILABLE", "Database temporarily unavailable, please retry");
     }
 }

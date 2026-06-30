@@ -6,6 +6,7 @@ import org.danteplanner.backend.repository.PlannerCommentRepository;
 import org.danteplanner.backend.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.repository.PlannerVoteRepository;
 import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.service.token.TokenBlacklistService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ public class UserAccountLifecycleService {
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerCommentRepository plannerCommentRepository;
     private final PlannerCommentVoteRepository plannerCommentVoteRepository;
+    private final TokenBlacklistService tokenBlacklistService;
     private final int gracePeriodDays;
 
     public UserAccountLifecycleService(
@@ -47,11 +49,13 @@ public class UserAccountLifecycleService {
             PlannerVoteRepository plannerVoteRepository,
             PlannerCommentRepository plannerCommentRepository,
             PlannerCommentVoteRepository plannerCommentVoteRepository,
+            TokenBlacklistService tokenBlacklistService,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerCommentRepository = plannerCommentRepository;
         this.plannerCommentVoteRepository = plannerCommentVoteRepository;
+        this.tokenBlacklistService = tokenBlacklistService;
         this.gracePeriodDays = gracePeriodDays;
     }
 
@@ -77,6 +81,11 @@ public class UserAccountLifecycleService {
         Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));
         user.softDelete(scheduledDeleteAt);
         userRepository.save(user);
+
+        // Immediately revoke existing tokens via the in-memory invalidation check.
+        // The JWT filter no longer does a per-request DB lookup to detect deletion
+        // (token-only auth), so deletion must push the revocation signal here.
+        tokenBlacklistService.invalidateUserTokens(userId);
 
         return scheduledDeleteAt;
     }

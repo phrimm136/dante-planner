@@ -1,5 +1,6 @@
 import { useSuspenseQuery, useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
-import { ApiClient } from '@/lib/api';
+import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api';
+import { queryClient } from '@/lib/queryClient';
 import { UserSchema, type User } from '@/schemas/AuthSchemas';
 
 /**
@@ -13,7 +14,7 @@ export const authQueryKeys = {
  * Query options for fetching current user
  * Returns null if no auth cookie exists (unauthenticated state)
  */
-function createAuthMeQueryOptions() {
+export function createAuthMeQueryOptions() {
   return queryOptions({
     queryKey: authQueryKeys.me,
     queryFn: async (): Promise<User | null> => {
@@ -26,8 +27,14 @@ function createAuthMeQueryOptions() {
           return null;
         }
         return result.data;
-      } catch {
-        // Auth failure degrades to guest state — never crash the page
+      } catch (error) {
+        // Transient backend/DB unavailability must NOT log the user out: preserve the
+        // last-known identity so a maintenance blip doesn't flip an authed user to guest.
+        // Only a genuine auth failure (401 / invalid token / null body) degrades to guest.
+        if (error instanceof BackendUnavailableError || error instanceof ServiceUpdatingError) {
+          const cached = queryClient.getQueryData<User | null>(authQueryKeys.me);
+          if (cached) return cached;
+        }
         return null;
       }
     },

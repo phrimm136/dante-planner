@@ -9,18 +9,23 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { Suspense } from 'react'
-import { authQueryKeys, useLogout } from '../useAuthQuery'
+import { authQueryKeys, useLogout, createAuthMeQueryOptions } from '../useAuthQuery'
+import { queryClient } from '@/lib/queryClient'
 
 
-// Mock the API client
-vi.mock('@/lib/api', () => ({
-  ApiClient: {
-    get: vi.fn(),
-    post: vi.fn(),
-  },
-}))
+// Mock only the API client; keep the real error classes (instanceof checks rely on them)
+vi.mock('@/lib/api', async (importActual) => {
+  const actual = await importActual<typeof import('@/lib/api')>()
+  return {
+    ...actual,
+    ApiClient: {
+      get: vi.fn(),
+      post: vi.fn(),
+    },
+  }
+})
 
-import { ApiClient } from '@/lib/api'
+import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
 
 /**
  * Mock user response matching UserSchema
@@ -72,23 +77,79 @@ describe('useAuthQuery error handling', () => {
   })
 
   describe('queryFn behavior', () => {
+    const callQueryFn = () =>
+      (createAuthMeQueryOptions().queryFn as unknown as () => Promise<unknown>)()
+
     it('returns null for unauthenticated user (null response)', async () => {
       vi.mocked(ApiClient.get).mockResolvedValue(null)
-      const { wrapper, queryClient } = createWrapper()
 
-      queryClient.setQueryData(authQueryKeys.me, null)
+      const result = await callQueryFn()
 
-      expect(queryClient.getQueryData(authQueryKeys.me)).toBeNull()
+      expect(result).toBeNull()
     })
 
     it('returns validated user for valid response', async () => {
       vi.mocked(ApiClient.get).mockResolvedValue(mockUserResponse)
-      const { queryClient } = createWrapper()
 
-      queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
+      const result = await callQueryFn()
 
-      expect(queryClient.getQueryData(authQueryKeys.me)).toEqual(mockUserResponse)
+      expect(result).toEqual(mockUserResponse)
     })
+  })
+})
+
+describe('useAuthQuery transient-failure session preservation (Fix 2b)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    queryClient.clear()
+  })
+
+  afterEach(() => {
+    vi.resetAllMocks()
+    queryClient.clear()
+  })
+
+  const callQueryFn = () =>
+    (createAuthMeQueryOptions().queryFn as unknown as () => Promise<unknown>)()
+
+  it('preserves the cached user when /auth/me hits a transient BackendUnavailableError', async () => {
+    queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
+    vi.mocked(ApiClient.get).mockRejectedValue(new BackendUnavailableError('server down'))
+
+    const result = await callQueryFn()
+
+    // Transient outage must NOT log the user out — last-known identity is preserved
+    expect(result).toEqual(mockUserResponse)
+  })
+
+  it('preserves the cached user when /auth/me hits a ServiceUpdatingError (rolling deploy)', async () => {
+    queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
+    vi.mocked(ApiClient.get).mockRejectedValue(new ServiceUpdatingError('deploying'))
+
+    const result = await callQueryFn()
+
+    // A rolling deploy (SERVICE_UPDATING) is availability, not identity — stay logged in
+    expect(result).toEqual(mockUserResponse)
+  })
+
+  it('degrades to guest (null) on a transient error when there is no cached identity', async () => {
+    queryClient.removeQueries({ queryKey: authQueryKeys.me })
+    vi.mocked(ApiClient.get).mockRejectedValue(new BackendUnavailableError('server down'))
+
+    const result = await callQueryFn()
+
+    // Cold load with backend down: can't restore identity, render as guest (page still works)
+    expect(result).toBeNull()
+  })
+
+  it('degrades to guest (null) on a genuine auth error even with a cached user', async () => {
+    queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
+    vi.mocked(ApiClient.get).mockRejectedValue(new Error('HTTP error! status: 401'))
+
+    const result = await callQueryFn()
+
+    // A real 401/invalid-token is identity state, not availability — clear it
+    expect(result).toBeNull()
   })
 })
 
