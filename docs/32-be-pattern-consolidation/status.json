@@ -1,0 +1,22 @@
+{
+  "totalPhases": 16,
+  "currentPhase": 0,
+  "phases": [
+    { "name": "Phase 0: Land loose BE files (main tree)", "status": "pending" },
+    { "name": "Phase 1: Hygiene", "status": "pending" },
+    { "name": "Phase 2: SSE characterization tests", "status": "pending" },
+    { "name": "Phase 3: SSE base extraction", "status": "pending" },
+    { "name": "Phase 4: Consolidation batch — adopt existing primitives", "status": "pending" },
+    { "name": "Phase 5: Entity transitions", "status": "pending" },
+    { "name": "Phase 6: Wire-pinning tests — moderation + admin", "status": "pending" },
+    { "name": "Phase 7: Records migration", "status": "pending" },
+    { "name": "Phase 8: DI sweep + lombok.config", "status": "pending" },
+    { "name": "Phase 9: Entity @Data removal + setter lockdown", "status": "pending" },
+    { "name": "Phase 10: Planner test split + Thread.sleep fixes", "status": "pending" },
+    { "name": "Phase 11: Mass sweeps — test rename + factory adoption", "status": "pending" },
+    { "name": "Phase 12: Controller split", "status": "pending" },
+    { "name": "Phase 13: Static-analysis ratchet", "status": "pending" },
+    { "name": "Phase 14: Package-by-feature (main session)", "status": "pending" },
+    { "name": "Phase 15: Boundaries, index hygiene, doc truth-sync", "status": "pending" }
+  ]
+}
