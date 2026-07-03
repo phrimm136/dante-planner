@@ -1,0 +1,99 @@
+package org.danteplanner.backend.user.repository;
+
+import jakarta.persistence.LockModeType;
+
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByProviderAndProviderId(AuthProviderType provider, String providerId);
+
+    /**
+     * Find an active (non-deleted) user by OAuth provider credentials.
+     * Used for authentication to exclude soft-deleted users.
+     *
+     * @param provider   the OAuth provider (e.g., "google", "apple")
+     * @param providerId the provider's user ID
+     * @return the active user if found
+     */
+    Optional<User> findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType provider, String providerId);
+
+    /**
+     * Find users scheduled for permanent deletion before the cutoff time.
+     * Used by the cleanup scheduler to find expired users.
+     *
+     * @param cutoff the cutoff instant (users scheduled before this are eligible)
+     * @return list of users ready for hard deletion
+     */
+    List<User> findByPermanentDeleteScheduledAtBefore(Instant cutoff);
+
+    /**
+     * Find an active (non-deleted) user by ID.
+     * Used for operations that should only work on non-deleted users.
+     *
+     * @param id the user ID
+     * @return the active user if found
+     */
+    Optional<User> findByIdAndDeletedAtIsNull(Long id);
+
+    /**
+     * Count users with a specific role.
+     * Used to ensure at least one admin always exists.
+     *
+     * @param role the role to count
+     * @return count of users with that role
+     */
+    long countByRole(UserRole role);
+
+    /**
+     * Find an active (non-deleted) user by ID with pessimistic write lock.
+     * Used for role changes to prevent TOCTOU race conditions.
+     *
+     * @param id the user ID
+     * @return the active user if found, with row-level lock
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<User> findWithLockByIdAndDeletedAtIsNull(Long id);
+
+    /**
+     * Find all active users with timeouts that haven't expired yet.
+     * Uses the V014 partial index on timeout_until for efficient lookup.
+     * Useful for moderation dashboards to see currently timed-out users.
+     *
+     * @param now the current instant to compare against
+     * @return list of currently timed-out users
+     */
+    List<User> findByTimeoutUntilAfterAndDeletedAtIsNull(Instant now);
+
+    /**
+     * Get all active user IDs except the specified one.
+     * Used for broadcast notifications (e.g., new planner published).
+     *
+     * @param excludeUserId the user ID to exclude (typically the author)
+     * @return list of user IDs
+     */
+    @Query("SELECT u.id FROM User u WHERE u.deletedAt IS NULL AND u.id <> :excludeUserId")
+    List<Long> findAllActiveUserIdsExcept(@Param("excludeUserId") Long excludeUserId);
+
+    /**
+     * Find an active (non-deleted) user by username suffix.
+     * Username suffixes are unique identifiers safe for moderation operations.
+     * Used by moderation endpoints to identify users without exposing internal IDs.
+     *
+     * @param usernameSuffix the unique username suffix (e.g., "1234")
+     * @return the active user if found
+     */
+    Optional<User> findByUsernameSuffixAndDeletedAtIsNull(String usernameSuffix);
+}

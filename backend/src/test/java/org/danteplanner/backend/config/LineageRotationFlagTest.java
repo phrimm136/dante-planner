@@ -1,4 +1,5 @@
 package org.danteplanner.backend.config;
+import org.danteplanner.backend.shared.config.LineageRotationFlag;
 
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ class LineageRotationFlagTest {
     }
 
     @Test
-    void setEnabled_FlipsValue() {
+    void setEnabled_WhenToggled_FlipsValue() {
         LineageRotationFlag flag = new LineageRotationFlag(false);
 
         flag.setEnabled(true);

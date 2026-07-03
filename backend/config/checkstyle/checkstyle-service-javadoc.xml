@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Public-type Javadoc, scoped by the checkstyleServiceJavadoc task's source set
+  to service/**Service.java only (Gradle wiring in build.gradle.kts). Kept out
+  of the main config so DTOs/entities/controllers are not swept into a Javadoc
+  churn baseline. All current services already carry class Javadoc (phase 4);
+  this ratchets future ones.
+-->
+<module name="Checker">
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+
+    <module name="TreeWalker">
+        <module name="MissingJavadocType">
+            <property name="scope" value="public"/>
+        </module>
+    </module>
+</module>

@@ -2,8 +2,8 @@ package org.danteplanner.backend.support;
 
 import jakarta.servlet.http.Cookie;
 
-import org.danteplanner.backend.security.CsrfDoubleSubmitFilter;
-import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
+import org.danteplanner.backend.shared.util.CookieConstants;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 

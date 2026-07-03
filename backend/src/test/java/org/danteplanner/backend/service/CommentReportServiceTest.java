@@ -1,14 +1,15 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.dto.comment.CommentReportRequest;
-import org.danteplanner.backend.dto.comment.CommentReportResponse;
-import org.danteplanner.backend.entity.PlannerComment;
-import org.danteplanner.backend.entity.PlannerCommentReport;
-import org.danteplanner.backend.exception.CommentForbiddenException;
-import org.danteplanner.backend.exception.CommentNotFoundException;
-import org.danteplanner.backend.exception.CommentReportAlreadyExistsException;
-import org.danteplanner.backend.repository.PlannerCommentReportRepository;
-import org.danteplanner.backend.repository.PlannerCommentRepository;
+import org.danteplanner.backend.moderation.service.CommentReportService;
+import org.danteplanner.backend.moderation.dto.CommentReportRequest;
+import org.danteplanner.backend.moderation.dto.CommentReportResponse;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
+import org.danteplanner.backend.comment.exception.CommentForbiddenException;
+import org.danteplanner.backend.comment.exception.CommentNotFoundException;
+import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
+import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -140,7 +141,7 @@ class CommentReportServiceTest {
 
         @Test
         @DisplayName("Should validate comment before checking existing report")
-        void createReport_ValidatesCommentFirst() {
+        void createReport_WhenCommentMissing_ValidatesCommentFirst() {
             // Arrange
             when(commentRepository.findByPublicId(COMMENT_PUBLIC_ID)).thenReturn(Optional.empty());
             CommentReportRequest request = new CommentReportRequest(REASON);
@@ -189,7 +190,7 @@ class CommentReportServiceTest {
 
         @Test
         @DisplayName("Should check correct user and comment IDs")
-        void hasReported_ChecksCorrectIds() {
+        void hasReported_WhenCalled_ChecksCorrectIds() {
             // Arrange
             Long userId = 42L;
             Long specificCommentId = 999L;

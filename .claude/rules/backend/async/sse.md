@@ -52,4 +52,4 @@ public class SseService {
 }
 ```
 
-**Reference:** `PlannerSseService.java`
+**Reference:** `SseService.java` (base: `AbstractSseService.java`)

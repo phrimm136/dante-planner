@@ -2,10 +2,10 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.service.token.JwtTokenService;
-import org.danteplanner.backend.service.token.TokenBlacklistService;
-import org.danteplanner.backend.service.token.TokenClaims;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,7 +28,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 /**
  * Integration tests for POST /api/auth/logout-all.
  *
- * <p>Exercises the endpoint end-to-end against the real {@link org.danteplanner.backend.facade.AuthenticationFacade}
+ * <p>Exercises the endpoint end-to-end against the real {@link org.danteplanner.backend.auth.facade.AuthenticationFacade}
  * and {@link TokenBlacklistService} so user-wide invalidation and the subsequent filter
  * rejection compose without mocking.</p>
  */
@@ -43,7 +43,7 @@ class AuthControllerLogoutAllTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private org.danteplanner.backend.repository.UserRepository userRepository;
+    private org.danteplanner.backend.user.repository.UserRepository userRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;

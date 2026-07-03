@@ -1,11 +1,14 @@
 package org.danteplanner.backend.repository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 
 import jakarta.persistence.EntityManager;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerComment;
-import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -85,14 +88,14 @@ class PlannerCommentRepositoryTest {
 
         @Test
         @DisplayName("Returns empty list when plannerIds is empty")
-        void emptyInput_ReturnsEmptyList() {
+        void countByPlannerIdsGrouped_WhenEmptyInput_ReturnsEmptyList() {
             List<Object[]> result = commentRepository.countByPlannerIdsGrouped(List.of());
             assertTrue(result.isEmpty());
         }
 
         @Test
         @DisplayName("Returns zero rows for planners with no comments")
-        void noComments_ReturnsNoRows() {
+        void countByPlannerIdsGrouped_WhenNoComments_ReturnsNoRows() {
             List<Object[]> result = commentRepository.countByPlannerIdsGrouped(
                     List.of(plannerA.getId(), plannerB.getId()));
             assertTrue(result.isEmpty());
@@ -100,7 +103,7 @@ class PlannerCommentRepositoryTest {
 
         @Test
         @DisplayName("Returns correct count for a single planner with comments")
-        void singlePlannerWithComments_ReturnsCorrectCount() {
+        void countByPlannerIdsGrouped_WhenSinglePlanner_ReturnsCorrectCount() {
             saveComment(plannerA.getId());
             saveComment(plannerA.getId());
             saveComment(plannerA.getId());
@@ -114,7 +117,7 @@ class PlannerCommentRepositoryTest {
 
         @Test
         @DisplayName("Returns counts grouped per planner when multiple planners have comments")
-        void multiplePlanners_ReturnsCountsPerPlanner() {
+        void countByPlannerIdsGrouped_WhenMultiplePlanners_ReturnsCountsPerPlanner() {
             saveComment(plannerA.getId());
             saveComment(plannerA.getId());
             saveComment(plannerB.getId());
@@ -129,7 +132,7 @@ class PlannerCommentRepositoryTest {
 
         @Test
         @DisplayName("Excludes soft-deleted comments from count")
-        void softDeletedComments_ExcludedFromCount() {
+        void countByPlannerIdsGrouped_WhenSoftDeletedComments_ExcludesThem() {
             PlannerComment live = saveComment(plannerA.getId());
             PlannerComment deleted = saveComment(plannerA.getId());
 
@@ -146,7 +149,7 @@ class PlannerCommentRepositoryTest {
 
         @Test
         @DisplayName("Only returns rows for planners in the input list")
-        void queryScoped_ToInputPlannerIds() {
+        void countByPlannerIdsGrouped_WhenScoped_ReturnsOnlyInputPlanners() {
             saveComment(plannerA.getId());
             saveComment(plannerB.getId());
 

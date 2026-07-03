@@ -1,7 +1,8 @@
 package org.danteplanner.backend.validation;
+import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 
-import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,13 +36,13 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("MD: accepts current version")
-        void mdCurrentVersion_succeeds() {
+        void validateVersionForCreate_WhenMdCurrentVersion_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 7));
         }
 
         @Test
         @DisplayName("MD: rejects old version")
-        void mdOldVersion_throwsException() {
+        void validateVersionForCreate_WhenMdOldVersion_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 5)
@@ -51,7 +52,7 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("MD: rejects future version")
-        void mdFutureVersion_throwsException() {
+        void validateVersionForCreate_WhenMdFutureVersion_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, 99)
@@ -61,19 +62,19 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("RR: accepts version 1")
-        void rrVersion1_succeeds() {
+        void validateVersionForCreate_WhenRrVersion1_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 1));
         }
 
         @Test
         @DisplayName("RR: accepts version 5")
-        void rrVersion5_succeeds() {
+        void validateVersionForCreate_WhenRrVersion5_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 5));
         }
 
         @Test
         @DisplayName("RR: rejects version not in list")
-        void rrVersionNotInList_throwsException() {
+        void validateVersionForCreate_WhenRrVersionNotInList_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.REFRACTED_RAILWAY, 3)
@@ -83,7 +84,7 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("Null version throws exception")
-        void nullVersion_throwsException() {
+        void validateVersionForCreate_WhenNullVersion_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
                     () -> validator.validateVersionForCreate(PlannerType.MIRROR_DUNGEON, null)
@@ -113,13 +114,13 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("MD: accepts version in available list")
-        void mdVersionInList_succeeds() {
+        void validateVersionForUpdate_WhenMdVersionInList_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForUpdate(PlannerType.MIRROR_DUNGEON, 6));
         }
 
         @Test
         @DisplayName("MD: rejects version not in available list")
-        void mdVersionNotInList_throwsException() {
+        void validateVersionForUpdate_WhenMdVersionNotInList_Throws() {
             PlannerValidationException ex = assertThrows(
                     PlannerValidationException.class,
                     () -> validator.validateVersionForUpdate(PlannerType.MIRROR_DUNGEON, 5)
@@ -129,7 +130,7 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("RR: accepts version in list")
-        void rrVersionInList_succeeds() {
+        void validateVersionForUpdate_WhenRrVersionInList_Succeeds() {
             assertDoesNotThrow(() -> validator.validateVersionForUpdate(PlannerType.REFRACTED_RAILWAY, 5));
         }
     }

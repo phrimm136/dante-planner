@@ -56,7 +56,7 @@ class UserServiceTest {
 }
 ```
 
-**Reference:** `PlannerServiceTest.java`
+**Reference:** `PlannerCommandServiceTest.java`
 
 ## Secondary Test Instance Pattern
 

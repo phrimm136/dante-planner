@@ -2,13 +2,13 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Notification;
-import org.danteplanner.backend.entity.NotificationType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.repository.NotificationRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -402,7 +402,7 @@ class NotificationControllerTest {
 
         @Test
         @DisplayName("Should return count of marked notifications")
-        void markAllRead_ReturnsCount() throws Exception {
+        void markAllRead_WhenUnreadExist_ReturnsCount() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
 
@@ -493,7 +493,7 @@ class NotificationControllerTest {
 
         @Test
         @DisplayName("Should exclude deleted notification from inbox")
-        void deleteNotification_ExcludesFromInbox() throws Exception {
+        void deleteNotification_WhenDeleted_ExcludesFromInbox() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
@@ -509,7 +509,7 @@ class NotificationControllerTest {
 
         @Test
         @DisplayName("Should exclude deleted notification from unread count")
-        void deleteNotification_ExcludesFromUnreadCount() throws Exception {
+        void deleteNotification_WhenDeleted_ExcludesFromUnreadCount() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())

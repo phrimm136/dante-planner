@@ -2,22 +2,22 @@ package org.danteplanner.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
-import org.danteplanner.backend.dto.planner.UpsertPlannerRequest;
-import org.danteplanner.backend.dto.planner.ImportPlannersRequest;
-import org.danteplanner.backend.dto.planner.VoteRequest;
-import org.danteplanner.backend.entity.VoteType;
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerStatus;
-import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.entity.PlannerView;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserRole;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.PlannerViewRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
-import org.danteplanner.backend.util.ViewerHashUtil;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
+import org.danteplanner.backend.planner.dto.VoteRequest;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.PlannerView;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerViewRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -75,7 +74,7 @@ class PlannerControllerTest {
     private PlannerRepository plannerRepository;
 
     @Autowired
-    private org.danteplanner.backend.repository.PlannerVoteRepository plannerVoteRepository;
+    private org.danteplanner.backend.planner.repository.PlannerVoteRepository plannerVoteRepository;
 
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
@@ -96,23 +95,9 @@ class PlannerControllerTest {
         userRepository.deleteAll();
 
         // Create test users
-        testUser = User.builder()
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
-        testUser = userRepository.save(testUser);
+        testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
 
-        otherUser = User.builder()
-                .email("other@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-456")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test2")
-                .build();
-        otherUser = userRepository.save(otherUser);
+        otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
 
         // Generate JWT tokens
         accessToken = jwtTokenService.generateAccessToken(testUser.getId(), UserRole.NORMAL);
@@ -164,15 +149,16 @@ class PlannerControllerTest {
         """.trim().replace("\n", "").replace(" ", "");
 
     private UpsertPlannerRequest createValidPlannerRequest() {
-        UpsertPlannerRequest request = new UpsertPlannerRequest();
-        request.setId(UUID.randomUUID().toString());
-        request.setCategory("5F");
-        request.setTitle("Test Planner");
-        request.setStatus(PlannerStatus.DRAFT);
-        request.setContent(VALID_CONTENT);
-        request.setContentVersion(7);
-        request.setPlannerType(PlannerType.MIRROR_DUNGEON);
-        return request;
+        return new UpsertPlannerRequest(
+                UUID.randomUUID().toString(),
+                "5F",
+                "Test Planner",
+                PlannerStatus.DRAFT,
+                VALID_CONTENT,
+                7,
+                PlannerType.MIRROR_DUNGEON,
+                null,
+                null);
     }
 
     /**
@@ -180,14 +166,51 @@ class PlannerControllerTest {
      * Use this for update tests to satisfy validation while testing specific field changes.
      */
     private UpsertPlannerRequest createUpsertRequestFromPlanner(Planner planner) {
-        UpsertPlannerRequest request = new UpsertPlannerRequest();
-        request.setId(planner.getId().toString());
-        request.setCategory(planner.getCategory());
-        request.setContent(planner.getContent());
-        request.setContentVersion(planner.getContentVersion());
-        request.setPlannerType(planner.getPlannerType());
-        request.setSyncVersion(planner.getSyncVersion());
-        return request;
+        return new UpsertPlannerRequest(
+                planner.getId().toString(),
+                planner.getCategory(),
+                null,
+                null,
+                planner.getContent(),
+                planner.getContentVersion(),
+                planner.getPlannerType(),
+                planner.getSyncVersion(),
+                null);
+    }
+
+    private UpsertPlannerRequest withCategory(UpsertPlannerRequest r, String category) {
+        return new UpsertPlannerRequest(r.id(), category, r.title(), r.status(),
+                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withTitle(UpsertPlannerRequest r, String title) {
+        return new UpsertPlannerRequest(r.id(), r.category(), title, r.status(),
+                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withStatus(UpsertPlannerRequest r, PlannerStatus status) {
+        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), status,
+                r.content(), r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withContent(UpsertPlannerRequest r, String content) {
+        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
+                content, r.contentVersion(), r.plannerType(), r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withContentVersion(UpsertPlannerRequest r, Integer contentVersion) {
+        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
+                r.content(), contentVersion, r.plannerType(), r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withPlannerType(UpsertPlannerRequest r, PlannerType plannerType) {
+        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
+                r.content(), r.contentVersion(), plannerType, r.syncVersion(), r.selectedKeywords());
+    }
+
+    private UpsertPlannerRequest withSyncVersion(UpsertPlannerRequest r, Long syncVersion) {
+        return new UpsertPlannerRequest(r.id(), r.category(), r.title(), r.status(),
+                r.content(), r.contentVersion(), r.plannerType(), syncVersion, r.selectedKeywords());
     }
 
     private Planner createTestPlanner(User user) {
@@ -216,7 +239,7 @@ class PlannerControllerTest {
         void createPlanner_ValidData_Returns201() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -237,7 +260,7 @@ class PlannerControllerTest {
         void createPlanner_NoAuth_Returns401() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -247,10 +270,9 @@ class PlannerControllerTest {
         @Test
         @DisplayName("Should return 400 when category is missing")
         void createPlanner_MissingCategory_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setCategory(null);
+            UpsertPlannerRequest request = withCategory(createValidPlannerRequest(), null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -266,7 +288,7 @@ class PlannerControllerTest {
             String body = objectMapper.writeValueAsString(request)
                     .replace("\"status\":\"draft\"", "\"status\":\"garbage\"");
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -279,10 +301,9 @@ class PlannerControllerTest {
         @Test
         @DisplayName("Should return 400 when content is missing")
         void createPlanner_MissingContent_Returns400() throws Exception {
-            UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setContent(null);
+            UpsertPlannerRequest request = withContent(createValidPlannerRequest(), null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -301,9 +322,9 @@ class PlannerControllerTest {
                 "{\"title\":\"%s\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{}}",
                 largeTitle
             );
-            request.setContent(largeContent);
+            request = withContent(request, largeContent);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -322,9 +343,9 @@ class PlannerControllerTest {
                 "{\"title\":\"Test\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{\"section1\":{\"content\":{\"type\":\"doc\",\"text\":\"%s\"}}}}",
                 largeNote
             );
-            request.setContent(contentWithLargeNote);
+            request = withContent(request, contentWithLargeNote);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -337,9 +358,9 @@ class PlannerControllerTest {
         @DisplayName("Should return 400 when contentVersion is missing")
         void createPlanner_MissingContentVersion_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setContentVersion(null);
+            request = withContentVersion(request, null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -352,9 +373,9 @@ class PlannerControllerTest {
         @DisplayName("Should return 400 when plannerType is missing")
         void createPlanner_MissingPlannerType_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setPlannerType(null);
+            request = withPlannerType(request, null);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -367,9 +388,9 @@ class PlannerControllerTest {
         @DisplayName("Should return 400 when contentVersion is not positive")
         void createPlanner_NonPositiveContentVersion_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setContentVersion(0);
+            request = withContentVersion(request, 0);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -388,7 +409,7 @@ class PlannerControllerTest {
 
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -401,11 +422,11 @@ class PlannerControllerTest {
         @DisplayName("Should return 400 when category is invalid for planner type")
         void createPlanner_InvalidCategoryForType_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setCategory("INVALID_CATEGORY");
+            request = withCategory(request, "INVALID_CATEGORY");
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -418,12 +439,11 @@ class PlannerControllerTest {
         @DisplayName("Should return 400 when MD category used with RR planner type")
         void createPlanner_MdCategoryWithRrType_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
-            request.setPlannerType(PlannerType.REFRACTED_RAILWAY);
-            request.setCategory("5F"); // MD category, invalid for RR
+            request = withCategory(withPlannerType(request, PlannerType.REFRACTED_RAILWAY), "5F"); // MD category, invalid for RR
 
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -439,7 +459,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return only current user's non-deleted planners")
-        void getPlanners_ReturnsOnlyUsersPlanners() throws Exception {
+        void getPlanners_WhenAuthenticated_ReturnsOnlyOwnPlanners() throws Exception {
             // Create planners for test user
             createTestPlanner(testUser);
             createTestPlanner(testUser);
@@ -458,7 +478,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should not return soft-deleted planners")
-        void getPlanners_ExcludesDeletedPlanners() throws Exception {
+        void getPlanners_WhenSoftDeleted_ExcludesDeletedPlanners() throws Exception {
             Planner planner1 = createTestPlanner(testUser);
             Planner planner2 = createTestPlanner(testUser);
 
@@ -484,7 +504,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should support pagination")
-        void getPlanners_SupportsPagination() throws Exception {
+        void getPlanners_WhenPaged_ReturnsRequestedPage() throws Exception {
             // Create 5 planners
             for (int i = 0; i < 5; i++) {
                 createTestPlanner(testUser);
@@ -573,7 +593,7 @@ class PlannerControllerTest {
             Long initialSyncVersion = planner.getSyncVersion();
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request.setTitle("Updated Title");
+            request = withTitle(request, "Updated Title");
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -591,8 +611,7 @@ class PlannerControllerTest {
             Planner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request.setTitle("Updated Title");
-            request.setSyncVersion(999L); // Wrong version
+            request = withSyncVersion(withTitle(request, "Updated Title"), 999L); // Wrong version
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -610,7 +629,7 @@ class PlannerControllerTest {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(otherUserPlanner);
-            request.setTitle("Updated Title");
+            request = withTitle(request, "Updated Title");
 
             mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -628,7 +647,7 @@ class PlannerControllerTest {
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
             String largeTitle = "x".repeat(52000);
-            request.setContent(String.format(
+            request = withContent(request, String.format(
                 "{\"title\":\"%s\",\"category\":\"5F\",\"selectedKeywords\":[],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{}}",
                 largeTitle
             ));
@@ -648,7 +667,7 @@ class PlannerControllerTest {
             Planner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request.setTitle("Updated Title");
+            request = withTitle(request, "Updated Title");
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(deviceIdCookie())
@@ -663,7 +682,7 @@ class PlannerControllerTest {
             Planner planner = createTestPlanner(testUser); // contentVersion = 6
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
-            request.setContentVersion(7);
+            request = withContentVersion(request, 7);
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -740,12 +759,11 @@ class PlannerControllerTest {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
                 UpsertPlannerRequest req = createValidPlannerRequest();
-                req.setTitle("Imported Planner " + i);
+                req = withTitle(req, "Imported Planner " + i);
                 planners.add(req);
             }
 
-            ImportPlannersRequest request = new ImportPlannersRequest();
-            request.setPlanners(planners);
+            ImportPlannersRequest request = new ImportPlannersRequest(planners);
 
             mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -769,12 +787,11 @@ class PlannerControllerTest {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
                 UpsertPlannerRequest req = createValidPlannerRequest();
-                req.setTitle("Imported Planner " + i);
+                req = withTitle(req, "Imported Planner " + i);
                 planners.add(req);
             }
 
-            ImportPlannersRequest request = new ImportPlannersRequest();
-            request.setPlanners(planners);
+            ImportPlannersRequest request = new ImportPlannersRequest(planners);
 
             mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -790,12 +807,11 @@ class PlannerControllerTest {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             for (int i = 0; i < 51; i++) {
                 UpsertPlannerRequest req = createValidPlannerRequest();
-                req.setTitle("Imported Planner " + i);
+                req = withTitle(req, "Imported Planner " + i);
                 planners.add(req);
             }
 
-            ImportPlannersRequest request = new ImportPlannersRequest();
-            request.setPlanners(planners);
+            ImportPlannersRequest request = new ImportPlannersRequest(planners);
 
             mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -811,8 +827,7 @@ class PlannerControllerTest {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             planners.add(createValidPlannerRequest());
 
-            ImportPlannersRequest request = new ImportPlannersRequest();
-            request.setPlanners(planners);
+            ImportPlannersRequest request = new ImportPlannersRequest(planners);
 
             mockMvc.perform(post("/api/planner/md/import").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -827,7 +842,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 401 for expired/invalid token")
-        void expiredToken_Returns401() throws Exception {
+        void getPlanners_WhenExpiredToken_Returns401() throws Exception {
             // This test verifies behavior with invalid/expired token
             // Note: Invalid tokens return 401, while missing tokens return 403
             String invalidToken = "invalid.jwt.token";
@@ -839,7 +854,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("All planner endpoints require authentication")
-        void allEndpoints_RequireAuth() throws Exception {
+        void plannerEndpoints_WhenUnauthenticated_Return401() throws Exception {
             UUID randomId = UUID.randomUUID();
 
             // PUT /api/planner/md/{id} (upsert)
@@ -880,7 +895,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 200 with config values (public endpoint)")
-        void getConfig_Success() throws Exception {
+        void getConfig_WhenPublic_Returns200WithConfig() throws Exception {
             // Config endpoint returns version info for planner creation:
             // - schemaVersion: data format version (for migration support)
             // - mdCurrentVersion: current Mirror Dungeon version (for MIRROR_DUNGEON planners)
@@ -911,7 +926,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Creating 100th planner should succeed")
-        void create100thPlanner_Succeeds() throws Exception {
+        void upsertPlanner_When100thPlanner_Succeeds() throws Exception {
             // Create 99 planners
             for (int i = 0; i < 99; i++) {
                 createTestPlanner(testUser);
@@ -920,7 +935,7 @@ class PlannerControllerTest {
             // 100th planner should succeed
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -933,7 +948,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Creating 101st planner should fail")
-        void create101stPlanner_Fails() throws Exception {
+        void upsertPlanner_When101stPlanner_ReturnsConflict() throws Exception {
             // Create 100 planners
             for (int i = 0; i < 100; i++) {
                 createTestPlanner(testUser);
@@ -942,7 +957,7 @@ class PlannerControllerTest {
             // 101st planner should fail
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -953,7 +968,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Deleted planners should not count toward limit")
-        void deletedPlanners_NotCountedInLimit() throws Exception {
+        void upsertPlanner_WhenDeletedPlannersExist_NotCountedInLimit() throws Exception {
             // Create 100 planners
             List<Planner> planners = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
@@ -968,7 +983,7 @@ class PlannerControllerTest {
             // Now should be able to create one more
             UpsertPlannerRequest request = createValidPlannerRequest();
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -978,12 +993,12 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Content well under 50KB should succeed")
-        void contentAt50KB_Succeeds() throws Exception {
+        void upsertPlanner_WhenContentUnder50KB_Succeeds() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             // Use VALID_CONTENT which is already well under 50KB
-            request.setContent(VALID_CONTENT);
+            request = withContent(request, VALID_CONTENT);
 
-            mockMvc.perform(put("/api/planner/md/{id}", request.getId()).with(withCsrf())
+            mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(deviceIdCookie())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1018,7 +1033,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 200 with paginated published planners (public endpoint)")
-        void getPublishedPlanners_Success() throws Exception {
+        void getPublishedPlanners_WhenPublic_Returns200WithPage() throws Exception {
             // Arrange - Create published planners
             createPublishedPlanner(testUser, "Published Planner 1");
             createPublishedPlanner(testUser, "Published Planner 2");
@@ -1035,7 +1050,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should filter by category when provided")
-        void getPublishedPlanners_WithCategoryFilter() throws Exception {
+        void getPublishedPlanners_WhenCategoryFilter_ReturnsFiltered() throws Exception {
             // Arrange - Create planners with different categories
             createPublishedPlanner(testUser, "F5 Planner");
 
@@ -1069,7 +1084,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should not return unpublished planners")
-        void getPublishedPlanners_ExcludesUnpublished() throws Exception {
+        void getPublishedPlanners_WhenUnpublishedExist_ExcludesThem() throws Exception {
             // Arrange - Create one published, one unpublished
             createPublishedPlanner(testUser, "Published");
             createTestPlanner(testUser); // Unpublished by default
@@ -1109,7 +1124,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 200 with planners meeting threshold (public endpoint)")
-        void getRecommendedPlanners_Success() throws Exception {
+        void getRecommendedPlanners_WhenPublic_Returns200WithQualifying() throws Exception {
             // Arrange - threshold is 10, create planners with various net votes
             createRecommendedPlanner(testUser, "Recommended 1", 15);
             createRecommendedPlanner(testUser, "Recommended 2", 12);
@@ -1126,7 +1141,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return empty when no planners meet threshold")
-        void getRecommendedPlanners_NoneQualify() throws Exception {
+        void getRecommendedPlanners_WhenNoneQualify_ReturnsEmpty() throws Exception {
             // Arrange - All planners below threshold
             createRecommendedPlanner(testUser, "Low Votes 1", 5);
             createRecommendedPlanner(testUser, "Low Votes 2", 8);
@@ -1146,7 +1161,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 200 when owner toggles publish status")
-        void togglePublish_OwnerSuccess() throws Exception {
+        void togglePublish_WhenOwner_Returns200() throws Exception {
             // Arrange - Create planner for test user
             Planner planner = createTestPlanner(testUser);
             assertFalse(planner.getPublished());
@@ -1165,7 +1180,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 403 when non-owner attempts to toggle publish")
-        void togglePublish_NonOwnerForbidden() throws Exception {
+        void togglePublish_WhenNonOwner_Returns403() throws Exception {
             // Arrange - Create planner for test user, but use other user's token
             Planner planner = createTestPlanner(testUser);
 
@@ -1198,7 +1213,7 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should toggle from published to unpublished")
-        void togglePublish_PublishedToUnpublished() throws Exception {
+        void togglePublish_WhenPublished_TogglesToUnpublished() throws Exception {
             // Arrange - Create already published planner
             Planner planner = Planner.builder()
                     .id(UUID.randomUUID())
@@ -1253,11 +1268,10 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 200 when casting upvote")
-        void castVote_Success() throws Exception {
+        void castVote_WhenAuthenticated_Returns200() throws Exception {
             // Arrange
             Planner planner = createPublishedPlanner();
-            VoteRequest request = new VoteRequest();
-            request.setVoteType(VoteType.UP);
+            VoteRequest request = new VoteRequest(VoteType.UP);
 
             // Act & Assert
             mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
@@ -1277,8 +1291,7 @@ class PlannerControllerTest {
             // Arrange
             Planner planner = createPublishedPlanner();
 
-            VoteRequest removeRequest = new VoteRequest();
-            removeRequest.setVoteType(null);
+            VoteRequest removeRequest = new VoteRequest(null);
 
             // Act & Assert - votes are permanent, null voteType is rejected
             mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
@@ -1291,10 +1304,9 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void castVote_Unauthenticated() throws Exception {
+        void castVote_WhenUnauthenticated_Returns401() throws Exception {
             Planner planner = createPublishedPlanner();
-            VoteRequest request = new VoteRequest();
-            request.setVoteType(VoteType.UP);
+            VoteRequest request = new VoteRequest(VoteType.UP);
 
             mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1304,10 +1316,9 @@ class PlannerControllerTest {
 
         @Test
         @DisplayName("Should return 404 for non-existent planner")
-        void castVote_PlannerNotFound() throws Exception {
+        void castVote_WhenPlannerNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
-            VoteRequest request = new VoteRequest();
-            request.setVoteType(VoteType.UP);
+            VoteRequest request = new VoteRequest(VoteType.UP);
 
             mockMvc.perform(post("/api/planner/md/{id}/upvote", nonExistentId).with(withCsrf())
                             .cookie(accessTokenCookie())
@@ -1324,8 +1335,7 @@ class PlannerControllerTest {
             Planner planner = createTestPlanner(otherUser);
             assertFalse(planner.getPublished());
 
-            VoteRequest request = new VoteRequest();
-            request.setVoteType(VoteType.UP);
+            VoteRequest request = new VoteRequest(VoteType.UP);
 
             // Act & Assert
             mockMvc.perform(post("/api/planner/md/{id}/upvote", planner.getId()).with(withCsrf())

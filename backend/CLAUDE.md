@@ -2,7 +2,7 @@
 
 **Tech Stack:** Spring Boot + Java + JPA/Hibernate + Bean Validation (JSR-380) + MySQL
 
-**Build Tool:** Gradle via `./gradlew`
+**Build Tool:** Gradle via `./gradlew -p backend` (always pass `-p backend` from the repo root; bare `./gradlew` without a project dir is hook-blocked)
 
 ---
 
@@ -65,7 +65,6 @@
 
 **Spring Boot Specific Rules:**
 - **Constructor Injection > Field Injection**: Testable, immutable, avoids circular deps
-- **Interface for Service Layer**: Loose coupling, easier testing/mocking
 - **DTO for API Boundaries**: NEVER expose Entity directly in REST API
 - **@Transactional at Service Layer**: Transaction management in business logic layer only
 
@@ -128,12 +127,12 @@ Before using ANY hardcoded value (URLs, numbers, strings):
 
 | Need Pattern For | Check These Files |
 |------------------|-------------------|
-| Controller | `PlannerController.java` |
-| Service | `PlannerService.java` |
-| Repository | `PlannerRepository.java` |
-| Exception Handler | `GlobalExceptionHandler.java` |
-| Security Config | `SecurityConfig.java` |
-| SSE Service | `PlannerSseService.java` |
+| Controller | `planner/controller/PlannerQueryController.java` |
+| Service | `planner/service/PlannerCommandService.java` |
+| Repository | `planner/repository/PlannerRepository.java` |
+| Exception Handler | `shared/exception/GlobalExceptionHandler.java` |
+| Security Config | `shared/config/SecurityConfig.java` |
+| SSE Service | `shared/sse/SseService.java` (base: `shared/sse/AbstractSseService.java`) |
 
 ---
 

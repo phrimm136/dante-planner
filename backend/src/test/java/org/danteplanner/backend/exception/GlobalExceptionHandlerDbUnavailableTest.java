@@ -1,6 +1,7 @@
 package org.danteplanner.backend.exception;
+import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
 
-import org.danteplanner.backend.util.CookieUtils;
+import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ class GlobalExceptionHandlerDbUnavailableTest {
 
     @Test
     @DisplayName("@Transactional path (CannotCreateTransactionException) maps to 503, not 500")
-    void transactionBeginFailure_mapsTo503() throws Exception {
+    void transactionBeginFailure_WhenThrown_MapsTo503() throws Exception {
         mockMvc.perform(get("/boom/transaction"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(header().string("Retry-After", "10"))
@@ -63,7 +64,7 @@ class GlobalExceptionHandlerDbUnavailableTest {
 
     @Test
     @DisplayName("Query-time path (DataAccessResourceFailureException) still maps to 503")
-    void queryTimeFailure_mapsTo503() throws Exception {
+    void queryTimeFailure_WhenThrown_MapsTo503() throws Exception {
         mockMvc.perform(get("/boom/query"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(header().string("Retry-After", "10"))

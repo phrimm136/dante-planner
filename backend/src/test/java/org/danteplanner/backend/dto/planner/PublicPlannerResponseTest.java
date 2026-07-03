@@ -1,8 +1,9 @@
 package org.danteplanner.backend.dto.planner;
+import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -24,20 +25,20 @@ class PublicPlannerResponseTest {
 
         @Test
         @DisplayName("Should return username keyword from user entity")
-        void fromEntity_ReturnsUsernameEpithet() {
+        void fromEntity_WhenMapped_ReturnsUsernameEpithet() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(TEST_KEYWORD, response.getAuthorUsernameEpithet());
+            assertEquals(TEST_KEYWORD, response.authorUsernameEpithet());
         }
 
         @Test
         @DisplayName("Should return username suffix from user entity")
-        void fromEntity_ReturnsUsernameSuffix() {
+        void fromEntity_WhenMapped_ReturnsUsernameSuffix() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix());
+            assertEquals(TEST_SUFFIX, response.authorUsernameSuffix());
         }
 
         @Test
@@ -46,8 +47,8 @@ class PublicPlannerResponseTest {
             User user = createTestUser(null);
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertEquals(TEST_KEYWORD, response.getAuthorUsernameEpithet());
-            assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix());
+            assertEquals(TEST_KEYWORD, response.authorUsernameEpithet());
+            assertEquals(TEST_SUFFIX, response.authorUsernameSuffix());
         }
     }
 
@@ -57,21 +58,21 @@ class PublicPlannerResponseTest {
 
         @Test
         @DisplayName("commentCount is null when fromEntity called without setter")
-        void fromEntity_CommentCountIsNullByDefault() {
+        void fromEntity_WhenNoSetter_CommentCountIsNull() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            assertNull(response.getCommentCount());
+            assertNull(response.commentCount());
         }
 
         @Test
         @DisplayName("setCommentCount stores the value correctly")
-        void setCommentCount_StoresValue() {
+        void commentCount_WhenSetViaBuilder_StoresValue() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
-            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            response.setCommentCount(7L);
-            assertEquals(7L, response.getCommentCount());
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner)
+                    .toBuilder().commentCount(7L).build();
+            assertEquals(7L, response.commentCount());
         }
 
         @Test
@@ -79,9 +80,9 @@ class PublicPlannerResponseTest {
         void setCommentCount_Zero_IsValid() {
             User user = createTestUser("test@example.com");
             Planner planner = createTestPlanner(user);
-            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
-            response.setCommentCount(0L);
-            assertEquals(0L, response.getCommentCount());
+            PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner)
+                    .toBuilder().commentCount(0L).build();
+            assertEquals(0L, response.commentCount());
         }
     }
 
@@ -91,7 +92,7 @@ class PublicPlannerResponseTest {
 
         @Test
         @DisplayName("Should map all fields correctly from Planner entity")
-        void fromEntity_MapsAllFieldsCorrectly() {
+        void fromEntity_WhenMapped_MapsAllFields() {
             User user = createTestUser("test@example.com");
             UUID plannerId = UUID.randomUUID();
             Instant createdAt = Instant.now();
@@ -110,14 +111,14 @@ class PublicPlannerResponseTest {
             PublicPlannerResponse response = PublicPlannerResponse.fromEntity(planner);
 
             assertAll("All fields should be mapped correctly",
-                    () -> assertEquals(plannerId, response.getId()),
-                    () -> assertEquals("Test Planner Title", response.getTitle()),
-                    () -> assertEquals("5F", response.getCategory()),
-                    () -> assertEquals(keywords, response.getSelectedKeywords()),
-                    () -> assertEquals(TEST_KEYWORD, response.getAuthorUsernameEpithet()),
-                    () -> assertEquals(TEST_SUFFIX, response.getAuthorUsernameSuffix()),
-                    () -> assertEquals(10, response.getUpvotes()),
-                    () -> assertEquals(createdAt, response.getCreatedAt())
+                    () -> assertEquals(plannerId, response.id()),
+                    () -> assertEquals("Test Planner Title", response.title()),
+                    () -> assertEquals("5F", response.category()),
+                    () -> assertEquals(keywords, response.selectedKeywords()),
+                    () -> assertEquals(TEST_KEYWORD, response.authorUsernameEpithet()),
+                    () -> assertEquals(TEST_SUFFIX, response.authorUsernameSuffix()),
+                    () -> assertEquals(10, response.upvotes()),
+                    () -> assertEquals(createdAt, response.createdAt())
             );
         }
     }

@@ -1,4 +1,5 @@
 package org.danteplanner.backend.config;
+import org.danteplanner.backend.shared.config.FrontendProperties;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class FrontendPropertiesTest {
 
     @Test
     @DisplayName("getUrl returns the first allowed origin")
-    void getUrl_returnsFirstOrigin() {
+    void getUrl_whenCalled_returnsFirstOrigin() {
         assertThat(properties.getUrl()).isEqualTo("http://localhost:5173");
     }
 

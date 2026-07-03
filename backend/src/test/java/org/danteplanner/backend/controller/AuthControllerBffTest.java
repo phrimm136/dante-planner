@@ -2,11 +2,11 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.facade.AuthenticationFacade;
-import org.danteplanner.backend.facade.AuthenticationFacade.AuthResult;
-import org.danteplanner.backend.service.oauth.OAuthStateService;
-import org.danteplanner.backend.util.CookieConstants;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.auth.facade.AuthenticationFacade.AuthResult;
+import org.danteplanner.backend.auth.oauth.OAuthStateService;
+import org.danteplanner.backend.shared.util.CookieConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,7 +72,7 @@ class AuthControllerBffTest {
 
     @Test
     @DisplayName("GET /google/start redirects to Google and sets the oauth_tx cookie")
-    void googleStart_redirectsToGoogleWithPkceAndSetsOauthTx() throws Exception {
+    void googleStart_whenInvoked_redirectsToGoogleAndSetsOauthTx() throws Exception {
         mockMvc.perform(get("/api/auth/google/start"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", containsString("accounts.google.com")))

@@ -1,11 +1,12 @@
 package org.danteplanner.backend.service.oauth;
+import org.danteplanner.backend.auth.oauth.OAuthStateService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.danteplanner.backend.config.JwtProperties;
-import org.danteplanner.backend.service.oauth.OAuthStateService.OAuthTransaction;
-import org.danteplanner.backend.service.token.AesGcmCipher;
+import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
+import org.danteplanner.backend.auth.token.AesGcmCipher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,7 +133,7 @@ class OAuthStateServiceTest {
 
     @Test
     @DisplayName("generateCodeChallenge is the S256 hash of the verifier")
-    void generateCodeChallenge_isS256OfVerifier() throws Exception {
+    void generateCodeChallenge_WhenGivenVerifier_ReturnsS256Hash() throws Exception {
         String verifier = stateService.generateCodeVerifier();
 
         byte[] expected = java.security.MessageDigest.getInstance("SHA-256")

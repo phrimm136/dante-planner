@@ -2,14 +2,14 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerVote;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.VoteType;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.PlannerVoteRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -356,10 +356,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 200 when admin role unhides planner")
         void unhideFromRecommended_AdminRole_Returns200() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -373,10 +370,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 403 when moderator role attempts to unhide planner")
         void unhideFromRecommended_ModeratorRole_Returns403() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(moderatorUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(moderatorUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -387,7 +381,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 403 when regular user attempts to unhide planner")
         void unhideFromRecommended_RegularUser_Returns403() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -398,10 +392,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenFromRecommended flag")
         void unhideFromRecommended_HiddenPlanner_ClearsHiddenFlag() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -415,10 +406,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenAt timestamp")
         void unhideFromRecommended_HiddenPlanner_ClearsHiddenAt() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -432,10 +420,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenByModeratorId")
         void unhideFromRecommended_HiddenPlanner_ClearsModeratorId() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -449,10 +434,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hideReason")
         void unhideFromRecommended_HiddenPlanner_ClearsHideReason() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -466,10 +448,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear all moderation metadata together")
         void unhideFromRecommended_HiddenPlanner_ClearsAllMetadata() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Comprehensive metadata clearing test");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Comprehensive metadata clearing test");
             plannerRepository.save(testPlanner);
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -499,10 +478,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should preserve votes when unhiding planner")
         void unhideFromRecommended_WithVotes_PreservesVotes() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);

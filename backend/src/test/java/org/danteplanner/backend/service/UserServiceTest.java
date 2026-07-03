@@ -1,10 +1,12 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.user.service.RandomUsernameGenerator;
+import org.danteplanner.backend.user.service.UserService;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.config.EpithetConfig;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.UserNotFoundException;
-import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.shared.config.EpithetConfig;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,7 +39,7 @@ class UserServiceTest {
     private EpithetConfig epithetConfig;
 
     @Mock
-    private org.danteplanner.backend.repository.ModerationActionRepository moderationActionRepository;
+    private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
 
     private UserService userService;
 
@@ -63,7 +65,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return active user when found")
-        void findActiveById_returnsActiveUser() {
+        void findActiveById_WhenActiveUserExists_ReturnsUser() {
             // Arrange
             when(userRepository.findByIdAndDeletedAtIsNull(testUser.getId()))
                     .thenReturn(Optional.of(testUser));

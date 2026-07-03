@@ -1,21 +1,22 @@
 package org.danteplanner.backend.facade;
+import org.danteplanner.backend.auth.facade.AuthenticationFacade;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.config.LineageRotationFlag;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserRole;
-import org.danteplanner.backend.exception.InvalidTokenException;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.UserAccountLifecycleService;
-import org.danteplanner.backend.service.UserService;
-import org.danteplanner.backend.service.oauth.OAuthProvider;
-import org.danteplanner.backend.service.oauth.OAuthProviderRegistry;
-import org.danteplanner.backend.service.oauth.OAuthTokens;
-import org.danteplanner.backend.service.oauth.OAuthUserInfo;
-import org.danteplanner.backend.service.token.TokenBlacklistService;
-import org.danteplanner.backend.service.token.TokenClaims;
-import org.danteplanner.backend.service.token.TokenGenerator;
-import org.danteplanner.backend.service.token.TokenValidator;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.shared.config.LineageRotationFlag;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.auth.oauth.OAuthProvider;
+import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
+import org.danteplanner.backend.auth.oauth.OAuthTokens;
+import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenClaims;
+import org.danteplanner.backend.auth.token.TokenGenerator;
+import org.danteplanner.backend.auth.token.TokenValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -67,13 +68,13 @@ class AuthenticationFacadeTest {
     private OAuthProvider oauthProvider;
 
     @Mock
-    private org.danteplanner.backend.service.token.RefreshRotationService refreshRotationService;
+    private org.danteplanner.backend.auth.token.RefreshRotationService refreshRotationService;
 
     @Mock
-    private org.danteplanner.backend.util.CookieUtils cookieUtils;
+    private org.danteplanner.backend.shared.util.CookieUtils cookieUtils;
 
     @Mock
-    private org.danteplanner.backend.config.JwtProperties jwtProperties;
+    private org.danteplanner.backend.shared.config.JwtProperties jwtProperties;
 
     @Mock
     private jakarta.servlet.http.HttpServletResponse response;
@@ -114,7 +115,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should return user and tokens on successful OAuth for existing active user")
-        void authenticateWithOAuth_returnsUserAndTokens() {
+        void authenticateWithOAuth_WhenExistingActiveUser_ReturnsUserAndTokens() {
             // Arrange
             String providerName = "google";
             String code = "auth-code";
@@ -157,7 +158,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should throw when provider not found")
-        void authenticateWithOAuth_throwsWhenProviderNotFound() {
+        void authenticateWithOAuth_WhenProviderNotFound_Throws() {
             // Arrange
             when(providerRegistry.getProvider("unknown"))
                     .thenThrow(new IllegalArgumentException("Unknown OAuth provider: unknown"));
@@ -177,7 +178,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should create new user when not found")
-        void authenticateWithOAuth_createsNewUserWhenNotFound() {
+        void authenticateWithOAuth_WhenUserNotFound_CreatesNewUser() {
             // Arrange
             OAuthTokens oauthTokens = new OAuthTokens("access", null, null, null);
             OAuthUserInfo userInfo = new OAuthUserInfo("provider-id-123", "user@email.com");
@@ -207,7 +208,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should reactivate soft-deleted user on OAuth login")
-        void authenticateWithOAuth_reactivatesDeletedUser() {
+        void authenticateWithOAuth_WhenUserSoftDeleted_ReactivatesUser() {
             // Arrange
             User deletedUser = User.builder()
                     .id(456L)
@@ -249,7 +250,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should generate new tokens and blacklist old")
-        void refreshTokens_generatesNewTokensAndBlacklistsOld() {
+        void refreshTokens_WhenValid_GeneratesNewTokensAndBlacklistsOld() {
             // Arrange
             String oldRefreshToken = "old-refresh-token";
             Date expiration = new Date(System.currentTimeMillis() + 86400000);
@@ -287,7 +288,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should throw for invalid token type")
-        void refreshTokens_throwsForInvalidTokenType() {
+        void refreshTokens_WhenInvalidTokenType_Throws() {
             // Arrange - access token instead of refresh token
             String accessToken = "access-token";
             TokenClaims accessClaims = new TokenClaims(
@@ -316,7 +317,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should throw for blacklisted refresh token")
-        void refreshTokens_throwsForBlacklistedToken() {
+        void refreshTokens_WhenBlacklistedToken_Throws() {
             // Arrange
             String blacklistedToken = "blacklisted-refresh-token";
             TokenClaims claims = new TokenClaims(
@@ -345,7 +346,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should throw for expired refresh token")
-        void refreshTokens_throwsForExpiredToken() {
+        void refreshTokens_WhenExpiredToken_Throws() {
             // Arrange
             String expiredToken = "expired-refresh-token";
 
@@ -393,8 +394,8 @@ class AuthenticationFacadeTest {
             when(userService.findById(testUser.getId())).thenReturn(deletedUser);
 
             // Act & Assert
-            org.danteplanner.backend.exception.AccountDeletedException exception = assertThrows(
-                    org.danteplanner.backend.exception.AccountDeletedException.class,
+            org.danteplanner.backend.user.exception.AccountDeletedException exception = assertThrows(
+                    org.danteplanner.backend.user.exception.AccountDeletedException.class,
                     () -> authenticationFacade.refreshTokens(refreshToken, response)
             );
 
@@ -415,7 +416,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should blacklist both tokens")
-        void logout_blacklistsBothTokens() {
+        void logout_WhenBothTokensValid_BlacklistsBoth() {
             // Arrange
             String accessToken = "access-token";
             String refreshToken = "refresh-token";
@@ -442,7 +443,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should handle null access token")
-        void logout_handlesNullAccessToken() {
+        void logout_WhenNullAccessToken_BlacklistsOnlyRefresh() {
             // Arrange
             String refreshToken = "refresh-token";
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
@@ -462,7 +463,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should handle null refresh token")
-        void logout_handlesNullRefreshToken() {
+        void logout_WhenNullRefreshToken_BlacklistsOnlyAccess() {
             // Arrange
             String accessToken = "access-token";
             Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
@@ -482,7 +483,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should handle both tokens null")
-        void logout_handlesBothTokensNull() {
+        void logout_WhenBothTokensNull_DoesNothing() {
             // Act
             authenticationFacade.logout(null, null);
 
@@ -493,7 +494,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should skip blacklist for already invalid access token")
-        void logout_skipsBlacklistForInvalidAccessToken() {
+        void logout_WhenInvalidAccessToken_SkipsBlacklist() {
             // Arrange
             String invalidAccessToken = "invalid-access";
             String validRefreshToken = "valid-refresh";
@@ -516,7 +517,7 @@ class AuthenticationFacadeTest {
 
         @Test
         @DisplayName("Should skip blacklist for already invalid refresh token")
-        void logout_skipsBlacklistForInvalidRefreshToken() {
+        void logout_WhenInvalidRefreshToken_SkipsBlacklist() {
             // Arrange
             String validAccessToken = "valid-access";
             String invalidRefreshToken = "invalid-refresh";

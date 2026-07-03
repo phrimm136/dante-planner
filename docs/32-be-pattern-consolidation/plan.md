@@ -5,11 +5,12 @@
 Execute docs/32 spec in 15 sequential execution phases (spec phases 1-8 decomposed to code-writer-sized units). Strategy: consolidate before relocating; characterization tests before every transformation they protect; mass sweeps late (clean baseline for the static-analysis ratchet); pure relocations (phase 14) executed by the main session directly, never by code-writer agents (agents Read→Write and drift content on pure moves — proven FE-playbook rule).
 
 Cross-cutting considerations (apply to EVERY phase):
+- **All subagents launch with `model: opus`** (user decision, 2026-07-02): agents inherit the session model (Fable) by default, which burns session budget; pass the model explicitly on every Agent call. A Fable-inherited phase-2 agent died on the session limit mid-implementation.
 - **Concurrent FE session**: docs/31 executes in the main working tree. This build runs in an isolated git worktree. Never touch `frontend/`, root `.gitignore`, root `CLAUDE.md`, or `.claude/rules/frontend/**`. `backend/CLAUDE.md` currently carries an uncommitted FE-session edit in the MAIN tree — phase 15's doc-sync must rebase/merge-check against whatever docs/31 landed by then.
 - **Gradle invocation**: `backend/gradlew -p backend <task>` from repo root, output redirected to `/tmp/be-<task>-<session-id>-<suffix>.log`. Never `cd`. Full suite green at every phase boundary (INV1).
 - **Verify agent claims**: this task's audits produced 4 confidently-wrong findings. Any claim a phase inherits (counts, file:line) is re-verified against source before acting. Counts measured 2026-07-02.
 - **Wire contract (INV2)**: existing Tier-2 jsonPath tests are never modified to make a phase pass. A failing jsonPath test means the phase broke the contract — fix the code.
-- **One phase = one commit** (via commit-process skill) = one eventual deploy. Record the commit SHA of phases 10-11 (mass sweeps) and 7-8 for `.git-blame-ignore-revs` (written in phase 15).
+- **Commits deferred to end of build (user decision, 2026-07-02)**: phases execute and verify in the MAIN tree without committing; the FE session works in different areas concurrently. NO git add/commit/reset/checkout during phases. At build end, commit in logical batches via commit-process with `git commit -- <pathspec>` discipline (the index is shared — plain `git commit` sweeps the FE session's staged files; happened once, recovered). The sweep batches (rename, DI, records, repackaging) still get separate end-commits so `.git-blame-ignore-revs` can list them.
 
 ## Phases
 
@@ -105,6 +106,7 @@ Cross-cutting considerations (apply to EVERY phase):
 - Verify: mapping-annotation inventory diff empty; full suite green
 
 ### Phase 13: Static-analysis ratchet (spec §5)
+- CARRIED FROM PHASE 11: Checkstyle test MethodName regex MUST be exactly `^[a-z][A-Za-z0-9]*(_[A-Za-z0-9]+){2,}$` with `^test[A-Z]` excluded, scoped to the test source set. Phase 11 swept 281 names to this exact pattern (digit-tolerant segments, lowercase segments allowed for production-method-name prefixes like `shouldNotFilter`). Any other regex breaks the zero-suppression baseline. If scoping to `*Test.java` (excluding `*Tests.java`), the `contextLoads`->`applicationContext_WhenStarted_LoadsSuccessfully` rename was optional.
 - Files: `backend/build.gradle.kts` (checkstyle, error-prone plugin, PMD/CPD wired into `check`), `backend/config/checkstyle/checkstyle.xml`, CI `ci-backend.yml` step → `check`
 - Tests: `backend/gradlew -p backend check` green with ZERO suppressions
 - Considerations: Checkstyle rules scoped to what the sweeps standardized: test `MethodName` regex on test source set only; import order per backend CLAUDE.md; Javadoc on public `@Service` classes; `ImportControl` banning `lombok.Data` in `entity/`+`dto/`. Error Prone: enable with Lombok compatibility (generated code excluded via the phase-8 annotation); start with default ERROR checks only — no experimental. CPD: threshold tuned so current post-consolidation code passes (~100 tokens); it's a ratchet, not an archaeology tool. If any rule fires on existing code, FIX THE CODE, never suppress — a nonzero baseline invalidates the phase's premise. ci-backend.yml is BE-owned; check the FE session hasn't queued edits to it (git log/status) before modifying.
@@ -126,4 +128,10 @@ Cross-cutting considerations (apply to EVERY phase):
 - Verify: full suite + check green; all Done-When boxes in instructions.md checkable
 
 ## Phase Dependencies
+### Phase 14 progress (in-flight, executed directly by main session)
+- Feature order: notification [DONE, compile-green] → admin → moderation → auth → comment → user → planner → shared (leaf-first; shared last so features keep importing old config/util/security paths until the end).
+- Per-feature mechanic (validated on notification pilot): (1) mkdir feature/<layer> dirs; (2) git mv each file; (3) sed package decl on moved files; (4) global sed rewrite `import ...<oldpkg>.<Class>;`→`import ...<feature>.<layer>.<Class>;` across main+test; (5) compile-fix the THREE straggler classes: (a) same-package refs that had no import (moved class referenced a sibling left behind, or a stayer referenced the moved class), (b) wildcard-import gaps (`entity.*` no longer covers a moved class → add specific import), (c) inline FQCNs in code bodies (phase-4/9 added some) → sed the FQCN too; (6) compileJava+compileTestJava green = checkpoint.
+- Gotchas: run seds via `bash -c` (zsh chokes on `${x%.*}`); guard the `Notification\b` word-boundary rewrites against double-application; NEVER `git checkout .` (uncommitted phases 1-13 would be lost) — revert individual HEAD-unchanged files via pathspec `git checkout HEAD -- <file>` only.
+- Empirical cost: notification (smallest, 9 files) took ~10 tool calls incl. compile-fix cycles. Planner (~90+ files) will be far larger.
+
 Sequential throughout (shared files + one worktree). Nominal parallelism exists (1‖2‖6, 4→5 vs 8) but is deliberately not used: phases are cheap relative to conflict risk, and one-phase-one-commit discipline requires ordered history.

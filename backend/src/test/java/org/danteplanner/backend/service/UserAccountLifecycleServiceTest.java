@@ -1,11 +1,12 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.UserNotFoundException;
-import org.danteplanner.backend.repository.PlannerVoteRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,10 +40,10 @@ class UserAccountLifecycleServiceTest {
     private PlannerVoteRepository plannerVoteRepository;
 
     @Mock
-    private org.danteplanner.backend.repository.PlannerCommentRepository plannerCommentRepository;
+    private org.danteplanner.backend.comment.repository.PlannerCommentRepository plannerCommentRepository;
 
     @Mock
-    private org.danteplanner.backend.repository.PlannerCommentVoteRepository plannerCommentVoteRepository;
+    private org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository plannerCommentVoteRepository;
 
     @Mock
     private TokenBlacklistService tokenBlacklistService;
@@ -80,7 +81,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should set deletedAt and scheduledDate on first deletion")
-        void deleteAccount_setsDeletedAtAndScheduledDate() {
+        void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -147,7 +148,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should clear deletedAt and scheduledDate on reactivation")
-        void reactivateAccount_clearsDeletedAtAndScheduledDate() {
+        void reactivateAccount_WhenSoftDeleted_ClearsDeletedAtAndScheduledDate() {
             // Arrange - user is soft-deleted
             testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
             assertTrue(testUser.isDeleted());
@@ -206,7 +207,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should reassign votes to sentinel and delete user")
-        void performHardDelete_reassignsVotesAndDeletesUser() {
+        void performHardDelete_WhenCalled_ReassignsVotesAndDeletesUser() {
             // Arrange
             when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
                     .thenReturn(5);
@@ -229,7 +230,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should use correct sentinel user ID")
-        void performHardDelete_usesCorrectSentinelId() {
+        void performHardDelete_WhenCalled_UsesCorrectSentinelId() {
             // Arrange
             ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
             ArgumentCaptor<Long> sentinelIdCaptor = ArgumentCaptor.forClass(Long.class);
@@ -251,7 +252,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should reassign both planner votes and comment votes")
-        void performHardDelete_reassignsBothVoteTypes() {
+        void performHardDelete_WhenCalled_ReassignsBothVoteTypes() {
             // Arrange
             when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
                     .thenReturn(5);
@@ -290,7 +291,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should reassign comments before deleting user")
-        void performHardDelete_reassignsCommentsBeforeDelete() {
+        void performHardDelete_WhenCalled_ReassignsCommentsBeforeDelete() {
             // Arrange
             when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
                     .thenReturn(2);
@@ -313,7 +314,7 @@ class UserAccountLifecycleServiceTest {
 
         @Test
         @DisplayName("Should delete colliding votes before reassigning to sentinel")
-        void performHardDelete_deletesCollidingVotesBeforeReassign() {
+        void performHardDelete_WhenCalled_DeletesCollidingVotesBeforeReassign() {
             // Arrange
             when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
                     .thenReturn(2);

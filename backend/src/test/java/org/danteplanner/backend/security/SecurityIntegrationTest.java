@@ -2,11 +2,11 @@ package org.danteplanner.backend.security;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -200,7 +200,7 @@ class SecurityIntegrationTest {
 
         @Test
         @DisplayName("Should verify SecurityFilterChain precedence over controller annotations")
-        void securityFilterChain_PrecedesControllerAnnotations() throws Exception {
+        void securityFilterChain_WhenAuthorizedUser_PrecedesControllerAnnotations() throws Exception {
             mockMvc.perform(get("/api/planner/md")
                             .cookie(regularUserCookie()))
                     .andExpect(status().isOk());

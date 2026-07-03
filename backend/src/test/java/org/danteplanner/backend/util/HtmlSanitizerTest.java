@@ -1,4 +1,5 @@
 package org.danteplanner.backend.util;
+import org.danteplanner.backend.shared.util.HtmlSanitizer;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;

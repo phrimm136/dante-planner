@@ -1,4 +1,8 @@
 package org.danteplanner.backend.entity;
+import org.danteplanner.backend.shared.entity.EnumLookup;
+import org.danteplanner.backend.planner.entity.MDCategory;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.user.entity.UserRole;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

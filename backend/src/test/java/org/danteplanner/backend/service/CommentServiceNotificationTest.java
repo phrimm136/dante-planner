@@ -1,12 +1,23 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.service.PlannerCommentSseService;
+import org.danteplanner.backend.comment.service.CommentService;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.dto.comment.CreateCommentRequest;
-import org.danteplanner.backend.entity.*;
-import org.danteplanner.backend.repository.PlannerCommentRepository;
-import org.danteplanner.backend.repository.PlannerCommentVoteRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.notification.service.NotificationService;
+
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.comment.dto.CreateCommentRequest;
+import org.danteplanner.backend.shared.entity.*;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -68,7 +79,8 @@ class CommentServiceNotificationTest {
                 plannerRepository,
                 userRepository,
                 notificationService,
-                plannerCommentSseService
+                plannerCommentSseService,
+                new PlannerAccessGuard(userRepository, plannerRepository)
         );
 
         owner = User.builder()

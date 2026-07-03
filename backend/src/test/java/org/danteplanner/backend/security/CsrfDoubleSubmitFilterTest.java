@@ -1,12 +1,13 @@
 package org.danteplanner.backend.security;
+import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.Cookie;
 
-import org.danteplanner.backend.util.CookieConstants;
-import org.danteplanner.backend.util.CookieUtils;
+import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -100,7 +101,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("PUT/PATCH/DELETE are enforced like POST")
-        void otherUnsafeMethods_enforced() throws Exception {
+        void otherUnsafeMethods_whenMissingHeader_rejected() throws Exception {
             for (String method : new String[]{"PUT", "PATCH", "DELETE"}) {
                 MockHttpServletRequest req = request(method, "/api/planner/md/1");
                 req.setCookies(csrfCookie(TOKEN));
@@ -121,7 +122,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("GET is never blocked, even without any token")
-        void safeMethod_neverBlocked() throws Exception {
+        void safeMethod_whenNoToken_neverBlocked() throws Exception {
             MockHttpServletRequest req = request("GET", "/api/planner/md/1");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -134,7 +135,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("POST to /api/internal/** is not blocked (machine-to-machine)")
-        void internalEndpoint_notBlocked() throws Exception {
+        void internalEndpoint_whenUnsafeMethod_notBlocked() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/internal/refresh-game-data");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -152,7 +153,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("Request with no csrf cookie receives a Set-Cookie for csrf")
-        void noCookie_setsCookieOnResponse() throws Exception {
+        void safeMethod_whenNoCsrfCookie_setsCookieOnResponse() throws Exception {
             MockHttpServletRequest req = request("GET", "/api/planner/md/config");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -168,7 +169,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("Guest mutation: Set-Cookie issued AND request rejected 403")
-        void guestMutation_setsCookieThenRejects() throws Exception {
+        void guestMutation_whenNoCsrfCookie_setsCookieThenRejects() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -182,7 +183,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("Retry with echoed cookie + header passes")
-        void retryWithEchoedToken_passes() throws Exception {
+        void retryWithEchoedToken_whenCookieAndHeaderMatch_passes() throws Exception {
             MockHttpServletRequest first = request("POST", "/api/planner/md/1");
             MockHttpServletResponse firstRes = new MockHttpServletResponse();
             filter.doFilter(first, firstRes, new MockFilterChain());

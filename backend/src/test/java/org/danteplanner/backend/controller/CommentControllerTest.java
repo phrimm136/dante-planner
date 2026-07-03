@@ -1,26 +1,24 @@
 package org.danteplanner.backend.controller;
 
+
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.config.TestDataInitializer;
-import org.danteplanner.backend.entity.Notification;
-import org.danteplanner.backend.entity.NotificationType;
-import org.danteplanner.backend.entity.PlannerComment;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.RateLimitExceededException;
-import org.danteplanner.backend.repository.NotificationRepository;
-import org.danteplanner.backend.repository.PlannerCommentRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.CommentService;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -36,9 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -56,12 +51,13 @@ class CommentControllerTest {
         @Primary
         public CommentService commentService(
                 PlannerCommentRepository commentRepository,
-                org.danteplanner.backend.repository.PlannerCommentVoteRepository commentVoteRepository,
+                org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository commentVoteRepository,
                 PlannerRepository plannerRepository,
                 UserRepository userRepository,
-                org.danteplanner.backend.service.NotificationService notificationService,
-                org.danteplanner.backend.service.PlannerCommentSseService sseService) {
-            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, userRepository, notificationService, sseService);
+                org.danteplanner.backend.notification.service.NotificationService notificationService,
+                org.danteplanner.backend.comment.service.PlannerCommentSseService sseService) {
+            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, userRepository, notificationService, sseService,
+                    new org.danteplanner.backend.planner.service.PlannerAccessGuard(userRepository, plannerRepository));
         }
     }
 
@@ -102,8 +98,6 @@ class CommentControllerTest {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
         publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
-        publishedPlanner.setPublished(true);
-        plannerRepository.save(publishedPlanner);
         unpublishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
 
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);

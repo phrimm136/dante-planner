@@ -1,6 +1,7 @@
 package org.danteplanner.backend.config;
+import org.danteplanner.backend.shared.config.RateLimitConfig;
 
-import org.danteplanner.backend.exception.RateLimitExceededException;
+import org.danteplanner.backend.shared.exception.RateLimitExceededException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

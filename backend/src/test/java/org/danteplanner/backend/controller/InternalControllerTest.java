@@ -1,6 +1,6 @@
 package org.danteplanner.backend.controller;
 
-import org.danteplanner.backend.config.LineageRotationFlag;
+import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.config.TestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Idiom ratchet (docs/32 phase 13). Tool-per-axis: Checkstyle polices import
+  hygiene and the entity/dto lombok.Data ban only. Bug patterns live in Error
+  Prone, duplication in CPD, test-method naming in ArchUnit (annotation-aware),
+  service Javadoc in the scoped checkstyleServiceJavadoc task. Zero suppressions.
+-->
+<module name="Checker">
+    <property name="severity" value="error"/>
+    <property name="fileExtensions" value="java"/>
+
+    <module name="TreeWalker">
+        <module name="UnusedImports">
+            <property name="processJavadoc" value="true"/>
+        </module>
+        <module name="RedundantImport"/>
+        <!-- Locks in phases 7/9: dto/ and entity/ are records/@Getter, never @Data. -->
+        <module name="IllegalImport">
+            <property name="illegalClasses" value="lombok.Data"/>
+        </module>
+    </module>
+</module>

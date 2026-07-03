@@ -1,9 +1,10 @@
 package org.danteplanner.backend.scheduler;
+import org.danteplanner.backend.user.scheduler.UserCleanupScheduler;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.UserAccountLifecycleService;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,7 +61,7 @@ class UserCleanupSchedulerTest {
 
         @Test
         @DisplayName("Should delete all expired users")
-        void cleanupExpiredUsers_deletesExpiredUsers() {
+        void cleanupExpiredUsers_WhenExpiredExist_DeletesAll() {
             // Arrange
             List<User> expiredUsers = List.of(
                     createExpiredUser(1L),
@@ -98,7 +99,7 @@ class UserCleanupSchedulerTest {
 
         @Test
         @DisplayName("Should handle exception gracefully and continue with remaining users")
-        void cleanupExpiredUsers_handlesExceptionGracefully() {
+        void cleanupExpiredUsers_WhenDeleteFails_ContinuesWithRest() {
             // Arrange
             User user1 = createExpiredUser(1L);
             User user2 = createExpiredUser(2L);
@@ -123,7 +124,7 @@ class UserCleanupSchedulerTest {
 
         @Test
         @DisplayName("Should query with current instant")
-        void cleanupExpiredUsers_queriesWithCurrentInstant() {
+        void cleanupExpiredUsers_WhenRun_QueriesWithCurrentInstant() {
             // Arrange
             when(userRepository.findByPermanentDeleteScheduledAtBefore(any(Instant.class)))
                     .thenReturn(new ArrayList<>());
