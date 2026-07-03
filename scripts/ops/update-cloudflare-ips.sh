@@ -97,3 +97,11 @@ if [ -n "$SLACK_WEBHOOK" ]; then
 fi
 
 log "Update complete"
+
+# Heartbeat for the CloudflareIpSilence alarm — reached only on success (set -e above).
+aws cloudwatch put-metric-data \
+    --namespace "DantePlanner" \
+    --metric-name "BackupSuccess" \
+    --dimensions "Job=CloudflareIpUpdate" \
+    --value 1 \
+    --region "${AWS_DEFAULT_REGION:-us-west-2}"
