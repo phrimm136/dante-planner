@@ -26,7 +26,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { ModeratorDeleteDialog } from './ModeratorDeleteDialog'
 import { PublishSyncOffWarningDialog } from './PublishSyncOffWarningDialog'
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth'
 import { usePlannerSubscription } from '../../hooks/usePlannerSubscription'
 import { usePlannerDelete } from '../../hooks/usePlannerDelete'
 import { useModeratorPlannerDelete } from '../../hooks/useModeratorPlannerDelete'
@@ -41,12 +41,13 @@ import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerSyncAdapter } from '../../hooks/usePlannerSyncAdapter'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { I18N_LOCALE_MAP, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, RECOMMENDED_THRESHOLD } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { I18N_LOCALE_MAP, RECOMMENDED_THRESHOLD } from '@/lib/constants'
 import { validatePlannerForPublish } from '../../lib/plannerValidation'
 import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { PublishedPlannerDetail } from '../../types/PlannerListTypes'
 import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
 
@@ -254,19 +255,28 @@ export function PlannerDetailHeader({
     }
   }
 
-  const callPublishMutation = (wasPublished: boolean) => {
-    if (!plannerId || !savedPlanner) return
+  // `base` is the planner the local save is derived from: for publish it's the
+  // server-synced planner (carries the server-bumped syncVersion); for unpublish
+  // it's the current savedPlanner (the toggle never bumps syncVersion).
+  const callPublishMutation = (wasPublished: boolean, base: SaveablePlanner) => {
+    if (!plannerId) return
 
     publishMutation.mutate(plannerId, {
       onSuccess: async (response) => {
         const updatedPlanner: SaveablePlanner = {
-          ...savedPlanner,
+          ...base,
           metadata: {
-            ...savedPlanner.metadata,
+            ...base.metadata,
             published: response.published,
           },
         }
-        await savePlanner(updatedPlanner)
+        // Server toggle already succeeded; the local mirror is best-effort. Surface
+        // a local-save failure instead of swallowing it (the personal view reads
+        // from IndexedDB, so a failed save leaves it stale until the next save).
+        const saveResult = await savePlanner(updatedPlanner)
+        if (!saveResult.success) {
+          console.error('Local planner save failed after publish toggle:', saveResult.errorCode)
+        }
 
         void queryClient.invalidateQueries({
           queryKey: plannerQueryKeys.detail(plannerId),
@@ -293,9 +303,11 @@ export function PlannerDetailHeader({
   const handlePublishToggle = () => {
     if (!plannerId || !savedPlanner) return
 
-    // Unpublishing — ensure plan is on server, then toggle
+    // Unpublishing — just flip the flag. No content upload: the row already
+    // exists on the server, and the publish toggle never bumps syncVersion, so
+    // there is no version to drift.
     if (savedPlanner.metadata.published) {
-      void handlePublishWithUpload(true)
+      callPublishMutation(true, savedPlanner)
       return
     }
 
@@ -327,15 +339,18 @@ export function PlannerDetailHeader({
     handlePublishWithUpload()
   }
 
-  const handlePublishWithUpload = async (wasPublished = false) => {
+  const handlePublishWithUpload = async () => {
     if (!plannerId || !savedPlanner) return
 
     setIsUploadingForPublish(true)
     setShowPublishWarning(false)
 
     try {
-      await syncAdapter.syncToServer(savedPlanner)
-      callPublishMutation(wasPublished)
+      // Upload current content first (the publish PUT carries none), then toggle.
+      // The synced result carries the server-bumped syncVersion — thread it into
+      // the local save so the next toggle doesn't send a stale version (409).
+      const synced = await syncAdapter.syncToServer(savedPlanner)
+      callPublishMutation(false, synced)
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
       toast.error(t('pages.plannerMD.publish.uploadFailed'))
@@ -684,7 +699,7 @@ export function PlannerDetailHeader({
                 variant="outline"
                 size="sm"
                 onClick={handlePublishToggle}
-                disabled={publishMutation.isPending}
+                disabled={publishMutation.isPending || isUploadingForPublish}
               >
                 <Upload className="size-4" />
                 <span className="hidden lg:inline">

@@ -65,7 +65,7 @@ vi.mock('../PublishSyncOffWarningDialog', () => ({
 }))
 
 // ── Auth ──────────────────────────────────────────────────────
-vi.mock('@/hooks/useAuthQuery', () => ({
+vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: () => ({
     data: { role: 'USER', usernameEpithet: 'Test', usernameSuffix: '0000' },
   }),
@@ -140,7 +140,7 @@ vi.mock('../../../hooks/usePublishedPlannerQuery', () => ({
 }))
 
 // ── Asset / formatting helpers ────────────────────────────────
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getKeywordIconPath: (keyword: string) => `/icons/${keyword}.webp`,
 }))
 vi.mock('@/lib/formatUsername', () => ({
@@ -571,6 +571,60 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     })
   })
 
+  it('threads the server-bumped syncVersion into the local save on publish', async () => {
+    mockSyncToServer.mockResolvedValue(syncedPlanner) // syncVersion: 2
+    mockPublishMutate.mockImplementation((_id: string, opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void }) => {
+      void opts.onSuccess({ plannerId: PLANNER_ID, published: true })
+    })
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: false, syncVersion: 1 })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={true}
+      />,
+      { wrapper }
+    )
+
+    clickPublishButton()
+
+    await waitFor(() => {
+      // Must persist the synced version (2), not the stale local version (1),
+      // else the next toggle sends a stale version and the server 409s.
+      expect(mockSavePlanner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({ syncVersion: 2, published: true }),
+        })
+      )
+    })
+  })
+
+  it('disables the publish button during the upload window (no double-submit 409)', async () => {
+    // Never resolves — keeps syncToServer in flight so the upload window stays open.
+    mockSyncToServer.mockReturnValue(new Promise<never>(() => {}))
+    const { wrapper } = createWrapper()
+    render(
+      <PlannerDetailHeader
+        variant="personal"
+        planner={makePlanner({ published: false })}
+        isOwner={true}
+        isAuthenticated={true}
+        syncEnabled={true}
+      />,
+      { wrapper }
+    )
+
+    const button = screen.getByText('pages.plannerMD.publish.button').closest('button')!
+    fireEvent.click(button)
+
+    // publishMutation.isPending is still false during the upload; the button must
+    // be disabled via isUploadingForPublish so a second click can't send a second
+    // stale-version sync (the 409 path).
+    await waitFor(() => expect(button).toBeDisabled())
+  })
+
   it('does not call publishMutation if syncToServer fails', async () => {
     mockSyncToServer.mockRejectedValue(new Error('Network error'))
     const { wrapper } = createWrapper()
@@ -595,10 +649,10 @@ describe('PlannerDetailHeader – publish sync guard', () => {
 })
 
 // ────────────────────────────────────────────────────────────────
-// Unpublish upload guard tests
+// Unpublish tests — no content upload (the toggle needs none)
 // ────────────────────────────────────────────────────────────────
 
-describe('PlannerDetailHeader – unpublish upload guard', () => {
+describe('PlannerDetailHeader – unpublish', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSyncToServer.mockResolvedValue(syncedPlanner)
@@ -609,7 +663,7 @@ describe('PlannerDetailHeader – unpublish upload guard', () => {
     fireEvent.click(screen.getByText('pages.plannerMD.publish.unpublish'))
   }
 
-  it('uploads to server before unpublishing when sync is enabled', async () => {
+  it('unpublishes directly without uploading to the server (sync enabled)', async () => {
     const { wrapper } = createWrapper()
     render(
       <PlannerDetailHeader
@@ -625,11 +679,7 @@ describe('PlannerDetailHeader – unpublish upload guard', () => {
     clickUnpublishButton()
 
     await waitFor(() => {
-      expect(mockSyncToServer).toHaveBeenCalledWith(
-        expect.objectContaining({
-          metadata: expect.objectContaining({ id: PLANNER_ID, published: true }),
-        })
-      )
+      expect(mockSyncToServer).not.toHaveBeenCalled()
       expect(mockPublishMutate).toHaveBeenCalledWith(
         PLANNER_ID,
         expect.objectContaining({ onSuccess: expect.any(Function) })
@@ -637,7 +687,7 @@ describe('PlannerDetailHeader – unpublish upload guard', () => {
     })
   })
 
-  it('uploads to server before unpublishing when sync is off', async () => {
+  it('unpublishes directly with no sync-off warning (sync off)', async () => {
     const { wrapper } = createWrapper()
     render(
       <PlannerDetailHeader
@@ -653,23 +703,21 @@ describe('PlannerDetailHeader – unpublish upload guard', () => {
     clickUnpublishButton()
 
     await waitFor(() => {
-      expect(mockSyncToServer).toHaveBeenCalled()
-      expect(mockPublishMutate).toHaveBeenCalledWith(
-        PLANNER_ID,
-        expect.objectContaining({ onSuccess: expect.any(Function) })
-      )
-      // No warning dialog for unpublish
+      expect(mockSyncToServer).not.toHaveBeenCalled()
+      expect(mockPublishMutate).toHaveBeenCalled()
       expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
     })
   })
 
-  it('does not call publishMutation if upload fails during unpublish', async () => {
-    mockSyncToServer.mockRejectedValue(new Error('Upload failed'))
+  it('saves the unpublished planner locally (published=false, version unchanged)', async () => {
+    mockPublishMutate.mockImplementation((_id: string, opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void }) => {
+      void opts.onSuccess({ plannerId: PLANNER_ID, published: false })
+    })
     const { wrapper } = createWrapper()
     render(
       <PlannerDetailHeader
         variant="personal"
-        planner={makePlanner({ published: true })}
+        planner={makePlanner({ published: true, syncVersion: 5 })}
         isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
@@ -680,8 +728,11 @@ describe('PlannerDetailHeader – unpublish upload guard', () => {
     clickUnpublishButton()
 
     await waitFor(() => {
-      expect(mockSyncToServer).toHaveBeenCalled()
-      expect(mockPublishMutate).not.toHaveBeenCalled()
+      expect(mockSavePlanner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({ syncVersion: 5, published: false }),
+        })
+      )
     })
   })
 })
