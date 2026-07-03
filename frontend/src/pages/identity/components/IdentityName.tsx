@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '../hooks/useIdentityListData'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
+import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
 
 interface IdentityNameProps {
   /** Identity ID to look up name */

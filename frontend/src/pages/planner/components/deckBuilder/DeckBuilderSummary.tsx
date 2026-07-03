@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DEFAULT_DEPLOYMENT_MAX } from '@/lib/constants'
+import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
 import { PlannerSection } from '../PlannerSection'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'

@@ -52,7 +52,7 @@ vi.mock('@/pages/planner', () => ({
 }))
 
 // Mock ResponsiveCardGrid
-vi.mock('@/components/common/ResponsiveCardGrid', () => ({
+vi.mock('@/components/layout/ResponsiveCardGrid', () => ({
   ResponsiveCardGrid: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="card-grid">{children}</div>
   ),

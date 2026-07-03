@@ -1,4 +1,4 @@
-import type { MDCategory, RRCategory, PlannerType } from '@/lib/constants'
+import type { MDCategory, RRCategory, PlannerType } from '@/shared/gameData'
 
 // Re-export category types for consumers
 export type { MDCategory, RRCategory, PlannerType }

@@ -5,9 +5,10 @@ import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListData } from '@/pages/identity'
 import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { SINNERS, DEFAULT_SKILL_EA, CARD_GRID } from '@/lib/constants'
-import type { OffensiveSkillSlot } from '@/lib/constants'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
+import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
 interface SkillReplacementSectionProps {

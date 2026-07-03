@@ -1,6 +1,6 @@
 ---
 paths:
-  - "frontend/src/routes/**/*.tsx"
+  - "frontend/src/pages/**/*.tsx"
   - "frontend/src/components/**/*.tsx"
 ---
 
@@ -13,8 +13,8 @@ import { Suspense } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
-import { LoadingState } from '@/components/common/LoadingState'
-import { ErrorState } from '@/components/common/ErrorState'
+import { LoadingState } from '@/components/feedback/LoadingState'
+import { ErrorState } from '@/components/feedback/ErrorState'
 
 export default function DetailPage() {
   const { id } = useParams({ strict: false })

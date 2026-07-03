@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { getHPIconPath, getSpeedIconPath, getDefenseLevelIconPath } from '@/lib/assetPaths'
+import { getHPIconPath, getSpeedIconPath, getDefenseLevelIconPath } from '@/shared/assets'
 
 interface StatusPanelProps {
   hp: number

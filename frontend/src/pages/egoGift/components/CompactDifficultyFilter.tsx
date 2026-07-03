@@ -1,7 +1,7 @@
-import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { EGO_GIFT_DIFFICULTIES } from '@/lib/constants'
+import { CompactIconFilter } from '@/shared/filter'
+import { EGO_GIFT_DIFFICULTIES } from '@/shared/gameData'
 
-import type { EGOGiftDifficulty } from '@/lib/constants'
+import type { EGOGiftDifficulty } from '@/shared/gameData'
 
 /** Display labels for difficulty values (capitalized) */
 const DIFFICULTY_LABELS: Record<EGOGiftDifficulty, string> = {

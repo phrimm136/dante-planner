@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { MAX_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
 
 // Mock react-i18next with proper i18n instance and initReactI18next
@@ -155,7 +155,7 @@ vi.mock('@/pages/identity/hooks/useIdentityDetailData', () => ({
 }))
 
 // Mock the useIsBreakpoint hook to simulate desktop by default
-vi.mock('@/hooks/use-is-breakpoint', () => ({
+vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false), // false = not mobile (desktop)
 }))
 
@@ -188,8 +188,8 @@ vi.mock('@/pages/identity/hooks/useTraitsI18n', () => ({
 }))
 
 // Mock asset paths - use importOriginal for complete mock
-vi.mock('@/lib/assetPaths', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/assetPaths')>()
+vi.mock('@/shared/assets', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/assets')>()
   return {
     ...actual,
     // Override specific paths if needed for testing

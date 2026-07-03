@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { DiscordIcon } from '@/components/icons/DiscordIcon'
+import { DiscordIcon } from '@/components/ui/DiscordIcon'
 import { CONTACT_EMAIL } from '@/lib/constants'
 
 export function Footer() {

@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import type { Announcement } from '@/types/AnnouncementTypes'
-import { linkifyText } from '@/components/common/LinkifyText'
+import type { Announcement } from '../types/AnnouncementTypes'
+import { linkifyText } from '@/components/ui/LinkifyText'
 
 // ============================================================================
 // Inner Content Component

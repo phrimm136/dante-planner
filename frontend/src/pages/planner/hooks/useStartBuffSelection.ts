@@ -1,14 +1,14 @@
 import { startTransition } from 'react'
 import { useStartBuffData, getBaseBuffs } from './useStartBuffData'
-import { useBattleKeywords } from '@/hooks/useBattleKeywords'
-import type { MDVersion } from '@/lib/constants'
-import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
+import { useBattleKeywords } from '@/shared/gameText'
+import type { MDVersion } from '@/shared/gameData'
+import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
 import {
   deriveEnhancements,
   getBaseIdFromBuffId,
   createBuffId,
-} from '@/types/StartBuffTypes'
-import type { EnhancementLevel } from '@/types/StartBuffTypes'
+} from '@/shared/gameText'
+import type { EnhancementLevel } from '@/shared/gameText'
 
 /**
  * Return type for useStartBuffSelection hook

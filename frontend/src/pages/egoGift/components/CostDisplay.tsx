@@ -1,4 +1,4 @@
-import { getEGOGiftCostIconPath } from '@/lib/assetPaths'
+import { getEGOGiftCostIconPath } from '@/shared/assets'
 
 interface CostDisplayProps {
   cost: number

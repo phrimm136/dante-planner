@@ -8,12 +8,12 @@ import {
   getStartBuffEnhancementBgPath,
   getStartBuffEnhancementOverlayPath,
   getStartBuffEnhancementIconPath,
-} from '@/lib/assetPaths'
-import { MD_ACCENT_COLORS } from '@/lib/constants'
+} from '@/shared/assets'
+import { MD_ACCENT_COLORS } from '@/shared/gameData'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
-import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
-import { getEnhancementSuffix, createBuffId } from '@/types/StartBuffTypes'
-import { AutoSizeText } from '@/components/common/AutoSizeText'
+import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
+import { getEnhancementSuffix, createBuffId } from '@/shared/gameText'
+import { AutoSizeText } from '@/components/ui/AutoSizeText'
 import { formatBuffEffects } from './formatBuffDescription'
 
 const MD_VERSION = 7

@@ -18,7 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Project constants
-import { DEFAULT_SKILL_EA } from '@/lib/constants'
+import { DEFAULT_SKILL_EA } from '@/shared/gameData'
 
 // Project utilities (@/lib)
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from './lib/deckCode'

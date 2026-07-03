@@ -12,7 +12,7 @@
 
 import { useTranslation } from 'react-i18next'
 
-import { SearchBar } from '@/components/common/SearchBar'
+import { SearchBar } from '@/shared/filter'
 import { Button } from '@/components/ui/button'
 
 import type { MDGesellschaftMode } from '../../types/MDPlannerListTypes'

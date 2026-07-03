@@ -9,6 +9,7 @@
     "generate:sitemap": "tsx scripts/generate-sitemap.ts",
     "typecheck": "tsc -b",
     "lint": "eslint .",
+    "lint:boundary": "eslint --config eslint.boundary.config.js src",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",

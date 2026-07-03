@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { useTraitsI18n } from '../hooks/useTraitsI18n'
-import { applyStrikethrough } from '@/lib/unityRichText'
+import { applyStrikethrough } from '@/shared/gameText'
 
 /** Keywords to skip in trait display (internal/visual only) */
 const HIDDEN_TRAITS = new Set(['BASE_APPEARANCE', 'SMALL'])

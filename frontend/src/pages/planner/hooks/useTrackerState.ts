@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { DEFAULT_SKILL_EA, SINNERS } from '@/lib/constants'
-import type { OffensiveSkillSlot } from '@/lib/constants'
+import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
+import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment } from '../types/DeckTypes'
 
 /**

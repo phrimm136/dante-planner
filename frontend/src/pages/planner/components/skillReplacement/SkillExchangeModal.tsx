@@ -8,9 +8,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { SkillEADisplay } from './SkillEADisplay'
 import { SkillExchangePane } from './SkillExchangePane'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { OFFENSIVE_SKILL_SLOTS, CARD_GRID } from '@/lib/constants'
-import type { OffensiveSkillSlot } from '@/lib/constants'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { OFFENSIVE_SKILL_SLOTS } from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
+import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
 interface SkillExchangeModalProps {

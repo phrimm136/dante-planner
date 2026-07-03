@@ -2,7 +2,7 @@ import {
   getEGOGiftBackgroundPath,
   getEGOGiftEnhancedBackgroundPath,
   getEGOGiftEnhanced2BackgroundPath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 
 interface EGOGiftCardBackgroundProps {
   enhancement: 0 | 1 | 2

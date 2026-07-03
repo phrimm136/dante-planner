@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { DUNGEON_IDX } from '@/lib/constants'
+import { DUNGEON_IDX } from '@/shared/gameData'
 
 /**
  * Theme Pack Schemas

@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { EGOPassiveDisplay } from '../EGOPassiveDisplay'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import type { EGOPassiveI18n } from '../../types/EGOTypes'
 
 describe('EGOPassiveDisplay', () => {

@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { DungeonIdx } from '@/lib/constants'
+import type { DungeonIdx } from '@/shared/gameData'
 import type {
   ExceptionConditionSchema,
   ThemePackConfigSchema,

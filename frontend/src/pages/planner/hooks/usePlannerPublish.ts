@@ -12,7 +12,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
-import { requestNotificationPermission } from '@/lib/browserNotification'
+import { requestNotificationPermission } from '@/shared/notifications'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
 // ============================================================================

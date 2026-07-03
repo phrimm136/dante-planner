@@ -1,14 +1,14 @@
 import { useMemo, memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
-import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { decodeGiftSelection } from '@/pages/egoGift'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { CARD_GRID } from '@/lib/constants'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 
 interface FloorGiftViewerProps {

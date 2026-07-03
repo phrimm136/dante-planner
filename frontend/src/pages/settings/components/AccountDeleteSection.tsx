@@ -4,13 +4,13 @@ import { toast } from '@/lib/toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
-import { useAuthQuery, authQueryKeys } from '@/hooks/useAuthQuery'
-import { useDeleteAccountMutation } from '@/hooks/useUserSettingsQuery'
+import { useAuthQuery, authQueryKeys } from '@/shared/auth'
+import { useDeleteAccountMutation } from '../hooks/useUserSettingsQuery'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountDeleteDialog } from './AccountDeleteDialog'
-import { startGoogleLogin } from '@/hooks/useGoogleLogin'
-import { GoogleIcon } from '@/components/icons/GoogleIcon'
+import { startGoogleLogin } from '@/shared/auth'
+import { GoogleIcon } from '@/components/ui/GoogleIcon'
 
 /**
  * Inner component that uses Suspense hooks.

@@ -1,45 +1,28 @@
-import { useSuspenseQuery, useQuery, queryOptions, keepPreviousData } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createEntityListQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { EGOSpecListSchema, EGONameListSchema } from '../schemas/EGOSchemas'
 
-// Query key factory for EGO list data
-export const egoListQueryKeys = {
-  all: () => ['ego', 'list'] as const,
-  spec: () => ['ego', 'list', 'spec'] as const,
-  i18n: (language: string) => ['ego', 'list', 'i18n', language] as const,
-}
+export const egoListQueryKeys = createEntityListQueryKeys('ego')
 
-// EGO spec list query options with runtime validation
 function createEGOSpecListQueryOptions() {
-  return queryOptions({
-    queryKey: egoListQueryKeys.spec(),
-    queryFn: async () => {
-      const module = await import('@static/data/egoSpecList.json')
-      const result = EGOSpecListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[ego specList] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    egoListQueryKeys.spec(),
+    () => import('@static/data/egoSpecList.json'),
+    EGOSpecListSchema,
+    'ego specList',
+  )
 }
 
-// EGO name list query options with runtime validation
 function createEGONameListQueryOptions(language: string) {
-  return queryOptions({
-    queryKey: egoListQueryKeys.i18n(language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/egoNameList.json`)
-      const result = EGONameListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[ego nameList / ${language}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-    placeholderData: keepPreviousData,
-  })
+  return createStaticDataQueryOptions(
+    egoListQueryKeys.i18n(language),
+    () => import(`@static/i18n/${language}/egoNameList.json`),
+    EGONameListSchema,
+    `ego nameList / ${language}`,
+    { keepPrevious: true },
+  )
 }
 
 /**

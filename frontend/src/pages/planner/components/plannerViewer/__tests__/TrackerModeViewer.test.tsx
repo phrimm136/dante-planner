@@ -108,7 +108,7 @@ vi.mock('../../egoGift/ComprehensiveGiftSummary', () => ({
   ComprehensiveGiftSummary: () => <div data-testid="comprehensive-gift-summary">ComprehensiveGiftSummary</div>,
 }))
 
-vi.mock('@/components/noteEditor/NoteEditor', () => ({
+vi.mock('@/shared/noteEditor/components/NoteEditor', () => ({
   NoteEditor: ({ disabled }: { disabled?: boolean }) => (
     <div data-testid="note-editor" data-disabled={disabled}>NoteEditor</div>
   ),
@@ -128,7 +128,7 @@ vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
 }))
 
 // Mock progressive reveal (show all sections immediately)
-vi.mock('@/hooks/useProgressiveReveal', () => ({
+vi.mock('@/components/hooks/useProgressiveReveal', () => ({
   useProgressiveReveal: () => 6,
 }))
 
@@ -154,7 +154,7 @@ vi.mock('../../PlannerSection', () => ({
   ),
 }))
 
-vi.mock('@/components/common/SectionNoteDialog', () => ({
+vi.mock('../../SectionNoteDialog', () => ({
   SectionNoteDialog: () => null,
 }))
 

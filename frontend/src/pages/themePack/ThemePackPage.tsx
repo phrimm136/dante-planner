@@ -1,15 +1,18 @@
 import { useState, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/pages/themePack'
-import type { DungeonIdx, ThemePackFloor } from '@/lib/constants'
-import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
-import { FilterSection } from '@/components/filter/FilterSection'
-import { CompactDungeonDifficultyFilter } from '@/components/filter/CompactDungeonDifficultyFilter'
-import { CompactFloorFilter } from '@/components/filter/CompactFloorFilter'
-import { EgoGiftSearchDropdown } from '@/components/filter/EgoGiftSearchDropdown'
-import { SearchBar } from '@/components/common/SearchBar'
+import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
+import { calculateActiveFilterCount } from '@/shared/filter'
+import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { FilterPageLayout } from '@/shared/filter'
+import { FilterSection } from '@/shared/filter'
+import { CompactDungeonDifficultyFilter } from '@/shared/filter'
+import { CompactFloorFilter } from '@/shared/filter'
+import { EgoGiftSearchDropdown } from '@/shared/filter'
+import { SearchBar } from '@/shared/filter'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { ThemePackList } from '@/pages/themePack'
-import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
+import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
@@ -21,31 +24,28 @@ function ThemePackPageShell() {
   const { spec } = useThemePackListData()
 
   // Filter states
-  const [selectedDifficulties, setSelectedDifficulties] = useState<Set<DungeonIdx>>(new Set())
-  const [selectedFloors, setSelectedFloors] = useState<Set<ThemePackFloor>>(new Set())
-  const [selectedEgoGifts, setSelectedEgoGifts] = useState<Set<string>>(new Set())
+  const { values: filters, setters, resetAll } = useSetFilters({
+    selectedDifficulties: new Set<DungeonIdx>(),
+    selectedFloors: new Set<ThemePackFloor>(),
+    selectedEgoGifts: new Set<string>(),
+  })
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   const handleResetAll = () => {
-    setSelectedDifficulties(new Set())
-    setSelectedFloors(new Set())
-    setSelectedEgoGifts(new Set())
+    resetAll()
     setSearchQuery('')
   }
 
-  const activeFilterCount =
-    selectedDifficulties.size +
-    selectedFloors.size +
-    selectedEgoGifts.size
+  const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
   const primaryFilters = (
     <FilterSection
       title={t('filters.difficulty', 'Difficulty')}
-      activeCount={selectedDifficulties.size}
+      activeCount={filters.selectedDifficulties.size}
     >
       <CompactDungeonDifficultyFilter
-        selectedDifficulties={selectedDifficulties}
-        onSelectionChange={setSelectedDifficulties}
+        selectedDifficulties={filters.selectedDifficulties}
+        onSelectionChange={setters.selectedDifficulties}
       />
     </FilterSection>
   )
@@ -54,22 +54,23 @@ function ThemePackPageShell() {
     <>
       <FilterSection
         title={t('filters.floor', 'Floor')}
-        activeCount={selectedFloors.size}
+        activeCount={filters.selectedFloors.size}
       >
         <CompactFloorFilter
-          selectedFloors={selectedFloors}
-          onSelectionChange={setSelectedFloors}
+          selectedFloors={filters.selectedFloors}
+          onSelectionChange={setters.selectedFloors}
         />
       </FilterSection>
 
       <FilterSection
         title={t('filters.egoGift', 'EGO Gift')}
-        activeCount={selectedEgoGifts.size}
+        activeCount={filters.selectedEgoGifts.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <EgoGiftSearchDropdown
-            selectedEgoGifts={selectedEgoGifts}
-            onSelectionChange={setSelectedEgoGifts}
+            selectedEgoGifts={filters.selectedEgoGifts}
+            onSelectionChange={setters.selectedEgoGifts}
+            useListData={useEGOGiftListData}
           />
         </Suspense>
       </FilterSection>
@@ -100,9 +101,9 @@ function ThemePackPageShell() {
     >
       <ThemePackList
         spec={spec}
-        selectedDifficulties={selectedDifficulties}
-        selectedFloors={selectedFloors}
-        selectedEgoGifts={selectedEgoGifts}
+        selectedDifficulties={filters.selectedDifficulties}
+        selectedFloors={filters.selectedFloors}
+        selectedEgoGifts={filters.selectedEgoGifts}
         searchQuery={searchQuery}
       />
     </FilterPageLayout>

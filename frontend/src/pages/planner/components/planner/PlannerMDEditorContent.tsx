@@ -33,14 +33,15 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 // Project utilities (@/lib)
-import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES, DUNGEON_IDX, DEFAULT_SKILL_EA } from '@/lib/constants'
-import { getKeywordIconPath } from '@/lib/assetPaths'
+import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, DUNGEON_IDX, DEFAULT_SKILL_EA } from '@/shared/gameData'
+import { MAX_NOTE_BYTES } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '../../lib/deckCode'
 
 // Project types & schemas
-import type { MDCategory } from '@/lib/constants'
-import type { NoteContent } from '@/types/NoteEditorTypes'
+import type { MDCategory } from '@/shared/gameData'
+import type { NoteContent } from '@/shared/noteEditor'
 import type { SaveablePlanner, MDPlannerContent, ConflictResolutionChoice } from '../../types/PlannerTypes'
 import type { DecodedDeck } from '../../lib/deckCode'
 
@@ -55,7 +56,7 @@ import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useUserSettingsQuery } from '@/pages/settings'
 
 // Project components (@/components)
 import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
@@ -71,7 +72,7 @@ import { ComprehensiveGiftSelectorPane } from '../egoGift/ComprehensiveGiftSelec
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
 import { PlannerSection } from '../PlannerSection'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SaveSyncOffWarningDialog } from './SaveSyncOffWarningDialog'
 

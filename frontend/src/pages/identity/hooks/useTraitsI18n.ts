@@ -1,27 +1,22 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { UnitKeywordsSchema } from '@/schemas'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import { UnitKeywordsSchema } from '@/shared/filter'
 
 // Query key factory for traits i18n data
+// Hand-rolled: tuple lacks the 'list' segment the shared factory produces
 export const traitsI18nQueryKeys = {
   all: () => ['traits'] as const,
   i18n: (language: string) => ['traits', 'i18n', language] as const,
 }
 
-// Traits i18n query options with runtime validation
 function createTraitsI18nQueryOptions(language: string) {
-  return queryOptions({
-    queryKey: traitsI18nQueryKeys.i18n(language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/unitKeywords.json`)
-      const result = UnitKeywordsSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[traits i18n / ${language}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    traitsI18nQueryKeys.i18n(language),
+    () => import(`@static/i18n/${language}/unitKeywords.json`),
+    UnitKeywordsSchema,
+    `traits i18n / ${language}`,
+  )
 }
 
 /**

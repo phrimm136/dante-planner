@@ -7,8 +7,8 @@ import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import { PlannerSection } from '../PlannerSection'
-import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { StarlightCostDisplay } from '../StarlightCostDisplay'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 
 interface EGOGiftObservationSummaryProps {

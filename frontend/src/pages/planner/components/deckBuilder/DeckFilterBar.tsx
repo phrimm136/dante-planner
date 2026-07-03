@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { cn } from '@/lib/utils'
-import { calculateActiveFilterCount } from '@/lib/filterUtils'
+import { calculateActiveFilterCount } from '@/shared/filter'
 import { DETAIL_PAGE } from '@/lib/constants'
-import { useIsBreakpoint } from '@/hooks/use-is-breakpoint'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
 import {
   useDeckFilterState,
@@ -18,18 +18,18 @@ import {
 import type { EntityMode } from '../../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
 
-import { SearchBar } from '@/components/common/SearchBar'
-import { FilterSection } from '@/components/filter/FilterSection'
-import { CompactSinnerFilter } from '@/components/filter/CompactSinnerFilter'
-import { CompactKeywordFilter } from '@/components/filter/CompactKeywordFilter'
-import { CompactSkillAttributeFilter } from '@/components/filter/CompactSkillAttributeFilter'
-import { CompactAttackTypeFilter } from '@/components/filter/CompactAttackTypeFilter'
-import { CompactDefenseTypeFilter } from '@/components/filter/CompactDefenseTypeFilter'
-import { CompactRarityFilter } from '@/components/filter/CompactRarityFilter'
-import { CompactEGOTypeFilter } from '@/components/filter/CompactEGOTypeFilter'
-import { SeasonDropdown } from '@/components/filter/SeasonDropdown'
-import { UnitKeywordDropdown } from '@/components/filter/UnitKeywordDropdown'
-import { BattleKeywordDropdown } from '@/components/filter/BattleKeywordDropdown'
+import { SearchBar } from '@/shared/filter'
+import { FilterSection } from '@/shared/filter'
+import { CompactSinnerFilter } from '@/shared/filter'
+import { CompactKeywordFilter } from '@/shared/filter'
+import { CompactSkillAttributeFilter } from '@/shared/filter'
+import { CompactAttackTypeFilter } from '@/shared/filter'
+import { CompactDefenseTypeFilter } from '@/shared/filter'
+import { CompactRarityFilter } from '@/shared/filter'
+import { CompactEGOTypeFilter } from '@/shared/filter'
+import { SeasonDropdown } from '@/shared/filter'
+import { UnitKeywordDropdown } from '@/shared/filter'
+import { BattleKeywordDropdown } from '@/shared/filter'
 
 import { EntityToggle } from './EntityToggle'
 

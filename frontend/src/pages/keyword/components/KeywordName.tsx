@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useKeywordListI18nDeferred } from '@/hooks/useKeywordListData'
-import { KoreanText } from '@/components/KoreanText'
+import { useKeywordListI18nDeferred } from '@/shared/gameText'
+import { KoreanText } from '@/components/ui/KoreanText'
 
 interface KeywordNameProps {
   /** Keyword ID to look up name */

@@ -1,4 +1,4 @@
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel } from '@/shared/gameData'
 import {
   Tooltip,
   TooltipContent,

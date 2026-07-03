@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { getAffinityIconPath } from '@/lib/assetPaths'
-import { AFFINITIES, type Affinity } from '@/lib/constants'
+import { getAffinityIconPath } from '@/shared/assets'
+import { AFFINITIES, type Affinity } from '@/shared/gameData'
 
 interface SinCostPanelProps {
   costs: Record<string, number>

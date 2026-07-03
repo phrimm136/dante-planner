@@ -2,11 +2,11 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '../PlannerSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { NoteContent } from '@/types/NoteEditorTypes'
-import { isNoteEmpty } from '@/lib/noteUtils'
+import type { NoteContent } from '@/shared/noteEditor'
+import { isNoteEmpty } from '@/shared/noteEditor'
 
 interface FloorGalleryTrackerProps {
   floorSelections: SerializableFloorSelection[]

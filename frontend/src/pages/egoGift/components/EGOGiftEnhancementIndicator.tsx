@@ -1,4 +1,4 @@
-import { getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
 
 interface EGOGiftEnhancementIndicatorProps {
   enhancement: 0 | 1 | 2

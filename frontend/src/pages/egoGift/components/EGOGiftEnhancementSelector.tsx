@@ -2,7 +2,7 @@ import {
   ENHANCEMENT_LEVELS,
   ENHANCEMENT_LABELS,
   type EnhancementLevel,
-} from '@/lib/constants'
+} from '@/shared/gameData'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftEnhancementSelectorProps {

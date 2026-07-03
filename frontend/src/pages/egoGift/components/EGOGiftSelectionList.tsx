@@ -1,13 +1,14 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import type { EnhancementLevel } from '@/lib/constants'
-import { CARD_GRID } from '@/lib/constants'
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
-import { buildSelectionLookup } from '@/lib/egoGiftEncoding'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import type { EnhancementLevel } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { buildSelectionLookup } from '../lib/egoGiftEncoding'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftSelectableCard } from './EGOGiftSelectableCard'
 import { EGOGiftObservationCard } from './EGOGiftObservationCard'
 import { EGOGiftCard } from './EGOGiftCard'
@@ -45,23 +46,13 @@ export function EGOGiftSelectionList({
   const { t } = useTranslation('database')
   const { keywordToValue } = useSearchMappingsDeferred()
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when gifts change
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [gifts])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < gifts.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, gifts.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, gifts.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: gifts.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: gifts,
+  })
 
   const visibleIds = useMemo(() => {
     const ids = new Set<string>()

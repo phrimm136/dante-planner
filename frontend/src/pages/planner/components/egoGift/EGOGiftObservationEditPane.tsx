@@ -11,13 +11,13 @@ import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { SortMode } from '@/components/common/Sorter'
+import type { SortMode } from '@/shared/filter'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
-import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
+import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import { EGOGiftObservationSelection } from '@/pages/egoGift'
-import { MAX_OBSERVABLE_GIFTS } from '@/lib/constants'
+import { MAX_OBSERVABLE_GIFTS } from '@/shared/gameData'
 
 interface EGOGiftObservationEditPaneProps {
   open: boolean

@@ -16,8 +16,8 @@ import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanst
 
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useAuthQuery } from '@/shared/auth'
+import { useUserSettingsQuery } from '@/pages/settings'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
@@ -27,7 +27,7 @@ import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 import type { PlannerSummary, SaveablePlanner, MDPlannerContent } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '../components/BatchConflictDialog'
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 
 // ============================================================================
 // Query Keys

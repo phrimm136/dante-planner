@@ -1,10 +1,10 @@
 import { useMemo, type Ref } from 'react'
 
 import { CARD_GRID } from '@/lib/constants'
-import { getSelectedIndicatorPath } from '@/lib/assetPaths'
+import { getSelectedIndicatorPath } from '@/shared/assets'
 import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOCard } from '@/pages/ego'
 import { TierLevelSelector } from './TierLevelSelector'
 import type { EGOListItem } from '@/pages/ego'

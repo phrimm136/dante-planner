@@ -1,9 +1,9 @@
 import React, { useState, memo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MAX_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL } from '@/shared/gameData'
 import type { UptieTier, ThreadspinTier } from '../../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
-import { getEGOTierIconPath } from '@/lib/assetPaths'
+import { getEGOTierIconPath } from '@/shared/assets'
 
 interface TierLevelSelectorProps {
   mode: 'identity' | 'ego'

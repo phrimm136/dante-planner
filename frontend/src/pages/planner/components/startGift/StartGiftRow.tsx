@@ -1,8 +1,8 @@
-import { getKeywordIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/shared/assets'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { CARD_GRID } from '@/lib/constants'
 
 interface StartGiftRowProps {

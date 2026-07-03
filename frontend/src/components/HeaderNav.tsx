@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Menu, ChevronDown } from 'lucide-react'
 
-import { useAuthQueryNonBlocking } from '@/hooks/useAuthQuery'
+import { useAuthQueryNonBlocking } from '@/shared/auth'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,

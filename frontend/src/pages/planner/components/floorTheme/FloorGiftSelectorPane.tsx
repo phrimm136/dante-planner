@@ -11,16 +11,16 @@ import { Button } from '@/components/ui/button'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
-import type { SortMode } from '@/components/common/Sorter'
-import { bucketAndSortFloorGifts } from '@/lib/floorGiftBucketing'
+import type { SortMode } from '@/shared/filter'
+import { bucketAndSortFloorGifts } from '../../lib/floorGiftBucketing'
 import {
   encodeGiftSelection,
   findEncodedGiftId,
   decodeGiftSelection,
   getCascadeIngredients,
-} from '@/lib/egoGiftEncoding'
+} from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel, DungeonIdx } from '@/lib/constants'
+import type { EnhancementLevel, DungeonIdx } from '@/shared/gameData'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean

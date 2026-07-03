@@ -14,8 +14,8 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { ErrorBoundary } from '@/components/common/ErrorBoundary'
-import { LoadingState } from '@/components/common/LoadingState'
+import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
+import { LoadingState } from '@/components/feedback/LoadingState'
 import { BannerSection } from './components/BannerSection'
 import { AnnouncementContent } from './components/AnnouncementContent'
 import { AnnouncementSkeleton } from './components/AnnouncementSection'

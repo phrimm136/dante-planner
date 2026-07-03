@@ -22,9 +22,10 @@ import {
   getSinnerIconPath,
   getRarityIconPath,
   getEGORankIconPath,
-} from '@/lib/assetPaths'
-import { cn, getSinnerFromId } from '@/lib/utils'
-import { getSeasonColor } from '@/lib/colorUtils'
+} from '@/shared/assets'
+import { getSinnerFromId } from '@/shared/gameData'
+import { cn } from '@/lib/utils'
+import { getSeasonColor } from '@/shared/gameData'
 
 import type { DateGroup, RecentEntity } from '../hooks/useHomePageData'
 

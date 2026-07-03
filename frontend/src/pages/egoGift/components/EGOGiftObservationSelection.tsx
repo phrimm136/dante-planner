@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useEGOGiftListData } from '../hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { CARD_GRID } from '@/lib/constants'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 

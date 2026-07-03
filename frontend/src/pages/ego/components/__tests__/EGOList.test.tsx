@@ -20,7 +20,7 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 // Mock asset paths
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getEGOImagePath: (id: string) => `/mock/ego/${id}.png`,
   getEGOFramePath: () => '/mock/frame.png',
   getEGOFrameHighlightPath: () => '/mock/frame-highlight.png',
@@ -33,7 +33,7 @@ vi.mock('@/lib/assetPaths', () => ({
 }))
 
 // Mock search mappings - non-suspending version
-vi.mock('@/hooks/useSearchMappings', () => ({
+vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: vi.fn(),
 }))
 
@@ -51,7 +51,7 @@ vi.mock('../../hooks/useEGOListData', () => ({
   }),
 }))
 
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/shared/filter'
 
 const mockEGOs: EGOListItem[] = [
   {

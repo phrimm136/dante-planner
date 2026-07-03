@@ -1,14 +1,14 @@
 ---
 paths:
-  - "frontend/src/routes/**/*.tsx"
-  - "frontend/src/routes/**/*.ts"
+  - "frontend/src/lib/router.tsx"
+  - "frontend/src/pages/**/*.tsx"
 ---
 
 # Routing Core Patterns
 
 ## Mandatory Rules
 
-- **Code-based routes** — no file-based routing
+- **Code-based routes** — no file-based routing; the whole route tree is defined programmatically in `src/lib/router.tsx` (no `src/routes/` dir, no generated route tree)
 - **Validate params early** — before calling data hooks
 - **Use `useSuspenseQuery`** in route components — loader guarantees data exists
 - **Define `queryOptions` factories** alongside their hooks

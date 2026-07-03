@@ -1,5 +1,5 @@
-import { SINNERS } from '@/lib/constants'
-import { getEGOImagePath, getEGOTypeIconPath } from '@/lib/assetPaths'
+import { SINNERS } from '@/shared/gameData'
+import { getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
 import colorCode from '@static/data/colorCode.json'

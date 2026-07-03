@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOListI18n } from '../hooks/useEGOListData'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
+import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
 
 interface EGONameProps {
   /** EGO ID to look up name */

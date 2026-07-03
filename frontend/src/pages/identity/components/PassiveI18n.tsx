@@ -2,11 +2,11 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
+import { FormattedDescription } from '@/shared/gameText'
+import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAffinityIconPath, getIdentityPassiveCountIconPath, getLockIconPath } from '@/lib/assetPaths'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { getAffinityIconPath, getIdentityPassiveCountIconPath, getLockIconPath } from '@/shared/assets'
+import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PassiveCondition {

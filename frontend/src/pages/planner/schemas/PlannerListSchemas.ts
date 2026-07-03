@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PLANNER_KEYWORDS } from '@/lib/constants'
+import { PLANNER_KEYWORDS } from '@/shared/gameData'
 import { MDCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
 
 /**

@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { AffinitySchema } from '@/schemas/SharedSchemas'
+import { AffinitySchema } from '@/shared/gameData'
+import { SkillDescEntrySchema } from '@/shared/gameData'
 
 /**
  * EGO Schemas
@@ -91,11 +92,8 @@ export const EGODataSchema = z.object({
  * EGO i18n schemas
  */
 
-// Skill description entry schema
-export const EGOSkillDescEntrySchema = z.object({
-  desc: z.string().optional(),
-  coinDescs: z.array(z.string()).optional(),
-})
+// Skill description entry — inherits the shared base shape
+export const EGOSkillDescEntrySchema = SkillDescEntrySchema
 
 // Skill i18n schema
 // `flavor` is forward-compat for when raw EGO data starts shipping it.

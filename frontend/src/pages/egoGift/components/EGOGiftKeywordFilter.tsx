@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { IconFilter } from '@/components/filter/IconFilter'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { KEYWORD_ORDER } from '@/lib/constants'
+import { IconFilter } from '@/shared/filter'
+import { getKeywordIconPath } from '@/shared/assets'
+import { KEYWORD_ORDER } from '@/shared/gameData'
 
 interface EGOGiftKeywordFilterProps {
   selectedKeywords: Set<string>

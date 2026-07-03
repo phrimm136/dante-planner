@@ -7,8 +7,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { CARD_GRID, START_BUFF_CARD_SIZE, ENHANCEMENT_LABELS, type MDVersion } from '@/lib/constants'
-import { getStartBuffEnhancementIconPath } from '@/lib/assetPaths'
+import { ENHANCEMENT_LABELS, type MDVersion } from '@/shared/gameData'
+import { CARD_GRID, START_BUFF_CARD_SIZE } from '@/lib/constants'
+import { getStartBuffEnhancementIconPath } from '@/shared/assets'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import {
@@ -16,10 +17,10 @@ import {
   createBuffId,
   deriveEnhancements,
   getBaseIdFromBuffId,
-} from '@/types/StartBuffTypes'
-import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
-import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+} from '@/shared/gameText'
+import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
+import { StarlightCostDisplay } from '../StarlightCostDisplay'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { StartBuffCardMD6 } from './StartBuffCardMD6'
 import { StartBuffCardMD7 } from './StartBuffCardMD7'
 

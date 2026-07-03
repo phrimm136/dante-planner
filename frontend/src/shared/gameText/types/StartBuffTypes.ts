@@ -1,0 +1,119 @@
+/**
+ * Start Buff types for Mirror Dungeon planners
+ *
+ * Pipeline JSON shapes are re-exported from their schemas (z.infer);
+ * assembled/computed view types below stay hand-written.
+ */
+
+import type { BuffEffect } from '../schemas/StartBuffSchemas'
+
+export type {
+  BuffReferenceData,
+  BuffEffect,
+  BuffUIConfig,
+  StartBuffData,
+  StartBuffDataList,
+  StartBuffI18n,
+} from '../schemas/StartBuffSchemas'
+
+export type { BattleKeywordI18nEntry } from '../schemas/BattleKeywordsSchemas'
+
+/**
+ * Enhancement level type (0 = base, 1 = +, 2 = ++)
+ */
+export type EnhancementLevel = 0 | 1 | 2
+
+/**
+ * Merged battle keyword entry combining i18n (name, desc) with spec (iconId, buffType)
+ * This is the consumer-facing type returned by useBattleKeywords.
+ */
+export interface BattleKeywordEntry {
+  name: string
+  desc: string
+  flavor?: string
+  iconId: string | null
+  buffType: string
+}
+
+/**
+ * Battle keywords dictionary
+ */
+export type BattleKeywords = Record<string, BattleKeywordEntry>
+
+/**
+ * Combined Start Buff for UI consumption
+ */
+export interface StartBuff {
+  id: string
+  baseId: number
+  level: number
+  name: string
+  cost: number
+  effects: BuffEffect[]
+  iconSpriteId: string
+}
+
+/**
+ * Base buff IDs (100-109)
+ */
+export const BASE_BUFF_IDS = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109] as const
+
+/**
+ * Extracts base ID from full buff ID
+ * @param id - Full buff ID (e.g., 100, 201, 302)
+ * @returns Base ID (100-109)
+ */
+export function getBaseIdFromBuffId(id: number): number {
+  return (id % 100) + 100
+}
+
+/**
+ * Extracts enhancement level from full buff ID
+ * @param id - Full buff ID (e.g., 100, 201, 302)
+ * @returns Enhancement level (0, 1, or 2)
+ */
+export function getEnhancementFromBuffId(id: number): EnhancementLevel {
+  const level = Math.floor(id / 100) - 1
+  return level as EnhancementLevel
+}
+
+/**
+ * Creates full buff ID from base ID and enhancement level
+ * @param baseId - Base ID (100-109)
+ * @param enhancement - Enhancement level (0, 1, or 2)
+ * @returns Full buff ID
+ */
+export function createBuffId(baseId: number, enhancement: EnhancementLevel): number {
+  const baseDigit = baseId % 100
+  return (enhancement + 1) * 100 + baseDigit
+}
+
+/**
+ * Gets enhancement suffix for display
+ * @param enhancement - Enhancement level
+ * @returns Suffix string (empty, "+", or "++")
+ */
+export function getEnhancementSuffix(enhancement: EnhancementLevel): string {
+  if (enhancement === 1) return '+'
+  if (enhancement === 2) return '++'
+  return ''
+}
+
+/**
+ * Derives enhancement levels from a set of selected buff IDs
+ * @param selectedBuffIds - Set of selected buff IDs (e.g., Set([201, 302]))
+ * @returns Record mapping base IDs to their enhancement levels
+ * @example
+ * deriveEnhancements(new Set([201, 302])) // { 101: 1, 102: 2 }
+ */
+export function deriveEnhancements(
+  selectedBuffIds: Set<number>
+): Record<number, EnhancementLevel> {
+  const result: Record<number, EnhancementLevel> = {}
+  for (const buffId of selectedBuffIds) {
+    const baseId = getBaseIdFromBuffId(buffId)
+    const enhancement = getEnhancementFromBuffId(buffId)
+    result[baseId] = enhancement
+  }
+  return result
+}

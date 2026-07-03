@@ -9,13 +9,13 @@ import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSec
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { FloorGalleryTracker } from './FloorGalleryTracker'
 import { PlannerSection } from '../PlannerSection'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
+import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
-import { FLOOR_COUNTS } from '@/lib/constants'
-import type { MDCategory } from '@/lib/constants'
-import { isNoteEmpty } from '@/lib/noteUtils'
+import { FLOOR_COUNTS } from '@/shared/gameData'
+import type { MDCategory } from '@/shared/gameData'
+import { isNoteEmpty } from '@/shared/noteEditor'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 
 const SECTION_COUNT = 7

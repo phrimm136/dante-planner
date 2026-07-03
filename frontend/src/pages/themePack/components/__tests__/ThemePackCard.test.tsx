@@ -13,19 +13,19 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getThemePackImagePath: (id: string) => `/images/themePack/${id}.webp`,
   getThemePackHoverHighlightPath: () => '/images/UI/themePack/onHover.webp',
   getThemePackSelectHighlightPath: () => '/images/UI/themePack/onSelect.webp',
   getThemePackExtremeHighlightPath: () => '/images/UI/themePack/extremeHighlight.webp',
 }))
 
-vi.mock('@/components/common/AutoSizeText', () => ({
+vi.mock('@/components/ui/AutoSizeText', () => ({
   AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
-vi.mock('@/components/common/ColoredText', async (importActual) => ({
-  ...(await importActual<typeof import('@/components/common/ColoredText')>()),
+vi.mock('@/shared/gameText/components/ColoredText', async (importActual) => ({
+  ...(await importActual<typeof import('@/shared/gameText/components/ColoredText')>()),
   parseColorTags: (text: string) => text,
 }))
 

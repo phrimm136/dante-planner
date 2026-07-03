@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import PlannerMDDetailPage from '../PlannerMDDetailPage'
 import { useSavedPlannerQuery } from '../hooks/useSavedPlannerQuery'
-import { useAuthQuery, useAuthQueryNonBlocking } from '@/hooks/useAuthQuery'
+import { useAuthQuery, useAuthQueryNonBlocking } from '@/shared/auth'
 import type { SaveablePlanner, MDPlannerContent } from '../types/PlannerTypes'
 
 // Mock react-router with all required exports
@@ -29,7 +29,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 vi.mock('../hooks/useSavedPlannerQuery')
 
 // Mock useAuthQuery
-vi.mock('@/hooks/useAuthQuery')
+vi.mock('@/shared/auth/hooks/useAuthQuery')
 
 const mockPlanner: SaveablePlanner = {
   metadata: {
@@ -84,7 +84,7 @@ vi.mock('../components/plannerViewer/PlannerDetailHeader', () => ({
 }))
 
 // Mock ErrorBoundary
-vi.mock('@/components/common/ErrorBoundary', () => ({
+vi.mock('@/components/feedback/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 

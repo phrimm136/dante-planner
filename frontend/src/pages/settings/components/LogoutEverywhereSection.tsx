@@ -4,8 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
 import { toast } from '@/lib/toast'
-import { authQueryKeys } from '@/hooks/useAuthQuery'
-import { useLogoutEverywhere } from '@/hooks/useLogoutEverywhere'
+import { authQueryKeys } from '@/shared/auth'
+import { useLogoutEverywhere } from '@/shared/auth'
 import { Button } from '@/components/ui/button'
 import { LogoutEverywhereDialog } from './LogoutEverywhereDialog'
 

@@ -1,10 +1,10 @@
 import { forwardRef, useCallback } from "react"
 
 // --- Lib ---
-import { parseShortcutKeys } from "@/lib/tiptap-utils"
+import { parseShortcutKeys } from "@/shared/noteEditor/lib/tiptap-utils"
 
 // --- Hooks ---
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
+import { useTiptapEditor } from "../use-tiptap-editor"
 
 // --- Tiptap UI ---
 import type { UseImageUploadConfig } from "@/components/tiptap-ui/image-upload-button"

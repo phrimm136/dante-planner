@@ -1,8 +1,9 @@
 import { useMemo, memo, useState, useEffect } from 'react'
-import { SINNERS, CARD_GRID, type Affinity, type AtkType } from '@/lib/constants'
+import { SINNERS, type Affinity, type AtkType } from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { Identity, IdentityListItem } from '@/pages/identity'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { SinnerDeckCard } from './SinnerDeckCard'
 
 export interface SkillData {

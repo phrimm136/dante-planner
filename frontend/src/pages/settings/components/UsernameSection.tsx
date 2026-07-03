@@ -2,8 +2,8 @@ import { useState, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useEpithetsQuery, useUpdateEpithetMutation } from '@/hooks/useUserSettingsQuery'
+import { useAuthQuery } from '@/shared/auth'
+import { useEpithetsQuery, useUpdateEpithetMutation } from '../hooks/useUserSettingsQuery'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -13,10 +13,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
-import { startGoogleLogin } from '@/hooks/useGoogleLogin'
+import { startGoogleLogin } from '@/shared/auth'
 import { formatUsername } from '@/lib/formatUsername'
 import { ChevronDown } from 'lucide-react'
-import { GoogleIcon } from '@/components/icons/GoogleIcon'
+import { GoogleIcon } from '@/components/ui/GoogleIcon'
 
 /**
  * Inner component that uses Suspense hooks.

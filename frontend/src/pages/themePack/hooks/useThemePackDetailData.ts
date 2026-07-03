@@ -1,44 +1,33 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { ThemePackDetailSchema, ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
 
-// Query key factory for theme pack detail data
 export const themePackDetailQueryKeys = {
-  all: () => ['themePack'] as const,
-  detail: (id: string) => ['themePack', id] as const,
+  ...createEntityDetailQueryKeys('themePack'),
+  // Deviates from the standard detail shape: all translations live in one
+  // shared file, so detail reuses the list i18n cache entry
   i18n: (language: string) => ['themePack', 'list', 'i18n', language] as const,
 }
 
-// Theme pack detail query options with runtime validation
 function createThemePackDetailQueryOptions(id: string) {
-  return queryOptions({
-    queryKey: themePackDetailQueryKeys.detail(id),
-    queryFn: async () => {
-      const module = await import(`@static/data/themePack/${id}.json`)
-      const result = ThemePackDetailSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[themePack / ${id}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    themePackDetailQueryKeys.detail(id),
+    () => import(`@static/data/themePack/${id}.json`),
+    ThemePackDetailSchema,
+    `themePack / ${id}`,
+  )
 }
 
 // Reuse the i18n query from list data (same file: themePack.json)
 function createThemePackI18nQueryOptions(language: string) {
-  return queryOptions({
-    queryKey: themePackDetailQueryKeys.i18n(language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/themePack.json`)
-      const result = ThemePackI18nSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[themePack i18n] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    themePackDetailQueryKeys.i18n(language),
+    () => import(`@static/i18n/${language}/themePack.json`),
+    ThemePackI18nSchema,
+    'themePack i18n',
+  )
 }
 
 /**

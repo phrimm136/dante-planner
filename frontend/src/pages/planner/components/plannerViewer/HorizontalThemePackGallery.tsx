@@ -2,13 +2,13 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { PlannerSection } from '../PlannerSection'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { ThemePackTrackerCard } from './ThemePackTrackerCard'
 import { useThemePackListData } from '@/pages/themePack'
 import { CARD_GRID, EMPTY_STATE } from '@/lib/constants'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
-import type { NoteContent } from '@/types/NoteEditorTypes'
+import type { NoteContent } from '@/shared/noteEditor'
 
 interface HorizontalThemePackGalleryProps {
   floorSelections: SerializableFloorSelection[]

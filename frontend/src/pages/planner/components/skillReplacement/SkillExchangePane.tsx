@@ -1,9 +1,9 @@
 import { ArrowRight, RotateCcw } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { SkillImageSimple } from './SkillImageSimple'
-import { getSkillImagePath } from '@/lib/assetPaths'
+import { getSkillImagePath } from '@/shared/assets'
 import { cn } from '@/lib/utils'
-import type { SkillAttributeType, OffensiveSkillSlot } from '@/lib/constants'
+import type { SkillAttributeType, OffensiveSkillSlot } from '@/shared/gameData'
 
 interface SkillExchangePaneProps {
   identityId: string

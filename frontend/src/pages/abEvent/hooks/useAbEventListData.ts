@@ -1,26 +1,23 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createEntityListQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { AbEventSpecListSchema } from '../schemas/AbEventSchemas'
 
-// Query key factory for AbEvent list data
+const listKeys = createEntityListQueryKeys('abEvent')
+
+// abEvent has no list i18n file — expose only the members that have data
 export const abEventListQueryKeys = {
-  all: () => ['abEvent', 'list'] as const,
-  spec: () => ['abEvent', 'list', 'spec'] as const,
+  all: listKeys.all,
+  spec: listKeys.spec,
 }
 
-// AbEvent spec list query options with runtime validation
 function createAbEventSpecListQueryOptions() {
-  return queryOptions({
-    queryKey: abEventListQueryKeys.spec(),
-    queryFn: async () => {
-      const module = await import('@static/data/abEventSpecList.json')
-      const result = AbEventSpecListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[abEvent specList] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    abEventListQueryKeys.spec(),
+    () => import('@static/data/abEventSpecList.json'),
+    AbEventSpecListSchema,
+    'abEvent specList',
+  )
 }
 
 /**

@@ -15,10 +15,10 @@ import { GiftNameI18n } from '@/pages/egoGift'
 import { EGOGiftMetadata } from '@/pages/egoGift'
 import { EnhancementsPanelI18n } from '@/pages/egoGift'
 import { RecipeSection } from '@/pages/egoGift'
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
-import { ENHANCEMENT_LEVELS } from '@/lib/constants'
+import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
 import {
   calculateEnhancementCost,
   extractEGOGiftTier,
@@ -73,7 +73,7 @@ function EGOGiftDetailContent() {
           enhancement={0}
         />
         {/* Name with internal Suspense - does not suspend parent */}
-        <GiftNameI18n id={id} attributeType={giftData.attributeType as import('@/lib/constants').EGOGiftAttributeType} />
+        <GiftNameI18n id={id} attributeType={giftData.attributeType as import('@/shared/gameData').EGOGiftAttributeType} />
       </div>
 
       {/* Metadata panel - internal Suspense for theme pack names only */}

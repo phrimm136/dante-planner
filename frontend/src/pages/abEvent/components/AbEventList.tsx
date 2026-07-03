@@ -1,14 +1,15 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { AbEventSpecList } from '../schemas/AbEventSchemas'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import {
   matchesRelatedEgoGiftFilter,
   matchesRelatedThemePackFilter,
 } from '../lib/abEventFilter'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { AbEventCardLink } from './AbEventCardLink'
 
 interface AbEventListProps {
@@ -36,20 +37,12 @@ export function AbEventList({
   )
 
   // Progressive rendering
-  const [displayCount, setDisplayCount] = useState(10)
-
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [sortedEvents])
-
-  useEffect(() => {
-    if (displayCount < sortedEvents.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, sortedEvents.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, sortedEvents.length])
+  const displayCount = useProgressiveCount({
+    total: sortedEvents.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: sortedEvents,
+  })
 
   // CSS-based visibility filtering
   const visibleIds = useMemo(() => {

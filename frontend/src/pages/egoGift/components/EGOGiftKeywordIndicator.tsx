@@ -1,4 +1,4 @@
-import { getKeywordIconPath } from '@/lib/assetPaths'
+import { getKeywordIconPath } from '@/shared/assets'
 import { getKeywordDisplayName } from '@/lib/utils'
 
 interface EGOGiftKeywordIndicatorProps {

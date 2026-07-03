@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEGOGiftDetailData } from '../hooks/useEGOGiftDetailData'
-import { getColorForAttributeType, useColorCodes } from '@/hooks/useColorCodes'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import type { EnhancementLevel } from '@/lib/constants'
+import { getColorForAttributeType, useColorCodes } from '@/shared/gameText'
+import { FormattedDescription } from '@/shared/gameText'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface EGOGiftTooltipInnerProps {

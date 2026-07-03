@@ -11,10 +11,11 @@ import {
   getIdentityFrameHighlightPath,
   getSinnerBGPath,
   getSinnerIconPath,
-} from '@/lib/assetPaths'
-import { MAX_LEVEL } from '@/lib/constants'
-import { cn, getSinnerFromId, getDisplayFontForNumeric } from '@/lib/utils'
-import { getRarityIconPath } from '@/lib/assetPaths'
+} from '@/shared/assets'
+import { MAX_LEVEL } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
+import { cn, getDisplayFontForNumeric } from '@/lib/utils'
+import { getRarityIconPath } from '@/shared/assets'
 
 interface IdentityCardProps {
   identity: IdentityListItem

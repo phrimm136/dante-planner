@@ -1,27 +1,22 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
-import type { MDVersion } from '@/lib/constants'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import type { MDVersion } from '@/shared/gameData'
 import type { StartEgoGiftPools } from '../types/StartGiftTypes'
 import { StartEgoGiftPoolsSchema } from '../schemas/StartGiftSchemas'
 
 // Query key factory for start gift pools
+// Hand-rolled: versioned tuple deviates from the shared list/detail factory shapes
 export const startGiftPoolsQueryKeys = {
   all: (version: MDVersion) => ['startGiftPools', `md${version}`] as const,
 }
 
-// Pool data query options
 function createPoolsQueryOptions(version: MDVersion) {
-  return queryOptions({
-    queryKey: startGiftPoolsQueryKeys.all(version),
-    queryFn: async () => {
-      const module = await import(`@static/data/MD${version}/startEgoGiftPools.json`)
-      const result = StartEgoGiftPoolsSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[startGiftPools/md${version}] Validation failed: ${result.error.message}`)
-      }
-      return result.data as StartEgoGiftPools
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    startGiftPoolsQueryKeys.all(version),
+    () => import(`@static/data/MD${version}/startEgoGiftPools.json`),
+    StartEgoGiftPoolsSchema,
+    `startGiftPools/md${version}`,
+  )
 }
 
 /**
@@ -30,7 +25,7 @@ function createPoolsQueryOptions(version: MDVersion) {
  * @param version - Mirror Dungeon version (5 or 6)
  * @returns keyword -> gift IDs mapping
  */
-export function useStartGiftPools(version: MDVersion) {
+export function useStartGiftPools(version: MDVersion): { data: StartEgoGiftPools } {
   const { data } = useSuspenseQuery(createPoolsQueryOptions(version))
   return { data }
 }

@@ -12,9 +12,10 @@ import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { PLANNER_LIST } from '@/lib/constants'
+import { validateData } from '@/lib/validation'
 import { PaginatedPlannersSchema } from '../schemas/PlannerListSchemas'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { MDGesellschaftMode } from '../types/MDPlannerListTypes'
 
 // ============================================================================
@@ -89,13 +90,7 @@ function createPublishedPlannersQueryOptions(params: {
       if (params.themePack) searchParams.append('themePack', params.themePack)
 
       const data = await ApiClient.get(`/api/planner/md/published?${searchParams.toString()}`)
-      const result = PaginatedPlannersSchema.safeParse(data)
-
-      if (!result.success) {
-        throw new Error(`[gesellschaft published] Validation failed: ${result.error.message}`)
-      }
-
-      return result.data
+      return validateData(data, PaginatedPlannersSchema, 'gesellschaft published')
     },
     staleTime: 60 * 1000, // 1 minute - list data changes frequently
   })
@@ -130,13 +125,7 @@ function createRecommendedPlannersQueryOptions(params: {
       if (params.themePack) searchParams.append('themePack', params.themePack)
 
       const data = await ApiClient.get(`/api/planner/md/recommended?${searchParams.toString()}`)
-      const result = PaginatedPlannersSchema.safeParse(data)
-
-      if (!result.success) {
-        throw new Error(`[gesellschaft recommended] Validation failed: ${result.error.message}`)
-      }
-
-      return result.data
+      return validateData(data, PaginatedPlannersSchema, 'gesellschaft recommended')
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - recommended list is more stable
   })

@@ -1,4 +1,4 @@
-import { getAbEventImagePath } from '@/lib/assetPaths'
+import { getAbEventImagePath } from '@/shared/assets'
 import { cn } from '@/lib/utils'
 
 interface AbEventCardProps {

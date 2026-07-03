@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { Clock } from 'lucide-react'
 
 import { formatPlannerDate } from '@/lib/formatDate'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, PLANNER_LIST } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { PLANNER_LIST } from '@/lib/constants'
 import { PlannerStatusIcon } from './PlannerStatusIcon'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { PlannerSummary } from '../../types/PlannerTypes'
 
 interface PersonalPlannerCardProps {

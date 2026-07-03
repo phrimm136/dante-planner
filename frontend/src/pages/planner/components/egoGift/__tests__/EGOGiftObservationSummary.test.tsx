@@ -98,7 +98,7 @@ vi.mock('../../PlannerSection', () => ({
 }))
 
 // Mock StarlightCostDisplay to verify cost value
-vi.mock('@/components/common/StarlightCostDisplay', () => ({
+vi.mock('../../StarlightCostDisplay', () => ({
   StarlightCostDisplay: ({ cost, size }: { cost: number; size: string }) => (
     <div data-testid="starlight-cost" data-cost={cost} data-size={size}>
       {cost}

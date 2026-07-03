@@ -3,16 +3,16 @@ import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { z } from 'zod'
 import { zodValidator } from '@tanstack/zod-adapter'
-import { GlobalLayout } from '@/components/GlobalLayout'
+import { GlobalLayout } from '@/components/layout/GlobalLayout'
 import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/pages/planner/hooks/usePublishedPlannerQuery'
-import { RouteErrorComponent } from '@/components/common/RouteErrorComponent'
+import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
-import NotFoundPage from '@/components/common/NotFoundPage'
+import NotFoundPage from '@/components/feedback/NotFoundPage'
 
 // Note: All route components are lazy loaded for code splitting
 // Each route will load its JS bundle only when navigated to

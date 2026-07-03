@@ -4,7 +4,7 @@
  * Utility functions for theme pack filtering logic.
  */
 
-import type { DungeonIdx, ThemePackFloor } from '@/lib/constants'
+import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
 
 /**

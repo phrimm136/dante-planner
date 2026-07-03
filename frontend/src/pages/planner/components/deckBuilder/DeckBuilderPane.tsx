@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { LoadingState } from '@/components/common/LoadingState'
+import { LoadingState } from '@/components/feedback/LoadingState'
 import { DeckBuilderContent } from './DeckBuilderContent'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 

@@ -1,4 +1,4 @@
-import { DiscordIcon } from '@/components/icons/DiscordIcon'
+import { DiscordIcon } from '@/components/ui/DiscordIcon'
 import { DISCORD_BLURPLE, DISCORD_INVITE_URL } from '@/lib/constants'
 
 export function SideLinkSection() {

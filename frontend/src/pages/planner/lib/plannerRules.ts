@@ -5,7 +5,7 @@
  * theme-pack affordability and floor theme-pack prerequisite gating.
  */
 
-import { getBaseGiftId } from '@/lib/egoGiftEncoding'
+import { getBaseGiftId } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 

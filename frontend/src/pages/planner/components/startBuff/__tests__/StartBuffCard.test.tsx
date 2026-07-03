@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffCardMD6 as StartBuffCard } from '../StartBuffCardMD6'
-import type { StartBuff, StartBuffI18n } from '@/types/StartBuffTypes'
+import type { StartBuff, StartBuffI18n } from '@/shared/gameText'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -10,7 +10,7 @@ vi.mock('react-i18next', () => ({
 }))
 
 // Mock asset path functions
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getStartBuffIconPath: () => '/mock/icon.png',
   getStartBuffPanePath: () => '/mock/pane.png',
   getStartBuffHighlightPath: () => '/mock/highlight.png',
@@ -25,7 +25,7 @@ vi.mock('../formatBuffDescription', () => ({
 }))
 
 // Mock AutoSizeText to render plain text
-vi.mock('@/components/common/AutoSizeText', () => ({
+vi.mock('@/components/ui/AutoSizeText', () => ({
   AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 

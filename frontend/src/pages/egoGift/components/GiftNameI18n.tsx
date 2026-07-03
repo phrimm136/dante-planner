@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { useEGOGiftDetailI18n } from '../hooks/useEGOGiftDetailData'
 import GiftName from './GiftName'
 
-import type { EGOGiftAttributeType } from '@/lib/constants'
+import type { EGOGiftAttributeType } from '@/shared/gameData'
 
 interface GiftNameI18nProps {
   /** EGO Gift ID for i18n lookup */

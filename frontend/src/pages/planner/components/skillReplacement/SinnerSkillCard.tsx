@@ -1,5 +1,5 @@
-import { getIdentityProfileImagePath, getIdentityImageFallbackPath, getAttackTypeIconPath } from '@/lib/assetPaths'
-import { OFFENSIVE_SKILL_SLOTS, DEFAULT_SKILL_EA } from '@/lib/constants'
+import { getIdentityProfileImagePath, getIdentityImageFallbackPath, getAttackTypeIconPath } from '@/shared/assets'
+import { OFFENSIVE_SKILL_SLOTS, DEFAULT_SKILL_EA } from '@/shared/gameData'
 import type { SkillEAState, UptieTier, SkillInfo } from '../../types/DeckTypes'
 import { cn } from '@/lib/utils'
 import colorCode from '@static/data/colorCode.json'

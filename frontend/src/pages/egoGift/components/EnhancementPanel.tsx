@@ -1,6 +1,6 @@
-import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/lib/assetPaths'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
+import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/assets'
+import { FormattedDescription } from '@/shared/gameText'
+import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
 
 interface EnhancementPanelProps {
   description: string

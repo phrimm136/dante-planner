@@ -9,15 +9,15 @@ import { useParams, Link } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
-import { ColoredText } from '@/components/common/ColoredText'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
+import { ColoredText } from '@/shared/gameText'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftName } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useThemePackI18n } from '@/pages/themePack'
-import { getAbEventImagePath } from '@/lib/assetPaths'
+import { getAbEventImagePath } from '@/shared/assets'
 import {
   ChoiceBranch,
   useAbEventDetailData,

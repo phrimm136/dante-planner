@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { useTrackerState } from '../useTrackerState'
-import { DEFAULT_SKILL_EA, SINNERS } from '@/lib/constants'
+import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
 
 // Default test props - hook requires initialEquipment and initialDeployment
 const defaultInitialEquipment = {}

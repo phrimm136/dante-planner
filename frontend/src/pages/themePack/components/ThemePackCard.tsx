@@ -5,12 +5,12 @@ import {
   getThemePackHoverHighlightPath,
   getThemePackSelectHighlightPath,
   getThemePackExtremeHighlightPath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 import { cn, getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
 import { isExtremePack } from '../types/ThemePackTypes'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
-import { AutoSizeText } from '@/components/common/AutoSizeText'
-import { parseColorTags, stripColorTags } from '@/components/common/ColoredText'
+import { AutoSizeText } from '@/components/ui/AutoSizeText'
+import { parseColorTags, stripColorTags } from '@/shared/gameText'
 
 interface ThemePackCardProps {
   packId: string

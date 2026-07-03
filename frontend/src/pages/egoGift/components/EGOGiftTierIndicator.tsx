@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { getEGOGiftTierEXPath } from '@/lib/assetPaths'
+import { getEGOGiftTierEXPath } from '@/shared/assets'
 import { getDisplayFontForLabel } from '@/lib/utils'
 
 interface EGOGiftTierIndicatorProps {

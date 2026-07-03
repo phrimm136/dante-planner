@@ -20,7 +20,7 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 // Mock asset paths
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getIdentityInfoImagePath: (id: string) => `/mock/identity/${id}.png`,
   getIdentityImageFallbackPath: (id: string) => `/mock/identity/${id}-fallback.png`,
   getUptieFramePath: () => '/mock/uptie-frame.png',
@@ -31,7 +31,7 @@ vi.mock('@/lib/assetPaths', () => ({
 }))
 
 // Mock search mappings - non-suspending version
-vi.mock('@/hooks/useSearchMappings', () => ({
+vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: vi.fn(),
 }))
 
@@ -49,7 +49,7 @@ vi.mock('../../hooks/useIdentityListData', () => ({
   }),
 }))
 
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/shared/filter'
 
 const mockIdentities: IdentityListItem[] = [
   {

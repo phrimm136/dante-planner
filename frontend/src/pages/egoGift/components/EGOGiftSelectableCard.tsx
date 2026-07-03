@@ -1,5 +1,5 @@
 import { useState, memo, useEffect, useRef } from 'react'
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 
 interface EGOGiftSelectableCardProps {

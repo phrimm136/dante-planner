@@ -1,12 +1,13 @@
 import { memo, useMemo } from 'react'
-import { SINNERS, CARD_GRID } from '@/lib/constants'
+import { SINNERS } from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { SkillData } from './SinnerGrid'
 import {
   getIdentityProfileImagePath,
   getEGOTierIconPath,
   getAttackTypeIconPath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 import { cn, getDisplayFontForNumeric } from '@/lib/utils'
 import colorCode from '@static/data/colorCode.json'
 

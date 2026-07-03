@@ -13,15 +13,15 @@ import {
   decodeGiftSelection,
   findEncodedGiftId,
   getCascadeIngredients,
-} from '@/lib/egoGiftEncoding'
+} from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
-import type { SortMode } from '@/components/common/Sorter'
+import type { SortMode } from '@/shared/filter'
 
 interface ComprehensiveGiftSelectorPaneProps {
   open: boolean

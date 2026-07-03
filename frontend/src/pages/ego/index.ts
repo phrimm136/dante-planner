@@ -6,7 +6,7 @@ export { EGOHeader } from './components/EGOHeader'
 export { EGOHeaderWithI18n } from './components/EGOHeaderI18n'
 export { SinCostPanel } from './components/SinCostPanel'
 export { SinResistancePanel } from './components/SinResistancePanel'
-export { SkillsSectionI18n } from './components/SkillI18n'
+export { SkillsSectionI18n } from './components/EGOSkillI18n'
 export { PassiveCardWithSuspense } from './components/PassiveI18n'
 
 export {

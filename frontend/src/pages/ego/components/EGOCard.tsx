@@ -12,8 +12,9 @@ import {
   getEGOInfoPanelPath,
   getSinnerIconPath,
   getSinnerBGPath,
-} from '@/lib/assetPaths'
-import { cn, getSinnerFromId } from '@/lib/utils'
+} from '@/shared/assets'
+import { getSinnerFromId } from '@/shared/gameData'
+import { cn } from '@/lib/utils'
 import { EGOName } from './EGOName'
 import { Skeleton } from '@/components/ui/skeleton'
 

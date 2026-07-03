@@ -33,8 +33,8 @@ import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useThemePackListData } from '@/pages/themePack'
 import { usePlannerKeywordsI18nDeferred } from '../../hooks/usePlannerKeywordsI18n'
 
-import { PLANNER_KEYWORDS, SINNERS } from '@/lib/constants'
-import { getSinnerFromId } from '@/lib/utils'
+import { PLANNER_KEYWORDS, SINNERS } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
 import {
   getKeywordIconPath,
   getIdentityInfoImagePath,
@@ -42,7 +42,7 @@ import {
   getEGOGiftIconPath,
   getThemePackImagePath,
   getSinnerIconPath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 

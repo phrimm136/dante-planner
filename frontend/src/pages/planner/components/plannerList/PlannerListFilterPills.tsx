@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
-import { MD_CATEGORIES } from '@/lib/constants'
+import { MD_CATEGORIES } from '@/shared/gameData'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 
 interface PlannerListFilterPillsProps {
   /** Currently selected category (undefined = All) */

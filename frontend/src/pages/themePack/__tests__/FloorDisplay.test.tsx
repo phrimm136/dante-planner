@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 
-import { DUNGEON_IDX, DIFFICULTY_LABELS } from '@/lib/constants'
+import { DUNGEON_IDX, DIFFICULTY_LABELS } from '@/shared/gameData'
 import type { ThemePackDetail } from '@/pages/themePack'
 import { FloorDisplay } from '../ThemePackDetailPage'
 

@@ -30,7 +30,7 @@ vi.mock('../components/planner/PlannerMDEditorContent', () => ({
   ),
 }))
 
-vi.mock('@/components/common/ErrorBoundary', () => ({
+vi.mock('@/components/feedback/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 

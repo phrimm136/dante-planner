@@ -15,9 +15,10 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import CostDisplay from './CostDisplay'
-import { getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
 import { useThemePackI18n } from '@/pages/themePack'
-import { DIFFICULTY_BADGE_STYLES, ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
+import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
+import { DIFFICULTY_BADGE_STYLES } from '@/lib/constants'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 

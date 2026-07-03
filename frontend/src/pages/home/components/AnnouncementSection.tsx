@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ANNOUNCEMENT_PREVIEW_COUNT } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import type { Announcement } from '@/types/AnnouncementTypes'
+import type { Announcement } from '../types/AnnouncementTypes'
 
 // ============================================================================
 // Loading Skeleton

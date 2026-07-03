@@ -17,7 +17,7 @@ import {
   PlannerEditorStoreProvider,
   usePlannerEditorStoreApi,
 } from '../../../stores/usePlannerEditorStore'
-import { SEASONS } from '@/lib/constants'
+import { SEASONS } from '@/shared/gameData'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
@@ -36,7 +36,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Dropdown i18n data (Season + UnitKeyword)
-vi.mock('@/hooks/useFilterI18nData', () => ({
+vi.mock('@/shared/filter/hooks/useFilterI18nData', () => ({
   useFilterI18nData: () => ({
     seasonsI18n: Object.fromEntries(SEASONS.map((s) => [String(s), `Season ${s}`])),
     unitKeywordsI18n: {},
@@ -44,14 +44,14 @@ vi.mock('@/hooks/useFilterI18nData', () => ({
 }))
 
 // Battle keyword dropdown data
-vi.mock('@/hooks/useKeywordListData', () => ({
+vi.mock('@/shared/gameText/hooks/useKeywordListData', () => ({
   useKeywordListSpec: () => ({}),
   useKeywordListI18n: () => ({}),
 }))
 
 // Viewport detection — default to desktop; mobile test overrides
 const isBreakpointMock = vi.fn<() => boolean>(() => true)
-vi.mock('@/hooks/use-is-breakpoint', () => ({
+vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: () => isBreakpointMock(),
 }))
 

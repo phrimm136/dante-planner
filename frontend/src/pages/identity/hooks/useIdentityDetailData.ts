@@ -1,44 +1,27 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { IdentityDataSchema, IdentityI18nSchema } from '../schemas/IdentitySchemas'
 
-// Query key factory for identity detail data
-export const identityDetailQueryKeys = {
-  all: () => ['identity'] as const,
-  detail: (id: string) => ['identity', id] as const,
-  i18n: (id: string, language: string) => ['identity', id, 'i18n', language] as const,
-}
+export const identityDetailQueryKeys = createEntityDetailQueryKeys('identity')
 
-// Identity data query options with runtime validation
 function createIdentityDataQueryOptions(id: string) {
-  return queryOptions({
-    queryKey: identityDetailQueryKeys.detail(id),
-    queryFn: async () => {
-      const module = await import(`@static/data/identity/${id}.json`)
-      const result = IdentityDataSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[identity / ${id}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    identityDetailQueryKeys.detail(id),
+    () => import(`@static/data/identity/${id}.json`),
+    IdentityDataSchema,
+    `identity / ${id}`,
+  )
 }
 
-// Identity i18n query options with runtime validation
 function createIdentityI18nQueryOptions(id: string, language: string) {
-  return queryOptions({
-    queryKey: identityDetailQueryKeys.i18n(id, language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/identity/${id}.json`)
-      const result = IdentityI18nSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[identity i18n / ${id} / ${language}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    identityDetailQueryKeys.i18n(id, language),
+    () => import(`@static/i18n/${language}/identity/${id}.json`),
+    IdentityI18nSchema,
+    `identity i18n / ${id} / ${language}`,
+  )
 }
 
 /**

@@ -17,7 +17,7 @@
  */
 
 import pako from 'pako'
-import { SINNERS, MAX_LEVEL } from '@/lib/constants'
+import { SINNERS, MAX_LEVEL } from '@/shared/gameData'
 import type { SinnerEquipment } from '../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
 

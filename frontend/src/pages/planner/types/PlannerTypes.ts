@@ -1,6 +1,6 @@
 import type { JSONContent } from '@tiptap/core'
 import type { z } from 'zod'
-import type { MDCategory, RRCategory, DungeonIdx, PlannerType } from '@/lib/constants'
+import type { MDCategory, RRCategory, DungeonIdx, PlannerType } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState } from './DeckTypes'
 
 /**

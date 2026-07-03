@@ -1,6 +1,6 @@
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import type { SortMode } from '@/components/common/Sorter'
-import { KEYWORD_ORDER } from '@/lib/constants'
+import type { SortMode } from '@/shared/filter'
+import { KEYWORD_ORDER } from '@/shared/gameData'
 
 /**
  * Get the category index for sorting

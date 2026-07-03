@@ -6,7 +6,7 @@ import { ThemePackViewer } from '../floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { cn } from '@/lib/utils'
 import type { ThemePackEntry } from '@/pages/themePack'
-import type { NoteContent } from '@/types/NoteEditorTypes'
+import type { NoteContent } from '@/shared/noteEditor'
 
 interface ThemePackTrackerCardProps {
   packId: string

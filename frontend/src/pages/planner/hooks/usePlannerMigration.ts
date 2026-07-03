@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth'
 import { usePlannerStorage } from './usePlannerStorage'
 import { plannerApi } from '../lib/plannerApi'
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 
 /**
  * SSR safety check

@@ -1,8 +1,8 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import type { MDVersion } from '@/lib/constants'
-import type { StartBuffDataList, StartBuffI18n, StartBuff } from '@/types/StartBuffTypes'
-import { BASE_BUFF_IDS } from '@/types/StartBuffTypes'
+import type { MDVersion } from '@/shared/gameData'
+import type { StartBuffDataList, StartBuffI18n, StartBuff } from '@/shared/gameText'
+import { BASE_BUFF_IDS } from '@/shared/gameText'
 
 // Query key factory for start buff data
 export const startBuffQueryKeys = {

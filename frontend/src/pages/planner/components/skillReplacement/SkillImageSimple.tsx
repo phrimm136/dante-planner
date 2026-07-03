@@ -4,8 +4,8 @@ import {
   getAttackTypeIconPath,
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
-} from '@/lib/assetPaths'
-import type { SkillAttributeType } from '@/lib/constants'
+} from '@/shared/assets'
+import type { SkillAttributeType } from '@/shared/gameData'
 
 interface SkillImageSimpleProps {
   skillImagePath: string

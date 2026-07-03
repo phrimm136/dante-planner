@@ -38,7 +38,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   }),
 }))
 
-vi.mock('@/hooks/useSearchMappings', () => ({
+vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: () => ({
     keywordToValue: new Map(),
   }),

@@ -9,6 +9,7 @@ export { PlannerSection } from './components/PlannerSection'
 // Hooks
 export { fetchPublishedPlanner, publishedPlannerQueryKeys } from './hooks/usePublishedPlannerQuery'
 export { usePlannerSaveAdapter } from './hooks/usePlannerSaveAdapter'
+export { useAppSse } from './hooks/useAppSse'
 export { plannerQueryKeys } from './hooks/usePlannerSync'
 export { userPlannersQueryKeys } from './hooks/useMDUserPlannersData'
 export { useMDGesellschaftData } from './hooks/useMDGesellschaftData'

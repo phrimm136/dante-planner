@@ -4,11 +4,13 @@ import { ThumbsUp, Eye, Bookmark, Star, Clock, MessageSquare } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { PLANNER_LIST, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { PLANNER_LIST, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
 
 import type { PublicPlanner } from '../../types/PlannerListTypes'
-import type { PlannerStatusBadge, MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
+import type { PlannerStatusBadge } from '@/lib/constants'
 
 interface PublishedPlannerCardProps {
   /** Planner data to display */

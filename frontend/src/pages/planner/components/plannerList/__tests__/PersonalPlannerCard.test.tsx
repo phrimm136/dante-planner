@@ -32,7 +32,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getKeywordIconPath: (keyword: string) => `/icons/${keyword}.webp`,
 }))
 

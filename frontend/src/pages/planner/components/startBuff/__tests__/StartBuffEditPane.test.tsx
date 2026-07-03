@@ -49,7 +49,7 @@ vi.mock('../../../hooks/useStartBuffSelection', () => ({
   }),
 }))
 
-vi.mock('@/hooks/useBattleKeywords', () => ({
+vi.mock('@/shared/gameText/hooks/useBattleKeywords', () => ({
   useBattleKeywords: () => ({ data: {} }),
 }))
 

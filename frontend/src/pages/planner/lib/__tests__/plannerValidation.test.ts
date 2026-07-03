@@ -20,7 +20,7 @@ import {
   validateNoteSizes,
 } from '../plannerValidation'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { calculateNoteByteLength } from '@/lib/noteUtils'
+import { calculateNoteByteLength } from '@/shared/noteEditor'
 import type { FloorValidationError, DifficultyValidationError } from '../plannerValidationErrors'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'

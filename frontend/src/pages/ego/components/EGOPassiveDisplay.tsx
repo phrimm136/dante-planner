@@ -1,4 +1,4 @@
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import type { EGOPassiveI18n } from '../types/EGOTypes'
 
 interface EGOPassiveDisplayProps {

@@ -4,8 +4,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { AccountDeleteSection } from '../AccountDeleteSection'
 import { AccountDeleteDialog } from '../AccountDeleteDialog'
 import { toast } from 'sonner'
-import type { User } from '@/schemas/AuthSchemas'
-import type { UserDeletionResponse } from '@/types/UserSettingsTypes'
+import type { User } from '@/shared/auth'
+import type { UserDeletionResponse } from '../../types/UserSettingsTypes'
 
 // Mock dependencies
 vi.mock('sonner', () => ({
@@ -19,14 +19,14 @@ const mockMutate = vi.fn()
 const mockSetQueryData = vi.fn()
 
 // Mock hooks
-vi.mock('@/hooks/useAuthQuery', () => ({
+vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: vi.fn(() => ({ data: null })),
   authQueryKeys: {
     me: 'auth-me',
   },
 }))
 
-vi.mock('@/hooks/useUserSettingsQuery', () => ({
+vi.mock('../../hooks/useUserSettingsQuery', () => ({
   useDeleteAccountMutation: vi.fn(() => ({
     mutate: mockMutate,
     isPending: false,
@@ -45,8 +45,8 @@ vi.mock('@tanstack/react-query', async () => {
   }
 })
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useDeleteAccountMutation } from '@/hooks/useUserSettingsQuery'
+import { useAuthQuery } from '@/shared/auth'
+import { useDeleteAccountMutation } from '../../hooks/useUserSettingsQuery'
 
 describe('AccountDeleteSection', () => {
   const mockUser: User = {

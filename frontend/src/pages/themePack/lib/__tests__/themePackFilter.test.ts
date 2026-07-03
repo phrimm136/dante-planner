@@ -4,7 +4,7 @@ import {
   matchesFloorFilter,
   matchesEgoGiftFilter,
 } from '../themePackFilter'
-import { DUNGEON_IDX } from '@/lib/constants'
+import { DUNGEON_IDX } from '@/shared/gameData'
 import type { ThemePackEntry } from '../../types/ThemePackTypes'
 
 function makeEntry(overrides: Partial<ThemePackEntry> = {}): ThemePackEntry {

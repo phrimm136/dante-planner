@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { AffinitySchema } from '@/schemas/SharedSchemas'
+import { AffinitySchema } from '@/shared/gameData'
+import { SkillDescEntrySchema } from '@/shared/gameData'
 
 /**
  * Identity Schemas
@@ -108,11 +109,8 @@ export const IdentityDataSchema = z.object({
  * Identity i18n schemas
  */
 
-// Skill description entry schema
-export const IdentitySkillDescEntrySchema = z.object({
-  desc: z.string().optional(),
-  coinDescs: z.array(z.string()).optional(),
-})
+// Skill description entry — inherits the shared base shape
+export const IdentitySkillDescEntrySchema = SkillDescEntrySchema
 
 // Skill i18n schema
 // `flavor` is a per-skill lore line (not per uptie) — raw game data ships the

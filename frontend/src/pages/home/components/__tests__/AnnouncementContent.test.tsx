@@ -10,11 +10,11 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: vi.fn() },
 }))
 
-vi.mock('@/hooks/useAnnouncementData', () => ({
+vi.mock('../../hooks/useAnnouncementData', () => ({
   useAnnouncementData: vi.fn(),
 }))
 
-import { useAnnouncementData } from '@/hooks/useAnnouncementData'
+import { useAnnouncementData } from '../../hooks/useAnnouncementData'
 
 const mockAnnouncements = [
   {

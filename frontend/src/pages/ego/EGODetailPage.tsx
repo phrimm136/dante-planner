@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   EGOHeader,
@@ -9,15 +9,16 @@ import {
   SkillsSectionI18n,
   PassiveCardWithSuspense,
 } from '@/pages/ego'
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { EntityMetaInfo } from '@/components/common/EntityMetaInfo'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
-import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
-import { DetailRightPanel } from '@/components/common/DetailRightPanel'
-import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { EntityMetaInfo } from '@/components/layout/EntityMetaInfo'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
+import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
+import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
+import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
 import { SkillTabButton } from '@/pages/identity'
 import { useEGODetailSpec } from '@/pages/ego'
-import { getEffectiveEgoPassives, getLockedEgoPassives } from '@/lib/egoPassiveSelection'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { getEffectiveEgoPassives, getLockedEgoPassives } from './lib/egoPassiveSelection'
 import type { Threadspin } from '@/pages/ego'
 
 type SkillType = 'awaken' | 'erosion'
@@ -30,20 +31,10 @@ function EGODetailContent() {
   const { t } = useTranslation(['database', 'common'])
   const [skillType, setSkillType] = useState<SkillType>('awaken')
 
-  // Progressive rendering: render sections one-by-one
+  // Progressive rendering: render sections one-by-one (start immediately)
   // Sections: 1=Skills, 2=Passives
-  const [visibleSections, setVisibleSections] = useState(0)
   const totalSections = 2
-
-  // Progressively show more sections (start immediately)
-  useEffect(() => {
-    if (visibleSections < totalSections) {
-      const rafId = requestAnimationFrame(() => {
-        setVisibleSections((prev) => prev + 1)
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [visibleSections])
+  const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
 
   // Route validation - id must be defined
   if (!id) {

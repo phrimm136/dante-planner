@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { MDVersion } from '@/lib/constants'
+import type { MDVersion } from '@/shared/gameData'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '../PlannerSection'
-import { StarlightCostDisplay } from '@/components/common/StarlightCostDisplay'
+import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
 
 interface StartBuffSectionProps {

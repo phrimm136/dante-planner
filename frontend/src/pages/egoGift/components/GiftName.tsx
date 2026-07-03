@@ -1,6 +1,6 @@
-import type { EGOGiftAttributeType } from "@/lib/constants"
+import type { EGOGiftAttributeType } from '@/shared/gameData'
 import { Skeleton } from "@/components/ui/skeleton"
-import { useColorCodes } from "@/hooks/useColorCodes"
+import { useColorCodes } from "@/shared/gameText"
 
 interface GiftNameProps {
   attributeType: EGOGiftAttributeType

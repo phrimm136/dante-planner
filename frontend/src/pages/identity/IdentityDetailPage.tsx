@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -16,13 +16,15 @@ import {
   TraitsDisplay,
   useIdentityDetailSpec,
 } from '@/pages/identity'
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { EntityMetaInfo } from '@/components/common/EntityMetaInfo'
-import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
-import { DetailRightPanel } from '@/components/common/DetailRightPanel'
-import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
-import { MAX_LEVEL, MAX_ENTITY_TIER, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { EntityMetaInfo } from '@/components/layout/EntityMetaInfo'
+import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
+import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
+import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { MAX_LEVEL, MAX_ENTITY_TIER } from '@/shared/gameData'
+import { PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { Uptie, IdentitySkillEntry } from '@/pages/identity'
 
@@ -46,20 +48,10 @@ function IdentityDetailContent() {
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
   const [level, setLevel] = useState<number>(MAX_LEVEL)
 
-  // Progressive rendering: render sections one-by-one
+  // Progressive rendering: render sections one-by-one (start immediately)
   // Sections: 1=Skills, 2=Passives, 3=Sanity
-  const [visibleSections, setVisibleSections] = useState(0)
   const totalSections = 3
-
-  // Progressively show more sections (start immediately)
-  useEffect(() => {
-    if (visibleSections < totalSections) {
-      const rafId = requestAnimationFrame(() => {
-        setVisibleSections((prev) => prev + 1)
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [visibleSections])
+  const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
 
   // Route validation - id must be defined
   if (!id) {

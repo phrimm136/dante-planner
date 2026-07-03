@@ -2,7 +2,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-// import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 import fs from 'fs'
@@ -77,10 +76,6 @@ export default defineConfig({
     serveWhitelistedStatic(),
     staticFile404Plugin(),
     hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
-    // tanstackRouter plugin disabled - using programmatic routing in lib/router.tsx instead
-    // tanstackRouter({
-    //   autoCodeSplitting: true,
-    // }),
     react({
       babel: {
         plugins: ['babel-plugin-react-compiler']
@@ -172,7 +167,6 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         'src/**/*.spec.{ts,tsx}',
         'src/main.tsx',
-        'src/routeTree.gen.ts',
         'src/**/*.d.ts',
       ],
     },

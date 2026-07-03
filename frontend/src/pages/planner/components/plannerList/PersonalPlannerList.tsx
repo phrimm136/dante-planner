@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react'
-
 import { useMDUserPlannersData } from '../../hooks/useMDUserPlannersData'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
-import { CARD_GRID, calculatePlannerPages } from '@/lib/constants'
+import { useUserSettingsQuery } from '@/pages/settings'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { CARD_GRID, PROGRESSIVE_REVEAL, calculatePlannerPages } from '@/lib/constants'
 
 import { PersonalPlannerCard } from './PersonalPlannerCard'
 import { PlannerListPagination } from './PlannerListPagination'
 import { PlannerEmptyState } from './PlannerEmptyState'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { BatchConflictDialog } from '../BatchConflictDialog'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { PlannerSummary } from '../../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
 
@@ -67,23 +66,13 @@ export function PersonalPlannerList({
   const { data: userSettings } = useUserSettingsQuery()
   const syncEnabled = userSettings?.syncEnabled
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when planners change
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [planners])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < planners.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, planners.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, planners.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: planners.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: planners,
+  })
 
   // Determine if any filters are active (for empty state messaging)
   const hasActiveFilters = !!category || !!search || !!(

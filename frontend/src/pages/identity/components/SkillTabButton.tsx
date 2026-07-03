@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
-import { getLockIconPath } from '@/lib/assetPaths'
-import { getAttributeColors } from '@/lib/colorUtils'
+import { getLockIconPath } from '@/shared/assets'
+import { getAttributeColors } from '@/shared/gameData'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface SkillTabButtonProps {

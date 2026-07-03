@@ -10,10 +10,11 @@ import {
   getButtonBasePath,
   getButtonSwapImagePath,
   getButtonExpandImagePath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SINNER_COLORS, type Sinner } from '@/lib/constants'
-import { getSinnerFromId, getDisplayFontForLanguage } from '@/lib/utils'
+import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 
 type ImageVariant = 'normal' | 'gacksung'
 

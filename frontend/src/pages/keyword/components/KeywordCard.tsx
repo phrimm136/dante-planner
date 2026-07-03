@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { getBattleKeywordIconPath } from '@/lib/assetPaths'
+import { getBattleKeywordIconPath } from '@/shared/assets'
 import { CARD_GRID } from '@/lib/constants'
 
 interface KeywordCardProps {

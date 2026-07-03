@@ -12,7 +12,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftDetailData', () => ({
 }))
 
 // Mock useColorCodes hook used by GiftName
-vi.mock('@/hooks/useColorCodes', () => ({
+vi.mock('@/shared/gameText/hooks/useColorCodes', () => ({
   useColorCodes: () => ({
     data: {
       WRATH: '#ff0000',

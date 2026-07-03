@@ -6,16 +6,17 @@
  * and note sizes. Mirrors backend PlannerContentValidator validation rules.
  */
 
-import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX, MAX_NOTE_BYTES } from '@/lib/constants'
-import { getBaseGiftId } from '@/lib/egoGiftEncoding'
-import { measureDocBytes } from '@/lib/noteUtils'
+import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX } from '@/shared/gameData'
+import { MAX_NOTE_BYTES } from '@/lib/constants'
+import { getBaseGiftId } from '@/pages/egoGift'
+import { measureDocBytes } from '@/shared/noteEditor'
 import { getUnaffordableGiftIds } from './plannerRules'
 import { toUserFriendlyError } from './plannerValidationErrors'
 import type { JSONContent } from '@tiptap/core'
 import type { MDPlannerContent } from '../types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type {
   PlannerValidationError,

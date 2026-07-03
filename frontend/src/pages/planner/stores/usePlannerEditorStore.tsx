@@ -8,16 +8,16 @@ import {
   MAX_LEVEL,
   DEFAULT_SKILL_EA,
   DUNGEON_IDX,
-} from '@/lib/constants'
-import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
+} from '@/shared/gameData'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
-import type { MDCategory, DungeonIdx } from '@/lib/constants'
+import type { MDCategory, DungeonIdx } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, DeckFilterState, ThreadspinTier } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { NoteContent } from '@/types/NoteEditorTypes'
+import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
 import type { PlannerState } from '../hooks/usePlannerSave'
 

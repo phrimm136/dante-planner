@@ -1,44 +1,27 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { EGOGiftDataSchema, EGOGiftI18nSchema } from '../schemas/EGOGiftSchemas'
 
-// Query key factory for EGO Gift detail data
-export const egoGiftDetailQueryKeys = {
-  all: () => ['egoGift'] as const,
-  detail: (id: string) => ['egoGift', id] as const,
-  i18n: (id: string, language: string) => ['egoGift', id, 'i18n', language] as const,
-}
+export const egoGiftDetailQueryKeys = createEntityDetailQueryKeys('egoGift')
 
-// EGO Gift data query options with runtime validation
 function createEGOGiftDataQueryOptions(id: string) {
-  return queryOptions({
-    queryKey: egoGiftDetailQueryKeys.detail(id),
-    queryFn: async () => {
-      const module = await import(`@static/data/egoGift/${id}.json`)
-      const result = EGOGiftDataSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[egoGift / ${id}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    egoGiftDetailQueryKeys.detail(id),
+    () => import(`@static/data/egoGift/${id}.json`),
+    EGOGiftDataSchema,
+    `egoGift / ${id}`,
+  )
 }
 
-// EGO Gift i18n query options with runtime validation
 function createEGOGiftI18nQueryOptions(id: string, language: string) {
-  return queryOptions({
-    queryKey: egoGiftDetailQueryKeys.i18n(id, language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/egoGift/${id}.json`)
-      const result = EGOGiftI18nSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[egoGift i18n / ${id} / ${language}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    egoGiftDetailQueryKeys.i18n(id, language),
+    () => import(`@static/i18n/${language}/egoGift/${id}.json`),
+    EGOGiftI18nSchema,
+    `egoGift i18n / ${id} / ${language}`,
+  )
 }
 
 /**

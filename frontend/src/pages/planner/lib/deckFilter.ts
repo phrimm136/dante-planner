@@ -10,9 +10,9 @@
 import type { DeckFilterState, EntityMode } from '../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
-import type { SearchMappings } from '@/hooks/useSearchMappings'
-import type { Keyword } from '@/lib/constants'
-import { getSinnerFromId } from '@/lib/utils'
+import type { SearchMappings } from '@/shared/filter'
+import type { Keyword } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
 
 type DeckFilterItem = IdentityListItem | EGOListItem
 

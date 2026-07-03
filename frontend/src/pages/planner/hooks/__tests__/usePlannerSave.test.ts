@@ -59,7 +59,7 @@ vi.mock('../usePlannerSyncAdapter', () => ({
 }))
 
 const mockUseAuthQuery = vi.fn()
-vi.mock('@/hooks/useAuthQuery', () => ({
+vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: () => mockUseAuthQuery(),
 }))
 

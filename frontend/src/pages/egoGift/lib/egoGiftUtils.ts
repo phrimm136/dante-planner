@@ -1,4 +1,4 @@
-import { EGO_GIFT_ENHANCEMENT_BASE_COSTS, ENHANCEMENT_LEVELS } from '@/lib/constants'
+import { EGO_GIFT_ENHANCEMENT_BASE_COSTS, ENHANCEMENT_LEVELS } from '@/shared/gameData'
 
 /**
  * Calculate enhancement cost for a given tier and level

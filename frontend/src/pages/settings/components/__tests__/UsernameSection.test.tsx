@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { User } from '@/schemas/AuthSchemas'
+import type { User } from '@/shared/auth'
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -64,11 +64,11 @@ const mockUser: User = {
 const mockMutate = vi.fn()
 
 // Mock hooks
-vi.mock('@/hooks/useAuthQuery', () => ({
+vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: vi.fn(() => ({ data: null })),
 }))
 
-vi.mock('@/hooks/useUserSettingsQuery', () => ({
+vi.mock('../../hooks/useUserSettingsQuery', () => ({
   useEpithetsQuery: vi.fn(() => ({
     epithets: mockEpithets,
   })),
@@ -78,8 +78,8 @@ vi.mock('@/hooks/useUserSettingsQuery', () => ({
   })),
 }))
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useEpithetsQuery, useUpdateEpithetMutation } from '@/hooks/useUserSettingsQuery'
+import { useAuthQuery } from '@/shared/auth'
+import { useEpithetsQuery, useUpdateEpithetMutation } from '../../hooks/useUserSettingsQuery'
 import { UsernameSection } from '../UsernameSection'
 
 describe('UsernameSection', () => {

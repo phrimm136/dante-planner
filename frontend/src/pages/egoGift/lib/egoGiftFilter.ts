@@ -5,8 +5,8 @@
  * Extracted from EGOGiftList for testability.
  */
 
-import type { EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
-import { EGO_GIFT_TIERS, EGO_GIFT_TIER_TAGS } from '@/lib/constants'
+import type { EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
+import { EGO_GIFT_TIERS, EGO_GIFT_TIER_TAGS } from '@/shared/gameData'
 
 /** Map tier tag (TIER_1) to display tier (I) */
 const TIER_TAG_TO_DISPLAY: Record<string, EGOGiftTier> = Object.fromEntries(

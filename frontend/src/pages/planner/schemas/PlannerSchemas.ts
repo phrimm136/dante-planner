@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, RR_CATEGORIES, PLANNER_TYPES } from '@/lib/constants'
-import type { DungeonIdx } from '@/lib/constants'
-import { JSONContentSchema } from '@/schemas/NoteEditorSchemas'
+import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, RR_CATEGORIES, PLANNER_TYPES } from '@/shared/gameData'
+import type { DungeonIdx } from '@/shared/gameData'
+import { JSONContentSchema } from '@/shared/noteEditor'
 import type { SerializableFloorSelection, SaveablePlanner, MDPlannerContent, RRPlannerContent } from '../types/PlannerTypes'
 import { EgoTypeSchema } from '@/pages/ego'
 

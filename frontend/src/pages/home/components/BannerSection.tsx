@@ -15,9 +15,9 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { getBannerImagePath } from '@/lib/assetPaths'
+import { getBannerImagePath } from '@/shared/assets'
 import { BANNER_CAROUSEL_INTERVAL } from '@/lib/constants'
-import { useFilterI18nData } from '@/hooks/useFilterI18nData'
+import { useFilterI18nData } from '@/shared/filter'
 
 // ============================================================================
 // Constants

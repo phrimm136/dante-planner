@@ -1,14 +1,16 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { IdentityListItem } from '../types/IdentityTypes'
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useIdentityListI18nDeferred } from '../hooks/useIdentityListData'
-import { CARD_GRID, type Season, type SkillAttributeType, type AtkType, type DefType } from '@/lib/constants'
-import { sortByReleaseDate } from '@/lib/entitySort'
-import { getSinnerFromId } from '@/lib/utils'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { type Season, type SkillAttributeType, type AtkType, type DefType } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { sortByReleaseDate } from '@/shared/filter'
+import { getSinnerFromId } from '@/shared/gameData'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { IdentityCardLink } from './IdentityCardLink'
 
 interface IdentityListProps {
@@ -67,23 +69,13 @@ export function IdentityList({
     [identities]
   )
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when identities change (new data loaded)
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [sortedIdentities])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < sortedIdentities.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, sortedIdentities.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, sortedIdentities.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: sortedIdentities.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: sortedIdentities,
+  })
 
   // Create Set of visible identity IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation

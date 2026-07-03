@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { ColoredText } from '@/components/common/ColoredText'
+import { ColoredText } from '@/shared/gameText'
 import { CantSelectCondition } from './CantSelectCondition'
 import { AFFINITY_COLORS, formatAdderInfo } from '../lib/abEventTextResolver'
 import type { CoinTossI18nContext } from '../lib/abEventTextResolver'

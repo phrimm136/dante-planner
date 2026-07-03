@@ -5,7 +5,7 @@ import {
   getSlashResistIconPath,
   getPierceResistIconPath,
   getBluntResistIconPath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 
 interface ResistancePanelProps {
   slash: number

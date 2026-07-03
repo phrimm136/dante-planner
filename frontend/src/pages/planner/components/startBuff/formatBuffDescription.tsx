@@ -1,7 +1,7 @@
-import type { BuffEffect, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
-import { getKeywordName } from '@/hooks/useBattleKeywords'
+import type { BuffEffect, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
+import { getKeywordName } from '@/shared/gameText'
 
-import { parseColorTags } from '@/components/common/ColoredText'
+import { parseColorTags } from '@/shared/gameText'
 
 /**
  * Replaces placeholders in text with effect values

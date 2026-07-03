@@ -9,8 +9,8 @@ import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { ThemePackCard } from '@/pages/themePack'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftName } from '@/pages/egoGift'
@@ -19,15 +19,15 @@ import { useThemePackDetailData } from '@/pages/themePack'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListData } from '@/pages/abEvent'
-import { getFeaturedBossImagePath } from '@/lib/assetPaths'
+import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
   DUNGEON_IDX,
   DIFFICULTY_COLORS,
   DIFFICULTY_LABELS,
   DUNGEON_FIXED_FLOOR_RANGE,
   THEME_PACK_FLOOR_LABELS,
-} from '@/lib/constants'
-import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/lib/constants'
+} from '@/shared/gameData'
+import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameData'
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 

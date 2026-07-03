@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { useAnnouncementData } from '@/hooks/useAnnouncementData'
+import { useAnnouncementData } from '../hooks/useAnnouncementData'
 import { AnnouncementSection } from './AnnouncementSection'
 import { AnnouncementDialog } from './AnnouncementDialog'
 

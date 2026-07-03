@@ -3,15 +3,15 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffMiniCard } from '../StartBuffMiniCard'
 
 // Mock asset path functions
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getStartBuffIconPath: (baseId: number, _version: number) => `/mock/icon/${baseId}.webp`,
   getStartBuffMiniPath: (version: number) => `/mock/startBuffMini-${version}.webp`,
   getStartBuffMiniHighlightPath: (version: number) => `/mock/startBuffMiniHighlight-${version}.webp`,
 }))
 
 // Mock constants
-vi.mock('@/lib/constants', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/lib/constants')>()),
+vi.mock('@/shared/gameData', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/gameData')>()),
   MD_ACCENT_COLORS: { 6: '#00ffcc', 7: '#b00000' },
 }))
 

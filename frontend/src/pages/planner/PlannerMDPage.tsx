@@ -31,8 +31,8 @@ import { PersonalPlannerList } from './components/plannerList/PersonalPlannerLis
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
-import { LoadingState } from '@/components/common/LoadingState'
-import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
+import { LoadingState } from '@/components/feedback/LoadingState'
+import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 
 // ============================================================================
 // Page Content Component

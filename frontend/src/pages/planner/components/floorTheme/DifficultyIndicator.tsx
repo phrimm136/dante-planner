@@ -1,4 +1,4 @@
-import { DIFFICULTY_LABELS, DIFFICULTY_COLORS, type DifficultyLabel } from '@/lib/constants'
+import { DIFFICULTY_LABELS, DIFFICULTY_COLORS, type DifficultyLabel } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 
 interface DifficultyIndicatorProps {

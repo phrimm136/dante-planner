@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { AtkType, DefType, Season, SkillAttributeType } from '@/lib/constants'
+import type { AtkType, DefType, Season, SkillAttributeType } from '@/shared/gameData'
 import type {
   IdentityHpDataSchema,
   IdentityResistInfoSchema,
@@ -67,10 +67,7 @@ export interface Identity {
   season: Season
 }
 
-/**
- * Uptie level type - 1 through 4
- */
-export type Uptie = 1 | 2 | 3 | 4
+export type { Uptie } from '@/shared/gameData'
 
 export type IdentityHpData = z.infer<typeof IdentityHpDataSchema>
 export type IdentityResistInfo = z.infer<typeof IdentityResistInfoSchema>

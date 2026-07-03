@@ -14,8 +14,8 @@
  * - Parsed: { baseName: "OnWinDuelAsParryingCountMultiplyAndPlusPercent", args: [10, 20] }
  */
 
-import type { SanityConditionI18n } from '@/schemas/SanityConditionSchemas'
-import type { SanityConditionType } from '@/lib/constants'
+import type { SanityConditionI18n } from '@/shared/gameText'
+import type { SanityConditionType } from '@/shared/gameData'
 
 /**
  * Result of parsing a sanity condition function name

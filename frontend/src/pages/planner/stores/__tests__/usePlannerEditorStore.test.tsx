@@ -15,8 +15,8 @@ import {
   createDefaultFloorSelections,
   createDefaultDeckFilterState,
 } from '../usePlannerEditorStore'
-import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
-import { DUNGEON_IDX } from '@/lib/constants'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
+import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 

@@ -8,10 +8,10 @@
  */
 
 import { Suspense } from 'react'
-import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/lib/assetPaths'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
+import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/assets'
+import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/lib/constants'
+import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/shared/gameData'
 
 interface AllEnhancementsPanelProps {
   /** Maximum enhancement level to display (0, 1, or 2) */

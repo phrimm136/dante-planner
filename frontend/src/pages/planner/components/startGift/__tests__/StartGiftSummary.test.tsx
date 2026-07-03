@@ -87,7 +87,7 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
 }))
 
 // Mock assetPaths
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getKeywordIconPath: (keyword: string) => `/icons/${keyword}.webp`,
 }))
 

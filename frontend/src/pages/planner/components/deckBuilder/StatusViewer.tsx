@@ -1,6 +1,6 @@
 import React, { useMemo, memo } from 'react'
-import { AFFINITIES, STATUS_EFFECTS } from '@/lib/constants'
-import { getAffinityIconPath, getBattleKeywordIconPath } from '@/lib/assetPaths'
+import { AFFINITIES, STATUS_EFFECTS } from '@/shared/gameData'
+import { getAffinityIconPath, getBattleKeywordIconPath } from '@/shared/assets'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
 import type { DeckState, AffinityCount, KeywordCount } from '../../types/DeckTypes'

@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth'
 import { UsernameSection } from './components/UsernameSection'
 import { SyncSection } from './components/SyncSection'
 import { PlannerExportImportSection } from '@/pages/planner'

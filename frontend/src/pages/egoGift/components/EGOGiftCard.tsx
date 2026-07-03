@@ -1,5 +1,5 @@
 import { Suspense, memo } from 'react'
-import { getEGOGiftIconPath, getEGOGiftOnHoverPath, getEGOGiftSelectHighlightPath } from '@/lib/assetPaths'
+import { getEGOGiftIconPath, getEGOGiftOnHoverPath, getEGOGiftSelectHighlightPath } from '@/shared/assets'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
