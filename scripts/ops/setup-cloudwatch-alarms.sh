@@ -179,7 +179,26 @@ setup_metric_filter() {
             metricName=HTTP5xxCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
         --region "$AWS_REGION"
 
-    log_info "Metric filter created for HTTP 5xx errors"
+    # RequestCount — every access-logged request (JSON lines carry $.status).
+    # Backs the traffic-drop alarm and the request-rate-vs-memory overlay.
+    aws logs put-metric-filter \
+        --log-group-name "$LOG_GROUP" \
+        --filter-name "RequestCount" \
+        --filter-pattern '{ $.status = * }' \
+        --metric-transformations \
+            metricName=RequestCount,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
+        --region "$AWS_REGION"
+
+    # HTTP429Count — rate-limit rejections (bucket4j). Backs the 429-spike alarm.
+    aws logs put-metric-filter \
+        --log-group-name "$LOG_GROUP" \
+        --filter-name "HTTP429Errors" \
+        --filter-pattern '{ $.status = 429 }' \
+        --metric-transformations \
+            metricName=HTTP429Count,metricNamespace=$NAMESPACE,metricValue=1,defaultValue=0 \
+        --region "$AWS_REGION"
+
+    log_info "Metric filters created: HTTP5xxCount, RequestCount, HTTP429Count"
 }
 
 # Create metric filters for ERROR and WARN events from JSON backend logs.
@@ -261,7 +280,7 @@ create_alarms() {
     log_info "Creating High CPU alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HighCPU" \
-        --alarm-description "CPU usage exceeds ${CPU_THRESHOLD}% for 5 minutes" \
+        --alarm-description "CPU > ${CPU_THRESHOLD}% for 5 min. Check per-process CPU (java/mysqld) and Request Rate for a traffic spike or runaway loop. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "cpu_usage_user" \
         --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=cpu,Value=cpu-total \
@@ -276,10 +295,12 @@ create_alarms() {
         --region "$AWS_REGION"
 
     # Alarm 2: Low Memory
+    # 3-of-3 (15 min sustained) to stop threshold flapping — mem_available oscillates
+    # right at the 200 MiB line, so a 1-of-1 evaluation pages every few minutes.
     log_info "Creating Low Memory alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-LowMemory" \
-        --alarm-description "Available memory below 200MB" \
+        --alarm-description "mem_available < 200 MiB sustained 15 min (3x5m). Likely the traffic-correlated JVM off-heap growth — check Per-Process RSS + JVM Heap panels and correlate with Request Rate. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "mem_available" \
         --dimensions Name=InstanceId,Value="$INSTANCE_ID" \
@@ -287,7 +308,8 @@ create_alarms() {
         --period 300 \
         --threshold "$MEM_THRESHOLD" \
         --comparison-operator LessThanThreshold \
-        --evaluation-periods 1 \
+        --evaluation-periods 3 \
+        --datapoints-to-alarm 3 \
         --alarm-actions "$TOPIC_ARN" \
         --ok-actions "$TOPIC_ARN" \
         --treat-missing-data breaching \
@@ -297,7 +319,7 @@ create_alarms() {
     log_info "Creating High Disk Usage alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HighDisk" \
-        --alarm-description "Disk usage exceeds ${DISK_THRESHOLD}%" \
+        --alarm-description "Disk > ${DISK_THRESHOLD}%. Likely log/table growth (MySQL slow_log TABLE, mysql-data volume) - check the disk trend and prune if needed. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "disk_used_percent" \
         --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=path,Value="/" Name=fstype,Value="xfs" \
@@ -315,7 +337,7 @@ create_alarms() {
     log_info "Creating High Network In alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HighNetworkIn" \
-        --alarm-description "Inbound bytes exceed ${NET_IN_THRESHOLD}B over 5 minutes" \
+        --alarm-description "Inbound > ${NET_IN_THRESHOLD}B over 5 min - possible scraping or brute-force against the API. Check Request Rate + HTTP Status Distribution. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "net_bytes_recv" \
         --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=interface,Value=ens5 \
@@ -333,7 +355,7 @@ create_alarms() {
     log_info "Creating High Network Out alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HighNetworkOut" \
-        --alarm-description "Outbound bytes exceed ${NET_OUT_THRESHOLD}B over 5 minutes" \
+        --alarm-description "Outbound > ${NET_OUT_THRESHOLD}B over 5 min - possible data exfiltration or runaway response sizes. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "net_bytes_sent" \
         --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=interface,Value=ens5 \
@@ -352,7 +374,7 @@ create_alarms() {
     log_info "Creating High Disk IO Write alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HighDiskIOWrite" \
-        --alarm-description "Disk write bytes exceed ${DISKIO_WRITE_THRESHOLD}B over 5 minutes" \
+        --alarm-description "Disk writes > ${DISKIO_WRITE_THRESHOLD}B over 5 min - possible log flooding or runaway DB writes. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "diskio_write_bytes" \
         --dimensions Name=InstanceId,Value="$INSTANCE_ID" Name=name,Value=nvme0n1 \
@@ -370,7 +392,7 @@ create_alarms() {
     log_info "Creating HTTP 5xx alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-HTTP5xx" \
-        --alarm-description "More than ${HTTP5XX_THRESHOLD} HTTP 5xx errors in 5 minutes" \
+        --alarm-description "More than ${HTTP5XX_THRESHOLD} HTTP 5xx in 5 min. Check Recent Backend Errors + Slowest Endpoints. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "HTTP5xxCount" \
         --statistic Sum \
@@ -387,7 +409,7 @@ create_alarms() {
     log_info "Creating backend error alarm (immediate)..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-BackendErrors" \
-        --alarm-description "Any backend application ERROR event" \
+        --alarm-description "A backend ERROR was logged. See the Recent Backend Errors panel - logger_name pinpoints the source class. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "BackendErrorCount" \
         --statistic Sum \
@@ -406,7 +428,7 @@ create_alarms() {
     log_info "Creating successive backend warnings alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-BackendWarnings" \
-        --alarm-description "Backend WARN events in 3 of the last 5 one-minute periods" \
+        --alarm-description "Backend WARNs in 3 of the last 5 minutes. Check the Recent Backend Errors panel. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "BackendWarnCount" \
         --statistic Sum \
@@ -426,7 +448,7 @@ create_alarms() {
     log_info "Creating backend silence alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-BackendSilence" \
-        --alarm-description "No backend log events for 5 minutes — possible crash or CW Agent failure" \
+        --alarm-description "No backend logs for 5 min - app crash or CW Agent failure (backend runs restart:'no', so a crash is a hard-down). Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "BackendLogCount" \
         --statistic Sum \
@@ -444,7 +466,7 @@ create_alarms() {
     log_info "Creating MySQL backup silence alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-MysqlBackupSilence" \
-        --alarm-description "No successful MySQL backup in the last 24 hours" \
+        --alarm-description "No successful MySQL backup in 24h - the daily S3 dump cron failed or did not run. Check the /danteplanner/backup log group. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "BackupSuccess" \
         --dimensions Name=Job,Value=MysqlDump \
@@ -462,7 +484,7 @@ create_alarms() {
     log_info "Creating CloudWatch export silence alarm..."
     aws cloudwatch put-metric-alarm \
         --alarm-name "DantePlanner-CwExportSilence" \
-        --alarm-description "No successful CloudWatch log export in the last 24 hours" \
+        --alarm-description "No successful CloudWatch to S3 log export in 24h - check the export cron (exec-bit fixed; verify IAM/S3 next run). Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
         --namespace "$NAMESPACE" \
         --metric-name "BackupSuccess" \
         --dimensions Name=Job,Value=CwLogExport \
@@ -475,6 +497,65 @@ create_alarms() {
         --ok-actions "$TOPIC_ARN" \
         --treat-missing-data breaching \
         --region "$AWS_REGION"
+
+    # Alarm 13: HTTP 429 spike — bucket4j rate limiting may be blocking legitimate users.
+    log_info "Creating HTTP 429 spike alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-HTTP429" \
+        --alarm-description "More than 20 HTTP 429s in 5 min — bucket4j rate limiting may be blocking legitimate users (watch the SSE reconnect-on-refresh case). Check HTTP Status Distribution panel. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
+        --namespace "$NAMESPACE" \
+        --metric-name "HTTP429Count" \
+        --statistic Sum \
+        --period 300 \
+        --threshold 20 \
+        --comparison-operator GreaterThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data notBreaching \
+        --region "$AWS_REGION"
+
+    # Alarm 14: Traffic drop — fewer than 1 request in 5 min for 2 periods. This app has
+    # 24/7 global traffic, so a sustained zero means an outage. Complements BackendSilence.
+    log_info "Creating traffic-drop alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-TrafficDrop" \
+        --alarm-description "Fewer than 1 request in 5 min for 2 consecutive periods — probable outage or upstream/DNS break. Complements BackendSilence. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
+        --namespace "$NAMESPACE" \
+        --metric-name "RequestCount" \
+        --statistic Sum \
+        --period 300 \
+        --threshold 1 \
+        --comparison-operator LessThanThreshold \
+        --evaluation-periods 2 \
+        --datapoints-to-alarm 2 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data breaching \
+        --region "$AWS_REGION"
+
+    # Alarm 15: Cloudflare IP Update Silence — daily SG allowlist refresh heartbeat.
+    # breaching = a missing/failed run fires, matching the other cron-silence alarms.
+    log_info "Creating Cloudflare IP update silence alarm..."
+    aws cloudwatch put-metric-alarm \
+        --alarm-name "DantePlanner-CloudflareIpSilence" \
+        --alarm-description "No successful Cloudflare IP allowlist update in the last 24 hours — the security-group ingress rules may be stale, so origin access could break or over-expose. Dashboard: https://$AWS_REGION.console.aws.amazon.com/cloudwatch/home?region=$AWS_REGION#dashboards:name=DantePlanner" \
+        --namespace "$NAMESPACE" \
+        --metric-name "BackupSuccess" \
+        --dimensions Name=Job,Value=CloudflareIpUpdate \
+        --statistic Sum \
+        --period 86400 \
+        --threshold 1 \
+        --comparison-operator LessThanThreshold \
+        --evaluation-periods 1 \
+        --alarm-actions "$TOPIC_ARN" \
+        --ok-actions "$TOPIC_ARN" \
+        --treat-missing-data breaching \
+        --region "$AWS_REGION"
+
+    # Alarms 16-17 (JVM heap > 90% of max, HikariCP pending sustained) land with the
+    # backend Prometheus scrape — their metric names are fixed by the scrape's EMF config.
+    # Added there so they aren't created in INSUFFICIENT_DATA against non-existent metrics.
 
     log_info "All alarms created successfully"
 }
@@ -522,11 +603,14 @@ setup_s3_logging() {
     log_info "S3 access logging enabled"
 }
 
-# Create CloudWatch Dashboard with metric and log insights widgets
-# Layout (24-col grid):
-#   Row 1 (y=0, h=6): CPU & Memory (w=12) | Error & Warning Rates (w=12)
-#   Row 2 (y=6, h=4): Alarm Status bar     (w=24)
-#   Row 3 (y=10,h=12): Log Insights — recent ERROR/WARN entries (w=24)
+# Create CloudWatch Dashboard, organized by concern (24-col grid).
+# Sections are text-widget headers; SEARCH expressions auto-populate widgets for
+# collectors that deploy later (procstat) without needing a dashboard edit.
+#   System / Host        : CPU/disk/net, memory-vs-alarm, per-process RSS & threads
+#   Latency / API        : per-endpoint p50/p90/p99 (nginx logs), HTTP 5xx
+#   Database             : mysqld memory (procstat), query-stats/pool placeholders
+#   Spring / Application : error+warn rates, JVM threads, recent error log
+#   Alarms               : alarm status strip
 setup_dashboard() {
     log_info "Creating CloudWatch dashboard: DantePlanner"
 
@@ -540,36 +624,95 @@ setup_dashboard() {
 {
   "widgets": [
     {
+      "type": "text",
+      "x": 0, "y": 0, "width": 24, "height": 1,
+      "properties": { "markdown": "# System / Host — CPU, memory, disk, network, per-process" }
+    },
+    {
       "type": "metric",
-      "x": 0, "y": 0, "width": 12, "height": 6,
+      "x": 0, "y": 1, "width": 12, "height": 6,
       "properties": {
-        "title": "System Resources",
+        "title": "CPU / Disk / Network",
         "metrics": [
-          ["$NAMESPACE", "cpu_usage_user",    "InstanceId", "$INSTANCE_ID", "cpu", "cpu-total",                    { "label": "CPU %",  "yAxis": "left",  "stat": "Average" }],
-          ["$NAMESPACE", "mem_used_percent",  "InstanceId", "$INSTANCE_ID",                                         { "label": "Mem %",  "yAxis": "left",  "stat": "Average" }],
-          ["$NAMESPACE", "disk_used_percent", "InstanceId", "$INSTANCE_ID", "path", "/", "fstype", "xfs",           { "label": "Disk %", "yAxis": "left",  "stat": "Average" }],
-          ["$NAMESPACE", "net_bytes_recv",    "InstanceId", "$INSTANCE_ID", "interface", "ens5",                    { "label": "Net In (B/5m)",  "yAxis": "right", "stat": "Sum" }],
-          ["$NAMESPACE", "net_bytes_sent",    "InstanceId", "$INSTANCE_ID", "interface", "ens5",                    { "label": "Net Out (B/5m)", "yAxis": "right", "stat": "Sum" }],
-          ["$NAMESPACE", "diskio_write_bytes","InstanceId", "$INSTANCE_ID", "name", "nvme0n1",                      { "label": "Disk Write (B/5m)", "yAxis": "right", "stat": "Sum" }]
+          ["$NAMESPACE", "cpu_usage_user",    "InstanceId", "$INSTANCE_ID", "cpu", "cpu-total",          { "label": "CPU %",  "yAxis": "left",  "stat": "Average" }],
+          ["$NAMESPACE", "disk_used_percent", "InstanceId", "$INSTANCE_ID", "path", "/", "fstype", "xfs", { "label": "Disk %", "yAxis": "left",  "stat": "Average" }],
+          ["$NAMESPACE", "net_bytes_recv",    "InstanceId", "$INSTANCE_ID", "interface", "ens5",          { "label": "Net In (B/5m)",  "yAxis": "right", "stat": "Sum" }],
+          ["$NAMESPACE", "net_bytes_sent",    "InstanceId", "$INSTANCE_ID", "interface", "ens5",          { "label": "Net Out (B/5m)", "yAxis": "right", "stat": "Sum" }]
         ],
         "period": 300,
         "region": "$AWS_REGION",
         "view": "timeSeries",
         "yAxis": {
           "left":  { "min": 0, "max": 100, "label": "Percent" },
-          "right": { "min": 0, "label": "Bytes" }
+          "right": { "min": 0, "label": "Bytes/5m" }
         }
       }
     },
     {
       "type": "metric",
-      "x": 12, "y": 0, "width": 12, "height": 6,
+      "x": 12, "y": 1, "width": 12, "height": 6,
       "properties": {
-        "title": "Error & Warning Rates",
+        "title": "Memory Available vs Low-Memory Alarm",
         "metrics": [
-          ["$NAMESPACE", "BackendErrorCount", { "color": "#d62728", "label": "Errors" }],
-          ["$NAMESPACE", "BackendWarnCount",  { "color": "#ff7f0e", "label": "Warnings" }],
-          ["$NAMESPACE", "HTTP5xxCount",      { "color": "#9467bd", "label": "HTTP 5xx" }]
+          ["$NAMESPACE", "mem_available", "InstanceId", "$INSTANCE_ID", { "label": "Available", "stat": "Minimum", "color": "#1f77b4" }]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Bytes" } },
+        "annotations": { "horizontal": [ { "label": "LowMemory alarm (200 MiB)", "value": 209715200, "color": "#d62728" } ] }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 7, "width": 12, "height": 6,
+      "properties": {
+        "title": "Per-Process Memory (RSS)",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"procstat_memory_rss\"', 'Average')", "label": "", "id": "rss" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Bytes" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 7, "width": 12, "height": 6,
+      "properties": {
+        "title": "Per-Process Threads",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"procstat_num_threads\"', 'Average')", "label": "", "id": "thr" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Threads" } }
+      }
+    },
+    {
+      "type": "text",
+      "x": 0, "y": 13, "width": 24, "height": 1,
+      "properties": { "markdown": "# Latency / API — response times, throughput, HTTP status" }
+    },
+    {
+      "type": "log",
+      "x": 0, "y": 14, "width": 16, "height": 7,
+      "properties": {
+        "title": "Slowest Endpoints — p50 / p90 / p99 (nginx request_time)",
+        "query": "SOURCE '/ecs/danteplanner/nginx' | filter ispresent(request_time) | stats pct(request_time, 50) as p50, pct(request_time, 90) as p90, pct(request_time, 99) as p99, count(*) as reqs by uri | sort p99 desc | limit 20",
+        "region": "$AWS_REGION",
+        "view": "table"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16, "y": 14, "width": 8, "height": 7,
+      "properties": {
+        "title": "HTTP 5xx Rate",
+        "metrics": [
+          ["$NAMESPACE", "HTTP5xxCount", { "color": "#9467bd", "label": "HTTP 5xx" }]
         ],
         "period": 60,
         "stat": "Sum",
@@ -579,8 +722,156 @@ setup_dashboard() {
       }
     },
     {
+      "type": "log",
+      "x": 0, "y": 21, "width": 12, "height": 6,
+      "properties": {
+        "title": "Request Rate (req / min)",
+        "query": "SOURCE '/ecs/danteplanner/nginx' | stats count(*) as requests by bin(1m)",
+        "region": "$AWS_REGION",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "log",
+      "x": 12, "y": 21, "width": 12, "height": 6,
+      "properties": {
+        "title": "HTTP Status Distribution",
+        "query": "SOURCE '/ecs/danteplanner/nginx' | stats count(*) as n by bin(5m), status",
+        "region": "$AWS_REGION",
+        "view": "timeSeries"
+      }
+    },
+    {
+      "type": "text",
+      "x": 0, "y": 27, "width": 24, "height": 1,
+      "properties": { "markdown": "# Database — MySQL memory, connection pool & query performance" }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 28, "width": 12, "height": 6,
+      "properties": {
+        "title": "MySQL Process Memory (RSS)",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"procstat_memory_rss\" exe=\"mysqld\"', 'Average')", "label": "mysqld", "id": "dbrss" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Bytes" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 28, "width": 12, "height": 6,
+      "properties": {
+        "title": "Connection Pool (HikariCP)",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"hikaricp_connections_active\"', 'Average')", "label": "active", "id": "pa" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"hikaricp_connections_pending\"', 'Average')", "label": "pending", "id": "pp" } ]
+        ],
+        "period": 60,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Connections" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 34, "width": 24, "height": 6,
+      "properties": {
+        "title": "Query Latency by Statement (perf_schema digests)",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_query_latency_avg_ms\"', 'Average')", "label": "", "id": "ql" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "ms" } }
+      }
+    },
+    {
+      "type": "text",
+      "x": 0, "y": 40, "width": 24, "height": 1,
+      "properties": { "markdown": "# Spring / Application — errors, JVM, throughput" }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 41, "width": 12, "height": 6,
+      "properties": {
+        "title": "Error & Warning Rates",
+        "metrics": [
+          ["$NAMESPACE", "BackendErrorCount", { "color": "#d62728", "label": "Errors" }],
+          ["$NAMESPACE", "BackendWarnCount",  { "color": "#ff7f0e", "label": "Warnings" }]
+        ],
+        "period": 60,
+        "stat": "Sum",
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0 } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 41, "width": 12, "height": 6,
+      "properties": {
+        "title": "JVM Heap Memory (used / committed / max)",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_used\" area=\"heap\"', 'Average')", "label": "used", "id": "hu" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_committed\" area=\"heap\"', 'Average')", "label": "committed", "id": "hc" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_max\" area=\"heap\"', 'Average')", "label": "max", "id": "hm" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Bytes" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 47, "width": 12, "height": 6,
+      "properties": {
+        "title": "JVM GC Pause",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_gc_pause\"', 'Average')", "label": "", "id": "gc" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Seconds" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 47, "width": 12, "height": 6,
+      "properties": {
+        "title": "Backend JVM Threads",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"procstat_num_threads\" exe=\"java\"', 'Average')", "label": "java", "id": "jvmthr" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Threads" } }
+      }
+    },
+    {
+      "type": "log",
+      "x": 0, "y": 53, "width": 24, "height": 8,
+      "properties": {
+        "title": "Recent Backend Errors & Warnings",
+        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, logger_name, message, method, path, userId, thread_name | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
+        "region": "$AWS_REGION",
+        "view": "table"
+      }
+    },
+    {
+      "type": "text",
+      "x": 0, "y": 61, "width": 24, "height": 1,
+      "properties": { "markdown": "# Alarms" }
+    },
+    {
       "type": "alarm",
-      "x": 0, "y": 6, "width": 24, "height": 4,
+      "x": 0, "y": 62, "width": 24, "height": 4,
       "properties": {
         "title": "Alarm Status",
         "alarms": [
@@ -593,18 +884,11 @@ setup_dashboard() {
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HTTP5xx",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendErrors",
           "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendWarnings",
-          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendSilence"
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-BackendSilence",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-HTTP429",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-TrafficDrop",
+          "arn:aws:cloudwatch:$AWS_REGION:$ACCOUNT_ID:alarm:DantePlanner-CloudflareIpSilence"
         ]
-      }
-    },
-    {
-      "type": "log",
-      "x": 0, "y": 10, "width": 24, "height": 12,
-      "properties": {
-        "title": "Recent Backend Errors & Warnings",
-        "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, message, userId, method, path | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
-        "region": "$AWS_REGION",
-        "view": "table"
       }
     }
   ]
