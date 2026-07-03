@@ -2,11 +2,12 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '@/hooks/useUserSettings'
-import { requestNotificationPermission } from '@/lib/browserNotification'
+import { useAuthQuery } from '@/shared/auth'
+import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
+import { useNotificationPermission } from '@/shared/notifications'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
@@ -18,6 +19,7 @@ function NotificationSectionContent() {
   const { data: user } = useAuthQuery()
   const { data: settings, isLoading } = useUserSettingsQuery()
   const updateSettings = useUpdateUserSettingsMutation()
+  const { state: permissionState, request: requestPermission } = useNotificationPermission()
 
   // Unauthenticated state - don't render
   if (!user) {
@@ -29,6 +31,14 @@ function NotificationSectionContent() {
     return <NotificationSectionSkeleton />
   }
 
+  const anyNotificationEnabled =
+    settings.notifyComments || settings.notifyRecommendations || settings.notifyNewPublications
+  // A pref is on but the browser hasn't granted OS delivery — desktop notifications
+  // silently won't fire. 'default' is fixable here with a click; 'denied' can only
+  // be re-allowed in the browser's own site settings.
+  const showPermissionNotice =
+    anyNotificationEnabled && (permissionState === 'default' || permissionState === 'denied')
+
   // Generic handler for notification toggles
   const handleToggle = (
     key: 'notifyComments' | 'notifyRecommendations' | 'notifyNewPublications',
@@ -36,7 +46,7 @@ function NotificationSectionContent() {
   ) => {
     // Request browser notification permission when enabling any notification
     if (checked) {
-      void requestNotificationPermission()
+      requestPermission()
     }
 
     updateSettings.mutate(
@@ -55,6 +65,32 @@ function NotificationSectionContent() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">{t('settings.notifications.title', 'Notifications')}</h2>
+
+      {showPermissionNotice && (
+        <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/50 px-3 py-2">
+          <p className="text-sm text-muted-foreground">
+            {permissionState === 'denied'
+              ? t(
+                  'settings.notifications.permission.deniedMessage',
+                  "Your browser has blocked notifications for this site. Re-allow them in your browser's site settings to receive desktop alerts."
+                )
+              : t(
+                  'settings.notifications.permission.defaultMessage',
+                  'Browser notifications are not enabled. Alerts show only in-app while a tab is open.'
+                )}
+          </p>
+          {permissionState === 'default' && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={requestPermission}
+            >
+              {t('settings.notifications.permission.enable', 'Enable browser notifications')}
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="space-y-4">
         {/* Comments notification */}
