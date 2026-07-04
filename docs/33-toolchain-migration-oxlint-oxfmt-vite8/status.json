@@ -1,9 +1,9 @@
 {
   "totalPhases": 4,
-  "currentPhase": 1,
+  "currentPhase": 2,
   "phases": [
-    { "name": "Oxlint adoption (type-aware)", "status": "done" },
-    { "name": "Oxfmt one-shot reformat", "status": "pending" },
+    { "name": "Oxlint adoption (type-aware)", "status": "done", "commit": "b42a6742" },
+    { "name": "Oxfmt one-shot reformat", "status": "done" },
     { "name": "Vite 7 to 8 (Rolldown) — entry-gated", "status": "pending" },
     { "name": "vp migrate — conditional on Phase 3", "status": "pending" }
   ]

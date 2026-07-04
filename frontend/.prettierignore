@@ -1,0 +1,15 @@
+# The asset-hash Vite plugin regex-matches single-line resolveAsset(...) calls;
+# formatter line-wrapping breaks build-time transformation (INV3a). Keep hand-formatted.
+src/shared/assets/assetPaths.ts
+
+# Stylesheets: oxfmt reformatting (e.g. wrapping CSS unicode-range) changes minified
+# output bytes with no house-style benefit, and touches vendored font CSS. Out of scope
+# for the JS/TS reformat (INV3a byte-parity).
+*.css
+*.scss
+
+# JSX significant-whitespace: wrapping `{t(...)}: {expr}` forces the space into a `{' '}`
+# child, which renders identically but compiles to a different React children array —
+# byte-changing though behavior-neutral. Kept hand-formatted to preserve INV3a byte-parity.
+src/pages/planner/components/BatchConflictDialog.tsx
+src/pages/settings/components/UsernameSection.tsx

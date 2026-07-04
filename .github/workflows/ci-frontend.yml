@@ -50,6 +50,10 @@ jobs:
         working-directory: ./frontend
         run: yarn lint
 
+      - name: FE Format Check
+        working-directory: ./frontend
+        run: yarn fmt:check
+
   build-frontend:
     needs: [checkout, test-frontend]
     runs-on: ubuntu-latest
