@@ -21,12 +21,13 @@ export function IdentitySearchDropdown({
   const { t } = useTranslation(['database', 'sinnerNames'])
   const { spec, i18n: identityNames } = useListData()
 
-  const options = useMemo(() =>
-    buildSinnerSuffixedOptions(Object.keys(spec), identityNames, (id) => {
-      const sinnerKey = getSinnerFromId(id)
-      return t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
-    }),
-    [spec, identityNames, t]
+  const options = useMemo(
+    () =>
+      buildSinnerSuffixedOptions(Object.keys(spec), identityNames, (id) => {
+        const sinnerKey = getSinnerFromId(id)
+        return t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
+      }),
+    [spec, identityNames, t],
   )
 
   return (

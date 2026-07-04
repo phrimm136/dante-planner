@@ -42,7 +42,7 @@ function NotificationSectionContent() {
   // Generic handler for notification toggles
   const handleToggle = (
     key: 'notifyComments' | 'notifyRecommendations' | 'notifyNewPublications',
-    checked: boolean
+    checked: boolean,
   ) => {
     // Request browser notification permission when enabling any notification
     if (checked) {
@@ -56,15 +56,19 @@ function NotificationSectionContent() {
           toast.success(t('settings.notifications.updateSuccess', 'Notification setting updated'))
         },
         onError: () => {
-          toast.error(t('settings.notifications.updateError', 'Failed to update notification setting'))
+          toast.error(
+            t('settings.notifications.updateError', 'Failed to update notification setting'),
+          )
         },
-      }
+      },
     )
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">{t('settings.notifications.title', 'Notifications')}</h2>
+      <h2 className="text-lg font-semibold">
+        {t('settings.notifications.title', 'Notifications')}
+      </h2>
 
       {showPermissionNotice && (
         <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/50 px-3 py-2">
@@ -72,20 +76,15 @@ function NotificationSectionContent() {
             {permissionState === 'denied'
               ? t(
                   'settings.notifications.permission.deniedMessage',
-                  "Your browser has blocked notifications for this site. Re-allow them in your browser's site settings to receive desktop alerts."
+                  "Your browser has blocked notifications for this site. Re-allow them in your browser's site settings to receive desktop alerts.",
                 )
               : t(
                   'settings.notifications.permission.defaultMessage',
-                  'Browser notifications are not enabled. Alerts show only in-app while a tab is open.'
+                  'Browser notifications are not enabled. Alerts show only in-app while a tab is open.',
                 )}
           </p>
           {permissionState === 'default' && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="shrink-0"
-              onClick={requestPermission}
-            >
+            <Button variant="outline" size="sm" className="shrink-0" onClick={requestPermission}>
               {t('settings.notifications.permission.enable', 'Enable browser notifications')}
             </Button>
           )}
@@ -100,7 +99,10 @@ function NotificationSectionContent() {
               {t('settings.notifications.comments.label', 'Comments')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              {t('settings.notifications.comments.description', 'Notify when someone comments on your planner')}
+              {t(
+                'settings.notifications.comments.description',
+                'Notify when someone comments on your planner',
+              )}
             </p>
           </div>
           <Switch
@@ -118,7 +120,10 @@ function NotificationSectionContent() {
               {t('settings.notifications.recommendations.label', 'Recommendations')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              {t('settings.notifications.recommendations.description', 'Notify when your planner reaches recommended status')}
+              {t(
+                'settings.notifications.recommendations.description',
+                'Notify when your planner reaches recommended status',
+              )}
             </p>
           </div>
           <Switch
@@ -136,7 +141,10 @@ function NotificationSectionContent() {
               {t('settings.notifications.newPublications.label', 'New Publications')}
             </Label>
             <p className="text-sm text-muted-foreground">
-              {t('settings.notifications.newPublications.description', 'Notify when someone publishes a new planner')}
+              {t(
+                'settings.notifications.newPublications.description',
+                'Notify when someone publishes a new planner',
+              )}
             </p>
           </div>
           <Switch

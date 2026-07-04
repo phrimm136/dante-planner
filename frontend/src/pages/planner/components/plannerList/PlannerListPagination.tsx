@@ -110,7 +110,9 @@ export function PlannerListPagination({
         {/* Previous button */}
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => { if (hasPrevious) onPageChange(currentPage - 1) }}
+            onClick={() => {
+              if (hasPrevious) onPageChange(currentPage - 1)
+            }}
             aria-disabled={!hasPrevious}
             className={!hasPrevious ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
           />
@@ -123,7 +125,9 @@ export function PlannerListPagination({
               <PaginationEllipsis />
             ) : (
               <PaginationLink
-                onClick={() => { onPageChange(page) }}
+                onClick={() => {
+                  onPageChange(page)
+                }}
                 isActive={page === currentPage}
                 className="cursor-pointer"
               >
@@ -136,7 +140,9 @@ export function PlannerListPagination({
         {/* Next button */}
         <PaginationItem>
           <PaginationNext
-            onClick={() => { if (hasNext) onPageChange(currentPage + 1) }}
+            onClick={() => {
+              if (hasNext) onPageChange(currentPage + 1)
+            }}
             aria-disabled={!hasNext}
             className={!hasNext ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
           />

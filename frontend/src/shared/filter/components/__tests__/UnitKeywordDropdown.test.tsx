@@ -20,16 +20,12 @@ vi.mock('react-i18next', async (importOriginal) => {
 vi.mock('@/shared/filter/hooks/useFilterI18nData', () => ({
   useFilterI18nData: () => ({
     seasonsI18n: {},
-    unitKeywordsI18n: Object.fromEntries(
-      ASSOCIATIONS.map((a) => [a, `Label_${a}`])
-    ),
+    unitKeywordsI18n: Object.fromEntries(ASSOCIATIONS.map((a) => [a, `Label_${a}`])),
   }),
 }))
 
 // Sorted by label to match SearchableMultiSelect's localeCompare sort
-const sorted = [...ASSOCIATIONS].sort((a, b) =>
-  `Label_${a}`.localeCompare(`Label_${b}`)
-)
+const sorted = [...ASSOCIATIONS].sort((a, b) => `Label_${a}`.localeCompare(`Label_${b}`))
 
 describe('UnitKeywordDropdown', () => {
   const defaultProps = {
@@ -47,12 +43,7 @@ describe('UnitKeywordDropdown', () => {
   it('shows selected count when unit keywords are active', () => {
     const selected = new Set([sorted[0], sorted[1]])
 
-    render(
-      <UnitKeywordDropdown
-        {...defaultProps}
-        selectedUnitKeywords={selected}
-      />
-    )
+    render(<UnitKeywordDropdown {...defaultProps} selectedUnitKeywords={selected} />)
 
     expect(screen.getByText('(2)')).toBeInTheDocument()
   })
@@ -69,8 +60,12 @@ describe('UnitKeywordDropdown', () => {
 
     await user.click(screen.getByRole('combobox'))
 
-    expect(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) })).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) }),
+    ).toBeInTheDocument()
   })
 
   it('calls onSelectionChange with added keyword on click', async () => {
@@ -81,7 +76,7 @@ describe('UnitKeywordDropdown', () => {
       <UnitKeywordDropdown
         selectedUnitKeywords={new Set<string>()}
         onSelectionChange={onSelectionChange}
-      />
+      />,
     )
 
     await user.click(screen.getByRole('combobox'))
@@ -99,7 +94,7 @@ describe('UnitKeywordDropdown', () => {
       <UnitKeywordDropdown
         selectedUnitKeywords={new Set([firstAssoc])}
         onSelectionChange={onSelectionChange}
-      />
+      />,
     )
 
     await user.click(screen.getByRole('combobox'))
@@ -115,7 +110,9 @@ describe('UnitKeywordDropdown', () => {
     await user.click(screen.getByRole('combobox'))
     await user.click(screen.getByRole('option', { name: new RegExp(`Label_${sorted[0]}`) }))
 
-    expect(screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) })).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: new RegExp(`Label_${sorted[1]}`) }),
+    ).toBeInTheDocument()
   })
 
   it('displays element counts when provided', async () => {

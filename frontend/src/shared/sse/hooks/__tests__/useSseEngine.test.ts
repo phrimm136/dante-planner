@@ -34,7 +34,9 @@ class MockEventSource {
     this.onerror?.()
   }
   emit(type: string, data: unknown) {
-    ;(this.listeners[type] ?? []).forEach((cb) => cb({ data: JSON.stringify(data) } as MessageEvent))
+    ;(this.listeners[type] ?? []).forEach((cb) =>
+      cb({ data: JSON.stringify(data) } as MessageEvent),
+    )
   }
 }
 
@@ -87,7 +89,9 @@ describe('useSseEngine — gating', () => {
 
   it('disconnects and marks disconnected when the gate flips to false', async () => {
     const config = makeConfig()
-    const { rerender } = renderHook((p: SseEngineConfig) => useSseEngine(p), { initialProps: config })
+    const { rerender } = renderHook((p: SseEngineConfig) => useSseEngine(p), {
+      initialProps: config,
+    })
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     const es = last()
     act(() => es.fireOpen())

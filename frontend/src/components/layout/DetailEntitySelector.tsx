@@ -77,7 +77,7 @@ export function DetailEntitySelector({
     <div
       className={cn(
         'bg-background/95 backdrop-blur-sm border rounded-lg p-4',
-        sticky && 'sticky top-0 z-10'
+        sticky && 'sticky top-0 z-10',
       )}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
@@ -102,7 +102,7 @@ export function DetailEntitySelector({
                   onClick={() => onTierChange(t)}
                   className={cn(
                     'selectable w-10 h-10 rounded flex items-center justify-center translation-250ms',
-                    !isSelected && 'opacity-60 hover:opacity-100'
+                    !isSelected && 'opacity-60 hover:opacity-100',
                   )}
                   data-selected={isSelected}
                   aria-label={`Tier ${t}`}
@@ -124,9 +124,7 @@ export function DetailEntitySelector({
             className="flex items-center gap-3 flex-1"
             style={{ fontFamily: getDisplayFontForNumeric() }}
           >
-            <span className="text-[26px] -translate-y-1">
-              {`Lv. ${inputValue}`}
-            </span>
+            <span className="text-[26px] -translate-y-1">{`Lv. ${inputValue}`}</span>
             <div className="flex-1 max-w-[200px]">
               <Slider
                 value={[level]}

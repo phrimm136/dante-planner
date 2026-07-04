@@ -29,7 +29,7 @@ import { PROGRESSIVE_REVEAL } from '@/lib/constants'
  */
 export function useProgressiveReveal(
   sectionCount: number,
-  staggerDelay: number = PROGRESSIVE_REVEAL.STAGGER_DELAY
+  staggerDelay: number = PROGRESSIVE_REVEAL.STAGGER_DELAY,
 ): boolean[] {
   const [revealedCount, setRevealedCount] = useState(1) // Start with first section visible
 

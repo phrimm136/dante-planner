@@ -78,7 +78,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -103,7 +103,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -126,7 +126,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Error boundary should catch the error and show fallback
@@ -149,7 +149,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -189,7 +189,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -240,7 +240,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -267,7 +267,7 @@ describe('CommunityPlansSection', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <CommunityPlansSection />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {

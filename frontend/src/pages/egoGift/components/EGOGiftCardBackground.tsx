@@ -23,7 +23,7 @@ export function EGOGiftCardBackground({ enhancement, size }: EGOGiftCardBackgrou
         src={enhancement === 2 ? getEGOGiftEnhanced2BackgroundPath() : getEGOGiftBackgroundPath()}
         alt=""
         className="absolute inset-0 w-full h-full object-contain"
-        loading="lazy" 
+        loading="lazy"
       />
 
       {/* Enhanced overlay - bgEnhanced.webp for enhancement 1 and 2 */}

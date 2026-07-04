@@ -35,13 +35,13 @@ export function SeasonDropdown({
         label: seasonsI18n[`${season}`] || `Season ${season}`,
         count: counts?.[String(season)],
       })),
-    [seasonsI18n, counts]
+    [seasonsI18n, counts],
   )
 
   // Bridge string Set <-> Season Set
   const selectedStrings = useMemo(
     () => new Set(Array.from(selectedSeasons).map(String)),
-    [selectedSeasons]
+    [selectedSeasons],
   )
 
   const handleChange = (values: Set<string>) => {

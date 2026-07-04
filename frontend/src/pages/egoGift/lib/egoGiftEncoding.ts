@@ -157,7 +157,9 @@ export function getCascadeIngredients(recipe: EGOGiftRecipe | undefined): number
   // Standard recipe: union all materials across all recipe options
   if ('materials' in recipe) {
     const uniqueIds = new Set<number>()
-    recipe.materials.forEach((option: number[]) => option.forEach((id: number) => uniqueIds.add(id)))
+    recipe.materials.forEach((option: number[]) =>
+      option.forEach((id: number) => uniqueIds.add(id)),
+    )
     return Array.from(uniqueIds)
   }
 

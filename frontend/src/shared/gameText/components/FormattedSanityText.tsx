@@ -35,7 +35,7 @@ function parseSegments(text: string): TextSegment[] {
     if (sizeMatch) {
       // Recursively parse content inside size tag
       const innerSegments = parseSegments(sizeMatch[1])
-      innerSegments.forEach(seg => {
+      innerSegments.forEach((seg) => {
         segments.push({ ...seg, type: seg.type === 'text' ? 'size' : seg.type })
       })
       remaining = remaining.slice(sizeMatch[0].length)

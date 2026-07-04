@@ -35,7 +35,8 @@ export function StartGiftSummary({
   // Store state (safe - returns undefined if outside context)
   const storeSelectedKeyword = usePlannerEditorStoreSafe((s) => s.selectedGiftKeyword)
   const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.selectedGiftIds)
-  const selectedKeyword = selectedKeywordOverride !== undefined ? selectedKeywordOverride : storeSelectedKeyword!
+  const selectedKeyword =
+    selectedKeywordOverride !== undefined ? selectedKeywordOverride : storeSelectedKeyword!
   const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
@@ -71,16 +72,18 @@ export function StartGiftSummary({
       <button
         type="button"
         onClick={onClick}
-        className={cn(
-          'w-full text-left',
-          !readOnly && 'selectable cursor-pointer'
-        )}
+        className={cn('w-full text-left', !readOnly && 'selectable cursor-pointer')}
       >
         {hasKeywordSelected ? (
           /* Selected state: keyword icon + gift cards (if any) + EA counter */
           <div className="flex items-center gap-4 p-2 min-h-28">
             {/* Keyword icon */}
-            <ScaledCardWrapper mobileScale={mobileScale} cardWidth={CARD_GRID.WIDTH.KEYWORD_ICON} cardHeight={CARD_GRID.HEIGHT.KEYWORD_ICON} className="shrink-0">
+            <ScaledCardWrapper
+              mobileScale={mobileScale}
+              cardWidth={CARD_GRID.WIDTH.KEYWORD_ICON}
+              cardHeight={CARD_GRID.HEIGHT.KEYWORD_ICON}
+              className="shrink-0"
+            >
               <div className="w-16 h-16 flex items-center justify-center">
                 <img
                   src={getKeywordIconPath(selectedKeyword)}

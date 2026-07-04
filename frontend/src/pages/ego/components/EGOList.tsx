@@ -76,7 +76,7 @@ export function EGOList({
       // Keyword filter - EGO must have ALL selected keywords
       if (selectedKeywords.size > 0) {
         const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-          ego.skillKeywordList.includes(selectedKeyword)
+          ego.skillKeywordList.includes(selectedKeyword),
         )
         if (!hasAllKeywords) continue
       }
@@ -84,7 +84,7 @@ export function EGOList({
       // Battle keyword filter - OR logic (EGO must have ANY selected battle keyword)
       if (selectedBattleKeywords.size > 0) {
         const hasAnyBattleKeyword = (ego.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword)
+          selectedBattleKeywords.has(keyword),
         )
         if (!hasAnyBattleKeyword) continue
       }
@@ -92,7 +92,7 @@ export function EGOList({
       // Skill attribute filter - AND logic (EGO must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
         const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-          ego.attributeTypes.includes(attr)
+          ego.attributeTypes.includes(attr),
         )
         if (!hasAllAttributes) continue
       }
@@ -100,7 +100,7 @@ export function EGOList({
       // Attack type filter - AND logic (EGO must have ALL selected attack types)
       if (selectedAtkTypes.size > 0) {
         const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-          ego.atkTypes.includes(atkType)
+          ego.atkTypes.includes(atkType),
         )
         if (!hasAllAtkTypes) continue
       }
@@ -126,7 +126,9 @@ export function EGOList({
         // Check keyword match (partial match on natural language, then lookup bracketed values)
         const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bracketedValue) => ego.skillKeywordList.includes(bracketedValue))
+            return bracketedValues.some((bracketedValue) =>
+              ego.skillKeywordList.includes(bracketedValue),
+            )
           }
           return false
         })
@@ -139,14 +141,24 @@ export function EGOList({
     }
 
     return ids
-  }, [sortedEGOs, selectedSinners, selectedKeywords, selectedBattleKeywords, selectedAttributes, selectedAtkTypes, selectedEGOTypes, selectedSeasons, searchQuery, keywordToValue, egoNames])
+  }, [
+    sortedEGOs,
+    selectedSinners,
+    selectedKeywords,
+    selectedBattleKeywords,
+    selectedAttributes,
+    selectedAtkTypes,
+    selectedEGOTypes,
+    selectedSeasons,
+    searchQuery,
+    keywordToValue,
+    egoNames,
+  ])
 
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('ego.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('ego.emptyState')}</div>
       </div>
     )
   }

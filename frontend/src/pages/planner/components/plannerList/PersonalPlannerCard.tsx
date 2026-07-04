@@ -36,16 +36,22 @@ interface PersonalPlannerCardProps {
  * 5. Guest or sync OFF + draft → draft (Circle outline)
  * 6. Guest or sync OFF + saved → saved (Circle filled)
  */
-export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: PersonalPlannerCardProps) {
+export function PersonalPlannerCard({
+  planner,
+  isAuthenticated,
+  syncEnabled,
+}: PersonalPlannerCardProps) {
   const { t } = useTranslation(['planner', 'common'])
   const search = useSearch({ strict: false })
 
-  const categoryBgColor = planner.category in MD_CATEGORY_COLORS
-    ? MD_CATEGORY_COLORS[planner.category as MDCategory]
-    : undefined
-  const categoryTextColor = planner.category in MD_CATEGORY_TEXT_COLORS
-    ? MD_CATEGORY_TEXT_COLORS[planner.category as MDCategory]
-    : undefined
+  const categoryBgColor =
+    planner.category in MD_CATEGORY_COLORS
+      ? MD_CATEGORY_COLORS[planner.category as MDCategory]
+      : undefined
+  const categoryTextColor =
+    planner.category in MD_CATEGORY_TEXT_COLORS
+      ? MD_CATEGORY_TEXT_COLORS[planner.category as MDCategory]
+      : undefined
 
   // Keywords display (max 3 icons + overflow indicator)
   const keywords = planner.selectedKeywords ?? []
@@ -53,7 +59,14 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
   const hasMoreKeywords = keywords.length > PLANNER_LIST.MAX_KEYWORDS_DISPLAY
 
   // Determine status (priority-based cascade)
-  let status: 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges' | null = null
+  let status:
+    | 'draft'
+    | 'saved'
+    | 'unsynced'
+    | 'synced'
+    | 'published'
+    | 'unpublishedChanges'
+    | null = null
 
   if (planner.published === true) {
     if (planner.status === 'draft') {
@@ -82,12 +95,7 @@ export function PersonalPlannerCard({ planner, isAuthenticated, syncEnabled }: P
   }
 
   return (
-    <Link
-      to="/planner/md/$id"
-      params={{ id: planner.id }}
-      search={search}
-      className="block"
-    >
+    <Link to="/planner/md/$id" params={{ id: planner.id }} search={search} className="block">
       <div className="bg-card border border-border rounded-lg p-4 h-full hover:border-primary/50 transition-colors cursor-pointer">
         {/* Top row: Floor badge + keywords (left), indicator (right) */}
         <div className="flex items-center justify-between gap-2 mb-2">

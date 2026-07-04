@@ -112,7 +112,10 @@ export function StyledNameSkeleton({ attributeType }: { attributeType?: string }
             backgroundImage: generateStripeGradient(primary),
           }}
         >
-          <Skeleton className="h-5 w-20" style={{ marginRight: '3em', backgroundColor: TEXT_COLOR }} />
+          <Skeleton
+            className="h-5 w-20"
+            style={{ marginRight: '3em', backgroundColor: TEXT_COLOR }}
+          />
         </div>
       </div>
     </div>

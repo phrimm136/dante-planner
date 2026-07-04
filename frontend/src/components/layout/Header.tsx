@@ -36,7 +36,7 @@ function UnreadBadge() {
       className={cn(
         'absolute -top-1 -right-1 flex items-center justify-center',
         'min-w-5 h-5 px-1 rounded-full',
-        'bg-destructive text-destructive-foreground text-xs font-medium'
+        'bg-destructive text-destructive-foreground text-xs font-medium',
       )}
     >
       {unreadCount > 99 ? '99+' : unreadCount}
@@ -79,9 +79,7 @@ function AuthSection() {
         <DropdownMenuContent align="end" className="w-56">
           {!user ? (
             <>
-              <div className="px-2 py-1.5 text-sm font-semibold">
-                {t('header.auth.welcome')}
-              </div>
+              <div className="px-2 py-1.5 text-sm font-semibold">{t('header.auth.welcome')}</div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/settings" className="cursor-pointer flex items-center gap-2">
@@ -197,11 +195,7 @@ export function Header() {
             to="/"
             className="flex rounded-lg pr-2 items-center gap-2 no-underline group hover:bg-accent transition-colors"
           >
-            <img
-              src={getLogoPath()}
-              alt={t('limbusCompany')}
-              className="h-8 w-8"
-            />
+            <img src={getLogoPath()} alt={t('limbusCompany')} className="h-8 w-8" />
             <span
               className="text-[22px] text-foreground tracking-tight transition-colors"
               style={{ fontFamily: displayFont }}
@@ -219,31 +213,16 @@ export function Header() {
           {/* Language Selector Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={t('header.settings.language')}
-              >
+              <Button variant="ghost" size="icon" aria-label={t('header.settings.language')}>
                 <Languages />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuRadioGroup
-                value={i18n.language}
-                onValueChange={changeLanguage}
-              >
-                <DropdownMenuRadioItem value="EN">
-                  English
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="JP">
-                  日本語
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="KR">
-                  한국어
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="CN">
-                  中文
-                </DropdownMenuRadioItem>
+              <DropdownMenuRadioGroup value={i18n.language} onValueChange={changeLanguage}>
+                <DropdownMenuRadioItem value="EN">English</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="JP">日本語</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="KR">한국어</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="CN">中文</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>

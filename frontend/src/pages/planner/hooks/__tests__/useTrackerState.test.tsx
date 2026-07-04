@@ -10,7 +10,9 @@ const defaultInitialDeployment: number[] = []
 describe('useTrackerState', () => {
   describe('Initial State', () => {
     it('initializes with default skill EA values (3/2/1)', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       // Hook uses numeric string keys ("1", "2", etc.)
       expect(result.current.state.currentSkillCounts['1']).toEqual({
@@ -22,19 +24,25 @@ describe('useTrackerState', () => {
 
     it('initializes with provided deployment order', () => {
       const initialDeployment = [0, 1, 2]
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, initialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, initialDeployment),
+      )
 
       expect(result.current.state.deploymentOrder).toEqual([0, 1, 2])
     })
 
     it('initializes with empty done marks', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       expect(result.current.state.doneMarks).toEqual({})
     })
 
     it('initializes skill counts for all 12 sinners', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       // Hook uses numeric string keys ("1" through "12")
       for (let i = 1; i <= SINNERS.length; i++) {
@@ -45,7 +53,9 @@ describe('useTrackerState', () => {
 
   describe('Deployment Order', () => {
     it('updates deployment order', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
       const newOrder = [0, 1, 2]
 
       act(() => {
@@ -56,7 +66,9 @@ describe('useTrackerState', () => {
     })
 
     it('preserves deployment order across multiple updates', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.setDeploymentOrder([0, 1])
@@ -72,7 +84,9 @@ describe('useTrackerState', () => {
 
   describe('Current Skill Counts', () => {
     it('updates a single skill count', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.updateCurrentSkillCount('1', 0, 5)
@@ -82,7 +96,9 @@ describe('useTrackerState', () => {
     })
 
     it('preserves other skill counts when updating one', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.updateCurrentSkillCount('1', 0, 5)
@@ -93,7 +109,9 @@ describe('useTrackerState', () => {
     })
 
     it('updates skill counts for different sinners independently', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.updateCurrentSkillCount('1', 0, 5)
@@ -105,7 +123,9 @@ describe('useTrackerState', () => {
     })
 
     it('allows skill count to be set to 0', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.updateCurrentSkillCount('1', 0, 0)
@@ -119,7 +139,9 @@ describe('useTrackerState', () => {
     const packGifts = ['gift1', 'gift2', 'gift3']
 
     it('adds a done mark for a theme pack and syncs gifts', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.togglePackDone(0, 'themePack1', packGifts)
@@ -130,7 +152,9 @@ describe('useTrackerState', () => {
     })
 
     it('removes a done mark when toggled again and removes gifts', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.togglePackDone(0, 'themePack1', packGifts)
@@ -145,7 +169,9 @@ describe('useTrackerState', () => {
     })
 
     it('handles multiple done marks on same floor', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.togglePackDone(0, 'themePack1', ['giftA'])
@@ -157,7 +183,9 @@ describe('useTrackerState', () => {
     })
 
     it('handles done marks on different floors independently', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.togglePackDone(0, 'themePack1', ['giftA'])
@@ -170,7 +198,9 @@ describe('useTrackerState', () => {
     })
 
     it('does not affect pack mark when individual gift is toggled', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.togglePackDone(0, 'themePack1', packGifts)
@@ -217,7 +247,9 @@ describe('useTrackerState', () => {
 
   describe('State Preservation', () => {
     it('preserves state across re-renders', () => {
-      const { result, rerender } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result, rerender } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.setDeploymentOrder([0, 1])
@@ -229,7 +261,9 @@ describe('useTrackerState', () => {
     })
 
     it('preserves multiple state updates', () => {
-      const { result } = renderHook(() => useTrackerState(defaultInitialEquipment, defaultInitialDeployment))
+      const { result } = renderHook(() =>
+        useTrackerState(defaultInitialEquipment, defaultInitialDeployment),
+      )
 
       act(() => {
         result.current.setDeploymentOrder([0])

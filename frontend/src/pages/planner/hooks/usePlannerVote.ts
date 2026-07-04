@@ -84,20 +84,17 @@ export function usePlannerVote() {
     },
     onSuccess: (response, { plannerId }) => {
       // Optimistically update cache with response data
-      queryClient.setQueryData(
-        publishedPlannerQueryKeys.detail(plannerId),
-        (old: any) => {
-          if (!old?.apiData) return old
-          return {
-            ...old,
-            apiData: {
-              ...old.apiData,
-              upvotes: response.upvoteCount,
-              hasUpvoted: response.hasUpvoted,
-            },
-          }
+      queryClient.setQueryData(publishedPlannerQueryKeys.detail(plannerId), (old: any) => {
+        if (!old?.apiData) return old
+        return {
+          ...old,
+          apiData: {
+            ...old.apiData,
+            upvotes: response.upvoteCount,
+            hasUpvoted: response.hasUpvoted,
+          },
         }
-      )
+      })
 
       // Also invalidate list queries to refresh cards
       void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })

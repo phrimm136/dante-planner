@@ -23,10 +23,7 @@ export function DifficultyIndicator({ difficulty, className }: DifficultyIndicat
 
   return (
     <div className={cn('flex justify-center', className)}>
-      <span
-        className="text-sm font-semibold tracking-wide"
-        style={{ color }}
-      >
+      <span className="text-sm font-semibold tracking-wide" style={{ color }}>
         {difficulty}
       </span>
     </div>
@@ -41,7 +38,7 @@ export function DifficultyIndicator({ difficulty, className }: DifficultyIndicat
  */
 export function getFloorDifficultyLabel(
   floorNumber: number,
-  baseDifficulty: 'NORMAL' | 'HARD'
+  baseDifficulty: 'NORMAL' | 'HARD',
 ): DifficultyLabel {
   if (floorNumber >= 11) {
     return DIFFICULTY_LABELS.EXTREME_MIRROR

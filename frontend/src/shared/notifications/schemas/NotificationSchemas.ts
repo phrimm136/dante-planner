@@ -31,55 +31,61 @@ export const NotificationTypeSchema = z.enum([
  * Single notification response schema
  * Matches backend NotificationResponse DTO
  */
-export const NotificationResponseSchema = z.object({
-  /** Public UUID identifier */
-  id: z.string().uuid(),
-  /** Related content ID (planner UUID or comment ID) */
-  contentId: z.string(),
-  /** Type of notification */
-  notificationType: NotificationTypeSchema,
-  /** Whether notification has been read */
-  read: z.boolean(),
-  /** ISO 8601 timestamp when notification was created */
-  createdAt: z.string(),
-  /** ISO 8601 timestamp when notification was read (null if unread) */
-  readAt: z.string().nullable(),
-  // Rich content fields for display and navigation
-  /** Planner UUID for navigation */
-  plannerId: z.string().uuid().nullable(),
-  /** Planner title for display */
-  plannerTitle: z.string().nullable(),
-  /** Comment content snippet for preview */
-  commentSnippet: z.string().nullable(),
-  /** Comment public UUID for anchor link */
-  commentPublicId: z.string().uuid().nullable(),
-}).strict()
+export const NotificationResponseSchema = z
+  .object({
+    /** Public UUID identifier */
+    id: z.string().uuid(),
+    /** Related content ID (planner UUID or comment ID) */
+    contentId: z.string(),
+    /** Type of notification */
+    notificationType: NotificationTypeSchema,
+    /** Whether notification has been read */
+    read: z.boolean(),
+    /** ISO 8601 timestamp when notification was created */
+    createdAt: z.string(),
+    /** ISO 8601 timestamp when notification was read (null if unread) */
+    readAt: z.string().nullable(),
+    // Rich content fields for display and navigation
+    /** Planner UUID for navigation */
+    plannerId: z.string().uuid().nullable(),
+    /** Planner title for display */
+    plannerTitle: z.string().nullable(),
+    /** Comment content snippet for preview */
+    commentSnippet: z.string().nullable(),
+    /** Comment public UUID for anchor link */
+    commentPublicId: z.string().uuid().nullable(),
+  })
+  .strict()
 
 /**
  * Notification inbox response schema with pagination
  * Matches backend NotificationInboxResponse DTO
  */
-export const NotificationInboxResponseSchema = z.object({
-  /** Array of notifications */
-  notifications: z.array(NotificationResponseSchema),
-  /** Current page number (0-indexed) */
-  page: z.number().int().nonnegative(),
-  /** Page size */
-  size: z.number().int().positive(),
-  /** Total notification count (including read/unread) */
-  totalElements: z.number().int().nonnegative(),
-  /** Total number of pages */
-  totalPages: z.number().int().nonnegative(),
-}).strict()
+export const NotificationInboxResponseSchema = z
+  .object({
+    /** Array of notifications */
+    notifications: z.array(NotificationResponseSchema),
+    /** Current page number (0-indexed) */
+    page: z.number().int().nonnegative(),
+    /** Page size */
+    size: z.number().int().positive(),
+    /** Total notification count (including read/unread) */
+    totalElements: z.number().int().nonnegative(),
+    /** Total number of pages */
+    totalPages: z.number().int().nonnegative(),
+  })
+  .strict()
 
 /**
  * Unread notification count response schema
  * Matches backend UnreadCountResponse DTO
  */
-export const UnreadCountResponseSchema = z.object({
-  /** Count of unread notifications */
-  unreadCount: z.number().int().nonnegative(),
-}).strict()
+export const UnreadCountResponseSchema = z
+  .object({
+    /** Count of unread notifications */
+    unreadCount: z.number().int().nonnegative(),
+  })
+  .strict()
 
 // ============================================================================
 // Inferred Types

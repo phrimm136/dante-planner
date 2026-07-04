@@ -62,19 +62,13 @@ export function PlannerViewer({ planner }: PlannerViewerProps) {
       </div>
 
       {/* Guide mode - always mounted */}
-      <div
-        className={cn(mode !== 'guide' && 'hidden')}
-        aria-hidden={mode !== 'guide'}
-      >
+      <div className={cn(mode !== 'guide' && 'hidden')} aria-hidden={mode !== 'guide'}>
         <GuideModeViewer planner={planner} />
       </div>
 
       {/* Tracker mode - lazy mounted on first access, then stays mounted */}
       {trackerMounted && (
-        <div
-          className={cn(mode !== 'tracker' && 'hidden')}
-          aria-hidden={mode !== 'tracker'}
-        >
+        <div className={cn(mode !== 'tracker' && 'hidden')} aria-hidden={mode !== 'tracker'}>
           <TrackerModeViewer planner={planner} />
         </div>
       )}

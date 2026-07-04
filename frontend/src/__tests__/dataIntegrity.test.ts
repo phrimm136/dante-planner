@@ -20,36 +20,21 @@ import {
   IdentitySpecListSchema,
   IdentityNameListSchema,
 } from '@/pages/identity'
-import {
-  EGODataSchema,
-  EGOI18nSchema,
-  EGOSpecListSchema,
-  EGONameListSchema,
-} from '@/pages/ego'
+import { EGODataSchema, EGOI18nSchema, EGOSpecListSchema, EGONameListSchema } from '@/pages/ego'
 import {
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
 } from '@/pages/egoGift'
-import {
-  ThemePackDetailSchema,
-  ThemePackListSchema,
-  ThemePackI18nSchema,
-} from '@/pages/themePack'
+import { ThemePackDetailSchema, ThemePackListSchema, ThemePackI18nSchema } from '@/pages/themePack'
 import {
   BattleKeywordsSchema,
   BattleKeywordSpecListSchema,
   ColorCodeMapSchema,
 } from '@/shared/gameText'
-import {
-  AnnouncementSpecListSchema,
-  AnnouncementI18nSchema,
-} from '@/pages/home'
-import {
-  StartBuffDataListSchema,
-  StartBuffI18nSchema,
-} from '@/shared/gameText'
+import { AnnouncementSpecListSchema, AnnouncementI18nSchema } from '@/pages/home'
+import { StartBuffDataListSchema, StartBuffI18nSchema } from '@/shared/gameText'
 import {
   AbEventSpecListSchema,
   AbEventDataSchema,
@@ -68,7 +53,8 @@ function readJson(filePath: string): unknown {
 
 function listJsonFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) return []
-  return fs.readdirSync(dir)
+  return fs
+    .readdirSync(dir)
     .filter((f: string) => f.endsWith('.json'))
     .map((f: string) => path.join(dir, f))
 }
@@ -106,14 +92,22 @@ function testFileIfExists(filePath: string, schema: ZodSchema) {
 // --- Spec List files (single aggregated files) ---
 
 describe('spec list files', () => {
-  it('identitySpecList.json', () => validateFile(path.join(DATA_DIR, 'identitySpecList.json'), IdentitySpecListSchema))
-  it('egoSpecList.json', () => validateFile(path.join(DATA_DIR, 'egoSpecList.json'), EGOSpecListSchema))
-  it('egoGiftSpecList.json', () => validateFile(path.join(DATA_DIR, 'egoGiftSpecList.json'), EGOGiftSpecListSchema))
-  it('themePackList.json', () => validateFile(path.join(DATA_DIR, 'themePackList.json'), ThemePackListSchema))
-  it('abEventSpecList.json', () => validateFile(path.join(DATA_DIR, 'abEventSpecList.json'), AbEventSpecListSchema))
-  it('battleKeywordSpecList.json', () => validateFile(path.join(DATA_DIR, 'battleKeywordSpecList.json'), BattleKeywordSpecListSchema))
-  it('colorCode.json', () => validateFile(path.join(DATA_DIR, 'colorCode.json'), ColorCodeMapSchema))
-  it('announcements.json', () => validateFile(path.join(DATA_DIR, 'announcements.json'), AnnouncementSpecListSchema))
+  it('identitySpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'identitySpecList.json'), IdentitySpecListSchema))
+  it('egoSpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'egoSpecList.json'), EGOSpecListSchema))
+  it('egoGiftSpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'egoGiftSpecList.json'), EGOGiftSpecListSchema))
+  it('themePackList.json', () =>
+    validateFile(path.join(DATA_DIR, 'themePackList.json'), ThemePackListSchema))
+  it('abEventSpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'abEventSpecList.json'), AbEventSpecListSchema))
+  it('battleKeywordSpecList.json', () =>
+    validateFile(path.join(DATA_DIR, 'battleKeywordSpecList.json'), BattleKeywordSpecListSchema))
+  it('colorCode.json', () =>
+    validateFile(path.join(DATA_DIR, 'colorCode.json'), ColorCodeMapSchema))
+  it('announcements.json', () =>
+    validateFile(path.join(DATA_DIR, 'announcements.json'), AnnouncementSpecListSchema))
 })
 
 // --- Mirror Dungeon versioned data files ---
@@ -121,16 +115,21 @@ describe('spec list files', () => {
 const MD_DIRS = fs.readdirSync(DATA_DIR).filter((d: string) => /^MD\d+$/.test(d))
 
 describe.each(MD_DIRS)('start buff data [%s]', (mdDir) => {
-  it('startBuffs.json', () => validateFile(path.join(DATA_DIR, mdDir, 'startBuffs.json'), StartBuffDataListSchema))
+  it('startBuffs.json', () =>
+    validateFile(path.join(DATA_DIR, mdDir, 'startBuffs.json'), StartBuffDataListSchema))
 })
 
 // --- Individual data files ---
 
-describe('identity data files', () => testDirectory(path.join(DATA_DIR, 'identity'), IdentityDataSchema))
+describe('identity data files', () =>
+  testDirectory(path.join(DATA_DIR, 'identity'), IdentityDataSchema))
 describe('ego data files', () => testDirectory(path.join(DATA_DIR, 'ego'), EGODataSchema))
-describe('egoGift data files', () => testDirectory(path.join(DATA_DIR, 'egoGift'), EGOGiftDataSchema))
-describe('themePack data files', () => testDirectory(path.join(DATA_DIR, 'themePack'), ThemePackDetailSchema))
-describe('abEvent data files', () => testDirectory(path.join(DATA_DIR, 'abEvent'), AbEventDataSchema))
+describe('egoGift data files', () =>
+  testDirectory(path.join(DATA_DIR, 'egoGift'), EGOGiftDataSchema))
+describe('themePack data files', () =>
+  testDirectory(path.join(DATA_DIR, 'themePack'), ThemePackDetailSchema))
+describe('abEvent data files', () =>
+  testDirectory(path.join(DATA_DIR, 'abEvent'), AbEventDataSchema))
 
 // --- i18n files per language ---
 

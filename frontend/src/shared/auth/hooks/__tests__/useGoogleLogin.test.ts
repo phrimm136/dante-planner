@@ -25,7 +25,7 @@ describe('startGoogleLogin', () => {
     expect(mockAssign).toHaveBeenCalledTimes(1)
     const returnTo = encodeURIComponent('http://localhost:5173/planner/1')
     expect(mockAssign).toHaveBeenCalledWith(
-      `${env.VITE_API_BASE_URL}/api/auth/google/start?returnTo=${returnTo}`
+      `${env.VITE_API_BASE_URL}/api/auth/google/start?returnTo=${returnTo}`,
     )
   })
 
@@ -39,7 +39,7 @@ describe('startGoogleLogin', () => {
 
     const returnTo = encodeURIComponent('http://localhost:5173/planner/1?tab=skills#sec-2')
     expect(mockAssign).toHaveBeenCalledWith(
-      `${env.VITE_API_BASE_URL}/api/auth/google/start?returnTo=${returnTo}`
+      `${env.VITE_API_BASE_URL}/api/auth/google/start?returnTo=${returnTo}`,
     )
   })
 

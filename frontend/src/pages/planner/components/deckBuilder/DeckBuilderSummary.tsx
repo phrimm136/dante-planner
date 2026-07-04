@@ -60,21 +60,22 @@ export function DeckBuilderSummary({
   const { spec: egoSpec } = useEGOListData()
 
   // Merge spec and i18n into IdentityListItem array for display
-  const identities = useMemo<IdentityListItem[]>(() =>
-    Object.entries(identitySpec).map(([id, specData]) => ({
-      id,
-      name: identityI18n[id] || id,
-      rank: specData.rank,
-      updateDate: specData.updateDate,
-      unitKeywordList: specData.unitKeywordList,
-      skillKeywordList: specData.skillKeywordList,
-      battleKeywordList: specData.battleKeywordList ?? [],
-      attributeTypes: specData.attributeType,
-      atkTypes: specData.atkType,
-      defenseTypes: specData.defenseType,
-      season: specData.season,
-    })),
-    [identitySpec, identityI18n]
+  const identities = useMemo<IdentityListItem[]>(
+    () =>
+      Object.entries(identitySpec).map(([id, specData]) => ({
+        id,
+        name: identityI18n[id] || id,
+        rank: specData.rank,
+        updateDate: specData.updateDate,
+        unitKeywordList: specData.unitKeywordList,
+        skillKeywordList: specData.skillKeywordList,
+        battleKeywordList: specData.battleKeywordList ?? [],
+        attributeTypes: specData.attributeType,
+        atkTypes: specData.atkType,
+        defenseTypes: specData.defenseType,
+        season: specData.season,
+      })),
+    [identitySpec, identityI18n],
   )
 
   // Get skill data (affinities and attack types) for each equipped identity
@@ -104,13 +105,16 @@ export function DeckBuilderSummary({
   }, [egoSpec])
 
   // Construct deckState for StatusViewer
-  const deckState: DeckState = useMemo(() => ({
-    equipment,
-    deploymentOrder,
-    deploymentConfig: {
-      maxDeployed: DEFAULT_DEPLOYMENT_MAX,
-    },
-  }), [equipment, deploymentOrder])
+  const deckState: DeckState = useMemo(
+    () => ({
+      equipment,
+      deploymentOrder,
+      deploymentConfig: {
+        maxDeployed: DEFAULT_DEPLOYMENT_MAX,
+      },
+    }),
+    [equipment, deploymentOrder],
+  )
 
   return (
     <PlannerSection title={t('pages.plannerMD.deckBuilder')} onViewNotes={onViewNotes}>

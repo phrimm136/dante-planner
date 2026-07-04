@@ -56,7 +56,7 @@ function AccountDeleteSectionContent() {
           t('settings.deleteAccount.success', {
             date: formattedDate,
             days: response.gracePeriodDays ?? 30,
-          })
+          }),
         )
 
         // Close dialog
@@ -77,15 +77,12 @@ function AccountDeleteSectionContent() {
     })
   }
 
-
   // Unauthenticated state - show sign-in prompt
   if (!user) {
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">{t('settings.deleteAccount.title')}</h2>
-        <p className="text-muted-foreground">
-          {t('settings.deleteAccount.signInPrompt')}
-        </p>
+        <p className="text-muted-foreground">{t('settings.deleteAccount.signInPrompt')}</p>
         <Button onClick={startGoogleLogin} className="flex items-center gap-2">
           <GoogleIcon className="h-4 w-4" />
           {t('header.auth.googleLogin')}
@@ -98,13 +95,8 @@ function AccountDeleteSectionContent() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">{t('settings.deleteAccount.title')}</h2>
-      <p className="text-sm text-muted-foreground">
-        {t('settings.deleteAccount.warning')}
-      </p>
-      <Button
-        variant="destructive"
-        onClick={() => setDialogOpen(true)}
-      >
+      <p className="text-sm text-muted-foreground">{t('settings.deleteAccount.warning')}</p>
+      <Button variant="destructive" onClick={() => setDialogOpen(true)}>
         {t('settings.deleteAccount.title')}
       </Button>
 

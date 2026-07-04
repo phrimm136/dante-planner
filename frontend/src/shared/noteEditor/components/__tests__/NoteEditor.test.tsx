@@ -92,7 +92,7 @@ describe('NoteEditor', () => {
           value={defaultValue}
           onChange={mockOnChange}
           placeholder="Enter your notes..."
-        />
+        />,
       )
 
       await waitFor(() => {
@@ -104,9 +104,7 @@ describe('NoteEditor', () => {
     })
 
     it('should apply readOnly state', async () => {
-      render(
-        <NoteEditor value={defaultValue} onChange={mockOnChange} readOnly />
-      )
+      render(<NoteEditor value={defaultValue} onChange={mockOnChange} readOnly />)
 
       await waitFor(() => {
         const container = document.querySelector('.note-editor')
@@ -115,13 +113,7 @@ describe('NoteEditor', () => {
     })
 
     it('should apply custom className', async () => {
-      render(
-        <NoteEditor
-          value={defaultValue}
-          onChange={mockOnChange}
-          className="custom-class"
-        />
-      )
+      render(<NoteEditor value={defaultValue} onChange={mockOnChange} className="custom-class" />)
 
       await waitFor(() => {
         const container = document.querySelector('.note-editor')
@@ -153,9 +145,7 @@ describe('NoteEditor', () => {
       // Note: The NoteEditor has debouncing and internal state management
       // that prevents immediate updates when hasLocalChangesRef is true.
       // This test verifies the component accepts new props gracefully.
-      const { rerender } = render(
-        <NoteEditor value={defaultValue} onChange={mockOnChange} />
-      )
+      const { rerender } = render(<NoteEditor value={defaultValue} onChange={mockOnChange} />)
 
       await waitFor(() => {
         expect(document.querySelector('.note-editor')).toBeTruthy()
@@ -488,7 +478,14 @@ describe('NoteEditor - paste byte limit', () => {
   // jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
   // Range.getClientRects(), which returns empty and throws. Shim a zero rect.
   const zeroRect = {
-    top: 0, left: 0, bottom: 0, right: 0, width: 0, height: 0, x: 0, y: 0,
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    width: 0,
+    height: 0,
+    x: 0,
+    y: 0,
     toJSON: () => ({}),
   } as DOMRect
   let origBounding: typeof Range.prototype.getBoundingClientRect
@@ -529,9 +526,7 @@ describe('NoteEditor - paste byte limit', () => {
 
   it('truncates an over-limit paste so the note stays within the cap', async () => {
     const onChange = vi.fn()
-    render(
-      <NoteEditor value={emptyValue} onChange={onChange} maxBytes={400} />
-    )
+    render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={400} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
@@ -546,15 +541,13 @@ describe('NoteEditor - paste byte limit', () => {
         const last = calls[calls.length - 1][0] as NoteContent
         expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(400)
       },
-      { timeout: 2000 }
+      { timeout: 2000 },
     )
   })
 
   it('keeps an in-limit paste intact', async () => {
     const onChange = vi.fn()
-    render(
-      <NoteEditor value={emptyValue} onChange={onChange} maxBytes={4096} />
-    )
+    render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={4096} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
@@ -570,16 +563,14 @@ describe('NoteEditor - paste byte limit', () => {
         expect(JSON.stringify(last.content)).toContain('hello world')
         expect(calculateNoteByteLength({ content: last.content })).toBeLessThanOrEqual(4096)
       },
-      { timeout: 2000 }
+      { timeout: 2000 },
     )
   })
 
   it('truncates right up to the cap — never over, fills the budget', async () => {
     const onChange = vi.fn()
     const cap = 300
-    render(
-      <NoteEditor value={emptyValue} onChange={onChange} maxBytes={cap} />
-    )
+    render(<NoteEditor value={emptyValue} onChange={onChange} maxBytes={cap} />)
 
     const container = document.querySelector('.note-editor') as Element
     await waitFor(() => expect(container).toBeTruthy())
@@ -595,10 +586,10 @@ describe('NoteEditor - paste byte limit', () => {
         const calls = onChange.mock.calls
         const last = calls[calls.length - 1][0] as NoteContent
         const size = calculateNoteByteLength({ content: last.content })
-        expect(size).toBeLessThanOrEqual(cap)        // inclusive boundary: never exceeds
-        expect(size).toBeGreaterThan(cap - 5)        // truncated to fit, not under-cut
+        expect(size).toBeLessThanOrEqual(cap) // inclusive boundary: never exceeds
+        expect(size).toBeGreaterThan(cap - 5) // truncated to fit, not under-cut
       },
-      { timeout: 2000 }
+      { timeout: 2000 },
     )
   })
 

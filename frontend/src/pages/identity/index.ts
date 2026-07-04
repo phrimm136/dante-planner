@@ -18,10 +18,7 @@ export {
   useIdentityListSpec,
   useIdentityListI18n,
 } from './hooks/useIdentityListData'
-export {
-  useIdentityDetailSpec,
-  useIdentityDetailI18n,
-} from './hooks/useIdentityDetailData'
+export { useIdentityDetailSpec, useIdentityDetailI18n } from './hooks/useIdentityDetailData'
 
 export type {
   Identity,

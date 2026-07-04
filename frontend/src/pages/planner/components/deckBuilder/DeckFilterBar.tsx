@@ -10,10 +10,7 @@ import { calculateActiveFilterCount } from '@/shared/filter'
 import { DETAIL_PAGE } from '@/lib/constants'
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
-import {
-  useDeckFilterState,
-  useSetDeckFilterState,
-} from '../../stores/usePlannerEditorStore'
+import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerEditorStore'
 
 import type { EntityMode } from '../../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
@@ -68,7 +65,7 @@ export function DeckFilterBar() {
     filterState.selectedEgoTypes,
     filterState.selectedSeasons,
     filterState.selectedUnitKeywords,
-    filterState.selectedBattleKeywords
+    filterState.selectedBattleKeywords,
   )
   const hasSearch = filterState.searchQuery.length > 0
   const hasActiveFilters = activeFilterCount > 0
@@ -149,7 +146,8 @@ export function DeckFilterBar() {
       onClick={handleResetAll}
       disabled={!canReset}
       className={cn(
-        canReset && 'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive'
+        canReset &&
+          'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive',
       )}
     >
       {t('filters.resetAll', 'Reset All')}
@@ -173,12 +171,7 @@ export function DeckFilterBar() {
 
   if (isDesktop) {
     return (
-      <div
-        className={cn(
-          'flex flex-wrap items-center gap-2',
-          'rounded-lg border bg-card p-2'
-        )}
-      >
+      <div className={cn('flex flex-wrap items-center gap-2', 'rounded-lg border bg-card p-2')}>
         <EntityToggle mode={filterState.entityMode} onModeChange={handleModeChange} />
         <div className={FILTER_BOX}>
           <CompactSinnerFilter
@@ -266,179 +259,183 @@ export function DeckFilterBar() {
 
   return (
     <div className="w-full relative">
-        <div className="rounded-lg border bg-card p-3">
-          <div className="space-y-1">
-            <div className="px-1 py-1.5">
-              <EntityToggle mode={filterState.entityMode} onModeChange={handleModeChange} />
-            </div>
-
-            <FilterSection
-              title={t('filters.sinner', 'Sinner')}
-              defaultExpanded={true}
-              activeCount={filterState.selectedSinners.size}
-            >
-              <CompactSinnerFilter
-                selectedSinners={filterState.selectedSinners}
-                onSelectionChange={handleSinnersChange}
-              />
-            </FilterSection>
-
-            <FilterSection
-              title={t('filters.keyword', 'Keyword')}
-              defaultExpanded={true}
-              activeCount={filterState.selectedKeywords.size}
-            >
-              <CompactKeywordFilter
-                selectedKeywords={filterState.selectedKeywords}
-                onSelectionChange={handleKeywordsChange}
-              />
-            </FilterSection>
-
-            {isExpanded && (
-              <>
-                <FilterSection
-                  title={t('filters.skillAttribute', 'Skill Attribute')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedAttributes.size}
-                >
-                  <CompactSkillAttributeFilter
-                    selectedAttributes={filterState.selectedAttributes}
-                    onSelectionChange={handleAttributesChange}
-                  />
-                </FilterSection>
-
-                <FilterSection
-                  title={t('filters.attackType', 'Attack Type')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedAtkTypes.size}
-                >
-                  <CompactAttackTypeFilter
-                    selectedTypes={filterState.selectedAtkTypes}
-                    onSelectionChange={handleAtkTypesChange}
-                  />
-                </FilterSection>
-
-                {isIdentityMode ? (
-                  <FilterSection
-                    title={t('filters.defenseType', 'Defense Type')}
-                    defaultExpanded={false}
-                    activeCount={filterState.selectedDefTypes.size}
-                  >
-                    <CompactDefenseTypeFilter
-                      selectedTypes={filterState.selectedDefTypes}
-                      onSelectionChange={handleDefTypesChange}
-                    />
-                  </FilterSection>
-                ) : (
-                  <FilterSection
-                    title={t('filters.egoType', 'EGO Type')}
-                    defaultExpanded={false}
-                    activeCount={filterState.selectedEgoTypes.size}
-                  >
-                    <CompactEGOTypeFilter
-                      selectedEGOTypes={filterState.selectedEgoTypes as Set<string>}
-                      onSelectionChange={handleEgoTypesChange}
-                    />
-                  </FilterSection>
-                )}
-
-                {isIdentityMode && (
-                  <FilterSection
-                    title={t('filters.rank', 'Rarity')}
-                    defaultExpanded={false}
-                    activeCount={filterState.selectedRaritys.size}
-                  >
-                    <CompactRarityFilter
-                      selectedRaritys={filterState.selectedRaritys}
-                      onSelectionChange={handleRaritysChange}
-                    />
-                  </FilterSection>
-                )}
-
-                <FilterSection
-                  title={t('filters.season', 'Season')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedSeasons.size}
-                >
-                  <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-                    <SeasonDropdown
-                      selectedSeasons={filterState.selectedSeasons}
-                      onSelectionChange={handleSeasonsChange}
-                    />
-                  </Suspense>
-                </FilterSection>
-
-                {isIdentityMode && (
-                  <FilterSection
-                    title={t('filters.unitKeywords', 'Unit Keywords')}
-                    defaultExpanded={false}
-                    activeCount={filterState.selectedUnitKeywords.size}
-                  >
-                    <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-                      <UnitKeywordDropdown
-                        selectedUnitKeywords={filterState.selectedUnitKeywords}
-                        onSelectionChange={handleUnitKeywordsChange}
-                      />
-                    </Suspense>
-                  </FilterSection>
-                )}
-
-                <FilterSection
-                  title={t('filters.additionalKeyword', 'Additional Keywords')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedBattleKeywords.size}
-                >
-                  <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-                    <BattleKeywordDropdown
-                      entityType={battleKeywordEntityType}
-                      selectedBattleKeywords={filterState.selectedBattleKeywords}
-                      onSelectionChange={handleBattleKeywordsChange}
-                    />
-                  </Suspense>
-                </FilterSection>
-              </>
-            )}
-
-            <div>{searchBar}</div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleResetAll}
-              disabled={!canReset}
-              className={cn(
-                'w-full',
-                canReset && 'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive'
-              )}
-            >
-              {t('filters.resetAll', 'Reset All')}
-              {hasActiveFilters && (
-                <span className="ml-1 text-muted-foreground">({activeFilterCount})</span>
-              )}
-            </Button>
+      <div className="rounded-lg border bg-card p-3">
+        <div className="space-y-1">
+          <div className="px-1 py-1.5">
+            <EntityToggle mode={filterState.entityMode} onModeChange={handleModeChange} />
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={() => { setIsExpanded(!isExpanded) }}
-          aria-expanded={isExpanded}
-          aria-label={isExpanded ? t('filters.collapse', 'Collapse filters') : t('filters.expand', 'Expand filters')}
-          className={cn(
-            'absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',
-            'size-8 rounded-full',
-            'bg-card border border-border',
-            'flex items-center justify-center',
-            'hover:bg-accent transition-colors',
-            'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+          <FilterSection
+            title={t('filters.sinner', 'Sinner')}
+            defaultExpanded={true}
+            activeCount={filterState.selectedSinners.size}
+          >
+            <CompactSinnerFilter
+              selectedSinners={filterState.selectedSinners}
+              onSelectionChange={handleSinnersChange}
+            />
+          </FilterSection>
+
+          <FilterSection
+            title={t('filters.keyword', 'Keyword')}
+            defaultExpanded={true}
+            activeCount={filterState.selectedKeywords.size}
+          >
+            <CompactKeywordFilter
+              selectedKeywords={filterState.selectedKeywords}
+              onSelectionChange={handleKeywordsChange}
+            />
+          </FilterSection>
+
+          {isExpanded && (
+            <>
+              <FilterSection
+                title={t('filters.skillAttribute', 'Skill Attribute')}
+                defaultExpanded={false}
+                activeCount={filterState.selectedAttributes.size}
+              >
+                <CompactSkillAttributeFilter
+                  selectedAttributes={filterState.selectedAttributes}
+                  onSelectionChange={handleAttributesChange}
+                />
+              </FilterSection>
+
+              <FilterSection
+                title={t('filters.attackType', 'Attack Type')}
+                defaultExpanded={false}
+                activeCount={filterState.selectedAtkTypes.size}
+              >
+                <CompactAttackTypeFilter
+                  selectedTypes={filterState.selectedAtkTypes}
+                  onSelectionChange={handleAtkTypesChange}
+                />
+              </FilterSection>
+
+              {isIdentityMode ? (
+                <FilterSection
+                  title={t('filters.defenseType', 'Defense Type')}
+                  defaultExpanded={false}
+                  activeCount={filterState.selectedDefTypes.size}
+                >
+                  <CompactDefenseTypeFilter
+                    selectedTypes={filterState.selectedDefTypes}
+                    onSelectionChange={handleDefTypesChange}
+                  />
+                </FilterSection>
+              ) : (
+                <FilterSection
+                  title={t('filters.egoType', 'EGO Type')}
+                  defaultExpanded={false}
+                  activeCount={filterState.selectedEgoTypes.size}
+                >
+                  <CompactEGOTypeFilter
+                    selectedEGOTypes={filterState.selectedEgoTypes as Set<string>}
+                    onSelectionChange={handleEgoTypesChange}
+                  />
+                </FilterSection>
+              )}
+
+              {isIdentityMode && (
+                <FilterSection
+                  title={t('filters.rank', 'Rarity')}
+                  defaultExpanded={false}
+                  activeCount={filterState.selectedRaritys.size}
+                >
+                  <CompactRarityFilter
+                    selectedRaritys={filterState.selectedRaritys}
+                    onSelectionChange={handleRaritysChange}
+                  />
+                </FilterSection>
+              )}
+
+              <FilterSection
+                title={t('filters.season', 'Season')}
+                defaultExpanded={false}
+                activeCount={filterState.selectedSeasons.size}
+              >
+                <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+                  <SeasonDropdown
+                    selectedSeasons={filterState.selectedSeasons}
+                    onSelectionChange={handleSeasonsChange}
+                  />
+                </Suspense>
+              </FilterSection>
+
+              {isIdentityMode && (
+                <FilterSection
+                  title={t('filters.unitKeywords', 'Unit Keywords')}
+                  defaultExpanded={false}
+                  activeCount={filterState.selectedUnitKeywords.size}
+                >
+                  <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+                    <UnitKeywordDropdown
+                      selectedUnitKeywords={filterState.selectedUnitKeywords}
+                      onSelectionChange={handleUnitKeywordsChange}
+                    />
+                  </Suspense>
+                </FilterSection>
+              )}
+
+              <FilterSection
+                title={t('filters.additionalKeyword', 'Additional Keywords')}
+                defaultExpanded={false}
+                activeCount={filterState.selectedBattleKeywords.size}
+              >
+                <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
+                  <BattleKeywordDropdown
+                    entityType={battleKeywordEntityType}
+                    selectedBattleKeywords={filterState.selectedBattleKeywords}
+                    onSelectionChange={handleBattleKeywordsChange}
+                  />
+                </Suspense>
+              </FilterSection>
+            </>
           )}
-        >
-          <ChevronDown
+
+          <div>{searchBar}</div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetAll}
+            disabled={!canReset}
             className={cn(
-              'size-4 transition-transform duration-200',
-              isExpanded && 'rotate-180'
+              'w-full',
+              canReset &&
+                'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive',
             )}
-          />
+          >
+            {t('filters.resetAll', 'Reset All')}
+            {hasActiveFilters && (
+              <span className="ml-1 text-muted-foreground">({activeFilterCount})</span>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          setIsExpanded(!isExpanded)
+        }}
+        aria-expanded={isExpanded}
+        aria-label={
+          isExpanded
+            ? t('filters.collapse', 'Collapse filters')
+            : t('filters.expand', 'Expand filters')
+        }
+        className={cn(
+          'absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',
+          'size-8 rounded-full',
+          'bg-card border border-border',
+          'flex items-center justify-center',
+          'hover:bg-accent transition-colors',
+          'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+        )}
+      >
+        <ChevronDown
+          className={cn('size-4 transition-transform duration-200', isExpanded && 'rotate-180')}
+        />
       </button>
     </div>
   )

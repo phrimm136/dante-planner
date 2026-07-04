@@ -21,7 +21,7 @@ export function bucketAndSortFloorGifts(
   gifts: EGOGiftListItem[],
   themePackId: string,
   difficulty: DungeonIdx,
-  sortMode: SortMode
+  sortMode: SortMode,
 ): EGOGiftListItem[] {
   const difficultyFiltered = gifts.filter((gift) => {
     if (gift.extremeOnly && difficulty < DUNGEON_IDX.EXTREME) return false
@@ -42,8 +42,5 @@ export function bucketAndSortFloorGifts(
     // else: themed to other packs only — hidden
   }
 
-  return [
-    ...sortEGOGifts(themedToThis, sortMode),
-    ...sortEGOGifts(general, sortMode),
-  ]
+  return [...sortEGOGifts(themedToThis, sortMode), ...sortEGOGifts(general, sortMode)]
 }

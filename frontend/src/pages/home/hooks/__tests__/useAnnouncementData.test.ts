@@ -172,8 +172,11 @@ describe('useAnnouncementData business logic', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     setupQueryMocks(
-      [{ id: 'has-i18n', date: '2026-02-20' }, { id: 'no-i18n', date: '2026-02-19' }],
-      { 'has-i18n': { title: 'Title', body: 'Body' } }
+      [
+        { id: 'has-i18n', date: '2026-02-20' },
+        { id: 'no-i18n', date: '2026-02-19' },
+      ],
+      { 'has-i18n': { title: 'Title', body: 'Body' } },
     )
     const { result } = renderHook(() => useAnnouncementData())
 
@@ -188,10 +191,9 @@ describe('useAnnouncementData business logic', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-02-20T10:00:00Z'))
 
-    setupQueryMocks(
-      [{ id: 'expiring-soon', date: '2026-02-19', expiresAt: '2026-02-20' }],
-      { 'expiring-soon': { title: 'Expiring', body: 'Body' } }
-    )
+    setupQueryMocks([{ id: 'expiring-soon', date: '2026-02-19', expiresAt: '2026-02-20' }], {
+      'expiring-soon': { title: 'Expiring', body: 'Body' },
+    })
 
     const { result } = renderHook(() => useAnnouncementData())
     // Before midnight on expiry date — entry is still visible (expiresAt is same-day)
@@ -202,10 +204,9 @@ describe('useAnnouncementData business logic', () => {
   })
 
   it('merges spec and i18n into Announcement shape', () => {
-    setupQueryMocks(
-      [{ id: 'test-id', date: '2026-02-20' }],
-      { 'test-id': { title: 'Test Title', body: 'Test Body' } }
-    )
+    setupQueryMocks([{ id: 'test-id', date: '2026-02-20' }], {
+      'test-id': { title: 'Test Title', body: 'Test Body' },
+    })
     const { result } = renderHook(() => useAnnouncementData())
 
     expect(result.current[0]).toMatchObject({

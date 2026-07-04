@@ -51,7 +51,7 @@ export function StartBuffSection({
   // Calculate total star cost of selected buffs
   const totalCost = useMemo(
     () => selectedBuffs.reduce((sum, buff) => sum + buff.cost, 0),
-    [selectedBuffs]
+    [selectedBuffs],
   )
 
   const hasSelectedBuffs = selectedBuffs.length > 0
@@ -66,10 +66,7 @@ export function StartBuffSection({
       <button
         type="button"
         onClick={onClick}
-        className={cn(
-          'w-full text-left',
-          !readOnly && 'selectable cursor-pointer'
-        )}
+        className={cn('w-full text-left', !readOnly && 'selectable cursor-pointer')}
       >
         {hasSelectedBuffs ? (
           <div className="flex flex-wrap gap-2 min-h-28">
@@ -87,7 +84,7 @@ export function StartBuffSection({
             className={cn(
               'flex items-center justify-center p-2 text-muted-foreground',
               EMPTY_STATE.MIN_HEIGHT,
-              EMPTY_STATE.DASHED_BORDER
+              EMPTY_STATE.DASHED_BORDER,
             )}
           >
             {readOnly

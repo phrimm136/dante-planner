@@ -89,7 +89,7 @@ export function usePlannerCommentsSse(plannerId: string) {
         // Calculate exponential backoff delay
         const delay = Math.min(
           SSE_CONFIG.BASE_DELAY * Math.pow(2, reconnectAttemptsRef.current),
-          SSE_CONFIG.MAX_DELAY
+          SSE_CONFIG.MAX_DELAY,
         )
 
         reconnectAttemptsRef.current += 1

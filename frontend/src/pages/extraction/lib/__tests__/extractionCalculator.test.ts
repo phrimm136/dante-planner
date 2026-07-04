@@ -245,7 +245,11 @@ describe('calculateMultiTargetProbability', () => {
         wantedCopies: 1,
         currentCopies: 0,
       }
-      const probability = calculateMultiTargetProbability([target], 100, makeFeaturedCounts(2, 1, 0))
+      const probability = calculateMultiTargetProbability(
+        [target],
+        100,
+        makeFeaturedCounts(2, 1, 0),
+      )
       // Rate = 0.0145 / 2 = 0.00725
       // P = 1 - (1 - 0.00725)^100 ≈ 0.518
       expect(probability).toBeCloseTo(0.518, 2)
@@ -311,7 +315,12 @@ describe('calculatePityAdjustedProbability', () => {
         currentCopies: 0,
       }
       // 150 planned pulls + 50 current pity = 200 total
-      const result = calculatePityAdjustedProbability([target], 150, makeFeaturedCounts(1, 0, 0), 50)
+      const result = calculatePityAdjustedProbability(
+        [target],
+        150,
+        makeFeaturedCounts(1, 0, 0),
+        50,
+      )
       expect(result.probability).toBe(1)
       expect(result.pityApplies).toBe(true)
     })
@@ -386,11 +395,7 @@ describe('calculateLunacyCost', () => {
 
 describe('calculateEffectiveRates', () => {
   it('calculates correct per-item rates with 2 featured IDs', () => {
-    const rates = calculateEffectiveRates(
-      { allEgoCollected: false, hasAnnouncer: false },
-      2,
-      1
-    )
+    const rates = calculateEffectiveRates({ allEgoCollected: false, hasAnnouncer: false }, 2, 1)
     expect(rates.threeStarIdEach).toBe(0.00725) // 0.0145 / 2
     expect(rates.egoEach).toBe(0.0065) // 0.0065 / 1
     expect(rates.announcer).toBe(0)
@@ -399,22 +404,14 @@ describe('calculateEffectiveRates', () => {
   })
 
   it('returns DOUBLED EGO rate when all EGO collected (no pik-tteul, full 1.3% to rate-up)', () => {
-    const rates = calculateEffectiveRates(
-      { allEgoCollected: true, hasAnnouncer: false },
-      1,
-      1
-    )
+    const rates = calculateEffectiveRates({ allEgoCollected: true, hasAnnouncer: false }, 1, 1)
     // When all EGO collected: rate-up gets full 1.3% instead of 0.65%
     expect(rates.egoEach).toBe(0.013) // Full 1.3% for single featured EGO
     expect(rates.egoTotal).toBe(0.013) // Total EGO rate is 1.3% (all goes to rate-up)
   })
 
   it('includes announcer rate when hasAnnouncer is true', () => {
-    const rates = calculateEffectiveRates(
-      { allEgoCollected: false, hasAnnouncer: true },
-      1,
-      1
-    )
+    const rates = calculateEffectiveRates({ allEgoCollected: false, hasAnnouncer: true }, 1, 1)
     expect(rates.announcer).toBe(0.013)
   })
 })
@@ -805,20 +802,20 @@ describe('calculateExtraction', () => {
       expect(result.pityCount).toBe(1)
 
       // Count how many targets have pityApplies = true (should be exactly 1)
-      const pitiedTargets = result.targetResults.filter(r => r.pityApplies)
+      const pitiedTargets = result.targetResults.filter((r) => r.pityApplies)
       expect(pitiedTargets.length).toBe(1)
 
       // ANNOUNCER should get the pity (lowest NATURAL PROBABILITY at ~52.9%)
       // Natural probs: ID=58.8%, EGO=92.7%, Announcer=52.9%
       // Old buggy code gave pity to EGO (lowest RATE 1.3%), but that wastes it!
-      const announcerResult = result.targetResults.find(r => r.target.type === 'announcer')
+      const announcerResult = result.targetResults.find((r) => r.target.type === 'announcer')
       expect(announcerResult?.pityApplies).toBe(true)
 
       // Other targets should NOT have pity applied
-      const idResult = result.targetResults.find(r => r.target.type === 'threeStarId')
+      const idResult = result.targetResults.find((r) => r.target.type === 'threeStarId')
       expect(idResult?.pityApplies).toBe(false)
 
-      const egoResult = result.targetResults.find(r => r.target.type === 'ego')
+      const egoResult = result.targetResults.find((r) => r.target.type === 'ego')
       expect(egoResult?.pityApplies).toBe(false)
 
       // allTargetProbability should NOT be inflated by duplicate pity
@@ -996,7 +993,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(1, 1, 0),
         false,
-        0
+        0,
       )
       expect(result).toEqual([])
     })
@@ -1010,7 +1007,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(1, 0, 0),
         false,
-        0
+        0,
       )
       expect(result).toEqual([])
     })
@@ -1024,7 +1021,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(1, 0, 0),
         false,
-        0
+        0,
       )
 
       expect(result).toHaveLength(1)
@@ -1042,7 +1039,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(3, 0, 0),
         false,
-        0
+        0,
       )
 
       expect(result).toHaveLength(3)
@@ -1066,7 +1063,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(2, 1, 0),
         false,
-        0
+        0,
       )
 
       // Total items = 2 + 1 = 3
@@ -1092,7 +1089,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         200,
         makeFeaturedCounts(2, 1, 2),
         false,
-        0
+        0,
       )
 
       // Total items = 2 + 1 + 2 = 5
@@ -1114,7 +1111,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(2, 0, 0),
         false,
-        0
+        0,
       )
 
       // With 1 pity
@@ -1123,7 +1120,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(2, 0, 0),
         false,
-        1
+        1,
       )
 
       // P(2+) with pity should be >= P(2+) without pity
@@ -1133,15 +1130,13 @@ describe('calculateSuccessiveTargetProbabilities', () => {
     })
 
     it('returns 100% when pity covers all items', () => {
-      const targets: ExtractionTarget[] = [
-        { type: 'ego', wantedCopies: 2, currentCopies: 0 },
-      ]
+      const targets: ExtractionTarget[] = [{ type: 'ego', wantedCopies: 2, currentCopies: 0 }]
       const result = calculateSuccessiveTargetProbabilities(
         targets,
         100,
         makeFeaturedCounts(0, 2, 0),
         true,
-        3 // 3 pity covers 2 wanted
+        3, // 3 pity covers 2 wanted
       )
 
       expect(result).toHaveLength(2)
@@ -1159,7 +1154,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         200,
         makeFeaturedCounts(3, 0, 0),
         false,
-        1
+        1,
       )
 
       expect(result).toHaveLength(3)
@@ -1172,16 +1167,14 @@ describe('calculateSuccessiveTargetProbabilities', () => {
 
   describe('edge cases', () => {
     it('handles 0 pulls with pity', () => {
-      const targets: ExtractionTarget[] = [
-        { type: 'ego', wantedCopies: 1, currentCopies: 0 },
-      ]
+      const targets: ExtractionTarget[] = [{ type: 'ego', wantedCopies: 1, currentCopies: 0 }]
       // 0 pulls but have pity
       const result = calculateSuccessiveTargetProbabilities(
         targets,
         0,
         makeFeaturedCounts(0, 1, 0),
         false,
-        1
+        1,
       )
 
       expect(result).toHaveLength(1)
@@ -1198,7 +1191,7 @@ describe('calculateSuccessiveTargetProbabilities', () => {
         100,
         makeFeaturedCounts(3, 0, 0),
         false,
-        0
+        0,
       )
 
       expect(result).toHaveLength(1) // Only 1 item needed
@@ -1350,8 +1343,9 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
       expect(result.successiveProbabilities).toHaveLength(5)
 
       for (let i = 0; i < result.successiveProbabilities.length - 1; i++) {
-        expect(result.successiveProbabilities[i].probability)
-          .toBeLessThanOrEqual(result.successiveProbabilities[i + 1].probability)
+        expect(result.successiveProbabilities[i].probability).toBeLessThanOrEqual(
+          result.successiveProbabilities[i + 1].probability,
+        )
       }
     })
 
@@ -1378,8 +1372,9 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
 
       // With pity, probabilities should be higher
       expect(withPityResult.pityCount).toBe(1)
-      expect(withPityResult.successiveProbabilities[0].probability)
-        .toBeGreaterThanOrEqual(noPityResult.successiveProbabilities[0].probability)
+      expect(withPityResult.successiveProbabilities[0].probability).toBeGreaterThanOrEqual(
+        noPityResult.successiveProbabilities[0].probability,
+      )
     })
 
     it('P(all) in successiveProbabilities uses convolution (different from per-target allTargetProbability)', () => {
@@ -1475,7 +1470,9 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
 
       // The key test: probabilities should be nearly identical
       // (slight difference due to rounding/floating point)
-      expect(Math.abs(resultTrue.allTargetProbability - resultFalse.allTargetProbability)).toBeLessThan(0.001)
+      expect(
+        Math.abs(resultTrue.allTargetProbability - resultFalse.allTargetProbability),
+      ).toBeLessThan(0.001)
     })
 
     it('2/1/1 @ 200 pulls with wanting 2 IDs: allEgoCollected should SIGNIFICANTLY increase probability', () => {
@@ -1531,7 +1528,9 @@ describe('calculateExtraction - successiveProbabilities and totalItemsWanted', (
       // The CRITICAL test: allEgoCollected=true should be SIGNIFICANTLY better
       // After fix: 81.3% vs 63.6% (17.7% absolute increase!)
       // Before fix: both were ~54.5% (modifier had no effect - BUG!)
-      expect(resultTrue.allTargetProbability).toBeGreaterThan(resultFalse.allTargetProbability + 0.15)
+      expect(resultTrue.allTargetProbability).toBeGreaterThan(
+        resultFalse.allTargetProbability + 0.15,
+      )
     })
   })
 })

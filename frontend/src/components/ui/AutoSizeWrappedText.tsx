@@ -70,7 +70,7 @@ export function AutoSizeWrappedText({
 
     // Couldn't fit even at minFontSize - use minFontSize (line-clamp will truncate)
     setFontSize(minFontSize)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, width, maxLines, minFontSize, maxFontSize, lineHeightProp, JSON.stringify(style)])
 
   return (

@@ -42,7 +42,9 @@ export function IconFilter({
           return (
             <button
               key={option}
-              onClick={() => { toggleOption(option); }}
+              onClick={() => {
+                toggleOption(option)
+              }}
               className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
               data-selected={isSelected}
             >

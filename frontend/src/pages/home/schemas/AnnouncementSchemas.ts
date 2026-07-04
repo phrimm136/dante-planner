@@ -17,12 +17,14 @@ import { z } from 'zod'
  */
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD format')
 
-export const AnnouncementSpecSchema = z.object({
-  id: z.string(),
-  date: dateString,
-  expiresAt: dateString.optional(),
-  permanent: z.boolean().optional(),
-}).strict()
+export const AnnouncementSpecSchema = z
+  .object({
+    id: z.string(),
+    date: dateString,
+    expiresAt: dateString.optional(),
+    permanent: z.boolean().optional(),
+  })
+  .strict()
 
 /**
  * Announcement spec list schema (the full announcements.json array)
@@ -36,10 +38,12 @@ export const AnnouncementSpecListSchema = z.array(AnnouncementSpecSchema)
 /**
  * Single i18n entry schema
  */
-export const AnnouncementI18nEntrySchema = z.object({
-  title: z.string(),
-  body: z.string(),
-}).strict()
+export const AnnouncementI18nEntrySchema = z
+  .object({
+    title: z.string(),
+    body: z.string(),
+  })
+  .strict()
 
 /**
  * Full i18n file schema: Record<id, { title, body }>

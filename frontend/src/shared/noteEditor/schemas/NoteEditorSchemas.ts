@@ -15,10 +15,12 @@ import type { NoteContent } from '../types/NoteEditorTypes'
 /**
  * Schema for Tiptap marks (inline formatting like bold, italic, links)
  */
-export const TiptapMarkSchema = z.object({
-  type: z.string(),
-  attrs: z.record(z.string(), z.unknown()).optional(),
-}).strict()
+export const TiptapMarkSchema = z
+  .object({
+    type: z.string(),
+    attrs: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict()
 
 /**
  * Schema for Tiptap JSONContent (recursive document structure)
@@ -32,15 +34,17 @@ export const JSONContentSchema: z.ZodType<unknown> = z.lazy(() =>
     content: z.array(JSONContentSchema).optional(),
     marks: z.array(TiptapMarkSchema).optional(),
     text: z.string().optional(),
-  })
+  }),
 )
 
 /**
  * Schema for NoteContent - wrapper around JSONContent
  */
-export const NoteContentSchema = z.object({
-  content: JSONContentSchema,
-}).strict()
+export const NoteContentSchema = z
+  .object({
+    content: JSONContentSchema,
+  })
+  .strict()
 
 /**
  * Schema for an array of note sections
@@ -50,11 +54,13 @@ export const NoteSectionsSchema = z.array(NoteContentSchema)
 /**
  * Schema for NoteImage metadata
  */
-export const NoteImageSchema = z.object({
-  src: z.string(),
-  alt: z.string().optional(),
-  title: z.string().optional(),
-}).strict()
+export const NoteImageSchema = z
+  .object({
+    src: z.string(),
+    alt: z.string().optional(),
+    title: z.string().optional(),
+  })
+  .strict()
 
 /**
  * Empty note content factory - creates valid empty JSONContent

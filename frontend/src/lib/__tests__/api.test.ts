@@ -57,7 +57,7 @@ describe('ApiClient', () => {
       expect(result).toBeUndefined()
       expect(mockFetch).toHaveBeenCalledWith(
         'http://localhost:8080/api/auth/logout',
-        expect.objectContaining({ method: 'DELETE' })
+        expect.objectContaining({ method: 'DELETE' }),
       )
     })
 
@@ -181,9 +181,7 @@ describe('ApiClient', () => {
         status: 404,
       })
 
-      await expect(ApiClient.get('/api/planner/nonexistent')).rejects.toThrow(
-        'Resource not found'
-      )
+      await expect(ApiClient.get('/api/planner/nonexistent')).rejects.toThrow('Resource not found')
     })
 
     it('throws error with status for 5xx responses', async () => {
@@ -208,7 +206,7 @@ describe('ApiClient', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ credentials: 'include' })
+        expect.objectContaining({ credentials: 'include' }),
       )
     })
 
@@ -227,7 +225,7 @@ describe('ApiClient', () => {
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
           }),
-        })
+        }),
       )
     })
 
@@ -245,7 +243,7 @@ describe('ApiClient', () => {
         expect.any(String),
         expect.objectContaining({
           body: JSON.stringify(data),
-        })
+        }),
       )
     })
   })
@@ -273,7 +271,7 @@ describe('ApiClient', () => {
 
       const safelisted = ['accept', 'accept-language', 'content-language']
       const nonSimple = Object.keys(sentHeaders()).filter(
-        (key) => !safelisted.includes(key.toLowerCase())
+        (key) => !safelisted.includes(key.toLowerCase()),
       )
       expect(nonSimple).toEqual([])
     })

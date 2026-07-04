@@ -142,10 +142,7 @@ describe('CommentTreeSchema', () => {
   })
 
   it('should reject array with invalid comment', () => {
-    const comments = [
-      validCommentNode,
-      { ...validCommentNode, id: 'invalid' },
-    ]
+    const comments = [validCommentNode, { ...validCommentNode, id: 'invalid' }]
     const result = CommentTreeSchema.safeParse(comments)
     expect(result.success).toBe(false)
   })

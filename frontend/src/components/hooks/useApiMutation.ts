@@ -36,7 +36,7 @@ export interface UseApiMutationOptions<TData, TVariables> {
 }
 
 export function useApiMutation<TData, TVariables = void>(
-  options: UseApiMutationOptions<TData, TVariables>
+  options: UseApiMutationOptions<TData, TVariables>,
 ): UseMutationResult<TData, Error, TVariables> {
   const queryClient = useQueryClient()
   const { t } = useTranslation()

@@ -68,11 +68,7 @@ function CommentSectionSkeleton() {
   )
 }
 
-function CommentSectionContent({
-  plannerId,
-  isPublished,
-  isAuthenticated,
-}: CommentSectionProps) {
+function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: CommentSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
   const queryClient = useQueryClient()
 
@@ -88,7 +84,10 @@ function CommentSectionContent({
 
   // Shared delete confirmation dialog state
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null)
-  const [moderatorDeleteTarget, setModeratorDeleteTarget] = useState<{ id: string; title: string } | null>(null)
+  const [moderatorDeleteTarget, setModeratorDeleteTarget] = useState<{
+    id: string
+    title: string
+  } | null>(null)
   const totalCount = countComments(tree)
 
   // Scroll to comment from URL hash (e.g., #comment-uuid from notification link)
@@ -140,22 +139,34 @@ function CommentSectionContent({
   moderatorDeleteCommentRef.current = moderatorDeleteComment
 
   // Stable handlers using refs
-  const handleCreateComment = useCallback((content: string) => {
-    createCommentRef.current.mutate({ plannerId, content })
-  }, [plannerId])
+  const handleCreateComment = useCallback(
+    (content: string) => {
+      createCommentRef.current.mutate({ plannerId, content })
+    },
+    [plannerId],
+  )
 
-  const handleReply = useCallback((parentCommentId: string, content: string) => {
-    createCommentRef.current.mutate({ plannerId, content, parentCommentId })
-  }, [plannerId])
+  const handleReply = useCallback(
+    (parentCommentId: string, content: string) => {
+      createCommentRef.current.mutate({ plannerId, content, parentCommentId })
+    },
+    [plannerId],
+  )
 
-  const handleEdit = useCallback((commentId: string, content: string) => {
-    editCommentRef.current.mutate({ commentId, content, plannerId })
-  }, [plannerId])
+  const handleEdit = useCallback(
+    (commentId: string, content: string) => {
+      editCommentRef.current.mutate({ commentId, content, plannerId })
+    },
+    [plannerId],
+  )
 
   // Opens delete confirmation dialog
-  const handleDelete = useCallback((commentId: string) => {
-    setDeleteTarget({ id: commentId, title: t('pages.plannerMD.comments.deleteConfirm.title') })
-  }, [t])
+  const handleDelete = useCallback(
+    (commentId: string) => {
+      setDeleteTarget({ id: commentId, title: t('pages.plannerMD.comments.deleteConfirm.title') })
+    },
+    [t],
+  )
 
   // Actually performs the delete after confirmation
   const handleDeleteConfirm = useCallback(() => {
@@ -165,17 +176,26 @@ function CommentSectionContent({
     }
   }, [deleteTarget, plannerId])
 
-  const handleUpvote = useCallback((commentId: string) => {
-    upvoteCommentRef.current.mutate({ commentId, plannerId })
-  }, [plannerId])
+  const handleUpvote = useCallback(
+    (commentId: string) => {
+      upvoteCommentRef.current.mutate({ commentId, plannerId })
+    },
+    [plannerId],
+  )
 
-  const handleToggleNotifications = useCallback((commentId: string, enabled: boolean) => {
-    toggleNotificationsRef.current.mutate({ commentId, enabled, plannerId })
-  }, [plannerId])
+  const handleToggleNotifications = useCallback(
+    (commentId: string, enabled: boolean) => {
+      toggleNotificationsRef.current.mutate({ commentId, enabled, plannerId })
+    },
+    [plannerId],
+  )
 
-  const handleReport = useCallback((commentId: string, reason: CommentReportReason) => {
-    reportCommentRef.current.mutate({ commentId, reason, plannerId })
-  }, [plannerId])
+  const handleReport = useCallback(
+    (commentId: string, reason: CommentReportReason) => {
+      reportCommentRef.current.mutate({ commentId, reason, plannerId })
+    },
+    [plannerId],
+  )
 
   // Moderator delete - opens confirmation dialog
   const handleModeratorDelete = useCallback((commentId: string) => {
@@ -183,12 +203,19 @@ function CommentSectionContent({
   }, [])
 
   // Actually performs moderator delete after confirmation (with reason)
-  const handleModeratorDeleteConfirm = useCallback((reason: string) => {
-    if (moderatorDeleteTarget) {
-      moderatorDeleteCommentRef.current.mutate({ commentId: moderatorDeleteTarget.id, plannerId, reason })
-      setModeratorDeleteTarget(null)
-    }
-  }, [moderatorDeleteTarget, plannerId])
+  const handleModeratorDeleteConfirm = useCallback(
+    (reason: string) => {
+      if (moderatorDeleteTarget) {
+        moderatorDeleteCommentRef.current.mutate({
+          commentId: moderatorDeleteTarget.id,
+          plannerId,
+          reason,
+        })
+        setModeratorDeleteTarget(null)
+      }
+    },
+    [moderatorDeleteTarget, plannerId],
+  )
 
   const handleRefresh = useCallback(() => {
     resetCount()
@@ -209,10 +236,7 @@ function CommentSectionContent({
       {/* Comment list */}
       {tree.length === 0 ? (
         <p className="text-muted-foreground text-sm py-4">
-          {t(
-            'pages.plannerMD.comments.empty',
-            'No comments yet. Be the first to comment.'
-          )}
+          {t('pages.plannerMD.comments.empty', 'No comments yet. Be the first to comment.')}
         </p>
       ) : (
         <div className="divide-y divide-border">
@@ -242,26 +266,20 @@ function CommentSectionContent({
       {isPublished ? (
         isAuthenticated ? (
           <CommentEditor
-            placeholder={t(
-              'pages.plannerMD.comments.placeholder',
-              'Write a comment...'
-            )}
+            placeholder={t('pages.plannerMD.comments.placeholder', 'Write a comment...')}
             onSubmit={handleCreateComment}
             isSubmitting={createComment.isPending}
           />
         ) : (
           <p className="text-muted-foreground text-sm">
-            {t(
-              'pages.plannerMD.comments.loginRequired',
-              'Sign in to leave a comment.'
-            )}
+            {t('pages.plannerMD.comments.loginRequired', 'Sign in to leave a comment.')}
           </p>
         )
       ) : (
         <p className="text-muted-foreground text-sm">
           {t(
             'pages.plannerMD.comments.unpublished',
-            'Comments are disabled while this planner is unpublished.'
+            'Comments are disabled while this planner is unpublished.',
           )}
         </p>
       )}
@@ -274,7 +292,10 @@ function CommentSectionContent({
               {t('pages.plannerMD.comments.deleteConfirm.title', 'Delete comment?')}
             </DialogTitle>
             <DialogDescription>
-              {t('pages.plannerMD.comments.deleteConfirm.description', 'This action cannot be undone.')}
+              {t(
+                'pages.plannerMD.comments.deleteConfirm.description',
+                'This action cannot be undone.',
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

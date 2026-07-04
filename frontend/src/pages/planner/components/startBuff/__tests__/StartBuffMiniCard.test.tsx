@@ -6,7 +6,8 @@ import { StartBuffMiniCard } from '../StartBuffMiniCard'
 vi.mock('@/shared/assets', () => ({
   getStartBuffIconPath: (baseId: number, _version: number) => `/mock/icon/${baseId}.webp`,
   getStartBuffMiniPath: (version: number) => `/mock/startBuffMini-${version}.webp`,
-  getStartBuffMiniHighlightPath: (version: number) => `/mock/startBuffMiniHighlight-${version}.webp`,
+  getStartBuffMiniHighlightPath: (version: number) =>
+    `/mock/startBuffMiniHighlight-${version}.webp`,
 }))
 
 // Mock constants
@@ -19,7 +20,11 @@ vi.mock('@/shared/gameData', async (importOriginal) => ({
 vi.mock('@/pages/egoGift/components/EGOGiftEnhancementIndicator', () => ({
   EGOGiftEnhancementIndicator: ({ enhancement }: { enhancement: number }) => {
     if (enhancement === 0) return null
-    return <div data-testid="enhancement-indicator" data-enhancement={enhancement}>+{enhancement}</div>
+    return (
+      <div data-testid="enhancement-indicator" data-enhancement={enhancement}>
+        +{enhancement}
+      </div>
+    )
   },
 }))
 
@@ -32,18 +37,14 @@ describe('StartBuffMiniCard', () => {
 
   describe('background and icon rendering', () => {
     it('renders background image', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const bgImg = container.querySelector('img[src="/mock/startBuffMini-6.webp"]')
       expect(bgImg).not.toBeNull()
     })
 
     it('renders buff icon using getStartBuffIconPath', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       // baseId for buffId 100 should be 100 (no enhancement)
       const iconImg = container.querySelector('img[src="/mock/icon/100.webp"]')
@@ -52,7 +53,7 @@ describe('StartBuffMiniCard', () => {
 
     it('extracts correct baseId from enhanced buffId', () => {
       const { container } = render(
-        <StartBuffMiniCard {...defaultProps} buffId={201} displayName="Enhanced Buff" />
+        <StartBuffMiniCard {...defaultProps} buffId={201} displayName="Enhanced Buff" />,
       )
 
       // buffId 201 = baseId 2, enhancement 1
@@ -121,36 +122,28 @@ describe('StartBuffMiniCard', () => {
 
   describe('hover highlight overlay', () => {
     it('renders highlight overlay image', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const highlightImg = container.querySelector('img[src="/mock/startBuffMiniHighlight-6.webp"]')
       expect(highlightImg).not.toBeNull()
     })
 
     it('highlight overlay has opacity-0 by default', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const highlightImg = container.querySelector('img[src="/mock/startBuffMiniHighlight-6.webp"]')
       expect(highlightImg?.className).toContain('opacity-0')
     })
 
     it('highlight overlay has group-hover:opacity-100 for hover effect', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const highlightImg = container.querySelector('img[src="/mock/startBuffMiniHighlight-6.webp"]')
       expect(highlightImg?.className).toContain('group-hover:opacity-100')
     })
 
     it('container has group class for hover propagation', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const cardContainer = container.firstChild as HTMLElement
       expect(cardContainer.className).toContain('group')
@@ -164,14 +157,12 @@ describe('StartBuffMiniCard', () => {
       // AutoSizeWrappedText renders text twice, get all and check the visible one
       const nameElements = screen.getAllByText('Test Buff')
       // The visible element should have the color
-      const visibleElement = nameElements.find(el => !el.getAttribute('aria-hidden'))
+      const visibleElement = nameElements.find((el) => !el.getAttribute('aria-hidden'))
       expect(visibleElement?.style.color).toBe('rgb(0, 255, 204)') // #00ffcc
     })
 
     it('has correct dimensions (w-24 h-24)', () => {
-      const { container } = render(
-        <StartBuffMiniCard {...defaultProps} />
-      )
+      const { container } = render(<StartBuffMiniCard {...defaultProps} />)
 
       const cardContainer = container.firstChild as HTMLElement
       expect(cardContainer.className).toContain('w-24')

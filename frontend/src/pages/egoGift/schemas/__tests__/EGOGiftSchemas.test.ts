@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  EGOGiftSpecSchema,
-  EGOGiftDataSchema,
-  EGOGiftI18nSchema,
-} from '../EGOGiftSchemas'
+import { EGOGiftSpecSchema, EGOGiftDataSchema, EGOGiftI18nSchema } from '../EGOGiftSchemas'
 
 describe('EGOGiftSpecSchema', () => {
   const validSpec = {
@@ -28,9 +24,7 @@ describe('EGOGiftSpecSchema', () => {
   })
 
   it('rejects a tag array without a TIER_ entry', () => {
-    expect(
-      EGOGiftSpecSchema.safeParse({ ...validSpec, tag: ['Combustion'] }).success
-    ).toBe(false)
+    expect(EGOGiftSpecSchema.safeParse({ ...validSpec, tag: ['Combustion'] }).success).toBe(false)
   })
 })
 

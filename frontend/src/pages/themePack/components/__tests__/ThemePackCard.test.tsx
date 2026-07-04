@@ -83,7 +83,9 @@ describe('ThemePackCard', () => {
     })
 
     it('renders hover layer after select layer for z-order priority', () => {
-      const { container } = render(<ThemePackCard {...defaultProps} isSelected enableHoverHighlight />)
+      const { container } = render(
+        <ThemePackCard {...defaultProps} isSelected enableHoverHighlight />,
+      )
 
       const srcs = getSrcs(container)
       expect(srcs).toHaveLength(3)
@@ -99,7 +101,7 @@ describe('ThemePackCard', () => {
           packEntry={extremePackEntry}
           isSelected
           enableHoverHighlight
-        />
+        />,
       )
 
       const srcs = getSrcs(container)

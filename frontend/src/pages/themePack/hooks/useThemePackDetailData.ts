@@ -52,9 +52,7 @@ export function useThemePackDetailData(id: string) {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createThemePackDetailQueryOptions(id))
-  const { data: i18nData } = useSuspenseQuery(
-    createThemePackI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createThemePackI18nQueryOptions(i18n.language))
 
   return {
     spec,

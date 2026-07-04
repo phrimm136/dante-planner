@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next'
 import type { AbEventSpecList } from '../schemas/AbEventSchemas'
 import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import {
-  matchesRelatedEgoGiftFilter,
-  matchesRelatedThemePackFilter,
-} from '../lib/abEventFilter'
+import { matchesRelatedEgoGiftFilter, matchesRelatedThemePackFilter } from '../lib/abEventFilter'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { AbEventCardLink } from './AbEventCardLink'
@@ -24,16 +21,12 @@ interface AbEventListProps {
  * All cards rendered once, visibility toggled via CSS class.
  * Filter logic: AND between filter types, OR within each type.
  */
-export function AbEventList({
-  spec,
-  selectedEgoGifts,
-  selectedThemePacks,
-}: AbEventListProps) {
+export function AbEventList({ spec, selectedEgoGifts, selectedThemePacks }: AbEventListProps) {
   const { t } = useTranslation('database')
 
   const sortedEvents = useMemo(
     () => Object.entries(spec).sort(([a], [b]) => a.localeCompare(b)),
-    [spec]
+    [spec],
   )
 
   // Progressive rendering
@@ -67,10 +60,7 @@ export function AbEventList({
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.AB_EVENT}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.AB_EVENT} mobileScale={0.8}>
         {sortedEvents.slice(0, displayCount).map(([eventId, entry]) => (
           <ScaledCardWrapper
             key={eventId}

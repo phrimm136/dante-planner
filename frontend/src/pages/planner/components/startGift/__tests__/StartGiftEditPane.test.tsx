@@ -86,7 +86,14 @@ vi.mock('../../../hooks/useStartBuffData', () => ({
   useStartBuffData: () => ({
     data: [
       { id: '100', baseId: 100, level: 1, name: 'Base Buff', cost: 0, effects: [] },
-      { id: '200', baseId: 100, level: 2, name: 'Enhanced Buff', cost: 10, effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }] },
+      {
+        id: '200',
+        baseId: 100,
+        level: 2,
+        name: 'Enhanced Buff',
+        cost: 10,
+        effects: [{ type: 'ADDITIONAL_START_EGO_GIFT_SELECT', value: 1, isTypoExist: false }],
+      },
     ],
     i18n: {},
   }),
@@ -127,7 +134,9 @@ vi.mock('../StartGiftRow', () => ({
       type="button"
       data-testid={`row-${keyword}`}
       data-selected={isRowSelected}
-      onClick={() => { onRowSelect(keyword); }}
+      onClick={() => {
+        onRowSelect(keyword)
+      }}
     >
       {keyword}
     </button>

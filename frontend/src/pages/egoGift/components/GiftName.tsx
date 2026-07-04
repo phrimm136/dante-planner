@@ -1,12 +1,11 @@
 import type { EGOGiftAttributeType } from '@/shared/gameData'
-import { Skeleton } from "@/components/ui/skeleton"
-import { useColorCodes } from "@/shared/gameText"
+import { Skeleton } from '@/components/ui/skeleton'
+import { useColorCodes } from '@/shared/gameText'
 
 interface GiftNameProps {
   attributeType: EGOGiftAttributeType
   name: string
 }
-
 
 export default function GiftName({ attributeType, name }: GiftNameProps) {
   const { data: colorCodes } = useColorCodes()

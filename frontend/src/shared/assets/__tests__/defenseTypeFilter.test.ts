@@ -32,7 +32,11 @@ describe('DEF_TYPES constant', () => {
 
   it('maintains expected order', () => {
     expect([...DEF_TYPES]).toEqual([
-      'GUARD', 'EVADE', 'COUNTER', 'CLASHABLE_GUARD', 'CLASHABLE_COUNTER',
+      'GUARD',
+      'EVADE',
+      'COUNTER',
+      'CLASHABLE_GUARD',
+      'CLASHABLE_COUNTER',
     ])
   })
 })
@@ -42,7 +46,7 @@ describe('defense type filter matching (AND logic)', () => {
     if (selected.size === 0) {
       return true
     }
-    return Array.from(selected).every(dt => defenseTypes.includes(dt))
+    return Array.from(selected).every((dt) => defenseTypes.includes(dt))
   }
 
   it('empty selection matches all', () => {
@@ -58,30 +62,26 @@ describe('defense type filter matching (AND logic)', () => {
   })
 
   it('multiple types selected, identity has all of them (AND)', () => {
-    expect(matchesDefenseTypeFilter(
-      ['EVADE', 'COUNTER'],
-      new Set(['EVADE', 'COUNTER'] as DefType[])
-    )).toBe(true)
+    expect(
+      matchesDefenseTypeFilter(['EVADE', 'COUNTER'], new Set(['EVADE', 'COUNTER'] as DefType[])),
+    ).toBe(true)
   })
 
   it('multiple types selected, identity has only one (AND fails)', () => {
-    expect(matchesDefenseTypeFilter(
-      ['EVADE'],
-      new Set(['EVADE', 'COUNTER'] as DefType[])
-    )).toBe(false)
+    expect(matchesDefenseTypeFilter(['EVADE'], new Set(['EVADE', 'COUNTER'] as DefType[]))).toBe(
+      false,
+    )
   })
 
   it('identity with multiple defense types, all selected match', () => {
-    expect(matchesDefenseTypeFilter(
-      ['GUARD', 'CLASHABLE_GUARD'],
-      new Set(['GUARD'] as DefType[])
-    )).toBe(true)
+    expect(
+      matchesDefenseTypeFilter(['GUARD', 'CLASHABLE_GUARD'], new Set(['GUARD'] as DefType[])),
+    ).toBe(true)
   })
 
   it('identity with multiple defense types, none match', () => {
-    expect(matchesDefenseTypeFilter(
-      ['GUARD', 'CLASHABLE_GUARD'],
-      new Set(['EVADE'] as DefType[])
-    )).toBe(false)
+    expect(
+      matchesDefenseTypeFilter(['GUARD', 'CLASHABLE_GUARD'], new Set(['EVADE'] as DefType[])),
+    ).toBe(false)
   })
 })

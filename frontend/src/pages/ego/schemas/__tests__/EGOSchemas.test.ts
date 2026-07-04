@@ -7,11 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import {
-  EGODataSchema,
-  EGOPassiveI18nSchema,
-  EGOSkillI18nSchema,
-} from '../EGOSchemas'
+import { EGODataSchema, EGOPassiveI18nSchema, EGOSkillI18nSchema } from '../EGOSchemas'
 
 describe('EGOSkillI18nSchema flavor field', () => {
   const baseSkill = {
@@ -117,12 +113,7 @@ describe('EGODataSchema', () => {
       erosion: [
         {
           id: 2070821,
-          skillData: [
-            { attributeType: 'AMBER', atkType: 'HIT', defaultValue: 28 },
-            {},
-            {},
-            {},
-          ],
+          skillData: [{ attributeType: 'AMBER', atkType: 'HIT', defaultValue: 28 }, {}, {}, {}],
         },
       ],
     },

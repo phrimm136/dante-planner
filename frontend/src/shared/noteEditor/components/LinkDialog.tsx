@@ -20,12 +20,7 @@ import type { LinkDialogProps } from '../types/NoteEditorTypes'
  * - Optional display text (pre-populated from selected text)
  * - Confirm/Cancel actions
  */
-export function LinkDialog({
-  open,
-  onClose,
-  onConfirm,
-  initialText = '',
-}: LinkDialogProps) {
+export function LinkDialog({ open, onClose, onConfirm, initialText = '' }: LinkDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
   const [url, setUrl] = useState('')
   const [displayText, setDisplayText] = useState('')
@@ -56,21 +51,19 @@ export function LinkDialog({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>
-            {t('pages.plannerMD.noteEditor.linkDialog.title')}
-          </DialogTitle>
+          <DialogTitle>{t('pages.plannerMD.noteEditor.linkDialog.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="link-url">
-              {t('pages.plannerMD.noteEditor.linkDialog.url')}
-            </Label>
+            <Label htmlFor="link-url">{t('pages.plannerMD.noteEditor.linkDialog.url')}</Label>
             <Input
               id="link-url"
               type="url"
               value={url}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setUrl(e.target.value); }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setUrl(e.target.value)
+              }}
               onKeyDown={handleKeyDown}
               placeholder="https://example.com"
               autoFocus
@@ -85,7 +78,9 @@ export function LinkDialog({
               id="link-text"
               type="text"
               value={displayText}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setDisplayText(e.target.value); }}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setDisplayText(e.target.value)
+              }}
               onKeyDown={handleKeyDown}
               placeholder={t('pages.plannerMD.noteEditor.linkDialog.displayTextPlaceholder')}
             />

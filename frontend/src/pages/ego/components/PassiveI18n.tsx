@@ -20,11 +20,7 @@ interface PassiveCardWithSuspenseProps {
  * Structure (locked indicator) stays visible,
  * only name and description suspend.
  */
-export function PassiveCardWithSuspense({
-  id,
-  passiveId,
-  isLocked,
-}: PassiveCardWithSuspenseProps) {
+export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
     <div className={cn('space-y-1', isLocked && 'opacity-50')}>
       <div className="flex items-center gap-2">

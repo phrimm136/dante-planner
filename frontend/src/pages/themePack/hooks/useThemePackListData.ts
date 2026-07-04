@@ -38,9 +38,7 @@ function createThemePackI18nQueryOptions(language: string) {
  */
 export function useThemePackI18n() {
   const { i18n } = useTranslation()
-  const { data: themePackI18n } = useSuspenseQuery(
-    createThemePackI18nQueryOptions(i18n.language)
-  )
+  const { data: themePackI18n } = useSuspenseQuery(createThemePackI18nQueryOptions(i18n.language))
   return themePackI18n
 }
 
@@ -54,9 +52,7 @@ export function useThemePackListData() {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createThemePackListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createThemePackI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createThemePackI18nQueryOptions(i18n.language))
 
   return {
     spec,

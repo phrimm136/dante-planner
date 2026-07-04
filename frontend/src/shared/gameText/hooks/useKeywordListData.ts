@@ -52,9 +52,7 @@ export function useKeywordListSpec(): Record<string, BattleKeywordSpecEntry> {
  */
 export function useKeywordListI18n(): Record<string, BattleKeywordI18nEntry> {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createKeywordI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createKeywordI18nQueryOptions(i18n.language))
   return i18nData
 }
 
@@ -70,9 +68,7 @@ const EMPTY_I18N_LIST: Record<string, BattleKeywordI18nEntry> = {}
  */
 export function useKeywordListI18nDeferred(): Record<string, BattleKeywordI18nEntry> {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(
-    createKeywordI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useQuery(createKeywordI18nQueryOptions(i18n.language))
   return i18nData ?? EMPTY_I18N_LIST
 }
 
@@ -91,9 +87,7 @@ export function useKeywordListData(): {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createKeywordSpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createKeywordI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createKeywordI18nQueryOptions(i18n.language))
 
   return {
     spec,

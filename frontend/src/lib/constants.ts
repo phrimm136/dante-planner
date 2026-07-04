@@ -241,7 +241,7 @@ export const PLANNER_STORAGE_KEYS = {
 /**
  * Planner storage key type
  */
-export type PlannerStorageKey = typeof PLANNER_STORAGE_KEYS[keyof typeof PLANNER_STORAGE_KEYS]
+export type PlannerStorageKey = (typeof PLANNER_STORAGE_KEYS)[keyof typeof PLANNER_STORAGE_KEYS]
 
 /**
  * Detail Page Layout Constants
@@ -342,7 +342,7 @@ export const CARD_GRID = {
 /**
  * Card width type for ResponsiveCardGrid
  */
-export type CardGridWidth = typeof CARD_GRID.WIDTH[keyof typeof CARD_GRID.WIDTH]
+export type CardGridWidth = (typeof CARD_GRID.WIDTH)[keyof typeof CARD_GRID.WIDTH]
 
 /**
  * Start Buff card dimensions keyed by MD version.
@@ -409,7 +409,7 @@ export function calculatePlannerPages(totalCount: number): number {
 /**
  * Planner list sort option type
  */
-export type PlannerListSortOption = typeof PLANNER_LIST.SORT_OPTIONS[number]
+export type PlannerListSortOption = (typeof PLANNER_LIST.SORT_OPTIONS)[number]
 
 /**
  * Boolean filter options (N/Y) for toggle filters like fusioned, theme pack exclusive

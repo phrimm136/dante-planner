@@ -62,17 +62,10 @@ export function PublishSyncOffWarningDialog({
         </DialogHeader>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isPending}
-          >
+          <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             {t('pages.plannerMD.publish.syncOffWarning.cancel')}
           </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={isPending}
-          >
+          <Button onClick={handleConfirm} disabled={isPending}>
             {t('pages.plannerMD.publish.syncOffWarning.confirm')}
           </Button>
         </DialogFooter>

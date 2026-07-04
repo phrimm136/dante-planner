@@ -33,10 +33,7 @@ interface PlannerDetailFooterProps {
  *   isAuthenticated={true}
  * />
  */
-export function PlannerDetailFooter({
-  planner,
-  isAuthenticated,
-}: PlannerDetailFooterProps) {
+export function PlannerDetailFooter({ planner, isAuthenticated }: PlannerDetailFooterProps) {
   const { t } = useTranslation('planner')
   const navigate = useNavigate()
 
@@ -58,21 +55,24 @@ export function PlannerDetailFooter({
         onSettled: () => {
           voteInProgressRef.current = false
         },
-      }
+      },
     )
   }
 
   const handleDuplicate = () => {
-    forkMutation.mutate({ plannerId: planner.id, planner }, {
-      onSuccess: (result) => {
-        void navigate({
-          to: '/planner/md/$id/edit',
-          params: { id: result.newPlannerId },
-        }).then(() => {
-          window.scrollTo({ top: 0 })
-        })
+    forkMutation.mutate(
+      { plannerId: planner.id, planner },
+      {
+        onSuccess: (result) => {
+          void navigate({
+            to: '/planner/md/$id/edit',
+            params: { id: result.newPlannerId },
+          }).then(() => {
+            window.scrollTo({ top: 0 })
+          })
+        },
       },
-    })
+    )
   }
 
   const handleBackToTop = () => {
@@ -91,9 +91,7 @@ export function PlannerDetailFooter({
           disabled={voteMutation.isPending || hasVoted}
           aria-pressed={hasVoted}
         >
-          <ThumbsUp
-            className={hasVoted ? 'size-4 fill-current text-primary' : 'size-4'}
-          />
+          <ThumbsUp className={hasVoted ? 'size-4 fill-current text-primary' : 'size-4'} />
           <span className="hidden lg:inline">
             {hasVoted
               ? t('pages.plannerList.contextMenu.upvoted')
@@ -103,15 +101,9 @@ export function PlannerDetailFooter({
       )}
 
       {/* Copy (Fork) - Available for all users */}
-      <Button
-        variant="outline"
-        onClick={handleDuplicate}
-        disabled={forkMutation.isPending}
-      >
+      <Button variant="outline" onClick={handleDuplicate} disabled={forkMutation.isPending}>
         <GitFork className="size-4" />
-        <span className="hidden lg:inline">
-          {t('pages.plannerList.contextMenu.copy')}
-        </span>
+        <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.copy')}</span>
       </Button>
 
       {/* Back to Top - Always visible */}

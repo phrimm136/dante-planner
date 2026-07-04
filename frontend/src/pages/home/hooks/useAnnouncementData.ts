@@ -29,7 +29,9 @@ function createI18nQueryOptions(language: string) {
       try {
         return await import(`@static/i18n/${language}/announcements.json`)
       } catch {
-        throw new Error(`[announcements/i18n] Missing language file for "${language}" — add static/i18n/${language}/announcements.json`)
+        throw new Error(
+          `[announcements/i18n] Missing language file for "${language}" — add static/i18n/${language}/announcements.json`,
+        )
       }
     },
     AnnouncementI18nSchema,
@@ -66,7 +68,7 @@ export function useAnnouncementData(): Announcement[] {
     const i18nEntry = i18nData[spec.id]
     if (!i18nEntry) {
       console.error(
-        `[useAnnouncementData] Missing i18n entry for id "${spec.id}" in language "${i18n.language}"`
+        `[useAnnouncementData] Missing i18n entry for id "${spec.id}" in language "${i18n.language}"`,
       )
       continue
     }

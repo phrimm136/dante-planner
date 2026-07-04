@@ -17,11 +17,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 interface ToolbarProps {
@@ -46,10 +42,7 @@ function ToolbarButton({ icon, label, isActive, onClick, disabled }: ToolbarButt
           type="button"
           variant="ghost"
           size="sm"
-          className={cn(
-            'h-8 w-8 p-0',
-            isActive && 'bg-muted'
-          )}
+          className={cn('h-8 w-8 p-0', isActive && 'bg-muted')}
           onClick={onClick}
           disabled={disabled}
           aria-label={label}
@@ -71,11 +64,7 @@ function ToolbarButton({ icon, label, isActive, onClick, disabled }: ToolbarButt
  * bullet list, ordered list, blockquote, code, code block,
  * link, spoiler
  */
-export function Toolbar({
-  editor,
-  visible,
-  onLinkClick,
-}: ToolbarProps) {
+export function Toolbar({ editor, visible, onLinkClick }: ToolbarProps) {
   const { t } = useTranslation(['planner', 'common'])
 
   if (!visible) {

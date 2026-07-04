@@ -48,15 +48,13 @@ export function IconFilter({
           return (
             <button
               key={option}
-              onClick={() => { toggleOption(option); }}
+              onClick={() => {
+                toggleOption(option)
+              }}
               data-selected={isSelected}
               className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
             >
-              <img
-                src={getIconPath(option)}
-                alt={label}
-                className="w-full h-full object-contain"
-              />
+              <img src={getIconPath(option)} alt={label} className="w-full h-full object-contain" />
             </button>
           )
         })}

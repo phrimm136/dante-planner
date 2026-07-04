@@ -30,11 +30,7 @@ export default function EnhancementPanel({ description, level, cost }: Enhanceme
         {/* Enhancement Cost */}
         {cost !== null && (
           <div className="flex items-center gap-2">
-            <img
-              src={getEGOGiftCostIconPath()}
-              alt="Cost"
-              className="w-6 h-6"
-            />
+            <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
         )}

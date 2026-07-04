@@ -53,9 +53,7 @@ function createPlannerKeywordsI18nQueryOptions(language: string) {
  */
 export function usePlannerKeywordsI18n(): PlannerKeywordsI18n {
   const { i18n } = useTranslation()
-  const { data } = useSuspenseQuery(
-    createPlannerKeywordsI18nQueryOptions(i18n.language)
-  )
+  const { data } = useSuspenseQuery(createPlannerKeywordsI18nQueryOptions(i18n.language))
   return data
 }
 
@@ -69,8 +67,6 @@ const EMPTY_MAP: PlannerKeywordsI18n = {}
  */
 export function usePlannerKeywordsI18nDeferred(): PlannerKeywordsI18n {
   const { i18n } = useTranslation()
-  const { data } = useQuery(
-    createPlannerKeywordsI18nQueryOptions(i18n.language)
-  )
+  const { data } = useQuery(createPlannerKeywordsI18nQueryOptions(i18n.language))
   return data ?? EMPTY_MAP
 }

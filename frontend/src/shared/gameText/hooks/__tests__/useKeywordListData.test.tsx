@@ -2,7 +2,11 @@ import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useKeywordListSpec, useKeywordListI18n, useKeywordListI18nDeferred } from '../useKeywordListData'
+import {
+  useKeywordListSpec,
+  useKeywordListI18n,
+  useKeywordListI18nDeferred,
+} from '../useKeywordListData'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()

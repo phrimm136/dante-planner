@@ -40,7 +40,6 @@ export function EGOGiftObservationSummary({
 
   // Breakpoint detection for scaling
 
-
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Load observation data for cost calculation (suspends)
@@ -50,7 +49,7 @@ export function EGOGiftObservationSummary({
   // Calculate current cost based on selection count
   const currentCost =
     observationData.observationEgoGiftCostDataList.find(
-      (cost) => cost.egogiftCount === selectedGiftIds.size
+      (cost) => cost.egogiftCount === selectedGiftIds.size,
     )?.starlightCost || 0
 
   // Build gift list items for selected gifts
@@ -87,10 +86,7 @@ export function EGOGiftObservationSummary({
       <button
         type="button"
         onClick={onClick}
-        className={cn(
-          'w-full text-left',
-          !readOnly && 'selectable cursor-pointer'
-        )}
+        className={cn('w-full text-left', !readOnly && 'selectable cursor-pointer')}
       >
         {hasSelectedGifts ? (
           <div className="flex flex-wrap gap-2 p-2 min-h-28">
@@ -110,7 +106,7 @@ export function EGOGiftObservationSummary({
             className={cn(
               'flex items-center justify-center p-2 text-muted-foreground',
               EMPTY_STATE.MIN_HEIGHT,
-              EMPTY_STATE.DASHED_BORDER
+              EMPTY_STATE.DASHED_BORDER,
             )}
           >
             {readOnly

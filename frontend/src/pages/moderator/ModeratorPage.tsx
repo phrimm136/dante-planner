@@ -4,7 +4,12 @@ import { Shield, Ban, Clock, UserCheck } from 'lucide-react'
 
 import { useAuthQuery } from '@/shared/auth'
 import { useModeratorUsers, useModerationHistory } from './hooks/useModeratorData'
-import { useBanUser, useUnbanUser, useTimeoutUser, useUntimeoutUser } from './hooks/useModeratorMutations'
+import {
+  useBanUser,
+  useUnbanUser,
+  useTimeoutUser,
+  useUntimeoutUser,
+} from './hooks/useModeratorMutations'
 import { BanDialog, TimeoutDialog, UnbanDialog, ClearTimeoutDialog } from '@/shared/moderation'
 import { Button } from '@/components/ui/button'
 import { formatUsername } from '@/lib/formatUsername'
@@ -34,54 +39,72 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
   const username = formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)
 
   const handleBanConfirm = (reason: string) => {
-    banMutation.mutate({ usernameSuffix: user.usernameSuffix, reason }, {
-      onSuccess: () => {
-        toast.success(t('dashboard.userBanned'))
-        setShowBanDialog(false)
+    banMutation.mutate(
+      { usernameSuffix: user.usernameSuffix, reason },
+      {
+        onSuccess: () => {
+          toast.success(t('dashboard.userBanned'))
+          setShowBanDialog(false)
+        },
+        onError: () => toast.error(t('dashboard.banFailed')),
       },
-      onError: () => toast.error(t('dashboard.banFailed')),
-    })
+    )
   }
 
   const handleUnbanConfirm = (reason: string) => {
-    unbanMutation.mutate({ usernameSuffix: user.usernameSuffix, reason }, {
-      onSuccess: () => {
-        toast.success(t('dashboard.userUnbanned'))
-        setShowUnbanDialog(false)
+    unbanMutation.mutate(
+      { usernameSuffix: user.usernameSuffix, reason },
+      {
+        onSuccess: () => {
+          toast.success(t('dashboard.userUnbanned'))
+          setShowUnbanDialog(false)
+        },
+        onError: () => toast.error(t('dashboard.unbanFailed')),
       },
-      onError: () => toast.error(t('dashboard.unbanFailed')),
-    })
+    )
   }
 
   const handleTimeoutConfirm = (durationMinutes: number, reason: string) => {
-    timeoutMutation.mutate({ usernameSuffix: user.usernameSuffix, durationMinutes, reason }, {
-      onSuccess: () => {
-        toast.success(t('dashboard.userTimedOut'))
-        setShowTimeoutDialog(false)
+    timeoutMutation.mutate(
+      { usernameSuffix: user.usernameSuffix, durationMinutes, reason },
+      {
+        onSuccess: () => {
+          toast.success(t('dashboard.userTimedOut'))
+          setShowTimeoutDialog(false)
+        },
+        onError: () => toast.error(t('dashboard.timeoutFailed')),
       },
-      onError: () => toast.error(t('dashboard.timeoutFailed')),
-    })
+    )
   }
 
   const handleUntimeoutConfirm = (reason: string) => {
-    untimeoutMutation.mutate({ usernameSuffix: user.usernameSuffix, reason }, {
-      onSuccess: () => {
-        toast.success(t('dashboard.timeoutRemoved'))
-        setShowUntimeoutDialog(false)
+    untimeoutMutation.mutate(
+      { usernameSuffix: user.usernameSuffix, reason },
+      {
+        onSuccess: () => {
+          toast.success(t('dashboard.timeoutRemoved'))
+          setShowUntimeoutDialog(false)
+        },
+        onError: () => toast.error(t('dashboard.untimeoutFailed')),
       },
-      onError: () => toast.error(t('dashboard.untimeoutFailed')),
-    })
+    )
   }
 
   return (
     <tr className="border-b">
-      <td className="px-4 py-3 text-sm">{formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}</td>
       <td className="px-4 py-3 text-sm">
-        <span className={
-          user.role === 'ADMIN' ? 'text-red-500 font-semibold' :
-          user.role === 'MODERATOR' ? 'text-blue-500 font-semibold' :
-          ''
-        }>
+        {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
+      </td>
+      <td className="px-4 py-3 text-sm">
+        <span
+          className={
+            user.role === 'ADMIN'
+              ? 'text-red-500 font-semibold'
+              : user.role === 'MODERATOR'
+                ? 'text-blue-500 font-semibold'
+                : ''
+          }
+        >
           {user.role}
         </span>
       </td>
@@ -179,17 +202,28 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
  */
 function HistoryRow({ action }: { action: ModerationAction }) {
   const { i18n } = useTranslation()
-  const actorName = formatUsername(action.actorUsernameEpithet, action.actorUsernameSuffix, i18n.language)
+  const actorName = formatUsername(
+    action.actorUsernameEpithet,
+    action.actorUsernameSuffix,
+    i18n.language,
+  )
 
   const getActionColor = (type: ModerationAction['actionType']) => {
     switch (type) {
-      case 'BAN': return 'text-red-500'
-      case 'UNBAN': return 'text-green-500'
-      case 'TIMEOUT': return 'text-orange-500'
-      case 'CLEAR_TIMEOUT': return 'text-green-500'
-      case 'DELETE_PLANNER': return 'text-red-500'
-      case 'DELETE_COMMENT': return 'text-red-500'
-      default: return ''
+      case 'BAN':
+        return 'text-red-500'
+      case 'UNBAN':
+        return 'text-green-500'
+      case 'TIMEOUT':
+        return 'text-orange-500'
+      case 'CLEAR_TIMEOUT':
+        return 'text-green-500'
+      case 'DELETE_PLANNER':
+        return 'text-red-500'
+      case 'DELETE_COMMENT':
+        return 'text-red-500'
+      default:
+        return ''
     }
   }
 
@@ -246,15 +280,25 @@ export default function ModeratorPage() {
           <table className="w-full">
             <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.username')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.username')}
+                </th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.role')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.status')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.actions')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.status')}
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.actions')}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {users.map(user => (
-                <UserRow key={user.usernameSuffix} user={user} currentUserSuffix={currentUser?.usernameSuffix || ''} />
+              {users.map((user) => (
+                <UserRow
+                  key={user.usernameSuffix}
+                  user={user}
+                  currentUserSuffix={currentUser?.usernameSuffix || ''}
+                />
               ))}
             </tbody>
           </table>
@@ -269,11 +313,21 @@ export default function ModeratorPage() {
             <thead className="bg-muted">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.time')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.action')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.targetType')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.moderator')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.reason')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.duration')}</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.action')}
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.targetType')}
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.moderator')}
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.reason')}
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">
+                  {t('dashboard.duration')}
+                </th>
               </tr>
             </thead>
             <tbody>

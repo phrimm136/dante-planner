@@ -31,8 +31,6 @@ function createTraitsI18nQueryOptions(language: string) {
  */
 export function useTraitsI18n(): Record<string, string> {
   const { i18n } = useTranslation()
-  const { data: traitsI18n } = useSuspenseQuery(
-    createTraitsI18nQueryOptions(i18n.language)
-  )
+  const { data: traitsI18n } = useSuspenseQuery(createTraitsI18nQueryOptions(i18n.language))
   return traitsI18n
 }

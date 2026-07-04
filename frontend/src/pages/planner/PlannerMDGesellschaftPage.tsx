@@ -53,18 +53,8 @@ function GesellschaftPageContent() {
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 
-  const {
-    category,
-    page,
-    mode,
-    search,
-    keyword,
-    identity,
-    ego,
-    gift,
-    themePack,
-    setFilters,
-  } = useMDGesellschaftFilters()
+  const { category, page, mode, search, keyword, identity, ego, gift, themePack, setFilters } =
+    useMDGesellschaftFilters()
 
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 

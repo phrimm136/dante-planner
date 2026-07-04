@@ -47,13 +47,7 @@ function EventImage({
       </div>
     )
   }
-  return (
-    <img
-      src={getAbEventImagePath(illustId ?? eventId)}
-      alt=""
-      className="w-full rounded-lg"
-    />
-  )
+  return <img src={getAbEventImagePath(illustId ?? eventId)} alt="" className="w-full rounded-lg" />
 }
 
 function RelatedEgoGifts({ giftIds, label }: { giftIds: string[]; label: string }) {
@@ -111,11 +105,7 @@ function RelatedThemePacks({ packIds, label }: { packIds: string[]; label: strin
         {packIds.map((id, idx) => (
           <span key={id}>
             {idx > 0 && ', '}
-            <Link
-              to="/theme-pack/$id"
-              params={{ id }}
-              className="hover:underline text-foreground"
-            >
+            <Link to="/theme-pack/$id" params={{ id }} className="hover:underline text-foreground">
               {themePackI18n[id]?.name ?? id}
             </Link>
           </span>
@@ -144,8 +134,7 @@ function AbEventDetailContent() {
   const giftNames = useEGOGiftListI18n()
 
   const sinnerNameLabel = t('abEvent.sinnerName', 'Sinner Name')
-  const processText = (text: string) =>
-    text.replace(/\[?\{0\}\]?/g, `{${sinnerNameLabel}}`)
+  const processText = (text: string) => text.replace(/\[?\{0\}\]?/g, `{${sinnerNameLabel}}`)
 
   const i18nCtx: CoinTossI18nContext = {
     affinityNames: shared.affinities ?? {},
@@ -160,7 +149,11 @@ function AbEventDetailContent() {
 
   const leftColumn = (
     <div className="space-y-4">
-      <EventImage eventId={id} hasImage={specEntry?.hasImage ?? false} illustId={specEntry?.illustId} />
+      <EventImage
+        eventId={id}
+        hasImage={specEntry?.hasImage ?? false}
+        illustId={specEntry?.illustId}
+      />
 
       {i18n.desc && (
         <div className="text-sm text-muted-foreground whitespace-pre-line border rounded p-4">
@@ -168,20 +161,27 @@ function AbEventDetailContent() {
         </div>
       )}
 
-      {specEntry && (specEntry.relatedEgoGifts.length > 0 || specEntry.relatedThemePacks.length > 0) && (
-        <div className="border rounded p-4 space-y-4">
-          {specEntry.relatedEgoGifts.length > 0 && (
-            <Suspense fallback={<Skeleton className="h-24 w-full" />}>
-              <RelatedEgoGifts giftIds={specEntry.relatedEgoGifts} label={t('abEvent.relatedEgoGifts', 'Related EGO Gifts')} />
-            </Suspense>
-          )}
-          {specEntry.relatedThemePacks.length > 0 && (
-            <Suspense fallback={<Skeleton className="h-12 w-full" />}>
-              <RelatedThemePacks packIds={specEntry.relatedThemePacks} label={t('abEvent.relatedThemePacks', 'Related Theme Packs')} />
-            </Suspense>
-          )}
-        </div>
-      )}
+      {specEntry &&
+        (specEntry.relatedEgoGifts.length > 0 || specEntry.relatedThemePacks.length > 0) && (
+          <div className="border rounded p-4 space-y-4">
+            {specEntry.relatedEgoGifts.length > 0 && (
+              <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+                <RelatedEgoGifts
+                  giftIds={specEntry.relatedEgoGifts}
+                  label={t('abEvent.relatedEgoGifts', 'Related EGO Gifts')}
+                />
+              </Suspense>
+            )}
+            {specEntry.relatedThemePacks.length > 0 && (
+              <Suspense fallback={<Skeleton className="h-12 w-full" />}>
+                <RelatedThemePacks
+                  packIds={specEntry.relatedThemePacks}
+                  label={t('abEvent.relatedThemePacks', 'Related Theme Packs')}
+                />
+              </Suspense>
+            )}
+          </div>
+        )}
     </div>
   )
 

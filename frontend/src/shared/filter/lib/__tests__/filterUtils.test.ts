@@ -78,7 +78,7 @@ describe('calculateActiveFilterCount', () => {
         selectedSinAffinities,
         selectedDamageTypes,
         selectedDefenseTypes,
-        selectedUnitKeywords
+        selectedUnitKeywords,
       )
 
       expect(result).toBe(12)
@@ -98,7 +98,7 @@ describe('calculateActiveFilterCount', () => {
         selectedEGOTypes,
         selectedAffinities,
         selectedSinAffinities,
-        selectedUnitKeywords
+        selectedUnitKeywords,
       )
 
       expect(result).toBe(12)
@@ -126,7 +126,7 @@ describe('calculateActiveFilterCount', () => {
         selectedEgoTypes,
         selectedSeasons,
         selectedUnitKeywords,
-        selectedBattleKeywords
+        selectedBattleKeywords,
       )
 
       expect(result).toBe(16)

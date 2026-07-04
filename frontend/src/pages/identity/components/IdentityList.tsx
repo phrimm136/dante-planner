@@ -64,10 +64,7 @@ export function IdentityList({
   const identityNames = useIdentityListI18nDeferred()
 
   // Sort all identities once (stable order for CSS-based filtering)
-  const sortedIdentities = useMemo(
-    () => sortByReleaseDate(identities),
-    [identities]
-  )
+  const sortedIdentities = useMemo(() => sortByReleaseDate(identities), [identities])
 
   // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
@@ -95,7 +92,7 @@ export function IdentityList({
       // Keyword filter - AND logic (identity must have ALL selected keywords)
       if (selectedKeywords.size > 0) {
         const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-          identity.skillKeywordList.includes(selectedKeyword)
+          identity.skillKeywordList.includes(selectedKeyword),
         )
         if (!hasAllKeywords) continue
       }
@@ -103,7 +100,7 @@ export function IdentityList({
       // Battle keyword filter - OR logic (identity must have ANY selected battle keyword)
       if (selectedBattleKeywords.size > 0) {
         const hasAnyBattleKeyword = (identity.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword)
+          selectedBattleKeywords.has(keyword),
         )
         if (!hasAnyBattleKeyword) continue
       }
@@ -111,7 +108,7 @@ export function IdentityList({
       // Attribute filter - AND logic (identity must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
         const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-          identity.attributeTypes.includes(attr)
+          identity.attributeTypes.includes(attr),
         )
         if (!hasAllAttributes) continue
       }
@@ -119,7 +116,7 @@ export function IdentityList({
       // Attack type filter - AND logic (identity must have ALL selected attack types)
       if (selectedAtkTypes.size > 0) {
         const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-          identity.atkTypes.includes(atkType)
+          identity.atkTypes.includes(atkType),
         )
         if (!hasAllAtkTypes) continue
       }
@@ -127,7 +124,7 @@ export function IdentityList({
       // Defense type filter - AND logic (identity must have ALL selected defense types)
       if (selectedDefTypes.size > 0) {
         const hasAllDefTypes = Array.from(selectedDefTypes).every((defType) =>
-          identity.defenseTypes.includes(defType)
+          identity.defenseTypes.includes(defType),
         )
         if (!hasAllDefTypes) continue
       }
@@ -145,7 +142,7 @@ export function IdentityList({
       // Unit keyword filter - OR logic (identity has ANY selected unit keyword in unitKeywordList)
       if (selectedUnitKeywords.size > 0) {
         const hasAnyUnitKeyword = identity.unitKeywordList.some((keyword) =>
-          selectedUnitKeywords.has(keyword)
+          selectedUnitKeywords.has(keyword),
         )
         if (!hasAnyUnitKeyword) continue
       }
@@ -161,7 +158,9 @@ export function IdentityList({
         // Check keyword match (partial match on natural language, then lookup bracketed values)
         const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bracketedValue) => identity.skillKeywordList.includes(bracketedValue))
+            return bracketedValues.some((bracketedValue) =>
+              identity.skillKeywordList.includes(bracketedValue),
+            )
           }
           return false
         })
@@ -169,7 +168,9 @@ export function IdentityList({
         // Check unit keyword match (partial match on natural language, then lookup internal codes)
         const unitKeywordMatch = unitKeywordEntries.some(([naturalLang, internalCodes]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return internalCodes.some((internalCode) => identity.unitKeywordList.includes(internalCode))
+            return internalCodes.some((internalCode) =>
+              identity.unitKeywordList.includes(internalCode),
+            )
           }
           return false
         })
@@ -202,9 +203,7 @@ export function IdentityList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('identity.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('identity.emptyState')}</div>
       </div>
     )
   }

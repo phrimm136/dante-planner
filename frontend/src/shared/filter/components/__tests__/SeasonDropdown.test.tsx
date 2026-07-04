@@ -19,9 +19,7 @@ vi.mock('react-i18next', async (importOriginal) => {
 // Mock filter i18n data hook to avoid Suspense/query setup
 vi.mock('@/shared/filter/hooks/useFilterI18nData', () => ({
   useFilterI18nData: () => ({
-    seasonsI18n: Object.fromEntries(
-      SEASONS.map((s) => [String(s), `Season ${s}`])
-    ),
+    seasonsI18n: Object.fromEntries(SEASONS.map((s) => [String(s), `Season ${s}`])),
     unitKeywordsI18n: {},
   }),
 }))
@@ -40,12 +38,7 @@ describe('SeasonDropdown', () => {
   })
 
   it('shows selected count when seasons are active', () => {
-    render(
-      <SeasonDropdown
-        {...defaultProps}
-        selectedSeasons={new Set<Season>([1, 3])}
-      />
-    )
+    render(<SeasonDropdown {...defaultProps} selectedSeasons={new Set<Season>([1, 3])} />)
 
     expect(screen.getByText('(2)')).toBeInTheDocument()
   })
@@ -63,7 +56,9 @@ describe('SeasonDropdown', () => {
     await user.click(screen.getByRole('combobox'))
 
     for (const season of SEASONS) {
-      expect(screen.getByRole('option', { name: new RegExp(`Season ${season}`) })).toBeInTheDocument()
+      expect(
+        screen.getByRole('option', { name: new RegExp(`Season ${season}`) }),
+      ).toBeInTheDocument()
     }
   })
 
@@ -86,10 +81,7 @@ describe('SeasonDropdown', () => {
     const user = userEvent.setup()
 
     render(
-      <SeasonDropdown
-        selectedSeasons={new Set<Season>()}
-        onSelectionChange={onSelectionChange}
-      />
+      <SeasonDropdown selectedSeasons={new Set<Season>()} onSelectionChange={onSelectionChange} />,
     )
 
     await user.click(screen.getByRole('combobox'))
@@ -107,7 +99,7 @@ describe('SeasonDropdown', () => {
       <SeasonDropdown
         selectedSeasons={new Set<Season>([firstSeason])}
         onSelectionChange={onSelectionChange}
-      />
+      />,
     )
 
     await user.click(screen.getByRole('combobox'))
@@ -123,7 +115,9 @@ describe('SeasonDropdown', () => {
     await user.click(screen.getByRole('combobox'))
     await user.click(screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[0]}`) }))
 
-    expect(screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[1]}`) })).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: new RegExp(`Season ${SEASONS[1]}`) }),
+    ).toBeInTheDocument()
   })
 
   it('displays element counts when provided', async () => {

@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerNotFound } from './components/PlannerNotFound'
-import { PlannerEditorStoreProvider, createDefaultSectionNotes } from './stores/usePlannerEditorStore'
+import {
+  PlannerEditorStoreProvider,
+  createDefaultSectionNotes,
+} from './stores/usePlannerEditorStore'
 import { deserializeSets } from './schemas/PlannerSchemas'
 import { PlannerMDEditorContent } from './components/planner/PlannerMDEditorContent'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
@@ -50,8 +53,7 @@ function PlannerEditContent({ id }: { id: string }) {
   const planner = useSavedPlannerQuery(id)
 
   if (!planner) {
-      return <PlannerNotFound listPath="/planner/md" />
-
+    return <PlannerNotFound listPath="/planner/md" />
   }
 
   if (planner.config.type !== 'MIRROR_DUNGEON') {
@@ -61,7 +63,10 @@ function PlannerEditContent({ id }: { id: string }) {
           {t('pages.detail.invalidType', 'Invalid Planner Type')}
         </h1>
         <p className="text-muted-foreground mb-6">
-          {t('pages.detail.invalidTypeMessage', 'This editor only supports Mirror Dungeon planners.')}
+          {t(
+            'pages.detail.invalidTypeMessage',
+            'This editor only supports Mirror Dungeon planners.',
+          )}
         </p>
         <p className="text-sm text-muted-foreground">
           {t('pages.detail.currentType', 'Current type')}: {planner.config.type}
@@ -98,7 +103,7 @@ function PlannerEditContent({ id }: { id: string }) {
             Object.entries(content.sectionNotes).map(([key, note]) => [
               key,
               { content: note?.content ?? '' },
-            ])
+            ]),
           )
         : {}),
     },

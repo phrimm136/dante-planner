@@ -42,7 +42,7 @@ export function ThemePackDropdown({
         label: themePackI18n[themePackId]?.name ?? `Theme Pack ${themePackId}`,
         count: packData.specificEgoGiftPool?.length,
       })),
-    [themePackList, themePackI18n]
+    [themePackList, themePackI18n],
   )
 
   return (

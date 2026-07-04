@@ -1,14 +1,20 @@
-import { useSuspenseQuery, useQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query';
-import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api';
-import { queryClient } from '@/lib/queryClient';
-import { UserSchema, type User } from '../schemas/AuthSchemas';
+import {
+  useSuspenseQuery,
+  useQuery,
+  useMutation,
+  useQueryClient,
+  queryOptions,
+} from '@tanstack/react-query'
+import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
+import { queryClient } from '@/lib/queryClient'
+import { UserSchema, type User } from '../schemas/AuthSchemas'
 
 /**
  * Query keys for auth-related queries
  */
 export const authQueryKeys = {
   me: ['auth', 'me'] as const,
-};
+}
 
 /**
  * Query options for fetching current user
@@ -19,28 +25,28 @@ export function createAuthMeQueryOptions() {
     queryKey: authQueryKeys.me,
     queryFn: async (): Promise<User | null> => {
       try {
-        const data = await ApiClient.get<User | null>('/api/auth/me');
-        if (data === null) return null;
-        const result = UserSchema.safeParse(data);
+        const data = await ApiClient.get<User | null>('/api/auth/me')
+        if (data === null) return null
+        const result = UserSchema.safeParse(data)
         if (!result.success) {
-          console.error('User validation failed:', result.error);
-          return null;
+          console.error('User validation failed:', result.error)
+          return null
         }
-        return result.data;
+        return result.data
       } catch (error) {
         // Transient backend/DB unavailability must NOT log the user out: preserve the
         // last-known identity so a maintenance blip doesn't flip an authed user to guest.
         // Only a genuine auth failure (401 / invalid token / null body) degrades to guest.
         if (error instanceof BackendUnavailableError || error instanceof ServiceUpdatingError) {
-          const cached = queryClient.getQueryData<User | null>(authQueryKeys.me);
-          if (cached) return cached;
+          const cached = queryClient.getQueryData<User | null>(authQueryKeys.me)
+          if (cached) return cached
         }
-        return null;
+        return null
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes - auth state is relatively stable
     retry: false, // Don't retry auth failures
-  });
+  })
 }
 
 /**
@@ -61,7 +67,7 @@ export function createAuthMeQueryOptions() {
  * ```
  */
 export function useAuthQuery() {
-  return useSuspenseQuery(createAuthMeQueryOptions());
+  return useSuspenseQuery(createAuthMeQueryOptions())
 }
 
 /**
@@ -84,7 +90,7 @@ export function useAuthQuery() {
  * ```
  */
 export function useAuthQueryNonBlocking() {
-  return useQuery(createAuthMeQueryOptions());
+  return useQuery(createAuthMeQueryOptions())
 }
 
 /**
@@ -104,18 +110,18 @@ export function useAuthQueryNonBlocking() {
  * ```
  */
 export function useLogout() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async () => {
-      await ApiClient.post('/api/auth/logout');
+      await ApiClient.post('/api/auth/logout')
     },
     onSuccess: () => {
       // Clear auth cache
-      queryClient.setQueryData(authQueryKeys.me, null);
+      queryClient.setQueryData(authQueryKeys.me, null)
     },
     onError: (error) => {
-      console.error('Logout failed:', error);
+      console.error('Logout failed:', error)
     },
-  });
+  })
 }

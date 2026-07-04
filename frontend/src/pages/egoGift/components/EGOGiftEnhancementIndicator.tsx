@@ -9,9 +9,7 @@ interface EGOGiftEnhancementIndicatorProps {
  * Shows +1 or +2 icon in upper-right corner
  * Not displayed for base level (0)
  */
-export function EGOGiftEnhancementIndicator({
-  enhancement,
-}: EGOGiftEnhancementIndicatorProps) {
+export function EGOGiftEnhancementIndicator({ enhancement }: EGOGiftEnhancementIndicatorProps) {
   if (enhancement === 0) {
     return null
   }

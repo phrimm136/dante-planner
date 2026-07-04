@@ -49,8 +49,6 @@ export function useKeywordDetailSpec(id: string): BattleKeywordSpecEntry | undef
  */
 export function useKeywordDetailI18n(id: string): BattleKeywordI18nEntry | undefined {
   const { i18n } = useTranslation()
-  const { data: i18nList } = useSuspenseQuery(
-    createKeywordI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nList } = useSuspenseQuery(createKeywordI18nQueryOptions(i18n.language))
   return i18nList[id]
 }

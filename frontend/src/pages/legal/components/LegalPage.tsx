@@ -30,10 +30,7 @@ export function LegalPage({ namespace, lastUpdated, sections, bulletSections }: 
               {section === 'contact' && (
                 <>
                   {' '}
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    className="text-primary hover:underline"
-                  >
+                  <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
                     {CONTACT_EMAIL}
                   </a>
                 </>
@@ -41,11 +38,11 @@ export function LegalPage({ namespace, lastUpdated, sections, bulletSections }: 
             </p>
             {bulletSections.includes(section) && (
               <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-2">
-                {(t(`${namespace}.sections.${section}.items`, { returnObjects: true }) as string[]).map(
-                  (item, index) => (
-                    <li key={index}>{item}</li>
-                  )
-                )}
+                {(
+                  t(`${namespace}.sections.${section}.items`, { returnObjects: true }) as string[]
+                ).map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
               </ul>
             )}
           </section>

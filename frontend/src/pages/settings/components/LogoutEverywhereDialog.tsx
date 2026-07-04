@@ -61,9 +61,7 @@ export function LogoutEverywhereDialog({
       >
         <DialogHeader>
           <DialogTitle>{t('settings.logoutEverywhere.confirmTitle')}</DialogTitle>
-          <DialogDescription>
-            {t('settings.logoutEverywhere.confirmDescription')}
-          </DialogDescription>
+          <DialogDescription>{t('settings.logoutEverywhere.confirmDescription')}</DialogDescription>
         </DialogHeader>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">

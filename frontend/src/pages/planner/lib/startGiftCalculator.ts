@@ -19,7 +19,7 @@ import { getBuffById } from '../hooks/useStartBuffData'
  */
 export function calculateMaxGiftSelection(
   buffs: StartBuff[] | undefined,
-  selectedIds: Set<number>
+  selectedIds: Set<number>,
 ): number {
   if (!buffs) return 1
 

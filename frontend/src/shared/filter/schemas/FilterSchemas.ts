@@ -12,18 +12,22 @@ import { SEASONS, ASSOCIATIONS } from '@/shared/gameData'
  * Seasons i18n schema - maps season ID string to localized name
  * Dynamically generated from SEASONS constant
  */
-export const SeasonsI18nSchema = z.object(
-  Object.fromEntries(SEASONS.map((season) => [String(season), z.string()])) as {
-    [K in `${typeof SEASONS[number]}`]: z.ZodString
-  }
-).strict()
+export const SeasonsI18nSchema = z
+  .object(
+    Object.fromEntries(SEASONS.map((season) => [String(season), z.string()])) as {
+      [K in `${(typeof SEASONS)[number]}`]: z.ZodString
+    },
+  )
+  .strict()
 
 /**
  * UnitKeywords i18n schema - maps unit keyword code to localized name
  * Dynamically generated from ASSOCIATIONS constant
  */
-export const UnitKeywordsI18nSchema = z.object(
-  Object.fromEntries(ASSOCIATIONS.map((assoc) => [assoc, z.string()])) as {
-    [K in typeof ASSOCIATIONS[number]]: z.ZodString
-  }
-).strict()
+export const UnitKeywordsI18nSchema = z
+  .object(
+    Object.fromEntries(ASSOCIATIONS.map((assoc) => [assoc, z.string()])) as {
+      [K in (typeof ASSOCIATIONS)[number]]: z.ZodString
+    },
+  )
+  .strict()

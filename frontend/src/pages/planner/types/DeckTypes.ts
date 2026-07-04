@@ -1,5 +1,12 @@
 import type { EGOType } from '@/pages/ego'
-import type { Affinity, AtkType, DefType, OffensiveSkillSlot, Season, SkillAttributeType } from '@/shared/gameData'
+import type {
+  Affinity,
+  AtkType,
+  DefType,
+  OffensiveSkillSlot,
+  Season,
+  SkillAttributeType,
+} from '@/shared/gameData'
 
 /**
  * Uptie tier for identities (1-4)

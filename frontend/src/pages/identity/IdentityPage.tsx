@@ -66,7 +66,7 @@ function IdentityCardGrid({
         updateDate: specData.updateDate,
         season: specData.season,
       })),
-    [spec]
+    [spec],
   )
 
   return (
@@ -109,7 +109,11 @@ function IdentityPageShell() {
   }, [spec])
 
   // Filter states
-  const { values: filters, setters, resetAll } = useSetFilters({
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
     selectedSinners: new Set<string>(),
     selectedKeywords: new Set<string>(),
     selectedBattleKeywords: new Set<string>(),

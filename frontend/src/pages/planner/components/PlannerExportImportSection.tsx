@@ -126,7 +126,9 @@ function PlannerExportImportSectionContent() {
 
       // Compress with gzip (type assertion for header option not in DefinitelyTyped)
       const jsonString = JSON.stringify(envelope)
-      const compressed = pako.gzip(jsonString, { header: { os: 10 } } as pako.DeflateFunctionOptions)
+      const compressed = pako.gzip(jsonString, {
+        header: { os: 10 },
+      } as pako.DeflateFunctionOptions)
 
       setProgress(80)
 
@@ -143,7 +145,7 @@ function PlannerExportImportSectionContent() {
 
       setProgress(100)
       toast.success(
-        t('exportImport.exportSuccess', 'Exported {{count}} planners', { count: planners.length })
+        t('exportImport.exportSuccess', 'Exported {{count}} planners', { count: planners.length }),
       )
     } catch (error) {
       console.error('Export failed:', error)
@@ -320,7 +322,7 @@ function PlannerExportImportSectionContent() {
             t('exportImport.partialImport', 'Imported {{imported}}, {{conflicts}} conflicts', {
               imported,
               conflicts: conflictItems.length,
-            })
+            }),
           )
         }
         // Don't reset progress - conflicts pending
@@ -331,11 +333,11 @@ function PlannerExportImportSectionContent() {
             t('exportImport.importPartialSuccess', 'Imported {{imported}}, skipped {{skipped}}', {
               imported,
               skipped,
-            })
+            }),
           )
         } else {
           toast.success(
-            t('exportImport.importSuccess', 'Imported {{count}} planners', { count: imported })
+            t('exportImport.importSuccess', 'Imported {{count}} planners', { count: imported }),
           )
         }
         resetImportState()
@@ -384,8 +386,11 @@ function PlannerExportImportSectionContent() {
           }
         } else if (resolution.choice === 'both') {
           // Keep both - save imported with new ID and "(Copy)" suffix via i18n
-          const baseTitle = conflict.serverPlanner.metadata.title || t('pages.plannerMD.untitled', 'Untitled')
-          const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title: baseTitle })
+          const baseTitle =
+            conflict.serverPlanner.metadata.title || t('pages.plannerMD.untitled', 'Untitled')
+          const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', {
+            title: baseTitle,
+          })
           const copyPlanner: SaveablePlanner = {
             metadata: {
               ...conflict.serverPlanner.metadata,
@@ -415,10 +420,15 @@ function PlannerExportImportSectionContent() {
 
     if (errors > 0) {
       toast.warning(
-        t('exportImport.resolvePartial', 'Resolved {{saved}}, {{errors}} errors', { saved, errors })
+        t('exportImport.resolvePartial', 'Resolved {{saved}}, {{errors}} errors', {
+          saved,
+          errors,
+        }),
       )
     } else if (saved > 0) {
-      toast.success(t('exportImport.resolveSuccess', 'Resolved {{count}} conflicts', { count: saved }))
+      toast.success(
+        t('exportImport.resolveSuccess', 'Resolved {{count}} conflicts', { count: saved }),
+      )
     } else {
       toast.success(t('exportImport.resolveKeptLocal', 'Kept all local versions'))
     }
@@ -428,14 +438,12 @@ function PlannerExportImportSectionContent() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">
-        {t('exportImport.title', 'Export / Import')}
-      </h2>
+      <h2 className="text-lg font-semibold">{t('exportImport.title', 'Export / Import')}</h2>
 
       <p className="text-sm text-muted-foreground">
         {t(
           'exportImport.description',
-          'Backup your planners to a file or restore from a previous backup. No server interaction.'
+          'Backup your planners to a file or restore from a previous backup. No server interaction.',
         )}
       </p>
 
@@ -451,11 +459,7 @@ function PlannerExportImportSectionContent() {
 
       {/* Action buttons */}
       <div className="flex gap-3">
-        <Button
-          variant="outline"
-          onClick={handleExport}
-          disabled={isProcessing}
-        >
+        <Button variant="outline" onClick={handleExport} disabled={isProcessing}>
           {isExporting
             ? t('exportImport.exporting', 'Exporting...')
             : t('exportImport.export', 'Export')}

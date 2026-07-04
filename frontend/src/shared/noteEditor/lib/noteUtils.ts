@@ -55,7 +55,7 @@ export function measureDocBytes(doc: JSONContent): number {
 export function largestPrefixWithinLimit(
   text: string,
   measure: (candidate: string) => number,
-  limit: number
+  limit: number,
 ): number {
   let lo = 0
   let hi = text.length

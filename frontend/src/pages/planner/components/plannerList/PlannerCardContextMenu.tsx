@@ -1,15 +1,7 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import {
-  Eye,
-  Edit,
-  Copy,
-  Globe,
-  Trash2,
-  GitFork,
-  ThumbsUp,
-} from 'lucide-react'
+import { Eye, Edit, Copy, Globe, Trash2, GitFork, ThumbsUp } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -129,16 +121,19 @@ export function PlannerCardContextMenu({
   }
 
   const handleFork = () => {
-    forkMutation.mutate({ plannerId: planner.id }, {
-      onSuccess: (forkResult) => {
-        void navigate({
-          to: '/planner/md/$id/edit',
-          params: { id: forkResult.newPlannerId },
-        }).then(() => {
-          window.scrollTo({ top: 0 })
-        })
+    forkMutation.mutate(
+      { plannerId: planner.id },
+      {
+        onSuccess: (forkResult) => {
+          void navigate({
+            to: '/planner/md/$id/edit',
+            params: { id: forkResult.newPlannerId },
+          }).then(() => {
+            window.scrollTo({ top: 0 })
+          })
+        },
       },
-    })
+    )
     setOpen(false)
   }
 
@@ -162,11 +157,10 @@ export function PlannerCardContextMenu({
           // Reset flag after mutation completes (success or error)
           voteInProgressRef.current = false
         },
-      }
+      },
     )
     setOpen(false)
   }
-
 
   // Render My Plans actions
   if (view === 'my-plans') {
@@ -197,10 +191,7 @@ export function PlannerCardContextMenu({
             {t('pages.plannerList.contextMenu.publish')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={handleDelete}
-            variant="destructive"
-          >
+          <DropdownMenuItem onClick={handleDelete} variant="destructive">
             <Trash2 className="size-4" />
             {t('pages.plannerList.contextMenu.delete')}
           </DropdownMenuItem>
@@ -251,11 +242,7 @@ export function PlannerCardContextMenu({
               disabled={voteMutation.isPending || planner.hasUpvoted === true}
             >
               <ThumbsUp
-                className={
-                  planner.hasUpvoted
-                    ? 'size-4 fill-current text-primary'
-                    : 'size-4'
-                }
+                className={planner.hasUpvoted ? 'size-4 fill-current text-primary' : 'size-4'}
               />
               {planner.hasUpvoted
                 ? t('pages.plannerList.contextMenu.upvoted')

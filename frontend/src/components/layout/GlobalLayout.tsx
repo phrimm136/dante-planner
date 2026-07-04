@@ -50,10 +50,7 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
       </div>
 
       {/* First-login sync choice dialog (GDPR compliant) */}
-      <SyncChoiceDialog
-        open={showSyncChoiceDialog}
-        onChoice={handleSyncChoice}
-      />
+      <SyncChoiceDialog open={showSyncChoiceDialog} onChoice={handleSyncChoice} />
     </div>
   )
 }

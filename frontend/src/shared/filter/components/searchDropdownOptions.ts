@@ -32,7 +32,7 @@ export type SearchListDataHook = () => {
  */
 export function buildNameOptions(
   ids: string[],
-  names: Record<string, string>
+  names: Record<string, string>,
 ): SearchDropdownOption[] {
   return ids.map((id) => ({
     value: id,
@@ -49,7 +49,7 @@ export function buildNameOptions(
 export function buildSinnerSuffixedOptions(
   ids: string[],
   names: Record<string, string>,
-  getSinnerName: (id: string) => string
+  getSinnerName: (id: string) => string,
 ): SearchDropdownOption[] {
   return ids.map((id) => ({
     value: id,

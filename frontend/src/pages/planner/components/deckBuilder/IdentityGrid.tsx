@@ -39,7 +39,7 @@ export function IdentityGrid({
 
   const displayIdentities = useMemo(
     () => sortedIdentities.slice(0, visibleCount),
-    [sortedIdentities, visibleCount]
+    [sortedIdentities, visibleCount],
   )
 
   return (
@@ -76,13 +76,15 @@ export function IdentityGrid({
                       <IdentityCard
                         identity={identity}
                         isSelected={isSelected}
-                        overlay={isSelected ? (
-                          <img
-                            src={getSelectedIndicatorPath()}
-                            alt="Selected"
-                            className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
-                          />
-                        ) : undefined}
+                        overlay={
+                          isSelected ? (
+                            <img
+                              src={getSelectedIndicatorPath()}
+                              alt="Selected"
+                              className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
+                            />
+                          ) : undefined
+                        }
                       />
                     </ScaledCardWrapper>
                   </TierLevelSelector>

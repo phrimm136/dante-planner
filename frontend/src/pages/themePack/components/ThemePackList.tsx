@@ -42,7 +42,7 @@ export function ThemePackList({
   // Build sorted pack list
   const sortedPacks = useMemo(
     () => Object.entries(spec).sort(([a], [b]) => a.localeCompare(b)),
-    [spec]
+    [spec],
   )
 
   // Progressive rendering
@@ -94,10 +94,7 @@ export function ThemePackList({
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.THEME_PACK} mobileScale={0.8}>
         {sortedPacks.slice(0, displayCount).map(([packId, entry]) => {
           const i18nEntry = themePackI18n[packId]
           return (

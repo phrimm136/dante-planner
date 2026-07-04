@@ -33,13 +33,8 @@ export function PlannerSection({ title, children, onViewNotes }: PlannerSectionP
       <div className="flex items-center justify-between mb-2 h-8">
         <h2 className={SECTION_STYLES.TEXT.header}>{title}</h2>
         {onViewNotes && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onViewNotes}
-            className="gap-2"
-          >
-            <FileText/>
+          <Button variant="ghost" size="sm" onClick={onViewNotes} className="gap-2">
+            <FileText />
             {t('viewNotes')}
           </Button>
         )}

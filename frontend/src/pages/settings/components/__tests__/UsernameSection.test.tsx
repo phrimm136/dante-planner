@@ -217,7 +217,7 @@ describe('UsernameSection', () => {
         expect.objectContaining({
           onSuccess: expect.any(Function),
           onError: expect.any(Function),
-        })
+        }),
       )
     })
   })

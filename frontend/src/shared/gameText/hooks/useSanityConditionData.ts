@@ -1,8 +1,8 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
-import { createStaticDataQueryOptions } from '@/lib/queryOptions';
-import { SanityConditionI18nSchema } from '../schemas/SanityConditionSchemas';
-import type { SanityConditionI18n } from '../schemas/SanityConditionSchemas';
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
+import { SanityConditionI18nSchema } from '../schemas/SanityConditionSchemas'
+import type { SanityConditionI18n } from '../schemas/SanityConditionSchemas'
 
 /**
  * Query keys for sanity condition i18n data
@@ -10,7 +10,7 @@ import type { SanityConditionI18n } from '../schemas/SanityConditionSchemas';
  */
 export const sanityConditionQueryKeys = {
   i18n: (language: string) => ['sanityCondition', 'i18n', language] as const,
-};
+}
 
 function createSanityConditionI18nQueryOptions(language: string) {
   return createStaticDataQueryOptions(
@@ -18,7 +18,7 @@ function createSanityConditionI18nQueryOptions(language: string) {
     () => import(`@static/i18n/${language}/sanityCondition.json`),
     SanityConditionI18nSchema,
     `sanityCondition i18n / ${language}`,
-  );
+  )
 }
 
 /**
@@ -31,7 +31,7 @@ function createSanityConditionI18nQueryOptions(language: string) {
  * @returns Validated sanity condition i18n data
  */
 export function useSanityConditionI18n(): SanityConditionI18n {
-  const { i18n } = useTranslation();
-  const { data } = useSuspenseQuery(createSanityConditionI18nQueryOptions(i18n.language));
-  return data;
+  const { i18n } = useTranslation()
+  const { data } = useSuspenseQuery(createSanityConditionI18nQueryOptions(i18n.language))
+  return data
 }

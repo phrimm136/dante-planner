@@ -5,7 +5,11 @@ import { MAX_LEVEL } from '@/shared/gameData'
 import { SANITY_INDICATOR_COLORS } from '@/lib/constants'
 import { getDisplayFontForNumeric } from '@/lib/utils'
 import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
-import { getAttackWeightIconPath, getAttackLevelIconPath, getDefenseLevelIconPath } from '@/shared/assets'
+import {
+  getAttackWeightIconPath,
+  getAttackLevelIconPath,
+  getDefenseLevelIconPath,
+} from '@/shared/assets'
 import { CoinDisplay } from './CoinDisplay'
 
 /** Minimal structural shape of the per-level skill stats this panel reads. */
@@ -89,7 +93,12 @@ export function SkillInfoPanelWithSuspense({
             alt={isDefenseSkill ? 'Defense' : 'Attack'}
             className="w-11 h-11"
           />
-          <span className="underline text-[38px] -translate-y-1.5 leading-none" style={{ fontFamily: getDisplayFontForNumeric() }}>{totalLevel}</span>
+          <span
+            className="underline text-[38px] -translate-y-1.5 leading-none"
+            style={{ fontFamily: getDisplayFontForNumeric() }}
+          >
+            {totalLevel}
+          </span>
         </div>
 
         {/* Attack weight indicator (game icons) */}
@@ -97,12 +106,7 @@ export function SkillInfoPanelWithSuspense({
           <span>{t('identity.atkWeight')}</span>
           <div className="flex gap-1 h-3.5">
             {Array.from({ length: atkWeight }).map((_, index) => (
-              <img
-                key={index}
-                src={getAttackWeightIconPath()}
-                alt="■"
-                className="w-3 h-3"
-              />
+              <img key={index} src={getAttackWeightIconPath()} alt="■" className="w-3 h-3" />
             ))}
           </div>
         </div>

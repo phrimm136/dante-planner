@@ -25,11 +25,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
       <div className="flex justify-around items-center">
         {/* Slash */}
         <div className="flex flex-col items-center gap-2">
-          <img
-            src={getSlashResistIconPath()}
-            alt="Slash"
-            className="w-6 h-6 object-contain"
-          />
+          <img src={getSlashResistIconPath()} alt="Slash" className="w-6 h-6 object-contain" />
           <div className="flex flex-col items-center">
             <span className={`text-xs ${slashInfo.color}`}>
               {t(`identity.resist.${slashInfo.categoryKey}`)}
@@ -40,11 +36,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
 
         {/* Pierce */}
         <div className="flex flex-col items-center gap-2">
-          <img
-            src={getPierceResistIconPath()}
-            alt="Pierce"
-            className="w-6 h-6 object-contain"
-          />
+          <img src={getPierceResistIconPath()} alt="Pierce" className="w-6 h-6 object-contain" />
           <div className="flex flex-col items-center">
             <span className={`text-xs ${pierceInfo.color}`}>
               {t(`identity.resist.${pierceInfo.categoryKey}`)}
@@ -55,11 +47,7 @@ export function ResistancePanel({ slash, pierce, blunt }: ResistancePanelProps) 
 
         {/* Blunt */}
         <div className="flex flex-col items-center gap-2">
-          <img
-            src={getBluntResistIconPath()}
-            alt="Blunt"
-            className="w-6 h-6 object-contain"
-          />
+          <img src={getBluntResistIconPath()} alt="Blunt" className="w-6 h-6 object-contain" />
           <div className="flex flex-col items-center">
             <span className={`text-xs ${bluntInfo.color}`}>
               {t(`identity.resist.${bluntInfo.categoryKey}`)}

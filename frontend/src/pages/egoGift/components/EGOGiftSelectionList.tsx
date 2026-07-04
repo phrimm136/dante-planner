@@ -65,12 +65,14 @@ export function EGOGiftSelectionList({
         const lowerQuery = searchQuery.toLowerCase()
         const nameMatch = gift.name?.toLowerCase().includes(lowerQuery)
         const giftKeyword = gift.keyword ?? 'None'
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return pascalValues.includes(giftKeyword)
-          }
-          return false
-        })
+        const keywordMatch = Array.from(keywordToValue.entries()).some(
+          ([naturalLang, pascalValues]) => {
+            if (naturalLang.includes(lowerQuery)) {
+              return pascalValues.includes(giftKeyword)
+            }
+            return false
+          },
+        )
         if (!nameMatch && !keywordMatch) continue
       }
       ids.add(gift.id)
@@ -80,15 +82,13 @@ export function EGOGiftSelectionList({
 
   const selectionLookup = useMemo(
     () => (enableEnhancementSelection ? buildSelectionLookup(selectedGiftIds) : null),
-    [enableEnhancementSelection, selectedGiftIds]
+    [enableEnhancementSelection, selectedGiftIds],
   )
 
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('egoGift.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('egoGift.emptyState')}</div>
       </div>
     )
   }
@@ -148,11 +148,7 @@ export function EGOGiftSelectionList({
                 isSelected={isSelected}
                 onSelect={onGiftSelect}
               >
-                <EGOGiftCard
-                  gift={gift}
-                  isSelected={isSelected}
-                  enableHoverHighlight
-                />
+                <EGOGiftCard gift={gift} isSelected={isSelected} enableHoverHighlight />
               </EGOGiftObservationCard>
             </ScaledCardWrapper>
           )

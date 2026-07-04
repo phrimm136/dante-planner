@@ -12,7 +12,14 @@ export function CantSelectCondition({ condition }: { condition: string }) {
   if (condition.startsWith('HasNotEgoGift_')) {
     const giftId = condition.replace('HasNotEgoGift_', '')
     const giftName = giftNames[giftId] ?? giftId
-    return <>{t('abEvent.requiresGift', { name: giftName, defaultValue: `Requires E.G.O Gift "${giftName}"` })}</>
+    return (
+      <>
+        {t('abEvent.requiresGift', {
+          name: giftName,
+          defaultValue: `Requires E.G.O Gift "${giftName}"`,
+        })}
+      </>
+    )
   }
 
   if (condition.startsWith('HasNotEnoughCost_')) {

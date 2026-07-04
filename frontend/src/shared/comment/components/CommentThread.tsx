@@ -10,10 +10,7 @@
 
 import { memo, useCallback } from 'react'
 import { cn } from '@/lib/utils'
-import {
-  COMMENT_MAX_VISUAL_DEPTH_MOBILE,
-  COMMENT_MAX_VISUAL_DEPTH_DESKTOP,
-} from '@/lib/constants'
+import { COMMENT_MAX_VISUAL_DEPTH_MOBILE, COMMENT_MAX_VISUAL_DEPTH_DESKTOP } from '@/lib/constants'
 import { CommentCard } from './CommentCard'
 
 import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
@@ -52,10 +49,7 @@ function nodeDataEqual(prev: CommentNode, next: CommentNode): boolean {
   return true
 }
 
-function commentThreadPropsAreEqual(
-  prev: CommentThreadProps,
-  next: CommentThreadProps
-): boolean {
+function commentThreadPropsAreEqual(prev: CommentThreadProps, next: CommentThreadProps): boolean {
   return (
     nodeDataEqual(prev.node, next.node) &&
     prev.isPublished === next.isPublished &&
@@ -87,13 +81,19 @@ export const CommentThread = memo(function CommentThread({
     depth > COMMENT_MAX_VISUAL_DEPTH_MOBILE && depth <= COMMENT_MAX_VISUAL_DEPTH_DESKTOP
 
   // Wrap handlers that need additional logic
-  const handleToggleNotifications = useCallback((commentId: string) => {
-    onToggleNotifications(commentId, !node.authorNotificationsEnabled)
-  }, [node.authorNotificationsEnabled, onToggleNotifications])
+  const handleToggleNotifications = useCallback(
+    (commentId: string) => {
+      onToggleNotifications(commentId, !node.authorNotificationsEnabled)
+    },
+    [node.authorNotificationsEnabled, onToggleNotifications],
+  )
 
-  const handleReport = useCallback((commentId: string) => {
-    onReport(commentId, 'OTHER')
-  }, [onReport])
+  const handleReport = useCallback(
+    (commentId: string) => {
+      onReport(commentId, 'OTHER')
+    },
+    [onReport],
+  )
 
   return (
     <div
@@ -101,7 +101,7 @@ export const CommentThread = memo(function CommentThread({
         // Mobile (<lg): full nesting (indent + border) only within mobile depth limit
         withinMobileMax && 'ml-1 border-l-2 border-border pl-1',
         // Desktop (>=lg): restore nesting for depths beyond mobile cap
-        beyondMobileWithinDesktop && 'lg:ml-3 lg:border-l-2 lg:border-border lg:pl-3'
+        beyondMobileWithinDesktop && 'lg:ml-3 lg:border-l-2 lg:border-border lg:pl-3',
       )}
     >
       <CommentCard

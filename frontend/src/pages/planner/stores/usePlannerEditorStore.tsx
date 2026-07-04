@@ -3,19 +3,19 @@ import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { useShallow } from 'zustand/shallow'
 
-import {
-  SINNERS,
-  MAX_LEVEL,
-  DEFAULT_SKILL_EA,
-  DUNGEON_IDX,
-} from '@/shared/gameData'
+import { SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, DUNGEON_IDX } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
 import type { MDCategory, DungeonIdx } from '@/shared/gameData'
-import type { SinnerEquipment, SkillEAState, DeckFilterState, ThreadspinTier } from '../types/DeckTypes'
+import type {
+  SinnerEquipment,
+  SkillEAState,
+  DeckFilterState,
+  ThreadspinTier,
+} from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
@@ -178,7 +178,11 @@ export interface PlannerEditorState extends HotState, WarmState, ColdState {}
  */
 export interface PlannerEditorActions {
   // Hot state setters
-  setEquipment: (equipment: Record<string, SinnerEquipment> | ((prev: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>)) => void
+  setEquipment: (
+    equipment:
+      | Record<string, SinnerEquipment>
+      | ((prev: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>),
+  ) => void
   updateSinnerEquipment: (sinnerId: string, equipment: SinnerEquipment) => void
   setFloorSelections: (selections: FloorThemeSelection[]) => void
   updateFloorSelection: (floorIndex: number, selection: FloorThemeSelection) => void
@@ -193,7 +197,9 @@ export interface PlannerEditorActions {
   setSelectedGiftKeyword: (keyword: string | null) => void
   setSkillEAState: (state: Record<string, SkillEAState>) => void
   updateSinnerSkillEA: (sinnerId: string, state: SkillEAState) => void
-  setDeckFilterState: (state: DeckFilterState | ((prev: DeckFilterState) => DeckFilterState)) => void
+  setDeckFilterState: (
+    state: DeckFilterState | ((prev: DeckFilterState) => DeckFilterState),
+  ) => void
   setDeckVisibleCount: (count: number | ((prev: number) => number)) => void
 
   // Cold state setters
@@ -205,7 +211,10 @@ export interface PlannerEditorActions {
   updateSectionNote: (sectionKey: string, content: NoteContent) => void
 
   // Batch operations
-  initializeFromPlanner: (content: MDPlannerContent, metadata: { title: string; category: MDCategory; isPublished: boolean }) => void
+  initializeFromPlanner: (
+    content: MDPlannerContent,
+    metadata: { title: string; category: MDCategory; isPublished: boolean },
+  ) => void
   reset: () => void
 
   // Derived state (imperative access)
@@ -280,10 +289,11 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
               equipment: { ...state.equipment, [sinnerId]: equipment },
             }),
             false,
-            'updateSinnerEquipment'
+            'updateSinnerEquipment',
           ),
 
-        setFloorSelections: (selections) => set({ floorSelections: selections }, false, 'setFloorSelections'),
+        setFloorSelections: (selections) =>
+          set({ floorSelections: selections }, false, 'setFloorSelections'),
 
         updateFloorSelection: (floorIndex, selection) =>
           set(
@@ -293,23 +303,27 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
               return { floorSelections: next }
             },
             false,
-            'updateFloorSelection'
+            'updateFloorSelection',
           ),
 
-        setComprehensiveGiftIds: (ids) => set({ comprehensiveGiftIds: ids }, false, 'setComprehensiveGiftIds'),
+        setComprehensiveGiftIds: (ids) =>
+          set({ comprehensiveGiftIds: ids }, false, 'setComprehensiveGiftIds'),
 
         setDeploymentOrder: (order) => set({ deploymentOrder: order }, false, 'setDeploymentOrder'),
 
         // Warm state actions
-        setSelectedKeywords: (keywords) => set({ selectedKeywords: keywords }, false, 'setSelectedKeywords'),
+        setSelectedKeywords: (keywords) =>
+          set({ selectedKeywords: keywords }, false, 'setSelectedKeywords'),
 
         setSelectedBuffIds: (ids) => set({ selectedBuffIds: ids }, false, 'setSelectedBuffIds'),
 
         setSelectedGiftIds: (ids) => set({ selectedGiftIds: ids }, false, 'setSelectedGiftIds'),
 
-        setObservationGiftIds: (ids) => set({ observationGiftIds: ids }, false, 'setObservationGiftIds'),
+        setObservationGiftIds: (ids) =>
+          set({ observationGiftIds: ids }, false, 'setObservationGiftIds'),
 
-        setSelectedGiftKeyword: (keyword) => set({ selectedGiftKeyword: keyword }, false, 'setSelectedGiftKeyword'),
+        setSelectedGiftKeyword: (keyword) =>
+          set({ selectedGiftKeyword: keyword }, false, 'setSelectedGiftKeyword'),
 
         setSkillEAState: (state) => set({ skillEAState: state }, false, 'setSkillEAState'),
 
@@ -319,7 +333,7 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
               skillEAState: { ...state.skillEAState, [sinnerId]: skillEA },
             }),
             false,
-            'updateSinnerSkillEA'
+            'updateSinnerSkillEA',
           ),
 
         setDeckFilterState: (state) => {
@@ -332,7 +346,11 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
 
         setDeckVisibleCount: (count) => {
           if (typeof count === 'function') {
-            set((s) => ({ deckVisibleCount: count(s.deckVisibleCount) }), false, 'setDeckVisibleCount')
+            set(
+              (s) => ({ deckVisibleCount: count(s.deckVisibleCount) }),
+              false,
+              'setDeckVisibleCount',
+            )
           } else {
             set({ deckVisibleCount: count }, false, 'setDeckVisibleCount')
           }
@@ -355,7 +373,7 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
               sectionNotes: { ...state.sectionNotes, [sectionKey]: content },
             }),
             false,
-            'updateSectionNote'
+            'updateSectionNote',
           ),
 
         // Batch operations
@@ -376,14 +394,26 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
                     giftIds: new Set(Array.isArray(floor?.giftIds) ? floor.giftIds : []),
                   }))
                 : createDefaultFloorSelections(),
-              comprehensiveGiftIds: new Set(Array.isArray(content.comprehensiveGiftIds) ? content.comprehensiveGiftIds : []),
-              deploymentOrder: Array.isArray(content.deploymentOrder) ? content.deploymentOrder : [],
+              comprehensiveGiftIds: new Set(
+                Array.isArray(content.comprehensiveGiftIds) ? content.comprehensiveGiftIds : [],
+              ),
+              deploymentOrder: Array.isArray(content.deploymentOrder)
+                ? content.deploymentOrder
+                : [],
 
               // Warm state - with defensive array validation
-              selectedKeywords: new Set(Array.isArray(content.selectedKeywords) ? content.selectedKeywords : []),
-              selectedBuffIds: new Set(Array.isArray(content.selectedBuffIds) ? content.selectedBuffIds : []),
-              selectedGiftIds: new Set(Array.isArray(content.selectedGiftIds) ? content.selectedGiftIds : []),
-              observationGiftIds: new Set(Array.isArray(content.observationGiftIds) ? content.observationGiftIds : []),
+              selectedKeywords: new Set(
+                Array.isArray(content.selectedKeywords) ? content.selectedKeywords : [],
+              ),
+              selectedBuffIds: new Set(
+                Array.isArray(content.selectedBuffIds) ? content.selectedBuffIds : [],
+              ),
+              selectedGiftIds: new Set(
+                Array.isArray(content.selectedGiftIds) ? content.selectedGiftIds : [],
+              ),
+              observationGiftIds: new Set(
+                Array.isArray(content.observationGiftIds) ? content.observationGiftIds : [],
+              ),
               selectedGiftKeyword: content.selectedGiftKeyword ?? null,
               skillEAState: content.skillEAState ?? createDefaultSkillEAState(),
               deckFilterState: createDefaultDeckFilterState(),
@@ -397,13 +427,13 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
                       Object.entries(content.sectionNotes).map(([key, note]) => [
                         key,
                         { content: note?.content ?? '' },
-                      ])
+                      ]),
                     )
                   : {}),
               },
             },
             false,
-            'initializeFromPlanner'
+            'initializeFromPlanner',
           ),
 
         reset: () => set(createInitialState(), false, 'reset'),
@@ -428,8 +458,8 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
           }
         },
       }),
-      { name: 'PlannerEditorStore', enabled: import.meta.env.DEV }
-    )
+      { name: 'PlannerEditorStore', enabled: import.meta.env.DEV },
+    ),
   )
 }
 
@@ -462,7 +492,10 @@ interface PlannerEditorStoreProviderProps {
  * </PlannerEditorStoreProvider>
  * ```
  */
-export function PlannerEditorStoreProvider({ children, initialState }: PlannerEditorStoreProviderProps) {
+export function PlannerEditorStoreProvider({
+  children,
+  initialState,
+}: PlannerEditorStoreProviderProps) {
   const storeRef = useRef<StoreApi<PlannerEditorStore> | null>(null)
 
   if (!storeRef.current) {
@@ -523,7 +556,9 @@ export function useIsInPlannerEditorContext(): boolean {
  * @param selector - Function to select state slice
  * @returns Selected state slice, or undefined if outside provider
  */
-export function usePlannerEditorStoreSafe<T>(selector: (state: PlannerEditorStore) => T): T | undefined {
+export function usePlannerEditorStoreSafe<T>(
+  selector: (state: PlannerEditorStore) => T,
+): T | undefined {
   const store = useContext(PlannerEditorStoreContext)
 
   // Create a stable dummy store for when we're outside context
@@ -600,7 +635,7 @@ export function usePlannerStateForSave(): PlannerState {
       skillEAState: s.skillEAState,
       floorSelections: s.floorSelections,
       sectionNotes: s.sectionNotes,
-    }))
+    })),
   )
 }
 
@@ -657,13 +692,15 @@ export const useSetEquipment = () => usePlannerEditorStore((s) => s.setEquipment
 export const useUpdateSinnerEquipment = () => usePlannerEditorStore((s) => s.updateSinnerEquipment)
 export const useSetFloorSelections = () => usePlannerEditorStore((s) => s.setFloorSelections)
 export const useUpdateFloorSelection = () => usePlannerEditorStore((s) => s.updateFloorSelection)
-export const useSetComprehensiveGiftIds = () => usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
+export const useSetComprehensiveGiftIds = () =>
+  usePlannerEditorStore((s) => s.setComprehensiveGiftIds)
 export const useSetDeploymentOrder = () => usePlannerEditorStore((s) => s.setDeploymentOrder)
 export const useSetSelectedKeywords = () => usePlannerEditorStore((s) => s.setSelectedKeywords)
 export const useSetSelectedBuffIds = () => usePlannerEditorStore((s) => s.setSelectedBuffIds)
 export const useSetSelectedGiftIds = () => usePlannerEditorStore((s) => s.setSelectedGiftIds)
 export const useSetObservationGiftIds = () => usePlannerEditorStore((s) => s.setObservationGiftIds)
-export const useSetSelectedGiftKeyword = () => usePlannerEditorStore((s) => s.setSelectedGiftKeyword)
+export const useSetSelectedGiftKeyword = () =>
+  usePlannerEditorStore((s) => s.setSelectedGiftKeyword)
 export const useSetSkillEAState = () => usePlannerEditorStore((s) => s.setSkillEAState)
 export const useUpdateSinnerSkillEA = () => usePlannerEditorStore((s) => s.updateSinnerSkillEA)
 export const useSetDeckFilterState = () => usePlannerEditorStore((s) => s.setDeckFilterState)

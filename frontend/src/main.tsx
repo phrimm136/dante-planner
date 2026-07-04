@@ -22,7 +22,8 @@ createRoot(document.getElementById('root')!).render(
         toastOptions={{
           unstyled: true,
           classNames: {
-            toast: 'flex items-center gap-3 w-[356px] p-4 bg-card text-card-foreground border border-border rounded-lg shadow-lg',
+            toast:
+              'flex items-center gap-3 w-[356px] p-4 bg-card text-card-foreground border border-border rounded-lg shadow-lg',
             title: 'text-sm font-medium',
             description: 'text-sm text-muted-foreground',
             actionButton: 'bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm',
@@ -36,9 +37,7 @@ createRoot(document.getElementById('root')!).render(
         }}
       />
       {/* Dev tools - only in development */}
-      {import.meta.env.DEV && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </StrictMode>,
 )

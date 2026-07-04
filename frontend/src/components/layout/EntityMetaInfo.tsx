@@ -36,7 +36,12 @@ export function EntityMetaInfo({ season, updateDate }: EntityMetaInfoProps) {
       {/* Season Panel */}
       <div className="border rounded p-3 space-y-2">
         <div className="font-semibold text-sm text-center">{t('meta.season')}</div>
-        <div className="text-xs text-center" style={seasonColor ? { color: seasonColor } : undefined}>{seasonName}</div>
+        <div
+          className="text-xs text-center"
+          style={seasonColor ? { color: seasonColor } : undefined}
+        >
+          {seasonName}
+        </div>
       </div>
 
       {/* Release Date Panel */}

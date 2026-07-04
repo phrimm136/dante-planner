@@ -80,13 +80,16 @@ export interface ParsedSegment {
  */
 export interface KeywordResolutionContext {
   /** Battle keywords dictionary (translated) */
-  battleKeywords: Record<string, {
-    name: string
-    desc: string
-    flavor?: string
-    iconId: string | null
-    buffType: string
-  }>
+  battleKeywords: Record<
+    string,
+    {
+      name: string
+      desc: string
+      flavor?: string
+      iconId: string | null
+      buffType: string
+    }
+  >
   /** Skill tags dictionary (translated) */
   skillTags: Record<string, string>
   /** Color codes for styling */

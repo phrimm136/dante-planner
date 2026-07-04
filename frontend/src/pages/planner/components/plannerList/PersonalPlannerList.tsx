@@ -75,15 +75,18 @@ export function PersonalPlannerList({
   })
 
   // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search || !!(
-    contentFilters &&
-    (contentFilters.title !== null ||
-      contentFilters.keywords.length > 0 ||
-      contentFilters.identityIds.length > 0 ||
-      contentFilters.egoIds.length > 0 ||
-      contentFilters.giftIds.length > 0 ||
-      contentFilters.themePackIds.length > 0)
-  )
+  const hasActiveFilters =
+    !!category ||
+    !!search ||
+    !!(
+      contentFilters &&
+      (contentFilters.title !== null ||
+        contentFilters.keywords.length > 0 ||
+        contentFilters.identityIds.length > 0 ||
+        contentFilters.egoIds.length > 0 ||
+        contentFilters.giftIds.length > 0 ||
+        contentFilters.themePackIds.length > 0)
+    )
 
   // Calculate pagination
   const totalPages = calculatePlannerPages(totalCount)

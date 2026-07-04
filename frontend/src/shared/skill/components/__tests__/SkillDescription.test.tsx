@@ -55,9 +55,7 @@ describe('SkillDescription', () => {
     })
 
     it('applies the FLAVOR_TEXT_COLOR brand color', () => {
-      render(
-        <SkillDescription descData={baseDesc} flavor="lore" />,
-      )
+      render(<SkillDescription descData={baseDesc} flavor="lore" />)
 
       const flavor = screen.getByTestId('skill-flavor')
       // jsdom serializes hex into rgb(...) when comparing inline styles.
@@ -87,9 +85,7 @@ describe('SkillDescription', () => {
 
   describe('desc + coin rendering remains intact', () => {
     it('renders the main desc above the flavor', () => {
-      const { container } = render(
-        <SkillDescription descData={baseDesc} flavor="lore" />,
-      )
+      const { container } = render(<SkillDescription descData={baseDesc} flavor="lore" />)
 
       expect(screen.getByText('Inflict +1 Sinking Count')).toBeInTheDocument()
       const wrapper = container.firstChild as HTMLElement

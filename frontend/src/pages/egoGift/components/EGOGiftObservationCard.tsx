@@ -11,7 +11,7 @@ interface EGOGiftObservationCardProps {
 // Custom comparison - exclude children and callback, include isSelected
 function areObservationCardPropsEqual(
   prev: EGOGiftObservationCardProps,
-  next: EGOGiftObservationCardProps
+  next: EGOGiftObservationCardProps,
 ): boolean {
   return prev.giftId === next.giftId && prev.isSelected === next.isSelected
   // children excluded - inner card handles its own memoization
@@ -32,7 +32,9 @@ export const EGOGiftObservationCard = memo(function EGOGiftObservationCard({
     <EGOGiftTooltip giftId={giftId}>
       <button
         type="button"
-        onClick={() => { onSelect(giftId); }}
+        onClick={() => {
+          onSelect(giftId)
+        }}
         className="cursor-pointer"
       >
         {children}

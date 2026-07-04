@@ -49,9 +49,7 @@ export function useIdentityListSpec() {
  */
 export function useIdentityListI18n() {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createIdentityNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createIdentityNameListQueryOptions(i18n.language))
   return i18nData
 }
 
@@ -67,9 +65,7 @@ const EMPTY_NAME_LIST: Record<string, string> = {}
  */
 export function useIdentityListI18nDeferred(): Record<string, string> {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(
-    createIdentityNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useQuery(createIdentityNameListQueryOptions(i18n.language))
   return i18nData ?? EMPTY_NAME_LIST
 }
 
@@ -85,9 +81,7 @@ export function useIdentityListData() {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createIdentitySpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createIdentityNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createIdentityNameListQueryOptions(i18n.language))
 
   return {
     spec,

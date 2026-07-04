@@ -36,7 +36,7 @@ export function useColorCodes() {
  */
 export function getColorForAttributeType(
   colorCodes: ColorCodeMap | undefined,
-  attributeType: string
+  attributeType: string,
 ): string {
   return colorCodes?.[attributeType] || '#ffffff'
 }

@@ -56,7 +56,11 @@ vi.mock('../ApplyLatestMirrorDialog', () => ({
 vi.mock('../CopyUrlButton', () => ({ CopyUrlButton: () => null }))
 vi.mock('../DeleteConfirmDialog', () => ({
   DeleteConfirmDialog: ({ open, onConfirm }: { open: boolean; onConfirm: () => void }) =>
-    open ? <button data-testid="confirm-delete" onClick={onConfirm}>Confirm Delete</button> : null,
+    open ? (
+      <button data-testid="confirm-delete" onClick={onConfirm}>
+        Confirm Delete
+      </button>
+    ) : null,
 }))
 vi.mock('../ModeratorDeleteDialog', () => ({ ModeratorDeleteDialog: () => null }))
 vi.mock('../PublishSyncOffWarningDialog', () => ({
@@ -187,9 +191,7 @@ const syncedPlanner: SaveablePlanner = {
   content: EMPTY_CONTENT,
 }
 
-function makePlanner(
-  overrides: Partial<SaveablePlanner['metadata']> = {}
-): SaveablePlanner {
+function makePlanner(overrides: Partial<SaveablePlanner['metadata']> = {}): SaveablePlanner {
   return {
     metadata: {
       id: PLANNER_ID,
@@ -256,12 +258,10 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           isAuthenticated={true}
           syncEnabled={false}
         />,
-        { wrapper }
+        { wrapper },
       )
 
-      expect(
-        screen.getByText('pages.plannerMD.applyLatestMirror.button')
-      ).toBeDefined()
+      expect(screen.getByText('pages.plannerMD.applyLatestMirror.button')).toBeDefined()
     })
 
     it('is hidden when plan contentVersion equals current version', () => {
@@ -274,12 +274,10 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           isAuthenticated={true}
           syncEnabled={false}
         />,
-        { wrapper }
+        { wrapper },
       )
 
-      expect(
-        screen.queryByText('pages.plannerMD.applyLatestMirror.button')
-      ).toBeNull()
+      expect(screen.queryByText('pages.plannerMD.applyLatestMirror.button')).toBeNull()
     })
   })
 
@@ -294,7 +292,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           isAuthenticated={true}
           syncEnabled={false}
         />,
-        { wrapper }
+        { wrapper },
       )
 
       await triggerApplyLatestMirror()
@@ -307,7 +305,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
               contentVersion: CURRENT_VERSION,
               syncVersion: 1, // unchanged — no server interaction
             }),
-          })
+          }),
         )
       })
     })
@@ -322,7 +320,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           isAuthenticated={true}
           syncEnabled={true}
         />,
-        { wrapper }
+        { wrapper },
       )
 
       await triggerApplyLatestMirror()
@@ -331,7 +329,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
         expect(mockSyncToServer).toHaveBeenCalledWith(
           expect.objectContaining({
             metadata: expect.objectContaining({ contentVersion: CURRENT_VERSION }),
-          })
+          }),
         )
         // Server response (with bumped syncVersion) is persisted — not the local draft
         expect(mockSavePlanner).toHaveBeenCalledWith(syncedPlanner)
@@ -348,7 +346,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           isAuthenticated={true}
           syncEnabled={false}
         />,
-        { wrapper }
+        { wrapper },
       )
 
       await triggerApplyLatestMirror()
@@ -357,7 +355,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
         expect(mockSyncToServer).toHaveBeenCalledWith(
           expect.objectContaining({
             metadata: expect.objectContaining({ contentVersion: CURRENT_VERSION }),
-          })
+          }),
         )
         expect(mockSavePlanner).toHaveBeenCalledWith(syncedPlanner)
       })
@@ -373,7 +371,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
           isAuthenticated={false}
           syncEnabled={true}
         />,
-        { wrapper }
+        { wrapper },
       )
 
       await triggerApplyLatestMirror()
@@ -383,7 +381,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
         expect(mockSavePlanner).toHaveBeenCalledWith(
           expect.objectContaining({
             metadata: expect.objectContaining({ contentVersion: CURRENT_VERSION }),
-          })
+          }),
         )
       })
     })
@@ -406,11 +404,9 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
   }
 
   it('calls deletePlanner locally on successful server delete', async () => {
-    mockDeleteMutate.mockImplementation(
-      (_id: string, callbacks?: { onSuccess?: () => void }) => {
-        callbacks?.onSuccess?.()
-      }
-    )
+    mockDeleteMutate.mockImplementation((_id: string, callbacks?: { onSuccess?: () => void }) => {
+      callbacks?.onSuccess?.()
+    })
 
     const { wrapper } = createWrapper()
     render(
@@ -420,7 +416,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
         isOwner={true}
         isAuthenticated={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     await openAndConfirmDelete()
@@ -434,7 +430,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
     mockDeleteMutate.mockImplementation(
       (_id: string, callbacks?: { onError?: (e: Error) => void }) => {
         callbacks?.onError?.(new NotFoundError('not found'))
-      }
+      },
     )
 
     const { wrapper } = createWrapper()
@@ -445,16 +441,14 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
         isOwner={true}
         isAuthenticated={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     await openAndConfirmDelete()
 
     await waitFor(() => {
       expect(mockDeletePlanner).toHaveBeenCalledWith(PLANNER_ID)
-      expect(mockNavigate).toHaveBeenCalledWith(
-        expect.objectContaining({ to: '/planner/md' })
-      )
+      expect(mockNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/planner/md' }))
     })
   })
 
@@ -462,7 +456,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
     mockDeleteMutate.mockImplementation(
       (_id: string, callbacks?: { onError?: (e: Error) => void }) => {
         callbacks?.onError?.(new Error('Internal server error'))
-      }
+      },
     )
 
     const { wrapper } = createWrapper()
@@ -473,7 +467,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
         isOwner={true}
         isAuthenticated={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     await openAndConfirmDelete()
@@ -509,7 +503,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         isAuthenticated={true}
         syncEnabled={null}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickPublishButton()
@@ -530,7 +524,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         isAuthenticated={true}
         syncEnabled={false}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickPublishButton()
@@ -552,7 +546,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         isAuthenticated={true}
         syncEnabled={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickPublishButton()
@@ -561,11 +555,11 @@ describe('PlannerDetailHeader – publish sync guard', () => {
       expect(mockSyncToServer).toHaveBeenCalledWith(
         expect.objectContaining({
           metadata: expect.objectContaining({ id: PLANNER_ID }),
-        })
+        }),
       )
       expect(mockPublishMutate).toHaveBeenCalledWith(
         PLANNER_ID,
-        expect.objectContaining({ onSuccess: expect.any(Function) })
+        expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
       expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
     })
@@ -573,9 +567,14 @@ describe('PlannerDetailHeader – publish sync guard', () => {
 
   it('threads the server-bumped syncVersion into the local save on publish', async () => {
     mockSyncToServer.mockResolvedValue(syncedPlanner) // syncVersion: 2
-    mockPublishMutate.mockImplementation((_id: string, opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void }) => {
-      opts.onSuccess({ plannerId: PLANNER_ID, published: true })
-    })
+    mockPublishMutate.mockImplementation(
+      (
+        _id: string,
+        opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void },
+      ) => {
+        opts.onSuccess({ plannerId: PLANNER_ID, published: true })
+      },
+    )
     const { wrapper } = createWrapper()
     render(
       <PlannerDetailHeader
@@ -585,7 +584,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         isAuthenticated={true}
         syncEnabled={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickPublishButton()
@@ -596,7 +595,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
       expect(mockSavePlanner).toHaveBeenCalledWith(
         expect.objectContaining({
           metadata: expect.objectContaining({ syncVersion: 2, published: true }),
-        })
+        }),
       )
     })
   })
@@ -613,7 +612,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         isAuthenticated={true}
         syncEnabled={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     const button = screen.getByText('pages.plannerMD.publish.button').closest('button')!
@@ -636,7 +635,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         isAuthenticated={true}
         syncEnabled={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickPublishButton()
@@ -673,7 +672,7 @@ describe('PlannerDetailHeader – unpublish', () => {
         isAuthenticated={true}
         syncEnabled={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickUnpublishButton()
@@ -682,7 +681,7 @@ describe('PlannerDetailHeader – unpublish', () => {
       expect(mockSyncToServer).not.toHaveBeenCalled()
       expect(mockPublishMutate).toHaveBeenCalledWith(
         PLANNER_ID,
-        expect.objectContaining({ onSuccess: expect.any(Function) })
+        expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
     })
   })
@@ -697,7 +696,7 @@ describe('PlannerDetailHeader – unpublish', () => {
         isAuthenticated={true}
         syncEnabled={false}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickUnpublishButton()
@@ -710,9 +709,14 @@ describe('PlannerDetailHeader – unpublish', () => {
   })
 
   it('saves the unpublished planner locally (published=false, version unchanged)', async () => {
-    mockPublishMutate.mockImplementation((_id: string, opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void }) => {
-      opts.onSuccess({ plannerId: PLANNER_ID, published: false })
-    })
+    mockPublishMutate.mockImplementation(
+      (
+        _id: string,
+        opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void },
+      ) => {
+        opts.onSuccess({ plannerId: PLANNER_ID, published: false })
+      },
+    )
     const { wrapper } = createWrapper()
     render(
       <PlannerDetailHeader
@@ -722,7 +726,7 @@ describe('PlannerDetailHeader – unpublish', () => {
         isAuthenticated={true}
         syncEnabled={true}
       />,
-      { wrapper }
+      { wrapper },
     )
 
     clickUnpublishButton()
@@ -731,7 +735,7 @@ describe('PlannerDetailHeader – unpublish', () => {
       expect(mockSavePlanner).toHaveBeenCalledWith(
         expect.objectContaining({
           metadata: expect.objectContaining({ syncVersion: 5, published: false }),
-        })
+        }),
       )
     })
   })

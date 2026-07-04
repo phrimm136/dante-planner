@@ -38,18 +38,14 @@ function ErrorFallback({ error, resetErrorBoundary }: ErrorFallbackProps) {
   return (
     <div className="container mx-auto p-8 min-h-screen flex items-center justify-center">
       <div className="bg-destructive/10 border border-destructive rounded-lg p-6 text-center max-w-2xl">
-        <h2 className="text-xl font-bold text-destructive mb-2">
-          {t('errors.generic.title')}
-        </h2>
+        <h2 className="text-xl font-bold text-destructive mb-2">{t('errors.generic.title')}</h2>
         <p className="text-muted-foreground mb-4">{errorMessage}</p>
         {isDev && errorObj.stack && (
           <details className="mt-4 text-left">
             <summary className="cursor-pointer text-sm font-semibold text-muted-foreground hover:text-foreground">
               {t('errors.stackTrace')}
             </summary>
-            <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">
-              {errorObj.stack}
-            </pre>
+            <pre className="mt-2 overflow-auto rounded bg-muted p-4 text-xs">{errorObj.stack}</pre>
           </details>
         )}
         <Button onClick={resetErrorBoundary} variant="destructive" className="mt-4">

@@ -91,7 +91,7 @@ describe('LogoutEverywhereSection', () => {
 
     expect(mockMutateWithCallback).toHaveBeenCalled()
     expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining('Signed out of all devices.')
+      expect.stringContaining('Signed out of all devices.'),
     )
     expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
     expect(mockNavigate).toHaveBeenCalledWith({ to: '/' })

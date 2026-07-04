@@ -51,10 +51,9 @@ describe('TraitsI18n', () => {
       BLACK_BEAST: 'Black Beast',
     })
 
-    render(
-      <TraitsI18n traits={['LIMBUS_COMPANY', 'LIMBUS_COMPANY_LCB']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['LIMBUS_COMPANY', 'LIMBUS_COMPANY_LCB']} />, {
+      wrapper: createWrapper(),
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Limbus Company')).toBeDefined()
@@ -69,10 +68,9 @@ describe('TraitsI18n', () => {
       LIMBUS_COMPANY: 'Limbus Company',
     })
 
-    render(
-      <TraitsI18n traits={['BASE_APPEARANCE', 'SMALL', 'LIMBUS_COMPANY']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['BASE_APPEARANCE', 'SMALL', 'LIMBUS_COMPANY']} />, {
+      wrapper: createWrapper(),
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Limbus Company')).toBeDefined()
@@ -86,10 +84,9 @@ describe('TraitsI18n', () => {
   it('filters out traits without translations', async () => {
     vi.mocked(useTraitsI18n).mockReturnValue({})
 
-    const { container } = render(
-      <TraitsI18n traits={['UNKNOWN_TRAIT']} />,
-      { wrapper: createWrapper() }
-    )
+    const { container } = render(<TraitsI18n traits={['UNKNOWN_TRAIT']} />, {
+      wrapper: createWrapper(),
+    })
 
     await waitFor(() => {
       // Traits without translations should not be rendered
@@ -104,10 +101,9 @@ describe('TraitsI18n', () => {
       BLACK_BEAST: 'Black Beast',
     })
 
-    render(
-      <TraitsI18n traits={['LIMBUS_COMPANY', 'PEQUOD_CAPTAIN', 'BLACK_BEAST']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['LIMBUS_COMPANY', 'PEQUOD_CAPTAIN', 'BLACK_BEAST']} />, {
+      wrapper: createWrapper(),
+    })
 
     await waitFor(() => {
       expect(screen.getByText('Limbus Company')).toBeDefined()
@@ -122,10 +118,9 @@ describe('TraitsI18n', () => {
       SMALL: 'Small',
     })
 
-    const { container } = render(
-      <TraitsI18n traits={['BASE_APPEARANCE', 'SMALL']} />,
-      { wrapper: createWrapper() }
-    )
+    const { container } = render(<TraitsI18n traits={['BASE_APPEARANCE', 'SMALL']} />, {
+      wrapper: createWrapper(),
+    })
 
     await waitFor(() => {
       // The component should render nothing when all visible traits are filtered out
@@ -140,10 +135,7 @@ describe('TraitsI18n', () => {
   it('renders nothing when traits array is empty', async () => {
     vi.mocked(useTraitsI18n).mockReturnValue({})
 
-    const { container } = render(
-      <TraitsI18n traits={[]} />,
-      { wrapper: createWrapper() }
-    )
+    const { container } = render(<TraitsI18n traits={[]} />, { wrapper: createWrapper() })
 
     // With empty traits, component should not render anything
     await waitFor(() => {
@@ -158,10 +150,7 @@ describe('TraitsI18n', () => {
       TRAIT_C: 'Trait C',
     })
 
-    render(
-      <TraitsI18n traits={['TRAIT_A', 'TRAIT_B', 'TRAIT_C']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['TRAIT_A', 'TRAIT_B', 'TRAIT_C']} />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText('Trait A')).toBeDefined()
@@ -175,10 +164,7 @@ describe('TraitsI18n', () => {
       JIA_FAMILY: '<color=#d40000>Jia Family</color>',
     })
 
-    render(
-      <TraitsI18n traits={['JIA_FAMILY']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['JIA_FAMILY']} />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       // The parsed text should appear (without the HTML tags)
@@ -195,10 +181,7 @@ describe('TraitsI18n', () => {
       DEPRECATED_TRAIT: '<s>Deprecated</s>',
     })
 
-    render(
-      <TraitsI18n traits={['DEPRECATED_TRAIT']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['DEPRECATED_TRAIT']} />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText('Deprecated')).toBeDefined()
@@ -214,10 +197,7 @@ describe('TraitsI18n', () => {
       COMBINED_TRAIT: '<color=#d40000><s>Combined</s></color>',
     })
 
-    render(
-      <TraitsI18n traits={['COMBINED_TRAIT']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['COMBINED_TRAIT']} />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText('Combined')).toBeDefined()
@@ -237,10 +217,7 @@ describe('TraitsI18n Suspense boundary - UT4', () => {
       LIMBUS_COMPANY: 'Limbus Company',
     })
 
-    render(
-      <TraitsI18n traits={['LIMBUS_COMPANY']} />,
-      { wrapper: createWrapper() }
-    )
+    render(<TraitsI18n traits={['LIMBUS_COMPANY']} />, { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(screen.getByText('Limbus Company')).toBeDefined()
@@ -253,10 +230,9 @@ describe('TraitsI18n Suspense boundary - UT4', () => {
       TRAIT_B: 'Trait B',
     })
 
-    const { container } = render(
-      <TraitsI18n traits={['TRAIT_A', 'TRAIT_B']} />,
-      { wrapper: createWrapper() }
-    )
+    const { container } = render(<TraitsI18n traits={['TRAIT_A', 'TRAIT_B']} />, {
+      wrapper: createWrapper(),
+    })
 
     await waitFor(() => {
       // Each trait should be rendered in its own span element

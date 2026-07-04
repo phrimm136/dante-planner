@@ -11,44 +11,52 @@ import { z } from 'zod'
 /**
  * Reference data for buff effects with buff keywords
  */
-export const BuffReferenceDataSchema = z.object({
-  activeRound: z.number().optional(),
-  buffKeyword: z.string().optional(),
-  stack: z.number().optional(),
-  turn: z.number().optional(),
-  limit: z.number().optional(),
-}).strict()
+export const BuffReferenceDataSchema = z
+  .object({
+    activeRound: z.number().optional(),
+    buffKeyword: z.string().optional(),
+    stack: z.number().optional(),
+    turn: z.number().optional(),
+    limit: z.number().optional(),
+  })
+  .strict()
 
 /**
  * Individual buff effect
  */
-export const BuffEffectSchema = z.object({
-  type: z.string(),
-  value: z.number().optional(),
-  value2: z.number().optional(),
-  isTypoExist: z.boolean(),
-  customLocalizeTextId: z.string().optional(),
-  referenceData: BuffReferenceDataSchema.optional(),
-}).strict()
+export const BuffEffectSchema = z
+  .object({
+    type: z.string(),
+    value: z.number().optional(),
+    value2: z.number().optional(),
+    isTypoExist: z.boolean(),
+    customLocalizeTextId: z.string().optional(),
+    referenceData: BuffReferenceDataSchema.optional(),
+  })
+  .strict()
 
 /**
  * UI configuration for buff display
  */
-export const BuffUIConfigSchema = z.object({
-  iconSpriteId: z.string(),
-}).strict()
+export const BuffUIConfigSchema = z
+  .object({
+    iconSpriteId: z.string(),
+  })
+  .strict()
 
 /**
  * Start Buff entry from startBuffs.json
  */
-export const StartBuffDataSchema = z.object({
-  level: z.number(),
-  baseId: z.number(),
-  cost: z.number(),
-  localizeId: z.string(),
-  effects: z.array(BuffEffectSchema),
-  uiConfig: BuffUIConfigSchema,
-}).strict()
+export const StartBuffDataSchema = z
+  .object({
+    level: z.number(),
+    baseId: z.number(),
+    cost: z.number(),
+    localizeId: z.string(),
+    effects: z.array(BuffEffectSchema),
+    uiConfig: BuffUIConfigSchema,
+  })
+  .strict()
 
 /**
  * Record of Start Buff data by ID

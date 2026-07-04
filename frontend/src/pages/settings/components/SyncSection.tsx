@@ -42,7 +42,7 @@ function SyncSectionContent() {
         onError: () => {
           toast.error(t('settings.sync.updateError', 'Failed to update sync setting'))
         },
-      }
+      },
     )
   }
 

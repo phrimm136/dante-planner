@@ -8,13 +8,17 @@ import { z } from 'zod'
  */
 
 // Cost data schema - maps gift count to starlight cost
-export const EGOGiftObservationCostSchema = z.object({
-  egogiftCount: z.number(),
-  starlightCost: z.number(),
-}).strict()
+export const EGOGiftObservationCostSchema = z
+  .object({
+    egogiftCount: z.number(),
+    starlightCost: z.number(),
+  })
+  .strict()
 
 // Observation data schema - cost list + gift ID list
-export const EGOGiftObservationDataSchema = z.object({
-  observationEgoGiftCostDataList: z.array(EGOGiftObservationCostSchema),
-  observationEgoGiftDataList: z.array(z.number()),
-}).strict()
+export const EGOGiftObservationDataSchema = z
+  .object({
+    observationEgoGiftCostDataList: z.array(EGOGiftObservationCostSchema),
+    observationEgoGiftDataList: z.array(z.number()),
+  })
+  .strict()

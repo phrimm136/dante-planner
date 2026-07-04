@@ -36,7 +36,7 @@ export interface UseSetFiltersResult<T extends Record<string, ReadonlySet<unknow
  * ```
  */
 export function useSetFilters<T extends Record<string, ReadonlySet<unknown>>>(
-  initialFilters: T
+  initialFilters: T,
 ): UseSetFiltersResult<T> {
   const [values, setValues] = useState<T>(initialFilters)
 

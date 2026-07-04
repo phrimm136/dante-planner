@@ -113,12 +113,7 @@ export function FormattedDescription({ text, className }: FormattedDescriptionPr
 
               // Keyword segment - render with FormattedKeyword (keeps its own color)
               if (segment.keyword) {
-                return (
-                  <FormattedKeyword
-                    key={segmentIndex}
-                    keyword={segment.keyword}
-                  />
-                )
+                return <FormattedKeyword key={segmentIndex} keyword={segment.keyword} />
               }
 
               // Fallback for malformed segment

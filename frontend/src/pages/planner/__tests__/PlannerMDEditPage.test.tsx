@@ -6,7 +6,9 @@ import { useSavedPlannerQuery } from '../hooks/useSavedPlannerQuery'
 import type { SaveablePlanner, MDPlannerContent } from '../types/PlannerTypes'
 
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
   useParams: () => ({ id: 'test-planner-123' }),
 }))
 
@@ -94,7 +96,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       expect(useSavedPlannerQuery).toHaveBeenCalledWith('test-planner-123')
@@ -104,7 +106,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       const editor = screen.getByTestId('editor-content')
@@ -121,7 +123,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       expect(screen.getByText(/Plan Not Found/)).toBeDefined()
@@ -140,7 +142,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       expect(screen.getByText(/Invalid Planner Type/)).toBeDefined()
@@ -153,7 +155,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       const editor = screen.getByTestId('editor-content')
@@ -164,7 +166,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       const editor = screen.getByTestId('editor-content')
@@ -177,7 +179,7 @@ describe('PlannerMDEditPage', () => {
       render(
         <QueryClientProvider client={queryClient}>
           <PlannerMDEditPage />
-        </QueryClientProvider>
+        </QueryClientProvider>,
       )
 
       expect(useSavedPlannerQuery).toHaveBeenCalledWith('test-planner-123')

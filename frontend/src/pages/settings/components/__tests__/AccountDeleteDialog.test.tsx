@@ -9,21 +9,31 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         'settings.deleteAccount.title': 'Delete Account',
-        'settings.deleteAccount.confirmMessage': 'This will permanently delete your account and all associated data.',
+        'settings.deleteAccount.confirmMessage':
+          'This will permanently delete your account and all associated data.',
         'settings.deleteAccount.typeToConfirm': 'Type <1>DELETE</1> to confirm',
-        'settings.deleteAccount.cannotUndo': 'This action cannot be undone after the grace period expires.',
+        'settings.deleteAccount.cannotUndo':
+          'This action cannot be undone after the grace period expires.',
         'settings.deleteAccount.gracePeriod': 'You have a 30-day grace period to cancel deletion.',
-        'cancel': 'Cancel',
-        'deleting': 'Deleting...',
+        cancel: 'Cancel',
+        deleting: 'Deleting...',
       }
       return translations[key] ?? key
     },
   }),
-  Trans: ({ i18nKey, components }: { i18nKey: string; components?: Record<string, React.ReactElement> }) => {
+  Trans: ({
+    i18nKey,
+    components,
+  }: {
+    i18nKey: string
+    components?: Record<string, React.ReactElement>
+  }) => {
     if (i18nKey === 'settings.deleteAccount.typeToConfirm' && components) {
       return (
         <>
-          Type {components[1] ? <span className="font-bold text-destructive">DELETE</span> : 'DELETE'} to confirm
+          Type{' '}
+          {components[1] ? <span className="font-bold text-destructive">DELETE</span> : 'DELETE'} to
+          confirm
         </>
       )
     }
@@ -53,9 +63,7 @@ describe('AccountDeleteDialog', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Delete Account' })).toBeInTheDocument()
-    expect(
-      screen.getByText(/permanently delete your account/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/permanently delete your account/i)).toBeInTheDocument()
   })
 
   it('does not render when closed', () => {

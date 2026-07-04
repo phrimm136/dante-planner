@@ -66,18 +66,14 @@ function NotificationToastContent({
       className={cn(
         'flex items-start gap-3 w-full text-left',
         'bg-background border border-border rounded-lg p-4 shadow-lg',
-        'hover:bg-accent transition-colors cursor-pointer'
+        'hover:bg-accent transition-colors cursor-pointer',
       )}
     >
-      <div className="flex-shrink-0 mt-0.5">
-        {getNotificationIcon(data.type)}
-      </div>
+      <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(data.type)}</div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{data.title}</p>
         {data.body && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">
-            {data.body}
-          </p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{data.body}</p>
         )}
       </div>
     </button>
@@ -89,14 +85,11 @@ function NotificationToastContent({
  * Use this when tab is visible instead of browser notification.
  */
 export function showNotificationToast(data: NotificationToastData): void {
-  toast.custom(
-    (id) => <NotificationToastContent data={data} toastId={id} />,
-    {
-      duration: 5000,
-      position: 'bottom-right',
-      unstyled: true,
-    }
-  )
+  toast.custom((id) => <NotificationToastContent data={data} toastId={id} />, {
+    duration: 5000,
+    position: 'bottom-right',
+    unstyled: true,
+  })
 }
 
 export type { NotificationToastData }

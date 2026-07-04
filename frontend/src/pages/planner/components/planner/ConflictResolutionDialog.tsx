@@ -8,7 +8,11 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import type { ConflictState, ConflictResolutionChoice, SaveablePlanner } from '../../types/PlannerTypes'
+import type {
+  ConflictState,
+  ConflictResolutionChoice,
+  SaveablePlanner,
+} from '../../types/PlannerTypes'
 
 /**
  * Props for ConflictResolutionDialog
@@ -82,13 +86,11 @@ export function ConflictResolutionDialog({
         onInteractOutside={preventDismissal}
       >
         <DialogHeader>
-          <DialogTitle>
-            {t('pages.plannerMD.conflict.title', 'Save Conflict Detected')}
-          </DialogTitle>
+          <DialogTitle>{t('pages.plannerMD.conflict.title', 'Save Conflict Detected')}</DialogTitle>
           <DialogDescription>
             {t(
               'pages.plannerMD.conflict.description',
-              'This planner was modified on another device or tab. Your local changes conflict with the server version.'
+              'This planner was modified on another device or tab. Your local changes conflict with the server version.',
             )}
           </DialogDescription>
         </DialogHeader>
@@ -133,21 +135,27 @@ export function ConflictResolutionDialog({
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="outline"
-            onClick={() => { onChoice('discard'); }}
+            onClick={() => {
+              onChoice('discard')
+            }}
             disabled={isResolving}
           >
             {t('pages.plannerMD.conflict.discard', 'Use Server')}
           </Button>
           <Button
             variant="outline"
-            onClick={() => { onChoice('both'); }}
+            onClick={() => {
+              onChoice('both')
+            }}
             disabled={isResolving}
           >
             {t('pages.plannerMD.conflict.keepBoth', 'Keep Both')}
           </Button>
           <Button
             variant="destructive"
-            onClick={() => { onChoice('overwrite'); }}
+            onClick={() => {
+              onChoice('overwrite')
+            }}
             disabled={isResolving}
           >
             {t('pages.plannerMD.conflict.overwrite', 'Keep Local')}

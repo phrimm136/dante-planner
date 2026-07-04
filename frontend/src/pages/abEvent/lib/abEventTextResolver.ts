@@ -74,10 +74,7 @@ export function resolveCondition(condition: string, shared: AbEventShared): stri
 /**
  * Resolve effect type to display text with template substitution.
  */
-export function createEffectTextResolver(
-  shared: AbEventShared,
-  giftNames: Record<string, string>,
-) {
+export function createEffectTextResolver(shared: AbEventShared, giftNames: Record<string, string>) {
   return function resolveEffectText(
     effectType: string,
     giftId?: number,
@@ -131,7 +128,7 @@ export function createEffectTextResolver(
         const resolvedCond = resolveCondition(condition, shared)
         template = template.replace(
           new RegExp(`<color=${CREAM}>\\{conditions\\}\\{targets\\}</color>`),
-          `${resolvedCond}<color=${CREAM}>${resolvedTarget}</color>`
+          `${resolvedCond}<color=${CREAM}>${resolvedTarget}</color>`,
         )
         template = template.replace('{conditions}', resolvedCond)
         template = template.replace('{targets}', `<color=${CREAM}>${resolvedTarget}</color>`)

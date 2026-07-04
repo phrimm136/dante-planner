@@ -55,11 +55,7 @@ export function ThemePackTrackerCard({
 
   return (
     <>
-      <div
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={onFocusToggle}
-      >
+      <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={onFocusToggle}>
         <ThemePackViewer
           packId={packId}
           packEntry={packEntry}
@@ -79,7 +75,11 @@ export function ThemePackTrackerCard({
                     e.stopPropagation()
                     onToggleDone()
                   }}
-                  aria-label={isDone ? t('common.markAsNotDone', 'Mark as Not Done') : t('common.markAsDone', 'Mark as Done')}
+                  aria-label={
+                    isDone
+                      ? t('common.markAsNotDone', 'Mark as Not Done')
+                      : t('common.markAsDone', 'Mark as Done')
+                  }
                 >
                   <CheckCircle2 className="h-5 w-5" />
                 </Button>

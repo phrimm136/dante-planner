@@ -1,8 +1,19 @@
 import { z } from 'zod'
-import { DUNGEON_IDX, MAX_LEVEL, MD_CATEGORIES, RR_CATEGORIES, PLANNER_TYPES } from '@/shared/gameData'
+import {
+  DUNGEON_IDX,
+  MAX_LEVEL,
+  MD_CATEGORIES,
+  RR_CATEGORIES,
+  PLANNER_TYPES,
+} from '@/shared/gameData'
 import type { DungeonIdx } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
-import type { SerializableFloorSelection, SaveablePlanner, MDPlannerContent, RRPlannerContent } from '../types/PlannerTypes'
+import type {
+  SerializableFloorSelection,
+  SaveablePlanner,
+  MDPlannerContent,
+  RRPlannerContent,
+} from '../types/PlannerTypes'
 import { EgoTypeSchema } from '@/pages/ego'
 
 /**
@@ -25,39 +36,35 @@ import { EgoTypeSchema } from '@/pages/ego'
  * Examples: 10101, 10102, 11212
  * Format: 1 + sinner index (01-12, 2 digits) + identity index (2+ digits)
  */
-export const IdentityIdSchema = z.string().regex(
-  /^1(0[1-9]|1[0-2])\d{2,}$/,
-  'Identity ID must match pattern 1{01-12}{2+ digits}'
-)
+export const IdentityIdSchema = z
+  .string()
+  .regex(/^1(0[1-9]|1[0-2])\d{2,}$/, 'Identity ID must match pattern 1{01-12}{2+ digits}')
 
 /**
  * EGO ID pattern: 2{01-12}{:2}
  * Examples: 20101, 20102, 21212
  * Format: 2 + sinner index (01-12, 2 digits) + EGO index (2+ digits)
  */
-export const EGOIdSchema = z.string().regex(
-  /^2(0[1-9]|1[0-2])\d{2,}$/,
-  'EGO ID must match pattern 2{01-12}{2+ digits}'
-)
+export const EGOIdSchema = z
+  .string()
+  .regex(/^2(0[1-9]|1[0-2])\d{2,}$/, 'EGO ID must match pattern 2{01-12}{2+ digits}')
 
 /**
  * Gift ID pattern: {1, 2, or empty}{4-digit starting with 9}
  * Examples: 9001, 9999, 19001, 29001
  * Format: optional prefix (1 or 2) + 9 + 3 digits
  */
-export const GiftIdSchema = z.string().regex(
-  /^[12]?9\d{3}$/,
-  'Gift ID must match pattern {1|2|empty}9{3 digits}'
-)
+export const GiftIdSchema = z
+  .string()
+  .regex(/^[12]?9\d{3}$/, 'Gift ID must match pattern {1|2|empty}9{3 digits}')
 
 /**
  * Theme pack ID pattern: {4-digit}
  * Examples: 1001, 1122, 1508
  */
-export const ThemePackSchema = z.string().regex(
-  /^\d{4}$/,
-  'Theme Pack Id must match pattern {4 digits}'
-)
+export const ThemePackSchema = z
+  .string()
+  .regex(/^\d{4}$/, 'Theme Pack Id must match pattern {4 digits}')
 
 // ============================================================================
 // Enum Schemas
@@ -96,12 +103,7 @@ export const DungeonIdxSchema = z.union([
 /**
  * Uptie tier schema - 1, 2, 3, or 4
  */
-const UptieTierSchema = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-])
+const UptieTierSchema = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
 
 /**
  * Threadspin tier schema - 1, 2, 3, 4, or 5
@@ -117,19 +119,23 @@ const ThreadspinTierSchema = z.union([
 /**
  * Equipped identity schema with validated ID and level
  */
-const EquippedIdentitySchema = z.object({
-  id: IdentityIdSchema,
-  uptie: UptieTierSchema,
-  level: z.number().int().min(1).max(MAX_LEVEL),
-}).strict()
+const EquippedIdentitySchema = z
+  .object({
+    id: IdentityIdSchema,
+    uptie: UptieTierSchema,
+    level: z.number().int().min(1).max(MAX_LEVEL),
+  })
+  .strict()
 
 /**
  * Equipped EGO schema with validated ID
  */
-const EquippedEGOSchema = z.object({
-  id: EGOIdSchema,
-  threadspin: ThreadspinTierSchema,
-}).strict()
+const EquippedEGOSchema = z
+  .object({
+    id: EGOIdSchema,
+    threadspin: ThreadspinTierSchema,
+  })
+  .strict()
 
 /**
  * EGO slots schema - Record keyed by EGO type (ZAYIN, TETH, etc.)
@@ -144,10 +150,12 @@ const SkillEAStateSchema = z.record(z.string(), z.number())
 /**
  * Sinner equipment schema
  */
-const SinnerEquipmentSchema = z.object({
-  identity: EquippedIdentitySchema,
-  egos: EGOSlotsSchema,
-}).strict()
+const SinnerEquipmentSchema = z
+  .object({
+    identity: EquippedIdentitySchema,
+    egos: EGOSlotsSchema,
+  })
+  .strict()
 
 // ============================================================================
 // Floor Selection Schemas (Draft vs Save)
@@ -157,14 +165,16 @@ const SinnerEquipmentSchema = z.object({
  * Base floor selection schema for drafts
  * Allows null themePackId for incomplete selections
  */
-export const FloorSelectionDraftSchema = z.object({
-  /** Selected theme pack ID, null if none selected */
-  themePackId: ThemePackSchema.nullable(),
-  /** Selected difficulty for this floor */
-  difficulty: DungeonIdxSchema,
-  /** Selected gift IDs as array (serialized from Set) - validated as gift IDs */
-  giftIds: z.array(GiftIdSchema),
-}).strict()
+export const FloorSelectionDraftSchema = z
+  .object({
+    /** Selected theme pack ID, null if none selected */
+    themePackId: ThemePackSchema.nullable(),
+    /** Selected difficulty for this floor */
+    difficulty: DungeonIdxSchema,
+    /** Selected gift IDs as array (serialized from Set) - validated as gift IDs */
+    giftIds: z.array(GiftIdSchema),
+  })
+  .strict()
 
 /**
  * Strict floor selection schema for saves
@@ -186,10 +196,12 @@ export const SerializableFloorSelectionSchema = FloorSelectionDraftSchema
  * Serializable note content schema
  * Wraps Tiptap's JSONContent for storage
  */
-export const SerializableNoteContentSchema = z.object({
-  /** Rich text content as Tiptap JSONContent */
-  content: JSONContentSchema,
-}).strict()
+export const SerializableNoteContentSchema = z
+  .object({
+    /** Rich text content as Tiptap JSONContent */
+    content: JSONContentSchema,
+  })
+  .strict()
 
 // ============================================================================
 // Metadata & Content Schemas
@@ -204,32 +216,34 @@ export const PlannerTypeSchema = z.enum(PLANNER_TYPES)
  * Planner metadata schema
  * Contains tracking and identification data
  */
-export const PlannerMetadataSchema = z.object({
-  /** Unique identifier (UUID v4) */
-  id: z.string().uuid(),
-  /** Planner title (identification, not game state) */
-  title: z.string(),
-  /** Current save status */
-  status: PlannerStatusSchema,
-  /** Schema version for data format migration support (1, 2, ...) */
-  schemaVersion: z.number().int().positive(),
-  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
-  contentVersion: z.number().int().positive(),
-  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-  plannerType: PlannerTypeSchema,
-  /** Server sync version for optimistic locking (starts at 1) */
-  syncVersion: z.number().int().positive().default(1),
-  /** ISO 8601 timestamp when planner was first created */
-  createdAt: z.string().datetime(),
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: z.string().datetime(),
-  /** ISO 8601 timestamp when planner was explicitly saved */
-  savedAt: z.string().datetime().nullable(),
-  /** Device identifier for local storage namespacing */
-  deviceId: z.string(),
-  /** Whether planner is published to Gesellschaft */
-  published: z.boolean().optional(),
-}).strict()
+export const PlannerMetadataSchema = z
+  .object({
+    /** Unique identifier (UUID v4) */
+    id: z.string().uuid(),
+    /** Planner title (identification, not game state) */
+    title: z.string(),
+    /** Current save status */
+    status: PlannerStatusSchema,
+    /** Schema version for data format migration support (1, 2, ...) */
+    schemaVersion: z.number().int().positive(),
+    /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+    contentVersion: z.number().int().positive(),
+    /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+    plannerType: PlannerTypeSchema,
+    /** Server sync version for optimistic locking (starts at 1) */
+    syncVersion: z.number().int().positive().default(1),
+    /** ISO 8601 timestamp when planner was first created */
+    createdAt: z.string().datetime(),
+    /** ISO 8601 timestamp when planner was last modified */
+    lastModifiedAt: z.string().datetime(),
+    /** ISO 8601 timestamp when planner was explicitly saved */
+    savedAt: z.string().datetime().nullable(),
+    /** Device identifier for local storage namespacing */
+    deviceId: z.string(),
+    /** Whether planner is published to Gesellschaft */
+    published: z.boolean().optional(),
+  })
+  .strict()
 
 // ============================================================================
 // Config Schemas (Discriminated Union)
@@ -238,22 +252,26 @@ export const PlannerMetadataSchema = z.object({
 /**
  * Mirror Dungeon config schema - discriminated by type field
  */
-export const MDConfigSchema = z.object({
-  /** Discriminator for type narrowing */
-  type: z.literal('MIRROR_DUNGEON'),
-  /** MD category (5F, 10F, 15F) */
-  category: MDCategorySchema,
-}).strict()
+export const MDConfigSchema = z
+  .object({
+    /** Discriminator for type narrowing */
+    type: z.literal('MIRROR_DUNGEON'),
+    /** MD category (5F, 10F, 15F) */
+    category: MDCategorySchema,
+  })
+  .strict()
 
 /**
  * Refracted Railway config schema - discriminated by type field
  */
-export const RRConfigSchema = z.object({
-  /** Discriminator for type narrowing */
-  type: z.literal('REFRACTED_RAILWAY'),
-  /** RR category (placeholder) */
-  category: RRCategorySchema,
-}).strict()
+export const RRConfigSchema = z
+  .object({
+    /** Discriminator for type narrowing */
+    type: z.literal('REFRACTED_RAILWAY'),
+    /** RR category (placeholder) */
+    category: RRCategorySchema,
+  })
+  .strict()
 
 /**
  * Planner config schema using discriminated union
@@ -299,21 +317,25 @@ const MDPlannerContentBaseFields = {
  * MD Draft planner content schema
  * Allows incomplete data (nullable themePackId in floor selections)
  */
-export const MDPlannerContentDraftSchema = z.object({
-  ...MDPlannerContentBaseFields,
-  /** Floor theme selections - nullable themePackId allowed */
-  floorSelections: z.array(FloorSelectionDraftSchema),
-}).strict()
+export const MDPlannerContentDraftSchema = z
+  .object({
+    ...MDPlannerContentBaseFields,
+    /** Floor theme selections - nullable themePackId allowed */
+    floorSelections: z.array(FloorSelectionDraftSchema),
+  })
+  .strict()
 
 /**
  * MD Save planner content schema
  * Requires complete data (themePackId required in floor selections)
  */
-export const MDPlannerContentSaveSchema = z.object({
-  ...MDPlannerContentBaseFields,
-  /** Floor theme selections - themePackId REQUIRED */
-  floorSelections: z.array(FloorSelectionSaveSchema),
-}).strict()
+export const MDPlannerContentSaveSchema = z
+  .object({
+    ...MDPlannerContentBaseFields,
+    /** Floor theme selections - themePackId REQUIRED */
+    floorSelections: z.array(FloorSelectionSaveSchema),
+  })
+  .strict()
 
 /**
  * RR planner content schema - placeholder for future implementation
@@ -342,27 +364,31 @@ export const PlannerContentSchema = MDPlannerContentDraftSchema
  * Draft planner schema with config layer
  * Allows incomplete data for auto-save during editing
  */
-export const DraftPlannerSchema = z.object({
-  /** Planner metadata (id, status, timestamps, etc.) */
-  metadata: PlannerMetadataSchema,
-  /** Planner config (type discriminator and category) */
-  config: PlannerConfigDiscriminatedSchema,
-  /** Planner content - allows incomplete floor selections */
-  content: z.record(z.string(), z.unknown()),
-}).strict()
+export const DraftPlannerSchema = z
+  .object({
+    /** Planner metadata (id, status, timestamps, etc.) */
+    metadata: PlannerMetadataSchema,
+    /** Planner config (type discriminator and category) */
+    config: PlannerConfigDiscriminatedSchema,
+    /** Planner content - allows incomplete floor selections */
+    content: z.record(z.string(), z.unknown()),
+  })
+  .strict()
 
 /**
  * Save planner schema with config layer
  * Requires complete data for explicit save operations
  */
-export const SavePlannerSchema = z.object({
-  /** Planner metadata (id, status, timestamps, etc.) */
-  metadata: PlannerMetadataSchema,
-  /** Planner config (type discriminator and category) */
-  config: PlannerConfigDiscriminatedSchema,
-  /** Planner content - requires complete data */
-  content: z.record(z.string(), z.unknown()),
-}).strict()
+export const SavePlannerSchema = z
+  .object({
+    /** Planner metadata (id, status, timestamps, etc.) */
+    metadata: PlannerMetadataSchema,
+    /** Planner config (type discriminator and category) */
+    config: PlannerConfigDiscriminatedSchema,
+    /** Planner content - requires complete data */
+    content: z.record(z.string(), z.unknown()),
+  })
+  .strict()
 
 /**
  * Default saveable planner schema (draft mode for backwards compatibility)
@@ -398,28 +424,27 @@ export const SaveablePlannerSchema = DraftPlannerSchema
  */
 export function validateSaveablePlanner(
   data: unknown,
-  mode: 'draft' | 'save' = 'draft'
+  mode: 'draft' | 'save' = 'draft',
 ): SaveablePlanner {
   // Step 1: Validate base structure with config
-  const base = z.object({
-    metadata: PlannerMetadataSchema,
-    config: PlannerConfigDiscriminatedSchema,
-    content: z.record(z.string(), z.unknown()),
-  }).strict().parse(data)
+  const base = z
+    .object({
+      metadata: PlannerMetadataSchema,
+      config: PlannerConfigDiscriminatedSchema,
+      content: z.record(z.string(), z.unknown()),
+    })
+    .strict()
+    .parse(data)
 
   // Step 2: Validate content based on config.type
   let content: MDPlannerContent | RRPlannerContent
 
   if (base.config.type === 'MIRROR_DUNGEON') {
-    const contentSchema = mode === 'save'
-      ? MDPlannerContentSaveSchema
-      : MDPlannerContentDraftSchema
+    const contentSchema = mode === 'save' ? MDPlannerContentSaveSchema : MDPlannerContentDraftSchema
     content = contentSchema.parse(base.content) as MDPlannerContent
   } else {
     // REFRACTED_RAILWAY
-    const contentSchema = mode === 'save'
-      ? RRPlannerContentSaveSchema
-      : RRPlannerContentDraftSchema
+    const contentSchema = mode === 'save' ? RRPlannerContentSaveSchema : RRPlannerContentDraftSchema
     content = contentSchema.parse(base.content) as RRPlannerContent
   }
 
@@ -451,22 +476,24 @@ export const PlannerCategorySchema = z.union([MDCategorySchema, RRCategorySchema
  * Planner summary schema
  * Lightweight version for list display
  */
-export const PlannerSummarySchema = z.object({
-  /** Unique identifier */
-  id: z.string(),
-  /** Planner title */
-  title: z.string(),
-  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-  plannerType: PlannerTypeSchema,
-  /** Category (MD: 5F/10F/15F, RR: placeholder) */
-  category: PlannerCategorySchema,
-  /** Current save status */
-  status: PlannerStatusSchema,
-  /** Last modification timestamp for sorting */
-  lastModifiedAt: z.string(),
-  /** Explicit save timestamp (null if never saved) */
-  savedAt: z.string().nullable(),
-}).strict()
+export const PlannerSummarySchema = z
+  .object({
+    /** Unique identifier */
+    id: z.string(),
+    /** Planner title */
+    title: z.string(),
+    /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+    plannerType: PlannerTypeSchema,
+    /** Category (MD: 5F/10F/15F, RR: placeholder) */
+    category: PlannerCategorySchema,
+    /** Current save status */
+    status: PlannerStatusSchema,
+    /** Last modification timestamp for sorting */
+    lastModifiedAt: z.string(),
+    /** Explicit save timestamp (null if never saved) */
+    savedAt: z.string().nullable(),
+  })
+  .strict()
 
 // ============================================================================
 // Serialization Helpers
@@ -570,59 +597,63 @@ export const PlannerIdSchema = z.string().uuid().brand<'PlannerId'>()
  * Server response schema for a single planner
  * Validates full planner data from the backend
  */
-export const ServerPlannerResponseSchema = z.object({
-  /** Unique identifier (UUID) */
-  id: PlannerIdSchema,
-  /** Planner title */
-  title: z.string(),
-  /** MD category */
-  category: MDCategorySchema,
-  /** Current save status */
-  status: PlannerStatusSchema,
-  /** Planner content as JSON string */
-  content: z.string(),
-  /** Schema version for data format migration support */
-  schemaVersion: z.number().int().positive(),
-  /** Game content version (e.g., 6 for MD6, 5 for RR5) */
-  contentVersion: z.number().int().positive(),
-  /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-  plannerType: PlannerTypeSchema,
-  /** Server sync version for optimistic locking */
-  syncVersion: z.number().int().positive(),
-  /** Whether the planner is published to Gesellschaft */
-  published: z.boolean(),
-  /** Device identifier (nullable - server may return null) */
-  deviceId: z.string().nullish(),
-  /** ISO 8601 timestamp when planner was created */
-  createdAt: z.string(),
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: z.string(),
-  /** ISO 8601 timestamp when planner was explicitly saved (nullable) */
-  savedAt: z.string().nullish(),
-  /** Number of upvotes (for published planners) */
-  upvotes: z.number().int().nonnegative().optional(),
-}).strict()
+export const ServerPlannerResponseSchema = z
+  .object({
+    /** Unique identifier (UUID) */
+    id: PlannerIdSchema,
+    /** Planner title */
+    title: z.string(),
+    /** MD category */
+    category: MDCategorySchema,
+    /** Current save status */
+    status: PlannerStatusSchema,
+    /** Planner content as JSON string */
+    content: z.string(),
+    /** Schema version for data format migration support */
+    schemaVersion: z.number().int().positive(),
+    /** Game content version (e.g., 6 for MD6, 5 for RR5) */
+    contentVersion: z.number().int().positive(),
+    /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
+    plannerType: PlannerTypeSchema,
+    /** Server sync version for optimistic locking */
+    syncVersion: z.number().int().positive(),
+    /** Whether the planner is published to Gesellschaft */
+    published: z.boolean(),
+    /** Device identifier (nullable - server may return null) */
+    deviceId: z.string().nullish(),
+    /** ISO 8601 timestamp when planner was created */
+    createdAt: z.string(),
+    /** ISO 8601 timestamp when planner was last modified */
+    lastModifiedAt: z.string(),
+    /** ISO 8601 timestamp when planner was explicitly saved (nullable) */
+    savedAt: z.string().nullish(),
+    /** Number of upvotes (for published planners) */
+    upvotes: z.number().int().nonnegative().optional(),
+  })
+  .strict()
 
 /**
  * Server summary schema for planner list display
  * Lightweight version without full content
  */
-export const ServerPlannerSummarySchema = z.object({
-  /** Unique identifier (UUID) */
-  id: PlannerIdSchema,
-  /** Planner title */
-  title: z.string(),
-  /** MD category */
-  category: MDCategorySchema,
-  /** Type of planner */
-  plannerType: PlannerTypeSchema,
-  /** Current save status */
-  status: PlannerStatusSchema,
-  /** Server sync version for optimistic locking */
-  syncVersion: z.number().int().positive(),
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: z.string(),
-}).strict()
+export const ServerPlannerSummarySchema = z
+  .object({
+    /** Unique identifier (UUID) */
+    id: PlannerIdSchema,
+    /** Planner title */
+    title: z.string(),
+    /** MD category */
+    category: MDCategorySchema,
+    /** Type of planner */
+    plannerType: PlannerTypeSchema,
+    /** Current save status */
+    status: PlannerStatusSchema,
+    /** Server sync version for optimistic locking */
+    syncVersion: z.number().int().positive(),
+    /** ISO 8601 timestamp when planner was last modified */
+    lastModifiedAt: z.string(),
+  })
+  .strict()
 
 /**
  * Array schema for server planner summaries
@@ -633,14 +664,16 @@ export const ServerPlannerSummaryArraySchema = z.array(ServerPlannerSummarySchem
 /**
  * Response schema for bulk import operation
  */
-export const ImportPlannersResponseSchema = z.object({
-  /** Number of planners successfully imported */
-  imported: z.number().int().nonnegative(),
-  /** Total number of planners in request */
-  total: z.number().int().nonnegative(),
-  /** Summary of imported planners */
-  planners: z.array(ServerPlannerSummarySchema),
-}).strict()
+export const ImportPlannersResponseSchema = z
+  .object({
+    /** Number of planners successfully imported */
+    imported: z.number().int().nonnegative(),
+    /** Total number of planners in request */
+    total: z.number().int().nonnegative(),
+    /** Summary of imported planners */
+    planners: z.array(ServerPlannerSummarySchema),
+  })
+  .strict()
 
 /**
  * SSE event type for planner updates
@@ -651,27 +684,31 @@ export const PlannerSseEventTypeSchema = z.enum(['created', 'updated', 'deleted'
  * Server-Sent Event schema for planner updates
  * Used for real-time sync notifications
  */
-export const PlannerSseEventSchema = z.object({
-  /** ID of the affected planner (UUID) */
-  plannerId: PlannerIdSchema,
-  /** Type of change that occurred */
-  type: PlannerSseEventTypeSchema,
-}).strict()
+export const PlannerSseEventSchema = z
+  .object({
+    /** ID of the affected planner (UUID) */
+    plannerId: PlannerIdSchema,
+    /** Type of change that occurred */
+    type: PlannerSseEventTypeSchema,
+  })
+  .strict()
 
 /**
  * Planner configuration schema from backend
  * Contains current versions for data format and game content
  */
-export const PlannerConfigSchema = z.object({
-  /** Current planner data schema version for migration support */
-  schemaVersion: z.number().int().positive(),
-  /** Current Mirror Dungeon version (e.g., 7 for MD7) */
-  mdCurrentVersion: z.number().int().positive(),
-  /** Available Mirror Dungeon versions including legacy (e.g., [6, 7]) */
-  mdAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
-  /** Available Refracted Railway versions (e.g., [1, 5] for RR1 and RR5) */
-  rrAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
-}).strict()
+export const PlannerConfigSchema = z
+  .object({
+    /** Current planner data schema version for migration support */
+    schemaVersion: z.number().int().positive(),
+    /** Current Mirror Dungeon version (e.g., 7 for MD7) */
+    mdCurrentVersion: z.number().int().positive(),
+    /** Available Mirror Dungeon versions including legacy (e.g., [6, 7]) */
+    mdAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
+    /** Available Refracted Railway versions (e.g., [1, 5] for RR1 and RR5) */
+    rrAvailableVersions: z.array(z.number().int().positive()).min(1).readonly(),
+  })
+  .strict()
 
 /**
  * Planner config type
@@ -686,28 +723,32 @@ export type PlannerConfig = z.infer<typeof PlannerConfigSchema>
  * Planner export item schema - light validation for individual planners
  * Allows any content structure for forward compatibility
  */
-export const PlannerExportItemSchema = z.object({
-  /** Planner ID (UUID) */
-  id: z.string(),
-  /** Planner metadata */
-  metadata: PlannerMetadataSchema,
-  /** Planner config (type and category) */
-  config: PlannerConfigDiscriminatedSchema,
-  /** Planner content - light validation, allow any structure */
-  content: z.record(z.string(), z.unknown()),
-}).strict()
+export const PlannerExportItemSchema = z
+  .object({
+    /** Planner ID (UUID) */
+    id: z.string(),
+    /** Planner metadata */
+    metadata: PlannerMetadataSchema,
+    /** Planner config (type and category) */
+    config: PlannerConfigDiscriminatedSchema,
+    /** Planner content - light validation, allow any structure */
+    content: z.record(z.string(), z.unknown()),
+  })
+  .strict()
 
 /**
  * Export envelope schema for validating imported .danteplanner files
  * Light structural validation - does not reject based on version mismatch
  */
-export const ExportEnvelopeSchema = z.object({
-  /** Export format version for future migration support */
-  exportVersion: z.number().int().positive(),
-  /** ISO 8601 timestamp when export was created */
-  exportedAt: z.string(),
-  /** Device ID of the source device */
-  sourceDeviceId: z.string(),
-  /** Array of exported planners */
-  planners: z.array(PlannerExportItemSchema),
-}).strict()
+export const ExportEnvelopeSchema = z
+  .object({
+    /** Export format version for future migration support */
+    exportVersion: z.number().int().positive(),
+    /** ISO 8601 timestamp when export was created */
+    exportedAt: z.string(),
+    /** Device ID of the source device */
+    sourceDeviceId: z.string(),
+    /** Array of exported planners */
+    planners: z.array(PlannerExportItemSchema),
+  })
+  .strict()

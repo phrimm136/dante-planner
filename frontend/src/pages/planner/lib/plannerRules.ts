@@ -35,7 +35,7 @@ export function isGiftAffordableForThemePack(gift: EGOGiftSpec, themePackId: str
 export function getUnaffordableGiftIds(
   giftIds: Set<string>,
   themePackId: string,
-  egoGiftSpec: Record<string, EGOGiftSpec>
+  egoGiftSpec: Record<string, EGOGiftSpec>,
 ): string[] {
   return Array.from(giftIds).filter((giftId) => {
     const baseGiftId = getBaseGiftId(giftId)
@@ -58,10 +58,10 @@ export function getUnaffordableGiftNames(
   giftIds: Set<string>,
   themePackId: string,
   egoGiftSpec: Record<string, EGOGiftSpec>,
-  egoGiftI18n: Record<string, string>
+  egoGiftI18n: Record<string, string>,
 ): { ids: string[]; names: string[] } {
   const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
-  const names = ids.map(id => egoGiftI18n[getBaseGiftId(id)] ?? id)
+  const names = ids.map((id) => egoGiftI18n[getBaseGiftId(id)] ?? id)
   return { ids, names }
 }
 
@@ -92,7 +92,7 @@ export function getUnaffordableGiftNames(
  */
 export function canSelectFloorThemePack(
   floorIndex: number,
-  floorSelections: FloorThemeSelection[]
+  floorSelections: FloorThemeSelection[],
 ): boolean {
   // First floor always enabled
   if (floorIndex === 0) return true

@@ -93,12 +93,7 @@ export function CommentActionButtons({
             <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onDelete}>
               <Trash2 className="size-3.5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-2"
-              onClick={onToggleNotifications}
-            >
+            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onToggleNotifications}>
               {comment.authorNotificationsEnabled ? (
                 <Bell className="size-3.5 fill-current text-primary" />
               ) : (
@@ -110,7 +105,12 @@ export function CommentActionButtons({
 
         {/* Moderator-only delete button (only if not author) */}
         {isModerator && !comment.isAuthor && !comment.isDeleted && (
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-orange-500 hover:text-orange-600" onClick={onModeratorDelete}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-orange-500 hover:text-orange-600"
+            onClick={onModeratorDelete}
+          >
             <Trash2 className="size-3.5" />
           </Button>
         )}

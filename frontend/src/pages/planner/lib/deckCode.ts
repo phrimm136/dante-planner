@@ -103,7 +103,7 @@ function bytesToBinary(bytes: Uint8Array): string {
  */
 export function encodeDeckCode(
   equipment: Record<string, SinnerEquipment>,
-  deploymentOrder: number[]
+  deploymentOrder: number[],
 ): string {
   let binary = ''
 
@@ -112,9 +112,7 @@ export function encodeDeckCode(
     const sinnerEquipment = equipment[sinnerCode]
 
     // Identity ID (8 bits, 1-indexed)
-    const identityIndex = sinnerEquipment
-      ? getEntityIndex(sinnerEquipment.identity.id)
-      : 0
+    const identityIndex = sinnerEquipment ? getEntityIndex(sinnerEquipment.identity.id) : 0
     binary += toBinary(identityIndex, 8)
 
     // Deployment order (4 bits, 0=not deployed, 1-12=position)
@@ -155,7 +153,7 @@ export function encodeDeckCode(
 export function decodeDeckCode(
   code: string,
   identitySpecMap: Record<string, unknown>,
-  egoSpecMap: Record<string, { maxThreadspin: 4 | 5 }>
+  egoSpecMap: Record<string, { maxThreadspin: 4 | 5 }>,
 ): DecodedDeck {
   const warnings: string[] = []
 

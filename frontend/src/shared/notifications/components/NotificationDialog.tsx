@@ -127,10 +127,7 @@ function DesktopNotificationCta() {
  * Displays user notifications in a scrollable dialog.
  * Clicking a notification navigates to the planner/comment and deletes it (arca.live style).
  */
-export function NotificationDialog({
-  open,
-  onOpenChange,
-}: NotificationDialogProps) {
+export function NotificationDialog({ open, onOpenChange }: NotificationDialogProps) {
   const { t } = useTranslation(['common'])
   const navigate = useNavigate()
 

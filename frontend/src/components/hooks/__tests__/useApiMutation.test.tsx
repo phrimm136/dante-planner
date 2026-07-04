@@ -49,7 +49,7 @@ describe('useApiMutation', () => {
           mutationFn: async () => {},
           invalidateKeys: ({ id }) => [['planner'], ['comments', id]],
         }),
-      { wrapper }
+      { wrapper },
     )
 
     result.current.mutate({ id: 'p1' })
@@ -70,7 +70,7 @@ describe('useApiMutation', () => {
           mutationFn: async (n) => `value-${n}`,
           onSuccess,
         }),
-      { wrapper }
+      { wrapper },
     )
 
     result.current.mutate(7)
@@ -88,7 +88,7 @@ describe('useApiMutation', () => {
           mutationFn: async () => {},
           successToastKey: 'comments.toast.deletedSuccess',
         }),
-      { wrapper }
+      { wrapper },
     )
 
     result.current.mutate()
@@ -111,7 +111,7 @@ describe('useApiMutation', () => {
           errorLogPrefix: 'Edit comment failed',
           errorToastKey: 'comments.toast.editFailed',
         }),
-      { wrapper }
+      { wrapper },
     )
 
     result.current.mutate()
@@ -136,7 +136,7 @@ describe('useApiMutation', () => {
           errorToastKey: 'should.not.toast',
           onError,
         }),
-      { wrapper }
+      { wrapper },
     )
 
     result.current.mutate()
@@ -157,7 +157,7 @@ describe('useApiMutation', () => {
             throw new Error('quiet')
           },
         }),
-      { wrapper }
+      { wrapper },
     )
 
     result.current.mutate()

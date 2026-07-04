@@ -72,12 +72,7 @@ export const CommentReportResponseSchema = z
   })
   .strict()
 
-export const CommentReportReasonSchema = z.enum([
-  'SPAM',
-  'HARASSMENT',
-  'OFF_TOPIC',
-  'OTHER',
-])
+export const CommentReportReasonSchema = z.enum(['SPAM', 'HARASSMENT', 'OFF_TOPIC', 'OTHER'])
 
 // ============================================================================
 // Inferred Types

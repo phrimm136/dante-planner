@@ -2,7 +2,11 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createEntityDetailQueryKeys } from '@/lib/queryKeys'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
-import { AbEventDataSchema, AbEventI18nSchema, AbEventSharedSchema } from '../schemas/AbEventSchemas'
+import {
+  AbEventDataSchema,
+  AbEventI18nSchema,
+  AbEventSharedSchema,
+} from '../schemas/AbEventSchemas'
 
 export const abEventDetailQueryKeys = {
   ...createEntityDetailQueryKeys('abEvent'),
@@ -56,9 +60,7 @@ export function useAbEventDetailSpec(id: string) {
  */
 export function useAbEventDetailI18n(id: string) {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createAbEventI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createAbEventI18nQueryOptions(id, i18n.language))
   return i18nData
 }
 
@@ -73,9 +75,7 @@ export function useAbEventDetailData(id: string) {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createAbEventDataQueryOptions(id))
-  const { data: i18nData } = useSuspenseQuery(
-    createAbEventI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createAbEventI18nQueryOptions(id, i18n.language))
 
   return {
     spec,
@@ -91,8 +91,6 @@ export function useAbEventDetailData(id: string) {
  */
 export function useAbEventShared() {
   const { i18n } = useTranslation()
-  const { data: shared } = useSuspenseQuery(
-    createAbEventSharedQueryOptions(i18n.language)
-  )
+  const { data: shared } = useSuspenseQuery(createAbEventSharedQueryOptions(i18n.language))
   return shared
 }

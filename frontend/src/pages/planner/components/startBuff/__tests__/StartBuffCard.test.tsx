@@ -29,7 +29,6 @@ vi.mock('@/components/ui/AutoSizeText', () => ({
   AutoSizeText: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
-
 const mockBuff: StartBuff = {
   id: '100',
   baseId: 100,
@@ -55,7 +54,7 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-      />
+      />,
     )
 
     expect(screen.getAllByRole('button')).toHaveLength(2)
@@ -73,7 +72,7 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-      />
+      />,
     )
 
     // Click the card (the outer div with cursor-pointer)
@@ -98,7 +97,7 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-      />
+      />,
     )
 
     // Click the card to deselect
@@ -123,7 +122,7 @@ describe('StartBuffCard', () => {
         onSelect={onSelect}
         enhancement={0}
         onEnhancementChange={vi.fn()}
-      />
+      />,
     )
 
     // Highlight image should be rendered - check for the specific mock path

@@ -24,7 +24,11 @@ function ThemePackPageShell() {
   const { spec } = useThemePackListData()
 
   // Filter states
-  const { values: filters, setters, resetAll } = useSetFilters({
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
     selectedDifficulties: new Set<DungeonIdx>(),
     selectedFloors: new Set<ThemePackFloor>(),
     selectedEgoGifts: new Set<string>(),
@@ -52,10 +56,7 @@ function ThemePackPageShell() {
 
   const secondaryFilters = (
     <>
-      <FilterSection
-        title={t('filters.floor', 'Floor')}
-        activeCount={filters.selectedFloors.size}
-      >
+      <FilterSection title={t('filters.floor', 'Floor')} activeCount={filters.selectedFloors.size}>
         <CompactFloorFilter
           selectedFloors={filters.selectedFloors}
           onSelectionChange={setters.selectedFloors}

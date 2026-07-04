@@ -8,7 +8,7 @@ describe('useSetFilters', () => {
       useSetFilters({
         sinners: new Set<string>(['yisang']),
         raritys: new Set<number>(),
-      })
+      }),
     )
 
     expect(result.current.values.sinners).toEqual(new Set(['yisang']))
@@ -20,7 +20,7 @@ describe('useSetFilters', () => {
       useSetFilters({
         sinners: new Set<string>(),
         keywords: new Set<string>(),
-      })
+      }),
     )
 
     act(() => {
@@ -32,9 +32,7 @@ describe('useSetFilters', () => {
   })
 
   it('supports toggle-style updates through the setter', () => {
-    const { result } = renderHook(() =>
-      useSetFilters({ keywords: new Set<string>() })
-    )
+    const { result } = renderHook(() => useSetFilters({ keywords: new Set<string>() }))
 
     act(() => {
       result.current.setters.keywords(new Set(['Burn']))
@@ -55,7 +53,7 @@ describe('useSetFilters', () => {
         sinners: new Set<string>(),
         keywords: new Set<string>(),
         raritys: new Set<number>(),
-      })
+      }),
     )
 
     act(() => {
@@ -80,7 +78,7 @@ describe('useSetFilters', () => {
       useSetFilters({
         a: new Set<string>(['seed']),
         b: new Set<string>(),
-      })
+      }),
     )
 
     act(() => {

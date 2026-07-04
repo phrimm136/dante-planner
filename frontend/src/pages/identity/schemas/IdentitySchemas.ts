@@ -143,7 +143,13 @@ export const IdentityI18nSchema = z.object({
 export const AtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 
 // Defense type enum for spec list
-export const DefenseTypeSchema = z.enum(['GUARD', 'EVADE', 'COUNTER', 'CLASHABLE_GUARD', 'CLASHABLE_COUNTER'])
+export const DefenseTypeSchema = z.enum([
+  'GUARD',
+  'EVADE',
+  'COUNTER',
+  'CLASHABLE_GUARD',
+  'CLASHABLE_COUNTER',
+])
 
 // Spec list item schema
 export const IdentitySpecListItemSchema = z.object({

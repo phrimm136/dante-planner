@@ -45,12 +45,7 @@ import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 function PlannerMDPageContent() {
   const { t } = useTranslation(['planner', 'common'])
 
-  const {
-    category,
-    page,
-    search,
-    setFilters,
-  } = useMDUserFilters()
+  const { category, page, search, setFilters } = useMDUserFilters()
 
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
@@ -73,10 +68,7 @@ function PlannerMDPageContent() {
 
       {/* Toolbar: Search only (no mode toggle for personal planners) */}
       <div className="mb-4">
-        <MDPlannerToolbar
-          search={search}
-          onSearchChange={(q) => setFilters({ q, page: 0 })}
-        />
+        <MDPlannerToolbar search={search} onSearchChange={(q) => setFilters({ q, page: 0 })} />
       </div>
 
       {/* Category Filter Pills */}

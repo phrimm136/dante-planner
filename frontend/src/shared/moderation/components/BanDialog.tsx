@@ -39,9 +39,7 @@ export function BanDialog({ open, onOpenChange, username, onConfirm, isPending }
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('dialogs.ban.title')}</DialogTitle>
-          <DialogDescription>
-            {t('dialogs.ban.description', { username })}
-          </DialogDescription>
+          <DialogDescription>{t('dialogs.ban.description', { username })}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
@@ -57,16 +55,18 @@ export function BanDialog({ open, onOpenChange, username, onConfirm, isPending }
             rows={4}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none overflow-y-auto"
           />
-          <p className="text-xs text-muted-foreground text-right">
-            {reason.length}/500
-          </p>
+          <p className="text-xs text-muted-foreground text-right">{reason.length}/500</p>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             {t('dialogs.ban.cancel')}
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isPending || !reason.trim()}>
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isPending || !reason.trim()}
+          >
             {t('dialogs.ban.confirm')}
           </Button>
         </DialogFooter>
@@ -83,7 +83,13 @@ interface TimeoutDialogProps {
   isPending: boolean
 }
 
-export function TimeoutDialog({ open, onOpenChange, username, onConfirm, isPending }: TimeoutDialogProps) {
+export function TimeoutDialog({
+  open,
+  onOpenChange,
+  username,
+  onConfirm,
+  isPending,
+}: TimeoutDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
   const [duration, setDuration] = useState<number>(30)
   const [reason, setReason] = useState('')
@@ -114,16 +120,14 @@ export function TimeoutDialog({ open, onOpenChange, username, onConfirm, isPendi
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('dialogs.timeout.title')}</DialogTitle>
-          <DialogDescription>
-            {t('dialogs.timeout.description', { username })}
-          </DialogDescription>
+          <DialogDescription>{t('dialogs.timeout.description', { username })}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">{t('dialogs.timeout.duration')}</label>
             <div className="grid grid-cols-2 gap-2">
-              {presetDurations.map(preset => (
+              {presetDurations.map((preset) => (
                 <button
                   key={preset.value}
                   type="button"
@@ -153,9 +157,7 @@ export function TimeoutDialog({ open, onOpenChange, username, onConfirm, isPendi
               rows={4}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none overflow-y-auto"
             />
-            <p className="text-xs text-muted-foreground text-right">
-              {reason.length}/500
-            </p>
+            <p className="text-xs text-muted-foreground text-right">{reason.length}/500</p>
           </div>
         </div>
 
@@ -163,7 +165,11 @@ export function TimeoutDialog({ open, onOpenChange, username, onConfirm, isPendi
           <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             {t('common:cancel')}
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isPending || !reason.trim()}>
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isPending || !reason.trim()}
+          >
             {t('dialogs.timeout.confirm')}
           </Button>
         </DialogFooter>
@@ -222,7 +228,13 @@ interface UnbanDialogProps {
   isPending: boolean
 }
 
-export function UnbanDialog({ open, onOpenChange, username, onConfirm, isPending }: UnbanDialogProps) {
+export function UnbanDialog({
+  open,
+  onOpenChange,
+  username,
+  onConfirm,
+  isPending,
+}: UnbanDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
   const [reason, setReason] = useState('')
 
@@ -242,9 +254,7 @@ export function UnbanDialog({ open, onOpenChange, username, onConfirm, isPending
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('dialogs.unban.title')}</DialogTitle>
-          <DialogDescription>
-            {t('dialogs.unban.description', { username })}
-          </DialogDescription>
+          <DialogDescription>{t('dialogs.unban.description', { username })}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
@@ -260,9 +270,7 @@ export function UnbanDialog({ open, onOpenChange, username, onConfirm, isPending
             rows={4}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none overflow-y-auto"
           />
-          <p className="text-xs text-muted-foreground text-right">
-            {reason.length}/500
-          </p>
+          <p className="text-xs text-muted-foreground text-right">{reason.length}/500</p>
         </div>
 
         <DialogFooter>
@@ -286,7 +294,13 @@ interface ClearTimeoutDialogProps {
   isPending: boolean
 }
 
-export function ClearTimeoutDialog({ open, onOpenChange, username, onConfirm, isPending }: ClearTimeoutDialogProps) {
+export function ClearTimeoutDialog({
+  open,
+  onOpenChange,
+  username,
+  onConfirm,
+  isPending,
+}: ClearTimeoutDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
   const [reason, setReason] = useState('')
 
@@ -324,9 +338,7 @@ export function ClearTimeoutDialog({ open, onOpenChange, username, onConfirm, is
             rows={4}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none overflow-y-auto"
           />
-          <p className="text-xs text-muted-foreground text-right">
-            {reason.length}/500
-          </p>
+          <p className="text-xs text-muted-foreground text-right">{reason.length}/500</p>
         </div>
 
         <DialogFooter>
@@ -349,7 +361,12 @@ interface CommentDeleteDialogProps {
   isPending: boolean
 }
 
-export function CommentDeleteDialog({ open, onOpenChange, onConfirm, isPending }: CommentDeleteDialogProps) {
+export function CommentDeleteDialog({
+  open,
+  onOpenChange,
+  onConfirm,
+  isPending,
+}: CommentDeleteDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
   const [reason, setReason] = useState('')
 
@@ -369,9 +386,7 @@ export function CommentDeleteDialog({ open, onOpenChange, onConfirm, isPending }
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t('dialogs.deleteComment.title')}</DialogTitle>
-          <DialogDescription>
-            {t('dialogs.deleteComment.description')}
-          </DialogDescription>
+          <DialogDescription>{t('dialogs.deleteComment.description')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
@@ -387,16 +402,18 @@ export function CommentDeleteDialog({ open, onOpenChange, onConfirm, isPending }
             rows={4}
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none overflow-y-auto"
           />
-          <p className="text-xs text-muted-foreground text-right">
-            {reason.length}/500
-          </p>
+          <p className="text-xs text-muted-foreground text-right">{reason.length}/500</p>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel} disabled={isPending}>
             {t('common:cancel')}
           </Button>
-          <Button variant="destructive" onClick={handleConfirm} disabled={isPending || !reason.trim()}>
+          <Button
+            variant="destructive"
+            onClick={handleConfirm}
+            disabled={isPending || !reason.trim()}
+          >
             {t('common:delete')}
           </Button>
         </DialogFooter>

@@ -20,7 +20,11 @@ function AbEventPageShell() {
   const spec = useAbEventListSpec()
 
   // Filter states
-  const { values: filters, setters, resetAll } = useSetFilters({
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
     selectedEgoGifts: new Set<string>(),
     selectedThemePacks: new Set<string>(),
   })

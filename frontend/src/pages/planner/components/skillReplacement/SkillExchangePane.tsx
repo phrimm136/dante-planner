@@ -56,7 +56,7 @@ export function SkillExchangePane({
         'inline-flex items-center justify-center gap-2 p-2 rounded-lg border-2',
         isDisabled
           ? 'border-muted bg-muted/50 opacity-50 cursor-not-allowed'
-          : 'selectable border-border bg-card cursor-pointer'
+          : 'selectable border-border bg-card cursor-pointer',
       )}
     >
       {/* Source skill (smaller size) */}
@@ -97,9 +97,7 @@ export function ResetPane({ onClick }: ResetPaneProps) {
       className="selectable flex items-center gap-2 px-4 py-3 rounded-lg border-2 border-border bg-card cursor-pointer"
     >
       <RotateCcw className="w-5 h-5 text-muted-foreground" />
-      <span className="text-sm font-medium">
-        {t('pages.plannerMD.skillReplacement.reset')}
-      </span>
+      <span className="text-sm font-medium">{t('pages.plannerMD.skillReplacement.reset')}</span>
     </button>
   )
 }

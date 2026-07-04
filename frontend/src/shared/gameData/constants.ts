@@ -83,12 +83,20 @@ export const STATUS_EFFECTS = [
 /**
  * Affinity types for internal computation (data format names)
  */
-export const AFFINITIES = ['CRIMSON', 'SCARLET', 'AMBER', 'SHAMROCK', 'AZURE', 'INDIGO', 'VIOLET'] as const
+export const AFFINITIES = [
+  'CRIMSON',
+  'SCARLET',
+  'AMBER',
+  'SHAMROCK',
+  'AZURE',
+  'INDIGO',
+  'VIOLET',
+] as const
 
 /**
  * Affinity type derived from AFFINITIES array
  */
-export type Affinity = typeof AFFINITIES[number]
+export type Affinity = (typeof AFFINITIES)[number]
 
 /**
  * Skill attribute types including NEUTRAL (for defense skills) and all affinities
@@ -98,7 +106,7 @@ export const SKILL_ATTRIBUTE_TYPES = ['NEUTRAL', ...AFFINITIES] as const
 /**
  * Skill attribute type derived from SKILL_ATTRIBUTE_TYPES array
  */
-export type SkillAttributeType = typeof SKILL_ATTRIBUTE_TYPES[number]
+export type SkillAttributeType = (typeof SKILL_ATTRIBUTE_TYPES)[number]
 
 /**
  * Skill frame glow colors for coin power backgrounds
@@ -124,10 +132,16 @@ export const ATK_TYPES = ['SLASH', 'PENETRATE', 'HIT'] as const
 /**
  * Attack type derived from ATK_TYPES array
  */
-export type AtkType = typeof ATK_TYPES[number]
+export type AtkType = (typeof ATK_TYPES)[number]
 
-export const DEF_TYPES = ['GUARD', 'EVADE', 'COUNTER', 'CLASHABLE_GUARD', 'CLASHABLE_COUNTER'] as const
-export type DefType = typeof DEF_TYPES[number]
+export const DEF_TYPES = [
+  'GUARD',
+  'EVADE',
+  'COUNTER',
+  'CLASHABLE_GUARD',
+  'CLASHABLE_COUNTER',
+] as const
+export type DefType = (typeof DEF_TYPES)[number]
 
 /**
  * EGO types (Hebrew letters from Lobotomy Corp lore)
@@ -138,7 +152,7 @@ export const EGO_TYPES = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'] as const
 /**
  * EGO type derived from EGO_TYPES array
  */
-export type EgoType = typeof EGO_TYPES[number]
+export type EgoType = (typeof EGO_TYPES)[number]
 
 /**
  * EGO Gift keyword order for filtering and sorting (PascalCase internal format)
@@ -297,7 +311,7 @@ export const DUNGEON_IDX = {
 /**
  * Dungeon difficulty index type
  */
-export type DungeonIdx = typeof DUNGEON_IDX[keyof typeof DUNGEON_IDX]
+export type DungeonIdx = (typeof DUNGEON_IDX)[keyof typeof DUNGEON_IDX]
 
 /**
  * Difficulty labels for floor indicator display (not i18n - game terminology)
@@ -312,7 +326,7 @@ export const DIFFICULTY_LABELS = {
 /**
  * Difficulty label type
  */
-export type DifficultyLabel = typeof DIFFICULTY_LABELS[keyof typeof DIFFICULTY_LABELS]
+export type DifficultyLabel = (typeof DIFFICULTY_LABELS)[keyof typeof DIFFICULTY_LABELS]
 
 /**
  * Difficulty colors for indicator display
@@ -467,7 +481,7 @@ export const BUFF_TYPES = ['Positive', 'Negative', 'Neutral'] as const
 /**
  * Buff type derived from BUFF_TYPES array
  */
-export type BuffType = typeof BUFF_TYPES[number]
+export type BuffType = (typeof BUFF_TYPES)[number]
 
 /**
  * Sanity condition types for increment/decrement conditions
@@ -483,7 +497,7 @@ export const SANITY_CONDITION_TYPE = {
 /**
  * Sanity condition type derived from SANITY_CONDITION_TYPE
  */
-export type SanityConditionType = typeof SANITY_CONDITION_TYPE[keyof typeof SANITY_CONDITION_TYPE]
+export type SanityConditionType = (typeof SANITY_CONDITION_TYPE)[keyof typeof SANITY_CONDITION_TYPE]
 
 /**
  * EGO Gift tiers (display format: Roman numerals)
@@ -500,7 +514,14 @@ export type EGOGiftTier = (typeof EGO_GIFT_TIERS)[number]
  * EGO Gift tier tags (data format)
  * Matches tag values in egoGiftSpecList.json
  */
-export const EGO_GIFT_TIER_TAGS = ['TIER_1', 'TIER_2', 'TIER_3', 'TIER_4', 'TIER_5', 'TIER_EX'] as const
+export const EGO_GIFT_TIER_TAGS = [
+  'TIER_1',
+  'TIER_2',
+  'TIER_3',
+  'TIER_4',
+  'TIER_5',
+  'TIER_EX',
+] as const
 
 /**
  * EGO Gift tier tag type (data format)

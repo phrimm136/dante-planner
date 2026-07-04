@@ -26,13 +26,7 @@ interface EGOHeaderWithI18nProps {
  */
 export function EGOHeaderWithI18n({ id, rank }: EGOHeaderWithI18nProps) {
   const i18n = useEGODetailI18n(id)
-  return (
-    <EGOHeader
-      egoId={id}
-      name={i18n.name}
-      rank={rank}
-    />
-  )
+  return <EGOHeader egoId={id} name={i18n.name} rank={rank} />
 }
 
 /**

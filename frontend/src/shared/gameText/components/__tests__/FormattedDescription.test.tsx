@@ -123,9 +123,7 @@ describe('FormattedDescription', () => {
         color: '',
       }
 
-      mockFormat.mockReturnValue([
-        { type: 'keyword', content: 'Unknown', keyword: unknownKeyword },
-      ])
+      mockFormat.mockReturnValue([{ type: 'keyword', content: 'Unknown', keyword: unknownKeyword }])
 
       render(<FormattedDescription text="[Unknown]" />)
 
@@ -196,9 +194,7 @@ describe('FormattedDescription', () => {
         color: '#ff6600',
       }
 
-      mockFormat.mockReturnValue([
-        { type: 'keyword', content: 'Burn', keyword: coloredKeyword },
-      ])
+      mockFormat.mockReturnValue([{ type: 'keyword', content: 'Burn', keyword: coloredKeyword }])
 
       render(<FormattedDescription text="[Burn]" />)
 
@@ -214,9 +210,7 @@ describe('FormattedDescription', () => {
         color: '',
       }
 
-      mockFormat.mockReturnValue([
-        { type: 'keyword', content: 'Test', keyword: noColorKeyword },
-      ])
+      mockFormat.mockReturnValue([{ type: 'keyword', content: 'Test', keyword: noColorKeyword }])
 
       render(<FormattedDescription text="[Test]" />)
 
@@ -254,7 +248,7 @@ describe('FormattedDescription', () => {
 
     it('handles empty lines', () => {
       mockFormat.mockImplementation((text: string) =>
-        text ? [{ type: 'text', content: text }] : []
+        text ? [{ type: 'text', content: text }] : [],
       )
 
       const { container } = render(<FormattedDescription text={'Before\n\nAfter'} />)
@@ -269,9 +263,7 @@ describe('FormattedDescription', () => {
     it('applies custom className to wrapper', () => {
       mockFormat.mockReturnValue([{ type: 'text', content: 'Text' }])
 
-      const { container } = render(
-        <FormattedDescription text="Text" className="custom-class" />
-      )
+      const { container } = render(<FormattedDescription text="Text" className="custom-class" />)
 
       const wrapper = container.firstChild as HTMLElement
       expect(wrapper).toHaveClass('custom-class')
@@ -305,9 +297,7 @@ describe('FormattedDescription', () => {
   describe('edge cases', () => {
     it('handles segment without keyword property gracefully', () => {
       // Malformed segment: type is keyword but no keyword property
-      mockFormat.mockReturnValue([
-        { type: 'keyword', content: 'Orphan' } as ParsedSegment,
-      ])
+      mockFormat.mockReturnValue([{ type: 'keyword', content: 'Orphan' } as ParsedSegment])
 
       // Should not throw, falls back to rendering content as-is
       const { container } = render(<FormattedDescription text="[Orphan]" />)

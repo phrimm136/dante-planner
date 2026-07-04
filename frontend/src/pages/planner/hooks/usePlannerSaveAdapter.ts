@@ -47,35 +47,38 @@ export function usePlannerSaveAdapter(): PlannerSaveAdapterOperations {
 
   // Memoize to return stable function references
   // Depends on storage which is now also memoized
-  return useMemo(() => ({
-    saveToLocal: async (
-      planner: SaveablePlanner,
-      options?: StorageOperationOptions
-    ): Promise<SaveResult> => {
-      return storage.savePlanner(planner, options)
-    },
+  return useMemo(
+    () => ({
+      saveToLocal: async (
+        planner: SaveablePlanner,
+        options?: StorageOperationOptions,
+      ): Promise<SaveResult> => {
+        return storage.savePlanner(planner, options)
+      },
 
-    loadFromLocal: async (
-      id: string,
-      options?: StorageOperationOptions
-    ): Promise<SaveablePlanner | null> => {
-      return storage.loadPlanner(id, options)
-    },
+      loadFromLocal: async (
+        id: string,
+        options?: StorageOperationOptions,
+      ): Promise<SaveablePlanner | null> => {
+        return storage.loadPlanner(id, options)
+      },
 
-    deleteFromLocal: async (id: string): Promise<void> => {
-      return storage.deletePlanner(id)
-    },
+      deleteFromLocal: async (id: string): Promise<void> => {
+        return storage.deletePlanner(id)
+      },
 
-    listLocal: async (): Promise<PlannerSummary[]> => {
-      return storage.listPlanners()
-    },
+      listLocal: async (): Promise<PlannerSummary[]> => {
+        return storage.listPlanners()
+      },
 
-    listLocalFull: async (): Promise<SaveablePlanner[]> => {
-      return storage.listFullPlanners()
-    },
+      listLocalFull: async (): Promise<SaveablePlanner[]> => {
+        return storage.listFullPlanners()
+      },
 
-    getOrCreateDeviceId: async (): Promise<string> => {
-      return storage.getOrCreateDeviceId()
-    },
-  }), [storage])
+      getOrCreateDeviceId: async (): Promise<string> => {
+        return storage.getOrCreateDeviceId()
+      },
+    }),
+    [storage],
+  )
 }

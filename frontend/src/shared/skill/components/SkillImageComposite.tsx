@@ -56,7 +56,7 @@ export function SkillImageComposite({
           className="absolute w-12 h-9"
           style={{
             backgroundColor: glowColor,
-            clipPath: 'polygon(5% 20%, 85% 0%, 100% 100%, 10% 100%)'
+            clipPath: 'polygon(5% 20%, 85% 0%, 100% 100%, 10% 100%)',
           }}
         />
       </div>
@@ -75,7 +75,10 @@ export function SkillImageComposite({
               src={skillImagePath}
               alt="Skill"
               className="w-full h-full object-cover"
-              style={{ clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' }}
+              style={{
+                clipPath:
+                  'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+              }}
               onError={onImageError}
             />
           ) : (
@@ -94,7 +97,7 @@ export function SkillImageComposite({
       />
 
       {/* Layer 4: Attack type composite (skills with attack type only) */}
-      {atkType && atkType !== "NONE" && (
+      {atkType && atkType !== 'NONE' && (
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-3/8 w-8 h-8 pointer-events-none">
           {/* Attack type frame background */}
           <img

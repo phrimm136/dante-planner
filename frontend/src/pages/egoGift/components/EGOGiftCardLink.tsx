@@ -27,25 +27,18 @@ interface EGOGiftCardLinkProps {
  * // With enhancement level
  * <EGOGiftCardLink gift={gift} enhancement={1} />
  */
-export const EGOGiftCardLink = memo(function EGOGiftCardLink({
-  gift,
-  enhancement = 0,
-  className,
-}: EGOGiftCardLinkProps) {
-  return (
-    <Link
-      to="/ego-gift/$id"
-      params={{ id: gift.id }}
-      className={cn(
-        className
-      )}
-    >
-      <div className="flex flex-col items-center gap-1.5">
-        <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
-        <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-          <EGOGiftName id={gift.id} />
-        </span>
-      </div>
-    </Link>
-  )
-}, (prev, next) => prev.gift.id === next.gift.id && prev.enhancement === next.enhancement)
+export const EGOGiftCardLink = memo(
+  function EGOGiftCardLink({ gift, enhancement = 0, className }: EGOGiftCardLinkProps) {
+    return (
+      <Link to="/ego-gift/$id" params={{ id: gift.id }} className={cn(className)}>
+        <div className="flex flex-col items-center gap-1.5">
+          <EGOGiftCard gift={gift} enhancement={enhancement} enableHoverHighlight />
+          <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
+            <EGOGiftName id={gift.id} />
+          </span>
+        </div>
+      </Link>
+    )
+  },
+  (prev, next) => prev.gift.id === next.gift.id && prev.enhancement === next.enhancement,
+)

@@ -16,10 +16,7 @@ interface CompactTierFilterProps {
  *
  * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
  */
-export function CompactTierFilter({
-  selectedTiers,
-  onSelectionChange,
-}: CompactTierFilterProps) {
+export function CompactTierFilter({ selectedTiers, onSelectionChange }: CompactTierFilterProps) {
   return (
     <CompactIconFilter
       options={EGO_GIFT_TIERS}

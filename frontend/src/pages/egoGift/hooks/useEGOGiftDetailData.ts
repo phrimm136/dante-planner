@@ -50,9 +50,7 @@ export function useEGOGiftDetailSpec(id: string) {
  */
 export function useEGOGiftDetailI18n(id: string) {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOGiftI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOGiftI18nQueryOptions(id, i18n.language))
   return i18nData
 }
 
@@ -69,9 +67,7 @@ export function useEGOGiftDetailData(id: string) {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createEGOGiftDataQueryOptions(id))
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOGiftI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOGiftI18nQueryOptions(id, i18n.language))
 
   return {
     spec,

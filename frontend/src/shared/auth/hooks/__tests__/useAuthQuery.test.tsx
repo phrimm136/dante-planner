@@ -12,7 +12,6 @@ import React, { Suspense } from 'react'
 import { authQueryKeys, useLogout, createAuthMeQueryOptions } from '../useAuthQuery'
 import { queryClient } from '@/lib/queryClient'
 
-
 // Mock only the API client; keep the real error classes (instanceof checks rely on them)
 vi.mock('@/lib/api', async (importActual) => {
   const actual = await importActual<typeof import('@/lib/api')>()

@@ -48,9 +48,7 @@ import type {
 // ============================================================================
 
 type Equal<X, Y> =
-  (<T>() => T extends X ? 1 : 2) extends (<T>() => T extends Y ? 1 : 2)
-    ? true
-    : false
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2 ? true : false
 
 type Extends<A, B> = A extends B ? true : false
 
@@ -92,18 +90,22 @@ export type PlannerSchemaDriftGuard = [
   // SaveablePlanner: metadata/config are pinned exactly by the leaf Equals
   // above; content must be ACCEPTED by the loose z.record(string, unknown)
   // gate — never equal to it.
-  Expect<Extends<
-    { metadata: PlannerMetadata; config: PlannerConfig; content: MDContentAsRecord },
-    z.input<typeof SaveablePlannerSchema>
-  >>,
+  Expect<
+    Extends<
+      { metadata: PlannerMetadata; config: PlannerConfig; content: MDContentAsRecord },
+      z.input<typeof SaveablePlannerSchema>
+    >
+  >,
 
   // PlannerContent (MD half) is accepted by SaveablePlannerSchema's content gate.
   Expect<Extends<MDContentAsRecord, z.input<typeof SaveablePlannerSchema>['content']>>,
 
   // Export format: every exported planner satisfies the import gate.
   Expect<Extends<ExportItemAsRecord, z.input<typeof PlannerExportItemSchema>>>,
-  Expect<Extends<
-    Omit<ExportEnvelope, 'planners'> & { planners: ExportItemAsRecord[] },
-    z.input<typeof ExportEnvelopeSchema>
-  >>,
+  Expect<
+    Extends<
+      Omit<ExportEnvelope, 'planners'> & { planners: ExportItemAsRecord[] },
+      z.input<typeof ExportEnvelopeSchema>
+    >
+  >,
 ]

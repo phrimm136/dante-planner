@@ -23,13 +23,13 @@ describe('validateData', () => {
     if (parsed.success) throw new Error('fixture must fail schema validation')
 
     expect(() => validateData(invalid, TestSchema, 'test entity')).toThrowError(
-      new Error(`[test entity] Validation failed: ${parsed.error.message}`)
+      new Error(`[test entity] Validation failed: ${parsed.error.message}`),
     )
   })
 
   it('interpolates the given context into the message prefix', () => {
     expect(() => validateData(null, TestSchema, 'identity specList')).toThrowError(
-      /^\[identity specList\] Validation failed: /
+      /^\[identity specList\] Validation failed: /,
     )
   })
 

@@ -124,7 +124,10 @@ export function BannerSection() {
   }
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg" aria-label={t('a11y.bannerCarousel')}>
+    <div
+      className="relative w-full overflow-hidden rounded-lg"
+      aria-label={t('a11y.bannerCarousel')}
+    >
       {/* Banner slides */}
       <div className="relative aspect-[16/9] w-full" aria-live="polite" aria-atomic="true">
         {BANNER_SLIDES.map((slide, index) => (
@@ -132,7 +135,7 @@ export function BannerSection() {
             key={slide.id}
             className={cn(
               'absolute inset-0 transition-opacity duration-500',
-              index === activeIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              index === activeIndex ? 'opacity-100' : 'opacity-0 pointer-events-none',
             )}
           >
             {/* Background */}
@@ -206,9 +209,7 @@ export function BannerSection() {
               onClick={() => goToSlide(index)}
               className={cn(
                 'size-3 rounded-full transition-colors',
-                index === activeIndex
-                  ? 'bg-white'
-                  : 'bg-white/50 hover:bg-white/75'
+                index === activeIndex ? 'bg-white' : 'bg-white/50 hover:bg-white/75',
               )}
               aria-label={`Go to slide ${index + 1}`}
             />

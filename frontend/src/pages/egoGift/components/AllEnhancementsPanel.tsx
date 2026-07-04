@@ -56,11 +56,7 @@ function EnhancementRow({
         {/* Enhancement Cost */}
         {cost !== null && (
           <div className="flex items-center gap-2">
-            <img
-              src={getEGOGiftCostIconPath()}
-              alt="Cost"
-              className="w-6 h-6"
-            />
+            <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
         )}
@@ -79,10 +75,10 @@ function EnhancementRow({
 export function AllEnhancementsPanel({
   maxEnhancement,
   descriptions = [],
-  costs
+  costs,
 }: AllEnhancementsPanelProps) {
   // Render all levels from 0 to maxEnhancement (structure stays visible)
-  const levelsToRender = ENHANCEMENT_LEVELS.filter(level => level <= maxEnhancement)
+  const levelsToRender = ENHANCEMENT_LEVELS.filter((level) => level <= maxEnhancement)
 
   return (
     <div className="border rounded-lg p-4 space-y-4">

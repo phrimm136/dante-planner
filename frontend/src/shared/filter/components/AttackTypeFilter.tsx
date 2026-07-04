@@ -13,10 +13,7 @@ interface AttackTypeFilterProps {
  *
  * Pattern: Wraps IconFilter like SinnerFilter.tsx
  */
-export function AttackTypeFilter({
-  selectedTypes,
-  onSelectionChange,
-}: AttackTypeFilterProps) {
+export function AttackTypeFilter({ selectedTypes, onSelectionChange }: AttackTypeFilterProps) {
   return (
     <IconFilter
       options={ATK_TYPES}

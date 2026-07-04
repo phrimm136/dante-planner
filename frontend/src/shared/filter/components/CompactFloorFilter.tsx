@@ -12,10 +12,7 @@ interface CompactFloorFilterProps {
  * Compact floor filter for theme pack filtering.
  * 5 text buttons: 1F / 2F / 3F / 4F / 5F
  */
-export function CompactFloorFilter({
-  selectedFloors,
-  onSelectionChange,
-}: CompactFloorFilterProps) {
+export function CompactFloorFilter({ selectedFloors, onSelectionChange }: CompactFloorFilterProps) {
   return (
     <CompactIconFilter
       options={THEME_PACK_FLOORS.map(String)}

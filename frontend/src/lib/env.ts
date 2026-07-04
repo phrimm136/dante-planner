@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 /**
  * Environment variable schema with validation
@@ -11,14 +11,14 @@ const envSchema = z.object({
   DEV: z.boolean(),
   PROD: z.boolean(),
   MODE: z.enum(['development', 'production', 'test']),
-});
+})
 
-const envValidation = envSchema.safeParse(import.meta.env);
+const envValidation = envSchema.safeParse(import.meta.env)
 
 if (!envValidation.success) {
-  console.error('❌ Environment validation failed:', envValidation.error.format());
+  console.error('❌ Environment validation failed:', envValidation.error.format())
   if (import.meta.env.MODE !== 'test') {
-    throw new Error('Invalid environment configuration. Check your .env file.');
+    throw new Error('Invalid environment configuration. Check your .env file.')
   }
 }
 
@@ -37,6 +37,6 @@ const testFallback = {
   DEV: false,
   PROD: false,
   MODE: 'test',
-} as const;
+} as const
 
-export const env = envValidation.success ? envValidation.data : testFallback;
+export const env = envValidation.success ? envValidation.data : testFallback

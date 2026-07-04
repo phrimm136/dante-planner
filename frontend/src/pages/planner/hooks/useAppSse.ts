@@ -146,7 +146,7 @@ export function useAppSse(): void {
         console.error('Failed to parse SSE planner-update event:', e)
       }
     },
-    [queryClient, setLastEventTime, saveAdapter]
+    [queryClient, setLastEventTime, saveAdapter],
   )
 
   /**
@@ -173,7 +173,7 @@ export function useAppSse(): void {
         console.error('Failed to parse SSE notification event:', e)
       }
     },
-    [queryClient, setLastEventTime]
+    [queryClient, setLastEventTime],
   )
 
   /**
@@ -198,7 +198,7 @@ export function useAppSse(): void {
         console.error('Failed to parse SSE account_suspended event:', e)
       }
     },
-    [queryClient, setLastEventTime]
+    [queryClient, setLastEventTime],
   )
 
   /**
@@ -238,7 +238,7 @@ export function useAppSse(): void {
         console.error('Failed to parse SSE published event:', e)
       }
     },
-    [queryClient, setLastEventTime]
+    [queryClient, setLastEventTime],
   )
 
   const createConnection = useCallback(() => plannerApi.createEventsConnection(), [])
@@ -252,7 +252,7 @@ export function useAppSse(): void {
       [SSE_EVENTS.NOTIFY_PUBLISHED]: handlePublished,
       account_suspended: handleAccountSuspended,
     }),
-    [handlePlannerUpdate, handleNotification, handlePublished, handleAccountSuspended]
+    [handlePlannerUpdate, handleNotification, handlePublished, handleAccountSuspended],
   )
 
   useSseEngine({ shouldConnect, createConnection, handlers })

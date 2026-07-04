@@ -44,9 +44,7 @@ export function extractEGOGiftTier(tags: string[]): string {
  * @returns Array of disabled level indices (0, 1, and/or 2)
  */
 export function getDisabledEnhancementLevels(descs: string[]): number[] {
-  return ENHANCEMENT_LEVELS.filter(
-    (level) => level >= descs.length || !descs[level]?.trim()
-  )
+  return ENHANCEMENT_LEVELS.filter((level) => level >= descs.length || !descs[level]?.trim())
 }
 
 /**

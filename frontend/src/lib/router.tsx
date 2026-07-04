@@ -1,4 +1,11 @@
-import { createRouter, createRootRoute, createRoute, lazyRouteComponent, stripSearchParams, HeadContent } from '@tanstack/react-router'
+import {
+  createRouter,
+  createRootRoute,
+  createRoute,
+  lazyRouteComponent,
+  stripSearchParams,
+  HeadContent,
+} from '@tanstack/react-router'
 import { Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { z } from 'zod'
@@ -8,7 +15,10 @@ import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
-import { publishedPlannerQueryKeys, fetchPublishedPlanner } from '@/pages/planner/hooks/usePublishedPlannerQuery'
+import {
+  publishedPlannerQueryKeys,
+  fetchPublishedPlanner,
+} from '@/pages/planner/hooks/usePublishedPlannerQuery'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
@@ -85,14 +95,16 @@ const mdGesellschaftSearchSchema = z.object({
   themePack: z.string().max(500).optional(),
 })
 
-
-
 // Root route - contains layout for all routes
 const rootRoute = createRootRoute({
   head: () => ({
     meta: [
       { title: "Dante's Planner" },
-      { name: 'description', content: 'Game planning tool for Limbus Company. Browse Identity, E.G.O, and E.G.O Gift databases. Plan Mirror Dungeon runs and track current run state.' },
+      {
+        name: 'description',
+        content:
+          'Game planning tool for Limbus Company. Browse Identity, E.G.O, and E.G.O Gift databases. Plan Mirror Dungeon runs and track current run state.',
+      },
     ],
   }),
   component: () => (
@@ -225,7 +237,11 @@ const plannerMDEditRoute = createRoute({
     return { title }
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],
+    meta: [
+      {
+        title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner`,
+      },
+    ],
   }),
 })
 
@@ -486,7 +502,10 @@ function stringifySearchWith(obj: Record<string, unknown>): string {
     if (value === undefined || value === null || value === '') continue
     // Search values are primitives or arrays (CSV like ?identity=10101,10102);
     // arrays stringify comma-joined, matching String(array).
-    params.set(key, Array.isArray(value) ? value.join(',') : String(value as string | number | boolean))
+    params.set(
+      key,
+      Array.isArray(value) ? value.join(',') : String(value as string | number | boolean),
+    )
   }
   const str = params.toString()
   if (!str) return ''
@@ -546,7 +565,9 @@ i18n.on('languageChanged', async () => {
         if (titleMeta?.title) {
           document.title = String(titleMeta.title)
         }
-      } catch { /* head evaluation failed, keep current title */ }
+      } catch {
+        /* head evaluation failed, keep current title */
+      }
       break
     }
   }

@@ -85,7 +85,15 @@ export function PublishedPlannerList({
   })
 
   // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search || mode === 'best' || !!keyword || !!identity || !!ego || !!gift || !!themePack
+  const hasActiveFilters =
+    !!category ||
+    !!search ||
+    mode === 'best' ||
+    !!keyword ||
+    !!identity ||
+    !!ego ||
+    !!gift ||
+    !!themePack
 
   // Handle empty state
   if (data.content.length === 0) {
@@ -103,10 +111,7 @@ export function PublishedPlannerList({
             search={currentSearch}
             className="block"
           >
-            <PublishedPlannerCard
-              planner={planner}
-              showBookmark={isAuthenticated}
-            />
+            <PublishedPlannerCard planner={planner} showBookmark={isAuthenticated} />
           </Link>
         ))}
       </ResponsiveCardGrid>

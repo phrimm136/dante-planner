@@ -10,9 +10,7 @@ import { Button } from '@/components/ui/button'
  *
  * Pattern: ErrorBoundary.tsx ErrorFallback component
  */
-export function CommunityPlansErrorFallback({
-  resetErrorBoundary,
-}: FallbackProps) {
+export function CommunityPlansErrorFallback({ resetErrorBoundary }: FallbackProps) {
   const { t } = useTranslation('common')
 
   return (
@@ -20,9 +18,7 @@ export function CommunityPlansErrorFallback({
       <h3 className="text-lg font-semibold text-destructive mb-2">
         {t('errors.communityPlans.title')}
       </h3>
-      <p className="text-muted-foreground mb-4">
-        {t('errors.communityPlans.connectionLost')}
-      </p>
+      <p className="text-muted-foreground mb-4">{t('errors.communityPlans.connectionLost')}</p>
       <Button onClick={resetErrorBoundary} variant="destructive" size="sm">
         {t('errors.generic.retry')}
       </Button>

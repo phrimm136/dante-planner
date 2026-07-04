@@ -57,22 +57,12 @@ export function DeleteConfirmDialog({
             {t('pages.detail.deleteConfirm.description', { title: plannerTitle })}
           </DialogDescription>
         </DialogHeader>
-        <p className="text-sm text-destructive">
-          {t('pages.detail.deleteConfirm.warning')}
-        </p>
+        <p className="text-sm text-destructive">{t('pages.detail.deleteConfirm.warning')}</p>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             {t('common:cancel')}
           </Button>
-          <Button
-            variant="destructive"
-            onClick={onConfirm}
-            disabled={isPending}
-          >
+          <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
             {isPending
               ? t('pages.detail.deleteConfirm.deleting')
               : t('pages.detail.deleteConfirm.delete')}

@@ -11,19 +11,18 @@ import { z } from 'zod'
 /**
  * BattleKeywordEntry schema - individual keyword entry
  */
-export const BattleKeywordEntrySchema = z.object({
-  name: z.string(),
-  desc: z.string(),
-  flavor: z.string().optional(),
-}).strict()
+export const BattleKeywordEntrySchema = z
+  .object({
+    name: z.string(),
+    desc: z.string(),
+    flavor: z.string().optional(),
+  })
+  .strict()
 
 /**
  * BattleKeywords schema - Record of keyword entries
  */
-export const BattleKeywordsSchema = z.record(
-  z.string(),
-  BattleKeywordEntrySchema
-)
+export const BattleKeywordsSchema = z.record(z.string(), BattleKeywordEntrySchema)
 
 // ============================================================================
 // Inferred Types

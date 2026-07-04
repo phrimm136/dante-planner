@@ -73,19 +73,19 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
             <span className="block">
               {t(
                 'settings.sync.choiceDialog.description',
-                'Your planners are stored locally on this device by default. You can optionally enable cloud sync to access them across devices. Only manually saved plans will sync.'
+                'Your planners are stored locally on this device by default. You can optionally enable cloud sync to access them across devices. Only manually saved plans will sync.',
               )}
             </span>
             <span className="block text-xs">
               {t(
                 'settings.sync.choiceDialog.privacy',
-                'Cloud sync stores your data on our servers. You can change this setting anytime.'
+                'Cloud sync stores your data on our servers. You can change this setting anytime.',
               )}
             </span>
             <span className="block text-xs">
               {t(
                 'settings.sync.choiceDialog.exportHint',
-                'You can also export your planners from the Settings page to backup or transfer them.'
+                'You can also export your planners from the Settings page to backup or transfer them.',
               )}
             </span>
           </DialogDescription>
@@ -99,10 +99,7 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
           >
             {t('settings.sync.choiceDialog.keepLocal', 'Keep Local Only')}
           </Button>
-          <Button
-            onClick={() => void handleChoice(true)}
-            disabled={updateSettings.isPending}
-          >
+          <Button onClick={() => void handleChoice(true)} disabled={updateSettings.isPending}>
             {t('settings.sync.choiceDialog.enableSync', 'Enable Cloud Sync')}
           </Button>
         </DialogFooter>

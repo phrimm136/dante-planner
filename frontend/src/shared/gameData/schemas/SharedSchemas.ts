@@ -14,15 +14,7 @@ import { z } from 'zod'
  * Sin type enum validation (display names)
  * Seven sin types matching game mechanics
  */
-export const SinSchema = z.enum([
-  'Wrath',
-  'Lust',
-  'Sloth',
-  'Gluttony',
-  'Gloom',
-  'Pride',
-  'Envy',
-])
+export const SinSchema = z.enum(['Wrath', 'Lust', 'Sloth', 'Gluttony', 'Gloom', 'Pride', 'Envy'])
 
 /**
  * Affinity type enum validation (data format names)
@@ -42,7 +34,9 @@ export const AffinitySchema = z.enum([
  * PassiveI18n schema - shared between Identity and EGO
  * Used for passive skill internationalization data
  */
-export const PassiveI18nSchema = z.object({
-  name: z.string(),
-  desc: z.string(),
-}).strict()
+export const PassiveI18nSchema = z
+  .object({
+    name: z.string(),
+    desc: z.string(),
+  })
+  .strict()

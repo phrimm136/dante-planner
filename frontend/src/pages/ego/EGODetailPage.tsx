@@ -50,7 +50,6 @@ function EGODetailContent() {
   // Cast to Threadspin type for component props
   const threadspinLevel = threadspin as Threadspin
 
-
   // Check if erosion skills exist
   const hasErosion = spec.skills.erosion && spec.skills.erosion.length > 0
 
@@ -92,13 +91,7 @@ function EGODetailContent() {
     <>
       <div className="space-y-4">
         {/* Header with rank, name, and image - Suspends for i18n name */}
-        <Suspense fallback={
-          <EGOHeader
-            egoId={id}
-            name=""
-            rank={spec.egoType}
-          />
-        }>
+        <Suspense fallback={<EGOHeader egoId={id} name="" rank={spec.egoType} />}>
           <EGOHeaderWithI18n id={id} rank={spec.egoType} />
         </Suspense>
 
@@ -109,12 +102,14 @@ function EGODetailContent() {
         </div>
 
         {/* Season and Release Date - Suspense for i18n data */}
-        <Suspense fallback={
-          <div className="grid grid-cols-2 gap-2">
-            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
-            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 gap-2">
+              <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+              <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+            </div>
+          }
+        >
           <EntityMetaInfo season={spec.season} updateDate={spec.updatedDate} />
         </Suspense>
       </div>
@@ -129,14 +124,18 @@ function EGODetailContent() {
         <SkillTabButton
           attributeType={getSkillAttributeType('awaken')}
           label={t('skill.awakening')}
-          onClick={() => { setSkillType('awaken'); }}
+          onClick={() => {
+            setSkillType('awaken')
+          }}
           isActive={skillType === 'awaken'}
         />
-{hasErosion && (
+        {hasErosion && (
           <SkillTabButton
             attributeType={getSkillAttributeType('erosion')}
             label={t('skill.corrosion')}
-            onClick={() => { setSkillType('erosion'); }}
+            onClick={() => {
+              setSkillType('erosion')
+            }}
             isActive={skillType === 'erosion'}
           />
         )}
@@ -157,20 +156,10 @@ function EGODetailContent() {
     <div className="border rounded p-4 space-y-4">
       <div className="space-y-3">
         {effectivePassives.map((passiveId) => (
-          <PassiveCardWithSuspense
-            key={passiveId}
-            id={id}
-            passiveId={passiveId}
-            isLocked={false}
-          />
+          <PassiveCardWithSuspense key={passiveId} id={id} passiveId={passiveId} isLocked={false} />
         ))}
         {lockedPassives.map((passiveId) => (
-          <PassiveCardWithSuspense
-            key={passiveId}
-            id={id}
-            passiveId={passiveId}
-            isLocked={true}
-          />
+          <PassiveCardWithSuspense key={passiveId} id={id} passiveId={passiveId} isLocked={true} />
         ))}
         {effectivePassives.length === 0 && lockedPassives.length === 0 && (
           <div className="text-sm text-muted-foreground">{t('passive.none', 'No passives')}</div>
@@ -190,22 +179,20 @@ function EGODetailContent() {
 
   // Mobile tabs: Skills, Passives (no third tab for EGO)
   // Progressive rendering: show tabs when all sections loaded
-  const mobileTabsContent = visibleSections >= totalSections ? (
-    <>
-      {/* Selector above tabs on mobile */}
-      <div className="mb-4">{selector}</div>
-      <MobileDetailTabs
-        skillsContent={skillsContent}
-        passivesContent={passivesContent}
-      />
-    </>
-  ) : (
-    <>
-      {/* Show selector while loading, then skills when available */}
-      <div className="mb-4">{selector}</div>
-      {visibleSections >= 1 && skillsContent}
-    </>
-  )
+  const mobileTabsContent =
+    visibleSections >= totalSections ? (
+      <>
+        {/* Selector above tabs on mobile */}
+        <div className="mb-4">{selector}</div>
+        <MobileDetailTabs skillsContent={skillsContent} passivesContent={passivesContent} />
+      </>
+    ) : (
+      <>
+        {/* Show selector while loading, then skills when available */}
+        <div className="mb-4">{selector}</div>
+        {visibleSections >= 1 && skillsContent}
+      </>
+    )
 
   return (
     <DetailPageLayout
@@ -215,7 +202,6 @@ function EGODetailContent() {
     />
   )
 }
-
 
 /**
  * EGODetailPage - EGO detail page with two-column layout

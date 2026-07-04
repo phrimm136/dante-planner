@@ -195,7 +195,7 @@ export function useMDGesellschaftData(options: UseMDGesellschaftDataOptions) {
         ego,
         gift,
         themePack,
-      })
+      }),
     )
   }
 
@@ -210,6 +210,6 @@ export function useMDGesellschaftData(options: UseMDGesellschaftDataOptions) {
       ego,
       gift,
       themePack,
-    })
+    }),
   )
 }

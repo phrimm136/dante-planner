@@ -58,78 +58,78 @@ describe('bucketAndSortFloorGifts', () => {
   describe('regression: 9410 must appear in both 1004 and 1005 (co-themed fusion)', () => {
     it('shows 9410 in pack 1004', () => {
       const out = bucketAndSortFloorGifts([G_9410], '1004', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9410')
+      expect(out.map((g) => g.id)).toContain('9410')
     })
 
     it('shows 9410 in pack 1005', () => {
       const out = bucketAndSortFloorGifts([G_9410], '1005', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9410')
+      expect(out.map((g) => g.id)).toContain('9410')
     })
 
     it('hides 9410 in unrelated pack 1001', () => {
       const out = bucketAndSortFloorGifts([G_9410], '1001', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).not.toContain('9410')
+      expect(out.map((g) => g.id)).not.toContain('9410')
     })
   })
 
   describe('regression: 9272 must appear only in 1127', () => {
     it('shows 9272 in pack 1127', () => {
       const out = bucketAndSortFloorGifts([G_9272], '1127', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9272')
+      expect(out.map((g) => g.id)).toContain('9272')
     })
 
     it('hides 9272 in pack 1117 even though some ingredients are co-themed there', () => {
       const out = bucketAndSortFloorGifts([G_9272], '1117', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).not.toContain('9272')
+      expect(out.map((g) => g.id)).not.toContain('9272')
     })
 
     it('hides 9272 in unrelated pack 1001', () => {
       const out = bucketAndSortFloorGifts([G_9272], '1001', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).not.toContain('9272')
+      expect(out.map((g) => g.id)).not.toContain('9272')
     })
   })
 
   describe('regression: 9092 (general fusion) must appear in every pack', () => {
     it.each(['1001', '1004', '1117', '1127', '3001'])('shows 9092 in pack %s', (packId) => {
       const out = bucketAndSortFloorGifts([G_9092], packId, DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9092')
+      expect(out.map((g) => g.id)).toContain('9092')
     })
   })
 
   describe('regression: single-pack exclusives are hidden in other packs', () => {
     it('shows 9408 in 1004', () => {
       const out = bucketAndSortFloorGifts([G_9408], '1004', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9408')
+      expect(out.map((g) => g.id)).toContain('9408')
     })
 
     it('hides 9408 in 1005', () => {
       const out = bucketAndSortFloorGifts([G_9408], '1005', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).not.toContain('9408')
+      expect(out.map((g) => g.id)).not.toContain('9408')
     })
   })
 
   describe('regression: co-exclusive gifts appear in each owner pack', () => {
     it('shows 9788 (themePack=[1117,1127]) in 1117', () => {
       const out = bucketAndSortFloorGifts([G_9788], '1117', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9788')
+      expect(out.map((g) => g.id)).toContain('9788')
     })
 
     it('shows 9788 in 1127', () => {
       const out = bucketAndSortFloorGifts([G_9788], '1127', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9788')
+      expect(out.map((g) => g.id)).toContain('9788')
     })
 
     it('hides 9788 in unrelated pack 1001', () => {
       const out = bucketAndSortFloorGifts([G_9788], '1001', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).not.toContain('9788')
+      expect(out.map((g) => g.id)).not.toContain('9788')
     })
   })
 
   describe('bucket order: themed-to-this precedes general', () => {
     it('places themed gifts before general gifts regardless of input order', () => {
-      const input = [G_9092, G_9408]  // general first, themed second
+      const input = [G_9092, G_9408] // general first, themed second
       const out = bucketAndSortFloorGifts(input, '1004', DUNGEON_IDX.NORMAL, 'tier-first')
-      const ids = out.map(g => g.id)
+      const ids = out.map((g) => g.id)
       expect(ids.indexOf('9408')).toBeLessThan(ids.indexOf('9092'))
     })
 
@@ -142,12 +142,15 @@ describe('bucketAndSortFloorGifts', () => {
 
       const out = bucketAndSortFloorGifts(
         [generalLow, themedLow, generalHigh, themedHigh],
-        '1004', DUNGEON_IDX.NORMAL, 'tier-first'
+        '1004',
+        DUNGEON_IDX.NORMAL,
+        'tier-first',
       )
-      const ids = out.map(g => g.id)
+      const ids = out.map((g) => g.id)
       // Both themed before any general
-      expect(Math.max(ids.indexOf('9998'), ids.indexOf('9999')))
-        .toBeLessThan(Math.min(ids.indexOf('8998'), ids.indexOf('8999')))
+      expect(Math.max(ids.indexOf('9998'), ids.indexOf('9999'))).toBeLessThan(
+        Math.min(ids.indexOf('8998'), ids.indexOf('8999')),
+      )
     })
   })
 
@@ -157,23 +160,43 @@ describe('bucketAndSortFloorGifts', () => {
     const normalGift = makeGift({ id: '9102' })
 
     it('hides hardOnly in NORMAL', () => {
-      const out = bucketAndSortFloorGifts([hardGift, normalGift], '1001', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toEqual(['9102'])
+      const out = bucketAndSortFloorGifts(
+        [hardGift, normalGift],
+        '1001',
+        DUNGEON_IDX.NORMAL,
+        'tier-first',
+      )
+      expect(out.map((g) => g.id)).toEqual(['9102'])
     })
 
     it('shows hardOnly in HARD', () => {
-      const out = bucketAndSortFloorGifts([hardGift, normalGift], '1001', DUNGEON_IDX.HARD, 'tier-first')
-      expect(out.map(g => g.id).sort((a, b) => a.localeCompare(b))).toEqual(['9100', '9102'])
+      const out = bucketAndSortFloorGifts(
+        [hardGift, normalGift],
+        '1001',
+        DUNGEON_IDX.HARD,
+        'tier-first',
+      )
+      expect(out.map((g) => g.id).sort((a, b) => a.localeCompare(b))).toEqual(['9100', '9102'])
     })
 
     it('hides extremeOnly in HARD', () => {
-      const out = bucketAndSortFloorGifts([extremeGift, normalGift], '1001', DUNGEON_IDX.HARD, 'tier-first')
-      expect(out.map(g => g.id)).toEqual(['9102'])
+      const out = bucketAndSortFloorGifts(
+        [extremeGift, normalGift],
+        '1001',
+        DUNGEON_IDX.HARD,
+        'tier-first',
+      )
+      expect(out.map((g) => g.id)).toEqual(['9102'])
     })
 
     it('shows extremeOnly in EXTREME', () => {
-      const out = bucketAndSortFloorGifts([extremeGift, normalGift], '1001', DUNGEON_IDX.EXTREME, 'tier-first')
-      expect(out.map(g => g.id).sort((a, b) => a.localeCompare(b))).toEqual(['9101', '9102'])
+      const out = bucketAndSortFloorGifts(
+        [extremeGift, normalGift],
+        '1001',
+        DUNGEON_IDX.EXTREME,
+        'tier-first',
+      )
+      expect(out.map((g) => g.id).sort((a, b) => a.localeCompare(b))).toEqual(['9101', '9102'])
     })
   })
 
@@ -185,18 +208,18 @@ describe('bucketAndSortFloorGifts', () => {
     // must NOT inherit theming.
     it('shows 9242 in pack 3001', () => {
       const out = bucketAndSortFloorGifts([G_9242], '3001', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).toContain('9242')
+      expect(out.map((g) => g.id)).toContain('9242')
     })
 
     it('hides 9242 in pack 1001', () => {
       const out = bucketAndSortFloorGifts([G_9242], '1001', DUNGEON_IDX.NORMAL, 'tier-first')
-      expect(out.map(g => g.id)).not.toContain('9242')
+      expect(out.map((g) => g.id)).not.toContain('9242')
     })
 
     it('shows 9083 (general fixedReward sibling) in every pack including 3001', () => {
       for (const packId of ['1001', '3001', '1127']) {
         const out = bucketAndSortFloorGifts([G_9083], packId, DUNGEON_IDX.NORMAL, 'tier-first')
-        expect(out.map(g => g.id)).toContain('9083')
+        expect(out.map((g) => g.id)).toContain('9083')
       }
     })
   })
@@ -206,23 +229,30 @@ describe('bucketAndSortFloorGifts', () => {
     // it conflated egoGiftPool memberships with theming. Lock in that other-pack
     // exclusives are filtered out.
     it('hides every non-1004 single-pack exclusive when planning for 1004', () => {
-      const otherPackExclusives = [G_9409, G_9271]  // themePack=[1005], [1127]
-      const out = bucketAndSortFloorGifts(otherPackExclusives, '1004', DUNGEON_IDX.NORMAL, 'tier-first')
+      const otherPackExclusives = [G_9409, G_9271] // themePack=[1005], [1127]
+      const out = bucketAndSortFloorGifts(
+        otherPackExclusives,
+        '1004',
+        DUNGEON_IDX.NORMAL,
+        'tier-first',
+      )
       expect(out).toEqual([])
     })
 
     it('integrated case: 9272 hidden, 9410 visible, 9092 visible in 1004', () => {
       const out = bucketAndSortFloorGifts(
         [G_9092, G_9272, G_9410, G_9408, G_9409, G_9271],
-        '1004', DUNGEON_IDX.NORMAL, 'tier-first'
+        '1004',
+        DUNGEON_IDX.NORMAL,
+        'tier-first',
       )
-      const ids = new Set(out.map(g => g.id))
-      expect(ids.has('9410')).toBe(true)   // co-themed includes 1004
-      expect(ids.has('9408')).toBe(true)   // 1004-exclusive
-      expect(ids.has('9092')).toBe(true)   // general
-      expect(ids.has('9272')).toBe(false)  // 1127-exclusive
-      expect(ids.has('9409')).toBe(false)  // 1005-exclusive
-      expect(ids.has('9271')).toBe(false)  // 1127-exclusive
+      const ids = new Set(out.map((g) => g.id))
+      expect(ids.has('9410')).toBe(true) // co-themed includes 1004
+      expect(ids.has('9408')).toBe(true) // 1004-exclusive
+      expect(ids.has('9092')).toBe(true) // general
+      expect(ids.has('9272')).toBe(false) // 1127-exclusive
+      expect(ids.has('9409')).toBe(false) // 1005-exclusive
+      expect(ids.has('9271')).toBe(false) // 1127-exclusive
     })
   })
 })

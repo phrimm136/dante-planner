@@ -50,7 +50,7 @@ export function FilterSidebar({
           'hidden lg:block',
           'sticky top-4 self-start',
           'max-h-[calc(100vh-2rem)] overflow-y-auto',
-          'rounded-lg border bg-card p-3'
+          'rounded-lg border bg-card p-3',
         )}
         style={{ width: `${FILTER_SIDEBAR_WIDTH}px`, minWidth: `${FILTER_SIDEBAR_WIDTH}px` }}
       >
@@ -70,14 +70,13 @@ export function FilterSidebar({
               disabled={!hasActiveFilters}
               className={cn(
                 'w-full',
-                hasActiveFilters && 'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive'
+                hasActiveFilters &&
+                  'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive',
               )}
             >
               {t('filters.resetAll', 'Reset All')}
               {hasActiveFilters && (
-                <span className="ml-1 text-muted-foreground">
-                  ({activeFilterCount})
-                </span>
+                <span className="ml-1 text-muted-foreground">({activeFilterCount})</span>
               )}
             </Button>
           )}
@@ -89,16 +88,10 @@ export function FilterSidebar({
         <div className="rounded-lg border bg-card p-3">
           <div className="space-y-1">
             {/* Primary filters - always visible */}
-            {primaryFilters && (
-              <div className="space-y-1">{primaryFilters}</div>
-            )}
+            {primaryFilters && <div className="space-y-1">{primaryFilters}</div>}
 
             {/* Secondary filters - expand in the middle (no separator) */}
-            {isExpanded && secondaryFilters && (
-              <div className="space-y-1">
-                {secondaryFilters}
-              </div>
-            )}
+            {isExpanded && secondaryFilters && <div className="space-y-1">{secondaryFilters}</div>}
 
             {/* Search Bar */}
             {searchBar && <div>{searchBar}</div>}
@@ -112,14 +105,13 @@ export function FilterSidebar({
                 disabled={!hasActiveFilters}
                 className={cn(
                   'w-full',
-                  hasActiveFilters && 'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive'
+                  hasActiveFilters &&
+                    'hover:bg-destructive hover:text-destructive-foreground hover:border-destructive',
                 )}
               >
                 {t('filters.resetAll', 'Reset All')}
                 {hasActiveFilters && (
-                  <span className="ml-1 text-muted-foreground">
-                    ({activeFilterCount})
-                  </span>
+                  <span className="ml-1 text-muted-foreground">({activeFilterCount})</span>
                 )}
               </Button>
             )}
@@ -130,23 +122,26 @@ export function FilterSidebar({
         {secondaryFilters && (
           <button
             type="button"
-            onClick={() => { setIsExpanded(!isExpanded) }}
+            onClick={() => {
+              setIsExpanded(!isExpanded)
+            }}
             aria-expanded={isExpanded}
-            aria-label={isExpanded ? t('filters.collapse', 'Collapse filters') : t('filters.expand', 'Expand filters')}
+            aria-label={
+              isExpanded
+                ? t('filters.collapse', 'Collapse filters')
+                : t('filters.expand', 'Expand filters')
+            }
             className={cn(
               'absolute left-1/2 bottom-0 -translate-x-1/2 translate-y-1/2',
               'size-8 rounded-full',
               'bg-card border border-border',
               'flex items-center justify-center',
               'hover:bg-accent transition-colors',
-              'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+              'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
             )}
           >
             <ChevronDown
-              className={cn(
-                'size-4 transition-transform duration-200',
-                isExpanded && 'rotate-180'
-              )}
+              className={cn('size-4 transition-transform duration-200', isExpanded && 'rotate-180')}
             />
           </button>
         )}

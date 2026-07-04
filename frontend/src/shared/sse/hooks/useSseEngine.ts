@@ -99,7 +99,7 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
 
       const delay = Math.min(
         SSE_CONNECTION.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
-        SSE_CONNECTION.MAX_DELAY
+        SSE_CONNECTION.MAX_DELAY,
       )
 
       // Schedule idle reset - if no successful connection in 5 minutes, reset attempts
@@ -134,7 +134,7 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
     // that re-runs the mount effect every render and churns the SSE connection.
     // The captured closure stays valid — setupEventSource's own deps are stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [incrementReconnectAttempts, resetReconnectAttempts, shouldReconnect, createConnection]
+    [incrementReconnectAttempts, resetReconnectAttempts, shouldReconnect, createConnection],
   )
 
   /**
@@ -207,7 +207,14 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
         scheduleReconnect()
       }
     },
-    [handlers, setConnected, resetReconnectAttempts, shouldReconnect, scheduleReconnect, createConnection]
+    [
+      handlers,
+      setConnected,
+      resetReconnectAttempts,
+      shouldReconnect,
+      scheduleReconnect,
+      createConnection,
+    ],
   )
 
   /**

@@ -21,12 +21,7 @@ export function AbEventCard({
   className,
 }: AbEventCardProps) {
   return (
-    <div
-      className={cn(
-        'group relative flex flex-col',
-        className
-      )}
-    >
+    <div className={cn('group relative flex flex-col', className)}>
       <div className="relative w-full aspect-[3/2] rounded-sm overflow-hidden bg-muted">
         {hasImage || illustId ? (
           <img

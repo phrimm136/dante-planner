@@ -26,9 +26,7 @@ describe('ThemePackDetailSchema', () => {
 
   it('accepts infinity pack with undefined selectableFloors', () => {
     const result = ThemePackDetailSchema.safeParse({
-      exceptionConditions: [
-        { dungeonIdx: 2 },
-      ],
+      exceptionConditions: [{ dungeonIdx: 2 }],
       nodeOption: {
         bossPool: [],
         battlePool: [],
@@ -49,8 +47,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],
@@ -67,8 +69,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [901001],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [901001],
         specialEventPool: [971001, 971002],
       },
       egoGiftPool: [],
@@ -86,8 +92,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 1, selectableFloors: [2, 3, 4] }, { dungeonIdx: 2 }],
       nodeOption: {
-        bossPool: [2070401], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [971055],
+        bossPool: [2070401],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [971055],
         specialEventPool: [971089],
       },
       egoGiftPool: [9003],
@@ -108,8 +118,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],
@@ -127,8 +141,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 5 }],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],
@@ -142,8 +160,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],
@@ -166,8 +188,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],
@@ -181,8 +207,12 @@ describe('ThemePackDetailSchema', () => {
     const result = ThemePackDetailSchema.safeParse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
-        bossPool: [], battlePool: [], abBattlePool: [],
-        hardBattlePool: [], hardAbBattlePool: [], eventPool: [],
+        bossPool: [],
+        battlePool: [],
+        abBattlePool: [],
+        hardBattlePool: [],
+        hardAbBattlePool: [],
+        eventPool: [],
       },
       egoGiftPool: [],
       specificEgoGiftPool: [],

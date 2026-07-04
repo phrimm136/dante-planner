@@ -4,8 +4,8 @@ import { SCORE_DREAM_VALID_SYLLABLES } from './scoreDreamGlyphs'
 /**
  * Korean syllable Unicode range: U+AC00 to U+D7A3
  */
-const HANGUL_SYLLABLE_START = 0xAC00
-const HANGUL_SYLLABLE_END = 0xD7A3
+const HANGUL_SYLLABLE_START = 0xac00
+const HANGUL_SYLLABLE_END = 0xd7a3
 
 /**
  * Checks if a character is a Korean syllable
@@ -53,7 +53,7 @@ export const KoreanText = memo(function KoreanText({ children, className }: Kore
         result.push(
           <span key={result.length} style={{ fontFamily: 'var(--font-pretendard)' }}>
             {currentRun}
-          </span>
+          </span>,
         )
       } else {
         result.push(currentRun)
@@ -71,7 +71,7 @@ export const KoreanText = memo(function KoreanText({ children, className }: Kore
       result.push(
         <span key={result.length} style={{ fontFamily: 'var(--font-pretendard)' }}>
           {currentRun}
-        </span>
+        </span>,
       )
     } else {
       result.push(currentRun)

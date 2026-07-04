@@ -21,10 +21,7 @@ export function EgoGiftSearchDropdown({
   const { t } = useTranslation('database')
   const { spec, i18n: giftNames } = useListData()
 
-  const options = useMemo(() =>
-    buildNameOptions(Object.keys(spec), giftNames),
-    [spec, giftNames]
-  )
+  const options = useMemo(() => buildNameOptions(Object.keys(spec), giftNames), [spec, giftNames])
 
   return (
     <SearchableMultiSelect

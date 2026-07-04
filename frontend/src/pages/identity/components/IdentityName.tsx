@@ -35,7 +35,7 @@ export function IdentityName({ id }: IdentityNameProps) {
       width={127}
       maxLines={5}
       className="text-right leading-4 text-identity-name"
-      style={{...displayStyle}}
+      style={{ ...displayStyle }}
       minFontSize={8}
       maxFontSize={18}
       lineHeight={lineHeight}

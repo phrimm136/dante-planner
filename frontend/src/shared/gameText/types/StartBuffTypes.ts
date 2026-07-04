@@ -106,9 +106,7 @@ export function getEnhancementSuffix(enhancement: EnhancementLevel): string {
  * @example
  * deriveEnhancements(new Set([201, 302])) // { 101: 1, 102: 2 }
  */
-export function deriveEnhancements(
-  selectedBuffIds: Set<number>
-): Record<number, EnhancementLevel> {
+export function deriveEnhancements(selectedBuffIds: Set<number>): Record<number, EnhancementLevel> {
   const result: Record<number, EnhancementLevel> = {}
   for (const buffId of selectedBuffIds) {
     const baseId = getBaseIdFromBuffId(buffId)

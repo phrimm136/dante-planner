@@ -9,21 +9,21 @@ interface KeywordFilterProps {
   onSelectionChange: (keywords: Set<string>) => void
 }
 
-export const KeywordFilter = memo(function KeywordFilter({
-  selectedKeywords,
-  onSelectionChange,
-}: KeywordFilterProps) {
-  const getIconPath = (keyword: string) => getKeywordIconPath(keyword)
+export const KeywordFilter = memo(
+  function KeywordFilter({ selectedKeywords, onSelectionChange }: KeywordFilterProps) {
+    const getIconPath = (keyword: string) => getKeywordIconPath(keyword)
 
-  return (
-    <IconFilter
-      options={STATUS_EFFECTS}
-      selectedOptions={selectedKeywords}
-      onSelectionChange={onSelectionChange}
-      getIconPath={getIconPath}
-    />
-  )
-}, (prev, next) => {
-  return areSetsEqual(prev.selectedKeywords, next.selectedKeywords)
-  // onSelectionChange excluded - callback identity changes but behavior is same
-})
+    return (
+      <IconFilter
+        options={STATUS_EFFECTS}
+        selectedOptions={selectedKeywords}
+        onSelectionChange={onSelectionChange}
+        getIconPath={getIconPath}
+      />
+    )
+  },
+  (prev, next) => {
+    return areSetsEqual(prev.selectedKeywords, next.selectedKeywords)
+    // onSelectionChange excluded - callback identity changes but behavior is same
+  },
+)

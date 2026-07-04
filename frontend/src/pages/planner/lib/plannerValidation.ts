@@ -43,7 +43,20 @@ const MIN_DEPLOYMENT_SINNER = 0
 const MAX_DEPLOYMENT_SINNER = 11
 
 /** All sinner keys that must be present (2-digit format) */
-const ALL_SINNER_KEYS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'] as const
+const ALL_SINNER_KEYS = [
+  '01',
+  '02',
+  '03',
+  '04',
+  '05',
+  '06',
+  '07',
+  '08',
+  '09',
+  '10',
+  '11',
+  '12',
+] as const
 
 /** Required EGO type for each sinner */
 const REQUIRED_EGO_TYPE = 'ZAYIN'
@@ -71,7 +84,9 @@ const MAX_BUFF_BASE_ID = 9
  * - Each sinner must have a ZAYIN EGO with valid ID
  * - Max 5 EGO types, all unique, from valid set
  */
-export function validateEquipment(equipment: Record<string, SinnerEquipment>): EquipmentValidationError[] {
+export function validateEquipment(
+  equipment: Record<string, SinnerEquipment>,
+): EquipmentValidationError[] {
   const errors: EquipmentValidationError[] = []
 
   // Collect present sinner keys and normalize to 2-digit format
@@ -89,7 +104,7 @@ export function validateEquipment(equipment: Record<string, SinnerEquipment>): E
   }
 
   // Check all 12 sinners are present
-  const missingSinners = ALL_SINNER_KEYS.filter(key => !presentKeys.has(key))
+  const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
   if (missingSinners.length > 0) {
     errors.push({
       code: 'EQUIPMENT_MISSING_SINNER',
@@ -129,7 +144,9 @@ export function validateEquipment(equipment: Record<string, SinnerEquipment>): E
     // Validate EGO types: max 5, unique, from valid set
     const egoTypes = Object.keys(sinnerEquipment.egos)
     const validEGOTypes = new Set(EGO_TYPES)
-    const invalidTypes = egoTypes.filter(type => !validEGOTypes.has(type as typeof EGO_TYPES[number]))
+    const invalidTypes = egoTypes.filter(
+      (type) => !validEGOTypes.has(type as (typeof EGO_TYPES)[number]),
+    )
 
     if (invalidTypes.length > 0) {
       errors.push({
@@ -180,7 +197,11 @@ export function validateDeploymentOrder(deploymentOrder: number[]): DeploymentVa
 
   for (let i = 0; i < deploymentOrder.length; i++) {
     const index = deploymentOrder[i]
-    if (typeof index !== 'number' || index < MIN_DEPLOYMENT_SINNER || index > MAX_DEPLOYMENT_SINNER) {
+    if (
+      typeof index !== 'number' ||
+      index < MIN_DEPLOYMENT_SINNER ||
+      index > MAX_DEPLOYMENT_SINNER
+    ) {
       errors.push({
         code: 'DEPLOYMENT_INVALID_INDEX',
         message: `Deployment order[${i}] has invalid sinner index: ${index} (must be 0-11)`,
@@ -201,7 +222,9 @@ export function validateDeploymentOrder(deploymentOrder: number[]): DeploymentVa
  * - No duplicate slots per sinner
  * - Each sinner's skill slots sum to SKILL_EA_TOTAL (6)
  */
-export function validateSkillEAState(skillEAState: Record<string, SkillEAState>): SkillEAValidationError[] {
+export function validateSkillEAState(
+  skillEAState: Record<string, SkillEAState>,
+): SkillEAValidationError[] {
   const errors: SkillEAValidationError[] = []
 
   // Collect present sinner keys
@@ -219,7 +242,7 @@ export function validateSkillEAState(skillEAState: Record<string, SkillEAState>)
   }
 
   // Check all 12 sinners are present
-  const missingSinners = ALL_SINNER_KEYS.filter(key => !presentKeys.has(key))
+  const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
   if (missingSinners.length > 0) {
     errors.push({
       code: 'SKILL_EA_MISSING_SINNER',
@@ -260,7 +283,7 @@ export function validateSkillEAState(skillEAState: Record<string, SkillEAState>)
       }
       seenSlots.add(slotKey)
 
-      total += sinnerSkills[slotKey as unknown as typeof OFFENSIVE_SKILL_SLOTS[number]]
+      total += sinnerSkills[slotKey as unknown as (typeof OFFENSIVE_SKILL_SLOTS)[number]]
     }
 
     // Check total equals SKILL_EA_TOTAL
@@ -283,7 +306,7 @@ export function validateSkillEAState(skillEAState: Record<string, SkillEAState>)
 export function validateGiftIdArray(
   giftIds: string[],
   fieldName: string,
-  egoGiftSpec?: Record<string, EGOGiftSpec>
+  egoGiftSpec?: Record<string, EGOGiftSpec>,
 ): GiftValidationError[] {
   const errors: GiftValidationError[] = []
   const seen = new Set<string>()
@@ -380,7 +403,7 @@ export function validateStartBuffIds(buffIds: number[]): BuffValidationError[] {
  */
 export function validateStartGiftSelection(
   selectedGiftKeyword: string | null,
-  selectedGiftIds: string[]
+  selectedGiftIds: string[],
 ): StartGiftValidationError[] {
   const errors: StartGiftValidationError[] = []
 
@@ -444,7 +467,7 @@ export function validateStartGiftSelection(
  */
 export function validateFloorThemePacksForSave(
   floorSelections: FloorThemeSelection[],
-  floorCount: number
+  floorCount: number,
 ): FloorValidationError[] {
   const errors: FloorValidationError[] = []
 
@@ -535,7 +558,7 @@ export function validateFloorThemePacksForSave(
 function validateFloorDifficulties(
   floorSelections: FloorThemeSelection[],
   category: MDCategory,
-  floorCount: number
+  floorCount: number,
 ): DifficultyValidationError[] {
   const errors: DifficultyValidationError[] = []
 
@@ -609,32 +632,32 @@ function validateFloorDifficulties(
 function validateFloorGiftExistence(
   floorSelections: FloorThemeSelection[],
   floorCount: number,
-  egoGiftSpec: Record<string, EGOGiftSpec>
+  egoGiftSpec: Record<string, EGOGiftSpec>,
 ): FloorValidationError[] {
-  return floorSelections
-    .slice(0, floorCount)
-    .flatMap((floor, i) => {
-      const unknownIds: string[] = []
+  return floorSelections.slice(0, floorCount).flatMap((floor, i) => {
+    const unknownIds: string[] = []
 
-      for (const giftId of floor.giftIds) {
-        const baseId = getBaseGiftId(giftId)
-        if (!(baseId in egoGiftSpec)) {
-          unknownIds.push(giftId)
-        }
+    for (const giftId of floor.giftIds) {
+      const baseId = getBaseGiftId(giftId)
+      if (!(baseId in egoGiftSpec)) {
+        unknownIds.push(giftId)
       }
+    }
 
-      if (unknownIds.length === 0) return []
+    if (unknownIds.length === 0) return []
 
-      const floorNumber = i + 1
-      return [{
+    const floorNumber = i + 1
+    return [
+      {
         code: 'GIFT_UNKNOWN_ID' as const,
         message: `Floor ${floorNumber}: unknown gift ID(s): ${unknownIds.join(', ')}`,
         field: `floorSelections[${i}].giftIds`,
         floorIndex: i,
         floorNumber,
         context: { giftIds: unknownIds },
-      }]
-    })
+      },
+    ]
+  })
 }
 
 /**
@@ -645,29 +668,29 @@ function validateFloorGiftAffordability(
   floorSelections: FloorThemeSelection[],
   floorCount: number,
   egoGiftSpec: Record<string, EGOGiftSpec>,
-  egoGiftI18n?: Record<string, string>
+  egoGiftI18n?: Record<string, string>,
 ): FloorValidationError[] {
-  return floorSelections
-    .slice(0, floorCount)
-    .flatMap((floor, i) => {
-      if (!floor?.themePackId) return []
+  return floorSelections.slice(0, floorCount).flatMap((floor, i) => {
+    if (!floor?.themePackId) return []
 
-      const unaffordableIds = getUnaffordableGiftIds(floor.giftIds, floor.themePackId, egoGiftSpec)
+    const unaffordableIds = getUnaffordableGiftIds(floor.giftIds, floor.themePackId, egoGiftSpec)
 
-      if (unaffordableIds.length === 0) return []
+    if (unaffordableIds.length === 0) return []
 
-      const floorNumber = i + 1
-      const giftNames = unaffordableIds.map(id => egoGiftI18n?.[getBaseGiftId(id)] ?? id).join(', ')
+    const floorNumber = i + 1
+    const giftNames = unaffordableIds.map((id) => egoGiftI18n?.[getBaseGiftId(id)] ?? id).join(', ')
 
-      return [{
+    return [
+      {
         code: 'FLOOR_UNAFFORDABLE_GIFT' as const,
         message: `Floor ${floorNumber} has ${unaffordableIds.length} gift(s) not available for theme pack: ${giftNames}`,
         field: `floorSelections[${i}].giftIds`,
         floorIndex: i,
         floorNumber,
         context: { giftIds: unaffordableIds, giftNames, themePackId: floor.themePackId },
-      }]
-    })
+      },
+    ]
+  })
 }
 
 /**
@@ -700,13 +723,17 @@ export function validatePlannerForPublish(
   content: MDPlannerContent,
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
-  egoGiftI18n?: Record<string, string>
+  egoGiftI18n?: Record<string, string>,
 ): { isValid: boolean; errors: PlannerValidationError[] } {
   const errors: PlannerValidationError[] = []
 
   // 0. Title validation (strict mode — required for publish)
   if (!title || title.trim() === '') {
-    errors.push({ code: 'MISSING_TITLE', message: 'Title is required for publishing', field: 'title' })
+    errors.push({
+      code: 'MISSING_TITLE',
+      message: 'Title is required for publishing',
+      field: 'title',
+    })
   }
 
   // 1. Equipment validation
@@ -721,7 +748,9 @@ export function validatePlannerForPublish(
   // 4. Gift IDs validation (all three arrays)
   errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
   errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
-  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec))
+  errors.push(
+    ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
+  )
 
   // 5. Start buffs validation
   errors.push(...validateStartBuffIds(content.selectedBuffIds))
@@ -732,10 +761,12 @@ export function validatePlannerForPublish(
   // 7. Floor selections validation
   const floorCount = FLOOR_COUNTS[category]
   // Deserialize floor selections (convert giftIds from string[] to Set<string>)
-  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(floor => ({
-    ...floor,
-    giftIds: new Set(floor.giftIds)
-  }))
+  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(
+    (floor) => ({
+      ...floor,
+      giftIds: new Set(floor.giftIds),
+    }),
+  )
   errors.push(...validateFloorThemePacksForSave(deserializedFloorSelections, floorCount))
 
   // 8. Difficulty validation (full rules based on category)
@@ -748,7 +779,14 @@ export function validatePlannerForPublish(
 
   // 10. Gift affordability validation (if egoGiftSpec is provided; assumes existence check passed)
   if (egoGiftSpec) {
-    errors.push(...validateFloorGiftAffordability(deserializedFloorSelections, floorCount, egoGiftSpec, egoGiftI18n))
+    errors.push(
+      ...validateFloorGiftAffordability(
+        deserializedFloorSelections,
+        floorCount,
+        egoGiftSpec,
+        egoGiftI18n,
+      ),
+    )
   }
 
   return {
@@ -776,7 +814,7 @@ export function validatePlannerForDraftSave(
   content: MDPlannerContent,
   category: MDCategory,
   egoGiftSpec?: Record<string, EGOGiftSpec>,
-  egoGiftI18n?: Record<string, string>
+  egoGiftI18n?: Record<string, string>,
 ): { key: string; params?: Record<string, string> } | null {
   const errors: PlannerValidationError[] = []
 
@@ -792,7 +830,9 @@ export function validatePlannerForDraftSave(
   // 4. Gift IDs validation (all three arrays)
   errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
   errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
-  errors.push(...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec))
+  errors.push(
+    ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
+  )
 
   // 5. Start buffs validation
   errors.push(...validateStartBuffIds(content.selectedBuffIds))
@@ -802,14 +842,16 @@ export function validatePlannerForDraftSave(
 
   // 7. Floor selections validation (non-strict: theme packs optional)
   const floorCount = FLOOR_COUNTS[category]
-  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(floor => ({
-    ...floor,
-    giftIds: new Set(floor.giftIds)
-  }))
+  const deserializedFloorSelections: FloorThemeSelection[] = content.floorSelections.map(
+    (floor) => ({
+      ...floor,
+      giftIds: new Set(floor.giftIds),
+    }),
+  )
   const floorErrors = validateFloorThemePacksForSave(deserializedFloorSelections, floorCount)
   // Filter out FLOOR_MISSING_THEME_PACK — theme packs are optional in non-strict mode.
   // Prerequisites and duplicates still fire when a floor *does* have a pack.
-  errors.push(...floorErrors.filter(e => e.code !== 'FLOOR_MISSING_THEME_PACK'))
+  errors.push(...floorErrors.filter((e) => e.code !== 'FLOOR_MISSING_THEME_PACK'))
 
   // 8. Gift existence validation
   if (egoGiftSpec) {
@@ -818,7 +860,14 @@ export function validatePlannerForDraftSave(
 
   // 9. Gift affordability (assumes existence check passed; guards on themePackId being set)
   if (egoGiftSpec) {
-    errors.push(...validateFloorGiftAffordability(deserializedFloorSelections, floorCount, egoGiftSpec, egoGiftI18n))
+    errors.push(
+      ...validateFloorGiftAffordability(
+        deserializedFloorSelections,
+        floorCount,
+        egoGiftSpec,
+        egoGiftI18n,
+      ),
+    )
   }
 
   if (errors.length === 0) return null
@@ -837,7 +886,7 @@ export function validatePlannerForDraftSave(
  * @returns user-friendly error for the first oversized note, or null if all fit
  */
 export function validateNoteSizes(
-  sectionNotes: Record<string, { content: unknown }>
+  sectionNotes: Record<string, { content: unknown }>,
 ): { key: string; params?: Record<string, string> } | null {
   for (const [section, note] of Object.entries(sectionNotes ?? {})) {
     if (measureDocBytes(note.content as JSONContent) > MAX_NOTE_BYTES) {

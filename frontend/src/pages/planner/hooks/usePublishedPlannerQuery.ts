@@ -47,7 +47,9 @@ export const publishedPlannerQueryKeys = {
  * Exported so route loaders can prefetch into the TanStack Query cache,
  * preventing a duplicate network request when the component mounts.
  */
-export async function fetchPublishedPlanner(plannerId: string): Promise<PublishedPlannerQueryResult> {
+export async function fetchPublishedPlanner(
+  plannerId: string,
+): Promise<PublishedPlannerQueryResult> {
   const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
   const result = PublishedPlannerDetailSchema.safeParse(data)
 
@@ -78,17 +80,18 @@ export async function fetchPublishedPlanner(plannerId: string): Promise<Publishe
   }
 
   // Type narrowing based on plannerType
-  const planner: SaveablePlanner = apiData.plannerType === 'MIRROR_DUNGEON'
-    ? {
-        metadata,
-        config: { type: 'MIRROR_DUNGEON', category: apiData.category },
-        content: contentData as MDPlannerContent,
-      }
-    : {
-        metadata,
-        config: { type: 'REFRACTED_RAILWAY', category: apiData.category as RRCategory },
-        content: contentData as RRPlannerContent,
-      }
+  const planner: SaveablePlanner =
+    apiData.plannerType === 'MIRROR_DUNGEON'
+      ? {
+          metadata,
+          config: { type: 'MIRROR_DUNGEON', category: apiData.category },
+          content: contentData as MDPlannerContent,
+        }
+      : {
+          metadata,
+          config: { type: 'REFRACTED_RAILWAY', category: apiData.category as RRCategory },
+          content: contentData as RRPlannerContent,
+        }
 
   return { apiData, planner }
 }

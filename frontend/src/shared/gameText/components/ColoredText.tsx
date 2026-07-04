@@ -72,7 +72,7 @@ function parseRecursive(text: string, keyBase: number): React.ReactNode[] {
       parts.push(
         <span key={keyBase + tagStart} style={{ color }}>
           {parseRecursive(innerContent, keyBase + contentStart)}
-        </span>
+        </span>,
       )
     }
 
@@ -109,12 +109,14 @@ export function ColoredText({ text }: { text: string }) {
 
   while ((smallMatch = smallRegex.exec(sanitized)) !== null) {
     if (smallMatch.index > topLastIndex) {
-      topParts.push(...parseRecursive(sanitized.slice(topLastIndex, smallMatch.index), topLastIndex))
+      topParts.push(
+        ...parseRecursive(sanitized.slice(topLastIndex, smallMatch.index), topLastIndex),
+      )
     }
     topParts.push(
       <span key={`small-${smallMatch.index}`} className="text-[75%]">
         {parseRecursive(smallMatch[1], smallMatch.index)}
-      </span>
+      </span>,
     )
     topLastIndex = smallRegex.lastIndex
   }

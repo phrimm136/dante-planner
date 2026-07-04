@@ -80,7 +80,7 @@ export function MDPlannerToolbar({
           searchQuery={search}
           onSearchChange={onSearchChange}
           placeholder={searchPlaceholder}
-          className={"h-8"}
+          className={'h-8'}
         />
       </div>
 
@@ -90,14 +90,18 @@ export function MDPlannerToolbar({
           <Button
             variant={mode === 'published' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => { onModeChange?.('published') }}
+            onClick={() => {
+              onModeChange?.('published')
+            }}
           >
             {t('toolbar.allPublished')}
           </Button>
           <Button
             variant={mode === 'best' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => { onModeChange?.('best') }}
+            onClick={() => {
+              onModeChange?.('best')
+            }}
           >
             {t('toolbar.bestOnly')}
           </Button>

@@ -16,10 +16,7 @@ interface RankFilterProps {
  *
  * Pattern: Custom toggle buttons following IconFilter selection logic
  */
-export function RankFilter({
-  selectedRanks,
-  onSelectionChange,
-}: RankFilterProps) {
+export function RankFilter({ selectedRanks, onSelectionChange }: RankFilterProps) {
   const { t } = useTranslation()
   const toggleRank = (rank: number) => {
     const newSelection = new Set(selectedRanks)
@@ -55,7 +52,9 @@ export function RankFilter({
           return (
             <button
               key={rank}
-              onClick={() => { toggleRank(rank); }}
+              onClick={() => {
+                toggleRank(rank)
+              }}
               className="selectable shrink-0 w-8 h-8 rounded-md border-2 border-border bg-button flex items-center justify-center font-bold text-sm"
               data-selected={isSelected}
               title={`Rank ${rank}`}

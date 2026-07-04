@@ -30,10 +30,7 @@ function EditorErrorFallback({
   return (
     <div className="p-3 text-center text-sm text-muted-foreground bg-muted/50 rounded min-h-[100px] flex flex-col items-center justify-center gap-2">
       <span>{t('pages.plannerMD.noteEditor.errorFallback.loadFailed')}</span>
-      <button
-        onClick={resetErrorBoundary}
-        className="text-xs underline hover:text-foreground"
-      >
+      <button onClick={resetErrorBoundary} className="text-xs underline hover:text-foreground">
         {t('pages.plannerMD.noteEditor.errorFallback.tryAgain')}
       </button>
     </div>
@@ -53,10 +50,7 @@ function EditorErrorFallback({
  */
 // Custom comparison for memo - compares value.content by reference equality
 // since parent should provide stable NoteContent objects
-function areNoteEditorPropsEqual(
-  prev: NoteEditorProps,
-  next: NoteEditorProps
-): boolean {
+function areNoteEditorPropsEqual(prev: NoteEditorProps, next: NoteEditorProps): boolean {
   return (
     prev.value === next.value &&
     prev.placeholder === next.placeholder &&
@@ -132,7 +126,7 @@ function NoteEditorInner({
       SpoilerExtension,
       ByteLimitExtension.configure({ limit: byteLimit }),
     ],
-    [byteLimit]
+    [byteLimit],
   )
 
   // Initialize Tiptap editor
@@ -182,9 +176,8 @@ function NoteEditorInner({
 
         const best = largestPrefixWithinLimit(
           text,
-          (candidate) =>
-            measureDocBytes(state.tr.insertText(candidate, from, to).doc.toJSON()),
-          byteLimit
+          (candidate) => measureDocBytes(state.tr.insertText(candidate, from, to).doc.toJSON()),
+          byteLimit,
         )
 
         if (best > 0) {
@@ -214,11 +207,7 @@ function NoteEditorInner({
         // legacy/server note still populates the editor instead of being
         // silently rejected by ByteLimitExtension (which would desync the
         // editor from the React state set just above).
-        editor
-          .chain()
-          .setMeta(BYTE_LIMIT_BYPASS, true)
-          .setContent(value.content)
-          .run()
+        editor.chain().setMeta(BYTE_LIMIT_BYPASS, true).setContent(value.content).run()
       }
     }
   }, [editor, value.content])
@@ -312,17 +301,13 @@ function NoteEditorInner({
         className={cn(
           'note-editor rounded-md border border-input bg-background relative',
           isFocused && 'ring-2 ring-ring ring-offset-2',
-          className
+          className,
         )}
         onClick={handleClick}
         onBlur={handleBlur}
       >
         {/* Toolbar - only visible when focused */}
-        <Toolbar
-          editor={editor}
-          visible={isFocused && !readOnly}
-          onLinkClick={handleLinkClick}
-        />
+        <Toolbar editor={editor} visible={isFocused && !readOnly} onLinkClick={handleLinkClick} />
 
         {/* Editor content with error boundary */}
         <ErrorBoundary
@@ -340,7 +325,7 @@ function NoteEditorInner({
             <div className="absolute top-0 left-0 p-3 text-muted-foreground pointer-events-none">
               {readOnly
                 ? t('pages.plannerMD.noteEditor.placeholderReadOnly')
-                : (placeholder || t('pages.plannerMD.noteEditor.placeholder'))}
+                : placeholder || t('pages.plannerMD.noteEditor.placeholder')}
             </div>
           )}
         </ErrorBoundary>
@@ -359,7 +344,7 @@ function NoteEditorInner({
             <span
               className={cn(
                 'text-xs',
-                currentBytes > byteLimit ? 'text-destructive' : 'text-muted-foreground'
+                currentBytes > byteLimit ? 'text-destructive' : 'text-muted-foreground',
               )}
             >
               {currentBytes}/{byteLimit} {t('pages.plannerMD.bytes')}

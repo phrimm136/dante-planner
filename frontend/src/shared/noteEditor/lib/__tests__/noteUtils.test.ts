@@ -27,9 +27,7 @@ describe('isNoteEmpty', () => {
   })
 
   it('returns true for single empty paragraph (createEmptyNoteContent default)', () => {
-    expect(
-      isNoteEmpty({ content: { type: 'doc', content: [{ type: 'paragraph' }] } })
-    ).toBe(true)
+    expect(isNoteEmpty({ content: { type: 'doc', content: [{ type: 'paragraph' }] } })).toBe(true)
   })
 
   it('returns true for whitespace-only text', () => {
@@ -44,7 +42,7 @@ describe('isNoteEmpty', () => {
             },
           ],
         },
-      })
+      }),
     ).toBe(true)
   })
 
@@ -60,7 +58,7 @@ describe('isNoteEmpty', () => {
             },
           ],
         },
-      })
+      }),
     ).toBe(false)
   })
 
@@ -79,7 +77,7 @@ describe('isNoteEmpty', () => {
           type: 'doc',
           content: [{ type: 'hardBreak' }],
         },
-      })
+      }),
     ).toBe(false)
   })
 })
@@ -87,9 +85,7 @@ describe('isNoteEmpty', () => {
 describe('calculateNoteByteLength', () => {
   it('counts the serialized note as exact UTF-8 bytes', () => {
     // {"content":{"type":"doc"}} — 26 ASCII characters = 26 bytes
-    expect(
-      calculateNoteByteLength({ content: { type: 'doc' } })
-    ).toBe(26)
+    expect(calculateNoteByteLength({ content: { type: 'doc' } })).toBe(26)
   })
 
   it('measures bytes, not characters, for multibyte content', () => {
@@ -98,16 +94,12 @@ describe('calculateNoteByteLength', () => {
 
     // Same character count, but each Korean char is 3 UTF-8 bytes,
     // so the Korean note is 6 bytes larger (3 chars × 2 extra bytes).
-    expect(calculateNoteByteLength(korean)).toBe(
-      calculateNoteByteLength(ascii) + 6
-    )
+    expect(calculateNoteByteLength(korean)).toBe(calculateNoteByteLength(ascii) + 6)
   })
 
   it('grows by exactly one byte per appended ASCII character', () => {
     const base = calculateNoteByteLength({ content: { type: 'doc', text: '' } })
-    expect(
-      calculateNoteByteLength({ content: { type: 'doc', text: 'abcde' } })
-    ).toBe(base + 5)
+    expect(calculateNoteByteLength({ content: { type: 'doc', text: 'abcde' } })).toBe(base + 5)
   })
 
   // Regression: the backend's PlannerContentValidator.validateNoteSize measures

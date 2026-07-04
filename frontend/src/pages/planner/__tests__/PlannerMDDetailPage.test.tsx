@@ -8,7 +8,9 @@ import type { SaveablePlanner, MDPlannerContent } from '../types/PlannerTypes'
 
 // Mock react-router with all required exports
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
   useParams: () => ({ id: 'test-planner-123' }),
   useNavigate: () => vi.fn(),
   useSearch: () => ({}),
@@ -102,14 +104,16 @@ describe('PlannerMDDetailPage', () => {
     vi.clearAllMocks()
     vi.mocked(useSavedPlannerQuery).mockReturnValue(mockPlanner)
     vi.mocked(useAuthQuery).mockReturnValue({ data: null } as ReturnType<typeof useAuthQuery>)
-    vi.mocked(useAuthQueryNonBlocking).mockReturnValue({ data: null } as ReturnType<typeof useAuthQueryNonBlocking>)
+    vi.mocked(useAuthQueryNonBlocking).mockReturnValue({ data: null } as ReturnType<
+      typeof useAuthQueryNonBlocking
+    >)
   })
 
   it('loads planner via useSavedPlannerQuery hook', async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <PlannerMDDetailPage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Wait for Suspense to resolve
@@ -122,7 +126,7 @@ describe('PlannerMDDetailPage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <PlannerMDDetailPage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Wait for Suspense to resolve and content to render
@@ -137,7 +141,7 @@ describe('PlannerMDDetailPage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <PlannerMDDetailPage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Wait for Suspense to resolve and not found message to render
@@ -151,7 +155,7 @@ describe('PlannerMDDetailPage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <PlannerMDDetailPage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Wait for Suspense to resolve

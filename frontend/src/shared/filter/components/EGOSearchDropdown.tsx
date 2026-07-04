@@ -21,12 +21,13 @@ export function EGOSearchDropdown({
   const { t } = useTranslation(['database', 'sinnerNames'])
   const { spec, i18n: egoNames } = useListData()
 
-  const options = useMemo(() =>
-    buildSinnerSuffixedOptions(Object.keys(spec), egoNames, (id) => {
-      const sinnerKey = getSinnerFromId(id)
-      return t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
-    }),
-    [spec, egoNames, t]
+  const options = useMemo(
+    () =>
+      buildSinnerSuffixedOptions(Object.keys(spec), egoNames, (id) => {
+        const sinnerKey = getSinnerFromId(id)
+        return t(`${sinnerKey}`, { ns: 'sinnerNames', defaultValue: sinnerKey })
+      }),
+    [spec, egoNames, t],
   )
 
   return (

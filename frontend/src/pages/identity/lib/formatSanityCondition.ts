@@ -44,7 +44,7 @@ export interface ParsedSanityCondition {
 export function parseSanityCondition(encodedName: string): ParsedSanityCondition {
   // Extract all number sequences from the string
   const numberMatches = encodedName.match(/\d+/g)
-  const args = numberMatches ? numberMatches.map(n => parseInt(n, 10)) : []
+  const args = numberMatches ? numberMatches.map((n) => parseInt(n, 10)) : []
 
   // Remove all digits to get the base function name
   const baseName = encodedName.replace(/\d+/g, '')
@@ -72,7 +72,6 @@ export function substituteArgs(template: string, args: number[]): string {
   return result
 }
 
-
 /**
  * Formats a sanity condition into a human-readable description.
  *
@@ -97,7 +96,7 @@ export function substituteArgs(template: string, args: number[]): string {
 export function formatSanityCondition(
   encodedName: string,
   i18n: SanityConditionI18n,
-  type: SanityConditionType
+  type: SanityConditionType,
 ): string {
   // Parse the encoded name
   const { baseName, args } = parseSanityCondition(encodedName)
@@ -126,7 +125,7 @@ export function formatSanityCondition(
 export function formatSanityConditions(
   encodedNames: string[],
   i18n: SanityConditionI18n,
-  type: SanityConditionType
+  type: SanityConditionType,
 ): string[] {
-  return encodedNames.map(name => formatSanityCondition(name, i18n, type))
+  return encodedNames.map((name) => formatSanityCondition(name, i18n, type))
 }

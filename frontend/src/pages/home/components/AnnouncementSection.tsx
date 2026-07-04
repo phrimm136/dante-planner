@@ -18,7 +18,10 @@ export function AnnouncementSkeleton() {
       </div>
       <div className="bg-muted border border-border rounded-md p-4 flex flex-col">
         {Array.from({ length: ANNOUNCEMENT_PREVIEW_COUNT }).map((_, i) => (
-          <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+          <div
+            key={i}
+            className="flex items-center justify-between py-2 border-b border-border last:border-0"
+          >
             <Skeleton className="h-5 w-3/4" />
             <Skeleton className="h-4 w-32" />
           </div>
@@ -38,7 +41,11 @@ interface AnnouncementSectionProps {
   onOpenAnnouncement: (id: string) => void
 }
 
-export function AnnouncementSection({ announcements, onViewAll, onOpenAnnouncement }: AnnouncementSectionProps) {
+export function AnnouncementSection({
+  announcements,
+  onViewAll,
+  onOpenAnnouncement,
+}: AnnouncementSectionProps) {
   const { t } = useTranslation('common')
   const regular = announcements.filter((a) => !a.permanent)
   const permanent = announcements.filter((a) => a.permanent)
@@ -51,7 +58,7 @@ export function AnnouncementSection({ announcements, onViewAll, onOpenAnnounceme
         <button
           onClick={onViewAll}
           className={cn(
-            'flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors'
+            'flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors',
           )}
         >
           {t('announcements.viewAll')}
@@ -70,7 +77,9 @@ export function AnnouncementSection({ announcements, onViewAll, onOpenAnnounceme
             >
               {announcement.title}
             </button>
-            <span className="text-sm text-muted-foreground shrink-0">{announcement.formattedDate}</span>
+            <span className="text-sm text-muted-foreground shrink-0">
+              {announcement.formattedDate}
+            </span>
           </div>
         ))}
       </div>

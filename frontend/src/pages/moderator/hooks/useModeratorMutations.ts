@@ -65,7 +65,10 @@ export function useTimeoutUser() {
 
   return useMutation({
     mutationFn: async ({ usernameSuffix, durationMinutes, reason }: TimeoutUserRequest) => {
-      await ApiClient.post(`/api/moderation/user/${usernameSuffix}/timeout`, { durationMinutes, reason })
+      await ApiClient.post(`/api/moderation/user/${usernameSuffix}/timeout`, {
+        durationMinutes,
+        reason,
+      })
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: moderatorQueryKeys.users() })

@@ -38,19 +38,19 @@ export function EGOGiftKeywordFilter({
         onSelectionChange={onSelectionChange}
         getIconPath={getIconPath}
       >
-      <button
-        onClick={handleNoneClick}
-        role="checkbox"
-        aria-checked={isNoneSelected}
-        aria-label={`${t('filter.common', 'None')} filter`}
-        data-selected={isNoneSelected}
-        className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
-        title={t('filter.common', 'None')}
-      >
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <rect x="30" y="30" width="40" height="40" fill="currentColor" />
-        </svg>
-      </button>
+        <button
+          onClick={handleNoneClick}
+          role="checkbox"
+          aria-checked={isNoneSelected}
+          aria-label={`${t('filter.common', 'None')} filter`}
+          data-selected={isNoneSelected}
+          className="selectable shrink-0 w-8 h-8 rounded-md border border-border"
+          title={t('filter.common', 'None')}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <rect x="30" y="30" width="40" height="40" fill="currentColor" />
+          </svg>
+        </button>
       </IconFilter>
     </div>
   )

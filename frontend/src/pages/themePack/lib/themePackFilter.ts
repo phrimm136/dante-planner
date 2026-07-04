@@ -14,7 +14,7 @@ import type { ThemePackEntry } from '../types/ThemePackTypes'
  */
 export function matchesDungeonDifficultyFilter(
   entry: ThemePackEntry,
-  selectedDifficulties: Set<DungeonIdx>
+  selectedDifficulties: Set<DungeonIdx>,
 ): boolean {
   if (selectedDifficulties.size === 0) return true
   const packDifficulties = new Set(entry.exceptionConditions.map((c) => c.dungeonIdx))
@@ -29,7 +29,7 @@ export function matchesDungeonDifficultyFilter(
  */
 export function matchesFloorFilter(
   entry: ThemePackEntry,
-  selectedFloors: Set<ThemePackFloor>
+  selectedFloors: Set<ThemePackFloor>,
 ): boolean {
   if (selectedFloors.size === 0) return true
   const packFloors = new Set<number>()
@@ -48,7 +48,7 @@ export function matchesFloorFilter(
  */
 export function matchesEgoGiftFilter(
   entry: ThemePackEntry,
-  selectedEgoGifts: Set<string>
+  selectedEgoGifts: Set<string>,
 ): boolean {
   if (selectedEgoGifts.size === 0) return true
   if (entry.specificEgoGiftPool.some((giftId) => selectedEgoGifts.has(String(giftId)))) return true

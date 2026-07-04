@@ -16,7 +16,7 @@ describe('DetailEntitySelector', () => {
           onTierChange={onTierChange}
           level={MAX_LEVEL}
           onLevelChange={onLevelChange}
-        />
+        />,
       )
 
       // Should have 4 tier buttons (1, 2, 3, 4)
@@ -37,7 +37,7 @@ describe('DetailEntitySelector', () => {
           onTierChange={onTierChange}
           level={MAX_LEVEL}
           onLevelChange={onLevelChange}
-        />
+        />,
       )
 
       // Should have level label (Lv. X format) and slider
@@ -56,7 +56,7 @@ describe('DetailEntitySelector', () => {
           onTierChange={onTierChange}
           level={MAX_LEVEL}
           onLevelChange={onLevelChange}
-        />
+        />,
       )
 
       fireEvent.click(screen.getByRole('button', { name: /tier 1/i }))
@@ -74,7 +74,7 @@ describe('DetailEntitySelector', () => {
           onTierChange={onTierChange}
           level={30}
           onLevelChange={onLevelChange}
-        />
+        />,
       )
 
       const slider = screen.getByRole('slider')
@@ -95,7 +95,7 @@ describe('DetailEntitySelector', () => {
           onTierChange={onTierChange}
           level={MAX_LEVEL}
           onLevelChange={onLevelChange}
-        />
+        />,
       )
 
       const slider = screen.getByRole('slider')
@@ -112,12 +112,7 @@ describe('DetailEntitySelector', () => {
       const onTierChange = vi.fn()
 
       render(
-        <DetailEntitySelector
-          entityType="ego"
-          tier={4}
-          onTierChange={onTierChange}
-          maxTier={4}
-        />
+        <DetailEntitySelector entityType="ego" tier={4} onTierChange={onTierChange} maxTier={4} />,
       )
 
       expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
@@ -130,12 +125,7 @@ describe('DetailEntitySelector', () => {
       const onTierChange = vi.fn()
 
       render(
-        <DetailEntitySelector
-          entityType="ego"
-          tier={5}
-          onTierChange={onTierChange}
-          maxTier={5}
-        />
+        <DetailEntitySelector entityType="ego" tier={5} onTierChange={onTierChange} maxTier={5} />,
       )
 
       expect(screen.getByRole('button', { name: /tier 1/i })).toBeDefined()
@@ -146,13 +136,7 @@ describe('DetailEntitySelector', () => {
     it('falls back to the global MAX_ENTITY_TIER.ego (5) when no maxTier is passed', () => {
       const onTierChange = vi.fn()
 
-      render(
-        <DetailEntitySelector
-          entityType="ego"
-          tier={4}
-          onTierChange={onTierChange}
-        />
-      )
+      render(<DetailEntitySelector entityType="ego" tier={4} onTierChange={onTierChange} />)
 
       expect(screen.getByRole('button', { name: /tier 5/i })).toBeDefined()
     })
@@ -162,13 +146,7 @@ describe('DetailEntitySelector', () => {
     it('renders 3 enhancement buttons (0, 1, 2)', () => {
       const onTierChange = vi.fn()
 
-      render(
-        <DetailEntitySelector
-          entityType="egoGift"
-          tier={0}
-          onTierChange={onTierChange}
-        />
-      )
+      render(<DetailEntitySelector entityType="egoGift" tier={0} onTierChange={onTierChange} />)
 
       // Should have 3 enhancement buttons (tier 0, 1, 2)
       const buttons = screen.getAllByRole('button')
@@ -183,13 +161,7 @@ describe('DetailEntitySelector', () => {
     it('does not render level slider', () => {
       const onTierChange = vi.fn()
 
-      render(
-        <DetailEntitySelector
-          entityType="egoGift"
-          tier={0}
-          onTierChange={onTierChange}
-        />
-      )
+      render(<DetailEntitySelector entityType="egoGift" tier={0} onTierChange={onTierChange} />)
 
       // Should NOT have level input
       expect(screen.queryByRole('spinbutton')).toBeNull()

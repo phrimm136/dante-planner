@@ -39,10 +39,7 @@ interface CommentCardProps {
 }
 
 // Custom comparison - only re-render when comment data actually changes
-function commentCardPropsAreEqual(
-  prev: CommentCardProps,
-  next: CommentCardProps
-): boolean {
+function commentCardPropsAreEqual(prev: CommentCardProps, next: CommentCardProps): boolean {
   // Compare comment data fields that affect rendering
   const prevComment = prev.comment
   const nextComment = next.comment
@@ -95,9 +92,7 @@ export const CommentCard = memo(function CommentCard({
   const formattedCreatedAt = formatShortRelativeTime(comment.createdAt, i18n.language)
 
   // Sanitize HTML content for XSS protection using DOMPurify
-  const sanitizedContent = comment.content
-    ? DOMPurify.sanitize(comment.content)
-    : ''
+  const sanitizedContent = comment.content ? DOMPurify.sanitize(comment.content) : ''
 
   const handleReplyClick = useCallback(() => setShowReplyEditor(true), [])
   const handleEditClick = useCallback(() => setShowEditEditor(true), [])
@@ -112,15 +107,21 @@ export const CommentCard = memo(function CommentCard({
     onModeratorDelete(comment.id)
   }, [comment.id, onModeratorDelete])
 
-  const handleReplySubmit = useCallback((content: string) => {
-    onReply(comment.id, content)
-    setShowReplyEditor(false)
-  }, [comment.id, onReply])
+  const handleReplySubmit = useCallback(
+    (content: string) => {
+      onReply(comment.id, content)
+      setShowReplyEditor(false)
+    },
+    [comment.id, onReply],
+  )
 
-  const handleEditSubmit = useCallback((content: string) => {
-    onEdit(comment.id, content)
-    setShowEditEditor(false)
-  }, [comment.id, onEdit])
+  const handleEditSubmit = useCallback(
+    (content: string) => {
+      onEdit(comment.id, content)
+      setShowEditEditor(false)
+    },
+    [comment.id, onEdit],
+  )
 
   const handleUpvote = useCallback(() => {
     onUpvote(comment.id)

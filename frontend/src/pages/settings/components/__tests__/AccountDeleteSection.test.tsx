@@ -142,10 +142,10 @@ describe('AccountDeleteSection', () => {
     await user.click(confirmButton)
 
     expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining('Account scheduled for deletion on')
+      expect.stringContaining('Account scheduled for deletion on'),
     )
     expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining('Log in within 30 days to cancel')
+      expect.stringContaining('Log in within 30 days to cancel'),
     )
   })
 
@@ -181,12 +181,7 @@ describe('AccountDeleteSection', () => {
 
     // Open dialog manually by rendering with isPending already true
     render(
-      <AccountDeleteDialog
-        open={true}
-        onConfirm={vi.fn()}
-        onCancel={vi.fn()}
-        isPending={true}
-      />
+      <AccountDeleteDialog open={true} onConfirm={vi.fn()} onCancel={vi.fn()} isPending={true} />,
     )
 
     expect(screen.getByRole('button', { name: /deleting/i })).toBeDisabled()

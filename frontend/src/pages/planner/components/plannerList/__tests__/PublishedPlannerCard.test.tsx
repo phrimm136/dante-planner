@@ -92,7 +92,11 @@ describe('PublishedPlannerCard', () => {
 
   describe('Keywords Display', () => {
     it('renders keyword icons', () => {
-      render(<PublishedPlannerCard planner={createMockPlanner({ selectedKeywords: ['Burn', 'Slash'] })} />)
+      render(
+        <PublishedPlannerCard
+          planner={createMockPlanner({ selectedKeywords: ['Burn', 'Slash'] })}
+        />,
+      )
       expect(screen.getByAltText('Burn')).toBeInTheDocument()
       expect(screen.getByAltText('Slash')).toBeInTheDocument()
     })
@@ -100,7 +104,9 @@ describe('PublishedPlannerCard', () => {
     it('shows +N overflow beyond 3 keywords', () => {
       render(
         <PublishedPlannerCard
-          planner={createMockPlanner({ selectedKeywords: ['Burn', 'Slash', 'Pierce', 'Blunt', 'Rupture'] })}
+          planner={createMockPlanner({
+            selectedKeywords: ['Burn', 'Slash', 'Pierce', 'Blunt', 'Rupture'],
+          })}
         />,
       )
       expect(screen.getByText('+2')).toBeInTheDocument()

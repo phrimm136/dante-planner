@@ -28,9 +28,7 @@ function createWrapper() {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <Suspense fallback={<span data-testid="loading">Loading...</span>}>
-          {children}
-        </Suspense>
+        <Suspense fallback={<span data-testid="loading">Loading...</span>}>{children}</Suspense>
       </QueryClientProvider>
     )
   }
@@ -84,7 +82,7 @@ describe('EGOName', () => {
         <Suspense fallback={<span>Loading...</span>}>
           <EGOName id="20102" />
         </Suspense>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Mock needs to be called again for new ID lookup

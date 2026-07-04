@@ -39,10 +39,7 @@ describe('CommunityPlansErrorFallback', () => {
 
   it('renders error title', () => {
     render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     expect(screen.getByText('Connection Lost')).toBeInTheDocument()
@@ -50,10 +47,7 @@ describe('CommunityPlansErrorFallback', () => {
 
   it('renders Faust connection error message', () => {
     render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     expect(screen.getByText('... My connection to Faust has been severed.')).toBeInTheDocument()
@@ -61,10 +55,7 @@ describe('CommunityPlansErrorFallback', () => {
 
   it('renders retry button', () => {
     render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     const retryButton = screen.getByRole('button', { name: 'Try Again' })
@@ -75,10 +66,7 @@ describe('CommunityPlansErrorFallback', () => {
     const user = userEvent.setup()
 
     render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     const retryButton = screen.getByRole('button', { name: 'Try Again' })
@@ -89,10 +77,7 @@ describe('CommunityPlansErrorFallback', () => {
 
   it('applies destructive styling to container', () => {
     const { container } = render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     const errorContainer = container.firstChild as HTMLElement
@@ -102,10 +87,7 @@ describe('CommunityPlansErrorFallback', () => {
 
   it('applies destructive variant to retry button', () => {
     render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     const retryButton = screen.getByRole('button', { name: 'Try Again' })
@@ -115,10 +97,7 @@ describe('CommunityPlansErrorFallback', () => {
 
   it('renders with correct structure', () => {
     const { container } = render(
-      <CommunityPlansErrorFallback
-        error={mockError}
-        resetErrorBoundary={mockResetErrorBoundary}
-      />
+      <CommunityPlansErrorFallback error={mockError} resetErrorBoundary={mockResetErrorBoundary} />,
     )
 
     // Should have title (h3), message (p), and button

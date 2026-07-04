@@ -65,7 +65,7 @@ function EGOGiftCardGrid({
         extremeOnly: specData.extremeOnly,
         fusioned: specData.fusioned,
       })),
-    [spec]
+    [spec],
   )
 
   return (
@@ -93,7 +93,11 @@ function EGOGiftPageShell() {
   const spec = useEGOGiftListSpec()
 
   // Filter states
-  const { values: filters, setters, resetAll } = useSetFilters({
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
     selectedKeywords: new Set<string>(),
     selectedBattleKeywords: new Set<string>(),
     selectedDifficulties: new Set<EGOGiftDifficulty>(),
@@ -142,10 +146,7 @@ function EGOGiftPageShell() {
   // Secondary filters (shown when mobile expanded): Tier, Theme Pack, Attribute Type
   const secondaryFilters = (
     <>
-      <FilterSection
-        title={t('filters.tier', 'Tier')}
-        activeCount={filters.selectedTiers.size}
-      >
+      <FilterSection title={t('filters.tier', 'Tier')} activeCount={filters.selectedTiers.size}>
         <CompactTierFilter
           selectedTiers={filters.selectedTiers}
           onSelectionChange={setters.selectedTiers}

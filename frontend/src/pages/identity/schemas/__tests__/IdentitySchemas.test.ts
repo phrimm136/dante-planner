@@ -8,15 +8,12 @@ import {
 } from '../IdentitySchemas'
 
 describe('DefenseTypeSchema', () => {
-  it.each([
-    'EVADE',
-    'COUNTER',
-    'CLASHABLE_COUNTER',
-    'GUARD',
-    'CLASHABLE_GUARD',
-  ])('accepts valid value: %s', (value) => {
-    expect(DefenseTypeSchema.parse(value)).toBe(value)
-  })
+  it.each(['EVADE', 'COUNTER', 'CLASHABLE_COUNTER', 'GUARD', 'CLASHABLE_GUARD'])(
+    'accepts valid value: %s',
+    (value) => {
+      expect(DefenseTypeSchema.parse(value)).toBe(value)
+    },
+  )
 
   it('rejects invalid string', () => {
     expect(() => DefenseTypeSchema.parse('DODGE')).toThrow()
@@ -136,9 +133,7 @@ describe('IdentityPassiveI18nSchema flavor field', () => {
     })
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.flavor).toBe(
-        "'The things I dread seeing again always come back.'",
-      )
+      expect(result.data.flavor).toBe("'The things I dread seeing again always come back.'")
     }
   })
 

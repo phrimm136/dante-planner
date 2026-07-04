@@ -25,8 +25,22 @@ vi.mock('react-i18next', async (importOriginal) => {
 
 // Mock ThemePackViewer to simplify testing
 vi.mock('../../floorTheme/ThemePackViewer', () => ({
-  ThemePackViewer: ({ packName, overlay, className, isSelected }: { packName: string; overlay?: React.ReactNode; className?: string; isSelected?: boolean }) => (
-    <div data-testid="theme-pack-viewer" className={className ?? ''} data-selected={isSelected ?? false}>
+  ThemePackViewer: ({
+    packName,
+    overlay,
+    className,
+    isSelected,
+  }: {
+    packName: string
+    overlay?: React.ReactNode
+    className?: string
+    isSelected?: boolean
+  }) => (
+    <div
+      data-testid="theme-pack-viewer"
+      className={className ?? ''}
+      data-selected={isSelected ?? false}
+    >
       <img src="/mock.webp" alt={packName} />
       <span>{packName}</span>
       {overlay}
@@ -86,12 +100,7 @@ describe('ThemePackTrackerCard', () => {
     it('calls onHoverChange when mouse enters and leaves', () => {
       const onHoverChange = vi.fn()
 
-      render(
-        <ThemePackTrackerCard
-          {...defaultProps}
-          onHoverChange={onHoverChange}
-        />
-      )
+      render(<ThemePackTrackerCard {...defaultProps} onHoverChange={onHoverChange} />)
 
       const viewer = screen.getByTestId('theme-pack-viewer')
       const hoverTarget = viewer.parentElement!
@@ -127,12 +136,7 @@ describe('ThemePackTrackerCard', () => {
     it('calls onFocusToggle when card is clicked', () => {
       const onFocusToggle = vi.fn()
 
-      render(
-        <ThemePackTrackerCard
-          {...defaultProps}
-          onFocusToggle={onFocusToggle}
-        />
-      )
+      render(<ThemePackTrackerCard {...defaultProps} onFocusToggle={onFocusToggle} />)
 
       const viewer = screen.getByTestId('theme-pack-viewer')
       const clickTarget = viewer.parentElement!
@@ -141,12 +145,7 @@ describe('ThemePackTrackerCard', () => {
     })
 
     it('passes isFocused as isSelected to ThemePackViewer', () => {
-      render(
-        <ThemePackTrackerCard
-          {...defaultProps}
-          isFocused={true}
-        />
-      )
+      render(<ThemePackTrackerCard {...defaultProps} isFocused={true} />)
 
       const viewer = screen.getByTestId('theme-pack-viewer')
       expect(viewer.getAttribute('data-selected')).toBe('true')
@@ -155,12 +154,7 @@ describe('ThemePackTrackerCard', () => {
     it('does not call onFocusToggle when done button is clicked', () => {
       const onFocusToggle = vi.fn()
 
-      render(
-        <ThemePackTrackerCard
-          {...defaultProps}
-          onFocusToggle={onFocusToggle}
-        />
-      )
+      render(<ThemePackTrackerCard {...defaultProps} onFocusToggle={onFocusToggle} />)
 
       const viewer = screen.getByTestId('theme-pack-viewer')
       const hoverTarget = viewer.parentElement!
@@ -177,12 +171,7 @@ describe('ThemePackTrackerCard', () => {
     it('calls onToggleDone when done button is clicked', () => {
       const onToggleDone = vi.fn()
 
-      render(
-        <ThemePackTrackerCard
-          {...defaultProps}
-          onToggleDone={onToggleDone}
-        />
-      )
+      render(<ThemePackTrackerCard {...defaultProps} onToggleDone={onToggleDone} />)
 
       // Trigger hover to show action buttons
       const viewer = screen.getByTestId('theme-pack-viewer')

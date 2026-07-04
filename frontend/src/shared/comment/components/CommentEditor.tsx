@@ -59,7 +59,7 @@ export function CommentEditor({
         heading: { levels: [1, 2, 3] },
       }),
     ],
-    []
+    [],
   )
 
   const editor = useEditor({
@@ -68,7 +68,8 @@ export function CommentEditor({
     editable: !disabled,
     editorProps: {
       attributes: {
-        class: 'comment-editor-content prose prose-sm max-w-none focus:outline-none min-h-[80px] p-3',
+        class:
+          'comment-editor-content prose prose-sm max-w-none focus:outline-none min-h-[80px] p-3',
       },
     },
     onUpdate: ({ editor }) => {
@@ -128,7 +129,7 @@ export function CommentEditor({
       className={cn(
         'comment-editor rounded-md border border-input bg-background',
         isFocused && 'ring-2 ring-ring ring-offset-2',
-        disabled && 'opacity-50 cursor-not-allowed'
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
       onClick={handleFocus}
       onBlur={handleBlur}
@@ -156,12 +157,7 @@ export function CommentEditor({
 
       {/* Footer: character count + buttons */}
       <div className="flex items-center justify-end gap-3 px-3 py-2 border-t border-input">
-        <span
-          className={cn(
-            'text-xs',
-            isOverLimit ? 'text-destructive' : 'text-muted-foreground'
-          )}
-        >
+        <span className={cn('text-xs', isOverLimit ? 'text-destructive' : 'text-muted-foreground')}>
           {charCount}/{COMMENT_MAX_CHARS}
         </span>
 

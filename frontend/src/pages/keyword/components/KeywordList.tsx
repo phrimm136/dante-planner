@@ -104,19 +104,14 @@ export function KeywordList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('keyword.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('keyword.emptyState')}</div>
       </div>
     )
   }
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.KEYWORD}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.KEYWORD} mobileScale={0.8}>
         {keywords.slice(0, displayCount).map((keyword) => (
           <ScaledCardWrapper
             key={keyword.id}
@@ -125,11 +120,7 @@ export function KeywordList({
             cardHeight={CARD_GRID.HEIGHT.KEYWORD}
             className={visibleIds.has(keyword.id) ? '' : 'hidden'}
           >
-            <KeywordCardLink
-              id={keyword.id}
-              iconId={keyword.iconId}
-              buffType={keyword.buffType}
-            />
+            <KeywordCardLink id={keyword.id} iconId={keyword.iconId} buffType={keyword.buffType} />
           </ScaledCardWrapper>
         ))}
       </ResponsiveCardGrid>

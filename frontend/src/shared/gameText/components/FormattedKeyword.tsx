@@ -42,10 +42,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
   // Skill tags: styled text only (no icon, no popover)
   if (type === 'skillTag') {
     return (
-      <span
-        className={cn('font-medium', className)}
-        style={{ color }}
-      >
+      <span className={cn('font-medium', className)} style={{ color }}>
         {applyStrikethrough(displayText)}
       </span>
     )
@@ -61,12 +58,14 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
       <PopoverTrigger asChild>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation() }}
+          onClick={(e) => {
+            e.stopPropagation()
+          }}
           className={cn(
             'items-center gap-1 font-medium',
             'cursor-pointer underline transition-opacity',
             'border-0 bg-transparent p-0 m-0',
-            className
+            className,
           )}
           style={{ color }}
         >
@@ -84,7 +83,7 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
         className={cn(
           'z-50 outline-hidden',
           'w-auto max-w-md bg-black/85 border-neutral-800',
-          '!animate-none data-[state=open]:!animate-none data-[state=closed]:!animate-none text-foreground rounded-none p-2'
+          '!animate-none data-[state=open]:!animate-none data-[state=closed]:!animate-none text-foreground rounded-none p-2',
         )}
       >
         <div className="space-y-1 max-w-[280px]">
@@ -95,14 +94,10 @@ export function FormattedKeyword({ keyword, className }: FormattedKeywordProps) 
               aria-hidden="true"
               className="w-6 h-6 shrink-0"
             />
-            <h4 className="font-bold text-lg">
-              {applyStrikethrough(displayText)}
-            </h4>
+            <h4 className="font-bold text-lg">{applyStrikethrough(displayText)}</h4>
           </div>
           {description && (
-            <p className="text-sm whitespace-pre-line px-2">
-              {applyStrikethrough(description)}
-            </p>
+            <p className="text-sm whitespace-pre-line px-2">{applyStrikethrough(description)}</p>
           )}
           {flavor && (
             <p

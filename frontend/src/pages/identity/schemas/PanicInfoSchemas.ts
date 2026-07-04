@@ -12,19 +12,18 @@ import { z } from 'zod'
 /**
  * PanicInfoEntry schema - individual panic type entry
  */
-export const PanicInfoEntrySchema = z.object({
-  name: z.string(),
-  lowMoraleDesc: z.string(),
-  panicDesc: z.string(),
-}).strict()
+export const PanicInfoEntrySchema = z
+  .object({
+    name: z.string(),
+    lowMoraleDesc: z.string(),
+    panicDesc: z.string(),
+  })
+  .strict()
 
 /**
  * PanicInfo schema - Record of panic entries keyed by ID string
  */
-export const PanicInfoSchema = z.record(
-  z.string(),
-  PanicInfoEntrySchema
-)
+export const PanicInfoSchema = z.record(z.string(), PanicInfoEntrySchema)
 
 // Type exports
 export type PanicInfoEntry = z.infer<typeof PanicInfoEntrySchema>

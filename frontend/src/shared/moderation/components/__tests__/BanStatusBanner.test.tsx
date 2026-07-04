@@ -58,10 +58,12 @@ describe('BanStatusBanner', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <BanStatusBanner />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
-    expect(screen.getByText(/Your account has been suspended. Reason: Violated terms of service/)).toBeDefined()
+    expect(
+      screen.getByText(/Your account has been suspended. Reason: Violated terms of service/),
+    ).toBeDefined()
     expect(screen.getByText(/Contact contact@dante-planner.com for assistance/)).toBeDefined()
   })
 
@@ -79,7 +81,7 @@ describe('BanStatusBanner', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <BanStatusBanner />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     expect(screen.getByText(/Your account has been suspended/)).toBeDefined()
@@ -100,7 +102,7 @@ describe('BanStatusBanner', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <BanStatusBanner />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     expect(screen.getByText(/Your account has been suspended. Reason: Spam detected/)).toBeDefined()
@@ -118,7 +120,7 @@ describe('BanStatusBanner', () => {
     const { container } = render(
       <QueryClientProvider client={queryClient}>
         <BanStatusBanner />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Banner should not render (container is empty)
@@ -142,7 +144,7 @@ describe('BanStatusBanner', () => {
     const { container } = render(
       <QueryClientProvider client={queryClient}>
         <BanStatusBanner />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     // Banner is visible
@@ -163,7 +165,7 @@ describe('BanStatusBanner', () => {
     const { container } = render(
       <QueryClientProvider client={queryClient}>
         <BanStatusBanner />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     expect(container.firstChild).toBeNull()

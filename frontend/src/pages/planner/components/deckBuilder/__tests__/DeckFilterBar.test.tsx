@@ -59,11 +59,7 @@ vi.mock('@/components/hooks/use-is-breakpoint', () => ({
  * Captures the store API from within the provider so tests can read/write
  * filter state without rendering the deck builder's heavy children.
  */
-function StoreCapture({
-  onReady,
-}: {
-  onReady: (api: StoreApi<PlannerEditorStore>) => void
-}) {
+function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>) => void }) {
   const api = usePlannerEditorStoreApi()
   onReady(api)
   return null
@@ -85,7 +81,7 @@ function renderWithStore(ui: ReactNode) {
         />
         {ui}
       </PlannerEditorStoreProvider>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 
   if (!storeApi) {

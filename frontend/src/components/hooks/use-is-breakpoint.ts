@@ -1,17 +1,15 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from 'react'
 
-type BreakpointMode = "min" | "max"
+type BreakpointMode = 'min' | 'max'
 
 function buildQuery(mode: BreakpointMode, breakpoint: number): string {
-  return mode === "min"
-    ? `(min-width: ${breakpoint}px)`
-    : `(max-width: ${breakpoint - 1}px)`
+  return mode === 'min' ? `(min-width: ${breakpoint}px)` : `(max-width: ${breakpoint - 1}px)`
 }
 
 function getInitialMatches(mode: BreakpointMode, breakpoint: number): boolean {
-  if (typeof window === "undefined") return false
+  if (typeof window === 'undefined') return false
   return window.matchMedia(buildQuery(mode, breakpoint)).matches
 }
 
@@ -22,21 +20,16 @@ function getInitialMatches(mode: BreakpointMode, breakpoint: number): boolean {
  *   useIsBreakpoint("max", 768)   // true when width < 768
  *   useIsBreakpoint("min", 1024)  // true when width >= 1024
  */
-export function useIsBreakpoint(
-  mode: BreakpointMode = "max",
-  breakpoint = 768
-) {
-  const [matches, setMatches] = useState<boolean>(() =>
-    getInitialMatches(mode, breakpoint)
-  )
+export function useIsBreakpoint(mode: BreakpointMode = 'max', breakpoint = 768) {
+  const [matches, setMatches] = useState<boolean>(() => getInitialMatches(mode, breakpoint))
 
   useEffect(() => {
     const mql = window.matchMedia(buildQuery(mode, breakpoint))
     const onChange = (e: MediaQueryListEvent) => setMatches(e.matches)
 
     setMatches(mql.matches)
-    mql.addEventListener("change", onChange)
-    return () => mql.removeEventListener("change", onChange)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
   }, [mode, breakpoint])
 
   return matches

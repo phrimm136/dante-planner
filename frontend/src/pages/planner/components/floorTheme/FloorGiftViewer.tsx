@@ -27,20 +27,20 @@ interface DecodedGift {
  * Individual gift item in floor viewer.
  * Memoized to prevent re-renders when other gifts are added/removed.
  */
-const FloorGiftItem = memo(function FloorGiftItem({
-  item,
-  enhancement,
-}: DecodedGift) {
-  return (
-    <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
-      <div>
-        <EGOGiftCard gift={item} enhancement={enhancement} />
-      </div>
-    </EGOGiftTooltip>
-  )
-}, (prev, next) => {
-  return prev.item.id === next.item.id && prev.enhancement === next.enhancement
-})
+const FloorGiftItem = memo(
+  function FloorGiftItem({ item, enhancement }: DecodedGift) {
+    return (
+      <EGOGiftTooltip giftId={item.id} enhancement={enhancement}>
+        <div>
+          <EGOGiftCard gift={item} enhancement={enhancement} />
+        </div>
+      </EGOGiftTooltip>
+    )
+  },
+  (prev, next) => {
+    return prev.item.id === next.item.id && prev.enhancement === next.enhancement
+  },
+)
 
 /**
  * Displays only the selected EGO gifts for a floor with their enhancement levels
@@ -57,7 +57,6 @@ export function FloorGiftViewer({
   const { spec, i18n } = useEGOGiftListData()
 
   // Breakpoint detection for scaling
-
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
@@ -84,7 +83,10 @@ export function FloorGiftViewer({
       }
     }
     const enhancementMap = new Map(gifts.map((g) => [g.item.id, g.enhancement]))
-    return sortEGOGifts(gifts.map((g) => g.item), 'tier-first').map((item) => ({
+    return sortEGOGifts(
+      gifts.map((g) => g.item),
+      'tier-first',
+    ).map((item) => ({
       item,
       enhancement: enhancementMap.get(item.id)!,
     }))
@@ -109,7 +111,7 @@ export function FloorGiftViewer({
           'translate-y-2 w-56 sm:w-full sm:h-100 p-4 rounded-lg border-2 border-dashed border-muted-foreground/50',
           'flex items-center justify-center',
           !readOnly && 'selectable',
-          className
+          className,
         )}
       >
         <span className="text-sm text-muted-foreground text-center">
@@ -130,7 +132,7 @@ export function FloorGiftViewer({
       className={cn(
         'w-full sm:min-h-104 rounded-lg text-left flex items-start',
         !readOnly && 'selectable',
-        className
+        className,
       )}
     >
       <div className="flex flex-row flex-wrap items-start gap-2 p-2">

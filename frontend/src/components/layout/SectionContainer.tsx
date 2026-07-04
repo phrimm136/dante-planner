@@ -35,19 +35,11 @@ export function SectionContainer({
       {/* Header Row */}
       <div className="flex items-center justify-between">
         <h2 className={SECTION_STYLES.TEXT.header}>{title}</h2>
-        {caption && (
-          <span className={SECTION_STYLES.TEXT.caption}>{caption}</span>
-        )}
+        {caption && <span className={SECTION_STYLES.TEXT.caption}>{caption}</span>}
       </div>
 
       {/* Content Container */}
-      {noContainer ? (
-        children
-      ) : (
-        <div className={SECTION_STYLES.container}>
-          {children}
-        </div>
-      )}
+      {noContainer ? children : <div className={SECTION_STYLES.container}>{children}</div>}
     </section>
   )
 }

@@ -15,8 +15,6 @@
  * const seasons = new Set([1, 2, 3])
  * calculateActiveFilterCount(sinners, seasons) // Returns 5
  */
-export function calculateActiveFilterCount(
-  ...filterSets: ReadonlySet<unknown>[]
-): number {
+export function calculateActiveFilterCount(...filterSets: ReadonlySet<unknown>[]): number {
   return filterSets.reduce((total, set) => total + set.size, 0)
 }

@@ -5,7 +5,7 @@ import { EGO_TYPES, type EgoType } from '@/shared/gameData'
  * Sort order: updateDate DESC -> rank DESC -> id DESC
  */
 export function sortByReleaseDate<T extends { updateDate: number; rank: number; id: string }>(
-  items: T[]
+  items: T[],
 ): T[] {
   return [...items].sort((a, b) => {
     if (a.updateDate !== b.updateDate) return b.updateDate - a.updateDate
@@ -22,7 +22,7 @@ export function sortByReleaseDate<T extends { updateDate: number; rank: number; 
  * Sinner extracted from id (format: 2XXYY where XX = sinner 01-12)
  */
 export function sortEGOByDate<T extends { updateDate: number; egoType: EgoType; id: string }>(
-  items: T[]
+  items: T[],
 ): T[] {
   return [...items].sort((a, b) => {
     // Primary: updateDate descending (newer first)

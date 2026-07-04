@@ -68,7 +68,7 @@ export const DEFAULT_UPLOAD_OPTIONS: Required<UploadOptions> = {
  */
 export function validateUploadFile(
   file: File,
-  options: UploadOptions = {}
+  options: UploadOptions = {},
 ): { valid: boolean; error?: string } {
   const opts = { ...DEFAULT_UPLOAD_OPTIONS, ...options }
 

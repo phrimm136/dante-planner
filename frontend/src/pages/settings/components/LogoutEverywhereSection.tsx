@@ -44,9 +44,7 @@ export function LogoutEverywhereSection() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">{t('settings.logoutEverywhere.title')}</h2>
-      <p className="text-sm text-muted-foreground">
-        {t('settings.logoutEverywhere.description')}
-      </p>
+      <p className="text-sm text-muted-foreground">{t('settings.logoutEverywhere.description')}</p>
       <Button variant="destructive" onClick={() => setDialogOpen(true)}>
         {t('settings.logoutEverywhere.button')}
       </Button>

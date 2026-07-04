@@ -26,7 +26,6 @@ export function EGOGiftObservationSelection({
 
   // Breakpoint detection for scaling
 
-
   // Merge spec and i18n into EGOGiftListItem array
   const gifts = useMemo<EGOGiftListItem[]>(
     () =>
@@ -40,7 +39,7 @@ export function EGOGiftObservationSelection({
         themePack: specData.themePack,
         maxEnhancement: specData.maxEnhancement,
       })),
-    [spec, i18n]
+    [spec, i18n],
   )
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
@@ -61,7 +60,9 @@ export function EGOGiftObservationSelection({
             <EGOGiftTooltip giftId={giftId} className="max-w-[320px]">
               <button
                 type="button"
-                onClick={() => { onGiftRemove(giftId); }}
+                onClick={() => {
+                  onGiftRemove(giftId)
+                }}
                 className="cursor-pointer"
               >
                 <EGOGiftCard gift={gift} isSelected={true} enableHoverHighlight />

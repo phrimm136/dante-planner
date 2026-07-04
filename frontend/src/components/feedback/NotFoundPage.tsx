@@ -12,12 +12,8 @@ export default function NotFoundPage() {
 
   return (
     <div className="space-y-6 text-center py-12">
-      <h1 className="text-2xl font-bold">
-        {t('errors.notFound.title')}
-      </h1>
-      <p className="text-muted-foreground">
-        {t('errors.notFound.message')}
-      </p>
+      <h1 className="text-2xl font-bold">{t('errors.notFound.title')}</h1>
+      <p className="text-muted-foreground">{t('errors.notFound.message')}</p>
       <Button asChild variant="outline">
         <Link to="/">{t('errors.notFound.goHome')}</Link>
       </Button>

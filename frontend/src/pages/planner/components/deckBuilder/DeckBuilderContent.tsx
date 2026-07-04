@@ -5,9 +5,18 @@ import { createDefaultDeckFilterState } from '../../stores/usePlannerEditorStore
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
 import { useSearchMappingsDeferred } from '@/shared/filter'
-import { usePlannerEditorStoreSafe, usePlannerEditorStoreApiSafe } from '../../stores/usePlannerEditorStore'
+import {
+  usePlannerEditorStoreSafe,
+  usePlannerEditorStoreApiSafe,
+} from '../../stores/usePlannerEditorStore'
 import { matchesDeckFilter } from '../../lib/deckFilter'
-import type { UptieTier, ThreadspinTier, DeckState, SinnerEquipment, DeckFilterState } from '../../types/DeckTypes'
+import type {
+  UptieTier,
+  ThreadspinTier,
+  DeckState,
+  SinnerEquipment,
+  DeckFilterState,
+} from '../../types/DeckTypes'
 import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
 import { getSinnerCodeFromId } from '@/lib/utils'
@@ -60,7 +69,16 @@ const BATCH_SIZE = 10
  * Used by both DeckBuilderPane (dialog) and DeckBuilderPage (standalone).
  */
 export function DeckBuilderContent(props: DeckBuilderContentProps) {
-  const { onImport, onExport, onResetOrder, equipmentOverride, deploymentOrderOverride, setEquipmentOverride, setDeploymentOrderOverride, onIdentityChange } = props
+  const {
+    onImport,
+    onExport,
+    onResetOrder,
+    equipmentOverride,
+    deploymentOrderOverride,
+    setEquipmentOverride,
+    setDeploymentOrderOverride,
+    onIdentityChange,
+  } = props
   const isDialogMode = props.mode === 'dialog'
   const open = isDialogMode ? props.open : true
 
@@ -80,7 +98,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   // Filter state: Use local state in tracker mode, store in editor mode
   const [localFilterState] = useState<DeckFilterState>(createDefaultDeckFilterState)
   const isOverrideMode = equipmentOverride !== undefined
-  const filterState = isOverrideMode ? localFilterState : (storeFilterState ?? createDefaultDeckFilterState())
+  const filterState = isOverrideMode
+    ? localFilterState
+    : (storeFilterState ?? createDefaultDeckFilterState())
 
   // Scroll position preservation
   const identityScrollRef = useRef<HTMLDivElement>(null)
@@ -138,7 +158,8 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     }
 
     // Take snapshot if: first time, just opened dialog, or entity mode changed
-    const needsSnapshot = sortingSnapshot === null ||
+    const needsSnapshot =
+      sortingSnapshot === null ||
       justOpened ||
       sortingSnapshot.entityMode !== filterState.entityMode
 
@@ -149,12 +170,18 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
         entityMode: filterState.entityMode,
       })
     }
-  }, [isDialogMode, open, filterState.entityMode, equippedIdentityIds, equippedEgoIds, sortingSnapshot])
+  }, [
+    isDialogMode,
+    open,
+    filterState.entityMode,
+    equippedIdentityIds,
+    equippedEgoIds,
+    sortingSnapshot,
+  ])
 
   // Extract snapshot sets for sorting (fall back to current equipped if no snapshot)
   const sortingIdentityIds = sortingSnapshot?.identityIds ?? equippedIdentityIds
   const sortingEgoIds = sortingSnapshot?.egoIds ?? equippedEgoIds
-
 
   // Inactive tab renders nothing until after first paint; latches true until close
   const [hasWarmedInactive, setHasWarmedInactive] = useState(false)
@@ -182,14 +209,17 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   useEffect(() => {
     if (!isActive || hasWarmedInactive) return
     const raf = requestAnimationFrame(() => {
-      const ric = (window as typeof window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
-        cancelIdleCallback?: (id: number) => void
-      }).requestIdleCallback
+      const ric = (
+        window as typeof window & {
+          requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
+          cancelIdleCallback?: (id: number) => void
+        }
+      ).requestIdleCallback
       if (ric) {
         const id = ric(() => setHasWarmedInactive(true), { timeout: 500 })
         return () => {
-          const cic = (window as typeof window & { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback
+          const cic = (window as typeof window & { cancelIdleCallback?: (id: number) => void })
+            .cancelIdleCallback
           if (cic) cic(id)
         }
       }
@@ -204,9 +234,8 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   useEffect(() => {
     if (savedScrollPositionRef.current === 0) return
 
-    const container = filterState.entityMode === 'identity'
-      ? identityScrollRef.current
-      : egoScrollRef.current
+    const container =
+      filterState.entityMode === 'identity' ? identityScrollRef.current : egoScrollRef.current
 
     if (container) {
       container.scrollTop = savedScrollPositionRef.current
@@ -360,34 +389,42 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   }, [isActive, totalIdentities, totalEgos, storeApi])
 
   // Construct deckState for StatusViewer
-  const deckState: DeckState = useMemo(() => ({
-    equipment,
-    deploymentOrder,
-    deploymentConfig: {
-      maxDeployed: DEFAULT_DEPLOYMENT_MAX,
-    },
-  }), [equipment, deploymentOrder])
+  const deckState: DeckState = useMemo(
+    () => ({
+      equipment,
+      deploymentOrder,
+      deploymentConfig: {
+        maxDeployed: DEFAULT_DEPLOYMENT_MAX,
+      },
+    }),
+    [equipment, deploymentOrder],
+  )
 
   // Create EGO lookup map
   const egoMap = useMemo(() => {
     const map: Record<string, EGOListItem> = {}
-    egos.forEach((e) => { map[e.id] = e })
+    egos.forEach((e) => {
+      map[e.id] = e
+    })
     return map
   }, [egos])
 
   // Handlers
-  const handleToggleDeploy = useCallback((sinnerIndex: number) => {
-    startTransition(() => {
-      const currentIndex = deploymentOrder.indexOf(sinnerIndex)
-      if (currentIndex >= 0) {
-        const newOrder = [...deploymentOrder]
-        newOrder.splice(currentIndex, 1)
-        setDeploymentOrder(newOrder)
-      } else {
-        setDeploymentOrder([...deploymentOrder, sinnerIndex])
-      }
-    })
-  }, [deploymentOrder, setDeploymentOrder])
+  const handleToggleDeploy = useCallback(
+    (sinnerIndex: number) => {
+      startTransition(() => {
+        const currentIndex = deploymentOrder.indexOf(sinnerIndex)
+        if (currentIndex >= 0) {
+          const newOrder = [...deploymentOrder]
+          newOrder.splice(currentIndex, 1)
+          setDeploymentOrder(newOrder)
+        } else {
+          setDeploymentOrder([...deploymentOrder, sinnerIndex])
+        }
+      })
+    },
+    [deploymentOrder, setDeploymentOrder],
+  )
 
   const handleEquipIdentity = (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
     // Save scroll position before state update
@@ -512,10 +549,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
             onToggleDeploy={handleToggleDeploy}
           />
         ) : (
-          <CompactEgoGrid
-            equipment={equipment}
-            egoAffinityMap={egoAffinityMap}
-          />
+          <CompactEgoGrid equipment={equipment} egoAffinityMap={egoAffinityMap} />
         )}
         {/* Status + Action Bar row */}
         <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">

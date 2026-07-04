@@ -10,7 +10,7 @@ import { EGO_GIFT_TIERS, EGO_GIFT_TIER_TAGS } from '@/shared/gameData'
 
 /** Map tier tag (TIER_1) to display tier (I) */
 const TIER_TAG_TO_DISPLAY: Record<string, EGOGiftTier> = Object.fromEntries(
-  EGO_GIFT_TIER_TAGS.map((tag, index) => [tag, EGO_GIFT_TIERS[index]])
+  EGO_GIFT_TIER_TAGS.map((tag, index) => [tag, EGO_GIFT_TIERS[index]]),
 )
 
 /**
@@ -54,7 +54,7 @@ export function deriveDifficulty(gift: {
  */
 export function matchesKeywordFilter(
   giftKeyword: string | null,
-  selectedKeywords: Set<string>
+  selectedKeywords: Set<string>,
 ): boolean {
   if (selectedKeywords.size === 0) return true
   if (giftKeyword === null) return selectedKeywords.has('None')
@@ -68,7 +68,7 @@ export function matchesKeywordFilter(
  */
 export function matchesDifficultyFilter(
   gift: { hardOnly?: boolean; extremeOnly?: boolean },
-  selectedDifficulties: Set<EGOGiftDifficulty>
+  selectedDifficulties: Set<EGOGiftDifficulty>,
 ): boolean {
   if (selectedDifficulties.size === 0) return true
   const difficulty = deriveDifficulty(gift)
@@ -82,7 +82,7 @@ export function matchesDifficultyFilter(
  */
 export function matchesTierFilter(
   tag: readonly string[],
-  selectedTiers: Set<EGOGiftTier>
+  selectedTiers: Set<EGOGiftTier>,
 ): boolean {
   if (selectedTiers.size === 0) return true
   const tier = extractTier(tag)
@@ -96,7 +96,7 @@ export function matchesTierFilter(
  */
 export function matchesThemePackFilter(
   themePacks: readonly (string | number)[] | undefined,
-  selectedThemePacks: Set<string>
+  selectedThemePacks: Set<string>,
 ): boolean {
   if (selectedThemePacks.size === 0) return true
   const giftThemePacks = themePacks ?? []
@@ -110,7 +110,7 @@ export function matchesThemePackFilter(
  */
 export function matchesAttributeTypeFilter(
   attributeType: string | undefined,
-  selectedAttributeTypes: Set<string>
+  selectedAttributeTypes: Set<string>,
 ): boolean {
   if (selectedAttributeTypes.size === 0) return true
   return attributeType !== undefined && selectedAttributeTypes.has(attributeType)
@@ -123,7 +123,7 @@ export function matchesAttributeTypeFilter(
  */
 export function matchesFusionedFilter(
   fusioned: boolean | undefined,
-  selectedFusioned: Set<string>
+  selectedFusioned: Set<string>,
 ): boolean {
   if (selectedFusioned.size === 0) return true
   const isFusioned = fusioned === true
@@ -139,7 +139,7 @@ export function matchesFusionedFilter(
  */
 export function matchesExclusiveFilter(
   themePacks: readonly string[] | undefined,
-  selectedExclusive: Set<string>
+  selectedExclusive: Set<string>,
 ): boolean {
   if (selectedExclusive.size === 0) return true
   const isExclusive = (themePacks ?? []).length > 0

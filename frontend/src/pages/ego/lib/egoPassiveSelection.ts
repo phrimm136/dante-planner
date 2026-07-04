@@ -47,10 +47,7 @@ export function getEffectiveEgoPassives(
  * effective set. A higher-tier passive that simply *replaces* an effective
  * one (same slot key) is hidden, not shown as a dimmed preview.
  */
-export function getLockedEgoPassives(
-  passiveList: string[][],
-  threadspinIndex: number,
-): string[] {
+export function getLockedEgoPassives(passiveList: string[][], threadspinIndex: number): string[] {
   const effective = getEffectiveEgoPassives(passiveList, threadspinIndex)
   const effectiveSet = new Set(effective)
   const seenSlots = new Set(effective.map(getEgoPassiveSlotKey))

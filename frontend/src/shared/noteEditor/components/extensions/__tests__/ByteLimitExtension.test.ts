@@ -70,9 +70,7 @@ describe('ByteLimitExtension', () => {
   it('allows shrinking edits even when the note is already over the limit', () => {
     const oversized = {
       type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(5000) }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(5000) }] }],
     }
     // Tiny cap; initial content bypasses the filter (set at construction).
     editor = makeEditor(5, oversized)
@@ -87,9 +85,7 @@ describe('ByteLimitExtension', () => {
   it('rejects a size-increasing edit when already over the limit', () => {
     const oversized = {
       type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(3000) }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(3000) }] }],
     }
     editor = makeEditor(5, oversized)
     const before = editor.getText().length
@@ -135,11 +131,7 @@ describe('ByteLimitExtension', () => {
     editor = makeEditor(emptyBytes + 50)
     // Same over-limit edit the plain test rejects — but tagged as a trusted
     // programmatic load, so filterTransaction must let it through.
-    editor
-      .chain()
-      .setMeta(BYTE_LIMIT_BYPASS, true)
-      .insertContent('a'.repeat(2000))
-      .run()
+    editor.chain().setMeta(BYTE_LIMIT_BYPASS, true).insertContent('a'.repeat(2000)).run()
 
     expect(editor.getText()).toContain('a'.repeat(2000))
     expect(noteSize(editor)).toBeGreaterThan(emptyBytes + 50)
@@ -152,16 +144,10 @@ describe('ByteLimitExtension', () => {
     editor = makeEditor(50)
     const oversized = {
       type: 'doc',
-      content: [
-        { type: 'paragraph', content: [{ type: 'text', text: 'X'.repeat(3000) }] },
-      ],
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'X'.repeat(3000) }] }],
     }
 
-    editor
-      .chain()
-      .setMeta(BYTE_LIMIT_BYPASS, true)
-      .setContent(oversized)
-      .run()
+    editor.chain().setMeta(BYTE_LIMIT_BYPASS, true).setContent(oversized).run()
 
     expect(editor.getText()).toContain('X'.repeat(3000))
     expect(noteSize(editor)).toBeGreaterThan(50)

@@ -17,7 +17,9 @@ interface EnhancementsPanelI18nProps {
  */
 function EnhancementsPanelContent({ giftId, maxEnhancement, costs }: EnhancementsPanelI18nProps) {
   const i18n = useEGOGiftDetailI18n(giftId)
-  return <AllEnhancementsPanel maxEnhancement={maxEnhancement} descriptions={i18n.descs} costs={costs} />
+  return (
+    <AllEnhancementsPanel maxEnhancement={maxEnhancement} descriptions={i18n.descs} costs={costs} />
+  )
 }
 
 /**
@@ -27,9 +29,17 @@ function EnhancementsPanelContent({ giftId, maxEnhancement, costs }: Enhancement
  * @example
  * <EnhancementsPanelI18n giftId={id} maxEnhancement={2} costs={costs} />
  */
-export function EnhancementsPanelI18n({ giftId, maxEnhancement, costs }: EnhancementsPanelI18nProps) {
+export function EnhancementsPanelI18n({
+  giftId,
+  maxEnhancement,
+  costs,
+}: EnhancementsPanelI18nProps) {
   return (
-    <Suspense fallback={<AllEnhancementsPanel maxEnhancement={maxEnhancement} descriptions={[]} costs={costs} />}>
+    <Suspense
+      fallback={
+        <AllEnhancementsPanel maxEnhancement={maxEnhancement} descriptions={[]} costs={costs} />
+      }
+    >
       <EnhancementsPanelContent giftId={giftId} maxEnhancement={maxEnhancement} costs={costs} />
     </Suspense>
   )

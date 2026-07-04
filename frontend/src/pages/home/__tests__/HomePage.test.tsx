@@ -67,7 +67,7 @@ describe('HomePage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -81,7 +81,7 @@ describe('HomePage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -95,7 +95,7 @@ describe('HomePage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -109,7 +109,7 @@ describe('HomePage', () => {
     const { container } = render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {

@@ -52,7 +52,7 @@ export function AutoSizeText({
     if (lineSpans.length === 0) return false
 
     let maxNaturalWidth = 0
-    lineSpans.forEach(span => {
+    lineSpans.forEach((span) => {
       maxNaturalWidth = Math.max(maxNaturalWidth, span.offsetWidth)
     })
 
@@ -94,14 +94,17 @@ export function AutoSizeText({
         rafRef.current = undefined
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, width, minFontSize, maxFontSize, JSON.stringify(style), measure])
 
   // Extract font-related styles for measurement (exclude fontSize as we control it)
   const { fontSize: _ignoredFontSize, ...fontStyles } = style || {}
 
   return (
-    <div className={className} style={{ width, position: 'relative', overflow: 'hidden', ...fontStyles }}>
+    <div
+      className={className}
+      style={{ width, position: 'relative', overflow: 'hidden', ...fontStyles }}
+    >
       {/* Hidden measurement container - uses same font styles at maxFontSize */}
       <div
         ref={measureRef}
@@ -115,11 +118,7 @@ export function AutoSizeText({
         }}
       >
         {lines.map((line, index) => (
-          <span
-            key={index}
-            data-measure
-            style={{ display: 'block', whiteSpace: 'nowrap' }}
-          >
+          <span key={index} data-measure style={{ display: 'block', whiteSpace: 'nowrap' }}>
             {line || '\u00A0'}
           </span>
         ))}
@@ -127,26 +126,32 @@ export function AutoSizeText({
 
       {/* Visible text with calculated fontSize */}
       {lines.length === 1 ? (
-        <span style={{
-          ...fontStyles,
-          fontSize: `${fontSize}px`,
-          lineHeight: lineHeightProp,
-          whiteSpace: shouldWrap ? 'normal' : 'nowrap',
-          wordBreak: shouldWrap ? 'keep-all' : undefined,
-        }}>
+        <span
+          style={{
+            ...fontStyles,
+            fontSize: `${fontSize}px`,
+            lineHeight: lineHeightProp,
+            whiteSpace: shouldWrap ? 'normal' : 'nowrap',
+            wordBreak: shouldWrap ? 'keep-all' : undefined,
+          }}
+        >
           {coloredContent ?? text}
         </span>
       ) : (
         <div style={{ ...fontStyles, fontSize: `${fontSize}px`, lineHeight: lineHeightProp }}>
-          {coloredContent ?? lines.map((line, index) => (
-            <span key={index} style={{
-              display: 'block',
-              whiteSpace: shouldWrap ? 'normal' : 'nowrap',
-              wordBreak: shouldWrap ? 'keep-all' : undefined,
-            }}>
-              {line}
-            </span>
-          ))}
+          {coloredContent ??
+            lines.map((line, index) => (
+              <span
+                key={index}
+                style={{
+                  display: 'block',
+                  whiteSpace: shouldWrap ? 'normal' : 'nowrap',
+                  wordBreak: shouldWrap ? 'keep-all' : undefined,
+                }}
+              >
+                {line}
+              </span>
+            ))}
         </div>
       )}
     </div>

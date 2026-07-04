@@ -41,11 +41,13 @@ import { usePlannerSyncAdapter } from '../usePlannerSyncAdapter'
 /**
  * Create a minimal mock SaveablePlanner for testing
  */
-function createMockPlanner(overrides: Partial<{
-  syncVersion: number
-  userId: string | null
-  plannerType: 'MIRROR_DUNGEON' | 'REFRACTED_RAILWAY'
-}> = {}): SaveablePlanner {
+function createMockPlanner(
+  overrides: Partial<{
+    syncVersion: number
+    userId: string | null
+    plannerType: 'MIRROR_DUNGEON' | 'REFRACTED_RAILWAY'
+  }> = {},
+): SaveablePlanner {
   return {
     metadata: {
       id: '550e8400-e29b-41d4-a716-446655440000',
@@ -84,7 +86,9 @@ function createMockPlanner(overrides: Partial<{
 /**
  * Create a mock server response
  */
-function createMockServerResponse(overrides: Partial<ServerPlannerResponse> = {}): ServerPlannerResponse {
+function createMockServerResponse(
+  overrides: Partial<ServerPlannerResponse> = {},
+): ServerPlannerResponse {
   return {
     id: '550e8400-e29b-41d4-a716-446655440000' as PlannerId,
     userId: 456,
@@ -148,7 +152,7 @@ describe('usePlannerSyncAdapter', () => {
           contentVersion: 6,
           plannerType: 'MIRROR_DUNGEON',
         }),
-        undefined
+        undefined,
       )
       expect(result.metadata.syncVersion).toBe(2)
     })
@@ -173,7 +177,7 @@ describe('usePlannerSyncAdapter', () => {
           title: 'Test Planner',
           syncVersion: 5,
         }),
-        undefined
+        undefined,
       )
       expect(result.metadata.syncVersion).toBe(6)
     })
@@ -194,7 +198,7 @@ describe('usePlannerSyncAdapter', () => {
       expect(mockUpsert).toHaveBeenCalledWith(
         '550e8400-e29b-41d4-a716-446655440000',
         expect.any(Object),
-        true // force=true passed
+        true, // force=true passed
       )
     })
 
@@ -211,7 +215,7 @@ describe('usePlannerSyncAdapter', () => {
 
       // Act & Assert
       await expect(adapter.syncToServer(mockPlanner)).rejects.toThrow(
-        'Server sync only supports MIRROR_DUNGEON planners'
+        'Server sync only supports MIRROR_DUNGEON planners',
       )
       expect(mockUpsert).not.toHaveBeenCalled()
     })
@@ -352,7 +356,7 @@ describe('usePlannerSyncAdapter', () => {
         expect.objectContaining({
           selectedKeywords: ['Burn', 'Slash', 'Pierce'],
         }),
-        undefined
+        undefined,
       )
     })
 
@@ -378,7 +382,7 @@ describe('usePlannerSyncAdapter', () => {
         expect.objectContaining({
           selectedKeywords: [],
         }),
-        undefined
+        undefined,
       )
     })
   })

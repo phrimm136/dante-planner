@@ -88,7 +88,7 @@ export function parseKeywords(text: string): ParsedSegment[] {
 export function resolveKeywordType(
   key: string,
   battleKeywords: KeywordResolutionContext['battleKeywords'],
-  skillTags: KeywordResolutionContext['skillTags']
+  skillTags: KeywordResolutionContext['skillTags'],
 ): KeywordType {
   if (Object.hasOwn(battleKeywords, key)) {
     return 'battleKeyword'
@@ -117,7 +117,7 @@ export function getKeywordColor(
   key: string,
   type: KeywordType,
   colorCodes: KeywordResolutionContext['colorCodes'],
-  battleKeywords: KeywordResolutionContext['battleKeywords']
+  battleKeywords: KeywordResolutionContext['battleKeywords'],
 ): string {
   if (type === 'battleKeyword') {
     const buffType = battleKeywords[key]?.buffType
@@ -162,10 +162,7 @@ export function getKeywordColor(
  * //   color: '#e30000'
  * // }
  */
-export function resolveKeyword(
-  key: string,
-  context: KeywordResolutionContext
-): ResolvedKeyword {
+export function resolveKeyword(key: string, context: KeywordResolutionContext): ResolvedKeyword {
   const { battleKeywords, skillTags, colorCodes } = context
 
   const type = resolveKeywordType(key, battleKeywords, skillTags)
@@ -226,11 +223,11 @@ export function resolveKeyword(
  */
 export function formatDescription(
   text: string,
-  context: KeywordResolutionContext
+  context: KeywordResolutionContext,
 ): ParsedSegment[] {
   const segments = parseKeywords(text)
 
-  return segments.map(segment => {
+  return segments.map((segment) => {
     if (segment.type === 'keyword') {
       return {
         ...segment,

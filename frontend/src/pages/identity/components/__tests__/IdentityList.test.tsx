@@ -14,8 +14,18 @@ import type { IdentityListItem } from '../../types/IdentityTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
-    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">{children}</a>
+  Link: ({
+    children,
+    to,
+    params,
+  }: {
+    children: React.ReactNode
+    to: string
+    params?: Record<string, string>
+  }) => (
+    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">
+      {children}
+    </a>
   ),
 }))
 
@@ -103,9 +113,7 @@ function createWrapper() {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <Suspense fallback={null}>
-          {children}
-        </Suspense>
+        <Suspense fallback={null}>{children}</Suspense>
       </QueryClientProvider>
     )
   }
@@ -137,7 +145,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       const cards = screen.getAllByRole('link')
@@ -159,7 +167,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(screen.getByText(/No Identities match/)).toBeInTheDocument()
@@ -182,7 +190,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Identities with AZURE: 10101 (CRIMSON+AZURE) and 10201 (AZURE)
@@ -207,7 +215,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only 10101 has BOTH CRIMSON and AZURE
@@ -232,7 +240,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Identities with PENETRATE: 10101 (SLASH+PENETRATE) and 10201 (PENETRATE)
@@ -257,7 +265,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only 10101 has BOTH SLASH and PENETRATE
@@ -282,7 +290,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Rank 3: 10101 and 10301
@@ -307,7 +315,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Season 1: 10101 and 10301
@@ -332,7 +340,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set(['SevenAssociation'])}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only 10201 has SevenAssociation
@@ -357,7 +365,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only 10101 has BOTH Burst and Combustion
@@ -382,7 +390,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Must have CRIMSON attribute AND SLASH attack type
@@ -415,7 +423,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery="rupture"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(screen.getByText(/No Identities match/)).toBeInTheDocument()
@@ -445,7 +453,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery="rupture"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Identities with Burst keyword: 10101 and 10301
@@ -457,9 +465,7 @@ describe('IdentityList', () => {
 
     it('search is case-insensitive', () => {
       vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['charge', ['Charge']],
-        ]),
+        keywordToValue: new Map([['charge', ['Charge']]]),
         unitKeywordToValue: new Map(),
       })
 
@@ -477,7 +483,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery="CHARGE"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
@@ -490,9 +496,7 @@ describe('IdentityList', () => {
   describe('combined filters and search', () => {
     it('applies both filters and search together', () => {
       vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['rupture', ['Burst']],
-        ]),
+        keywordToValue: new Map([['rupture', ['Burst']]]),
         unitKeywordToValue: new Map(),
       })
 
@@ -510,7 +514,7 @@ describe('IdentityList', () => {
           selectedUnitKeywords={new Set()}
           searchQuery="rupture"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Must have CRIMSON attribute AND match "rupture" search (Burst keyword)

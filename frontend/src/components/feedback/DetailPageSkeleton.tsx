@@ -287,13 +287,9 @@ export function DetailPageSkeleton({ preset }: DetailPageSkeletonProps) {
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       <div className="grid grid-cols-10 gap-6">
         {/* Left column: 4/10 on desktop, full width on mobile */}
-        <div className={cn('col-span-10 space-y-6', DETAIL_PAGE.COLUMN_LEFT)}>
-          {left}
-        </div>
+        <div className={cn('col-span-10 space-y-6', DETAIL_PAGE.COLUMN_LEFT)}>{left}</div>
         {/* Right column: 6/10 on desktop, full width on mobile */}
-        <div className={cn('col-span-10 space-y-6', DETAIL_PAGE.COLUMN_RIGHT)}>
-          {right}
-        </div>
+        <div className={cn('col-span-10 space-y-6', DETAIL_PAGE.COLUMN_RIGHT)}>{right}</div>
       </div>
     </div>
   )

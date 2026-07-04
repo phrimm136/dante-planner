@@ -47,7 +47,7 @@ export function BattleKeywordDropdown({
           label: i18n[keywordId]?.name ?? keywordId,
           count: entry[backlinkField].length,
         })),
-    [spec, i18n, backlinkField]
+    [spec, i18n, backlinkField],
   )
 
   return (

@@ -1,9 +1,16 @@
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
 import { ApiClient } from '@/lib/api'
-import { EpithetListResponseSchema, UserDeletionResponseSchema } from '../schemas/UserSettingsSchemas'
+import {
+  EpithetListResponseSchema,
+  UserDeletionResponseSchema,
+} from '../schemas/UserSettingsSchemas'
 import { UserSchema } from '@/shared/auth'
 import { authQueryKeys } from '@/shared/auth'
-import type { EpithetListResponse, UpdateUsernameEpithetRequest, UserDeletionResponse } from '../types/UserSettingsTypes'
+import type {
+  EpithetListResponse,
+  UpdateUsernameEpithetRequest,
+  UserDeletionResponse,
+} from '../types/UserSettingsTypes'
 import type { User } from '@/shared/auth'
 
 /**

@@ -40,10 +40,7 @@ export function EgoGrid({
 }: EgoGridProps) {
   const visibleCount = useDeckVisibleCount()
 
-  const displayEgos = useMemo(
-    () => sortedEgos.slice(0, visibleCount),
-    [sortedEgos, visibleCount]
-  )
+  const displayEgos = useMemo(() => sortedEgos.slice(0, visibleCount), [sortedEgos, visibleCount])
 
   return (
     <div className={isActive ? '' : 'hidden'}>
@@ -81,13 +78,15 @@ export function EgoGrid({
                       <EGOCard
                         ego={ego}
                         isSelected={isSelected}
-                        overlay={isSelected ? (
-                          <img
-                            src={getSelectedIndicatorPath()}
-                            alt="Selected"
-                            className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                          />
-                        ) : undefined}
+                        overlay={
+                          isSelected ? (
+                            <img
+                              src={getSelectedIndicatorPath()}
+                              alt="Selected"
+                              className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
+                            />
+                          ) : undefined
+                        }
                       />
                     </ScaledCardWrapper>
                   </TierLevelSelector>

@@ -51,18 +51,9 @@ export function ThemePackCard({
   const extremeStyle = { left: '-2.22%', top: '-1.3%', width: '104.06%', height: '101.37%' }
 
   return (
-    <div
-      className={cn(
-        'group relative w-60 aspect-[416/684]',
-        className
-      )}
-    >
+    <div className={cn('group relative w-60 aspect-[416/684]', className)}>
       {/* Layer 1: Theme pack image - static to define container size */}
-      <img
-        src={getThemePackImagePath(packId)}
-        alt={packName}
-        className="w-full h-auto"
-      />
+      <img src={getThemePackImagePath(packId)} alt={packName} className="w-full h-auto" />
 
       {/* Layer 2: Select highlight overlay */}
       {isSelected && (
@@ -87,13 +78,20 @@ export function ThemePackCard({
       {/* Layer 4: Theme pack name */}
       <div
         className="absolute left-0 right-0 flex justify-center items-center pointer-events-none leading-4"
-        style={{ top: !isExtreme ? '74.586%' : '81.960%', height: !isExtreme ? '8.544%' : '10.010%' }}
+        style={{
+          top: !isExtreme ? '74.586%' : '81.960%',
+          height: !isExtreme ? '8.544%' : '10.010%',
+        }}
       >
         <AutoSizeText
           text={specialName ? stripColorTags(specialName) : packName}
           width={!isExtreme ? 168 : 154}
           className="text-center"
-          style={{ ...displayStyle, ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }), filter: 'drop-shadow(1.2px 1.2px 0 rgba(0,0,0,0.9))' }}
+          style={{
+            ...displayStyle,
+            ...(!specialName && { color: `#${packEntry.themePackConfig.textColor}` }),
+            filter: 'drop-shadow(1.2px 1.2px 0 rgba(0,0,0,0.9))',
+          }}
           minFontSize={!isExtreme ? 15 : 15}
           maxFontSize={!isExtreme ? 24 : 24}
           lineHeight={lineHeight}

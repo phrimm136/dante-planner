@@ -75,9 +75,14 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
   if (planner.config.type !== 'MIRROR_DUNGEON') {
     return (
       <div className="space-y-6 text-center py-12">
-        <h1 className="text-2xl font-bold">{t('pages.detail.invalidType', 'Invalid Planner Type')}</h1>
+        <h1 className="text-2xl font-bold">
+          {t('pages.detail.invalidType', 'Invalid Planner Type')}
+        </h1>
         <p className="text-muted-foreground">
-          {t('pages.detail.invalidTypeMessage', 'This viewer only supports Mirror Dungeon planners.')}
+          {t(
+            'pages.detail.invalidTypeMessage',
+            'This viewer only supports Mirror Dungeon planners.',
+          )}
         </p>
         <p className="text-sm text-muted-foreground">
           {t('pages.detail.currentType', 'Current type')}: {planner.config.type}
@@ -118,10 +123,7 @@ function PlannerDetailContent({ plannerId }: { plannerId: string }) {
       <div className={SECTION_STYLES.SPACING.section}>
         {/* Toolbar: Search */}
         <div className="mb-4">
-          <MDPlannerToolbar
-            search={search}
-            onSearchChange={(q) => setFilters({ q, page: 0 })}
-          />
+          <MDPlannerToolbar search={search} onSearchChange={(q) => setFilters({ q, page: 0 })} />
         </div>
 
         {/* Category Filter Pills */}

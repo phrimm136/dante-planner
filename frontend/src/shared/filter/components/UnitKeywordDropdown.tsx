@@ -57,7 +57,7 @@ export function UnitKeywordDropdown({
           count: counts?.[unitKeyword],
         }
       }),
-    [unitKeywordsI18n, counts]
+    [unitKeywordsI18n, counts],
   )
 
   return (

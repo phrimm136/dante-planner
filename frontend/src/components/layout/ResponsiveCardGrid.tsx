@@ -49,7 +49,9 @@ export function ResponsiveCardGrid({
   className,
   mobileScale = 1,
 }: ResponsiveCardGridProps) {
-  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT,
+  )
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,10 +79,7 @@ export function ResponsiveCardGrid({
   }
 
   return (
-    <div
-      className={cn('grid', className)}
-      style={gridStyle}
-    >
+    <div className={cn('grid', className)} style={gridStyle}>
       {children}
     </div>
   )

@@ -19,10 +19,7 @@ import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { useEGOGiftDetailSpec } from '@/pages/egoGift'
 import { ENHANCEMENT_LEVELS } from '@/shared/gameData'
-import {
-  calculateEnhancementCost,
-  extractEGOGiftTier,
-} from '@/pages/egoGift'
+import { calculateEnhancementCost, extractEGOGiftTier } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 
 /**
@@ -46,9 +43,7 @@ function EGOGiftDetailContent() {
   const maxEnhancement = giftData.maxEnhancement
 
   // Calculate costs for all enhancement levels
-  const enhancementCosts = ENHANCEMENT_LEVELS.map((level) =>
-    calculateEnhancementCost(tier, level)
-  )
+  const enhancementCosts = ENHANCEMENT_LEVELS.map((level) => calculateEnhancementCost(tier, level))
 
   // Construct gift object for EGOGiftCard (spec data only for stable card display)
   // Type assertion needed: Zod validates tag has TIER_* at runtime,
@@ -68,12 +63,12 @@ function EGOGiftDetailContent() {
     <div className="space-y-4">
       {/* Header row: Card + Name (vertically centered) */}
       <div className="flex gap-4 items-center">
-        <EGOGiftCard
-          gift={gift}
-          enhancement={0}
-        />
+        <EGOGiftCard gift={gift} enhancement={0} />
         {/* Name with internal Suspense - does not suspend parent */}
-        <GiftNameI18n id={id} attributeType={giftData.attributeType as import('@/shared/gameData').EGOGiftAttributeType} />
+        <GiftNameI18n
+          id={id}
+          attributeType={giftData.attributeType as import('@/shared/gameData').EGOGiftAttributeType}
+        />
       </div>
 
       {/* Metadata panel - internal Suspense for theme pack names only */}
@@ -90,11 +85,7 @@ function EGOGiftDetailContent() {
   // Right column: All enhancement descriptions + recipe section
   const rightColumn = (
     <div className="space-y-4">
-      <EnhancementsPanelI18n
-        giftId={id}
-        maxEnhancement={maxEnhancement}
-        costs={enhancementCosts}
-      />
+      <EnhancementsPanelI18n giftId={id} maxEnhancement={maxEnhancement} costs={enhancementCosts} />
       {giftData.recipe && <RecipeSection recipe={giftData.recipe} />}
     </div>
   )

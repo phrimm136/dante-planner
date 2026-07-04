@@ -78,7 +78,9 @@ vi.mock('../usePlannerSaveAdapter', () => ({
 }))
 vi.mock('../usePlannerSync', () => ({ plannerQueryKeys: h.PLANNER_KEYS }))
 vi.mock('../useMDUserPlannersData', () => ({ userPlannersQueryKeys: h.USER_PLANNER_KEYS }))
-vi.mock('../../schemas/PlannerSchemas', () => ({ PlannerSseEventSchema: { parse: (x: unknown) => x } }))
+vi.mock('../../schemas/PlannerSchemas', () => ({
+  PlannerSseEventSchema: { parse: (x: unknown) => x },
+}))
 
 vi.mock('@/pages/settings', () => ({
   useUserSettingsQuery: () => ({ data: h.settingsRef.current, isLoading: false }),
@@ -102,9 +104,24 @@ vi.mock('@/lib/formatUsername', () => ({ formatUsername: (a: string, b: string) 
 
 import { useAppSse } from '../useAppSse'
 
-const SYNC_ON = { syncEnabled: true, notifyComments: false, notifyRecommendations: false, notifyNewPublications: false }
-const NOTIFY_ON = { syncEnabled: false, notifyComments: true, notifyRecommendations: false, notifyNewPublications: false }
-const ALL_OFF = { syncEnabled: false, notifyComments: false, notifyRecommendations: false, notifyNewPublications: false }
+const SYNC_ON = {
+  syncEnabled: true,
+  notifyComments: false,
+  notifyRecommendations: false,
+  notifyNewPublications: false,
+}
+const NOTIFY_ON = {
+  syncEnabled: false,
+  notifyComments: true,
+  notifyRecommendations: false,
+  notifyNewPublications: false,
+}
+const ALL_OFF = {
+  syncEnabled: false,
+  notifyComments: false,
+  notifyRecommendations: false,
+  notifyNewPublications: false,
+}
 const USER = { id: 'u1' }
 
 function createWrapper() {
@@ -243,7 +260,7 @@ describe('useAppSse — event → effect map', () => {
         type: 'COMMENT_RECEIVED',
         plannerId: 'p1',
         plannerTitle: 'My Plan',
-      })
+      }),
     )
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })

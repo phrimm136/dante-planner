@@ -153,7 +153,7 @@ export function PlannerDetailHeader({
     if (plannerId && publishedPlanner) {
       ownerNotificationMutation.mutate({
         plannerId,
-        enabled: !(publishedPlanner.ownerNotificationsEnabled),
+        enabled: !publishedPlanner.ownerNotificationsEnabled,
       })
     }
   }
@@ -207,7 +207,7 @@ export function PlannerDetailHeader({
         onError: () => {
           toast.error(t('plannerTakedown.failed', { ns: 'moderation' }))
         },
-      }
+      },
     )
   }
 
@@ -283,7 +283,11 @@ export function PlannerDetailHeader({
         })
 
         toast.success(
-          t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success')
+          t(
+            wasPublished
+              ? 'pages.plannerMD.publish.unpublishSuccess'
+              : 'pages.plannerMD.publish.success',
+          ),
         )
         setIsUploadingForPublish(false)
       },
@@ -320,7 +324,7 @@ export function PlannerDetailHeader({
         content,
         category,
         egoGiftSpec,
-        egoGiftI18n
+        egoGiftI18n,
       )
       if (!isValid) {
         const friendly = toUserFriendlyError(errors[0])
@@ -394,12 +398,14 @@ export function PlannerDetailHeader({
             <span
               className="px-2 py-0.5 text-sm font-medium rounded shrink-0"
               style={{
-                backgroundColor: publishedPlanner.category in MD_CATEGORY_COLORS
-                  ? MD_CATEGORY_COLORS[publishedPlanner.category as MDCategory]
-                  : undefined,
-                color: publishedPlanner.category in MD_CATEGORY_TEXT_COLORS
-                  ? MD_CATEGORY_TEXT_COLORS[publishedPlanner.category as MDCategory]
-                  : undefined,
+                backgroundColor:
+                  publishedPlanner.category in MD_CATEGORY_COLORS
+                    ? MD_CATEGORY_COLORS[publishedPlanner.category as MDCategory]
+                    : undefined,
+                color:
+                  publishedPlanner.category in MD_CATEGORY_TEXT_COLORS
+                    ? MD_CATEGORY_TEXT_COLORS[publishedPlanner.category as MDCategory]
+                    : undefined,
               }}
             >
               {t(`pages.plannerList.mdCategory.${publishedPlanner.category}`)}
@@ -423,7 +429,7 @@ export function PlannerDetailHeader({
               {formatUsername(
                 publishedPlanner.authorUsernameEpithet,
                 publishedPlanner.authorUsernameSuffix,
-                i18n.language
+                i18n.language,
               )}
             </span>
             <span className="text-sm text-muted-foreground hidden lg:inline">
@@ -437,17 +443,21 @@ export function PlannerDetailHeader({
           <h1 className="text-2xl font-bold">{publishedPlanner.title || t('untitled')}</h1>
 
           <div className="flex items-center gap-1 shrink-0">
-            {isOwner && savedPlannerData && savedPlannerData.metadata.contentVersion < config.mdCurrentVersion && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowApplyLatestMirrorDialog(true)}
-                disabled={isApplyingLatestMirror}
-              >
-                <ChevronsRight className="size-4" />
-                <span className="hidden lg:inline">{t('pages.plannerMD.applyLatestMirror.button')}</span>
-              </Button>
-            )}
+            {isOwner &&
+              savedPlannerData &&
+              savedPlannerData.metadata.contentVersion < config.mdCurrentVersion && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApplyLatestMirrorDialog(true)}
+                  disabled={isApplyingLatestMirror}
+                >
+                  <ChevronsRight className="size-4" />
+                  <span className="hidden lg:inline">
+                    {t('pages.plannerMD.applyLatestMirror.button')}
+                  </span>
+                </Button>
+              )}
             {isOwner && onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <Edit className="size-4" />
@@ -462,7 +472,9 @@ export function PlannerDetailHeader({
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="size-4" />
-                <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.delete')}</span>
+                <span className="hidden lg:inline">
+                  {t('pages.plannerList.contextMenu.delete')}
+                </span>
               </Button>
             )}
             {isOwner && (
@@ -512,7 +524,9 @@ export function PlannerDetailHeader({
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="size-4" />
-                <span className="hidden lg:inline">{t('plannerTakedown.button', { ns: 'moderation' })}</span>
+                <span className="hidden lg:inline">
+                  {t('plannerTakedown.button', { ns: 'moderation' })}
+                </span>
               </Button>
             )}
           </div>
@@ -557,7 +571,9 @@ export function PlannerDetailHeader({
         <ApplyLatestMirrorDialog
           open={showApplyLatestMirrorDialog}
           onOpenChange={setShowApplyLatestMirrorDialog}
-          onConfirm={() => { void handleApplyLatestMirror() }}
+          onConfirm={() => {
+            void handleApplyLatestMirror()
+          }}
           isPending={isApplyingLatestMirror}
         />
 
@@ -576,7 +592,8 @@ export function PlannerDetailHeader({
   // Personal variant
   if (savedPlanner) {
     // Determine detailed status (same logic as PersonalPlannerCard)
-    let status: 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges' = 'draft'
+    let status: 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges' =
+      'draft'
     let statusBadgeVariant: 'default' | 'secondary' | 'outline' | 'destructive' = 'outline'
 
     if (savedPlanner.metadata.published) {
@@ -635,12 +652,14 @@ export function PlannerDetailHeader({
             <span
               className="px-2 py-0.5 text-sm font-medium rounded shrink-0"
               style={{
-                backgroundColor: savedPlanner.config.category in MD_CATEGORY_COLORS
-                  ? MD_CATEGORY_COLORS[savedPlanner.config.category as MDCategory]
-                  : undefined,
-                color: savedPlanner.config.category in MD_CATEGORY_TEXT_COLORS
-                  ? MD_CATEGORY_TEXT_COLORS[savedPlanner.config.category as MDCategory]
-                  : undefined,
+                backgroundColor:
+                  savedPlanner.config.category in MD_CATEGORY_COLORS
+                    ? MD_CATEGORY_COLORS[savedPlanner.config.category as MDCategory]
+                    : undefined,
+                color:
+                  savedPlanner.config.category in MD_CATEGORY_TEXT_COLORS
+                    ? MD_CATEGORY_TEXT_COLORS[savedPlanner.config.category as MDCategory]
+                    : undefined,
               }}
             >
               {t(`pages.plannerList.mdCategory.${savedPlanner.config.category}`)}
@@ -672,9 +691,7 @@ export function PlannerDetailHeader({
 
         {/* Row 2: Title | Actions */}
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold">
-            {savedPlanner.metadata.title || t('untitled')}
-          </h1>
+          <h1 className="text-2xl font-bold">{savedPlanner.metadata.title || t('untitled')}</h1>
 
           <div className="flex items-center gap-1 shrink-0">
             {savedPlanner.metadata.contentVersion < config.mdCurrentVersion && (
@@ -685,7 +702,9 @@ export function PlannerDetailHeader({
                 disabled={isApplyingLatestMirror}
               >
                 <ChevronsRight className="size-4" />
-                <span className="hidden lg:inline">{t('pages.plannerMD.applyLatestMirror.button')}</span>
+                <span className="hidden lg:inline">
+                  {t('pages.plannerMD.applyLatestMirror.button')}
+                </span>
               </Button>
             )}
             {onEdit && (
@@ -704,7 +723,11 @@ export function PlannerDetailHeader({
                 <Upload className="size-4" />
                 <span className="hidden lg:inline">
                   {publishMutation.isPending
-                    ? t(savedPlanner.metadata.published ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
+                    ? t(
+                        savedPlanner.metadata.published
+                          ? 'pages.plannerMD.publish.unpublishing'
+                          : 'pages.plannerMD.publish.publishing',
+                      )
                     : savedPlanner.metadata.published
                       ? t('pages.plannerMD.publish.unpublish')
                       : t('pages.plannerMD.publish.button')}
@@ -737,7 +760,9 @@ export function PlannerDetailHeader({
         <ApplyLatestMirrorDialog
           open={showApplyLatestMirrorDialog}
           onOpenChange={setShowApplyLatestMirrorDialog}
-          onConfirm={() => { void handleApplyLatestMirror() }}
+          onConfirm={() => {
+            void handleApplyLatestMirror()
+          }}
           isPending={isApplyingLatestMirror}
         />
 

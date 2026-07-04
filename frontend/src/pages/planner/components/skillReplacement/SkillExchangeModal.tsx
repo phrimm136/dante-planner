@@ -1,10 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { SkillEADisplay } from './SkillEADisplay'
 import { SkillExchangePane } from './SkillExchangePane'
@@ -57,7 +52,6 @@ export function SkillExchangeModal({
 
   // Breakpoint detection for scaling
 
-
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   const handleExchange = (source: OffensiveSkillSlot, target: OffensiveSkillSlot) => {
@@ -73,21 +67,25 @@ export function SkillExchangeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-0.5rem)] sm:max-w-[400px] lg:max-w-[480px] max-h-[90vh] flex flex-col" showCloseButton={false}>
+      <DialogContent
+        className="max-w-[calc(100%-0.5rem)] sm:max-w-[400px] lg:max-w-[480px] max-h-[90vh] flex flex-col"
+        showCloseButton={false}
+      >
         <DialogHeader className="shrink-0 border-b border-border pb-4">
           <div className="flex items-center gap-4 flex-wrap">
             <DialogTitle>
               {t('pages.plannerMD.skillReplacement.title')} - {t(`sinnerNames:${sinnerName}`)}
             </DialogTitle>
             <div className="flex gap-2 ml-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-              >
+              <Button variant="outline" size="sm" onClick={handleReset}>
                 {t('common:reset')}
               </Button>
-              <Button size="sm" onClick={() => { onOpenChange(false); }}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  onOpenChange(false)
+                }}
+              >
                 {t('common:done')}
               </Button>
             </div>
@@ -98,62 +96,64 @@ export function SkillExchangeModal({
           <div className="flex flex-col gap-4">
             {/* Top: Current EA display */}
             <div className="flex flex-col gap-2">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {t('pages.plannerMD.skillReplacement.currentSkills')}
-            </h3>
-            <div className="flex gap-3 justify-center">
-              {OFFENSIVE_SKILL_SLOTS.map((slot) => (
-                <ScaledCardWrapper
-                  key={slot}
-                  mobileScale={mobileScale}
-                  cardWidth={CARD_GRID.WIDTH.SKILL_IMAGE}
-                  cardHeight={CARD_GRID.HEIGHT.SKILL_IMAGE}
-                >
-                  <SkillEADisplay
-                    identityId={identityId}
-                    skillSlot={slot}
-                    attributeType={skillInfos[slot].attributeType}
-                    atkType={skillInfos[slot].atkType}
-                    ea={skillEA[slot]}
-                    currentEA={currentEA?.[slot]}
-                  />
-                </ScaledCardWrapper>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom: Exchange options */}
-          <div className="flex flex-col gap-4">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              {t('pages.plannerMD.skillReplacement.exchangeOptions')}
-            </h3>
-            <div className="flex flex-col gap-2 items-center">
-              {EXCHANGE_PAIRS.map(([source, target]) => {
-                const ea = currentEA || skillEA
-                return (
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {t('pages.plannerMD.skillReplacement.currentSkills')}
+              </h3>
+              <div className="flex gap-3 justify-center">
+                {OFFENSIVE_SKILL_SLOTS.map((slot) => (
                   <ScaledCardWrapper
-                    key={`${source}-${target}`}
+                    key={slot}
                     mobileScale={mobileScale}
-                    cardWidth={CARD_GRID.WIDTH.SKILL_EXCHANGE}
-                    cardHeight={CARD_GRID.HEIGHT.SKILL_EXCHANGE}
+                    cardWidth={CARD_GRID.WIDTH.SKILL_IMAGE}
+                    cardHeight={CARD_GRID.HEIGHT.SKILL_IMAGE}
                   >
-                    <SkillExchangePane
+                    <SkillEADisplay
                       identityId={identityId}
-                      sourceSlot={source}
-                      targetSlot={target}
-                      sourceAttributeType={skillInfos[source].attributeType}
-                      targetAttributeType={skillInfos[target].attributeType}
-                      sourceAtkType={skillInfos[source].atkType}
-                      targetAtkType={skillInfos[target].atkType}
-                      sourceEA={ea[source]}
-                      onClick={() => { handleExchange(source, target); }}
+                      skillSlot={slot}
+                      attributeType={skillInfos[slot].attributeType}
+                      atkType={skillInfos[slot].atkType}
+                      ea={skillEA[slot]}
+                      currentEA={currentEA?.[slot]}
                     />
                   </ScaledCardWrapper>
-                )
-              })}
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom: Exchange options */}
+            <div className="flex flex-col gap-4">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {t('pages.plannerMD.skillReplacement.exchangeOptions')}
+              </h3>
+              <div className="flex flex-col gap-2 items-center">
+                {EXCHANGE_PAIRS.map(([source, target]) => {
+                  const ea = currentEA || skillEA
+                  return (
+                    <ScaledCardWrapper
+                      key={`${source}-${target}`}
+                      mobileScale={mobileScale}
+                      cardWidth={CARD_GRID.WIDTH.SKILL_EXCHANGE}
+                      cardHeight={CARD_GRID.HEIGHT.SKILL_EXCHANGE}
+                    >
+                      <SkillExchangePane
+                        identityId={identityId}
+                        sourceSlot={source}
+                        targetSlot={target}
+                        sourceAttributeType={skillInfos[source].attributeType}
+                        targetAttributeType={skillInfos[target].attributeType}
+                        sourceAtkType={skillInfos[source].atkType}
+                        targetAtkType={skillInfos[target].atkType}
+                        sourceEA={ea[source]}
+                        onClick={() => {
+                          handleExchange(source, target)
+                        }}
+                      />
+                    </ScaledCardWrapper>
+                  )
+                })}
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </DialogContent>
     </Dialog>

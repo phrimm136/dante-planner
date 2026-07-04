@@ -32,7 +32,11 @@ const mockAnnouncements: Announcement[] = [
 describe('AnnouncementSection', () => {
   it('UT5: renders announcement title and formatted date', () => {
     render(
-      <AnnouncementSection announcements={mockAnnouncements} onViewAll={vi.fn()} onOpenAnnouncement={vi.fn()} />
+      <AnnouncementSection
+        announcements={mockAnnouncements}
+        onViewAll={vi.fn()}
+        onOpenAnnouncement={vi.fn()}
+      />,
     )
     expect(screen.getByText('Latest Update')).toBeInTheDocument()
     expect(screen.getByText('Feb 20, 2026')).toBeInTheDocument()
@@ -42,7 +46,11 @@ describe('AnnouncementSection', () => {
     const onViewAll = vi.fn()
     const user = userEvent.setup()
     render(
-      <AnnouncementSection announcements={mockAnnouncements} onViewAll={onViewAll} onOpenAnnouncement={vi.fn()} />
+      <AnnouncementSection
+        announcements={mockAnnouncements}
+        onViewAll={onViewAll}
+        onOpenAnnouncement={vi.fn()}
+      />,
     )
 
     await user.click(screen.getByRole('button', { name: 'announcements.viewAll' }))
@@ -55,7 +63,11 @@ describe('AnnouncementSection', () => {
     const user = userEvent.setup()
 
     render(
-      <AnnouncementSection announcements={mockAnnouncements} onViewAll={onViewAll} onOpenAnnouncement={onOpenAnnouncement} />
+      <AnnouncementSection
+        announcements={mockAnnouncements}
+        onViewAll={onViewAll}
+        onOpenAnnouncement={onOpenAnnouncement}
+      />,
     )
 
     await user.click(screen.getByRole('button', { name: 'Latest Update' }))
@@ -65,7 +77,11 @@ describe('AnnouncementSection', () => {
 
   it('renders section title from i18n', () => {
     render(
-      <AnnouncementSection announcements={mockAnnouncements} onViewAll={vi.fn()} onOpenAnnouncement={vi.fn()} />
+      <AnnouncementSection
+        announcements={mockAnnouncements}
+        onViewAll={vi.fn()}
+        onOpenAnnouncement={vi.fn()}
+      />,
     )
     expect(screen.getByText('announcements.title')).toBeInTheDocument()
   })

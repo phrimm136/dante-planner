@@ -63,8 +63,6 @@ describe('AbEventSpecListSchema', () => {
   })
 })
 
-
-
 describe('AbEventDataSchema', () => {
   it('accepts action event with choices', () => {
     const result = AbEventDataSchema.safeParse({
@@ -105,13 +103,20 @@ describe('AbEventDataSchema', () => {
             {
               outcome: 'SUCCESS',
               effects: [
-                { effect: 'GetConfirmedEgogift', reward: { type: 'EGO_GIFT', id: 9002, num: 1, prob: 1.0 } },
+                {
+                  effect: 'GetConfirmedEgogift',
+                  reward: { type: 'EGO_GIFT', id: 9002, num: 1, prob: 1.0 },
+                },
               ],
             },
             {
               outcome: 'FAILURE',
               effects: [
-                { effect: 'LoseHpMpDifferentAmount_12_8', target: 'ChosenPersonality', condition: 'FAILURE' },
+                {
+                  effect: 'LoseHpMpDifferentAmount_12_8',
+                  target: 'ChosenPersonality',
+                  condition: 'FAILURE',
+                },
               ],
             },
           ],
@@ -142,13 +147,18 @@ describe('AbEventDataSchema', () => {
     const result = AbEventDataSchema.safeParse({
       canSkip: false,
       eventType: 'EVENT',
-      choices: [{
-        index: 0,
-        conditionalResults: [
-          { condition: 'MpAverage_Under0', effects: [] },
-          { condition: 'MpAverage_NotLessThan0', effects: [{ effect: 'RecoverHpMpSameAmount_15', target: 'EveryAlly' }] },
-        ],
-      }],
+      choices: [
+        {
+          index: 0,
+          conditionalResults: [
+            { condition: 'MpAverage_Under0', effects: [] },
+            {
+              condition: 'MpAverage_NotLessThan0',
+              effects: [{ effect: 'RecoverHpMpSameAmount_15', target: 'EveryAlly' }],
+            },
+          ],
+        },
+      ],
     })
     expect(result.success).toBe(true)
   })
@@ -157,13 +167,15 @@ describe('AbEventDataSchema', () => {
     const result = AbEventDataSchema.safeParse({
       canSkip: false,
       eventType: 'EVENT',
-      choices: [{
-        index: 0,
-        conditionalResults: [
-          { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
-          { effects: [{ effect: 'RecoverHpMpSameAmount_25' }] },
-        ],
-      }],
+      choices: [
+        {
+          index: 0,
+          conditionalResults: [
+            { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
+            { effects: [{ effect: 'RecoverHpMpSameAmount_25' }] },
+          ],
+        },
+      ],
     })
     expect(result.success).toBe(true)
   })
@@ -172,13 +184,15 @@ describe('AbEventDataSchema', () => {
     const result = AbEventDataSchema.safeParse({
       canSkip: false,
       eventType: 'EVENT',
-      choices: [{
-        index: 0,
-        probabilityResults: [
-          { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
-          { probability: 0.5, effects: [] },
-        ],
-      }],
+      choices: [
+        {
+          index: 0,
+          probabilityResults: [
+            { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
+            { probability: 0.5, effects: [] },
+          ],
+        },
+      ],
     })
     expect(result.success).toBe(true)
   })
@@ -191,14 +205,20 @@ describe('AbEventDataSchema', () => {
         '1': {
           canSkip: false,
           judgement: { successThreshold: 8, bestThreshold: 16, affinities: ['SCARLET'] },
-          results: [{
-            outcome: 'FAILURE',
-            effects: [{ effect: 'LoseHpOnly_5' }],
-            subResults: [
-              { condition: 'Failed_Under3', effects: [{ effect: 'LoseHpOnly_5' }], nextEventId: 901020 },
-              { condition: 'Failed_NotLessThan3', effects: [{ effect: 'LoseHpOnly_10' }] },
-            ],
-          }],
+          results: [
+            {
+              outcome: 'FAILURE',
+              effects: [{ effect: 'LoseHpOnly_5' }],
+              subResults: [
+                {
+                  condition: 'Failed_Under3',
+                  effects: [{ effect: 'LoseHpOnly_5' }],
+                  nextEventId: 901020,
+                },
+                { condition: 'Failed_NotLessThan3', effects: [{ effect: 'LoseHpOnly_10' }] },
+              ],
+            },
+          ],
         },
       },
     })
@@ -213,14 +233,16 @@ describe('AbEventDataSchema', () => {
         '1': {
           canSkip: false,
           judgement: { successThreshold: 8, bestThreshold: 16, affinities: ['SCARLET'] },
-          results: [{
-            outcome: 'SUCCESS',
-            effects: [],
-            subResults: [
-              { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
-              { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
-            ],
-          }],
+          results: [
+            {
+              outcome: 'SUCCESS',
+              effects: [],
+              subResults: [
+                { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
+                { probability: 0.5, effects: [{ effect: 'GetConfirmedEgogift' }] },
+              ],
+            },
+          ],
         },
       },
     })

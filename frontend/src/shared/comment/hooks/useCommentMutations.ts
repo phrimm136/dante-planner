@@ -63,18 +63,15 @@ export function useEditComment() {
     },
     // Direct cache update - update content and mark as updated
     onSuccess: (_, { commentId, content, plannerId }, queryClient) => {
-      queryClient.setQueryData<CommentNode[]>(
-        commentsQueryKeys.list(plannerId),
-        (oldTree) => {
-          if (!oldTree) return oldTree
-          return updateCommentInTree(oldTree, commentId, (node) => ({
-            ...node,
-            content,
-            isUpdated: true,
-            updatedAt: new Date().toISOString(),
-          }))
-        }
-      )
+      queryClient.setQueryData<CommentNode[]>(commentsQueryKeys.list(plannerId), (oldTree) => {
+        if (!oldTree) return oldTree
+        return updateCommentInTree(oldTree, commentId, (node) => ({
+          ...node,
+          content,
+          isUpdated: true,
+          updatedAt: new Date().toISOString(),
+        }))
+      })
     },
     errorLogPrefix: 'Edit comment failed',
     errorToastKey: 'comments.toast.editFailed',
@@ -121,17 +118,14 @@ export function useUpvoteComment() {
     },
     // Direct cache update - increment upvotes and mark as upvoted
     onSuccess: (_, { commentId, plannerId }, queryClient) => {
-      queryClient.setQueryData<CommentNode[]>(
-        commentsQueryKeys.list(plannerId),
-        (oldTree) => {
-          if (!oldTree) return oldTree
-          return updateCommentInTree(oldTree, commentId, (node) => ({
-            ...node,
-            upvoteCount: node.upvoteCount + 1,
-            hasUpvoted: true,
-          }))
-        }
-      )
+      queryClient.setQueryData<CommentNode[]>(commentsQueryKeys.list(plannerId), (oldTree) => {
+        if (!oldTree) return oldTree
+        return updateCommentInTree(oldTree, commentId, (node) => ({
+          ...node,
+          upvoteCount: node.upvoteCount + 1,
+          hasUpvoted: true,
+        }))
+      })
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
@@ -195,7 +189,7 @@ interface ToggleNotificationsInput {
 function updateCommentInTree(
   nodes: CommentNode[],
   targetId: string,
-  updater: (node: CommentNode) => CommentNode
+  updater: (node: CommentNode) => CommentNode,
 ): CommentNode[] {
   return nodes.map((node) => {
     if (node.id === targetId) {
@@ -215,16 +209,13 @@ export function useToggleCommentNotifications() {
     },
     // Direct cache update instead of full refetch
     onSuccess: (_, { commentId, enabled, plannerId }, queryClient) => {
-      queryClient.setQueryData<CommentNode[]>(
-        commentsQueryKeys.list(plannerId),
-        (oldTree) => {
-          if (!oldTree) return oldTree
-          return updateCommentInTree(oldTree, commentId, (node) => ({
-            ...node,
-            authorNotificationsEnabled: enabled,
-          }))
-        }
-      )
+      queryClient.setQueryData<CommentNode[]>(commentsQueryKeys.list(plannerId), (oldTree) => {
+        if (!oldTree) return oldTree
+        return updateCommentInTree(oldTree, commentId, (node) => ({
+          ...node,
+          authorNotificationsEnabled: enabled,
+        }))
+      })
     },
     errorLogPrefix: 'Toggle notifications failed',
     errorToastKey: 'comments.toast.notificationUpdateFailed',

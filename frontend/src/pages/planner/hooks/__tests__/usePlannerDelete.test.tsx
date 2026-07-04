@@ -70,7 +70,7 @@ describe('usePlannerDelete', () => {
       })
 
       expect(ApiClient.delete).toHaveBeenCalledWith(
-        '/api/planner/md/123e4567-e89b-12d3-a456-426614174000'
+        '/api/planner/md/123e4567-e89b-12d3-a456-426614174000',
       )
     })
 

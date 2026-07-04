@@ -18,7 +18,10 @@ import { ExtractionCalculator } from '@/pages/extraction'
 /**
  * Error fallback component for calculator errors
  */
-function ErrorFallback({ error, resetErrorBoundary }: {
+function ErrorFallback({
+  error,
+  resetErrorBoundary,
+}: {
   error: unknown
   resetErrorBoundary: (...args: unknown[]) => void
 }) {
@@ -27,9 +30,7 @@ function ErrorFallback({ error, resetErrorBoundary }: {
 
   return (
     <div className="bg-destructive/10 border border-destructive rounded-md text-center">
-      <h2 className="text-lg font-semibold text-destructive mb-2">
-        {t('errors.generic.title')}
-      </h2>
+      <h2 className="text-lg font-semibold text-destructive mb-2">{t('errors.generic.title')}</h2>
       <p className="text-muted-foreground mb-4">{errorMessage}</p>
       <button
         onClick={resetErrorBoundary}
@@ -49,9 +50,7 @@ function LoadingFallback() {
 
   return (
     <div className="bg-muted border border-border rounded-md">
-      <div className="text-center text-muted-foreground py-8">
-        {t('common:loading')}
-      </div>
+      <div className="text-center text-muted-foreground py-8">{t('common:loading')}</div>
     </div>
   )
 }

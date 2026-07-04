@@ -10,7 +10,11 @@ import { useBattleKeywords } from './useBattleKeywords'
 import { useSkillTagI18n } from '@/shared/skill'
 import { useColorCodes } from './useColorCodes'
 import { formatDescription, parseKeywords, resolveKeyword } from '../lib/keywordFormatter'
-import type { ParsedSegment, KeywordResolutionContext, ResolvedKeyword } from '../types/KeywordTypes'
+import type {
+  ParsedSegment,
+  KeywordResolutionContext,
+  ResolvedKeyword,
+} from '../types/KeywordTypes'
 
 /**
  * Hook that provides formatter functions for skill/passive description keywords.

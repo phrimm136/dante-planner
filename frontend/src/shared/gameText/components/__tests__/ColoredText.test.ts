@@ -25,7 +25,7 @@ describe('parseColorTags', () => {
 
   it('handles nested color tags', () => {
     const result = parseColorTags(
-      '<color=#ff0000>outer <color=#00ff00>inner</color> still outer</color>'
+      '<color=#ff0000>outer <color=#00ff00>inner</color> still outer</color>',
     )
     expect(result).toHaveLength(1)
     const outer = result[0] as React.ReactElement
@@ -33,20 +33,14 @@ describe('parseColorTags', () => {
   })
 
   it('handles multiple sequential color tags', () => {
-    const result = parseColorTags(
-      '<color=#ff0000>red</color> <color=#00ff00>green</color>'
-    )
+    const result = parseColorTags('<color=#ff0000>red</color> <color=#00ff00>green</color>')
     expect(result).toHaveLength(3)
   })
 
   it('sanitizes malformed </color=#hex> close tags', () => {
-    const result = parseColorTags(
-      '<color=#ff0000>text</color> </color=#ebcaa2>more</color>'
-    )
+    const result = parseColorTags('<color=#ff0000>text</color> </color=#ebcaa2>more</color>')
     // Should not crash or produce raw tag text
-    const flatText = result.map((r) =>
-      typeof r === 'string' ? r : ''
-    ).join('')
+    const flatText = result.map((r) => (typeof r === 'string' ? r : '')).join('')
     expect(flatText).not.toContain('</color=')
   })
 
@@ -76,9 +70,9 @@ describe('stripColorTags', () => {
   })
 
   it('strips nested color tags', () => {
-    expect(stripColorTags(
-      '<color=#ff0000>outer <color=#00ff00>inner</color></color>'
-    )).toBe('outer inner')
+    expect(stripColorTags('<color=#ff0000>outer <color=#00ff00>inner</color></color>')).toBe(
+      'outer inner',
+    )
   })
 
   it('preserves plain text', () => {
@@ -86,9 +80,7 @@ describe('stripColorTags', () => {
   })
 
   it('handles multiple sequential tags', () => {
-    expect(stripColorTags(
-      '<color=#ff0000>a</color> <color=#00ff00>b</color>'
-    )).toBe('a b')
+    expect(stripColorTags('<color=#ff0000>a</color> <color=#00ff00>b</color>')).toBe('a b')
   })
 
   it('handles empty string', () => {
@@ -96,8 +88,8 @@ describe('stripColorTags', () => {
   })
 
   it('strips deeply nested tags', () => {
-    expect(stripColorTags(
-      '<color=#aa0000><color=#bb0000><color=#cc0000>deep</color></color></color>'
-    )).toBe('deep')
+    expect(
+      stripColorTags('<color=#aa0000><color=#bb0000><color=#cc0000>deep</color></color></color>'),
+    ).toBe('deep')
   })
 })

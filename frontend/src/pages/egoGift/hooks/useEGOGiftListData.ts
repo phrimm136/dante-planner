@@ -49,9 +49,7 @@ export function useEGOGiftListSpec() {
  */
 export function useEGOGiftListI18n() {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOGiftNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOGiftNameListQueryOptions(i18n.language))
   return i18nData
 }
 
@@ -67,9 +65,7 @@ const EMPTY_NAME_LIST: Record<string, string> = {}
  */
 export function useEGOGiftListI18nDeferred(): Record<string, string> {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(
-    createEGOGiftNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useQuery(createEGOGiftNameListQueryOptions(i18n.language))
   return i18nData ?? EMPTY_NAME_LIST
 }
 
@@ -85,9 +81,7 @@ export function useEGOGiftListData() {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createEGOGiftSpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOGiftNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOGiftNameListQueryOptions(i18n.language))
 
   return {
     spec,

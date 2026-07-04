@@ -1,6 +1,14 @@
-import { getStartBuffIconPath, getStartBuffMiniPath, getStartBuffMiniHighlightPath } from '@/shared/assets'
+import {
+  getStartBuffIconPath,
+  getStartBuffMiniPath,
+  getStartBuffMiniHighlightPath,
+} from '@/shared/assets'
 import { MD_ACCENT_COLORS } from '@/shared/gameData'
-import { getEnhancementFromBuffId, getBaseIdFromBuffId, getEnhancementSuffix } from '@/shared/gameText'
+import {
+  getEnhancementFromBuffId,
+  getBaseIdFromBuffId,
+  getEnhancementSuffix,
+} from '@/shared/gameText'
 import { EGOGiftEnhancementIndicator } from '@/pages/egoGift'
 import { useTranslation } from 'react-i18next'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'

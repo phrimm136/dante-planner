@@ -76,7 +76,9 @@ describe('matchesDeckFilter — empty sets match all', () => {
   })
 
   it('returns true for EGO with all-empty filter state', () => {
-    expect(matchesDeckFilter(makeEgo(), makeState({ entityMode: 'ego' }), 'ego', EMPTY_MAPPINGS)).toBe(true)
+    expect(
+      matchesDeckFilter(makeEgo(), makeState({ entityMode: 'ego' }), 'ego', EMPTY_MAPPINGS),
+    ).toBe(true)
   })
 })
 
@@ -183,12 +185,16 @@ describe('matchesDeckFilter — defense types (identity-only, ANY / OR)', () => 
 describe('matchesDeckFilter — rank (identity-only)', () => {
   it('matches when item rank is in selected set', () => {
     const state = makeState({ selectedRaritys: new Set([0, 1]) })
-    expect(matchesDeckFilter(makeIdentity({ rank: 0 }), state, 'identity', EMPTY_MAPPINGS)).toBe(true)
+    expect(matchesDeckFilter(makeIdentity({ rank: 0 }), state, 'identity', EMPTY_MAPPINGS)).toBe(
+      true,
+    )
   })
 
   it('fails when item rank is not in selected set', () => {
     const state = makeState({ selectedRaritys: new Set([2, 3]) })
-    expect(matchesDeckFilter(makeIdentity({ rank: 0 }), state, 'identity', EMPTY_MAPPINGS)).toBe(false)
+    expect(matchesDeckFilter(makeIdentity({ rank: 0 }), state, 'identity', EMPTY_MAPPINGS)).toBe(
+      false,
+    )
   })
 })
 
@@ -198,7 +204,9 @@ describe('matchesDeckFilter — EGO type (ego-only)', () => {
       entityMode: 'ego',
       selectedEgoTypes: new Set(['ALEPH']),
     })
-    expect(matchesDeckFilter(makeEgo({ egoType: 'ALEPH' }), state, 'ego', EMPTY_MAPPINGS)).toBe(true)
+    expect(matchesDeckFilter(makeEgo({ egoType: 'ALEPH' }), state, 'ego', EMPTY_MAPPINGS)).toBe(
+      true,
+    )
   })
 
   it('does not match ZAYIN EGO when only ALEPH selected', () => {
@@ -206,19 +214,25 @@ describe('matchesDeckFilter — EGO type (ego-only)', () => {
       entityMode: 'ego',
       selectedEgoTypes: new Set(['ALEPH']),
     })
-    expect(matchesDeckFilter(makeEgo({ egoType: 'ZAYIN' }), state, 'ego', EMPTY_MAPPINGS)).toBe(false)
+    expect(matchesDeckFilter(makeEgo({ egoType: 'ZAYIN' }), state, 'ego', EMPTY_MAPPINGS)).toBe(
+      false,
+    )
   })
 })
 
 describe('matchesDeckFilter — season', () => {
   it('matches identity when season in set', () => {
     const state = makeState({ selectedSeasons: new Set([1]) })
-    expect(matchesDeckFilter(makeIdentity({ season: 1 }), state, 'identity', EMPTY_MAPPINGS)).toBe(true)
+    expect(matchesDeckFilter(makeIdentity({ season: 1 }), state, 'identity', EMPTY_MAPPINGS)).toBe(
+      true,
+    )
   })
 
   it('fails identity when season not in set', () => {
     const state = makeState({ selectedSeasons: new Set([5]) })
-    expect(matchesDeckFilter(makeIdentity({ season: 1 }), state, 'identity', EMPTY_MAPPINGS)).toBe(false)
+    expect(matchesDeckFilter(makeIdentity({ season: 1 }), state, 'identity', EMPTY_MAPPINGS)).toBe(
+      false,
+    )
   })
 
   it('applies to EGO mode as well', () => {
@@ -294,7 +308,9 @@ describe('matchesDeckFilter — search', () => {
       keywordToValue: new Map([['burn', ['Combustion']]]),
       unitKeywordToValue: new Map(),
     }
-    expect(matchesDeckFilter(makeIdentity({ name: 'Other' }), state, 'identity', mappings)).toBe(true)
+    expect(matchesDeckFilter(makeIdentity({ name: 'Other' }), state, 'identity', mappings)).toBe(
+      true,
+    )
   })
 
   it('matches by unit-keyword display name in identity mode', () => {
@@ -303,7 +319,9 @@ describe('matchesDeckFilter — search', () => {
       keywordToValue: new Map(),
       unitKeywordToValue: new Map([['blade lineage', ['BLADE_LINEAGE']]]),
     }
-    expect(matchesDeckFilter(makeIdentity({ name: 'Other' }), state, 'identity', mappings)).toBe(true)
+    expect(matchesDeckFilter(makeIdentity({ name: 'Other' }), state, 'identity', mappings)).toBe(
+      true,
+    )
   })
 
   it('does not consult unit-keyword mappings in EGO mode', () => {

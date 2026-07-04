@@ -39,7 +39,7 @@ export function matchesDeckFilter(
   item: DeckFilterItem,
   state: DeckFilterState,
   mode: EntityMode,
-  searchMappings: SearchMappings
+  searchMappings: SearchMappings,
 ): boolean {
   if (state.selectedSinners.size > 0) {
     if (!state.selectedSinners.has(getSinnerFromId(item.id))) return false
@@ -102,7 +102,7 @@ export function matchesDeckFilter(
       ([naturalLang, internalCodes]) => {
         if (!naturalLang.includes(lowerQuery)) return false
         return internalCodes.some((code) => item.skillKeywordList.includes(code as Keyword))
-      }
+      },
     )
 
     let unitKeywordMatch = false
@@ -112,7 +112,7 @@ export function matchesDeckFilter(
         ([naturalLang, internalCodes]) => {
           if (!naturalLang.includes(lowerQuery)) return false
           return internalCodes.some((code) => identity.unitKeywordList.includes(code))
-        }
+        },
       )
     }
 

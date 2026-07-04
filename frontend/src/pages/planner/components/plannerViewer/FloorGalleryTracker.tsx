@@ -28,12 +28,13 @@ export function FloorGalleryTracker({
   const floorIndices = useMemo(() => Array.from({ length: floorCount }, (_, i) => i), [floorCount])
 
   // Deserialize floor selections (convert giftIds from string[] to Set<string>)
-  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(() =>
-    floorSelections.map(floor => ({
-      ...floor,
-      giftIds: new Set(floor.giftIds)
-    })),
-    [floorSelections]
+  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(
+    () =>
+      floorSelections.map((floor) => ({
+        ...floor,
+        giftIds: new Set(floor.giftIds),
+      })),
+    [floorSelections],
   )
 
   return (

@@ -27,7 +27,7 @@ describe('createStaticDataQueryOptions', () => {
       QUERY_KEY,
       createImporter({ name: 'Dante' }),
       TestSchema,
-      'test data'
+      'test data',
     )
 
     expect(options.queryKey).toEqual(['test', 'list', 'spec'])
@@ -57,9 +57,7 @@ describe('createStaticDataQueryOptions', () => {
     const importer = createImporter({ name: 12345 })
     const options = createStaticDataQueryOptions(QUERY_KEY, importer, TestSchema, 'test data')
 
-    await expect(invokeQueryFn(options)).rejects.toThrowError(
-      /^\[test data\] Validation failed: /
-    )
+    await expect(invokeQueryFn(options)).rejects.toThrowError(/^\[test data\] Validation failed: /)
   })
 
   it('defaults staleTime to STATIC_DATA_STALE_TIME (7 days)', () => {
@@ -67,7 +65,7 @@ describe('createStaticDataQueryOptions', () => {
       QUERY_KEY,
       createImporter({ name: 'Dante' }),
       TestSchema,
-      'test data'
+      'test data',
     )
 
     expect(options.staleTime).toBe(STATIC_DATA_STALE_TIME)
@@ -80,7 +78,7 @@ describe('createStaticDataQueryOptions', () => {
       createImporter({ name: 'Dante' }),
       TestSchema,
       'test data',
-      { keepPrevious: true }
+      { keepPrevious: true },
     )
 
     expect(options.placeholderData).toBe(keepPreviousData)
@@ -91,7 +89,7 @@ describe('createStaticDataQueryOptions', () => {
       QUERY_KEY,
       createImporter({ name: 'Dante' }),
       TestSchema,
-      'test data'
+      'test data',
     )
 
     expect(options.placeholderData).toBeUndefined()

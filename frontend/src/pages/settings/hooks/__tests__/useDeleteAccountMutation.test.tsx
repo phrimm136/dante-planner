@@ -85,7 +85,7 @@ describe('useDeleteAccountMutation', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(console.error).toHaveBeenCalledWith(
       'User deletion response validation failed:',
-      expect.anything()
+      expect.anything(),
     )
   })
 

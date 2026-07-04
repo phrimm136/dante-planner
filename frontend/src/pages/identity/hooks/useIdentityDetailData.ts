@@ -50,9 +50,7 @@ export function useIdentityDetailSpec(id: string) {
  */
 export function useIdentityDetailI18n(id: string) {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createIdentityI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createIdentityI18nQueryOptions(id, i18n.language))
   return i18nData
 }
 
@@ -69,9 +67,7 @@ export function useIdentityDetailData(id: string) {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createIdentityDataQueryOptions(id))
-  const { data: i18nData } = useSuspenseQuery(
-    createIdentityI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createIdentityI18nQueryOptions(id, i18n.language))
 
   return {
     spec,

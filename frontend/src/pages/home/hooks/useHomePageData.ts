@@ -52,10 +52,7 @@ export interface DateGroup {
 /**
  * Group entities by updateDate and limit to MAX_DATE_GROUPS
  */
-function groupEntitiesByDate(
-  entities: RecentEntity[],
-  language: string
-): DateGroup[] {
+function groupEntitiesByDate(entities: RecentEntity[], language: string): DateGroup[] {
   const groupMap = new Map<number, RecentEntity[]>()
 
   for (const entity of entities) {
@@ -96,21 +93,17 @@ export function useRecentlyReleasedData(language: string) {
 
   const dateGroups = useMemo(() => {
     // Convert to RecentEntity array with id from record key
-    const identities: RecentEntity[] = Object.entries(identitySpecs).map(
-      ([id, spec]) => ({
-        type: 'identity' as const,
-        data: { id, updateDate: spec.updateDate, rank: spec.rank, season: spec.season },
-      })
-    )
+    const identities: RecentEntity[] = Object.entries(identitySpecs).map(([id, spec]) => ({
+      type: 'identity' as const,
+      data: { id, updateDate: spec.updateDate, rank: spec.rank, season: spec.season },
+    }))
     const egos: RecentEntity[] = Object.entries(egoSpecs).map(([id, spec]) => ({
       type: 'ego' as const,
       data: { id, updateDate: spec.updateDate, egoType: spec.egoType, season: spec.season },
     }))
 
     // Combine and sort by updateDate descending
-    const combined = [...identities, ...egos].sort(
-      (a, b) => b.data.updateDate - a.data.updateDate
-    )
+    const combined = [...identities, ...egos].sort((a, b) => b.data.updateDate - a.data.updateDate)
 
     // Limit total items
     const limited = combined.slice(0, MAX_RECENT_ITEMS)

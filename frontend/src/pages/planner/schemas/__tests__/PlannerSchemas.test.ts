@@ -379,9 +379,7 @@ describe('import path: oversized note tolerated by storage, gated at save', () =
       intro: {
         content: {
           type: 'doc',
-          content: [
-            { type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(5000) }] },
-          ],
+          content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a'.repeat(5000) }] }],
         },
       },
     }

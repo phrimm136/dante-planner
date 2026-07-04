@@ -78,12 +78,10 @@ export function HorizontalThemePackGallery({
           className={cn(
             'flex items-center justify-center p-4 text-muted-foreground md:h-[306px] lg:h-[481px]',
             EMPTY_STATE.MIN_HEIGHT,
-            EMPTY_STATE.DASHED_BORDER
+            EMPTY_STATE.DASHED_BORDER,
           )}
         >
-          <span className="text-sm text-center">
-            {t('pages.plannerMD.emptyState.noThemePack')}
-          </span>
+          <span className="text-sm text-center">{t('pages.plannerMD.emptyState.noThemePack')}</span>
         </div>
       </PlannerSection>
     )
@@ -104,10 +102,7 @@ export function HorizontalThemePackGallery({
             const giftIds = floorSelections[floorIndex]?.giftIds ?? []
 
             return (
-              <div
-                key={packId}
-                className="flex flex-col items-center flex-shrink-0"
-              >
+              <div key={packId} className="flex flex-col items-center flex-shrink-0">
                 <span
                   className="text-lg mb-1"
                   style={getDisplayFontForLanguage(i18nInstance.language)}

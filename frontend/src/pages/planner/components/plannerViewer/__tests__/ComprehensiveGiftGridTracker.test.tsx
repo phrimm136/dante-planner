@@ -45,9 +45,7 @@ vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
 }))
 
 vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
-  EGOGiftCard: ({ gift }: { gift: { id: string } }) => (
-    <div data-testid={`gift-card-${gift.id}`} />
-  ),
+  EGOGiftCard: ({ gift }: { gift: { id: string } }) => <div data-testid={`gift-card-${gift.id}`} />,
 }))
 
 vi.mock('@/pages/egoGift/components/EGOGiftTooltip', () => ({
@@ -89,7 +87,7 @@ describe('ComprehensiveGiftGridTracker', () => {
           doneMarks={{}}
           hoveredThemePackId={null}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(container).toBeDefined()
@@ -102,7 +100,7 @@ describe('ComprehensiveGiftGridTracker', () => {
           doneMarks={{}}
           hoveredThemePackId={null}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(container.textContent).toContain('pages.plannerMD.emptyState.noEgoGifts')
@@ -121,7 +119,7 @@ describe('ComprehensiveGiftGridTracker', () => {
           comprehensiveGiftIds={['gift1']}
           hoveredThemePackId={null}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(getByTestId('gift-card-gift1')).toBeDefined()
@@ -138,7 +136,7 @@ describe('ComprehensiveGiftGridTracker', () => {
           comprehensiveGiftIds={['gift1']}
           hoveredThemePackId={null}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(queryByTestId('gift-card-gift1')).toBeDefined()
@@ -158,7 +156,7 @@ describe('ComprehensiveGiftGridTracker', () => {
           doneMarks={{}}
           hoveredThemePackId="pack1"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Should render without errors
@@ -179,7 +177,7 @@ describe('ComprehensiveGiftGridTracker', () => {
           doneMarks={doneMarks}
           hoveredThemePackId={null}
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Should render without errors

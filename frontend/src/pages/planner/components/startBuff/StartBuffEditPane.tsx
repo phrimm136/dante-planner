@@ -1,11 +1,6 @@
 import { useMemo, useState, useEffect, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { ENHANCEMENT_LABELS, type MDVersion } from '@/shared/gameData'
 import { CARD_GRID, START_BUFF_CARD_SIZE } from '@/lib/constants'
@@ -50,23 +45,22 @@ interface StartBuffEditPaneProps {
  * Dialog for editing start buff selection
  * Renders cards directly without intermediate Grid component
  */
-export function StartBuffEditPane({
-  open,
-  onOpenChange,
-  mdVersion,
-}: StartBuffEditPaneProps) {
+export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEditPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
   // Store state
   const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
   const setSelectedBuffIds = usePlannerEditorStore((s) => s.setSelectedBuffIds)
 
-  const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } =
-    useStartBuffSelection(mdVersion, selectedBuffIds, setSelectedBuffIds)
+  const { buffs, i18n, battleKeywords, displayBuffs, handleSelect } = useStartBuffSelection(
+    mdVersion,
+    selectedBuffIds,
+    setSelectedBuffIds,
+  )
 
   // Breakpoint detection for scaling
   const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT
+    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT,
   )
 
   useEffect(() => {
@@ -81,15 +75,18 @@ export function StartBuffEditPane({
   // Calculate scale and dimensions
   const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
   const scale = isDesktop ? 1 : mobileScale
-  const { width: cardWidth, height: cardHeight } = START_BUFF_CARD_SIZE[mdVersion] ?? START_BUFF_CARD_SIZE[6]
+  const { width: cardWidth, height: cardHeight } =
+    START_BUFF_CARD_SIZE[mdVersion] ?? START_BUFF_CARD_SIZE[6]
   const scaledWidth = cardWidth * scale
   const scaledHeight = cardHeight * scale
 
   // Enhancement preview state for all cards (lifted from StartBuffCard)
   // Initialized from current selection; empty entries fall back to 0
-  const [enhancementPreviews, setEnhancementPreviews] = useState<Record<number, EnhancementLevel>>(() => {
-    return deriveEnhancements(selectedBuffIds)
-  })
+  const [enhancementPreviews, setEnhancementPreviews] = useState<Record<number, EnhancementLevel>>(
+    () => {
+      return deriveEnhancements(selectedBuffIds)
+    },
+  )
 
   // Get enhancement for a given base buff
   const getEnhancement = (baseId: number): EnhancementLevel => {
@@ -98,7 +95,7 @@ export function StartBuffEditPane({
 
   // Single card enhancement change (from card's +/++ buttons)
   const handleEnhancementChange = (baseId: number, level: EnhancementLevel) => {
-    setEnhancementPreviews(prev => ({ ...prev, [baseId]: level }))
+    setEnhancementPreviews((prev) => ({ ...prev, [baseId]: level }))
 
     // If this buff is selected, update its ID in the selection
     const newSelection = new Set(selectedBuffIds)
@@ -118,7 +115,7 @@ export function StartBuffEditPane({
   const totalCost = useMemo(() => {
     let sum = 0
     for (const buffId of selectedBuffIds) {
-      const buff = buffs.find(b => Number(b.id) === buffId)
+      const buff = buffs.find((b) => Number(b.id) === buffId)
       if (buff) sum += buff.cost
     }
     return sum
@@ -169,11 +166,19 @@ export function StartBuffEditPane({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => { setSelectedBuffIds(new Set()); setEnhancementPreviews({}) }}
+                  onClick={() => {
+                    setSelectedBuffIds(new Set())
+                    setEnhancementPreviews({})
+                  }}
                 >
                   {t('common:reset')}
                 </Button>
-                <Button size="sm" onClick={() => { onOpenChange(false) }}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    onOpenChange(false)
+                  }}
+                >
                   {t('common:done')}
                 </Button>
               </div>
@@ -194,7 +199,9 @@ export function StartBuffEditPane({
           <button
             type="button"
             className="selectable px-3 h-8 rounded-md border border-border text-sm"
-            onClick={() => { setSelectedBuffIds(new Set()) }}
+            onClick={() => {
+              setSelectedBuffIds(new Set())
+            }}
           >
             {t('common:unselectAll')}
           </button>
@@ -206,7 +213,9 @@ export function StartBuffEditPane({
               key={level}
               type="button"
               className="selectable w-8 h-8 rounded-md border border-border flex items-center justify-center"
-              onClick={() => { handleBatchEnhancement(level) }}
+              onClick={() => {
+                handleBatchEnhancement(level)
+              }}
             >
               {level === 0 ? (
                 <span className="text-xs font-bold">{ENHANCEMENT_LABELS[level]}</span>

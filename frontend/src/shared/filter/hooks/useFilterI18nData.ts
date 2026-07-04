@@ -38,11 +38,9 @@ function createUnitKeywordsI18nQueryOptions(language: string) {
 export function useFilterI18nData() {
   const { i18n } = useTranslation()
 
-  const { data: seasonsI18n } = useSuspenseQuery(
-    createSeasonsI18nQueryOptions(i18n.language)
-  )
+  const { data: seasonsI18n } = useSuspenseQuery(createSeasonsI18nQueryOptions(i18n.language))
   const { data: unitKeywordsI18n } = useSuspenseQuery(
-    createUnitKeywordsI18nQueryOptions(i18n.language)
+    createUnitKeywordsI18nQueryOptions(i18n.language),
   )
 
   return {

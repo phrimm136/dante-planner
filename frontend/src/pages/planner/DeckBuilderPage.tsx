@@ -203,9 +203,7 @@ function DeckBuilderPageContent() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('deckBuilder.importConfirmDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('deckBuilder.importConfirmDescription')}</DialogDescription>
           </DialogHeader>
 
           {pendingImport && pendingImport.warnings.length > 0 && (
@@ -225,9 +223,7 @@ function DeckBuilderPageContent() {
             <Button variant="outline" onClick={handleImportCancel}>
               {t('deckBuilder.cancel')}
             </Button>
-            <Button onClick={handleImportConfirm}>
-              {t('deckBuilder.apply')}
-            </Button>
+            <Button onClick={handleImportConfirm}>{t('deckBuilder.apply')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

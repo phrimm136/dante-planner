@@ -23,7 +23,12 @@ export interface ValidationError {
  * Equipment validation error
  */
 export interface EquipmentValidationError extends ValidationError {
-  code: 'EQUIPMENT_MISSING_SINNER' | 'EQUIPMENT_MISSING_IDENTITY' | 'EQUIPMENT_MISSING_ZAYIN' | 'EQUIPMENT_INVALID_EGO_TYPES' | 'EQUIPMENT_INVALID_ID_FORMAT'
+  code:
+    | 'EQUIPMENT_MISSING_SINNER'
+    | 'EQUIPMENT_MISSING_IDENTITY'
+    | 'EQUIPMENT_MISSING_ZAYIN'
+    | 'EQUIPMENT_INVALID_EGO_TYPES'
+    | 'EQUIPMENT_INVALID_ID_FORMAT'
 }
 
 /**
@@ -37,7 +42,11 @@ export interface DeploymentValidationError extends ValidationError {
  * Skill EA validation error
  */
 export interface SkillEAValidationError extends ValidationError {
-  code: 'SKILL_EA_MISSING_SINNER' | 'SKILL_EA_INVALID_SLOT' | 'SKILL_EA_DUPLICATE_SLOT' | 'SKILL_EA_INVALID_TOTAL'
+  code:
+    | 'SKILL_EA_MISSING_SINNER'
+    | 'SKILL_EA_INVALID_SLOT'
+    | 'SKILL_EA_DUPLICATE_SLOT'
+    | 'SKILL_EA_INVALID_TOTAL'
 }
 
 /**
@@ -65,7 +74,13 @@ export interface StartGiftValidationError extends ValidationError {
  * Floor validation error — carries the failing floor and offending gift/theme-pack context.
  */
 export interface FloorValidationError extends ValidationError {
-  code: 'FLOOR_MISSING_THEME_PACK' | 'FLOOR_PREREQUISITE_VIOLATION' | 'FLOOR_DUPLICATE_GIFT_ID' | 'FLOOR_DUPLICATE_THEME_PACK' | 'FLOOR_UNAFFORDABLE_GIFT' | 'GIFT_UNKNOWN_ID'
+  code:
+    | 'FLOOR_MISSING_THEME_PACK'
+    | 'FLOOR_PREREQUISITE_VIOLATION'
+    | 'FLOOR_DUPLICATE_GIFT_ID'
+    | 'FLOOR_DUPLICATE_THEME_PACK'
+    | 'FLOOR_UNAFFORDABLE_GIFT'
+    | 'GIFT_UNKNOWN_ID'
   /** 0-indexed floor that failed validation */
   floorIndex?: number
   /** 1-indexed floor number for display */
@@ -112,9 +127,10 @@ export type PlannerValidationError =
  * they collapse to a single generic key. Actionable errors (title, theme pack,
  * difficulty, affordability) get their own specific keys.
  */
-export function toUserFriendlyError(
-  error: PlannerValidationError
-): { key: string; params?: Record<string, string> } {
+export function toUserFriendlyError(error: PlannerValidationError): {
+  key: string
+  params?: Record<string, string>
+} {
   switch (error.code) {
     case 'MISSING_TITLE':
       return { key: 'pages.plannerMD.publish.missingTitle' }

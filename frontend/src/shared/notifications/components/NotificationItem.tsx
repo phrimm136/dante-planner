@@ -13,7 +13,10 @@ interface NotificationItemProps {
   onDelete: (id: string) => void
 }
 
-const NOTIFICATION_CONFIG: Record<NotificationType, { icon: typeof Star; color: string; labelKey: string }> = {
+const NOTIFICATION_CONFIG: Record<
+  NotificationType,
+  { icon: typeof Star; color: string; labelKey: string }
+> = {
   PLANNER_RECOMMENDED: {
     icon: Star,
     color: 'text-yellow-500',
@@ -45,11 +48,7 @@ const NOTIFICATION_CONFIG: Record<NotificationType, { icon: typeof Star; color: 
  * Single notification row with icon, content preview, and delete action.
  * Clicking the row navigates and deletes (arca.live style).
  */
-export function NotificationItem({
-  notification,
-  onNavigate,
-  onDelete,
-}: NotificationItemProps) {
+export function NotificationItem({ notification, onNavigate, onDelete }: NotificationItemProps) {
   const { t, i18n } = useTranslation(['common'])
   const config = NOTIFICATION_CONFIG[notification.notificationType]
   const Icon = config.icon
@@ -76,7 +75,7 @@ export function NotificationItem({
       className={cn(
         'flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-colors',
         'hover:bg-accent',
-        !notification.read && 'bg-accent/50'
+        !notification.read && 'bg-accent/50',
       )}
       onClick={handleClick}
     >
@@ -87,14 +86,10 @@ export function NotificationItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={cn('text-sm', !notification.read && 'font-medium')}>
-          {t(config.labelKey)}
-        </p>
+        <p className={cn('text-sm', !notification.read && 'font-medium')}>{t(config.labelKey)}</p>
         {/* Plan title */}
         {notification.plannerTitle && (
-          <p className="text-sm text-foreground/80 truncate mt-0.5">
-            {notification.plannerTitle}
-          </p>
+          <p className="text-sm text-foreground/80 truncate mt-0.5">{notification.plannerTitle}</p>
         )}
         {/* Comment snippet */}
         {notification.commentSnippet && (
@@ -102,9 +97,7 @@ export function NotificationItem({
             {notification.commentSnippet}
           </p>
         )}
-        <p className="text-xs text-muted-foreground mt-1">
-          {formattedTime}
-        </p>
+        <p className="text-xs text-muted-foreground mt-1">{formattedTime}</p>
       </div>
 
       {/* Delete button */}

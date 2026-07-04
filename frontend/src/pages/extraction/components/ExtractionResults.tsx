@@ -61,20 +61,17 @@ function ResultRow({
   subtext?: string
 }) {
   return (
-    <div className={cn(
-      'flex justify-between items-baseline py-2 border-b border-border last:border-b-0',
-      highlight && 'bg-primary/5 -mx-2 px-2 rounded'
-    )}>
+    <div
+      className={cn(
+        'flex justify-between items-baseline py-2 border-b border-border last:border-b-0',
+        highlight && 'bg-primary/5 -mx-2 px-2 rounded',
+      )}
+    >
       <div className="flex flex-col">
         <span className={SECTION_STYLES.TEXT.label}>{label}</span>
-        {subtext && (
-          <span className={SECTION_STYLES.TEXT.caption}>{subtext}</span>
-        )}
+        {subtext && <span className={SECTION_STYLES.TEXT.caption}>{subtext}</span>}
       </div>
-      <span className={cn(
-        'font-mono text-lg',
-        highlight && 'font-semibold text-primary'
-      )}>
+      <span className={cn('font-mono text-lg', highlight && 'font-semibold text-primary')}>
         {value}
       </span>
     </div>
@@ -115,9 +112,7 @@ function TargetResultCard({
         </span>
       </div>
       <div className="flex justify-between items-center">
-        <span className={SECTION_STYLES.TEXT.caption}>
-          {t('results.probability')}
-        </span>
+        <span className={SECTION_STYLES.TEXT.caption}>{t('results.probability')}</span>
         <span className="font-mono font-semibold">
           {formatProbability(probability)}
           {pityApplies && (
@@ -128,9 +123,7 @@ function TargetResultCard({
         </span>
       </div>
       <div className="flex justify-between items-center">
-        <span className={SECTION_STYLES.TEXT.caption}>
-          {t('results.expectedPulls')}
-        </span>
+        <span className={SECTION_STYLES.TEXT.caption}>{t('results.expectedPulls')}</span>
         <span className="font-mono">
           {expectedPulls === Infinity ? '∞' : formatNumber(Math.ceil(expectedPulls))}
         </span>
@@ -139,30 +132,24 @@ function TargetResultCard({
   )
 }
 
-export function ExtractionResults({
-  result,
-  currentPity,
-  hasTargets,
-}: ExtractionResultsProps) {
+export function ExtractionResults({ result, currentPity, hasTargets }: ExtractionResultsProps) {
   const { t } = useTranslation('extraction')
 
   // Filter to targets that actually need copies
   const activeTargetResults = result.targetResults.filter(
-    (r) => r.target.wantedCopies - r.target.currentCopies > 0
+    (r) => r.target.wantedCopies - r.target.currentCopies > 0,
   )
 
   // Get successive probabilities excluding the "all" case (which is shown separately)
   const successiveProbs = result.successiveProbabilities.filter(
-    (sp) => sp.count < result.totalItemsWanted
+    (sp) => sp.count < result.totalItemsWanted,
   )
 
   return (
     <div className={cn(SECTION_STYLES.container, 'space-y-6')}>
       {/* Summary Section - All Targets at top (highlighted), successive probs below */}
       <div className="space-y-2">
-        <h3 className={SECTION_STYLES.TEXT.subHeader}>
-          {t('results.summary')}
-        </h3>
+        <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('results.summary')}</h3>
 
         {!hasTargets ? (
           <p className={cn(SECTION_STYLES.TEXT.caption, 'py-4 text-center')}>
@@ -201,16 +188,10 @@ export function ExtractionResults({
       {/* Per-Target Breakdown */}
       {hasTargets && activeTargetResults.length > 0 && (
         <div className="space-y-3">
-          <h3 className={SECTION_STYLES.TEXT.subHeader}>
-            {t('results.breakdown')}
-          </h3>
+          <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('results.breakdown')}</h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {activeTargetResults.map((targetResult, index) => (
-              <TargetResultCard
-                key={index}
-                result={targetResult}
-                t={t}
-              />
+              <TargetResultCard key={index} result={targetResult} t={t} />
             ))}
           </div>
         </div>
@@ -218,14 +199,9 @@ export function ExtractionResults({
 
       {/* Cost Section */}
       <div className="space-y-2">
-        <h3 className={SECTION_STYLES.TEXT.subHeader}>
-          {t('results.cost')}
-        </h3>
+        <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('results.cost')}</h3>
         <div className="space-y-1">
-          <ResultRow
-            label={t('results.lunacyCost')}
-            value={formatNumber(result.lunacyCost)}
-          />
+          <ResultRow label={t('results.lunacyCost')} value={formatNumber(result.lunacyCost)} />
           <ResultRow
             label={t('results.pullsUntilPity')}
             value={formatNumber(result.pullsUntilPity)}

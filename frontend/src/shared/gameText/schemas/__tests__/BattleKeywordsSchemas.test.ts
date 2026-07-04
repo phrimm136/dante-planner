@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  BattleKeywordEntrySchema,
-  BattleKeywordsSchema,
-} from '../BattleKeywordsSchemas'
+import { BattleKeywordEntrySchema, BattleKeywordsSchema } from '../BattleKeywordsSchemas'
 
 describe('BattleKeywordEntrySchema', () => {
   it('accepts valid entry with name and desc', () => {

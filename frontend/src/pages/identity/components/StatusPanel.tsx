@@ -12,8 +12,8 @@ interface StatusPanelProps {
 
 export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }: StatusPanelProps) {
   const { t } = useTranslation(['database', 'common'])
-  const defCorrectionString = defCorrection <= 0 ? String(defCorrection) : "+" + String(defCorrection)
-
+  const defCorrectionString =
+    defCorrection <= 0 ? String(defCorrection) : '+' + String(defCorrection)
 
   return (
     <div className="border rounded p-3 space-y-2 h-full">
@@ -27,11 +27,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
 
         {/* Speed */}
         <div className="flex flex-col items-center gap-1">
-          <img
-            src={getSpeedIconPath()}
-            alt="Speed"
-            className="w-6 h-6 object-contain"
-          />
+          <img src={getSpeedIconPath()} alt="Speed" className="w-6 h-6 object-contain" />
           <span className="text-xs tabular-nums">
             {minSpeed}-{maxSpeed}
           </span>
@@ -39,11 +35,7 @@ export function StatusPanel({ hp, minSpeed, maxSpeed, defLevel, defCorrection }:
 
         {/* Defense */}
         <div className="flex flex-col items-center gap-1">
-          <img
-            src={getDefenseLevelIconPath()}
-            alt="Defense"
-            className="w-6 h-6 object-contain"
-          />
+          <img src={getDefenseLevelIconPath()} alt="Defense" className="w-6 h-6 object-contain" />
           <span className="text-xs tabular-nums">
             {defLevel} ({defCorrectionString})
           </span>

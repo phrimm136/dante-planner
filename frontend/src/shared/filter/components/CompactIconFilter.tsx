@@ -87,7 +87,7 @@ export function CompactIconFilter<T extends string>({
               data-selected={isSelected}
               className={cn(
                 'selectable rounded-md border border-border p-0.5',
-                flexIcons ? 'h-10 lg:h-8 w-auto' : cn('aspect-square', buttonSize)
+                flexIcons ? 'h-10 lg:h-8 w-auto' : cn('aspect-square', buttonSize),
               )}
               title={label}
             >
@@ -109,9 +109,7 @@ export function CompactIconFilter<T extends string>({
                   src={getIconPath!(option)}
                   alt={label}
                   className={
-                    flexIcons
-                      ? 'h-full w-auto'
-                      : 'object-contain mx-auto w-8 h-8 lg:w-6 lg:h-6'
+                    flexIcons ? 'h-full w-auto' : 'object-contain mx-auto w-8 h-8 lg:w-6 lg:h-6'
                   }
                 />
               )}
@@ -141,7 +139,7 @@ export function CompactIconFilter<T extends string>({
             data-selected={isSelected}
             className={cn(
               'selectable rounded-md border border-border p-0.5',
-              flexIcons ? 'h-10 lg:h-8 w-auto' : cn('aspect-square', buttonSize)
+              flexIcons ? 'h-10 lg:h-8 w-auto' : cn('aspect-square', buttonSize),
             )}
             title={label}
           >

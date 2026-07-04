@@ -69,18 +69,20 @@ export const PublicPlannerSchema = z.object({
  * Follows Spring Data Page structure
  * Uses passthrough() to allow Spring's extra fields (empty, first, last, etc.)
  */
-export const PaginatedPlannersSchema = z.object({
-  /** Array of planners for current page */
-  content: z.array(PublicPlannerSchema),
-  /** Total number of planners matching the query */
-  totalElements: z.number().int().min(0),
-  /** Total number of pages */
-  totalPages: z.number().int().min(0),
-  /** Current page number (0-indexed) */
-  number: z.number().int().min(0),
-  /** Page size */
-  size: z.number().int().positive(),
-}).passthrough()
+export const PaginatedPlannersSchema = z
+  .object({
+    /** Array of planners for current page */
+    content: z.array(PublicPlannerSchema),
+    /** Total number of planners matching the query */
+    totalElements: z.number().int().min(0),
+    /** Total number of pages */
+    totalPages: z.number().int().min(0),
+    /** Current page number (0-indexed) */
+    number: z.number().int().min(0),
+    /** Page size */
+    size: z.number().int().positive(),
+  })
+  .passthrough()
 
 // ============================================================================
 // Action Response Schemas
@@ -89,44 +91,52 @@ export const PaginatedPlannersSchema = z.object({
 /**
  * Bookmark toggle response schema
  */
-export const BookmarkResponseSchema = z.object({
-  /** ID of the bookmarked planner */
-  plannerId: z.string().uuid(),
-  /** New bookmark state */
-  bookmarked: z.boolean(),
-}).strict()
+export const BookmarkResponseSchema = z
+  .object({
+    /** ID of the bookmarked planner */
+    plannerId: z.string().uuid(),
+    /** New bookmark state */
+    bookmarked: z.boolean(),
+  })
+  .strict()
 
 /**
  * Vote response schema
  */
-export const VoteResponseSchema = z.object({
-  /** ID of the voted planner */
-  plannerId: z.string().uuid(),
-  /** Whether the user has upvoted */
-  hasUpvoted: z.boolean(),
-  /** Updated upvote count */
-  upvoteCount: z.number().int().min(0),
-}).strict()
+export const VoteResponseSchema = z
+  .object({
+    /** ID of the voted planner */
+    plannerId: z.string().uuid(),
+    /** Whether the user has upvoted */
+    hasUpvoted: z.boolean(),
+    /** Updated upvote count */
+    upvoteCount: z.number().int().min(0),
+  })
+  .strict()
 
 /**
  * Subscription response schema
  */
-export const SubscriptionResponseSchema = z.object({
-  /** ID of the subscribed planner */
-  plannerId: z.string().uuid(),
-  /** New subscription state */
-  subscribed: z.boolean(),
-}).strict()
+export const SubscriptionResponseSchema = z
+  .object({
+    /** ID of the subscribed planner */
+    plannerId: z.string().uuid(),
+    /** New subscription state */
+    subscribed: z.boolean(),
+  })
+  .strict()
 
 /**
  * Report response schema
  */
-export const ReportResponseSchema = z.object({
-  /** ID of the reported planner */
-  plannerId: z.string().uuid(),
-  /** Response message */
-  message: z.string(),
-}).strict()
+export const ReportResponseSchema = z
+  .object({
+    /** ID of the reported planner */
+    plannerId: z.string().uuid(),
+    /** Response message */
+    message: z.string(),
+  })
+  .strict()
 
 /**
  * Published planner detail schema (extends PublicPlannerSchema with content and metadata)

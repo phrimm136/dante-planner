@@ -73,10 +73,11 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
 
   // Determine ownership by comparing author username with current user's username
-  const isOwner = isAuthenticated && user !== null && (
+  const isOwner =
+    isAuthenticated &&
+    user !== null &&
     user.usernameEpithet === apiData.authorUsernameEpithet &&
     user.usernameSuffix === apiData.authorUsernameSuffix
-  )
 
   // Validate planner type - viewer only supports Mirror Dungeon planners
   if (planner.config.type !== 'MIRROR_DUNGEON') {
@@ -123,11 +124,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
       <PlannerViewer planner={planner} />
 
       {/* Footer with engagement actions */}
-      <PlannerDetailFooter
-        planner={apiData}
-        isOwner={isOwner}
-        isAuthenticated={isAuthenticated}
-      />
+      <PlannerDetailFooter planner={apiData} isOwner={isOwner} isAuthenticated={isAuthenticated} />
 
       {/* Comment Section */}
       <div ref={commentsRef}>

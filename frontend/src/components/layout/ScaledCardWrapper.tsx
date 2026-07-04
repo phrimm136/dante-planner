@@ -31,7 +31,9 @@ export function ScaledCardWrapper({
   className,
   children,
 }: ScaledCardWrapperProps) {
-  const [isDesktop, setIsDesktop] = useState(typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT,
+  )
 
   useEffect(() => {
     const handleResize = () => {

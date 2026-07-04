@@ -95,7 +95,7 @@ export function EGOGiftList({
       // Battle keyword filter - OR logic (gift must have ANY selected battle keyword)
       if (selectedBattleKeywords.size > 0) {
         const hasAnyBattleKeyword = (gift.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword)
+          selectedBattleKeywords.has(keyword),
         )
         if (!hasAnyBattleKeyword) continue
       }
@@ -149,19 +149,14 @@ export function EGOGiftList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('egoGift.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('egoGift.emptyState')}</div>
       </div>
     )
   }
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT} mobileScale={0.8}>
         {sortedGifts.slice(0, displayCount).map((gift) => (
           <ScaledCardWrapper
             key={gift.id}

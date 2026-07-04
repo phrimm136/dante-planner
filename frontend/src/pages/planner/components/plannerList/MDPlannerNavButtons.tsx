@@ -33,36 +33,24 @@ export function MDPlannerNavButtons() {
 
   return (
     <div className="flex gap-2">
-      <Link
-        to="/planner/md"
-        activeOptions={{ exact: true, includeSearch: false }}
-      >
+      <Link to="/planner/md" activeOptions={{ exact: true, includeSearch: false }}>
         {({ isActive }) => (
           <Button
             variant={isActive ? 'default' : 'outline'}
             size="sm"
-            className={cn(
-              'min-w-[100px]',
-              isActive && 'pointer-events-none'
-            )}
+            className={cn('min-w-[100px]', isActive && 'pointer-events-none')}
           >
             {t('nav.myPlans')}
           </Button>
         )}
       </Link>
 
-      <Link
-        to="/planner/md/gesellschaft"
-        activeOptions={{ exact: true, includeSearch: false }}
-      >
+      <Link to="/planner/md/gesellschaft" activeOptions={{ exact: true, includeSearch: false }}>
         {({ isActive }) => (
           <Button
             variant={isActive ? 'default' : 'outline'}
             size="sm"
-            className={cn(
-              'min-w-[100px]',
-              isActive && 'pointer-events-none'
-            )}
+            className={cn('min-w-[100px]', isActive && 'pointer-events-none')}
           >
             {t('nav.gesellschaft')}
           </Button>

@@ -8,7 +8,8 @@ import { KeywordMatchSchema, UnitKeywordsSchema } from '../schemas/SearchMapping
 // Hand-rolled: tuples lack the 'list'/'i18n' segments the shared factory produces
 export const searchMappingsQueryKeys = {
   all: ['searchMappings'] as const,
-  keywordMatch: (language: string) => [...searchMappingsQueryKeys.all, 'keyword', language] as const,
+  keywordMatch: (language: string) =>
+    [...searchMappingsQueryKeys.all, 'keyword', language] as const,
   unitKeywords: (language: string) => [...searchMappingsQueryKeys.all, 'unit', language] as const,
 }
 

@@ -15,11 +15,14 @@ interface TierLevelSelectorProps {
   egoType?: EGOType
   /** Per-EGO threadspin ceiling (4 or 5). Required for mode='ego', ignored otherwise. */
   maxThreadspin?: ThreadspinTier
-  onConfirm: (entityId: string, data: {
-    uptie?: UptieTier
-    threadspin?: ThreadspinTier
-    level?: number
-  }) => void
+  onConfirm: (
+    entityId: string,
+    data: {
+      uptie?: UptieTier
+      threadspin?: ThreadspinTier
+      level?: number
+    },
+  ) => void
   onUnequip?: (entityId: string) => void
   children: React.ReactNode
 }
@@ -39,11 +42,14 @@ interface TierLevelSelectorInnerProps {
   isSelected: boolean
   egoType?: EGOType
   maxThreadspin: ThreadspinTier
-  onConfirm: (entityId: string, data: {
-    uptie?: UptieTier
-    threadspin?: ThreadspinTier
-    level?: number
-  }) => void
+  onConfirm: (
+    entityId: string,
+    data: {
+      uptie?: UptieTier
+      threadspin?: ThreadspinTier
+      level?: number
+    },
+  ) => void
   onUnequip?: (entityId: string) => void
 }
 
@@ -68,10 +74,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
   const [threadspin, setThreadspin] = useState<ThreadspinTier>(currentThreadspin)
   const [level, setLevel] = useState<number>(currentLevel)
 
-  const threadspinTiers = Array.from(
-    { length: maxThreadspin },
-    (_, i) => (i + 1) as ThreadspinTier
-  )
+  const threadspinTiers = Array.from({ length: maxThreadspin }, (_, i) => (i + 1) as ThreadspinTier)
 
   // Handle clicks outside to close on mobile
   useEffect(() => {
@@ -137,9 +140,7 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
       onTouchStart={handleTouchStart}
     >
       {isOpen && (
-        <div
-          className="absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
-        >
+        <div className="absolute z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
           <div className="flex flex-col items-center gap-2">
             {/* Uptie/Threadspin tier icons with background */}
             <div className="flex bg-black/70 rounded px-2 py-1 justify-center">
@@ -177,8 +178,12 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
                 <input
                   type="number"
                   value={level}
-                  onChange={(e) => { handleLevelChange(e.target.value); }}
-                  onClick={(e) => { e.stopPropagation(); }}
+                  onChange={(e) => {
+                    handleLevelChange(e.target.value)
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                  }}
                   min={1}
                   max={MAX_LEVEL}
                   className="w-10 h-5 px-1 text-center text-xs bg-transparent text-white border-0 outline-none"
@@ -187,7 +192,11 @@ const TierLevelSelectorInner = memo(function TierLevelSelectorInner({
             )}
 
             {/* Equip/Unequip button */}
-            {mode === 'ego' && isSelected && threadspin === currentThreadspin && !entityId.endsWith('01') && onUnequip ? (
+            {mode === 'ego' &&
+            isSelected &&
+            threadspin === currentThreadspin &&
+            !entityId.endsWith('01') &&
+            onUnequip ? (
               <button
                 type="button"
                 onClick={(e) => {
@@ -261,19 +270,19 @@ export const TierLevelSelector: React.FC<TierLevelSelectorProps> = memo(function
       },
       {
         rootMargin: '100px', // Start loading slightly before entering viewport
-      }
+      },
     )
 
     observer.observe(element)
 
-    return () => { observer.disconnect(); }
+    return () => {
+      observer.disconnect()
+    }
   }, [])
 
   return (
     <div ref={containerRef} className="relative inline-block group">
-      <div className="pointer-events-none">
-        {children}
-      </div>
+      <div className="pointer-events-none">{children}</div>
       {isVisible && (
         <TierLevelSelectorInner
           mode={mode}

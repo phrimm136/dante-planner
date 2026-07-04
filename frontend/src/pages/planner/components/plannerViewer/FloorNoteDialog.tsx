@@ -1,10 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import type { NoteContent } from '@/shared/noteEditor'
 import { isNoteEmpty } from '@/shared/noteEditor'

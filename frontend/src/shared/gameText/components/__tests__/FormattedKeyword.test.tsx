@@ -317,9 +317,7 @@ describe('FormattedKeyword', () => {
         displayText: 'Test',
       }
 
-      const { container } = render(
-        <FormattedKeyword keyword={keyword} className="custom-class" />
-      )
+      const { container } = render(<FormattedKeyword keyword={keyword} className="custom-class" />)
 
       expect(container.firstChild).toHaveClass('custom-class')
     })

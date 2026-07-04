@@ -32,7 +32,16 @@ function KeywordCardGrid({
   selectedEgoGifts,
   searchQuery,
 }: {
-  spec: Record<string, { iconId: string | null; buffType: string; identities: string[]; egos: string[]; egoGifts: string[] }>
+  spec: Record<
+    string,
+    {
+      iconId: string | null
+      buffType: string
+      identities: string[]
+      egos: string[]
+      egoGifts: string[]
+    }
+  >
   selectedBuffTypes: Set<BuffType>
   selectedIdentities: Set<string>
   selectedEgos: Set<string>
@@ -51,7 +60,7 @@ function KeywordCardGrid({
           egos: entry.egos,
           egoGifts: entry.egoGifts,
         })),
-    [spec]
+    [spec],
   )
 
   return (
@@ -76,7 +85,11 @@ function KeywordPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useKeywordListSpec()
 
-  const { values: filters, setters, resetAll } = useSetFilters({
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
     selectedBuffTypes: new Set<BuffType>(),
     selectedIdentities: new Set<string>(),
     selectedEgos: new Set<string>(),
@@ -93,10 +106,7 @@ function KeywordPageShell() {
 
   const primaryFilters = (
     <>
-      <FilterSection
-        title={t('keyword.buffType')}
-        activeCount={filters.selectedBuffTypes.size}
-      >
+      <FilterSection title={t('keyword.buffType')} activeCount={filters.selectedBuffTypes.size}>
         <CompactBuffTypeFilter
           selectedBuffTypes={filters.selectedBuffTypes}
           onBuffTypesChange={setters.selectedBuffTypes}
@@ -120,10 +130,7 @@ function KeywordPageShell() {
         </Suspense>
       </FilterSection>
 
-      <FilterSection
-        title={t('keyword.filterEgo')}
-        activeCount={filters.selectedEgos.size}
-      >
+      <FilterSection title={t('keyword.filterEgo')} activeCount={filters.selectedEgos.size}>
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <EGOSearchDropdown
             selectedEgos={filters.selectedEgos}
@@ -133,10 +140,7 @@ function KeywordPageShell() {
         </Suspense>
       </FilterSection>
 
-      <FilterSection
-        title={t('keyword.filterEgoGift')}
-        activeCount={filters.selectedEgoGifts.size}
-      >
+      <FilterSection title={t('keyword.filterEgoGift')} activeCount={filters.selectedEgoGifts.size}>
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <EgoGiftSearchDropdown
             selectedEgoGifts={filters.selectedEgoGifts}

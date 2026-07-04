@@ -8,7 +8,8 @@ import { BASE_BUFF_IDS } from '@/shared/gameText'
 export const startBuffQueryKeys = {
   all: (version: MDVersion) => ['startBuff', `md${version}`] as const,
   data: (version: MDVersion) => [...startBuffQueryKeys.all(version), 'data'] as const,
-  i18n: (version: MDVersion, language: string) => [...startBuffQueryKeys.all(version), 'i18n', language] as const,
+  i18n: (version: MDVersion, language: string) =>
+    [...startBuffQueryKeys.all(version), 'i18n', language] as const,
 }
 
 // Data query options
@@ -48,15 +49,18 @@ export function useStartBuffData(version: MDVersion) {
   const { data: i18nData } = useSuspenseQuery(createI18nQueryOptions(version, i18n.language))
 
   // Merge data with i18n
-  const data = Object.entries(buffData).map(([id, buff]) => ({
-    id,
-    baseId: buff.baseId,
-    level: buff.level,
-    name: i18nData[buff.localizeId] || buff.localizeId,
-    cost: buff.cost,
-    effects: buff.effects,
-    iconSpriteId: buff.uiConfig.iconSpriteId,
-  } as StartBuff))
+  const data = Object.entries(buffData).map(
+    ([id, buff]) =>
+      ({
+        id,
+        baseId: buff.baseId,
+        level: buff.level,
+        name: i18nData[buff.localizeId] || buff.localizeId,
+        cost: buff.cost,
+        effects: buff.effects,
+        iconSpriteId: buff.uiConfig.iconSpriteId,
+      }) as StartBuff,
+  )
 
   return {
     data,
@@ -68,19 +72,23 @@ export function useStartBuffData(version: MDVersion) {
  * Gets a specific buff by ID from the data
  */
 export function getBuffById(buffs: StartBuff[] | undefined, id: number): StartBuff | undefined {
-  return buffs?.find(b => b.id === String(id))
+  return buffs?.find((b) => b.id === String(id))
 }
 
 /**
  * Gets all buffs for a specific base ID (all enhancement levels)
  */
 export function getBuffsByBaseId(buffs: StartBuff[] | undefined, baseId: number): StartBuff[] {
-  return buffs?.filter(b => b.baseId === baseId) ?? []
+  return buffs?.filter((b) => b.baseId === baseId) ?? []
 }
 
 /**
  * Gets the 10 base buffs (level 1) for initial display
  */
 export function getBaseBuffs(buffs: StartBuff[] | undefined): StartBuff[] {
-  return buffs?.filter(b => BASE_BUFF_IDS.includes(b.baseId as typeof BASE_BUFF_IDS[number]) && b.level === 1) ?? []
+  return (
+    buffs?.filter(
+      (b) => BASE_BUFF_IDS.includes(b.baseId as (typeof BASE_BUFF_IDS)[number]) && b.level === 1,
+    ) ?? []
+  )
 }

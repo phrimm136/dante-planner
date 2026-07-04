@@ -1,12 +1,12 @@
-import { env } from './env';
-import { queryClient } from './queryClient';
+import { env } from './env'
+import { queryClient } from './queryClient'
 
-const API_BASE_URL = env.VITE_API_BASE_URL;
+const API_BASE_URL = env.VITE_API_BASE_URL
 
 /** Readable cookie holding the double-submit CSRF token (set by the backend). */
-const CSRF_COOKIE_NAME = 'csrf';
+const CSRF_COOKIE_NAME = 'csrf'
 /** Request header that must echo the CSRF cookie on state-changing requests. */
-const CSRF_HEADER_NAME = 'X-CSRF-Token';
+const CSRF_HEADER_NAME = 'X-CSRF-Token'
 
 /**
  * Read the readable `csrf` cookie for double-submit CSRF protection.
@@ -15,12 +15,10 @@ const CSRF_HEADER_NAME = 'X-CSRF-Token';
  */
 function readCsrfToken(): string | null {
   if (typeof document === 'undefined') {
-    return null;
+    return null
   }
-  const match = document.cookie.match(
-    new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`)
-  );
-  return match ? decodeURIComponent(match[1]) : null;
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE_NAME}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
 }
 
 /**
@@ -29,11 +27,11 @@ function readCsrfToken(): string | null {
  */
 export interface ApiConflictError {
   /** Error code identifying the conflict type */
-  code: string;
+  code: string
   /** Human-readable error message */
-  message: string;
+  message: string
   /** Current server version (for sync resolution) - REQUIRED for conflict resolution */
-  serverVersion: number;
+  serverVersion: number
 }
 
 /**
@@ -41,9 +39,9 @@ export interface ApiConflictError {
  */
 export interface ApiErrorResponse {
   /** Error code (e.g., USER_BANNED, USER_TIMED_OUT, PLANNER_FORBIDDEN) */
-  code: string;
+  code: string
   /** Human-readable error message */
-  message: string;
+  message: string
 }
 
 /**
@@ -52,12 +50,12 @@ export interface ApiErrorResponse {
  */
 export class ConflictError extends Error {
   /** Server's current version for sync resolution */
-  readonly serverVersion: number;
+  readonly serverVersion: number
 
   constructor(message: string, serverVersion: number) {
-    super(message);
-    this.name = 'ConflictError';
-    this.serverVersion = serverVersion;
+    super(message)
+    this.name = 'ConflictError'
+    this.serverVersion = serverVersion
   }
 }
 
@@ -67,8 +65,8 @@ export class ConflictError extends Error {
  */
 export class NotFoundError extends Error {
   constructor(message: string) {
-    super(message);
-    this.name = 'NotFoundError';
+    super(message)
+    this.name = 'NotFoundError'
   }
 }
 
@@ -77,11 +75,11 @@ export class NotFoundError extends Error {
  * User account has been permanently banned
  */
 export class BannedError extends Error {
-  readonly code = 'USER_BANNED';
+  readonly code = 'USER_BANNED'
 
   constructor(message: string) {
-    super(message);
-    this.name = 'BannedError';
+    super(message)
+    this.name = 'BannedError'
   }
 }
 
@@ -90,11 +88,11 @@ export class BannedError extends Error {
  * User account is temporarily restricted
  */
 export class TimedOutError extends Error {
-  readonly code = 'USER_TIMED_OUT';
+  readonly code = 'USER_TIMED_OUT'
 
   constructor(message: string) {
-    super(message);
-    this.name = 'TimedOutError';
+    super(message)
+    this.name = 'TimedOutError'
   }
 }
 
@@ -103,12 +101,12 @@ export class TimedOutError extends Error {
  * Used for PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.
  */
 export class ForbiddenError extends Error {
-  readonly code: string;
+  readonly code: string
 
   constructor(code: string, message: string) {
-    super(message);
-    this.name = 'ForbiddenError';
-    this.code = code;
+    super(message)
+    this.name = 'ForbiddenError'
+    this.code = code
   }
 }
 
@@ -117,11 +115,11 @@ export class ForbiddenError extends Error {
  * Thrown when nginx returns SERVICE_UPDATING (maintenance flag present)
  */
 export class ServiceUpdatingError extends Error {
-  readonly code = 'SERVICE_UPDATING';
+  readonly code = 'SERVICE_UPDATING'
 
   constructor(message: string) {
-    super(message);
-    this.name = 'ServiceUpdatingError';
+    super(message)
+    this.name = 'ServiceUpdatingError'
   }
 }
 
@@ -130,40 +128,37 @@ export class ServiceUpdatingError extends Error {
  * Thrown when nginx returns BACKEND_UNAVAILABLE (no maintenance flag)
  */
 export class BackendUnavailableError extends Error {
-  readonly code = 'BACKEND_UNAVAILABLE';
+  readonly code = 'BACKEND_UNAVAILABLE'
 
   constructor(message: string) {
-    super(message);
-    this.name = 'BackendUnavailableError';
+    super(message)
+    this.name = 'BackendUnavailableError'
   }
 }
 
 export class ApiClient {
-  static async fetch<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const method = (options.method ?? 'GET').toUpperCase();
-    const callerHeaders = (options.headers as Record<string, string> | undefined) ?? {};
-    const headers: Record<string, string> = { ...callerHeaders };
+  static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const method = (options.method ?? 'GET').toUpperCase()
+    const callerHeaders = (options.headers as Record<string, string> | undefined) ?? {}
+    const headers: Record<string, string> = { ...callerHeaders }
 
     // Bodyless GET/HEAD must stay CORS "simple" — a request Content-Type would force a
     // preflight OPTIONS that blocks the cold-load request burst.
-    const isBodylessMethod = method === 'GET' || method === 'HEAD';
-    const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const isBodylessMethod = method === 'GET' || method === 'HEAD'
+    const isFormDataBody = typeof FormData !== 'undefined' && options.body instanceof FormData
     const callerSetContentType = Object.keys(callerHeaders).some(
-      (key) => key.toLowerCase() === 'content-type'
-    );
+      (key) => key.toLowerCase() === 'content-type',
+    )
     if (!isBodylessMethod && !isFormDataBody && !callerSetContentType) {
-      headers['Content-Type'] = 'application/json';
+      headers['Content-Type'] = 'application/json'
     }
 
     // Double-submit CSRF: echo the readable `csrf` cookie on state-changing
     // methods. GET/HEAD stay header-free to remain CORS "simple" requests.
     if (!isBodylessMethod) {
-      const csrfToken = readCsrfToken();
+      const csrfToken = readCsrfToken()
       if (csrfToken) {
-        headers[CSRF_HEADER_NAME] = csrfToken;
+        headers[CSRF_HEADER_NAME] = csrfToken
       }
     }
 
@@ -171,113 +166,114 @@ export class ApiClient {
       ...options,
       headers,
       credentials: 'include', // Include HttpOnly cookies
-    });
+    })
 
     // Backend handles token refresh automatically via JwtAuthenticationFilter
     // If we get 401, auth has genuinely failed (no valid refresh token)
     if (response.status === 401) {
-      queryClient.setQueryData(['auth', 'me'], null);
-      throw new Error(`HTTP error! status: 401`);
+      queryClient.setQueryData(['auth', 'me'], null)
+      throw new Error(`HTTP error! status: 401`)
     }
 
     // Handle 403 Forbidden with typed errors based on error code
     if (response.status === 403) {
       try {
-        const errorBody = (await response.json()) as ApiErrorResponse;
+        const errorBody = (await response.json()) as ApiErrorResponse
         if (errorBody.code === 'USER_BANNED') {
-          throw new BannedError(errorBody.message);
+          throw new BannedError(errorBody.message)
         }
         if (errorBody.code === 'USER_TIMED_OUT') {
-          throw new TimedOutError(errorBody.message);
+          throw new TimedOutError(errorBody.message)
         }
         // Other 403 errors (PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.)
-        throw new ForbiddenError(errorBody.code, errorBody.message);
+        throw new ForbiddenError(errorBody.code, errorBody.message)
       } catch (error) {
         // If error is already one of our custom types, re-throw it
-        if (error instanceof BannedError || error instanceof TimedOutError || error instanceof ForbiddenError) {
-          throw error;
+        if (
+          error instanceof BannedError ||
+          error instanceof TimedOutError ||
+          error instanceof ForbiddenError
+        ) {
+          throw error
         }
         // Body parsing failed, throw generic 403
-        throw new Error('Forbidden');
+        throw new Error('Forbidden')
       }
     }
 
     // Handle 404 Not Found with typed error
     if (response.status === 404) {
-      throw new NotFoundError('Resource not found');
+      throw new NotFoundError('Resource not found')
     }
 
     // Handle 409 conflict with typed error
     if (response.status === 409) {
-      let serverVersion = 1;
+      let serverVersion = 1
       try {
-        const errorBody = (await response.json()) as ApiConflictError;
-        serverVersion = errorBody.serverVersion ?? 1;
+        const errorBody = (await response.json()) as ApiConflictError
+        serverVersion = errorBody.serverVersion ?? 1
       } catch {
         // Body parsing failed, use default
       }
-      throw new ConflictError(
-        `Conflict: server version ${serverVersion}`,
-        serverVersion
-      );
+      throw new ConflictError(`Conflict: server version ${serverVersion}`, serverVersion)
     }
 
     // Handle 503 Service Unavailable - distinguish planned deploy vs crash
     if (response.status === 503) {
-      let code = '';
-      let message = 'Service temporarily unavailable';
+      let code = ''
+      let message = 'Service temporarily unavailable'
       try {
-        const errorBody = (await response.json()) as ApiErrorResponse;
-        code = errorBody.code || '';
-        message = errorBody.message || message;
+        const errorBody = (await response.json()) as ApiErrorResponse
+        code = errorBody.code || ''
+        message = errorBody.message || message
       } catch {
         // Body parsing failed, use defaults
       }
       if (code === 'SERVICE_UPDATING') {
-        throw new ServiceUpdatingError(message);
+        throw new ServiceUpdatingError(message)
       }
-      throw new BackendUnavailableError(message);
+      throw new BackendUnavailableError(message)
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     // Handle 204 No Content (e.g., logout, DELETE operations)
     if (response.status === 204) {
-      return undefined as T;
+      return undefined as T
     }
 
-    return response.json();
+    return response.json()
   }
 
   static async get<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'GET' });
+    return this.fetch<T>(endpoint, { method: 'GET' })
   }
 
   static async post<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    })
   }
 
   static async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    })
   }
 
   static async delete<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'DELETE' });
+    return this.fetch<T>(endpoint, { method: 'DELETE' })
   }
 
   static async patch<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.fetch<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    })
   }
 
   /**
@@ -287,6 +283,6 @@ export class ApiClient {
   static createEventSource(endpoint: string): EventSource {
     return new EventSource(`${API_BASE_URL}${endpoint}`, {
       withCredentials: true,
-    });
+    })
   }
 }

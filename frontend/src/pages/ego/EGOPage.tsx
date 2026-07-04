@@ -61,7 +61,7 @@ function EGOCardGrid({
         season: specData.season,
         maxThreadspin: specData.maxThreadspin,
       })),
-    [spec]
+    [spec],
   )
 
   return (
@@ -97,7 +97,11 @@ function EGOPageShell() {
   }, [spec])
 
   // Filter states
-  const { values: filters, setters, resetAll } = useSetFilters({
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
     selectedSinners: new Set<string>(),
     selectedKeywords: new Set<string>(),
     selectedBattleKeywords: new Set<string>(),
@@ -143,7 +147,7 @@ function EGOPageShell() {
       </FilterSection>
     </>
   )
-  
+
   // Secondary filters (shown when mobile expanded): Skill Attributes, Attack Types, EGO Types, Season
   const secondaryFilters = (
     <>
@@ -220,32 +224,32 @@ function EGOPageShell() {
 
   return (
     <FilterPageLayout
-        filterContent={filterContent}
-        primaryFilters={primaryFilters}
-        secondaryFilters={secondaryFilters}
-        activeFilterCount={activeFilterCount}
-        onResetAll={handleResetAll}
-        searchBar={
-          <SearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            placeholder={t('pages.ego.searchBar')}
-          />
-        }
-      >
-        {/* No Suspense needed - EGOCardGrid doesn't suspend */}
-        <EGOCardGrid
-          spec={spec}
-          selectedSinners={filters.selectedSinners}
-          selectedKeywords={filters.selectedKeywords}
-          selectedBattleKeywords={filters.selectedBattleKeywords}
-          selectedAttributes={filters.selectedAttributes}
-          selectedAtkTypes={filters.selectedAtkTypes}
-          selectedEGOTypes={filters.selectedEGOTypes}
-          selectedSeasons={filters.selectedSeasons}
+      filterContent={filterContent}
+      primaryFilters={primaryFilters}
+      secondaryFilters={secondaryFilters}
+      activeFilterCount={activeFilterCount}
+      onResetAll={handleResetAll}
+      searchBar={
+        <SearchBar
           searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          placeholder={t('pages.ego.searchBar')}
         />
-      </FilterPageLayout>
+      }
+    >
+      {/* No Suspense needed - EGOCardGrid doesn't suspend */}
+      <EGOCardGrid
+        spec={spec}
+        selectedSinners={filters.selectedSinners}
+        selectedKeywords={filters.selectedKeywords}
+        selectedBattleKeywords={filters.selectedBattleKeywords}
+        selectedAttributes={filters.selectedAttributes}
+        selectedAtkTypes={filters.selectedAtkTypes}
+        selectedEGOTypes={filters.selectedEGOTypes}
+        selectedSeasons={filters.selectedSeasons}
+        searchQuery={searchQuery}
+      />
+    </FilterPageLayout>
   )
 }
 

@@ -50,9 +50,7 @@ export function useEGODetailSpec(id: string) {
  */
 export function useEGODetailI18n(id: string) {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOI18nQueryOptions(id, i18n.language))
   return i18nData
 }
 
@@ -69,9 +67,7 @@ export function useEGODetailData(id: string) {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createEGODataQueryOptions(id))
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOI18nQueryOptions(id, i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOI18nQueryOptions(id, i18n.language))
 
   return {
     spec,

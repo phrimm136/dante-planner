@@ -5,7 +5,11 @@ import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
 import { FormattedDescription } from '@/shared/gameText'
 import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getAffinityIconPath, getIdentityPassiveCountIconPath, getLockIconPath } from '@/shared/assets'
+import {
+  getAffinityIconPath,
+  getIdentityPassiveCountIconPath,
+  getLockIconPath,
+} from '@/shared/assets'
 import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
 
@@ -42,13 +46,7 @@ interface PassiveCardWithSuspenseProps {
  * PassiveCard - Base component that displays passive information.
  * Takes name and desc as props directly.
  */
-export function PassiveCard({
-  name,
-  desc,
-  flavor,
-  condition,
-  isLocked,
-}: PassiveCardProps) {
+export function PassiveCard({ name, desc, flavor, condition, isLocked }: PassiveCardProps) {
   const { t } = useTranslation(['database', 'common'])
 
   return (
@@ -67,16 +65,8 @@ export function PassiveCard({
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
             <span key={affinity} className="flex items-center gap-1">
-              <img
-                src={getAffinityIconPath(affinity)}
-                alt={affinity}
-                className="w-8 h-8"
-              />
-              <img
-                src={getIdentityPassiveCountIconPath()}
-                alt="x"
-                className="w-4 h-4"
-              />
+              <img src={getAffinityIconPath(affinity)} alt={affinity} className="w-8 h-8" />
+              <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
               <span>{count}</span>
             </span>
           ))}
@@ -134,17 +124,9 @@ export function PassiveCardWithSuspense({
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
             <span key={affinity} className="flex items-center gap-1">
-              <img
-                src={getAffinityIconPath(affinity)}
-                alt={affinity}
-                className="h-8"
-              />
-              <img
-                src={getIdentityPassiveCountIconPath()}
-                alt="x"
-                className="w-4 h-4"
-              />
-              <span 
+              <img src={getAffinityIconPath(affinity)} alt={affinity} className="h-8" />
+              <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
+              <span
                 className="text-[32px] leading-[32px] -mt-3"
                 style={{ fontFamily: getDisplayFontForNumeric() }}
               >
@@ -152,10 +134,7 @@ export function PassiveCardWithSuspense({
               </span>
             </span>
           ))}
-          <span
-            className="text-lg"
-            style={getDisplayFontForLanguage(i18n.language)}
-          >
+          <span className="text-lg" style={getDisplayFontForLanguage(i18n.language)}>
             {t(`passive.${condition.type.toLowerCase()}`)}
           </span>
         </div>

@@ -67,9 +67,7 @@ describe('parseKeywords', () => {
 
     it('returns single text segment for plain text without brackets', () => {
       const result = parseKeywords('Plain text without keywords')
-      expect(result).toEqual([
-        { type: 'text', content: 'Plain text without keywords' },
-      ])
+      expect(result).toEqual([{ type: 'text', content: 'Plain text without keywords' }])
     })
 
     it('parses single keyword with surrounding text', () => {
@@ -231,7 +229,12 @@ describe('getKeywordColor', () => {
     })
 
     it('returns Positive color for Positive buffType', () => {
-      const result = getKeywordColor('Protection', 'battleKeyword', mockColorCodes, mockBattleKeywords)
+      const result = getKeywordColor(
+        'Protection',
+        'battleKeyword',
+        mockColorCodes,
+        mockBattleKeywords,
+      )
       expect(result).toBe('#00ff00')
     })
 
@@ -239,7 +242,12 @@ describe('getKeywordColor', () => {
       const keywordsWithUnknownBuff = {
         Weird: { name: 'Weird', desc: 'Weird', iconId: null, buffType: 'UnknownType' },
       }
-      const result = getKeywordColor('Weird', 'battleKeyword', mockColorCodes, keywordsWithUnknownBuff)
+      const result = getKeywordColor(
+        'Weird',
+        'battleKeyword',
+        mockColorCodes,
+        keywordsWithUnknownBuff,
+      )
       expect(result).toBe('#93f13e')
     })
 
@@ -256,7 +264,12 @@ describe('getKeywordColor', () => {
     })
 
     it('returns another key-specific color', () => {
-      const result = getKeywordColor('OnSucceedAttack', 'skillTag', mockColorCodes, mockBattleKeywords)
+      const result = getKeywordColor(
+        'OnSucceedAttack',
+        'skillTag',
+        mockColorCodes,
+        mockBattleKeywords,
+      )
       expect(result).toBe('#00ffff')
     })
 
@@ -277,7 +290,12 @@ describe('getKeywordColor', () => {
   describe('edge cases', () => {
     it('handles empty colorCodes with Critical fallback', () => {
       const emptyColorCodes: Record<string, string> = {}
-      const result = getKeywordColor('Sinking', 'battleKeyword', emptyColorCodes, mockBattleKeywords)
+      const result = getKeywordColor(
+        'Sinking',
+        'battleKeyword',
+        emptyColorCodes,
+        mockBattleKeywords,
+      )
       // No Critical in colorCodes, so returns '' via ?? ''
       expect(result).toBe('')
     })

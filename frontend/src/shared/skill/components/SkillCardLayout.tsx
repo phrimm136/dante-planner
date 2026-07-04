@@ -11,11 +11,7 @@ interface SkillCardLayoutProps {
  * - Top section: Image composite + Info panel (horizontal)
  * - Bottom section: Skill description
  */
-export function SkillCardLayout({
-  imageComposite,
-  infoPanel,
-  description,
-}: SkillCardLayoutProps) {
+export function SkillCardLayout({ imageComposite, infoPanel, description }: SkillCardLayoutProps) {
   return (
     <div className="p-4">
       {/* Top section: Image + Info */}

@@ -9,21 +9,21 @@ interface SinnerFilterProps {
   onSelectionChange: (sinners: Set<string>) => void
 }
 
-export const SinnerFilter = memo(function SinnerFilter({
-  selectedSinners,
-  onSelectionChange,
-}: SinnerFilterProps) {
-  const getIconPath = (sinner: string) => getSinnerIconPath(sinner)
+export const SinnerFilter = memo(
+  function SinnerFilter({ selectedSinners, onSelectionChange }: SinnerFilterProps) {
+    const getIconPath = (sinner: string) => getSinnerIconPath(sinner)
 
-  return (
-    <IconFilter
-      options={SINNERS}
-      selectedOptions={selectedSinners}
-      onSelectionChange={onSelectionChange}
-      getIconPath={getIconPath}
-    />
-  )
-}, (prev, next) => {
-  return areSetsEqual(prev.selectedSinners, next.selectedSinners)
-  // onSelectionChange excluded - callback identity changes but behavior is same
-})
+    return (
+      <IconFilter
+        options={SINNERS}
+        selectedOptions={selectedSinners}
+        onSelectionChange={onSelectionChange}
+        getIconPath={getIconPath}
+      />
+    )
+  },
+  (prev, next) => {
+    return areSetsEqual(prev.selectedSinners, next.selectedSinners)
+    // onSelectionChange excluded - callback identity changes but behavior is same
+  },
+)

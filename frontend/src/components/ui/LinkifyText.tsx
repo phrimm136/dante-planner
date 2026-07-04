@@ -14,9 +14,15 @@ export function linkifyText(text: string): ReactNode[] {
     }
     const href = matchStr.includes('@') ? `mailto:${matchStr}` : matchStr
     parts.push(
-      <a key={index} href={href} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+      <a
+        key={index}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline"
+      >
         {matchStr}
-      </a>
+      </a>,
     )
     lastIndex = index + matchStr.length
   }
