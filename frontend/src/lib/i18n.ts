@@ -40,7 +40,7 @@ const resources = {
   CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, epithet: cnEpithet, sinnerNames: cnSinnerNames, moderation: cnModeration },
 }
 
-i18n
+void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

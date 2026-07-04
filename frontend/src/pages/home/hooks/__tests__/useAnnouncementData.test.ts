@@ -193,7 +193,7 @@ describe('useAnnouncementData business logic', () => {
       { 'expiring-soon': { title: 'Expiring', body: 'Body' } }
     )
 
-    const { result, rerender } = renderHook(() => useAnnouncementData())
+    const { result } = renderHook(() => useAnnouncementData())
     // Before midnight on expiry date — entry is still visible (expiresAt is same-day)
     // new Date('2026-02-20') = midnight UTC; our time is 10:00 UTC = past midnight → filtered
     expect(result.current).toHaveLength(0)

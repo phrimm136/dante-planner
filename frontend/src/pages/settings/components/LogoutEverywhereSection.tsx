@@ -33,7 +33,7 @@ export function LogoutEverywhereSection() {
         toast.success(t('settings.logoutEverywhere.success'))
         setDialogOpen(false)
         queryClient.setQueryData(authQueryKeys.me, null)
-        navigate({ to: '/' })
+        void navigate({ to: '/' })
       },
       onError: () => {
         toast.error(t('settings.logoutEverywhere.error'))

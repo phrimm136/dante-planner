@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DetailEntitySelector } from '../DetailEntitySelector'
-import { MAX_LEVEL, MAX_ENTITY_TIER } from '@/shared/gameData'
+import { MAX_LEVEL } from '@/shared/gameData'
 
 describe('DetailEntitySelector', () => {
   describe('Identity mode', () => {

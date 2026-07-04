@@ -110,7 +110,7 @@ describe('CommentNodeSchema', () => {
   })
 
   it('should reject missing required fields', () => {
-    const { content, ...missingContent } = validCommentNode
+    const { content: _content, ...missingContent } = validCommentNode
     const result = CommentNodeSchema.safeParse(missingContent)
     expect(result.success).toBe(false)
   })

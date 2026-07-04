@@ -46,6 +46,10 @@ jobs:
           yarn install --frozen-lockfile
           yarn test
 
+      - name: FE Lint
+        working-directory: ./frontend
+        run: yarn lint
+
   build-frontend:
     needs: [checkout, test-frontend]
     runs-on: ubuntu-latest

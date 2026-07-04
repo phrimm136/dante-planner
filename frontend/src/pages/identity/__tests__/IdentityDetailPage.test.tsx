@@ -213,7 +213,7 @@ vi.mock('@/pages/identity/components/TraitsDisplay', () => ({
 // Mock fetch for hooks that use fetch
 beforeEach(() => {
   vi.spyOn(global, 'fetch').mockImplementation((url) => {
-    const urlStr = url.toString()
+    const urlStr = url instanceof Request ? url.url : url.toString()
     // Return mock data for various fetch endpoints
     if (urlStr.includes('skillTag.json')) {
       return Promise.resolve({

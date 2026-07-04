@@ -332,7 +332,7 @@ describe('validateSkillEAState', () => {
     const errors = validateSkillEAState(state)
     expect(errors.some(e => e.code === 'SKILL_EA_MISSING_SINNER')).toBe(true)
     const err = errors.find(e => e.code === 'SKILL_EA_MISSING_SINNER')
-    expect((err?.context?.missingSinners as string[]).includes('01')).toBe(true)
+    expect((err!.context!.missingSinners as string[]).includes('01')).toBe(true)
   })
 
   it('invalid slot key "3" returns SKILL_EA_INVALID_SLOT', () => {
@@ -486,7 +486,7 @@ describe('validatePlannerForPublish – gift affordability', () => {
     expect(err).toBeDefined()
     expect(err.floorNumber).toBe(1)
     expect(err.context?.themePackId).toBe('1110')
-    expect((err.context?.giftIds as string[]).includes('9220')).toBe(true)
+    expect((err.context!.giftIds as string[]).includes('9220')).toBe(true)
   })
 
   it("enhanced gift '19220' (level 1) not affordable for theme pack '1110' → FLOOR_UNAFFORDABLE_GIFT", () => {

@@ -336,7 +336,7 @@ export function PlannerDetailHeader({
     }
 
     // Sync enabled — upload then publish
-    handlePublishWithUpload()
+    void handlePublishWithUpload()
   }
 
   const handlePublishWithUpload = async () => {

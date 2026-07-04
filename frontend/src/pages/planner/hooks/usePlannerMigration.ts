@@ -202,7 +202,7 @@ export function usePlannerMigration(): PlannerMigrationResult {
     if (migrationAttemptedRef.current) return
     migrationAttemptedRef.current = true
 
-    performMigration()
+    void performMigration()
   }, [performMigration])
 
   /**
@@ -212,7 +212,7 @@ export function usePlannerMigration(): PlannerMigrationResult {
   const retryMigration = useCallback(() => {
     migrationAttemptedRef.current = false
     setErrorCode(null)
-    performMigration()
+    void performMigration()
   }, [performMigration])
 
   return {

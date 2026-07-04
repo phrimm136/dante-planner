@@ -220,7 +220,7 @@ describe('getCascadeIngredients', () => {
         materials: [[9069, 9099, 9182]],
       }
       const result = getCascadeIngredients(recipe)
-      expect(result.sort()).toEqual([9069, 9099, 9182])
+      expect(result.sort((a, b) => a - b)).toEqual([9069, 9099, 9182])
     })
 
     it('handles gift 9088 (two recipe options)', () => {
@@ -231,7 +231,7 @@ describe('getCascadeIngredients', () => {
         ],
       }
       const result = getCascadeIngredients(recipe)
-      expect(result.sort()).toEqual([9003, 9053, 9101, 9155, 9157])
+      expect(result.sort((a, b) => a - b)).toEqual([9003, 9053, 9101, 9155, 9157])
     })
 
     it('handles gift 9761 (hardOnly, single recipe)', () => {
@@ -239,7 +239,7 @@ describe('getCascadeIngredients', () => {
         materials: [[9759, 9760]],
       }
       const result = getCascadeIngredients(recipe)
-      expect(result.sort()).toEqual([9759, 9760])
+      expect(result.sort((a, b) => a - b)).toEqual([9759, 9760])
     })
   })
 })

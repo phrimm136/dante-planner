@@ -333,7 +333,7 @@ describe('matchesDeckFilter — search', () => {
 
 describe('matchesDeckFilter — type signature exercise', () => {
   it('accepts the union at the call site and narrows via mode', () => {
-    const item: IdentityListItem | EGOListItem = makeIdentity()
+    const item: Parameters<typeof matchesDeckFilter>[0] = makeIdentity()
     const mode: EntityMode = 'identity'
     const state = makeState({ selectedDefTypes: new Set(['GUARD']) })
     expect(matchesDeckFilter(item, state, mode, EMPTY_MAPPINGS)).toBe(true)

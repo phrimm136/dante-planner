@@ -218,7 +218,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
 
     // Navigate to forked planner edit page, replacing current history entry
     // Back button will go to original view (which now shows server version)
-    navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
+    void navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
   }, [navigate])
 
   // ============================================================================

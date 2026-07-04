@@ -484,7 +484,9 @@ function stringifySearchWith(obj: Record<string, unknown>): string {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined || value === null || value === '') continue
-    params.set(key, String(value))
+    // Search values are primitives or arrays (CSV like ?identity=10101,10102);
+    // arrays stringify comma-joined, matching String(array).
+    params.set(key, Array.isArray(value) ? value.join(',') : String(value as string | number | boolean))
   }
   const str = params.toString()
   if (!str) return ''

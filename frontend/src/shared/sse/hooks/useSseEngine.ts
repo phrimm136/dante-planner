@@ -129,6 +129,11 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
       // Backend auto-refresh handles token expiry transparently
       reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
     },
+    // setupEventSource (used by doReconnect above) is intentionally omitted: it
+    // depends on scheduleReconnect, so listing it would form a re-creation cycle
+    // that re-runs the mount effect every render and churns the SSE connection.
+    // The captured closure stays valid — setupEventSource's own deps are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [incrementReconnectAttempts, resetReconnectAttempts, shouldReconnect, createConnection]
   )
 

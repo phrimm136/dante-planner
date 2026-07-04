@@ -67,7 +67,7 @@ function AccountDeleteSectionContent() {
 
         // Wait 2 seconds then redirect
         setTimeout(() => {
-          navigate({ to: '/' })
+          void navigate({ to: '/' })
         }, 2000)
       },
       onError: () => {

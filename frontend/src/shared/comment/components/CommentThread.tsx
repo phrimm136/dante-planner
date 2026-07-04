@@ -23,7 +23,6 @@ interface CommentThreadProps {
   isPublished: boolean
   isAuthenticated: boolean
   isModerator: boolean
-  plannerId: string
   onReply: (parentId: string, content: string) => void
   onEdit: (commentId: string, content: string) => void
   onDelete: (commentId: string) => void
@@ -62,7 +61,6 @@ function commentThreadPropsAreEqual(
     prev.isPublished === next.isPublished &&
     prev.isAuthenticated === next.isAuthenticated &&
     prev.isModerator === next.isModerator &&
-    prev.plannerId === next.plannerId &&
     prev.depth === next.depth
   )
 }
@@ -72,7 +70,6 @@ export const CommentThread = memo(function CommentThread({
   isPublished,
   isAuthenticated,
   isModerator,
-  plannerId,
   onReply,
   onEdit,
   onDelete,
@@ -129,7 +126,6 @@ export const CommentThread = memo(function CommentThread({
           isPublished={isPublished}
           isAuthenticated={isAuthenticated}
           isModerator={isModerator}
-          plannerId={plannerId}
           onReply={onReply}
           onEdit={onEdit}
           onDelete={onDelete}

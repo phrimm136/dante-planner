@@ -117,7 +117,7 @@ vi.mock('../../../lib/plannerValidation', () => ({
   validatePlannerForDraftSave: () => null,
 }))
 vi.mock('../../../lib/plannerValidationErrors', () => ({
-  toUserFriendlyError: (e: unknown) => ({ key: 'error.key', params: {} }),
+  toUserFriendlyError: (_e: unknown) => ({ key: 'error.key', params: {} }),
 }))
 vi.mock('../../../hooks/usePlannerOwnerNotifications', () => ({
   useToggleOwnerNotifications: () => ({ mutate: vi.fn(), isPending: false }),
@@ -574,7 +574,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
   it('threads the server-bumped syncVersion into the local save on publish', async () => {
     mockSyncToServer.mockResolvedValue(syncedPlanner) // syncVersion: 2
     mockPublishMutate.mockImplementation((_id: string, opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void }) => {
-      void opts.onSuccess({ plannerId: PLANNER_ID, published: true })
+      opts.onSuccess({ plannerId: PLANNER_ID, published: true })
     })
     const { wrapper } = createWrapper()
     render(
@@ -711,7 +711,7 @@ describe('PlannerDetailHeader – unpublish', () => {
 
   it('saves the unpublished planner locally (published=false, version unchanged)', async () => {
     mockPublishMutate.mockImplementation((_id: string, opts: { onSuccess: (r: { plannerId: string; published: boolean }) => void }) => {
-      void opts.onSuccess({ plannerId: PLANNER_ID, published: false })
+      opts.onSuccess({ plannerId: PLANNER_ID, published: false })
     })
     const { wrapper } = createWrapper()
     render(

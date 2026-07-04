@@ -23,6 +23,9 @@ import { bucketAndSortFloorGifts } from '../floorGiftBucketing'
 import { DUNGEON_IDX } from '@/shared/gameData'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 
+// EGOGiftListItem resolves to an error/any type under oxlint's type-aware pass because test
+// files are excluded from tsconfig; the intersection is well-typed under tsc. False positive.
+// oxlint-disable-next-line typescript/no-redundant-type-constituents
 function makeGift(overrides: Partial<EGOGiftListItem> & { id: string }): EGOGiftListItem {
   return {
     tag: ['TIER_2'],
@@ -160,7 +163,7 @@ describe('bucketAndSortFloorGifts', () => {
 
     it('shows hardOnly in HARD', () => {
       const out = bucketAndSortFloorGifts([hardGift, normalGift], '1001', DUNGEON_IDX.HARD, 'tier-first')
-      expect(out.map(g => g.id).sort()).toEqual(['9100', '9102'])
+      expect(out.map(g => g.id).sort((a, b) => a.localeCompare(b))).toEqual(['9100', '9102'])
     })
 
     it('hides extremeOnly in HARD', () => {
@@ -170,7 +173,7 @@ describe('bucketAndSortFloorGifts', () => {
 
     it('shows extremeOnly in EXTREME', () => {
       const out = bucketAndSortFloorGifts([extremeGift, normalGift], '1001', DUNGEON_IDX.EXTREME, 'tier-first')
-      expect(out.map(g => g.id).sort()).toEqual(['9101', '9102'])
+      expect(out.map(g => g.id).sort((a, b) => a.localeCompare(b))).toEqual(['9101', '9102'])
     })
   })
 

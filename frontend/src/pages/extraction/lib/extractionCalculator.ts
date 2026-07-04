@@ -447,7 +447,7 @@ export function calculateCategoryDistribution(
  * @returns Convolved distribution [P(X+Y=0), P(X+Y=1), ...]
  */
 export function convolveDistributions(dist1: number[], dist2: number[]): number[] {
-  const result: number[] = new Array(dist1.length + dist2.length - 1).fill(0)
+  const result: number[] = Array.from({ length: dist1.length + dist2.length - 1 }, () => 0)
 
   for (let i = 0; i < dist1.length; i++) {
     for (let j = 0; j < dist2.length; j++) {

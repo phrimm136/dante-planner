@@ -437,7 +437,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
 
     return true
-  }, [getState, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType, published])
+  }, [getState, plannerId, saveAdapter, syncAdapter, isAuthenticated, syncEnabled, schemaVersion, contentVersion, plannerType, published, egoGiftSpec, egoGiftI18n])
 
   /**
    * Handle save errors with typed detection
@@ -728,7 +728,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     } finally {
       setIsSaving(false)
     }
-  }, [conflictState, getState, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, onKeepBothCreated, handleSaveError, schemaVersion, contentVersion, plannerType, t, isAuthenticated, syncEnabled])
+  }, [conflictState, getState, performSave, syncAdapter, saveAdapter, plannerId, onServerReload, onKeepBothCreated, handleSaveError, schemaVersion, contentVersion, plannerType, t, isAuthenticated, egoGiftSpec, egoGiftI18n])
 
   /**
    * Clear error state
@@ -754,7 +754,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
       // Set new debounce timer
       timerRef.current = setTimeout(() => {
-        debouncedSave()
+        void debouncedSave()
       }, AUTO_SAVE_DEBOUNCE_MS)
     })
 

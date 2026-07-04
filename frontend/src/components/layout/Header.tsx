@@ -185,7 +185,7 @@ export function Header() {
   const displayFont = getDisplayFontForLabel()
 
   const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng)
+    void i18n.changeLanguage(lng)
   }
 
   return (

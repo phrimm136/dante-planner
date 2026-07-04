@@ -38,7 +38,7 @@ export function useTiptapEditor(providedEditor?: Editor | null): {
       return {
         editor: context.editor,
         editorState: context.editor.state,
-        canCommand: context.editor.can,
+        canCommand: context.editor.can.bind(context.editor),
       }
     },
   })

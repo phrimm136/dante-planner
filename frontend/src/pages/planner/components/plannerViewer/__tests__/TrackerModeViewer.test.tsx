@@ -25,7 +25,7 @@ vi.mock('react-i18next', async (importOriginal) => {
     useTranslation: () => ({
       t: (key: string, options?: Record<string, unknown>) => {
         if (key === 'pages.plannerMD.floor' && options?.number) {
-          return `Floor ${options.number}`
+          return `Floor ${options.number as number}`
         }
         if (key === 'pages.plannerMD.noteEditor.placeholder') return 'Note placeholder'
         if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'

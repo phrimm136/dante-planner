@@ -20,7 +20,7 @@ export type KeywordType = 'battleKeyword' | 'skillTag' | 'unknown'
  * Deliberately an OPEN union: pipeline data may carry buffType values beyond
  * the three known ones, so this must stay hand-written — do not narrow to an enum.
  */
-export type BuffType = 'Positive' | 'Negative' | 'Neutral' | string
+export type BuffType = 'Positive' | 'Negative' | 'Neutral' | (string & {})
 
 /**
  * Spec entry for a battle keyword from battleKeywordSpecList.json

@@ -54,7 +54,7 @@ describe('parseColorTags', () => {
     const result = parseColorTags('<size=75%>small text</size>')
     // The sanitize converts <size> to <small>, then ColoredText handles it
     // parseColorTags only does sanitize + parse, <small> stays as string
-    const text = result.join('')
+    const text = result.map((r) => (typeof r === 'string' ? r : '')).join('')
     expect(text).not.toContain('<size')
   })
 

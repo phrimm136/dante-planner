@@ -223,7 +223,6 @@ function CommentSectionContent({
               isPublished={isPublished}
               isAuthenticated={isAuthenticated}
               isModerator={isModerator}
-              plannerId={plannerId}
               onReply={handleReply}
               onEdit={handleEdit}
               onDelete={handleDelete}

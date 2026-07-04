@@ -45,7 +45,7 @@ export function ComprehensiveGiftGridTracker({
   egoGiftDoneMarks,
   onToggleEgoGiftDone,
   readOnly,
-  comprehensiveGiftIds = [],
+  comprehensiveGiftIds,
 }: ComprehensiveGiftGridTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
