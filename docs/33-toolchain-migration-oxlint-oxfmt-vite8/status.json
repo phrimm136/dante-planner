@@ -1,10 +1,10 @@
 {
   "totalPhases": 4,
-  "currentPhase": 2,
+  "currentPhase": 3,
   "phases": [
     { "name": "Oxlint adoption (type-aware)", "status": "done", "commit": "b42a6742" },
-    { "name": "Oxfmt one-shot reformat", "status": "done" },
-    { "name": "Vite 7 to 8 (Rolldown) — entry-gated", "status": "pending" },
+    { "name": "Oxfmt one-shot reformat", "status": "done", "commits": ["8015e612 (adopt)", "333472c2 (reformat)", "1d7af28f (blame-ignore)"] },
+    { "name": "Vite 7 to 8 (Rolldown) — entry-gated", "status": "done", "gate": "D16 2-core docker build PASS (11s); INV3b preserved; INV5 6229 pass; preview smoke ok" },
     { "name": "vp migrate — conditional on Phase 3", "status": "pending" }
   ]
 }

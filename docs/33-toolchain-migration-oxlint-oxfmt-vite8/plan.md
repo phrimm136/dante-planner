@@ -152,7 +152,17 @@ Work from the live count, not the spec table.
     / `cssMinify:'esbuild'` (needs esbuild devDep).
   - CJS default-import interop changed — invisible to tsc; run full suite AND manual app smoke (dev +
     preview of prod build, asset-heavy pages).
-  - `rollup-plugin-visualizer`: verify under Rolldown or drop (dev-only, not a blocker).
+  - `rollup-plugin-visualizer`: **DROPPED (2026-07-04).** Under Rolldown it HANGS the build
+    indefinitely at the renderChunk/generateBundle phase (main thread parks in `do_epoll_wait`, worker
+    threads idle — a plugin-compat hang masquerading as the 2-core deadlock, distinguishable because it
+    also hangs on 12 cores). Removing the plugin + import makes the build complete in ~5s. Its devDep is
+    removed. If bundle analysis is wanted later, use a Rolldown-native analyzer.
+  - **Musl binding trim recurs:** each `yarn add`/full `yarn install` (vite 8 upgrade included)
+    re-resolves and re-adds the redundant `@oxlint/@oxfmt/*-linux-x64-musl` bindings (yarn v1 can't
+    filter by libc). Trim them from yarn.lock before every commit; CI's `--frozen-lockfile` then honors
+    the trimmed lock. The vite 8 upgrade also needed lock surgery: removing the old `resolutions.vite`
+    pin left a stale `vite@7.2.2` stanza merged with vitest's peer range that blocked linking — delete
+    the `vite@...` stanzas from yarn.lock and reinstall to re-resolve to 8.x.
   - Browser targets rise (Chrome 111 / FF 114 / Safari 16.4) — accepted, note in PR.
 - Depends on: Phase 2
 - Verify: 2-core `vite build` completes (INV6); dist audit clean, no 404s (INV3b); suite green;

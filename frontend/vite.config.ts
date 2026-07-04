@@ -2,7 +2,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { visualizer } from 'rollup-plugin-visualizer'
 import path from 'path'
 import fs from 'fs'
 import type { Plugin } from 'vite'
@@ -82,11 +81,6 @@ export default defineConfig({
       }
     }),
     tailwindcss(),
-    visualizer({
-      filename: 'stats.html',
-      open: false,
-      gzipSize: true,
-    }),
   ],
   resolve: {
     alias: {
@@ -112,29 +106,26 @@ export default defineConfig({
   },
   publicDir: false,
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         entryFileNames: 'a/[hash:12].js',
         chunkFileNames: 'a/[hash:12].js',
         assetFileNames: 'a/[hash:12][extname]',
-        manualChunks(id) {
-          if (!id.includes('node_modules')) return
-          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/'))
-            return 'react-vendor'
-          if (id.includes('@tanstack/react-query') || id.includes('@tanstack/react-router'))
-            return 'tanstack'
-          if (id.includes('@radix-ui/'))
-            return 'radix'
-          if (id.includes('i18next') || id.includes('react-i18next') || id.includes('i18next-browser-languagedetector'))
-            return 'i18n'
-          if (id.includes('lucide-react'))
-            return 'icons'
-          if (id.includes('node_modules/zod'))
-            return 'zod'
-          if (id.includes('node_modules/sonner'))
-            return 'sonner'
-          if (id.includes('@tiptap/'))
-            return 'tiptap'
+        // Vendor splitter. Rolldown evaluates groups in order, first match wins —
+        // mirrors the old manualChunks if-chain (react-vendor must precede the
+        // react-i18next/react-router matchers; the `react` trailing slash keeps it
+        // from swallowing react-dom/react-i18next).
+        codeSplitting: {
+          groups: [
+            { name: 'react-vendor', test: /node_modules\/(react-dom|react)\// },
+            { name: 'tanstack', test: /node_modules\/@tanstack\/(react-query|react-router)/ },
+            { name: 'radix', test: /node_modules\/@radix-ui\// },
+            { name: 'i18n', test: /node_modules\/(i18next|react-i18next|i18next-browser-languagedetector)/ },
+            { name: 'icons', test: /node_modules\/lucide-react/ },
+            { name: 'zod', test: /node_modules\/zod/ },
+            { name: 'sonner', test: /node_modules\/sonner/ },
+            { name: 'tiptap', test: /node_modules\/@tiptap\// },
+          ],
         },
       },
     },
