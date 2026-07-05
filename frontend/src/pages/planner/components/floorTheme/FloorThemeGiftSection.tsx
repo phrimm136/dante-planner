@@ -182,11 +182,11 @@ export function FloorThemeGiftSection({
     >
       <div
         className={cn(
-          'flex flex-col [orientation:landscape]:flex-row sm:flex-row items-center [orientation:landscape]:items-start sm:items-start gap-4',
+          'flex flex-col landscape:flex-row sm:flex-row items-center landscape:items-start sm:items-start gap-4',
           className,
         )}
       >
-        <div className="flex flex-col w-56 h-104 items-center [orientation:landscape]:shrink-0 sm:shrink-0">
+        <div className="flex flex-col w-56 h-104 items-center landscape:shrink-0 sm:shrink-0">
           {/* Difficulty indicator */}
           <DifficultyIndicator difficulty={difficultyLabel} />
 
