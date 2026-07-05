@@ -13,9 +13,12 @@ on:
 
 jobs:
   check-origin:
+    permissions: {}
     uses: ./.github/workflows/check-pr-origin.yml
 
   checkout:
+    permissions:
+      contents: read
     needs: check-origin
     if: >-
       needs.check-origin.outputs.is-internal == 'true' ||

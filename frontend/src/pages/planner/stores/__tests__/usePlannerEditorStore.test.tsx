@@ -68,12 +68,10 @@ describe('usePlannerEditorStore', () => {
     it('setEquipment accepts an updater function', () => {
       const store = createPlannerEditorStore()
 
-      store
-        .getState()
-        .setEquipment((prev) => ({
-          ...prev,
-          '99': { identity: { id: 'X', uptie: 4, level: 1 }, egos: {} },
-        }))
+      store.getState().setEquipment((prev) => ({
+        ...prev,
+        '99': { identity: { id: 'X', uptie: 4, level: 1 }, egos: {} },
+      }))
 
       expect(store.getState().equipment['99']).toEqual({
         identity: { id: 'X', uptie: 4, level: 1 },
@@ -260,16 +258,14 @@ describe('usePlannerEditorStore', () => {
       const store = createPlannerEditorStore()
       const defaultEmpty = createEmptyNoteContent()
 
-      store
-        .getState()
-        .initializeFromPlanner(
-          makeContent({
-            sectionNotes: {
-              intro: { content: 'only-intro' },
-            } as unknown as MDPlannerContent['sectionNotes'],
-          }),
-          { title: 'T', category: '5F', isPublished: false },
-        )
+      store.getState().initializeFromPlanner(
+        makeContent({
+          sectionNotes: {
+            intro: { content: 'only-intro' },
+          } as unknown as MDPlannerContent['sectionNotes'],
+        }),
+        { title: 'T', category: '5F', isPublished: false },
+      )
 
       const notes = store.getState().sectionNotes
       // Supplied key is taken verbatim (content ?? '')
