@@ -29,13 +29,13 @@ function serveWhitelistedStatic(): Plugin {
         next()
       })
     },
-    writeBundle() {
+    async writeBundle() {
       const distRoot = path.resolve(__dirname, 'dist')
       for (const dir of STATIC_WHITELIST) {
         const src = path.join(STATIC_ROOT, dir)
         const dst = path.join(distRoot, dir)
         if (fs.existsSync(src)) {
-          fs.cpSync(src, dst, {
+          await fs.promises.cp(src, dst, {
             recursive: true,
             filter: (s) => !s.endsWith('.png'),
           })
