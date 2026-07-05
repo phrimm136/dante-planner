@@ -8,10 +8,10 @@
  */
 
 import { Suspense } from 'react'
-import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/lib/assetPaths'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
+import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/assets'
+import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/lib/constants'
+import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/shared/gameData'
 
 interface AllEnhancementsPanelProps {
   /** Maximum enhancement level to display (0, 1, or 2) */
@@ -56,11 +56,7 @@ function EnhancementRow({
         {/* Enhancement Cost */}
         {cost !== null && (
           <div className="flex items-center gap-2">
-            <img
-              src={getEGOGiftCostIconPath()}
-              alt="Cost"
-              className="w-6 h-6"
-            />
+            <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
         )}
@@ -79,10 +75,10 @@ function EnhancementRow({
 export function AllEnhancementsPanel({
   maxEnhancement,
   descriptions = [],
-  costs
+  costs,
 }: AllEnhancementsPanelProps) {
   // Render all levels from 0 to maxEnhancement (structure stays visible)
-  const levelsToRender = ENHANCEMENT_LEVELS.filter(level => level <= maxEnhancement)
+  const levelsToRender = ENHANCEMENT_LEVELS.filter((level) => level <= maxEnhancement)
 
   return (
     <div className="border rounded-lg p-4 space-y-4">

@@ -3,20 +3,23 @@ import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
 import type { EGOGiftListItem, EGOGiftSpecListSchema } from '@/pages/egoGift'
 import type { z } from 'zod'
-import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/lib/constants'
+import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/shared/gameData'
 import { BOOLEAN_FILTER_OPTIONS } from '@/lib/constants'
-import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
-import { FilterSection } from '@/components/filter/FilterSection'
+import { calculateActiveFilterCount } from '@/shared/filter'
+import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { FilterPageLayout } from '@/shared/filter'
+import { FilterSection } from '@/shared/filter'
 import { CompactEGOGiftKeywordFilter } from '@/pages/egoGift'
 import { CompactDifficultyFilter } from '@/pages/egoGift'
 import { CompactTierFilter } from '@/pages/egoGift'
-import { ThemePackDropdown } from '@/components/filter/ThemePackDropdown'
-import { BattleKeywordDropdown } from '@/components/filter/BattleKeywordDropdown'
-import { CompactAttributeTypeFilter } from '@/components/filter/CompactAttributeTypeFilter'
-import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { SearchBar } from '@/components/common/SearchBar'
+import { ThemePackDropdown } from '@/shared/filter'
+import { useThemePackListData } from '@/pages/themePack'
+import { BattleKeywordDropdown } from '@/shared/filter'
+import { CompactAttributeTypeFilter } from '@/shared/filter'
+import { CompactIconFilter } from '@/shared/filter'
+import { SearchBar } from '@/shared/filter'
 import { EGOGiftList } from '@/pages/egoGift'
-import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
+import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
@@ -62,7 +65,7 @@ function EGOGiftCardGrid({
         extremeOnly: specData.extremeOnly,
         fusioned: specData.fusioned,
       })),
-    [spec]
+    [spec],
   )
 
   return (
@@ -90,61 +93,51 @@ function EGOGiftPageShell() {
   const spec = useEGOGiftListSpec()
 
   // Filter states
-  const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(new Set())
-  const [selectedBattleKeywords, setSelectedBattleKeywords] = useState<Set<string>>(new Set())
-  const [selectedDifficulties, setSelectedDifficulties] = useState<Set<EGOGiftDifficulty>>(new Set())
-  const [selectedTiers, setSelectedTiers] = useState<Set<EGOGiftTier>>(new Set())
-  const [selectedThemePacks, setSelectedThemePacks] = useState<Set<string>>(new Set())
-  const [selectedAttributeTypes, setSelectedAttributeTypes] = useState<Set<EGOGiftAttributeType>>(new Set())
-  const [selectedFusioned, setSelectedFusioned] = useState<Set<string>>(new Set())
-  const [selectedExclusive, setSelectedExclusive] = useState<Set<string>>(new Set())
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
+    selectedKeywords: new Set<string>(),
+    selectedBattleKeywords: new Set<string>(),
+    selectedDifficulties: new Set<EGOGiftDifficulty>(),
+    selectedTiers: new Set<EGOGiftTier>(),
+    selectedThemePacks: new Set<string>(),
+    selectedAttributeTypes: new Set<EGOGiftAttributeType>(),
+    selectedFusioned: new Set<string>(),
+    selectedExclusive: new Set<string>(),
+  })
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Reset all filters
   const handleResetAll = () => {
-    setSelectedKeywords(new Set())
-    setSelectedBattleKeywords(new Set())
-    setSelectedDifficulties(new Set())
-    setSelectedTiers(new Set())
-    setSelectedThemePacks(new Set())
-    setSelectedAttributeTypes(new Set())
-    setSelectedFusioned(new Set())
-    setSelectedExclusive(new Set())
+    resetAll()
     setSearchQuery('')
   }
 
-
   // Calculate active filter count for mobile badge
-  const activeFilterCount =
-    selectedKeywords.size +
-    selectedBattleKeywords.size +
-    selectedDifficulties.size +
-    selectedTiers.size +
-    selectedThemePacks.size +
-    selectedAttributeTypes.size +
-    selectedFusioned.size +
-    selectedExclusive.size
+  const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
   // Primary filters (always visible on mobile): Keyword and Difficulty
   const primaryFilters = (
     <>
       <FilterSection
         title={t('filters.keyword', 'Keyword')}
-        activeCount={selectedKeywords.size}
+        activeCount={filters.selectedKeywords.size}
       >
         <CompactEGOGiftKeywordFilter
-          selectedKeywords={selectedKeywords}
-          onSelectionChange={setSelectedKeywords}
+          selectedKeywords={filters.selectedKeywords}
+          onSelectionChange={setters.selectedKeywords}
         />
       </FilterSection>
 
       <FilterSection
         title={t('filters.difficulty', 'Difficulty')}
-        activeCount={selectedDifficulties.size}
+        activeCount={filters.selectedDifficulties.size}
       >
         <CompactDifficultyFilter
-          selectedDifficulties={selectedDifficulties}
-          onSelectionChange={setSelectedDifficulties}
+          selectedDifficulties={filters.selectedDifficulties}
+          onSelectionChange={setters.selectedDifficulties}
         />
       </FilterSection>
     </>
@@ -153,34 +146,31 @@ function EGOGiftPageShell() {
   // Secondary filters (shown when mobile expanded): Tier, Theme Pack, Attribute Type
   const secondaryFilters = (
     <>
-      <FilterSection
-        title={t('filters.tier', 'Tier')}
-        activeCount={selectedTiers.size}
-      >
+      <FilterSection title={t('filters.tier', 'Tier')} activeCount={filters.selectedTiers.size}>
         <CompactTierFilter
-          selectedTiers={selectedTiers}
-          onSelectionChange={setSelectedTiers}
+          selectedTiers={filters.selectedTiers}
+          onSelectionChange={setters.selectedTiers}
         />
       </FilterSection>
 
       <FilterSection
         title={t('filters.attributeType', 'Attribute')}
-        activeCount={selectedAttributeTypes.size}
+        activeCount={filters.selectedAttributeTypes.size}
       >
         <CompactAttributeTypeFilter
-          selectedAttributeTypes={selectedAttributeTypes}
-          onAttributeTypesChange={setSelectedAttributeTypes}
+          selectedAttributeTypes={filters.selectedAttributeTypes}
+          onAttributeTypesChange={setters.selectedAttributeTypes}
         />
       </FilterSection>
 
       <FilterSection
         title={t('filters.fusioned', 'Fusioned')}
-        activeCount={selectedFusioned.size}
+        activeCount={filters.selectedFusioned.size}
       >
         <CompactIconFilter
           options={BOOLEAN_FILTER_OPTIONS}
-          selectedOptions={selectedFusioned}
-          onSelectionChange={setSelectedFusioned}
+          selectedOptions={filters.selectedFusioned}
+          onSelectionChange={setters.selectedFusioned}
           getLabel={(v) => v}
           columns={5}
         />
@@ -188,12 +178,12 @@ function EGOGiftPageShell() {
 
       <FilterSection
         title={t('filters.themePackExclusive', 'Theme Pack Exclusive')}
-        activeCount={selectedExclusive.size}
+        activeCount={filters.selectedExclusive.size}
       >
         <CompactIconFilter
           options={BOOLEAN_FILTER_OPTIONS}
-          selectedOptions={selectedExclusive}
-          onSelectionChange={setSelectedExclusive}
+          selectedOptions={filters.selectedExclusive}
+          onSelectionChange={setters.selectedExclusive}
           getLabel={(v) => v}
           columns={5}
         />
@@ -201,25 +191,26 @@ function EGOGiftPageShell() {
 
       <FilterSection
         title={t('filters.themePack', 'Theme Pack')}
-        activeCount={selectedThemePacks.size}
+        activeCount={filters.selectedThemePacks.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <ThemePackDropdown
-            selectedThemePacks={selectedThemePacks}
-            onThemePacksChange={setSelectedThemePacks}
+            selectedThemePacks={filters.selectedThemePacks}
+            onThemePacksChange={setters.selectedThemePacks}
+            useListData={useThemePackListData}
           />
         </Suspense>
       </FilterSection>
 
       <FilterSection
         title={t('filters.additionalKeyword', 'Additional Keywords')}
-        activeCount={selectedBattleKeywords.size}
+        activeCount={filters.selectedBattleKeywords.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <BattleKeywordDropdown
             entityType="egoGift"
-            selectedBattleKeywords={selectedBattleKeywords}
-            onSelectionChange={setSelectedBattleKeywords}
+            selectedBattleKeywords={filters.selectedBattleKeywords}
+            onSelectionChange={setters.selectedBattleKeywords}
           />
         </Suspense>
       </FilterSection>
@@ -254,14 +245,14 @@ function EGOGiftPageShell() {
       {/* Name search uses deferred hook in EGOGiftList */}
       <EGOGiftCardGrid
         spec={spec}
-        selectedKeywords={selectedKeywords}
-        selectedBattleKeywords={selectedBattleKeywords}
-        selectedDifficulties={selectedDifficulties}
-        selectedTiers={selectedTiers}
-        selectedThemePacks={selectedThemePacks}
-        selectedAttributeTypes={selectedAttributeTypes}
-        selectedFusioned={selectedFusioned}
-        selectedExclusive={selectedExclusive}
+        selectedKeywords={filters.selectedKeywords}
+        selectedBattleKeywords={filters.selectedBattleKeywords}
+        selectedDifficulties={filters.selectedDifficulties}
+        selectedTiers={filters.selectedTiers}
+        selectedThemePacks={filters.selectedThemePacks}
+        selectedAttributeTypes={filters.selectedAttributeTypes}
+        selectedFusioned={filters.selectedFusioned}
+        selectedExclusive={filters.selectedExclusive}
         searchQuery={searchQuery}
       />
     </FilterPageLayout>

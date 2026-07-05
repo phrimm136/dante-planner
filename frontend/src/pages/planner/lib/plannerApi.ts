@@ -36,7 +36,7 @@ export const plannerApi = {
    */
   async list(page = 0, size = 100): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
     const data = await ApiClient.get<{ content: unknown[]; last: boolean }>(
-      `${PLANNERS_BASE}?page=${page}&size=${size}`
+      `${PLANNERS_BASE}?page=${page}&size=${size}`,
     )
     return {
       content: ServerPlannerSummaryArraySchema.parse(data.content),
@@ -89,11 +89,9 @@ export const plannerApi = {
   async upsert(
     id: PlannerId | string,
     request: UpsertPlannerRequest,
-    force?: boolean
+    force?: boolean,
   ): Promise<ServerPlannerResponse> {
-    const endpoint = force
-      ? `${PLANNERS_BASE}/${id}?force=true`
-      : `${PLANNERS_BASE}/${id}`
+    const endpoint = force ? `${PLANNERS_BASE}/${id}?force=true` : `${PLANNERS_BASE}/${id}`
     const data = await ApiClient.put(endpoint, request)
     return ServerPlannerResponseSchema.parse(data)
   },

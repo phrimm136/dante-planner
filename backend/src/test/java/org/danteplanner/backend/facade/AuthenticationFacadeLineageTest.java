@@ -1,24 +1,25 @@
 package org.danteplanner.backend.facade;
+import org.danteplanner.backend.auth.facade.AuthenticationFacade;
 
-import org.danteplanner.backend.entity.AuthProviderType;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import jakarta.servlet.http.HttpServletResponse;
-import org.danteplanner.backend.config.JwtProperties;
-import org.danteplanner.backend.config.LineageRotationFlag;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserRole;
-import org.danteplanner.backend.exception.SessionRevokedException;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.UserAccountLifecycleService;
-import org.danteplanner.backend.service.UserService;
-import org.danteplanner.backend.service.oauth.OAuthProviderRegistry;
-import org.danteplanner.backend.service.token.RefreshRotationService;
-import org.danteplanner.backend.service.token.RotationResult;
-import org.danteplanner.backend.service.token.TokenBlacklistService;
-import org.danteplanner.backend.service.token.TokenClaims;
-import org.danteplanner.backend.service.token.TokenGenerator;
-import org.danteplanner.backend.service.token.TokenValidator;
-import org.danteplanner.backend.util.CookieConstants;
-import org.danteplanner.backend.util.CookieUtils;
+import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.shared.config.LineageRotationFlag;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.auth.exception.SessionRevokedException;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
+import org.danteplanner.backend.auth.token.RefreshRotationService;
+import org.danteplanner.backend.auth.token.RotationResult;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenClaims;
+import org.danteplanner.backend.auth.token.TokenGenerator;
+import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -118,7 +119,7 @@ class AuthenticationFacadeLineageTest {
         when(refreshRotationService.rotate(eq(oldRefresh), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(tokenGenerator.generateAccessToken(eq(testUser.getId()), eq(testUser.getEmail()), any(UserRole.class)))
+        when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
         when(jwtProperties.getCookieExpirySeconds()).thenReturn(604800);
 
@@ -142,7 +143,7 @@ class AuthenticationFacadeLineageTest {
         SessionRevokedException ex = assertThrows(SessionRevokedException.class,
                 () -> facade.refreshTokens(stolen, response));
         assertEquals("fam-theft", ex.getFamilyId());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any(), any());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     @Test

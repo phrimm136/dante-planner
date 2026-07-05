@@ -1,15 +1,16 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { EGOListItem, EGOType } from '../types/EGOTypes'
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useEGOListI18nDeferred } from '../hooks/useEGOListData'
-import type { Season, SkillAttributeType, AtkType } from '@/lib/constants'
-import { CARD_GRID } from '@/lib/constants'
-import { sortEGOByDate } from '@/lib/entitySort'
-import { getSinnerFromId } from '@/lib/utils'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import type { Season, SkillAttributeType, AtkType } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { sortEGOByDate } from '@/shared/filter'
+import { getSinnerFromId } from '@/shared/gameData'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOCardLink } from './EGOCardLink'
 
 interface EGOListProps {
@@ -50,23 +51,13 @@ export function EGOList({
   // Sort all EGOs once (stable order for CSS-based filtering)
   const sortedEGOs = useMemo(() => sortEGOByDate(egos), [egos])
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when EGOs change (new data loaded)
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [sortedEGOs])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < sortedEGOs.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, sortedEGOs.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, sortedEGOs.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: sortedEGOs.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: sortedEGOs,
+  })
 
   // Create Set of visible EGO IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -85,7 +76,7 @@ export function EGOList({
       // Keyword filter - EGO must have ALL selected keywords
       if (selectedKeywords.size > 0) {
         const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-          ego.skillKeywordList.includes(selectedKeyword)
+          ego.skillKeywordList.includes(selectedKeyword),
         )
         if (!hasAllKeywords) continue
       }
@@ -93,7 +84,7 @@ export function EGOList({
       // Battle keyword filter - OR logic (EGO must have ANY selected battle keyword)
       if (selectedBattleKeywords.size > 0) {
         const hasAnyBattleKeyword = (ego.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword)
+          selectedBattleKeywords.has(keyword),
         )
         if (!hasAnyBattleKeyword) continue
       }
@@ -101,7 +92,7 @@ export function EGOList({
       // Skill attribute filter - AND logic (EGO must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
         const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-          ego.attributeTypes.includes(attr)
+          ego.attributeTypes.includes(attr),
         )
         if (!hasAllAttributes) continue
       }
@@ -109,7 +100,7 @@ export function EGOList({
       // Attack type filter - AND logic (EGO must have ALL selected attack types)
       if (selectedAtkTypes.size > 0) {
         const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-          ego.atkTypes.includes(atkType)
+          ego.atkTypes.includes(atkType),
         )
         if (!hasAllAtkTypes) continue
       }
@@ -135,7 +126,9 @@ export function EGOList({
         // Check keyword match (partial match on natural language, then lookup bracketed values)
         const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bracketedValue) => ego.skillKeywordList.includes(bracketedValue))
+            return bracketedValues.some((bracketedValue) =>
+              ego.skillKeywordList.includes(bracketedValue),
+            )
           }
           return false
         })
@@ -148,14 +141,24 @@ export function EGOList({
     }
 
     return ids
-  }, [sortedEGOs, selectedSinners, selectedKeywords, selectedBattleKeywords, selectedAttributes, selectedAtkTypes, selectedEGOTypes, selectedSeasons, searchQuery, keywordToValue, egoNames])
+  }, [
+    sortedEGOs,
+    selectedSinners,
+    selectedKeywords,
+    selectedBattleKeywords,
+    selectedAttributes,
+    selectedAtkTypes,
+    selectedEGOTypes,
+    selectedSeasons,
+    searchQuery,
+    keywordToValue,
+    egoNames,
+  ])
 
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('ego.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('ego.emptyState')}</div>
       </div>
     )
   }

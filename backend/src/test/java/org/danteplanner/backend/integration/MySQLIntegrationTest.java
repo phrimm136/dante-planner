@@ -1,13 +1,26 @@
 package org.danteplanner.backend.integration;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
 
-import org.danteplanner.backend.entity.AuthProviderType;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+
+import org.danteplanner.backend.notification.entity.NotificationType;
+
+import org.danteplanner.backend.notification.entity.Notification;
+
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.converter.KeywordSetConverter;
-import org.danteplanner.backend.entity.*;
+import org.danteplanner.backend.planner.converter.KeywordSetConverter;
+import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.repository.*;
-import org.danteplanner.backend.service.PlannerEngagementService;
+import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.CannotAcquireLockException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -236,12 +249,9 @@ class MySQLIntegrationTest {
                     if (attempt >= 25) {
                         throw deadlock;
                     }
-                    try {
-                        Thread.sleep(5);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        return;
-                    }
+                    // Backoff before retrying so the winning transaction can commit and
+                    // release its locks (parkNanos, not a synchronizer — the retry is the wait).
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(5));
                 }
             }
         }
@@ -446,7 +456,7 @@ class MySQLIntegrationTest {
 
         @Test
         @DisplayName("planner persists and restores every FE keyword through the real SET column")
-        void saveAllKeywords_roundTripsThroughSetColumn() {
+        void saveAllKeywords_WhenPersistedAndReloaded_RoundTripsThroughSetColumn() {
             // The full set joins to ~375 chars; only the MySQL SET(...) column (bitmask
             // storage) holds it. H2's converter-backed VARCHAR(255) cannot, which is why
             // this empirical all-keywords save lives in the containerized tier.

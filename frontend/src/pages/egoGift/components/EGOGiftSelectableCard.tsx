@@ -1,5 +1,5 @@
 import { useState, memo, useEffect, useRef } from 'react'
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { EGOGiftEnhancementSelector } from './EGOGiftEnhancementSelector'
 
 interface EGOGiftSelectableCardProps {
@@ -23,7 +23,7 @@ interface EGOGiftSelectableCardInnerProps {
 // Custom comparison for inner - exclude callback
 function areInnerPropsEqual(
   prev: EGOGiftSelectableCardInnerProps,
-  next: EGOGiftSelectableCardInnerProps
+  next: EGOGiftSelectableCardInnerProps,
 ): boolean {
   return (
     prev.giftId === next.giftId &&
@@ -109,7 +109,10 @@ const EGOGiftSelectableCardInner = memo(function EGOGiftSelectableCardInner({
 }, areInnerPropsEqual)
 
 // Custom comparison for outer wrapper - ignore children and callback
-function arePropsEqual(prev: EGOGiftSelectableCardProps, next: EGOGiftSelectableCardProps): boolean {
+function arePropsEqual(
+  prev: EGOGiftSelectableCardProps,
+  next: EGOGiftSelectableCardProps,
+): boolean {
   return (
     prev.giftId === next.giftId &&
     prev.enhancement === next.enhancement &&
@@ -140,9 +143,7 @@ export const EGOGiftSelectableCard = memo(function EGOGiftSelectableCard({
 }: EGOGiftSelectableCardProps) {
   return (
     <div className="relative inline-block cursor-pointer">
-      <div className="pointer-events-none">
-        {children}
-      </div>
+      <div className="pointer-events-none">{children}</div>
       <EGOGiftSelectableCardInner
         giftId={giftId}
         enhancement={enhancement}

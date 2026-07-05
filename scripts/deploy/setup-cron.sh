@@ -6,8 +6,6 @@ trap 'echo "[ERROR] $SCRIPT_NAME failed at line $LINENO (exit code: $?)" >&2; ex
 DEPLOY_DIR="/opt/danteplanner"
 cd "$DEPLOY_DIR"
 
-chmod +x scripts/ops/aws-backup.sh scripts/ops/update-cloudflare-ips.sh scripts/ops/export-cloudwatch-logs.sh
-
 # Create log files with proper ownership BEFORE registering crontab
 sudo touch /var/log/danteplanner-backup.log /var/log/cloudflare-ip-update.log /var/log/danteplanner-cw-export.log
 sudo chown ec2-user:ec2-user /var/log/danteplanner-backup.log /var/log/cloudflare-ip-update.log /var/log/danteplanner-cw-export.log

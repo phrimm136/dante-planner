@@ -16,6 +16,7 @@ game_term,identity,인격,Identity,人格,人格
 game_term,ego,E.G.O,E.G.O,E.G.O,E.G.O
 game_term,ego_gift,E.G.O 기프트,E.G.O Gifts,E.G.Oギフト,E.G.O饰品
 game_term,theme_pack,테마팩,Theme Pack,テーマパック,主题卡包
+game_term,trait_keyword,특성 키워드,Trait Keywords,特性キーワード,特性关键词
 mirror_dungeon,mirrordungeon_name_1,시작의 거울,Mirror of the Beginning,始まりの鏡,起始之镜
 mirror_dungeon,mirrordungeon_name_2,거울의 거울,Mirror of Mirrors,鏡の鏡,镜中之镜
 mirror_dungeon,mirrordungeon_name_3,호수의 거울,Mirror of the Lake,湖の鏡,湖之镜

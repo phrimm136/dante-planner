@@ -4,8 +4,8 @@ import {
   getAttackTypeIconPath,
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
-} from '@/lib/assetPaths'
-import type { SkillAttributeType } from '@/lib/constants'
+} from '@/shared/assets'
+import type { SkillAttributeType } from '@/shared/gameData'
 
 interface SkillImageSimpleProps {
   skillImagePath: string
@@ -56,7 +56,10 @@ export function SkillImageSimple({
               src={skillImagePath}
               alt="Skill"
               className="w-full h-full object-cover"
-              style={{ clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)' }}
+              style={{
+                clipPath:
+                  'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+              }}
               onError={onImageError}
             />
           ) : (

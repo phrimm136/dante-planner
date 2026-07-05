@@ -81,10 +81,10 @@ const equipment = usePlannerStore((s) => s.equipment[sinner])
 
 Before using ANY hardcoded value (colors, numbers, strings):
 
-1. Read `frontend/src/lib/constants.ts` to check if constant exists
-2. If YES: Import and use the constant
-3. If NO: Add to `constants.ts` FIRST, then import and use
-4. State "**Constants Check:** Using [CONSTANT_NAME] from constants.ts" or "**Constants Check:** Added [NEW_CONSTANT] to constants.ts"
+1. Check the right constants module: **game vocabulary** (sinners, affinities, status effects, level caps) lives in `frontend/src/shared/gameData/constants.ts`; **app configuration** (debounce delays, stale times, UI colors, thresholds) lives in `frontend/src/lib/constants.ts`
+2. If the constant exists: Import and use it
+3. If NO: Add it to the correct module FIRST, then import and use
+4. State "**Constants Check:** Using [CONSTANT_NAME] from [module]" or "**Constants Check:** Added [NEW_CONSTANT] to [module]"
 
 ---
 
@@ -102,19 +102,28 @@ Before using ANY hardcoded value (colors, numbers, strings):
 
 ## Quick Reference: Where to Find Patterns
 
+**Four-layer architecture.** Every module lives in exactly one layer:
+- **`pages/`** — route slices, one vertical folder per game-noun/feature (`components/hooks/lib/types/schemas` + `index.ts`)
+- **`shared/`** — co-owned domain modules, each reached only through its `@/shared/<concept>` public API
+- **`components/`** — domain-free React (`ui`, `layout`, `feedback`, `hooks`, vendored `tiptap-*`)
+- **`lib/`** — domain-free non-React utilities
+
+The boundary is enforced by `eslint.boundary.config.js` (deep-import ban + sink rules + frozen allowlists) — reach `shared`/`pages` modules only through their public API, never by deep import.
+
 | Need Pattern For | Check These Files |
 |------------------|-------------------|
-| Data fetching hook | `hooks/useEntityListData.ts`, `hooks/useEntityDetailData.ts` |
-| Zustand store | `stores/usePlannerStore.ts` |
+| Data fetching hook | `pages/<slice>/hooks/use<Entity>ListData.ts`, `use<Entity>DetailData.ts` — shared factories: `lib/queryOptions.ts` (`createStaticDataQueryOptions`), `lib/queryKeys.ts` |
+| Zustand store | `pages/planner/stores/usePlannerEditorStore.tsx` — SSE store: `shared/sse/stores/useSseStore.ts` |
 | Card component | `pages/identity/components/IdentityCard.tsx`, `pages/egoGift/components/EGOGiftCard.tsx` |
 | Detail page | `pages/identity/IdentityDetailPage.tsx`, `pages/ego/EGODetailPage.tsx` |
 | List page | `pages/identity/IdentityPage.tsx`, `pages/egoGift/EGOGiftPage.tsx` |
 | Type definitions | `pages/identity/types/IdentityTypes.ts`, `pages/egoGift/types/EGOGiftTypes.ts` |
 | Zod schemas | `pages/identity/schemas/IdentitySchemas.ts`, `pages/egoGift/schemas/EGOGiftSchemas.ts` |
-| Asset paths | `lib/assetPaths.ts` (ALL helper functions) |
-| Constants | `lib/constants.ts` (MAX_LEVEL, SINNERS, AFFINITIES, etc.) |
+| Asset paths | `shared/assets/` (helper functions + manifest, via `@/shared/assets`) |
+| Constants | game vocabulary → `shared/gameData/constants.ts` (SINNERS, AFFINITIES, MAX_LEVEL, etc.); app config → `lib/constants.ts` (debounce delays, stale times, UI colors, etc.) |
 | Styling utilities | `lib/utils.ts` (cn function) |
 | Validation utilities | `lib/validation.ts` (validateData) |
+| Shared domain module | `shared/<concept>/` — co-owned vertical modules (skill, gameText, filter, comment, notifications, auth, sse, noteEditor, moderation, assets, gameData), each `components/hooks/lib/schemas/types` behind a `@/shared/<concept>` public API |
 | Page slice (game-noun page) | `pages/<noun>/` — colocates list+detail route components, `components/hooks/lib/types/schemas`, exposes a public API via `index.ts`. Reach a slice only via `@/pages/<noun>`; cross-page reuse is allowed. |
 
 ---

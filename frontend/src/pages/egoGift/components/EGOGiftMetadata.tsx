@@ -15,9 +15,10 @@ import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
 import CostDisplay from './CostDisplay'
-import { getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
 import { useThemePackI18n } from '@/pages/themePack'
-import { DIFFICULTY_BADGE_STYLES, ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
+import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
+import { DIFFICULTY_BADGE_STYLES } from '@/lib/constants'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
@@ -73,11 +74,7 @@ function ThemePackDisplay({ themePack }: { themePack: string[] }) {
       {themePack.map((id, idx) => (
         <span key={id}>
           {idx > 0 && ', '}
-          <Link
-            to="/theme-pack/$id"
-            params={{ id }}
-            className="hover:underline text-foreground"
-          >
+          <Link to="/theme-pack/$id" params={{ id }} className="hover:underline text-foreground">
             {themePackI18n[id]?.name ?? id}
           </Link>
         </span>
@@ -129,12 +126,22 @@ export function EGOGiftMetadata({
         <MetadataRow label={t('egoGift.difficulty', 'Difficulty')}>
           <div className="flex gap-2">
             {hardOnly && (
-              <span className={cn('px-2 py-0.5 text-xs font-medium rounded', DIFFICULTY_BADGE_STYLES.HARD)}>
+              <span
+                className={cn(
+                  'px-2 py-0.5 text-xs font-medium rounded',
+                  DIFFICULTY_BADGE_STYLES.HARD,
+                )}
+              >
                 {t('egoGift.hard', 'Hard')}
               </span>
             )}
             {extremeOnly && (
-              <span className={cn('px-2 py-0.5 text-xs font-medium rounded', DIFFICULTY_BADGE_STYLES.EXTREME)}>
+              <span
+                className={cn(
+                  'px-2 py-0.5 text-xs font-medium rounded',
+                  DIFFICULTY_BADGE_STYLES.EXTREME,
+                )}
+              >
                 {t('egoGift.extreme', 'Extreme')}
               </span>
             )}

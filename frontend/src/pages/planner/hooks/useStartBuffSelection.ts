@@ -1,14 +1,10 @@
 import { startTransition } from 'react'
 import { useStartBuffData, getBaseBuffs } from './useStartBuffData'
-import { useBattleKeywords } from '@/hooks/useBattleKeywords'
-import type { MDVersion } from '@/lib/constants'
-import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
-import {
-  deriveEnhancements,
-  getBaseIdFromBuffId,
-  createBuffId,
-} from '@/types/StartBuffTypes'
-import type { EnhancementLevel } from '@/types/StartBuffTypes'
+import { useBattleKeywords } from '@/shared/gameText'
+import type { MDVersion } from '@/shared/gameData'
+import type { StartBuff, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
+import { deriveEnhancements, getBaseIdFromBuffId, createBuffId } from '@/shared/gameText'
+import type { EnhancementLevel } from '@/shared/gameText'
 
 /**
  * Return type for useStartBuffSelection hook
@@ -57,7 +53,7 @@ export interface UseStartBuffSelectionResult {
 export function useStartBuffSelection(
   mdVersion: MDVersion,
   selectedBuffIds: Set<number>,
-  onSelectionChange: (buffIds: Set<number>) => void
+  onSelectionChange: (buffIds: Set<number>) => void,
 ): UseStartBuffSelectionResult {
   const { data: buffs, i18n } = useStartBuffData(mdVersion)
   const { data: battleKeywords } = useBattleKeywords()
@@ -65,10 +61,10 @@ export function useStartBuffSelection(
   const enhancements = deriveEnhancements(selectedBuffIds)
   const baseBuffs = getBaseBuffs(buffs)
 
-  const displayBuffs = baseBuffs.map(baseBuff => {
+  const displayBuffs = baseBuffs.map((baseBuff) => {
     const enhancement = enhancements[baseBuff.baseId] ?? 0
     const displayBuffId = createBuffId(baseBuff.baseId, enhancement)
-    const displayBuff = buffs.find(b => Number(b.id) === displayBuffId)
+    const displayBuff = buffs.find((b) => Number(b.id) === displayBuffId)
     return displayBuff ?? baseBuff
   })
 

@@ -8,7 +8,7 @@ import { FeaturedBoss } from '../ThemePackDetailPage'
 // transform time, so getFeaturedBossImagePath returns "/missing-asset" at runtime
 // for any asset absent from the build manifest. Mock the helper to assert the
 // component passes packId + portraitId through and builds one img per entry.
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getFeaturedBossImagePath: (packId: string, portraitId: number | string) =>
     `/images/featuredBoss/${packId}_${portraitId}.webp`,
 }))

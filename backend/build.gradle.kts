@@ -4,6 +4,9 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
     id("org.owasp.dependencycheck") version "12.2.0"
+    id("de.aaschmid.cpd") version "3.5"
+    id("net.ltgt.errorprone") version "4.3.0"
+    checkstyle
     jacoco
 }
 
@@ -71,11 +74,79 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-mysql:2.0.4")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.4")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
+
+    errorprone("com.google.errorprone:error_prone_core:2.36.0")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+}
+
+// Error Prone: bug-pattern axis. Default ERROR-level checks only (no experimental).
+// Lombok-generated code carries @lombok.Generated (lombok.config) which Error Prone
+// skips, so the generator and the analyzer do not fight. JDK 16+ requires the javac
+// internals to be exported to the Error Prone plugin, via a forked compiler.
+tasks.withType<JavaCompile>().configureEach {
+    options.forkOptions.jvmArgs!!.addAll(
+        listOf(
+            "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+            "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+            "--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED",
+            "--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED"
+        )
+    )
+}
+
+checkstyle {
+    toolVersion = "10.21.0"
+    configFile = file("config/checkstyle/checkstyle.xml")
+    isIgnoreFailures = false
+    maxWarnings = 0
+}
+
+// Public-type Javadoc scoped to service classes only; kept out of the main
+// config so DTOs/entities/controllers are not pulled into a Javadoc baseline.
+val checkstyleServiceJavadoc by tasks.registering(Checkstyle::class) {
+    configFile = file("config/checkstyle/checkstyle-service-javadoc.xml")
+    source("src/main/java")
+    include("**/service/**Service.java")
+    classpath = files()
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+tasks.check {
+    dependsOn(checkstyleServiceJavadoc)
+}
+
+// Copy-paste detection as a regression ratchet: catch NEW production duplication.
+// Test sources are excluded — assertion/arrange scaffolding legitimately repeats
+// and would force a threshold high enough to blind the main-source check.
+// Threshold set just above the two pre-existing blocks the consolidation phases
+// deliberately kept (structure-varying / rule-of-three exempt, docs/32 Decisions):
+// PlannerIndexService's twin equipment-iteration extractors (112 tokens) and the
+// PlannerBookmarkId/SubscriptionId/VoteId composite-key boilerplate (101 tokens).
+cpd {
+    language = "java"
+    toolVersion = "7.7.0"
+    minimumTokenCount = 120
+}
+
+tasks.named<de.aaschmid.gradle.plugins.cpd.Cpd>("cpdCheck") {
+    source = files("src/main/java").asFileTree
+    reports {
+        text.required = true
+        xml.required = false
+    }
 }
 
 jacoco {

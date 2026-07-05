@@ -1,14 +1,16 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { IdentityListItem } from '../types/IdentityTypes'
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useIdentityListI18nDeferred } from '../hooks/useIdentityListData'
-import { CARD_GRID, type Season, type SkillAttributeType, type AtkType, type DefType } from '@/lib/constants'
-import { sortByReleaseDate } from '@/lib/entitySort'
-import { getSinnerFromId } from '@/lib/utils'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { type Season, type SkillAttributeType, type AtkType, type DefType } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { sortByReleaseDate } from '@/shared/filter'
+import { getSinnerFromId } from '@/shared/gameData'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { IdentityCardLink } from './IdentityCardLink'
 
 interface IdentityListProps {
@@ -62,28 +64,15 @@ export function IdentityList({
   const identityNames = useIdentityListI18nDeferred()
 
   // Sort all identities once (stable order for CSS-based filtering)
-  const sortedIdentities = useMemo(
-    () => sortByReleaseDate(identities),
-    [identities]
-  )
+  const sortedIdentities = useMemo(() => sortByReleaseDate(identities), [identities])
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when identities change (new data loaded)
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [sortedIdentities])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < sortedIdentities.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, sortedIdentities.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, sortedIdentities.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: sortedIdentities.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: sortedIdentities,
+  })
 
   // Create Set of visible identity IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -103,7 +92,7 @@ export function IdentityList({
       // Keyword filter - AND logic (identity must have ALL selected keywords)
       if (selectedKeywords.size > 0) {
         const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-          identity.skillKeywordList.includes(selectedKeyword)
+          identity.skillKeywordList.includes(selectedKeyword),
         )
         if (!hasAllKeywords) continue
       }
@@ -111,7 +100,7 @@ export function IdentityList({
       // Battle keyword filter - OR logic (identity must have ANY selected battle keyword)
       if (selectedBattleKeywords.size > 0) {
         const hasAnyBattleKeyword = (identity.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword)
+          selectedBattleKeywords.has(keyword),
         )
         if (!hasAnyBattleKeyword) continue
       }
@@ -119,7 +108,7 @@ export function IdentityList({
       // Attribute filter - AND logic (identity must have ALL selected attributes)
       if (selectedAttributes.size > 0) {
         const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-          identity.attributeTypes.includes(attr)
+          identity.attributeTypes.includes(attr),
         )
         if (!hasAllAttributes) continue
       }
@@ -127,7 +116,7 @@ export function IdentityList({
       // Attack type filter - AND logic (identity must have ALL selected attack types)
       if (selectedAtkTypes.size > 0) {
         const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-          identity.atkTypes.includes(atkType)
+          identity.atkTypes.includes(atkType),
         )
         if (!hasAllAtkTypes) continue
       }
@@ -135,7 +124,7 @@ export function IdentityList({
       // Defense type filter - AND logic (identity must have ALL selected defense types)
       if (selectedDefTypes.size > 0) {
         const hasAllDefTypes = Array.from(selectedDefTypes).every((defType) =>
-          identity.defenseTypes.includes(defType)
+          identity.defenseTypes.includes(defType),
         )
         if (!hasAllDefTypes) continue
       }
@@ -153,7 +142,7 @@ export function IdentityList({
       // Unit keyword filter - OR logic (identity has ANY selected unit keyword in unitKeywordList)
       if (selectedUnitKeywords.size > 0) {
         const hasAnyUnitKeyword = identity.unitKeywordList.some((keyword) =>
-          selectedUnitKeywords.has(keyword)
+          selectedUnitKeywords.has(keyword),
         )
         if (!hasAnyUnitKeyword) continue
       }
@@ -169,7 +158,9 @@ export function IdentityList({
         // Check keyword match (partial match on natural language, then lookup bracketed values)
         const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bracketedValue) => identity.skillKeywordList.includes(bracketedValue))
+            return bracketedValues.some((bracketedValue) =>
+              identity.skillKeywordList.includes(bracketedValue),
+            )
           }
           return false
         })
@@ -177,7 +168,9 @@ export function IdentityList({
         // Check unit keyword match (partial match on natural language, then lookup internal codes)
         const unitKeywordMatch = unitKeywordEntries.some(([naturalLang, internalCodes]) => {
           if (naturalLang.includes(lowerQuery)) {
-            return internalCodes.some((internalCode) => identity.unitKeywordList.includes(internalCode))
+            return internalCodes.some((internalCode) =>
+              identity.unitKeywordList.includes(internalCode),
+            )
           }
           return false
         })
@@ -210,9 +203,7 @@ export function IdentityList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('identity.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('identity.emptyState')}</div>
       </div>
     )
   }

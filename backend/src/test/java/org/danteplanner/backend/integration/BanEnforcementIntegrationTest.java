@@ -2,16 +2,16 @@ package org.danteplanner.backend.integration;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.dto.planner.UpsertPlannerRequest;
-import org.danteplanner.backend.entity.ModerationAction;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.repository.ModerationActionRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.ModerationService;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 /**
  * Integration tests for ban enforcement across the full stack.
@@ -96,12 +97,8 @@ class BanEnforcementIntegrationTest {
         // Arrange - ban the user
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
-        UpsertPlannerRequest request = new UpsertPlannerRequest();
-        request.setTitle("Test Planner");
-        request.setPlannerType(PlannerType.MIRROR_DUNGEON);
-        request.setCategory("5F");
-        request.setContent("{}");
-        request.setContentVersion(1);
+        UpsertPlannerRequest request = new UpsertPlannerRequest(
+                null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
 
         UUID plannerId = UUID.randomUUID();
 
@@ -117,7 +114,7 @@ class BanEnforcementIntegrationTest {
                 """.formatted(plannerId);
 
         // Act & Assert
-        mockMvc.perform(put("/api/planner/md/" + plannerId)
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
@@ -139,7 +136,7 @@ class BanEnforcementIntegrationTest {
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
         // Act & Assert
-        mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish")
+        mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish").with(withCsrf())
                         .cookie(userCookie()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("USER_BANNED")));
@@ -165,7 +162,7 @@ class BanEnforcementIntegrationTest {
                 """;
 
         // Act & Assert
-        mockMvc.perform(post("/api/planner/" + planner.getId() + "/comments")
+        mockMvc.perform(post("/api/planner/" + planner.getId() + "/comments").with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
@@ -175,7 +172,7 @@ class BanEnforcementIntegrationTest {
 
     @Test
     @DisplayName("Unbanned user can resume operations - verified by audit trail")
-    void unbannedUser_canResumeOperations() {
+    void unbanUser_WhenUnbanned_CanResumeOperations() {
         // Arrange - ban then unban
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
         moderationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
@@ -194,7 +191,7 @@ class BanEnforcementIntegrationTest {
 
     @Test
     @DisplayName("Ban action is logged to audit trail")
-    void banUser_logsAuditAction() {
+    void banUser_WhenBanned_LogsAuditAction() {
         // Arrange & Act
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
 
@@ -212,7 +209,7 @@ class BanEnforcementIntegrationTest {
 
     @Test
     @DisplayName("Unban action is logged to audit trail")
-    void unbanUser_logsAuditAction() {
+    void unbanUser_WhenUnbanned_LogsAuditAction() {
         // Arrange
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
@@ -238,7 +235,7 @@ class BanEnforcementIntegrationTest {
 
     @Test
     @DisplayName("Concurrent timeout and ban both block actions")
-    void concurrentRestrictions_bothBlock() throws Exception {
+    void concurrentRestrictions_WhenTimeoutAndBan_BothBlock() throws Exception {
         // Arrange - both timeout AND ban the user
         moderationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
@@ -257,7 +254,7 @@ class BanEnforcementIntegrationTest {
                 """.formatted(plannerId);
 
         // Act & Assert - timeout is checked first, so USER_TIMED_OUT
-        mockMvc.perform(put("/api/planner/md/" + plannerId)
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))

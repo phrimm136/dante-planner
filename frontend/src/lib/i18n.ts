@@ -34,13 +34,45 @@ import krSinnerNames from '@static/i18n/KR/sinnerNames.json'
 import cnSinnerNames from '@static/i18n/CN/sinnerNames.json'
 
 const resources = {
-  EN: { common: enCommon, database: enDatabase, planner: enPlanner, extraction: enExtraction, epithet: enEpithet, sinnerNames: enSinnerNames, moderation: enModeration },
-  JP: { common: jpCommon, database: jpDatabase, planner: jpPlanner, extraction: jpExtraction, epithet: jpEpithet, sinnerNames: jpSinnerNames, moderation: jpModeration },
-  KR: { common: krCommon, database: krDatabase, planner: krPlanner, extraction: krExtraction, epithet: krEpithet, sinnerNames: krSinnerNames, moderation: krModeration },
-  CN: { common: cnCommon, database: cnDatabase, planner: cnPlanner, extraction: cnExtraction, epithet: cnEpithet, sinnerNames: cnSinnerNames, moderation: cnModeration },
+  EN: {
+    common: enCommon,
+    database: enDatabase,
+    planner: enPlanner,
+    extraction: enExtraction,
+    epithet: enEpithet,
+    sinnerNames: enSinnerNames,
+    moderation: enModeration,
+  },
+  JP: {
+    common: jpCommon,
+    database: jpDatabase,
+    planner: jpPlanner,
+    extraction: jpExtraction,
+    epithet: jpEpithet,
+    sinnerNames: jpSinnerNames,
+    moderation: jpModeration,
+  },
+  KR: {
+    common: krCommon,
+    database: krDatabase,
+    planner: krPlanner,
+    extraction: krExtraction,
+    epithet: krEpithet,
+    sinnerNames: krSinnerNames,
+    moderation: krModeration,
+  },
+  CN: {
+    common: cnCommon,
+    database: cnDatabase,
+    planner: cnPlanner,
+    extraction: cnExtraction,
+    epithet: cnEpithet,
+    sinnerNames: cnSinnerNames,
+    moderation: cnModeration,
+  },
 }
 
-i18n
+void i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

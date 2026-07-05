@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
-import type { SortMode } from '@/components/common/Sorter'
-import { Sorter } from '@/components/common/Sorter'
-import { SearchBar } from '@/components/common/SearchBar'
+import type { SortMode } from '@/shared/filter'
+import { Sorter } from '@/shared/filter'
+import { SearchBar } from '@/shared/filter'
 import { EGOGiftKeywordFilter } from './EGOGiftKeywordFilter'
 
 interface EGOGiftFilterBarProps {

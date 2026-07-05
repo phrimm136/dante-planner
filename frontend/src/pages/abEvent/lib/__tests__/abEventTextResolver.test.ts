@@ -16,9 +16,12 @@ function createShared(overrides: Partial<AbEventShared> = {}): AbEventShared {
     effects: {
       Nothing: '<color=#ebcaa2>Nothing happened.</color>',
       GetConfirmedEgogift: '<color=#ebcaa2>E.G.O Gift {reward} acquired!</color>',
-      LoseHpOnly: '<color=#ebcaa2>{conditions}{targets}</color> <color=#e30000>{amount} HP</color> damage!',
-      RecoverHpMpSameAmount: '<color=#ebcaa2>{targets}</color> heal <color=#00ff9c>{amount} HP</color> and SP',
-      RecoverHpMpDifferentAmount: 'Heal <color=#00ff9c>{hpAmount} HP</color> and <color=#80c9ff>{mpAmount} SP</color>',
+      LoseHpOnly:
+        '<color=#ebcaa2>{conditions}{targets}</color> <color=#e30000>{amount} HP</color> damage!',
+      RecoverHpMpSameAmount:
+        '<color=#ebcaa2>{targets}</color> heal <color=#00ff9c>{amount} HP</color> and SP',
+      RecoverHpMpDifferentAmount:
+        'Heal <color=#00ff9c>{hpAmount} HP</color> and <color=#80c9ff>{mpAmount} SP</color>',
       Choice_901007: 'Pre-baked effect text via descId',
       ...overrides.effects,
     },
@@ -103,12 +106,20 @@ describe('createEffectTextResolver', () => {
 
   describe('descId lookup', () => {
     it('returns pre-baked text when descId matches', () => {
-      expect(resolve('anything', undefined, undefined, undefined, undefined, 'Choice_901007'))
-        .toBe('Pre-baked effect text via descId')
+      expect(resolve('anything', undefined, undefined, undefined, undefined, 'Choice_901007')).toBe(
+        'Pre-baked effect text via descId',
+      )
     })
 
     it('falls back to effect type when descId not found', () => {
-      const result = resolve('Nothing', undefined, undefined, undefined, undefined, 'NonExistentDescId')
+      const result = resolve(
+        'Nothing',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'NonExistentDescId',
+      )
       expect(result).toContain('Nothing happened')
     })
   })
@@ -180,7 +191,8 @@ describe('createEffectTextResolver', () => {
     it('resolves condition and target together', () => {
       const result = resolve(
         'LoseHpOnly_10',
-        undefined, undefined,
+        undefined,
+        undefined,
         'EveryAlly',
         'NotIncludeSkillAttribute_CRIMSON',
       )
@@ -227,7 +239,8 @@ describe('formatAdderInfo', () => {
   it('resolves SpecificAssociation with single key', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificAssociation_LCB', adder: 5 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['LCB Sinner +5'])
   })
@@ -235,7 +248,8 @@ describe('formatAdderInfo', () => {
   it('resolves SpecificAssociation with multiple keys', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificAssociation_LCB,SevenAssoc', adder: 3 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['LCB Sinner / Seven Association +3'])
   })
@@ -243,7 +257,8 @@ describe('formatAdderInfo', () => {
   it('resolves SpecificKeyword', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificKeyword_Sinking', adder: -3 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['Sinking -3'])
   })
@@ -251,7 +266,8 @@ describe('formatAdderInfo', () => {
   it('resolves SpecificUnit with sinner name', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificUnit_DonQuixote', adder: 5 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['Don Quixote +5'])
   })
@@ -259,7 +275,9 @@ describe('formatAdderInfo', () => {
   it('resolves SpecificPersonality with identity names', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificPersonality_10310', adder: -10 }],
-      unitKeywords, sinnerNames, identityNames,
+      unitKeywords,
+      sinnerNames,
+      identityNames,
     )
     expect(result).toEqual(['The Manager of La Manchaland -10'])
   })
@@ -267,7 +285,9 @@ describe('formatAdderInfo', () => {
   it('resolves SpecificPersonality with multiple IDs', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificPersonality_10310,10911,11210', adder: 7 }],
-      unitKeywords, sinnerNames, identityNames,
+      unitKeywords,
+      sinnerNames,
+      identityNames,
     )
     expect(result[0]).toContain('The Manager of La Manchaland')
     expect(result[0]).toContain('The Princess of La Manchaland')
@@ -278,7 +298,9 @@ describe('formatAdderInfo', () => {
   it('falls back to raw ID when identity name not found', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificPersonality_99999', adder: 1 }],
-      unitKeywords, sinnerNames, identityNames,
+      unitKeywords,
+      sinnerNames,
+      identityNames,
     )
     expect(result).toEqual(['99999 +1'])
   })
@@ -286,7 +308,8 @@ describe('formatAdderInfo', () => {
   it('falls back to raw ID when identityNames not provided', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificPersonality_10310', adder: 1 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['10310 +1'])
   })
@@ -294,7 +317,8 @@ describe('formatAdderInfo', () => {
   it('falls back to raw key for SpecificUnit with unknown sinner', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificUnit_UnknownSinner', adder: 2 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['UnknownSinner +2'])
   })
@@ -302,7 +326,8 @@ describe('formatAdderInfo', () => {
   it('formats negative adders without + sign', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificKeyword_Bleed', adder: -5 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toEqual(['Bleed -5'])
   })
@@ -313,7 +338,8 @@ describe('formatAdderInfo', () => {
         { correctionCase: 'SpecificUnit_DonQuixote', adder: 5 },
         { correctionCase: 'SpecificKeyword_Sinking', adder: -3 },
       ],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result).toHaveLength(2)
     expect(result[0]).toContain('Don Quixote')
@@ -323,7 +349,8 @@ describe('formatAdderInfo', () => {
   it('falls back to underscore-to-space for unknown SpecificKeyword', () => {
     const result = formatAdderInfo(
       [{ correctionCase: 'SpecificKeyword_Some_Unknown_Key', adder: 1 }],
-      unitKeywords, sinnerNames,
+      unitKeywords,
+      sinnerNames,
     )
     expect(result[0]).toContain('Some Unknown Key')
   })

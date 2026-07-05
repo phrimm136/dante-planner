@@ -26,7 +26,7 @@ import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { ModeratorDeleteDialog } from './ModeratorDeleteDialog'
 import { PublishSyncOffWarningDialog } from './PublishSyncOffWarningDialog'
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth'
 import { usePlannerSubscription } from '../../hooks/usePlannerSubscription'
 import { usePlannerDelete } from '../../hooks/usePlannerDelete'
 import { useModeratorPlannerDelete } from '../../hooks/useModeratorPlannerDelete'
@@ -41,12 +41,13 @@ import { useEGOGiftListData } from '@/pages/egoGift'
 import { usePlannerSyncAdapter } from '../../hooks/usePlannerSyncAdapter'
 import { useQueryClient } from '@tanstack/react-query'
 import { formatUsername } from '@/lib/formatUsername'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { I18N_LOCALE_MAP, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, RECOMMENDED_THRESHOLD } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { I18N_LOCALE_MAP, RECOMMENDED_THRESHOLD } from '@/lib/constants'
 import { validatePlannerForPublish } from '../../lib/plannerValidation'
 import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { PublishedPlannerDetail } from '../../types/PlannerListTypes'
 import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
 
@@ -152,7 +153,7 @@ export function PlannerDetailHeader({
     if (plannerId && publishedPlanner) {
       ownerNotificationMutation.mutate({
         plannerId,
-        enabled: !(publishedPlanner.ownerNotificationsEnabled),
+        enabled: !publishedPlanner.ownerNotificationsEnabled,
       })
     }
   }
@@ -206,7 +207,7 @@ export function PlannerDetailHeader({
         onError: () => {
           toast.error(t('plannerTakedown.failed', { ns: 'moderation' }))
         },
-      }
+      },
     )
   }
 
@@ -254,26 +255,39 @@ export function PlannerDetailHeader({
     }
   }
 
-  const callPublishMutation = (wasPublished: boolean) => {
-    if (!plannerId || !savedPlanner) return
+  // `base` is the planner the local save is derived from: for publish it's the
+  // server-synced planner (carries the server-bumped syncVersion); for unpublish
+  // it's the current savedPlanner (the toggle never bumps syncVersion).
+  const callPublishMutation = (wasPublished: boolean, base: SaveablePlanner) => {
+    if (!plannerId) return
 
     publishMutation.mutate(plannerId, {
       onSuccess: async (response) => {
         const updatedPlanner: SaveablePlanner = {
-          ...savedPlanner,
+          ...base,
           metadata: {
-            ...savedPlanner.metadata,
+            ...base.metadata,
             published: response.published,
           },
         }
-        await savePlanner(updatedPlanner)
+        // Server toggle already succeeded; the local mirror is best-effort. Surface
+        // a local-save failure instead of swallowing it (the personal view reads
+        // from IndexedDB, so a failed save leaves it stale until the next save).
+        const saveResult = await savePlanner(updatedPlanner)
+        if (!saveResult.success) {
+          console.error('Local planner save failed after publish toggle:', saveResult.errorCode)
+        }
 
         void queryClient.invalidateQueries({
           queryKey: plannerQueryKeys.detail(plannerId),
         })
 
         toast.success(
-          t(wasPublished ? 'pages.plannerMD.publish.unpublishSuccess' : 'pages.plannerMD.publish.success')
+          t(
+            wasPublished
+              ? 'pages.plannerMD.publish.unpublishSuccess'
+              : 'pages.plannerMD.publish.success',
+          ),
         )
         setIsUploadingForPublish(false)
       },
@@ -293,9 +307,11 @@ export function PlannerDetailHeader({
   const handlePublishToggle = () => {
     if (!plannerId || !savedPlanner) return
 
-    // Unpublishing — ensure plan is on server, then toggle
+    // Unpublishing — just flip the flag. No content upload: the row already
+    // exists on the server, and the publish toggle never bumps syncVersion, so
+    // there is no version to drift.
     if (savedPlanner.metadata.published) {
-      void handlePublishWithUpload(true)
+      callPublishMutation(true, savedPlanner)
       return
     }
 
@@ -308,7 +324,7 @@ export function PlannerDetailHeader({
         content,
         category,
         egoGiftSpec,
-        egoGiftI18n
+        egoGiftI18n,
       )
       if (!isValid) {
         const friendly = toUserFriendlyError(errors[0])
@@ -324,18 +340,21 @@ export function PlannerDetailHeader({
     }
 
     // Sync enabled — upload then publish
-    handlePublishWithUpload()
+    void handlePublishWithUpload()
   }
 
-  const handlePublishWithUpload = async (wasPublished = false) => {
+  const handlePublishWithUpload = async () => {
     if (!plannerId || !savedPlanner) return
 
     setIsUploadingForPublish(true)
     setShowPublishWarning(false)
 
     try {
-      await syncAdapter.syncToServer(savedPlanner)
-      callPublishMutation(wasPublished)
+      // Upload current content first (the publish PUT carries none), then toggle.
+      // The synced result carries the server-bumped syncVersion — thread it into
+      // the local save so the next toggle doesn't send a stale version (409).
+      const synced = await syncAdapter.syncToServer(savedPlanner)
+      callPublishMutation(false, synced)
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
       toast.error(t('pages.plannerMD.publish.uploadFailed'))
@@ -379,12 +398,14 @@ export function PlannerDetailHeader({
             <span
               className="px-2 py-0.5 text-sm font-medium rounded shrink-0"
               style={{
-                backgroundColor: publishedPlanner.category in MD_CATEGORY_COLORS
-                  ? MD_CATEGORY_COLORS[publishedPlanner.category as MDCategory]
-                  : undefined,
-                color: publishedPlanner.category in MD_CATEGORY_TEXT_COLORS
-                  ? MD_CATEGORY_TEXT_COLORS[publishedPlanner.category as MDCategory]
-                  : undefined,
+                backgroundColor:
+                  publishedPlanner.category in MD_CATEGORY_COLORS
+                    ? MD_CATEGORY_COLORS[publishedPlanner.category as MDCategory]
+                    : undefined,
+                color:
+                  publishedPlanner.category in MD_CATEGORY_TEXT_COLORS
+                    ? MD_CATEGORY_TEXT_COLORS[publishedPlanner.category as MDCategory]
+                    : undefined,
               }}
             >
               {t(`pages.plannerList.mdCategory.${publishedPlanner.category}`)}
@@ -408,7 +429,7 @@ export function PlannerDetailHeader({
               {formatUsername(
                 publishedPlanner.authorUsernameEpithet,
                 publishedPlanner.authorUsernameSuffix,
-                i18n.language
+                i18n.language,
               )}
             </span>
             <span className="text-sm text-muted-foreground hidden lg:inline">
@@ -422,17 +443,21 @@ export function PlannerDetailHeader({
           <h1 className="text-2xl font-bold">{publishedPlanner.title || t('untitled')}</h1>
 
           <div className="flex items-center gap-1 shrink-0">
-            {isOwner && savedPlannerData && savedPlannerData.metadata.contentVersion < config.mdCurrentVersion && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowApplyLatestMirrorDialog(true)}
-                disabled={isApplyingLatestMirror}
-              >
-                <ChevronsRight className="size-4" />
-                <span className="hidden lg:inline">{t('pages.plannerMD.applyLatestMirror.button')}</span>
-              </Button>
-            )}
+            {isOwner &&
+              savedPlannerData &&
+              savedPlannerData.metadata.contentVersion < config.mdCurrentVersion && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowApplyLatestMirrorDialog(true)}
+                  disabled={isApplyingLatestMirror}
+                >
+                  <ChevronsRight className="size-4" />
+                  <span className="hidden lg:inline">
+                    {t('pages.plannerMD.applyLatestMirror.button')}
+                  </span>
+                </Button>
+              )}
             {isOwner && onEdit && (
               <Button variant="outline" size="sm" onClick={onEdit}>
                 <Edit className="size-4" />
@@ -447,7 +472,9 @@ export function PlannerDetailHeader({
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="size-4" />
-                <span className="hidden lg:inline">{t('pages.plannerList.contextMenu.delete')}</span>
+                <span className="hidden lg:inline">
+                  {t('pages.plannerList.contextMenu.delete')}
+                </span>
               </Button>
             )}
             {isOwner && (
@@ -497,7 +524,9 @@ export function PlannerDetailHeader({
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="size-4" />
-                <span className="hidden lg:inline">{t('plannerTakedown.button', { ns: 'moderation' })}</span>
+                <span className="hidden lg:inline">
+                  {t('plannerTakedown.button', { ns: 'moderation' })}
+                </span>
               </Button>
             )}
           </div>
@@ -542,7 +571,9 @@ export function PlannerDetailHeader({
         <ApplyLatestMirrorDialog
           open={showApplyLatestMirrorDialog}
           onOpenChange={setShowApplyLatestMirrorDialog}
-          onConfirm={() => { void handleApplyLatestMirror() }}
+          onConfirm={() => {
+            void handleApplyLatestMirror()
+          }}
           isPending={isApplyingLatestMirror}
         />
 
@@ -561,7 +592,8 @@ export function PlannerDetailHeader({
   // Personal variant
   if (savedPlanner) {
     // Determine detailed status (same logic as PersonalPlannerCard)
-    let status: 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges' = 'draft'
+    let status: 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges' =
+      'draft'
     let statusBadgeVariant: 'default' | 'secondary' | 'outline' | 'destructive' = 'outline'
 
     if (savedPlanner.metadata.published) {
@@ -620,12 +652,14 @@ export function PlannerDetailHeader({
             <span
               className="px-2 py-0.5 text-sm font-medium rounded shrink-0"
               style={{
-                backgroundColor: savedPlanner.config.category in MD_CATEGORY_COLORS
-                  ? MD_CATEGORY_COLORS[savedPlanner.config.category as MDCategory]
-                  : undefined,
-                color: savedPlanner.config.category in MD_CATEGORY_TEXT_COLORS
-                  ? MD_CATEGORY_TEXT_COLORS[savedPlanner.config.category as MDCategory]
-                  : undefined,
+                backgroundColor:
+                  savedPlanner.config.category in MD_CATEGORY_COLORS
+                    ? MD_CATEGORY_COLORS[savedPlanner.config.category as MDCategory]
+                    : undefined,
+                color:
+                  savedPlanner.config.category in MD_CATEGORY_TEXT_COLORS
+                    ? MD_CATEGORY_TEXT_COLORS[savedPlanner.config.category as MDCategory]
+                    : undefined,
               }}
             >
               {t(`pages.plannerList.mdCategory.${savedPlanner.config.category}`)}
@@ -657,9 +691,7 @@ export function PlannerDetailHeader({
 
         {/* Row 2: Title | Actions */}
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold">
-            {savedPlanner.metadata.title || t('untitled')}
-          </h1>
+          <h1 className="text-2xl font-bold">{savedPlanner.metadata.title || t('untitled')}</h1>
 
           <div className="flex items-center gap-1 shrink-0">
             {savedPlanner.metadata.contentVersion < config.mdCurrentVersion && (
@@ -670,7 +702,9 @@ export function PlannerDetailHeader({
                 disabled={isApplyingLatestMirror}
               >
                 <ChevronsRight className="size-4" />
-                <span className="hidden lg:inline">{t('pages.plannerMD.applyLatestMirror.button')}</span>
+                <span className="hidden lg:inline">
+                  {t('pages.plannerMD.applyLatestMirror.button')}
+                </span>
               </Button>
             )}
             {onEdit && (
@@ -684,12 +718,16 @@ export function PlannerDetailHeader({
                 variant="outline"
                 size="sm"
                 onClick={handlePublishToggle}
-                disabled={publishMutation.isPending}
+                disabled={publishMutation.isPending || isUploadingForPublish}
               >
                 <Upload className="size-4" />
                 <span className="hidden lg:inline">
                   {publishMutation.isPending
-                    ? t(savedPlanner.metadata.published ? 'pages.plannerMD.publish.unpublishing' : 'pages.plannerMD.publish.publishing')
+                    ? t(
+                        savedPlanner.metadata.published
+                          ? 'pages.plannerMD.publish.unpublishing'
+                          : 'pages.plannerMD.publish.publishing',
+                      )
                     : savedPlanner.metadata.published
                       ? t('pages.plannerMD.publish.unpublish')
                       : t('pages.plannerMD.publish.button')}
@@ -722,7 +760,9 @@ export function PlannerDetailHeader({
         <ApplyLatestMirrorDialog
           open={showApplyLatestMirrorDialog}
           onOpenChange={setShowApplyLatestMirrorDialog}
-          onConfirm={() => { void handleApplyLatestMirror() }}
+          onConfirm={() => {
+            void handleApplyLatestMirror()
+          }}
           isPending={isApplyingLatestMirror}
         />
 

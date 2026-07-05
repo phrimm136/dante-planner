@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { PlannerSection } from '../PlannerSection'
-import { SectionNoteDialog } from '@/components/common/SectionNoteDialog'
+import { SectionNoteDialog } from '../SectionNoteDialog'
 import { StartBuffSection } from '../startBuff/StartBuffSection'
 import { StartGiftSummary } from '../startGift/StartGiftSummary'
 import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
@@ -20,16 +20,21 @@ import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { HorizontalThemePackGallery } from './HorizontalThemePackGallery'
 import { useTrackerState } from '../../hooks/useTrackerState'
-import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
+import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
-import { DEFAULT_SKILL_EA } from '@/lib/constants'
-import { isNoteEmpty } from '@/lib/noteUtils'
+import { DEFAULT_SKILL_EA } from '@/shared/gameData'
+import { isNoteEmpty } from '@/shared/noteEditor'
 import { cn } from '@/lib/utils'
-import { encodeDeckCode, decodeDeckCode, validateDeckCode, type DecodedDeck } from '../../lib/deckCode'
+import {
+  encodeDeckCode,
+  decodeDeckCode,
+  validateDeckCode,
+  type DecodedDeck,
+} from '../../lib/deckCode'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
 
@@ -90,7 +95,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         comprehensiveGiftIds: content.comprehensiveGiftIds,
         floorSelections: content.floorSelections,
       }),
-    [content]
+    [content],
   )
 
   const handleDeckExport = async () => {
@@ -152,7 +157,12 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       )}
 
       {/* Section 0: Deck Builder - Equipment read-only, deployment editable */}
-      <div className={cn('transition-opacity duration-200', visibleSections[0] ? 'opacity-100' : 'opacity-0')}>
+      <div
+        className={cn(
+          'transition-opacity duration-200',
+          visibleSections[0] ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         <Suspense
           fallback={
             <div className="space-y-2">
@@ -194,7 +204,12 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       />
 
       {/* Section 1: Start Buff - Read-only */}
-      <div className={cn('transition-opacity duration-200', visibleSections[1] ? 'opacity-100' : 'opacity-0')}>
+      <div
+        className={cn(
+          'transition-opacity duration-200',
+          visibleSections[1] ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         <Suspense
           fallback={
             <div className="space-y-2">
@@ -213,7 +228,12 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       </div>
 
       {/* Section 2: Start Gift - Read-only */}
-      <div className={cn('transition-opacity duration-200', visibleSections[2] ? 'opacity-100' : 'opacity-0')}>
+      <div
+        className={cn(
+          'transition-opacity duration-200',
+          visibleSections[2] ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         <Suspense
           fallback={
             <div className="space-y-2">
@@ -232,32 +252,56 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       </div>
 
       {/* Section 3: EGO Gift Observation - Read-only */}
-      <div className={cn('transition-opacity duration-200', visibleSections[3] ? 'opacity-100' : 'opacity-0')}>
+      <div
+        className={cn(
+          'transition-opacity duration-200',
+          visibleSections[3] ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         <Suspense
           fallback={
             <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2 p-2 min-h-28">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="w-24 h-24 rounded-md" style={{ animationDelay: `${i * 80}ms` }} />
+                    <Skeleton
+                      key={i}
+                      className="w-24 h-24 rounded-md"
+                      style={{ animationDelay: `${i * 80}ms` }}
+                    />
                   ))}
                 </div>
               </div>
             </PlannerSection>
           }
         >
-          <EGOGiftObservationSummary mdVersion={planner.metadata.contentVersion} selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} onViewNotes={() => setObservationNotesOpen(true)} />
+          <EGOGiftObservationSummary
+            mdVersion={planner.metadata.contentVersion}
+            selectedGiftIdsOverride={deserialized.observationGiftIds}
+            onClick={() => {}}
+            readOnly={true}
+            onViewNotes={() => setObservationNotesOpen(true)}
+          />
         </Suspense>
       </div>
 
       {/* Section 4: Skill Replacement - Current skill counts editable */}
-      <div className={cn('transition-opacity duration-200', visibleSections[4] ? 'opacity-100' : 'opacity-0')}>
+      <div
+        className={cn(
+          'transition-opacity duration-200',
+          visibleSections[4] ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         <Suspense
           fallback={
             <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 {Array.from({ length: 12 }).map((_, i) => (
-                  <Skeleton key={i} className="h-32 rounded-lg" style={{ animationDelay: `${i * 60}ms` }} />
+                  <Skeleton
+                    key={i}
+                    className="h-32 rounded-lg"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  />
                 ))}
               </div>
             </PlannerSection>
@@ -274,14 +318,24 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       </div>
 
       {/* Section 5: EGO Gift List and Theme Pack Collection - Side by side */}
-      <div className={cn('transition-opacity duration-200', visibleSections[5] ? 'opacity-100' : 'opacity-0')}>
+      <div
+        className={cn(
+          'transition-opacity duration-200',
+          visibleSections[5] ? 'opacity-100' : 'opacity-0',
+        )}
+      >
         <div className="flex flex-col md:flex-row gap-2">
           {/* Comprehensive Gifts from all floors */}
           <div className="md:w-1/2 md:min-w-0">
-            <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftListView')} onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}>
+            <PlannerSection
+              title={t('pages.plannerMD.comprehensiveEgoGiftListView')}
+              onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}
+            >
               <Suspense
                 fallback={
-                  <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
+                  <div className="text-center text-gray-500 py-8">
+                    {t('pages.plannerMD.loading.EGOGiftData')}
+                  </div>
                 }
               >
                 <ComprehensiveGiftGridTracker
@@ -299,7 +353,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           <div className="md:w-1/2 md:min-w-0 overflow-hidden">
             <Suspense
               fallback={
-                <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
+                <div className="text-center text-gray-500 py-8">
+                  {t('pages.plannerMD.loading.themePackData')}
+                </div>
               }
             >
               <HorizontalThemePackGallery
@@ -308,7 +364,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                 doneMarks={trackerState.doneMarks}
                 onTogglePackDone={togglePackDone}
                 focusedThemePackId={focusedThemePackId}
-                onFocusToggle={(packId) => setFocusedThemePackId((prev) => prev === packId ? null : packId)}
+                onFocusToggle={(packId) =>
+                  setFocusedThemePackId((prev) => (prev === packId ? null : packId))
+                }
                 onHoverChange={setHoveredThemePackId}
               />
             </Suspense>
@@ -377,9 +435,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('deckBuilder.importConfirmDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('deckBuilder.importConfirmDescription')}</DialogDescription>
           </DialogHeader>
 
           {pendingImport && pendingImport.warnings.length > 0 && (
@@ -399,13 +455,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             <Button variant="outline" onClick={() => setImportDialogOpen(false)}>
               {t('deckBuilder.cancel')}
             </Button>
-            <Button onClick={handleImportConfirm}>
-              {t('deckBuilder.apply')}
-            </Button>
+            <Button onClick={handleImportConfirm}>{t('deckBuilder.apply')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

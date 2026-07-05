@@ -1,10 +1,9 @@
 import type { CSSProperties } from 'react'
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 import { formatDistanceToNowStrict, type Locale } from 'date-fns'
 import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 import keywordMatch from '@static/i18n/EN/keywordMatch.json'
-import { SINNERS } from './constants'
 import i18n from './i18n'
 
 /** Map app language codes to date-fns locales */
@@ -17,22 +16,6 @@ const dateFnsLocales: Record<string, Locale> = {
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
-}
-
-/**
- * Extracts sinner name from entity ID
- * ID format: T SS II (5 digits)
- *   T: Type (1=identity, 2=ego)
- *   SS: Sinner index (01-12)
- *   II: Entity index within sinner
- * Example: 10101 -> type 1, sinner 01 -> YiSang
- * Example: 20305 -> type 2, sinner 03 -> DonQuixote
- * @param id - Entity ID (identity or EGO)
- * @returns Sinner name (e.g., "YiSang", "Faust")
- */
-export function getSinnerFromId(id: string): string {
-  const sinnerIndex = parseInt(id.substring(1, 3), 10) - 1
-  return SINNERS[sinnerIndex] || 'Unknown'
 }
 
 /**
@@ -205,33 +188,35 @@ export function formatShortRelativeTime(date: Date | string, language?: string):
   // Korean: "X초/분/시간/일/개월/년 전"
   // Japanese: "X秒/分/時間/日/か月/年前"
   // Chinese: "X 秒/分钟/小时/天/个月/年前"
-  return distance
-    // English
-    .replace(/(\d+)\s*seconds?\s*ago/, '$1s ago')
-    .replace(/(\d+)\s*minutes?\s*ago/, '$1m ago')
-    .replace(/(\d+)\s*hours?\s*ago/, '$1h ago')
-    .replace(/(\d+)\s*days?\s*ago/, '$1d ago')
-    .replace(/(\d+)\s*months?\s*ago/, '$1mo ago')
-    .replace(/(\d+)\s*years?\s*ago/, '$1y ago')
-    // Korean
-    .replace(/(\d+)초 전/, '$1초 전')
-    .replace(/(\d+)분 전/, '$1분 전')
-    .replace(/(\d+)시간 전/, '$1시간 전')
-    .replace(/(\d+)일 전/, '$1일 전')
-    .replace(/(\d+)개월 전/, '$1개월 전')
-    .replace(/(\d+)년 전/, '$1년 전')
-    // Japanese
-    .replace(/(\d+)秒前/, '$1秒前')
-    .replace(/(\d+)分前/, '$1分前')
-    .replace(/(\d+)時間前/, '$1時間前')
-    .replace(/(\d+)日前/, '$1日前')
-    .replace(/(\d+)か月前/, '$1ヶ月前')
-    .replace(/(\d+)年前/, '$1年前')
-    // Chinese
-    .replace(/(\d+)\s*秒钟?前/, '$1秒前')
-    .replace(/(\d+)\s*分钟前/, '$1分前')
-    .replace(/(\d+)\s*小时前/, '$1时前')
-    .replace(/(\d+)\s*天前/, '$1天前')
-    .replace(/(\d+)\s*个月前/, '$1月前')
-    .replace(/(\d+)\s*年前/, '$1年前')
+  return (
+    distance
+      // English
+      .replace(/(\d+)\s*seconds?\s*ago/, '$1s ago')
+      .replace(/(\d+)\s*minutes?\s*ago/, '$1m ago')
+      .replace(/(\d+)\s*hours?\s*ago/, '$1h ago')
+      .replace(/(\d+)\s*days?\s*ago/, '$1d ago')
+      .replace(/(\d+)\s*months?\s*ago/, '$1mo ago')
+      .replace(/(\d+)\s*years?\s*ago/, '$1y ago')
+      // Korean
+      .replace(/(\d+)초 전/, '$1초 전')
+      .replace(/(\d+)분 전/, '$1분 전')
+      .replace(/(\d+)시간 전/, '$1시간 전')
+      .replace(/(\d+)일 전/, '$1일 전')
+      .replace(/(\d+)개월 전/, '$1개월 전')
+      .replace(/(\d+)년 전/, '$1년 전')
+      // Japanese
+      .replace(/(\d+)秒前/, '$1秒前')
+      .replace(/(\d+)分前/, '$1分前')
+      .replace(/(\d+)時間前/, '$1時間前')
+      .replace(/(\d+)日前/, '$1日前')
+      .replace(/(\d+)か月前/, '$1ヶ月前')
+      .replace(/(\d+)年前/, '$1年前')
+      // Chinese
+      .replace(/(\d+)\s*秒钟?前/, '$1秒前')
+      .replace(/(\d+)\s*分钟前/, '$1分前')
+      .replace(/(\d+)\s*小时前/, '$1时前')
+      .replace(/(\d+)\s*天前/, '$1天前')
+      .replace(/(\d+)\s*个月前/, '$1月前')
+      .replace(/(\d+)\s*年前/, '$1年前')
+  )
 }

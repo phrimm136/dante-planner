@@ -17,9 +17,7 @@ export function PlannerNotFound({ listPath }: PlannerNotFoundProps) {
 
   return (
     <div className="space-y-6 text-center py-12">
-      <h1 className="text-2xl font-bold">
-        {t('pages.detail.notFound', 'Plan Not Found')}
-      </h1>
+      <h1 className="text-2xl font-bold">{t('pages.detail.notFound', 'Plan Not Found')}</h1>
       <p className="text-muted-foreground">
         {t('pages.detail.notFoundMessage', 'The plan you are looking for does not exist.')}
       </p>

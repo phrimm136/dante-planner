@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
-import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { KEYWORD_ORDER } from '@/lib/constants'
+import { CompactIconFilter } from '@/shared/filter'
+import { getKeywordIconPath } from '@/shared/assets'
+import { KEYWORD_ORDER } from '@/shared/gameData'
 
 interface CompactEGOGiftKeywordFilterProps {
   selectedKeywords: Set<string>

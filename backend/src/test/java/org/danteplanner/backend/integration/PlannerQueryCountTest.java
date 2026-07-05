@@ -3,19 +3,19 @@ package org.danteplanner.backend.integration;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerBookmark;
-import org.danteplanner.backend.entity.PlannerComment;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.VoteType;
-import org.danteplanner.backend.entity.PlannerVote;
-import org.danteplanner.backend.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.repository.PlannerCommentRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.PlannerVoteRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.specification.PlannerSpecifications;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerBookmark;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.planner.specification.PlannerSpecifications;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
@@ -134,7 +134,7 @@ class PlannerQueryCountTest {
 
     @Test
     @DisplayName("getPublishedPlanners: statement count is constant across result-set sizes")
-    void getPublishedPlanners_statementCountConstant() {
+    void getPublishedPlanners_WhenResultSizeVaries_StatementCountConstant() {
         assertConstantStatementCount(() -> {
             statistics.clear();
             publishedPlannerQueryService.getPublishedPlanners(PAGE, null, viewerId, null);
@@ -144,7 +144,7 @@ class PlannerQueryCountTest {
 
     @Test
     @DisplayName("getRecommendedPlanners: statement count is constant across result-set sizes")
-    void getRecommendedPlanners_statementCountConstant() {
+    void getRecommendedPlanners_WhenResultSizeVaries_StatementCountConstant() {
         assertConstantStatementCount(() -> {
             statistics.clear();
             publishedPlannerQueryService.getRecommendedPlanners(PAGE, null, viewerId, null);
@@ -154,7 +154,7 @@ class PlannerQueryCountTest {
 
     @Test
     @DisplayName("searchPlanners: statement count is constant across result-set sizes")
-    void searchPlanners_statementCountConstant() {
+    void searchPlanners_WhenResultSizeVaries_StatementCountConstant() {
         assertConstantStatementCount(() -> {
             statistics.clear();
             publishedPlannerQueryService.searchPlanners(
@@ -186,7 +186,7 @@ class PlannerQueryCountTest {
 
     private void assertConstantStatementCount(LongSupplier measure, boolean crossRecommendedThreshold) {
         seedPlanners(SMALL_SET, crossRecommendedThreshold);
-        measure.getAsLong(); // warm-up: discard one-time/bootstrap statements
+        long unusedWarmUp = measure.getAsLong(); // warm-up: discard one-time/bootstrap statements
         long smallCount = measure.getAsLong();
 
         seedPlanners(LARGE_SET - SMALL_SET, crossRecommendedThreshold);

@@ -1,13 +1,8 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
-import type { NoteContent } from '@/types/NoteEditorTypes'
-import { isNoteEmpty } from '@/lib/noteUtils'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
+import type { NoteContent } from '@/shared/noteEditor'
+import { isNoteEmpty } from '@/shared/noteEditor'
 
 interface FloorNoteDialogProps {
   open: boolean

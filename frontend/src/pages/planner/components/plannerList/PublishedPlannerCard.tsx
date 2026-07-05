@@ -4,11 +4,13 @@ import { ThumbsUp, Eye, Bookmark, Star, Clock, MessageSquare } from 'lucide-reac
 import { cn } from '@/lib/utils'
 import { formatPlannerDate } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
-import { getKeywordIconPath } from '@/lib/assetPaths'
-import { PLANNER_LIST, MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { PLANNER_LIST, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
 
 import type { PublicPlanner } from '../../types/PlannerListTypes'
-import type { PlannerStatusBadge, MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
+import type { PlannerStatusBadge } from '@/lib/constants'
 
 interface PublishedPlannerCardProps {
   /** Planner data to display */
@@ -83,7 +85,7 @@ export function PublishedPlannerCard({
     <div
       className={cn(
         'selectable group relative bg-card border border-border rounded-lg p-4 cursor-pointer',
-        className
+        className,
       )}
       onContextMenu={onContextMenu}
     >
@@ -94,12 +96,14 @@ export function PublishedPlannerCard({
           <span
             className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
             style={{
-              backgroundColor: category in MD_CATEGORY_COLORS
-                ? MD_CATEGORY_COLORS[category as MDCategory]
-                : undefined,
-              color: category in MD_CATEGORY_TEXT_COLORS
-                ? MD_CATEGORY_TEXT_COLORS[category as MDCategory]
-                : undefined,
+              backgroundColor:
+                category in MD_CATEGORY_COLORS
+                  ? MD_CATEGORY_COLORS[category as MDCategory]
+                  : undefined,
+              color:
+                category in MD_CATEGORY_TEXT_COLORS
+                  ? MD_CATEGORY_TEXT_COLORS[category as MDCategory]
+                  : undefined,
             }}
           >
             {t(`pages.plannerList.mdCategory.${category}`)}
@@ -127,7 +131,7 @@ export function PublishedPlannerCard({
             <span
               className={cn(
                 'px-1.5 py-0.5 text-[10px] font-medium rounded whitespace-nowrap',
-                PLANNER_STATUS_BADGE_STYLES[statusBadge]
+                PLANNER_STATUS_BADGE_STYLES[statusBadge],
               )}
             >
               {statusBadgeLabels[statusBadge]}
@@ -143,9 +147,7 @@ export function PublishedPlannerCard({
       </div>
 
       {/* Title (text-sm for consistency with PersonalPlannerCard) */}
-      <h3 className="line-clamp-2 text-sm font-medium min-h-[2.5rem] mb-2">
-        {title}
-      </h3>
+      <h3 className="line-clamp-2 text-sm font-medium min-h-[2.5rem] mb-2">{title}</h3>
 
       {/* Stats row */}
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">

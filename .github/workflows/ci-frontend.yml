@@ -13,9 +13,12 @@ on:
 
 jobs:
   check-origin:
+    permissions: {}
     uses: ./.github/workflows/check-pr-origin.yml
 
   checkout:
+    permissions:
+      contents: read
     needs: check-origin
     if: >-
       needs.check-origin.outputs.is-internal == 'true' ||
@@ -46,6 +49,14 @@ jobs:
           yarn install --frozen-lockfile
           yarn test
 
+      - name: FE Lint
+        working-directory: ./frontend
+        run: yarn lint
+
+      - name: FE Format Check
+        working-directory: ./frontend
+        run: yarn fmt:check
+
   build-frontend:
     needs: [checkout, test-frontend]
     runs-on: ubuntu-latest
@@ -63,7 +74,7 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
 
       - name: FE Build
-        timeout-minutes: 10
+        timeout-minutes: 12
         working-directory: ./frontend
         run: |
           yarn install --frozen-lockfile

@@ -13,7 +13,7 @@
 
 import { useSearch, useNavigate } from '@tanstack/react-router'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { MDUserSearchParams } from '../types/MDPlannerListTypes'
 
 // ============================================================================

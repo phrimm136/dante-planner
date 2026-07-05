@@ -102,56 +102,56 @@ function serverSummaryToLocal(summary: ServerPlannerSummary): PlannerSummary {
 export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
   // Memoize to return stable function references
   // All functions only use module-level imports, no React state/props
-  return useMemo(() => ({
-    syncToServer: async (
-      planner: SaveablePlanner,
-      force?: boolean
-    ): Promise<SaveablePlanner> => {
-      // Guard: Server currently only supports MD planners
-      if (planner.config.type !== 'MIRROR_DUNGEON') {
-        throw new Error('Server sync only supports MIRROR_DUNGEON planners')
-      }
+  return useMemo(
+    () => ({
+      syncToServer: async (planner: SaveablePlanner, force?: boolean): Promise<SaveablePlanner> => {
+        // Guard: Server currently only supports MD planners
+        if (planner.config.type !== 'MIRROR_DUNGEON') {
+          throw new Error('Server sync only supports MIRROR_DUNGEON planners')
+        }
 
-      const content = JSON.stringify(planner.content)
-      const metadata = planner.metadata
+        const content = JSON.stringify(planner.content)
+        const metadata = planner.metadata
 
-      // Extract keywords from content for dedicated column storage
-      const mdContent = planner.content as import('../types/PlannerTypes').MDPlannerContent
-      const selectedKeywords = mdContent.selectedKeywords ?? []
+        // Extract keywords from content for dedicated column storage
+        const mdContent = planner.content as import('../types/PlannerTypes').MDPlannerContent
+        const selectedKeywords = mdContent.selectedKeywords ?? []
 
-      const request: UpsertPlannerRequest = {
-        id: metadata.id,
-        category: planner.config.category,
-        title: metadata.title,
-        status: metadata.status,
-        content,
-        contentVersion: metadata.contentVersion,
-        plannerType: metadata.plannerType,
-        syncVersion: metadata.syncVersion,
-        selectedKeywords,
-      }
+        const request: UpsertPlannerRequest = {
+          id: metadata.id,
+          category: planner.config.category,
+          title: metadata.title,
+          status: metadata.status,
+          content,
+          contentVersion: metadata.contentVersion,
+          plannerType: metadata.plannerType,
+          syncVersion: metadata.syncVersion,
+          selectedKeywords,
+        }
 
-      const response = await plannerApi.upsert(metadata.id, request, force)
-      return serverResponseToSaveable(response)
-    },
-
-    fetchFromServer: async (id: string): Promise<SaveablePlanner | null> => {
-      try {
-        const response = await plannerApi.get(id)
+        const response = await plannerApi.upsert(metadata.id, request, force)
         return serverResponseToSaveable(response)
-      } catch (error) {
-        console.error(`fetchFromServer failed for ${id}:`, error)
-        return null
-      }
-    },
+      },
 
-    deleteFromServer: async (id: string): Promise<void> => {
-      return plannerApi.delete(id)
-    },
+      fetchFromServer: async (id: string): Promise<SaveablePlanner | null> => {
+        try {
+          const response = await plannerApi.get(id)
+          return serverResponseToSaveable(response)
+        } catch (error) {
+          console.error(`fetchFromServer failed for ${id}:`, error)
+          return null
+        }
+      },
 
-    listFromServer: async (): Promise<PlannerSummary[]> => {
-      const serverPlanners = await plannerApi.listAll()
-      return serverPlanners.map(serverSummaryToLocal)
-    },
-  }), []) // Empty deps: functions only use module-level imports
+      deleteFromServer: async (id: string): Promise<void> => {
+        return plannerApi.delete(id)
+      },
+
+      listFromServer: async (): Promise<PlannerSummary[]> => {
+        const serverPlanners = await plannerApi.listAll()
+        return serverPlanners.map(serverSummaryToLocal)
+      },
+    }),
+    [],
+  ) // Empty deps: functions only use module-level imports
 }

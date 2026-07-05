@@ -3,19 +3,19 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { decodeGiftSelection } from '@/lib/egoGiftEncoding'
+import { decodeGiftSelection } from '@/pages/egoGift'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
-import type { EnhancementLevel } from '@/lib/constants'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { useSearchMappingsDeferred } from '@/shared/filter'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftTooltip } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
-import type { SortMode } from '@/components/common/Sorter'
+import type { SortMode } from '@/shared/filter'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 
 interface ComprehensiveGiftGridTrackerProps {
@@ -45,7 +45,7 @@ export function ComprehensiveGiftGridTracker({
   egoGiftDoneMarks,
   onToggleEgoGiftDone,
   readOnly,
-  comprehensiveGiftIds = [],
+  comprehensiveGiftIds,
 }: ComprehensiveGiftGridTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
@@ -105,12 +105,14 @@ export function ComprehensiveGiftGridTracker({
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
         const nameMatch = giftName.toLowerCase().includes(lowerQuery)
-        const keywordMatch = Array.from(keywordToValue.entries()).some(([naturalLang, pascalValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return pascalValues.includes(giftKeyword)
-          }
-          return false
-        })
+        const keywordMatch = Array.from(keywordToValue.entries()).some(
+          ([naturalLang, pascalValues]) => {
+            if (naturalLang.includes(lowerQuery)) {
+              return pascalValues.includes(giftKeyword)
+            }
+            return false
+          },
+        )
         if (!nameMatch && !keywordMatch) continue
       }
 
@@ -145,12 +147,25 @@ export function ComprehensiveGiftGridTracker({
     // Sort each group by tier-then-keyword (matching edit page order)
     const sortGroup = (gifts: DecodedGift[]) => {
       const itemToGift = new Map(gifts.map((g) => [g.item, g]))
-      return sortEGOGifts(gifts.map((g) => g.item), sortMode).map((item) => itemToGift.get(item)!)
+      return sortEGOGifts(
+        gifts.map((g) => g.item),
+        sortMode,
+      ).map((item) => itemToGift.get(item)!)
     }
 
     // Concatenate: highlighted first, then regular, then done
     return [...sortGroup(highlighted), ...sortGroup(regular), ...sortGroup(done)]
-  }, [allComprehensiveGiftIds, spec, i18n, highlightedGiftIds, egoGiftDoneMarks, selectedKeywords, searchQuery, keywordToValue, sortMode])
+  }, [
+    allComprehensiveGiftIds,
+    spec,
+    i18n,
+    highlightedGiftIds,
+    egoGiftDoneMarks,
+    selectedKeywords,
+    searchQuery,
+    keywordToValue,
+    sortMode,
+  ])
 
   const hasAnyGifts = allComprehensiveGiftIds.size > 0
   const hasFilteredGifts = selectedGifts.length > 0
@@ -163,12 +178,10 @@ export function ComprehensiveGiftGridTracker({
         className={cn(
           'flex items-center justify-center p-4 text-muted-foreground md:h-[306px] lg:h-[481px]',
           EMPTY_STATE.MIN_HEIGHT,
-          EMPTY_STATE.DASHED_BORDER
+          EMPTY_STATE.DASHED_BORDER,
         )}
       >
-        <span className="text-sm text-center">
-          {t('pages.plannerMD.emptyState.noEgoGifts')}
-        </span>
+        <span className="text-sm text-center">{t('pages.plannerMD.emptyState.noEgoGifts')}</span>
       </div>
     )
   }
@@ -213,7 +226,7 @@ export function ComprehensiveGiftGridTracker({
           className={cn(
             'flex items-center justify-center p-4 text-muted-foreground md:h-[178px] lg:h-[353px]',
             EMPTY_STATE.MIN_HEIGHT,
-            EMPTY_STATE.DASHED_BORDER
+            EMPTY_STATE.DASHED_BORDER,
           )}
         >
           <span className="text-sm text-center">
@@ -264,11 +277,7 @@ function EgoGiftCardWithOverlay({
           onMouseLeave={() => setIsHovered(false)}
         >
           <div className={cn(isDone && 'brightness-50')}>
-            <EGOGiftCard
-              gift={item}
-              enhancement={enhancement}
-              isSelected={isHighlighted}
-            />
+            <EGOGiftCard gift={item} enhancement={enhancement} isSelected={isHighlighted} />
           </div>
           {!readOnly && isHovered && (
             <div className="absolute inset-0 flex items-center justify-center">
@@ -280,7 +289,11 @@ function EgoGiftCardWithOverlay({
                   e.stopPropagation()
                   onToggleDone?.(encodedId)
                 }}
-                aria-label={isDone ? t('common:markAsNotDone', 'Mark as Not Done') : t('common:markAsDone', 'Mark as Done')}
+                aria-label={
+                  isDone
+                    ? t('common:markAsNotDone', 'Mark as Not Done')
+                    : t('common:markAsDone', 'Mark as Done')
+                }
               >
                 <CheckCircle2 className="h-4 w-4" />
               </Button>

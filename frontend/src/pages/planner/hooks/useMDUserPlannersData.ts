@@ -16,8 +16,8 @@ import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanst
 
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useAuthQuery } from '@/shared/auth'
+import { useUserSettingsQuery } from '@/pages/settings'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
@@ -27,7 +27,7 @@ import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 import type { PlannerSummary, SaveablePlanner, MDPlannerContent } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '../components/BatchConflictDialog'
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 
 // ============================================================================
 // Query Keys
@@ -150,9 +150,7 @@ const PAGE_SIZE = 20
  * }
  * ```
  */
-export function useMDUserPlannersData(
-  options: UseMDUserPlannersDataOptions
-): MDUserPlannersResult {
+export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MDUserPlannersResult {
   const { category, page, search, contentFilters } = options
 
   // Whether content-based filters are active (requires full planner data)
@@ -181,7 +179,10 @@ export function useMDUserPlannersData(
   // Conflict resolution state
   const [pendingConflicts, setPendingConflicts] = useState<ConflictItem[]>([])
   const [isResolvingConflicts, setIsResolvingConflicts] = useState(false)
-  const [conflictResolutionError, setConflictResolutionError] = useState<{ key: string; params?: Record<string, string> } | null>(null)
+  const [conflictResolutionError, setConflictResolutionError] = useState<{
+    key: string
+    params?: Record<string, string>
+  } | null>(null)
 
   // EGO Gift spec for affordability validation in conflict resolution
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
@@ -192,7 +193,7 @@ export function useMDUserPlannersData(
       queryKey: userPlannersQueryKeys.list(isAuthenticated),
       queryFn: () => saveAdapter.listLocal(),
       staleTime: 30 * 1000,
-    })
+    }),
   )
 
   // Query: Full planners with content (for content-based filtering)
@@ -334,10 +335,7 @@ export function useMDUserPlannersData(
         // Directly update cache with synced planners (avoids re-suspension)
         if (syncedCount > 0 || purgedCount > 0) {
           const updatedLocal = await saveAdapter.listLocal()
-          queryClient.setQueryData(
-            userPlannersQueryKeys.list(isAuthenticated),
-            updatedLocal
-          )
+          queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
           // Invalidate full planners cache so content filters pick up synced data
           void queryClient.invalidateQueries({
             queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
@@ -355,7 +353,7 @@ export function useMDUserPlannersData(
     }
 
     void runSync()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncKey])
 
   // Memoize filtering to prevent recalculation on unrelated re-renders
@@ -376,7 +374,7 @@ export function useMDUserPlannersData(
             if (category && p.config.category !== category) return false
             return matchesPlannerFilters(p, contentFilters!)
           })
-          .map((p) => p.metadata.id)
+          .map((p) => p.metadata.id),
       )
 
       const filtered = allPlanners.filter((p) => matchedIds.has(p.id))
@@ -416,14 +414,23 @@ export function useMDUserPlannersData(
     let friendlyError: { key: string; params?: Record<string, string> } | null = null
 
     if (published) {
-      const { isValid, errors } = validatePlannerForPublish(title, content, category, egoGiftSpec, egoGiftI18n)
+      const { isValid, errors } = validatePlannerForPublish(
+        title,
+        content,
+        category,
+        egoGiftSpec,
+        egoGiftI18n,
+      )
       if (!isValid) friendlyError = toUserFriendlyError(errors[0])
     } else {
       friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
     }
 
     if (friendlyError) {
-      throw Object.assign(new Error('validationFailed'), { code: 'validationFailed', friendlyError })
+      throw Object.assign(new Error('validationFailed'), {
+        code: 'validationFailed',
+        friendlyError,
+      })
     }
   }
 
@@ -490,15 +497,15 @@ export function useMDUserPlannersData(
       // Only clear conflicts after ALL resolutions succeed
       setPendingConflicts([])
       const updatedLocal = await saveAdapter.listLocal()
-      queryClient.setQueryData(
-        userPlannersQueryKeys.list(isAuthenticated),
-        updatedLocal
-      )
+      queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
       void queryClient.invalidateQueries({
         queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
       })
     } catch (error) {
-      const e = error as { code?: string; friendlyError?: { key: string; params?: Record<string, string> } }
+      const e = error as {
+        code?: string
+        friendlyError?: { key: string; params?: Record<string, string> }
+      }
       if (e.code === 'validationFailed' && e.friendlyError) {
         setConflictResolutionError(e.friendlyError)
       } else {

@@ -98,7 +98,7 @@ vi.mock('../../PlannerSection', () => ({
 }))
 
 // Mock StarlightCostDisplay to verify cost value
-vi.mock('@/components/common/StarlightCostDisplay', () => ({
+vi.mock('../../StarlightCostDisplay', () => ({
   StarlightCostDisplay: ({ cost, size }: { cost: number; size: string }) => (
     <div data-testid="starlight-cost" data-cost={cost} data-size={size}>
       {cost}
@@ -108,7 +108,13 @@ vi.mock('@/components/common/StarlightCostDisplay', () => ({
 
 // Mock EGOGiftCard to simplify testing
 vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
-  EGOGiftCard: ({ gift, isSelected }: { gift: { id: string; name: string }; isSelected?: boolean }) => (
+  EGOGiftCard: ({
+    gift,
+    isSelected,
+  }: {
+    gift: { id: string; name: string }
+    isSelected?: boolean
+  }) => (
     <div data-testid={`gift-card-${gift.id}`} data-selected={isSelected}>
       {gift.name}
     </div>
@@ -142,19 +148,31 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('cost display with override', () => {
     it('shows cost 70 for 1 gift', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />)
+      render(
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />,
+      )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '70')
     })
 
     it('shows cost 160 for 2 gifts', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001', '9002'])} />)
+      render(
+        <EGOGiftObservationSummary
+          {...defaultProps}
+          selectedGiftIdsOverride={new Set(['9001', '9002'])}
+        />,
+      )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '160')
     })
 
     it('shows cost 270 for 3 gifts', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])} />)
+      render(
+        <EGOGiftObservationSummary
+          {...defaultProps}
+          selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])}
+        />,
+      )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '270')
     })
@@ -162,20 +180,29 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('selected state with override', () => {
     it('renders gift cards when gifts are selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />)
+      render(
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />,
+      )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByText('Blazing Gift')).toBeInTheDocument()
     })
 
     it('renders multiple gift cards', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])} />)
+      render(
+        <EGOGiftObservationSummary
+          {...defaultProps}
+          selectedGiftIdsOverride={new Set(['9001', '9002', '9003'])}
+        />,
+      )
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       expect(screen.getByTestId('gift-card-9002')).toBeInTheDocument()
       expect(screen.getByTestId('gift-card-9003')).toBeInTheDocument()
     })
 
     it('does not render placeholder when gifts selected', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />)
+      render(
+        <EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001'])} />,
+      )
       expect(screen.queryByText('Select EGO Gifts')).not.toBeInTheDocument()
     })
   })
@@ -204,7 +231,12 @@ describe('EGOGiftObservationSummary', () => {
 
   describe('edge cases', () => {
     it('gracefully handles unknown gift ID', () => {
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001', 'unknown-id'])} />)
+      render(
+        <EGOGiftObservationSummary
+          {...defaultProps}
+          selectedGiftIdsOverride={new Set(['9001', 'unknown-id'])}
+        />,
+      )
       // Known gift should render
       expect(screen.getByTestId('gift-card-9001')).toBeInTheDocument()
       // Unknown gift should be skipped (not crash)
@@ -213,7 +245,12 @@ describe('EGOGiftObservationSummary', () => {
 
     it('defaults to 0 cost for unknown gift count', () => {
       // 4+ gifts beyond cost table should default to 0
-      render(<EGOGiftObservationSummary {...defaultProps} selectedGiftIdsOverride={new Set(['9001', '9002', '9003', 'extra'])} />)
+      render(
+        <EGOGiftObservationSummary
+          {...defaultProps}
+          selectedGiftIdsOverride={new Set(['9001', '9002', '9003', 'extra'])}
+        />,
+      )
       const costDisplay = screen.getByTestId('starlight-cost')
       expect(costDisplay).toHaveAttribute('data-cost', '0')
     })

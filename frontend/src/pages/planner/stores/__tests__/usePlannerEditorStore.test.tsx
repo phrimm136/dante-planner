@@ -15,8 +15,8 @@ import {
   createDefaultFloorSelections,
   createDefaultDeckFilterState,
 } from '../usePlannerEditorStore'
-import { createEmptyNoteContent } from '@/schemas/NoteEditorSchemas'
-import { DUNGEON_IDX } from '@/lib/constants'
+import { createEmptyNoteContent } from '@/shared/noteEditor'
+import { DUNGEON_IDX } from '@/shared/gameData'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 
@@ -40,7 +40,11 @@ describe('usePlannerEditorStore', () => {
     })
 
     it('applies initial-state overrides over defaults', () => {
-      const store = createPlannerEditorStore({ title: 'Preset', category: '15F', isPublished: true })
+      const store = createPlannerEditorStore({
+        title: 'Preset',
+        category: '15F',
+        isPublished: true,
+      })
       const s = store.getState()
 
       expect(s.title).toBe('Preset')
@@ -64,9 +68,15 @@ describe('usePlannerEditorStore', () => {
     it('setEquipment accepts an updater function', () => {
       const store = createPlannerEditorStore()
 
-      store.getState().setEquipment((prev) => ({ ...prev, '99': { identity: { id: 'X', uptie: 4, level: 1 }, egos: {} } }))
+      store.getState().setEquipment((prev) => ({
+        ...prev,
+        '99': { identity: { id: 'X', uptie: 4, level: 1 }, egos: {} },
+      }))
 
-      expect(store.getState().equipment['99']).toEqual({ identity: { id: 'X', uptie: 4, level: 1 }, egos: {} })
+      expect(store.getState().equipment['99']).toEqual({
+        identity: { id: 'X', uptie: 4, level: 1 },
+        egos: {},
+      })
     })
 
     it('updateSinnerEquipment replaces a single sinner entry without dropping others', () => {
@@ -94,7 +104,11 @@ describe('usePlannerEditorStore', () => {
 
     it('updateFloorSelection replaces a single floor by index', () => {
       const store = createPlannerEditorStore()
-      const updated = { themePackId: 'pack-1', difficulty: DUNGEON_IDX.HARD, giftIds: new Set(['g1']) }
+      const updated = {
+        themePackId: 'pack-1',
+        difficulty: DUNGEON_IDX.HARD,
+        giftIds: new Set(['g1']),
+      }
 
       store.getState().updateFloorSelection(3, updated)
 
@@ -203,7 +217,9 @@ describe('usePlannerEditorStore', () => {
     it('converts serialized arrays into Set instances', () => {
       const store = createPlannerEditorStore()
 
-      store.getState().initializeFromPlanner(makeContent(), { title: 'T', category: '5F', isPublished: true })
+      store
+        .getState()
+        .initializeFromPlanner(makeContent(), { title: 'T', category: '5F', isPublished: true })
 
       const s = store.getState()
       expect(s.selectedKeywords).toBeInstanceOf(Set)
@@ -228,7 +244,7 @@ describe('usePlannerEditorStore', () => {
           deploymentOrder: undefined as unknown as number[],
           equipment: undefined as unknown as MDPlannerContent['equipment'],
         }),
-        { title: 'T', category: '5F', isPublished: false }
+        { title: 'T', category: '5F', isPublished: false },
       )
 
       const s = store.getState()
@@ -243,8 +259,12 @@ describe('usePlannerEditorStore', () => {
       const defaultEmpty = createEmptyNoteContent()
 
       store.getState().initializeFromPlanner(
-        makeContent({ sectionNotes: { intro: { content: 'only-intro' } } as unknown as MDPlannerContent['sectionNotes'] }),
-        { title: 'T', category: '5F', isPublished: false }
+        makeContent({
+          sectionNotes: {
+            intro: { content: 'only-intro' },
+          } as unknown as MDPlannerContent['sectionNotes'],
+        }),
+        { title: 'T', category: '5F', isPublished: false },
       )
 
       const notes = store.getState().sectionNotes
@@ -266,7 +286,9 @@ describe('usePlannerEditorStore', () => {
         selectedSinners: new Set(['1', '2']),
       })
 
-      store.getState().initializeFromPlanner(makeContent(), { title: 'T', category: '5F', isPublished: false })
+      store
+        .getState()
+        .initializeFromPlanner(makeContent(), { title: 'T', category: '5F', isPublished: false })
 
       expect(store.getState().deckFilterState).toEqual(createDefaultDeckFilterState())
     })

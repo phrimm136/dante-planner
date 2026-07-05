@@ -37,6 +37,6 @@ export function createTestRouter({
     history: createMemoryHistory({
       initialEntries,
     }),
-    defaultPendingMs: 0,  // CRITICAL: Prevents 1000ms delay per test
+    defaultPendingMs: 0, // CRITICAL: Prevents 1000ms delay per test
   })
 }

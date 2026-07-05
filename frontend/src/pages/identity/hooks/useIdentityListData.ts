@@ -1,45 +1,28 @@
-import { useSuspenseQuery, useQuery, queryOptions, keepPreviousData } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createEntityListQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { IdentitySpecListSchema, IdentityNameListSchema } from '../schemas/IdentitySchemas'
 
-// Query key factory for identity list data
-export const identityListQueryKeys = {
-  all: () => ['identity', 'list'] as const,
-  spec: () => ['identity', 'list', 'spec'] as const,
-  i18n: (language: string) => ['identity', 'list', 'i18n', language] as const,
-}
+export const identityListQueryKeys = createEntityListQueryKeys('identity')
 
-// Identity spec list query options with runtime validation
 function createIdentitySpecListQueryOptions() {
-  return queryOptions({
-    queryKey: identityListQueryKeys.spec(),
-    queryFn: async () => {
-      const module = await import('@static/data/identitySpecList.json')
-      const result = IdentitySpecListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[identity specList] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    identityListQueryKeys.spec(),
+    () => import('@static/data/identitySpecList.json'),
+    IdentitySpecListSchema,
+    'identity specList',
+  )
 }
 
-// Identity name list query options with runtime validation
 function createIdentityNameListQueryOptions(language: string) {
-  return queryOptions({
-    queryKey: identityListQueryKeys.i18n(language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/identityNameList.json`)
-      const result = IdentityNameListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[identity nameList / ${language}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-    placeholderData: keepPreviousData,
-  })
+  return createStaticDataQueryOptions(
+    identityListQueryKeys.i18n(language),
+    () => import(`@static/i18n/${language}/identityNameList.json`),
+    IdentityNameListSchema,
+    `identity nameList / ${language}`,
+    { keepPrevious: true },
+  )
 }
 
 /**
@@ -66,9 +49,7 @@ export function useIdentityListSpec() {
  */
 export function useIdentityListI18n() {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createIdentityNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createIdentityNameListQueryOptions(i18n.language))
   return i18nData
 }
 
@@ -84,9 +65,7 @@ const EMPTY_NAME_LIST: Record<string, string> = {}
  */
 export function useIdentityListI18nDeferred(): Record<string, string> {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(
-    createIdentityNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useQuery(createIdentityNameListQueryOptions(i18n.language))
   return i18nData ?? EMPTY_NAME_LIST
 }
 
@@ -102,9 +81,7 @@ export function useIdentityListData() {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createIdentitySpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createIdentityNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createIdentityNameListQueryOptions(i18n.language))
 
   return {
     spec,

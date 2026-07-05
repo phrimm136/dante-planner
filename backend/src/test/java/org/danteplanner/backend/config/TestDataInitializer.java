@@ -1,10 +1,11 @@
 package org.danteplanner.backend.config;
+import org.danteplanner.backend.shared.config.SentinelUserVerifier;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Profile;
@@ -75,7 +76,7 @@ public class TestDataInitializer {
      * JPA repository cannot insert with explicit ID when using IDENTITY generation.
      */
     @Deprecated
-    public static org.danteplanner.backend.entity.User createSentinelUser(UserRepository userRepository) {
+    public static org.danteplanner.backend.user.entity.User createSentinelUser(UserRepository userRepository) {
         throw new UnsupportedOperationException(
                 "Cannot create sentinel user via JPA - use createSentinelUser(EntityManager) instead");
     }

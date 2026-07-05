@@ -1,4 +1,5 @@
 package org.danteplanner.backend.util;
+import org.danteplanner.backend.shared.util.TiptapUrlSanitizer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

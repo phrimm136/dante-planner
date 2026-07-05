@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { AtkType, Season, SkillAttributeType } from '@/lib/constants'
+import type { AtkType, Season, SkillAttributeType } from '@/shared/gameData'
 import type {
   EgoTypeSchema,
   EGOSkillDataEntrySchema,
@@ -17,10 +17,7 @@ import type {
 
 export type EGOType = z.infer<typeof EgoTypeSchema>
 
-/**
- * Threadspin level type - 1 through 5
- */
-export type Threadspin = 1 | 2 | 3 | 4 | 5
+export type { Threadspin } from '@/shared/gameData'
 
 /**
  * EGO list item for list/grid views.

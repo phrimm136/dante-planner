@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react'
 import { Link, useSearch } from '@tanstack/react-router'
 
 import { useMDGesellschaftData } from '../../hooks/useMDGesellschaftData'
-import { CARD_GRID } from '@/lib/constants'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
 
 import { PublishedPlannerCard } from './PublishedPlannerCard'
 import { PlannerListPagination } from './PlannerListPagination'
 import { PlannerEmptyState } from './PlannerEmptyState'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 import type { MDGesellschaftMode } from '../../types/MDPlannerListTypes'
 
 export interface PublishedPlannerListProps {
@@ -76,26 +76,24 @@ export function PublishedPlannerList({
 
   const currentSearch = useSearch({ strict: false })
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when content changes
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [data.content])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < data.content.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, data.content.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, data.content.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: data.content.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: data.content,
+  })
 
   // Determine if any filters are active (for empty state messaging)
-  const hasActiveFilters = !!category || !!search || mode === 'best' || !!keyword || !!identity || !!ego || !!gift || !!themePack
+  const hasActiveFilters =
+    !!category ||
+    !!search ||
+    mode === 'best' ||
+    !!keyword ||
+    !!identity ||
+    !!ego ||
+    !!gift ||
+    !!themePack
 
   // Handle empty state
   if (data.content.length === 0) {
@@ -113,10 +111,7 @@ export function PublishedPlannerList({
             search={currentSearch}
             className="block"
           >
-            <PublishedPlannerCard
-              planner={planner}
-              showBookmark={isAuthenticated}
-            />
+            <PublishedPlannerCard planner={planner} showBookmark={isAuthenticated} />
           </Link>
         ))}
       </ResponsiveCardGrid>

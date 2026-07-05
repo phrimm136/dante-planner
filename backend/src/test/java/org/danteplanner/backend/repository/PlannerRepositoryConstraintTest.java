@@ -1,10 +1,20 @@
 package org.danteplanner.backend.repository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 
-import org.danteplanner.backend.entity.AuthProviderType;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.config.TestDataInitializer;
-import org.danteplanner.backend.entity.*;
+import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

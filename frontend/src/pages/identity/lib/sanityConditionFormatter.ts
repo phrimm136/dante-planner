@@ -5,9 +5,9 @@
  * Separated from useSanityConditionData.ts following Single Responsibility Principle.
  */
 
-import { useSanityConditionI18n } from '@/hooks/useSanityConditionData'
+import { useSanityConditionI18n } from '@/shared/gameText'
 import { formatSanityCondition, formatSanityConditions } from './formatSanityCondition'
-import type { SanityConditionType } from '@/lib/constants'
+import type { SanityConditionType } from '@/shared/gameData'
 
 /**
  * Hook that provides a formatter function for sanity conditions.

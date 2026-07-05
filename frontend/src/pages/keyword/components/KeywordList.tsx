@@ -1,11 +1,12 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { BuffType } from '@/lib/constants'
-import { CARD_GRID } from '@/lib/constants'
-import { useKeywordListI18nDeferred } from '@/hooks/useKeywordListData'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import type { BuffType } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { useKeywordListI18nDeferred } from '@/shared/gameText'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { KeywordCardLink } from './KeywordCardLink'
 
 interface KeywordListItem {
@@ -51,23 +52,13 @@ export function KeywordList({
   const { t } = useTranslation('database')
   const keywordNames = useKeywordListI18nDeferred()
 
-  // Progressive rendering: start with 50 cards, add 50 per frame
-  const [displayCount, setDisplayCount] = useState(50)
-
-  // Reset display count when keywords change
-  useEffect(() => {
-    setDisplayCount(50)
-  }, [keywords])
-
-  // Progressively render more cards
-  useEffect(() => {
-    if (displayCount < keywords.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 50, keywords.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, keywords.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: keywords.length,
+    step: PROGRESSIVE_REVEAL.KEYWORD_CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.KEYWORD_CARD_BATCH,
+    resetKey: keywords,
+  })
 
   // Create Set of visible keyword IDs based on filters
   const visibleIds = useMemo(() => {
@@ -113,19 +104,14 @@ export function KeywordList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('keyword.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('keyword.emptyState')}</div>
       </div>
     )
   }
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.KEYWORD}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.KEYWORD} mobileScale={0.8}>
         {keywords.slice(0, displayCount).map((keyword) => (
           <ScaledCardWrapper
             key={keyword.id}
@@ -134,11 +120,7 @@ export function KeywordList({
             cardHeight={CARD_GRID.HEIGHT.KEYWORD}
             className={visibleIds.has(keyword.id) ? '' : 'hidden'}
           >
-            <KeywordCardLink
-              id={keyword.id}
-              iconId={keyword.iconId}
-              buffType={keyword.buffType}
-            />
+            <KeywordCardLink id={keyword.id} iconId={keyword.iconId} buffType={keyword.buffType} />
           </ScaledCardWrapper>
         ))}
       </ResponsiveCardGrid>

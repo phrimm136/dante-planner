@@ -5,6 +5,16 @@ paths:
 
 # Frontend Testing Core
 
+## Running Tests
+
+Always target the frontend root from the repo root — never run bare `vitest`/`tsc`
+at the repo root (creates stray `node_modules/.vite` cache there; blocked by hook):
+
+```bash
+yarn --cwd frontend vitest run > /tmp/fe-test-<session-id>-<suffix>.log 2>&1
+yarn --cwd frontend tsc -b > /tmp/fe-typecheck-<session-id>-<suffix>.log 2>&1
+```
+
 ## Test Type Balance
 
 | Type | When | Tool |
@@ -77,6 +87,6 @@ vi.mock('@/lib/api', () => ({
 ## File Co-location
 
 ```
-src/components/common/FormattedDescription.tsx
-src/components/common/__tests__/FormattedDescription.test.tsx
+src/shared/gameText/components/FormattedDescription.tsx
+src/shared/gameText/components/__tests__/FormattedDescription.test.tsx
 ```

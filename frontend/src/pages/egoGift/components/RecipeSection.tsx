@@ -17,7 +17,12 @@ import { EGOGiftCard } from './EGOGiftCard'
 import { EGOGiftName } from './EGOGiftName'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec } from '../hooks/useEGOGiftListData'
-import type { EGOGiftRecipe, EGOGiftListItem, StandardRecipe, MixedRecipe } from '../types/EGOGiftTypes'
+import type {
+  EGOGiftRecipe,
+  EGOGiftListItem,
+  StandardRecipe,
+  MixedRecipe,
+} from '../types/EGOGiftTypes'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
@@ -35,11 +40,7 @@ function isMixedRecipe(recipe: EGOGiftRecipe): recipe is MixedRecipe {
  */
 function IngredientCard({ gift }: { gift: EGOGiftListItem }) {
   return (
-    <Link
-      to="/ego-gift/$id"
-      params={{ id: gift.id }}
-      className="block"
-    >
+    <Link to="/ego-gift/$id" params={{ id: gift.id }} className="block">
       <div className="flex flex-col items-center gap-1">
         <EGOGiftCard gift={gift} enhancement={0} enableHoverHighlight />
         <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
@@ -57,9 +58,7 @@ function IngredientCard({ gift }: { gift: EGOGiftListItem }) {
  */
 function PlusSeparator() {
   return (
-    <span
-      className="text-3xl font-bold text-muted-foreground self-center text-center mx-1 -translate-y-2.5"
-    >
+    <span className="text-3xl font-bold text-muted-foreground self-center text-center mx-1 -translate-y-2.5">
       +
     </span>
   )

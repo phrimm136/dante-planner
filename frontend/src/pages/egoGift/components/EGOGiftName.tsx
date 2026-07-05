@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
-import { KoreanText } from '@/components/KoreanText'
+import { KoreanText } from '@/components/ui/KoreanText'
 
 interface EGOGiftNameProps {
   /** EGO Gift ID to look up name */

@@ -3,7 +3,13 @@ import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
 import type { IdentityListItem } from '@/pages/identity'
 import type { SkillData } from './SinnerGrid'
-import { getAttackTypeIconPath, getEGOImagePath, getEGOTypeIconPath, getSelectedIndicatorPath, getBackupIndicatorPath } from '@/lib/assetPaths'
+import {
+  getAttackTypeIconPath,
+  getEGOImagePath,
+  getEGOTypeIconPath,
+  getSelectedIndicatorPath,
+  getBackupIndicatorPath,
+} from '@/shared/assets'
 import { IdentityCard } from '@/pages/identity'
 import colorCode from '@static/data/colorCode.json'
 import { getDisplayFontForNumeric } from '@/lib/utils'
@@ -40,23 +46,24 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
   const isDeployed = deploymentOrder !== null && deploymentOrder <= 7
 
   // Create deployment overlay for IdentityCard
-  const deploymentOverlay = deploymentOrder !== null ? (
-    <div className="absolute flex inset-0 items-center justify-center">
-      <div className="flex flex-col items-center -translate-y-[18px] gap-2">
-        <span
-          className={`w-12 h-12 flex items-center justify-center text-[48px] ${isDeployed ? 'formation-number-deploy' : 'formation-number-backup'}`}
-          style={{ fontFamily: getDisplayFontForNumeric() }}
-        >
-          {deploymentOrder}
-        </span>
-        <img
-          src={isDeployed ? getSelectedIndicatorPath() : getBackupIndicatorPath()}
-          alt={isDeployed ? 'Selected' : 'Backup'}
-          className="w-37 object-contain"
-        />
+  const deploymentOverlay =
+    deploymentOrder !== null ? (
+      <div className="absolute flex inset-0 items-center justify-center">
+        <div className="flex flex-col items-center -translate-y-[18px] gap-2">
+          <span
+            className={`w-12 h-12 flex items-center justify-center text-[48px] ${isDeployed ? 'formation-number-deploy' : 'formation-number-backup'}`}
+            style={{ fontFamily: getDisplayFontForNumeric() }}
+          >
+            {deploymentOrder}
+          </span>
+          <img
+            src={isDeployed ? getSelectedIndicatorPath() : getBackupIndicatorPath()}
+            alt={isDeployed ? 'Selected' : 'Backup'}
+            className="w-37 object-contain"
+          />
+        </div>
       </div>
-    </div>
-  ) : null
+    ) : null
 
   // Build a minimal identity object for IdentityCard if missing
   const displayIdentity: IdentityListItem = identityData ?? {
@@ -139,11 +146,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <img
-                  src={getEGOTypeIconPath(rank)}
-                  alt={rank}
-                  className="h-4 object-cover"
-                />
+                <img src={getEGOTypeIconPath(rank)} alt={rank} className="h-4 object-cover" />
               )}
             </div>
           )

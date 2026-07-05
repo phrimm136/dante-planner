@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  matchesRelatedEgoGiftFilter,
-  matchesRelatedThemePackFilter,
-} from '../abEventFilter'
+import { matchesRelatedEgoGiftFilter, matchesRelatedThemePackFilter } from '../abEventFilter'
 import type { AbEventSpecListEntry } from '../../schemas/AbEventSchemas'
 
 function makeEntry(overrides: Partial<AbEventSpecListEntry> = {}): AbEventSpecListEntry {

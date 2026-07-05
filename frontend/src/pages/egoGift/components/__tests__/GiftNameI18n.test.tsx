@@ -12,7 +12,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftDetailData', () => ({
 }))
 
 // Mock useColorCodes hook used by GiftName
-vi.mock('@/hooks/useColorCodes', () => ({
+vi.mock('@/shared/gameText/hooks/useColorCodes', () => ({
   useColorCodes: () => ({
     data: {
       WRATH: '#ff0000',
@@ -34,20 +34,16 @@ function createWrapper() {
 
 describe('GiftNameI18n', () => {
   it('should render gift name from i18n data', () => {
-    render(
-      <GiftNameI18n id="9001" attributeType="WRATH" />,
-      { wrapper: createWrapper() }
-    )
+    render(<GiftNameI18n id="9001" attributeType="WRATH" />, { wrapper: createWrapper() })
 
     // Should render the name from mocked i18n data
     expect(screen.getByText('Test Gift Name')).toBeDefined()
   })
 
   it('should not suspend parent component', () => {
-    const { container } = render(
-      <GiftNameI18n id="9001" attributeType="WRATH" />,
-      { wrapper: createWrapper() }
-    )
+    const { container } = render(<GiftNameI18n id="9001" attributeType="WRATH" />, {
+      wrapper: createWrapper(),
+    })
 
     // Component should render immediately (internal Suspense handles loading)
     expect(container.firstChild).toBeTruthy()

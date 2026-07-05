@@ -154,6 +154,25 @@
                 ]
             }
         },
+        "plan-keyword": {
+            "type": "domain",
+            "enforcement": "suggest",
+            "priority": "medium",
+            "description": "Add a selectable planner keyword across FE, BE, and i18n with the proper in-game translation",
+            "promptTriggers": {
+                "keywords": ["plan keyword", "planner keyword", "synergy keyword", "faction keyword"],
+                "intentPatterns": [
+                    "(add|new|create).*?(plan|planner|synergy|faction).*?keyword",
+                    "keyword.*?(SYNERGY_KEYWORDS|VALID_KEYWORDS|plannerKeywords)"
+                ]
+            },
+            "fileTriggers": {
+                "pathPatterns": [
+                    "static/i18n/*/plannerKeywords.json",
+                    "backend/src/main/java/org/danteplanner/backend/converter/KeywordSetConverter.java"
+                ]
+            }
+        },
         "findings-sync": {
             "type": "domain",
             "enforcement": "suggest",

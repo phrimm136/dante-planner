@@ -68,4 +68,4 @@ const { user, token } = useAuthStore()
 | Frequent state in Context | Zustand with selectors |
 | Prop drilling 3+ levels | Context or Zustand |
 
-**Reference:** `stores/usePlannerStore.ts`
+**Reference:** `pages/planner/stores/usePlannerEditorStore.tsx`

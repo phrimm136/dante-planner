@@ -17,10 +17,7 @@ function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
   )
 }
 
-function PaginationContent({
-  className,
-  ...props
-}: React.ComponentProps<'ul'>) {
+function PaginationContent({ className, ...props }: React.ComponentProps<'ul'>) {
   return (
     <ul
       data-slot="pagination-content"
@@ -39,12 +36,7 @@ type PaginationLinkProps = {
   size?: 'default' | 'icon'
 } & React.ComponentProps<'button'>
 
-function PaginationLink({
-  className,
-  isActive,
-  size = 'icon',
-  ...props
-}: PaginationLinkProps) {
+function PaginationLink({ className, isActive, size = 'icon', ...props }: PaginationLinkProps) {
   return (
     <button
       aria-current={isActive ? 'page' : undefined}
@@ -55,17 +47,14 @@ function PaginationLink({
           variant: isActive ? 'outline' : 'ghost',
           size,
         }),
-        className
+        className,
       )}
       {...props}
     />
   )
 }
 
-function PaginationPrevious({
-  className,
-  ...props
-}: React.ComponentProps<typeof PaginationLink>) {
+function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
   const { t } = useTranslation()
   return (
     <PaginationLink
@@ -79,27 +68,16 @@ function PaginationPrevious({
   )
 }
 
-function PaginationNext({
-  className,
-  ...props
-}: React.ComponentProps<typeof PaginationLink>) {
+function PaginationNext({ className, ...props }: React.ComponentProps<typeof PaginationLink>) {
   const { t } = useTranslation()
   return (
-    <PaginationLink
-      aria-label={t('a11y.nextPage')}
-      size="icon"
-      className={className}
-      {...props}
-    >
+    <PaginationLink aria-label={t('a11y.nextPage')} size="icon" className={className} {...props}>
       <ChevronRightIcon className="size-4" />
     </PaginationLink>
   )
 }
 
-function PaginationEllipsis({
-  className,
-  ...props
-}: React.ComponentProps<'span'>) {
+function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
   const { t } = useTranslation()
   return (
     <span

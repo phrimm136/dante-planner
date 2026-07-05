@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useIdentityListI18n } from '../hooks/useIdentityListData'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
+import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
 
 interface IdentityNameProps {
   /** Identity ID to look up name */
@@ -35,7 +35,7 @@ export function IdentityName({ id }: IdentityNameProps) {
       width={127}
       maxLines={5}
       className="text-right leading-4 text-identity-name"
-      style={{...displayStyle}}
+      style={{ ...displayStyle }}
       minFontSize={8}
       maxFontSize={18}
       lineHeight={lineHeight}

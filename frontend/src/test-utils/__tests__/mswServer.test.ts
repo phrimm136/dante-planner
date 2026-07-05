@@ -26,9 +26,7 @@ describe('MSW server interception', () => {
   it('returns the registered fixture for an intercepted request', async () => {
     const fixture = { id: 'planner-1', name: 'Intercepted' }
     server.use(
-      http.get('http://localhost/api/planners/planner-1', () =>
-        HttpResponse.json(fixture)
-      )
+      http.get('http://localhost/api/planners/planner-1', () => HttpResponse.json(fixture)),
     )
 
     const response = await fetch('http://localhost/api/planners/planner-1')

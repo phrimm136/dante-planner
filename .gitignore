@@ -24,3 +24,7 @@ logs/
 # Backup files
 *.backup
 *.bak
+
+# Python
+__pycache__/
+*.py[cod]

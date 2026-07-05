@@ -4,19 +4,19 @@ import { useTranslation } from 'react-i18next'
 import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ErrorBoundary } from '@/components/common/ErrorBoundary'
+import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
 import { PlannerDetailHeader } from './components/plannerViewer/PlannerDetailHeader'
 import { PlannerDetailFooter } from './components/plannerViewer/PlannerDetailFooter'
-import { CommentSection } from '@/components/comment/CommentSection'
+import { CommentSection } from '@/shared/comment'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
-import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
-import { CommunityPlansErrorFallback } from '@/components/common/CommunityPlansErrorFallback'
+import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery } from './hooks/usePublishedPlannerQuery'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useAuthQuery } from '@/shared/auth'
+import { useUserSettingsQuery } from '@/pages/settings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -73,10 +73,11 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
 
   // Determine ownership by comparing author username with current user's username
-  const isOwner = isAuthenticated && user !== null && (
+  const isOwner =
+    isAuthenticated &&
+    user !== null &&
     user.usernameEpithet === apiData.authorUsernameEpithet &&
     user.usernameSuffix === apiData.authorUsernameSuffix
-  )
 
   // Validate planner type - viewer only supports Mirror Dungeon planners
   if (planner.config.type !== 'MIRROR_DUNGEON') {
@@ -123,11 +124,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
       <PlannerViewer planner={planner} />
 
       {/* Footer with engagement actions */}
-      <PlannerDetailFooter
-        planner={apiData}
-        isOwner={isOwner}
-        isAuthenticated={isAuthenticated}
-      />
+      <PlannerDetailFooter planner={apiData} isOwner={isOwner} isAuthenticated={isAuthenticated} />
 
       {/* Comment Section */}
       <div ref={commentsRef}>

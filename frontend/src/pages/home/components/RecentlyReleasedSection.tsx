@@ -22,9 +22,10 @@ import {
   getSinnerIconPath,
   getRarityIconPath,
   getEGORankIconPath,
-} from '@/lib/assetPaths'
-import { cn, getSinnerFromId } from '@/lib/utils'
-import { getSeasonColor } from '@/lib/colorUtils'
+} from '@/shared/assets'
+import { getSinnerFromId } from '@/shared/gameData'
+import { cn } from '@/lib/utils'
+import { getSeasonColor } from '@/shared/gameData'
 
 import type { DateGroup, RecentEntity } from '../hooks/useHomePageData'
 
@@ -192,11 +193,7 @@ function EntityCardLink({ entity }: EntityCardLinkProps) {
   }
 
   return (
-    <Link
-      to="/ego/$id"
-      params={{ id: entity.data.id }}
-      className="block transition-all selectable"
-    >
+    <Link to="/ego/$id" params={{ id: entity.data.id }} className="block transition-all selectable">
       <HomeEGOCard id={entity.data.id} egoType={entity.data.egoType} season={entity.data.season} />
     </Link>
   )
@@ -221,14 +218,12 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
     <section className="flex flex-col gap-4">
       {/* Header with browse links */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          {t('pages.home.recentlyReleased.title')}
-        </h2>
+        <h2 className="text-xl font-semibold">{t('pages.home.recentlyReleased.title')}</h2>
         <div className="flex items-center gap-4 text-sm">
           <Link
             to="/identity"
             className={cn(
-              'flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors'
+              'flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors',
             )}
           >
             {t('pages.home.recentlyReleased.browseIdentity')}
@@ -237,7 +232,7 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
           <Link
             to="/ego"
             className={cn(
-              'flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors'
+              'flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors',
             )}
           >
             {t('pages.home.recentlyReleased.browseEGO')}
@@ -252,11 +247,12 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
           {dateGroups.map((group) => (
             <div key={group.date}>
               {/* Date header */}
-              <div className="text-sm text-muted-foreground mb-3">
-                {group.formattedDate}
-              </div>
+              <div className="text-sm text-muted-foreground mb-3">{group.formattedDate}</div>
               {/* Card grid - auto-fit creates only columns needed */}
-              <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fit, 112px)', justifyContent: 'start' }}>
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: 'repeat(auto-fit, 112px)', justifyContent: 'start' }}
+              >
                 {group.entities.map((entity) => (
                   <EntityCardLink key={`${entity.type}-${entity.data.id}`} entity={entity} />
                 ))}

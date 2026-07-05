@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEGOListI18n } from '../hooks/useEGOListData'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
+import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
 
 interface EGONameProps {
   /** EGO ID to look up name */
@@ -27,9 +27,7 @@ interface EGONameProps {
  */
 function insertKanjiBreaks(text: string): string {
   // Match sequences of CJK ideographs and insert zero-width space between each
-  return text.replace(/[\u4E00-\u9FFF]+/g, (match) =>
-    match.split('').join('\u200B')
-  )
+  return text.replace(/[\u4E00-\u9FFF]+/g, (match) => match.split('').join('\u200B'))
 }
 
 export function EGOName({ id }: EGONameProps) {
@@ -48,7 +46,7 @@ export function EGOName({ id }: EGONameProps) {
       width={78}
       maxLines={3}
       className="text-center"
-      style={{...displayStyle}}
+      style={{ ...displayStyle }}
       minFontSize={6}
       maxFontSize={12}
       lineHeight={lineHeight}

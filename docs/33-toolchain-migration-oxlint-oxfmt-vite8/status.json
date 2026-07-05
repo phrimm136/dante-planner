@@ -1,0 +1,10 @@
+{
+  "totalPhases": 4,
+  "currentPhase": 3,
+  "phases": [
+    { "name": "Oxlint adoption (type-aware)", "status": "done", "commit": "b42a6742" },
+    { "name": "Oxfmt one-shot reformat", "status": "done", "commits": ["8015e612 (adopt)", "333472c2 (reformat)", "1d7af28f (blame-ignore)"] },
+    { "name": "Vite 7 to 8 (Rolldown) — entry-gated", "status": "done", "commit": "8e3371de", "gate": "D16 2-core docker build PASS (11s); INV3b preserved; INV5 6229 pass; preview smoke ok" },
+    { "name": "vp migrate — conditional on Phase 3", "status": "deferred", "reason": "vite-plus 0.2.2 migrate requires Yarn Berry (catalog: protocol, .yarnrc.yml, Berry lockfile v10) — a full Yarn Classic v1 -> Berry migration incompatible with the repo's yarn-v1 + --frozen-lockfile CI. Also breaks @tailwindcss/vite peer (catalog aliases vite->vite-plus-core@0.2.2). D17 already flagged low value for a single-package repo. Reverted to clean Phase 3; treat yarn v1 -> Berry as a separate deliberate decision if ever wanted (would also cleanly solve the musl-trim via Berry supportedArchitectures)." }
+  ]
+}

@@ -4,7 +4,7 @@ export { IdentityCard } from './components/IdentityCard'
 export { IdentityList } from './components/IdentityList'
 export { IdentityHeader } from './components/IdentityHeader'
 export { IdentityHeaderWithI18n } from './components/IdentityHeaderI18n'
-export { SkillsSectionI18n } from './components/SkillI18n'
+export { SkillsSectionI18n } from './components/IdentitySkillI18n'
 export { SkillTabButton } from './components/SkillTabButton'
 export { PassiveCardI18n } from './components/PassiveI18n'
 export { PanicTypeSectionI18n, SanityConditionsSectionI18n } from './components/SanityI18n'
@@ -18,10 +18,7 @@ export {
   useIdentityListSpec,
   useIdentityListI18n,
 } from './hooks/useIdentityListData'
-export {
-  useIdentityDetailSpec,
-  useIdentityDetailI18n,
-} from './hooks/useIdentityDetailData'
+export { useIdentityDetailSpec, useIdentityDetailI18n } from './hooks/useIdentityDetailData'
 
 export type {
   Identity,

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { DUNGEON_IDX } from '@/lib/constants'
+import { DUNGEON_IDX } from '@/shared/gameData'
 
 /**
  * Theme Pack Schemas
@@ -18,43 +18,53 @@ const dungeonIdxSchema = z.union([
 ])
 
 // Exception condition schema
-export const ExceptionConditionSchema = z.object({
-  dungeonIdx: dungeonIdxSchema,
-  selectableFloors: z.array(z.number()).optional(),
-}).strict()
+export const ExceptionConditionSchema = z
+  .object({
+    dungeonIdx: dungeonIdxSchema,
+    selectableFloors: z.array(z.number()).optional(),
+  })
+  .strict()
 
 // Theme pack config schema - simplified for pre-composed images
 // Only textColor is needed for runtime text overlay (hex color without # prefix)
-export const ThemePackConfigSchema = z.object({
-  textColor: z.string(),
-}).strict()
+export const ThemePackConfigSchema = z
+  .object({
+    textColor: z.string(),
+  })
+  .strict()
 
 // Theme pack i18n entry schema
-export const ThemePackI18nEntrySchema = z.object({
-  name: z.string(),
-  specialName: z.string().optional(),
-}).strict()
+export const ThemePackI18nEntrySchema = z
+  .object({
+    name: z.string(),
+    specialName: z.string().optional(),
+  })
+  .strict()
 
 // Theme pack i18n record schema
 export const ThemePackI18nSchema = z.record(z.string(), ThemePackI18nEntrySchema)
 
 // Theme pack entry schema
-export const ThemePackEntrySchema = z.object({
-  exceptionConditions: z.array(ExceptionConditionSchema),
-  specificEgoGiftPool: z.array(z.number()),
-  themePackConfig: ThemePackConfigSchema,
-  fixedRewardEgoGifts: z.array(z.number()).optional(),
-}).strict()
+export const ThemePackEntrySchema = z
+  .object({
+    exceptionConditions: z.array(ExceptionConditionSchema),
+    specificEgoGiftPool: z.array(z.number()),
+    themePackConfig: ThemePackConfigSchema,
+    fixedRewardEgoGifts: z.array(z.number()).optional(),
+  })
+  .strict()
 
 // Theme pack list schema (Record keyed by pack ID)
 export const ThemePackListSchema = z.record(z.string(), ThemePackEntrySchema)
 
 // Featured boss schema (unitId + portrait reference for a theme pack's boss roster)
 // portraitId is a string when the source field is a string sdPortrait, number otherwise
-export const FeaturedBossSchema = z.object({
-  unitId: z.number(),
-  portraitId: z.union([z.number(), z.string()]),
-}).strict()
+export const FeaturedBossSchema = z
+  .object({
+    unitId: z.number(),
+    portraitId: z.union([z.number(), z.string()]),
+  })
+  .strict()
 
 export type FeaturedBoss = z.infer<typeof FeaturedBossSchema>
 

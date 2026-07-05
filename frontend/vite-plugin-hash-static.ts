@@ -150,19 +150,39 @@ function scanFiles(dir: string, base = ''): string[] {
   return files
 }
 
+/** Maps each non-JSON static file's hashed key to its content-hashed output path. */
 function buildManifest(staticDir: string): Record<string, string> {
   const manifest: Record<string, string> = {}
   const files = scanFiles(staticDir)
 
   for (const file of files) {
-    // Skip JSON files — they are bundled into JS chunks via dynamic import()
     if (path.extname(file) === '.json') continue
 
-    const filePath = path.join(staticDir, file)
-    const content = fs.readFileSync(filePath)
+    const content = fs.readFileSync(path.join(staticDir, file))
     const hash = createHash('md5').update(content).digest('hex').slice(0, 12)
-    const ext = path.extname(file)
-    manifest[hashKey(file)] = `a/${hash}${ext}`
+    manifest[hashKey(file)] = `a/${hash}${path.extname(file)}`
+  }
+
+  return manifest
+}
+
+/**
+ * Async variant of {@link buildManifest} that awaits file I/O so the work yields to
+ * the event loop between files. Rolldown drives plugins from a native async runtime;
+ * a long synchronous hook parks the JS thread while the runtime waits on it,
+ * deadlocking the build. buildStart pre-warms the cache with this so the hot
+ * load/transform hooks never run the synchronous builder in a production build.
+ */
+async function buildManifestAsync(staticDir: string): Promise<Record<string, string>> {
+  const manifest: Record<string, string> = {}
+  const files = scanFiles(staticDir)
+
+  for (const file of files) {
+    if (path.extname(file) === '.json') continue
+
+    const content = await fs.promises.readFile(path.join(staticDir, file))
+    const hash = createHash('md5').update(content).digest('hex').slice(0, 12)
+    manifest[hashKey(file)] = `a/${hash}${path.extname(file)}`
   }
 
   return manifest
@@ -173,9 +193,16 @@ export { transformResolveAsset, transformDynamicImportKey, partialHash, toBytes 
 
 export function hashStaticPlugin(options: HashStaticOptions): Plugin {
   let hasManifest = false
+  let manifest: Record<string, string> | null = null
 
   return {
     name: 'hash-static-assets',
+
+    async buildStart() {
+      if (this.meta.watchMode) return
+      manifest = await buildManifestAsync(options.staticDir)
+      hasManifest = Object.keys(manifest).length > 0
+    },
 
     resolveId(id) {
       if (id === VIRTUAL_MODULE_ID) {
@@ -188,9 +215,9 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
         if (this.meta.watchMode) {
           return 'export default {}'
         }
-        const manifest = buildManifest(options.staticDir)
-        hasManifest = Object.keys(manifest).length > 0
-        return `export default ${JSON.stringify(manifest)}`
+        const m = (manifest ??= buildManifest(options.staticDir))
+        hasManifest = Object.keys(m).length > 0
+        return `export default ${JSON.stringify(m)}`
       }
     },
 
@@ -198,7 +225,7 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
       if (this.meta.watchMode) return
       if (!id.endsWith('assetPaths.ts')) return
 
-      const manifest = buildManifest(options.staticDir)
+      const m = (manifest ??= buildManifest(options.staticDir))
 
       // Regex to match resolveAsset(`...`), resolveAsset('...'), and resolveAsset("...")
       // Note: esbuild pre-transform converts single quotes to double quotes
@@ -210,17 +237,17 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
 
       // Process template literal calls
       result = result.replace(templateRegex, (_match, template: string) => {
-        return transformResolveAsset(template, manifest, (msg) => this.warn(msg))
+        return transformResolveAsset(template, m, (msg) => this.warn(msg))
       })
 
       // Process single-quoted string calls
       result = result.replace(singleQuoteRegex, (_match, str: string) => {
-        return transformResolveAsset(str, manifest, (msg) => this.warn(msg))
+        return transformResolveAsset(str, m, (msg) => this.warn(msg))
       })
 
       // Process double-quoted string calls (esbuild converts single to double quotes)
       result = result.replace(doubleQuoteRegex, (_match, str: string) => {
-        return transformResolveAsset(str, manifest, (msg) => this.warn(msg))
+        return transformResolveAsset(str, m, (msg) => this.warn(msg))
       })
 
       // Replace import of resolveAsset with direct manifest import

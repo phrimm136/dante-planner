@@ -170,9 +170,7 @@ export function ExtractionInputs({
     <div className={cn(SECTION_STYLES.container, 'space-y-6')}>
       {/* Pull Configuration */}
       <div className="space-y-4">
-        <h3 className={SECTION_STYLES.TEXT.subHeader}>
-          {t('inputs.pullConfig')}
-        </h3>
+        <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('inputs.pullConfig')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InputField
             label={t('inputs.plannedPulls')}
@@ -193,15 +191,11 @@ export function ExtractionInputs({
 
       {/* Banner Configuration */}
       <div className="space-y-4">
-        <h3 className={SECTION_STYLES.TEXT.subHeader}>
-          {t('inputs.bannerConfig')}
-        </h3>
+        <h3 className={SECTION_STYLES.TEXT.subHeader}>{t('inputs.bannerConfig')}</h3>
 
         {/* 3-Star Identity */}
         <div className="space-y-2">
-          <h4 className={SECTION_STYLES.TEXT.label}>
-            {t('inputs.threeStarId')}
-          </h4>
+          <h4 className={SECTION_STYLES.TEXT.label}>{t('inputs.threeStarId')}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
               label={t('inputs.featured')}
@@ -222,9 +216,7 @@ export function ExtractionInputs({
 
         {/* EGO */}
         <div className="space-y-2">
-          <h4 className={SECTION_STYLES.TEXT.label}>
-            {t('inputs.ego')}
-          </h4>
+          <h4 className={SECTION_STYLES.TEXT.label}>{t('inputs.ego')}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
               label={t('inputs.featured')}
@@ -251,9 +243,7 @@ export function ExtractionInputs({
 
         {/* Announcer */}
         <div className="space-y-2">
-          <h4 className={SECTION_STYLES.TEXT.label}>
-            {t('inputs.announcer')}
-          </h4>
+          <h4 className={SECTION_STYLES.TEXT.label}>{t('inputs.announcer')}</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
               label={t('inputs.featured')}

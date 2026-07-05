@@ -90,7 +90,7 @@ describe('usePlannerVote', () => {
 
       expect(ApiClient.post).toHaveBeenCalledWith(
         '/api/planner/md/123e4567-e89b-12d3-a456-426614174000/upvote',
-        { voteType: 'UP' }
+        { voteType: 'UP' },
       )
     })
 
@@ -215,7 +215,7 @@ describe('usePlannerVote', () => {
             plannerId: '123e4567-e89b-12d3-a456-426614174000',
             voteType: 'UP',
           })
-        })
+        }),
       ).rejects.toThrow()
     })
   })

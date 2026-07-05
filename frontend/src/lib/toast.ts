@@ -1,6 +1,6 @@
 import { toast as sonnerToast, type ExternalToast } from 'sonner'
 import i18n from '@/lib/i18n'
-import { linkifyText } from '@/components/common/LinkifyText'
+import { linkifyText } from '@/components/ui/LinkifyText'
 
 function toastError(message: string | React.ReactNode, options?: ExternalToast) {
   return sonnerToast.error(message, {

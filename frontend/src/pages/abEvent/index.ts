@@ -4,10 +4,7 @@ export { AbEventList } from './components/AbEventList'
 export { AbEventCard } from './components/AbEventCard'
 export { ChoiceBranch } from './components/AbEventChoiceBranch'
 
-export {
-  useAbEventListData,
-  useAbEventListSpec,
-} from './hooks/useAbEventListData'
+export { useAbEventListData, useAbEventListSpec } from './hooks/useAbEventListData'
 export {
   useAbEventDetailData,
   useAbEventDetailSpec,

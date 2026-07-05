@@ -9,7 +9,7 @@ interface StaggerPanelProps {
 const STAGGER_TEXT_COLORS = ['text-stagger-1', 'text-stagger-2', 'text-stagger-3'] as const
 
 function calculateStaggerThreshold(maxHP: number, staggerPercent: number): number {
-  return Math.floor(maxHP * staggerPercent / 100)
+  return Math.floor((maxHP * staggerPercent) / 100)
 }
 
 export function StaggerPanel({ maxHP, staggerThresholds }: StaggerPanelProps) {
@@ -26,7 +26,9 @@ export function StaggerPanel({ maxHP, staggerThresholds }: StaggerPanelProps) {
           return (
             <div key={index} className="flex flex-col items-center gap-1">
               <p className={`text-xs tabular-nums ${STAGGER_TEXT_COLORS[index]}`}>{hpValue}</p>
-              <span className={`text-xs tabular-nums ${STAGGER_TEXT_COLORS[index]}`}>({percentage}%)</span>
+              <span className={`text-xs tabular-nums ${STAGGER_TEXT_COLORS[index]}`}>
+                ({percentage}%)
+              </span>
             </div>
           )
         })}

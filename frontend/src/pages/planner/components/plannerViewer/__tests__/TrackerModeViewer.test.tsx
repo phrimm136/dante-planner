@@ -25,7 +25,7 @@ vi.mock('react-i18next', async (importOriginal) => {
     useTranslation: () => ({
       t: (key: string, options?: Record<string, unknown>) => {
         if (key === 'pages.plannerMD.floor' && options?.number) {
-          return `Floor ${options.number}`
+          return `Floor ${options.number as number}`
         }
         if (key === 'pages.plannerMD.noteEditor.placeholder') return 'Note placeholder'
         if (key === 'pages.plannerMD.startBuffs') return 'Start Buffs'
@@ -87,9 +87,13 @@ vi.mock('../SkillTrackerPanel', () => ({
 }))
 
 vi.mock('../FloorTrackerSection', () => ({
-  FloorTrackerSection: ({ floorNumber, floorIndex }: { floorNumber: number; floorIndex: number }) => (
-    <div data-testid={`floor-tracker-section-${floorIndex}`}>Floor {floorNumber}</div>
-  ),
+  FloorTrackerSection: ({
+    floorNumber,
+    floorIndex,
+  }: {
+    floorNumber: number
+    floorIndex: number
+  }) => <div data-testid={`floor-tracker-section-${floorIndex}`}>Floor {floorNumber}</div>,
 }))
 
 vi.mock('../../startBuff/StartBuffSection', () => ({
@@ -101,21 +105,29 @@ vi.mock('../../startGift/StartGiftSummary', () => ({
 }))
 
 vi.mock('../../egoGift/EGOGiftObservationSummary', () => ({
-  EGOGiftObservationSummary: () => <div data-testid="ego-gift-observation-summary">EGOGiftObservationSummary</div>,
+  EGOGiftObservationSummary: () => (
+    <div data-testid="ego-gift-observation-summary">EGOGiftObservationSummary</div>
+  ),
 }))
 
 vi.mock('../../egoGift/ComprehensiveGiftSummary', () => ({
-  ComprehensiveGiftSummary: () => <div data-testid="comprehensive-gift-summary">ComprehensiveGiftSummary</div>,
+  ComprehensiveGiftSummary: () => (
+    <div data-testid="comprehensive-gift-summary">ComprehensiveGiftSummary</div>
+  ),
 }))
 
-vi.mock('@/components/noteEditor/NoteEditor', () => ({
+vi.mock('@/shared/noteEditor/components/NoteEditor', () => ({
   NoteEditor: ({ disabled }: { disabled?: boolean }) => (
-    <div data-testid="note-editor" data-disabled={disabled}>NoteEditor</div>
+    <div data-testid="note-editor" data-disabled={disabled}>
+      NoteEditor
+    </div>
   ),
 }))
 
 vi.mock('@/components/ui/skeleton', () => ({
-  Skeleton: ({ className }: { className?: string }) => <div data-testid="skeleton" className={className} />,
+  Skeleton: ({ className }: { className?: string }) => (
+    <div data-testid="skeleton" className={className} />
+  ),
 }))
 
 // Mock identity and EGO hooks
@@ -128,21 +140,29 @@ vi.mock('@/pages/ego/hooks/useEGOListData', () => ({
 }))
 
 // Mock progressive reveal (show all sections immediately)
-vi.mock('@/hooks/useProgressiveReveal', () => ({
+vi.mock('@/components/hooks/useProgressiveReveal', () => ({
   useProgressiveReveal: () => 6,
 }))
 
 // Mock other child components
 vi.mock('../ComprehensiveGiftGridTracker', () => ({
-  ComprehensiveGiftGridTracker: () => <div data-testid="comprehensive-gift-grid-tracker">ComprehensiveGiftGridTracker</div>,
+  ComprehensiveGiftGridTracker: () => (
+    <div data-testid="comprehensive-gift-grid-tracker">ComprehensiveGiftGridTracker</div>
+  ),
 }))
 
 vi.mock('../HorizontalThemePackGallery', () => ({
-  HorizontalThemePackGallery: () => <div data-testid="horizontal-theme-pack-gallery" data-unified="true">HorizontalThemePackGallery</div>,
+  HorizontalThemePackGallery: () => (
+    <div data-testid="horizontal-theme-pack-gallery" data-unified="true">
+      HorizontalThemePackGallery
+    </div>
+  ),
 }))
 
 vi.mock('../../skillReplacement/SkillReplacementSection', () => ({
-  SkillReplacementSection: () => <div data-testid="skill-replacement-section">SkillReplacementSection</div>,
+  SkillReplacementSection: () => (
+    <div data-testid="skill-replacement-section">SkillReplacementSection</div>
+  ),
 }))
 
 vi.mock('../../PlannerSection', () => ({
@@ -154,7 +174,7 @@ vi.mock('../../PlannerSection', () => ({
   ),
 }))
 
-vi.mock('@/components/common/SectionNoteDialog', () => ({
+vi.mock('../../SectionNoteDialog', () => ({
   SectionNoteDialog: () => null,
 }))
 
@@ -173,7 +193,12 @@ describe('TrackerModeViewer', () => {
       observation: { content: { type: 'doc' as const, content: [] } },
       comprehensiveGifts: { content: { type: 'doc' as const, content: [] } },
       skillReplacement: { content: { type: 'doc' as const, content: [] } },
-      ...Object.fromEntries(floorSelections.map((_, i) => [`floor-${i}`, { content: { type: 'doc' as const, content: [] } }])),
+      ...Object.fromEntries(
+        floorSelections.map((_, i) => [
+          `floor-${i}`,
+          { content: { type: 'doc' as const, content: [] } },
+        ]),
+      ),
     }
 
     const content: MDPlannerContent = {

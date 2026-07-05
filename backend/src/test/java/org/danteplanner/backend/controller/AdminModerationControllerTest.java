@@ -2,14 +2,14 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerVote;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.VoteType;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.PlannerVoteRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +31,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -106,7 +107,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -125,7 +126,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(moderatorCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -141,7 +142,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -157,7 +158,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
                     .andExpect(status().isUnauthorized());
@@ -172,7 +173,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -189,7 +190,7 @@ class AdminModerationControllerTest {
                 }
                 """, longReason);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -206,7 +207,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -222,7 +223,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -243,7 +244,7 @@ class AdminModerationControllerTest {
 
             Instant beforeHide = Instant.now();
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -263,7 +264,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -283,7 +284,7 @@ class AdminModerationControllerTest {
                 }
                 """, reason);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -303,7 +304,7 @@ class AdminModerationControllerTest {
                 }
                 """, reason);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -334,7 +335,7 @@ class AdminModerationControllerTest {
                 }
                 """;
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content(hideRequest))
@@ -355,13 +356,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 200 when admin role unhides planner")
         void unhideFromRecommended_AdminRole_Returns200() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -372,13 +370,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 403 when moderator role attempts to unhide planner")
         void unhideFromRecommended_ModeratorRole_Returns403() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(moderatorUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(moderatorUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(moderatorCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -386,10 +381,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 403 when regular user attempts to unhide planner")
         void unhideFromRecommended_RegularUser_Returns403() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(regularUserCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -397,13 +392,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenFromRecommended flag")
         void unhideFromRecommended_HiddenPlanner_ClearsHiddenFlag() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -414,13 +406,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenAt timestamp")
         void unhideFromRecommended_HiddenPlanner_ClearsHiddenAt() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -431,13 +420,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenByModeratorId")
         void unhideFromRecommended_HiddenPlanner_ClearsModeratorId() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -448,13 +434,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hideReason")
         void unhideFromRecommended_HiddenPlanner_ClearsHideReason() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -465,13 +448,10 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear all moderation metadata together")
         void unhideFromRecommended_HiddenPlanner_ClearsAllMetadata() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Comprehensive metadata clearing test");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Comprehensive metadata clearing test");
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -487,7 +467,7 @@ class AdminModerationControllerTest {
         void unhideFromRecommended_AlreadyUnhidden_IsIdempotent() throws Exception {
             assertThat(testPlanner.getHiddenFromRecommended()).isFalse();
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
@@ -498,10 +478,7 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should preserve votes when unhiding planner")
         void unhideFromRecommended_WithVotes_PreservesVotes() throws Exception {
-            testPlanner.setHiddenFromRecommended(true);
-            testPlanner.setHiddenAt(Instant.now());
-            testPlanner.setHiddenByModeratorId(adminUser.getId());
-            testPlanner.setHiddenReason("Test hide reason");
+            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
             PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);
@@ -513,7 +490,7 @@ class AdminModerationControllerTest {
             testPlanner.setUpvotes(2);
             plannerRepository.save(testPlanner);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 

@@ -1,8 +1,11 @@
 package org.danteplanner.backend.validation;
+import org.danteplanner.backend.planner.validation.SinnerIdValidator;
+import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.GameDataRegistry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

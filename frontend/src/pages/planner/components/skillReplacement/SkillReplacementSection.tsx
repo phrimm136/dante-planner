@@ -5,9 +5,10 @@ import { SinnerSkillCard } from './SinnerSkillCard'
 import { SkillExchangeModal } from './SkillExchangeModal'
 import { useIdentityListData } from '@/pages/identity'
 import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { SINNERS, DEFAULT_SKILL_EA, CARD_GRID } from '@/lib/constants'
-import type { OffensiveSkillSlot } from '@/lib/constants'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { SINNERS, DEFAULT_SKILL_EA } from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
+import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState, SkillInfo } from '../../types/DeckTypes'
 
 interface SkillReplacementSectionProps {
@@ -55,7 +56,7 @@ export function SkillReplacementSection({
 
   // Breakpoint detection for scaling and column count
   const [windowWidth, setWindowWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1024
+    typeof window !== 'undefined' ? window.innerWidth : 1024,
   )
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export function SkillReplacementSection({
 
   // Calculate column count based on breakpoint
   const getColumnCount = () => {
-    if (windowWidth >= 640) return 6  // sm
+    if (windowWidth >= 640) return 6 // sm
     return 3 // default
   }
 
@@ -102,7 +103,11 @@ export function SkillReplacementSection({
   }
 
   // Handle exchange: transfer 1 EA from source to target
-  const handleExchange = (sinnerCode: string, sourceSlot: OffensiveSkillSlot, targetSlot: OffensiveSkillSlot) => {
+  const handleExchange = (
+    sinnerCode: string,
+    sourceSlot: OffensiveSkillSlot,
+    targetSlot: OffensiveSkillSlot,
+  ) => {
     const ea = currentEAState ? currentEAState[sinnerCode] : plannedEAState[sinnerCode]
     const activeEA = ea || { ...DEFAULT_SKILL_EA }
     if (activeEA[sourceSlot] <= 0) return
@@ -165,7 +170,9 @@ export function SkillReplacementSection({
                 skillInfos={skillInfos}
                 skillEA={planned}
                 currentEA={current}
-                onClick={() => { setSelectedSinner(sinnerCode); }}
+                onClick={() => {
+                  setSelectedSinner(sinnerCode)
+                }}
                 readOnly={readOnly}
               />
             </ScaledCardWrapper>
@@ -183,8 +190,12 @@ export function SkillReplacementSection({
           skillInfos={getSkillInfos(selectedIdentityId)}
           skillEA={plannedEAState[selectedSinner] || { ...DEFAULT_SKILL_EA }}
           currentEA={currentEAState?.[selectedSinner]}
-          onExchange={(source, target) => { handleExchange(selectedSinner, source, target); }}
-          onReset={() => { handleReset(selectedSinner); }}
+          onExchange={(source, target) => {
+            handleExchange(selectedSinner, source, target)
+          }}
+          onReset={() => {
+            handleReset(selectedSinner)
+          }}
         />
       )}
     </PlannerSection>

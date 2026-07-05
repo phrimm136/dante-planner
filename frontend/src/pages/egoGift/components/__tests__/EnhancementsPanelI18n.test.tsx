@@ -24,10 +24,9 @@ function createWrapper() {
 
 describe('EnhancementsPanelI18n', () => {
   it('should render enhancement panel with descriptions', () => {
-    render(
-      <EnhancementsPanelI18n giftId="9001" maxEnhancement={2} costs={[100, 200, 300]} />,
-      { wrapper: createWrapper() }
-    )
+    render(<EnhancementsPanelI18n giftId="9001" maxEnhancement={2} costs={[100, 200, 300]} />, {
+      wrapper: createWrapper(),
+    })
 
     // Should render enhancement images
     const images = screen.getAllByRole('img')
@@ -37,7 +36,7 @@ describe('EnhancementsPanelI18n', () => {
   it('should not suspend parent component', () => {
     const { container } = render(
       <EnhancementsPanelI18n giftId="9001" maxEnhancement={1} costs={[100, 200]} />,
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     )
 
     // Component should render immediately (internal Suspense handles loading)

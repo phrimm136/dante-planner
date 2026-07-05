@@ -11,10 +11,11 @@ import {
   getIdentityFrameHighlightPath,
   getSinnerBGPath,
   getSinnerIconPath,
-} from '@/lib/assetPaths'
-import { MAX_LEVEL } from '@/lib/constants'
-import { cn, getSinnerFromId, getDisplayFontForNumeric } from '@/lib/utils'
-import { getRarityIconPath } from '@/lib/assetPaths'
+} from '@/shared/assets'
+import { MAX_LEVEL } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
+import { cn, getDisplayFontForNumeric } from '@/lib/utils'
+import { getRarityIconPath } from '@/shared/assets'
 
 interface IdentityCardProps {
   identity: IdentityListItem
@@ -67,12 +68,7 @@ export function IdentityCard({
   const sinner = getSinnerFromId(id)
 
   return (
-    <div
-      className={cn(
-        'relative w-40 h-56 shrink-0',
-        className
-      )}
-    >
+    <div className={cn('relative w-40 h-56 shrink-0', className)}>
       {/* Card content wrapper - dimmed when selected */}
       <div className={cn('absolute inset-0', isSelected && 'brightness-50')}>
         {/* Clipping container for identity image to fit within frame */}
@@ -90,7 +86,10 @@ export function IdentityCard({
             alt={identity.name}
             loading="lazy"
             className="w-[88%] h-[96%] object-cover mt-1.5"
-            style={{ clipPath: 'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)' }}
+            style={{
+              clipPath:
+                'polygon(4% 0%, 96% 0%, 100% 4%, 100% 96%, 96% 100%, 4% 100%, 0% 96%, 0% 4%)',
+            }}
           />
         </div>
 
@@ -134,12 +133,14 @@ export function IdentityCard({
           </div>
           {/* Name - suspends independently for granular loading */}
           <span>
-            <Suspense fallback={
-              <span className="flex flex-col items-end gap-0.5">
-                <Skeleton className="w-14 h-2.5 bg-white/30" />
-                <Skeleton className="w-10 h-2.5 bg-white/30" />
-              </span>
-            }>
+            <Suspense
+              fallback={
+                <span className="flex flex-col items-end gap-0.5">
+                  <Skeleton className="w-14 h-2.5 bg-white/30" />
+                  <Skeleton className="w-10 h-2.5 bg-white/30" />
+                </span>
+              }
+            >
               <IdentityName id={id} />
             </Suspense>
           </span>
@@ -147,11 +148,7 @@ export function IdentityCard({
 
         {/* Layer 6 - Identity Rank Indicator (top-left) */}
         <div className="absolute top-3.5 left-3.5 pointer-events-none">
-          <img
-            src={getRarityIconPath(rank)}
-            alt={String(rank)}
-            className="h-6"
-          />
+          <img src={getRarityIconPath(rank)} alt={String(rank)} className="h-6" />
         </div>
       </div>
 

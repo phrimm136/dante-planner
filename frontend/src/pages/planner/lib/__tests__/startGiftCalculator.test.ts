@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi } from 'vitest'
 import { calculateMaxGiftSelection } from '../startGiftCalculator'
-import type { StartBuff } from '@/types/StartBuffTypes'
+import type { StartBuff } from '@/shared/gameText'
 
 // Mock getBuffById to return buffs from array
 vi.mock('../../hooks/useStartBuffData', () => ({

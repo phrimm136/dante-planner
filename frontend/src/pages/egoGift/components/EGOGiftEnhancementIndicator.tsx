@@ -1,4 +1,4 @@
-import { getEGOGiftEnhancementIconPath } from '@/lib/assetPaths'
+import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
 
 interface EGOGiftEnhancementIndicatorProps {
   enhancement: 0 | 1 | 2
@@ -9,9 +9,7 @@ interface EGOGiftEnhancementIndicatorProps {
  * Shows +1 or +2 icon in upper-right corner
  * Not displayed for base level (0)
  */
-export function EGOGiftEnhancementIndicator({
-  enhancement,
-}: EGOGiftEnhancementIndicatorProps) {
+export function EGOGiftEnhancementIndicator({ enhancement }: EGOGiftEnhancementIndicatorProps) {
   if (enhancement === 0) {
     return null
   }

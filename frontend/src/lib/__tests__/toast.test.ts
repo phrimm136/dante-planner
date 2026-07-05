@@ -19,7 +19,7 @@ vi.mock('@/lib/i18n', () => ({
   },
 }))
 
-vi.mock('@/components/common/LinkifyText', () => ({
+vi.mock('@/components/ui/LinkifyText', () => ({
   linkifyText: (text: string) => text,
 }))
 

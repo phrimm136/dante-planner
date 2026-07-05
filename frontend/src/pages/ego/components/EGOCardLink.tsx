@@ -21,20 +21,17 @@ interface EGOCardLinkProps {
  * // In a list view with navigation
  * <EGOCardLink ego={ego} />
  */
-export const EGOCardLink = memo(function EGOCardLink({
-  ego,
-  className,
-}: EGOCardLinkProps) {
-  return (
-    <Link
-      to="/ego/$id"
-      params={{ id: ego.id }}
-      className={cn(
-        'group block transition',
-        className
-      )}
-    >
-      <EGOCard ego={ego} />
-    </Link>
-  )
-}, (prev, next) => prev.ego.id === next.ego.id && prev.className === next.className)
+export const EGOCardLink = memo(
+  function EGOCardLink({ ego, className }: EGOCardLinkProps) {
+    return (
+      <Link
+        to="/ego/$id"
+        params={{ id: ego.id }}
+        className={cn('group block transition', className)}
+      >
+        <EGOCard ego={ego} />
+      </Link>
+    )
+  },
+  (prev, next) => prev.ego.id === next.ego.id && prev.className === next.className,
+)

@@ -8,12 +8,12 @@ import {
   getStartBuffEnhancementBgPath,
   getStartBuffEnhancementOverlayPath,
   getStartBuffEnhancementIconPath,
-} from '@/lib/assetPaths'
-import { MD_ACCENT_COLORS } from '@/lib/constants'
+} from '@/shared/assets'
+import { MD_ACCENT_COLORS } from '@/shared/gameData'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
-import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
-import { getEnhancementSuffix, createBuffId } from '@/types/StartBuffTypes'
-import { AutoSizeText } from '@/components/common/AutoSizeText'
+import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
+import { getEnhancementSuffix, createBuffId } from '@/shared/gameText'
+import { AutoSizeText } from '@/components/ui/AutoSizeText'
 import { formatBuffEffects } from './formatBuffDescription'
 
 const MD_VERSION = 7
@@ -61,7 +61,7 @@ export function StartBuffCardMD7({
 
   // Get the buff data for current enhancement level
   const currentBuffId = createBuffId(buff.baseId, enhancement)
-  const displayBuff = allBuffs.find(b => Number(b.id) === currentBuffId) ?? buff
+  const displayBuff = allBuffs.find((b) => Number(b.id) === currentBuffId) ?? buff
 
   // Enhancement button click: toggle enhancement via parent
   const handleEnhancementClick = (level: 1 | 2) => {
@@ -76,7 +76,9 @@ export function StartBuffCardMD7({
   const handleCardClick = () => {
     // Trigger press animation
     setIsPressed(true)
-    setTimeout(() => { setIsPressed(false) }, 100)
+    setTimeout(() => {
+      setIsPressed(false)
+    }, 100)
 
     if (isSelected) {
       // Deselect - signal with negative ID
@@ -96,7 +98,10 @@ export function StartBuffCardMD7({
     return (
       <div className="flex-1 h-7 relative overflow-visible mx-1.25 -translate-x-1">
         <button
-          onClick={(e) => { e.stopPropagation(); handleEnhancementClick(lvl) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleEnhancementClick(lvl)
+          }}
           className="absolute inset-0 overflow-visible"
           style={{
             borderStyle: 'solid',
@@ -122,8 +127,11 @@ export function StartBuffCardMD7({
         )}
         <div className="absolute inset-0 flex items-center justify-center gap-0.5 pointer-events-none">
           {Array.from({ length: iconCount }).map((_, i) => (
-            <img key={i} src={iconPath} alt=""
-              className={`w-auto shrink-0 ${isButtonSelected ? lvl === 2 ? 'h-[20.8px]' : 'h-[16.9px]' : 'h-4'}`}
+            <img
+              key={i}
+              src={iconPath}
+              alt=""
+              className={`w-auto shrink-0 ${isButtonSelected ? (lvl === 2 ? 'h-[20.8px]' : 'h-[16.9px]') : 'h-4'}`}
             />
           ))}
         </div>
@@ -134,30 +142,30 @@ export function StartBuffCardMD7({
   return (
     <div
       className={`relative cursor-pointer transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
-      onMouseEnter={() => { setIsHovered(true) }}
-      onMouseLeave={() => { setIsHovered(false) }}
+      onMouseEnter={() => {
+        setIsHovered(true)
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false)
+      }}
       onClick={handleCardClick}
     >
       {/* Pane background */}
-      <img
-        src={getStartBuffPanePath(MD_VERSION)}
-        alt=""
-        className="w-66 h-80 object-fill"
-      />
+      <img src={getStartBuffPanePath(MD_VERSION)} alt="" className="w-66 h-80 object-fill" />
 
       {/* Content overlay */}
       <div className="absolute inset-0 flex flex-col pt-1">
         {/* Top black area: Cost with star (top-right) */}
         <div className="relative" style={{ height: '15%' }}>
           <div className="absolute left-3/4 top-9/32 -translate-x-3 -translate-y-1/2 flex items-center gap-1">
-            <img
-              src={getStartBuffStarLightPath()}
-              alt=""
-              className="w-6 h-6 object-contain"
-            />
+            <img src={getStartBuffStarLightPath()} alt="" className="w-6 h-6 object-contain" />
             <span
               className="text-[30px] -translate-y-[3px] "
-              style={{ color: enhancement > 0 ? '#f8c200' : undefined, fontFamily: getDisplayFontForNumeric(), textShadow: '1px 1px 1px black' }}
+              style={{
+                color: enhancement > 0 ? '#f8c200' : undefined,
+                fontFamily: getDisplayFontForNumeric(),
+                textShadow: '1px 1px 1px black',
+              }}
             >
               {displayBuff.cost}
             </span>
@@ -191,7 +199,9 @@ export function StartBuffCardMD7({
         </div>
 
         {/* Description - center area */}
-        <div className={`flex-1 overflow-y-auto px-2 py-2 m-3 scrollbar-hide text-[${MD_ACCENT_COLORS[7]}] mt-10 mr-5`}>
+        <div
+          className={`flex-1 overflow-y-auto px-2 py-2 m-3 scrollbar-hide text-[${MD_ACCENT_COLORS[7]}] mt-10 mr-5`}
+        >
           <div className="space-y-0.5" style={{ wordBreak: 'keep-all' }}>
             {formatBuffEffects(displayBuff.effects, i18n, battleKeywords)}
           </div>

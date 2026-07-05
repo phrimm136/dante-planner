@@ -6,7 +6,7 @@
  * @see StartBuffTypes.ts for StartBuff definition
  */
 
-import type { StartBuff } from '@/types/StartBuffTypes'
+import type { StartBuff } from '@/shared/gameText'
 import { getBuffById } from '../hooks/useStartBuffData'
 
 /**
@@ -19,7 +19,7 @@ import { getBuffById } from '../hooks/useStartBuffData'
  */
 export function calculateMaxGiftSelection(
   buffs: StartBuff[] | undefined,
-  selectedIds: Set<number>
+  selectedIds: Set<number>,
 ): number {
   if (!buffs) return 1
 

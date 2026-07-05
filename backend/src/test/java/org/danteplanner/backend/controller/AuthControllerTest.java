@@ -1,15 +1,11 @@
 package org.danteplanner.backend.controller;
 
-import org.danteplanner.backend.entity.AuthProviderType;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.config.TestDataInitializer;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserRole;
-import org.danteplanner.backend.exception.RateLimitExceededException;
-import org.danteplanner.backend.facade.AuthenticationFacade;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,19 +24,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -134,195 +123,10 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should return 400 as Apple OAuth not implemented")
         void appleCallback_NotImplemented_Returns400() throws Exception {
-            mockMvc.perform(post("/api/auth/apple/callback")
+            mockMvc.perform(post("/api/auth/apple/callback").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"code\":\"apple-code\",\"provider\":\"apple\",\"codeVerifier\":\"verifier\"}"))
                     .andExpect(status().isBadRequest());
-        }
-    }
-
-    @Nested
-    @DisplayName("POST /api/auth/google/callback - Google OAuth Flow")
-    class GoogleCallbackTests {
-
-        @Test
-        @DisplayName("Should return 200 with JWT cookies when OAuth code is valid")
-        void callback_ValidCode_Returns200WithJWTCookies() throws Exception {
-            UUID mockPublicId = UUID.randomUUID();
-            User mockUser = User.builder()
-                    .id(123L)
-                    .publicId(mockPublicId)
-                    .email("newuser@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-new-123")
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix("test1")
-                    .role(UserRole.NORMAL)
-                    .build();
-
-            AuthenticationFacade.AuthResult mockResult = new AuthenticationFacade.AuthResult(
-                    mockUser,
-                    "mock-access-token",
-                    "mock-refresh-token",
-                    false
-            );
-
-            when(authFacade.authenticateWithOAuth(
-                    eq("google"),
-                    eq("valid-oauth-code"),
-                    anyString(),
-                    anyString()
-            )).thenReturn(mockResult);
-
-            mockMvc.perform(post("/api/auth/google/callback")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"code\":\"valid-oauth-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("newuser@example.com"))
-                    .andExpect(cookie().exists("accessToken"))
-                    .andExpect(cookie().httpOnly("accessToken", true))
-                    .andExpect(cookie().secure("accessToken", true))
-                    .andExpect(cookie().exists("refreshToken"))
-                    .andExpect(cookie().httpOnly("refreshToken", true))
-                    .andExpect(cookie().secure("refreshToken", true));
-                    // SameSite verification gap: CookieUtils sets SameSite=Lax on Cookie object
-                    // (verified in CookieUtilsTest), but MockMvc doesn't serialize this attribute
-                    // in Set-Cookie headers. Full E2E verification requires integration test with
-                    // real HTTP client (WebTestClient or curl).
-        }
-
-        @Test
-        @DisplayName("Should return 401 when OAuth code is invalid")
-        void callback_InvalidCode_Returns401() throws Exception {
-            when(authFacade.authenticateWithOAuth(
-                    eq("google"),
-                    eq("invalid-code"),
-                    anyString(),
-                    anyString()
-            )).thenThrow(new RuntimeException("Invalid authorization code"));
-
-            mockMvc.perform(post("/api/auth/google/callback")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"code\":\"invalid-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
-                    .andExpect(status().is5xxServerError());
-        }
-
-        @Test
-        @DisplayName("Should create new user with random username when user does not exist")
-        void callback_NewUser_CreatesAccountWithRandomUsername() throws Exception {
-            User newUser = TestDataFactory.createTestUser(userRepository, "newuser@example.com");
-
-            AuthenticationFacade.AuthResult mockResult = new AuthenticationFacade.AuthResult(
-                    newUser,
-                    "mock-access-token",
-                    "mock-refresh-token",
-                    false
-            );
-
-            when(authFacade.authenticateWithOAuth(
-                    eq("google"),
-                    eq("new-user-code"),
-                    anyString(),
-                    anyString()
-            )).thenReturn(mockResult);
-
-            mockMvc.perform(post("/api/auth/google/callback")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"code\":\"new-user-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("newuser@example.com"));
-
-            User created = userRepository.findById(newUser.getId()).orElseThrow();
-            assertThat(created.getUsernameEpithet()).isNotEmpty();
-            assertThat(created.getUsernameSuffix()).hasSize(5);
-        }
-
-        @Test
-        @DisplayName("Should reactivate account when deleted user logs in")
-        void callback_DeletedUser_ReactivatesAccount() throws Exception {
-            User deletedUser = TestDataFactory.createTestUser(userRepository, "deleted@example.com");
-            deletedUser.setDeletedAt(Instant.now());
-            userRepository.save(deletedUser);
-
-            deletedUser.setDeletedAt(null);
-
-            AuthenticationFacade.AuthResult mockResult = new AuthenticationFacade.AuthResult(
-                    deletedUser,
-                    "mock-access-token",
-                    "mock-refresh-token",
-                    true
-            );
-
-            when(authFacade.authenticateWithOAuth(
-                    eq("google"),
-                    eq("reactivate-code"),
-                    anyString(),
-                    anyString()
-            )).thenReturn(mockResult);
-
-            mockMvc.perform(post("/api/auth/google/callback")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"code\":\"reactivate-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.email").value("deleted@example.com"));
-        }
-
-        @Test
-        @DisplayName("Should return 429 when rate limit exceeded")
-        void callback_ExceedsRateLimit_Returns429() throws Exception {
-            when(authFacade.authenticateWithOAuth(
-                    eq("google"),
-                    anyString(),
-                    anyString(),
-                    anyString()
-            )).thenThrow(new RateLimitExceededException(null, "auth"));
-
-            mockMvc.perform(post("/api/auth/google/callback")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"code\":\"rate-limit-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
-                    .andExpect(status().isTooManyRequests());
-        }
-
-        @Test
-        @DisplayName("Should validate cookie security attributes")
-        void callback_ValidCode_SetsCookiesWithSecurityAttributes() throws Exception {
-            User mockUser = User.builder()
-                    .id(456L)
-                    .publicId(UUID.randomUUID())
-                    .email("secure@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-456")
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix("test2")
-                    .role(UserRole.NORMAL)
-                    .build();
-
-            AuthenticationFacade.AuthResult mockResult = new AuthenticationFacade.AuthResult(
-                    mockUser,
-                    "access-token-secure",
-                    "refresh-token-secure",
-                    false
-            );
-
-            when(authFacade.authenticateWithOAuth(
-                    eq("google"),
-                    eq("secure-code"),
-                    anyString(),
-                    anyString()
-            )).thenReturn(mockResult);
-
-            mockMvc.perform(post("/api/auth/google/callback")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"code\":\"secure-code\",\"provider\":\"google\",\"codeVerifier\":\"verifier\"}"))
-                    .andExpect(status().isOk())
-                    .andExpect(cookie().httpOnly("accessToken", true))
-                    .andExpect(cookie().secure("accessToken", true))
-                    .andExpect(cookie().httpOnly("refreshToken", true))
-                    .andExpect(cookie().secure("refreshToken", true));
-                    // SameSite verification gap: CookieUtils sets SameSite=Lax on Cookie object
-                    // (verified in CookieUtilsTest), but MockMvc doesn't serialize this attribute
-                    // in Set-Cookie headers. Full E2E verification requires integration test with
-                    // real HTTP client (WebTestClient or curl).
         }
     }
 }

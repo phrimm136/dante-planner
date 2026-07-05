@@ -51,11 +51,7 @@ export function ApplyLatestMirrorDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
             {t('common:cancel')}
           </Button>
           <Button onClick={onConfirm} disabled={isPending}>

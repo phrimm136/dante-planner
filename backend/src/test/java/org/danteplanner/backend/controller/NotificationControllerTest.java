@@ -2,13 +2,13 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Notification;
-import org.danteplanner.backend.entity.NotificationType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.repository.NotificationRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -312,7 +313,7 @@ class NotificationControllerTest {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             assertThat(notification.getRead()).isFalse();
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(notification.getPublicId().toString()))
@@ -325,7 +326,7 @@ class NotificationControllerTest {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             assertThat(notification.getReadAt()).isNull();
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk());
 
@@ -342,7 +343,7 @@ class NotificationControllerTest {
             notificationRepository.save(notification);
             Instant firstReadAt = notification.getReadAt();
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.read").value(true));
@@ -356,7 +357,7 @@ class NotificationControllerTest {
         void markRead_NotOwner_Returns403() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", otherUserNotification.getPublicId())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", otherUserNotification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -364,7 +365,7 @@ class NotificationControllerTest {
         @Test
         @DisplayName("Should return 403 when notification does not exist")
         void markRead_NonexistentId_Returns403() throws Exception {
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", UUID.randomUUID())
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", UUID.randomUUID()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -374,7 +375,7 @@ class NotificationControllerTest {
         void markRead_Unauthenticated_Returns401() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()))
+            mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -390,7 +391,7 @@ class NotificationControllerTest {
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
             createNotification(testUser, NotificationType.PLANNER_RECOMMENDED);
 
-            mockMvc.perform(post("/api/notifications/mark-all-read")
+            mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").value(3));
@@ -401,11 +402,11 @@ class NotificationControllerTest {
 
         @Test
         @DisplayName("Should return count of marked notifications")
-        void markAllRead_ReturnsCount() throws Exception {
+        void markAllRead_WhenUnreadExist_ReturnsCount() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/mark-all-read")
+            mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").value(2));
@@ -421,7 +422,7 @@ class NotificationControllerTest {
 
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/mark-all-read")
+            mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").value(1));
@@ -436,7 +437,7 @@ class NotificationControllerTest {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(otherUser, NotificationType.REPLY_RECEIVED);
 
-            mockMvc.perform(post("/api/notifications/mark-all-read")
+            mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").value(1));
@@ -448,7 +449,7 @@ class NotificationControllerTest {
         @Test
         @DisplayName("Should return 0 when no unread notifications exist")
         void markAllRead_NoUnread_ReturnsZero() throws Exception {
-            mockMvc.perform(post("/api/notifications/mark-all-read")
+            mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").value(0));
@@ -457,7 +458,7 @@ class NotificationControllerTest {
         @Test
         @DisplayName("Should return 401 when unauthenticated")
         void markAllRead_Unauthenticated_Returns401() throws Exception {
-            mockMvc.perform(post("/api/notifications/mark-all-read"))
+            mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -471,7 +472,7 @@ class NotificationControllerTest {
         void deleteNotification_ValidRequest_Returns204() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId())
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
@@ -485,17 +486,17 @@ class NotificationControllerTest {
         void deleteNotification_NotOwner_Returns403() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", otherUserNotification.getPublicId())
+            mockMvc.perform(delete("/api/notifications/{id}", otherUserNotification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         @DisplayName("Should exclude deleted notification from inbox")
-        void deleteNotification_ExcludesFromInbox() throws Exception {
+        void deleteNotification_WhenDeleted_ExcludesFromInbox() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId())
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
@@ -508,10 +509,10 @@ class NotificationControllerTest {
 
         @Test
         @DisplayName("Should exclude deleted notification from unread count")
-        void deleteNotification_ExcludesFromUnreadCount() throws Exception {
+        void deleteNotification_WhenDeleted_ExcludesFromUnreadCount() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId())
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
 
@@ -524,7 +525,7 @@ class NotificationControllerTest {
         @Test
         @DisplayName("Should return 403 when notification does not exist")
         void deleteNotification_NonexistentId_Returns403() throws Exception {
-            mockMvc.perform(delete("/api/notifications/{id}", UUID.randomUUID())
+            mockMvc.perform(delete("/api/notifications/{id}", UUID.randomUUID()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -534,7 +535,7 @@ class NotificationControllerTest {
         void deleteNotification_Unauthenticated_Returns401() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
-            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()))
+            mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
     }

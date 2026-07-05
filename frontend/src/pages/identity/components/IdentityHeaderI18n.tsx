@@ -27,14 +27,7 @@ interface IdentityHeaderWithI18nProps {
  */
 export function IdentityHeaderWithI18n({ id, rank, uptie }: IdentityHeaderWithI18nProps) {
   const i18n = useIdentityDetailI18n(id)
-  return (
-    <IdentityHeader
-      identityId={id}
-      name={i18n.name}
-      rank={rank}
-      uptie={uptie}
-    />
-  )
+  return <IdentityHeader identityId={id} name={i18n.name} rank={rank} uptie={uptie} />
 }
 
 /**

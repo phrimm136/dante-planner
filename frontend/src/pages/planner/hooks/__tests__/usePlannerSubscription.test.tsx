@@ -77,7 +77,7 @@ describe('usePlannerSubscription', () => {
       })
 
       expect(ApiClient.post).toHaveBeenCalledWith(
-        '/api/planner/md/123e4567-e89b-12d3-a456-426614174000/subscribe'
+        '/api/planner/md/123e4567-e89b-12d3-a456-426614174000/subscribe',
       )
     })
 
@@ -169,7 +169,7 @@ describe('usePlannerSubscription', () => {
       await expect(
         act(async () => {
           await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
-        })
+        }),
       ).rejects.toThrow()
     })
   })

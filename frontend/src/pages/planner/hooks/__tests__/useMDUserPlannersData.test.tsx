@@ -49,13 +49,17 @@ describe('shouldPurgeLocal', () => {
   }
 
   it('purges when saved and savedAt is set (two witnesses of prior sync)', () => {
-    expect(shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z' }))).toBe(true)
+    expect(
+      shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z' })),
+    ).toBe(true)
   })
 
   it('keeps drafts even when they have prior saves', () => {
     // User started editing a previously-synced planner; their edits must not be wiped
     // just because the server lost the row.
-    expect(shouldPurgeLocal(makeSummary({ status: 'draft', savedAt: '2026-06-01T00:00:00.000Z' }))).toBe(false)
+    expect(
+      shouldPurgeLocal(makeSummary({ status: 'draft', savedAt: '2026-06-01T00:00:00.000Z' })),
+    ).toBe(false)
   })
 
   it('keeps never-synced drafts', () => {
@@ -72,7 +76,15 @@ describe('shouldPurgeLocal', () => {
   it('ignores syncVersion (relies on status + savedAt only)', () => {
     // syncVersion alone can't distinguish "first server save" from "never synced",
     // so it is deliberately not part of the predicate.
-    expect(shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z', syncVersion: 1 }))).toBe(true)
-    expect(shouldPurgeLocal(makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z', syncVersion: 99 }))).toBe(true)
+    expect(
+      shouldPurgeLocal(
+        makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z', syncVersion: 1 }),
+      ),
+    ).toBe(true)
+    expect(
+      shouldPurgeLocal(
+        makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z', syncVersion: 99 }),
+      ),
+    ).toBe(true)
   })
 })

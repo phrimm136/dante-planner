@@ -1,6 +1,6 @@
 import { SkillImageSimple } from './SkillImageSimple'
-import { getSkillImagePath } from '@/lib/assetPaths'
-import type { SkillAttributeType, OffensiveSkillSlot } from '@/lib/constants'
+import { getSkillImagePath } from '@/shared/assets'
+import type { SkillAttributeType, OffensiveSkillSlot } from '@/shared/gameData'
 
 interface SkillEADisplayProps {
   identityId: string

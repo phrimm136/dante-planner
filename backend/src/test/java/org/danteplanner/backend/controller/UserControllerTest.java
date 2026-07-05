@@ -1,13 +1,14 @@
 package org.danteplanner.backend.controller;
+import org.danteplanner.backend.user.controller.UserController;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.danteplanner.backend.config.RateLimitConfig;
-import org.danteplanner.backend.dto.user.UserDeletionResponse;
-import org.danteplanner.backend.facade.AuthenticationFacade;
-import org.danteplanner.backend.service.UserAccountLifecycleService;
-import org.danteplanner.backend.util.CookieConstants;
-import org.danteplanner.backend.util.CookieUtils;
+import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.user.dto.UserDeletionResponse;
+import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -82,7 +83,7 @@ class UserControllerTest {
 
         @Test
         @DisplayName("Should return success response with deletion details")
-        void deleteMyAccount_returnsSuccessResponse() {
+        void deleteMyAccount_WhenAuthenticated_ReturnsSuccessResponse() {
             // Arrange
             Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
             when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
@@ -107,7 +108,7 @@ class UserControllerTest {
 
         @Test
         @DisplayName("Should blacklist tokens and clear cookies on deletion")
-        void deleteMyAccount_blacklistsTokensAndClearsCookies() {
+        void deleteMyAccount_WhenAuthenticated_BlacklistsTokensAndClearsCookies() {
             // Arrange
             Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
             when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
@@ -143,7 +144,7 @@ class UserControllerTest {
 
         @Test
         @DisplayName("Should extract user ID from authentication principal")
-        void deleteMyAccount_extractsUserIdFromPrincipal() {
+        void deleteMyAccount_WhenAuthenticated_ExtractsUserIdFromPrincipal() {
             // Arrange
             Long userId = 456L;
             Instant scheduledAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
@@ -160,7 +161,7 @@ class UserControllerTest {
 
         @Test
         @DisplayName("Should use configured grace period in response")
-        void deleteMyAccount_usesConfiguredGracePeriod() {
+        void deleteMyAccount_WhenConfiguredGracePeriod_UsesItInResponse() {
             // Arrange
             int customGracePeriod = 60;
             ReflectionTestUtils.setField(userController, "gracePeriodDays", customGracePeriod);

@@ -1,0 +1,10 @@
+{
+  "totalPhases": 4,
+  "currentPhase": 4,
+  "phases": [
+    { "name": "Backend token claim minimization", "status": "done" },
+    { "name": "Backend CSRF double-submit", "status": "done" },
+    { "name": "Backend BFF endpoints + config cutover", "status": "done" },
+    { "name": "Frontend BFF migration + CSRF header", "status": "done" }
+  ]
+}

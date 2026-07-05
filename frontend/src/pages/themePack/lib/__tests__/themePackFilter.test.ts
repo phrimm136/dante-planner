@@ -4,7 +4,7 @@ import {
   matchesFloorFilter,
   matchesEgoGiftFilter,
 } from '../themePackFilter'
-import { DUNGEON_IDX } from '@/lib/constants'
+import { DUNGEON_IDX } from '@/shared/gameData'
 import type { ThemePackEntry } from '../../types/ThemePackTypes'
 
 function makeEntry(overrides: Partial<ThemePackEntry> = {}): ThemePackEntry {
@@ -34,12 +34,15 @@ describe('matchesDungeonDifficultyFilter', () => {
   })
 
   it('matches with AND logic — pack must have all selected difficulties', () => {
-    expect(matchesDungeonDifficultyFilter(
-      makeEntry(), new Set([DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD])
-    )).toBe(true)
-    expect(matchesDungeonDifficultyFilter(
-      makeEntry(), new Set([DUNGEON_IDX.EXTREME, DUNGEON_IDX.NORMAL])
-    )).toBe(false)
+    expect(
+      matchesDungeonDifficultyFilter(makeEntry(), new Set([DUNGEON_IDX.NORMAL, DUNGEON_IDX.HARD])),
+    ).toBe(true)
+    expect(
+      matchesDungeonDifficultyFilter(
+        makeEntry(),
+        new Set([DUNGEON_IDX.EXTREME, DUNGEON_IDX.NORMAL]),
+      ),
+    ).toBe(false)
   })
 
   it('matches infinity (parallel) packs', () => {

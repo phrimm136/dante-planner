@@ -68,9 +68,7 @@ export function AccountDeleteDialog({
       >
         <DialogHeader>
           <DialogTitle>{t('settings.deleteAccount.title')}</DialogTitle>
-          <DialogDescription>
-            {t('settings.deleteAccount.confirmMessage')}
-          </DialogDescription>
+          <DialogDescription>{t('settings.deleteAccount.confirmMessage')}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -90,17 +88,11 @@ export function AccountDeleteDialog({
               autoComplete="off"
             />
           </div>
-          <p className="text-xs text-muted-foreground">
-            {t('settings.deleteAccount.cannotUndo')}
-          </p>
+          <p className="text-xs text-muted-foreground">{t('settings.deleteAccount.cannotUndo')}</p>
         </div>
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
-          <Button
-            variant="outline"
-            onClick={onCancel}
-            disabled={isPending}
-          >
+          <Button variant="outline" onClick={onCancel} disabled={isPending}>
             {t('cancel')}
           </Button>
           <Button

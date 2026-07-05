@@ -6,7 +6,7 @@ import { ThemePackViewer } from '../floorTheme/ThemePackViewer'
 import { FloorNoteDialog } from './FloorNoteDialog'
 import { cn } from '@/lib/utils'
 import type { ThemePackEntry } from '@/pages/themePack'
-import type { NoteContent } from '@/types/NoteEditorTypes'
+import type { NoteContent } from '@/shared/noteEditor'
 
 interface ThemePackTrackerCardProps {
   packId: string
@@ -55,11 +55,7 @@ export function ThemePackTrackerCard({
 
   return (
     <>
-      <div
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={onFocusToggle}
-      >
+      <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={onFocusToggle}>
         <ThemePackViewer
           packId={packId}
           packEntry={packEntry}
@@ -79,7 +75,11 @@ export function ThemePackTrackerCard({
                     e.stopPropagation()
                     onToggleDone()
                   }}
-                  aria-label={isDone ? t('common.markAsNotDone', 'Mark as Not Done') : t('common.markAsDone', 'Mark as Done')}
+                  aria-label={
+                    isDone
+                      ? t('common.markAsNotDone', 'Mark as Not Done')
+                      : t('common.markAsDone', 'Mark as Done')
+                  }
                 >
                   <CheckCircle2 className="h-5 w-5" />
                 </Button>

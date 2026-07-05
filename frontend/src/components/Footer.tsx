@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { DiscordIcon } from '@/components/icons/DiscordIcon'
+import { DiscordIcon } from '@/components/ui/DiscordIcon'
 import { CONTACT_EMAIL } from '@/lib/constants'
 
 export function Footer() {
@@ -10,9 +10,7 @@ export function Footer() {
     <footer className="px-6 py-8 border-t border-border">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Disclaimer */}
-        <p className="text-sm text-muted-foreground text-center">
-          {t('footer.disclaimer')}
-        </p>
+        <p className="text-sm text-muted-foreground text-center">{t('footer.disclaimer')}</p>
 
         {/* CN Translation Credit */}
         <p className="text-sm text-muted-foreground text-center">
@@ -29,11 +27,17 @@ export function Footer() {
 
         {/* Links */}
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-          <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            to="/privacy"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             {t('footer.links.privacy')}
           </Link>
           <span className="text-muted-foreground/50">·</span>
-          <Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link
+            to="/terms"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             {t('footer.links.terms')}
           </Link>
           <span className="text-muted-foreground/50">·</span>
@@ -56,9 +60,7 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="text-xs text-muted-foreground/70 text-center">
-          {t('footer.copyright')}
-        </p>
+        <p className="text-xs text-muted-foreground/70 text-center">{t('footer.copyright')}</p>
       </div>
     </footer>
   )

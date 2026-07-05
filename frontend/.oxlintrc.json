@@ -1,0 +1,75 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
+          { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["src/shared/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
+              { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." },
+              { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/**/*.{ts,tsx}"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              { "group": ["@/pages/*", "@/pages/*/**"], "message": "This layer is a dependency sink: it must not import page slices." },
+              { "group": ["@/shared/*", "@/shared/*/**"], "message": "lib is the domain-free sink: it must not import shared concepts." }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/components/layout/GlobalLayout.tsx", "src/components/feedback/RouteErrorComponent.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              { "group": ["@/pages/*/**"], "message": "Import a page slice via its public API (@/pages/<name>), not a deep internal path." },
+              { "group": ["@/shared/*/**", "!@/shared/noteEditor/**"], "message": "Import a shared concept via its public API (@/shared/<name>), not a deep internal path." }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/router.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["**/*.test.{ts,tsx}", "**/__tests__/**"],
+      "rules": {
+        "typescript/unbound-method": "off"
+      }
+    }
+  ]
+}

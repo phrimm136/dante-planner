@@ -24,7 +24,11 @@ import i18next from 'i18next'
  * // If fields missing, returns fallback
  * formatUsername("", "", "EN") // => "Unknown"
  */
-export function formatUsername(usernameEpithet: string, usernameSuffix: string, language?: string): string {
+export function formatUsername(
+  usernameEpithet: string,
+  usernameSuffix: string,
+  language?: string,
+): string {
   const lng = language || i18next.language
 
   // Validate inputs - return fallback for missing data

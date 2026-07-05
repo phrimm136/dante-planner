@@ -1,45 +1,28 @@
-import { useSuspenseQuery, useQuery, queryOptions, keepPreviousData } from '@tanstack/react-query'
+import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createEntityListQueryKeys } from '@/lib/queryKeys'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { EGOGiftSpecListSchema, EGOGiftNameListSchema } from '../schemas/EGOGiftSchemas'
 
-// Query key factory for EGO Gift list data
-export const egoGiftListQueryKeys = {
-  all: () => ['egoGift', 'list'] as const,
-  spec: () => ['egoGift', 'list', 'spec'] as const,
-  i18n: (language: string) => ['egoGift', 'list', 'i18n', language] as const,
-}
+export const egoGiftListQueryKeys = createEntityListQueryKeys('egoGift')
 
-// EGO Gift spec list query options with runtime validation
 function createEGOGiftSpecListQueryOptions() {
-  return queryOptions({
-    queryKey: egoGiftListQueryKeys.spec(),
-    queryFn: async () => {
-      const module = await import('@static/data/egoGiftSpecList.json')
-      const result = EGOGiftSpecListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[egoGift specList] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    egoGiftListQueryKeys.spec(),
+    () => import('@static/data/egoGiftSpecList.json'),
+    EGOGiftSpecListSchema,
+    'egoGift specList',
+  )
 }
 
-// EGO Gift name list query options with runtime validation
 function createEGOGiftNameListQueryOptions(language: string) {
-  return queryOptions({
-    queryKey: egoGiftListQueryKeys.i18n(language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/egoGiftNameList.json`)
-      const result = EGOGiftNameListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[egoGift nameList / ${language}] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-    placeholderData: keepPreviousData,
-  })
+  return createStaticDataQueryOptions(
+    egoGiftListQueryKeys.i18n(language),
+    () => import(`@static/i18n/${language}/egoGiftNameList.json`),
+    EGOGiftNameListSchema,
+    `egoGift nameList / ${language}`,
+    { keepPrevious: true },
+  )
 }
 
 /**
@@ -66,9 +49,7 @@ export function useEGOGiftListSpec() {
  */
 export function useEGOGiftListI18n() {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOGiftNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOGiftNameListQueryOptions(i18n.language))
   return i18nData
 }
 
@@ -84,9 +65,7 @@ const EMPTY_NAME_LIST: Record<string, string> = {}
  */
 export function useEGOGiftListI18nDeferred(): Record<string, string> {
   const { i18n } = useTranslation()
-  const { data: i18nData } = useQuery(
-    createEGOGiftNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useQuery(createEGOGiftNameListQueryOptions(i18n.language))
   return i18nData ?? EMPTY_NAME_LIST
 }
 
@@ -102,9 +81,7 @@ export function useEGOGiftListData() {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createEGOGiftSpecListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createEGOGiftNameListQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createEGOGiftNameListQueryOptions(i18n.language))
 
   return {
     spec,

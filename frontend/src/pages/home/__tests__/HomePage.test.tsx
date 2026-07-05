@@ -47,12 +47,12 @@ vi.mock('@/pages/home/components/CommunityPlansSection', () => ({
 }))
 
 // Mock LoadingState
-vi.mock('@/components/common/LoadingState', () => ({
+vi.mock('@/components/feedback/LoadingState', () => ({
   LoadingState: () => <div data-testid="loading-state">Loading...</div>,
 }))
 
 // Mock ErrorBoundary
-vi.mock('@/components/common/ErrorBoundary', () => ({
+vi.mock('@/components/feedback/ErrorBoundary', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
@@ -67,7 +67,7 @@ describe('HomePage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -81,7 +81,7 @@ describe('HomePage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -95,7 +95,7 @@ describe('HomePage', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {
@@ -109,7 +109,7 @@ describe('HomePage', () => {
     const { container } = render(
       <QueryClientProvider client={queryClient}>
         <HomePage />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     )
 
     await waitFor(() => {

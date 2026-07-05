@@ -21,22 +21,13 @@ interface RenderWithProvidersOptions extends Omit<RenderOptions, 'wrapper'> {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  {
-    queryClient,
-    router,
-    initialRoute = '/',
-    ...renderOptions
-  }: RenderWithProvidersOptions = {}
+  { queryClient, router, initialRoute = '/', ...renderOptions }: RenderWithProvidersOptions = {},
 ) {
   const testQueryClient = queryClient ?? createTestQueryClient()
   const testRouter = router ?? createTestRouter({ initialEntries: [initialRoute] })
 
   function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={testQueryClient}>
-        {children}
-      </QueryClientProvider>
-    )
+    return <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>
   }
 
   return {

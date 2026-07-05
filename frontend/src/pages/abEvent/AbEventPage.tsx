@@ -1,45 +1,16 @@
-import { useState, Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/pages/themePack'
-import { FilterPageLayout } from '@/components/filter/FilterPageLayout'
-import { FilterSection } from '@/components/filter/FilterSection'
-import { SearchableMultiSelect } from '@/components/common/SearchableMultiSelect'
-import { EgoGiftSearchDropdown } from '@/components/filter/EgoGiftSearchDropdown'
+import { calculateActiveFilterCount } from '@/shared/filter'
+import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { FilterPageLayout } from '@/shared/filter'
+import { FilterSection } from '@/shared/filter'
+import { ThemePackDropdown } from '@/shared/filter'
+import { EgoGiftSearchDropdown } from '@/shared/filter'
+import { useEGOGiftListData } from '@/pages/egoGift'
 import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
-import { ListPageSkeleton } from '@/components/common/ListPageSkeleton'
+import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
-
-/**
- * Theme Pack searchable dropdown with i18n names.
- */
-function ThemePackSearchDropdown({
-  selectedThemePacks,
-  onSelectionChange,
-}: {
-  selectedThemePacks: Set<string>
-  onSelectionChange: (packs: Set<string>) => void
-}) {
-  const { t } = useTranslation('database')
-  const { spec, i18n: themePackI18n } = useThemePackListData()
-
-  const options = useMemo(() =>
-    Object.keys(spec).map((id) => ({
-      value: id,
-      label: themePackI18n[id]?.name ?? id,
-    })),
-    [spec, themePackI18n]
-  )
-
-  return (
-    <SearchableMultiSelect
-      options={options}
-      selectedValues={selectedThemePacks}
-      onSelectionChange={onSelectionChange}
-      placeholder={t('filters.themePack', 'Theme Pack')}
-      searchPlaceholder={t('filters.searchThemePack', 'Search Theme Packs...')}
-    />
-  )
-}
 
 /**
  * Shell component - loads spec, manages filter states.
@@ -49,27 +20,27 @@ function AbEventPageShell() {
   const spec = useAbEventListSpec()
 
   // Filter states
-  const [selectedEgoGifts, setSelectedEgoGifts] = useState<Set<string>>(new Set())
-  const [selectedThemePacks, setSelectedThemePacks] = useState<Set<string>>(new Set())
+  const {
+    values: filters,
+    setters,
+    resetAll,
+  } = useSetFilters({
+    selectedEgoGifts: new Set<string>(),
+    selectedThemePacks: new Set<string>(),
+  })
 
-  const handleResetAll = () => {
-    setSelectedEgoGifts(new Set())
-    setSelectedThemePacks(new Set())
-  }
-
-  const activeFilterCount =
-    selectedEgoGifts.size +
-    selectedThemePacks.size
+  const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
   const primaryFilters = (
     <FilterSection
       title={t('filters.egoGift', 'EGO Gift')}
-      activeCount={selectedEgoGifts.size}
+      activeCount={filters.selectedEgoGifts.size}
     >
       <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
         <EgoGiftSearchDropdown
-          selectedEgoGifts={selectedEgoGifts}
-          onSelectionChange={setSelectedEgoGifts}
+          selectedEgoGifts={filters.selectedEgoGifts}
+          onSelectionChange={setters.selectedEgoGifts}
+          useListData={useEGOGiftListData}
         />
       </Suspense>
     </FilterSection>
@@ -78,12 +49,13 @@ function AbEventPageShell() {
   const secondaryFilters = (
     <FilterSection
       title={t('filters.themePack', 'Theme Pack')}
-      activeCount={selectedThemePacks.size}
+      activeCount={filters.selectedThemePacks.size}
     >
       <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-        <ThemePackSearchDropdown
-          selectedThemePacks={selectedThemePacks}
-          onSelectionChange={setSelectedThemePacks}
+        <ThemePackDropdown
+          selectedThemePacks={filters.selectedThemePacks}
+          onThemePacksChange={setters.selectedThemePacks}
+          useListData={useThemePackListData}
         />
       </Suspense>
     </FilterSection>
@@ -102,12 +74,12 @@ function AbEventPageShell() {
       primaryFilters={primaryFilters}
       secondaryFilters={secondaryFilters}
       activeFilterCount={activeFilterCount}
-      onResetAll={handleResetAll}
+      onResetAll={resetAll}
     >
       <AbEventList
         spec={spec}
-        selectedEgoGifts={selectedEgoGifts}
-        selectedThemePacks={selectedThemePacks}
+        selectedEgoGifts={filters.selectedEgoGifts}
+        selectedThemePacks={filters.selectedThemePacks}
       />
     </FilterPageLayout>
   )

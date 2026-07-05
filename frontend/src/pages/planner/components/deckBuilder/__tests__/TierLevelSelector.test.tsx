@@ -14,7 +14,7 @@ beforeEach(() => {
     observe(target: Element) {
       this.cb(
         [{ isIntersecting: true, target } as IntersectionObserverEntry],
-        this as unknown as IntersectionObserver
+        this as unknown as IntersectionObserver,
       )
     }
     disconnect() {}
@@ -47,7 +47,7 @@ describe('TierLevelSelector — EGO mode threadspin buttons', () => {
         onConfirm={onConfirm}
       >
         <div data-testid="ego-card">card</div>
-      </TierLevelSelector>
+      </TierLevelSelector>,
     )
 
     openPopover(container)
@@ -68,7 +68,7 @@ describe('TierLevelSelector — EGO mode threadspin buttons', () => {
         onConfirm={onConfirm}
       >
         <div data-testid="ego-card">card</div>
-      </TierLevelSelector>
+      </TierLevelSelector>,
     )
 
     openPopover(container)
@@ -89,7 +89,7 @@ describe('TierLevelSelector — EGO mode threadspin buttons', () => {
         onConfirm={onConfirm}
       >
         <div data-testid="ego-card">card</div>
-      </TierLevelSelector>
+      </TierLevelSelector>,
     )
 
     openPopover(container)
@@ -111,7 +111,7 @@ describe('TierLevelSelector — EGO mode threadspin buttons', () => {
         onConfirm={onConfirm}
       >
         <div data-testid="ego-card">card</div>
-      </TierLevelSelector>
+      </TierLevelSelector>,
     )
 
     openPopover(container)

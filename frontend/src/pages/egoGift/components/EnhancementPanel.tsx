@@ -1,6 +1,6 @@
-import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/lib/assetPaths'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/lib/constants'
+import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/assets'
+import { FormattedDescription } from '@/shared/gameText'
+import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
 
 interface EnhancementPanelProps {
   description: string
@@ -30,11 +30,7 @@ export default function EnhancementPanel({ description, level, cost }: Enhanceme
         {/* Enhancement Cost */}
         {cost !== null && (
           <div className="flex items-center gap-2">
-            <img
-              src={getEGOGiftCostIconPath()}
-              alt="Cost"
-              className="w-6 h-6"
-            />
+            <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
         )}

@@ -80,10 +80,12 @@ export const AbEventResultSchema = z.object({
 export const AbEventSelectionEventSchema = z.object({
   canSkip: z.boolean(),
   eventType: z.string().optional(),
-  participantInfo: z.object({
-    min: z.number(),
-    max: z.number(),
-  }).optional(),
+  participantInfo: z
+    .object({
+      min: z.number(),
+      max: z.number(),
+    })
+    .optional(),
   adderInfo: z.array(z.object({ correctionCase: z.string(), adder: z.number() })).optional(),
   judgement: AbEventJudgementSchema.optional(),
   results: z.array(AbEventResultSchema).optional(),
@@ -136,12 +138,17 @@ export const AbEventI18nSchema = z.object({
   options: z.array(AbEventOptionI18nSchema).optional(),
   selectionTexts: z.record(z.string(), AbEventSelectionTextI18nSchema).optional(),
   choiceEffects: z.record(z.string(), z.array(z.string())).optional(),
-  subEventTexts: z.record(z.string(), z.object({
-    name: z.string().optional(),
-    desc: z.string().optional(),
-    options: z.array(AbEventOptionI18nSchema).optional(),
-    selectionTexts: z.record(z.string(), AbEventSelectionTextI18nSchema).optional(),
-  })).optional(),
+  subEventTexts: z
+    .record(
+      z.string(),
+      z.object({
+        name: z.string().optional(),
+        desc: z.string().optional(),
+        options: z.array(AbEventOptionI18nSchema).optional(),
+        selectionTexts: z.record(z.string(), AbEventSelectionTextI18nSchema).optional(),
+      }),
+    )
+    .optional(),
 })
 
 // =============================================================================

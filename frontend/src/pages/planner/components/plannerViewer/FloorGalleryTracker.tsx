@@ -2,11 +2,11 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '../PlannerSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { NoteContent } from '@/types/NoteEditorTypes'
-import { isNoteEmpty } from '@/lib/noteUtils'
+import type { NoteContent } from '@/shared/noteEditor'
+import { isNoteEmpty } from '@/shared/noteEditor'
 
 interface FloorGalleryTrackerProps {
   floorSelections: SerializableFloorSelection[]
@@ -28,12 +28,13 @@ export function FloorGalleryTracker({
   const floorIndices = useMemo(() => Array.from({ length: floorCount }, (_, i) => i), [floorCount])
 
   // Deserialize floor selections (convert giftIds from string[] to Set<string>)
-  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(() =>
-    floorSelections.map(floor => ({
-      ...floor,
-      giftIds: new Set(floor.giftIds)
-    })),
-    [floorSelections]
+  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(
+    () =>
+      floorSelections.map((floor) => ({
+        ...floor,
+        giftIds: new Set(floor.giftIds),
+      })),
+    [floorSelections],
   )
 
   return (

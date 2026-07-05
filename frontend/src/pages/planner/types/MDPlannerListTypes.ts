@@ -1,4 +1,4 @@
-import type { MDCategory, PlannerType } from '@/lib/constants'
+import type { MDCategory, PlannerType } from '@/shared/gameData'
 
 // Re-export category type for consumer convenience
 export type { MDCategory, PlannerType }

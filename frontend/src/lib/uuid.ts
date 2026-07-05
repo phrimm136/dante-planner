@@ -25,10 +25,14 @@ function formatV4(bytes: Uint8Array): string {
     hex.push(bytes[i].toString(16).padStart(2, '0'))
   }
   return (
-    hex.slice(0, 4).join('') + '-' +
-    hex.slice(4, 6).join('') + '-' +
-    hex.slice(6, 8).join('') + '-' +
-    hex.slice(8, 10).join('') + '-' +
+    hex.slice(0, 4).join('') +
+    '-' +
+    hex.slice(4, 6).join('') +
+    '-' +
+    hex.slice(6, 8).join('') +
+    '-' +
+    hex.slice(8, 10).join('') +
+    '-' +
     hex.slice(10, 16).join('')
   )
 }
@@ -47,5 +51,7 @@ export function generateUUID(): string {
       return formatV4(crypto.getRandomValues(new Uint8Array(16)))
     }
   }
-  throw new Error('UUID generation requires the Web Crypto API (crypto.randomUUID or crypto.getRandomValues).')
+  throw new Error(
+    'UUID generation requires the Web Crypto API (crypto.randomUUID or crypto.getRandomValues).',
+  )
 }

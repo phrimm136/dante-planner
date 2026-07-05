@@ -33,7 +33,7 @@ To determine NN:
 
 Before translating, refine the raw Korean input to match the tone and style of existing announcements:
 1. Read recent entries in `static/i18n/KR/announcements.json` to learn the established style
-2. Read the term dictionary at `.claude/skills/add-announcement/terms.csv` and correct any game terms to their canonical Korean forms (e.g., `EGO 기프트` → `E.G.O 기프트`)
+2. Read the term dictionary at `.claude/skills/announcement/terms.csv` and correct any game terms to their canonical Korean forms (e.g., `EGO 기프트` → `E.G.O 기프트`)
 3. Rewrite `kr_title` and `kr_body` to match that style (sentence structure, formality, formatting)
 4. Present the refined Korean text to the user for approval before proceeding to translation
 
@@ -41,7 +41,7 @@ Do NOT proceed to translation until the user approves the refined Korean text.
 
 ## Step 4 — Translate
 
-Read the term dictionary at `.claude/skills/add-announcement/terms.csv` (if not already read in Step 3).
+Read the term dictionary at `.claude/skills/announcement/terms.csv` (if not already read in Step 3).
 It contains canonical translations for:
 - Sinner names (12 characters)
 - Game terms: 인격 → Identity/人格/人格, E.G.O 기프트 → E.G.O Gifts/E.G.Oギフト/E.G.O饰品, E.G.O
@@ -63,8 +63,11 @@ In the input, `[[{category}:{name}]]` marks an in-game term. Find its id or inte
 | `gift` | `egoGiftNameList.json` | numeric id |
 | `keyword` | `battleKeywords.json` | PascalCase id |
 | `themepack` | `themePack.json` | numeric id |
+| `trait` | `plannerKeywords.json` | PascalCase id (matched on `label`) |
 
 **Example:** `[[keyword:부하]]` → search `battleKeywords.json` for entry with `"name"` containing `부하` → find key `ChargeLoad` → look up `ChargeLoad` in EN/JP/CN `battleKeywords.json` → `부하/Load/負荷/载荷`
+
+**Trait example:** `[[trait:엄지]]` → search `plannerKeywords.json` for entry whose `"label"` is `엄지` → find key `AccelBullet` → look up `AccelBullet` in EN/JP/CN `plannerKeywords.json` → `엄지/The Thumb/親指/拇指`. (`거미집` → `SojiRyoshuEntangle` → `The House of Spiders/蜘蛛の巣/蜘蛛巢`.)
 
 ## Step 5 — Write All 5 Files
 

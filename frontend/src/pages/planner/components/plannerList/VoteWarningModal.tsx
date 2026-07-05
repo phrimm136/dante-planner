@@ -56,8 +56,7 @@ export function VoteWarningModal({
     onOpenChange(false)
   }
 
-  const messageKey =
-    voteDirection === 'UP' ? 'voteWarning.messageUp' : 'voteWarning.messageDown'
+  const messageKey = voteDirection === 'UP' ? 'voteWarning.messageUp' : 'voteWarning.messageDown'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -3,14 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { ChevronLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import type { Announcement } from '@/types/AnnouncementTypes'
-import { linkifyText } from '@/components/common/LinkifyText'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import type { Announcement } from '../types/AnnouncementTypes'
+import { linkifyText } from '@/components/ui/LinkifyText'
 
 // ============================================================================
 // Inner Content Component
@@ -25,7 +20,10 @@ interface AnnouncementDialogContentProps {
  * Inner component owning list/detail selection state.
  * Separated from the Dialog shell so selection re-renders stay isolated.
  */
-function AnnouncementDialogContent({ announcements, initialSelectedId }: AnnouncementDialogContentProps) {
+function AnnouncementDialogContent({
+  announcements,
+  initialSelectedId,
+}: AnnouncementDialogContentProps) {
   const { t } = useTranslation('common')
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId)
 
@@ -33,7 +31,7 @@ function AnnouncementDialogContent({ announcements, initialSelectedId }: Announc
     setSelectedId(initialSelectedId)
   }, [initialSelectedId])
 
-  const selected = selectedId ? announcements.find((a) => a.id === selectedId) ?? null : null
+  const selected = selectedId ? (announcements.find((a) => a.id === selectedId) ?? null) : null
 
   if (selected) {
     return (
@@ -69,7 +67,9 @@ function AnnouncementDialogContent({ announcements, initialSelectedId }: Announc
             onClick={() => setSelectedId(announcement.id)}
           >
             <span className="text-sm font-medium truncate pr-4">{announcement.title}</span>
-            <span className="text-sm text-muted-foreground shrink-0">{announcement.formattedDate}</span>
+            <span className="text-sm text-muted-foreground shrink-0">
+              {announcement.formattedDate}
+            </span>
           </button>
         ))
       )}
@@ -93,7 +93,12 @@ interface AnnouncementDialogProps {
  * Announcement dialog — shell component.
  * Owns open/close and seeds the initial selection; content state lives in AnnouncementDialogContent.
  */
-export function AnnouncementDialog({ announcements, open, onOpenChange, initialSelectedId = null }: AnnouncementDialogProps) {
+export function AnnouncementDialog({
+  announcements,
+  open,
+  onOpenChange,
+  initialSelectedId = null,
+}: AnnouncementDialogProps) {
   const { t } = useTranslation('common')
 
   // Derive seed: null when closed so content resets to list view on reopen
@@ -107,10 +112,7 @@ export function AnnouncementDialog({ announcements, open, onOpenChange, initialS
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60vh]">
-          <AnnouncementDialogContent
-            announcements={announcements}
-            initialSelectedId={seed}
-          />
+          <AnnouncementDialogContent announcements={announcements} initialSelectedId={seed} />
         </div>
       </DialogContent>
     </Dialog>

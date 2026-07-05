@@ -73,10 +73,7 @@ describe('StartBuffSection', () => {
   describe('empty state', () => {
     it('shows placeholder when no buffs selected', () => {
       render(
-        <StartBuffSection
-          mdVersion={CURRENT_MD_VERSION}
-          selectedBuffIdsOverride={new Set()}
-        />
+        <StartBuffSection mdVersion={CURRENT_MD_VERSION} selectedBuffIdsOverride={new Set()} />,
       )
 
       expect(screen.getByText('Click to select start buffs')).toBeDefined()
@@ -91,7 +88,7 @@ describe('StartBuffSection', () => {
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIdsOverride={new Set()}
           onClick={onClick}
-        />
+        />,
       )
 
       const clickableArea = screen.getByRole('button')
@@ -107,7 +104,7 @@ describe('StartBuffSection', () => {
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIdsOverride={new Set([1001])}
-        />
+        />,
       )
 
       const miniCards = screen.getAllByTestId('start-buff-mini-card')
@@ -120,7 +117,7 @@ describe('StartBuffSection', () => {
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIdsOverride={new Set([1001, 1002])}
-        />
+        />,
       )
 
       const miniCards = screen.getAllByTestId('start-buff-mini-card')
@@ -132,7 +129,7 @@ describe('StartBuffSection', () => {
         <StartBuffSection
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIdsOverride={new Set([1001])}
-        />
+        />,
       )
 
       expect(screen.queryByText('Click to select start buffs')).toBeNull()
@@ -148,7 +145,7 @@ describe('StartBuffSection', () => {
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIdsOverride={new Set([1001])}
           onClick={onClick}
-        />
+        />,
       )
 
       const clickableArea = screen.getByRole('button')
@@ -163,7 +160,7 @@ describe('StartBuffSection', () => {
           mdVersion={CURRENT_MD_VERSION}
           selectedBuffIdsOverride={new Set()}
           onClick={() => {}}
-        />
+        />,
       )
 
       const button = screen.getByRole('button')

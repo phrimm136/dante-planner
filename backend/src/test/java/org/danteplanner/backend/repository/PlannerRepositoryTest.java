@@ -1,12 +1,15 @@
 package org.danteplanner.backend.repository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
 
-import org.danteplanner.backend.entity.AuthProviderType;
+
 import jakarta.persistence.EntityManager;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerStatus;
-import org.danteplanner.backend.entity.User;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,14 +55,7 @@ class PlannerRepositoryTest {
         userRepository.deleteAll();
 
         // Create test user
-        testUser = User.builder()
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
-        testUser = userRepository.save(testUser);
+        testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
 
         // Create test planner with initial vote counts at 0
         testPlanner = Planner.builder()
@@ -73,7 +69,7 @@ class PlannerRepositoryTest {
                 .upvotes(0)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
+                .plannerType(org.danteplanner.backend.planner.entity.PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         testPlanner = plannerRepository.save(testPlanner);

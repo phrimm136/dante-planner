@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service.token;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +31,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Should add token to blacklist")
-        void blacklistToken_addsTokenToBlacklist() {
+        void blacklistToken_WhenCalled_AddsTokenToBlacklist() {
             // Arrange
             String token = "test.jwt.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000); // 1 minute from now
@@ -93,7 +94,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Should return true for blacklisted token")
-        void isBlacklisted_returnsTrueForBlacklistedToken() {
+        void isBlacklisted_WhenBlacklisted_ReturnsTrue() {
             // Arrange
             String token = "blacklisted.jwt.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -108,7 +109,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Should return false for non-blacklisted token")
-        void isBlacklisted_returnsFalseForNonBlacklistedToken() {
+        void isBlacklisted_WhenNotBlacklisted_ReturnsFalse() {
             // Arrange
             String unknownToken = "unknown.jwt.token";
 
@@ -121,7 +122,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Should return false for expired blacklist entry (TTL cleanup)")
-        void isBlacklisted_returnsFalseForExpiredBlacklistEntry() {
+        void isBlacklisted_WhenEntryExpired_ReturnsFalse() {
             // Arrange - token with expiry in the past
             String token = "expired.jwt.token";
             Date expiry = new Date(System.currentTimeMillis() - 1000); // 1 second ago
@@ -152,7 +153,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("clear() should remove all entries")
-        void clear_removesAllEntries() {
+        void clear_WhenCalled_RemovesAllEntries() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
             blacklistService.blacklistToken("token1", expiry);
@@ -170,7 +171,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("cleanupExpired() should remove all expired entries")
-        void cleanupExpired_removesExpiredEntries() {
+        void cleanupExpired_WhenEntriesExpired_RemovesThem() {
             // Arrange
             Date pastExpiry = new Date(System.currentTimeMillis() - 1000);
             Date futureExpiry = new Date(System.currentTimeMillis() + 60000);
@@ -190,7 +191,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("size() should return correct count")
-        void size_returnsCorrectCount() {
+        void size_WhenEntriesExist_ReturnsCorrectCount() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
 
@@ -212,7 +213,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Rotation-blacklisted token should be allowed within grace period")
-        void blacklistTokenForRotation_allowedWithinGracePeriod() {
+        void blacklistTokenForRotation_WhenWithinGracePeriod_Allowed() {
             // Arrange
             String token = "rotation.refresh.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -226,7 +227,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Immediate-blacklisted token should be rejected instantly")
-        void blacklistToken_rejectedImmediately() {
+        void blacklistToken_WhenBlacklisted_RejectedImmediately() {
             // Arrange
             String token = "logout.refresh.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -240,7 +241,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Rotation-blacklisted token should be rejected after grace period")
-        void blacklistTokenForRotation_rejectedAfterGracePeriod() throws InterruptedException {
+        void blacklistTokenForRotation_WhenAfterGracePeriod_Rejected() throws InterruptedException {
             // Arrange
             String token = "rotation.expired.grace.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -259,7 +260,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Same token: rotation then logout should override to immediate")
-        void rotationThenLogout_overridesToImmediate() {
+        void blacklistToken_WhenRotationThenLogout_OverridesToImmediate() {
             // Arrange
             String token = "rotate.then.logout.token";
             Date expiry = new Date(System.currentTimeMillis() + 60000);
@@ -281,7 +282,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Different tokens should not collide")
-        void differentTokens_doNotCollide() {
+        void blacklistToken_WhenDifferentTokens_DoNotCollide() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
             String token1 = "token.one.value";
@@ -297,7 +298,7 @@ class TokenBlacklistServiceTest {
 
         @Test
         @DisplayName("Same token value should always match")
-        void sameToken_alwaysMatches() {
+        void isBlacklisted_WhenSameToken_AlwaysMatches() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
             String token = "consistent.token.value";

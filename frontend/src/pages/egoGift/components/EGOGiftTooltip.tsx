@@ -1,9 +1,5 @@
-import type { EnhancementLevel } from '@/lib/constants'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import type { EnhancementLevel } from '@/shared/gameData'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { EGOGiftTooltipContent } from './EGOGiftTooltipContent'
 import { cn } from '@/lib/utils'
 
@@ -33,17 +29,19 @@ export function EGOGiftTooltip({
 }: EGOGiftTooltipProps) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        {children}
-      </TooltipTrigger>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side={side}
         className={cn(
           'w-auto max-w-[330px] bg-background border-1 border-primary text-foreground rounded-none p-2',
-          className
+          className,
         )}
-        onClick={(e) => { e.stopPropagation() }}
-        onMouseDown={(e) => { e.stopPropagation() }}
+        onClick={(e) => {
+          e.stopPropagation()
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation()
+        }}
       >
         <EGOGiftTooltipContent giftId={giftId} enhancement={enhancement} />
       </TooltipContent>

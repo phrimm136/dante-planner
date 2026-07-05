@@ -1,9 +1,10 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.service.PlannerIndexService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.entity.ContentEntityType;
-import org.danteplanner.backend.entity.PlannerContentIndex;
-import org.danteplanner.backend.repository.PlannerContentIndexRepository;
+import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.danteplanner.backend.planner.entity.PlannerContentIndex;
+import org.danteplanner.backend.planner.repository.PlannerContentIndexRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +44,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexWithFullContent() {
+    void reindex_WhenFullContent_IndexesAllEntities() {
         String content = """
                 {
                   "equipment": {
@@ -91,7 +92,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexDeduplicates() {
+    void reindex_WhenDuplicateGiftIds_Deduplicates() {
         String content = """
                 {
                   "selectedGiftIds": ["g001", "g002"],
@@ -117,7 +118,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexWithEmptyContent() {
+    void reindex_WhenEmptyContent_DeletesAndSkipsSave() {
         indexService.reindex(plannerId, "{}");
 
         verify(contentIndexRepository).deleteByPlannerId(plannerId);
@@ -125,7 +126,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexWithNullContent() {
+    void reindex_WhenNullContent_DeletesAndSkipsSave() {
         indexService.reindex(plannerId, null);
 
         verify(contentIndexRepository).deleteByPlannerId(plannerId);
@@ -133,7 +134,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexWithBlankContent() {
+    void reindex_WhenBlankContent_DeletesAndSkipsSave() {
         indexService.reindex(plannerId, "   ");
 
         verify(contentIndexRepository).deleteByPlannerId(plannerId);
@@ -141,7 +142,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexWithMalformedJson() {
+    void reindex_WhenMalformedJson_DeletesAndSkipsSave() {
         indexService.reindex(plannerId, "{not valid json!!!");
 
         verify(contentIndexRepository).deleteByPlannerId(plannerId);
@@ -149,7 +150,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void deleteIndex() {
+    void deleteIndex_WhenCalled_DeletesByPlannerId() {
         indexService.deleteIndex(plannerId);
 
         verify(contentIndexRepository).deleteByPlannerId(plannerId);
@@ -157,7 +158,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexHandlesMissingEquipment() {
+    void reindex_WhenMissingEquipment_IndexesRemaining() {
         String content = """
                 {
                   "selectedGiftIds": ["g001"],
@@ -179,7 +180,7 @@ class PlannerIndexServiceTest {
     }
 
     @Test
-    void reindexHandlesNullThemePackId() {
+    void reindex_WhenNullThemePackId_SkipsThemePackEntry() {
         String content = """
                 {
                   "floorSelections": [

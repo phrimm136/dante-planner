@@ -13,7 +13,7 @@ import type { AbEventSpecListEntry } from '../schemas/AbEventSchemas'
  */
 export function matchesRelatedEgoGiftFilter(
   entry: AbEventSpecListEntry,
-  selectedEgoGifts: Set<string>
+  selectedEgoGifts: Set<string>,
 ): boolean {
   if (selectedEgoGifts.size === 0) return true
   return entry.relatedEgoGifts.some((giftId) => selectedEgoGifts.has(giftId))
@@ -26,7 +26,7 @@ export function matchesRelatedEgoGiftFilter(
  */
 export function matchesRelatedThemePackFilter(
   entry: AbEventSpecListEntry,
-  selectedThemePacks: Set<string>
+  selectedThemePacks: Set<string>,
 ): boolean {
   if (selectedThemePacks.size === 0) return true
   return entry.relatedThemePacks.some((packId) => selectedThemePacks.has(packId))

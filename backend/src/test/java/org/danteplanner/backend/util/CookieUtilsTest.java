@@ -1,4 +1,5 @@
 package org.danteplanner.backend.util;
+import org.danteplanner.backend.shared.util.CookieUtils;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +44,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set HttpOnly, Secure, and SameSite attributes")
-        void setCookie_setsHttpOnlySecureSameSite() {
+        void setCookie_WhenCalled_SetsHttpOnlySecureSameSite() {
             // Arrange
             String name = "accessToken";
             String value = "jwt.token.value";
@@ -68,7 +69,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set path to root")
-        void setCookie_setsPathToRoot() {
+        void setCookie_WhenCalled_SetsPathToRoot() {
             // Act
             cookieUtils.setCookie(response, "test", "value", 3600);
 
@@ -81,7 +82,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set correct max age")
-        void setCookie_setsCorrectMaxAge() {
+        void setCookie_WhenCalled_SetsCorrectMaxAge() {
             // Arrange
             int expectedMaxAge = 86400; // 1 day
 
@@ -97,7 +98,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set Secure=false when configured for development")
-        void setCookie_setsSecureFalseInDevMode() {
+        void setCookie_WhenDevMode_SetsSecureFalse() {
             // Arrange - dev mode with secure cookies disabled
             CookieUtils devCookieUtils = new CookieUtils(false, "", "Lax");
 
@@ -118,7 +119,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should return value for existing cookie")
-        void getCookieValue_returnsValueForExistingCookie() {
+        void getCookieValue_WhenCookieExists_ReturnsValue() {
             // Arrange
             String expectedName = "accessToken";
             String expectedValue = "jwt.token.value";
@@ -138,7 +139,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should return null for missing cookie")
-        void getCookieValue_returnsNullForMissingCookie() {
+        void getCookieValue_WhenCookieMissing_ReturnsNull() {
             // Arrange
             Cookie[] cookies = {
                     new Cookie("otherCookie", "otherValue"),
@@ -155,7 +156,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should return null when no cookies present")
-        void getCookieValue_returnsNullWhenNoCookies() {
+        void getCookieValue_WhenNoCookies_ReturnsNull() {
             // Arrange
             when(request.getCookies()).thenReturn(null);
 
@@ -168,7 +169,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should return null for empty cookies array")
-        void getCookieValue_returnsNullForEmptyCookiesArray() {
+        void getCookieValue_WhenEmptyCookiesArray_ReturnsNull() {
             // Arrange
             when(request.getCookies()).thenReturn(new Cookie[0]);
 
@@ -181,7 +182,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should handle case-sensitive cookie names")
-        void getCookieValue_isCaseSensitive() {
+        void getCookieValue_WhenDifferentCase_ReturnsNull() {
             // Arrange
             Cookie[] cookies = {new Cookie("AccessToken", "value")};
             when(request.getCookies()).thenReturn(cookies);
@@ -200,7 +201,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set cookie with zero max age")
-        void clearCookie_setsCookieWithZeroMaxAge() {
+        void clearCookie_WhenCalled_SetsZeroMaxAge() {
             // Arrange
             String name = "accessToken";
 
@@ -219,7 +220,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set security attributes when clearing")
-        void clearCookie_setsSecurityAttributes() {
+        void clearCookie_WhenCalled_SetsSecurityAttributes() {
             // Act
             cookieUtils.clearCookie(response, "tokenToClear");
 
@@ -236,7 +237,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should set path to root when clearing")
-        void clearCookie_setsPathToRoot() {
+        void clearCookie_WhenCalled_SetsPathToRoot() {
             // Act
             cookieUtils.clearCookie(response, "test");
 
@@ -254,7 +255,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should throw IllegalArgumentException for empty cookie name")
-        void setCookie_throwsForEmptyName() {
+        void setCookie_WhenEmptyName_Throws() {
             // Act & Assert - Cookie API does not allow empty names
             assertThrows(
                     IllegalArgumentException.class,
@@ -264,7 +265,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should throw IllegalArgumentException for null cookie name")
-        void setCookie_throwsForNullName() {
+        void setCookie_WhenNullName_Throws() {
             // Act & Assert - Cookie API does not allow null names
             assertThrows(
                     IllegalArgumentException.class,
@@ -274,7 +275,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should handle empty cookie value")
-        void setCookie_handlesEmptyValue() {
+        void setCookie_WhenEmptyValue_SetsEmptyValue() {
             // Act
             cookieUtils.setCookie(response, "name", "", 3600);
 
@@ -286,7 +287,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should handle zero max age")
-        void setCookie_handlesZeroMaxAge() {
+        void setCookie_WhenZeroMaxAge_SetsZeroMaxAge() {
             // Act
             cookieUtils.setCookie(response, "name", "value", 0);
 
@@ -298,7 +299,7 @@ class CookieUtilsTest {
 
         @Test
         @DisplayName("Should handle negative max age")
-        void setCookie_handlesNegativeMaxAge() {
+        void setCookie_WhenNegativeMaxAge_SetsNegativeMaxAge() {
             // Act - negative max age means session cookie
             cookieUtils.setCookie(response, "name", "value", -1);
 

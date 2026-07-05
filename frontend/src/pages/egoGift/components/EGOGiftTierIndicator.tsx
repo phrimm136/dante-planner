@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { getEGOGiftTierEXPath } from '@/lib/assetPaths'
+import { getEGOGiftTierEXPath } from '@/shared/assets'
 import { getDisplayFontForLabel } from '@/lib/utils'
 
 interface EGOGiftTierIndicatorProps {
@@ -29,7 +29,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
     )
   }
 
-  const tierText = tierTexts[parseInt(tier)-1]
+  const tierText = tierTexts[parseInt(tier) - 1]
   const textSize = 'text-[34px]'
 
   return (

@@ -1,5 +1,5 @@
-import { SINNERS } from '@/lib/constants'
-import { getEGOImagePath, getEGOTypeIconPath } from '@/lib/assetPaths'
+import { SINNERS } from '@/shared/gameData'
+import { getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EGOType } from '@/pages/ego'
 import colorCode from '@static/data/colorCode.json'
@@ -18,9 +18,7 @@ const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
  */
 export function CompactEgoGrid({ equipment, egoAffinityMap }: CompactEgoGridProps) {
   return (
-    <div
-      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 w-fit mx-auto gap-2"
-    >
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 w-fit mx-auto gap-2">
       {SINNERS.map((_sinnerName, index) => {
         const sinnerCode = String(index + 1)
         const sinnerEquipment = equipment[sinnerCode]
@@ -47,11 +45,7 @@ export function CompactEgoGrid({ equipment, egoAffinityMap }: CompactEgoGridProp
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <img
-                      src={getEGOTypeIconPath(rank)}
-                      alt={rank}
-                      className="h-4 object-cover"
-                    />
+                    <img src={getEGOTypeIconPath(rank)} alt={rank} className="h-4 object-cover" />
                   )}
                 </div>
               )

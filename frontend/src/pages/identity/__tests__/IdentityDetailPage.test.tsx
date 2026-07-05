@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Suspense } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '@/test-utils/queryClient'
-import { MAX_LEVEL } from '@/lib/constants'
+import { MAX_LEVEL } from '@/shared/gameData'
 import IdentityDetailPage from '../IdentityDetailPage'
 
 // Mock react-i18next with proper i18n instance and initReactI18next
@@ -57,7 +57,9 @@ const mockIdentityData10101 = {
   skills: {
     skill1: [{ id: 1010101, skillData: [{ attributeType: 'AZURE', atkType: 'SLASH' }] }],
     skill2: [{ id: 1010102, skillData: [{ attributeType: 'VIOLET', atkType: 'PENETRATE' }] }],
-    skill3: [{ id: 1010103, skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] }],
+    skill3: [
+      { id: 1010103, skillData: [{}, {}, { attributeType: 'AMBER', atkType: 'SLASH' }, {}] },
+    ],
     skillDef: [{ id: 1010104, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
   },
   passives: {
@@ -95,7 +97,14 @@ const mockIdentityData10114 = {
   defCorrection: 5,
   minSpeedList: [3, 3, 4, 4],
   maxSpeedList: [5, 6, 7, 7],
-  unitKeywordList: ['SMALL', 'BLACK_BEAST', 'BLACK_BEAST_CHIEF', 'FAMILY_GA', 'BLACK_BEAST_HORSE', 'H_CORP'],
+  unitKeywordList: [
+    'SMALL',
+    'BLACK_BEAST',
+    'BLACK_BEAST_CHIEF',
+    'FAMILY_GA',
+    'BLACK_BEAST_HORSE',
+    'H_CORP',
+  ],
   staggerList: [60, 30],
   ResistInfo: { SLASH: 0.5, PENETRATE: 2, HIT: 1 },
   mentalConditionInfo: {
@@ -105,11 +114,18 @@ const mockIdentityData10114 = {
   skills: {
     skill1: [{ id: 1011401, skillData: [{ attributeType: 'AMBER', atkType: 'SLASH' }] }],
     skill2: [{ id: 1011402, skillData: [{ attributeType: 'VIOLET', atkType: 'SLASH' }] }],
-    skill3: [{ id: 1011403, skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] }],
+    skill3: [
+      { id: 1011403, skillData: [{}, {}, { attributeType: 'SHAMROCK', atkType: 'SLASH' }, {}] },
+    ],
     skillDef: [{ id: 1011404, skillData: [{ attributeType: 'NEUTRAL', atkType: 'NONE' }] }],
   },
   passives: {
-    battlePassiveList: [[1011402, 1011403], [1011402, 1011403, 1011401], [], [1011402, 1011403, 1011411]],
+    battlePassiveList: [
+      [1011402, 1011403],
+      [1011402, 1011403, 1011401],
+      [],
+      [1011402, 1011403, 1011411],
+    ],
     supportPassiveList: [[], [], [1011421], []],
     conditions: {
       '1011401': { type: 'STOCK', values: { SHAMROCK: 5 } },
@@ -123,8 +139,14 @@ const mockIdentityI18n10114 = {
   skills: {
     '1011401': { name: 'Cut Down and Trample', descs: [{ desc: 'Test skill', coinDescs: [] }] },
     '1011402': { name: 'Crescent Blade Strike', descs: [{ desc: 'Test skill 2', coinDescs: [] }] },
-    '1011403': { name: "Cavalry's Vanguard Charge", descs: [{ desc: 'Test skill 3', coinDescs: [] }] },
-    '1011404': { name: 'Preparation Afore the Charge', descs: [{ desc: 'Defense skill', coinDescs: [] }] },
+    '1011403': {
+      name: "Cavalry's Vanguard Charge",
+      descs: [{ desc: 'Test skill 3', coinDescs: [] }],
+    },
+    '1011404': {
+      name: 'Preparation Afore the Charge',
+      descs: [{ desc: 'Defense skill', coinDescs: [] }],
+    },
   },
   passives: {
     '1011402': { name: 'Passive 1', desc: 'Passive description 1' },
@@ -155,7 +177,7 @@ vi.mock('@/pages/identity/hooks/useIdentityDetailData', () => ({
 }))
 
 // Mock the useIsBreakpoint hook to simulate desktop by default
-vi.mock('@/hooks/use-is-breakpoint', () => ({
+vi.mock('@/components/hooks/use-is-breakpoint', () => ({
   useIsBreakpoint: vi.fn(() => false), // false = not mobile (desktop)
 }))
 
@@ -188,8 +210,8 @@ vi.mock('@/pages/identity/hooks/useTraitsI18n', () => ({
 }))
 
 // Mock asset paths - use importOriginal for complete mock
-vi.mock('@/lib/assetPaths', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/lib/assetPaths')>()
+vi.mock('@/shared/assets', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/shared/assets')>()
   return {
     ...actual,
     // Override specific paths if needed for testing
@@ -213,7 +235,7 @@ vi.mock('@/pages/identity/components/TraitsDisplay', () => ({
 // Mock fetch for hooks that use fetch
 beforeEach(() => {
   vi.spyOn(global, 'fetch').mockImplementation((url) => {
-    const urlStr = url.toString()
+    const urlStr = url instanceof Request ? url.url : url.toString()
     // Return mock data for various fetch endpoints
     if (urlStr.includes('skillTag.json')) {
       return Promise.resolve({
@@ -224,10 +246,11 @@ beforeEach(() => {
     if (urlStr.includes('unitKeywords.json')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({
-          LIMBUS_COMPANY: 'Limbus Company',
-          BLACK_BEAST: 'Black Beast',
-        }),
+        json: () =>
+          Promise.resolve({
+            LIMBUS_COMPANY: 'Limbus Company',
+            BLACK_BEAST: 'Black Beast',
+          }),
       } as Response)
     }
     return Promise.resolve({
@@ -242,10 +265,8 @@ function renderWithProviders(ui: React.ReactElement) {
   const queryClient = createTestQueryClient()
   return render(
     <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<div data-testid="page-skeleton">Loading...</div>}>
-        {ui}
-      </Suspense>
-    </QueryClientProvider>
+      <Suspense fallback={<div data-testid="page-skeleton">Loading...</div>}>{ui}</Suspense>
+    </QueryClientProvider>,
   )
 }
 

@@ -10,10 +10,11 @@ import {
   getButtonBasePath,
   getButtonSwapImagePath,
   getButtonExpandImagePath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SINNER_COLORS, type Sinner } from '@/lib/constants'
-import { getSinnerFromId, getDisplayFontForLanguage } from '@/lib/utils'
+import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 
 type ImageVariant = 'normal' | 'gacksung'
 
@@ -34,7 +35,9 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
   const { t, i18n } = useTranslation()
   // Gacksung image only available for rank > 1 AND uptie >= 3
   const canShowGacksung = rank > 1 && uptie >= 3
-  const [imageVariant, setImageVariant] = useState<ImageVariant>(canShowGacksung ? 'gacksung' : 'normal')
+  const [imageVariant, setImageVariant] = useState<ImageVariant>(
+    canShowGacksung ? 'gacksung' : 'normal',
+  )
 
   // Derive sinner from identity ID and get color
   const sinner = getSinnerFromId(identityId) as Sinner
@@ -63,11 +66,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
       <div>
         {/* Row 1: Rank icon on the right */}
         <div className="flex justify-end">
-          <img
-            src={getRarityIconPath(rank)}
-            alt={`${rank} rank`}
-            className="h-6 object-contain"
-          />
+          <img src={getRarityIconPath(rank)} alt={`${rank} rank`} className="h-6 object-contain" />
         </div>
         {/* Row 2: Sinner icon + Identity name */}
         <div className="flex items-center gap-3">
@@ -88,10 +87,7 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
           </div>
           {/* Identity name with sinner color */}
           {name ? (
-            <h1
-              className="text-2xl font-bold"
-              style={{ color: sinnerColor, ...displayStyle }}
-            >
+            <h1 className="text-2xl font-bold" style={{ color: sinnerColor, ...displayStyle }}>
               {name}
             </h1>
           ) : (

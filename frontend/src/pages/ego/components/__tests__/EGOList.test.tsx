@@ -14,13 +14,23 @@ import type { EGOListItem } from '../../types/EGOTypes'
 
 // Mock TanStack Router Link component
 vi.mock('@tanstack/react-router', () => ({
-  Link: ({ children, to, params }: { children: React.ReactNode; to: string; params?: Record<string, string> }) => (
-    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">{children}</a>
+  Link: ({
+    children,
+    to,
+    params,
+  }: {
+    children: React.ReactNode
+    to: string
+    params?: Record<string, string>
+  }) => (
+    <a href={params?.id ? `${to.replace('$id', params.id)}` : to} role="link">
+      {children}
+    </a>
   ),
 }))
 
 // Mock asset paths
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getEGOImagePath: (id: string) => `/mock/ego/${id}.png`,
   getEGOFramePath: () => '/mock/frame.png',
   getEGOFrameHighlightPath: () => '/mock/frame-highlight.png',
@@ -33,7 +43,7 @@ vi.mock('@/lib/assetPaths', () => ({
 }))
 
 // Mock search mappings - non-suspending version
-vi.mock('@/hooks/useSearchMappings', () => ({
+vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: vi.fn(),
 }))
 
@@ -51,7 +61,7 @@ vi.mock('../../hooks/useEGOListData', () => ({
   }),
 }))
 
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import { useSearchMappingsDeferred } from '@/shared/filter'
 
 const mockEGOs: EGOListItem[] = [
   {
@@ -99,9 +109,7 @@ function createWrapper() {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <Suspense fallback={null}>
-          {children}
-        </Suspense>
+        <Suspense fallback={null}>{children}</Suspense>
       </QueryClientProvider>
     )
   }
@@ -131,7 +139,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // All EGOs should be visible (ResponsiveCardGrid renders twice: mobile + desktop)
@@ -152,7 +160,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       expect(screen.getByText(/No E\.G\.Os match/)).toBeInTheDocument()
@@ -173,7 +181,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only ZAYIN EGOs should be visible (hidden class is on parent div)
@@ -198,7 +206,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // EGOs with AZURE: 20101 (CRIMSON+AZURE) and 20201 (AZURE)
@@ -221,7 +229,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only 20101 has BOTH CRIMSON and AZURE
@@ -244,7 +252,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // EGOs with PENETRATE: 20101 (SLASH+PENETRATE) and 20201 (PENETRATE)
@@ -267,7 +275,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Only 20101 has BOTH SLASH and PENETRATE
@@ -290,7 +298,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set([1])}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Season 1 EGOs only (hidden class is on parent div)
@@ -313,7 +321,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery=""
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Must have CRIMSON attribute AND SLASH attack type
@@ -345,7 +353,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery="rupture"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Search returns no results when mappings are loading
@@ -375,7 +383,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery="rupture"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // EGOs with Burst keyword should be visible (hidden class is on parent div)
@@ -387,9 +395,7 @@ describe('EGOList', () => {
 
     it('search is case-insensitive', () => {
       vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['charge', ['Charge']],
-        ]),
+        keywordToValue: new Map([['charge', ['Charge']]]),
         unitKeywordToValue: new Map(),
       })
 
@@ -405,7 +411,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery="CHARGE"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
@@ -418,9 +424,7 @@ describe('EGOList', () => {
   describe('combined filters and search', () => {
     it('applies both filters and search together', () => {
       vi.mocked(useSearchMappingsDeferred).mockReturnValue({
-        keywordToValue: new Map([
-          ['rupture', ['Burst']],
-        ]),
+        keywordToValue: new Map([['rupture', ['Burst']]]),
         unitKeywordToValue: new Map(),
       })
 
@@ -436,7 +440,7 @@ describe('EGOList', () => {
           selectedSeasons={new Set()}
           searchQuery="rupture"
         />,
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       )
 
       // Must match ZAYIN type AND have Burst keyword (hidden class is on parent div)

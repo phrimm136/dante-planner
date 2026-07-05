@@ -1,17 +1,12 @@
 import { useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useStartGiftPools } from '../../hooks/useStartGiftPools'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { useStartBuffData } from '../../hooks/useStartBuffData'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import type { MDVersion } from '@/lib/constants'
+import type { MDVersion } from '@/shared/gameData'
 import { calculateMaxGiftSelection } from '../../lib/startGiftCalculator'
 import { StartGiftRow } from './StartGiftRow'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
@@ -30,11 +25,7 @@ interface StartGiftEditPaneProps {
  * - Gift selection gated by keyword selection
  * - Selection count = 1 + ADDITIONAL_START_EGO_GIFT_SELECT effects
  */
-export function StartGiftEditPane({
-  open,
-  onOpenChange,
-  mdVersion,
-}: StartGiftEditPaneProps) {
+export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEditPaneProps) {
   // Store state
   const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
   const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
@@ -53,7 +44,7 @@ export function StartGiftEditPane({
   // Calculate max selectable gifts
   const maxSelectable = useMemo(
     () => calculateMaxGiftSelection(buffs, selectedBuffIds),
-    [buffs, selectedBuffIds]
+    [buffs, selectedBuffIds],
   )
 
   // Trim excess gifts when EA changes
@@ -79,7 +70,13 @@ export function StartGiftEditPane({
       }
       setSelectedGiftIds(newSelection)
     }
-  }, [maxSelectable, selectedGiftIds, setSelectedGiftIds, comprehensiveGiftIds, setComprehensiveGiftIds])
+  }, [
+    maxSelectable,
+    selectedGiftIds,
+    setSelectedGiftIds,
+    comprehensiveGiftIds,
+    setComprehensiveGiftIds,
+  ])
 
   // Row click (not gift) - just toggle row selection
   const handleRowSelect = (keyword: string) => {
@@ -166,7 +163,12 @@ export function StartGiftEditPane({
                 >
                   {t('common:reset')}
                 </Button>
-                <Button size="sm" onClick={() => { onOpenChange(false) }}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    onOpenChange(false)
+                  }}
+                >
                   {t('common:done')}
                 </Button>
               </div>
@@ -176,23 +178,22 @@ export function StartGiftEditPane({
 
         {/* Scrollable content area with visual margin */}
         <div className="flex-1 overflow-y-auto py-4 -mx-6 px-6">
-
           {/* 10 Keyword Rows */}
           <div className="space-y-2">
-          {keywords.map((keyword) => (
-            <StartGiftRow
-              key={keyword}
-              keyword={keyword}
-              giftIds={pools[keyword]}
-              giftSpecMap={spec as Record<string, EGOGiftSpec>}
-              giftNameMap={i18n as EGOGiftNameList}
-              isRowSelected={selectedKeyword === keyword}
-              selectedGiftIds={selectedGiftIds}
-              maxSelectable={maxSelectable}
-              onRowSelect={handleRowSelect}
-              onGiftClick={handleGiftClick}
-            />
-          ))}
+            {keywords.map((keyword) => (
+              <StartGiftRow
+                key={keyword}
+                keyword={keyword}
+                giftIds={pools[keyword]}
+                giftSpecMap={spec as Record<string, EGOGiftSpec>}
+                giftNameMap={i18n as EGOGiftNameList}
+                isRowSelected={selectedKeyword === keyword}
+                selectedGiftIds={selectedGiftIds}
+                maxSelectable={maxSelectable}
+                onRowSelect={handleRowSelect}
+                onGiftClick={handleGiftClick}
+              />
+            ))}
           </div>
         </div>
       </DialogContent>

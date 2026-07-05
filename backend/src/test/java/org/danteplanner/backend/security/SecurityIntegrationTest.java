@@ -2,11 +2,11 @@ package org.danteplanner.backend.security;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 /**
  * Integration tests for security boundaries that controller tests cannot reach.
@@ -164,7 +165,7 @@ class SecurityIntegrationTest {
         void adminEndpoint_RegularUser_Returns403() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))
@@ -176,7 +177,7 @@ class SecurityIntegrationTest {
         void adminEndpoint_AdminUser_Returns200() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId())
+            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))
@@ -199,7 +200,7 @@ class SecurityIntegrationTest {
 
         @Test
         @DisplayName("Should verify SecurityFilterChain precedence over controller annotations")
-        void securityFilterChain_PrecedesControllerAnnotations() throws Exception {
+        void securityFilterChain_WhenAuthorizedUser_PrecedesControllerAnnotations() throws Exception {
             mockMvc.perform(get("/api/planner/md")
                             .cookie(regularUserCookie()))
                     .andExpect(status().isOk());

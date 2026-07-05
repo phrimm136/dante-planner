@@ -4,8 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
 import { toast } from '@/lib/toast'
-import { authQueryKeys } from '@/hooks/useAuthQuery'
-import { useLogoutEverywhere } from '@/hooks/useLogoutEverywhere'
+import { authQueryKeys } from '@/shared/auth'
+import { useLogoutEverywhere } from '@/shared/auth'
 import { Button } from '@/components/ui/button'
 import { LogoutEverywhereDialog } from './LogoutEverywhereDialog'
 
@@ -33,7 +33,7 @@ export function LogoutEverywhereSection() {
         toast.success(t('settings.logoutEverywhere.success'))
         setDialogOpen(false)
         queryClient.setQueryData(authQueryKeys.me, null)
-        navigate({ to: '/' })
+        void navigate({ to: '/' })
       },
       onError: () => {
         toast.error(t('settings.logoutEverywhere.error'))
@@ -44,9 +44,7 @@ export function LogoutEverywhereSection() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">{t('settings.logoutEverywhere.title')}</h2>
-      <p className="text-sm text-muted-foreground">
-        {t('settings.logoutEverywhere.description')}
-      </p>
+      <p className="text-sm text-muted-foreground">{t('settings.logoutEverywhere.description')}</p>
       <Button variant="destructive" onClick={() => setDialogOpen(true)}>
         {t('settings.logoutEverywhere.button')}
       </Button>

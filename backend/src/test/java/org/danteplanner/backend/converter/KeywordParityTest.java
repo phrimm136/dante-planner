@@ -1,4 +1,5 @@
 package org.danteplanner.backend.converter;
+import org.danteplanner.backend.planner.converter.KeywordSetConverter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,12 +43,17 @@ class KeywordParityTest {
     private static final Path FE_PLANNER_KEYWORDS =
             Path.of("..", "static", "i18n", "EN", "plannerKeywords.json");
 
-    private static final String LATEST_KEYWORD_MIGRATION =
-            "db/migration/V043__add_thumb_spider_keywords.sql";
+    private static final Path MIGRATION_DIR =
+            Path.of("src", "main", "resources", "db", "migration");
+
+    private static final Pattern MIGRATION_VERSION = Pattern.compile("^V(\\d+)__");
+
+    private static final Pattern KEYWORD_SET_DEF =
+            Pattern.compile("MODIFY COLUMN selected_keywords SET\\s*\\((.*?)\\)", Pattern.DOTALL);
 
     @Test
     @DisplayName("VALID_KEYWORDS equals the FE plannerKeywords.json id set")
-    void validKeywords_matchFrontendList() throws IOException {
+    void validKeywords_WhenComparedToFrontendList_AreEqual() throws IOException {
         Set<String> feKeywords = readFrontendKeywordIds();
         assertThat(KeywordSetConverter.VALID_KEYWORDS)
                 .as("BE VALID_KEYWORDS must equal FE plannerKeywords.json keys")
@@ -56,10 +62,10 @@ class KeywordParityTest {
 
     @Test
     @DisplayName("VALID_KEYWORDS equals the selected_keywords SET column members")
-    void validKeywords_matchMigrationSetMembers() throws IOException {
+    void validKeywords_WhenComparedToMigrationSet_AreEqual() throws IOException {
         Set<String> setMembers = readMigrationSetMembers();
         assertThat(KeywordSetConverter.VALID_KEYWORDS)
-                .as("BE VALID_KEYWORDS must equal the V043 selected_keywords SET members")
+                .as("BE VALID_KEYWORDS must equal the latest migration's selected_keywords SET members")
                 .isEqualTo(setMembers);
     }
 
@@ -75,18 +81,54 @@ class KeywordParityTest {
     }
 
     private Set<String> readMigrationSetMembers() throws IOException {
-        String sql;
-        try (InputStream in = getClass().getClassLoader().getResourceAsStream(LATEST_KEYWORD_MIGRATION)) {
-            assertThat(in).as("migration %s not on classpath", LATEST_KEYWORD_MIGRATION).isNotNull();
-            sql = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        Path migration = latestKeywordMigration();
+        String sql = Files.readString(migration, StandardCharsets.UTF_8);
+        // A rename migration redefines the column twice (add new member, then remove the old);
+        // the resulting members are the LAST MODIFY ... SET(...). Append migrations have just one.
+        Matcher setBlock = KEYWORD_SET_DEF.matcher(sql);
+        String lastSetBody = null;
+        while (setBlock.find()) {
+            lastSetBody = setBlock.group(1);
         }
-        Matcher setBlock = Pattern.compile("SET\\s*\\((.*?)\\)", Pattern.DOTALL).matcher(sql);
-        assertThat(setBlock.find()).as("no SET(...) definition in %s", LATEST_KEYWORD_MIGRATION).isTrue();
-        Matcher members = Pattern.compile("'([^']+)'").matcher(setBlock.group(1));
+        assertThat(lastSetBody).as("no SET(...) definition in %s", migration).isNotNull();
+        Matcher members = Pattern.compile("'([^']+)'").matcher(lastSetBody);
         Set<String> result = new HashSet<>();
         while (members.find()) {
             result.add(members.group(1));
         }
         return result;
+    }
+
+    /**
+     * Resolves the highest-versioned Flyway migration that (re)defines the
+     * {@code selected_keywords} SET column. Computed rather than hardcoded so adding a keyword
+     * migration needs no edit here; filtered to keyword migrations so an unrelated later
+     * migration (e.g. a notification-column change) does not become the wrong target.
+     */
+    private Path latestKeywordMigration() throws IOException {
+        assertThat(Files.isDirectory(MIGRATION_DIR))
+                .as("migration dir not found at %s (test must run from the backend module dir)",
+                        MIGRATION_DIR.toAbsolutePath())
+                .isTrue();
+        Path latest = null;
+        int latestVersion = -1;
+        try (Stream<Path> files = Files.list(MIGRATION_DIR)) {
+            for (Path file : (Iterable<Path>) files::iterator) {
+                Matcher version = MIGRATION_VERSION.matcher(file.getFileName().toString());
+                if (!version.find()) {
+                    continue;
+                }
+                int v = Integer.parseInt(version.group(1));
+                if (v <= latestVersion) {
+                    continue;
+                }
+                if (KEYWORD_SET_DEF.matcher(Files.readString(file, StandardCharsets.UTF_8)).find()) {
+                    latest = file;
+                    latestVersion = v;
+                }
+            }
+        }
+        assertThat(latest).as("no migration defines a selected_keywords SET in %s", MIGRATION_DIR).isNotNull();
+        return latest;
     }
 }

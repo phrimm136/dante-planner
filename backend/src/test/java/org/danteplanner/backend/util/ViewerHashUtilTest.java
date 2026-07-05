@@ -1,4 +1,5 @@
 package org.danteplanner.backend.util;
+import org.danteplanner.backend.shared.util.ViewerHashUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +32,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce deterministic hash for same inputs")
-        void hashForAuthenticatedUser_isDeterministic() {
+        void hashForAuthenticatedUser_WhenSameInputs_IsDeterministic() {
             // Act
             String hash1 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
@@ -42,7 +43,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce 64-character lowercase hex string")
-        void hashForAuthenticatedUser_produces64CharHex() {
+        void hashForAuthenticatedUser_WhenCalled_Produces64CharHex() {
             // Act
             String hash = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
 
@@ -53,7 +54,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce different hash for different userIds")
-        void hashForAuthenticatedUser_differentUserIds() {
+        void hashForAuthenticatedUser_WhenDifferentUserIds_ProducesDifferentHashes() {
             // Act
             String hash1 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAuthenticatedUser(OTHER_USER_ID, PLANNER_ID);
@@ -64,7 +65,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce different hash for different plannerIds")
-        void hashForAuthenticatedUser_differentPlannerIds() {
+        void hashForAuthenticatedUser_WhenDifferentPlannerIds_ProducesDifferentHashes() {
             // Act
             String hash1 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, OTHER_PLANNER_ID);
@@ -80,7 +81,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce deterministic hash for same inputs")
-        void hashForAnonymousUser_isDeterministic() {
+        void hashForAnonymousUser_WhenSameInputs_IsDeterministic() {
             // Act
             String hash1 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
@@ -91,7 +92,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce 64-character lowercase hex string")
-        void hashForAnonymousUser_produces64CharHex() {
+        void hashForAnonymousUser_WhenCalled_Produces64CharHex() {
             // Act
             String hash = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
 
@@ -102,7 +103,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce different hash for different IPs")
-        void hashForAnonymousUser_differentIPs() {
+        void hashForAnonymousUser_WhenDifferentIps_ProducesDifferentHashes() {
             // Act
             String hash1 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAnonymousUser(OTHER_IP_ADDRESS, USER_AGENT, PLANNER_ID);
@@ -113,7 +114,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce different hash for different User-Agents")
-        void hashForAnonymousUser_differentUserAgents() {
+        void hashForAnonymousUser_WhenDifferentUserAgents_ProducesDifferentHashes() {
             // Act
             String hash1 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, OTHER_USER_AGENT, PLANNER_ID);
@@ -124,7 +125,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should produce different hash for different plannerIds")
-        void hashForAnonymousUser_differentPlannerIds() {
+        void hashForAnonymousUser_WhenDifferentPlannerIds_ProducesDifferentHashes() {
             // Act
             String hash1 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);
             String hash2 = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, OTHER_PLANNER_ID);
@@ -140,7 +141,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should treat null User-Agent as empty string")
-        void hashForAnonymousUser_nullUserAgentTreatedAsEmpty() {
+        void hashForAnonymousUser_WhenNullUserAgent_TreatedAsEmpty() {
             // Act
             String hashNull = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, null, PLANNER_ID);
             String hashEmpty = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, "", PLANNER_ID);
@@ -151,7 +152,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should truncate User-Agent longer than 256 characters")
-        void hashForAnonymousUser_truncatesLongUserAgent() {
+        void hashForAnonymousUser_WhenUserAgentOver256_Truncates() {
             // Arrange
             String longUserAgent = "A".repeat(300);
             String truncatedUserAgent = "A".repeat(256);
@@ -166,7 +167,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should not truncate User-Agent exactly 256 characters")
-        void hashForAnonymousUser_doesNotTruncate256Chars() {
+        void hashForAnonymousUser_WhenUserAgent256_DoesNotTruncate() {
             // Arrange
             String exactUserAgent = "A".repeat(256);
             String shorterUserAgent = "A".repeat(255);
@@ -181,7 +182,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Should not truncate User-Agent shorter than 256 characters")
-        void hashForAnonymousUser_doesNotTruncateShortUserAgent() {
+        void hashForAnonymousUser_WhenShortUserAgent_DoesNotTruncate() {
             // Arrange - 100 chars, well under limit
             String shortUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
 
@@ -200,7 +201,7 @@ class ViewerHashUtilTest {
 
         @Test
         @DisplayName("Authenticated and anonymous hashes should differ for same planner")
-        void authenticatedAndAnonymous_produceDifferentHashes() {
+        void hash_WhenAuthenticatedVsAnonymous_ProducesDifferentHashes() {
             // Act
             String authHash = ViewerHashUtil.hashForAuthenticatedUser(USER_ID, PLANNER_ID);
             String anonHash = ViewerHashUtil.hashForAnonymousUser(IP_ADDRESS, USER_AGENT, PLANNER_ID);

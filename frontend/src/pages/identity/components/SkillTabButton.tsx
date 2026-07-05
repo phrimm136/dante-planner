@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
-import { getLockIconPath } from '@/lib/assetPaths'
-import { getAttributeColors } from '@/lib/colorUtils'
+import { getLockIconPath } from '@/shared/assets'
+import { getAttributeColors } from '@/shared/gameData'
 import { cn, getDisplayFontForLanguage } from '@/lib/utils'
 
 interface SkillTabButtonProps {
@@ -72,7 +72,7 @@ export function SkillTabButton({
   // Base classes - bg-muted when not active
   const baseClasses = cn(
     'flex-1 py-2 px-4 rounded font-medium transition-all duration-200',
-    !isActive && 'bg-muted'
+    !isActive && 'bg-muted',
   )
 
   const getButtonStyle = (): React.CSSProperties | undefined => {
@@ -112,9 +112,7 @@ export function SkillTabButton({
         }
       }}
     >
-      {isLocked && (
-        <img src={getLockIconPath()} alt="" className="mr-1 inline-block h-6" />
-      )}
+      {isLocked && <img src={getLockIconPath()} alt="" className="mr-1 inline-block h-6" />}
       <span
         className={cn(isLocked && 'text-muted-foreground')}
         style={getDisplayFontForLanguage(i18n.language)}

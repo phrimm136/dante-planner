@@ -16,8 +16,8 @@ import { ErrorBoundary as ReactErrorBoundary } from 'react-error-boundary'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PublishedPlannerCard } from '@/pages/planner'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { CommunityPlansErrorFallback } from '@/components/common/CommunityPlansErrorFallback'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 
 import { useMDGesellschaftData } from '@/pages/planner'
 import { CARD_GRID } from '@/lib/constants'
@@ -61,11 +61,7 @@ function CommunityPlansContent({ mode }: CommunityPlansContentProps) {
   return (
     <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
       {planners.map((planner) => (
-        <Link
-          key={planner.id}
-          to="/planner/md/gesellschaft/$id"
-          params={{ id: planner.id }}
-        >
+        <Link key={planner.id} to="/planner/md/gesellschaft/$id" params={{ id: planner.id }}>
           <PublishedPlannerCard planner={planner} />
         </Link>
       ))}
@@ -103,13 +99,11 @@ export function CommunityPlansSection() {
     <section className="flex flex-col gap-4">
       {/* Header with browse link */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">
-          {t('pages.home.communityPlans.title')}
-        </h2>
+        <h2 className="text-xl font-semibold">{t('pages.home.communityPlans.title')}</h2>
         <Link
           to="/planner/md/gesellschaft"
           className={cn(
-            'flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors'
+            'flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors',
           )}
         >
           {t('pages.home.communityPlans.browseAll')}
@@ -120,18 +114,10 @@ export function CommunityPlansSection() {
       {/* Content container */}
       <div className="bg-muted border border-border rounded-md p-6">
         {/* Tab switcher */}
-        <Tabs
-          value={mode}
-          onValueChange={(v) => setMode(v as MDGesellschaftMode)}
-          className="mb-4"
-        >
+        <Tabs value={mode} onValueChange={(v) => setMode(v as MDGesellschaftMode)} className="mb-4">
           <TabsList>
-            <TabsTrigger value="published">
-              {t('pages.home.communityPlans.tabLatest')}
-            </TabsTrigger>
-            <TabsTrigger value="best">
-              {t('pages.home.communityPlans.tabRecommended')}
-            </TabsTrigger>
+            <TabsTrigger value="published">{t('pages.home.communityPlans.tabLatest')}</TabsTrigger>
+            <TabsTrigger value="best">{t('pages.home.communityPlans.tabRecommended')}</TabsTrigger>
           </TabsList>
         </Tabs>
 

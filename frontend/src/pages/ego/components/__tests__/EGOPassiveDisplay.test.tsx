@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { EGOPassiveDisplay } from '../EGOPassiveDisplay'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import type { EGOPassiveI18n } from '../../types/EGOTypes'
 
 describe('EGOPassiveDisplay', () => {
@@ -35,11 +35,7 @@ describe('EGOPassiveDisplay', () => {
   })
 
   it('renders the flavor lore line when present', () => {
-    render(
-      <EGOPassiveDisplay
-        passives={[{ ...baseline, flavor: 'A whispered prescript.' }]}
-      />,
-    )
+    render(<EGOPassiveDisplay passives={[{ ...baseline, flavor: 'A whispered prescript.' }]} />)
     const flavor = screen.getByTestId('passive-flavor')
     expect(flavor).toBeInTheDocument()
     expect(flavor).toHaveTextContent('A whispered prescript.')
@@ -49,10 +45,7 @@ describe('EGOPassiveDisplay', () => {
   it('renders flavor only for passives that carry it (mixed list)', () => {
     render(
       <EGOPassiveDisplay
-        passives={[
-          baseline,
-          { ...baseline, name: 'Variant', flavor: 'Lore B.' },
-        ]}
+        passives={[baseline, { ...baseline, name: 'Variant', flavor: 'Lore B.' }]}
       />,
     )
     const flavors = screen.getAllByTestId('passive-flavor')

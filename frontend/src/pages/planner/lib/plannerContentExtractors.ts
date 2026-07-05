@@ -169,9 +169,8 @@ export function matchesPlannerFilters(
     const planKeywords = content.selectedKeywords
     if (!planKeywords) return false
 
-    const keywordSet = planKeywords instanceof Set
-      ? planKeywords as Set<string>
-      : new Set(planKeywords)
+    const keywordSet =
+      planKeywords instanceof Set ? (planKeywords as Set<string>) : new Set(planKeywords)
 
     if (!filters.keywords.every((kw) => keywordSet.has(kw))) {
       return false

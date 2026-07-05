@@ -2,13 +2,14 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { usePanicInfo, getPanicEntry } from '../hooks/usePanicInfo'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import { FormattedSanityText } from '@/components/common/FormattedSanityText'
+import { FormattedDescription } from '@/shared/gameText'
+import { FormattedSanityText } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/lib/assetPaths'
+import { getPanicIconPath, getSanityIncIconPath, getSanityDecIconPath } from '@/shared/assets'
 import { useSanityConditionFormatter } from '../lib/sanityConditionFormatter'
-import { SANITY_INDICATOR_COLORS, SANITY_CONDITION_TYPE } from '@/lib/constants'
-import type { SanityConditionType } from '@/lib/constants'
+import { SANITY_CONDITION_TYPE } from '@/shared/gameData'
+import { SANITY_INDICATOR_COLORS } from '@/lib/constants'
+import type { SanityConditionType } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface PanicTypeSectionI18nProps {
@@ -34,7 +35,11 @@ export function PanicTypeSectionI18n({ panicType }: PanicTypeSectionI18nProps) {
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`, ...displayStyle }}
+            style={{
+              color: SANITY_INDICATOR_COLORS.INCREMENT,
+              border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`,
+              ...displayStyle,
+            }}
           >
             {t('sanity.panicType', 'Panic Type')}
           </span>
@@ -96,7 +101,10 @@ export function PanicTypeSkeleton({ panicType }: PanicTypeSkeletonProps) {
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+            style={{
+              color: SANITY_INDICATOR_COLORS.INCREMENT,
+              border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`,
+            }}
           >
             {t('sanity.panicType', 'Panic Type')}
           </span>
@@ -177,9 +185,8 @@ interface SanityDescI18nProps {
 export function SanityDescI18n({ panicType, descType }: SanityDescI18nProps) {
   const { data: panicInfo } = usePanicInfo()
   const panicEntry = getPanicEntry(panicInfo, panicType)
-  const desc = descType === 'panic'
-    ? (panicEntry?.panicDesc ?? '')
-    : (panicEntry?.lowMoraleDesc ?? '')
+  const desc =
+    descType === 'panic' ? (panicEntry?.panicDesc ?? '') : (panicEntry?.lowMoraleDesc ?? '')
 
   return <>{desc}</>
 }
@@ -205,7 +212,10 @@ interface SanityConditionsSectionI18nProps {
  *   minConditions={mentalConditionInfo.min}
  * />
  */
-export function SanityConditionsSectionI18n({ addConditions, minConditions }: SanityConditionsSectionI18nProps) {
+export function SanityConditionsSectionI18n({
+  addConditions,
+  minConditions,
+}: SanityConditionsSectionI18nProps) {
   const { t, i18n } = useTranslation(['database', 'common'])
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
@@ -216,7 +226,11 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`, ...displayStyle }}
+            style={{
+              color: SANITY_INDICATOR_COLORS.INCREMENT,
+              border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`,
+              ...displayStyle,
+            }}
           >
             {t('sanity.increaseHeader', 'Factors increasing Sanity')}
           </span>
@@ -224,10 +238,15 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
         <div className="text-sm space-y-2 ml-1 min-h-25">
           {addConditions.length > 0 ? (
             <Suspense fallback={<ConditionListSkeleton count={addConditions.length} />}>
-              <ConditionListContent conditions={addConditions} type={SANITY_CONDITION_TYPE.INCREMENT} />
+              <ConditionListContent
+                conditions={addConditions}
+                type={SANITY_CONDITION_TYPE.INCREMENT}
+              />
             </Suspense>
           ) : (
-            <div className="text-muted-foreground">{t('sanity.noIncrease', 'No sanity increase conditions')}</div>
+            <div className="text-muted-foreground">
+              {t('sanity.noIncrease', 'No sanity increase conditions')}
+            </div>
           )}
         </div>
         <img
@@ -242,7 +261,11 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.DECREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}`, ...displayStyle }}
+            style={{
+              color: SANITY_INDICATOR_COLORS.DECREMENT,
+              border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}`,
+              ...displayStyle,
+            }}
           >
             {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
           </span>
@@ -250,10 +273,15 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
         <div className="text-sm space-y-2 ml-1 min-h-25">
           {minConditions.length > 0 ? (
             <Suspense fallback={<ConditionListSkeleton count={minConditions.length} />}>
-              <ConditionListContent conditions={minConditions} type={SANITY_CONDITION_TYPE.DECREMENT} />
+              <ConditionListContent
+                conditions={minConditions}
+                type={SANITY_CONDITION_TYPE.DECREMENT}
+              />
             </Suspense>
           ) : (
-            <div className="text-muted-foreground">{t('sanity.noDecrease', 'No sanity decrease conditions')}</div>
+            <div className="text-muted-foreground">
+              {t('sanity.noDecrease', 'No sanity decrease conditions')}
+            </div>
           )}
         </div>
         <img
@@ -269,7 +297,13 @@ export function SanityConditionsSectionI18n({ addConditions, minConditions }: Sa
 /**
  * Internal component that fetches and renders condition list.
  */
-function ConditionListContent({ conditions, type }: { conditions: string[]; type: SanityConditionType }) {
+function ConditionListContent({
+  conditions,
+  type,
+}: {
+  conditions: string[]
+  type: SanityConditionType
+}) {
   const { formatAll } = useSanityConditionFormatter()
   return (
     <>
@@ -308,7 +342,10 @@ export function SanityConditionsSkeleton() {
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.INCREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}` }}
+            style={{
+              color: SANITY_INDICATOR_COLORS.INCREMENT,
+              border: `2px solid ${SANITY_INDICATOR_COLORS.INCREMENT_BORDER}`,
+            }}
           >
             {t('sanity.increaseHeader', 'Factors increasing Sanity')}
           </span>
@@ -322,7 +359,10 @@ export function SanityConditionsSkeleton() {
         <div className="mb-2">
           <span
             className="font-bold px-3 py-1 text-sm"
-            style={{ color: SANITY_INDICATOR_COLORS.DECREMENT, border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}` }}
+            style={{
+              color: SANITY_INDICATOR_COLORS.DECREMENT,
+              border: `2px solid ${SANITY_INDICATOR_COLORS.DECREMENT_BORDER}`,
+            }}
           >
             {t('sanity.decreaseHeader', 'Factors decreasing Sanity')}
           </span>

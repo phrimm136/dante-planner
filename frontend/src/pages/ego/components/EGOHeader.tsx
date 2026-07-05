@@ -8,10 +8,11 @@ import {
   getButtonOnHoverPath,
   getButtonBasePath,
   getButtonExpandImagePath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SINNER_COLORS, type Sinner } from '@/lib/constants'
-import { getSinnerFromId, getDisplayFontForLanguage } from '@/lib/utils'
+import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
+import { getSinnerFromId } from '@/shared/gameData'
+import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { EGOType } from '../types/EGOTypes'
 
 interface EGOHeaderProps {
@@ -47,11 +48,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
       <div>
         {/* Row 1: Rank icon on the right */}
         <div className="flex justify-end">
-          <img
-            src={getEGORankIconPath(rank)}
-            alt={`${rank} rank`}
-            className="h-6 object-contain"
-          />
+          <img src={getEGORankIconPath(rank)} alt={`${rank} rank`} className="h-6 object-contain" />
         </div>
         {/* Row 2: Sinner icon + EGO name */}
         <div className="flex items-center gap-3">
@@ -72,10 +69,7 @@ export function EGOHeader({ egoId, name, rank }: EGOHeaderProps) {
           </div>
           {/* EGO name with sinner color */}
           {name ? (
-            <h1
-              className="text-2xl font-bold"
-              style={{ color: sinnerColor, ...displayStyle }}
-            >
+            <h1 className="text-2xl font-bold" style={{ color: sinnerColor, ...displayStyle }}>
               {name}
             </h1>
           ) : (

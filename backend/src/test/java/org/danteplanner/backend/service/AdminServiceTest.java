@@ -1,11 +1,12 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserRole;
-import org.danteplanner.backend.exception.UserNotFoundException;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.TokenBlacklistService;
+import org.danteplanner.backend.admin.service.AdminService;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -198,7 +199,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Cannot demote another admin even when multiple admins exist")
-        void changeRole_cannotDemoteOtherAdmin() {
+        void changeRole_WhenDemotingOtherAdmin_Throws() {
             // Arrange - per spec: "Cannot modify role of users at equal or higher rank (unless self-demotion)"
             User otherAdmin = User.builder()
                     .id(5L)
@@ -277,7 +278,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("No token invalidation on promotion")
-        void changeRole_promotionNoTokenInvalidation() {
+        void changeRole_WhenPromotion_NoTokenInvalidation() {
             // Arrange - use locking query method
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));

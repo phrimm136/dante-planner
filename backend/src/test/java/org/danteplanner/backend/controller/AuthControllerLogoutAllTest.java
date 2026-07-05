@@ -2,10 +2,10 @@ package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.service.token.JwtTokenService;
-import org.danteplanner.backend.service.token.TokenBlacklistService;
-import org.danteplanner.backend.service.token.TokenClaims;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,11 +23,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 /**
  * Integration tests for POST /api/auth/logout-all.
  *
- * <p>Exercises the endpoint end-to-end against the real {@link org.danteplanner.backend.facade.AuthenticationFacade}
+ * <p>Exercises the endpoint end-to-end against the real {@link org.danteplanner.backend.auth.facade.AuthenticationFacade}
  * and {@link TokenBlacklistService} so user-wide invalidation and the subsequent filter
  * rejection compose without mocking.</p>
  */
@@ -42,7 +43,7 @@ class AuthControllerLogoutAllTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private org.danteplanner.backend.repository.UserRepository userRepository;
+    private org.danteplanner.backend.user.repository.UserRepository userRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -64,7 +65,7 @@ class AuthControllerLogoutAllTest {
 
         testUser = TestDataFactory.createTestUser(userRepository, "logoutall@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);
-        refreshToken = jwtTokenService.generateRefreshToken(testUser.getId(), testUser.getEmail());
+        refreshToken = jwtTokenService.generateRefreshToken(testUser.getId());
     }
 
     private Cookie accessTokenCookie() {
@@ -82,7 +83,7 @@ class AuthControllerLogoutAllTest {
         @Test
         @DisplayName("Should return 401 when no token provided")
         void logoutAll_Unauthenticated_Returns401() throws Exception {
-            mockMvc.perform(post("/api/auth/logout-all"))
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -91,7 +92,7 @@ class AuthControllerLogoutAllTest {
         void logoutAll_MalformedToken_Returns401() throws Exception {
             Cookie malformed = new Cookie("accessToken", "malformed.token.here");
 
-            mockMvc.perform(post("/api/auth/logout-all")
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(malformed))
                     .andExpect(status().isUnauthorized());
         }
@@ -104,7 +105,7 @@ class AuthControllerLogoutAllTest {
         @Test
         @DisplayName("Should return 204 and clear both cookies when authenticated")
         void logoutAll_Authenticated_Returns204AndClearsCookies() throws Exception {
-            mockMvc.perform(post("/api/auth/logout-all")
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent())
@@ -119,7 +120,7 @@ class AuthControllerLogoutAllTest {
         void logoutAll_Authenticated_InvalidatesUserTokens() throws Exception {
             assertThat(tokenBlacklistService.userInvalidationSize()).isZero();
 
-            mockMvc.perform(post("/api/auth/logout-all")
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());
@@ -136,7 +137,7 @@ class AuthControllerLogoutAllTest {
         @Test
         @DisplayName("Pre-action access token is rejected on a subsequent request")
         void logoutAll_ThenPreActionAccessToken_Rejected() throws Exception {
-            mockMvc.perform(post("/api/auth/logout-all")
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());
@@ -146,7 +147,7 @@ class AuthControllerLogoutAllTest {
             // The current access token was blacklisted immediately (no grace): the filter
             // throws TokenRevokedException, clears the context, and the protected matcher
             // forces a 401 via the authentication entry point.
-            mockMvc.perform(post("/api/auth/logout-all")
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isUnauthorized());
         }
@@ -156,7 +157,7 @@ class AuthControllerLogoutAllTest {
         void logoutAll_ThenPreActionRefreshToken_Invalidated() throws Exception {
             TokenClaims refreshClaims = jwtTokenService.validateToken(refreshToken);
 
-            mockMvc.perform(post("/api/auth/logout-all")
+            mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());

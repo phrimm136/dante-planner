@@ -1,10 +1,18 @@
-import { getStartBuffIconPath, getStartBuffMiniPath, getStartBuffMiniHighlightPath } from '@/lib/assetPaths'
-import { MD_ACCENT_COLORS } from '@/lib/constants'
-import { getEnhancementFromBuffId, getBaseIdFromBuffId, getEnhancementSuffix } from '@/types/StartBuffTypes'
+import {
+  getStartBuffIconPath,
+  getStartBuffMiniPath,
+  getStartBuffMiniHighlightPath,
+} from '@/shared/assets'
+import { MD_ACCENT_COLORS } from '@/shared/gameData'
+import {
+  getEnhancementFromBuffId,
+  getBaseIdFromBuffId,
+  getEnhancementSuffix,
+} from '@/shared/gameText'
 import { EGOGiftEnhancementIndicator } from '@/pages/egoGift'
 import { useTranslation } from 'react-i18next'
 import { getDisplayFontForLanguage, getLineHeightForLanguage } from '@/lib/utils'
-import { AutoSizeWrappedText } from '@/components/common/AutoSizeWrappedText'
+import { AutoSizeWrappedText } from '@/components/ui/AutoSizeWrappedText'
 
 interface StartBuffMiniCardProps {
   /** Full buff ID including enhancement (e.g., 101, 202, 303) */

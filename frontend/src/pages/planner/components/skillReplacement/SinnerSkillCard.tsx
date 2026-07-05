@@ -1,5 +1,9 @@
-import { getIdentityProfileImagePath, getIdentityImageFallbackPath, getAttackTypeIconPath } from '@/lib/assetPaths'
-import { OFFENSIVE_SKILL_SLOTS, DEFAULT_SKILL_EA } from '@/lib/constants'
+import {
+  getIdentityProfileImagePath,
+  getIdentityImageFallbackPath,
+  getAttackTypeIconPath,
+} from '@/shared/assets'
+import { OFFENSIVE_SKILL_SLOTS, DEFAULT_SKILL_EA } from '@/shared/gameData'
 import type { SkillEAState, UptieTier, SkillInfo } from '../../types/DeckTypes'
 import { cn } from '@/lib/utils'
 import colorCode from '@static/data/colorCode.json'
@@ -31,8 +35,12 @@ export function SinnerSkillCard({
   onClick,
   readOnly = false,
 }: SinnerSkillCardProps) {
-  const isDefaultEA = OFFENSIVE_SKILL_SLOTS.every((slot) => skillEA[slot] === DEFAULT_SKILL_EA[slot])
-  const matchesCurrentEA = currentEA !== undefined && OFFENSIVE_SKILL_SLOTS.every((slot) => skillEA[slot] === currentEA[slot])
+  const isDefaultEA = OFFENSIVE_SKILL_SLOTS.every(
+    (slot) => skillEA[slot] === DEFAULT_SKILL_EA[slot],
+  )
+  const matchesCurrentEA =
+    currentEA !== undefined &&
+    OFFENSIVE_SKILL_SLOTS.every((slot) => skillEA[slot] === currentEA[slot])
   const isDimmed = isDefaultEA || matchesCurrentEA
 
   return (
@@ -44,7 +52,7 @@ export function SinnerSkillCard({
         'bg-card',
         'transition-all',
         !readOnly && 'selectable',
-        isDimmed && 'opacity-60'
+        isDimmed && 'opacity-60',
       )}
     >
       {/* Identity image */}
@@ -96,7 +104,9 @@ export function SinnerSkillCard({
               {/* Current EA Badge (오른쪽 아래) - Tracker mode only */}
               {currentEA !== undefined && (
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-accent flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-accent-foreground">{currentEA[slot]}</span>
+                  <span className="text-[10px] font-bold text-accent-foreground">
+                    {currentEA[slot]}
+                  </span>
                 </div>
               )}
             </div>

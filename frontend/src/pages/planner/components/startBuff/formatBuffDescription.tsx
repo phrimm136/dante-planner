@@ -1,14 +1,18 @@
-import type { BuffEffect, StartBuffI18n, BattleKeywords } from '@/types/StartBuffTypes'
-import { getKeywordName } from '@/hooks/useBattleKeywords'
+import type { BuffEffect, StartBuffI18n, BattleKeywords } from '@/shared/gameText'
+import { getKeywordName } from '@/shared/gameText'
 
-import { parseColorTags } from '@/components/common/ColoredText'
+import { parseColorTags } from '@/shared/gameText'
 
 /**
  * Replaces placeholders in text with effect values
  * Placeholders: {0} = value, {1} = value2
  * For referenceData: {0} = activeRound, {1} = buffKeyword (translated), {2} = stack, {3} = turn, {4} = limit
  */
-function replacePlaceholders(text: string, effect: BuffEffect, battleKeywords?: BattleKeywords): string {
+function replacePlaceholders(
+  text: string,
+  effect: BuffEffect,
+  battleKeywords?: BattleKeywords,
+): string {
   let result = text
 
   if (effect.referenceData) {
@@ -41,7 +45,7 @@ function replacePlaceholders(text: string, effect: BuffEffect, battleKeywords?: 
 export function formatEffect(
   effect: BuffEffect,
   i18n: StartBuffI18n,
-  battleKeywords?: BattleKeywords
+  battleKeywords?: BattleKeywords,
 ): React.ReactNode {
   // Use customLocalizeTextId if present (for enhanced effects), otherwise use type
   const translationKey = effect.customLocalizeTextId || effect.type
@@ -64,7 +68,7 @@ export function formatEffect(
 export function formatBuffEffects(
   effects: BuffEffect[],
   i18n: StartBuffI18n,
-  battleKeywords?: BattleKeywords
+  battleKeywords?: BattleKeywords,
 ): React.ReactNode[] {
   return effects.map((effect, index) => (
     <div key={index} className="text-[16.9px] leading-5">

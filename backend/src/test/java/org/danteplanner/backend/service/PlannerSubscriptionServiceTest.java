@@ -1,14 +1,15 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerStatus;
-import org.danteplanner.backend.entity.PlannerSubscription;
-import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.PlannerNotFoundException;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerSubscription;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -280,7 +281,7 @@ class PlannerSubscriptionServiceTest {
 
         @Test
         @DisplayName("Should return only enabled subscriber user IDs")
-        void getSubscriberUserIds_ReturnsOnlyEnabled() {
+        void getSubscriberUserIds_WhenCalled_ReturnsOnlyEnabled() {
             // Arrange
             PlannerSubscription sub1 = new PlannerSubscription(1L, plannerId);
             PlannerSubscription sub2 = new PlannerSubscription(2L, plannerId);

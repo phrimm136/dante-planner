@@ -13,38 +13,38 @@
  * const data = await storage.getItem('plannerData')
  */
 
-const DB_NAME = 'danteplanner';
-const STORE_NAME = 'planner';
-const DB_VERSION = 1;
+const DB_NAME = 'danteplanner'
+const STORE_NAME = 'planner'
+const DB_VERSION = 1
 
-const isClient = typeof window !== 'undefined';
+const isClient = typeof window !== 'undefined'
 
-let dbPromise: Promise<IDBDatabase> | null = null;
+let dbPromise: Promise<IDBDatabase> | null = null
 
 function getDB(): Promise<IDBDatabase> {
   if (!isClient) {
-    return Promise.reject(new Error('IndexedDB not available on server'));
+    return Promise.reject(new Error('IndexedDB not available on server'))
   }
 
   if (dbPromise) {
-    return dbPromise;
+    return dbPromise
   }
 
   dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error)
+    request.onsuccess = () => resolve(request.result)
 
     request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
+      const db = (event.target as IDBOpenDBRequest).result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
+        db.createObjectStore(STORE_NAME)
       }
-    };
-  });
+    }
+  })
 
-  return dbPromise;
+  return dbPromise
 }
 
 export const storage = {
@@ -53,24 +53,24 @@ export const storage = {
    * @returns null if key doesn't exist or during SSR
    */
   async getItem(key: string): Promise<string | null> {
-    if (!isClient) return null;
+    if (!isClient) return null
 
     try {
-      const db = await getDB();
+      const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.get(key);
+        const transaction = db.transaction(STORE_NAME, 'readonly')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.get(key)
 
         request.onsuccess = () => {
-          resolve(request.result ?? null);
-        };
-        request.onerror = () => reject(request.error);
-      });
+          resolve(request.result ?? null)
+        }
+        request.onerror = () => reject(request.error)
+      })
     } catch (error) {
       // Log for debugging in production (Sentry will auto-capture console.error)
-      console.error(`IndexedDB.getItem failed for key: ${key}`, error);
-      return null;
+      console.error(`IndexedDB.getItem failed for key: ${key}`, error)
+      return null
     }
   },
 
@@ -79,20 +79,20 @@ export const storage = {
    * Silently fails during SSR
    */
   async setItem(key: string, value: string): Promise<void> {
-    if (!isClient) return;
+    if (!isClient) return
 
     try {
-      const db = await getDB();
+      const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.put(value, key);
+        const transaction = db.transaction(STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.put(value, key)
 
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
     } catch (error) {
-      console.error(`IndexedDB.setItem failed for key: ${key}`, error);
+      console.error(`IndexedDB.setItem failed for key: ${key}`, error)
     }
   },
 
@@ -101,20 +101,20 @@ export const storage = {
    * Silently fails during SSR
    */
   async removeItem(key: string): Promise<void> {
-    if (!isClient) return;
+    if (!isClient) return
 
     try {
-      const db = await getDB();
+      const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.delete(key);
+        const transaction = db.transaction(STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.delete(key)
 
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
     } catch (error) {
-      console.error(`IndexedDB.removeItem failed for key: ${key}`, error);
+      console.error(`IndexedDB.removeItem failed for key: ${key}`, error)
     }
   },
 
@@ -123,20 +123,20 @@ export const storage = {
    * Silently fails during SSR
    */
   async clear(): Promise<void> {
-    if (!isClient) return;
+    if (!isClient) return
 
     try {
-      const db = await getDB();
+      const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.clear();
+        const transaction = db.transaction(STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORE_NAME)
+        const request = store.clear()
 
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
+        request.onsuccess = () => resolve()
+        request.onerror = () => reject(request.error)
+      })
     } catch (error) {
-      console.error('IndexedDB.clear failed', error);
+      console.error('IndexedDB.clear failed', error)
     }
   },
-};
+}

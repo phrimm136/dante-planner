@@ -9,8 +9,8 @@ import { useParams } from '@tanstack/react-router'
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { ThemePackCard } from '@/pages/themePack'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { EGOGiftName } from '@/pages/egoGift'
@@ -19,15 +19,15 @@ import { useThemePackDetailData } from '@/pages/themePack'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListData } from '@/pages/abEvent'
-import { getFeaturedBossImagePath } from '@/lib/assetPaths'
+import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
   DUNGEON_IDX,
   DIFFICULTY_COLORS,
   DIFFICULTY_LABELS,
   DUNGEON_FIXED_FLOOR_RANGE,
   THEME_PACK_FLOOR_LABELS,
-} from '@/lib/constants'
-import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/lib/constants'
+} from '@/shared/gameData'
+import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameData'
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 
@@ -70,7 +70,11 @@ function DifficultyBadges({ conditions }: { conditions: ThemePackDetail['excepti
  * 6-10F / 11-15F ranges from DUNGEON_FIXED_FLOOR_RANGE when no
  * selectableFloors are present.
  */
-export function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exceptionConditions'] }) {
+export function FloorDisplay({
+  conditions,
+}: {
+  conditions: ThemePackDetail['exceptionConditions']
+}) {
   const FLOOR_DIFFICULTIES: { idx: DungeonIdx; label: DifficultyLabel }[] = [
     { idx: DUNGEON_IDX.NORMAL, label: DIFFICULTY_LABELS.NORMAL },
     { idx: DUNGEON_IDX.HARD, label: DIFFICULTY_LABELS.HARD },
@@ -78,30 +82,28 @@ export function FloorDisplay({ conditions }: { conditions: ThemePackDetail['exce
     { idx: DUNGEON_IDX.EXTREME, label: DIFFICULTY_LABELS.EXTREME_MIRROR },
   ]
 
-  const floorGroups = FLOOR_DIFFICULTIES
-    .map((d) => {
-      const conds = conditions.filter((c) => c.dungeonIdx === d.idx)
-      if (conds.length === 0) return { ...d, floors: [] as string[] }
+  const floorGroups = FLOOR_DIFFICULTIES.map((d) => {
+    const conds = conditions.filter((c) => c.dungeonIdx === d.idx)
+    if (conds.length === 0) return { ...d, floors: [] as string[] }
 
-      const indexed = new Set<number>()
-      for (const c of conds) {
-        for (const f of c.selectableFloors ?? []) {
-          indexed.add(f)
-        }
+    const indexed = new Set<number>()
+    for (const c of conds) {
+      for (const f of c.selectableFloors ?? []) {
+        indexed.add(f)
       }
+    }
 
-      if (indexed.size > 0) {
-        const floors = Array.from(indexed)
-          .sort((a, b) => a - b)
-          .map((f) => THEME_PACK_FLOOR_LABELS[f as ThemePackFloor])
-        return { ...d, floors }
-      }
-
-      const fixedRange = DUNGEON_FIXED_FLOOR_RANGE[d.idx]
-      const floors = fixedRange ? fixedRange.map((n) => `${n}F`) : []
+    if (indexed.size > 0) {
+      const floors = Array.from(indexed)
+        .sort((a, b) => a - b)
+        .map((f) => THEME_PACK_FLOOR_LABELS[f as ThemePackFloor])
       return { ...d, floors }
-    })
-    .filter((g) => g.floors.length > 0)
+    }
+
+    const fixedRange = DUNGEON_FIXED_FLOOR_RANGE[d.idx]
+    const floors = fixedRange ? fixedRange.map((n) => `${n}F`) : []
+    return { ...d, floors }
+  }).filter((g) => g.floors.length > 0)
 
   if (floorGroups.length === 0) return null
 
@@ -282,13 +284,7 @@ function FixedRewardEgoGifts({ giftIds }: { giftIds: number[] }) {
  * Exclusive abnormality events section — events only in this pack.
  * Self-contained: renders nothing if no exclusive events found.
  */
-function ExclusiveEventsSection({
-  eventPool,
-  packId,
-}: {
-  eventPool: number[]
-  packId: string
-}) {
+function ExclusiveEventsSection({ eventPool, packId }: { eventPool: number[]; packId: string }) {
   const { t } = useTranslation('database')
   const { spec: abEventSpec } = useAbEventListData()
 
@@ -438,9 +434,7 @@ function ThemePackDetailContent() {
             <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
               {t('themePack.hiddenThemeRate')}
             </div>
-            <span className="px-2 py-0.5 text-sm">
-              {(spec.hiddenThemeRate * 100).toFixed(2)}%
-            </span>
+            <span className="px-2 py-0.5 text-sm">{(spec.hiddenThemeRate * 100).toFixed(2)}%</span>
           </div>
         )}
       </div>
@@ -448,10 +442,7 @@ function ThemePackDetailContent() {
   )
 
   // Merge eventPool + specialEventPool for full event list
-  const allEventPool = [
-    ...spec.nodeOption.eventPool,
-    ...(spec.nodeOption.specialEventPool ?? []),
-  ]
+  const allEventPool = [...spec.nodeOption.eventPool, ...(spec.nodeOption.specialEventPool ?? [])]
 
   const rightColumn = (
     <div className="space-y-6">

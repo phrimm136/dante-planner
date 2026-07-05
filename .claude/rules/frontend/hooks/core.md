@@ -58,8 +58,9 @@ function usePlannerConfig() { ... }
 ## File Location
 
 ```
-src/hooks/useSharedHook.ts        # cross-feature hooks
-src/hooks/useEntityListData.ts    # data hooks alongside each other
+pages/<slice>/hooks/use<Entity>ListData.ts  # data hooks live in their slice
+shared/<concept>/hooks/useSharedHook.ts     # hooks co-owned by a shared domain module
+components/hooks/useSharedHook.ts            # domain-free cross-feature hooks
 ```
 
 ## Composition Pattern
@@ -75,4 +76,4 @@ function useIdentityPage() {
 }
 ```
 
-**Reference:** `hooks/useEntityListData.ts`, `hooks/useEntityDetailData.ts`
+**Reference:** `pages/identity/hooks/useIdentityListData.ts`, `pages/identity/hooks/useIdentityDetailData.ts`

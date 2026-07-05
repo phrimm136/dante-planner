@@ -1,12 +1,15 @@
 package org.danteplanner.backend.repository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
 
-import org.danteplanner.backend.entity.AuthProviderType;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerStatus;
-import org.danteplanner.backend.entity.PlannerVote;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.VoteType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,14 +61,7 @@ class PlannerVoteRepositoryTest {
         userRepository.deleteAll();
 
         // Create test user
-        testUser = User.builder()
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
-        testUser = userRepository.save(testUser);
+        testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
 
         // Create test planner
         testPlanner = Planner.builder()
@@ -79,7 +75,7 @@ class PlannerVoteRepositoryTest {
                 .upvotes(0)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
+                .plannerType(org.danteplanner.backend.planner.entity.PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         testPlanner = plannerRepository.save(testPlanner);
@@ -87,7 +83,7 @@ class PlannerVoteRepositoryTest {
 
     @Test
     @DisplayName("Should save vote and retrieve by user ID and planner ID")
-    void testSaveAndFindVote() {
+    void saveAndFindVote_WhenSaved_RetrievableByUserAndPlanner() {
         // Arrange
         PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
 
@@ -107,7 +103,7 @@ class PlannerVoteRepositoryTest {
 
     @Test
     @DisplayName("Should return empty optional when vote not found")
-    void testFindVote_NotFound_ReturnsEmpty() {
+    void findByUserIdAndPlannerId_WhenNotFound_ReturnsEmpty() {
         // Act
         Optional<PlannerVote> result = plannerVoteRepository.findByUserIdAndPlannerId(
                 999L, UUID.randomUUID());
@@ -118,16 +114,9 @@ class PlannerVoteRepositoryTest {
 
     @Test
     @DisplayName("Should allow multiple users to vote on same planner")
-    void testMultipleUsersVoteOnSamePlanner() {
+    void save_WhenMultipleUsersVoteSamePlanner_AllPersisted() {
         // Arrange - Create another user
-        User secondUser = User.builder()
-                .email("second@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-456")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test2")
-                .build();
-        secondUser = userRepository.save(secondUser);
+        User secondUser = TestDataFactory.createTestUser(userRepository, "second@example.com");
 
         // Act - Both users upvote
         PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
@@ -149,7 +138,7 @@ class PlannerVoteRepositoryTest {
 
     @Test
     @DisplayName("Should allow same user to vote on multiple planners")
-    void testSameUserVotesOnMultiplePlanners() {
+    void save_WhenSameUserVotesMultiplePlanners_AllPersisted() {
         // Arrange - Create another planner
         Planner secondPlanner = Planner.builder()
                 .id(UUID.randomUUID())
@@ -162,7 +151,7 @@ class PlannerVoteRepositoryTest {
                 .upvotes(0)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(org.danteplanner.backend.entity.PlannerType.MIRROR_DUNGEON)
+                .plannerType(org.danteplanner.backend.planner.entity.PlannerType.MIRROR_DUNGEON)
                 .savedAt(Instant.now())
                 .build();
         secondPlanner = plannerRepository.save(secondPlanner);
@@ -187,7 +176,7 @@ class PlannerVoteRepositoryTest {
 
     @Test
     @DisplayName("Vote type is immutable - cannot be changed after creation")
-    void testVoteType_IsImmutable() {
+    void voteType_WhenSaved_IsImmutable() {
         // Arrange
         PlannerVote vote = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
         vote = plannerVoteRepository.save(vote);

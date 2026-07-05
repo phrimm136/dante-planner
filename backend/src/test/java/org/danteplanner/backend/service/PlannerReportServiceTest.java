@@ -1,15 +1,16 @@
 package org.danteplanner.backend.service;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerReport;
-import org.danteplanner.backend.entity.PlannerStatus;
-import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.PlannerNotFoundException;
-import org.danteplanner.backend.exception.ReportAlreadyExistsException;
-import org.danteplanner.backend.repository.PlannerReportRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
+import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.moderation.entity.PlannerReport;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
+import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -159,7 +160,7 @@ class PlannerReportServiceTest {
 
         @Test
         @DisplayName("Should validate planner before checking existing report")
-        void createReport_ValidatesPlannerFirst() {
+        void createReport_WhenPlannerMissing_ValidatesPlannerFirst() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
@@ -211,7 +212,7 @@ class PlannerReportServiceTest {
 
         @Test
         @DisplayName("Should check correct user and planner IDs")
-        void hasReported_ChecksCorrectIds() {
+        void hasReported_WhenCalled_ChecksCorrectIds() {
             // Arrange
             Long userId = 42L;
             UUID specificPlannerId = UUID.randomUUID();

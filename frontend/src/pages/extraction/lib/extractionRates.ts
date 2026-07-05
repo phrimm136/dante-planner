@@ -22,7 +22,7 @@ export const EXTRACTION_RATES = {
   STANDARD: {
     THREE_STAR_ID: 0.029,
     TWO_STAR_ID: 0.128,
-    ONE_STAR_ID: 0.830,
+    ONE_STAR_ID: 0.83,
     EGO: 0.013,
     ANNOUNCER: 0,
   },

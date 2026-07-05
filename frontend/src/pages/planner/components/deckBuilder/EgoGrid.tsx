@@ -1,10 +1,10 @@
 import { useMemo, type Ref } from 'react'
 
 import { CARD_GRID } from '@/lib/constants'
-import { getSelectedIndicatorPath } from '@/lib/assetPaths'
+import { getSelectedIndicatorPath } from '@/shared/assets'
 import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOCard } from '@/pages/ego'
 import { TierLevelSelector } from './TierLevelSelector'
 import type { EGOListItem } from '@/pages/ego'
@@ -40,10 +40,7 @@ export function EgoGrid({
 }: EgoGridProps) {
   const visibleCount = useDeckVisibleCount()
 
-  const displayEgos = useMemo(
-    () => sortedEgos.slice(0, visibleCount),
-    [sortedEgos, visibleCount]
-  )
+  const displayEgos = useMemo(() => sortedEgos.slice(0, visibleCount), [sortedEgos, visibleCount])
 
   return (
     <div className={isActive ? '' : 'hidden'}>
@@ -81,13 +78,15 @@ export function EgoGrid({
                       <EGOCard
                         ego={ego}
                         isSelected={isSelected}
-                        overlay={isSelected ? (
-                          <img
-                            src={getSelectedIndicatorPath()}
-                            alt="Selected"
-                            className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
-                          />
-                        ) : undefined}
+                        overlay={
+                          isSelected ? (
+                            <img
+                              src={getSelectedIndicatorPath()}
+                              alt="Selected"
+                              className="absolute inset-0 m-auto w-28 object-contain pointer-events-none"
+                            />
+                          ) : undefined
+                        }
                       />
                     </ScaledCardWrapper>
                   </TierLevelSelector>

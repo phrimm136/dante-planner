@@ -17,7 +17,16 @@ export const UserForModSchema = z.object({
  * Moderation action audit log entry
  */
 export const ModerationActionSchema = z.object({
-  actionType: z.enum(['BAN', 'UNBAN', 'TIMEOUT', 'CLEAR_TIMEOUT', 'PROMOTE', 'DEMOTE', 'DELETE_PLANNER', 'DELETE_COMMENT']),
+  actionType: z.enum([
+    'BAN',
+    'UNBAN',
+    'TIMEOUT',
+    'CLEAR_TIMEOUT',
+    'PROMOTE',
+    'DEMOTE',
+    'DELETE_PLANNER',
+    'DELETE_COMMENT',
+  ]),
   targetType: z.enum(['USER', 'PLANNER', 'COMMENT']),
   targetUuid: z.string(),
   reason: z.string(),

@@ -51,12 +51,7 @@ export function ThemePackViewer({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={packName}
-      className={className}
-    >
+    <button type="button" onClick={onClick} aria-label={packName} className={className}>
       <ThemePackCard
         packId={packId}
         packEntry={packEntry}
@@ -95,7 +90,7 @@ export function ThemePackPlaceholder({
         'relative top-2 w-56 h-100 border-2 border-dashed border-muted-foreground/50',
         'flex items-center justify-center',
         !readOnly ? 'selectable' : 'rounded-md',
-        className
+        className,
       )}
     >
       <span className="text-sm text-muted-foreground text-center px-4">

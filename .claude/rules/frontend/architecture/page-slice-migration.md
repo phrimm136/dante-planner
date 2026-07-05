@@ -4,6 +4,10 @@ How to move a route + its code into `src/pages/<slice>/`. Proven across the extr
 game-noun, planner, and app-shell-pages migrations. The boundary model itself is in
 `frontend/CLAUDE.md` (the "Page slice" quick-reference row).
 
+Extracting a co-owned `shared/<concept>` module follows the SAME playbook (reverse-grep the
+consumers, `git mv` each file, expose a public-API `index.ts`); the only difference is the
+destination is `src/shared/<concept>/` and imports resolve via `@/shared/<concept>`.
+
 ## Decide what moves vs. stays — grep FIRST
 
 Before moving any file, grep ALL of `src` for who imports it from OUTSIDE the page:
@@ -13,8 +17,8 @@ grep -rn "@/components/<name>" src | grep -v -e "components/<name>/" -e "routes/
 ```
 
 **Dual-consumer rule (decision procedure):** a module imported by 2+ domains STAYS in shared
-space (`components/common`, `hooks/`, `lib/`, `types/`, `schemas/`) — it is NEVER moved into a
-consuming slice. Only files used solely by the one page move into the slice.
+space (`shared/<concept>`, `components/` `ui`/`layout`/`feedback`/`hooks`, `lib/`) — it is NEVER
+moved into a consuming slice. Only files used solely by the one page move into the slice.
 
 Tracing what the page *imports* is not enough — you must trace who imports the page's *components*.
 That reverse direction is where dual-consumers hide (e.g. `CommunityPlansErrorFallback` =
@@ -36,7 +40,7 @@ A pure relocation has no new logic; agents Read→Write and risk content drift/r
   `no-restricted-imports` rule bans `@/pages/*/**` even from a slice's own files. The bare
   `@/pages/<slice>` barrel is allowed but only exists if the slice has an `index.ts`.
 - **Cross-slice / shared imports stay `@/...`** (unchanged): `@/pages/<other>` public API,
-  `@/components/common`, `@/hooks`, `@/lib`.
+  `@/shared/<concept>` public API, `@/components`, `@/lib`.
 - **`index.ts` only if externally consumed.** A page nothing imports from (router deep-imports it
   and is eslint-exempt) needs no public API. Do not add empty barrels.
 - **Repoint `vi.mock` paths** in moved tests to the new module location

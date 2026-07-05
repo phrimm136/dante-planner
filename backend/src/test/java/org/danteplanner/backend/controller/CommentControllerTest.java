@@ -1,26 +1,24 @@
 package org.danteplanner.backend.controller;
 
+
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.config.TestDataInitializer;
-import org.danteplanner.backend.entity.Notification;
-import org.danteplanner.backend.entity.NotificationType;
-import org.danteplanner.backend.entity.PlannerComment;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.exception.RateLimitExceededException;
-import org.danteplanner.backend.repository.NotificationRepository;
-import org.danteplanner.backend.repository.PlannerCommentRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.CommentService;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -36,11 +34,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -55,12 +51,13 @@ class CommentControllerTest {
         @Primary
         public CommentService commentService(
                 PlannerCommentRepository commentRepository,
-                org.danteplanner.backend.repository.PlannerCommentVoteRepository commentVoteRepository,
+                org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository commentVoteRepository,
                 PlannerRepository plannerRepository,
                 UserRepository userRepository,
-                org.danteplanner.backend.service.NotificationService notificationService,
-                org.danteplanner.backend.service.PlannerCommentSseService sseService) {
-            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, userRepository, notificationService, sseService);
+                org.danteplanner.backend.notification.service.NotificationService notificationService,
+                org.danteplanner.backend.comment.service.PlannerCommentSseService sseService) {
+            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, userRepository, notificationService, sseService,
+                    new org.danteplanner.backend.planner.service.PlannerAccessGuard(userRepository, plannerRepository));
         }
     }
 
@@ -101,8 +98,6 @@ class CommentControllerTest {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
         publishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
-        publishedPlanner.setPublished(true);
-        plannerRepository.save(publishedPlanner);
         unpublishedPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
 
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);
@@ -171,7 +166,7 @@ class CommentControllerTest {
         void createComment_ValidTopLevel_Returns201() throws Exception {
             String requestBody = "{\"content\":\"New comment\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -187,7 +182,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parent.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -208,7 +203,7 @@ class CommentControllerTest {
         void createComment_Unauthenticated_Returns401() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isUnauthorized());
@@ -219,7 +214,7 @@ class CommentControllerTest {
         void createComment_UnpublishedPlanner_Returns403() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", unpublishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", unpublishedPlanner.getId()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -231,7 +226,7 @@ class CommentControllerTest {
         void createComment_EmptyContent_Returns400() throws Exception {
             String requestBody = "{\"content\":\"\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -243,7 +238,7 @@ class CommentControllerTest {
         void createComment_TopLevel_HasDepth0() throws Exception {
             String requestBody = "{\"content\":\"Top-level\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -262,7 +257,7 @@ class CommentControllerTest {
             PlannerComment depth0 = createComment(null, 0);
             String requestBody1 = "{\"content\":\"Depth 1\",\"parentCommentId\":\"" + depth0.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody1))
@@ -290,7 +285,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Depth 6 reply\",\"parentCommentId\":\"" + depth5.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -319,7 +314,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Depth 6 comment\",\"parentCommentId\":\"" + depth5.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -339,7 +334,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parentComment.getPublicId() + "\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -357,7 +352,7 @@ class CommentControllerTest {
         void createComment_TopLevelOnPlanner_CreatesNotification() throws Exception {
             String requestBody = "{\"content\":\"Top-level comment\"}";
 
-            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId())
+            mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -382,7 +377,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Updated content\"}";
 
-            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId())
+            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -401,7 +396,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Hacked content\"}";
 
-            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId())
+            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -415,7 +410,7 @@ class CommentControllerTest {
 
             String requestBody = "{\"content\":\"Persisted update\"}";
 
-            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId())
+            mockMvc.perform(put("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
@@ -436,7 +431,7 @@ class CommentControllerTest {
         void deleteComment_Owner_Returns204() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId())
+            mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNoContent());
         }
@@ -446,7 +441,7 @@ class CommentControllerTest {
         void deleteComment_NonOwner_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId())
+            mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
                             .cookie(otherUserAccessTokenCookie()))
                     .andExpect(status().isForbidden());
         }
@@ -462,7 +457,7 @@ class CommentControllerTest {
         void upvote_FirstTime_CreatesVote() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId())
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.hasUpvoted").value(true))
@@ -475,7 +470,7 @@ class CommentControllerTest {
         void upvote_AtomicCounter_IncrementsCorrectly() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId())
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk());
 
@@ -488,7 +483,7 @@ class CommentControllerTest {
         void upvote_Unauthenticated_Returns401() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()))
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -497,7 +492,7 @@ class CommentControllerTest {
         void upvote_Success_ReturnsUpdatedStatus() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
-            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId())
+            mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.commentId").value(comment.getPublicId().toString()))

@@ -43,8 +43,7 @@ export type HiddenPlannerPage = z.infer<typeof HiddenPlannerPageSchema>
 
 export const hiddenPlannersQueryKeys = {
   all: ['moderator', 'hiddenPlanners'] as const,
-  page: (page: number, size: number) =>
-    ['moderator', 'hiddenPlanners', page, size] as const,
+  page: (page: number, size: number) => ['moderator', 'hiddenPlanners', page, size] as const,
 }
 
 // ============================================================================
@@ -55,9 +54,7 @@ function createHiddenPlannersQueryOptions(page: number = 0, size: number = 20) {
   return queryOptions({
     queryKey: hiddenPlannersQueryKeys.page(page, size),
     queryFn: async (): Promise<HiddenPlannerPage> => {
-      const data = await ApiClient.get(
-        `/api/admin/planner/hidden?page=${page}&size=${size}`
-      )
+      const data = await ApiClient.get(`/api/admin/planner/hidden?page=${page}&size=${size}`)
       const result = HiddenPlannerPageSchema.safeParse(data)
 
       if (!result.success) {

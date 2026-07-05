@@ -25,6 +25,8 @@ jobs:
   # 0. Detect which services changed
   detect-changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 5
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
@@ -91,6 +93,8 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.backend == 'true' || needs.detect-changes.outputs.nginx == 'true' || needs.detect-changes.outputs.mysql == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
@@ -143,6 +147,7 @@ jobs:
     needs: [detect-changes, build-and-push]
     if: always() && !cancelled() && needs.detect-changes.result == 'success' && (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -256,6 +261,7 @@ jobs:
   health-check:
     needs: deploy
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 5
     outputs:
       healthy: ${{ steps.check.outputs.healthy }}
@@ -351,6 +357,7 @@ jobs:
     needs: health-check
     if: failure()
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 10
     steps:
       - name: Configure AWS credentials

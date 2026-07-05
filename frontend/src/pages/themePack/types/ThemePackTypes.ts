@@ -1,5 +1,5 @@
 import type { z } from 'zod'
-import type { DungeonIdx } from '@/lib/constants'
+import type { DungeonIdx } from '@/shared/gameData'
 import type {
   ExceptionConditionSchema,
   ThemePackConfigSchema,
@@ -32,7 +32,10 @@ export interface FloorThemeSelection {
  * mixed packs (available on normal/hard AND extreme) return false.
  */
 export function isExtremePack(entry: ThemePackEntry): boolean {
-  return entry.exceptionConditions.length > 0 && entry.exceptionConditions.every(
-    (cond) => cond.dungeonIdx === 3 && cond.selectableFloors === undefined
+  return (
+    entry.exceptionConditions.length > 0 &&
+    entry.exceptionConditions.every(
+      (cond) => cond.dungeonIdx === 3 && cond.selectableFloors === undefined,
+    )
   )
 }

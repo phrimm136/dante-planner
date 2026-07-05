@@ -1,13 +1,14 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.user.service.UserSettingsService;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.dto.user.UpdateUserSettingsRequest;
-import org.danteplanner.backend.dto.user.UserSettingsResponse;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserSettings;
-import org.danteplanner.backend.exception.UserNotFoundException;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.repository.UserSettingsRepository;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
+import org.danteplanner.backend.user.dto.UserSettingsResponse;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserSettings;
+import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

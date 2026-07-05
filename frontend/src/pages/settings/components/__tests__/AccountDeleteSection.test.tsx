@@ -1,11 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AccountDeleteSection } from '../AccountDeleteSection'
 import { AccountDeleteDialog } from '../AccountDeleteDialog'
 import { toast } from 'sonner'
-import type { User } from '@/schemas/AuthSchemas'
-import type { UserDeletionResponse } from '@/types/UserSettingsTypes'
+import type { User } from '@/shared/auth'
+import type { UserDeletionResponse } from '../../types/UserSettingsTypes'
 
 // Mock dependencies
 vi.mock('sonner', () => ({
@@ -15,25 +15,18 @@ vi.mock('sonner', () => ({
   },
 }))
 
-vi.mock('@/lib/oauth', () => ({
-  generateState: () => 'mock-state',
-  generateCodeVerifier: () => 'mock-verifier',
-  generateCodeChallenge: () => Promise.resolve('mock-challenge'),
-  storeOAuthParams: vi.fn(),
-}))
-
 const mockMutate = vi.fn()
 const mockSetQueryData = vi.fn()
 
 // Mock hooks
-vi.mock('@/hooks/useAuthQuery', () => ({
+vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: vi.fn(() => ({ data: null })),
   authQueryKeys: {
     me: 'auth-me',
   },
 }))
 
-vi.mock('@/hooks/useUserSettingsQuery', () => ({
+vi.mock('../../hooks/useUserSettingsQuery', () => ({
   useDeleteAccountMutation: vi.fn(() => ({
     mutate: mockMutate,
     isPending: false,
@@ -52,8 +45,8 @@ vi.mock('@tanstack/react-query', async () => {
   }
 })
 
-import { useAuthQuery } from '@/hooks/useAuthQuery'
-import { useDeleteAccountMutation } from '@/hooks/useUserSettingsQuery'
+import { useAuthQuery } from '@/shared/auth'
+import { useDeleteAccountMutation } from '../../hooks/useUserSettingsQuery'
 
 describe('AccountDeleteSection', () => {
   const mockUser: User = {
@@ -149,10 +142,10 @@ describe('AccountDeleteSection', () => {
     await user.click(confirmButton)
 
     expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining('Account scheduled for deletion on')
+      expect.stringContaining('Account scheduled for deletion on'),
     )
     expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining('Log in within 30 days to cancel')
+      expect.stringContaining('Log in within 30 days to cancel'),
     )
   })
 
@@ -188,12 +181,7 @@ describe('AccountDeleteSection', () => {
 
     // Open dialog manually by rendering with isPending already true
     render(
-      <AccountDeleteDialog
-        open={true}
-        onConfirm={vi.fn()}
-        onCancel={vi.fn()}
-        isPending={true}
-      />
+      <AccountDeleteDialog open={true} onConfirm={vi.fn()} onCancel={vi.fn()} isPending={true} />,
     )
 
     expect(screen.getByRole('button', { name: /deleting/i })).toBeDisabled()

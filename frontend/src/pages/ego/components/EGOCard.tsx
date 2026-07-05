@@ -12,8 +12,9 @@ import {
   getEGOInfoPanelPath,
   getSinnerIconPath,
   getSinnerBGPath,
-} from '@/lib/assetPaths'
-import { cn, getSinnerFromId } from '@/lib/utils'
+} from '@/shared/assets'
+import { getSinnerFromId } from '@/shared/gameData'
+import { cn } from '@/lib/utils'
 import { EGOName } from './EGOName'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -63,12 +64,7 @@ export function EGOCard({
   const sinner = getSinnerFromId(id)
 
   return (
-    <div
-      className={cn(
-        'relative w-40 h-48 shrink-0',
-        className
-      )}
-    >
+    <div className={cn('relative w-40 h-48 shrink-0', className)}>
       {/* Layer 1: Circular EGO Image */}
       <div className="absolute inset-0 flex items-center justify-center">
         <img
@@ -82,7 +78,6 @@ export function EGOCard({
       {/* Custom Overlay - above image */}
       {overlay}
 
-
       {/* Layer 2: Static EGO Frame */}
       <img
         src={getEGOFramePath()}
@@ -90,14 +85,14 @@ export function EGOCard({
         loading="lazy"
         className="absolute inset-0 w-38 h-38 object-cover top-5 left-0.5 pointer-events-none"
       />
-      
+
       {/* Layer 2.5: EGO Highlight Frame (glowing ring around portrait) */}
       <div
         className={cn(
           'absolute inset-0 flex items-center justify-center pointer-events-none',
           isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-active:opacity-100',
           !isSelected && 'group-hover:brightness-75 group-active:brightness-75',
-          isSelected && 'group-hover:brightness-125 group-active:brightness-125'
+          isSelected && 'group-hover:brightness-125 group-active:brightness-125',
         )}
       >
         <img

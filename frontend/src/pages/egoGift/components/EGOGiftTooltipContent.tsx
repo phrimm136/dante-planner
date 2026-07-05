@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEGOGiftDetailData } from '../hooks/useEGOGiftDetailData'
-import { getColorForAttributeType, useColorCodes } from '@/hooks/useColorCodes'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import type { EnhancementLevel } from '@/lib/constants'
+import { getColorForAttributeType, useColorCodes } from '@/shared/gameText'
+import { FormattedDescription } from '@/shared/gameText'
+import type { EnhancementLevel } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 
 interface EGOGiftTooltipInnerProps {
@@ -59,7 +59,9 @@ function EGOGiftTooltipInner({ giftId, enhancement }: EGOGiftTooltipInnerProps) 
             ref={scrollRef}
             className="text-sm text-wrap break-keep h-full overflow-y-auto scrollbar-hide"
             onScroll={updateScrollState}
-            onWheel={(e) => { e.stopPropagation() }}
+            onWheel={(e) => {
+              e.stopPropagation()
+            }}
           >
             <FormattedDescription text={description} />
           </div>
@@ -111,10 +113,7 @@ interface EGOGiftTooltipContentProps {
  * - Observation list: Render on card hover
  * - Comprehensive list: Render on enhancement button hover
  */
-export function EGOGiftTooltipContent({
-  giftId,
-  enhancement,
-}: EGOGiftTooltipContentProps) {
+export function EGOGiftTooltipContent({ giftId, enhancement }: EGOGiftTooltipContentProps) {
   return (
     <ErrorBoundary fallback={<TooltipError />}>
       <Suspense fallback={<TooltipLoading />}>

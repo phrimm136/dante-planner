@@ -1,17 +1,18 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { ThemePackList as ThemePackListType } from '../types/ThemePackTypes'
-import type { DungeonIdx, ThemePackFloor } from '@/lib/constants'
-import { CARD_GRID } from '@/lib/constants'
+import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useThemePackI18n } from '../hooks/useThemePackListData'
 import {
   matchesDungeonDifficultyFilter,
   matchesFloorFilter,
   matchesEgoGiftFilter,
 } from '../lib/themePackFilter'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { ThemePackCardLink } from './ThemePackCardLink'
 
 interface ThemePackListProps {
@@ -41,24 +42,16 @@ export function ThemePackList({
   // Build sorted pack list
   const sortedPacks = useMemo(
     () => Object.entries(spec).sort(([a], [b]) => a.localeCompare(b)),
-    [spec]
+    [spec],
   )
 
   // Progressive rendering
-  const [displayCount, setDisplayCount] = useState(10)
-
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [sortedPacks])
-
-  useEffect(() => {
-    if (displayCount < sortedPacks.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, sortedPacks.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, sortedPacks.length])
+  const displayCount = useProgressiveCount({
+    total: sortedPacks.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: sortedPacks,
+  })
 
   // CSS-based visibility filtering
   const visibleIds = useMemo(() => {
@@ -101,10 +94,7 @@ export function ThemePackList({
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.THEME_PACK} mobileScale={0.8}>
         {sortedPacks.slice(0, displayCount).map(([packId, entry]) => {
           const i18nEntry = themePackI18n[packId]
           return (

@@ -1,12 +1,16 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.sse.SseService;
 
-import org.danteplanner.backend.dto.planner.NotificationInboxResponse;
-import org.danteplanner.backend.dto.planner.NotificationResponse;
-import org.danteplanner.backend.dto.planner.UnreadCountResponse;
-import org.danteplanner.backend.entity.Notification;
-import org.danteplanner.backend.entity.NotificationType;
-import org.danteplanner.backend.repository.NotificationRepository;
-import org.danteplanner.backend.repository.UserSettingsRepository;
+import org.danteplanner.backend.notification.service.NotificationService;
+
+import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
+import org.danteplanner.backend.notification.dto.NotificationResponse;
+import org.danteplanner.backend.notification.dto.UnreadCountResponse;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.notification.repository.NotificationRepository;
+import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -63,7 +67,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should create PLANNER_RECOMMENDED notification successfully")
-        void notifyPlannerRecommended_Success() {
+        void notifyPlannerRecommended_WhenValid_CreatesNotification() {
             // Arrange - set publicId and createdAt on saved notification (simulating @PrePersist)
             when(notificationRepository.save(any(Notification.class)))
                     .thenAnswer(invocation -> {
@@ -100,6 +104,39 @@ class NotificationServiceTest {
             assertDoesNotThrow(() ->
                     notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId)
             );
+        }
+
+        @Test
+        @DisplayName("Should push saved notification to recipient via SSE on success")
+        void notifyPlannerRecommended_Success_PushesViaSse() {
+            // Arrange
+            when(notificationRepository.save(any(Notification.class)))
+                    .thenAnswer(invocation -> {
+                        Notification n = invocation.getArgument(0);
+                        n.setPublicId(UUID.randomUUID());
+                        n.setCreatedAt(Instant.now());
+                        return n;
+                    });
+
+            // Act
+            notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+
+            // Assert
+            verify(sseService).sendToUser(eq(testUserId), eq(SseEventType.NOTIFY_RECOMMENDED.getValue()), any());
+        }
+
+        @Test
+        @DisplayName("Should not push via SSE when save hits duplicate constraint")
+        void notifyPlannerRecommended_Duplicate_DoesNotPush() {
+            // Arrange
+            when(notificationRepository.save(any(Notification.class)))
+                    .thenThrow(new DataIntegrityViolationException("Duplicate key violation"));
+
+            // Act
+            notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+
+            // Assert
+            verify(sseService, never()).sendToUser(any(), any(), any());
         }
     }
 
@@ -239,7 +276,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should return paginated notifications")
-        void getInbox_ReturnsPagedResults() {
+        void getInbox_WhenNotificationsExist_ReturnsPagedResults() {
             // Arrange
             Notification n1 = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
             Notification n2 = new Notification(testUserId, testPlannerId.toString(), NotificationType.COMMENT_RECEIVED);
@@ -283,7 +320,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should return correct unread count")
-        void getUnreadCount_ReturnsCount() {
+        void getUnreadCount_WhenUnreadExist_ReturnsCount() {
             // Arrange
             when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUserId))
                     .thenReturn(5L);
@@ -373,7 +410,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should mark all unread notifications as read")
-        void markAllAsRead_ReturnsUpdatedCount() {
+        void markAllAsRead_WhenUnreadExist_ReturnsUpdatedCount() {
             // Arrange
             when(notificationRepository.markAllAsRead(eq(testUserId), any(Instant.class)))
                     .thenReturn(3);
@@ -463,7 +500,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should soft-delete old read notifications and hard-delete old soft-deleted")
-        void cleanupOldNotifications_PerformsCleanup() {
+        void cleanupOldNotifications_WhenRun_SoftAndHardDeletes() {
             // Arrange
             when(notificationRepository.softDeleteOldReadNotifications(any(Instant.class), any(Instant.class)))
                     .thenReturn(10);
@@ -480,7 +517,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should use correct cutoff dates")
-        void cleanupOldNotifications_CorrectCutoffDates() {
+        void cleanupOldNotifications_WhenRun_UsesCorrectCutoffDates() {
             // Arrange
             ArgumentCaptor<Instant> softDeleteCutoffCaptor = ArgumentCaptor.forClass(Instant.class);
             ArgumentCaptor<Instant> hardDeleteCutoffCaptor = ArgumentCaptor.forClass(Instant.class);

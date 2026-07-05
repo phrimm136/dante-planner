@@ -1,0 +1,842 @@
+import { AFFINITIES, ATK_TYPES } from '@/shared/gameData'
+import type { SkillAttributeType } from '@/shared/gameData'
+import { resolveAsset } from './assetManifest'
+
+/**
+ * Removes bracket notation from strings used in game data
+ * Example: "[yiSang]" -> "Yisang", "[rupture]" -> "rupture"
+ */
+export function parseBracketNotation(valueWithBrackets: string): string {
+  return valueWithBrackets.replace(/[[\]]/g, '')
+}
+
+/**
+ * Gets the selected indicator overlay path (checkmark/highlight for selected items)
+ * Used across identity cards, EGO cards, and other selectable items in formation
+ * @returns Selected indicator path
+ */
+export function getSelectedIndicatorPath(): string {
+  return resolveAsset(`/images/UI/formation/selected.webp`)
+}
+
+/**
+ * Gets the image path for an identity card (gacksung|normal_info)
+ */
+export function getIdentityInfoImagePath(identityId: string, identityUptie = 4): string {
+  if (identityUptie < 3 || identityId.endsWith('01')) {
+    return resolveAsset(`/images/identity/${identityId}/${identityId}_normal_info.webp`)
+  }
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_gacksung_info.webp`)
+}
+
+/**
+ * Gets the image path for an identity card (gacksung|normal_profile)
+ */
+export function getIdentityProfileImagePath(identityId: string, identityUptie = 4): string {
+  if (identityUptie < 3) {
+    return resolveAsset(`/images/identity/${identityId}/${identityId}_normal_profile.webp`)
+  }
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_gacksung_profile.webp`)
+}
+
+/**
+ * Gets the fallback image path for an identity card (normal_info)
+ */
+export function getIdentityImageFallbackPath(identityId: string): string {
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_normal_info.webp`)
+}
+
+/**
+ * Gets the image path for an uptie frame based on rank and uptie level
+ * @param rank - Rank (1-3)
+ * @param uptie - Uptie level (1-4), defaults to 4
+ */
+export function getUptieFramePath(rank: number, uptie = 4): string {
+  return resolveAsset(`/images/UI/formation/${String(rank)}Rank${String(uptie)}UptieFrame.webp`)
+}
+
+/**
+ * Gets identity frame highlight path (glowing border overlay)
+ * @returns Identity frame highlight path
+ */
+export function getIdentityFrameHighlightPath(): string {
+  return resolveAsset(`/images/UI/formation/identityFrameHighlight.webp`)
+}
+
+/**
+ * Gets the image path for sinner background based on rank
+ */
+export function getSinnerBGPath(rank: number): string {
+  return resolveAsset(`/images/UI/formation/${String(rank)}RankSinnerBG.webp`)
+}
+
+/**
+ * Gets the image path for a sinner icon
+ * Expects PascalCase sinner name (e.g., "YiSang")
+ */
+export function getSinnerIconPath(sinner: string): string {
+  return resolveAsset(`/images/icon/sinners/${sinner}.webp`)
+}
+
+/**
+ * Gets the image path for a sin icon
+ * Expects PascalCase sin name (e.g., "Wrath", "Lust")
+ */
+export function getSinIconPath(sin: string): string {
+  return resolveAsset(`/images/icon/sin/${sin}.webp`)
+}
+
+/**
+ * Gets the image path for a status effect icon
+ * Expects PascalCase keyword (e.g., "Rupture")
+ */
+export function getStatusEffectIconPath(keyword: string): string {
+  return resolveAsset(`/images/icon/statusEffect/${keyword}.webp`)
+}
+
+/**
+ * Resistance category key type (used as i18n translation key)
+ * Maps to: t(`identity.resist.${categoryKey}`)
+ */
+export type ResistanceCategoryKey = 'fatal' | 'weak' | 'normal' | 'endure' | 'ineffective'
+
+/**
+ * Resistance info with category key and color
+ */
+export interface ResistanceInfo {
+  categoryKey: ResistanceCategoryKey
+  value: number
+  color: string
+}
+
+/**
+ * Gets resistance category key and color based on resistance value
+ * Use categoryKey with t(`identity.resist.${categoryKey}`) for localized display
+ */
+export function getResistanceInfo(value: number): ResistanceInfo {
+  if (value > 1.5 && value <= 2) {
+    return { categoryKey: 'fatal', value, color: 'text-red-500' }
+  } else if (value > 1.0 && value <= 1.5) {
+    return { categoryKey: 'weak', value, color: 'text-orange-300' }
+  } else if (value === 1.0) {
+    return { categoryKey: 'normal', value, color: 'text-amber-100' }
+  } else if (value >= 0.75 && value < 1.0) {
+    return { categoryKey: 'endure', value, color: 'text-gray-400' }
+  } else {
+    return { categoryKey: 'ineffective', value, color: 'text-gray-500' }
+  }
+}
+
+/**
+ * Gets rarity icon path based on grade
+ */
+export function getRarityIconPath(grade: number): string {
+  return resolveAsset(`/images/UI/identity/rarity${String(grade)}.webp`)
+}
+
+/**
+ * Gets identity detail image path with variant support
+ */
+export function getIdentityDetailImagePath(
+  identityId: string,
+  variant: 'gacksung' | 'normal' = 'gacksung'
+): string {
+  return resolveAsset(`/images/identity/${identityId}/${identityId}_${variant}.webp`)
+}
+
+/**
+ * Gets skill image path by skill ID
+ * @param identityId - Identity ID (directory path)
+ * @param skillId - Skill ID or iconID (filename)
+ * @returns Image path
+ */
+export function getSkillImagePath(identityId: string, skillId: string): string {
+  // Strip _4 suffix if present (legacy uptie4 format no longer used)
+  return resolveAsset(`/images/identity/${identityId}/${skillId}.webp`)
+}
+
+/**
+ * Gets skill image path from iconID (cross-identity icon reference)
+ * iconID format: {5-digit identityId}{2+ digit skillNum}[_4]
+ * @param iconID - Icon ID string (e.g., "1011303", "1010504_4")
+ * @returns Image path
+ */
+export function getSkillImagePathFromIconID(iconID: string): string {
+  // Strip _4 suffix if present
+  const identityId = iconID.slice(0, 5)
+  return resolveAsset(`/images/identity/${identityId}/${iconID}.webp`)
+}
+
+/**
+ * Gets skill frame image path based on attribute type and skill tier
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
+ * @param skillTier - Skill tier (1-3) determines frame level
+ * @returns Frame image path
+ */
+export function getSkillFramePath(attributeType: SkillAttributeType | undefined, skillTier: number): string {
+  // Defense skills or undefined attribute use NEUTRAL
+  const attr = attributeType ?? 'NEUTRAL'
+  // Clamp tier to 1-3 range
+  const frameLevel = Math.max(1, Math.min(3, skillTier))
+  return resolveAsset(`/images/UI/skillFrame/${attr}${String(frameLevel)}.webp`)
+}
+
+/**
+ * Gets skill frame background image path
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
+ * @param skillTier - Skill tier (1-3) determines frame level
+ * @returns Frame background image path
+ */
+export function getSkillFrameBGPath(attributeType: SkillAttributeType | undefined, skillTier: number): string {
+  const attr = attributeType ?? 'NEUTRAL'
+  // Clamp tier to 1-3 range
+  const frameLevel = Math.max(1, Math.min(3, skillTier))
+  return resolveAsset(`/images/UI/skillFrame/${attr}${String(frameLevel)}BG.webp`)
+}
+
+/**
+ * Gets attack type icon path
+ * @param atkType - Attack type (slash, pierce, blunt, attack)
+ * @returns Icon path
+ */
+export function getAttackTypeIconPath(atkType: string): string {
+  const atkTypeCapital = atkType[0].toUpperCase() + atkType.slice(1).toLowerCase()
+  return resolveAsset(`/images/UI/common/${atkTypeCapital}.webp`)
+}
+
+/**
+ * Gets defense type icon path
+ * @param defType - Defense type (e.g., "EVADE", "CLASHABLE_GUARD")
+ * @returns Icon path
+ */
+export function getDefenseTypeIconPath(defType: string): string {
+  const filename = defType
+    .split('_')
+    .map((seg) => seg[0].toUpperCase() + seg.slice(1).toLowerCase())
+    .join('')
+  return resolveAsset(`/images/UI/identity/${filename}.webp`)
+}
+
+/**
+ * Gets attack type frame path
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
+ * @returns Attack type frame path
+ */
+export function getAttackTypeFramePath(attributeType: SkillAttributeType): string {
+  return resolveAsset(`/images/UI/skillFrame/attackType${attributeType}.webp`)
+}
+
+/**
+ * Gets attack type frame background path
+ * @param attributeType - Skill attribute type (e.g., "CRIMSON", "NEUTRAL")
+ * @returns Attack type frame background path
+ */
+export function getAttackTypeFrameBGPath(attributeType: SkillAttributeType): string {
+  return resolveAsset(`/images/UI/skillFrame/attackTypeBG${attributeType}.webp`)
+}
+
+/**
+ * Gets coin icon path based on coin type (for EA display)
+ * @param coinType - Coin type ('C' for normal, 'U' for unbreakable)
+ * @returns Coin icon path
+ */
+export function getCoinIconPath(coinType: 'C' | 'U'): string {
+  const iconName = coinType === 'U' ? 'superCoin' : 'coin'
+  return resolveAsset(`/images/icon/${iconName}.webp`)
+}
+
+/**
+ * Gets coin icon path for description text (numbered coins)
+ * @param coinIndex - Coin index (0-based, will be converted to 1-based)
+ * @returns Coin icon path for descriptions
+ */
+export function getCoinDescIconPath(coinIndex: number): string {
+  return resolveAsset(`/images/UI/common/coin${String(coinIndex + 1)}.webp`)
+}
+
+/**
+ * EGO-specific utility functions
+ */
+
+/**
+ * Gets EGO image path (circular awakening image)
+ * @param egoId - EGO ID (e.g., "20101")
+ * @returns EGO image path
+ */
+export function getEGOImagePath(egoId: string): string {
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`)
+}
+
+/**
+ * Gets EGO profile image path for card display
+ * Uses awaken_profile for consistent sizing with identity cards
+ * @param egoId - EGO ID (e.g., "20101")
+ * @returns EGO profile image path
+ */
+export function getEGOProfileImagePath(egoId: string): string {
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_awaken_profile.webp`)
+}
+
+/**
+ * Gets EGO frame path (static frame overlay)
+ * @returns EGO frame path
+ */
+export function getEGOFramePath(): string {
+  return resolveAsset(`/images/UI/formation/egoFrame.webp`)
+}
+
+/**
+ * Gets EGO frame highlight path (glowing ring overlay)
+ * @returns EGO frame highlight path
+ */
+export function getEGOFrameHighlightPath(): string {
+  return resolveAsset(`/images/UI/formation/egoFrameHighlight.webp`)
+}
+
+/**
+ * Gets EGO rank icon path (large rank indicator)
+ * @param rank - EGO rank in PascalCase (e.g., "Zayin", "Aleph")
+ * @returns Rank icon path
+ */
+export function getEGORankIconPath(rank: string): string {
+  return resolveAsset(`/images/UI/ego/${rank}.webp`)
+}
+
+/**
+ * Gets small EGO rank icon path for info panel
+ * @param rank - EGO rank in PascalCase (e.g., "Zayin", "Aleph")
+ * @returns Small rank icon path
+ */
+export function getEGOSmallRankIconPath(rank: string): string {
+  return resolveAsset(`/images/icon/ego/${rank}.webp`)
+}
+
+/**
+ * Gets tier icon path for threadspin tier display
+ * @param tier - Tier number (1-5)
+ * @returns Tier icon path
+ */
+export function getEGOTierIconPath(tier: number): string {
+  return resolveAsset(`/images/UI/common/tier${String(tier)}.webp`)
+}
+
+/**
+ * Gets EGO info panel background path (attribute-colored)
+ * @param attribute - Attribute type (e.g., "CRIMSON", "AZURE")
+ * @returns EGO info panel path
+ */
+export function getEGOInfoPanelPath(attribute: string): string {
+  return resolveAsset(`/images/UI/formation/egoInfoPanel${attribute}.webp`)
+}
+
+/**
+ * Gets EGO skill image path for awaken or erosion
+ * @param egoId - EGO identifier
+ * @param skillType - 'awaken' or 'erosion'
+ * @returns EGO skill image path
+ */
+export function getEGOSkillImagePath(egoId: string, skillType: 'awaken' | 'erosion'): string {
+  const imageFileName = skillType === 'awaken' ? 'awaken_profile.webp' : 'erosion_profile.webp'
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_${imageFileName}`)
+}
+
+/**
+ * Gets EGO detail page character image path
+ * @param egoId - EGO identifier
+ * @returns EGO character image path
+ */
+export function getEGODetailImagePath(egoId: string): string {
+  return resolveAsset(`/images/ego/${egoId}/${egoId}_cg.webp`)
+}
+
+/**
+ * EGO Gift-specific utility functions
+ */
+
+/**
+ * Gets EGO Gift icon path (128x128px gift image)
+ * @param giftId - Gift ID
+ * @returns Gift icon path
+ */
+export function getEGOGiftIconPath(giftId: string): string {
+  return resolveAsset(`/images/icon/egoGift/${giftId}.webp`)
+}
+
+/**
+ * Gets EGO Gift enhancement icon path
+ * @param level - Enhancement level (0, 1, 2, etc.)
+ * @returns Enhancement icon path
+ */
+export function getEGOGiftEnhancementIconPath(level: number): string {
+  return resolveAsset(`/images/UI/egoGift/enhancement${String(level)}.webp`)
+}
+
+/**
+ * Gets EGO Gift cost icon path
+ * @returns Cost icon path
+ */
+export function getEGOGiftCostIconPath(): string {
+  return resolveAsset(`/images/UI/egoGift/cost.webp`)
+}
+
+/**
+ * Gets EGO Gift background image path
+ * @returns Background image path
+ */
+export function getEGOGiftBackgroundPath(): string {
+  return resolveAsset(`/images/UI/egoGift/bg.webp`)
+}
+
+/**
+ * Gets EGO Gift hover overlay path
+ * @returns Hover overlay path
+ */
+export function getEGOGiftOnHoverPath(): string {
+  return resolveAsset(`/images/UI/egoGift/onHover.webp`)
+}
+
+/**
+ * Gets EGO Gift enhanced background image path (level 1 overlay)
+ * @returns Enhanced background path
+ */
+export function getEGOGiftEnhancedBackgroundPath(): string {
+  return resolveAsset(`/images/UI/egoGift/bgEnhanced.webp`)
+}
+
+/**
+ * Gets EGO Gift enhanced background image path (level 2 base)
+ * @returns Enhanced background level 2 path
+ */
+export function getEGOGiftEnhanced2BackgroundPath(): string {
+  return resolveAsset(`/images/UI/egoGift/bgEnhanced2.webp`)
+}
+
+/**
+ * Gets EGO Gift tier EX icon path
+ * @returns Tier EX icon path
+ */
+export function getEGOGiftTierEXPath(): string {
+  return resolveAsset(`/images/UI/egoGift/tierEX.webp`)
+}
+
+/**
+ * Planner-specific utility functions
+ */
+
+/**
+ * Mapping from affinity names to sin names for asset paths
+ * Used internally to convert data format to file naming convention
+ */
+const AFFINITY_TO_SIN_NAME: Record<string, string> = {
+  CRIMSON: 'Wrath',
+  SCARLET: 'Lust',
+  AMBER: 'Sloth',
+  SHAMROCK: 'Gluttony',
+  AZURE: 'Gloom',
+  INDIGO: 'Pride',
+  VIOLET: 'Envy',
+}
+
+/**
+ * Gets icon path for planner keywords (handles both affinity types, attack types, ego gifts, and battle keywords)
+ * @param keyword - Keyword (e.g., "Combustion", "CRIMSON")
+ * @returns Icon path
+ */
+export function getKeywordIconPath(keyword: string): string {
+  // Check if keyword is an affinity type
+  if ((AFFINITIES as readonly string[]).includes(keyword)) {
+    return getAffinityIconPath(keyword)
+  }
+
+  // Check if keyword is an attack type
+  if ((ATK_TYPES as readonly string[]).includes(keyword.toUpperCase())) {
+    return resolveAsset(`/images/UI/egoGift/${keyword}.webp`)
+  }
+
+  // Check if keyword is an ego gift
+  if (/^\d{4}$/.test(keyword)) {
+    return getEGOGiftIconPath(keyword)
+  }
+
+  // Otherwise treat as battle keywords
+  return getBattleKeywordIconPath(keyword)
+}
+
+/**
+ * Gets the image path for an affinity icon
+ * Converts affinity name to sin name for file path
+ * @param affinity - Affinity name (e.g., "CRIMSON", "AZURE")
+ * @returns Affinity icon path using sin name
+ */
+export function getAffinityIconPath(affinity: string): string {
+  const sinName = AFFINITY_TO_SIN_NAME[affinity] || affinity
+  return resolveAsset(`/images/icon/sin/${sinName}.webp`)
+}
+
+/**
+ * Start Buff-specific utility functions
+ */
+
+/**
+ * Gets Start Buff icon path
+ * @param baseId - Base buff ID (100-109)
+ * @param version - Mirror Dungeon version
+ * @returns Buff icon path
+ */
+export function getStartBuffIconPath(baseId: number, version: number): string {
+  return resolveAsset(`/images/UI/MD${String(version)}/StartBuffIcon_${String(baseId)}.webp`)
+}
+
+/**
+ * Gets Start Buff pane background path
+ * @param version - Mirror Dungeon version
+ * @returns Pane background path
+ */
+export function getStartBuffPanePath(version: number): string {
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffPane.webp`)
+}
+
+/**
+ * Gets Start Buff highlight overlay path
+ * @param version - Mirror Dungeon version
+ * @returns Highlight overlay path
+ */
+export function getStartBuffHighlightPath(version: number): string {
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffHighlight.webp`)
+}
+
+/**
+ * Gets Start Buff star light decoration path
+ * @returns Star light path
+ */
+export function getStartBuffStarLightPath(): string {
+  return resolveAsset(`/images/UI/MD/starLight.webp`)
+}
+
+/**
+ * Gets Start Buff enhancement button background path
+ * @param level - Enhancement level (0 for unselected, 1 for +, 2 for ++)
+ * @param version - Mirror Dungeon version
+ * @returns Enhancement button background path
+ */
+export function getStartBuffEnhancementBgPath(level: 0 | 1 | 2, version: number): string {
+  if (level === 0) {
+    return resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancementUnselected.webp`)
+  }
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancement${String(level)}Selected.webp`)
+}
+
+/**
+ * Gets Start Buff enhancement selected overlay path (MD7+)
+ * Rendered on top of the base (unselected) frame when a buff is selected.
+ * MD7+ uses a single overlay image instead of level-numbered selected images.
+ * @param version - Mirror Dungeon version
+ * @returns Overlay image path
+ */
+export function getStartBuffEnhancementOverlayPath(version: number): string {
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffEnhancementSelected.webp`)
+}
+
+/**
+ * Gets Start Buff enhancement icon path
+ * @param level - Enhancement level (0 for default, 1 for +, 2 for ++)
+ * @returns Enhancement icon path
+ */
+export function getStartBuffEnhancementIconPath(level: 0 | 1 | 2): string {
+  if (level === 0) {
+    return resolveAsset(`/images/UI/MD/startBuffEnhancementIcon.webp`)
+  }
+  return resolveAsset(`/images/UI/egoGift/enhancement${String(level)}.webp`)
+}
+
+/**
+ * Gets Start Buff mini card background path
+ * @param version - Mirror Dungeon version (from backend config)
+ * @returns Mini card background path
+ */
+export function getStartBuffMiniPath(version: number): string {
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffMini.webp`)
+}
+
+/**
+ * Gets Start Buff mini card highlight overlay path
+ * @param version - Mirror Dungeon version (from backend config)
+ * @returns Mini card highlight path
+ */
+export function getStartBuffMiniHighlightPath(version: number): string {
+  return resolveAsset(`/images/UI/MD${String(version)}/startBuffMiniHighlight.webp`)
+}
+
+/**
+ * Theme Pack-specific utility functions
+ */
+
+/**
+ * Gets composed theme pack image path
+ * These are pre-composed images (base + boss + frame + icons, no text)
+ * @param packId - Theme pack ID (e.g., "1001", "1002")
+ * @returns Composed theme pack image path
+ */
+export function getThemePackImagePath(packId: string): string {
+  return resolveAsset(`/images/themePack/${packId}.webp`)
+}
+
+/**
+ * Gets pre-composited featured boss panel image path
+ * These are pre-composited images (mask stencil + portrait + copper frame, no text)
+ * @param packId - Theme pack ID (e.g., "1001", "1002")
+ * @param portraitId - Portrait key (nameID or sdPortrait; number or string)
+ * @returns Featured boss panel image path
+ */
+export function getFeaturedBossImagePath(packId: string, portraitId: number | string): string {
+  return resolveAsset(`/images/featuredBoss/${packId}_${portraitId}.webp`)
+}
+
+/**
+ * Gets theme pack hover highlight overlay path (for normal packs)
+ * @returns Hover highlight path
+ */
+export function getThemePackHoverHighlightPath(): string {
+  return resolveAsset('/images/UI/themePack/onHover.webp')
+}
+
+/**
+ * Gets theme pack select highlight overlay path (for normal packs)
+ * @returns Select highlight path
+ */
+export function getThemePackSelectHighlightPath(): string {
+  return resolveAsset('/images/UI/themePack/onSelect.webp')
+}
+
+/**
+ * Gets theme pack extreme highlight overlay path (for extreme packs)
+ * @returns Extreme highlight path
+ */
+export function getThemePackExtremeHighlightPath(): string {
+  return resolveAsset('/images/UI/themePack/extremeHighlight.webp')
+}
+
+/**
+ * Gets abnormality event image path
+ * @param eventId - Event ID (e.g., "901001", "971055")
+ * @returns Event image path
+ */
+export function getAbEventImagePath(eventId: string): string {
+  return resolveAsset(`/images/abEvent/${eventId}.webp`)
+}
+
+/**
+ * Gets EGO type icon path
+ * @Param egoType - EGO Type (ZAYIN, TETH, HE, WAW, ALEPH)
+ * @Returns Icon path
+ */
+export function getEGOTypeIconPath(egoType: string): string {
+  return resolveAsset(`/images/icon/ego/${egoType}.webp`)
+}
+
+/**
+ * Battle Keyword-specific utility functions
+ */
+
+/**
+ * Gets battle keyword icon path
+ * Used in skill/passive descriptions for keywords like Sinking, Rupture, Burn
+ * @param iconIdOrKey - Icon ID from battleKeywords data, or keyword key as fallback
+ * @returns Battle keyword icon path
+ */
+export function getBattleKeywordIconPath(iconIdOrKey: string): string {
+  return resolveAsset(`/images/icon/battleKeywords/${iconIdOrKey}.webp`)
+}
+
+/**
+ * Panic-specific utility functions
+ */
+
+/**
+ * Gets panic type icon path
+ * @param panicType - Panic type ID (e.g., 1001, 9999)
+ * @returns Panic icon path
+ */
+export function getPanicIconPath(panicType: number): string {
+  return resolveAsset(`/images/icon/sanity/${String(panicType)}.webp`)
+}
+
+/**
+ * Gets identity passive count icon path
+ * @returns Identity passive count icon path
+ */
+export function getIdentityPassiveCountIconPath(): string {
+  return resolveAsset(`/images/UI/identity/passiveCount.webp`)
+}
+
+/**
+ * Gets attack weight icon path
+ * @returns Attack weight icon path
+ */
+export function getAttackWeightIconPath(): string {
+  return resolveAsset(`/images/UI/common/atkWeight.webp`)
+}
+
+/**
+ * Banner-specific utility functions
+ */
+
+/**
+ * Gets banner image path for home page carousel
+ * @returns Banner image path
+ */
+export function getBannerImagePath(): string {
+  return resolveAsset(`/images/banner/MD.webp`)
+}
+
+/**
+ * Gets lock icon path for locked state indicators
+ * @returns Lock icon path
+ */
+export function getLockIconPath(): string {
+  return resolveAsset(`/images/UI/common/lock.webp`)
+}
+
+/**
+ * Gets sanity increment indicator icon path
+ * @returns Sanity increment icon path
+ */
+export function getSanityIncIconPath(): string {
+  return resolveAsset(`/images/UI/identity/sanityInc.webp`)
+}
+
+/**
+ * Gets sanity decrement indicator icon path
+ * @returns Sanity decrement icon path
+ */
+export function getSanityDecIconPath(): string {
+  return resolveAsset(`/images/UI/identity/sanityDec.webp`)
+}
+
+/**
+ * Gets button base background path
+ * @returns Button base background path
+ */
+export function getButtonBasePath(): string {
+  return resolveAsset(`/images/UI/common/button.webp`)
+}
+
+/**
+ * Gets button hover overlay path
+ * @returns Button hover overlay path
+ */
+export function getButtonOnHoverPath(): string {
+  return resolveAsset(`/images/UI/common/buttonOnHover.webp`)
+}
+
+/**
+ * Gets button selected overlay path
+ * @returns Button selected overlay path
+ */
+export function getButtonSelectedPath(): string {
+  return resolveAsset(`/images/UI/common/buttonSelected.webp`)
+}
+
+/**
+ * Gets button expand image icon path
+ * @returns Button expand image icon path
+ */
+export function getButtonExpandImagePath(): string {
+  return resolveAsset(`/images/UI/common/buttonExpandImage.webp`)
+}
+
+/**
+ * Gets button swap image icon path
+ * @returns Button swap image icon path
+ */
+export function getButtonSwapImagePath(): string {
+  return resolveAsset(`/images/UI/common/buttonSwapImage.webp`)
+}
+
+/**
+ * Gets attack level icon path (sword icon for skill panels)
+ * @returns Attack level icon path
+ */
+export function getAttackLevelIconPath(): string {
+  return resolveAsset(`/images/UI/identity/attack.webp`)
+}
+
+/**
+ * Gets defense level icon path (shield icon for skill panels)
+ * @returns Defense level icon path
+ */
+export function getDefenseLevelIconPath(): string {
+  return resolveAsset(`/images/UI/identity/defense.webp`)
+}
+
+/**
+ * Gets HP stat icon path
+ * @returns HP icon path
+ */
+export function getHPIconPath(): string {
+  return resolveAsset(`/images/UI/identity/hp.webp`)
+}
+
+/**
+ * Gets speed stat icon path
+ * @returns Speed icon path
+ */
+export function getSpeedIconPath(): string {
+  return resolveAsset(`/images/UI/identity/speed.webp`)
+}
+
+/**
+ * Gets slash resistance icon path
+ * @returns Slash resistance icon path
+ */
+export function getSlashResistIconPath(): string {
+  return resolveAsset(`/images/UI/identity/SLASH.webp`)
+}
+
+/**
+ * Gets pierce resistance icon path
+ * @returns Pierce resistance icon path
+ */
+export function getPierceResistIconPath(): string {
+  return resolveAsset(`/images/UI/identity/PENETRATE.webp`)
+}
+
+/**
+ * Gets blunt resistance icon path
+ * @returns Blunt resistance icon path
+ */
+export function getBluntResistIconPath(): string {
+  return resolveAsset(`/images/UI/identity/HIT.webp`)
+}
+
+/**
+ * Gets EGO Gift selection highlight overlay path
+ * @returns EGO Gift select highlight path
+ */
+export function getEGOGiftSelectHighlightPath(): string {
+  return resolveAsset(`/images/UI/egoGift/onSelect.webp`)
+}
+
+/**
+ * Gets backup formation indicator path
+ * @returns Backup indicator path
+ */
+export function getBackupIndicatorPath(): string {
+  return resolveAsset(`/images/UI/formation/backup.webp`)
+}
+
+/**
+ * Gets app logo path
+ * @returns Logo image path
+ */
+export function getLogoPath(): string {
+  return resolveAsset(`/images/logo/LCMC.webp`)
+}
+
+/**
+ * Gets tiptap editor placeholder image path
+ * @returns Placeholder image path
+ */
+export function getTiptapPlaceholderPath(): string {
+  return resolveAsset(`/images/tiptap-ui-placeholder-image.jpg`)
+}

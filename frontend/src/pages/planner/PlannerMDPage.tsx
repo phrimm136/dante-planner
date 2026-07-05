@@ -31,8 +31,8 @@ import { PersonalPlannerList } from './components/plannerList/PersonalPlannerLis
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
-import { LoadingState } from '@/components/common/LoadingState'
-import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
+import { LoadingState } from '@/components/feedback/LoadingState'
+import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 
 // ============================================================================
 // Page Content Component
@@ -45,12 +45,7 @@ import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
 function PlannerMDPageContent() {
   const { t } = useTranslation(['planner', 'common'])
 
-  const {
-    category,
-    page,
-    search,
-    setFilters,
-  } = useMDUserFilters()
+  const { category, page, search, setFilters } = useMDUserFilters()
 
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
@@ -73,10 +68,7 @@ function PlannerMDPageContent() {
 
       {/* Toolbar: Search only (no mode toggle for personal planners) */}
       <div className="mb-4">
-        <MDPlannerToolbar
-          search={search}
-          onSearchChange={(q) => setFilters({ q, page: 0 })}
-        />
+        <MDPlannerToolbar search={search} onSearchChange={(q) => setFilters({ q, page: 0 })} />
       </div>
 
       {/* Category Filter Pills */}

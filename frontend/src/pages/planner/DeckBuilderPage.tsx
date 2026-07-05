@@ -18,7 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Project constants
-import { DEFAULT_SKILL_EA } from '@/lib/constants'
+import { DEFAULT_SKILL_EA } from '@/shared/gameData'
 
 // Project utilities (@/lib)
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from './lib/deckCode'
@@ -203,9 +203,7 @@ function DeckBuilderPageContent() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('deckBuilder.importConfirmDescription')}
-            </DialogDescription>
+            <DialogDescription>{t('deckBuilder.importConfirmDescription')}</DialogDescription>
           </DialogHeader>
 
           {pendingImport && pendingImport.warnings.length > 0 && (
@@ -225,9 +223,7 @@ function DeckBuilderPageContent() {
             <Button variant="outline" onClick={handleImportCancel}>
               {t('deckBuilder.cancel')}
             </Button>
-            <Button onClick={handleImportConfirm}>
-              {t('deckBuilder.apply')}
-            </Button>
+            <Button onClick={handleImportConfirm}>{t('deckBuilder.apply')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

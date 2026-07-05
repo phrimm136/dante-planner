@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EGOGiftObservationEditPane } from '../EGOGiftObservationEditPane'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
@@ -92,7 +92,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
 }))
 
 // Mock StarlightCostDisplay
-vi.mock('@/components/common/StarlightCostDisplay', () => ({
+vi.mock('../../StarlightCostDisplay', () => ({
   StarlightCostDisplay: ({ cost, size }: { cost: number; size: string }) => (
     <div data-testid="starlight-cost" data-cost={cost} data-size={size}>
       Cost: {cost}
@@ -101,7 +101,7 @@ vi.mock('@/components/common/StarlightCostDisplay', () => ({
 }))
 
 // Mock Sorter
-vi.mock('@/components/common/Sorter', () => ({
+vi.mock('@/shared/filter/components/Sorter', () => ({
   Sorter: () => <select data-testid="sorter" />,
 }))
 
@@ -111,7 +111,7 @@ vi.mock('@/pages/egoGift/components/EGOGiftKeywordFilter', () => ({
 }))
 
 // Mock SearchBar
-vi.mock('@/components/common/SearchBar', () => ({
+vi.mock('@/shared/filter/components/SearchBar', () => ({
   SearchBar: () => <input data-testid="search-bar" />,
 }))
 

@@ -2,7 +2,7 @@ import {
   getEGOGiftBackgroundPath,
   getEGOGiftEnhancedBackgroundPath,
   getEGOGiftEnhanced2BackgroundPath,
-} from '@/lib/assetPaths'
+} from '@/shared/assets'
 
 interface EGOGiftCardBackgroundProps {
   enhancement: 0 | 1 | 2
@@ -23,7 +23,7 @@ export function EGOGiftCardBackground({ enhancement, size }: EGOGiftCardBackgrou
         src={enhancement === 2 ? getEGOGiftEnhanced2BackgroundPath() : getEGOGiftBackgroundPath()}
         alt=""
         className="absolute inset-0 w-full h-full object-contain"
-        loading="lazy" 
+        loading="lazy"
       />
 
       {/* Enhanced overlay - bgEnhanced.webp for enhancement 1 and 2 */}

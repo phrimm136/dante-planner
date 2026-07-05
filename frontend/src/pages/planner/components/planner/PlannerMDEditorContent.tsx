@@ -33,29 +33,37 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 // Project utilities (@/lib)
-import { MD_CATEGORIES, PLANNER_KEYWORDS, FLOOR_COUNTS, MAX_NOTE_BYTES, DUNGEON_IDX, DEFAULT_SKILL_EA } from '@/lib/constants'
-import { getKeywordIconPath } from '@/lib/assetPaths'
+import {
+  MD_CATEGORIES,
+  PLANNER_KEYWORDS,
+  FLOOR_COUNTS,
+  DUNGEON_IDX,
+  DEFAULT_SKILL_EA,
+} from '@/shared/gameData'
+import { MAX_NOTE_BYTES } from '@/lib/constants'
+import { getKeywordIconPath } from '@/shared/assets'
 import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '../../lib/deckCode'
 
 // Project types & schemas
-import type { MDCategory } from '@/lib/constants'
-import type { NoteContent } from '@/types/NoteEditorTypes'
-import type { SaveablePlanner, MDPlannerContent, ConflictResolutionChoice } from '../../types/PlannerTypes'
+import type { MDCategory } from '@/shared/gameData'
+import type { NoteContent } from '@/shared/noteEditor'
+import type {
+  SaveablePlanner,
+  MDPlannerContent,
+  ConflictResolutionChoice,
+} from '../../types/PlannerTypes'
 import type { DecodedDeck } from '../../lib/deckCode'
 
 // Store
-import {
-  usePlannerEditorStore,
-  usePlannerEditorStoreApi,
-} from '../../stores/usePlannerEditorStore'
+import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/usePlannerEditorStore'
 
 // Project hooks
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
-import { useUserSettingsQuery } from '@/hooks/useUserSettings'
+import { useUserSettingsQuery } from '@/pages/settings'
 
 // Project components (@/components)
 import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
@@ -71,7 +79,7 @@ import { ComprehensiveGiftSelectorPane } from '../egoGift/ComprehensiveGiftSelec
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
 import { PlannerSection } from '../PlannerSection'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SaveSyncOffWarningDialog } from './SaveSyncOffWarningDialog'
 
@@ -146,9 +154,7 @@ function KeywordSelector({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-80 p-3">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">
-            {selectedCountText}
-          </span>
+          <span className="text-sm text-muted-foreground">{selectedCountText}</span>
           <Button variant="ghost" size="sm" onClick={clearAll}>
             {clearLabel}
           </Button>
@@ -162,7 +168,9 @@ function KeywordSelector({
               <button
                 type="button"
                 key={option}
-                onClick={() => { toggleOption(option); }}
+                onClick={() => {
+                  toggleOption(option)
+                }}
                 className={`shrink-0 w-10 h-10 rounded-md border-2 transition-all ${
                   isSelected
                     ? 'border-primary bg-primary/10'
@@ -188,20 +196,22 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const { t, i18n } = useTranslation(['planner', 'common'])
 
   // Map i18n language to date-fns locale
-  const dateFnsLocale = {
-    EN: enUS,
-    JP: ja,
-    KR: ko,
-    CN: zhCN,
-  }[i18n.language] ?? enUS
+  const dateFnsLocale =
+    {
+      EN: enUS,
+      JP: ja,
+      KR: ko,
+      CN: zhCN,
+    }[i18n.language] ?? enUS
   const config = usePlannerConfig()
   const navigate = useNavigate()
 
   // For existing planners, preserve the original content version (backward compat).
   // New planners use the current server version.
-  const mdVersion = (mode === 'edit' && planner?.metadata.contentVersion)
-    ? planner.metadata.contentVersion
-    : config.mdCurrentVersion
+  const mdVersion =
+    mode === 'edit' && planner?.metadata.contentVersion
+      ? planner.metadata.contentVersion
+      : config.mdCurrentVersion
 
   // Get user settings for sync preference
   const { data: userSettings } = useUserSettingsQuery()
@@ -211,14 +221,17 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const isIntentionalNavigationRef = useRef(false)
 
   // Callback for "Keep Both" - navigate to the newly created copy
-  const handleKeepBothCreated = useCallback((newPlannerId: string) => {
-    // Mark as intentional navigation to skip "leave page?" popup
-    isIntentionalNavigationRef.current = true
+  const handleKeepBothCreated = useCallback(
+    (newPlannerId: string) => {
+      // Mark as intentional navigation to skip "leave page?" popup
+      isIntentionalNavigationRef.current = true
 
-    // Navigate to forked planner edit page, replacing current history entry
-    // Back button will go to original view (which now shows server version)
-    navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
-  }, [navigate])
+      // Navigate to forked planner edit page, replacing current history entry
+      // Back button will go to original view (which now shows server version)
+      void navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
+    },
+    [navigate],
+  )
 
   // ============================================================================
   // Store API (for imperative access in handlers)
@@ -285,48 +298,57 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   // ============================================================================
   // SSE Reload Handler - Uses store batch action
   // ============================================================================
-  const handleServerReload = useCallback((reloadedPlanner: SaveablePlanner) => {
-    if (reloadedPlanner.config.type !== 'MIRROR_DUNGEON') {
-      console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
-      toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
-      return
-    }
+  const handleServerReload = useCallback(
+    (reloadedPlanner: SaveablePlanner) => {
+      if (reloadedPlanner.config.type !== 'MIRROR_DUNGEON') {
+        console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
+        toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
+        return
+      }
 
-    const content = reloadedPlanner.content as MDPlannerContent
-    initializeFromPlannerAction(content, {
-      title: reloadedPlanner.metadata.title,
-      category: reloadedPlanner.config.category as MDCategory,
-      isPublished: reloadedPlanner.metadata.published ?? false,
-    })
-  }, [initializeFromPlannerAction, t])
+      const content = reloadedPlanner.content as MDPlannerContent
+      initializeFromPlannerAction(content, {
+        title: reloadedPlanner.metadata.title,
+        category: reloadedPlanner.config.category as MDCategory,
+        isPublished: reloadedPlanner.metadata.published ?? false,
+      })
+    },
+    [initializeFromPlannerAction, t],
+  )
 
   // ============================================================================
   // Section Note Handler
   // ============================================================================
-  const handleSectionNoteChange = useCallback((sectionKey: string, content: NoteContent) => {
-    updateSectionNote(sectionKey, content)
-  }, [updateSectionNote])
+  const handleSectionNoteChange = useCallback(
+    (sectionKey: string, content: NoteContent) => {
+      updateSectionNote(sectionKey, content)
+    },
+    [updateSectionNote],
+  )
 
   // ============================================================================
   // Category Change Handler
   // ============================================================================
-  const handleCategoryChange = useCallback((newCategory: MDCategory) => {
-    const currentCategory = storeApi.getState().category
-    const floorSelections = storeApi.getState().floorSelections
+  const handleCategoryChange = useCallback(
+    (newCategory: MDCategory) => {
+      const currentCategory = storeApi.getState().category
+      const floorSelections = storeApi.getState().floorSelections
 
-    // Warn if changing from 5F to 10F/15F with Normal difficulty on floors 1-5
-    if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
-      const hasNormalDifficulty = floorSelections
-        .slice(0, 5)
-        .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
+      // Warn if changing from 5F to 10F/15F with Normal difficulty on floors 1-5
+      if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
+        const hasNormalDifficulty = floorSelections
+          .slice(0, 5)
+          .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
 
-      if (hasNormalDifficulty) {
-        toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+        if (hasNormalDifficulty) {
+          toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+        }
       }
-    }
 
-    setCategory(newCategory)
-  }, [storeApi, setCategory, t])
+      setCategory(newCategory)
+    },
+    [storeApi, setCategory, t],
+  )
 
   // Stable getter function - must not be recreated on each render
   const getState = useCallback(() => storeApi.getState().getPlannerState(), [storeApi])
@@ -354,8 +376,14 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       const id = mode === 'edit' && planner?.metadata.id ? planner.metadata.id : undefined
       return id
     })(),
-    initialSyncVersion: mode === 'edit' && planner?.metadata.syncVersion !== undefined ? planner.metadata.syncVersion : undefined,
-    initialSavedAt: mode === 'edit' && planner?.metadata.lastModifiedAt ? planner.metadata.lastModifiedAt : undefined,
+    initialSyncVersion:
+      mode === 'edit' && planner?.metadata.syncVersion !== undefined
+        ? planner.metadata.syncVersion
+        : undefined,
+    initialSavedAt:
+      mode === 'edit' && planner?.metadata.lastModifiedAt
+        ? planner.metadata.lastModifiedAt
+        : undefined,
     published: isPublished,
     onServerReload: handleServerReload,
     onKeepBothCreated: handleKeepBothCreated,
@@ -374,7 +402,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       clearError()
     } else if (errorCode === 'saveFailed') {
       // Use user-friendly i18n key if available, otherwise generic error
-      const message = errorI18nKey ? t(errorI18nKey, errorI18nParams ?? {}) : t('pages.plannerMD.save.failed')
+      const message = errorI18nKey
+        ? t(errorI18nKey, errorI18nParams ?? {})
+        : t('pages.plannerMD.save.failed')
       toast.error(message)
       clearError()
     } else if (errorCode === 'quotaExceeded') {
@@ -568,10 +598,11 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       />
 
       <div className="flex items-center justify-end gap-2 mb-4">
-          {isAutoSaving && (
-            <span className="text-sm text-muted-foreground">
-              {t('pages.plannerMD.save.autoSaving', 'Saving...')}
-              {lastSavedAt && (() => {
+        {isAutoSaving && (
+          <span className="text-sm text-muted-foreground">
+            {t('pages.plannerMD.save.autoSaving', 'Saving...')}
+            {lastSavedAt &&
+              (() => {
                 try {
                   const parsedDate = new Date(lastSavedAt)
                   if (isNaN(parsedDate.getTime())) return null
@@ -580,31 +611,40 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                   return null
                 }
               })()}
-            </span>
-          )}
-          {!isAutoSaving && lastSavedAt && (() => {
+          </span>
+        )}
+        {!isAutoSaving &&
+          lastSavedAt &&
+          (() => {
             try {
               const parsedDate = new Date(lastSavedAt)
               if (isNaN(parsedDate.getTime())) return null
               return (
                 <span className="text-sm text-muted-foreground">
-                  {t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true, locale: dateFnsLocale }) })}
+                  {t('sync.lastSaved', {
+                    time: formatDistanceToNow(parsedDate, {
+                      addSuffix: true,
+                      locale: dateFnsLocale,
+                    }),
+                  })}
                 </span>
               )
             } catch {
               return null
             }
           })()}
-          <Button onClick={handleSave} disabled={isSaving} variant="outline">
-            <Save className="w-4 h-4 mr-2" />
-            {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
-          </Button>
+        <Button onClick={handleSave} disabled={isSaving} variant="outline">
+          <Save className="w-4 h-4 mr-2" />
+          {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
+        </Button>
       </div>
 
       <div className="bg-background rounded-lg space-y-2">
         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 items-start">
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
-            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.category')}</label>
+            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+              {t('pages.plannerMD.category')}
+            </label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-auto min-w-24 h-10 justify-between">
@@ -614,7 +654,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {MD_CATEGORIES.map((cat) => (
-                  <DropdownMenuItem key={cat} onClick={() => { handleCategoryChange(cat); }}>
+                  <DropdownMenuItem
+                    key={cat}
+                    onClick={() => {
+                      handleCategoryChange(cat)
+                    }}
+                  >
                     {t(`pages.plannerList.mdCategory.${cat}`)}
                   </DropdownMenuItem>
                 ))}
@@ -623,7 +668,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-start gap-2 w-full sm:w-auto">
-            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.keywords')}</label>
+            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+              {t('pages.plannerMD.keywords')}
+            </label>
             <div className="w-full sm:w-80">
               <KeywordSelector
                 options={PLANNER_KEYWORDS}
@@ -632,14 +679,18 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 getIconPath={getKeywordIconPath}
                 placeholder={t('pages.plannerMD.keywordsPlaceholder')}
                 clearLabel={t('pages.plannerMD.clearKeywords')}
-                selectedCountText={t('pages.plannerMD.keywordSelector.selected', { count: selectedKeywords.size })}
+                selectedCountText={t('pages.plannerMD.keywordSelector.selected', {
+                  count: selectedKeywords.size,
+                })}
               />
             </div>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-          <label className="text-sm font-medium whitespace-nowrap sm:mt-2">{t('pages.plannerMD.planTitle')}</label>
+          <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+            {t('pages.plannerMD.planTitle')}
+          </label>
           <div className="flex flex-col gap-1 flex-1">
             <input
               type="text"
@@ -663,7 +714,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         <PlannerSection title={t('pages.plannerMD.introduction')}>
           <NoteEditor
             value={sectionNotes.intro}
-            onChange={(content) => { handleSectionNoteChange('intro', content); }}
+            onChange={(content) => {
+              handleSectionNoteChange('intro', content)
+            }}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             maxBytes={MAX_NOTE_BYTES}
           />
@@ -693,7 +746,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 onImport={handleDeckImport}
                 onExport={handleDeckExport}
                 onResetOrder={handleResetDeployment}
-                onEditDeck={() => { startTransition(() => setIsDeckPaneOpen(true)) }}
+                onEditDeck={() => {
+                  startTransition(() => setIsDeckPaneOpen(true))
+                }}
               />
             </Suspense>
             <Suspense fallback={null}>
@@ -715,9 +770,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
-              <DialogDescription>
-                {t('deckBuilder.importConfirmDescription')}
-              </DialogDescription>
+              <DialogDescription>{t('deckBuilder.importConfirmDescription')}</DialogDescription>
             </DialogHeader>
 
             {pendingImport && pendingImport.warnings.length > 0 && (
@@ -737,9 +790,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               <Button variant="outline" onClick={handleImportCancel}>
                 {t('deckBuilder.cancel')}
               </Button>
-              <Button onClick={handleImportConfirm}>
-                {t('deckBuilder.apply')}
-              </Button>
+              <Button onClick={handleImportConfirm}>{t('deckBuilder.apply')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -747,7 +798,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         {visibleSections >= 1 && (
           <NoteEditor
             value={sectionNotes.deckBuilder}
-            onChange={(content) => { handleSectionNoteChange('deckBuilder', content); }}
+            onChange={(content) => {
+              handleSectionNoteChange('deckBuilder', content)
+            }}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             maxBytes={MAX_NOTE_BYTES}
           />
@@ -763,7 +816,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           >
             <StartBuffSection
               mdVersion={mdVersion}
-              onClick={() => { setIsStartBuffPaneOpen(true); }}
+              onClick={() => {
+                setIsStartBuffPaneOpen(true)
+              }}
             />
             <StartBuffEditPane
               open={isStartBuffPaneOpen}
@@ -772,7 +827,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             />
             <NoteEditor
               value={sectionNotes.startBuffs}
-              onChange={(content) => { handleSectionNoteChange('startBuffs', content); }}
+              onChange={(content) => {
+                handleSectionNoteChange('startBuffs', content)
+              }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
               maxBytes={MAX_NOTE_BYTES}
             />
@@ -788,7 +845,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             }
           >
             <StartGiftSummary
-              onClick={() => { setIsStartGiftPaneOpen(true); }}
+              onClick={() => {
+                setIsStartGiftPaneOpen(true)
+              }}
             />
             <StartGiftEditPane
               open={isStartGiftPaneOpen}
@@ -797,7 +856,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             />
             <NoteEditor
               value={sectionNotes.startGifts}
-              onChange={(content) => { handleSectionNoteChange('startGifts', content); }}
+              onChange={(content) => {
+                handleSectionNoteChange('startGifts', content)
+              }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
               maxBytes={MAX_NOTE_BYTES}
             />
@@ -831,7 +892,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             >
               <EGOGiftObservationSummary
                 mdVersion={mdVersion}
-                onClick={() => { setIsObservationPaneOpen(true); }}
+                onClick={() => {
+                  setIsObservationPaneOpen(true)
+                }}
               />
             </Suspense>
             <Suspense fallback={null}>
@@ -843,7 +906,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             </Suspense>
             <NoteEditor
               value={sectionNotes.observation}
-              onChange={(content) => { handleSectionNoteChange('observation', content); }}
+              onChange={(content) => {
+                handleSectionNoteChange('observation', content)
+              }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
               maxBytes={MAX_NOTE_BYTES}
             />
@@ -878,7 +943,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             </Suspense>
             <NoteEditor
               value={sectionNotes.skillReplacement}
-              onChange={(content) => { handleSectionNoteChange('skillReplacement', content); }}
+              onChange={(content) => {
+                handleSectionNoteChange('skillReplacement', content)
+              }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
               maxBytes={MAX_NOTE_BYTES}
             />
@@ -896,9 +963,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 </div>
               }
             >
-              <ComprehensiveGiftSummary
-                onClick={() => setIsComprehensivePaneOpen(true)}
-              />
+              <ComprehensiveGiftSummary onClick={() => setIsComprehensivePaneOpen(true)} />
             </Suspense>
             <Suspense fallback={null}>
               <ComprehensiveGiftSelectorPane
@@ -908,7 +973,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
             </Suspense>
             <NoteEditor
               value={sectionNotes.comprehensiveGifts}
-              onChange={(content) => { handleSectionNoteChange('comprehensiveGifts', content); }}
+              onChange={(content) => {
+                handleSectionNoteChange('comprehensiveGifts', content)
+              }}
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
               maxBytes={MAX_NOTE_BYTES}
             />
@@ -933,13 +1000,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                   const floorNoteKey = `floor-${floorIndex}`
                   return (
                     <div key={floorIndex} className="space-y-2">
-                      <FloorThemeGiftSection
-                        floorNumber={floorNumber}
-                        floorIndex={floorIndex}
-                      />
+                      <FloorThemeGiftSection floorNumber={floorNumber} floorIndex={floorIndex} />
                       <NoteEditor
                         value={sectionNotes[floorNoteKey]}
-                        onChange={(content) => { handleSectionNoteChange(floorNoteKey, content); }}
+                        onChange={(content) => {
+                          handleSectionNoteChange(floorNoteKey, content)
+                        }}
                         placeholder={t('pages.plannerMD.noteEditor.placeholder')}
                         maxBytes={MAX_NOTE_BYTES}
                       />
@@ -954,7 +1020,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
           <NoteEditor
             value={sectionNotes.outro}
-            onChange={(content) => { handleSectionNoteChange('outro', content); }}
+            onChange={(content) => {
+              handleSectionNoteChange('outro', content)
+            }}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             maxBytes={MAX_NOTE_BYTES}
           />

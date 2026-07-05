@@ -1,5 +1,5 @@
 import { useParams } from '@tanstack/react-router'
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -16,13 +16,15 @@ import {
   TraitsDisplay,
   useIdentityDetailSpec,
 } from '@/pages/identity'
-import { DetailPageLayout } from '@/components/common/DetailPageLayout'
-import { EntityMetaInfo } from '@/components/common/EntityMetaInfo'
-import { DetailEntitySelector } from '@/components/common/DetailEntitySelector'
-import { DetailRightPanel } from '@/components/common/DetailRightPanel'
-import { MobileDetailTabs } from '@/components/common/MobileDetailTabs'
-import { DetailPageSkeleton } from '@/components/common/DetailPageSkeleton'
-import { MAX_LEVEL, MAX_ENTITY_TIER, PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
+import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
+import { EntityMetaInfo } from '@/components/layout/EntityMetaInfo'
+import { DetailEntitySelector } from '@/components/layout/DetailEntitySelector'
+import { DetailRightPanel } from '@/components/layout/DetailRightPanel'
+import { MobileDetailTabs } from '@/components/layout/MobileDetailTabs'
+import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import { MAX_LEVEL, MAX_ENTITY_TIER } from '@/shared/gameData'
+import { PASSIVE_INDICATOR_COLORS } from '@/lib/constants'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { Uptie, IdentitySkillEntry } from '@/pages/identity'
 
@@ -46,20 +48,10 @@ function IdentityDetailContent() {
   const [uptie, setUptie] = useState<number>(MAX_ENTITY_TIER.identity)
   const [level, setLevel] = useState<number>(MAX_LEVEL)
 
-  // Progressive rendering: render sections one-by-one
+  // Progressive rendering: render sections one-by-one (start immediately)
   // Sections: 1=Skills, 2=Passives, 3=Sanity
-  const [visibleSections, setVisibleSections] = useState(0)
   const totalSections = 3
-
-  // Progressively show more sections (start immediately)
-  useEffect(() => {
-    if (visibleSections < totalSections) {
-      const rafId = requestAnimationFrame(() => {
-        setVisibleSections((prev) => prev + 1)
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [visibleSections])
+  const visibleSections = useProgressiveCount({ total: totalSections, step: 1, initial: 0 })
 
   // Route validation - id must be defined
   if (!id) {
@@ -101,10 +93,7 @@ function IdentityDetailContent() {
    * Get locked passives: passives from higher tiers not available at current tier.
    * Excludes enhanced versions (type=1) if base version (type=0) with same variant exists.
    */
-  const getLockedPassives = (
-    passiveList: number[][],
-    currentUptieIndex: number
-  ): number[] => {
+  const getLockedPassives = (passiveList: number[][], currentUptieIndex: number): number[] => {
     const effectivePassives = new Set(getEffectivePassives(passiveList, currentUptieIndex))
     const lockedPassives: number[] = []
     const seenVariants = new Set<number>()
@@ -195,7 +184,9 @@ function IdentityDetailContent() {
   }
 
   // Calculate HP at current level
-  const calculatedHp = Math.floor(identityData.hp.defaultStat + identityData.hp.incrementByLevel * level)
+  const calculatedHp = Math.floor(
+    identityData.hp.defaultStat + identityData.hp.incrementByLevel * level,
+  )
   const calculatedDefense = Math.max(1, level + identityData.defCorrection)
 
   // Get speed values at uptie level (0-indexed, so uptie 4 = index 3)
@@ -221,14 +212,11 @@ function IdentityDetailContent() {
       {/* Header Area */}
       <div className="space-y-4">
         {/* Header with rank, name, and image - Suspends for i18n name */}
-        <Suspense fallback={
-          <IdentityHeader
-            identityId={id}
-            name=""
-            rank={identityData.rank}
-            uptie={uptie}
-          />
-        }>
+        <Suspense
+          fallback={
+            <IdentityHeader identityId={id} name="" rank={identityData.rank} uptie={uptie} />
+          }
+        >
           <IdentityHeaderWithI18n id={id} rank={identityData.rank} uptie={uptie} />
         </Suspense>
 
@@ -257,12 +245,14 @@ function IdentityDetailContent() {
         <TraitsDisplay traits={identityData.unitKeywordList} />
 
         {/* Season and Release Date - Suspense for i18n data */}
-        <Suspense fallback={
-          <div className="grid grid-cols-2 gap-2">
-            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
-            <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 gap-2">
+              <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+              <div className="border rounded p-3 h-16 animate-pulse bg-muted" />
+            </div>
+          }
+        >
           <EntityMetaInfo season={identityData.season} updateDate={identityData.updatedDate} />
         </Suspense>
       </div>
@@ -280,26 +270,34 @@ function IdentityDetailContent() {
         <SkillTabButton
           attributeType={getSkillAttributeType('skill1')}
           label={t('skill.skill1')}
-          onClick={() => { setActiveSkillSlot('skill1'); }}
+          onClick={() => {
+            setActiveSkillSlot('skill1')
+          }}
           isActive={activeSkillSlot === 'skill1'}
         />
         <SkillTabButton
           attributeType={getSkillAttributeType('skill2')}
           label={t('skill.skill2')}
-          onClick={() => { setActiveSkillSlot('skill2'); }}
+          onClick={() => {
+            setActiveSkillSlot('skill2')
+          }}
           isActive={activeSkillSlot === 'skill2'}
         />
         <SkillTabButton
           attributeType={getSkillAttributeType('skill3')}
           label={t('skill.skill3')}
-          onClick={() => { setActiveSkillSlot('skill3'); }}
+          onClick={() => {
+            setActiveSkillSlot('skill3')
+          }}
           isActive={activeSkillSlot === 'skill3'}
           isLocked={isSkill3Locked}
         />
         <SkillTabButton
           attributeType={getSkillAttributeType('skillDef')}
           label={t('skill.defense')}
-          onClick={() => { setActiveSkillSlot('skillDef'); }}
+          onClick={() => {
+            setActiveSkillSlot('skillDef')
+          }}
           isActive={activeSkillSlot === 'skillDef'}
         />
       </div>
@@ -316,10 +314,22 @@ function IdentityDetailContent() {
   )
 
   // Get effective and locked passives for current uptie
-  const effectiveBattlePassives = getEffectivePassives(identityData.passives.battlePassiveList, uptieIndex)
-  const lockedBattlePassives = getLockedPassives(identityData.passives.battlePassiveList, uptieIndex)
-  const effectiveSupportPassives = getEffectivePassives(identityData.passives.supportPassiveList, uptieIndex)
-  const lockedSupportPassives = getLockedPassives(identityData.passives.supportPassiveList, uptieIndex)
+  const effectiveBattlePassives = getEffectivePassives(
+    identityData.passives.battlePassiveList,
+    uptieIndex,
+  )
+  const lockedBattlePassives = getLockedPassives(
+    identityData.passives.battlePassiveList,
+    uptieIndex,
+  )
+  const effectiveSupportPassives = getEffectivePassives(
+    identityData.passives.supportPassiveList,
+    uptieIndex,
+  )
+  const lockedSupportPassives = getLockedPassives(
+    identityData.passives.supportPassiveList,
+    uptieIndex,
+  )
 
   // Passives content - PassiveCardI18n uses internal granular Suspense
   const passivesContent = (
@@ -329,7 +339,11 @@ function IdentityDetailContent() {
         <div className="mb-4">
           <span
             className="font-bold px-8 py-1 text-md"
-            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, ...displayStyle }}
+            style={{
+              color: PASSIVE_INDICATOR_COLORS.TEXT,
+              border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`,
+              ...displayStyle,
+            }}
           >
             {t('passive.battle')}
           </span>
@@ -353,7 +367,9 @@ function IdentityDetailContent() {
           />
         ))}
         {effectiveBattlePassives.length === 0 && lockedBattlePassives.length === 0 && (
-          <div className="text-sm text-muted-foreground">{t('identity.noBattlePassives', { ns: 'database' })}</div>
+          <div className="text-sm text-muted-foreground">
+            {t('identity.noBattlePassives', { ns: 'database' })}
+          </div>
         )}
       </div>
 
@@ -362,7 +378,11 @@ function IdentityDetailContent() {
         <div className="mb-4 mt-8">
           <span
             className="font-bold px-8 py-1 text-md"
-            style={{ color: PASSIVE_INDICATOR_COLORS.TEXT, border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`, ...displayStyle }}
+            style={{
+              color: PASSIVE_INDICATOR_COLORS.TEXT,
+              border: `2px solid ${PASSIVE_INDICATOR_COLORS.BORDER}`,
+              ...displayStyle,
+            }}
           >
             {t('passive.support')}
           </span>
@@ -386,7 +406,9 @@ function IdentityDetailContent() {
           />
         ))}
         {effectiveSupportPassives.length === 0 && lockedSupportPassives.length === 0 && (
-          <div className="text-sm text-muted-foreground">{t('identity.noSupportPassives', { ns: 'database' })}</div>
+          <div className="text-sm text-muted-foreground">
+            {t('identity.noSupportPassives', { ns: 'database' })}
+          </div>
         )}
       </div>
     </div>
@@ -419,23 +441,24 @@ function IdentityDetailContent() {
 
   // Mobile tabs: Skills, Passives, Sanity (Info is shown above via leftColumn)
   // Progressive rendering: show tabs when all sections loaded
-  const mobileTabsContent = visibleSections >= totalSections ? (
-    <>
-      {/* Selector above tabs on mobile */}
-      <div className="mb-4">{selector}</div>
-      <MobileDetailTabs
-        skillsContent={skillsContent}
-        passivesContent={passivesContent}
-        thirdTabContent={sanityContent}
-      />
-    </>
-  ) : (
-    <>
-      {/* Show selector while loading, then skills when available */}
-      <div className="mb-4">{selector}</div>
-      {visibleSections >= 1 && skillsContent}
-    </>
-  )
+  const mobileTabsContent =
+    visibleSections >= totalSections ? (
+      <>
+        {/* Selector above tabs on mobile */}
+        <div className="mb-4">{selector}</div>
+        <MobileDetailTabs
+          skillsContent={skillsContent}
+          passivesContent={passivesContent}
+          thirdTabContent={sanityContent}
+        />
+      </>
+    ) : (
+      <>
+        {/* Show selector while loading, then skills when available */}
+        <div className="mb-4">{selector}</div>
+        {visibleSections >= 1 && skillsContent}
+      </>
+    )
 
   return (
     <DetailPageLayout

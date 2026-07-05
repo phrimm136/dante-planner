@@ -1,15 +1,17 @@
 import { useState, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
-import { DUNGEON_IDX, DIFFICULTY_COLORS, DIFFICULTY_LABELS, CARD_GRID, type DungeonIdx, type MDCategory } from '@/lib/constants'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import {
+  DUNGEON_IDX,
+  DIFFICULTY_COLORS,
+  DIFFICULTY_LABELS,
+  type DungeonIdx,
+  type MDCategory,
+} from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
 import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
 
@@ -38,7 +40,7 @@ interface ThemePackSelectorPaneProps {
 function getAvailableDifficulties(
   floorNumber: number,
   previousFloorDifficulty: DungeonIdx | null,
-  category: MDCategory
+  category: MDCategory,
 ): DungeonIdx[] {
   // Floor 11-15: Extreme only
   if (floorNumber >= 11) {
@@ -69,7 +71,7 @@ function filterThemePacks(
   themePackList: ThemePackListType,
   floorNumber: number,
   difficulty: DungeonIdx,
-  usedThemePackIds: Set<string>
+  usedThemePackIds: Set<string>,
 ): { id: string; entry: ThemePackEntry }[] {
   const result: { id: string; entry: ThemePackEntry }[] = []
 
@@ -121,13 +123,20 @@ export function ThemePackSelectorPane({
 }: ThemePackSelectorPaneProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const availableDifficulties = getAvailableDifficulties(floorNumber, previousFloorDifficulty, category)
-
-  const [selectedDifficulty, setSelectedDifficulty] = useState<DungeonIdx>(
-    availableDifficulties[0]
+  const availableDifficulties = getAvailableDifficulties(
+    floorNumber,
+    previousFloorDifficulty,
+    category,
   )
 
-  const filteredPacks = filterThemePacks(themePackList, floorNumber, selectedDifficulty, usedThemePackIds)
+  const [selectedDifficulty, setSelectedDifficulty] = useState<DungeonIdx>(availableDifficulties[0])
+
+  const filteredPacks = filterThemePacks(
+    themePackList,
+    floorNumber,
+    selectedDifficulty,
+    usedThemePackIds,
+  )
 
   const handlePackSelect = (packId: string) => {
     startTransition(() => {
@@ -174,15 +183,22 @@ export function ThemePackSelectorPane({
 
         <Tabs
           value={String(selectedDifficulty)}
-          onValueChange={(v) => { setSelectedDifficulty(Number(v) as DungeonIdx); }}
+          onValueChange={(v) => {
+            setSelectedDifficulty(Number(v) as DungeonIdx)
+          }}
           className="flex-1 flex flex-col overflow-hidden"
         >
-          <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${availableDifficulties.length}, 1fr)` }}>
+          <TabsList
+            className="grid w-full"
+            style={{ gridTemplateColumns: `repeat(${availableDifficulties.length}, 1fr)` }}
+          >
             {availableDifficulties.map((diff) => (
               <TabsTrigger
                 key={diff}
                 value={String(diff)}
-                style={{ color: selectedDifficulty === diff ? getDifficultyColor(diff) : undefined }}
+                style={{
+                  color: selectedDifficulty === diff ? getDifficultyColor(diff) : undefined,
+                }}
               >
                 {getDifficultyLabel(diff)}
               </TabsTrigger>
@@ -221,7 +237,9 @@ export function ThemePackSelectorPane({
                           packEntry={entry}
                           packName={name}
                           specialName={i18nData?.specialName}
-                          onClick={() => { handlePackSelect(id); }}
+                          onClick={() => {
+                            handlePackSelect(id)
+                          }}
                           enableHoverHighlight
                         />
                       </ScaledCardWrapper>

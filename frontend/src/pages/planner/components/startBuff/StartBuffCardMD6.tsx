@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   getStartBuffIconPath,
@@ -7,12 +7,12 @@ import {
   getStartBuffStarLightPath,
   getStartBuffEnhancementBgPath,
   getStartBuffEnhancementIconPath,
-} from '@/lib/assetPaths'
-import { MD_ACCENT_COLORS } from '@/lib/constants'
+} from '@/shared/assets'
+import { MD_ACCENT_COLORS } from '@/shared/gameData'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
-import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/types/StartBuffTypes'
-import { getEnhancementSuffix, createBuffId } from '@/types/StartBuffTypes'
-import { AutoSizeText } from '@/components/common/AutoSizeText'
+import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
+import { getEnhancementSuffix, createBuffId } from '@/shared/gameText'
+import { AutoSizeText } from '@/components/ui/AutoSizeText'
 import { formatBuffEffects } from './formatBuffDescription'
 
 const MD_VERSION = 6
@@ -60,7 +60,7 @@ export function StartBuffCardMD6({
 
   // Get the buff data for current enhancement level
   const currentBuffId = createBuffId(buff.baseId, enhancement)
-  const displayBuff = allBuffs.find(b => Number(b.id) === currentBuffId) ?? buff
+  const displayBuff = allBuffs.find((b) => Number(b.id) === currentBuffId) ?? buff
 
   // Enhancement button click: toggle enhancement via parent
   const handleEnhancementClick = (level: 1 | 2) => {
@@ -70,12 +70,23 @@ export function StartBuffCardMD6({
 
   // Press animation state
   const [isPressed, setIsPressed] = useState(false)
+  const pressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clear the press-animation timer on unmount so it cannot fire after teardown
+  useEffect(() => {
+    return () => {
+      if (pressTimeoutRef.current !== null) clearTimeout(pressTimeoutRef.current)
+    }
+  }, [])
 
   // Card click: toggle selection with current enhancement
   const handleCardClick = () => {
     // Trigger press animation
     setIsPressed(true)
-    setTimeout(() => { setIsPressed(false) }, 100)
+    if (pressTimeoutRef.current !== null) clearTimeout(pressTimeoutRef.current)
+    pressTimeoutRef.current = setTimeout(() => {
+      setIsPressed(false)
+    }, 100)
 
     if (isSelected) {
       // Deselect - signal with negative ID
@@ -100,7 +111,10 @@ export function StartBuffCardMD6({
     return (
       <div className="flex-1 h-6 relative overflow-visible">
         <button
-          onClick={(e) => { e.stopPropagation(); handleEnhancementClick(lvl) }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleEnhancementClick(lvl)
+          }}
           className="absolute inset-0 overflow-visible"
           style={{
             borderStyle: 'solid',
@@ -113,8 +127,11 @@ export function StartBuffCardMD6({
         />
         <div className="absolute inset-0 flex items-center justify-center gap-0.5 pointer-events-none">
           {Array.from({ length: iconCount }).map((_, i) => (
-            <img key={i} src={iconPath} alt=""
-              className={`w-auto shrink-0 ${isButtonSelected ? lvl === 2 ? 'h-[20.8px]' : 'h-[16.9px]' : 'h-4'}`}
+            <img
+              key={i}
+              src={iconPath}
+              alt=""
+              className={`w-auto shrink-0 ${isButtonSelected ? (lvl === 2 ? 'h-[20.8px]' : 'h-[16.9px]') : 'h-4'}`}
             />
           ))}
         </div>
@@ -125,30 +142,29 @@ export function StartBuffCardMD6({
   return (
     <div
       className={`relative cursor-pointer w-68 h-80 transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
-      onMouseEnter={() => { setIsHovered(true) }}
-      onMouseLeave={() => { setIsHovered(false) }}
+      onMouseEnter={() => {
+        setIsHovered(true)
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false)
+      }}
       onClick={handleCardClick}
     >
       {/* Pane background */}
-      <img
-        src={getStartBuffPanePath(MD_VERSION)}
-        alt=""
-        className="w-full h-full object-cover"
-      />
+      <img src={getStartBuffPanePath(MD_VERSION)} alt="" className="w-full h-full object-cover" />
 
       {/* Content overlay */}
       <div className="absolute inset-0 flex flex-col pt-1">
         {/* Top black area: Cost with star (top-right) */}
         <div className="relative" style={{ height: '15%' }}>
           <div className="absolute left-21/32 top-5/8 -translate-y-1/2 flex items-center gap-1">
-            <img
-              src={getStartBuffStarLightPath()}
-              alt=""
-              className="w-6 h-6 object-contain"
-            />
+            <img src={getStartBuffStarLightPath()} alt="" className="w-6 h-6 object-contain" />
             <span
               className="text-[25px] -translate-y-1"
-              style={{ color: enhancement > 0 ? '#f8c200' : undefined, fontFamily: getDisplayFontForNumeric() }}
+              style={{
+                color: enhancement > 0 ? '#f8c200' : undefined,
+                fontFamily: getDisplayFontForNumeric(),
+              }}
             >
               {displayBuff.cost}
             </span>

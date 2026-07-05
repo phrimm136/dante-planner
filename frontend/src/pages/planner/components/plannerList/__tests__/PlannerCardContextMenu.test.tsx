@@ -100,13 +100,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -123,13 +119,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -146,13 +138,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -168,13 +156,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -185,7 +169,7 @@ describe('PlannerCardContextMenu', () => {
 
       expect(mockVoteMutate).toHaveBeenCalledWith(
         { plannerId: '123e4567-e89b-12d3-a456-426614174000', voteType: 'UP' },
-        expect.any(Object)
+        expect.any(Object),
       )
     })
 
@@ -194,13 +178,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: true }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -226,13 +206,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       expect(screen.getByText('Test Card')).toBeInTheDocument()
@@ -245,13 +221,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={false}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={false}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -265,13 +237,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={false}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={false}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -298,13 +266,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -332,13 +296,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')
@@ -366,13 +326,9 @@ describe('PlannerCardContextMenu', () => {
       const planner = { ...basePlanner, hasUpvoted: null }
 
       render(
-        <PlannerCardContextMenu
-          planner={planner}
-          view="community"
-          isAuthenticated={true}
-        >
+        <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
           <div>Test Card</div>
-        </PlannerCardContextMenu>
+        </PlannerCardContextMenu>,
       )
 
       const card = screen.getByText('Test Card')

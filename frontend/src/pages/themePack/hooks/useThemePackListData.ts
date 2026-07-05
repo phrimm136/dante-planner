@@ -1,44 +1,31 @@
-import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { ThemePackListSchema, ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
 
-// Query key factory for theme pack list data
+// `data()` deviates from the standard list shape (`spec()`) — kept hand-rolled
 export const themePackListQueryKeys = {
   all: () => ['themePack', 'list'] as const,
   data: () => ['themePack', 'list', 'data'] as const,
   i18n: (language: string) => ['themePack', 'list', 'i18n', language] as const,
 }
 
-// Theme pack list query options with runtime validation
 function createThemePackListQueryOptions() {
-  return queryOptions({
-    queryKey: themePackListQueryKeys.data(),
-    queryFn: async () => {
-      const module = await import('@static/data/themePackList.json')
-      const result = ThemePackListSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[themePack list] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    themePackListQueryKeys.data(),
+    () => import('@static/data/themePackList.json'),
+    ThemePackListSchema,
+    'themePack list',
+  )
 }
 
-// Theme pack i18n query options (names)
 function createThemePackI18nQueryOptions(language: string) {
-  return queryOptions({
-    queryKey: themePackListQueryKeys.i18n(language),
-    queryFn: async () => {
-      const module = await import(`@static/i18n/${language}/themePack.json`)
-      const result = ThemePackI18nSchema.safeParse(module.default)
-      if (!result.success) {
-        throw new Error(`[themePack i18n] Validation failed: ${result.error.message}`)
-      }
-      return result.data
-    },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
-  })
+  return createStaticDataQueryOptions(
+    themePackListQueryKeys.i18n(language),
+    () => import(`@static/i18n/${language}/themePack.json`),
+    ThemePackI18nSchema,
+    'themePack i18n',
+  )
 }
 
 /**
@@ -51,9 +38,7 @@ function createThemePackI18nQueryOptions(language: string) {
  */
 export function useThemePackI18n() {
   const { i18n } = useTranslation()
-  const { data: themePackI18n } = useSuspenseQuery(
-    createThemePackI18nQueryOptions(i18n.language)
-  )
+  const { data: themePackI18n } = useSuspenseQuery(createThemePackI18nQueryOptions(i18n.language))
   return themePackI18n
 }
 
@@ -67,9 +52,7 @@ export function useThemePackListData() {
   const { i18n } = useTranslation()
 
   const { data: spec } = useSuspenseQuery(createThemePackListQueryOptions())
-  const { data: i18nData } = useSuspenseQuery(
-    createThemePackI18nQueryOptions(i18n.language)
-  )
+  const { data: i18nData } = useSuspenseQuery(createThemePackI18nQueryOptions(i18n.language))
 
   return {
     spec,

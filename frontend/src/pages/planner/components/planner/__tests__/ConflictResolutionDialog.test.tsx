@@ -33,9 +33,7 @@ describe('ConflictResolutionDialog', () => {
     render(<ConflictResolutionDialog {...defaultProps} />)
 
     expect(screen.getByText('Save Conflict Detected')).toBeInTheDocument()
-    expect(
-      screen.getByText(/This planner was modified on another device/)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/This planner was modified on another device/)).toBeInTheDocument()
   })
 
   it('should not render when open is false', () => {

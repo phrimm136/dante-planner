@@ -83,3 +83,15 @@ export {
   EGOGiftObservationCostSchema,
   EGOGiftObservationDataSchema,
 } from './schemas/EGOGiftObservationSchemas'
+
+export {
+  encodeGiftSelection,
+  decodeGiftSelection,
+  getBaseGiftId,
+  isGiftSelected,
+  getGiftEnhancement,
+  findEncodedGiftId,
+  buildSelectionLookup,
+  getCascadeIngredients,
+} from './lib/egoGiftEncoding'
+export type { GiftSelectionEntry } from './lib/egoGiftEncoding'

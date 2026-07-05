@@ -1,5 +1,9 @@
 import { Suspense, memo } from 'react'
-import { getEGOGiftIconPath, getEGOGiftOnHoverPath, getEGOGiftSelectHighlightPath } from '@/lib/assetPaths'
+import {
+  getEGOGiftIconPath,
+  getEGOGiftOnHoverPath,
+  getEGOGiftSelectHighlightPath,
+} from '@/shared/assets'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
@@ -25,10 +29,7 @@ interface EGOGiftCardProps {
 }
 
 // Custom comparison - compare gift by id/keyword, not object reference
-function areGiftCardPropsEqual(
-  prev: EGOGiftCardProps,
-  next: EGOGiftCardProps
-): boolean {
+function areGiftCardPropsEqual(prev: EGOGiftCardProps, next: EGOGiftCardProps): boolean {
   return (
     prev.gift.id === next.gift.id &&
     prev.gift.keyword === next.gift.keyword &&
@@ -70,13 +71,19 @@ export const EGOGiftCard = memo(function EGOGiftCard({
   const { id } = gift
 
   // Extract tier from tag array (guaranteed to exist)
-    const tier = gift.tag
-      .filter(t => t.startsWith('TIER_'))
-      .sort((a) => (a.includes('EX') ? -1 : 1)) // Moves EX to the front
-      [0]?.replace('TIER_', '');
+  const tier = gift.tag
+    .filter((t) => t.startsWith('TIER_'))
+    .sort((a) => (a.includes('EX') ? -1 : 1)) // Moves EX to the front
+    [0]?.replace('TIER_', '')
 
   return (
-    <div className={cn('w-24 group', showName ? 'flex flex-col items-center gap-1.5' : 'relative', className)}>
+    <div
+      className={cn(
+        'w-24 group',
+        showName ? 'flex flex-col items-center gap-1.5' : 'relative',
+        className,
+      )}
+    >
       {/* Background and icon container */}
       <div className={cn('w-24 h-24', showName && 'relative')}>
         {/* Background layers */}

@@ -1,20 +1,29 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.service.PlannerCommentSseService;
+import org.danteplanner.backend.comment.service.CommentService;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.dto.comment.CommentTreeNode;
-import org.danteplanner.backend.dto.comment.CreateCommentResponse;
-import org.danteplanner.backend.dto.comment.UpdateCommentResponse;
-import org.danteplanner.backend.dto.comment.CommentVoteResponse;
-import org.danteplanner.backend.dto.comment.CreateCommentRequest;
-import org.danteplanner.backend.dto.comment.UpdateCommentRequest;
-import org.danteplanner.backend.entity.*;
-import org.danteplanner.backend.exception.CommentForbiddenException;
-import org.danteplanner.backend.exception.CommentNotFoundException;
-import org.danteplanner.backend.exception.PlannerNotFoundException;
-import org.danteplanner.backend.repository.PlannerCommentRepository;
-import org.danteplanner.backend.repository.PlannerCommentVoteRepository;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
+import org.danteplanner.backend.notification.service.NotificationService;
+
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.comment.dto.CommentTreeNode;
+import org.danteplanner.backend.comment.dto.CreateCommentResponse;
+import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
+import org.danteplanner.backend.comment.dto.CreateCommentRequest;
+import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
+import org.danteplanner.backend.shared.entity.*;
+import org.danteplanner.backend.comment.exception.CommentForbiddenException;
+import org.danteplanner.backend.comment.exception.CommentNotFoundException;
+import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -74,7 +83,8 @@ class CommentServiceTest {
                 plannerRepository,
                 userRepository,
                 notificationService,
-                plannerCommentSseService
+                plannerCommentSseService,
+                new PlannerAccessGuard(userRepository, plannerRepository)
         );
 
         testUser = User.builder()
@@ -429,8 +439,8 @@ class CommentServiceTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
-            org.danteplanner.backend.exception.UserTimedOutException exception = assertThrows(
-                    org.danteplanner.backend.exception.UserTimedOutException.class,
+            org.danteplanner.backend.user.exception.UserTimedOutException exception = assertThrows(
+                    org.danteplanner.backend.user.exception.UserTimedOutException.class,
                     () -> commentService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
             );
             assertEquals(testUser.getId(), exception.getUserId());
@@ -450,8 +460,8 @@ class CommentServiceTest {
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
-            org.danteplanner.backend.exception.UserBannedException exception = assertThrows(
-                    org.danteplanner.backend.exception.UserBannedException.class,
+            org.danteplanner.backend.user.exception.UserBannedException exception = assertThrows(
+                    org.danteplanner.backend.user.exception.UserBannedException.class,
                     () -> commentService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
             );
             assertEquals(testUser.getId(), exception.getUserId());
@@ -471,7 +481,7 @@ class CommentServiceTest {
 
             // Act & Assert
             assertThrows(
-                    org.danteplanner.backend.exception.UserTimedOutException.class,
+                    org.danteplanner.backend.user.exception.UserTimedOutException.class,
                     () -> commentService.toggleUpvote(commentId, testUser.getId())
             );
             verify(commentVoteRepository, never()).save(any());
@@ -490,7 +500,7 @@ class CommentServiceTest {
 
             // Act & Assert
             assertThrows(
-                    org.danteplanner.backend.exception.UserBannedException.class,
+                    org.danteplanner.backend.user.exception.UserBannedException.class,
                     () -> commentService.toggleUpvote(commentId, testUser.getId())
             );
             verify(commentVoteRepository, never()).save(any());

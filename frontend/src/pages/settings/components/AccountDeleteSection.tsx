@@ -4,19 +4,13 @@ import { toast } from '@/lib/toast'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
-import { useAuthQuery, authQueryKeys } from '@/hooks/useAuthQuery'
-import { useDeleteAccountMutation } from '@/hooks/useUserSettingsQuery'
+import { useAuthQuery, authQueryKeys } from '@/shared/auth'
+import { useDeleteAccountMutation } from '../hooks/useUserSettingsQuery'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AccountDeleteDialog } from './AccountDeleteDialog'
-import {
-  generateState,
-  generateCodeVerifier,
-  generateCodeChallenge,
-  storeOAuthParams,
-} from '@/lib/oauth'
-import { env } from '@/lib/env'
-import { GoogleIcon } from '@/components/icons/GoogleIcon'
+import { startGoogleLogin } from '@/shared/auth'
+import { GoogleIcon } from '@/components/ui/GoogleIcon'
 
 /**
  * Inner component that uses Suspense hooks.
@@ -29,49 +23,6 @@ function AccountDeleteSectionContent() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  // OAuth login handler (reused from UsernameSection pattern)
-  const handleGoogleLogin = async () => {
-    try {
-      const state = generateState()
-      const codeVerifier = generateCodeVerifier()
-      const codeChallenge = await generateCodeChallenge(codeVerifier)
-
-      storeOAuthParams(state, codeVerifier)
-
-      const clientId = env.VITE_GOOGLE_CLIENT_ID
-      const redirectUri = `${window.location.origin}/auth/callback/google`
-      const scope = 'openid email'
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}&` +
-        `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-        `response_type=code&` +
-        `scope=${encodeURIComponent(scope)}&` +
-        `state=${state}&` +
-        `code_challenge=${codeChallenge}&` +
-        `code_challenge_method=S256`
-
-      const width = 500
-      const height = 600
-      const left = (window.screen.width - width) / 2
-      const top = (window.screen.height - height) / 2
-
-      const popup = window.open(
-        authUrl,
-        'Google Sign-In',
-        `width=${width},height=${height},left=${left},top=${top},popup=yes`
-      )
-
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        toast.error(t('header.auth.popupBlocked', 'Popup blocked. Please allow popups for this site.'))
-        window.location.href = authUrl
-      }
-    } catch (error) {
-      console.error('Failed to initiate OAuth flow:', error)
-      toast.error(t('header.auth.loginFailed', 'Failed to start login. Please try again.'))
-    }
-  }
 
   // Handle account deletion
   const handleDelete = () => {
@@ -105,7 +56,7 @@ function AccountDeleteSectionContent() {
           t('settings.deleteAccount.success', {
             date: formattedDate,
             days: response.gracePeriodDays ?? 30,
-          })
+          }),
         )
 
         // Close dialog
@@ -116,7 +67,7 @@ function AccountDeleteSectionContent() {
 
         // Wait 2 seconds then redirect
         setTimeout(() => {
-          navigate({ to: '/' })
+          void navigate({ to: '/' })
         }, 2000)
       },
       onError: () => {
@@ -126,16 +77,13 @@ function AccountDeleteSectionContent() {
     })
   }
 
-
   // Unauthenticated state - show sign-in prompt
   if (!user) {
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">{t('settings.deleteAccount.title')}</h2>
-        <p className="text-muted-foreground">
-          {t('settings.deleteAccount.signInPrompt')}
-        </p>
-        <Button onClick={handleGoogleLogin} className="flex items-center gap-2">
+        <p className="text-muted-foreground">{t('settings.deleteAccount.signInPrompt')}</p>
+        <Button onClick={startGoogleLogin} className="flex items-center gap-2">
           <GoogleIcon className="h-4 w-4" />
           {t('header.auth.googleLogin')}
         </Button>
@@ -147,13 +95,8 @@ function AccountDeleteSectionContent() {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">{t('settings.deleteAccount.title')}</h2>
-      <p className="text-sm text-muted-foreground">
-        {t('settings.deleteAccount.warning')}
-      </p>
-      <Button
-        variant="destructive"
-        onClick={() => setDialogOpen(true)}
-      >
+      <p className="text-sm text-muted-foreground">{t('settings.deleteAccount.warning')}</p>
+      <Button variant="destructive" onClick={() => setDialogOpen(true)}>
         {t('settings.deleteAccount.title')}
       </Button>
 

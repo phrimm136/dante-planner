@@ -326,7 +326,7 @@ describe('cross-filter AND logic', () => {
       attributeTypes: Set<string>
       fusioned: Set<string>
       exclusive: Set<string>
-    }
+    },
   ): boolean {
     return (
       matchesKeywordFilter(gift.keyword ?? null, filters.keywords) &&

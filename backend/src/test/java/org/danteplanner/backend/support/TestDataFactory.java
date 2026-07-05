@@ -1,14 +1,14 @@
 package org.danteplanner.backend.support;
 
-import org.danteplanner.backend.entity.AuthProviderType;
-import org.danteplanner.backend.entity.Planner;
-import org.danteplanner.backend.entity.PlannerStatus;
-import org.danteplanner.backend.entity.PlannerType;
-import org.danteplanner.backend.entity.User;
-import org.danteplanner.backend.entity.UserRole;
-import org.danteplanner.backend.repository.PlannerRepository;
-import org.danteplanner.backend.repository.UserRepository;
-import org.danteplanner.backend.service.token.JwtTokenService;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -97,6 +97,6 @@ public class TestDataFactory {
     }
 
     public static String generateAccessToken(JwtTokenService jwtTokenService, User user) {
-        return jwtTokenService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+        return jwtTokenService.generateAccessToken(user.getId(), user.getRole());
     }
 }

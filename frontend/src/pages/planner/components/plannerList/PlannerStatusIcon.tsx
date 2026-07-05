@@ -46,19 +46,9 @@ export function PlannerStatusIcon({ status, className }: PlannerStatusIconProps)
         />
       )
     case 'synced':
-      return (
-        <CheckCircle
-          className={cn(iconClass, 'text-primary')}
-          aria-label="Synced"
-        />
-      )
+      return <CheckCircle className={cn(iconClass, 'text-primary')} aria-label="Synced" />
     case 'published':
-      return (
-        <Globe
-          className={cn(iconClass, 'text-primary')}
-          aria-label="Published"
-        />
-      )
+      return <Globe className={cn(iconClass, 'text-primary')} aria-label="Published" />
     case 'unpublishedChanges':
       return (
         <AlertCircle

@@ -24,9 +24,7 @@ import {
 /**
  * Create a minimal valid MDPlannerContent with optional overrides
  */
-function createMockMDContent(
-  overrides: Partial<MDPlannerContent> = {},
-): MDPlannerContent {
+function createMockMDContent(overrides: Partial<MDPlannerContent> = {}): MDPlannerContent {
   return {
     selectedKeywords: [],
     selectedBuffIds: [],
@@ -73,9 +71,7 @@ function createMockPlanner(
 /**
  * Create filters with overrides on top of empty defaults
  */
-function createFilters(
-  overrides: Partial<PlannerSearchFilters> = {},
-): PlannerSearchFilters {
+function createFilters(overrides: Partial<PlannerSearchFilters> = {}): PlannerSearchFilters {
   return { ...EMPTY_PLANNER_SEARCH_FILTERS, ...overrides }
 }
 
@@ -194,9 +190,7 @@ describe('extractGiftIds', () => {
       selectedGiftIds: ['g1', 'g2'],
       observationGiftIds: ['g3'],
       comprehensiveGiftIds: ['g4'],
-      floorSelections: [
-        { themePackId: null, difficulty: 0, giftIds: ['g5', 'g6'] },
-      ],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['g5', 'g6'] }],
     })
 
     const result = extractGiftIds(content)
@@ -209,9 +203,7 @@ describe('extractGiftIds', () => {
       selectedGiftIds: ['g1', 'g2'],
       observationGiftIds: ['g2', 'g3'],
       comprehensiveGiftIds: [],
-      floorSelections: [
-        { themePackId: null, difficulty: 0, giftIds: ['g1'] },
-      ],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['g1'] }],
     })
 
     const result = extractGiftIds(content)

@@ -9,13 +9,13 @@ import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSec
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { FloorGalleryTracker } from './FloorGalleryTracker'
 import { PlannerSection } from '../PlannerSection'
-import { NoteEditor } from '@/components/noteEditor/NoteEditor'
+import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useProgressiveReveal } from '@/hooks/useProgressiveReveal'
+import { useProgressiveReveal } from '@/components/hooks/useProgressiveReveal'
 import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
-import { FLOOR_COUNTS } from '@/lib/constants'
-import type { MDCategory } from '@/lib/constants'
-import { isNoteEmpty } from '@/lib/noteUtils'
+import { FLOOR_COUNTS } from '@/shared/gameData'
+import type { MDCategory } from '@/shared/gameData'
+import { isNoteEmpty } from '@/shared/noteEditor'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 
 const SECTION_COUNT = 7
@@ -47,7 +47,7 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         comprehensiveGiftIds: content.comprehensiveGiftIds,
         floorSelections: content.floorSelections,
       }),
-    [content]
+    [content],
   )
 
   return (
@@ -72,7 +72,11 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
               <div className="border-2 border-border rounded-lg p-4">
                 <div className="flex flex-wrap gap-2">
                   {Array.from({ length: 12 }).map((_, i) => (
-                    <Skeleton key={i} className="w-16 h-20 rounded-md" style={{ animationDelay: `${i * 40}ms` }} />
+                    <Skeleton
+                      key={i}
+                      className="w-16 h-20 rounded-md"
+                      style={{ animationDelay: `${i * 40}ms` }}
+                    />
                   ))}
                 </div>
               </div>
@@ -166,14 +170,23 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
                 </div>
                 <div className="flex flex-wrap gap-2 p-2 min-h-28">
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="w-24 h-24 rounded-md" style={{ animationDelay: `${i * 80}ms` }} />
+                    <Skeleton
+                      key={i}
+                      className="w-24 h-24 rounded-md"
+                      style={{ animationDelay: `${i * 80}ms` }}
+                    />
                   ))}
                 </div>
               </div>
             </PlannerSection>
           }
         >
-          <EGOGiftObservationSummary mdVersion={planner.metadata.contentVersion} selectedGiftIdsOverride={deserialized.observationGiftIds} onClick={() => {}} readOnly={true} />
+          <EGOGiftObservationSummary
+            mdVersion={planner.metadata.contentVersion}
+            selectedGiftIdsOverride={deserialized.observationGiftIds}
+            onClick={() => {}}
+            readOnly={true}
+          />
         </Suspense>
       )}
       {visibleSections[3] && !isNoteEmpty(content.sectionNotes.observation) && (
@@ -230,7 +243,9 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftListView')}>
           <Suspense
             fallback={
-              <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.EGOGiftData')}</div>
+              <div className="text-center text-gray-500 py-8">
+                {t('pages.plannerMD.loading.EGOGiftData')}
+              </div>
             }
           >
             <ComprehensiveGiftGridTracker
@@ -255,7 +270,9 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
       {visibleSections[6] && (
         <Suspense
           fallback={
-            <div className="text-center text-gray-500 py-8">{t('pages.plannerMD.loading.themePackData')}</div>
+            <div className="text-center text-gray-500 py-8">
+              {t('pages.plannerMD.loading.themePackData')}
+            </div>
           }
         >
           <FloorGalleryTracker

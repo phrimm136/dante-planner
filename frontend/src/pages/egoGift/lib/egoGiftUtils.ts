@@ -1,4 +1,4 @@
-import { EGO_GIFT_ENHANCEMENT_BASE_COSTS, ENHANCEMENT_LEVELS } from '@/lib/constants'
+import { EGO_GIFT_ENHANCEMENT_BASE_COSTS, ENHANCEMENT_LEVELS } from '@/shared/gameData'
 
 /**
  * Calculate enhancement cost for a given tier and level
@@ -44,9 +44,7 @@ export function extractEGOGiftTier(tags: string[]): string {
  * @returns Array of disabled level indices (0, 1, and/or 2)
  */
 export function getDisabledEnhancementLevels(descs: string[]): number[] {
-  return ENHANCEMENT_LEVELS.filter(
-    (level) => level >= descs.length || !descs[level]?.trim()
-  )
+  return ENHANCEMENT_LEVELS.filter((level) => level >= descs.length || !descs[level]?.trim())
 }
 
 /**

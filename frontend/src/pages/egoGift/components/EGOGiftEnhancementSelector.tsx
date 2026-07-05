@@ -1,8 +1,4 @@
-import {
-  ENHANCEMENT_LEVELS,
-  ENHANCEMENT_LABELS,
-  type EnhancementLevel,
-} from '@/lib/constants'
+import { ENHANCEMENT_LEVELS, ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
 import { EGOGiftTooltip } from './EGOGiftTooltip'
 
 interface EGOGiftEnhancementSelectorProps {
@@ -44,7 +40,9 @@ export function EGOGiftEnhancementSelector({
             <EGOGiftTooltip key={level} giftId={giftId} enhancement={level}>
               <button
                 type="button"
-                onClick={(e) => { handleLevelClick(e, level); }}
+                onClick={(e) => {
+                  handleLevelClick(e, level)
+                }}
                 className="selectable w-7 h-7 rounded text-xs font-bold flex items-center justify-center bg-card/80"
                 data-selected={isCurrentLevel}
               >

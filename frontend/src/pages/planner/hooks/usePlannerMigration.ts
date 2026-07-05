@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth'
 import { usePlannerStorage } from './usePlannerStorage'
 import { plannerApi } from '../lib/plannerApi'
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 
 /**
  * SSR safety check
@@ -19,10 +19,7 @@ const MIGRATION_DONE_KEY = 'planner-migration-done'
  * Migration error codes for i18n translation
  * Components should use these codes to display localized error messages
  */
-export type MigrationErrorCode =
-  | 'limitExceeded'
-  | 'migrationFailed'
-  | null
+export type MigrationErrorCode = 'limitExceeded' | 'migrationFailed' | null
 
 /**
  * Return type for usePlannerMigration hook
@@ -145,13 +142,11 @@ export function usePlannerMigration(): PlannerMigrationResult {
             contentVersion: planner.metadata.contentVersion,
             plannerType: planner.config.type,
           }
-        })
+        }),
       )
 
       // Filter out nulls (failed loads)
-      const validPlanners = plannersToImport.filter(
-        (p): p is NonNullable<typeof p> => p !== null
-      )
+      const validPlanners = plannersToImport.filter((p): p is NonNullable<typeof p> => p !== null)
 
       setTotalCount(validPlanners.length)
 
@@ -176,8 +171,7 @@ export function usePlannerMigration(): PlannerMigrationResult {
       // Handle planner limit exceeded error
       if (
         error instanceof Error &&
-        (error.message.includes('PLANNER_LIMIT_EXCEEDED') ||
-          error.message.includes('limit'))
+        (error.message.includes('PLANNER_LIMIT_EXCEEDED') || error.message.includes('limit'))
       ) {
         setErrorCode('limitExceeded')
       } else {
@@ -202,7 +196,7 @@ export function usePlannerMigration(): PlannerMigrationResult {
     if (migrationAttemptedRef.current) return
     migrationAttemptedRef.current = true
 
-    performMigration()
+    void performMigration()
   }, [performMigration])
 
   /**
@@ -212,7 +206,7 @@ export function usePlannerMigration(): PlannerMigrationResult {
   const retryMigration = useCallback(() => {
     migrationAttemptedRef.current = false
     setErrorCode(null)
-    performMigration()
+    void performMigration()
   }, [performMigration])
 
   return {

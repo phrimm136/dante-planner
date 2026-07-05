@@ -16,14 +16,14 @@ const mockMutate = vi.fn()
 const mockSetQueryData = vi.fn()
 const mockNavigate = vi.fn()
 
-vi.mock('@/hooks/useLogoutEverywhere', () => ({
+vi.mock('@/shared/auth/hooks/useLogoutEverywhere', () => ({
   useLogoutEverywhere: vi.fn(() => ({
     mutate: mockMutate,
     isPending: false,
   })),
 }))
 
-vi.mock('@/hooks/useAuthQuery', () => ({
+vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   authQueryKeys: {
     me: ['auth', 'me'],
   },
@@ -43,7 +43,7 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: vi.fn(() => mockNavigate),
 }))
 
-import { useLogoutEverywhere } from '@/hooks/useLogoutEverywhere'
+import { useLogoutEverywhere } from '@/shared/auth'
 
 describe('LogoutEverywhereSection', () => {
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe('LogoutEverywhereSection', () => {
 
     expect(mockMutateWithCallback).toHaveBeenCalled()
     expect(toast.success).toHaveBeenCalledWith(
-      expect.stringContaining('Signed out of all devices.')
+      expect.stringContaining('Signed out of all devices.'),
     )
     expect(mockSetQueryData).toHaveBeenCalledWith(['auth', 'me'], null)
     expect(mockNavigate).toHaveBeenCalledWith({ to: '/' })

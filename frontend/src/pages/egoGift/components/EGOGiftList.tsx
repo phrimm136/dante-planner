@@ -1,10 +1,11 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/lib/constants'
-import { CARD_GRID } from '@/lib/constants'
-import { useSearchMappingsDeferred } from '@/hooks/useSearchMappings'
+import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
+import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
 import { sortEGOGifts } from '../lib/egoGiftSort'
 import {
@@ -16,8 +17,8 @@ import {
   matchesFusionedFilter,
   matchesExclusiveFilter,
 } from '../lib/egoGiftFilter'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 interface EGOGiftListProps {
@@ -70,23 +71,13 @@ export function EGOGiftList({
   // Default sort: tier-first (higher tier first, then by keyword)
   const sortedGifts = useMemo(() => sortEGOGifts(gifts, 'tier-first'), [gifts])
 
-  // Progressive rendering: start with 10 cards, add more incrementally
-  const [displayCount, setDisplayCount] = useState(10)
-
-  // Reset display count when gifts change (new data loaded)
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [sortedGifts])
-
-  // Progressively render more cards (10 per frame)
-  useEffect(() => {
-    if (displayCount < sortedGifts.length) {
-      const rafId = requestAnimationFrame(() => {
-        setDisplayCount((prev) => Math.min(prev + 10, sortedGifts.length))
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [displayCount, sortedGifts.length])
+  // Progressive rendering: start with one batch, add a batch per frame
+  const displayCount = useProgressiveCount({
+    total: sortedGifts.length,
+    step: PROGRESSIVE_REVEAL.CARD_BATCH,
+    initial: PROGRESSIVE_REVEAL.CARD_BATCH,
+    resetKey: sortedGifts,
+  })
 
   // Create Set of visible gift IDs based on filters
   // This is fast O(n) computation, much cheaper than React reconciliation
@@ -104,7 +95,7 @@ export function EGOGiftList({
       // Battle keyword filter - OR logic (gift must have ANY selected battle keyword)
       if (selectedBattleKeywords.size > 0) {
         const hasAnyBattleKeyword = (gift.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword)
+          selectedBattleKeywords.has(keyword),
         )
         if (!hasAnyBattleKeyword) continue
       }
@@ -158,19 +149,14 @@ export function EGOGiftList({
   if (visibleIds.size === 0) {
     return (
       <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">
-          {t('egoGift.emptyState')}
-        </div>
+        <div className="text-center text-muted-foreground py-8">{t('egoGift.emptyState')}</div>
       </div>
     )
   }
 
   return (
     <div className="bg-muted border border-border rounded-md p-6">
-      <ResponsiveCardGrid
-        cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-        mobileScale={0.8}
-      >
+      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT} mobileScale={0.8}>
         {sortedGifts.slice(0, displayCount).map((gift) => (
           <ScaledCardWrapper
             key={gift.id}

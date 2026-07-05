@@ -10,20 +10,20 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PassiveCard } from '../PassiveI18n'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 
 // FormattedDescription pulls a keyword pipeline that needs query providers.
-vi.mock('@/components/common/FormattedDescription', () => ({
+vi.mock('@/shared/gameText/components/FormattedDescription', () => ({
   FormattedDescription: ({ text }: { text: string }) => <span>{text}</span>,
 }))
 
 // StyledSkillName is unrelated to flavor; stub it.
-vi.mock('@/components/common/StyledName', () => ({
+vi.mock('@/shared/gameText/components/StyledName', () => ({
   StyledSkillName: ({ name }: { name: string }) => <span>{name}</span>,
   StyledNameSkeleton: () => <span data-testid="styled-name-skeleton" />,
 }))
 
-vi.mock('@/lib/assetPaths', () => ({
+vi.mock('@/shared/assets', () => ({
   getAffinityIconPath: (a: string) => `/icons/${a}.webp`,
   getIdentityPassiveCountIconPath: () => '/icons/count.webp',
   getLockIconPath: () => '/icons/lock.webp',
@@ -50,17 +50,12 @@ describe('PassiveCard flavor rendering', () => {
 
   it('renders the flavor lore line when provided', () => {
     render(
-      <PassiveCard
-        {...baseProps}
-        flavor="'The things I dread seeing again always come back.'"
-      />,
+      <PassiveCard {...baseProps} flavor="'The things I dread seeing again always come back.'" />,
     )
 
     const flavor = screen.getByTestId('passive-flavor')
     expect(flavor).toBeInTheDocument()
-    expect(flavor).toHaveTextContent(
-      "'The things I dread seeing again always come back.'",
-    )
+    expect(flavor).toHaveTextContent("'The things I dread seeing again always come back.'")
     expect(flavor).toHaveStyle({ color: FLAVOR_TEXT_COLOR })
   })
 
@@ -76,11 +71,7 @@ describe('PassiveCard flavor rendering', () => {
 
   it('renders flavor after the description in DOM order', () => {
     const { container } = render(
-      <PassiveCard
-        {...baseProps}
-        desc="Mechanical passive desc."
-        flavor="Lore tail."
-      />,
+      <PassiveCard {...baseProps} desc="Mechanical passive desc." flavor="Lore tail." />,
     )
 
     const root = container.firstChild as HTMLElement

@@ -29,7 +29,24 @@
         "measurement": ["bytes_sent", "bytes_recv", "packets_sent", "packets_recv"],
         "metrics_collection_interval": 60,
         "resources": ["ens5"]
-      }
+      },
+      "procstat": [
+        {
+          "exe": "java",
+          "measurement": ["memory_rss", "cpu_usage", "num_threads", "num_fds"],
+          "metrics_collection_interval": 60
+        },
+        {
+          "exe": "mysqld",
+          "measurement": ["memory_rss", "cpu_usage", "num_threads", "num_fds"],
+          "metrics_collection_interval": 60
+        },
+        {
+          "exe": "nginx",
+          "measurement": ["memory_rss", "cpu_usage", "num_threads"],
+          "metrics_collection_interval": 60
+        }
+      ]
     },
     "append_dimensions": {
       "InstanceId": "${aws:InstanceId}",

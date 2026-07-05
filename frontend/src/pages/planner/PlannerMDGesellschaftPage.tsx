@@ -29,16 +29,16 @@ import { Button } from '@/components/ui/button'
 
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import { usePlannerSearchFilters } from './hooks/usePlannerSearchFilters'
-import { useAuthQuery } from '@/hooks/useAuthQuery'
+import { useAuthQuery } from '@/shared/auth'
 
 import { MDPlannerNavButtons } from './components/plannerList/MDPlannerNavButtons'
 import { MDPlannerToolbar } from './components/plannerList/MDPlannerToolbar'
 import { PlannerListFilterPills } from './components/plannerList/PlannerListFilterPills'
 import { PlannerFilterPane } from './components/plannerList/PlannerFilterPane'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
-import { LoadingState } from '@/components/common/LoadingState'
-import { PlannerGridSkeleton } from '@/components/common/ListPageSkeleton'
-import { CommunityPlansErrorFallback } from '@/components/common/CommunityPlansErrorFallback'
+import { LoadingState } from '@/components/feedback/LoadingState'
+import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
+import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 
 // ============================================================================
 // Page Content Component
@@ -53,18 +53,8 @@ function GesellschaftPageContent() {
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 
-  const {
-    category,
-    page,
-    mode,
-    search,
-    keyword,
-    identity,
-    ego,
-    gift,
-    themePack,
-    setFilters,
-  } = useMDGesellschaftFilters()
+  const { category, page, mode, search, keyword, identity, ego, gift, themePack, setFilters } =
+    useMDGesellschaftFilters()
 
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 

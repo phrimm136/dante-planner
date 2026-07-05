@@ -25,47 +25,47 @@ interface DeckBuilderActionBarProps {
  * memo: render only depends on boolean flags; callback identities
  * change across parent renders but behavior is stable.
  */
-export const DeckBuilderActionBar = memo(function DeckBuilderActionBar({
-  onImport,
-  onExport,
-  onResetOrder,
-  showEditDeck = false,
-  onEditDeck,
-  trackerMode = false,
-  onResetToInitial,
-}: DeckBuilderActionBarProps) {
-  const { t } = useTranslation(['planner', 'common'])
+export const DeckBuilderActionBar = memo(
+  function DeckBuilderActionBar({
+    onImport,
+    onExport,
+    onResetOrder,
+    showEditDeck = false,
+    onEditDeck,
+    trackerMode = false,
+    onResetToInitial,
+  }: DeckBuilderActionBarProps) {
+    const { t } = useTranslation(['planner', 'common'])
 
-  return (
-    <div className="flex flex-wrap shrink-0 justify-end gap-2">
-      {showEditDeck && onEditDeck && (
-        <Button variant="default" size="sm" onClick={onEditDeck}>
-          <Edit className="w-4 h-4" />
-          {t('deckBuilder.editDeck')}
+    return (
+      <div className="flex flex-wrap shrink-0 justify-end gap-2">
+        {showEditDeck && onEditDeck && (
+          <Button variant="default" size="sm" onClick={onEditDeck}>
+            <Edit className="w-4 h-4" />
+            {t('deckBuilder.editDeck')}
+          </Button>
+        )}
+        <Button variant="outline" size="sm" onClick={onImport}>
+          <Download className="w-4 h-4" />
+          {t('deckBuilder.import')}
         </Button>
-      )}
-      <Button variant="outline" size="sm" onClick={onImport}>
-        <Download className="w-4 h-4" />
-        {t('deckBuilder.import')}
-      </Button>
-      <Button variant="outline" size="sm" onClick={onExport}>
-        <Upload className="w-4 h-4" />
-        {t('deckBuilder.export')}
-      </Button>
-      <Button variant="outline" size="sm" onClick={onResetOrder}>
-        {t('deckBuilder.resetOrder')}
-      </Button>
-      {trackerMode && onResetToInitial && (
-        <Button variant="outline" size="sm" onClick={onResetToInitial}>
-          {t('deckBuilder.resetToInitial', 'Reset to Initial')}
+        <Button variant="outline" size="sm" onClick={onExport}>
+          <Upload className="w-4 h-4" />
+          {t('deckBuilder.export')}
         </Button>
-      )}
-    </div>
-  )
-}, (prev, next) => {
-  return (
-    prev.showEditDeck === next.showEditDeck &&
-    prev.trackerMode === next.trackerMode
-  )
-  // Callbacks excluded — identities change across parent renders, behavior stable.
-})
+        <Button variant="outline" size="sm" onClick={onResetOrder}>
+          {t('deckBuilder.resetOrder')}
+        </Button>
+        {trackerMode && onResetToInitial && (
+          <Button variant="outline" size="sm" onClick={onResetToInitial}>
+            {t('deckBuilder.resetToInitial', 'Reset to Initial')}
+          </Button>
+        )}
+      </div>
+    )
+  },
+  (prev, next) => {
+    return prev.showEditDeck === next.showEditDeck && prev.trackerMode === next.trackerMode
+    // Callbacks excluded — identities change across parent renders, behavior stable.
+  },
+)

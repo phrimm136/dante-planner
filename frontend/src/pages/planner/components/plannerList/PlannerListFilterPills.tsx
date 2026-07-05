@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 
-import { MD_CATEGORIES } from '@/lib/constants'
+import { MD_CATEGORIES } from '@/shared/gameData'
 
-import type { MDCategory } from '@/lib/constants'
+import type { MDCategory } from '@/shared/gameData'
 
 interface PlannerListFilterPillsProps {
   /** Currently selected category (undefined = All) */
@@ -33,7 +33,9 @@ export function PlannerListFilterPills({
     <div className="flex gap-2 flex-wrap">
       {/* All pill */}
       <button
-        onClick={() => { onCategoryChange(undefined) }}
+        onClick={() => {
+          onCategoryChange(undefined)
+        }}
         className="selectable px-3 py-1.5 text-sm font-medium rounded-full bg-card"
         data-selected={selectedCategory === undefined}
       >
@@ -44,7 +46,9 @@ export function PlannerListFilterPills({
       {MD_CATEGORIES.map((category) => (
         <button
           key={category}
-          onClick={() => { onCategoryChange(category) }}
+          onClick={() => {
+            onCategoryChange(category)
+          }}
           className="selectable px-3 py-1.5 text-sm font-medium rounded-full bg-card"
           data-selected={selectedCategory === category}
         >

@@ -10,16 +10,11 @@ import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
 import { ThemePackSelectorPane } from './ThemePackSelectorPane'
 import { FloorGiftViewer } from './FloorGiftViewer'
 import { FloorGiftSelectorPane } from './FloorGiftSelectorPane'
-import { DUNGEON_IDX, type DungeonIdx, type MDCategory } from '@/lib/constants'
+import { DUNGEON_IDX, type DungeonIdx, type MDCategory } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 import { canSelectFloorThemePack, getUnaffordableGiftNames } from '../../lib/plannerRules'
 import { PlannerSection } from '../PlannerSection'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import type { FloorThemeSelection } from '@/pages/themePack'
 
 interface FloorThemeGiftSectionProps {
@@ -65,8 +60,13 @@ export function FloorThemeGiftSection({
       allFloors: s?.floorSelections ?? [],
       updateFloorSelection: s?.updateFloorSelection,
       storeCategory: s?.category,
-    }))
-  ) ?? { currentFloor: undefined, allFloors: [], updateFloorSelection: undefined, storeCategory: undefined }
+    })),
+  ) ?? {
+    currentFloor: undefined,
+    allFloors: [],
+    updateFloorSelection: undefined,
+    storeCategory: undefined,
+  }
 
   const floorSelections = floorSelectionsOverride ?? allFloors
   const category = categoryProp ?? storeCategory ?? '5F'
@@ -82,10 +82,20 @@ export function FloorThemeGiftSection({
       // Remove gifts that are unaffordable for the new theme pack
       let newGiftIds = existingGifts
       if (existingGifts.size > 0) {
-        const { ids, names } = getUnaffordableGiftNames(existingGifts, packId, egoGiftSpec, egoGiftI18n)
+        const { ids, names } = getUnaffordableGiftNames(
+          existingGifts,
+          packId,
+          egoGiftSpec,
+          egoGiftI18n,
+        )
         if (names.length > 0) {
-          newGiftIds = new Set([...existingGifts].filter(id => !ids.includes(id)))
-          toast.warning(t('pages.plannerMD.gifts.unaffordableWarning', { floor: floorNumber, gifts: names.join(', ') }))
+          newGiftIds = new Set([...existingGifts].filter((id) => !ids.includes(id)))
+          toast.warning(
+            t('pages.plannerMD.gifts.unaffordableWarning', {
+              floor: floorNumber,
+              gifts: names.join(', '),
+            }),
+          )
         }
       }
 
@@ -113,7 +123,8 @@ export function FloorThemeGiftSection({
   const selectedThemePackId = selection?.themePackId ?? null
   const selectedDifficulty = selection?.difficulty ?? null
   const selectedGiftIds = selection?.giftIds ?? new Set<string>()
-  const previousFloorDifficulty = floorIndex > 0 ? floorSelections[floorIndex - 1]?.difficulty ?? null : null
+  const previousFloorDifficulty =
+    floorIndex > 0 ? (floorSelections[floorIndex - 1]?.difficulty ?? null) : null
 
   const [isThemePackPaneOpen, setIsThemePackPaneOpen] = useState(false)
   const [isGiftPaneOpen, setIsGiftPaneOpen] = useState(false)
@@ -135,9 +146,10 @@ export function FloorThemeGiftSection({
   const getBaseDifficulty = (dungeonIdx: DungeonIdx): 'NORMAL' | 'HARD' => {
     return dungeonIdx === DUNGEON_IDX.NORMAL ? 'NORMAL' : 'HARD'
   }
-  const difficultyLabel = selectedDifficulty !== null
-    ? getFloorDifficultyLabel(floorNumber, getBaseDifficulty(selectedDifficulty))
-    : null
+  const difficultyLabel =
+    selectedDifficulty !== null
+      ? getFloorDifficultyLabel(floorNumber, getBaseDifficulty(selectedDifficulty))
+      : null
 
   const handleOpenThemePackPane = () => {
     setIsThemePackPaneOpen(true)
@@ -164,9 +176,17 @@ export function FloorThemeGiftSection({
   }, [floorSelections, floorIndex])
 
   return (
-    <PlannerSection title={t('pages.plannerMD.floor', { number: floorNumber })} onViewNotes={onViewNotes}>
-      <div className={cn('flex flex-col [orientation:landscape]:flex-row sm:flex-row items-center [orientation:landscape]:items-start sm:items-start gap-4', className)}>
-        <div className="flex flex-col w-56 h-104 items-center [orientation:landscape]:shrink-0 sm:shrink-0">
+    <PlannerSection
+      title={t('pages.plannerMD.floor', { number: floorNumber })}
+      onViewNotes={onViewNotes}
+    >
+      <div
+        className={cn(
+          'flex flex-col landscape:flex-row sm:flex-row items-center landscape:items-start sm:items-start gap-4',
+          className,
+        )}
+      >
+        <div className="flex flex-col w-56 h-104 items-center landscape:shrink-0 sm:shrink-0">
           {/* Difficulty indicator */}
           <DifficultyIndicator difficulty={difficultyLabel} />
 

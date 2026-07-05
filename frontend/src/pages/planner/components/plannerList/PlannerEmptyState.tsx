@@ -35,9 +35,7 @@ export function PlannerEmptyState({ view, isFiltered }: PlannerEmptyStateProps) 
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
         <Search className="size-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">
-          {t('pages.plannerList.empty.noMatchTitle')}
-        </h3>
+        <h3 className="text-lg font-medium mb-2">{t('pages.plannerList.empty.noMatchTitle')}</h3>
         <p className="text-muted-foreground max-w-md">
           {t('pages.plannerList.empty.noMatchDescription')}
         </p>
@@ -50,9 +48,7 @@ export function PlannerEmptyState({ view, isFiltered }: PlannerEmptyStateProps) 
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
         <FileText className="size-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">
-          {t('pages.plannerList.empty.noPlansTitle')}
-        </h3>
+        <h3 className="text-lg font-medium mb-2">{t('pages.plannerList.empty.noPlansTitle')}</h3>
         <p className="text-muted-foreground max-w-md mb-6">
           {t('pages.plannerList.empty.noPlansDescription')}
         </p>

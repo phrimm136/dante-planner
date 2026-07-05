@@ -1,0 +1,12 @@
+package org.danteplanner.backend.shared.entity;
+
+/**
+ * Enum representing the type of entity indexed in planner_content_index.
+ * Maps to the MySQL ENUM('IDENTITY', 'EGO', 'EGO_GIFT', 'THEME_PACK').
+ */
+public enum ContentEntityType {
+    IDENTITY,
+    EGO,
+    EGO_GIFT,
+    THEME_PACK
+}

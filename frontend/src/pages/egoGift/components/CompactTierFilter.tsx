@@ -1,7 +1,7 @@
-import { CompactIconFilter } from '@/components/filter/CompactIconFilter'
-import { EGO_GIFT_TIERS } from '@/lib/constants'
+import { CompactIconFilter } from '@/shared/filter'
+import { EGO_GIFT_TIERS } from '@/shared/gameData'
 
-import type { EGOGiftTier } from '@/lib/constants'
+import type { EGOGiftTier } from '@/shared/gameData'
 
 interface CompactTierFilterProps {
   selectedTiers: Set<EGOGiftTier>
@@ -16,10 +16,7 @@ interface CompactTierFilterProps {
  *
  * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
  */
-export function CompactTierFilter({
-  selectedTiers,
-  onSelectionChange,
-}: CompactTierFilterProps) {
+export function CompactTierFilter({ selectedTiers, onSelectionChange }: CompactTierFilterProps) {
   return (
     <CompactIconFilter
       options={EGO_GIFT_TIERS}

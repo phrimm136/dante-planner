@@ -1,10 +1,11 @@
 import { useMemo, type Ref } from 'react'
 
-import { CARD_GRID, MAX_LEVEL } from '@/lib/constants'
-import { getSelectedIndicatorPath } from '@/lib/assetPaths'
+import { MAX_LEVEL } from '@/shared/gameData'
+import { CARD_GRID } from '@/lib/constants'
+import { getSelectedIndicatorPath } from '@/shared/assets'
 import { useDeckVisibleCount } from '../../stores/usePlannerEditorStore'
-import { ResponsiveCardGrid } from '@/components/common/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/common/ScaledCardWrapper'
+import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
+import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { IdentityCard } from '@/pages/identity'
 import { TierLevelSelector } from './TierLevelSelector'
 import type { IdentityListItem } from '@/pages/identity'
@@ -38,7 +39,7 @@ export function IdentityGrid({
 
   const displayIdentities = useMemo(
     () => sortedIdentities.slice(0, visibleCount),
-    [sortedIdentities, visibleCount]
+    [sortedIdentities, visibleCount],
   )
 
   return (
@@ -75,13 +76,15 @@ export function IdentityGrid({
                       <IdentityCard
                         identity={identity}
                         isSelected={isSelected}
-                        overlay={isSelected ? (
-                          <img
-                            src={getSelectedIndicatorPath()}
-                            alt="Selected"
-                            className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
-                          />
-                        ) : undefined}
+                        overlay={
+                          isSelected ? (
+                            <img
+                              src={getSelectedIndicatorPath()}
+                              alt="Selected"
+                              className="absolute inset-0 m-auto w-38 object-contain pointer-events-none"
+                            />
+                          ) : undefined
+                        }
                       />
                     </ScaledCardWrapper>
                   </TierLevelSelector>

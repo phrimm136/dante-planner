@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
-import { FormattedDescription } from '@/components/common/FormattedDescription'
-import { StyledSkillName, StyledNameSkeleton } from '@/components/common/StyledName'
+import { FormattedDescription } from '@/shared/gameText'
+import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
 
 interface PassiveCardWithSuspenseProps {
@@ -20,11 +20,7 @@ interface PassiveCardWithSuspenseProps {
  * Structure (locked indicator) stays visible,
  * only name and description suspend.
  */
-export function PassiveCardWithSuspense({
-  id,
-  passiveId,
-  isLocked,
-}: PassiveCardWithSuspenseProps) {
+export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
     <div className={cn('space-y-1', isLocked && 'opacity-50')}>
       <div className="flex items-center gap-2">
