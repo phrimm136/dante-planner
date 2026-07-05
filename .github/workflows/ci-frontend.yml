@@ -74,11 +74,22 @@ jobs:
           cache-dependency-path: frontend/yarn.lock
 
       - name: FE Build
-        timeout-minutes: 10
+        timeout-minutes: 20
         working-directory: ./frontend
+        # Vite 8's Rolldown native binding intermittently hangs on GitHub runners
+        # (sveltejs/kit#15554); upstream tolerates this via retry (VITEST_SEGFAULT_RETRY
+        # in vitejs/vite's own CI). Retry the whole build and accept only a clean exit —
+        # a hung attempt is killed and retried, never passed off as a partial artifact.
         run: |
           yarn install --frozen-lockfile
-          yarn build
+          for attempt in 1 2; do
+            echo "::group::FE build attempt $attempt"
+            timeout 480 yarn build && { echo "::endgroup::"; exit 0; }
+            echo "::endgroup::"
+            echo "Build attempt $attempt hung or failed; retrying"
+          done
+          echo "FE build failed after 2 attempts"
+          exit 1
         env:
           NODE_OPTIONS: '--max-old-space-size=6144'
 
