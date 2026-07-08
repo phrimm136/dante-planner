@@ -73,14 +73,33 @@ class KeywordSetConverterTest {
         }
 
         @Test
-        @DisplayName("invalid keyword throws IllegalArgumentException")
-        void convertToDatabaseColumn_WhenInvalidKeyword_ThrowsIllegalArgument() {
-            Set<String> keywords = Set.of("Combustion", "InvalidKeyword");
-            IllegalArgumentException ex = assertThrows(
-                    IllegalArgumentException.class,
-                    () -> converter.convertToDatabaseColumn(keywords)
-            );
-            assertTrue(ex.getMessage().contains("InvalidKeyword"));
+        @DisplayName("unknown keyword is dropped, not thrown")
+        void convertToDatabaseColumn_WhenUnknownKeyword_DropsIt() {
+            Set<String> keywords = new HashSet<>(Set.of("Combustion", "REMOVED_KEYWORD"));
+            String result = converter.convertToDatabaseColumn(keywords);
+            assertEquals("Combustion", result);
+        }
+
+        @Test
+        @DisplayName("set of only unknown keywords returns null")
+        void convertToDatabaseColumn_WhenAllUnknown_ReturnsNull() {
+            assertNull(converter.convertToDatabaseColumn(Set.of("REMOVED_KEYWORD", "GhostKeyword")));
+        }
+
+        @Test
+        @DisplayName("renamed keyword from stale client is remapped to current id")
+        void convertToDatabaseColumn_WhenRenamedKeyword_RemapsToCurrent() {
+            Set<String> keywords = new HashSet<>(Set.of("AccelBullet", "ChargeLoad"));
+            String result = converter.convertToDatabaseColumn(keywords);
+            assertEquals("9828,EmergencyChargeForceField", result);
+        }
+
+        @Test
+        @DisplayName("renamed and current id collapse to a single member")
+        void convertToDatabaseColumn_WhenRenamedAndCurrentPresent_Deduplicates() {
+            Set<String> keywords = new HashSet<>(Set.of("AccelBullet", "9828"));
+            String result = converter.convertToDatabaseColumn(keywords);
+            assertEquals("9828", result);
         }
 
         @Test
