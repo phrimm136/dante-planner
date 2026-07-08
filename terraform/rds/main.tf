@@ -10,7 +10,7 @@ terraform {
 
 # Credentials come from the operator's AWS profile (a dedicated least-privilege
 # provisioning identity assumed via STS). No role ARN is hardcoded here so this
-# file is safe to publish in a public repo. See docs/30-rds-migration/runbook.md.
+# file is safe to publish in a public repo. See docs/tasks/030-rds-migration/runbook.md.
 provider "aws" {
   region = var.region
 }

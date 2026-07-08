@@ -2,7 +2,7 @@
 
 Provisions the **empty** RDS MySQL 8.0 instance + networking + parameter group for the migration.
 It does **not** load data and does **not** run the cutover — those are operator runbook steps
-(`docs/30-rds-migration/runbook.md`). Terraform owns infra; never data.
+(`docs/tasks/030-rds-migration/runbook.md`). Terraform owns infra; never data.
 
 ## Prereqs
 - A dedicated least-privilege **provisioning identity** assumed via STS (kept in private ops notes,

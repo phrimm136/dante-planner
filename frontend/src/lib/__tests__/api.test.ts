@@ -251,7 +251,7 @@ describe('ApiClient', () => {
   describe('CORS preflight avoidance (regression guard)', () => {
     // Bodyless GET/HEAD must stay CORS "simple" requests: a request Content-Type would
     // force a preflight OPTIONS that blocks the cold-load request burst.
-    // See docs/22-performance/01-request-latency.
+    // See docs/tasks/035-performance/01-request-latency.
     const okJson = () => ({ ok: true, status: 200, json: vi.fn().mockResolvedValue({}) })
     const sentHeaders = () =>
       ((mockFetch.mock.calls[0][1] as RequestInit).headers ?? {}) as Record<string, string>
