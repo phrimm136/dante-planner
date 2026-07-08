@@ -5,6 +5,7 @@ import {
   MD_CATEGORIES,
   RR_CATEGORIES,
   PLANNER_TYPES,
+  migrateKeywords,
 } from '@/shared/gameData'
 import type { DungeonIdx } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
@@ -570,7 +571,7 @@ export function serializeSets(state: PageStateWithSets): SerializablePageState {
  */
 export function deserializeSets(state: SerializablePageState): PageStateWithSets {
   return {
-    selectedKeywords: new Set(state.selectedKeywords),
+    selectedKeywords: new Set(migrateKeywords(state.selectedKeywords)),
     selectedBuffIds: new Set(state.selectedBuffIds),
     selectedGiftIds: new Set(state.selectedGiftIds),
     observationGiftIds: new Set(state.observationGiftIds),

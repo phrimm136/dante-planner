@@ -17,6 +17,7 @@ export {
   MD_CATEGORY_STYLES,
   SYNERGY_KEYWORDS,
   PLANNER_KEYWORDS,
+  KEYWORD_RENAME_MAP,
   DEFAULT_DEPLOYMENT_MAX,
   MAX_OBSERVABLE_GIFTS,
   ENHANCEMENT_LEVELS,
@@ -85,6 +86,8 @@ export type {
 
 export { getAttributeColors, getSeasonColor } from './colorUtils'
 export type { AttributeColors } from './colorUtils'
+
+export { migrateKeywords } from './keywordNormalize'
 
 export { SkillDescEntrySchema } from './schemas/SkillSchemas'
 export type { SkillDescEntry, Uptie, Threadspin } from './schemas/SkillSchemas'

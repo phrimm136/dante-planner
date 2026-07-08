@@ -197,7 +197,7 @@ describe('usePlannerEditorStore', () => {
     function makeContent(overrides: Partial<MDPlannerContent> = {}): MDPlannerContent {
       return {
         type: 'MIRROR_DUNGEON',
-        selectedKeywords: ['k1'],
+        selectedKeywords: ['Combustion'],
         selectedBuffIds: [3],
         selectedGiftKeyword: 'fire',
         selectedGiftIds: ['g1', 'g2'],
@@ -223,7 +223,7 @@ describe('usePlannerEditorStore', () => {
 
       const s = store.getState()
       expect(s.selectedKeywords).toBeInstanceOf(Set)
-      expect(Array.from(s.selectedKeywords)).toEqual(['k1'])
+      expect(Array.from(s.selectedKeywords)).toEqual(['Combustion'])
       expect(Array.from(s.selectedBuffIds)).toEqual([3])
       expect(Array.from(s.selectedGiftIds)).toEqual(['g1', 'g2'])
       expect(Array.from(s.observationGiftIds)).toEqual(['o1'])

@@ -246,6 +246,18 @@ export const PLANNER_KEYWORDS = [
 export type PlannerKeyword = (typeof PLANNER_KEYWORDS)[number]
 
 /**
+ * Legacy keyword aliases → current ids. Mirrors the backend `RENAME_MAP`
+ * (KeywordSetConverter). Outdated clients (stale IndexedDB, cached bundles) still
+ * hold pre-rename ids; the read-side normalizer remaps them before use so their
+ * icons/filters resolve. Keys are intentionally absent from PLANNER_KEYWORDS.
+ * @see backend KeywordSetConverter.RENAME_MAP — must stay in lockstep.
+ */
+export const KEYWORD_RENAME_MAP: Readonly<Record<string, string>> = {
+  AccelBullet: '9828',
+  ChargeLoad: 'EmergencyChargeForceField',
+} as const
+
+/**
  * Max number of deployment
  */
 export const DEFAULT_DEPLOYMENT_MAX = 7

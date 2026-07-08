@@ -51,6 +51,16 @@ describe('toUserFriendlyError', () => {
     expect(result.key).toBe('pages.plannerMD.publish.requiresHardMode')
   })
 
+  it('KEYWORD_INVALID → invalidKeyword key with keyword param', () => {
+    const result = toUserFriendlyError({
+      code: 'KEYWORD_INVALID',
+      message: '',
+      context: { keyword: 'GhostKeyword' },
+    })
+    expect(result.key).toBe('pages.plannerMD.validation.invalidKeyword')
+    expect(result.params?.keyword).toBe('GhostKeyword')
+  })
+
   it('structural error codes → corruptedState key', () => {
     const structuralCodes = [
       'EQUIPMENT_MISSING_SINNER',

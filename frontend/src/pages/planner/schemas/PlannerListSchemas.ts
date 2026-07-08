@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { PLANNER_KEYWORDS } from '@/shared/gameData'
+import { PLANNER_KEYWORDS, migrateKeywords } from '@/shared/gameData'
 import { MDCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
 
 /**
@@ -42,8 +42,11 @@ export const PublicPlannerSchema = z.object({
   plannerType: PlannerTypeSchema,
   /** MD category (5F, 10F, 15F) */
   category: MDCategorySchema,
-  /** Selected planner keywords */
-  selectedKeywords: z.array(z.string()).nullable(),
+  /** Selected planner keywords - legacy ids remapped, unknown preserved (null preserved) */
+  selectedKeywords: z.preprocess(
+    (v) => (v == null ? v : migrateKeywords(v)),
+    z.array(z.string()).nullable(),
+  ),
   /** Number of upvotes */
   upvotes: z.number().int().min(0),
   /** Number of views */

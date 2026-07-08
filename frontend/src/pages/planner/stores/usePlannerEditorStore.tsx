@@ -3,7 +3,13 @@ import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { useShallow } from 'zustand/shallow'
 
-import { SINNERS, MAX_LEVEL, DEFAULT_SKILL_EA, DUNGEON_IDX } from '@/shared/gameData'
+import {
+  SINNERS,
+  MAX_LEVEL,
+  DEFAULT_SKILL_EA,
+  DUNGEON_IDX,
+  migrateKeywords,
+} from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 import egoSpecList from '@static/data/egoSpecList.json'
 
@@ -401,10 +407,8 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
                 ? content.deploymentOrder
                 : [],
 
-              // Warm state - with defensive array validation
-              selectedKeywords: new Set(
-                Array.isArray(content.selectedKeywords) ? content.selectedKeywords : [],
-              ),
+              // Warm state - migrate renamed keyword ids (handles non-array input)
+              selectedKeywords: new Set(migrateKeywords(content.selectedKeywords)),
               selectedBuffIds: new Set(
                 Array.isArray(content.selectedBuffIds) ? content.selectedBuffIds : [],
               ),

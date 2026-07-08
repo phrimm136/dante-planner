@@ -6,7 +6,14 @@
  * and note sizes. Mirrors backend PlannerContentValidator validation rules.
  */
 
-import { EGO_TYPES, OFFENSIVE_SKILL_SLOTS, FLOOR_COUNTS, DUNGEON_IDX } from '@/shared/gameData'
+import {
+  EGO_TYPES,
+  OFFENSIVE_SKILL_SLOTS,
+  FLOOR_COUNTS,
+  DUNGEON_IDX,
+  PLANNER_KEYWORDS,
+  migrateKeywords,
+} from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { getBaseGiftId } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
@@ -28,6 +35,7 @@ import type {
   StartGiftValidationError,
   FloorValidationError,
   DifficultyValidationError,
+  KeywordValidationError,
 } from './plannerValidationErrors'
 
 // ============================================================================
@@ -63,6 +71,9 @@ const REQUIRED_EGO_TYPE = 'ZAYIN'
 
 /** Valid skill slots (0=S1, 1=S2, 2=S3) */
 const VALID_SKILL_SLOTS = new Set(['0', '1', '2'])
+
+/** Current selectable planner keyword ids */
+const VALID_PLANNER_KEYWORDS = new Set<string>(PLANNER_KEYWORDS)
 
 /** Skill EA total must equal 6 (3+2+1 default distribution) */
 const SKILL_EA_TOTAL = 6
@@ -694,6 +705,27 @@ function validateFloorGiftAffordability(
 }
 
 /**
+ * Strict keyword membership check (publish tier).
+ * Rejects any selected keyword id not in the current planner keyword set. The publish
+ * path migrates renamed ids before calling this, so anything still unknown here is
+ * genuine corruption and is surfaced loudly as KEYWORD_INVALID.
+ */
+export function validateSelectedKeywords(keywords: string[]): KeywordValidationError[] {
+  const errors: KeywordValidationError[] = []
+  for (const keyword of keywords) {
+    if (!VALID_PLANNER_KEYWORDS.has(keyword)) {
+      errors.push({
+        code: 'KEYWORD_INVALID',
+        message: `Selected keyword "${keyword}" is not a valid planner keyword`,
+        field: 'selectedKeywords',
+        context: { keyword },
+      })
+    }
+  }
+  return errors
+}
+
+/**
  * Comprehensive planner validation for save operations
  * Runs all validation checks and returns consolidated errors
  *
@@ -757,6 +789,11 @@ export function validatePlannerForPublish(
 
   // 6. Start gifts validation
   errors.push(...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds))
+
+  // 6b. Migrate renamed keyword ids, then strict-reject any that remain unknown. Read
+  // boundaries already migrate stored keywords; migrating a local copy here keeps a rename
+  // from being mis-rejected without mutating caller state, while a residual unknown fails loudly.
+  errors.push(...validateSelectedKeywords(migrateKeywords(content.selectedKeywords)))
 
   // 7. Floor selections validation
   const floorCount = FLOOR_COUNTS[category]

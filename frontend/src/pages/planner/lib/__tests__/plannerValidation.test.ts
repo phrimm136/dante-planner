@@ -18,6 +18,7 @@ import {
   validatePlannerForPublish,
   validatePlannerForDraftSave,
   validateNoteSizes,
+  validateSelectedKeywords,
 } from '../plannerValidation'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
 import { calculateNoteByteLength } from '@/shared/noteEditor'
@@ -243,6 +244,45 @@ describe('validatePlannerForPublish (strict)', () => {
     const { isValid, errors } = validatePlannerForPublish('My Plan', content, '10F')
     expect(isValid).toBe(false)
     expect(errors.some((e) => e.code === 'DIFFICULTY_INVALID_FOR_CATEGORY')).toBe(true)
+  })
+
+  it('renamed keyword is accepted via migration and does not mutate caller state', () => {
+    const content = makeValidContent('5F')
+    content.selectedKeywords = ['AccelBullet'] // legacy id with a rename target
+    const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
+    expect(isValid).toBe(true)
+    expect(errors).toHaveLength(0)
+    expect(content.selectedKeywords).toEqual(['AccelBullet']) // validator does not mutate input
+  })
+
+  it('unknown (non-rename) keyword fails loudly with KEYWORD_INVALID', () => {
+    const content = makeValidContent('5F')
+    content.selectedKeywords = ['9828', 'GhostKeyword'] // no rename target — genuine corruption
+    const { isValid, errors } = validatePlannerForPublish('My Plan', content, '5F')
+    expect(isValid).toBe(false)
+    expect(errors.some((e) => e.code === 'KEYWORD_INVALID')).toBe(true)
+  })
+})
+
+// ============================================================================
+// validateSelectedKeywords (strict membership tier)
+// ============================================================================
+
+describe('validateSelectedKeywords', () => {
+  it('accepts current keyword ids', () => {
+    expect(validateSelectedKeywords(['9828', 'Combustion'])).toHaveLength(0)
+  })
+
+  it('rejects a legacy (renamed) keyword id — the read tier should have remapped it', () => {
+    const errors = validateSelectedKeywords(['AccelBullet'])
+    expect(errors).toHaveLength(1)
+    expect(errors[0].code).toBe('KEYWORD_INVALID')
+  })
+
+  it('rejects an unknown keyword id', () => {
+    const errors = validateSelectedKeywords(['GhostKeyword'])
+    expect(errors).toHaveLength(1)
+    expect(errors[0].code).toBe('KEYWORD_INVALID')
   })
 })
 
