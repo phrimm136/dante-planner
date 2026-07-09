@@ -2,7 +2,7 @@
 
 Target cloud architecture for the backend infra epic (learning project: k8s/AWS for Korean BE/SRE roles), plus the Phase-2 backend backlog it generates. Archives the design debate of 2026-07-05/06. The `docs/spec.md` data-driven-feature sections (data catalog, normalization, rendering modes) are not applicable — this is an infrastructure/backend spec with no game-data surface.
 
-Implementation-grade mechanics for the Phase-2 backend work (Redis key layouts, rotation Lua contract, SSE event schema, routing/gate/re-check/tombstone semantics, pool sizes, test harness) live in the companion file **`mechanics.md`** in this directory — read it before building any Phase-2 item.
+Implementation-grade mechanics for the Phase-2 backend work (Redis key layouts, the full rotation Lua script, SSE event rules, routing/gate/re-check/tombstone semantics, pool ledger, test harness) live in the companion file **`mechanics.md`** in this directory — read it before building any Phase-2 item, starting with its §0 executor boundary (BINDING / PLAN-TIME / FORBIDDEN).
 
 Phase ordering (unchanged from the original arc, extended):
 RDS cutover (in-flight, `docs/tasks/030-rds-migration/`) → Phase-2 stateless refactor + causal stack (this spec's backend backlog) → k3s single region (Oregon) + ArgoCD → Seoul region + Global Accelerator → someday: Seoul-primary flip (promote runbook).
