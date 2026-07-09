@@ -106,6 +106,14 @@ export interface TitleValidationError extends ValidationError {
 }
 
 /**
+ * Keyword validation error (strict/publish mode only) — a selected keyword id is
+ * not a current planner keyword (e.g. an un-remapped legacy id).
+ */
+export interface KeywordValidationError extends ValidationError {
+  code: 'KEYWORD_INVALID'
+}
+
+/**
  * Union type of all validation errors
  */
 export type PlannerValidationError =
@@ -118,6 +126,7 @@ export type PlannerValidationError =
   | FloorValidationError
   | DifficultyValidationError
   | TitleValidationError
+  | KeywordValidationError
 
 /**
  * Maps a structured validation error to an i18n key + params for toast display
@@ -160,6 +169,14 @@ export function toUserFriendlyError(error: PlannerValidationError): {
     }
     case 'DIFFICULTY_INVALID_FOR_CATEGORY':
       return { key: 'pages.plannerMD.publish.requiresHardMode' }
+    case 'KEYWORD_INVALID': {
+      const keywordError = error as KeywordValidationError
+      const ctx = keywordError.context as { keyword?: string } | undefined
+      return {
+        key: 'pages.plannerMD.validation.invalidKeyword',
+        params: { keyword: ctx?.keyword ?? '' },
+      }
+    }
     default:
       return { key: 'pages.plannerMD.validation.corruptedState' }
   }

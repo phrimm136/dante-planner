@@ -45,7 +45,7 @@ Monorepo: `frontend/` (React 19 + TypeScript, Vite), `backend/` (Spring Boot 3.5
 
 All traffic enters through the Cloudflare edge: `api.dante-planner.com` is proxied to an AWS EC2 origin (nginx, Spring Boot, MySQL); everything else is served by Cloudflare Pages. Deploys go through GitHub Actions: changed services are detected against the last release tag, built to ECR, rolled out over AWS SSM (no SSH exposure), health-checked, and rolled back automatically on failure. Monitored with CloudWatch and Sentry; load-tested with k6.
 
-Planned: multi-region k3s with a causal-consistency read path — lives in [`docs/034-multi-region-k8s-architecture/`](docs/034-multi-region-k8s-architecture/).
+Planned: multi-region k3s with a causal-consistency read path — lives in [`docs/tasks/034-multi-region-k8s-architecture/`](docs/tasks/034-multi-region-k8s-architecture/).
 
 ## Testing
 

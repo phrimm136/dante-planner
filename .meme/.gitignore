@@ -1,0 +1,4 @@
+# meme: unreviewed drafts and hook sidecars never enter a commit
+drafts/
+.flags
+.last-swept

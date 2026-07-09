@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { storage } from '@/lib/storage'
 import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
+import { migrateKeywords } from '@/shared/gameData'
 import { SaveablePlannerSchema } from '../schemas/PlannerSchemas'
 import type { SaveablePlanner, PlannerSummary, MDPlannerContent } from '../types/PlannerTypes'
 
@@ -232,7 +233,13 @@ export function usePlannerStorage(): PlannerStorageOperations {
         // 1. Zod schema uses z.record(z.string(), z.unknown()) for content flexibility
         // 2. TypeScript expects specific PlannerContent type
         // Zod validation ensures the structure is correct at runtime
-        return result.data as unknown as SaveablePlanner
+        const planner = result.data as unknown as SaveablePlanner
+        // Migrate renamed keyword ids so the detail/view page renders current icons.
+        if (planner.config.type === 'MIRROR_DUNGEON') {
+          const mdContent = planner.content as MDPlannerContent
+          mdContent.selectedKeywords = migrateKeywords(mdContent.selectedKeywords)
+        }
+        return planner
       } catch (error) {
         console.error('Failed to parse planner data (corrupted JSON):', error)
         options?.onError?.('corruptedData')
@@ -285,7 +292,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
                   // Extract keywords for MD planners only (RR has no keywords)
                   const selectedKeywords =
                     planner.config.type === 'MIRROR_DUNGEON'
-                      ? (planner.content as MDPlannerContent).selectedKeywords
+                      ? migrateKeywords((planner.content as MDPlannerContent).selectedKeywords)
                       : undefined
 
                   results.push({
@@ -358,7 +365,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
                 const validation = SaveablePlannerSchema.safeParse(data)
 
                 if (validation.success) {
-                  results.push(validation.data as unknown as SaveablePlanner)
+                  const planner = validation.data as unknown as SaveablePlanner
+                  // Migrate renamed keyword ids so downstream sync-validation and
+                  // keyword filtering see current ids (content is unvalidated here).
+                  if (planner.config.type === 'MIRROR_DUNGEON') {
+                    const mdContent = planner.content as MDPlannerContent
+                    mdContent.selectedKeywords = migrateKeywords(mdContent.selectedKeywords)
+                  }
+                  results.push(planner)
                 }
               } catch {
                 // Skip invalid entries

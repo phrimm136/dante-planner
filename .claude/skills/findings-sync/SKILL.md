@@ -40,10 +40,10 @@ Extract patterns, recommendations, and learnings from `docs/**/findings.md` file
 ### Priority Order
 Files are processed by recency (higher directory numbers = newer):
 ```
-docs/06-planner-creation/08-skill-replacement/  (newest)
-docs/06-planner-creation/07-comprehensive-ego-gift-list/
-docs/05-code-refactoring/...
-docs/04-ego-gift-browser/...
+docs/tasks/006-planner-creation/08-skill-replacement/  (newest)
+docs/tasks/006-planner-creation/07-comprehensive-ego-gift-list/
+docs/tasks/005-code-refactoring/...
+docs/tasks/004-ego-gift-browser/...
 ... (older)
 ```
 

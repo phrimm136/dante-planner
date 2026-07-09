@@ -65,7 +65,7 @@ Append each `keyword-id` to all three:
 | Layer | Full path | Edit |
 |---|---|---|
 | FE list | `frontend/src/lib/constants.ts` | append id to the `SYNERGY_KEYWORDS` array, before its closing `] as const` |
-| BE allow-list | `backend/src/main/java/org/danteplanner/backend/converter/KeywordSetConverter.java` | append id to `VALID_KEYWORDS` (the `Set.of(...)`) |
+| BE allow-list | `backend/src/main/java/org/danteplanner/backend/planner/converter/KeywordSetConverter.java` | append id to `VALID_KEYWORDS` (the `Set.of(...)`) |
 | DB constraint | new `backend/src/main/resources/db/migration/V{next}__add_<slug>_keywords.sql` | `ALTER TABLE planners MODIFY COLUMN selected_keywords SET(...)` re-declaring **every existing member** + the new id(s) |
 
 - `V{next}`: list `backend/src/main/resources/db/migration/`, take the highest `V###`, add 1.
@@ -90,6 +90,33 @@ three-step add→migrate→remove pattern (model it on `V038__rename_charge_load
    WHERE FIND_IN_SET('OLD_ID', selected_keywords) > 0;
    ```
 3. `ALTER … MODIFY` the SET again to the final definition with the old id removed.
+
+**Then register the rename in the converter — this step is mandatory, not optional.** Add an
+`OLD_ID → NEW_ID` entry to `RENAME_MAP` in `KeywordSetConverter.java` (same pair as the SQL
+`UPDATE`; keep the two identical). The migration `UPDATE` only rewrites rows **already in the DB**
+at deploy time. An offline or stale-bundle client still holding the old id syncs it **after** the
+migration, via `PUT /api/planner/md/{id}`. `convertToDatabaseColumn` remaps `RENAME_MAP` entries to
+the current id before storing, so that late save is preserved as `NEW_ID` instead of being silently
+dropped by the `VALID_KEYWORDS` filter. Omit this and every not-yet-synced client loses the keyword.
+
+`RENAME_MAP` keys are the **removed** SET members — they must stay **out** of `VALID_KEYWORDS`
+(which `KeywordParityTest` locks to the current SET/FE set). Old ids accumulate in `RENAME_MAP`;
+never delete an entry, or its stragglers regress.
+
+**Mirror the rename in the FE map too — also mandatory.** Add the same `OLD_ID → NEW_ID` entry to
+`KEYWORD_RENAME_MAP` in `frontend/src/shared/gameData/constants.ts`. The FE `migrateKeywords`
+converter uses it to remap legacy ids loaded from IndexedDB / server / import before they render,
+so guest planners and pre-sync state show the correct icon instead of a broken one — the BE fix
+alone can't reach those. `migrateKeywords` remaps renames but deliberately **preserves** unknown
+(non-renamed) ids so the strict publish tier (`validateSelectedKeywords` → `KEYWORD_INVALID`) can
+reject genuine corruption loudly, the way gift/EGO ids are rejected — it never silently drops.
+Like the BE, FE `KEYWORD_RENAME_MAP` keys must stay **out** of `PLANNER_KEYWORDS`, and entries
+accumulate (never delete one).
+
+**FE ↔ BE `RENAME_MAP` must stay in lockstep.** They are the same alias→current pairs in two
+languages; a rename that updates one and not the other leaves that tier broken. No test currently
+guards this coupling (`KeywordParityTest` checks the valid-keyword sets, not the rename maps) — it is
+a manual invariant, so update both in the same change.
 
 If the old id is still a valid id in another domain (e.g. `AccelBullet` remains a battle
 keyword used by identities), you are only removing its **planner-keyword registration** —
@@ -117,9 +144,12 @@ Add a `"<keyword-id>": { "label": "<exact-bytes-from-Step-2>" }` entry to each:
   the supermodule pointer references a commit nobody else can fetch.
 
 ## Gotchas  *(the reason this skill exists)*
-- **Converter is the real gate.** Skip `VALID_KEYWORDS` → save throws `IllegalArgumentException`;
-  reads silently drop the keyword via `.filter(VALID_KEYWORDS::contains)`. The MySQL `SET`
-  migration alone is **not** enough.
+- **Converter is the real gate — and it now fails *silently*.** `convertToDatabaseColumn` no
+  longer throws on an unregistered id (it once did — a stale keyword 500'd the whole planner sync).
+  It remaps `RENAME_MAP` entries, then **drops** anything still outside `VALID_KEYWORDS`, mirroring
+  the read filter. So forgetting `VALID_KEYWORDS` when adding a keyword produces no runtime error —
+  the keyword just vanishes on save. `KeywordParityTest` is the **only** guard that catches the
+  miss; the MySQL `SET` migration alone is **not** enough.
 - **`StructuralValidator` is type-only** — it checks `selectedKeywords` is an array, not
   membership. **No change needed** (don't waste an edit here).
 - **H2 vs MySQL column divergence.** The converter column has no `columnDefinition`: H2 auto-DDL
@@ -141,8 +171,10 @@ Add a `"<keyword-id>": { "label": "<exact-bytes-from-Step-2>" }` entry to each:
 ## Reference — canonical file map & invariant
 | Purpose | Path |
 |---|---|
-| FE selectable list | `frontend/src/lib/constants.ts` (`SYNERGY_KEYWORDS` → `PLANNER_KEYWORDS` → `type PlannerKeyword`) |
-| BE allow-list (the gate) | `backend/src/main/java/org/danteplanner/backend/converter/KeywordSetConverter.java` (`VALID_KEYWORDS`) |
+| FE selectable list | `frontend/src/shared/gameData/constants.ts` (`SYNERGY_KEYWORDS` → `PLANNER_KEYWORDS` → `type PlannerKeyword`; `KEYWORD_RENAME_MAP` for retired ids) |
+| FE keyword converter | `frontend/src/shared/gameData/keywordNormalize.ts` (`migrateKeywords` remaps renames, keeps unknown) |
+| FE strict reject | `frontend/src/pages/planner/lib/plannerValidation.ts` (`validateSelectedKeywords` vs `VALID_PLANNER_KEYWORDS` → `KEYWORD_INVALID`) |
+| BE allow-list (the gate) | `backend/src/main/java/org/danteplanner/backend/planner/converter/KeywordSetConverter.java` (`VALID_KEYWORDS`; `RENAME_MAP` for retired ids) |
 | DB constraint | `backend/src/main/resources/db/migration/V{n}__…` (`selected_keywords` SET column) |
 | Label source (read-only) | `static/i18n/{EN,KR,JP,CN}/unitKeywords.json` |
 | Label store (rendered) | `static/i18n/{EN,KR,JP,CN}/plannerKeywords.json` |
