@@ -35,8 +35,7 @@ validate_params() {
     log_info "Alert Email: ${ALERT_EMAIL:-'(not configured - no email notifications)'}"
 }
 
-# TODO(human): Configure alarm thresholds
-# These thresholds determine when you get alerted. Consider:
+# Alarm thresholds — these determine when you get alerted. Consider:
 # - CPU: t3.small can burst to 20% baseline, 70% is conservative
 # - Memory: 2GB total, 200MB free is tight but catches OOM early
 # - Disk: 85% leaves buffer for logs/temp files
@@ -608,7 +607,8 @@ setup_s3_logging() {
 # collectors that deploy later (procstat) without needing a dashboard edit.
 #   System / Host        : CPU/disk/net, memory-vs-alarm, per-process RSS & threads
 #   Latency / API        : per-endpoint p50/p90/p99 (nginx logs), HTTP 5xx
-#   Database             : mysqld memory (procstat), query-stats/pool placeholders
+#   Database             : mysqld memory (procstat), Hikari pool + query digests
+#                          (prometheus scrape + emit-mysql-query-stats.sh cron)
 #   Spring / Application : error+warn rates, JVM threads, recent error log
 #   Alarms               : alarm status strip
 setup_dashboard() {
@@ -700,8 +700,8 @@ setup_dashboard() {
       "type": "log",
       "x": 0, "y": 14, "width": 16, "height": 7,
       "properties": {
-        "title": "Slowest Endpoints — p50 / p90 / p99 (nginx request_time)",
-        "query": "SOURCE '/ecs/danteplanner/nginx' | filter ispresent(request_time) | stats pct(request_time, 50) as p50, pct(request_time, 90) as p90, pct(request_time, 99) as p99, count(*) as reqs by uri | sort p99 desc | limit 20",
+        "title": "Slowest Endpoints — p50 / p90 / p99 (nginx request_time, SSE excluded)",
+        "query": "SOURCE '/ecs/danteplanner/nginx' | filter ispresent(request_time) | filter uri not like \"/events\" and uri not like \"/api/sse/\" | stats pct(request_time, 50) as p50, pct(request_time, 90) as p90, pct(request_time, 99) as p99, count(*) as reqs by uri | sort p99 desc | limit 20",
         "region": "$AWS_REGION",
         "view": "table"
       }
@@ -779,24 +779,59 @@ setup_dashboard() {
       "type": "metric",
       "x": 0, "y": 34, "width": 24, "height": 6,
       "properties": {
-        "title": "Query Latency by Statement (perf_schema digests)",
+        "title": "Query Latency & Lock Time by Statement (perf_schema digests)",
         "metrics": [
-          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_query_latency_avg_ms\"', 'Average')", "label": "", "id": "ql" } ]
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_query_latency_avg_ms\"', 'Average')", "label": "", "id": "ql" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_query_lock_avg_ms\"', 'Average')", "label": "", "id": "qlk", "yAxis": "right" } ]
         ],
         "period": 300,
         "region": "$AWS_REGION",
         "view": "timeSeries",
-        "yAxis": { "left": { "min": 0, "label": "ms" } }
+        "yAxis": { "left": { "min": 0, "label": "latency ms" }, "right": { "min": 0, "label": "lock ms" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 40, "width": 12, "height": 6,
+      "properties": {
+        "title": "InnoDB Lock Contention",
+        "metrics": [
+          [ { "expression": "RATE(SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_innodb_deadlocks\"', 'Maximum'))*300", "label": "deadlocks /5m", "id": "dl" } ],
+          [ { "expression": "RATE(SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_innodb_lock_timeouts\"', 'Maximum'))*300", "label": "lock timeouts /5m", "id": "lt" } ],
+          [ { "expression": "RATE(SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_innodb_row_lock_waits\"', 'Maximum'))*300", "label": "row-lock waits /5m", "id": "rlw" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_innodb_row_lock_time_avg_ms\"', 'Average')", "label": "row-lock time avg (ms)", "id": "rlt", "yAxis": "right" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "events / 5m" }, "right": { "min": 0, "label": "ms" } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 40, "width": 12, "height": 6,
+      "properties": {
+        "title": "Transactions & Blocking",
+        "metrics": [
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_blocked_sessions\"', 'Maximum')", "label": "blocked sessions", "id": "bs" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_active_transactions\"', 'Maximum')", "label": "active trx", "id": "at" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_threads_running\"', 'Maximum')", "label": "threads running", "id": "trn" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"mysql_longest_transaction_s\"', 'Maximum')", "label": "longest trx (s)", "id": "ltx", "yAxis": "right" } ]
+        ],
+        "period": 300,
+        "region": "$AWS_REGION",
+        "view": "timeSeries",
+        "yAxis": { "left": { "min": 0, "label": "Count" }, "right": { "min": 0, "label": "Seconds" } }
       }
     },
     {
       "type": "text",
-      "x": 0, "y": 40, "width": 24, "height": 1,
+      "x": 0, "y": 46, "width": 24, "height": 1,
       "properties": { "markdown": "# Spring / Application — errors, JVM, throughput" }
     },
     {
       "type": "metric",
-      "x": 0, "y": 41, "width": 12, "height": 6,
+      "x": 0, "y": 47, "width": 12, "height": 6,
       "properties": {
         "title": "Error & Warning Rates",
         "metrics": [
@@ -812,13 +847,13 @@ setup_dashboard() {
     },
     {
       "type": "metric",
-      "x": 12, "y": 41, "width": 12, "height": 6,
+      "x": 12, "y": 47, "width": 12, "height": 6,
       "properties": {
         "title": "JVM Heap Memory (used / committed / max)",
         "metrics": [
-          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_used\" area=\"heap\"', 'Average')", "label": "used", "id": "hu" } ],
-          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_committed\" area=\"heap\"', 'Average')", "label": "committed", "id": "hc" } ],
-          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_max\" area=\"heap\"', 'Average')", "label": "max", "id": "hm" } ]
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_used_bytes\" area=\"heap\"', 'Average')", "label": "used", "id": "hu" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_committed_bytes\" area=\"heap\"', 'Average')", "label": "committed", "id": "hc" } ],
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_memory_max_bytes\" area=\"heap\"', 'Average')", "label": "max", "id": "hm" } ]
         ],
         "period": 300,
         "region": "$AWS_REGION",
@@ -828,11 +863,11 @@ setup_dashboard() {
     },
     {
       "type": "metric",
-      "x": 0, "y": 47, "width": 12, "height": 6,
+      "x": 0, "y": 53, "width": 12, "height": 6,
       "properties": {
         "title": "JVM GC Pause",
         "metrics": [
-          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_gc_pause\"', 'Average')", "label": "", "id": "gc" } ]
+          [ { "expression": "SEARCH('Namespace=\"$NAMESPACE\" MetricName=\"jvm_gc_pause_seconds_max\"', 'Average')", "label": "", "id": "gc" } ]
         ],
         "period": 300,
         "region": "$AWS_REGION",
@@ -842,7 +877,7 @@ setup_dashboard() {
     },
     {
       "type": "metric",
-      "x": 12, "y": 47, "width": 12, "height": 6,
+      "x": 12, "y": 53, "width": 12, "height": 6,
       "properties": {
         "title": "Backend JVM Threads",
         "metrics": [
@@ -856,7 +891,7 @@ setup_dashboard() {
     },
     {
       "type": "log",
-      "x": 0, "y": 53, "width": 24, "height": 8,
+      "x": 0, "y": 59, "width": 24, "height": 8,
       "properties": {
         "title": "Recent Backend Errors & Warnings",
         "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, logger_name, message, method, path, userId, thread_name | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
@@ -866,12 +901,12 @@ setup_dashboard() {
     },
     {
       "type": "text",
-      "x": 0, "y": 61, "width": 24, "height": 1,
+      "x": 0, "y": 67, "width": 24, "height": 1,
       "properties": { "markdown": "# Alarms" }
     },
     {
       "type": "alarm",
-      "x": 0, "y": 62, "width": 24, "height": 4,
+      "x": 0, "y": 68, "width": 24, "height": 4,
       "properties": {
         "title": "Alarm Status",
         "alarms": [
@@ -1004,6 +1039,7 @@ setup_insights_queries() {
 
     upsert_query "DantePlanner/Nginx/SlowestEndpoints" "$NGINX_LOG_GROUP" \
         'filter ispresent(request_time)
+| filter uri not like "/events" and uri not like "/api/sse/"
 | stats avg(request_time) as avg_ms,
         max(request_time) as max_ms,
         count(*) as requests

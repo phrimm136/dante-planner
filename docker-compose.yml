@@ -55,6 +55,11 @@ services:
         JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
     container_name: danteplanner-backend
     restart: "no"
+    # Loopback-only: the host CloudWatch Agent scrapes /actuator/prometheus
+    # (scripts/ops/prometheus.yaml). Never widen past 127.0.0.1 — the actuator
+    # endpoints are unauthenticated.
+    ports:
+      - "127.0.0.1:8080:8080"
     volumes:
       - ./static/data:/app/data:ro
       - ${JWT_KEYS_PATH:-./jwt-keys}:/app/keys:ro

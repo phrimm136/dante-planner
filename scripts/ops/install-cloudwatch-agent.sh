@@ -8,6 +8,8 @@ trap 'echo "[ERROR] $SCRIPT_NAME failed at line $LINENO (exit code: $?)" >&2; ex
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 AGENT_CTL="/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl"
 CONFIG_SOURCE="${SCRIPT_DIR}/cloudwatch-agent-config.json"
+PROMETHEUS_SOURCE="${SCRIPT_DIR}/prometheus.yaml"
+PROMETHEUS_TARGET="/opt/aws/amazon-cloudwatch-agent/etc/prometheus.yaml"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -45,6 +47,15 @@ configure_and_start() {
         log_error "Config not found: $CONFIG_SOURCE"
         exit 1
     fi
+
+    if [ ! -f "$PROMETHEUS_SOURCE" ]; then
+        log_error "Prometheus scrape config not found: $PROMETHEUS_SOURCE"
+        exit 1
+    fi
+
+    # Must land before fetch-config: the agent reads prometheus_config_path on start
+    log_info "Installing Prometheus scrape config to $PROMETHEUS_TARGET"
+    sudo cp "$PROMETHEUS_SOURCE" "$PROMETHEUS_TARGET"
 
     log_info "Applying config from $CONFIG_SOURCE"
     $AGENT_CTL -a fetch-config -m ec2 -c "file:$CONFIG_SOURCE" -s

@@ -36,6 +36,7 @@ fi
 
 # Fetch secrets from SSM Parameter Store (encrypted)
 MYSQL_PASSWORD=$(aws ssm get-parameter --name "MYSQL_PASSWORD" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
+MYSQL_ROOT_PASSWORD=$(aws ssm get-parameter --name "MYSQL_ROOT_PASSWORD" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 SENTRY_DSN=$(aws ssm get-parameter --name "SENTRY_DSN" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 INTERNAL_API_KEY=$(aws ssm get-parameter --name "INTERNAL_API_KEY" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
@@ -61,6 +62,7 @@ SSL_CERT_PATH=$SSL_CERT_PATH
 MYSQL_USER=$MYSQL_USER
 MYSQL_DATABASE=$MYSQL_DATABASE
 MYSQL_PASSWORD=$MYSQL_PASSWORD
+MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
 GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID
 GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 JWT_KEYS_PATH=$DEPLOY_DIR/jwt-keys
