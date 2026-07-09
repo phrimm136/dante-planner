@@ -13,10 +13,10 @@
 --   - When a migration changes SET/ENUM/column types, update this seed in the SAME PR
 --   - Every SET member and ENUM value must appear in at least one row
 --
--- Schema version: V041 (last migration reflected in seed values)
+-- Schema version: V045 (last migration reflected in seed values)
 --
 -- Coverage:
---   - selected_keywords: all 31 SET members across 4 planners
+--   - selected_keywords: all 35 SET members across 4 planners
 --   - planner_type: MIRROR_DUNGEON, REFRACTED_RAILWAY
 --   - status: draft, saved
 --   - vote_type: UP
@@ -116,7 +116,7 @@ VALUES (
         'floorSelections', JSON_ARRAY()
     ),
     1, 1, 6, 'MIRROR_DUNGEON', TRUE, 12,
-    'Assemble,KnowledgeExplored,AaCePcBt,SwordPlayOfTheHomeland,EchoOfMansion,TimeSuspend,EmergencyChargeForceField,BloodDinner,BlackCloud,RetaliationBook,HeishouSynergy,Bullet,BlessingOfIndexPrescriptAlly,Inspire',
+    'Assemble,KnowledgeExplored,AaCePcBt,SwordPlayOfTheHomeland,EchoOfMansion,TimeSuspend,EmergencyChargeForceField,BloodDinner,BlackCloud,RetaliationBook,HeishouSynergy,Bullet,BlessingOfIndexPrescriptAlly,Inspire,9828,SojiRyoshuEntangle,DawnTeam',
     87, NOW(6)
 );
 

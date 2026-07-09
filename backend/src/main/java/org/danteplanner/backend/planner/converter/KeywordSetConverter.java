@@ -39,7 +39,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
             "EchoOfMansion", "TimeSuspend", "EmergencyChargeForceField", "BloodDinner",
             "BlackCloud", "RetaliationBook", "HeishouSynergy",
             "Bullet", "BlessingOfIndexPrescriptAlly", "Inspire",
-            "9828", "SojiRyoshuEntangle"
+            "9828", "SojiRyoshuEntangle", "DawnTeam"
     );
 
     /**

@@ -228,6 +228,7 @@ export const SYNERGY_KEYWORDS = [
   'Inspire',
   '9828',
   'SojiRyoshuEntangle',
+  'DawnTeam',
 ] as const
 
 /**
