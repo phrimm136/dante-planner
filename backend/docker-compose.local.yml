@@ -1,0 +1,60 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: danteplanner-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: danteplanner
+      MYSQL_USER: danteplanner
+      MYSQL_PASSWORD: danteplanner123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: danteplanner-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: danteplanner
+      MYSQL_USER: danteplanner
+      MYSQL_PASSWORD: danteplanner123
+      GAME_DATA_PATH: /app/data
+      JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
+      JWT_ENCRYPTION_KEY: bG9jYWwtZGV2LWFlcy0yNTYta2V5LTMyLWJ5dGVzISE=
+      GOOGLE_OAUTH_CLIENT_ID: local-dev-client-id
+      GOOGLE_OAUTH_CLIENT_SECRET: local-dev-client-secret
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000
+      COOKIE_SECURE: "false"
+      COOKIE_SAME_SITE: Lax
+    volumes:
+      - ../static/data:/app/data:ro
+      # One-time key generation (git-ignored):
+      #   mkdir -p backend/jwt-keys-local
+      #   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out backend/jwt-keys-local/private_key.pem
+      #   openssl rsa -in backend/jwt-keys-local/private_key.pem -pubout -out backend/jwt-keys-local/public_key.pem
+      - ./jwt-keys-local:/app/keys:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:

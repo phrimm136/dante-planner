@@ -19,6 +19,7 @@ logs/
 .claude/tsc-cache/
 .claude/logs/
 .claude/projects/
+.claude/worktrees/
 .playwright-mcp/
 
 # Backup files
@@ -28,3 +29,9 @@ logs/
 # Python
 __pycache__/
 *.py[cod]
+
+# Node
+node_modules/
+
+# Local dev JWT keys (docker-compose.local.yml)
+backend/jwt-keys-local/
