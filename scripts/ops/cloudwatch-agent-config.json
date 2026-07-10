@@ -54,6 +54,42 @@
     }
   },
   "logs": {
+    "metrics_collected": {
+      "prometheus": {
+        "log_group_name": "/danteplanner/prometheus",
+        "prometheus_config_path": "/opt/aws/amazon-cloudwatch-agent/etc/prometheus.yaml",
+        "emf_processor": {
+          "metric_declaration_dedup": true,
+          "metric_namespace": "DantePlanner",
+          "metric_unit": {
+            "jvm_memory_used_bytes": "Bytes",
+            "jvm_memory_committed_bytes": "Bytes",
+            "jvm_memory_max_bytes": "Bytes",
+            "jvm_gc_pause_seconds_max": "Seconds"
+          },
+          "metric_declaration": [
+            {
+              "source_labels": ["job"],
+              "label_matcher": "^backend$",
+              "dimensions": [["area", "id"]],
+              "metric_selectors": ["^jvm_memory_(used|committed|max)_bytes$"]
+            },
+            {
+              "source_labels": ["job"],
+              "label_matcher": "^backend$",
+              "dimensions": [["action", "cause"]],
+              "metric_selectors": ["^jvm_gc_pause_seconds_(max|count|sum)$"]
+            },
+            {
+              "source_labels": ["job"],
+              "label_matcher": "^backend$",
+              "dimensions": [["pool"]],
+              "metric_selectors": ["^hikaricp_connections_(active|pending)$"]
+            }
+          ]
+        }
+      }
+    },
     "logs_collected": {
       "files": {
         "collect_list": [
@@ -72,6 +108,12 @@
           {
             "file_path": "/var/log/danteplanner-cw-export.log",
             "log_group_name": "/danteplanner/cw-export",
+            "log_stream_name": "{instance_id}",
+            "retention_in_days": 30
+          },
+          {
+            "file_path": "/var/log/danteplanner-query-stats.log",
+            "log_group_name": "/danteplanner/query-stats",
             "log_stream_name": "{instance_id}",
             "retention_in_days": 30
           }

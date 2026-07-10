@@ -28,10 +28,9 @@ aws ecr get-login-password --region "$AWS_REGION" | \
 PULL_ARGS=""
 service_changed "backend" && PULL_ARGS="$PULL_ARGS backend"
 service_changed "nginx"   && PULL_ARGS="$PULL_ARGS nginx"
-service_changed "mysql"   && PULL_ARGS="$PULL_ARGS mysql"
 [ -n "$PULL_ARGS" ] && docker compose pull $PULL_ARGS
 
-# Rolling update: nginx first (serves 503 during backend restart), then backend, then mysql
+# Rolling update: nginx first (serves 503 during backend restart), then backend
 if service_changed "nginx"; then
   docker compose up -d --no-deps --force-recreate nginx
   sleep 2
@@ -59,9 +58,10 @@ if service_changed "backend"; then
     echo "[WARN] Backend did not become healthy within 120s — maintenance flag removed"
   fi
 fi
-service_changed "mysql"   && docker compose up -d --no-deps --force-recreate mysql
 
-# Cleanup orphaned containers and old images
+# Cleanup orphaned containers and old images.
+# --remove-orphans reaps containers whose service was deleted from compose, but
+# never their named volumes — a retained data volume survives the reap.
 docker compose up -d --remove-orphans
 docker image prune -f --filter "until=720h"  # 30 days
 

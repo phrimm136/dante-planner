@@ -40,6 +40,23 @@ SENTRY_DSN=$(aws ssm get-parameter --name "SENTRY_DSN" --with-decryption --query
 GOOGLE_CLIENT_SECRET=$(aws ssm get-parameter --name "GOOGLE_OAUTH_CLIENT_SECRET" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 INTERNAL_API_KEY=$(aws ssm get-parameter --name "INTERNAL_API_KEY" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
 
+# RDS endpoint host — a plain String param (not a secret), so no --with-decryption.
+MYSQL_HOST=$(aws ssm get-parameter --name "MYSQL_HOST" --query "Parameter.Value" --output text --region "$AWS_REGION")
+
+# Fail-fast on a bad MYSQL_HOST. A hard-missing param already aborts (set -e +
+# the ERR trap catch get-parameter's non-zero exit); these guards close the gap
+# where the param EXISTS but is empty or malformed — which would otherwise boot
+# the backend against no database and pass through silently.
+if [[ -z "$MYSQL_HOST" ]]; then
+  echo "[ERROR] MYSQL_HOST resolved empty from SSM" >&2
+  exit 20
+fi
+
+if [[ "$MYSQL_HOST" != *.rds.amazonaws.com ]]; then
+  echo "[ERROR] MYSQL_HOST '$MYSQL_HOST' doesn't look like an RDS endpoint" >&2
+  exit 20
+fi
+
 # Fetch JWT keys from SSM and write to files
 mkdir -p "$DEPLOY_DIR/jwt-keys"
 chmod 700 "$DEPLOY_DIR/jwt-keys"
@@ -58,6 +75,7 @@ AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID
 AWS_REGION=$AWS_REGION
 SPRING_PROFILES_ACTIVE=prod
 SSL_CERT_PATH=$SSL_CERT_PATH
+MYSQL_HOST=$MYSQL_HOST
 MYSQL_USER=$MYSQL_USER
 MYSQL_DATABASE=$MYSQL_DATABASE
 MYSQL_PASSWORD=$MYSQL_PASSWORD
