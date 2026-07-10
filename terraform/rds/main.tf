@@ -95,12 +95,28 @@ resource "aws_db_parameter_group" "this" {
   }
   parameter {
     name  = "collation_server"
-    value = "utf8mb4_unicode_ci"
+    value = "utf8mb4_0900_ai_ci"
+  }
+  # Match the source (case-sensitive, Linux default). CREATION-TIME ONLY on RDS — an
+  # already-running instance created with a different value must be recreated, not modified.
+  parameter {
+    name         = "lower_case_table_names"
+    value        = "0"
+    apply_method = "pending-reboot"
   }
   # Match the source's captured @@sql_mode (runbook 0.2). Default = MySQL 8.0 stock.
   parameter {
     name  = "sql_mode"
     value = var.sql_mode
+  }
+  # Refuse any non-TLS client connection (server-side enforcement of the app's
+  # sslMode=VERIFY_CA). Dynamic — no reboot. Enable only once the app connects
+  # over TLS; flipping it while the app is on a non-TLS path refuses every
+  # connection. Does NOT affect RDS's outbound replication pull (that TLS is
+  # governed by rds_set_external_master ssl=1).
+  parameter {
+    name  = "require_secure_transport"
+    value = "ON"
   }
   # Sane slow-query diagnostics (NOT the source's 1ms-to-TABLE setting).
   parameter {
