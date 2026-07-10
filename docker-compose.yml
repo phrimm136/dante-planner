@@ -1,51 +1,4 @@
 services:
-  mysql:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-mysql:${IMAGE_TAG}
-    build:
-      context: ./mysql
-    container_name: danteplanner-mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - mysql-data:/var/lib/mysql
-    # Temporary: RDS pulls binlog replication from this source, so 3306 must be reachable.
-    # Binds the EC2 private IP only (SG-gated to the RDS subnet); defaults to localhost when
-    # SOURCE_PRIVATE_IP is unset so non-migration runs never expose MySQL. Remove at cutover —
-    # see docs/tasks/030-rds-migration/runbook.md 0.5 (expose) / 0.8 (tear down).
-    ports:
-      - "${SOURCE_PRIVATE_IP:-127.0.0.1}:3306:3306"
-    networks:
-      - danteplanner-network
-    command:
-      - --innodb-buffer-pool-size=256M
-      - --max-connections=50
-      - --innodb-log-file-size=64M
-      - --slow-query-log=ON
-      - --long-query-time=0.001
-      - --log-output=TABLE
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-west-2
-        awslogs-group: /ecs/danteplanner/mysql
-        awslogs-create-group: "true"
-
   backend:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-backend:${IMAGE_TAG}
     build:
@@ -65,7 +18,7 @@ services:
       - ${JWT_KEYS_PATH:-./jwt-keys}:/app/keys:ro
     environment:
       GAME_DATA_PATH: /app/data
-      MYSQL_HOST: mysql
+      MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PORT: 3306
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
@@ -81,9 +34,6 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SENTRY_DSN: ${SENTRY_DSN:-}
       JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
-    depends_on:
-      mysql:
-        condition: service_healthy
     networks:
       - danteplanner-network
     deploy:
@@ -141,6 +91,9 @@ services:
         awslogs-group: /ecs/danteplanner/nginx
         awslogs-create-group: "true"
 
+# Not mounted by any service — retained as the only copy of the pre-RDS prod
+# data (the rollback source). Do NOT `docker compose down -v` or prune it; see
+# docs/tasks/030-rds-migration/runbook.md (Zone 4) for the decommission gate.
 volumes:
   mysql-data:
     driver: local
