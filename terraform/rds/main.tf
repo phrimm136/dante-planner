@@ -116,7 +116,7 @@ resource "aws_db_parameter_group" "this" {
   # governed by rds_set_external_master ssl=1).
   parameter {
     name  = "require_secure_transport"
-    value = "ON"
+    value = "1" # RDS canonicalizes this boolean to 1/0; "ON" causes a perpetual plan diff
   }
   # Sane slow-query diagnostics (NOT the source's 1ms-to-TABLE setting).
   parameter {
