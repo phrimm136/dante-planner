@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/ops/setup-cloudwatch-alarms.sh'
+      - 'scripts/ops/lib/**'
       - 'scripts/ops/cloudwatch-agent-config.json'
       - '.github/workflows/setup-cloudwatch.yml'
 
