@@ -1,0 +1,23 @@
+{
+  "totalPhases": 15,
+  "currentPhase": 1,
+  "reviewMode": "phase",
+  "infraPhasesMode": "authored-as-code, apply consent-gated with user AWS credentials",
+  "phases": [
+    { "name": "Testcontainers causal harness + Redis wiring", "status": "done" },
+    { "name": "Datasource routing + pool ledger + read-path seam", "status": "pending" },
+    { "name": "Primary re-check on byId miss + bulkhead pool", "status": "pending" },
+    { "name": "Redis content tombstones + byId-positive check", "status": "pending" },
+    { "name": "Blacklist externalization + fail-open ladder", "status": "pending" },
+    { "name": "Rotation Lua externalization + ShedLock job safety", "status": "pending" },
+    { "name": "Rate limiter -> bucket4j-redis on local Redis", "status": "pending" },
+    { "name": "GTID cookie gate (author RYW)", "status": "pending" },
+    { "name": "Typed degradation + health semantics + Lettuce mapping", "status": "pending" },
+    { "name": "SSE over Redis pub/sub (payload events) - backend", "status": "pending" },
+    { "name": "FE SSE invalidate->patch + errorCode UX", "status": "pending" },
+    { "name": "Pre-Seoul gates - recorded measurements", "status": "pending" },
+    { "name": "Oregon k3s fleet + ArgoCD + CI arm64 - infra", "status": "pending" },
+    { "name": "Seoul + GA + peering + ECR replication - infra", "status": "pending" },
+    { "name": "Drills + portfolio write-ups - infra", "status": "pending" }
+  ]
+}

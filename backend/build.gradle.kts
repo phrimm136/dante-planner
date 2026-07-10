@@ -44,6 +44,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-mysql")
@@ -73,14 +74,32 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers:2.0.4")
     testImplementation("org.testcontainers:testcontainers-mysql:2.0.4")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter:2.0.4")
+    testImplementation("org.testcontainers:testcontainers-toxiproxy:2.0.4")
+    testImplementation("com.redis:testcontainers-redis:2.2.2")
     testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
 
     errorprone("com.google.errorprone:error_prone_core:2.36.0")
 }
 
 tasks.withType<Test> {
-    useJUnitPlatform()
+    val excludeTags = (project.findProperty("excludeTags") as String?)
+        ?.split(",")
+        ?.map(String::trim)
+        ?.filter(String::isNotEmpty)
+        ?: emptyList()
+    inputs.property("excludeTags", excludeTags)
+    useJUnitPlatform {
+        if (excludeTags.isNotEmpty()) {
+            excludeTags(*excludeTags.toTypedArray())
+        }
+    }
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    filter {
+        includeTestsMatching("*Test")
+        includeTestsMatching("*Tests")
+        includeTestsMatching("*IntegrationTest")
+        includeTestsMatching("*IT")
+    }
 }
 
 // Error Prone: bug-pattern axis. Default ERROR-level checks only (no experimental).
