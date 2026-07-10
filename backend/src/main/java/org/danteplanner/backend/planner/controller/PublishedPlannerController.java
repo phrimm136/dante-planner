@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.planner.specification.PlannerSpecifications;
+import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,7 @@ public class PublishedPlannerController {
 
     private final PublishedPlannerQueryService publishedPlannerQueryService;
     private final SecurityProperties securityProperties;
+    private final ByIdReadGuard byIdReadGuard;
 
     @Value("${planner.recommended-threshold}")
     private int recommendedThreshold;
@@ -157,7 +159,8 @@ public class PublishedPlannerController {
         String clientIp = ClientIpResolver.resolve(request, securityProperties);
         String userAgent = request.getHeader("User-Agent");
         log.debug("Fetching published planner {} for userId {}", id, userId);
-        PublishedPlannerDetailResponse response = publishedPlannerQueryService.getPublishedPlanner(id, userId, clientIp, userAgent);
+        PublishedPlannerDetailResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+                () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, clientIp, userAgent));
         return ResponseEntity.ok(response);
     }
 

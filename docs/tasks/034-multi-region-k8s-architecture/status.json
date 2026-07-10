@@ -1,11 +1,11 @@
 {
   "totalPhases": 15,
-  "currentPhase": 1,
+  "currentPhase": 2,
   "reviewMode": "phase",
   "infraPhasesMode": "authored-as-code, apply consent-gated with user AWS credentials",
   "phases": [
     { "name": "Testcontainers causal harness + Redis wiring", "status": "done" },
-    { "name": "Datasource routing + pool ledger + read-path seam", "status": "pending" },
+    { "name": "Datasource routing + pool ledger + read-path seam", "status": "done" },
     { "name": "Primary re-check on byId miss + bulkhead pool", "status": "pending" },
     { "name": "Redis content tombstones + byId-positive check", "status": "pending" },
     { "name": "Blacklist externalization + fail-open ladder", "status": "pending" },
