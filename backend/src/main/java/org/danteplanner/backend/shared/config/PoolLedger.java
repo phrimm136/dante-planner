@@ -11,6 +11,10 @@ public final class PoolLedger {
     public static final int OREGON_PRIMARY_POOL = 15;
     public static final int SEOUL_PRIMARY_POOL = 10;
     public static final int SEOUL_REPLICA_POOL = 15;
+
+    /** Seoul-only re-check bulkhead pool (primary-hitting); isolation not throughput. */
+    public static final int BULKHEAD_POOL = 3;
+
     public static final int MAX_PODS_PER_ASG = 2;
     public static final int RDS_MICRO_MAX_CONNECTIONS = 85;
     public static final int CONNECTION_RESERVE = 10;

@@ -121,3 +121,71 @@ BUILD SUCCESSFUL, EXIT=0, 84 tests all green including nested `GET /api/planner/
 - Production Phase-2 files under `shared/config/` + `shared/readpath/ByIdReadGuard` were untracked
   (`??`) at implementation time (per scenarios-phase-2.md) — the commit boundary is the orchestrator's
   concern, not a verification defect; the files exist on disk and compile/test green.
+
+## Phase 3: Primary re-check on byId miss + bulkhead pool — PASS
+
+### Suite
+Scoped command (re-run once by the verifier with the ledger test added):
+```
+backend/gradlew -p backend test \
+  --tests 'org.danteplanner.backend.integration.ReplicaLagIT' \
+  --tests 'org.danteplanner.backend.integration.BulkheadIT' \
+  --tests 'org.danteplanner.backend.config.PoolLedgerConfigTest'
+```
+Verbatim tail (`/tmp/build-8603a2f4-p3-verify.log`):
+```
+> Task :test
+
+> Task :jacocoTestReport
+
+BUILD SUCCESSFUL in 1m 39s
+6 actionable tasks: 2 executed, 4 up-to-date
+```
+EXIT=0. Per-class from `build/test-results/test/` XML (tests/skipped/failures/errors):
+
+| Class | tests | skip | fail | err |
+|-------|-------|------|------|-----|
+| ReplicaLagIT (containerized, INV1) | 3 | 0 | 0 | 0 |
+| BulkheadIT (containerized, INV7) | 1 | 0 | 0 | 0 |
+| PoolLedgerConfigTest (INV9, bulkhead-extended) | 4 | 0 | 0 | 0 |
+| ByIdReadGuardTest (seam unit, re-run this phase) | 2 | 0 | 0 | 0 |
+| ByIdReadSeamTest (seam wiring, re-run this phase) | 2 | 0 | 0 | 0 |
+
+`ByIdReadGuardTest` + `ByIdReadSeamTest` were re-run this phase (`/tmp/build-8603a2f4-p3-seam.log`,
+EXIT=0) because `ByIdReadGuard.java` was modified in Phase 3 (the `Optional<PrimaryReCheck>` branch
+replaced the pure pass-through body) — the pass-through/seam-wiring rows now rest on a this-phase result.
+
+The two ITs each ran ~90–100s against live Testcontainers MySQL primary+replica pair (real
+replication pause/resume + Toxiproxy `wan` toxic), not a mocked substitute. The phase gate
+(`ReplicaLagIT` + `BulkheadIT`) also ran green earlier in the session (EXIT=0,
+`/tmp/build-8603a2f4-p3-gate.log`).
+
+### Trace
+
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| INV1.1 — replica byId miss re-checks primary, serves entity, `replica_miss_promoted_total` +1 | requirements INV1; plan Phase 3; mechanics §5 | MET | `PrimaryReCheck.java:39-52` — replica `dereference.get()` throws → `pinTo(BULKHEAD)` → re-run dereference on primary → `Counter(replica_miss_promoted_total).increment()` (`:46`) → return promoted; `ByIdReadGuard.java:35-40` routes to `readWithReCheck` when `PrimaryReCheck` present | `ReplicaLagIT.byIdMissOnPausedReplica_reChecksPrimary_servesEntityAndIncrementsCounter` (`:90-126`): replication paused, row on primary only, seam read → no throw, served id == plannerId, `promotedCount() - before == 1.0` — green |
+| INV1.2 — absent on both → `PlannerNotFoundException` (404), counter untouched, BULKHEAD pin cleared (no leak) | requirements INV1; Brief negative case | MET | `PrimaryReCheck.java:44-50` — still-missing primary re-throws (no `increment()` reached); `finally { ReadOnlyRoutingDataSource.clear() }` (`:48-50`) removes the ThreadLocal `OVERRIDE` (`ReadOnlyRoutingDataSource.java:20,26-28`) so a follow-on read-only tx routes REPLICA again (`:36-38`) | `ReplicaLagIT.byIdMissOnBothReplicaAndPrimary_propagatesNotFound_doesNotPromote_andClearsPin` (`:128-167`): double-miss → `PlannerNotFoundException`, `promotedCount()-before == 0.0`, follow-on read-only probe returns STALE replica value (`:160-162`) — pin proven cleared — green |
+| INV1.3 — replica hit served without re-check, counter unchanged (no false promotion) | requirements INV1; Brief case 3 | MET | `PrimaryReCheck.java:41` — first `dereference.get()` returns on a hit; no `catch` branch entered, counter not touched | `ReplicaLagIT.byIdHitOnReplica_servesWithoutReCheck_andDoesNotPromote` (`:169-199`): replicated row, seam read → served, `promotedCount()-before == 0.0` — green |
+| INV7 — re-check flood on bulkhead does not delay writes (all four load-bearing assertions inspected individually) | requirements INV7; plan Phase 3; mechanics §6 | MET | Bulkhead is a distinct `HikariDataSource` (size `PoolLedger.BULKHEAD_POOL=3`) keyed `RoutingKey.BULKHEAD` (`RoutingDataSourceConfig.java:103-104,77-86`); re-check pins to it (`PrimaryReCheck.java:43`); write path draws PRIMARY pool via read-write tx (`ReadOnlyRoutingDataSource.java:36-38`) | `BulkheadIT.reCheckFloodOnBulkhead_doesNotDelay_concurrentWrite` (`:100-171`) — all four asserted and green: (1) `floodOutcomes.hasSize(24).containsOnly(PlannerNotFoundException)` anti-vacuity (`:140-144`); (2) `floodDrainMs > singleReCheckMs` bulkhead saturated (`:146-150`); (3) `writeElapsedMs < singleReCheckMs` write isolated (`:156-160`); (4) `stillInFlight > 0` non-serialization (`:162-164`); plus write-persisted probe (`:152-154`) |
+| §5 primary re-check is byId-ONLY (never list/search) | mechanics §5, §0 FORBIDDEN; plan cross-cutting | MET | Grep of `ByIdReadGuard.read` across `src/main` returns exactly two call sites, both byId; list/search methods `getPlanners`, `getPublishedPlanners`, `getRecommendedPlanners` do NOT call the seam (confirmed by inspection); re-check lives only inside `PrimaryReCheck` reached only via `ByIdReadGuard` | Covered by `ByIdReadSeamTest` (Phase 2, seam wiring) + `ReplicaLagIT`/`BulkheadIT` exercising byId only; no list/search re-check test exists because no such wiring exists (correct) |
+| Both-endpoints scope — seam wraps `getPlanner` (`GET /api/planner/md/{id}`) AND `getPublishedPlanner` (`GET .../published/{id}`); published tx semantics unchanged | plan cross-cutting; Brief | MET | `PlannerQueryController.java:69-70` wraps `getPlanner` byId; `PublishedPlannerController.java:162-163` wraps `getPublishedPlanner` byId, both via `PLANNER_ENTITY_TYPE`. Published byId performs a view-count write (`PublishedPlannerQueryService.incrementViewCount` `:120` `@Transactional`) → primary-routed, so re-check holds trivially; both controllers are git-unmodified this phase (seam committed Phase 2) — tx semantics untouched (CLAUDE.md rule #1) | `ByIdReadSeamTest` (re-run this phase, 2/2) verifies `byIdReadGuard.read("planner", id, …)` invoked on BOTH endpoints; `ReplicaLagIT` drives the `getPlanner` seam directly; `PlannerControllerTest` (Phase 2) 84/84 no-regression on both byId groups |
+| §6 bulkhead pool sized 2–3 from `PoolLedger.BULKHEAD_POOL` (Seoul-only, primary-hitting, isolation) | mechanics §6 | MET | `PoolLedger.java:16` `BULKHEAD_POOL = 3`; `RoutingDataSourceConfig.java:84` `setMaximumPoolSize(PoolLedger.BULKHEAD_POOL)`; bulkhead target only created when `replicaProperties.isEnabled()` i.e. Seoul (`:100-104`); `BulkheadDataSourceProperties.java:19-24` defaults endpoint to primary — no hardcoded size | `PoolLedgerConfigTest.poolLedger_whenReadBulkhead_matchesBindingPoolSize` (`:53-57`) pins == 3 — green |
+| INV4 — no timing constants in correctness/routing production code | requirements INV4; mechanics §0 FORBIDDEN | MET | Grep over `shared/readpath/*` + the six routing/config files for `Thread.sleep`/`parkNanos`/`TimeUnit`/`Duration`/`await(`/`.SECONDS`/`setConnectionTimeout`/`setIdleTimeout` → NO match. Branch is causal: miss = `PlannerNotFoundException` drives the re-check (`PrimaryReCheck.java:42`), not time. The only wall-clock number lives in `BulkheadIT` (`singleReCheckMs` reference), framed as comparative isolation (`:156-160`) | INV7 asserts a ratio (`writeElapsedMs < singleReCheckMs`), not a tuned SLA — no production timing constant exercised |
+| Seoul-only gating — routing/replica disabled → `ByIdReadGuard` pure pass-through, no behavior change | Brief; plan | MET | `ByIdReadGuard.java:26-40` — `Optional<PrimaryReCheck>` empty (no-arg ctor / no bean) → `return dereference.get()`; `PrimaryReCheck` bean is `@ConditionalOnProperty(datasource.replica.enabled=true)` (`RoutingDataSourceConfig.java:115-119`) so it exists only on Seoul pods | `ByIdReadGuardTest` (re-run this phase, 2/2) pins pass-through against the current `Optional<PrimaryReCheck>` body with an empty Optional; existing Oregon/default-profile suites unaffected (no `PrimaryReCheck` bean) |
+| INV9 (Phase-2 owned) — Phase 3 extended the ledger test with `BULKHEAD_POOL`; bulkhead-inclusive sum still ≤ budget | Brief secondary check; requirements INV9 | MET | `PoolLedger.java:16` adds `BULKHEAD_POOL=3`; `PoolLedgerConfigTest.java:39-51` computes `(OREGON_PRIMARY 15 + SEOUL_PRIMARY 10 + BULKHEAD 3) × MAX_PODS 2 = 56 ≤ RDS_MICRO 85 − RESERVE 10 = 75`, reading the same production constants | `PoolLedgerConfigTest.poolLedger_whenBulkheadIncluded_staysWithinConnectionBudget` (`:39-51`) + `poolLedger_whenSummedAcrossMaxPods_...` (non-bulkhead 50 ≤ 75) — both green |
+
+### Gaps
+- (none) — every in-scope Phase-3 item is MET; scoped suite green (ReplicaLagIT 3/3, BulkheadIT 1/1,
+  PoolLedgerConfigTest 4/4).
+
+### Notes
+- INV2 (tombstone) is Phase 4's deliverable and is correctly ABSENT from `ReplicaLagIT` here — not
+  reported against Phase 3 per the Brief's scope carve-out.
+- INV7 `INV7 magnitudes:` log line is emitted at INFO via slf4j (`BulkheadIT.java:137`) and is not
+  captured into the surefire XML; the four assertions themselves are the durable evidence and all
+  passed. This test closed green-on-arrival (compile-gated at phase open, never observed red), so
+  the individual assertion inspection above substitutes for a missing red proof, per the Brief.
+- Bulkhead endpoint indirection (`BulkheadDataSourceProperties`) lets `BulkheadIT` route the bulkhead
+  through the Toxiproxy `wan` proxy while the primary write pool stays un-proxied — the mechanism that
+  makes INV7's comparative-isolation assertion observable without any production timing constant.

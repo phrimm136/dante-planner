@@ -35,4 +35,24 @@ class PoolLedgerConfigTest {
         assertThat(PoolLedger.SEOUL_PRIMARY_POOL).isEqualTo(10);
         assertThat(PoolLedger.SEOUL_REPLICA_POOL).isEqualTo(15);
     }
+
+    @Test
+    @DisplayName("INV9: Σ(primary-hitting pools including Seoul bulkhead) × max pods ≤ budget")
+    void poolLedger_whenBulkheadIncluded_staysWithinConnectionBudget() {
+        int primaryHittingLoad =
+                (PoolLedger.OREGON_PRIMARY_POOL
+                                + PoolLedger.SEOUL_PRIMARY_POOL
+                                + PoolLedger.BULKHEAD_POOL)
+                        * PoolLedger.MAX_PODS_PER_ASG;
+        int usableConnections =
+                PoolLedger.RDS_MICRO_MAX_CONNECTIONS - PoolLedger.CONNECTION_RESERVE;
+
+        assertThat(primaryHittingLoad).isLessThanOrEqualTo(usableConnections);
+    }
+
+    @Test
+    @DisplayName("bulkhead pool size matches mechanics §6 (isolation, not throughput)")
+    void poolLedger_whenReadBulkhead_matchesBindingPoolSize() {
+        assertThat(PoolLedger.BULKHEAD_POOL).isEqualTo(3);
+    }
 }
