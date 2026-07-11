@@ -6,7 +6,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { ApiClient, ConflictError } from '../api'
+import {
+  ApiClient,
+  ConflictError,
+  WriteTemporarilyUnavailableError,
+  AuthTemporarilyUnavailableError,
+  BackendUnavailableError,
+} from '../api'
 
 // Mock the env module
 vi.mock('../env', () => ({
@@ -171,6 +177,53 @@ describe('ApiClient', () => {
         expect(error).toBeInstanceOf(ConflictError)
         expect((error as ConflictError).serverVersion).toBe(1)
       }
+    })
+  })
+
+  describe('503 regional failover typed errors', () => {
+    it('503 with code WRITE_TEMPORARILY_UNAVAILABLE throws WriteTemporarilyUnavailableError', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: vi.fn().mockResolvedValue({
+          code: 'WRITE_TEMPORARILY_UNAVAILABLE',
+          message: 'Database temporarily unavailable, please retry',
+        }),
+      })
+
+      await expect(ApiClient.put('/api/planner/123', {})).rejects.toBeInstanceOf(
+        WriteTemporarilyUnavailableError,
+      )
+    })
+
+    it('503 with code AUTH_TEMPORARILY_UNAVAILABLE throws AuthTemporarilyUnavailableError', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: vi.fn().mockResolvedValue({
+          code: 'AUTH_TEMPORARILY_UNAVAILABLE',
+          message: 'Authentication service temporarily unavailable, please retry',
+        }),
+      })
+
+      await expect(ApiClient.put('/api/planner/123', {})).rejects.toBeInstanceOf(
+        AuthTemporarilyUnavailableError,
+      )
+    })
+
+    it('503 without a recognized code still throws BackendUnavailableError', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: vi.fn().mockResolvedValue({
+          code: 'BACKEND_UNAVAILABLE',
+          message: 'Service temporarily unavailable',
+        }),
+      })
+
+      await expect(ApiClient.put('/api/planner/123', {})).rejects.toBeInstanceOf(
+        BackendUnavailableError,
+      )
     })
   })
 

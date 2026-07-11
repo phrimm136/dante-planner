@@ -481,6 +481,8 @@ export const SSE_CONNECTION = {
   PROACTIVE_RECONNECT_INTERVAL: 13 * 60 * 1000,
   /** Idle timeout (5 min) after which reconnect attempts reset */
   IDLE_RESET_TIMEOUT: 5 * 60 * 1000,
+  /** Random reconnect jitter ceiling (0–5s) to avoid thundering-herd reconnects */
+  MAX_JITTER: 5 * 1000,
 } as const
 
 /**

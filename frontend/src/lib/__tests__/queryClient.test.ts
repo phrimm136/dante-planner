@@ -10,7 +10,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryCache, MutationCache } from '@tanstack/react-query'
 
-import { ServiceUpdatingError, BackendUnavailableError } from '../api'
+import {
+  ServiceUpdatingError,
+  BackendUnavailableError,
+  AuthTemporarilyUnavailableError,
+} from '../api'
 
 vi.mock('../toast', () => ({
   toast: {
@@ -26,14 +30,7 @@ vi.mock('../i18n', () => ({
 }))
 
 import { toast } from '../toast'
-
-function handleBackendDownError(error: Error): void {
-  if (error instanceof ServiceUpdatingError) {
-    toast.error('errors.serviceUpdating')
-  } else if (error instanceof BackendUnavailableError) {
-    toast.error('errors.backendUnavailable')
-  }
-}
+import { handleBackendDownError } from '../queryClient'
 
 describe('QueryCache onError', () => {
   let queryCache: QueryCache
@@ -59,6 +56,15 @@ describe('QueryCache onError', () => {
     queryCache.config.onError?.(error, {} as never)
 
     expect(toast.error).toHaveBeenCalledWith('errors.backendUnavailable')
+  })
+
+  it('shows authUnavailable toast for AuthTemporarilyUnavailableError', () => {
+    const error = new AuthTemporarilyUnavailableError(
+      'Authentication service temporarily unavailable, please retry',
+    )
+    queryCache.config.onError?.(error, {} as never)
+
+    expect(toast.error).toHaveBeenCalledWith('errors.authUnavailable')
   })
 
   it('does not toast for generic errors', () => {
@@ -100,6 +106,15 @@ describe('MutationCache onError', () => {
     mutationCache.config.onError?.(error, {} as never, {} as never, {} as never, {} as never)
 
     expect(toast.error).toHaveBeenCalledWith('errors.backendUnavailable')
+  })
+
+  it('shows authUnavailable toast for AuthTemporarilyUnavailableError', () => {
+    const error = new AuthTemporarilyUnavailableError(
+      'Authentication service temporarily unavailable, please retry',
+    )
+    mutationCache.config.onError?.(error, {} as never, {} as never, {} as never, {} as never)
+
+    expect(toast.error).toHaveBeenCalledWith('errors.authUnavailable')
   })
 
   it('does not toast for generic errors', () => {

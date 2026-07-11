@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { SSE_CONNECTION } from '@/lib/constants'
+import { SseEnvelopeSchema } from '@/shared/sse'
+
+import { commentsQueryKeys } from './useCommentsQuery'
+
+import type { CommentNode } from '../types/CommentTypes'
 
 /**
  * SSE reconnection configuration for planner comments
@@ -48,6 +55,7 @@ const SSE_CONFIG = {
  * ```
  */
 export function usePlannerCommentsSse(plannerId: string) {
+  const queryClient = useQueryClient()
   const [newCommentsCount, setNewCommentsCount] = useState(0)
   const eventSourceRef = useRef<EventSource | null>(null)
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -78,8 +86,24 @@ export function usePlannerCommentsSse(plannerId: string) {
         reconnectAttemptsRef.current = 0
       })
 
-      es.addEventListener('comment:added', () => {
+      es.addEventListener('comment:added', (event) => {
         setNewCommentsCount((c) => c + 1)
+
+        try {
+          const envelope = SseEnvelopeSchema.parse(JSON.parse(event.data as string))
+          const payload = envelope.payload as CommentNode | null
+          if (payload && typeof payload === 'object' && typeof payload.id === 'string') {
+            queryClient.setQueryData(
+              commentsQueryKeys.list(plannerId),
+              (prev: CommentNode[] | undefined) => {
+                const arr = Array.isArray(prev) ? prev : []
+                return arr.some((c) => c?.id === payload.id) ? arr : [...arr, payload]
+              },
+            )
+          }
+        } catch (error) {
+          console.warn('Planner comment SSE: failed to patch comment tree cache', error)
+        }
       })
 
       es.onerror = () => {
@@ -87,10 +111,11 @@ export function usePlannerCommentsSse(plannerId: string) {
         eventSourceRef.current = null
 
         // Calculate exponential backoff delay
-        const delay = Math.min(
-          SSE_CONFIG.BASE_DELAY * Math.pow(2, reconnectAttemptsRef.current),
-          SSE_CONFIG.MAX_DELAY,
-        )
+        const delay =
+          Math.min(
+            SSE_CONFIG.BASE_DELAY * Math.pow(2, reconnectAttemptsRef.current),
+            SSE_CONFIG.MAX_DELAY,
+          ) + Math.random() * SSE_CONNECTION.MAX_JITTER
 
         reconnectAttemptsRef.current += 1
 

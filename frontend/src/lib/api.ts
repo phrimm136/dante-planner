@@ -136,6 +136,32 @@ export class BackendUnavailableError extends Error {
   }
 }
 
+/**
+ * Custom error class for 503 when a write cannot be served during regional failover
+ * Thrown when the backend returns WRITE_TEMPORARILY_UNAVAILABLE
+ */
+export class WriteTemporarilyUnavailableError extends Error {
+  readonly code = 'WRITE_TEMPORARILY_UNAVAILABLE'
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'WriteTemporarilyUnavailableError'
+  }
+}
+
+/**
+ * Custom error class for 503 when auth cannot be served during regional failover
+ * Thrown when the backend returns AUTH_TEMPORARILY_UNAVAILABLE
+ */
+export class AuthTemporarilyUnavailableError extends Error {
+  readonly code = 'AUTH_TEMPORARILY_UNAVAILABLE'
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthTemporarilyUnavailableError'
+  }
+}
+
 export class ApiClient {
   static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const method = (options.method ?? 'GET').toUpperCase()
@@ -231,6 +257,12 @@ export class ApiClient {
       }
       if (code === 'SERVICE_UPDATING') {
         throw new ServiceUpdatingError(message)
+      }
+      if (code === 'WRITE_TEMPORARILY_UNAVAILABLE') {
+        throw new WriteTemporarilyUnavailableError(message)
+      }
+      if (code === 'AUTH_TEMPORARILY_UNAVAILABLE') {
+        throw new AuthTemporarilyUnavailableError(message)
       }
       throw new BackendUnavailableError(message)
     }
