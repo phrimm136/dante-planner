@@ -413,3 +413,80 @@ Diff of `RateLimitConfig.java` vs `HEAD` confirms parity, not just current-state
 
 ### Gaps
 - (none) — R1–R5 all MET; scoped suite green (RateLimitConfig 28, naming 1; 0 failures / 0 errors / 0 skipped).
+
+## Phase 8: GTID cookie gate (author read-your-own-write, INV3) — PASS
+
+### Suite
+Scoped command (cwd = repo root; gradlew is `backend/gradlew`, `-p backend` required):
+```
+./backend/gradlew -p backend test --tests "*CausalGateIT" --tests "*TestNamingConventionTest" \
+  --tests "*GtidCookieFilterTest" --tests "*GtidCookieTest"
+```
+Verbatim tail:
+```
+> Task :test UP-TO-DATE
+> Task :jacocoTestReport UP-TO-DATE
+
+BUILD SUCCESSFUL in 915ms
+6 actionable tasks: 6 up-to-date
+```
+The `test` task reported UP-TO-DATE (inputs unchanged since the burndown-close run), so the
+load-bearing evidence is the per-class JUnit XML (`backend/build/test-results/test/`, timestamps
+**2026-07-11T13:45Z** = today, real run). All four in-scope classes green:
+
+| Class | tests | skip | fail | err |
+|-------|-------|------|------|-----|
+| CausalGateIT (acceptance, containerized) | 1 | 0 | 0 | 0 |
+| GtidCookieFilterTest (filter routing unit) | 5 | 0 | 0 | 0 |
+| GtidCookieTest (cookie attributes unit) | 2 | 0 | 0 | 0 |
+| TestNamingConventionTest (naming ArchUnit) | 1 | 0 | 0 | 0 |
+
+### FORBIDDEN §0 check (token rides cookie ONLY — no server-side/Redis token store)
+`grep -rniE "redis|session|store|opsForValue|template"` over
+`backend/src/main/java/org/danteplanner/backend/shared/gtid/` returns ZERO Redis/session/store
+matches — the only hits are `JdbcTemplate`/`TransactionTemplate` (the WAIT-probe and capture
+queries). The RYW causal token is minted from `@@gtid_executed` and travels ONLY in the
+`Set-Cookie` header (`GtidCookieFilter.java:72`, `GtidCookie.of()`); it is never written to a
+server-side key. FORBIDDEN §0(a) HOLDS.
+
+FORBIDDEN §0(b) — no timing constant on a correctness path (the `0.05` is a probe bound, not a
+correctness window): verified by branch reasoning, not by the source comment. Both WAIT outcomes are
+safe independent of the timeout value — timeout (`→1`) → `isCaughtUp` false → pin PRIMARY, which is
+unconditionally correct (author reads own write); applied (`→0`) → serve REPLICA, correct because the
+replica has provably executed the GTID. So `PROBE_TIMEOUT_SECONDS` (`GtidReadGate.java:28,45`) only
+trades fallback-to-primary latency vs replica-hit rate — NO correctness branch depends on its value.
+§0(b) HOLDS.
+
+### Trace
+
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| 1. GTID cookie gate = mechanics §5 **verified fallback** (`SELECT @@gtid_executed` on primary post-commit), full contract: HttpOnly/Secure/SameSite=Lax cookie; WAIT probe on replica; 0→replica+clear, 1→primary; NO server-side store | requirements.md:49; mechanics §5 (Brief) | MET | Fallback branch: `GtidWriteCapture.java:26` `SELECT @@gtid_executed`, plain (non-read-only) `JdbcTemplate` over the `@Primary` routing DS → routes PRIMARY key (`RoutingDataSource` read-write → PRIMARY); `:36-40` returns whitespace-stripped superset. Cookie: `GtidCookie.java:30-36` `httpOnly(true).secure(true).sameSite("Lax").path("/")`, name `ryw_gtid` (`:14`); cleared `Max-Age=0` (`:26-28`). Read gate: `GtidReadGate.java:25,43-46` `SELECT WAIT_FOR_EXECUTED_GTID_SET(?,0.05)` inside a read-only `TransactionTemplate` (`:37-38`) → REPLICA key; `result==0`(APPLIED)→`isCaughtUp` true. Filter mapping: `GtidCookieFilter.java:55-65` caught-up→clear cookie+serve(replica), NOT caught-up→`pinTo(PRIMARY)` + `clear()` in finally; write branch `:68-73` sets cookie from captured GTID. NO server-side store (§0 grep above) | `GtidCookieTest.of_WithGtid_CarriesHttpOnlySecureSameSiteLaxValue` + `cleared_ForCaughtUp_HasMaxAgeZero` (2/2); `GtidCookieFilterTest.write_WhenCaptureHasGtid_SetsGtidCookieAndSkipsReadGate` (HttpOnly/Secure/SameSite=Lax on write), `readGet_WhenCookieCaughtUp_ClearsCookieAndDoesNotPin`, `readGet_WhenCookieNotCaughtUp_PinsPrimaryRetainsCookieAndClearsPin`, `readGet_WhenNoCookie_PassesThroughWithoutGateOrPin` (5/5); `CausalGateIT` end-to-end (1/1) |
+| 2. Gate is a DISTINCT mechanism from the Phase-3 byId re-check (PrimaryReCheck), not a duplicate — list refetches (positive-but-incomplete) invisible to miss-triggered repair | requirements.md:51 (Brief) | MET | Gate lives in `shared/gtid/` and pins the WHOLE cookie-bearing request to PRIMARY via `ReadOnlyRoutingDataSource.pinTo(RoutingKey.PRIMARY)` (`GtidCookieFilter.java:60`) — covers list/search GETs too, not only byId. `PrimaryReCheck` (`shared/readpath/PrimaryReCheck.java`) fires ONLY inside `ByIdReadGuard` on a byId replica MISS (Phase-3 evidence); a positive-but-stale list read never throws, so the re-check cannot repair it — the gate can. Separate packages, separate triggers (cookie-present time-gate vs byId not-found), no shared code path | Distinct-mechanism structure is code-evident; `CausalGateIT` exercises the gate on the byId GET path (`/api/planner/md/{id}`) independent of any miss; `GtidCookieFilterTest` proves the gate pins on cookie+not-caught-up with no byId-miss involvement |
+| 3. INV3 — replica paused → author's post-write reads route to primary; after `awaitCaughtUp`, route to replica (test: `CausalGateIT`) | requirements.md:103 INV3 (Brief) | MET | `GtidCookieFilter.java:55-65` — pins PRIMARY while `isCaughtUp` false, serves replica + clears cookie when true; `GtidReadGate.isCaughtUp` drives the branch off `WAIT_FOR_EXECUTED_GTID_SET` | `CausalGateIT.causalGate_authorWriteSetsGtidCookie_readYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp` (`:125-184`): replication stopped, author writes `PRIMARY_ONLY_TITLE`; cookie-bearing read observes fresh primary value (`:160-163`) while ungated read observes stale replica `REPLICATED_TITLE` (`:165-168`); after `startReplica()`+`awaitCaughtUp()` cookie-bearing read serves replica value + cookie cleared (`:173-179`). Containerized, 1/1 green |
+| 4. Test Plan — `CausalGateIT`: cookie set on write, `WAIT_FOR_EXECUTED_GTID_SET` routing both branches | requirements.md:131 Test Plan (Brief) | MET | Write-sets-cookie: `GtidCookieFilter.java:71-72`; both WAIT branches: `GtidReadGate.java:46` result mapping + `GtidCookieFilter.java:55-65` | `CausalGateIT` asserts (a) write returns `Set-Cookie` with GTID-shaped value + HttpOnly/Secure/SameSite=Lax (`assertGtidCookie` `:191-207`), (b) not-caught-up branch → primary value, (c) caught-up branch → replica value + cleared cookie (`assertGateCookieCleared` `:213-225`). Both WAIT branches driven by real stop/await replication control. 1/1 green |
+
+### Wiring / structural checks
+- `GtidGateConfig.java:19-21` — `@Configuration @ConditionalOnProperty("datasource.routing.enabled"="true")`
+  so the gate loads only on Seoul-shape (routing) contexts; single `FilterRegistrationBean` (`:35-43`)
+  over `/api/*` at `LOWEST_PRECEDENCE` (after security chain). One filter registration, no duplicate.
+- `GtidCookieFilter` extends `OncePerRequestFilter`; safe methods = GET/HEAD (`:75-78`), all others
+  treated as write (cookie-set branch).
+
+### Gaps
+- (none) — every in-scope Phase-8 item is MET; scoped suite green (CausalGateIT 1, GtidCookieFilterTest 5,
+  GtidCookieTest 2, TestNamingConventionTest 1; 0 failures / 0 errors / 0 skipped). FORBIDDEN §0 holds.
+
+### Notes
+- **Divergence from mechanics §5 wording (does NOT break contract):** the fallback captures the GTID via
+  a FRESH `JdbcTemplate` connection reading `@@gtid_executed` in the filter after the chain completes,
+  not literally "the same connection immediately after commit". `@@gtid_executed` is the GLOBAL executed
+  set — a monotonic superset that already includes the just-committed write's GTID — so any post-commit
+  primary read yields a causally-sufficient token for RYW. The class Javadoc (`GtidWriteCapture.java:16-21`)
+  states this "conservative superset" contract explicitly. Recorded in the dossier `## Divergences`.
+- `GtidWriteCapture.pollCapturedGtid()` runs on EVERY non-safe request (captures on any write attempt),
+  matching the §5 "on any authenticated write" wording; over-capture on a no-op write only sets a
+  redundant cookie, never a correctness risk.
+- `CausalGateIT` drives the external HTTP contract name-agnostically (matches the cookie by GTID-shaped
+  value, not the `ryw_gtid` literal), so it survives any gate implementation — the unit `GtidCookieTest`
+  pins the concrete `ryw_gtid` name/attributes.
