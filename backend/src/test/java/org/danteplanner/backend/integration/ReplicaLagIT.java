@@ -212,7 +212,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV2: a delete on the primary while replication is paused makes a byId via the stale replica return 404, even though the replica still holds the non-soft-deleted row")
-    void deleteTombstonesGhost_replicaPositiveReturns404() {
+    void deleteTombstonesGhost_ReplicaPositive_Returns404() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone@example.com");
         Long userId = owner.getId();
 
@@ -249,7 +249,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV2 write half: a delete issues a del:planner:<id> tombstone synchronously with a bounded ~1h TTL")
-    void deleteWritesTombstoneKeyWithBoundedTtl() {
+    void deleteOnPrimary_WritesTombstoneKey_WithBoundedTtl() {
         User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone-write@example.com");
 
         Planner p = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
