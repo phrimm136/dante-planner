@@ -67,6 +67,7 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
 
     implementation("com.bucket4j:bucket4j-core:8.10.1")
+    implementation("com.bucket4j:bucket4j-redis:8.10.1")
     implementation("org.jsoup:jsoup:1.22.1")
     implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")

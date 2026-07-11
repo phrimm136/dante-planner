@@ -352,3 +352,64 @@ Per-suite JUnit XML gate (`backend/build/test-results/test/`) after this run:
 ### Gaps
 - (none) — every in-scope Phase-6 item is MET; scoped suite green (rotation 15, shedlock 3, naming 1;
   0 failures / 0 errors / 0 skipped).
+
+## Phase 7: Rate limiter → bucket4j-redis on local ephemeral Redis (behavior-preserving, no INV) — PASS
+
+### Suite
+Scoped command (cwd = `backend`; gradlew is `backend/gradlew`, forced rerun via `cleanTest`):
+```
+./gradlew -p . cleanTest test --tests "*RateLimitConfigTest" --tests "*TestNamingConventionTest"
+```
+Verbatim result tail:
+```
+> Task :cleanTest
+> Task :test
+> Task :jacocoTestReport
+
+BUILD SUCCESSFUL in 20s
+7 actionable tasks: 3 executed, 4 up-to-date
+```
+Per-suite JUnit XML gate (`backend/build/test-results/test/`) after the rerun:
+- `RateLimitConfigTest$*` (9 `@Nested` XML): AllowRequestsWithinLimit 4, Exceeded 4, SeparateBucketsPerEndpoint 3,
+  SeparateBucketsPerUser 4, BucketKey 1, BucketConfig 3, AuthLimitIdentifier 4, EdgeCase 3,
+  LocalRedisPersistence 2 — **28 testcases, 0 failures / 0 errors / 0 skipped**.
+- `architecture.TestNamingConventionTest.xml`: tests="1" failures="0" errors="0" skipped="0".
+
+### Trace
+
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| R1 — rate-limit buckets live in local ephemeral Redis with TTL eviction; per-IP 429 behavior unchanged; buckets observed in local Redis, not auth Redis | plan/phase-7 external contract (Brief) | MET | `RateLimitConfig.tryConsume` consumes via injected `ProxyManager<byte[]>` (`RateLimitConfig.java:121-125`); the proxy manager is built from the `rateLimit` endpoint (`RedisConnectionConfig.java:70-73`), separate from `@Primary` `authRedisConnectionFactory` (`:59-62`) | `LocalRedisPersistenceTests.rateLimitBucket_AfterConsume_PersistsInLocalRedisWithTtl` (key present in rate-limit Redis, TTL >0 and ≤2s) + `rateLimitBucket_AfterConsume_AbsentFromAuthRedis` (present in rate-limit, absent from a separate auth Redis) — `$LocalRedisPersistence.xml` 2/2 green; 429 parity pinned by the other 26 cases |
+| R2 — swap hand-rolled `ConcurrentHashMap` for `bucket4j-redis`; `proxyManager.builder().build(key,config)` against local Redis; manual 5-min eviction + `maxBuckets` LRU deleted entirely | mechanics §3 (BINDING, Brief) | MET | `private final ProxyManager<byte[]> proxyManager` constructor-injected (`RateLimitConfig.java:24,34`); `proxyManager.builder().build(keyBytes, () -> bucketConfiguration).tryConsume(1)` (`:124`); grep over `RateLimitConfig.java` for `ConcurrentHashMap\|BucketEntry\|@Scheduled\|maxBuckets` → 0 matches (old eviction/LRU gone); dep `com.bucket4j:bucket4j-redis:8.10.1` (`build.gradle.kts:70`) | Consume-path exercised by all 28 cases (reuse/isolation/exhaustion) — 0 fail; deleted eviction code is structural (grep) — no positive test possible |
+| R3 — `LettuceBasedProxyManager` wiring + bucket expiration strategy (local Redis, TTL-based eviction) | mechanics §9.2 / §9(2) (PLAN-TIME, Brief) | MET | `buildRateLimitProxyManager` builds `LettuceBasedProxyManager.builderFor(connection).withExpirationStrategy(ExpirationAfterWriteStrategy.fixedTimeToLive(bucketTtl)).build()` over `RedisClient.create("redis://"+host+":"+port)` with `ByteArrayCodec` (`RedisConnectionConfig.java:84-90`); TTL bound from `redis.rate-limit.bucket-ttl-seconds` (`application.properties:56`, default 3600 at `Endpoint.bucketTtlSeconds=3600` `:104`) | `rateLimitBucket_AfterConsume_PersistsInLocalRedisWithTtl` asserts a positive Redis TTL ≤ configured 2s on the bucket key — direct evidence the `fixedTimeToLive` strategy is applied — green |
+| R4 — separate local ephemeral rate-limit Redis; rate-limiter wired against rate-limit endpoint, NEVER the auth/@Primary endpoint | requirements.md L41/L34 (verifiable slice, Brief) | MET | `@Bean rateLimitProxyManager()` built from `rateLimit.getHost()/getPort()` (`RedisConnectionConfig.java:70-73`); `rateLimit` is a distinct `Endpoint` (`:55-56`) bound from `redis.rate-limit.host/port` (`application.properties:54-55`); auth endpoint is the separate `@Primary` bean (`:59-62`) | `rateLimitBucket_AfterConsume_AbsentFromAuthRedis` — after consume, key present in rate-limit Redis and absent from a physically separate auth Redis container — green |
+| R5 — 429 semantics preserved: per-user / per-endpoint / per-identifier isolation and `RateLimitExceededException` (same args) unchanged | 429 parity (Brief) | MET | `checkRateLimit`/`checkCrud/Import/Sse/Auth/Comment/Report/Moderation/PlannerCommentSse` signatures + key formats unchanged; throws `new RateLimitExceededException(userId, endpoint)` (`RateLimitConfig.java:47`), `(null,"auth")` (`:69`), `(null,"planner-comment-sse")` (`:112`) | Isolation: `SeparateBucketsPerUserTests` 4/4, `SeparateBucketsPerEndpointTests` 3/3, `AuthLimitIdentifierTests` 4/4, `BucketKeyTests` 1/1. Exception contract: `ExceededLimitTests` 4/4 assert `getUserId()`/`getEndpoint()`/message content — all green |
+
+### Before-state evidence (`git diff HEAD`, Phase 7 is uncommitted working-tree `M`)
+Diff of `RateLimitConfig.java` vs `HEAD` confirms parity, not just current-state:
+- R2 "deleted entirely": the removed side shows `ConcurrentHashMap<String,BucketEntry> buckets`,
+  the `BucketEntry` inner class, `bucketTtlSeconds`, `maxBuckets`, `@Scheduled(fixedRate=300000)
+  evictExpiredBuckets()` (with its LRU-by-`lastAccess` eviction), and `getBucketCount()` — all
+  deleted; added side is the injected `ProxyManager<byte[]>` + `proxyManager.builder().build(...)`.
+  `grep -rn "BucketEntry\|maxBuckets\|getBucketCount\|evictExpiredBuckets" backend/src` → 0 matches
+  (no orphaned artifact survived elsewhere).
+- R5 "same args / unchanged": the diff shows the key formats (`userId+":"+endpoint`,
+  `identifier+":auth"`, `"device:"+deviceId+":planner-comment-sse"`) and the
+  `RateLimitExceededException(userId,endpoint)` / `(null,"auth")` / `(null,"planner-comment-sse")`
+  args are byte-identical across the change; every `checkX` signature is untouched; the token-bucket
+  math (`Bandwidth…capacity/refillGreedy`, `tryConsume(1)`) is unchanged — only the bucket *store*
+  moved from in-memory `Bucket` to the Redis proxy manager.
+- Test diff (110+/5−): the 5 deletions are 3 Javadoc lines, the `new RateLimitConfig()` →
+  constructor-injection rewire, and one edge-test refill window widened 60s→86400s in
+  `checkRateLimit_LargeCapacity_HandlesCorrectly` (keeps greedy refill from leaking a token during
+  the slower real Redis round-trips; the "1001st throws" assertion is unchanged). NO exception-contract
+  or isolation assertion (`getUserId`/`getEndpoint`/message/`assertThrows`) was removed or weakened.
+
+### Deletion / structural checks
+- `RateLimitConfig.java` carries NO `ConcurrentHashMap`, `BucketEntry`, `@Scheduled`, or `maxBuckets`
+  (grep 0 matches) — manual 5-min eviction and LRU cap deleted; key TTL replaces both.
+- `bucket4j-redis:8.10.1` present alongside `bucket4j-core:8.10.1` (`build.gradle.kts:69-70`).
+- `redis.rate-limit.host/port/bucket-ttl-seconds` bound in `application.properties:54-56`.
+
+### Gaps
+- (none) — R1–R5 all MET; scoped suite green (RateLimitConfig 28, naming 1; 0 failures / 0 errors / 0 skipped).

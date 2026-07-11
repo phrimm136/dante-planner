@@ -1,11 +1,7 @@
 package org.danteplanner.backend.shared.config;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +9,20 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.validation.annotation.Validated;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
+import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
+import io.github.bucket4j.distributed.proxy.ProxyManager;
+import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.codec.ByteArrayCodec;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Wires the two logical Redis roles as distinct {@link LettuceConnectionFactory} beans.
@@ -56,6 +66,29 @@ public class RedisConnectionConfig {
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(rateLimit.getHost(), rateLimit.getPort()));
     }
 
+    @Bean
+    public ProxyManager<byte[]> rateLimitProxyManager() {
+        return buildRateLimitProxyManager(
+                rateLimit.getHost(), rateLimit.getPort(), Duration.ofSeconds(rateLimit.getBucketTtlSeconds()));
+    }
+
+    /**
+     * Builds a bucket4j {@link ProxyManager} whose buckets live in the local ephemeral
+     * rate-limit Redis, keyed by the UTF-8 bytes of the rate-limit key.
+     *
+     * @param host      rate-limit Redis host
+     * @param port      rate-limit Redis port
+     * @param bucketTtl per-bucket time-to-live for the Redis key
+     * @return a byte[]-keyed proxy manager backed by the given Redis endpoint
+     */
+    public static ProxyManager<byte[]> buildRateLimitProxyManager(String host, int port, Duration bucketTtl) {
+        RedisClient client = RedisClient.create("redis://" + host + ":" + port);
+        StatefulRedisConnection<byte[], byte[]> connection = client.connect(ByteArrayCodec.INSTANCE);
+        return LettuceBasedProxyManager.builderFor(connection)
+                .withExpirationStrategy(ExpirationAfterWriteStrategy.fixedTimeToLive(bucketTtl))
+                .build();
+    }
+
     @Getter
     @Setter
     public static class Endpoint {
@@ -66,5 +99,8 @@ public class RedisConnectionConfig {
         @Min(1)
         @Max(65535)
         private int port;
+
+        @Min(1)
+        private int bucketTtlSeconds = 3600;
     }
 }
