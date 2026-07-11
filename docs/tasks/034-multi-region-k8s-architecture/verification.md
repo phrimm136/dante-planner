@@ -490,3 +490,45 @@ trades fallback-to-primary latency vs replica-hit rate — NO correctness branch
 - `CausalGateIT` drives the external HTTP contract name-agnostically (matches the cookie by GTID-shaped
   value, not the `ryw_gtid` literal), so it survives any gate implementation — the unit `GtidCookieTest`
   pins the concrete `ryw_gtid` name/attributes.
+
+## Phase 9: Typed degradation + health semantics + Lettuce mapping — PASS
+
+### Suite
+Scoped tests only (per Brief; the FULL backend suite is NOT run here — the sandbox has no standalone
+Redis, so ~294 Redis-context @SpringBootTest/repository tests fail environmentally, proven independent
+of phase 9. The three phase-9 tests carry their own Testcontainers / no external Redis and are green.)
+
+Fast:
+`backend/gradlew -p backend test --tests "*GlobalExceptionHandlerDbUnavailableTest" --tests "*JwtAuthenticationFilterTest"`
+```
+> Task :test
+BUILD SUCCESSFUL in 20s
+```
+- `GlobalExceptionHandlerDbUnavailableTest`: tests="3" skipped="0" failures="0" errors="0"
+- `JwtAuthenticationFilterTest$DbUnavailableDuringRefreshTests`: tests="5" skipped="0" failures="0" errors="0"
+  (whole `JwtAuthenticationFilterTest` also green)
+
+Slow (Docker/Testcontainers): `backend/gradlew -p backend test --tests "*DegradationIT"`
+```
+> Task :test
+BUILD SUCCESSFUL in 2m 55s
+```
+- `DegradationIT`: tests="3" skipped="0" failures="0" errors="0" — cases:
+  - INV5: primary DB cut → readiness stays UP, write returns WRITE_TEMPORARILY_UNAVAILABLE, list read still serves the replica
+  - (a) Auth Redis unreachable: blacklist check fails open + skip counter increments (INV6, Phase-5, present in same IT)
+  - (b) AOF-replay integrity: blacklisted token survives DEBUG LOADAOF (INV6)
+
+### Trace
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| R-typed-codes: `WRITE_TEMPORARILY_UNAVAILABLE` (primary unreachable) | req L63 / mech §7 | MET | `GlobalExceptionHandler.java:354-364` `handleDatabaseUnavailable` (`DataAccessResourceFailureException` + `CannotCreateTransactionException` → 503, code `WRITE_TEMPORARILY_UNAVAILABLE`) | `GlobalExceptionHandlerDbUnavailableTest.java:64-78` (tx-begin + query-time paths, both 503 + code, via real `@ExceptionHandler` dispatch) |
+| R-typed-codes: `AUTH_TEMPORARILY_UNAVAILABLE` (Redis outage) mapped in `GlobalExceptionHandler` | req L63 / mech §7 | MET | `GlobalExceptionHandler.java:376-383` `handleRedisUnavailable` (`RedisConnectionFailureException` → 503, code `AUTH_TEMPORARILY_UNAVAILABLE`, more specific than DB handler) | `GlobalExceptionHandlerDbUnavailableTest.java:82-86` (`/boom/redis` → 503 + `AUTH_TEMPORARILY_UNAVAILABLE`) |
+| R-typed-codes: Lettuce exceptions mapped ALSO in `JwtAuthenticationFilter` (filter bypasses `@RestControllerAdvice`) | req L63 / mech §7 | MET | `JwtAuthenticationFilter.java:112-118` and `173-179` (Redis catch BEFORE DB catch at both `doFilterInternal` refresh sites) → `writeAuthUnavailable` (`:409-413`, `AUTH_TEMPORARILY_UNAVAILABLE`) / `writeDbUnavailable` (`:399-403`, `WRITE_TEMPORARILY_UNAVAILABLE`) | `JwtAuthenticationFilterTest.java:290-311` (Redis-write→AUTH body) + `:316-334` (DB→WRITE body) + `:219,242,265` (503 status at both sites, tx-begin + query-time) |
+| R-degrade-by-operation: reads survive write-path outage; writes surface typed errors | req L60 | MET | Write path 503-typed via handler above; read path routed to replica (Phase-2 routing, exercised) | `DegradationIT.java:316-358` — primary cut: list read returns 200 non-empty from replica, write returns 503 `WRITE_TEMPORARILY_UNAVAILABLE` |
+| R-health-app-only: liveness/readiness app-only (never deroute); dependency failures still visible for alerting | req L61 / mech §7 | MET | never-deroute: `application.properties:144-146` (`probes.enabled=true`; `group.readiness.include=readinessState`, `group.liveness.include=livenessState` — DB/Redis excluded); `SecurityConfig.java:85-87` permits readiness/liveness. alert-visible: no `management.health.db.enabled` / `management.health.redis.enabled` opt-out anywhere in `src/main/resources` (grep empty), so both indicators auto-register on the aggregate `/actuator/health` per Spring default | `DegradationIT.java:350-357` — primary-DB outage: `/actuator/health/readiness` stays 200 + "UP" (never-deroute clause pinned; alert-visible clause is config-verified, not IT-asserted) |
+| INV5: DB outage never flips readiness; writes fail typed while reads serve | req L105 / Test Plan L132 | MET | (composite of above) | `DegradationIT.java:318` INV5 acceptance test, green |
+| R-healthz-local: GA probe `/healthz-local` through Traefik to app-only readiness | req L31 | design-satisfied (infra out of code scope) | Backend deliverable it targets — app-only `/actuator/health/readiness` group — implemented at `application.properties:145` + permitted `SecurityConfig.java:86`; Traefik route has no manifest in this docs-only task dir (per phase-manager note) | Readiness group app-only behavior pinned by `DegradationIT.java:350-357` |
+| §0 FORBIDDEN: no dependency checks inside liveness/readiness probes | mech §0 | MET (absence verified) | `application.properties:145-146` include ONLY `readinessState`/`livenessState`; no custom `HealthIndicator`/`HealthContributor` class in `src/main/java`; no group adds db/redis | Enforced behaviorally by `DegradationIT.java:350-357` (readiness UP under DB outage) |
+
+### Gaps
+None. All in-scope items MET (R-healthz-local design-satisfied per Brief note).

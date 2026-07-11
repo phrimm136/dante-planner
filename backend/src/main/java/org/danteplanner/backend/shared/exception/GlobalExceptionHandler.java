@@ -348,7 +348,7 @@ public class GlobalExceptionHandler {
      * rewrites any backend 5xx body to {@code BACKEND_UNAVAILABLE} (or {@code SERVICE_UPDATING}).
      * A 500 would NOT be intercepted and would leak through as a raw INTERNAL_ERROR. So this handler
      * exists to (a) emit 503 so nginx maps it cleanly to BACKEND_UNAVAILABLE for the client, and
-     * (b) keep it out of Sentry. The {@code DB_UNAVAILABLE} code below is internal-only (logs /
+     * (b) keep it out of Sentry. The {@code WRITE_TEMPORARILY_UNAVAILABLE} code below is internal-only (logs /
      * direct backend access); external clients always see BACKEND_UNAVAILABLE.</p>
      */
     @ExceptionHandler({
@@ -360,7 +360,26 @@ public class GlobalExceptionHandler {
         log.warn("Database unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
-            .body(new ErrorResponse("DB_UNAVAILABLE", "Database temporarily unavailable, please retry"));
+            .body(new ErrorResponse("WRITE_TEMPORARILY_UNAVAILABLE", "Database temporarily unavailable, please retry"));
+    }
+
+    /**
+     * Handle Redis being briefly unreachable during authentication (failover, network blip, maintenance).
+     *
+     * <p>The auth path touches Redis for session/token lookups. When Redis is unreachable, Spring Data
+     * surfaces a RedisConnectionFailureException. This is more specific than the DB
+     * DataAccessResourceFailureException below (it is a subclass of DataAccessResourceFailureException),
+     * so Spring dispatches Redis-connection failures here by type specificity. Transient and
+     * self-healing — deliberately NOT sent to Sentry for the same reason as the DB handler: it is
+     * expected during a Redis outage and would otherwise alert-storm.</p>
+     */
+    @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
+    public ResponseEntity<ErrorResponse> handleRedisUnavailable(
+            org.springframework.data.redis.RedisConnectionFailureException ex) {
+        log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Retry-After", "10")
+            .body(new ErrorResponse("AUTH_TEMPORARILY_UNAVAILABLE", "Authentication service temporarily unavailable, please retry"));
     }
 
     /**

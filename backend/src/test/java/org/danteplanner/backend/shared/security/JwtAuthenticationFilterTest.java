@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -27,6 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.Optional;
 
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 
@@ -105,6 +108,17 @@ class JwtAuthenticationFilterTest {
                 new Date(),
                 new Date(System.currentTimeMillis() + 3600000)
         );
+    }
+
+    private User activeUser(Long id) {
+        return User.builder()
+                .id(id)
+                .email("user@example.com")
+                .provider(AuthProviderType.GOOGLE)
+                .providerId("google-" + id)
+                .usernameEpithet("W_CORP")
+                .usernameSuffix("usr" + String.format("%02d", id % 100))
+                .build();
     }
 
     @Nested
@@ -269,6 +283,55 @@ class JwtAuthenticationFilterTest {
             verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             verify(filterChain, never()).doFilter(any(), any());
             assertNull(SecurityContextHolder.getContext().getAuthentication());
+        }
+
+        @Test
+        @DisplayName("Redis auth-write failure during refresh returns 503 with AUTH_TEMPORARILY_UNAVAILABLE body")
+        void doFilterInternal_refreshRedisWriteFails_returnsAuthTemporarilyUnavailable() throws Exception {
+            String refreshToken = "refresh.jwt.token";
+            Long userId = 123L;
+            User user = activeUser(userId);
+            StringWriter body = new StringWriter();
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(tokenValidator.validateToken(refreshToken)).thenReturn(createRefreshClaims(userId));
+            when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
+            when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), anyLong())).thenReturn(false);
+            when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
+            doThrow(new org.springframework.data.redis.RedisConnectionFailureException("auth redis down"))
+                    .when(tokenBlacklistService).blacklistTokenForRotation(eq(refreshToken), any());
+            when(response.getWriter()).thenReturn(new PrintWriter(body));
+
+            filter.doFilterInternal(request, response, filterChain);
+
+            verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            verify(filterChain, never()).doFilter(any(), any());
+            assertTrue(body.toString().contains("AUTH_TEMPORARILY_UNAVAILABLE"),
+                    "Redis auth-write failure must write AUTH_TEMPORARILY_UNAVAILABLE, got: " + body);
+        }
+
+        @Test
+        @DisplayName("DB down during refresh writes body code WRITE_TEMPORARILY_UNAVAILABLE")
+        void doFilterInternal_refreshDbDown_bodyCodeIsWriteTemporarilyUnavailable() throws Exception {
+            String expiredToken = "expired.jwt.token";
+            String refreshToken = "refresh.jwt.token";
+            Long userId = 123L;
+            StringWriter body = new StringWriter();
+
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(tokenValidator.validateToken(expiredToken))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
+            when(tokenValidator.validateToken(refreshToken)).thenReturn(createRefreshClaims(userId));
+            when(userService.findActiveById(userId))
+                    .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
+            when(response.getWriter()).thenReturn(new PrintWriter(body));
+
+            filter.doFilterInternal(request, response, filterChain);
+
+            assertTrue(body.toString().contains("WRITE_TEMPORARILY_UNAVAILABLE"),
+                    "DB-down refresh must write WRITE_TEMPORARILY_UNAVAILABLE body code, got: " + body);
         }
     }
 

@@ -1,6 +1,6 @@
 {
   "totalPhases": 15,
-  "currentPhase": 8,
+  "currentPhase": 9,
   "reviewMode": "end",
   "infraPhasesMode": "authored-as-code, apply consent-gated with user AWS credentials",
   "phases": [
@@ -12,7 +12,7 @@
     { "name": "Rotation Lua externalization + ShedLock job safety", "status": "done" },
     { "name": "Rate limiter -> bucket4j-redis on local Redis", "status": "done" },
     { "name": "GTID cookie gate (author RYW)", "status": "done" },
-    { "name": "Typed degradation + health semantics + Lettuce mapping", "status": "pending" },
+    { "name": "Typed degradation + health semantics + Lettuce mapping", "status": "done" },
     { "name": "SSE over Redis pub/sub (payload events) - backend", "status": "pending" },
     { "name": "FE SSE invalidate->patch + errorCode UX", "status": "pending" },
     { "name": "Pre-Seoul gates - recorded measurements", "status": "pending" },
