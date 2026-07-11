@@ -25,7 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Wires the two logical Redis roles as distinct {@link LettuceConnectionFactory} beans.
+ * Wires the three logical Redis roles as distinct {@link LettuceConnectionFactory} beans.
  *
  * <ul>
  *   <li>{@code authRedisConnectionFactory} — the auth Redis (Oregon primary, durable):
@@ -35,6 +35,9 @@ import lombok.Setter;
  *       by type.</li>
  *   <li>{@code rateLimitRedisConnectionFactory} — the per-region local ephemeral Redis
  *       backing rate-limit buckets (no persistence, no replication).</li>
+ *   <li>{@code sseLocalRedisConnectionFactory} — the per-region local Redis a pod
+ *       subscribes to for SSE fan-out; single-region it is the same host as auth,
+ *       multi-region it is the regional replica.</li>
  * </ul>
  *
  * <p>Each endpoint's host/port is environment-specific and bound from
@@ -55,6 +58,9 @@ public class RedisConnectionConfig {
     @Valid
     private Endpoint rateLimit = new Endpoint();
 
+    @Valid
+    private Endpoint sseLocal = new Endpoint();
+
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
@@ -64,6 +70,11 @@ public class RedisConnectionConfig {
     @Bean
     public LettuceConnectionFactory rateLimitRedisConnectionFactory() {
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(rateLimit.getHost(), rateLimit.getPort()));
+    }
+
+    @Bean
+    public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sseLocal.getHost(), sseLocal.getPort()));
     }
 
     @Bean

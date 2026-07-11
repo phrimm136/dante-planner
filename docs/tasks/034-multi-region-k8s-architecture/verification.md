@@ -532,3 +532,49 @@ BUILD SUCCESSFUL in 2m 55s
 
 ### Gaps
 None. All in-scope items MET (R-healthz-local design-satisfied per Brief note).
+
+## Phase 10: SSE over Redis pub/sub (payload-carrying events) — backend — PASS
+
+### Suite
+Scoped tests only (per Brief; the FULL backend suite is NOT run here — the sandbox has no standalone
+Redis, so ~294 Redis-context @SpringBootTest/repository tests fail environmentally, independent of
+phase 10. The phase-10 fan-out IT carries its own Testcontainers harness and is green.)
+
+`backend/gradlew -p backend test --tests "*SseFanoutIT" --tests "*SsePublisherTest" --tests "*PlannerCommentSseServiceTest" --tests "*SseServiceTest" --tests "*TestNamingConventionTest"`
+```
+> Task :test UP-TO-DATE
+BUILD SUCCESSFUL in 1s
+```
+Aggregate over the five classes (JUnit XML at `backend/build/test-results/test/`, run 2026-07-12 02:17):
+`tests=41 skipped=0 failures=0 errors=0`
+- `SseFanoutIT`: tests="3" skipped="0" failures="0" errors="0" (acceptance — user fan-out w/ payload,
+  settings-invalidate control, comment fan-out w/ payload)
+- `SsePublisherTest`: tests="1" failures="0"
+- `PlannerCommentSseServiceTest` (nested): all green
+- `SseServiceTest` (nested): all green
+- `TestNamingConventionTest`: green
+
+### Trace
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| (1) Every pod publishes to the Oregon Redis primary | plan Ph10 / mech §4 | MET | `SsePublisher.java:24,83` publishes via the default `StringRedisTemplate` → `@Primary authRedisConnectionFactory` (`RedisConnectionConfig.java:64-68`, Oregon primary/auth) `.convertAndSend(channel, json)`; channels `SseChannels.java:8-9` (`sse:user`,`sse:comment`) | `SsePublisherTest.java:39` verifies `convertAndSend("sse:user", …)` on the primary template; `SseFanoutIT.java:72,85,97` publish via `SsePublisher` bound to `redis.auth.*` |
+| (2) Subscribe local + deliver to local emitters (true fan-out, no sticky sessions) | plan Ph10 / mech §4 | MET | `SseSubscriberConfig.java:31-48` `RedisMessageListenerContainer` on a **distinct** `sseLocalRedisConnectionFactory` (`RedisConnectionConfig.java:75-78`, `redis.sse-local.*`), subscribes `sse:user`+`sse:comment`; `SseRedisSubscriber.java:50-57` routes to `PlannerCommentSseService.broadcast` / `SseService.sendToUser` (local emitters) | `SseFanoutIT.java:50-54,66-78` — publish on primary factory, subscriber on the distinct sse-local factory delivers to spied `SseService` (Mockito `timeout(5000)`, no sleeps) |
+| (3) Events carry payloads — recipient patches cache, NOT notify-then-fetch (§0 FORBIDDEN) | plan Ph10 / mech §4 / §0 | MET | `SseEnvelope.java:13-32` record carries `payload`/`deletedId`/entity fields; `SsePublisher.java:36,49,64` build payload-carrying envelopes; subscriber passes the whole `envelope` to `sendToUser(...,envelope)` (`SseRedisSubscriber.java:56`) and `broadcast(...,envelope)` (`:50-51`) — no bare-notify path | `SsePublisherTest.java:42-46` asserts serialized envelope contains `planner-9`+`title`+`Deck`; `SseFanoutIT.java:74-77,99-102` `argThat(data contains entityId)` — payload delivered end-to-end |
+| (4) Redis Pub/Sub, NOT Streams | mech §4 | MET (absence verified by grep) | Publish via `convertAndSend` (`SsePublisher.java:83`); receive via `RedisMessageListenerContainer`/`ChannelTopic` (`SseSubscriberConfig.java:34,47`) + `MessageListener` (`SseRedisSubscriber.java:28,35`); grep for `opsForStream`/`StreamListener`/`StreamMessageListenerContainer`/`XADD`/`XREAD` over `shared/sse` + `PlannerCommentSseService` returns nothing | Exercised by `SseFanoutIT` cross-node delivery (pub/sub path) |
+| (5) Settings-cache invalidation rides the same pub/sub mechanism | mech §4 | MET | `SsePublisher.java:48-50` `publishSettingsInvalidation` → same `sse:user` channel + `SseEnvelope.settingsInvalidation` (`SseEnvelope.java:26-28`, type `SETTINGS_INVALIDATED`); subscriber discriminates `SseRedisSubscriber.java:53-54` → `SseService.invalidateSettingsCache` (`SseService.java:202-205`) | `SseFanoutIT.java:82-88` `settingsInvalidate_WhenPublishedOnPrimary_InvalidatesLocalSettingsCache` verifies `invalidateSettingsCache(userId)` via the pub/sub path |
+| (6) At-most-once — neither SSE service sets `.id()` (only `.name().data()`) | mech §4 | MET (absence verified by grep) | grep for `.id(` over `shared/sse/` + `PlannerCommentSseService.java` returns nothing; send sites use only `.name().data()` (`SseService.java:120,163`; `PlannerCommentSseService.java:109`) and heartbeat `.comment()` (`AbstractSseService.java:95,115`) | Send path exercised green by `SseServiceTest`/`PlannerCommentSseServiceTest`; no dedicated regression guard asserting the raw SSE frame carries no `id:` line (see Gaps) |
+| (7) Heartbeat < 100s (Cloudflare idle limit) | mech §4 | MET | `SseService.java:38` `HEARTBEAT_INTERVAL_MS=10_000L`; `PlannerCommentSseService.java:39` `=15_000L` — both < 100s; `@Scheduled(fixedRate=…)` at `SseService.java:220`, `PlannerCommentSseService.java:173` | `SseServiceTest$SendHeartbeats` + `PlannerCommentSseServiceTest$SendHeartbeats` green |
+| (8) Fan-out IT green (cross-node delivery with payload) | Test Plan Ph10 | MET | (acceptance IT) | `SseFanoutIT.xml`: tests="3" skipped="0" failures="0" errors="0" |
+
+### Gaps
+None blocking. All 8 in-scope items MET (items 4 and 6 are negative properties verified by grep — the
+same "MET (absence verified)" convention used by Phase 9's §0 row). Two non-blocking notes:
+- Item (6) at-most-once has no regression guard: an IT that subscribes, triggers an event, and asserts
+  the raw SSE frame carries no `id:` line would catch a future `.id()` addition. Absence is grep-verified
+  today; the guard is the smallest slice that would freeze it.
+- Cross-node replication propagation (Oregon primary → Seoul replica) is a Redis deployment guarantee
+  tested on a single-Redis topology per Brief (the IT points `redis.auth` and `redis.sse-local` at the
+  same container, so no test discriminates that publish specifically targets the `@Primary`/auth
+  endpoint — that binding rests on the `@Primary` annotation + Spring convention). The app-code contract
+  (publish via the `@Primary` primary factory, subscribe via a distinct `sse-local` factory, fan out to
+  local emitters) is proven.

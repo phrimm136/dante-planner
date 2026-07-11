@@ -13,7 +13,8 @@ public enum SseEventType {
     DELETED("deleted"),
     NOTIFY_COMMENT("notify:comment"),
     NOTIFY_PUBLISHED("notify:published"),
-    NOTIFY_RECOMMENDED("notify:recommended");
+    NOTIFY_RECOMMENDED("notify:recommended"),
+    SETTINGS_INVALIDATED("settings:invalidated");
 
     private final String value;
 
