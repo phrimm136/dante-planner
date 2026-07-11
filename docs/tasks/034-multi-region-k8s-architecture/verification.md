@@ -306,3 +306,49 @@ files incl. `@Nested` splits) — **98 testcases, 0 `<failure>`/`<error>` childr
   and stands up its own isolated MySQL+auth-Redis+Toxiproxy harness (Option B) so sibling ITs' shared
   auth Redis is never toxic-ed/AOF-corrupted — intentional test-determinism choice, not a contract
   violation.
+
+## Phase 6: Refresh rotation Lua externalization + scheduled-job multi-pod safety — PASS
+
+### Suite
+Scoped command (cwd = repo root → absolute gradlew path):
+```
+backend/gradlew -p backend test --tests "*RefreshRotationServiceTest" \
+  --tests "*ShedLockMultiPodTest" --tests "*TestNamingConventionTest"
+```
+Verbatim result tail (`/tmp/phase6-verify-run.log`):
+```
+> Task :test
+> Task :jacocoTestReport
+BUILD SUCCESSFUL in 23s
+6 actionable tasks: 2 executed, 4 up-to-date
+```
+Per-suite JUnit XML gate (`backend/build/test-results/test/`) after this run:
+- `RefreshRotationServiceTest$*` (7 `@Nested` XML: HappyPath 3, Retry 2, TheftDetection 2,
+  FamilyRevocation 3, ConcurrentRotation 1, CrossInstanceAtomicity 1, LegacyAdmission 3)
+  — **15 testcases, 0 failures / 0 errors / 0 skipped**.
+- `scheduling.ShedLockMultiPodTest.xml`: tests="3" failures="0" errors="0" skipped="0"
+  (lock-contention + both `@SchedulerLock`-presence assertions).
+- `architecture.TestNamingConventionTest.xml`: tests="1" failures="0" errors="0" skipped="0".
+(Note: the ShedLock XML was absent on arrival; I re-ran the scoped suite to regenerate it — now green.)
+
+### Trace
+
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| INV8 — rotation atomicity survives multi-instance; RefreshRotationService is Redis-Lua backed (per-family hash `rt:fam:{familyId}` + transition script via `execute(rotateScript,…)`); atomicity = single-threaded Lua, NO Redisson/distributed lock | requirements.md INV8 (Brief) | MET | Per-family key `FAMILY_KEY_PREFIX="rt:fam:"` + `familyKey`=`rt:fam:{familyId}` (`RefreshRotationService.java:52,317-319`); `ROTATE_SCRIPT` compiled to `DefaultRedisScript` (`:82-116,144-146`) and run via `authRedisTemplate.execute(rotateScript, List.of(familyKey), …)` (`:204-208`); no Redisson/lock import anywhere in the file | ConcurrentRotation: `rotate_WhenConcurrentSameParent_OneTransitionOneSupersede` (2 threads same parent → asserts one `UNUSED_LATEST` winner + one `SUPERSEDED` loser, both valid distinct JWTs) — `$ConcurrentRotation.xml` 1/1 green. CrossInstanceAtomicity: `rotate_WhenTokenUsedOnInstanceA_ReplayOnInstanceB_DetectsTheftOverSharedRedis` (USED on A, replay on B over shared Redis → Revoked + family revoked) — `$CrossInstanceAtomicity.xml` 1/1 green |
+| Test Plan — rotation concurrency suite re-run vs Lua + `jwt_rotation_outcome_total` NAME parity pre/post migration | requirements.md Test Plan (Brief) | MET | Metric `METRIC_OUTCOME="jwt_rotation_outcome_total"`, `TAG_OUTCOME="outcome"` (`:61-62`); outcome tags byte-identical: `rotated`, `retry_superseded`, `theft_revoked`, `legacy_admitted`, `rejected_revoked_family`, `rejected_invalid` (`:64-69`) | Every tag asserted: `OUTCOME_ROTATED` (test `:143,161,198`), `RETRY_SUPERSEDED` (`:199`), `THEFT_REVOKED` (`:237,254`), `LEGACY_ADMITTED` (`:429,461`), `REJECTED_REVOKED_FAMILY` (`:279`), `REJECTED_INVALID` (`:290,304,445`) — all across the 15 green testcases |
+| mechanics §2.2 (BINDING) — transition Lua script present character-for-character | mechanics §2.2 (Brief) | MET | `ROTATE_SCRIPT` (`:82-116`) matches verbatim: KEYS[1]=`rt:fam:{F}`; ARGV=jti,parentJti,successorJti,succExpiryMs,nowMs,ttlMs; `HGET __revoked__`→`'REVOKED'` (`:88`); USED/SUPERSEDED replay→`HSET __revoked__ ARGV[5]`+`'THEFT'` (`:93-96`); parent PENDING→`'USED||'..ARGV[4]` (`:98-103`); PENDING→supersede oldSucc `'SUPERSEDED||'..ARGV[4]` (`:105-110`); write succ `'UNUSED_LATEST||'..ARGV[4]` (`:112`); write jti `'PENDING|'..succ..'|'..ARGV[4]` (`:113`); `PEXPIRE ARGV[6]` (`:114`); `'ROTATED'` (`:115`) | Behaviorally pinned by the full 15-case suite (state-machine + theft + retry + concurrency all exercise the script branches) — 0 fail |
+| mechanics §2.3 (BINDING) — successor JWT minted BEFORE EVALSHA; cookie set ONLY on ROTATED; dropped on THEFT/REVOKED | mechanics §2.3 (Brief) | MET | Mint+validate successor at `:192-195` BEFORE `execute(...)` at `:204`; `switch(result)`: ROTATED→`cookieUtils.setCookie(REFRESH_TOKEN, successorJwt,…)` (`:221-222`); THEFT→`clearAuthCookies` (no set) (`:211-215`); REVOKED→`clearAuthCookies` (`:216-220`) — signed successor never set nor written into the hash on THEFT/REVOKED | HappyPath `rotate_WhenRotated_SetsRefreshCookie` asserts cookie value=new JWT + maxAge>0 (`:166-176`); TheftDetection + FamilyRevocation assert refresh+access cookie maxAge 0 (`:235-236,278`) — 0 fail |
+| mechanics §2.5 (BINDING) — 5s grace stays Java (no grace/blacklist in rotation svc); metric preserved; hourly `@Scheduled cleanupExpired` sweep DELETED (no `@Scheduled`/`ConcurrentHashMap` remain); Notification 2AM + UserCleanup 3AM get `@SchedulerLock`; SSE heartbeat/zombie sweeps STAY without `@SchedulerLock` | mechanics §2.5 (Brief) | MET | `grep grace\|blacklist` over `RefreshRotationService.java` → 0 matches; `grep @Scheduled\|ConcurrentHashMap` over same → 0 matches (hourly sweep gone). `NotificationService.cleanupOldNotifications`: `@Scheduled(cron="0 0 2 * * *")`+`@SchedulerLock(name="cleanupOldNotifications",…)` (`NotificationService.java:343-346`); `UserCleanupScheduler.cleanupExpiredUsers`: `@Scheduled(cron=…3…)`+`@SchedulerLock(name="cleanupExpiredUsers",…)` (`UserCleanupScheduler.java:36-38`). SSE sweeps remain `@Scheduled` WITHOUT `@SchedulerLock`: `SseService.sendHeartbeats/cleanupZombieConnections` (`:220,228`), `PlannerCommentSseService.sendHeartbeats/cleanupZombieConnections` (`:129,137`) | ShedLock presence pinned by `ShedLockMultiPodTest.cleanupOldNotifications_…IsAnnotatedWithSchedulerLock` + `cleanupExpiredUsers_…IsAnnotatedWithSchedulerLock` (reflection) — 2/2 green. Grace/deletion checks are structural (grep) — no positive test needed; deleted code cannot be tested |
+| Plan external contract — verdict→result mapping (ROTATED→Rotated, THEFT→Revoked, REVOKED→Rejected(REVOKED_FAMILY)); cookie cleared on THEFT/REVOKED; ShedLock over durable auth Redis (`authRedisConnectionFactory`, not ephemeral rate-limit Redis); jobs fleet-once | plan.md Phase 6 (Brief) | MET | `switch(result)`: THEFT→`new RotationResult.Revoked(familyId)` (`:214`), REVOKED→`Rejected(Reason.REVOKED_FAMILY)` (`:219`), ROTATED→`Rotated(successorJwt,…)` (`:226`). `ShedLockConfig.lockProvider` binds `@Qualifier("authRedisConnectionFactory")` → `new RedisLockProvider(authRedisConnectionFactory)` (`ShedLockConfig.java:23-27`); `@EnableSchedulerLock(defaultLockAtMostFor="PT10M")` (`:20`); shedlock deps `shedlock-spring:5.16.0` + `shedlock-provider-redis-spring:5.16.0` (`build.gradle.kts:66-67`) | Verdict mapping + cookie-clear pinned by TheftDetection (maxAge 0 both cookies `:235-236`), FamilyRevocation (`:275-279`), CrossInstanceAtomicity (`:391-394`). Fleet-once mutual exclusion: `ShedLockMultiPodTest.lock_WhenTwoPodsContendSameLockName_OnlyFirstAcquires` — two `RedisLockProvider`s over one Redis: first `isPresent()`, concurrent second `isEmpty()` — green |
+
+### Deletion checks (structural)
+- `RotationEntry.java` DELETED — `ls .../auth/token/RotationEntry.java` → "No such file or directory".
+- `RefreshRotationService.java` carries NO `@Scheduled` and NO `ConcurrentHashMap` (grep 0 matches);
+  the Phase-5 note about a surviving `@Scheduled` in this file is now stale — that sweep is gone.
+- No `grace`/`blacklist` logic in `RefreshRotationService.java` (grep 0 matches) — the 5s grace
+  comparison stays in `TokenBlacklistService` (single clock source), untouched by Phase 6.
+
+### Gaps
+- (none) — every in-scope Phase-6 item is MET; scoped suite green (rotation 15, shedlock 3, naming 1;
+  0 failures / 0 errors / 0 skipped).

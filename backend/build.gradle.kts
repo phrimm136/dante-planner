@@ -63,6 +63,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    implementation("net.javacrumbs.shedlock:shedlock-spring:5.16.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0")
+
     implementation("com.bucket4j:bucket4j-core:8.10.1")
     implementation("org.jsoup:jsoup:1.22.1")
     implementation("io.sentry:sentry-spring-boot-starter-jakarta:8.37.1")

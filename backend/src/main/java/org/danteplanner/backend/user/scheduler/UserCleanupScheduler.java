@@ -2,6 +2,7 @@ package org.danteplanner.backend.user.scheduler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
@@ -15,8 +16,8 @@ import java.util.List;
  * Scheduled job for permanently deleting users whose grace period has expired.
  * Runs daily at 3 AM by default (configurable via app.user.cleanup.cron).
  *
- * <p>Note: This is a single-server solution. For multi-server deployments,
- * consider using ShedLock or similar distributed locking mechanism.</p>
+ * <p>Multi-pod safe: {@code @SchedulerLock} over the shared auth Redis lock store ensures
+ * the job fires once across the fleet, not once per pod.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class UserCleanupScheduler {
      * are unaffected by the reassignment.
      */
     @Scheduled(cron = "${app.user.cleanup.cron:0 0 3 * * *}")
+    @SchedulerLock(name = "cleanupExpiredUsers", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     public void cleanupExpiredUsers() {
         log.info("Starting scheduled user cleanup job");
 

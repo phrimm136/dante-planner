@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -340,6 +341,7 @@ public class NotificationService {
      * - Hard-delete soft-deleted notifications older than 1 year
      */
     @Scheduled(cron = "0 0 2 * * *")
+    @SchedulerLock(name = "cleanupOldNotifications", lockAtMostFor = "PT10M", lockAtLeastFor = "PT30S")
     @Transactional
     public void cleanupOldNotifications() {
         Instant softDeleteCutoff = Instant.now().minus(90, ChronoUnit.DAYS);

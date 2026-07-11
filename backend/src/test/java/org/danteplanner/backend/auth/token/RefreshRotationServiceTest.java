@@ -5,11 +5,18 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import com.redis.testcontainers.RedisContainer;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -37,19 +44,41 @@ import static org.mockito.Mockito.spy;
  *
  * <p>Exercises the full lineage state machine against a real {@link JwtTokenService}
  * so generated successors carry real lineage claims, plus a {@link SimpleMeterRegistry}
- * to assert outcome metrics. Covers theft scenarios A–D from the spec.</p>
+ * to assert outcome metrics. Family state is externalized to a live Redis container so
+ * theft detection survives across service instances. Covers theft scenarios A–D from
+ * the spec plus cross-instance atomicity.</p>
  */
+@Tag("containerized")
 class RefreshRotationServiceTest {
 
+    private static final String REDIS_IMAGE = "redis:7-alpine";
     private static final long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
     private static final Long USER_ID = 42L;
     private static final String EMAIL = "rotation@example.com";
+
+    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
+
+    private static StringRedisTemplate sharedTemplate;
 
     private JwtTokenService tokenService;
     private JwtProperties jwtProperties;
     private CookieUtils cookieUtils;
     private SimpleMeterRegistry meterRegistry;
     private RefreshRotationService rotationService;
+
+    @BeforeAll
+    static void startRedis() {
+        REDIS.start();
+        sharedTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+    }
+
+    private static StringRedisTemplate buildTemplate(String host, int port) {
+        LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        f.afterPropertiesSet();
+        StringRedisTemplate t = new StringRedisTemplate(f);
+        t.afterPropertiesSet();
+        return t;
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -72,7 +101,8 @@ class RefreshRotationServiceTest {
         meterRegistry = new SimpleMeterRegistry();
 
         rotationService = new RefreshRotationService(
-                tokenService, tokenService, cookieUtils, jwtProperties, meterRegistry, true);
+                sharedTemplate, tokenService, tokenService, cookieUtils, jwtProperties, meterRegistry, true);
+        rotationService.clear();
     }
 
     private String freshLoginToken() {
@@ -335,53 +365,33 @@ class RefreshRotationServiceTest {
     }
 
     @Nested
-    @DisplayName("Scheduled cleanup")
-    class Cleanup {
+    @DisplayName("Cross-instance atomicity")
+    class CrossInstanceAtomicity {
 
         @Test
-        @DisplayName("Expired RotationEntry is removed, unexpired kept")
-        void cleanupExpired_WhenEntriesExpired_RemovesThem() {
-            long now = System.currentTimeMillis();
-            rotationService.putEntryForTest("expired-jti", new RotationEntry(
-                    RotationState.UNUSED_LATEST, null, null, "fam", now - 10000, now - 1000));
-            rotationService.putEntryForTest("live-jti", new RotationEntry(
-                    RotationState.UNUSED_LATEST, null, null, "fam", now, now + 60000));
-            assertEquals(2, rotationService.rotationStateSize());
+        @DisplayName("Token driven to USED on instance A is detected as theft when replayed on instance B over shared Redis")
+        void rotate_WhenTokenUsedOnInstanceA_ReplayOnInstanceB_DetectsTheftOverSharedRedis() {
+            StringRedisTemplate templateA = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            StringRedisTemplate templateB = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
 
-            rotationService.cleanupExpired();
+            RefreshRotationService instanceA = new RefreshRotationService(
+                    templateA, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(), true);
+            RefreshRotationService instanceB = new RefreshRotationService(
+                    templateB, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(), true);
 
-            assertEquals(1, rotationService.rotationStateSize());
-            assertEquals(RotationState.UNUSED_LATEST, rotationService.stateOf("live-jti"));
-            assertNull(rotationService.stateOf("expired-jti"));
-        }
-
-        @Test
-        @DisplayName("Revoked family past retention is removed")
-        void cleanupExpired_WhenRevokedFamilyPastRetention_RemovesIt() {
-            // Negative retention window: cleanup's cutoff (now - expiry) lands in the future,
-            // so a just-revoked family is already past retention — deterministic, no sleep.
-            jwtProperties.setRefreshTokenExpiry(-1000L);
-            RefreshRotationService svc = new RefreshRotationService(
-                    tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(), true);
-
-            svc.revokeFamily("stale-family");
-            assertEquals(1, svc.revokedFamiliesSize());
-
-            svc.cleanupExpired();
-
-            assertEquals(0, svc.revokedFamiliesSize());
-        }
-
-        @Test
-        @DisplayName("Unexpired entries survive cleanup")
-        void cleanupExpired_WhenEntriesUnexpired_KeepsThem() {
             String r1 = freshLoginToken();
-            rotationService.rotate(r1, newResponse());
-            int before = rotationService.rotationStateSize();
+            String familyId = tokenService.validateToken(r1).familyId();
 
-            rotationService.cleanupExpired();
+            RotationResult.Rotated first = (RotationResult.Rotated) instanceA.rotate(r1, newResponse());
+            instanceA.rotate(first.newRefreshJwt(), newResponse()); // r1 -> USED on A
 
-            assertEquals(before, rotationService.rotationStateSize());
+            MockHttpServletResponse responseB = newResponse();
+            RotationResult replay = instanceB.rotate(r1, responseB);
+
+            assertInstanceOf(RotationResult.Revoked.class, replay);
+            assertTrue(instanceB.isFamilyRevoked(familyId));
+            assertNotNull(responseB.getCookie(CookieConstants.REFRESH_TOKEN));
+            assertEquals(0, responseB.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
         }
     }
 
@@ -399,7 +409,7 @@ class RefreshRotationServiceTest {
 
         private RefreshRotationService serviceWith(TokenValidator validator, boolean legacyAdmit) {
             return new RefreshRotationService(
-                    validator, tokenService, cookieUtils, jwtProperties, meterRegistry, legacyAdmit);
+                    sharedTemplate, validator, tokenService, cookieUtils, jwtProperties, meterRegistry, legacyAdmit);
         }
 
         @Test

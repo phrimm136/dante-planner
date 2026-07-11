@@ -1,6 +1,6 @@
 {
   "totalPhases": 15,
-  "currentPhase": 5,
+  "currentPhase": 6,
   "reviewMode": "end",
   "infraPhasesMode": "authored-as-code, apply consent-gated with user AWS credentials",
   "phases": [
@@ -9,7 +9,7 @@
     { "name": "Primary re-check on byId miss + bulkhead pool", "status": "done" },
     { "name": "Redis content tombstones + byId-positive check", "status": "done" },
     { "name": "Blacklist externalization + fail-open ladder", "status": "done" },
-    { "name": "Rotation Lua externalization + ShedLock job safety", "status": "pending" },
+    { "name": "Rotation Lua externalization + ShedLock job safety", "status": "done" },
     { "name": "Rate limiter -> bucket4j-redis on local Redis", "status": "pending" },
     { "name": "GTID cookie gate (author RYW)", "status": "pending" },
     { "name": "Typed degradation + health semantics + Lettuce mapping", "status": "pending" },
