@@ -1,42 +1,42 @@
 package org.danteplanner.backend.auth.token;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import org.springframework.beans.factory.annotation.Value;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * In-memory token blacklist service with TTL support.
- * Uses ConcurrentHashMap for thread-safe storage.
+ * Redis-backed token blacklist service with TTL support.
+ * Per-token revocations live in the auth Redis so logout and rotation
+ * are visible across all pods in a multi-server deployment.
  *
  * <p>Tokens are stored as SHA-256 hashes to avoid keeping
- * sensitive token values in memory. Entries auto-expire
- * based on the token's original expiration time.</p>
+ * sensitive token values in Redis. Entries auto-expire via Redis TTL
+ * set from the token's original expiration time.</p>
  *
  * <p>Also supports user-level token invalidation via timestamp.
  * When a user is demoted, all their tokens issued before the
  * invalidation time are rejected.</p>
- *
- * <p>Note: This is a single-server solution. For multi-server
- * deployments, consider using Redis or similar distributed cache.</p>
  */
 @Service
 @Slf4j
 public class TokenBlacklistService {
-
-    /**
-     * Maximum number of entries in the blacklist.
-     * Prevents memory exhaustion from excessive logout requests.
-     */
-    private static final int MAX_BLACKLIST_SIZE = 100_000;
 
     /**
      * Grace period for rotation-blacklisted tokens (milliseconds).
@@ -46,26 +46,31 @@ public class TokenBlacklistService {
      */
     private static final long ROTATION_GRACE_PERIOD_MS = 5_000;
 
+    private static final String BLACKLIST_KEY_PREFIX = "bl:";
+
+    private static final String USER_INVALIDATION_KEY_PREFIX = "uinv:";
+
+    private static final long DEFAULT_REFRESH_TOKEN_EXPIRY_MS = 604800000;
+
+    private static final String BLACKLIST_CHECK_SKIPPED_COUNTER = "blacklist_check_skipped_total";
+
+    private static final long SCAN_BATCH_SIZE = 1000;
+
     /**
      * Refresh token expiry in milliseconds (injected from config).
      * Used to calculate TTL for user invalidation entries.
      */
     @Value("${jwt.refresh-token-expiry:604800000}")
-    private long refreshTokenExpiry;
+    private long refreshTokenExpiry = DEFAULT_REFRESH_TOKEN_EXPIRY_MS;
 
-    private record BlacklistEntry(long expiryTime, long blacklistedAt, boolean immediate) {}
+    private final StringRedisTemplate stringRedisTemplate;
 
-    /**
-     * Maps token hash to blacklist entry.
-     * Entries are lazily cleaned on access.
-     */
-    private final ConcurrentHashMap<String, BlacklistEntry> blacklist = new ConcurrentHashMap<>();
+    private final MeterRegistry meterRegistry;
 
-    /**
-     * Maps userId to the timestamp when all their tokens were invalidated.
-     * Tokens issued before this timestamp are considered invalid.
-     */
-    private final ConcurrentHashMap<Long, Long> userInvalidationTimes = new ConcurrentHashMap<>();
+    public TokenBlacklistService(StringRedisTemplate stringRedisTemplate, MeterRegistry meterRegistry) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.meterRegistry = meterRegistry;
+    }
 
     /**
      * Adds a token to the blacklist with immediate effect.
@@ -95,55 +100,46 @@ public class TokenBlacklistService {
             return;
         }
 
-        // Prevent memory exhaustion
-        if (blacklist.size() >= MAX_BLACKLIST_SIZE) {
-            cleanupExpired();
-            if (blacklist.size() >= MAX_BLACKLIST_SIZE) {
-                log.warn("Token blacklist at capacity ({}), forcing cleanup", MAX_BLACKLIST_SIZE);
-                long cutoff = System.currentTimeMillis() + 60_000;
-                blacklist.entrySet().removeIf(e -> e.getValue().expiryTime() < cutoff);
-            }
+        long now = System.currentTimeMillis();
+        long remaining = expiry.getTime() - now;
+        if (remaining <= 0) {
+            return;
         }
 
-        String hash = hashToken(token);
-        blacklist.put(hash, new BlacklistEntry(expiry.getTime(), System.currentTimeMillis(), immediate));
+        String key = blacklistKey(token);
+        stringRedisTemplate.opsForValue().set(key, encode(immediate, now), Duration.ofMillis(remaining));
     }
 
     /**
      * Checks if a token is blacklisted.
-     * Performs lazy cleanup of expired entries.
+     * Rotation-blacklisted tokens are allowed within the grace period.
      *
      * @param token the token to check
-     * @return true if the token is blacklisted and not yet expired
+     * @return true if the token is blacklisted and outside any grace period
      */
     public boolean isBlacklisted(String token) {
         if (token == null) {
             return false;
         }
 
-        String hash = hashToken(token);
-        BlacklistEntry entry = blacklist.get(hash);
+        try {
+            String value = stringRedisTemplate.opsForValue().get(blacklistKey(token));
+            if (value == null) {
+                return false;
+            }
 
-        if (entry == null) {
-            return false;
+            long now = System.currentTimeMillis();
+            boolean immediate = decodeImmediate(value);
+            long blacklistedAt = decodeBlacklistedAt(value);
+
+            if (!immediate && now - blacklistedAt < ROTATION_GRACE_PERIOD_MS) {
+                return false;
+            }
+
+            return true;
+        } catch (DataAccessException e) {
+            return failOpen("Blacklist check failed open due to Redis error", e);
         }
-
-        long now = System.currentTimeMillis();
-
-        // Lazy cleanup: remove expired entries
-        if (now > entry.expiryTime()) {
-            blacklist.remove(hash);
-            return false;
-        }
-
-        // Rotation grace period: allow concurrent requests using the same
-        // refresh token within the window. Logout-blacklisted tokens (immediate)
-        // bypass this and are rejected instantly.
-        if (!entry.immediate() && now - entry.blacklistedAt() < ROTATION_GRACE_PERIOD_MS) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -157,7 +153,9 @@ public class TokenBlacklistService {
         if (userId == null) {
             return;
         }
-        userInvalidationTimes.put(userId, System.currentTimeMillis());
+        long now = System.currentTimeMillis();
+        stringRedisTemplate.opsForValue().set(
+                userInvalidationKey(userId), String.valueOf(now), Duration.ofMillis(refreshTokenExpiry));
         log.info("Invalidated all tokens for user {}", userId);
     }
 
@@ -172,8 +170,15 @@ public class TokenBlacklistService {
         if (userId == null) {
             return false;
         }
-        Long invalidationTime = userInvalidationTimes.get(userId);
-        return invalidationTime != null && issuedAt < invalidationTime;
+        try {
+            String value = stringRedisTemplate.opsForValue().get(userInvalidationKey(userId));
+            if (value == null) {
+                return false;
+            }
+            return issuedAt < Long.parseLong(value);
+        } catch (DataAccessException e) {
+            return failOpen("User invalidation check failed open due to Redis error", e);
+        }
     }
 
     /**
@@ -183,7 +188,7 @@ public class TokenBlacklistService {
      */
     public void clearUserInvalidation(Long userId) {
         if (userId != null) {
-            userInvalidationTimes.remove(userId);
+            stringRedisTemplate.delete(userInvalidationKey(userId));
         }
     }
 
@@ -192,7 +197,7 @@ public class TokenBlacklistService {
      * Useful for monitoring and testing.
      */
     public int size() {
-        return blacklist.size();
+        return scanKeys(BLACKLIST_KEY_PREFIX + "*").size();
     }
 
     /**
@@ -200,7 +205,7 @@ public class TokenBlacklistService {
      * Useful for monitoring and testing.
      */
     public int userInvalidationSize() {
-        return userInvalidationTimes.size();
+        return scanKeys(USER_INVALIDATION_KEY_PREFIX + "*").size();
     }
 
     /**
@@ -208,41 +213,67 @@ public class TokenBlacklistService {
      * Primarily for testing purposes.
      */
     public void clear() {
-        blacklist.clear();
-        userInvalidationTimes.clear();
-    }
-
-    /**
-     * Performs cleanup of all expired entries.
-     * Scheduled to run every hour to prevent memory buildup.
-     */
-    @Scheduled(fixedRate = 3600000) // Every hour
-    public void cleanupExpired() {
-        int sizeBefore = blacklist.size();
-        long now = System.currentTimeMillis();
-        blacklist.entrySet().removeIf(entry -> entry.getValue().expiryTime() < now);
-        int removed = sizeBefore - blacklist.size();
-        if (removed > 0) {
-            log.debug("Token blacklist cleanup: removed {} expired entries, {} remaining", removed, blacklist.size());
+        Set<String> keys = scanKeys(BLACKLIST_KEY_PREFIX + "*");
+        if (!keys.isEmpty()) {
+            stringRedisTemplate.delete(keys);
+        }
+        Set<String> userKeys = scanKeys(USER_INVALIDATION_KEY_PREFIX + "*");
+        if (!userKeys.isEmpty()) {
+            stringRedisTemplate.delete(userKeys);
         }
     }
 
     /**
-     * Performs cleanup of stale user invalidation entries.
-     * Entries older than refresh token expiry + 1 hour buffer are removed.
-     * Scheduled to run every 6 hours.
+     * Non-blocking key sweep via a cursor-based SCAN.
+     * Collects into a set because a SCAN may return the same key more
+     * than once across cursor iterations.
+     *
+     * @param pattern the Redis key match pattern
+     * @return the distinct keys matching the pattern
      */
-    @Scheduled(fixedRate = 21600000) // Every 6 hours
-    public void cleanupUserInvalidations() {
-        int sizeBefore = userInvalidationTimes.size();
-        // TTL = refresh token expiry + 1 hour buffer
-        long ttl = refreshTokenExpiry + 3600000;
-        long cutoff = System.currentTimeMillis() - ttl;
-        userInvalidationTimes.entrySet().removeIf(entry -> entry.getValue() < cutoff);
-        int removed = sizeBefore - userInvalidationTimes.size();
-        if (removed > 0) {
-            log.info("User invalidation cleanup: removed {} stale entries, {} remaining", removed, userInvalidationTimes.size());
+    private Set<String> scanKeys(String pattern) {
+        Set<String> keys = new HashSet<>();
+        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(SCAN_BATCH_SIZE).build();
+        try (Cursor<String> cursor = stringRedisTemplate.scan(options)) {
+            while (cursor.hasNext()) {
+                keys.add(cursor.next());
+            }
         }
+        return keys;
+    }
+
+    /**
+     * Fails open when a Redis read errors: logs the reason, increments the
+     * skip counter, and treats the token as valid so auth stays available.
+     *
+     * @param message the warning to log
+     * @param e       the originating Redis access error
+     * @return false — the token is not treated as blacklisted or invalidated
+     */
+    private boolean failOpen(String message, DataAccessException e) {
+        log.warn(message, e);
+        Counter.builder(BLACKLIST_CHECK_SKIPPED_COUNTER).register(meterRegistry).increment();
+        return false;
+    }
+
+    private String blacklistKey(String token) {
+        return BLACKLIST_KEY_PREFIX + hashToken(token);
+    }
+
+    private String userInvalidationKey(Long userId) {
+        return USER_INVALIDATION_KEY_PREFIX + userId;
+    }
+
+    private String encode(boolean immediate, long blacklistedAt) {
+        return (immediate ? "1" : "0") + ":" + blacklistedAt;
+    }
+
+    private boolean decodeImmediate(String value) {
+        return value.charAt(0) == '1';
+    }
+
+    private long decodeBlacklistedAt(String value) {
+        return Long.parseLong(value.substring(value.indexOf(':') + 1));
     }
 
     /**

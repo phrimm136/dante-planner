@@ -241,3 +241,68 @@ The other three (INV1 miss/negative/hit) are Phase-3-owned and re-confirmed gree
 - The INV2 read-half test asserts the replica still holds the row un-soft-deleted (`deleted_at IS NULL`
   on the replica) BEFORE the byId — this is the load-bearing anti-vacuity guard proving the 404 is the
   tombstone, not the replica having caught up.
+
+## Phase 5: Blacklist + logout-everywhere externalization to Redis (fail-open ladder) — PASS
+
+### Suite
+Scoped command (cwd = task dir → absolute gradlew path):
+```
+backend/gradlew -p backend test --tests "*DegradationIT" --tests "*TokenBlacklistServiceTest" \
+  --tests "*AuthControllerLogoutAllTest" --tests "*JwtAuthenticationFilterTest" \
+  --tests "*JwtAuthenticationFilterLineageTest" --tests "*AuthenticationFacadeTest" \
+  --tests "*AuthenticationFacadeLineageTest" --tests "*UserControllerTest" \
+  --tests "*UserAccountLifecycleServiceTest" --tests "*AdminServiceTest"
+```
+Verbatim result tail:
+```
+> Task :test
+TestNamingConventionTest > test_methods_follow_naming_convention FAILED
+    java.lang.AssertionError at ArchRule.java:94
+110 tests completed, 1 failed
+> Task :test FAILED
+BUILD FAILED in 2m 8s
+```
+Gate is the per-suite JUnit XML, NOT the aggregate exit. The single aggregate failure is
+`architecture.TestNamingConventionTest` — a DOCUMENTED PRE-EXISTING out-of-scope ArchUnit
+failure (ReplicaLagIT method names, committed in a prior phase; ArchUnit runs ungated by
+`--tests`). It is not a Phase-5 regression and not in scope (Brief §Verification run).
+
+Per-suite XML gate (`backend/build/test-results/test/`): across the 10 target suites (28 XML
+files incl. `@Nested` splits) — **98 testcases, 0 `<failure>`/`<error>` children, 0 skipped**.
+`DegradationIT.xml`: tests="2" failures="0" errors="0" skipped="0" (both INV6 legs green).
+
+### Trace
+
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| INV6 fail-open + `blacklist_check_skipped_total` counter (auth Redis unreachable → authed read proceeds, counter increments) | requirements.md:106 (INV6); degrade-by-operation taste requirements.md:60,62 | MET | `TokenBlacklistService.isBlacklisted` `try/catch DataAccessException`→`failOpen(...)` returns `false` (`TokenBlacklistService.java:140-142`); `failOpen` logs + `Counter.builder("blacklist_check_skipped_total").register(meterRegistry).increment()` (`:253-257`); mirrored on the user-invalidation read path `:179-181` | Acceptance: `DegradationIT::blacklistCheck_WhenAuthRedisUnreachable_FailsOpenAndIncrementsSkipCounter` (Toxiproxy timeout cut on dedicated auth-Redis route, asserts `isBlacklisted==false` AND counter delta `==1.0`) — DegradationIT.xml 2/2 green. Unit mirror: `TokenBlacklistServiceTest$FailOpenTests` (both read paths throw→false+counter==1.0) — 0 fail |
+| AOF-replay blacklist integrity (pre-outage blacklisted token still rejected after AOF replay) | requirements.md:106 (INV6); Test Plan requirements.md:132; mechanics §7 | MET | Redis-native durability: `bl:` written with TTL via `opsForValue().set(key, …, Duration.ofMillis(remaining))` (`TokenBlacklistService.java:110`); AOF persistence is the auth-Redis property (mechanics §7 `everysec`) | Acceptance: `DegradationIT::blacklistedToken_WhenAuthRedisReloadsFromAof_StaysRejected` — blacklist with Redis UP (precondition `isBlacklisted==true`), `DEBUG LOADAOF` on the dedicated `--appendonly yes --appendfsync always` Redis, re-assert `isBlacklisted==true` (`DegradationIT.java:167-183,194-206`) — green |
+| `bl:<tokenHash>` key layout = string SET … PEX `<remaining-expiry>`; TTL = token remaining life; on logout/invalidation | mechanics §1, §3, §9.1 | MET | `BLACKLIST_KEY_PREFIX="bl:"` (`:49`), `blacklistKey`=prefix+SHA-256 hash (`:259-261,282-291`); `remaining=expiry.getTime()-now`, guard `remaining<=0`, `set(key, marker, Duration.ofMillis(remaining))` (`:103-110`); logout→`AuthenticationFacade.logout` `blacklistToken(access/refresh…)` (`AuthenticationFacade.java:249,260`); immediate marker via `encode(true,…)` | `TokenBlacklistServiceTest$BlacklistTokenTests` (add/overwrite/expiry/null), `$IsBlacklistedTests` (incl. `WhenEntryExpired_ReturnsFalse` = TTL expiry), `$CrossInstanceTests` (real Redis, second service sees `bl:`) — 0 fail |
+| `uinv:<userId>` key layout = string epoch-ms; TTL = refresh-token max life; on logout-everywhere/account-delete | mechanics §1, §3 | MET | `USER_INVALIDATION_KEY_PREFIX="uinv:"` (`:51`), `invalidateUserTokens`→`set(uinv:<id>, String.valueOf(now), Duration.ofMillis(refreshTokenExpiry))` (`:152-159`); callers: `AuthenticationFacade.logoutEverywhere` (`:287`), `UserAccountLifecycleService` account-delete (`:88`), `AdminService` demotion (`:71`) | `AuthControllerLogoutAllTest` (full boot, real auth Redis via `@DynamicPropertySource`): `$SuccessTests.logoutAll_…_InvalidatesUserTokens`, `$PostActionTests.…_PreActionAccessToken_Rejected`; `TokenBlacklistServiceTest$UserInvalidationRedisTests`; `UserAccountLifecycleServiceTest$DeleteAccountTests`; `AdminServiceTest$ChangeRoleTests` — all 0 fail |
+| Read path rejects blacklisted tokens honoring the 5s grace — **the 5s grace compare stays Java-side** | mechanics §3, §9.1; external contract | MET | `ROTATION_GRACE_PERIOD_MS=5_000` (`:47`); Java compare `if (!immediate && now - blacklistedAt < ROTATION_GRACE_PERIOD_MS) return false;` (`:131-137`) — no Redis-side eval; logout uses immediate path (bypasses grace), rotation uses grace | `TokenBlacklistServiceTest$RotationGracePeriodTests` (`WhenWithinGracePeriod_Allowed`, `WhenAfterGracePeriod_Rejected`, `WhenBlacklisted_RejectedImmediately`, `WhenRotationThenLogout_OverridesToImmediate`) — 0 fail |
+| Hourly cleanup `@Scheduled` job deleted (TTL replaces it) | mechanics §3 | MET | Current `auth/token/TokenBlacklistService.java` has NO `@Scheduled` and relies on Redis TTL (`Duration.ofMillis` at `:110,:158`). Pre-Redis in-memory version (`a595cec4:…/service/token/TokenBlacklistService.java:39,55,116`) held a `ConcurrentHashMap` + `@Scheduled(fixedRate=3600000) cleanupExpired()` — that job is gone. (The surviving `@Scheduled` in `RefreshRotationService.java:315` prunes in-memory rotation-state maps, an unrelated concern.) | Covered transitively: `$IsBlacklistedTests.…WhenEntryExpired_ReturnsFalse` proves TTL-driven expiry works without a sweep — 0 fail |
+| Real reject with Redis UP (blacklisted token → rejected) | external contract | MET | `isBlacklisted` returns `true` for a live `bl:` entry outside grace (`:120-139`) | `TokenBlacklistServiceTest$IsBlacklistedTests.isBlacklisted_WhenBlacklisted_ReturnsTrue`; `DegradationIT` precondition assert `isBlacklisted==true` (Redis UP) at `DegradationIT.java:174-176`; `AuthControllerLogoutAllTest$PostActionTests` end-to-end post-logout rejection — 0 fail |
+| Auth Redis persistence config: AOF `everysec` + RDB preamble (production §7) | mechanics §7 | DEFERRED-out-of-phase | No production auth-Redis persistence config (`appendfsync everysec` / `aof-use-rdb-preamble`) exists in-repo — repo-wide grep over `*.yml/*.yaml/*.conf/*.tf/*.jsonc/*.properties` (excl. tests) returns 0 matches. The production auth-Redis instance + its persistence tuning is provisioned by the later managed-Redis/K8s infra phase (same family as the Seoul `REPLICAOF` rung → Phase 14), not Phase 5. Phase 5's AOF-replay leg proves the *mechanism* on a test Redis (`--appendfsync always`, Brief-blessed test-determinism); the prod persistence flags are out-of-phase | DegradationIT proves the replay mechanism; the prod config has no in-repo artifact to pin yet |
+| Existing-tests-pass migration (auth-path suites still green after externalization) | Brief §Deliverable (existing-tests-pass migration) | MET | Migration to Redis-backed store is complete; consumers unchanged in contract | 9 existing auth-path suites re-run green: TokenBlacklistServiceTest, AuthControllerLogoutAllTest, JwtAuthenticationFilterTest, JwtAuthenticationFilterLineageTest, AuthenticationFacadeTest, AuthenticationFacadeLineageTest, UserControllerTest, UserAccountLifecycleServiceTest, AdminServiceTest — 96 testcases (excl. DegradationIT's 2), 0 fail / 0 error |
+
+### Scoped-out (later phase / infra — NOT gaps)
+- **Middle rung "(Seoul) stale-but-honest replica" of the read ladder** (mechanics §7) — requires a
+  second region + a `REPLICAOF` auth Redis that does not exist until the Seoul infra phase (Phase 14).
+  Phase 5 implements/tests only the local-Redis rung and the all-unavailable→fail-open rung.
+  DEFERRED-out-of-phase.
+- **Typed `AUTH/WRITE_TEMPORARILY_UNAVAILABLE` codes, GlobalExceptionHandler, JwtAuthenticationFilter
+  Lettuce→typed-code mapping** — Phase 9 (advisor-pinned scope boundary). NOT in Phase 5. DEFERRED.
+- **INV5 / primary-DB toxics / typed codes legs of the `DegradationIT` Test Plan line** (requirements.md:132)
+  — other phases; Phase 5 owns only the INV6 fail-open-counter + AOF-replay legs, both MET above. SCOPED-OUT.
+
+### Gaps
+- (none) — every in-scope Phase-5 item is MET or justifiably DEFERRED-out-of-phase; target-suite XML
+  green (98 testcases, 0 fail / 0 error; DegradationIT 2/2).
+
+### Notes
+- The aggregate `BUILD FAILED` is solely `TestNamingConventionTest` (pre-existing, out-of-scope per
+  Brief); the phase gate is per-suite XML, all target suites green.
+- `DegradationIT` uses `--appendfsync always` for deterministic AOF-replay (production §7 is `everysec`)
+  and stands up its own isolated MySQL+auth-Redis+Toxiproxy harness (Option B) so sibling ITs' shared
+  auth Redis is never toxic-ed/AOF-corrupted — intentional test-determinism choice, not a contract
+  violation.

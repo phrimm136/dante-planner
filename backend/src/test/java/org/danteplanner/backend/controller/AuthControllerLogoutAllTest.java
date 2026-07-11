@@ -1,5 +1,6 @@
 package org.danteplanner.backend.controller;
 
+import com.redis.testcontainers.RedisContainer;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
@@ -10,12 +11,15 @@ import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +41,22 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 @ActiveProfiles("test")
 @Import(TestConfig.class)
 @Transactional
+@Tag("containerized")
 class AuthControllerLogoutAllTest {
+
+    private static final String REDIS_IMAGE = "redis:7-alpine";
+
+    static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE);
+
+    static {
+        AUTH_REDIS.start();
+    }
+
+    @DynamicPropertySource
+    static void authRedisProperties(DynamicPropertyRegistry registry) {
+        registry.add("redis.auth.host", AUTH_REDIS::getRedisHost);
+        registry.add("redis.auth.port", AUTH_REDIS::getRedisPort);
+    }
 
     @Autowired
     private MockMvc mockMvc;
