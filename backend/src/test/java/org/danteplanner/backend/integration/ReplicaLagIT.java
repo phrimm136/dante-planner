@@ -1,5 +1,6 @@
 package org.danteplanner.backend.integration;
 
+import java.sql.Timestamp;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.sql.DataSource;
@@ -10,6 +11,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -63,6 +65,9 @@ class ReplicaLagIT extends CausalHarnessSupport {
     private PlannerQueryService plannerQueryService;
 
     @Autowired
+    private PlannerCommandService plannerCommandService;
+
+    @Autowired
     private PlannerRepository plannerRepository;
 
     @Autowired
@@ -76,7 +81,14 @@ class ReplicaLagIT extends CausalHarnessSupport {
     private JdbcTemplate primaryJdbcTemplate;
 
     @Autowired
+    @Qualifier("replicaJdbcTemplate")
+    private JdbcTemplate replicaJdbcTemplate;
+
+    @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
 
     @DynamicPropertySource
     static void routingProperties(DynamicPropertyRegistry registry) {
@@ -196,6 +208,66 @@ class ReplicaLagIT extends CausalHarnessSupport {
         assertThat(promotedCount() - before)
                 .as("a replica hit must NOT increment " + PROMOTED_COUNTER)
                 .isEqualTo(0.0);
+    }
+
+    @Test
+    @DisplayName("INV2: a delete on the primary while replication is paused makes a byId via the stale replica return 404, even though the replica still holds the non-soft-deleted row")
+    void deleteTombstonesGhost_replicaPositiveReturns404() {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone@example.com");
+        Long userId = owner.getId();
+
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        UUID plannerId = planner.getId();
+        replicationControl.awaitCaughtUp();
+
+        try {
+            replicationControl.stopReplica();
+
+            plannerCommandService.deletePlanner(userId, UUID.randomUUID(), plannerId);
+
+            Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
+                    "SELECT deleted_at FROM planners WHERE id = UUID_TO_BIN(?)",
+                    Timestamp.class,
+                    plannerId.toString());
+            assertThat(replicaDeletedAt)
+                    .as("the paused replica must still hold the row un-soft-deleted, so the 404 comes from the tombstone, not replication catching up")
+                    .isNull();
+
+            Throwable thrown = catchThrowable(() -> byIdReadGuard.read(
+                    ByIdReadGuard.PLANNER_ENTITY_TYPE,
+                    plannerId,
+                    () -> plannerQueryService.getPlanner(userId, plannerId)));
+
+            assertThat(thrown)
+                    .as("a delete issues a tombstone synchronously before the response, so a replica-served positive whose del:planner:<id> is present must return 404")
+                    .isInstanceOf(org.danteplanner.backend.planner.exception.PlannerNotFoundException.class);
+        } finally {
+            replicationControl.startReplica();
+            replicationControl.awaitCaughtUp();
+        }
+    }
+
+    @Test
+    @DisplayName("INV2 write half: a delete issues a del:planner:<id> tombstone synchronously with a bounded ~1h TTL")
+    void deleteWritesTombstoneKeyWithBoundedTtl() {
+        User owner = TestDataFactory.createTestUser(userRepository, "replica-lag-tombstone-write@example.com");
+
+        Planner p = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        UUID plannerId = p.getId();
+
+        plannerCommandService.deletePlanner(owner.getId(), UUID.randomUUID(), plannerId);
+
+        String key = "del:planner:" + plannerId;
+
+        assertThat(stringRedisTemplate.hasKey(key))
+                .as("a delete must issue the tombstone " + key + " synchronously before returning")
+                .isTrue();
+
+        Long ttl = stringRedisTemplate.getExpire(key, java.util.concurrent.TimeUnit.SECONDS);
+        assertThat(ttl)
+                .as("the tombstone must carry a bounded ~1h TTL (PX 3600000), not persist forever")
+                .isGreaterThan(0L)
+                .isLessThanOrEqualTo(3600L);
     }
 
     private String readProbeViaRouting() {

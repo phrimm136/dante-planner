@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
  *
  * <p>The pass-through form runs the supplier that dereferences the entity. On Seoul pods (routing +
  * replica enabled) a {@link PrimaryReCheck} is present, so a read-only replica miss is re-checked
- * on the primary before answering; elsewhere the seam stays a pure pass-through. The
- * {@code entityType} and {@code id} arguments carry the forward-compatible signature for routing,
- * staleness re-check, and tombstone handling.</p>
+ * on the primary before answering and a replica-hit positive is masked as a 404 when tombstoned;
+ * elsewhere the seam stays a pure pass-through. The {@code entityType} and {@code id} arguments
+ * carry the coordinates through to the re-check and tombstone gate.</p>
  */
 @Component
 public class ByIdReadGuard {
@@ -36,6 +36,6 @@ public class ByIdReadGuard {
         if (primaryReCheck.isEmpty()) {
             return dereference.get();
         }
-        return primaryReCheck.get().readWithReCheck(dereference);
+        return primaryReCheck.get().readWithReCheck(entityType, id, dereference);
     }
 }

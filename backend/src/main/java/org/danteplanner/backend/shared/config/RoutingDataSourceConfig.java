@@ -19,6 +19,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 
 /**
@@ -114,7 +115,7 @@ public class RoutingDataSourceConfig {
 
     @Bean
     @ConditionalOnProperty(name = "datasource.replica.enabled", havingValue = "true")
-    public PrimaryReCheck primaryReCheck(MeterRegistry meterRegistry) {
-        return new PrimaryReCheck(meterRegistry);
+    public PrimaryReCheck primaryReCheck(MeterRegistry meterRegistry, ContentTombstoneStore tombstoneStore) {
+        return new PrimaryReCheck(meterRegistry, tombstoneStore);
     }
 }

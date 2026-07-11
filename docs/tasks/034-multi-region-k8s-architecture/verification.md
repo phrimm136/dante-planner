@@ -189,3 +189,55 @@ replication pause/resume + Toxiproxy `wan` toxic), not a mocked substitute. The 
 - Bulkhead endpoint indirection (`BulkheadDataSourceProperties`) lets `BulkheadIT` route the bulkhead
   through the Toxiproxy `wan` proxy while the primary write pool stays un-proxied — the mechanism that
   makes INV7's comparative-isolation assertion observable without any production timing constant.
+
+## Phase 4: Redis content tombstones for deletes + byId-positive tombstone check — PASS
+
+### Suite
+Scoped command (per Brief; NO root gradlew, `-p backend` required):
+```
+backend/gradlew -p backend test --tests "org.danteplanner.backend.integration.ReplicaLagIT"
+```
+Verbatim tail (`/tmp/spec-verify-phase4.log`, EXIT=0):
+```
+> Task :test
+
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+
+> Task :jacocoTestReport
+
+BUILD SUCCESSFUL in 1m 44s
+6 actionable tasks: 2 executed, 4 up-to-date
+```
+Per-class from `build/test-results/test/TEST-…ReplicaLagIT.xml`: `tests="5" skipped="0" failures="0" errors="0"`.
+The `test` task reported `2 executed` (not UP-TO-DATE), so this is a live containerized run
+(~1m44s = real Testcontainers MySQL primary+replica pair with GTID replication + pause/resume).
+Two of the five cases are the Phase-4 INV2 deliverables (both green):
+- `deleteTombstonesGhost_replicaPositiveReturns404` (INV2 read half)
+- `deleteWritesTombstoneKeyWithBoundedTtl` (INV2 write half)
+The other three (INV1 miss/negative/hit) are Phase-3-owned and re-confirmed green here.
+
+### Trace
+
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| Redis content tombstone on delete: `SET del:planner:{id} PX 1h` written synchronously before the delete response; TTL is cleanup not the correctness gate; fail-open write (Blacklist pattern applied to entities) | req §Phase-2 backend line 54; mechanics §1 | MET | Write issued in the delete flow: `PlannerCommandService.deletePlanner` `:366-368` — `planner.softDelete()` → `plannerRepository.save(planner)` → `tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id))`, synchronous, before the `return`/response. Store: `ContentTombstoneStore.writeTombstone` `:41-48` = `stringRedisTemplate.opsForValue().set(key, "1", Duration.ofHours(1))`; key builder `:69-71` = `"del:" + entityType + ":" + id`; TTL const `:25` = `Duration.ofHours(1)` (= PX 3600000). Fail-open: catch `DataAccessException` `:45-47` logs+swallows so the delete still succeeds behind the primary re-check gate | `ReplicaLagIT.deleteWritesTombstoneKeyWithBoundedTtl` (`:250-271`): after `deletePlanner`, `stringRedisTemplate.hasKey("del:planner:"+id)` is `true`, and `getExpire(..SECONDS)` is `>0 and ≤3600` — proves the synchronous write with a bounded ~1h TTL — green |
+| Read-path contract — tombstone-check limb: replica-served byId **positives** check `del:<type>:<id>`; present → 404. (GTID-gate limb = later phase → verify only tombstone limb) | req line 55; mechanics §5 tombstone check + read-path order | MET | Check runs on the replica-HIT positive branch only: `PrimaryReCheck.readWithReCheck` `:51-69` — `hit = dereference.get()` succeeds (positive), then `:65-67` `if (tombstoneStore.isTombstoned(entityType, id)) throw new PlannerNotFoundException(id)`. The check sits OUTSIDE the miss `catch` (`:55-64`), so the tombstone throw does NOT trigger a primary re-check; the promoted-primary return path (`:58-60`) is not tombstone-checked (a promoted read already reflects the delete). `isTombstoned` `:59-67` = `hasKey`, fail-open (returns `false` on `DataAccessException`, `:63-65`). Threaded via `ByIdReadGuard.read` (Phase-3 wiring, store injected into the `PrimaryReCheck` bean) | `ReplicaLagIT.deleteTombstonesGhost_replicaPositiveReturns404` (`:213-248`): replication paused, `deletePlanner` on primary, replica STILL holds the un-soft-deleted row (asserted directly: `replicaJdbcTemplate` `deleted_at IS NULL`, `:228-234`), then `byIdReadGuard.read(...getPlanner...)` → `PlannerNotFoundException` — proves the 404 comes from the tombstone, not replication catch-up — green |
+| INV2 — Tombstone: a deleted entity 404s on replica-served byId even while the replica still holds the row (test: pause, delete on primary, GET → 404) | req §Invariants line 102; Test Plan line 130 (`ReplicaLagIT` INV2 case) | MET | Composite of the two rows above: synchronous tombstone write (`PlannerCommandService.java:368` + `ContentTombstoneStore.java:41-48`) + replica-positive check (`PrimaryReCheck.java:65-67`) | `ReplicaLagIT` INV2 read-half `deleteTombstonesGhost_replicaPositiveReturns404` (pause→delete→replica-positive→404) + write-half `deleteWritesTombstoneKeyWithBoundedTtl` (synchronous `del:planner:<id>`, bounded TTL) — both green in the live containerized run above |
+
+### Scoped-out (later phase / infra — NOT gaps)
+- **GTID-gate limb** of the read-path contract (`author with cookie → GTID gate` / `cookie-gated author → primary until caught up`) — the Brief explicitly assigns Phase 4 only the tombstone-check limb. SCOPED-OUT.
+- **Oregon `REPLICAOF` / no-replica topology** — infra/later phase, not exercised by this phase's byId tombstone. SCOPED-OUT.
+- **N+1 write-path audit** — not a Phase-4 clause. SCOPED-OUT.
+
+### Gaps
+- (none) — every in-scope Phase-4 clause is MET; scoped suite green (ReplicaLagIT 5/5, both INV2 cases 0 fail / 0 error).
+
+### Notes
+- Fail-open on BOTH tombstone paths (write and check) is by design and consistent with the spec's
+  "1h TTL = cleanup, not the correctness gate" + accepted-residue clauses: the Phase-3 primary
+  re-check remains the correctness gate; the tombstone only shrinks the ghost-readable window from
+  MySQL lag (tens of seconds) to Redis lag (~ms). Class Javadoc `ContentTombstoneStore.java:12-20`
+  and `PrimaryReCheck.java:22-25` state this contract.
+- The INV2 read-half test asserts the replica still holds the row un-soft-deleted (`deleted_at IS NULL`
+  on the replica) BEFORE the byId — this is the load-bearing anti-vacuity guard proving the 404 is the
+  tombstone, not the replica having caught up.
