@@ -29,6 +29,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # The private data submodule is baked into the backend image; fetch it
+      # with a read-only deploy key.
+      - name: Fetch data submodule
+        env:
+          STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$STATIC_DEPLOY_KEY" > ~/.ssh/static_key
+          chmod 600 ~/.ssh/static_key
+          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/static_key -o IdentitiesOnly=yes" \
+            git submodule update --init --depth 1 static
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -49,7 +62,7 @@ jobs:
       - name: Build and Push Backend (arm64)
         uses: docker/build-push-action@v7
         with:
-          context: ./backend
+          context: .
           file: ./backend/Dockerfile
           platforms: linux/arm64
           push: true

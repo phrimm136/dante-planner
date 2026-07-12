@@ -3,12 +3,12 @@ FROM gradle:8.12-jdk21 AS builder
 
 WORKDIR /app
 
-COPY build.gradle.kts settings.gradle.kts ./
+COPY backend/build.gradle.kts backend/settings.gradle.kts ./
 
 RUN --mount=type=cache,target=/root/.gradle \
     gradle dependencies --no-daemon
 
-COPY src ./src
+COPY backend/src ./src
 
 RUN --mount=type=cache,target=/root/.gradle \
     gradle bootJar --no-daemon
@@ -20,6 +20,12 @@ WORKDIR /app
 RUN apk add --no-cache curl
 
 COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Bake the game domain data so the pod is self-contained; k3s has no host
+# bind-mount. The backend reads it via GAME_DATA_PATH (GameDataRegistry).
+# Build context must be repo root.
+COPY static/data /app/data
+ENV GAME_DATA_PATH=/app/data
 
 # Bake the public Amazon RDS CA bundle into a PKCS12 truststore so the backend
 # can verify the RDS server certificate (sslMode=VERIFY_CA). The bundle is
