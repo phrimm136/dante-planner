@@ -51,7 +51,7 @@ variable "instance_type" {
 variable "ami_ssm_parameter" {
   description = "SSM public parameter resolving to the latest Amazon Linux 2023 arm64 AMI. Pinning the parameter (not an AMI id) keeps the fleet current without hardcoding."
   type        = string
-  default     = "/aws/service/ami-al2023/ami-al2023-latest-kernel-default-arm64"
+  default     = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64"
 }
 
 variable "ssh_key_name" {
