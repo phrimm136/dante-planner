@@ -6,16 +6,15 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
+
+import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -53,8 +52,6 @@ public class TokenBlacklistService {
     private static final long DEFAULT_REFRESH_TOKEN_EXPIRY_MS = 604800000;
 
     private static final String BLACKLIST_CHECK_SKIPPED_COUNTER = "blacklist_check_skipped_total";
-
-    private static final long SCAN_BATCH_SIZE = 1000;
 
     /**
      * Refresh token expiry in milliseconds (injected from config).
@@ -197,7 +194,7 @@ public class TokenBlacklistService {
      * Useful for monitoring and testing.
      */
     public int size() {
-        return scanKeys(BLACKLIST_KEY_PREFIX + "*").size();
+        return RedisKeyScanner.scanKeys(stringRedisTemplate, BLACKLIST_KEY_PREFIX + "*").size();
     }
 
     /**
@@ -205,7 +202,7 @@ public class TokenBlacklistService {
      * Useful for monitoring and testing.
      */
     public int userInvalidationSize() {
-        return scanKeys(USER_INVALIDATION_KEY_PREFIX + "*").size();
+        return RedisKeyScanner.scanKeys(stringRedisTemplate, USER_INVALIDATION_KEY_PREFIX + "*").size();
     }
 
     /**
@@ -213,33 +210,14 @@ public class TokenBlacklistService {
      * Primarily for testing purposes.
      */
     public void clear() {
-        Set<String> keys = scanKeys(BLACKLIST_KEY_PREFIX + "*");
+        Set<String> keys = RedisKeyScanner.scanKeys(stringRedisTemplate, BLACKLIST_KEY_PREFIX + "*");
         if (!keys.isEmpty()) {
             stringRedisTemplate.delete(keys);
         }
-        Set<String> userKeys = scanKeys(USER_INVALIDATION_KEY_PREFIX + "*");
+        Set<String> userKeys = RedisKeyScanner.scanKeys(stringRedisTemplate, USER_INVALIDATION_KEY_PREFIX + "*");
         if (!userKeys.isEmpty()) {
             stringRedisTemplate.delete(userKeys);
         }
-    }
-
-    /**
-     * Non-blocking key sweep via a cursor-based SCAN.
-     * Collects into a set because a SCAN may return the same key more
-     * than once across cursor iterations.
-     *
-     * @param pattern the Redis key match pattern
-     * @return the distinct keys matching the pattern
-     */
-    private Set<String> scanKeys(String pattern) {
-        Set<String> keys = new HashSet<>();
-        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(SCAN_BATCH_SIZE).build();
-        try (Cursor<String> cursor = stringRedisTemplate.scan(options)) {
-            while (cursor.hasNext()) {
-                keys.add(cursor.next());
-            }
-        }
-        return keys;
     }
 
     /**

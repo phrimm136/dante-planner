@@ -18,6 +18,7 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -399,7 +400,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void writeDbUnavailable(HttpServletResponse response) throws IOException {
         SecurityContextHolder.clearContext();
         writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                "WRITE_TEMPORARILY_UNAVAILABLE", "Database temporarily unavailable, please retry");
+                DegradationErrorConstants.DB_UNAVAILABLE_CODE, DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE);
     }
 
     /**
@@ -409,6 +410,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void writeAuthUnavailable(HttpServletResponse response) throws IOException {
         SecurityContextHolder.clearContext();
         writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                "AUTH_TEMPORARILY_UNAVAILABLE", "Authentication service temporarily unavailable, please retry");
+                DegradationErrorConstants.AUTH_UNAVAILABLE_CODE, DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE);
     }
 }
