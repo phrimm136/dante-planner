@@ -19,6 +19,7 @@ module "fleet" {
   # carries peer_region so AWS routes the request to us-west-2, where the accepter
   # below completes it.
   rds_vpc_id              = var.rds_vpc_id
+  rds_vpc_cidr            = data.terraform_remote_state.rds.outputs.rds_vpc_cidr
   rds_peer_region         = var.rds_region
   rds_peering_auto_accept = false
 

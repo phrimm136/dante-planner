@@ -55,7 +55,7 @@ output "kubeconfig_ssm_parameter" {
 
 output "backend_ecr_repository_url" {
   description = "ECR repository URL for the backend image. Feed into the CI workflow's push target and the kustomize overlay image newName."
-  value       = data.aws_ecr_repository.backend.repository_url
+  value       = local.backend_ecr_repository_url
 }
 
 output "etcd_snapshot_bucket" {

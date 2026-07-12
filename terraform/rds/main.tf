@@ -23,6 +23,11 @@ resource "aws_db_subnet_group" "this" {
   tags       = var.tags
 }
 
+# The RDS VPC, for its CIDR (exported so a cross-region fleet can route to it).
+data "aws_vpc" "this" {
+  id = var.vpc_id
+}
+
 # RDS-side security group: the backend on EC2 reaches RDS on 3306.
 resource "aws_security_group" "rds" {
   name        = "${var.name_prefix}-rds"

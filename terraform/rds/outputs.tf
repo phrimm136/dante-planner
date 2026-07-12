@@ -8,6 +8,11 @@ output "rds_arn" {
   value       = aws_db_instance.this.arn
 }
 
+output "rds_vpc_cidr" {
+  description = "RDS VPC CIDR — read by terraform/seoul (remote state) for the cross-region fleet→RDS route, since Seoul cannot data-source a us-west-2 VPC from ap-northeast-2."
+  value       = data.aws_vpc.this.cidr_block
+}
+
 output "ca_cert_identifier" {
   description = "CA bundle id the RDS instance presents. Download the matching bundle from https://truststore.pki.rds.amazonaws.com/<region>/<region>-bundle.pem for the backend's VERIFY_CA trust store."
   value       = aws_db_instance.this.ca_cert_identifier

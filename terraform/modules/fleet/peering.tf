@@ -5,8 +5,13 @@
 # (return route + the 3306 SG rule referencing the cluster SG) lives in
 # terraform/rds, wired via the outputs below. CIDRs must not overlap.
 
+# Same-region caller (Oregon) data-sources the RDS VPC to get its CIDR for the
+# route. A cross-region caller (Seoul) CANNOT — a data.aws_vpc by id only resolves
+# in the provider's own region — so it passes rds_vpc_cidr explicitly and the data
+# source is skipped.
 data "aws_vpc" "rds" {
-  id = var.rds_vpc_id
+  count = var.rds_vpc_cidr == "" ? 1 : 0
+  id    = var.rds_vpc_id
 }
 
 resource "aws_vpc_peering_connection" "rds" {
@@ -19,7 +24,7 @@ resource "aws_vpc_peering_connection" "rds" {
 
 resource "aws_route" "fleet_to_rds" {
   route_table_id            = aws_route_table.public.id
-  destination_cidr_block    = data.aws_vpc.rds.cidr_block
+  destination_cidr_block    = var.rds_vpc_cidr != "" ? var.rds_vpc_cidr : data.aws_vpc.rds[0].cidr_block
   vpc_peering_connection_id = aws_vpc_peering_connection.rds.id
 }
 

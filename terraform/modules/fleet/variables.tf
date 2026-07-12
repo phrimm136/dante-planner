@@ -16,6 +16,12 @@ variable "region_name_suffix" {
   default     = "oregon"
 }
 
+variable "rds_vpc_cidr" {
+  description = "RDS VPC CIDR for the fleet→RDS route. Empty (Oregon, same-region) = data-source it from rds_vpc_id. Set (Seoul, cross-region) = passed explicitly, since a data.aws_vpc lookup only resolves in the provider's own region."
+  type        = string
+  default     = ""
+}
+
 variable "rds_peer_region" {
   description = "Region of the RDS VPC when it is in a DIFFERENT region than this fleet (cross-region peering, e.g. Seoul→us-west-2 RDS). null = same-region peering (Oregon). When set, rds_peering_auto_accept must be false and the caller provides an aws_vpc_peering_connection_accepter in the RDS region."
   type        = string
