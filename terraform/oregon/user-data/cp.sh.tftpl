@@ -73,4 +73,4 @@ kubectl apply -f /opt/gitops/deploy/argocd/root-app.yaml
 # sync time. The host is never committed to git — it is rendered here from
 # Terraform state. The override sets only newName (:* preserves the overlay's
 # CI-bumped newTag), so the git-committed tag still selects the image.
-kubectl -n argocd patch application danteplanner-oregon --type merge -p '{"spec":{"source":{"kustomize":{"images":["${ecr_image}"]}}}}'
+kubectl -n argocd patch application danteplanner-oregon --type merge -p '{"spec":{"source":{"targetRevision":"${gitops_revision}","kustomize":{"images":["${ecr_image}"]}}}}'
