@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  DEPLOY_REGION: us-west-2
+  # In-cluster service DNS (region-invariant shape, region-local instances).
+  REDIS_AUTH_HOST: redis-auth.danteplanner.svc.cluster.local
+  REDIS_RATELIMIT_HOST: redis-ratelimit.danteplanner.svc.cluster.local
+  # RDS primary lives in Oregon. Set to the terraform/rds `rds_endpoint` output.
+  # Oregon has no read replica (primary region) — reads and writes hit the primary.
+  MYSQL_HOST: REPLACE_WITH_RDS_ENDPOINT

@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars (gitignored) and fill with YOUR account's real values.
+# Do NOT commit terraform.tfvars — trusted_admin_principal_arn is account-specific.
+
+# The human admin principal (IAM user/role or SSO permission-set role) allowed to
+# assume the provisioning role from a laptop for the initial apply. REQUIRED.
+#   IAM user:      arn:aws:iam::<account-id>:user/<name>
+#   IAM role:      arn:aws:iam::<account-id>:role/<name>
+#   SSO/Identity:  arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_<permset>_<hash>/<user>
+trusted_admin_principal_arn = "arn:aws:iam::000000000000:user/CHANGE-ME"
+
+# Optional overrides (defaults are sensible):
+# role_name           = "dante-oregon-provisioner"
+# github_oidc_subject = "repo:phrimm136/dante-planner:ref:refs/heads/main"  # tighter: ...:environment:oregon
+# create_github_oidc_provider = true   # set false if the account already has a GitHub OIDC provider
+# region              = "us-west-2"
+# name_prefix         = "danteplanner"  # MUST match terraform/oregon

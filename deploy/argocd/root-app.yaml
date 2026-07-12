@@ -1,0 +1,26 @@
+# App-of-apps root Application, applied by the CP node at bootstrap. ArgoCD core
+# runs per cluster (hub-spoke rejected — no cross-region deploy dependency), so
+# each region's CP owns this Application pointing at its own overlay.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: danteplanner-oregon
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # Confirm this matches gitops_repo_url in terraform/oregon at apply time.
+    repoURL: https://github.com/phrimm136/dante-planner.git
+    targetRevision: main
+    path: deploy/overlays/oregon
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: danteplanner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

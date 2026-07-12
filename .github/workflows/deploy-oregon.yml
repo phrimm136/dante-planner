@@ -1,0 +1,94 @@
+name: Deploy Oregon (arm64 -> ECR -> GitOps)
+
+# Phase 13 GitOps deploy: build the arm64 backend image, push to ECR, then bump
+# the kustomize image tag and commit it back. ArgoCD core on the CP node syncs
+# the commit. Does not touch the legacy single-EC2 deploy.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-oregon.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: oregon-gitops-deploy
+  cancel-in-progress: false
+
+env:
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  IMAGE_REPO: danteplanner-backend
+  OVERLAY_DIR: deploy/overlays/oregon
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # arm64 (Graviton t4g fleet) built on the amd64 runner via QEMU emulation.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Backend (arm64)
+        uses: docker/build-push-action@v7
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
+          cache-from: type=gha,scope=backend-arm64
+          cache-to: type=gha,mode=max,scope=backend-arm64
+
+  bump-tag:
+    needs: build-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 10
+    env:
+      GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Install kustomize
+        run: |
+          curl -sfL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Bump image tag in the Oregon overlay
+        run: |
+          cd "$OVERLAY_DIR"
+          kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}"
+
+      - name: Commit the tag bump
+        run: |
+          if git diff --quiet; then
+            echo "No image change to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$OVERLAY_DIR/kustomization.yaml"
+          # [skip ci] + the backend-only path filter keep this from retriggering.
+          git commit -m "chore(deploy): bump Oregon backend image to ${GIT_SHA} [skip ci]"
+          git push origin main

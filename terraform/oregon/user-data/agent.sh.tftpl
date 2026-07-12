@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euxo pipefail
+
+# AL2023 ships awscli v2 in most AMIs; guard in case it is absent.
+command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
+
+TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
+  --name "${token_param}" --query 'Parameter.Value' --output text)
+%{ if set_nofile ~}
+
+# App nodes hold ~500 SSE connections; the fd ceiling is the only real cost
+# (requirements: Entry plane). Set it on the k3s-agent unit before first start.
+mkdir -p /etc/systemd/system/k3s-agent.service.d
+cat > /etc/systemd/system/k3s-agent.service.d/limits.conf <<'UNIT'
+[Service]
+LimitNOFILE=65536
+UNIT
+%{ endif ~}
+
+curl -sfL https://get.k3s.io | K3S_TOKEN="$TOKEN" \
+  INSTALL_K3S_EXEC="agent --server ${server_url} --node-label ${node_label}" sh -

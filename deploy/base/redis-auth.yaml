@@ -1,0 +1,66 @@
+# Auth-state Redis (blacklist, rotation families, tombstones, SSE pub/sub) as a
+# StatefulSet on the data node. AOF everysec + RDB preamble, gp3 PVC, AZ-pinned.
+# NO Sentinel, NO auto-promote — an outage is a typed 503 + auto-recovery + AOF
+# replay (requirements: no autonomous writer promotion).
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-auth
+  labels:
+    app: redis-auth
+spec:
+  clusterIP: None
+  selector:
+    app: redis-auth
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-auth
+spec:
+  serviceName: redis-auth
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-auth
+  template:
+    metadata:
+      labels:
+        app: redis-auth
+    spec:
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args:
+            - --appendonly
+            - "yes"
+            - --appendfsync
+            - everysec
+            - --aof-use-rdb-preamble
+            - "yes"
+          ports:
+            - name: redis
+              containerPort: 6379
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 8Gi
