@@ -9,6 +9,10 @@
 # IP is enough for an initial single-region smoke test.
 ingress_allowed_cidrs = ["REPLACE_WITH_CLOUDFLARE_AND_GA_HEALTH_CIDRS"]
 
+# REQUIRED: the RDS (prod) VPC id to peer with for private DB access. Its CIDR
+# must not overlap vpc_cidr (10.20.0.0/16). Do not commit the real value.
+rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
+
 # Optional overrides (defaults are sensible):
 # region                        = "us-west-2"
 # vpc_cidr                      = "10.20.0.0/16"
