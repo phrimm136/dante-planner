@@ -619,3 +619,92 @@ All 58 files green; the single skip is a pre-existing unrelated skip (not a Phas
 
 ### Gaps
 - None. The prior mech §4 gap was closed by amending `mechanics.md` §4 (FE surface bullet ~L126) to record the notification-inbox + auth-`/me` invalidate carve-out as intended design — the spec now matches the green code. All in-scope items MET; scoped suite green (735 passed | 1 skipped).
+
+## Phase 12: Pre-Seoul gates — recorded measurements (partial local) — PASS
+
+Measurement/audit/docs phase — **no production code, no tests** (correctly none written). Deliverable
+is the portfolio write-up `docs/portfolio/pre-seoul-gates.md` recording three gates with numbers per
+`requirements.md` Done-When L115 and `mechanics.md` "Pre-implementation gates" §1–3.
+
+### Verdict summary
+
+| Gate | mechanics §ref | Status | Verdict |
+|------|----------------|--------|---------|
+| Gate 2 — write-path round-trip audit | §2 | **Complete (local)** — every write txn audited, table recorded | PASS (audit done; 1 violation carried forward) |
+| Gate 1 — backend RSS under load ≤ ~1.3 GiB | §1 | **Partial-local** — target + methodology + heap-bound recorded; real number needs load-test infra | PASS (partial recorded as scoped) |
+| Gate 3 — `ReplicaLag` p99 baseline | §3 | **Deferred** — needs live Seoul replica | PASS (deferred, carried forward) |
+
+### Gate 2 — write-path round-trip audit (FULLY performed)
+
+- **Method:** enumerated every write transaction — all `@Transactional` service methods WITHOUT
+  `readOnly=true` (≈50 methods across 13 services) — and traced each body + private helpers +
+  repository calls for lazy-association getters, `save`/`saveAll`/`delete` inside loops, and
+  `REQUIRES_NEW` notify methods called once-per-recipient in a caller loop. Criterion (operationally
+  defined in the write-up): **BOUNDED-OK** = fixed, data-size-independent round-trip count (load-then-
+  mutate is fine); **VIOLATION** = unbounded per-row fan-out that grows with data size.
+- **Hibernate batching config:** confirmed ABSENT — no `hibernate.jdbc.batch_size` / `order_inserts` /
+  `order_updates` / `batch_versioned_data` in any `.properties`, no `application.yml`, no programmatic
+  `HibernatePropertiesCustomizer` (grep over `resources/` + `src/main/java`).
+- **Enumeration completeness:** no service carries a **class-level** `@Transactional`, so no unannotated
+  public write method escaped the method-level enumeration — the "every write txn" claim holds.
+- **Result:** all single-entity write paths (create/update/delete planner, vote, bookmark, comment,
+  moderation ×14, user/settings/admin, per-notification writes, hard-delete via bulk `@Modifying` +
+  DB FK cascade) are **BOUNDED-OK**. Exceptions, all personally verified at file:line:
+  - **VIOLATION (headline, hot path) — `PlannerIndexService.reindex` (`:41`)**: called inside the write
+    txn of `updatePlanner`/`upsertPlanner`/`togglePublish` (every published-planner edit). 1 DELETE
+    (`:43`) + `saveAll(entries)` (`:67`) where entries = one row per extracted content term → **N
+    INSERTs**, grows with content. `PlannerContentIndex` implements `Persistable` (`isNew=true`, `:39/:58`)
+    with an assigned composite `@IdClass` (no `@GeneratedValue`) → clean `persist` (no per-row pre-SELECT),
+    **batchable**, but N unbatched INSERTs today (no `batch_size`). Operationally the most important
+    fan-out (routine publish/update path). **Carried forward.**
+  - **VIOLATION — `PlannerCommandService.importPlanners` (`:383`)**: `for` loop (`:397`) calling
+    `plannerRepository.save(planner)` per element (`:423`) → 2 SELECT + **N INSERTs**, grows with
+    request size. `Planner` has an assigned `UUID` id (`:411`, batchable) + a nullable `@Version Long`
+    (`:147`) left unset → `isNew()` true → `persist()` (no per-row pre-SELECT), but the flush emits N
+    unbatched INSERTs because no `batch_size` is set. **Carried forward.** Fix for BOTH violations =
+    the same single config change (`hibernate.jdbc.batch_size` + `order_inserts`); both keys are batchable.
+  - **FLAG (bounded, not a blocker) — `PlannerPublishingService.togglePublish` (`:49`)**: reads
+    `saved.getUser()` + `getUsernameEpithet()`/`getUsernameSuffix()` (`:93–98`) on the `Planner.user`
+    `@ManyToOne LAZY` proxy on the first-publish branch → one constant extra SELECT (not size-dependent).
+    Optional `JOIN FETCH` fix.
+  - **WATCH (write-scaling ladder) — `NotificationService.notifyPlannerPublished` (`:253`)**: `saveAll`
+    of `Notification` (`GenerationType.IDENTITY` → unbatchable N INSERTs by construction), but
+    `REQUIRES_NEW`, first-publish only, bounded by opt-in `notifyNewPublications` (default `false`).
+    Not a core-CRUD single-round-trip blocker.
+- **Gate 2 verdict:** audit complete and recorded. Done-When "every write txn single-round-trip" met for
+  all single-entity paths; `reindex` + `importPlanners` are the two exceptions (both N unbatched INSERTs,
+  both fixed by one config change), recorded with remediation and carried forward.
+
+### Gate 1 — backend RSS under load (PARTIAL — recorded, NOT executed)
+
+- **Target:** RSS ≤ ~1.3 GiB on the 2 GiB `t4g.small` app node (pass → small; fail → medium).
+  `requirements.md` L21.
+- **Methodology recorded:** k6 `scripts/load-test.js` (+ `lib/load-test-shared.js`) ramp 10→1000 VUs;
+  backend under `dev,loadtest` profile via `docker-compose.loadtest.yml`; RSS captured via
+  `docker stats … {{.MemUsage}} backend` (documented in `application-loadtest.properties`), production
+  analogue = CloudWatch `procstat_memory_rss` Per-Process Memory panel.
+- **Heap bound cited:** container caps JVM at `-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m`
+  (`backend/Dockerfile:41`, `docker-compose.yml`) → ~1.0 GiB JVM-managed, ~300 MiB headroom under target.
+- **Why partial:** off-heap/native RSS (Netty/Lettuce/SSE working set) is what the ops alarm set calls
+  "traffic-correlated JVM off-heap growth" — unbounded by config, resolved only by a real load run.
+  `docker-compose.loadtest.yml` deliberately NOT run (brief scope). Recorded as **partial-local**.
+
+### Gate 3 — `ReplicaLag` p99 baseline (DEFERRED — carried-forward post-Phase-14)
+
+- **Deferred to after Phase 14** (Seoul cross-region RDS read-replica). The local Testcontainers harness
+  proves the replication *mechanism* but cannot produce a production lag distribution. This is a
+  **carried-forward, post-Phase-14 measurement**; the causal-consistency stack (GTID gate, primary
+  re-check, tombstones) is correct under arbitrary lag, so the p99 only right-sizes the tombstone-TTL /
+  GTID-probe margins. Intended methodology (RDS/CloudWatch `ReplicaLag` p50/p95/p99 over a peak window,
+  cross-checked vs Redis offset delta) recorded in the write-up. **Closes when Phase 14 runs** (plan
+  Phase 14 Verify: "Gate 3 ReplicaLag p99 baseline recorded (closes Phase 12)").
+
+### Deliverables (this phase)
+- `docs/portfolio/pre-seoul-gates.md` — the three-gate write-up (Gate 2 table + Gate 1 partial + Gate 3 deferred).
+- `verification.md` (this section), `status.json` (Phase 12 → done, currentPhase → 12).
+
+### Gaps
+- Gate 3 is intentionally open — a post-Phase-14 cloud measurement, not a Phase-12 defect.
+- `reindex` and `importPlanners` unbatched N-insert paths are real write-path violations surfaced by
+  Gate 2; recorded for a follow-up hardening phase (single fix: `hibernate.jdbc.batch_size` +
+  `order_inserts`), not fixed here (this is an audit/docs phase, no code).
