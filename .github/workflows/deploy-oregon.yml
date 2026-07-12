@@ -5,7 +5,10 @@ name: Deploy Oregon (arm64 -> ECR -> GitOps)
 # the commit. Does not touch the legacy single-EC2 deploy.yml.
 on:
   push:
-    branches: [main]
+    # feat/034-oregon-k3s is the pre-promotion GitOps branch (deploy overlay lives
+    # here, not on frozen main); include it so a push builds the image directly,
+    # since workflow_dispatch requires the workflow on the default branch.
+    branches: [main, feat/034-oregon-k3s]
     paths:
       - 'backend/**'
       - '.github/workflows/deploy-oregon.yml'
