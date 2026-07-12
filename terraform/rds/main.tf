@@ -163,8 +163,13 @@ resource "aws_db_instance" "this" {
 
   db_name  = var.db_name # empty schema for the dump to load into
   username = var.master_username
-  # Master password is generated + held in Secrets Manager by AWS; never in state/tfvars.
-  manage_master_user_password = true
+  # AWS-managed master password (manage_master_user_password) is unsupported as a
+  # read-replica SOURCE for MySQL, so it is disabled to allow the Seoul cross-region
+  # replica. Password is now supplied via var.master_password (set to the CURRENT
+  # value pulled from the old managed secret, so nothing rotates). The app connects
+  # as the danteplanner user, not master, so this is admin-only. Trade-off vs the
+  # 030 managed-password decision: the master password now lives in state/tfvars.
+  password = var.master_password
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]
