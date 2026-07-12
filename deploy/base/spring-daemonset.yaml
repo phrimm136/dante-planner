@@ -30,6 +30,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: backend-config
+            - secretRef:
+                name: backend-runtime-config
           env:
             - name: JWT_PRIVATE_KEY_PATH
               value: /app/keys/private_key.pem

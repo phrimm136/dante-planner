@@ -117,10 +117,11 @@ resource "aws_iam_role_policy" "app_join" {
 # than IRSA — any pod on an app node inherits it. Documented deviation (README).
 data "aws_iam_policy_document" "app_secrets" {
   statement {
-    sid     = "ReadJwtSecrets"
+    sid     = "ReadBackendSecrets"
     actions = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
     resources = [
-      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${dirname(var.rs256_private_key_secret_name)}/*"
+      # The app's own secret namespace: jwt/* keys + the backend/* runtime-config bundle.
+      "arn:aws:secretsmanager:${var.region}:${data.aws_caller_identity.current.account_id}:secret:${dirname(dirname(var.rs256_private_key_secret_name))}/*"
     ]
   }
 }

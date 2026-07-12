@@ -1,0 +1,21 @@
+# Backend runtime config (DB connection + Sentry DSN, and any OAuth/other keys)
+# sourced from ONE JSON secret in AWS Secrets Manager via the aws-secrets-manager
+# SecretStore. dataFrom.extract pulls every JSON key into the k8s secret; the
+# daemonset envFrom-injects them. Environment-specific and secret values thus
+# never live in the committed overlay, and Secrets Manager replicates them to
+# Seoul for the multi-region flip.
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: backend-runtime-config
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: backend-runtime-config
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: danteplanner/backend/runtime-config
