@@ -3,9 +3,9 @@ package org.danteplanner.backend.shared.readpath;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -17,7 +17,7 @@ import io.micrometer.core.instrument.MeterRegistry;
  * the {@link RoutingKey#BULKHEAD} pool and re-runs the same dereference: the fresh read-only
  * transaction routes to the primary through the isolated bulkhead. A hit promotes the miss and
  * increments {@code replica_miss_promoted_total}; a still-missing primary re-throws the original
- * {@link PlannerNotFoundException} (404).</p>
+ * {@link EntityNotFoundException} (404).</p>
  *
  * <p>A replica-hit positive is additionally gated by the tombstone store: a just-deleted entity
  * still present on the stale replica surfaces its {@code del:<type>:<id>} marker and is masked as a
@@ -45,14 +45,14 @@ public class PrimaryReCheck {
      * @param dereference the side-effect-free by-id dereference (safe to invoke twice)
      * @param <T>         the dereferenced entity type
      * @return the entity, from the replica or the promoted primary re-check
-     * @throws PlannerNotFoundException if the entity is absent on both the replica and the primary,
-     *                                  or if the replica-hit positive carries a tombstone
+     * @throws EntityNotFoundException if the entity is absent on both the replica and the primary,
+     *                                 or if the replica-hit positive carries a tombstone
      */
     public <T> T readWithReCheck(String entityType, UUID id, Supplier<T> dereference) {
         T hit;
         try {
             hit = dereference.get();
-        } catch (PlannerNotFoundException miss) {
+        } catch (EntityNotFoundException miss) {
             ReadOnlyRoutingDataSource.pinTo(RoutingKey.BULKHEAD);
             try {
                 T promoted = dereference.get();
@@ -63,7 +63,7 @@ public class PrimaryReCheck {
             }
         }
         if (tombstoneStore.isTombstoned(entityType, id)) {
-            throw new PlannerNotFoundException(id);
+            throw new EntityNotFoundException(entityType, id);
         }
         return hit;
     }

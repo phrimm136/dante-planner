@@ -26,6 +26,13 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  * {@link #shared_should_not_depend_on_admin_or_notification} rule freezes the sink in its true,
  * currently-passing form: {@code shared} must not grow edges into {@code admin} or
  * {@code notification}.</p>
+ *
+ * <p>The read seam {@code shared.readpath} is held to a stricter, feature-agnostic contract by
+ * {@link #shared_readpath_must_not_depend_on_planner}: it dereferences entities through opaque
+ * suppliers and a base {@code EntityNotFoundException}, so it must carry no dependency on
+ * {@code planner} (or any feature). The broader {@code shared}-wide planner edges that remain
+ * ({@code GlobalExceptionHandler} handling planner exceptions, a config class reading a planner
+ * entity) are inherent to those classes living in {@code shared} and are out of this rule's scope.</p>
  */
 @AnalyzeClasses(
         packages = "org.danteplanner.backend",
@@ -83,6 +90,13 @@ class FeatureBoundaryTest {
                     .that().resideInAPackage("..shared..")
                     .should().dependOnClassesThat().resideInAnyPackage("..admin..", "..notification..")
                     .as("shared is a dependency sink: it must not grow edges into admin or notification");
+
+    @ArchTest
+    static final ArchRule shared_readpath_must_not_depend_on_planner =
+            noClasses()
+                    .that().resideInAPackage("..shared.readpath..")
+                    .should().dependOnClassesThat().resideInAPackage("..planner..")
+                    .as("the shared read seam must stay feature-agnostic: shared.readpath must not depend on planner");
 
     @ArchTest
     static final ArchRule user_does_not_depend_on_admin_or_notification =

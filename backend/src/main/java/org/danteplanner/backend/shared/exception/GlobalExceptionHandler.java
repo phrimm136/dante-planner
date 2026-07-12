@@ -71,6 +71,11 @@ public class GlobalExceptionHandler {
         return warnAndRespond(HttpStatus.NOT_FOUND, "Planner not found: {}", "PLANNER_NOT_FOUND", ex.getMessage());
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
+        return warnAndRespond(HttpStatus.NOT_FOUND, "Entity not found: {}", "NOT_FOUND", ex.getMessage());
+    }
+
     @ExceptionHandler(PlannerForbiddenException.class)
     public ResponseEntity<ErrorResponse> handlePlannerForbidden(PlannerForbiddenException ex) {
         return warnAndRespond(HttpStatus.FORBIDDEN, "Planner access forbidden: {}", "PLANNER_FORBIDDEN", ex.getMessage());

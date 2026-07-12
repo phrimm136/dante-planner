@@ -1,11 +1,13 @@
 package org.danteplanner.backend.planner.exception;
 
-import lombok.Getter;
-
 import java.util.UUID;
 
+import lombok.Getter;
+
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+
 @Getter
-public class PlannerNotFoundException extends RuntimeException {
+public class PlannerNotFoundException extends EntityNotFoundException {
 
     private final UUID plannerId;
 

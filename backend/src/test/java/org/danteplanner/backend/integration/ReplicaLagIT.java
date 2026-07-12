@@ -240,7 +240,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
             assertThat(thrown)
                     .as("a delete issues a tombstone synchronously before the response, so a replica-served positive whose del:planner:<id> is present must return 404")
-                    .isInstanceOf(org.danteplanner.backend.planner.exception.PlannerNotFoundException.class);
+                    .isInstanceOf(org.danteplanner.backend.shared.exception.EntityNotFoundException.class);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
