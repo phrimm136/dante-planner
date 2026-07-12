@@ -81,7 +81,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
 
       - name: Install kustomize
         run: |
@@ -104,4 +104,4 @@ jobs:
           git add "$OVERLAY_DIR/kustomization.yaml"
           # [skip ci] + the backend-only path filter keep this from retriggering.
           git commit -m "chore(deploy): bump Oregon backend image to ${GIT_SHA} [skip ci]"
-          git push origin main
+          git push origin HEAD:${{ github.ref_name }}
