@@ -6,17 +6,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -52,7 +50,6 @@ public class RefreshRotationService {
     private static final String FAMILY_KEY_PREFIX = "rt:fam:";
     private static final String FAMILY_KEY_PATTERN = FAMILY_KEY_PREFIX + "*";
     private static final String REVOKED_FIELD = "__revoked__";
-    private static final long SCAN_BATCH_SIZE = 1000;
     private static final String FIELD_SEPARATOR = "|";
     private static final String ROTATED_RESULT = "ROTATED";
     private static final String THEFT_RESULT = "THEFT";
@@ -322,7 +319,7 @@ public class RefreshRotationService {
      * Returns the rotation state for a {@code jti}, or null if unknown. For testing.
      */
     RotationState stateOf(String jti) {
-        for (String key : scanKeys(FAMILY_KEY_PATTERN)) {
+        for (String key : RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN)) {
             Object value = authRedisTemplate.opsForHash().get(key, jti);
             if (value != null) {
                 return parseLeadingState(value.toString());
@@ -345,7 +342,7 @@ public class RefreshRotationService {
      */
     int rotationStateSize() {
         int total = 0;
-        for (String key : scanKeys(FAMILY_KEY_PATTERN)) {
+        for (String key : RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN)) {
             for (Object field : authRedisTemplate.opsForHash().keys(key)) {
                 if (!REVOKED_FIELD.equals(field)) {
                     total++;
@@ -359,28 +356,9 @@ public class RefreshRotationService {
      * Deletes all family state. For testing.
      */
     void clear() {
-        Set<String> keys = scanKeys(FAMILY_KEY_PATTERN);
+        Set<String> keys = RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN);
         if (!keys.isEmpty()) {
             authRedisTemplate.delete(keys);
         }
-    }
-
-    /**
-     * Non-blocking key sweep via a cursor-based SCAN.
-     * Collects into a set because a SCAN may return the same key more
-     * than once across cursor iterations.
-     *
-     * @param pattern the Redis key match pattern
-     * @return the distinct keys matching the pattern
-     */
-    private Set<String> scanKeys(String pattern) {
-        Set<String> keys = new HashSet<>();
-        ScanOptions options = ScanOptions.scanOptions().match(pattern).count(SCAN_BATCH_SIZE).build();
-        try (Cursor<String> cursor = authRedisTemplate.scan(options)) {
-            while (cursor.hasNext()) {
-                keys.add(cursor.next());
-            }
-        }
-        return keys;
     }
 }

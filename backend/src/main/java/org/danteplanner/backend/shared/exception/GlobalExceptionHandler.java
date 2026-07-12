@@ -365,7 +365,8 @@ public class GlobalExceptionHandler {
         log.warn("Database unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
-            .body(new ErrorResponse("WRITE_TEMPORARILY_UNAVAILABLE", "Database temporarily unavailable, please retry"));
+            .body(new ErrorResponse(
+                DegradationErrorConstants.DB_UNAVAILABLE_CODE, DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE));
     }
 
     /**
@@ -384,7 +385,8 @@ public class GlobalExceptionHandler {
         log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
-            .body(new ErrorResponse("AUTH_TEMPORARILY_UNAVAILABLE", "Authentication service temporarily unavailable, please retry"));
+            .body(new ErrorResponse(
+                DegradationErrorConstants.AUTH_UNAVAILABLE_CODE, DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE));
     }
 
     /**
@@ -409,7 +411,8 @@ public class GlobalExceptionHandler {
         log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
-            .body(new ErrorResponse("RATE_LIMIT_TEMPORARILY_UNAVAILABLE", "Rate limiter temporarily unavailable, please retry"));
+            .body(new ErrorResponse(
+                DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE_CODE, DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE_MESSAGE));
     }
 
     /**
