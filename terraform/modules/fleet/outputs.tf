@@ -28,6 +28,11 @@ output "ingress_public_ip" {
   value       = aws_instance.ingress.public_ip
 }
 
+output "ingress_instance_id" {
+  description = "Ingress EC2 instance id — the Global Accelerator endpoint (EC2 endpoints preserve the client IP)."
+  value       = aws_instance.ingress.id
+}
+
 output "ingress_eip" {
   description = "Stable public IP associated with the ingress (empty until a durable EIP is allocated in terraform/oregon-edge and var.ingress_eip_allocation_id is set). Point Cloudflare's api A-record HERE, not at ingress_public_ip (which changes on ingress replacement)."
   value       = var.ingress_eip_allocation_id != "" ? data.aws_eip.ingress[0].public_ip : ""
