@@ -25,6 +25,8 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final PlannerCommentSseService plannerCommentSseService;
+    private final SsePublisher ssePublisher;
     private final PlannerAccessGuard accessGuard;
 
     /**
@@ -249,8 +252,7 @@ public class CommentService {
             }
         }
 
-        // Broadcast to other viewers (excluding author's device)
-        plannerCommentSseService.broadcastCommentAdded(plannerId, deviceId);
+        publishCommentCreated(plannerId, saved, userId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
@@ -314,10 +316,23 @@ public class CommentService {
             log.debug("Sent REPLY_RECEIVED notification to parent author {}", parentAuthorId);
         }
 
-        // Broadcast to other viewers (excluding author's device)
-        plannerCommentSseService.broadcastCommentAdded(plannerId, deviceId);
+        publishCommentCreated(plannerId, saved, userId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
+    }
+
+    /**
+     * Fan out a newly created comment to other nodes via Redis pub/sub,
+     * carrying the full comment payload for real-time SSE delivery.
+     *
+     * @param plannerId    the planner the comment belongs to
+     * @param saved        the persisted comment to broadcast
+     * @param authorUserId the comment author's user ID
+     */
+    private void publishCommentCreated(UUID plannerId, PlannerComment saved, Long authorUserId) {
+        User author = userRepository.findById(authorUserId).orElse(null);
+        CommentTreeNode payload = CommentTreeNode.fromEntity(saved, author, null, false, List.of());
+        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED, saved.getPublicId().toString(), payload);
     }
 
     /**

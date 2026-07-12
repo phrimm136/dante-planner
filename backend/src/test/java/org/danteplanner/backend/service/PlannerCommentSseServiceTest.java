@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,34 +85,34 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void broadcastCommentAdded_WhenEmitterDead_RemovesConnection() {
+        void broadcast_WhenEmitterDead_RemovesConnection() {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = service.subscribe(plannerId, deviceId);
             emitter.complete();
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
 
-            service.broadcastCommentAdded(plannerId, null);
+            service.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString()));
 
             assertThat(service.getSubscriberCount(plannerId)).isZero();
         }
 
         @Test
         @DisplayName("does nothing when the planner has no subscribers")
-        void broadcastCommentAdded_WhenNoSubscribers_DoesNothing() {
-            assertThatCode(() -> service.broadcastCommentAdded(plannerId, null))
+        void broadcast_WhenNoSubscribers_DoesNothing() {
+            assertThatCode(() -> service.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString())))
                     .doesNotThrowAnyException();
             assertThat(service.getSubscriberCount(plannerId)).isZero();
         }
 
         @Test
         @DisplayName("does not propagate when serialization fails")
-        void broadcastCommentAdded_WhenSerializationFails_DoesNotThrow() throws Exception {
+        void broadcast_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
             PlannerCommentSseService failingService = new PlannerCommentSseService(failingMapper);
             failingService.subscribe(plannerId, UUID.randomUUID());
 
-            assertThatCode(() -> failingService.broadcastCommentAdded(plannerId, null))
+            assertThatCode(() -> failingService.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString())))
                     .doesNotThrowAnyException();
             assertThat(failingService.getSubscriberCount(plannerId)).isEqualTo(1);
         }

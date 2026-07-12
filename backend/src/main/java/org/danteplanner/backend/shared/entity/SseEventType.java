@@ -11,6 +11,7 @@ public enum SseEventType {
     CREATED("created"),
     UPDATED("updated"),
     DELETED("deleted"),
+    COMMENT_ADDED("comment:added"),
     NOTIFY_COMMENT("notify:comment"),
     NOTIFY_PUBLISHED("notify:published"),
     NOTIFY_RECOMMENDED("notify:recommended"),

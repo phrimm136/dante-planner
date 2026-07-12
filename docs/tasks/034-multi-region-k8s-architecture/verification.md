@@ -774,3 +774,38 @@ Not a numbered plan phase (status.json untouched). Three verified reliability fi
 ### Notes
 - Refactor leg: nothing warranted (surgical, disjoint changes; only minor DRY strain noted in the ledger).
 - meme capture: SKIPPED per task instruction.
+
+## Pre-Seoul Perf + Comment-SSE Hardening — PASS
+
+Certifies two ad-hoc pre-Seoul hardening fixes. Closes the two carried-forward Gate 2 write-path
+violations (see "Gate 2 — write-path round-trip audit", Findings on `reindex` `:41` and
+`importPlanners` `:383`) — moved to REMEDIATED — and closes the F3 comment leg (see "F3 — cross-pod
+SSE fan-out dead", "Comment path (DEFERRED, documented)") — moved from DEFERRED to MET.
+
+### Suite (scoped Testcontainers set — gated per Brief; full localhost suite is environmentally red for want of local Redis, not a regression)
+Command:
+`gradlew -p backend test --tests CommentServiceTest --tests PlannerCommentSseServiceTest --tests CommentServiceNotificationTest --tests HibernateInsertBatchingIT --tests SseFanoutIT --tests PlannerCommandServiceTest --tests TestNamingConventionTest --tests PlannerIndexServiceTest`
+Result tail:
+```
+BUILD SUCCESSFUL in 1m 38s
+6 actionable tasks: 2 executed, 4 up-to-date
+```
+Aggregated JUnit XML (25 result files, all from the single 13:51 run — `@Nested` classes each emit
+a `$`-suffixed file — no stale results): tests=82 skipped=0 failures=0 errors=0.
+`TestNamingConventionTest` green (new test method names satisfy its regex). Log:
+`/tmp/spec-verify-hardening.log`.
+
+### Trace
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| Item A — Gate 2 batching: 4 hibernate props in `application.properties` | Brief Item A / Gate 2 Findings 1&2 | MET | `backend/src/main/resources/application.properties:14-17` — `jdbc.batch_size=30`, `order_inserts=true`, `order_updates=true`, `batch_versioned_data=true` | `HibernateInsertBatchingIT:130` drives REAL `importPlanners` N=40 against Testcontainers MySQL, asserts `getPrepareStatementCount() <= BOUNDED_STATEMENT_THRESHOLD` (=12, `:56`,`:158`) — green in scoped run |
+| Item A — config-only, no service code change; `reindex` fixed by same global config | Brief Item A | MET | `git diff HEAD` on `PlannerIndexService.java` + `PlannerCommandService.java` = empty (zero write-path service change; batching is properties-only); same `Persistable`/assigned-key batchability covers `reindex` | `PlannerIndexServiceTest` + `PlannerCommandServiceTest` green (behavior unchanged); no separate reindex batching test needed per Brief |
+| Item B — `SseEventType.COMMENT_ADDED("comment:added")` exists; `broadcastCommentAdded` GONE | Brief Item B / F3 comment leg | MET | `shared/entity/SseEventType.java:14` COMMENT_ADDED; `broadcastCommentAdded` absent from `PlannerCommentSseService.java` (surviving method: `broadcast(...)` `:97`); grep finds no production reference | `PlannerCommentSseServiceTest` 3 characterization tests retargeted onto `broadcast(...)` (`:88`,`:101`,`:109` — dead-emitter, no-subscriber no-op, serialization-failure swallow) — green |
+| Item B — `CommentService` injects `SsePublisher`; both create paths call `publishCommentCreated` → `publishCommentEvent(..., COMMENT_ADDED, ...)` | Brief Item B | MET | `comment/service/CommentService.java:52` injects `SsePublisher`; `:255` & `:319` both call `publishCommentCreated(...)`; `:332-335` helper calls `ssePublisher.publishCommentEvent(plannerId, COMMENT_ADDED, ...)` | `SseFanoutIT.createComment_WhenWritePathRuns_FansOutToCommentSubscribers:151` drives REAL `commentService.createComment`, verifies cross-node `plannerCommentSseService.broadcast(eq(plannerId), eq("comment:added"), <payload carrying plannerId>)` (`:167-170`) — green |
+
+### Cross-reference — prior sections closed
+- **Gate 2 Findings 1 & 2** (`reindex` `:41`, `importPlanners` `:383`, "two exceptions, both N unbatched INSERTs"): both carried-forward write-path violations → **REMEDIATED** by the single global `hibernate.jdbc.batch_size` config Gate 2 named. `HibernateInsertBatchingIT` pins the `importPlanners` leg empirically (bounded ≤12 vs. ~one-per-row unbatched).
+- **F3 comment leg** ("Comment path (DEFERRED, documented)" — `publishCommentEvent` unwired, `CommentService` used in-process `broadcastCommentAdded`): → **MET** as the F3b follow-up. Both create paths now fan out cross-pod; the dead `broadcastCommentAdded` is removed (no double-delivery); the 3 characterization tests were retargeted onto `broadcast(...)`, coverage preserved.
+
+### Gaps
+- None. Both items MET; scoped Testcontainers suite green at 82/0/0.

@@ -2,6 +2,8 @@ package org.danteplanner.backend.integration;
 
 import java.util.Map;
 import java.util.UUID;
+import org.danteplanner.backend.comment.dto.CreateCommentRequest;
+import org.danteplanner.backend.comment.service.CommentService;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
@@ -65,6 +67,9 @@ class SseFanoutIT extends CausalHarnessSupport {
 
     @Autowired
     private PlannerCommandService plannerCommandService;
+
+    @Autowired
+    private CommentService commentService;
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -139,5 +144,29 @@ class SseFanoutIT extends CausalHarnessSupport {
                 eq(userId),
                 eq(SseEventType.UPDATED.getValue()),
                 argThat(env -> env != null && env.toString().contains(plannerId.toString())));
+    }
+
+    @Test
+    @DisplayName("A real comment write runs through the write path and fans out cross-node to comment subscribers")
+    void createComment_WhenWritePathRuns_FansOutToCommentSubscribers() {
+        User owner = TestDataFactory.createTestUser(
+                userRepository, "sse-comment-owner-" + UUID.randomUUID() + "@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
+        User commenter = TestDataFactory.createTestUser(
+                userRepository, "sse-comment-" + UUID.randomUUID() + "@example.com");
+        Long commenterId = commenter.getId();
+        UUID plannerId = planner.getId();
+        UUID deviceId = UUID.randomUUID();
+
+        commentService.createComment(
+                plannerId,
+                commenterId,
+                deviceId,
+                new CreateCommentRequest("Great deck, thanks for sharing", null));
+
+        verify(plannerCommentSseService, timeout(5000)).broadcast(
+                eq(plannerId),
+                eq("comment:added"),
+                argThat(data -> data != null && data.toString().contains(plannerId.toString())));
     }
 }

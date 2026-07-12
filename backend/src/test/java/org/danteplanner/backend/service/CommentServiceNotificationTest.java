@@ -8,6 +8,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 
 import org.danteplanner.backend.notification.service.NotificationService;
 
@@ -58,6 +59,9 @@ class CommentServiceNotificationTest {
     @Mock
     private PlannerCommentSseService plannerCommentSseService;
 
+    @Mock
+    private SsePublisher ssePublisher;
+
     private CommentService service;
 
     private static final UUID PLANNER_ID = UUID.randomUUID();
@@ -80,6 +84,7 @@ class CommentServiceNotificationTest {
                 userRepository,
                 notificationService,
                 plannerCommentSseService,
+                ssePublisher,
                 new PlannerAccessGuard(userRepository, plannerRepository)
         );
 
