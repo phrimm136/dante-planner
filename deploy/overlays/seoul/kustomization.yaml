@@ -17,3 +17,4 @@ images:
 patches:
 - path: configmap-patch.yaml
 - path: redis-replicaof-patch.yaml
+- path: secretstore-region-patch.yaml
