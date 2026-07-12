@@ -44,8 +44,9 @@ locals {
     data    = aws_iam_role.data.name
     app     = aws_iam_role.app.name
   }
-  # Token param ARN pattern (the parameter itself is defined in cp.tf).
-  token_param_arn = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${aws_ssm_parameter.k3s_token.name}"
+  # SSM param ARNs (the parameters themselves are defined in cp.tf).
+  token_param_arn      = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${aws_ssm_parameter.k3s_token.name}"
+  kubeconfig_param_arn = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${aws_ssm_parameter.kubeconfig.name}"
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_core" {
@@ -66,6 +67,11 @@ data "aws_iam_policy_document" "cp" {
     sid       = "PublishJoinToken"
     actions   = ["ssm:PutParameter", "ssm:GetParameter"]
     resources = [local.token_param_arn]
+  }
+  statement {
+    sid       = "PublishKubeconfig"
+    actions   = ["ssm:PutParameter"]
+    resources = [local.kubeconfig_param_arn]
   }
   statement {
     sid       = "EtcdSnapshotBucket"

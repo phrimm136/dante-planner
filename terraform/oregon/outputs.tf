@@ -18,9 +18,24 @@ output "ingress_public_ip" {
   value       = aws_instance.ingress.public_ip
 }
 
+output "ingress_eip" {
+  description = "Stable public IP associated with the ingress (empty until a durable EIP is allocated in terraform/oregon-edge and var.ingress_eip_allocation_id is set). Point Cloudflare's api A-record HERE, not at ingress_public_ip (which changes on ingress replacement)."
+  value       = var.ingress_eip_allocation_id != "" ? data.aws_eip.ingress[0].public_ip : ""
+}
+
 output "cp_private_ip" {
   description = "Control-plane node private IP (k3s server / agent join target)."
   value       = aws_instance.cp.private_ip
+}
+
+output "cp_instance_id" {
+  description = "Control-plane instance id — the `aws ssm send-command` target for scripts/ops/oregon-verify.sh."
+  value       = aws_instance.cp.id
+}
+
+output "kubeconfig_ssm_parameter" {
+  description = "SSM SecureString holding the admin kubeconfig (server = CP private IP, in-VPC only). Fetch: aws ssm get-parameter --with-decryption --region us-west-2 --name <this> --query Parameter.Value --output text > ~/.kube/dante-oregon"
+  value       = aws_ssm_parameter.kubeconfig.name
 }
 
 output "backend_ecr_repository_url" {

@@ -4,6 +4,12 @@ set -euxo pipefail
 command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
 command -v git >/dev/null 2>&1 || dnf install -y git
 
+# CP private IP (IMDSv2 — IMDSv1 is disabled). Used as a k3s API cert SAN and in
+# the published kubeconfig so operators reach the API in-VPC without SSH. The CP
+# cannot get this from Terraform (self-reference in its own user_data = cycle).
+IMDS_TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 300')
+CP_PRIVATE_IP=$(curl -sf -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+
 TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
   --name "${token_param}" --query 'Parameter.Value' --output text)
 umask 077
@@ -16,6 +22,7 @@ echo "$TOKEN" > /etc/k3s-token
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --cluster-init \
   --token-file /etc/k3s-token \
+  --tls-san $CP_PRIVATE_IP \
   --disable traefik \
   --disable servicelb \
   --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule \
@@ -27,6 +34,15 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
 
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 until kubectl get nodes >/dev/null 2>&1; do sleep 5; done
+
+# Publish the admin kubeconfig to SSM (loopback rewritten to the CP private IP,
+# a cert SAN via --tls-san) so operators fetch cluster access without SSH.
+# set +x so the embedded client key never lands in the cloud-init log.
+set +x
+aws ssm put-parameter --region ${region} --name "${kubeconfig_param}" \
+  --type SecureString --tier Intelligent-Tiering --overwrite \
+  --value "$(sed 's#https://127.0.0.1:6443#https://'"$CP_PRIVATE_IP"':6443#' /etc/rancher/k3s/k3s.yaml)"
+set -x
 
 # ArgoCD core per cluster (reconciler only, no API server / UI — hub-spoke
 # rejected, no cross-region deploy dependency).

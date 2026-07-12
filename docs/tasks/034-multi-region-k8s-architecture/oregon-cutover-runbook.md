@@ -91,26 +91,29 @@ plane. The cluster must already be serving the merged code when you cut traffic 
 > docs). Do **not** sweep it into this merge — keep the branch history clean.
 
 ### Step 1 — Give the ingress a stable EIP (the "reassign the EIP" prerequisite)
-The ingress currently publishes an **ephemeral** `public_ip` (`terraform/oregon/outputs.tf`
-`ingress_public_ip`). Cloudflare cannot durably point at an IP that changes on stop/start or
-replacement. Allocate a dedicated EIP and associate it with the ingress instance, in Terraform so
-it survives:
+The ingress publishes an **ephemeral** `public_ip` (`ingress_public_ip`); Cloudflare cannot durably
+point at an IP that changes on stop/start or replacement. This is automated in **two layers** so the
+address survives the fleet's destroy+apply rebuild proof:
 
-```hcl
-# terraform/oregon/ingress.tf (add)
-resource "aws_eip" "ingress" {
-  domain   = "vpc"
-  instance = aws_instance.ingress.id
-  tags     = { Name = "danteplanner-oregon-ingress" }
-}
-output "ingress_eip" { value = aws_eip.ingress.public_ip }
-```
+- **Allocate (once, durable)** — `terraform/oregon-edge` holds the `aws_eip` in its own state, so a
+  fleet rebuild never releases the address:
 ```bash
-terraform -chdir=terraform/oregon plan     # review: 1 EIP + 1 association, no instance replacement
-terraform -chdir=terraform/oregon apply
-INGRESS_EIP=$(terraform -chdir=terraform/oregon output -raw ingress_eip)
+terraform -chdir=terraform/oregon-edge init
+terraform -chdir=terraform/oregon-edge apply
+ALLOC=$(terraform -chdir=terraform/oregon-edge output -raw ingress_eip_allocation_id)
+INGRESS_EIP=$(terraform -chdir=terraform/oregon-edge output -raw ingress_eip_public_ip)
 ```
-This apply is **consent-gated** — run it with your AWS credentials, read the plan before yes.
+- **Associate (in the fleet, rebuild-safe)** — set `ingress_eip_allocation_id = "$ALLOC"` in
+  `terraform/oregon/terraform.tfvars`, then apply the fleet. It creates only the
+  `aws_eip_association`, re-bound on every rebuild to the SAME address:
+```bash
+terraform -chdir=terraform/oregon apply                       # review: 1 association, NO instance replacement
+terraform -chdir=terraform/oregon output -raw ingress_eip     # == $INGRESS_EIP
+```
+Both applies are **consent-gated** — run with your AWS credentials, read the plan before yes. Why
+two layers: an `aws_eip` inside the fleet would be released on `terraform destroy`, and reallocation
+hands you a *different* IP — every rebuild would silently break Cloudflare. Splitting allocation
+(durable) from association (disposable) keeps the entry IP stable **and** the rebuild unattended.
 
 ### Step 2 — Validate the cluster end-to-end BEFORE cutover (separate hostname)
 Do not test by flipping prod. Point a throwaway record at the EIP and exercise the real path

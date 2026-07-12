@@ -31,3 +31,19 @@ resource "aws_instance" "ingress" {
 
   tags = merge(var.tags, { Name = "${var.name_prefix}-oregon-ingress", Role = "ingress" })
 }
+
+# Durable ingress EIP: only the ASSOCIATION lives in this rebuild-disposable
+# stack. The allocation is held in terraform/oregon-edge (separate state), so a
+# destroy+apply re-binds the SAME address instead of releasing it — the public IP
+# Cloudflare points at never changes across a rebuild. count=0 leaves the node on
+# its ephemeral public IP until a durable EIP is allocated and the var is set.
+resource "aws_eip_association" "ingress" {
+  count         = var.ingress_eip_allocation_id != "" ? 1 : 0
+  allocation_id = var.ingress_eip_allocation_id
+  instance_id   = aws_instance.ingress.id
+}
+
+data "aws_eip" "ingress" {
+  count = var.ingress_eip_allocation_id != "" ? 1 : 0
+  id    = var.ingress_eip_allocation_id
+}

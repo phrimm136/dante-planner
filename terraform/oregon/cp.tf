@@ -15,6 +15,25 @@ resource "aws_ssm_parameter" "k3s_token" {
   tags        = var.tags
 }
 
+# --- Admin kubeconfig -------------------------------------------------------
+# The CP writes its admin kubeconfig here at bootstrap (loopback server rewritten
+# to the CP private IP, a cert SAN via --tls-san), so operators fetch cluster
+# access from SSM instead of SSHing the CP. Terraform owns existence/KMS/tags but
+# NOT the value (the CP overwrites it at runtime — ignore_changes keeps plan
+# clean). Intelligent-Tiering absorbs a >4KB kubeconfig without a standing cost.
+resource "aws_ssm_parameter" "kubeconfig" {
+  name        = "/${var.name_prefix}/oregon/kubeconfig"
+  description = "Admin kubeconfig (CP writes at bootstrap, operators read)"
+  type        = "SecureString"
+  tier        = "Intelligent-Tiering"
+  value       = "pending-cp-bootstrap"
+  tags        = var.tags
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 # --- CP node (pet): k3s server + embedded etcd + ArgoCD core ----------------
 resource "aws_instance" "cp" {
   ami                    = data.aws_ssm_parameter.node_ami.value
@@ -27,6 +46,7 @@ resource "aws_instance" "cp" {
   user_data = templatefile("${path.module}/user-data/cp.sh.tftpl", {
     region              = var.region
     token_param         = aws_ssm_parameter.k3s_token.name
+    kubeconfig_param    = aws_ssm_parameter.kubeconfig.name
     s3_bucket           = aws_s3_bucket.etcd_snapshots.bucket
     snapshot_retention  = var.etcd_snapshot_retention
     gitops_repo_url     = var.gitops_repo_url
