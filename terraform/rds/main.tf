@@ -217,3 +217,32 @@ resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
   ip_protocol                  = "tcp"
   referenced_security_group_id = var.fleet_cluster_security_group_id
 }
+
+# --- Seoul fleet <-> RDS VPC peering (RDS side) -------------------------------
+# The cross-region peering is created + accepted by terraform/seoul; here we add
+# the return route from the RDS VPC to the Seoul fleet and open 3306 to Seoul's
+# VPC CIDR. Seoul's cluster SG lives in ap-northeast-2 and SG references do NOT
+# resolve across cross-region peering, so this rule is CIDR-based (unlike the
+# same-region Oregon rule above). All guarded so a plain RDS apply is unaffected
+# until seoul_peering_connection_id is set.
+data "aws_route_tables" "rds_vpc_seoul" {
+  count  = var.seoul_peering_connection_id != "" ? 1 : 0
+  vpc_id = var.vpc_id
+}
+
+resource "aws_route" "rds_to_seoul_fleet" {
+  count                     = var.seoul_peering_connection_id != "" ? length(data.aws_route_tables.rds_vpc_seoul[0].ids) : 0
+  route_table_id            = tolist(data.aws_route_tables.rds_vpc_seoul[0].ids)[count.index]
+  destination_cidr_block    = var.seoul_fleet_cidr
+  vpc_peering_connection_id = var.seoul_peering_connection_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "seoul_fleet_to_rds" {
+  count             = var.seoul_peering_connection_id != "" ? 1 : 0
+  security_group_id = aws_security_group.rds.id
+  description       = "Seoul k3s fleet (VPC CIDR) to RDS over cross-region peering; SG reference impossible cross-region"
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.seoul_fleet_cidr
+}

@@ -145,3 +145,15 @@ variable "fleet_vpc_cidr" {
   type        = string
   default     = ""
 }
+
+variable "seoul_peering_connection_id" {
+  description = "Cross-region VPC peering connection id from terraform/seoul (module.fleet output rds_peering_connection_id). Empty = no Seoul wiring."
+  type        = string
+  default     = ""
+}
+
+variable "seoul_fleet_cidr" {
+  description = "Seoul fleet VPC CIDR, for the RDS-side return route and the CIDR-based 3306 ingress (cross-region SG references are not allowed)."
+  type        = string
+  default     = "10.30.0.0/16"
+}
