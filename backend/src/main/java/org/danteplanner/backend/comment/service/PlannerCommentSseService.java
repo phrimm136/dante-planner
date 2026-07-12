@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -53,37 +51,6 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
         SseEmitter emitter = register(plannerId, deviceId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;
-    }
-
-    /**
-     * Broadcast a comment:added event to all subscribers of a planner.
-     * Excludes the author's device to prevent self-notification.
-     *
-     * @param plannerId       the planner ID
-     * @param excludeDeviceId the device ID to exclude (author's device)
-     */
-    public void broadcastCommentAdded(UUID plannerId, UUID excludeDeviceId) {
-        var subscribers = emitters.get(plannerId);
-        if (subscribers == null || subscribers.isEmpty()) {
-            log.debug("No subscribers for planner {} comment notification", plannerId);
-            return;
-        }
-
-        Map<String, Object> payload = Map.of(
-                "plannerId", plannerId.toString(),
-                "timestamp", Instant.now().toString()
-        );
-
-        String jsonData;
-        try {
-            jsonData = objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize comment:added event for planner {}", plannerId, e);
-            return;
-        }
-
-        int sent = sendToSubscribers(plannerId, subscribers, "comment:added", jsonData, excludeDeviceId);
-        log.debug("Broadcast comment:added to {} subscribers for planner {}", sent, plannerId);
     }
 
     /**
