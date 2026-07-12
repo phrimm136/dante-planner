@@ -1,6 +1,6 @@
 {
   "totalPhases": 15,
-  "currentPhase": 11,
+  "currentPhase": 12,
   "reviewMode": "end",
   "infraPhasesMode": "authored-as-code, apply consent-gated with user AWS credentials",
   "phases": [
@@ -15,7 +15,7 @@
     { "name": "Typed degradation + health semantics + Lettuce mapping", "status": "done" },
     { "name": "SSE over Redis pub/sub (payload events) - backend", "status": "done" },
     { "name": "FE SSE invalidate->patch + errorCode UX", "status": "done" },
-    { "name": "Pre-Seoul gates - recorded measurements", "status": "pending" },
+    { "name": "Pre-Seoul gates - recorded measurements", "status": "done" },
     { "name": "Oregon k3s fleet + ArgoCD + CI arm64 - infra", "status": "pending" },
     { "name": "Seoul + GA + peering + ECR replication - infra", "status": "pending" },
     { "name": "Drills + portfolio write-ups - infra", "status": "pending" }
