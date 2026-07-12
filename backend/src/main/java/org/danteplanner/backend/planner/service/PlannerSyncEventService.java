@@ -2,6 +2,8 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.entity.SseEventType;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ import java.util.UUID;
 public class PlannerSyncEventService {
 
     private final SseService sseService;
+    private final SsePublisher ssePublisher;
 
     /**
      * Notify all connected devices of a user about a planner update,
@@ -36,7 +39,7 @@ public class PlannerSyncEventService {
                 "type", eventType
         );
 
-        sseService.sendToUser(userId, excludeDeviceId, "sync:planner", data);
+        ssePublisher.publishUserEvent(userId, SseEventType.fromValue(eventType), plannerId.toString(), data);
         log.debug("Sent planner-update event: user={}, planner={}, type={}", userId, plannerId, eventType);
     }
 

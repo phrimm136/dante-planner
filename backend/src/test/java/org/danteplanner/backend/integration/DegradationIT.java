@@ -101,6 +101,8 @@ class DegradationIT {
     private static final int MYSQL_INTERNAL_PORT = 3306;
     private static final String PRIMARY_DB_PROXY_NAME = "degradation-app-to-primary";
     private static final int PRIMARY_DB_PROXY_LISTEN_PORT = 8667;
+    private static final String RATE_LIMIT_REDIS_PROXY_NAME = "degradation-app-to-rate-limit-redis";
+    private static final int RATE_LIMIT_PROXY_LISTEN_PORT = 8668;
     private static final String ROOT_USER = "root";
     private static final String REPL_USER = "repl";
     private static final String REPL_PASSWORD = "repl-pass";
@@ -182,6 +184,8 @@ class DegradationIT {
 
     static final Proxy PRIMARY_DB_PROXY;
 
+    static final Proxy RATE_LIMIT_REDIS_PROXY;
+
     static {
         PRIMARY.start();
         REPLICA.start();
@@ -189,6 +193,7 @@ class DegradationIT {
         DEGRADATION_TOXIPROXY.start();
         AUTH_REDIS_PROXY = createAuthRedisProxy();
         PRIMARY_DB_PROXY = createPrimaryDbProxy();
+        RATE_LIMIT_REDIS_PROXY = createRateLimitRedisProxy();
         wireReplication(new JdbcTemplate(adminDataSource(PRIMARY)), new JdbcTemplate(adminDataSource(REPLICA)));
     }
 
@@ -240,8 +245,8 @@ class DegradationIT {
         registry.add("redis.auth.host", DEGRADATION_TOXIPROXY::getHost);
         registry.add("redis.auth.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(PROXY_LISTEN_PORT));
 
-        registry.add("redis.rate-limit.host", DEDICATED_AUTH_REDIS::getHost);
-        registry.add("redis.rate-limit.port", () -> DEDICATED_AUTH_REDIS.getMappedPort(REDIS_INTERNAL_PORT));
+        registry.add("redis.rate-limit.host", DEGRADATION_TOXIPROXY::getHost);
+        registry.add("redis.rate-limit.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(RATE_LIMIT_PROXY_LISTEN_PORT));
     }
 
     private static String primaryUrlThroughProxy() {
@@ -266,6 +271,10 @@ class DegradationIT {
             toxic.remove();
         }
         PRIMARY_DB_PROXY.enable();
+        for (Toxic toxic : RATE_LIMIT_REDIS_PROXY.toxics().getAll()) {
+            toxic.remove();
+        }
+        RATE_LIMIT_REDIS_PROXY.enable();
     }
 
     @Test
@@ -357,6 +366,36 @@ class DegradationIT {
                 .contains("UP");
     }
 
+    /**
+     * F2: with the rate-limit Redis route severed (Toxiproxy proxy disabled) and every other path
+     * healthy, a rate-limited write endpoint must degrade by operation — the raw-Lettuce failure the
+     * bucket4j {@code tryConsume} raises at controller entry must be mapped to a typed
+     * {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} (503), NOT fall through to the catch-all 500
+     * INTERNAL_ERROR + Sentry. The auth Redis and both datasources stay healthy so the request
+     * clears the JWT filter and reaches {@code checkCrudLimit} before any service/DB work; the 503 +
+     * typed code structurally proves {@code handleUnexpected} (the only Sentry path for this
+     * exception) was never reached.
+     */
+    @Test
+    @DisplayName("F2: rate-limit Redis cut → rate-limited write returns 503 RATE_LIMIT_TEMPORARILY_UNAVAILABLE, not 500")
+    void rateLimitRedisCut_WhenRateLimitedEndpointCalled_ReturnsRateLimitTemporarilyUnavailable() throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "degradation-f2-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = new Cookie("accessToken",
+                TestDataFactory.generateAccessToken(jwtTokenService, author));
+        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        UUID plannerId = UUID.randomUUID();
+
+        cutRateLimitRedis();
+
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content(upsertBody(plannerId, "degradation-f2-blocked-by-ratelimit-outage")))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("RATE_LIMIT_TEMPORARILY_UNAVAILABLE"));
+    }
+
     private double skipCounterValue() {
         Counter counter = meterRegistry.find(COUNTER_NAME).counter();
         return counter == null ? 0.0 : counter.count();
@@ -368,6 +407,10 @@ class DegradationIT {
 
     private void cutPrimaryDb() throws IOException {
         PRIMARY_DB_PROXY.disable();
+    }
+
+    private void cutRateLimitRedis() throws IOException {
+        RATE_LIMIT_REDIS_PROXY.disable();
     }
 
     private String upsertBody(UUID id, String title) throws IOException {
@@ -414,6 +457,19 @@ class DegradationIT {
                     PRIMARY_ALIAS + ":" + MYSQL_INTERNAL_PORT);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to create the app→primary DB Toxiproxy proxy", e);
+        }
+    }
+
+    private static Proxy createRateLimitRedisProxy() {
+        try {
+            ToxiproxyClient client = new ToxiproxyClient(
+                    DEGRADATION_TOXIPROXY.getHost(), DEGRADATION_TOXIPROXY.getControlPort());
+            return client.createProxy(
+                    RATE_LIMIT_REDIS_PROXY_NAME,
+                    "0.0.0.0:" + RATE_LIMIT_PROXY_LISTEN_PORT,
+                    DEDICATED_AUTH_REDIS_ALIAS + ":" + REDIS_INTERNAL_PORT);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Failed to create the app→rate-limit-Redis Toxiproxy proxy", e);
         }
     }
 

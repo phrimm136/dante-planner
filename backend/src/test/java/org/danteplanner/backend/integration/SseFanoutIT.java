@@ -4,9 +4,16 @@ import java.util.Map;
 import java.util.UUID;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -56,6 +63,15 @@ class SseFanoutIT extends CausalHarnessSupport {
     @Autowired
     private SsePublisher ssePublisher;
 
+    @Autowired
+    private PlannerCommandService plannerCommandService;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @MockitoSpyBean
     private SseService sseService;
 
@@ -100,5 +116,28 @@ class SseFanoutIT extends CausalHarnessSupport {
                 eq(plannerId),
                 eq(SseEventType.CREATED.getValue()),
                 argThat(data -> data != null && data.toString().contains(commentId)));
+    }
+
+    @Test
+    @DisplayName("A real planner update runs through the write path and fans out cross-node carrying its payload")
+    void updatePlanner_WhenWritePathRuns_FansOutCrossNodeWithPayload() {
+        User owner = TestDataFactory.createTestUser(
+                userRepository, "sse-fanout-planner-" + UUID.randomUUID() + "@example.com");
+        Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
+        Long userId = owner.getId();
+        UUID plannerId = planner.getId();
+        UUID deviceId = UUID.randomUUID();
+
+        plannerCommandService.updatePlanner(
+                userId,
+                deviceId,
+                plannerId,
+                new UpdatePlannerRequest("Refactored deck", null, null, null, planner.getSyncVersion(), null),
+                true);
+
+        verify(sseService, timeout(5000)).sendToUser(
+                eq(userId),
+                eq(SseEventType.UPDATED.getValue()),
+                argThat(env -> env != null && env.toString().contains(plannerId.toString())));
     }
 }

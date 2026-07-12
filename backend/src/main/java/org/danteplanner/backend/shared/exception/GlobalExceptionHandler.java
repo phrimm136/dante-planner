@@ -383,6 +383,31 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle the rate-limit Redis being briefly unreachable or slow (failover, network blip, maintenance).
+     *
+     * <p>The rate limiter uses a RAW Lettuce client (only {@code RedisConnectionConfig} does — bucket4j's
+     * {@code LettuceBasedProxyManager} is handed a raw {@code RedisClient.connect(...)}), so a rate-limit
+     * Redis outage does NOT surface as Spring Data's {@code RedisConnectionFailureException}. It rethrows
+     * the raw {@code io.lettuce.core.RedisException} (RedisConnectionException / RedisCommandTimeoutException /
+     * RedisSystemException) unwrapped. Mapping the common supertype covers every cut variant. Transient and
+     * self-healing — the client reconnects when Redis returns.</p>
+     *
+     * <p>Returning 503 (not letting it fall to the catch-all 500) honours the edge contract: nginx has
+     * {@code proxy_intercept_errors on}, so it rewrites any backend 5xx to {@code BACKEND_UNAVAILABLE}.
+     * A 500 would leak through as a raw INTERNAL_ERROR. Deliberately NOT sent to Sentry, for the same reason
+     * as the DB and auth-Redis handlers: it is expected during a Redis outage and would otherwise alert-storm.
+     * The {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} code is internal-only; external clients see
+     * BACKEND_UNAVAILABLE.</p>
+     */
+    @ExceptionHandler(io.lettuce.core.RedisException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(io.lettuce.core.RedisException ex) {
+        log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Retry-After", "10")
+            .body(new ErrorResponse("RATE_LIMIT_TEMPORARILY_UNAVAILABLE", "Rate limiter temporarily unavailable, please retry"));
+    }
+
+    /**
      * Handle SSE client disconnections (broken pipe, connection reset).
      *
      * <p>When clients disconnect from SSE endpoints (browser close, network interruption),
