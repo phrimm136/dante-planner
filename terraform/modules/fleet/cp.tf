@@ -8,7 +8,7 @@ resource "random_password" "k3s_token" {
 }
 
 resource "aws_ssm_parameter" "k3s_token" {
-  name        = "/${var.name_prefix}/oregon/k3s-join-token"
+  name        = "/${var.name_prefix}/${var.region_name_suffix}/k3s-join-token"
   description = "k3s cluster join token (CP writes, agents read)"
   type        = "SecureString"
   value       = random_password.k3s_token.result
@@ -22,7 +22,7 @@ resource "aws_ssm_parameter" "k3s_token" {
 # NOT the value (the CP overwrites it at runtime — ignore_changes keeps plan
 # clean). Intelligent-Tiering absorbs a >4KB kubeconfig without a standing cost.
 resource "aws_ssm_parameter" "kubeconfig" {
-  name        = "/${var.name_prefix}/oregon/kubeconfig"
+  name        = "/${var.name_prefix}/${var.region_name_suffix}/kubeconfig"
   description = "Admin kubeconfig (CP writes at bootstrap, operators read)"
   type        = "SecureString"
   tier        = "Intelligent-Tiering"
@@ -45,6 +45,7 @@ resource "aws_instance" "cp" {
 
   user_data = templatefile("${path.module}/user-data/cp.sh.tftpl", {
     region              = var.region
+    region_suffix       = var.region_name_suffix
     token_param         = aws_ssm_parameter.k3s_token.name
     kubeconfig_param    = aws_ssm_parameter.kubeconfig.name
     s3_bucket           = aws_s3_bucket.etcd_snapshots.bucket
@@ -68,5 +69,5 @@ resource "aws_instance" "cp" {
     encrypted   = true
   }
 
-  tags = merge(var.tags, { Name = "${var.name_prefix}-oregon-cp", Role = "control-plane" })
+  tags = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-cp", Role = "control-plane" })
 }

@@ -10,6 +10,24 @@ variable "name_prefix" {
   default     = "danteplanner"
 }
 
+variable "region_name_suffix" {
+  description = "Short region label baked into resource names, tags, and SSM paths (IAM role names are account-global, so this MUST differ per region to avoid collisions). Oregon = 'oregon' (default keeps existing names byte-identical); Seoul passes 'seoul'."
+  type        = string
+  default     = "oregon"
+}
+
+variable "rds_peer_region" {
+  description = "Region of the RDS VPC when it is in a DIFFERENT region than this fleet (cross-region peering, e.g. Seoul→us-west-2 RDS). null = same-region peering (Oregon). When set, rds_peering_auto_accept must be false and the caller provides an aws_vpc_peering_connection_accepter in the RDS region."
+  type        = string
+  default     = null
+}
+
+variable "rds_peering_auto_accept" {
+  description = "true for same-region peering (Oregon auto-accepts). false for cross-region (Seoul): AWS requires an explicit accepter in the peer's region."
+  type        = bool
+  default     = true
+}
+
 # --- Network ----------------------------------------------------------------
 
 variable "vpc_cidr" {

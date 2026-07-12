@@ -2,8 +2,8 @@
 # The CP node runs k3s server with --cluster-init so it has embedded etcd;
 # snapshots ship here on a schedule so a CP rebuild can restore cluster state.
 resource "aws_s3_bucket" "etcd_snapshots" {
-  bucket = "${var.name_prefix}-oregon-etcd-snapshots-${data.aws_caller_identity.current.account_id}"
-  tags   = merge(var.tags, { Name = "${var.name_prefix}-oregon-etcd-snapshots" })
+  bucket = "${var.name_prefix}-${var.region_name_suffix}-etcd-snapshots-${data.aws_caller_identity.current.account_id}"
+  tags   = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-etcd-snapshots" })
 }
 
 resource "aws_s3_bucket_public_access_block" "etcd_snapshots" {

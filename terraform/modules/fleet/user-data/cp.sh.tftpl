@@ -90,10 +90,10 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
 # deploy/overlays/oregon so the cluster is GitOps-managed from here on.
 git clone --depth 1 --branch ${gitops_revision} ${gitops_repo_url} /opt/gitops
 kubectl apply -f /opt/gitops/deploy/argocd/project.yaml
-kubectl apply -f /opt/gitops/deploy/argocd/root-app.yaml
+kubectl apply -f /opt/gitops/deploy/argocd/root-app-${region_suffix}.yaml
 
 # Inject the ECR registry host (account id) as a kustomize image override at
 # sync time. The host is never committed to git — it is rendered here from
 # Terraform state. The override sets only newName (:* preserves the overlay's
 # CI-bumped newTag), so the git-committed tag still selects the image.
-kubectl -n argocd patch application danteplanner-oregon --type merge -p '{"spec":{"source":{"targetRevision":"${gitops_revision}","kustomize":{"images":["${ecr_image}"]}}}}'
+kubectl -n argocd patch application danteplanner-${region_suffix} --type merge -p '{"spec":{"source":{"targetRevision":"${gitops_revision}","kustomize":{"images":["${ecr_image}"]}}}}'

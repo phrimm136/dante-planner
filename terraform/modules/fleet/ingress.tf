@@ -29,7 +29,7 @@ resource "aws_instance" "ingress" {
     encrypted   = true
   }
 
-  tags = merge(var.tags, { Name = "${var.name_prefix}-oregon-ingress", Role = "ingress" })
+  tags = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-ingress", Role = "ingress" })
 }
 
 # Durable ingress EIP: only the ASSOCIATION lives in this rebuild-disposable
