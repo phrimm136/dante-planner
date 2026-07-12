@@ -125,7 +125,7 @@ resource "aws_db_parameter_group" "this" {
   }
   parameter {
     name  = "long_query_time"
-    value = "1"
+    value = "0.1"
   }
   parameter {
     name  = "log_output"
@@ -166,6 +166,12 @@ resource "aws_db_instance" "this" {
   parameter_group_name   = aws_db_parameter_group.this.name
   port                   = 3306
 
+  # Ship the slow query log (slow_query_log=1 in the parameter group) to
+  # CloudWatch Logs as /aws/rds/instance/<id>/slowquery. RDS applies log-export
+  # changes immediately — apply_immediately=false does not defer them — and no
+  # reboot is involved.
+  enabled_cloudwatch_logs_exports = ["slowquery"]
+
   backup_retention_period    = var.backup_retention_period
   backup_window              = var.backup_window
   maintenance_window         = var.maintenance_window
@@ -183,4 +189,31 @@ resource "aws_db_instance" "this" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+# --- Fleet <-> RDS VPC peering (RDS side) -----------------------------------
+# The peering is created + auto-accepted by terraform/oregon; here we add the
+# return route from the RDS VPC to the fleet and allow the fleet cluster SG to
+# reach RDS on 3306 (an SG reference resolves across same-region peering). All
+# guarded so a plain RDS apply (no fleet) is unaffected until fleet_* are set.
+data "aws_route_tables" "rds_vpc" {
+  count  = var.fleet_peering_connection_id != "" ? 1 : 0
+  vpc_id = var.vpc_id
+}
+
+resource "aws_route" "rds_to_fleet" {
+  count                     = var.fleet_peering_connection_id != "" ? length(data.aws_route_tables.rds_vpc[0].ids) : 0
+  route_table_id            = tolist(data.aws_route_tables.rds_vpc[0].ids)[count.index]
+  destination_cidr_block    = var.fleet_vpc_cidr
+  vpc_peering_connection_id = var.fleet_peering_connection_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
+  count                        = var.fleet_cluster_security_group_id != "" ? 1 : 0
+  security_group_id            = aws_security_group.rds.id
+  description                  = "k3s fleet app/data nodes to RDS over VPC peering"
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.fleet_cluster_security_group_id
 }

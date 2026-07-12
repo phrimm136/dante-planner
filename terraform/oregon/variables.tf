@@ -162,3 +162,8 @@ variable "tags" {
     Phase   = "oregon-k3s-fleet"
   }
 }
+
+variable "rds_vpc_id" {
+  description = "RDS (prod) VPC id to peer with for private RDS access. Set in terraform.tfvars (gitignored) — do not commit."
+  type        = string
+}

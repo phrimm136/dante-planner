@@ -3,11 +3,6 @@
 # side (return route + the 3306 SG rule referencing the cluster SG) lives in
 # terraform/rds, wired via the outputs below. CIDRs must not overlap.
 
-variable "rds_vpc_id" {
-  description = "RDS (prod) VPC id to peer with for private RDS access. Set in terraform.tfvars (gitignored) — do not commit."
-  type        = string
-}
-
 data "aws_vpc" "rds" {
   id = var.rds_vpc_id
 }

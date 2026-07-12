@@ -41,3 +41,9 @@ variable "tags" {
     Phase   = "oregon-iam-bootstrap"
   }
 }
+
+variable "rds_provisioner_role_name" {
+  description = "Name of the existing role that applies terraform/rds. Empty = skip the peering grant. Set in terraform.tfvars (gitignored)."
+  type        = string
+  default     = ""
+}

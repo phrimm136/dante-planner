@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "assume" {
 
 resource "aws_iam_role" "provisioner" {
   name                 = var.role_name
-  description          = "Least-privilege identity that provisions the Oregon fleet (terraform/oregon). Assumable by an admin laptop (STS) and GitHub Actions CI (OIDC). No instance profile — neither runner is an EC2 instance."
+  description          = "Least-privilege identity that provisions the Oregon fleet (terraform/oregon). Assumable by an admin laptop (STS) and GitHub Actions CI (OIDC). No instance profile - neither runner is an EC2 instance."
   assume_role_policy   = data.aws_iam_policy_document.assume.json
   max_session_duration = 3600
   tags                 = var.tags
@@ -239,4 +239,25 @@ resource "aws_iam_policy" "provisioning" {
 resource "aws_iam_role_policy_attachment" "provisioning" {
   role       = aws_iam_role.provisioner.name
   policy_arn = aws_iam_policy.provisioning.arn
+}
+
+# --- Reproducible grant to the external terraform/rds role ------------------
+# It needs ec2 route actions to add the fleet <-> RDS peering return route.
+# Managed as code (vs a one-off put-role-policy); gated on the role name, which
+# comes from a variable so it never lands in a committed file.
+data "aws_iam_policy_document" "rds_fleet_peering" {
+  count = var.rds_provisioner_role_name != "" ? 1 : 0
+  statement {
+    sid       = "FleetPeeringRoutes"
+    effect    = "Allow"
+    actions   = ["ec2:CreateRoute", "ec2:DeleteRoute", "ec2:ReplaceRoute", "ec2:DescribeRouteTables"]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "rds_fleet_peering" {
+  count  = var.rds_provisioner_role_name != "" ? 1 : 0
+  name   = "fleet-peering"
+  role   = var.rds_provisioner_role_name
+  policy = data.aws_iam_policy_document.rds_fleet_peering[0].json
 }
