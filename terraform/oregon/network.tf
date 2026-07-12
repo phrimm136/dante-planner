@@ -27,11 +27,16 @@ resource "aws_subnet" "public" {
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
-  }
-  tags = merge(var.tags, { Name = "${var.name_prefix}-oregon-public" })
+  tags   = merge(var.tags, { Name = "${var.name_prefix}-oregon-public" })
+}
+
+# Standalone route (not an inline route{} block) so it coexists with the
+# aws_route.fleet_to_rds peering route on the same table — inline + standalone
+# routes on one route table conflict and clobber each other.
+resource "aws_route" "public_igw" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.this.id
 }
 
 resource "aws_route_table_association" "public" {
