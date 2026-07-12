@@ -34,6 +34,12 @@ kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -n argocd \
   -f https://raw.githubusercontent.com/argoproj/argo-cd/${argocd_version}/manifests/core-install.yaml
 
+# The overlay references no submodules (static/data is baked into the backend
+# image at build time, not delivered via GitOps). Disable submodule fetch so the
+# private SSH-only static submodule cannot fail manifest generation for a repo
+# ArgoCD otherwise reaches over public HTTPS.
+kubectl -n argocd set env deployment/argocd-repo-server ARGOCD_GIT_MODULES_ENABLED=false
+
 # The CP is the only node at bootstrap and carries the control-plane NoSchedule
 # taint (k3s system pods tolerate it; upstream ArgoCD does not). Pin ArgoCD to
 # the CP and tolerate the taint so it schedules here and stays here.
