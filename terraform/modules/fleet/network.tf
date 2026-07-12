@@ -106,21 +106,24 @@ resource "aws_vpc_security_group_ingress_rule" "ingress_https" {
   ip_protocol       = "tcp"
 }
 
-# Global Accelerator health-checks the ingress DIRECTLY on 443 from AWS's GA IP
-# ranges (not via Cloudflare), so its source must be allowlisted or every endpoint
-# reads unhealthy and GA routes nowhere. Uses the AWS-managed GA prefix list rather
-# than hardcoded CIDRs (AWS keeps it current). Gated on enable_global_accelerator
-# so a fleet with no GA (single-region default) has an unchanged SG surface.
-data "aws_ec2_managed_prefix_list" "global_accelerator" {
+# GA health-checks the ingress DIRECTLY on 443, and with client-IP preservation
+# those checks originate from Route 53's health-checker ranges (GA offloads health
+# checking to Route 53), NOT the GLOBALACCELERATOR anycast ranges — with client-IP
+# preservation the endpoint sees the real client IP (Cloudflare), so the GA
+# front-door ranges never reach the SG. AWS publishes these as the managed prefix
+# list com.amazonaws.<region>.route53-healthchecks (31 entries, fits the SG quota;
+# the 131 GLOBALACCELERATOR ranges would not). Gated on enable_global_accelerator
+# so the single-region default leaves the SG surface unchanged.
+data "aws_ec2_managed_prefix_list" "ga_health" {
   count = var.enable_global_accelerator ? 1 : 0
-  name  = "com.amazonaws.global.globalaccelerator"
+  name  = "com.amazonaws.${var.region}.route53-healthchecks"
 }
 
 resource "aws_vpc_security_group_ingress_rule" "ingress_ga_health" {
   count             = var.enable_global_accelerator ? 1 : 0
   security_group_id = aws_security_group.ingress.id
-  description       = "HTTPS health check from the Global Accelerator managed prefix list"
-  prefix_list_id    = data.aws_ec2_managed_prefix_list.global_accelerator[0].id
+  description       = "HTTPS health check from GA (Route 53 health-checker ranges)"
+  prefix_list_id    = data.aws_ec2_managed_prefix_list.ga_health[0].id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
