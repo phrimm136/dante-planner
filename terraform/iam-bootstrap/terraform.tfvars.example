@@ -14,3 +14,7 @@ trusted_admin_principal_arn = "arn:aws:iam::000000000000:user/CHANGE-ME"
 # create_github_oidc_provider = true   # set false if the account already has a GitHub OIDC provider
 # region              = "us-west-2"
 # name_prefix         = "danteplanner"  # MUST match terraform/oregon
+
+# The existing role that applies terraform/rds. Set to grant it the ec2 route
+# actions for the fleet<->RDS peering return route (reproducible, vs put-role-policy).
+# rds_provisioner_role_name = "terraform-rds"
