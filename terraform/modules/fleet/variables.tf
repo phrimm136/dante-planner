@@ -58,6 +58,23 @@ variable "ingress_allowed_cidrs" {
   type        = list(string)
 }
 
+variable "redis_cross_region_cidr" {
+  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort over VPC peering (Oregon passes Seoul's 10.30.0.0/16 so the Seoul replica can REPLICAOF and Seoul pods can write blacklist/rotation/tombstone state). Empty (default) creates NO rule — the auth Redis stays region-private and the single-region SG surface is unchanged. The auth Redis holds revocation state: scope this to the one peer fleet CIDR, never a broad range."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.redis_cross_region_cidr != "0.0.0.0/0"
+    error_message = "The auth Redis NodePort must never be open to 0.0.0.0/0; set the peer region's fleet CIDR only."
+  }
+}
+
+variable "redis_auth_nodeport" {
+  description = "NodePort exposing the auth Redis primary on the fleet nodes. MUST match the nodePort in deploy/overlays/oregon/redis-auth-nodeport.yaml."
+  type        = number
+  default     = 31637
+}
+
 # --- Instance shape ---------------------------------------------------------
 
 variable "instance_type" {

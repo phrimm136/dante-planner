@@ -40,6 +40,12 @@ variable "ingress_allowed_cidrs" {
   type        = list(string)
 }
 
+variable "redis_cross_region_cidr" {
+  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in terraform.tfvars when Seoul goes live. Never 0.0.0.0/0."
+  type        = string
+  default     = ""
+}
+
 # --- Instance shape ---------------------------------------------------------
 
 variable "instance_type" {

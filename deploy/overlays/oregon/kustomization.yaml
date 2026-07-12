@@ -5,6 +5,7 @@ namespace: danteplanner
 
 resources:
 - ../../base
+- redis-auth-nodeport.yaml
 
 # The CI arm64 workflow bumps only newTag via `kustomize edit set image` and
 # commits back (see .github/workflows/deploy-oregon.yml). The registry host

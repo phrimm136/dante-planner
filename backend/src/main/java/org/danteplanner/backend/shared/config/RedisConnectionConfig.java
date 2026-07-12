@@ -6,9 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
@@ -77,22 +79,37 @@ public class RedisConnectionConfig {
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(auth.getHost(), auth.getPort()));
+        return new LettuceConnectionFactory(standaloneConfiguration(auth));
     }
 
     @Bean
     public LettuceConnectionFactory rateLimitRedisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(rateLimit.getHost(), rateLimit.getPort()));
+        return new LettuceConnectionFactory(standaloneConfiguration(rateLimit));
     }
 
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sseLocal.getHost(), sseLocal.getPort()));
+        return new LettuceConnectionFactory(standaloneConfiguration(sseLocal));
     }
 
     @Bean
     public LettuceConnectionFactory authLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(authLocal.getHost(), authLocal.getPort()));
+        return new LettuceConnectionFactory(standaloneConfiguration(authLocal));
+    }
+
+    /**
+     * Maps an {@link Endpoint} to a {@link RedisStandaloneConfiguration}. An empty
+     * password means the endpoint runs without AUTH (single-region default); a
+     * non-empty one is sent on connect ({@code requirepass}-protected endpoints,
+     * e.g. the cross-region-exposed auth primary and its replicas).
+     */
+    private static RedisStandaloneConfiguration standaloneConfiguration(Endpoint endpoint) {
+        RedisStandaloneConfiguration configuration =
+                new RedisStandaloneConfiguration(endpoint.getHost(), endpoint.getPort());
+        if (StringUtils.hasText(endpoint.getPassword())) {
+            configuration.setPassword(RedisPassword.of(endpoint.getPassword()));
+        }
+        return configuration;
     }
 
     @Bean
@@ -142,5 +159,8 @@ public class RedisConnectionConfig {
 
         @Min(1)
         private int bucketTtlSeconds = 3600;
+
+        /** Empty = connect without AUTH; non-empty = the endpoint's requirepass value. */
+        private String password = "";
     }
 }

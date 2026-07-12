@@ -11,12 +11,17 @@
 # mechanism the ECR registry host uses. Until injected, Seoul redis-auth is a
 # standalone primary (safe: no REPLICAOF pointing at a dead host).
 #
-# OREGON-SIDE PREREQUISITE (consent-gated, security-sensitive, NOT auto-applied):
-# Oregon must expose redis-auth at a peering-reachable endpoint (a NodePort on the
-# data node) AND its cluster SG must admit Seoul's CIDR on that port. The auth
-# Redis holds revocation state, so opening it cross-region is a deliberate
-# security decision — author it explicitly with the SG scoped to Seoul's CIDR
-# only, never 0.0.0.0/0.
+# OREGON-SIDE PREREQUISITE: Oregon exposes redis-auth at a peering-reachable
+# endpoint (deploy/overlays/oregon/redis-auth-nodeport.yaml, nodePort 31637) and
+# its cluster SG admits ONLY Seoul's fleet CIDR on that port
+# (terraform/modules/fleet/network.tf, redis_cross_region_cidr — never
+# 0.0.0.0/0). The auth Redis holds revocation state, so the exposed primary
+# requires AUTH: this replica sends --masterauth to replicate from it and sets
+# its own --requirepass so the Seoul copy of that state is equally protected.
+# Both come from the same AUTH_REDIS_PASSWORD key (Secrets Manager replicates
+# the runtime-config bundle to Seoul). The password gate mirrors
+# base/redis-auth.yaml: env absent/empty = no AUTH (pre-provisioning fallback;
+# replication to a requirepass master will not sync until the key lands).
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -26,14 +31,26 @@ spec:
     spec:
       containers:
         - name: redis
-          args:
-            - --appendonly
-            - "yes"
-            - --appendfsync
-            - everysec
-            - --aof-use-rdb-preamble
-            - "yes"
-            - --replica-read-only
-            - "yes"
-            - --replicaof
-            - REPLICAOF_ENDPOINT_HOST REPLICAOF_ENDPOINT_PORT
+          command:
+            - sh
+            - -c
+            - |
+              if [ -n "$REDIS_AUTH_PASSWORD" ]; then
+                exec docker-entrypoint.sh redis-server \
+                  --appendonly yes \
+                  --appendfsync everysec \
+                  --aof-use-rdb-preamble yes \
+                  --replica-read-only yes \
+                  --replicaof REPLICAOF_ENDPOINT_HOST REPLICAOF_ENDPOINT_PORT \
+                  --protected-mode yes \
+                  --requirepass "$REDIS_AUTH_PASSWORD" \
+                  --masterauth "$REDIS_AUTH_PASSWORD"
+              else
+                exec docker-entrypoint.sh redis-server \
+                  --appendonly yes \
+                  --appendfsync everysec \
+                  --aof-use-rdb-preamble yes \
+                  --replica-read-only yes \
+                  --replicaof REPLICAOF_ENDPOINT_HOST REPLICAOF_ENDPOINT_PORT \
+                  --protected-mode no
+              fi

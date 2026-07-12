@@ -12,6 +12,7 @@ module "fleet" {
   availability_zones              = var.availability_zones
   public_subnet_cidrs             = var.public_subnet_cidrs
   ingress_allowed_cidrs           = var.ingress_allowed_cidrs
+  redis_cross_region_cidr         = var.redis_cross_region_cidr
   instance_type                   = var.instance_type
   ami_ssm_parameter               = var.ami_ssm_parameter
   ssh_key_name                    = var.ssh_key_name
