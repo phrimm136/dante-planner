@@ -10,11 +10,11 @@ resource "aws_instance" "ingress" {
   key_name               = var.ssh_key_name != "" ? var.ssh_key_name : null
 
   user_data = templatefile("${path.module}/user-data/agent.sh.tftpl", {
-    region      = var.region
-    token_param = aws_ssm_parameter.k3s_token.name
-    server_url  = "https://${aws_instance.cp.private_ip}:6443"
-    node_label  = "role=ingress"
-    set_nofile  = false
+    region                = var.region
+    token_param           = aws_ssm_parameter.k3s_token.name
+    server_url            = "https://${aws_instance.cp.private_ip}:6443"
+    node_label            = "role=ingress"
+    set_nofile            = false
     cred_provider_version = var.ecr_credential_provider_version
   })
 

@@ -74,4 +74,7 @@ regression from the eager sse-local listener), SseServiceTest 24/0/0 (unchanged)
 - verify: PASS after 1 round — verification.md Phase 10 (all 8 contract items MET; scoped suite 41 tests
   0 failures). Non-blocking note: no regression guard freezing the raw-frame absence of an `id:` line.
 - capture: SKIPPED per user (meme draft + sweep not run)
-- staged: see Pipeline/staged digest below
+- staged: 14 files, +583/-8 — prod: PlannerCommentSseService, RedisConnectionConfig, SseEventType,
+  application.properties (mod) + SseChannels, SseEnvelope, SsePublisher, SseRedisSubscriber,
+  SseSubscriberConfig (new); tests: SseFanoutIT, SsePublisherTest (new); docs: scenarios-phase-10.md,
+  verification.md, status.json. status.json → phase 10 done, currentPhase 10. Commit is the USER's.

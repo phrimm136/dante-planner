@@ -30,11 +30,11 @@ resource "aws_launch_template" "app" {
   }
 
   user_data = base64encode(templatefile("${path.module}/user-data/agent.sh.tftpl", {
-    region      = var.region
-    token_param = aws_ssm_parameter.k3s_token.name
-    server_url  = "https://${aws_instance.cp.private_ip}:6443"
-    node_label  = "role=app"
-    set_nofile  = true
+    region                = var.region
+    token_param           = aws_ssm_parameter.k3s_token.name
+    server_url            = "https://${aws_instance.cp.private_ip}:6443"
+    node_label            = "role=app"
+    set_nofile            = true
     cred_provider_version = var.ecr_credential_provider_version
   }))
 

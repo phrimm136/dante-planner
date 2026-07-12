@@ -33,7 +33,23 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      # Redis topology (034 multi-region). auth = durable store (blacklist,
+      # rotation, tombstones, SSE pub/sub); rate-limit = ephemeral buckets;
+      # sse-local = the pod's local subscribe target (= auth host single-region).
+      # Hosts default to the compose service names; override via env for a
+      # managed or multi-region endpoint.
+      AUTH_REDIS_HOST: ${AUTH_REDIS_HOST:-redis-auth}
+      AUTH_REDIS_PORT: ${AUTH_REDIS_PORT:-6379}
+      RATE_LIMIT_REDIS_HOST: ${RATE_LIMIT_REDIS_HOST:-redis-ratelimit}
+      RATE_LIMIT_REDIS_PORT: ${RATE_LIMIT_REDIS_PORT:-6379}
+      SSE_LOCAL_REDIS_HOST: ${SSE_LOCAL_REDIS_HOST:-redis-auth}
+      SSE_LOCAL_REDIS_PORT: ${SSE_LOCAL_REDIS_PORT:-6379}
       JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
+    depends_on:
+      redis-auth:
+        condition: service_healthy
+      redis-ratelimit:
+        condition: service_healthy
     networks:
       - danteplanner-network
     deploy:
@@ -91,11 +107,79 @@ services:
         awslogs-group: /ecs/danteplanner/nginx
         awslogs-create-group: "true"
 
+  # Durable auth store (034 mechanics section 1): AOF everysec + RDB preamble,
+  # noeviction. Also serves the single-region sse-local subscribe target.
+  redis-auth:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-redis:${IMAGE_TAG}
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: danteplanner-redis-auth
+    restart: unless-stopped
+    command: ["redis-server", "/etc/redis/redis-auth.conf"]
+    volumes:
+      - redis-auth-data:/data
+    networks:
+      - danteplanner-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/redis-auth
+        awslogs-create-group: "true"
+
+  # Per-region ephemeral rate-limit store: no persistence, memory-bounded (see
+  # redis-ephemeral.conf). Same image as redis-auth, different command/config.
+  redis-ratelimit:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-redis:${IMAGE_TAG}
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: danteplanner-redis-ratelimit
+    restart: unless-stopped
+    command: ["redis-server", "/etc/redis/redis-ephemeral.conf"]
+    networks:
+      - danteplanner-network
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/redis-ratelimit
+        awslogs-create-group: "true"
+
 # Not mounted by any service — retained as the only copy of the pre-RDS prod
 # data (the rollback source). Do NOT `docker compose down -v` or prune it; see
 # docs/tasks/030-rds-migration/runbook.md (Zone 4) for the decommission gate.
 volumes:
   mysql-data:
+    driver: local
+  # Durable auth Redis AOF/RDB. In prod it rebuilds from replication; losing it
+  # locally just clears blacklist/rotation/tombstone state (fail-open by design).
+  redis-auth-data:
     driver: local
 
 networks:

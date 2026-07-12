@@ -40,8 +40,8 @@ Tests live in `__tests__/` per FE convention. No Gradle / ArchUnit here.
 - burndown close (my independent run): `yarn --cwd frontend vitest run src/pages/planner src/shared/comment src/shared/sse src/lib` → Test Files 58 passed (58), Tests 735 passed | 1 skipped (736), EXIT=0. tsc -b EXIT=0.
 - refactor: done (useAppSse.ts — extracted `upsertById` shared by handlePlannerUpdate+handlePublished; single-parse handlePublished). Suite green (599 passed sub-run + 16 net), test file byte-unchanged (md5 match), tsc 0. Benign divergence: malformed-JSON second-log level changed (untested path).
 - verify: PASS after 2 rounds — verification.md Phase 11 (round 1 PARTIAL on mech §4 "7→patches"; reconciled mechanics.md §4 to record the bounded causal-stack carve-out per requirements L50/L88 + pagination/authoritative-state correctness; round 2 all 6 rows MET).
-- capture: SKIPPED per user instruction
-- staged: see Pipeline/staged below
+- capture: SKIPPED per user instruction (meme draft/sweep not run)
+- staged: 18 files, +624/-49 (9 prod: api.ts, constants.ts, queryClient.ts, useAppSse.ts, usePlannerSave.ts, usePlannerCommentsSse.ts, useSseEngine.ts, sse/index.ts, SseEnvelopeSchemas.ts; 6 tests; ledger + verification.md + status.json). NOT staged (flagged for user, separate commits): (a) mechanics.md — my §4 reconciliation rides alongside UNRELATED pre-existing spec edits (RDS/GTID §5 caveats), so commit mechanics.md separately as a spec-doc change; (b) static submodule — errors.authUnavailable locale key in static/i18n/EN/common.json needs its own submodule commit + pointer bump.
 
 ## Strain reports (for refactor leg)
 - useAppSse handlePlannerUpdate + handlePublished BOTH do the same "replace-or-insert into list cache by id" — DRY extraction candidate.

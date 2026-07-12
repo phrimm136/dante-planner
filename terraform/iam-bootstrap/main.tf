@@ -250,7 +250,7 @@ data "aws_iam_policy_document" "rds_fleet_peering" {
   statement {
     sid       = "FleetPeeringRoutes"
     effect    = "Allow"
-    actions   = ["ec2:CreateRoute", "ec2:DeleteRoute", "ec2:ReplaceRoute", "ec2:DescribeRouteTables"]
+    actions   = ["ec2:CreateRoute", "ec2:DeleteRoute", "ec2:ReplaceRoute", "ec2:DescribeRouteTables", "ec2:ModifySecurityGroupRules", "ec2:AuthorizeSecurityGroupIngress", "ec2:RevokeSecurityGroupIngress", "ec2:DescribeSecurityGroupRules", "ec2:UpdateSecurityGroupRuleDescriptionsIngress"]
     resources = ["*"]
   }
 }
