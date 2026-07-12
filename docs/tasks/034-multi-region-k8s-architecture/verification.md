@@ -708,3 +708,69 @@ is the portfolio write-up `docs/portfolio/pre-seoul-gates.md` recording three ga
 - `reindex` and `importPlanners` unbatched N-insert paths are real write-path violations surfaced by
   Gate 2; recorded for a follow-up hardening phase (single fix: `hibernate.jdbc.batch_size` +
   `order_inserts`), not fixed here (this is an audit/docs phase, no code).
+
+## Reliability Hardening (ad-hoc — phase 4-11 review remediation) — PASS
+
+Not a numbered plan phase (status.json untouched). Three verified reliability findings from the phase
+4-11 review, each fixed TDD (test opens RED, closes GREEN), backend suite kept green. Ledger:
+`scenarios-hardening-reliability.md`.
+
+### Suite (independent confirmation run, `backend/gradlew ... test`)
+`BUILD SUCCESSFUL in 5m 54s`, exit 0, sum_failures=0 across all emitted results.
+- `TombstoneRollbackIT` — tests=1 failures=0 errors=0
+- `DegradationIT` — tests=4 failures=0 errors=0 (F2 case + INV5 + fail-open (a)/(b))
+- `SseFanoutIT` — tests=4 failures=0 errors=0 (F3 planner write-path case + 3 publisher-direct)
+- `PlannerCommandServiceTest` — tests=31 failures=0 errors=0 (regression)
+- `CommentServiceTest` — tests=17 failures=0 errors=0 (regression)
+- `PlannerCommentSseServiceTest` — tests=12 failures=0 errors=0 (regression)
+- `TestNamingConventionTest` — tests=1 failures=0 errors=0 (ArchUnit method-name ratchet; new tests conform)
+
+### F1 — tombstone written pre-commit false-404s a live entity on rollback — UNMET→MET
+- Was: `PlannerCommandService.deletePlanner` wrote the `del:planner:<id>` tombstone to Redis inside the
+  `@Transactional` body, before commit. A post-write rollback reverted the soft-delete (entity stays
+  live) but the tombstone persisted for up to 1h, 404-ing a live entity (mechanics §5).
+- Fix: the tombstone write moved into a `TransactionSynchronization.afterCommit()` hook (guarded by
+  `isSynchronizationActive()` with a direct-write else-branch for the non-transactional unit path), so
+  it fires only on commit — still synchronous, pre-HTTP-response. PrimaryReCheck / read-path tombstone
+  check left unchanged (correct per its javadoc).
+- Proof: RED `TombstoneRollbackIT:80` — tombstone expected false but was true (live-check :76 passed
+  first); GREEN after the fix. Real service path driven inside a `TransactionTemplate` forced to roll back.
+
+### F2 — rate-limit Redis outage returns 500+Sentry instead of a typed 503 — UNMET→MET
+- Was: the rate limiter uses a RAW Lettuce client (`RedisConnectionConfig` — the only raw
+  `io.lettuce.core` user); its failures (`io.lettuce.core.RedisException` family) escaped
+  `GlobalExceptionHandler` (which mapped only Spring `RedisConnectionFailureException`) and fell through
+  to `handleUnexpected` → 500 INTERNAL_ERROR + Sentry storm (mechanics §7).
+- Fix: one `@ExceptionHandler(io.lettuce.core.RedisException.class)` in `GlobalExceptionHandler` → 503
+  `RATE_LIMIT_TEMPORARILY_UNAVAILABLE`, `Retry-After: 10`, no Sentry — mirroring the DB/auth-Redis
+  handlers. `JwtAuthenticationFilter` deliberately NOT changed: it invokes no rate-limit check and its
+  only Redis access is Spring Data (`RedisConnectionFailureException`, already mapped) — a filter catch
+  would be unreachable dead code. Mechanics §7's "filter too" intent (auth-Redis Lettuce failures) is
+  already satisfied by the existing `writeAuthUnavailable`.
+- Proof: RED `DegradationIT:395` — status expected 503 but was 500 (body INTERNAL_ERROR); escaping
+  exception proven `io.lettuce.core.RedisCommandTimeoutException` (raw, unwrapped) via a Toxiproxy cut on
+  a new rate-limit-Redis proxy route; GREEN after the fix (503 + typed code). No-Sentry established
+  structurally (typed 503 never reaches the handleUnexpected/Sentry path).
+
+### F3 — cross-pod SSE fan-out dead: SsePublisher had no production caller — PARTIAL (planner MET; comment DEFERRED)
+- Was: `SsePublisher` referenced by NO production file. Planner writes called in-process
+  `sseService.notifyPlannerUpdate` → single-pod delivery only (mechanics §4 "true fan-out" unmet). The
+  prior `SseFanoutIT` passed while unwired because it called the publisher directly.
+- Fix (planner, MET): `PlannerSyncEventService.notifyPlannerUpdate`'s body now routes through
+  `ssePublisher.publishUserEvent(...)` (via a new additive `SseEventType.fromValue`), keeping the method
+  signature so all `PlannerCommandServiceTest` verifications stay green. A real `updatePlanner` now
+  publishes to Redis and is delivered by the local `SseRedisSubscriber` — the acceptance driven by a
+  REAL write, not a direct publisher call.
+- Proof: RED `SseFanoutIT` planner case — 0 invocations of the subscriber-side 3-arg `sendToUser(...,
+  "updated", envelope)` (only the in-process 4-arg "sync:planner" fired); GREEN after the fix.
+- Comment path (DEFERRED, documented): `PlannerCommentSseService`'s cross-pod publish is ALSO dead
+  (`SsePublisher.publishCommentEvent` unwired; `CommentService` uses in-process `broadcastCommentAdded`).
+  Same F3 gap. NOT fixed here because both green-to-green routes break an existing test
+  (`CommentServiceTest`'s manual 7-arg constructor / 3 `PlannerCommentSseServiceTest` characterization
+  tests), which tdd-green may not edit. Impact is notification-latency (backstopped by client
+  reconnect/reconciliation per §4), not correctness, and single-region is a non-issue. Recommended as a
+  follow-up scenario (F3b) that deliberately updates those tests before multi-region cutover.
+
+### Notes
+- Refactor leg: nothing warranted (surgical, disjoint changes; only minor DRY strain noted in the ledger).
+- meme capture: SKIPPED per task instruction.
