@@ -30,11 +30,13 @@ resource "aws_secretsmanager_secret" "origin_tls" {
 }
 
 # origin-client-ca is the Cloudflare Authenticated Origin Pull CA — PUBLIC (same
-# for every customer), not secret. So unlike the key above it is safe to codify by
-# value: created here from a plain var and replicated. Download the PEM once from
-# Cloudflare's docs. Referenced by the TLSOption (VerifyClientCertIfGiven).
+# for every customer), not secret. Gated on the var: mTLS on Traefik is DEFERRED
+# (needs traefik.io CRDs), so this secret is created only once you supply the CA
+# for that follow-up. Empty default (the norm today) → count=0, nothing created,
+# so `terraform/secrets apply` does not demand a CA you do not need yet.
 resource "aws_secretsmanager_secret" "origin_client_ca" {
-  name = "danteplanner/origin-client-ca"
+  count = var.origin_client_ca == "" ? 0 : 1
+  name  = "danteplanner/origin-client-ca"
   replica {
     region = var.replica_region
   }
@@ -44,11 +46,13 @@ resource "aws_secretsmanager_secret" "origin_client_ca" {
 }
 
 resource "aws_secretsmanager_secret_version" "origin_client_ca" {
-  secret_id     = aws_secretsmanager_secret.origin_client_ca.id
+  count         = var.origin_client_ca == "" ? 0 : 1
+  secret_id     = aws_secretsmanager_secret.origin_client_ca[0].id
   secret_string = jsonencode({ tls_ca = var.origin_client_ca })
 }
 
 variable "origin_client_ca" {
-  description = "Cloudflare Authenticated Origin Pull CA (PEM). PUBLIC (not secret) — safe in tfvars. Download once from Cloudflare's docs."
+  description = "Cloudflare Authenticated Origin Pull CA (PEM). PUBLIC (not secret) — safe in tfvars. Empty (default) = not created (mTLS deferred). Set only when restoring the Traefik TLSOption."
   type        = string
+  default     = ""
 }
