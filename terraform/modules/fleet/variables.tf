@@ -64,6 +64,12 @@ variable "ingress_allowed_cidrs" {
   type        = list(string)
 }
 
+variable "enable_global_accelerator" {
+  description = "When true, allowlist the AWS-managed Global Accelerator prefix list on the ingress SG (443) so GA's direct health checks reach /healthz-local. Set alongside applying terraform/global-accelerator; default false keeps the single-region SG surface unchanged."
+  type        = bool
+  default     = false
+}
+
 variable "redis_cross_region_cidr" {
   description = "Peer-region fleet CIDR admitted to the auth Redis NodePort over VPC peering (Oregon passes Seoul's 10.30.0.0/16 so the Seoul replica can REPLICAOF and Seoul pods can write blacklist/rotation/tombstone state). Empty (default) creates NO rule — the auth Redis stays region-private and the single-region SG surface is unchanged. The auth Redis holds revocation state: scope this to the one peer fleet CIDR, never a broad range."
   type        = string

@@ -180,6 +180,12 @@ variable "ingress_eip_allocation_id" {
   default     = ""
 }
 
+variable "enable_global_accelerator" {
+  description = "Allowlist the GA managed prefix list on the ingress SG (443) for GA direct health checks. Set true when applying terraform/global-accelerator. Default false = unchanged SG."
+  type        = bool
+  default     = false
+}
+
 variable "seoul_region" {
   description = "Second region (ap-northeast-2) that ECR replicates the backend image to, so Seoul app nodes pull a local copy. Root-only — the reusable module never mirrors back."
   type        = string

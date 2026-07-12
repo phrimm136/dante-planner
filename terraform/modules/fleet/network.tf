@@ -99,8 +99,28 @@ resource "aws_security_group" "ingress" {
 resource "aws_vpc_security_group_ingress_rule" "ingress_https" {
   for_each          = toset(var.ingress_allowed_cidrs)
   security_group_id = aws_security_group.ingress.id
-  description       = "HTTPS from Cloudflare + GA health-check ranges"
+  description       = "HTTPS from Cloudflare edge ranges"
   cidr_ipv4         = each.value
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+}
+
+# Global Accelerator health-checks the ingress DIRECTLY on 443 from AWS's GA IP
+# ranges (not via Cloudflare), so its source must be allowlisted or every endpoint
+# reads unhealthy and GA routes nowhere. Uses the AWS-managed GA prefix list rather
+# than hardcoded CIDRs (AWS keeps it current). Gated on enable_global_accelerator
+# so a fleet with no GA (single-region default) has an unchanged SG surface.
+data "aws_ec2_managed_prefix_list" "global_accelerator" {
+  count = var.enable_global_accelerator ? 1 : 0
+  name  = "com.amazonaws.global.globalaccelerator"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "ingress_ga_health" {
+  count             = var.enable_global_accelerator ? 1 : 0
+  security_group_id = aws_security_group.ingress.id
+  description       = "HTTPS health check from the Global Accelerator managed prefix list"
+  prefix_list_id    = data.aws_ec2_managed_prefix_list.global_accelerator[0].id
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"

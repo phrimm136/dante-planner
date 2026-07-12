@@ -13,6 +13,7 @@ module "fleet" {
   public_subnet_cidrs             = var.public_subnet_cidrs
   ingress_allowed_cidrs           = var.ingress_allowed_cidrs
   redis_cross_region_cidr         = var.redis_cross_region_cidr
+  enable_global_accelerator       = var.enable_global_accelerator
   instance_type                   = var.instance_type
   ami_ssm_parameter               = var.ami_ssm_parameter
   ssh_key_name                    = var.ssh_key_name

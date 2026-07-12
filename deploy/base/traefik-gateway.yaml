@@ -64,3 +64,25 @@ spec:
       backendRefs:
         - name: backend
           port: 8080
+---
+# Traefik CRD (applied at cluster sync; not Gateway API, so kustomize does not
+# schema-validate it). Client-cert policy for the 443 listener — Traefik applies
+# the TLSOption named `default` in the Gateway's namespace to its listeners.
+#
+# VerifyClientCertIfGiven, NOT RequireAndVerifyClientCert: Global Accelerator
+# health-checks /healthz-local DIRECTLY and cannot present Cloudflare's origin-pull
+# client cert, so a hard requirement would fail every health check and blackhole
+# the region. Verify-if-given lets the certless GA prober (SG-restricted to the GA
+# managed prefix list) complete the TLS handshake and get 200, while real
+# Cloudflare traffic still presents and is verified. The ingress SG (Cloudflare +
+# GA ranges only) is the compensating hard gate: no arbitrary certless client can
+# reach 443. Populate origin-client-ca with Cloudflare's origin-pull CA.
+apiVersion: traefik.io/v1alpha1
+kind: TLSOption
+metadata:
+  name: default
+spec:
+  clientAuth:
+    secretNames:
+      - origin-client-ca
+    clientAuthType: VerifyClientCertIfGiven
