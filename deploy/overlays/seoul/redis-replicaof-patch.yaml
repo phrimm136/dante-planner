@@ -1,0 +1,39 @@
+# Seoul redis-auth = read-only REPLICAOF the Oregon PRIMARY (mechanics #5). It
+# pulls blacklist/rotation/tombstone state from Oregon over the Seoul<->Oregon
+# peering and serves Seoul's read-local traffic; it REFUSES local writes
+# (replica-read-only), so a Seoul write correctly routes to the primary via
+# REDIS_AUTH_HOST instead of silently landing on a stale replica.
+#
+# REPLICAOF_ENDPOINT is the Oregon primary redis reachable over peering. Same
+# injected value as the ConfigMap's REDIS_AUTH_HOST (both point at the Oregon
+# primary). It CANNOT be committed (a dynamic private IP), so the Seoul CP's
+# ArgoCD Application patches it at sync from terraform/seoul state — the same
+# mechanism the ECR registry host uses. Until injected, Seoul redis-auth is a
+# standalone primary (safe: no REPLICAOF pointing at a dead host).
+#
+# OREGON-SIDE PREREQUISITE (consent-gated, security-sensitive, NOT auto-applied):
+# Oregon must expose redis-auth at a peering-reachable endpoint (a NodePort on the
+# data node) AND its cluster SG must admit Seoul's CIDR on that port. The auth
+# Redis holds revocation state, so opening it cross-region is a deliberate
+# security decision — author it explicitly with the SG scoped to Seoul's CIDR
+# only, never 0.0.0.0/0.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-auth
+spec:
+  template:
+    spec:
+      containers:
+        - name: redis
+          args:
+            - --appendonly
+            - "yes"
+            - --appendfsync
+            - everysec
+            - --aof-use-rdb-preamble
+            - "yes"
+            - --replica-read-only
+            - "yes"
+            - --replicaof
+            - REPLICAOF_ENDPOINT_HOST REPLICAOF_ENDPOINT_PORT

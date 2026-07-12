@@ -2,6 +2,12 @@
 # differences are set here (the "Seoul = tfvars" goal). Shared operational
 # defaults (instance_type, pinned versions, ASG sizing) fall through to the module.
 
+variable "name_prefix" {
+  description = "Prefix for resource names/identifiers (matches the fleet)."
+  type        = string
+  default     = "danteplanner"
+}
+
 variable "region" {
   description = "Seoul region."
   type        = string

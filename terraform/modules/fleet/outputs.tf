@@ -8,6 +8,16 @@ output "public_subnet_ids" {
   value       = aws_subnet.public[*].id
 }
 
+output "public_route_table_id" {
+  description = "Public route table id. A cross-region caller (Seoul) adds an aws_route here toward the peer (Oregon) CIDR for the Redis write path."
+  value       = aws_route_table.public.id
+}
+
+output "vpc_cidr" {
+  description = "This fleet's VPC CIDR (for a peer's return route)."
+  value       = aws_vpc.this.cidr_block
+}
+
 output "cluster_security_group_id" {
   description = "Cluster SG carried by every fleet node. Add this to the RDS SG allowlist (in terraform/rds's inputs) so app/data nodes can reach RDS on 3306 — this stack does NOT edit the RDS SG."
   value       = aws_security_group.cluster.id
