@@ -16,6 +16,7 @@ resource "aws_instance" "data" {
     server_url  = "https://${aws_instance.cp.private_ip}:6443"
     node_label  = "role=data"
     set_nofile  = false
+    cred_provider_version = var.ecr_credential_provider_version
   })
 
   metadata_options {

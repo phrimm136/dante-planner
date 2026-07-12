@@ -17,5 +17,26 @@ LimitNOFILE=65536
 UNIT
 %{ endif ~}
 
+# Kubelet ECR credential provider: exchange the node instance profile for a
+# short-lived ECR token on pull, so containerd can pull the private backend image
+# from a private repo without a static imagePullSecret. arm64 fleet (t4g).
+CPV=/var/lib/rancher/credentialprovider
+mkdir -p "$CPV/bin"
+curl -sfL -o "$CPV/bin/ecr-credential-provider" \
+  "https://artifacts.k8s.io/binaries/cloud-provider-aws/${cred_provider_version}/linux/arm64/ecr-credential-provider-linux-arm64"
+chmod +x "$CPV/bin/ecr-credential-provider"
+cat > "$CPV/config.yaml" <<'CPCFG'
+apiVersion: kubelet.config.k8s.io/v1
+kind: CredentialProviderConfig
+providers:
+  - name: ecr-credential-provider
+    matchImages:
+      - "*.dkr.ecr.*.amazonaws.com"
+    defaultCacheDuration: "12h"
+    apiVersion: credentialprovider.kubelet.k8s.io/v1
+CPCFG
+
 curl -sfL https://get.k3s.io | K3S_TOKEN="$TOKEN" \
-  INSTALL_K3S_EXEC="agent --server ${server_url} --node-label ${node_label}" sh -
+  INSTALL_K3S_EXEC="agent --server ${server_url} --node-label ${node_label} \
+    --kubelet-arg=image-credential-provider-config=$CPV/config.yaml \
+    --kubelet-arg=image-credential-provider-bin-dir=$CPV/bin" sh -

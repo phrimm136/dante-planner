@@ -35,6 +35,7 @@ resource "aws_launch_template" "app" {
     server_url  = "https://${aws_instance.cp.private_ip}:6443"
     node_label  = "role=app"
     set_nofile  = true
+    cred_provider_version = var.ecr_credential_provider_version
   }))
 
   tag_specifications {

@@ -120,6 +120,12 @@ variable "external_secrets_chart_version" {
   default     = "0.10.4"
 }
 
+variable "ecr_credential_provider_version" {
+  description = "Pinned cloud-provider-aws ecr-credential-provider release. The kubelet on app nodes calls this binary to exchange the node instance profile for a short-lived ECR token, so containerd can pull the private backend image (no imagePullSecret)."
+  type        = string
+  default     = "v1.31.0"
+}
+
 # --- Secrets (External Secrets Operator source) -----------------------------
 
 variable "rs256_private_key_secret_name" {

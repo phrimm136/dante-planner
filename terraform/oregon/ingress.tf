@@ -15,6 +15,7 @@ resource "aws_instance" "ingress" {
     server_url  = "https://${aws_instance.cp.private_ip}:6443"
     node_label  = "role=ingress"
     set_nofile  = false
+    cred_provider_version = var.ecr_credential_provider_version
   })
 
   metadata_options {
