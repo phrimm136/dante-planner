@@ -33,7 +33,7 @@ resource "aws_globalaccelerator_endpoint_group" "oregon" {
   threshold_count               = 3
 
   endpoint_configuration {
-    endpoint_id                    = var.oregon_ingress_instance_id
+    endpoint_id                    = data.terraform_remote_state.oregon.outputs.ingress_instance_id
     weight                         = 128
     client_ip_preservation_enabled = true
   }

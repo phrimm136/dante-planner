@@ -22,13 +22,12 @@ variable "seoul_region" {
   default     = "ap-northeast-2"
 }
 
-variable "oregon_ingress_instance_id" {
-  description = "Oregon ingress EC2 instance id (terraform/oregon output ingress_instance_id). Set in terraform.tfvars."
-  type        = string
-}
-
+# oregon_ingress_instance_id is auto-resolved from the Oregon stack's state
+# (remote-state.tf), not a tfvars hand-off. Seoul stays an optional input because
+# its state may not exist yet (single-region-first); reading a not-yet-created
+# remote state would error at plan.
 variable "seoul_ingress_instance_id" {
-  description = "Seoul ingress EC2 instance id (terraform/seoul — expose ingress_instance_id). Empty until Seoul is provisioned; GA runs single-region until then."
+  description = "Seoul ingress EC2 instance id (terraform/seoul output ingress_instance_id). Empty until Seoul is provisioned; GA runs single-region until then. The one remaining hand-off, unavoidable because Seoul's state need not exist when GA is first applied."
   type        = string
   default     = ""
 }

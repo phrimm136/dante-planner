@@ -8,6 +8,21 @@ output "public_subnet_ids" {
   value       = module.fleet.public_subnet_ids
 }
 
+output "public_route_table_id" {
+  description = "Oregon public route table id — read by terraform/seoul (remote state) for the Seoul→Oregon return route."
+  value       = module.fleet.public_route_table_id
+}
+
+output "vpc_cidr" {
+  description = "Oregon fleet VPC CIDR — read by terraform/seoul (remote state) for the Seoul→Oregon route destination."
+  value       = module.fleet.vpc_cidr
+}
+
+output "ingress_instance_id" {
+  description = "Oregon ingress EC2 instance id — read by terraform/global-accelerator (remote state) as the Oregon GA endpoint."
+  value       = module.fleet.ingress_instance_id
+}
+
 output "cluster_security_group_id" {
   description = "Cluster SG carried by every fleet node. Add this to the RDS SG allowlist (in terraform/rds's inputs) so app/data nodes can reach RDS on 3306 — this stack does NOT edit the RDS SG."
   value       = module.fleet.cluster_security_group_id

@@ -6,10 +6,8 @@
 # a config gap. Seoul serves READS from here; WRITES go cross-region to the
 # primary (no autonomous promotion — requirements/mechanics §0 FORBIDDEN).
 
-variable "primary_rds_arn" {
-  description = "ARN of the Oregon primary aws_db_instance (cross-region replica source). Cross-region replicas require the full ARN, not the identifier. Get it from the terraform/rds stack; set in terraform.tfvars."
-  type        = string
-}
+# primary_rds_arn is auto-resolved from the RDS stack's state (remote-state.tf),
+# not a tfvars hand-off.
 
 variable "rds_param_group_family" {
   description = "DB parameter group family for the replica; must match the primary's engine family."
@@ -77,7 +75,7 @@ resource "aws_db_parameter_group" "replica" {
 
 resource "aws_db_instance" "replica" {
   identifier          = "${var.name_prefix}-mysql-seoul"
-  replicate_source_db = var.primary_rds_arn
+  replicate_source_db = data.terraform_remote_state.rds.outputs.rds_arn
   instance_class      = var.rds_instance_class
 
   # Single-AZ during seed; Multi-AZ is a post-cutover action, not a seed default.

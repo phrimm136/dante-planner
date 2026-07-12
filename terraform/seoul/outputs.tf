@@ -13,6 +13,11 @@ output "cp_instance_id" {
   value       = module.fleet.cp_instance_id
 }
 
+output "ingress_instance_id" {
+  description = "Seoul ingress EC2 instance id — feed into terraform/global-accelerator seoul_ingress_instance_id to add the Seoul GA endpoint group."
+  value       = module.fleet.ingress_instance_id
+}
+
 output "kubeconfig_ssm_parameter" {
   description = "Seoul admin kubeconfig SSM parameter (in ap-northeast-2)."
   value       = module.fleet.kubeconfig_ssm_parameter

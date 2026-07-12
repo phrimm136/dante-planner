@@ -30,16 +30,32 @@ single EC2 :443 ───┐              Oregon ingress EIP :443 (Traefik)
 You cannot cut over to a cluster you cannot inspect. Get `kubectl` + ArgoCD access first.
 
 ### A1. kubeconfig
-The k3s server config lives on the CP node. Pull it and rewrite the API host to the CP private IP
-(reachable from a bastion / SSM session inside the VPC):
+The CP publishes its admin kubeconfig to SSM at bootstrap (server rewritten to the CP private IP).
+Fetch it:
 
 ```bash
-CP_IP=$(terraform -chdir=terraform/oregon output -raw cp_private_ip)
-# via SSM (no public SSH on the CP):
-aws ssm start-session --target <cp-instance-id> --region us-west-2
-sudo cat /etc/rancher/k3s/k3s.yaml   # copy locally, replace 127.0.0.1 with $CP_IP
-kubectl get nodes -o wide            # expect: cp, ingress, data, >=1 app node — all Ready
+scripts/ops/oregon-verify.sh --kubeconfig   # → ~/.kube/dante-oregon
+export KUBECONFIG=~/.kube/dante-oregon
+kubectl get nodes -o wide                    # expect cp, ingress, data, >=1 app — all Ready
 ```
+
+> **Activation caveat (important).** The SSM-publish + `--tls-san` are in the CP `user_data`.
+> `aws_instance` does NOT re-run cloud-init on an in-place `user_data` change
+> (`user_data_replace_on_change` defaults false), so on an **already-running** CP the SSM parameter
+> still holds the seed value `pending-cp-bootstrap` until the CP is next rebuilt. It self-activates on
+> any CP replacement (or a full rebuild). To activate on the current CP without replacing it, run the
+> publish once over SSM:
+> ```bash
+> CP_ID=$(terraform -chdir=terraform/oregon output -raw cp_instance_id)
+> PARAM=$(terraform -chdir=terraform/oregon output -raw kubeconfig_ssm_parameter)
+> aws ssm send-command --region us-west-2 --instance-ids "$CP_ID" \
+>   --document-name AWS-RunShellScript --parameters commands='[
+>     "IP=$(hostname -I | awk \"{print \\$1}\")",
+>     "aws ssm put-parameter --region us-west-2 --name '"$PARAM"' --type SecureString --overwrite --value \"$(sed s#127.0.0.1#$IP# /etc/rancher/k3s/k3s.yaml)\""
+>   ]'
+> ```
+> Until then, the manual fallback is `aws ssm start-session --target $CP_ID` then
+> `sudo cat /etc/rancher/k3s/k3s.yaml` (rewrite `127.0.0.1` → the CP private IP locally).
 
 ### A2. Is the app actually serving?
 ```bash
@@ -139,6 +155,12 @@ curl -sv $BASE/actuator/health 2>&1 | grep -iE "SSL|TLS|cf-ray|200"  # mTLS hand
   dashboards, RDS connections climbing on the fleet SG.
 
 Only proceed when every check is green on `api-cluster`.
+
+> **Apply-time gate.** The module refactor is safe because of its `moved {}` blocks, but the
+> zero-destroy claim was proven with `plan -refresh=false` against local state. Before any real
+> apply, run a **refresh-on** `terraform plan` and read it — that is the true apply-time guarantee;
+> confirm `0 to destroy` and that the only changes are the ones you intend (Part A kubeconfig param,
+> ECR replication, CP user-data).
 
 ### Step 3 — Cut over
 Two ways to move prod `api` onto the fleet. **Recommended: DNS repoint** (controllable, reversible in

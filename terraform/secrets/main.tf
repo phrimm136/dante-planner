@@ -8,6 +8,12 @@
 # untouched here, and AWS replicates every version to the replica region on its
 # own. Seoul's app-node IAM must grant secretsmanager:GetSecretValue on the
 # region-specific replica ARN (handled in the Seoul stack, chunk 3).
+#
+# REVIEW THE IMPORT PLAN BEFORE APPLYING. This config declares only name+replica;
+# if a real secret carries a custom kms_key_id, rotation, or recovery window, the
+# refresh-on plan will try to null those (an in-place change prevent_destroy does
+# NOT guard). If the plan shows any attribute change beyond adding the replica,
+# add a matching attribute or lifecycle{ ignore_changes = [...] } and re-plan.
 import {
   for_each = var.secret_names
   to       = aws_secretsmanager_secret.replicated[each.value]

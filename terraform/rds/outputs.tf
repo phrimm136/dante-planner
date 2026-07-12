@@ -3,6 +3,11 @@ output "rds_endpoint" {
   value       = aws_db_instance.this.address
 }
 
+output "rds_arn" {
+  description = "Primary RDS instance ARN — read by terraform/seoul (remote state) as the cross-region read-replica source (replicas require the full ARN)."
+  value       = aws_db_instance.this.arn
+}
+
 output "ca_cert_identifier" {
   description = "CA bundle id the RDS instance presents. Download the matching bundle from https://truststore.pki.rds.amazonaws.com/<region>/<region>-bundle.pem for the backend's VERIFY_CA trust store."
   value       = aws_db_instance.this.ca_cert_identifier
