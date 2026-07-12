@@ -67,6 +67,7 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
 # App-of-apps: apply the root Application, which points ArgoCD at
 # deploy/overlays/oregon so the cluster is GitOps-managed from here on.
 git clone --depth 1 --branch ${gitops_revision} ${gitops_repo_url} /opt/gitops
+kubectl apply -f /opt/gitops/deploy/argocd/project.yaml
 kubectl apply -f /opt/gitops/deploy/argocd/root-app.yaml
 
 # Inject the ECR registry host (account id) as a kustomize image override at
