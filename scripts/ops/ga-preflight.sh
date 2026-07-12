@@ -43,12 +43,20 @@ if [ -n "${INGRESS_ID:-}" ]; then
     fi
 fi
 
-# 3. /healthz-local returns 200 (checked on the CP via SSM, no VPN needed).
+# 3. /healthz-local returns 200 — probe the INGRESS node's 443 (where Traefik
+# serves it), from the CP via SSM. The CP itself runs no Traefik, so it discovers
+# the role=ingress node's internal IP with kubectl and curls that (certless, like
+# GA's own check).
 CP_ID=$(terraform -chdir="$TF_OREGON" output -raw cp_instance_id 2>/dev/null || echo "")
 if [ -n "$CP_ID" ]; then
+    remote=$(cat <<'REMOTE'
+IP=$(k3s kubectl get node -l role=ingress -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null)
+if [ -z "$IP" ]; then echo NOINGRESS; else curl -sk -o /dev/null -w '%{http_code}' --max-time 5 "https://$IP/healthz-local"; fi
+REMOTE
+)
+    params=$(jq -n --arg s "$remote" '{commands: [$s]}')
     HZ=$(aws ssm send-command --region "$AWS_REGION" --instance-ids "$CP_ID" \
-        --document-name AWS-RunShellScript \
-        --parameters 'commands=["curl -sk -o /dev/null -w %{http_code} https://localhost/healthz-local || echo 000"]' \
+        --document-name AWS-RunShellScript --parameters "$params" \
         --query 'Command.CommandId' --output text 2>/dev/null || echo "")
     if [ -n "$HZ" ]; then
         aws ssm wait command-executed --region "$AWS_REGION" --command-id "$HZ" --instance-id "$CP_ID" 2>/dev/null || true
@@ -59,9 +67,13 @@ if [ -n "$CP_ID" ]; then
             200)
                 log_info "/healthz-local → 200 (Spring readiness green)"
                 ;;
-            ""|000)
-                # No TLS response: handshake rejected (mTLS misconfigured) or Traefik
-                # not listening — structural, and exactly what would fail GA's check.
+            NOINGRESS)
+                log_error "no role=ingress node found — the ingress node is not joined/Ready"
+                fatal=1
+                ;;
+            ""|000|000000)
+                # No TLS response: handshake rejected, origin-tls cert missing, or
+                # Traefik not listening — structural, and exactly what fails GA's check.
                 log_error "/healthz-local unreachable (empty/000) — TLS handshake rejected or Traefik down; GA's health check would fail. Fix before applying GA"
                 fatal=1
                 ;;
