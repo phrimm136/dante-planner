@@ -21,6 +21,14 @@ variable "rds_instance_class" {
   default     = "db.t4g.micro"
 }
 
+# A cross-region read replica of an ENCRYPTED primary must itself be encrypted,
+# and KMS keys are region-scoped — the source's us-west-2 key cannot be used in
+# ap-northeast-2. Use Seoul's AWS-managed RDS key (no CMK to provision); the
+# replica is re-encrypted under it. kms_key_id set => storage_encrypted.
+data "aws_kms_alias" "rds" {
+  name = "alias/aws/rds"
+}
+
 resource "aws_db_subnet_group" "replica" {
   name       = "${var.name_prefix}-seoul-replica"
   subnet_ids = module.fleet.public_subnet_ids
@@ -81,6 +89,9 @@ resource "aws_db_instance" "replica" {
   # Single-AZ during seed; Multi-AZ is a post-cutover action, not a seed default.
   multi_az            = false
   publicly_accessible = false
+
+  # Required for a cross-region replica of an encrypted source (see the alias above).
+  kms_key_id = data.aws_kms_alias.rds.target_key_arn
 
   db_subnet_group_name   = aws_db_subnet_group.replica.name
   vpc_security_group_ids = [aws_security_group.replica.id]
