@@ -56,6 +56,8 @@ class AuthControllerLogoutAllTest {
     static void authRedisProperties(DynamicPropertyRegistry registry) {
         registry.add("redis.auth.host", AUTH_REDIS::getRedisHost);
         registry.add("redis.auth.port", AUTH_REDIS::getRedisPort);
+        registry.add("redis.auth-local.host", AUTH_REDIS::getRedisHost);
+        registry.add("redis.auth-local.port", AUTH_REDIS::getRedisPort);
     }
 
     @Autowired

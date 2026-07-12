@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
@@ -38,7 +39,16 @@ import lombok.Setter;
  *   <li>{@code sseLocalRedisConnectionFactory} — the per-region local Redis a pod
  *       subscribes to for SSE fan-out; single-region it is the same host as auth,
  *       multi-region it is the regional replica.</li>
+ *   <li>{@code authLocalRedisConnectionFactory} — the per-region auth read replica;
+ *       single-region it is the same host as auth, multi-region it is the regional
+ *       replica serving local reads.</li>
  * </ul>
+ *
+ * <p>The explicit {@link Primary} {@code stringRedisTemplate} is the auth write template:
+ * defining it makes Spring Boot's auto-configured template back off, so every by-type
+ * {@code StringRedisTemplate} injection resolves deterministically to the auth (write-global)
+ * store, while the non-{@code @Primary} {@code authLocalStringRedisTemplate} serves the
+ * read-local path.</p>
  *
  * <p>Each endpoint's host/port is environment-specific and bound from
  * {@code application.properties} under the {@code redis} prefix. The factories connect
@@ -61,6 +71,9 @@ public class RedisConnectionConfig {
     @Valid
     private Endpoint sseLocal = new Endpoint();
 
+    @Valid
+    private Endpoint authLocal = new Endpoint();
+
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
@@ -75,6 +88,22 @@ public class RedisConnectionConfig {
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
         return new LettuceConnectionFactory(new RedisStandaloneConfiguration(sseLocal.getHost(), sseLocal.getPort()));
+    }
+
+    @Bean
+    public LettuceConnectionFactory authLocalRedisConnectionFactory() {
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(authLocal.getHost(), authLocal.getPort()));
+    }
+
+    @Bean
+    @Primary
+    public StringRedisTemplate stringRedisTemplate() {
+        return new StringRedisTemplate(authRedisConnectionFactory());
+    }
+
+    @Bean
+    public StringRedisTemplate authLocalStringRedisTemplate() {
+        return new StringRedisTemplate(authLocalRedisConnectionFactory());
     }
 
     @Bean
