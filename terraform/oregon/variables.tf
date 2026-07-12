@@ -173,3 +173,9 @@ variable "ingress_eip_allocation_id" {
   type        = string
   default     = ""
 }
+
+variable "seoul_region" {
+  description = "Second region (ap-northeast-2) that ECR replicates the backend image to, so Seoul app nodes pull a local copy. Root-only — the reusable module never mirrors back."
+  type        = string
+  default     = "ap-northeast-2"
+}
