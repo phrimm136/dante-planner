@@ -16,6 +16,7 @@ variable "secret_names" {
   default = [
     "danteplanner/backend/runtime-config",
     "danteplanner/jwt/rs256-private-key",
+    "danteplanner/jwt/rs256-public-key",
     "danteplanner/jwt/encryption-key",
   ]
 }
