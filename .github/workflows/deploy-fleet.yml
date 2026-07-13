@@ -92,8 +92,51 @@ jobs:
           cache-from: type=gha,scope=backend-arm64
           cache-to: type=gha,mode=max,scope=backend-arm64
 
-  bump-tag:
+  # Deploy surge: the app tier is a DaemonSet on ASG nodes (node count = pod
+  # count) and two Spring heaps do not fit one 2GiB t4g.small, so zero-downtime
+  # needs a second NODE, not a second pod. Both app ASGs go to 2 BEFORE the tag
+  # bump lands — if ArgoCD synced the bump first, maxUnavailable=1 would kill
+  # the region's only pod before the surge node exists. settle-down returns the
+  # ASGs to 1 after the rollout completes.
+  surge-up:
     needs: build-push
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Scale app ASGs to 2
+        run: |
+          aws autoscaling set-desired-capacity --region "${{ secrets.AWS_REGION }}" \
+            --auto-scaling-group-name danteplanner-oregon-app --desired-capacity 2
+          aws autoscaling set-desired-capacity --region "$SEOUL_REGION" \
+            --auto-scaling-group-name danteplanner-seoul-app --desired-capacity 2
+
+      - name: Wait until both ASGs have 2 InService nodes
+        run: |
+          wait_asg() {
+            local region="$1" asg="$2" n=0
+            for _ in $(seq 1 40); do
+              n=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
+                --auto-scaling-group-names "$asg" \
+                --query 'length(AutoScalingGroups[0].Instances[?LifecycleState==`InService`])' \
+                --output text)
+              [ "$n" -ge 2 ] && return 0
+              sleep 10
+            done
+            echo "::error::$asg did not reach 2 InService nodes"
+            return 1
+          }
+          wait_asg "${{ secrets.AWS_REGION }}" danteplanner-oregon-app
+          wait_asg "$SEOUL_REGION" danteplanner-seoul-app
+
+  bump-tag:
+    needs: [build-push, surge-up]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -129,3 +172,72 @@ jobs:
           # [skip ci] + the backend-only path filter keep this from retriggering.
           git commit -m "chore(deploy): bump backend image to ${GIT_SHA} (Oregon+Seoul) [skip ci]"
           git push origin "HEAD:${REF_NAME}"
+
+  # After ArgoCD syncs the bump, verify the DaemonSet template actually carries
+  # the new image and the rollout completes on BOTH clusters (checked over SSM
+  # on each CP), then scale the surge nodes back in. On any failure the surge
+  # stays up deliberately — two serving nodes during an incident beats a blind
+  # scale-in; the job failure is the signal to investigate.
+  settle-down:
+    needs: [bump-tag, surge-up]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GIT_SHA: ${{ github.sha }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Wait for rollout on both clusters
+        run: |
+          ssm_out() {
+            local region="$1" iid="$2" cmd="$3" cid status=Pending
+            cid=$(aws ssm send-command --region "$region" --instance-ids "$iid" \
+              --document-name AWS-RunShellScript \
+              --parameters commands="$cmd" \
+              --query Command.CommandId --output text)
+            for _ in $(seq 1 150); do
+              sleep 5
+              status=$(aws ssm get-command-invocation --region "$region" --command-id "$cid" \
+                --instance-id "$iid" --query Status --output text 2>/dev/null || echo Pending)
+              case "$status" in Success|Failed|TimedOut|Cancelled) break;; esac
+            done
+            aws ssm get-command-invocation --region "$region" --command-id "$cid" \
+              --instance-id "$iid" --query StandardOutputContent --output text
+            [ "$status" = Success ]
+          }
+          cp_id() {
+            aws ec2 describe-instances --region "$1" \
+              --filters "Name=tag:Name,Values=$2" "Name=instance-state-name,Values=running" \
+              --query 'Reservations[0].Instances[0].InstanceId' --output text
+          }
+          wait_cluster() {
+            local region="$1" cp="$2" iid img=""
+            iid=$(cp_id "$region" "$cp")
+            # ArgoCD reconcile can lag the push by ~3 min; wait for the template
+            # to carry the new SHA before trusting rollout status (which passes
+            # trivially against the OLD revision).
+            for _ in $(seq 1 40); do
+              img=$(ssm_out "$region" "$iid" "sudo k3s kubectl get ds backend -n danteplanner -o jsonpath={.spec.template.spec.containers[0].image}") || true
+              case "$img" in *"$GIT_SHA"*) break;; esac
+              sleep 10
+            done
+            case "$img" in
+              *"$GIT_SHA"*) ;;
+              *) echo "::error::$cp never synced $GIT_SHA"; return 1;;
+            esac
+            ssm_out "$region" "$iid" "sudo k3s kubectl rollout status ds/backend -n danteplanner --timeout=600s"
+          }
+          wait_cluster "${{ secrets.AWS_REGION }}" danteplanner-oregon-cp
+          wait_cluster "$SEOUL_REGION" danteplanner-seoul-cp
+
+      - name: Scale app ASGs back to 1
+        run: |
+          aws autoscaling set-desired-capacity --region "${{ secrets.AWS_REGION }}" \
+            --auto-scaling-group-name danteplanner-oregon-app --desired-capacity 1
+          aws autoscaling set-desired-capacity --region "$SEOUL_REGION" \
+            --auto-scaling-group-name danteplanner-seoul-app --desired-capacity 1
