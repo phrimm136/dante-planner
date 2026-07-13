@@ -23,3 +23,10 @@ data:
   REDIS_SSELOCAL_HOST: redis-auth.danteplanner.svc.cluster.local
   # MYSQL_HOST + secrets come from the backend-runtime-config Secrets Manager
   # bundle, read from the ap-northeast-2 REPLICA (terraform/secrets replication).
+  # That bundle is a byte-copy of Oregon's, so it can only carry the PRIMARY
+  # endpoint — the Seoul-local replica must be wired here, the region-scoped
+  # surface. Reads route to the local RDS replica; writes keep crossing the
+  # peering to the Oregon primary (read-local / write-global, mechanics §5).
+  DATASOURCE_ROUTING_ENABLED: "true"
+  DATASOURCE_REPLICA_ENABLED: "true"
+  MYSQL_REPLICA_HOST: mysql-replica.seoul.danteplanner.internal
