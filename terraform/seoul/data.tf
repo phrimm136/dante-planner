@@ -91,7 +91,11 @@ resource "aws_db_instance" "replica" {
   publicly_accessible = false
 
   # Required for a cross-region replica of an encrypted source (see the alias above).
-  kms_key_id = data.aws_kms_alias.rds.target_key_arn
+  # BOTH must be set explicitly: kms_key_id alone leaves storage_encrypted omitted,
+  # which the provider reads as null and plans true->null — a ForceNew that would
+  # destroy+recreate the replica (resyncing from the primary, resetting ReplicaLag).
+  storage_encrypted = true
+  kms_key_id        = data.aws_kms_alias.rds.target_key_arn
 
   db_subnet_group_name   = aws_db_subnet_group.replica.name
   vpc_security_group_ids = [aws_security_group.replica.id]
