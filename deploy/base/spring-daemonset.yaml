@@ -1,0 +1,82 @@
+# Spring backend as a DaemonSet on role=app nodes: the app ASG is the only
+# scaling dial, so node count = pod count (requirements: Regions & fleet).
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: /actuator/prometheus
+    spec:
+      # Suppress k8s Docker-legacy service-link env vars (e.g. REDIS_RATELIMIT_PORT=
+      # tcp://ip:port), which collide with the app's redis.*.port int config. The
+      # app resolves services via explicit ConfigMap hosts, not service links.
+      enableServiceLinks: false
+      nodeSelector:
+        role: app
+      containers:
+        - name: backend
+          image: danteplanner-backend
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-runtime-config
+          env:
+            - name: JWT_PRIVATE_KEY_PATH
+              value: /app/keys/private_key.pem
+            - name: JWT_PUBLIC_KEY_PATH
+              value: /app/keys-public/public_key.pem
+            - name: JWT_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-encryption-key
+                  key: encryption_key
+          volumeMounts:
+            - name: rs256-key
+              mountPath: /app/keys
+              readOnly: true
+            - name: rs256-public-key
+              mountPath: /app/keys-public
+              readOnly: true
+          # Liveness/readiness are app-only (Spring health groups); dependency
+          # failures alert but never deroute (requirements: health semantics).
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 250m
+              memory: 768Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: rs256-key
+          secret:
+            secretName: jwt-rs256-private-key
+        - name: rs256-public-key
+          secret:
+            secretName: jwt-rs256-public-key

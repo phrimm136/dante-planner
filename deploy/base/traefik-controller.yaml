@@ -1,0 +1,93 @@
+# Traefik controller pinned to the ingress node (role=ingress) with hostNetwork,
+# so Global Accelerator hits the ingress EC2 on :443 directly — no NLB. k3s's
+# bundled Traefik is disabled (CP user-data --disable traefik) precisely so this
+# single-node, Gateway-API-provider Traefik is the only one. Native SSE streaming.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: traefik
+rules:
+  - apiGroups: [""]
+    resources: ["services", "endpoints", "secrets", "namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["discovery.k8s.io"]
+    resources: ["endpointslices"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources:
+      - gatewayclasses
+      - gateways
+      - httproutes
+      - referencegrants
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["gateway.networking.k8s.io"]
+    resources:
+      - gatewayclasses/status
+      - gateways/status
+      - httproutes/status
+    verbs: ["update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: traefik
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik
+subjects:
+  - kind: ServiceAccount
+    name: traefik
+    namespace: danteplanner
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: traefik
+spec:
+  controllerName: traefik.io/gateway-controller
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: traefik
+spec:
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik
+      nodeSelector:
+        role: ingress
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: traefik
+          image: traefik:v3.1
+          args:
+            - --entrypoints.websecure.address=:443
+            - --providers.kubernetesgateway=true
+            - --ping=true
+          ports:
+            - name: websecure
+              containerPort: 443
+              hostPort: 443
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi

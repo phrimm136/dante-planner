@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  DEPLOY_REGION: us-west-2
+  # In-cluster service DNS (region-invariant shape, region-local instances).
+  REDIS_AUTH_HOST: redis-auth.danteplanner.svc.cluster.local
+  REDIS_RATELIMIT_HOST: redis-ratelimit.danteplanner.svc.cluster.local
+  # DB connection (MYSQL_HOST/DATABASE/USER/PASSWORD) + SENTRY_DSN come from the
+  # backend-runtime-config Secrets Manager bundle (runtime-config.yaml), not here —
+  # environment-specific and secret values stay out of the committed overlay.

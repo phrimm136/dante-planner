@@ -1,0 +1,83 @@
+#!/bin/bash
+set -euxo pipefail
+
+command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
+command -v git >/dev/null 2>&1 || dnf install -y git
+
+TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
+  --name "${token_param}" --query 'Parameter.Value' --output text)
+umask 077
+echo "$TOKEN" > /etc/k3s-token
+
+# k3s server with EMBEDDED etcd (--cluster-init) so etcd snapshots exist and
+# ship to S3. SQLite default has no etcd and cannot snapshot. Bundled Traefik
+# and servicelb are disabled: Traefik is deployed via kustomize on the ingress
+# node with Gateway API. etcd-s3 uses the CP instance-profile credentials.
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
+  --cluster-init \
+  --token-file /etc/k3s-token \
+  --disable traefik \
+  --disable servicelb \
+  --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule \
+  --etcd-s3 \
+  --etcd-s3-bucket ${s3_bucket} \
+  --etcd-s3-region ${region} \
+  --etcd-snapshot-schedule-cron '0 */6 * * *' \
+  --etcd-snapshot-retention ${snapshot_retention}" sh -
+
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+until kubectl get nodes >/dev/null 2>&1; do sleep 5; done
+
+# ArgoCD core per cluster (reconciler only, no API server / UI — hub-spoke
+# rejected, no cross-region deploy dependency).
+kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n argocd \
+  -f https://raw.githubusercontent.com/argoproj/argo-cd/${argocd_version}/manifests/core-install.yaml
+
+# The overlay references no submodules (static/data is baked into the backend
+# image at build time, not delivered via GitOps). Disable submodule fetch so the
+# private SSH-only static submodule cannot fail manifest generation for a repo
+# ArgoCD otherwise reaches over public HTTPS.
+kubectl -n argocd set env deployment/argocd-repo-server ARGOCD_GIT_MODULES_ENABLED=false
+
+# The CP is the only node at bootstrap and carries the control-plane NoSchedule
+# taint (k3s system pods tolerate it; upstream ArgoCD does not). Pin ArgoCD to
+# the CP and tolerate the taint so it schedules here and stays here.
+kubectl -n argocd get deploy,statefulset -o name | while read -r obj; do
+  kubectl -n argocd patch "$obj" --type merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/control-plane":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Exists","effect":"NoSchedule"}]}}}}'
+done
+kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=300s || true
+
+# Platform CRDs/controllers the overlay's custom resources depend on. k3s ships
+# no Gateway API CRDs and --disable traefik removed the bundled path, so the CP
+# installs them before ArgoCD syncs the overlay (the API server rejects a CR
+# whose CRD is absent). Without this the unattended rebuild cannot converge.
+kubectl apply -f \
+  https://github.com/kubernetes-sigs/gateway-api/releases/download/${gateway_api_version}/standard-install.yaml
+
+# External Secrets Operator (CRDs + controller), pinned to role=app nodes so its
+# AWS SDK default-chain credential resolves to the app node instance profile —
+# the role granted secretsmanager:GetSecretValue (no-IRSA boundary). App nodes
+# may still be joining; ESO stays Pending until one is Ready, then schedules.
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+helm repo add external-secrets https://charts.external-secrets.io
+helm repo update
+helm upgrade --install external-secrets external-secrets/external-secrets \
+  --namespace external-secrets --create-namespace \
+  --version ${eso_chart_version} \
+  --set installCRDs=true \
+  --set nodeSelector.role=app \
+  --set webhook.nodeSelector.role=app \
+  --set certController.nodeSelector.role=app
+
+# App-of-apps: apply the root Application, which points ArgoCD at
+# deploy/overlays/oregon so the cluster is GitOps-managed from here on.
+git clone --depth 1 --branch ${gitops_revision} ${gitops_repo_url} /opt/gitops
+kubectl apply -f /opt/gitops/deploy/argocd/project.yaml
+kubectl apply -f /opt/gitops/deploy/argocd/root-app.yaml
+
+# Inject the ECR registry host (account id) as a kustomize image override at
+# sync time. The host is never committed to git — it is rendered here from
+# Terraform state. The override sets only newName (:* preserves the overlay's
+# CI-bumped newTag), so the git-committed tag still selects the image.
+kubectl -n argocd patch application danteplanner-oregon --type merge -p '{"spec":{"source":{"targetRevision":"${gitops_revision}","kustomize":{"images":["${ecr_image}"]}}}}'

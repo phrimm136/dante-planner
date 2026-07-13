@@ -127,3 +127,21 @@ variable "tags" {
     Phase   = "rds-migration"
   }
 }
+
+variable "fleet_peering_connection_id" {
+  description = "VPC peering connection id from terraform/oregon output rds_peering_connection_id. Empty = no fleet wiring."
+  type        = string
+  default     = ""
+}
+
+variable "fleet_cluster_security_group_id" {
+  description = "k3s fleet cluster SG (terraform/oregon output cluster_security_group_id) allowed to reach RDS on 3306."
+  type        = string
+  default     = ""
+}
+
+variable "fleet_vpc_cidr" {
+  description = "Fleet VPC CIDR, for the RDS-side return route over the peering."
+  type        = string
+  default     = ""
+}
