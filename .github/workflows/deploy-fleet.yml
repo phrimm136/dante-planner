@@ -1,27 +1,35 @@
-name: Deploy Oregon (arm64 -> ECR -> GitOps)
+name: "Deploy (multi-region k3s): arm64 -> ECR x2 -> GitOps"
 
-# Phase 13 GitOps deploy: build the arm64 backend image, push to ECR, then bump
-# the kustomize image tag and commit it back. ArgoCD core on the CP node syncs
-# the commit. Does not touch the legacy single-EC2 deploy.yml.
+# Production GitOps deploy for the two-region k3s fleet (supersedes the legacy
+# single-EC2 deploy.yml). Build the arm64 backend image once, push it to BOTH
+# regional ECR registries (Oregon primary + Seoul), then bump the kustomize image
+# tag in BOTH overlays and commit. Each region's ArgoCD core syncs the commit and
+# pulls the image from its LOCAL registry — pushing to both here removes the
+# cross-region ECR-replication race (a bump could otherwise reference a tag not
+# yet replicated to Seoul).
 on:
   push:
-    # feat/034-oregon-k3s is the pre-promotion GitOps branch (deploy overlay lives
+    # feat/034-oregon-k3s is the pre-promotion GitOps branch (deploy overlays live
     # here, not on frozen main); include it so a push builds the image directly,
     # since workflow_dispatch requires the workflow on the default branch.
     branches: [main, feat/034-oregon-k3s]
     paths:
       - 'backend/**'
-      - '.github/workflows/deploy-oregon.yml'
+      - '.github/workflows/deploy-fleet.yml'
   workflow_dispatch:
 
 concurrency:
-  group: oregon-gitops-deploy
+  group: k3s-gitops-deploy
   cancel-in-progress: false
 
 env:
+  # Oregon (primary) + Seoul registries. AWS_REGION = us-west-2; Seoul is fixed.
   ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  SEOUL_REGION: ap-northeast-2
+  ECR_REGISTRY_SEOUL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-northeast-2.amazonaws.com
   IMAGE_REPO: danteplanner-backend
   OVERLAY_DIR: deploy/overlays/oregon
+  OVERLAY_DIR_SEOUL: deploy/overlays/seoul
 
 jobs:
   build-push:
@@ -52,8 +60,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login to Amazon ECR
+      # Log in to BOTH regional ECR registries (the action logs into the
+      # credentials' default region = us-west-2; Seoul needs an explicit login).
+      - name: Login to Amazon ECR (Oregon)
         uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Login to Amazon ECR (Seoul)
+        run: |
+          aws ecr get-login-password --region "$SEOUL_REGION" \
+            | docker login --username AWS --password-stdin "$ECR_REGISTRY_SEOUL"
 
       # arm64 (Graviton t4g fleet) built on the amd64 runner via QEMU emulation.
       - name: Set up QEMU
@@ -62,14 +77,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and Push Backend (arm64)
+      # One build, pushed to both regional registries under the same tag, so each
+      # region pulls locally and the tags in both overlays resolve.
+      - name: Build and Push Backend (arm64) to both regions
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./backend/Dockerfile
           platforms: linux/arm64
           push: true
-          tags: ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
+          tags: |
+            ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
+            ${{ env.ECR_REGISTRY_SEOUL }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
           cache-from: type=gha,scope=backend-arm64
           cache-to: type=gha,mode=max,scope=backend-arm64
 
@@ -91,12 +110,14 @@ jobs:
           curl -sfL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
           sudo mv kustomize /usr/local/bin/
 
-      - name: Bump image tag in the Oregon overlay
+      - name: Bump image tag in BOTH overlays
         run: |
-          cd "$OVERLAY_DIR"
-          kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}"
+          (cd "$OVERLAY_DIR"       && kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}")
+          (cd "$OVERLAY_DIR_SEOUL" && kustomize edit set image "${IMAGE_REPO}:${GIT_SHA}")
 
       - name: Commit the tag bump
+        env:
+          REF_NAME: ${{ github.ref_name }}
         run: |
           if git diff --quiet; then
             echo "No image change to commit"
@@ -104,7 +125,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$OVERLAY_DIR/kustomization.yaml"
+          git add "$OVERLAY_DIR/kustomization.yaml" "$OVERLAY_DIR_SEOUL/kustomization.yaml"
           # [skip ci] + the backend-only path filter keep this from retriggering.
-          git commit -m "chore(deploy): bump Oregon backend image to ${GIT_SHA} [skip ci]"
-          git push origin HEAD:${{ github.ref_name }}
+          git commit -m "chore(deploy): bump backend image to ${GIT_SHA} (Oregon+Seoul) [skip ci]"
+          git push origin "HEAD:${REF_NAME}"
