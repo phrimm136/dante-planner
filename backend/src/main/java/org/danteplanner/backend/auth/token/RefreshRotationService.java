@@ -26,7 +26,7 @@ import java.util.UUID;
  * per family whose fields map each token's {@code jti} to its lifecycle state, plus a
  * {@code __revoked__} marker. A freshly minted token is {@link RotationState#UNUSED_LATEST};
  * presenting it for rotation mints a successor and moves it to {@link RotationState#PENDING}.
- * The successor's first use marks the parent {@link RotationState#USED}. Externalizing state
+ * The successor's first use marks the parent {@link RotationState#RETIRED}. Externalizing state
  * to Redis lets rotation and theft detection be consistent across every pod in a multi-server
  * deployment.</p>
  *
@@ -50,15 +50,18 @@ public class RefreshRotationService {
     private static final String FAMILY_KEY_PREFIX = "rt:fam:";
     private static final String FAMILY_KEY_PATTERN = FAMILY_KEY_PREFIX + "*";
     private static final String REVOKED_FIELD = "__revoked__";
+    private static final String SUCCESSOR_JWT_FIELD_PREFIX = "succjwt:";
     private static final String FIELD_SEPARATOR = "|";
     private static final String ROTATED_RESULT = "ROTATED";
     private static final String THEFT_RESULT = "THEFT";
     private static final String REVOKED_RESULT = "REVOKED";
+    private static final String REUSED_RESULT_PREFIX = "REUSED" + FIELD_SEPARATOR;
 
     static final String METRIC_OUTCOME = "jwt_rotation_outcome_total";
     static final String TAG_OUTCOME = "outcome";
 
     static final String OUTCOME_ROTATED = "rotated";
+    static final String OUTCOME_RETRY_REUSED = "retry_reused";
     static final String OUTCOME_RETRY_SUPERSEDED = "retry_superseded";
     static final String OUTCOME_THEFT_REVOKED = "theft_revoked";
     static final String OUTCOME_LEGACY_ADMITTED = "legacy_admitted";
@@ -69,16 +72,28 @@ public class RefreshRotationService {
      * Atomic single-family rotation transition (mechanics §2.2).
      *
      * <p>KEYS[1] = family key; ARGV = jti, parentJti (or ""), successorJti,
-     * succExpiryMs, nowMs, ttlMs. Returns {@code "REVOKED"} if the family already carries
-     * the revocation marker; {@code "THEFT"} (and revokes the whole family) if the presented
-     * token is a replay of a spent ({@code USED}/{@code SUPERSEDED}) token; otherwise marks
-     * the parent {@code USED}, supersedes a stale successor on a legit retry, registers the
-     * new successor {@code UNUSED_LATEST}, moves the presented token to {@code PENDING},
-     * refreshes the family TTL, and returns {@code "ROTATED"}.</p>
+     * succExpiryMs, nowMs, ttlMs, successorJwt, reuseWindowMs. Returns {@code "REVOKED"}
+     * if the family already carries the revocation marker; {@code "THEFT"} (and revokes
+     * the whole family) if the presented token is a replay of a spent
+     * ({@code RETIRED}/{@code SUPERSEDED}) token; {@code "REUSED|<jwt>"} if the presented
+     * token is a {@code PENDING} retry whose stored successor is still the live tip and
+     * within the reuse window, so every concurrent retry converges on the same successor;
+     * otherwise marks the parent {@code RETIRED}, supersedes a stale successor on a retry
+     * outside the window, registers the new successor {@code UNUSED_LATEST}, moves the
+     * presented token to {@code PENDING}, refreshes the family TTL, and returns
+     * {@code "ROTATED"}.</p>
+     *
+     * <p>Entries written as {@code USED} before the rename to {@code RETIRED} may survive
+     * in Redis for up to one family TTL; the theft check matches both spellings.</p>
+     *
+     * <p>The successor JWT is memoized as a {@code succjwt:{jti}} field
+     * ({@code "mintedAtMs|jwt"}) so a retry can replay the identical cookie; it is
+     * deleted as soon as the parent retires, bounding how long a bearer token rests
+     * in Redis.</p>
      */
     private static final String ROTATE_SCRIPT = """
             -- KEYS[1] = rt:fam:{F}
-            -- ARGV   = jti, parentJti, successorJti, succExpiryMs, nowMs, ttlMs
+            -- ARGV   = jti, parentJti, successorJti, succExpiryMs, nowMs, ttlMs, succJwt, reuseWindowMs
             local fkey = KEYS[1]
             local jti, parent, succ = ARGV[1], ARGV[2], ARGV[3]
 
@@ -87,20 +102,30 @@ public class RefreshRotationService {
             local cur = redis.call('HGET', fkey, jti)            -- "STATE|succ|exp" or false
             local state = cur and string.match(cur, '^[^|]+') or 'UNUSED_LATEST'
 
-            if state == 'USED' or state == 'SUPERSEDED' then     -- replay of a spent token
+            if state == 'RETIRED' or state == 'USED' or state == 'SUPERSEDED' then
               redis.call('HSET', fkey, '__revoked__', ARGV[5])   -- THEFT: revoke whole family
               return 'THEFT'
             end
 
-            if parent ~= '' then                                 -- mark parent USED on successor's first use
+            if parent ~= '' then                                 -- retire parent on successor's first use
               local p = redis.call('HGET', fkey, parent)
               if p and string.match(p,'^[^|]+')=='PENDING' then
-                redis.call('HSET', fkey, parent, 'USED||'..ARGV[4])
+                redis.call('HSET', fkey, parent, 'RETIRED||'..ARGV[4])
+                redis.call('HDEL', fkey, 'succjwt:'..parent)     -- memoized JWT no longer replayable
               end
             end
 
-            if state == 'PENDING' then                           -- legit retry: supersede the old successor
+            if state == 'PENDING' then                           -- retry: reuse the stored successor or supersede it
               local oldSucc = string.match(cur, '|([^|]*)|')
+              local stored = redis.call('HGET', fkey, 'succjwt:'..jti)  -- "mintedAtMs|jwt" or false
+              if stored and oldSucc and oldSucc ~= '' then
+                local mintedAt, jwt = string.match(stored, '^(%d+)|(.+)$')
+                local os = redis.call('HGET', fkey, oldSucc)
+                if mintedAt and os and string.match(os,'^[^|]+')=='UNUSED_LATEST'
+                    and tonumber(ARGV[5]) - tonumber(mintedAt) < tonumber(ARGV[8]) then
+                  return 'REUSED|'..jwt                        -- replay: racers converge on one child
+                end
+              end
               if oldSucc and oldSucc ~= '' then
                 redis.call('HSET', fkey, oldSucc, 'SUPERSEDED||'..ARGV[4])
               end
@@ -108,6 +133,7 @@ public class RefreshRotationService {
 
             redis.call('HSET', fkey, succ, 'UNUSED_LATEST||'..ARGV[4])
             redis.call('HSET', fkey, jti,  'PENDING|'..succ..'|'..ARGV[4])
+            redis.call('HSET', fkey, 'succjwt:'..jti, ARGV[5]..'|'..ARGV[7])
             redis.call('PEXPIRE', fkey, ARGV[6])                 -- sliding TTL = the cleanup job
             return 'ROTATED'
             """;
@@ -119,6 +145,7 @@ public class RefreshRotationService {
     private final JwtProperties jwtProperties;
     private final MeterRegistry meterRegistry;
     private final boolean legacyAdmitEnabled;
+    private final long retryReuseWindowMs;
 
     private final DefaultRedisScript<String> rotateScript;
 
@@ -129,7 +156,8 @@ public class RefreshRotationService {
             CookieUtils cookieUtils,
             JwtProperties jwtProperties,
             MeterRegistry meterRegistry,
-            @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled) {
+            @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled,
+            @Value("${jwt.rotation.retry-reuse-window-ms:30000}") long retryReuseWindowMs) {
         this.authRedisTemplate = authRedisTemplate;
         this.tokenValidator = tokenValidator;
         this.tokenGenerator = tokenGenerator;
@@ -137,6 +165,7 @@ public class RefreshRotationService {
         this.jwtProperties = jwtProperties;
         this.meterRegistry = meterRegistry;
         this.legacyAdmitEnabled = legacyAdmitEnabled;
+        this.retryReuseWindowMs = retryReuseWindowMs;
 
         this.rotateScript = new DefaultRedisScript<>();
         this.rotateScript.setScriptText(ROTATE_SCRIPT);
@@ -202,7 +231,19 @@ public class RefreshRotationService {
                 rotateScript,
                 List.of(familyKey(familyId)),
                 jti, parentJti, successorJti,
-                String.valueOf(succExpiryMs), String.valueOf(nowMs), String.valueOf(ttlMs));
+                String.valueOf(succExpiryMs), String.valueOf(nowMs), String.valueOf(ttlMs),
+                successorJwt, String.valueOf(retryReuseWindowMs));
+
+        if (result != null && result.startsWith(REUSED_RESULT_PREFIX)) {
+            // Concurrent retry: replay the memoized successor so every racer converges
+            // on one cookie; the JWT this call optimistically signed is discarded.
+            String storedJwt = result.substring(REUSED_RESULT_PREFIX.length());
+            TokenClaims storedClaims = tokenValidator.validateToken(storedJwt);
+            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, storedJwt,
+                    jwtProperties.getRefreshTokenExpirySeconds());
+            incrementOutcome(OUTCOME_RETRY_REUSED);
+            return new RotationResult.Rotated(storedJwt, storedClaims);
+        }
 
         return switch (result) {
             case THEFT_RESULT -> {
@@ -253,7 +294,12 @@ public class RefreshRotationService {
             return null;
         }
         int sep = fieldValue.indexOf(FIELD_SEPARATOR);
-        return RotationState.valueOf(sep >= 0 ? fieldValue.substring(0, sep) : fieldValue);
+        String leading = sep >= 0 ? fieldValue.substring(0, sep) : fieldValue;
+        // Entries persisted before the USED -> RETIRED rename survive one family TTL.
+        if ("USED".equals(leading)) {
+            return RotationState.RETIRED;
+        }
+        return RotationState.valueOf(leading);
     }
 
     /**
@@ -338,13 +384,14 @@ public class RefreshRotationService {
 
     /**
      * Returns the total number of rotation-state entries across all families,
-     * excluding revocation markers. For testing.
+     * excluding revocation markers and memoized successor JWTs. For testing.
      */
     int rotationStateSize() {
         int total = 0;
         for (String key : RedisKeyScanner.scanKeys(authRedisTemplate, FAMILY_KEY_PATTERN)) {
             for (Object field : authRedisTemplate.opsForHash().keys(key)) {
-                if (!REVOKED_FIELD.equals(field)) {
+                if (!REVOKED_FIELD.equals(field)
+                        && !field.toString().startsWith(SUCCESSOR_JWT_FIELD_PREFIX)) {
                     total++;
                 }
             }
