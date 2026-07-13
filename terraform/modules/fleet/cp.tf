@@ -54,6 +54,7 @@ resource "aws_instance" "cp" {
     gitops_revision     = var.gitops_target_revision
     argocd_version      = var.argocd_version
     gateway_api_version = var.gateway_api_version
+    traefik_version     = var.traefik_version
     eso_chart_version   = var.external_secrets_chart_version
     ecr_image           = "${var.backend_image_repo}=${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.backend_image_repo}:*"
   })

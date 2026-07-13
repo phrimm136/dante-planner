@@ -71,6 +71,14 @@ kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=300s || tru
 kubectl apply -f \
   https://github.com/kubernetes-sigs/gateway-api/releases/download/${gateway_api_version}/standard-install.yaml
 
+# Traefik's OWN CRDs (traefik.io/v1alpha1) — needed for the mTLS TLSOption that
+# enforces Cloudflare Authenticated Origin Pull. --disable traefik removed the
+# bundled path, and the kustomize base ships only Gateway API resources, so these
+# CRDs must be installed here or a TLSOption fails the whole ArgoCD sync. Pinned to
+# the Traefik minor running in the base (traefik:v3.1).
+kubectl apply -f \
+  https://raw.githubusercontent.com/traefik/traefik/${traefik_version}/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
+
 # External Secrets Operator (CRDs + controller), pinned to role=app nodes so its
 # AWS SDK default-chain credential resolves to the app node instance profile —
 # the role granted secretsmanager:GetSecretValue (no-IRSA boundary). App nodes

@@ -161,6 +161,12 @@ variable "gateway_api_version" {
   default     = "v1.1.0"
 }
 
+variable "traefik_version" {
+  description = "Pinned Traefik release tag for the traefik.io CRDs installed at CP bootstrap (must match the traefik:<tag> image in deploy/base/traefik-controller.yaml). Enables the mTLS TLSOption."
+  type        = string
+  default     = "v3.1"
+}
+
 variable "external_secrets_chart_version" {
   description = "Pinned External Secrets Operator Helm chart version. The CP installs ESO (CRDs + controller) at bootstrap, pinned to role=app nodes so its SDK-default-chain credential is the app node role granted secretsmanager:GetSecretValue."
   type        = string
