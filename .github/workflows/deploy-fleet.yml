@@ -9,10 +9,10 @@ name: "Deploy (multi-region k3s)"
 # yet replicated to Seoul).
 on:
   push:
-    # dev is the integration branch ArgoCD tracks pre-promotion (deploy overlays
-    # live here, not on frozen main); main stays listed for the eventual
-    # promotion cutover.
-    branches: [main, dev]
+    # Images are built and pushed to ECR only when a PR merges to main; both
+    # regions' ArgoCD root apps track main. workflow_dispatch remains as the
+    # manual escape hatch.
+    branches: [main]
     paths:
       - 'backend/**'
       - '.github/workflows/deploy-fleet.yml'
