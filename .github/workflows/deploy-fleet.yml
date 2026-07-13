@@ -145,7 +145,7 @@ jobs:
             local region="$1" iid="$2" cmd="$3" cid status=Pending
             cid=$(aws ssm send-command --region "$region" --instance-ids "$iid" \
               --document-name AWS-RunShellScript \
-              --parameters commands="$cmd" \
+              --parameters "{\"commands\":[\"$cmd\"]}" \
               --query Command.CommandId --output text)
             for _ in $(seq 1 24); do
               sleep 5
@@ -246,7 +246,7 @@ jobs:
             local region="$1" iid="$2" cmd="$3" cid status=Pending
             cid=$(aws ssm send-command --region "$region" --instance-ids "$iid" \
               --document-name AWS-RunShellScript \
-              --parameters commands="$cmd" \
+              --parameters "{\"commands\":[\"$cmd\"]}" \
               --query Command.CommandId --output text)
             for _ in $(seq 1 150); do
               sleep 5
