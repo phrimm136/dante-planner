@@ -272,7 +272,7 @@ resource "aws_iam_role_policy" "rds_fleet_peering" {
 data "aws_iam_policy_document" "deploy_surge" {
   statement {
     sid     = "SurgeScale"
-    actions = ["autoscaling:SetDesiredCapacity"]
+    actions = ["autoscaling:SetDesiredCapacity", "autoscaling:TerminateInstanceInAutoScalingGroup"]
     resources = [
       "arn:aws:autoscaling:us-west-2:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${var.name_prefix}-oregon-app",
       "arn:aws:autoscaling:ap-northeast-2:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${var.name_prefix}-seoul-app",

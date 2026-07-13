@@ -283,9 +283,67 @@ jobs:
           wait_cluster "${{ secrets.AWS_REGION }}" danteplanner-oregon-cp
           wait_cluster "$SEOUL_REGION" danteplanner-seoul-cp
 
-      - name: Scale app ASGs back to 1
+      # Scale-in must not black-hole traffic: a bare desired-capacity decrement
+      # kills the EC2 without draining, and the dead pod lingers in the Service
+      # endpoints while Traefik keeps routing to it (observed as a half-outage
+      # window on the first surge run). DaemonSets ignore cordon, so evict the
+      # pod with a NoExecute taint, wait until the Service is down to a single
+      # endpoint, then terminate the SURGE instance specifically (newest launch)
+      # with a capacity decrement — and delete the k8s node object so no
+      # NotReady ghost accumulates.
+      - name: Drain surge nodes and scale back to 1
         run: |
-          aws autoscaling set-desired-capacity --region "${{ secrets.AWS_REGION }}" \
-            --auto-scaling-group-name danteplanner-oregon-app --desired-capacity 1
-          aws autoscaling set-desired-capacity --region "$SEOUL_REGION" \
-            --auto-scaling-group-name danteplanner-seoul-app --desired-capacity 1
+          ssm_out() {
+            local region="$1" iid="$2" cmd="$3" cid status=Pending
+            cid=$(aws ssm send-command --region "$region" --instance-ids "$iid" \
+              --document-name AWS-RunShellScript \
+              --parameters "{\"commands\":[\"$cmd\"]}" \
+              --query Command.CommandId --output text)
+            for _ in $(seq 1 24); do
+              sleep 5
+              status=$(aws ssm get-command-invocation --region "$region" --command-id "$cid" \
+                --instance-id "$iid" --query Status --output text 2>/dev/null || echo Pending)
+              case "$status" in Success|Failed|TimedOut|Cancelled) break;; esac
+            done
+            aws ssm get-command-invocation --region "$region" --command-id "$cid" \
+              --instance-id "$iid" --query StandardOutputContent --output text
+            [ "$status" = Success ]
+          }
+          cp_id() {
+            aws ec2 describe-instances --region "$1" \
+              --filters "Name=tag:Name,Values=$2" "Name=instance-state-name,Values=running" \
+              --query 'Reservations[0].Instances[0].InstanceId' --output text
+          }
+          drain_and_scale_in() {
+            local region="$1" asg="$2" cp="$3" cp_iid ids surge_iid node_ip node eps=0
+            cp_iid=$(cp_id "$region" "$cp")
+            ids=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
+              --auto-scaling-group-names "$asg" \
+              --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
+              --output text)
+            if [ "$(echo "$ids" | wc -w)" -lt 2 ]; then
+              echo "$asg has no surge node to remove"
+              return 0
+            fi
+            surge_iid=$(aws ec2 describe-instances --region "$region" --instance-ids $ids \
+              --query 'sort_by(Reservations[].Instances[], &LaunchTime)[-1].InstanceId' --output text)
+            node_ip=$(aws ec2 describe-instances --region "$region" --instance-ids "$surge_iid" \
+              --query 'Reservations[0].Instances[0].PrivateIpAddress' --output text)
+            node="ip-$(echo "$node_ip" | tr . -).$region.compute.internal"
+            ssm_out "$region" "$cp_iid" "sudo k3s kubectl taint node $node danteplanner.dev/retiring=true:NoExecute --overwrite"
+            for _ in $(seq 1 24); do
+              eps=$(ssm_out "$region" "$cp_iid" "sudo k3s kubectl get endpoints backend -n danteplanner --no-headers" \
+                | awk '{print $2}' | tr ',' '\n' | grep -c ':' || true)
+              [ "$eps" = "1" ] && break
+              sleep 5
+            done
+            if [ "$eps" != "1" ]; then
+              echo "::error::$asg Service endpoints never settled to 1 after draining $node"
+              return 1
+            fi
+            aws autoscaling terminate-instance-in-auto-scaling-group --region "$region" \
+              --instance-id "$surge_iid" --should-decrement-desired-capacity >/dev/null
+            ssm_out "$region" "$cp_iid" "sudo k3s kubectl delete node $node" || true
+          }
+          drain_and_scale_in "${{ secrets.AWS_REGION }}" danteplanner-oregon-app danteplanner-oregon-cp
+          drain_and_scale_in "$SEOUL_REGION" danteplanner-seoul-app danteplanner-seoul-cp
