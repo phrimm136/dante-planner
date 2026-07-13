@@ -809,3 +809,46 @@ a `$`-suffixed file — no stale results): tests=82 skipped=0 failures=0 errors=
 
 ### Gaps
 - None. Both items MET; scoped Testcontainers suite green at 82/0/0.
+
+## Phase 14a: Auth-Redis read-local / write-global split — PASS
+
+Certifies the auth-Redis read-local / write-global split: blacklist (`bl:`/`uinv:`) and tombstone
+(`del:`) READS reroute to the auth-local replica; their WRITES stay on the `@Primary` auth store;
+both rerouted reads preserve fail-open; and with `AUTH_LOCAL_REDIS_*` unset the auth-local endpoint
+aliases to auth (single-region no-op).
+
+### Suite
+Command:
+`gradlew -p backend test --tests RedisFactoriesIT --tests AuthLocalReadSplitIT --tests AuthLocalAliasingTest`
+Result tail:
+```
+BUILD SUCCESSFUL in 1m 18s
+6 actionable tasks: 2 executed, 4 up-to-date
+```
+JUnit XML (`backend/build/test-results/test/`, all from 2026-07-12T18:08 run):
+- `RedisFactoriesIT` tests=2 failures=0 errors=0
+- `AuthLocalReadSplitIT` tests=3 failures=0 errors=0
+- `AuthLocalAliasingTest` tests=1 failures=0 errors=0
+Total 6/0/0. Log: `/tmp/spec-verify-14a.log`.
+
+### Trace
+| Item | Source | Status | Code evidence | Test evidence |
+|------|--------|--------|---------------|---------------|
+| Cluster 1 — `authLocalRedisConnectionFactory` bean exists, DISTINCT instance from `authRedisConnectionFactory` | Contract 1 | MET | `RedisConnectionConfig.java:93-96` non-`@Primary` `authLocalRedisConnectionFactory()` bound to `authLocal` Endpoint; `authRedisConnectionFactory()` is `@Primary` (`:77-81`) | `RedisFactoriesIT.authLocalFactory_whenContextLoads_isDistinctInjectableBean:58` — asserts bean not-null and `isNotSameAs(authRedisConnectionFactory)` and `isNotSameAs(rateLimitRedisConnectionFactory)` — green |
+| Cluster 2 — blacklist `bl:`/`uinv:` READS served from auth-local, WRITES land on `@Primary` auth; end-to-end write-invisible-until-caught-up | Contract 2, req L46 | MET | Reads: `TokenBlacklistService.isBlacklisted:134` and `isUserTokenInvalidated:182` use `authLocalStringRedisTemplate`. Writes: `addToBlacklist:118` and `invalidateUserTokens:165` use `@Primary stringRedisTemplate`. `@Qualifier("authLocalStringRedisTemplate")` ctor injection `:74-81`; templates wired at `RedisConnectionConfig.java:98-107` (`@Primary stringRedisTemplate`→auth, `authLocalStringRedisTemplate`→auth-local) | `AuthLocalReadSplitIT.blacklistReadWriteSplit_bl_and_uinv:120` (ACCEPTANCE) — write→`bl:*` present on auth store (`:127`), `isBlacklisted` false pre-mirror (`:132`), true after `mirror("bl:*")` (`:138`); same for `uinv:` (`:147`,`:152`,`:158`) — green |
+| Cluster 2 (tombstone) — `del:` READ served from auth-local, WRITE lands on `@Primary` auth | Contract 2, req L46 | MET | Read: `ContentTombstoneStore.isTombstoned:66` uses `authLocalStringRedisTemplate.hasKey`. Write: `writeTombstone:48` uses `@Primary stringRedisTemplate`; ctor `@Qualifier` inject `:32-36` | `AuthLocalReadSplitIT.tombstoneRead_whenAuthLocalStale_returnsFalseUntilCaughtUp:165` — write→`del:*` on auth (`:170`), `isTombstoned` false pre-mirror (`:175`), true after `mirror("del:*")` (`:181`) — green |
+| Cluster 3 — both rerouted reads fail-open when auth-local unreachable; `blacklist_check_skipped_total` increments | Contract 3, req Degradation, INV6 | MET | `isBlacklisted:148-150` catches `DataAccessException`→`failOpen` (`:242-246` increments `blacklist_check_skipped_total`, returns false — UNCHANGED); `isUserTokenInvalidated:187-189` same; `isTombstoned:67-70` catches `DataAccessException`→returns false (UNCHANGED) | `AuthLocalReadSplitIT.reads_whenAuthLocalUnreachable_failOpen:188` — builds services with a stopped ("dead") auth-local template; `isBlacklisted` false (`:205`), counter `>=1.0` (`:209`), `isTombstoned` false (`:216`) — green |
+| Cluster 4 — single-region no-op: `AUTH_LOCAL_REDIS_*` unset ⇒ auth-local endpoint == auth endpoint | Contract 4 | MET | `application.properties:65-66` nested-default aliasing: `redis.auth-local.host=${AUTH_LOCAL_REDIS_HOST:${AUTH_REDIS_HOST:localhost}}`, port likewise | `AuthLocalAliasingTest.authLocal_whenVarsUnset_aliasesToAuthEndpoint:54` — sets only `AUTH_REDIS_*`, asserts auth-local host+port equal auth host+port, and auth port equals the container port (`:60-62`) — green |
+| Req L46 — read-local / write-global (Redis blacklist + tombstone reads) | requirements.md L46 | MET | Realized by Clusters 1-2 above (reads on auth-local factory/template, writes on `@Primary` auth) | `AuthLocalReadSplitIT` all 3 tests green (write-invisible-until-mirror on all three key layouts) |
+| Req Degradation — blacklist local-replica read; all Redis unavailable ⇒ fail-open + `blacklist_check_skipped_total` | requirements.md Degradation | MET | Local-replica rung: `isBlacklisted` reads `authLocalStringRedisTemplate:134`; fail-open terminus `failOpen:242-246` unchanged | `AuthLocalReadSplitIT.reads_whenAuthLocalUnreachable_failOpen:188` asserts counter increments and read returns not-blacklisted — green |
+| INV4 — no timing constants; "has X happened" as checkable condition | mechanics INV4 | MET | Split tests gate on key-presence via `mirror(pattern)` (`AuthLocalReadSplitIT:105-116`) and container start/stop, not sleeps. Ran `grep -nE "Thread\.sleep\|Awaitility\|await(\|TimeUnit\.\|delay"` over both test files → no matches (exit 1) | Caught-up condition expressed as `mirror(...)` then re-read (`:136-140`, `:156-160`, `:179-183`) — green |
+| INV6 — blacklist fail-open catch not narrowed on either rerouted read | mechanics INV6 | MET | `DataAccessException` catch preserved on `isBlacklisted:148`, `isUserTokenInvalidated:187`, `isTombstoned:67` — reroute changed only the template the read targets, not the catch clause | `reads_whenAuthLocalUnreachable_failOpen:188` exercises the real `DataAccessException` path (dead container) on both blacklist and tombstone reads — green |
+| Mechanics §7 — blacklist read ladder adds local-replica rung; fail-open terminus unchanged | mechanics §7 | MET | Local-replica rung = `authLocalStringRedisTemplate` read (`:134`); terminus `failOpen` unchanged | Covered by Cluster 3 + Req Degradation rows |
+| Mechanics §1 — `bl:`/`uinv:`/`del:` READS move (writes stay) | mechanics §1 | MET | Key layouts unchanged (`bl:` `:49`, `uinv:` `:51`, `del:` `ContentTombstoneStore:74`); only the read template moved | Covered by Cluster 2 rows (per-layout write-invisible-until-mirror) |
+
+### Regression closure (second-bean + ctor-arity risk)
+- The scoped `gradlew test` runs `compileTestJava` over the ENTIRE test source set before `--tests` filtering; `BUILD SUCCESSFUL` therefore proves every construction site of the 2→3-arg `TokenBlacklistService` ctor (incl. `TokenBlacklistServiceTest`'s 5 sites) and the `ContentTombstoneStore` ctor compiled against the new signatures.
+- The `@SpringBootTest` classes autowire `StringRedisTemplate` by type and load context successfully ⇒ the explicit `@Primary stringRedisTemplate()` resolved the `NoUniqueBeanDefinitionException` ambiguity introduced by the second `StringRedisTemplate` bean (an unresolved ambiguity would fail context load).
+
+### Gaps
+- None. All four contract clusters, both requirement items, and INV4/INV6 MET with cited code + green tests; scoped suite 6/0/0.

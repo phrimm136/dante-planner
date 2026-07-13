@@ -3,6 +3,7 @@ package org.danteplanner.backend.shared.readpath;
 import java.time.Duration;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -26,9 +27,12 @@ public class ContentTombstoneStore {
     private static final String TOMBSTONE_MARKER = "1";
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final StringRedisTemplate authLocalStringRedisTemplate;
 
-    public ContentTombstoneStore(StringRedisTemplate stringRedisTemplate) {
+    public ContentTombstoneStore(StringRedisTemplate stringRedisTemplate,
+            @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
     }
 
     /**
@@ -59,7 +63,7 @@ public class ContentTombstoneStore {
     public boolean isTombstoned(String entityType, UUID id) {
         String key = tombstoneKey(entityType, id);
         try {
-            return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+            return Boolean.TRUE.equals(authLocalStringRedisTemplate.hasKey(key));
         } catch (DataAccessException e) {
             log.warn("tombstone check failed for {}:{} — serving the positive (primary re-check remains the gate)", entityType, id, e);
             return false;

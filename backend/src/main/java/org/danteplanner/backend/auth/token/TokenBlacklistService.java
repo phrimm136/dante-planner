@@ -8,6 +8,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -62,10 +63,20 @@ public class TokenBlacklistService {
 
     private final StringRedisTemplate stringRedisTemplate;
 
+    /**
+     * Auth-local read replica template. Blacklist and user-invalidation READS are
+     * served from here (read-local); WRITES stay on {@link #stringRedisTemplate}.
+     */
+    private final StringRedisTemplate authLocalStringRedisTemplate;
+
     private final MeterRegistry meterRegistry;
 
-    public TokenBlacklistService(StringRedisTemplate stringRedisTemplate, MeterRegistry meterRegistry) {
+    public TokenBlacklistService(
+            StringRedisTemplate stringRedisTemplate,
+            @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate,
+            MeterRegistry meterRegistry) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
         this.meterRegistry = meterRegistry;
     }
 
@@ -120,7 +131,7 @@ public class TokenBlacklistService {
         }
 
         try {
-            String value = stringRedisTemplate.opsForValue().get(blacklistKey(token));
+            String value = authLocalStringRedisTemplate.opsForValue().get(blacklistKey(token));
             if (value == null) {
                 return false;
             }
@@ -168,7 +179,7 @@ public class TokenBlacklistService {
             return false;
         }
         try {
-            String value = stringRedisTemplate.opsForValue().get(userInvalidationKey(userId));
+            String value = authLocalStringRedisTemplate.opsForValue().get(userInvalidationKey(userId));
             if (value == null) {
                 return false;
             }

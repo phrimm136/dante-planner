@@ -57,7 +57,7 @@ class TokenBlacklistServiceTest {
 
     @BeforeEach
     void setUp() {
-        blacklistService = new TokenBlacklistService(sharedTemplate, new SimpleMeterRegistry());
+        blacklistService = new TokenBlacklistService(sharedTemplate, sharedTemplate, new SimpleMeterRegistry());
         blacklistService.clear();
     }
 
@@ -343,7 +343,7 @@ class TokenBlacklistServiceTest {
 
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, new SimpleMeterRegistry());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
 
             // Assert - externalized revocation is visible across instances
             assertThat(secondService.isBlacklisted(token)).isTrue();
@@ -363,7 +363,7 @@ class TokenBlacklistServiceTest {
 
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, new SimpleMeterRegistry());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
 
             // Assert - externalized user invalidation is visible across instances
             assertThat(secondService.isUserTokenInvalidated(userId, 0L)).isTrue();
@@ -413,7 +413,7 @@ class TokenBlacklistServiceTest {
             StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
             when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
             SimpleMeterRegistry registry = new SimpleMeterRegistry();
-            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, registry);
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry);
 
             // Act
             boolean result = service.isBlacklisted("t");
@@ -430,7 +430,7 @@ class TokenBlacklistServiceTest {
             StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
             when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
             SimpleMeterRegistry registry = new SimpleMeterRegistry();
-            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, registry);
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry);
 
             // Act
             boolean result = service.isUserTokenInvalidated(1L, 0L);

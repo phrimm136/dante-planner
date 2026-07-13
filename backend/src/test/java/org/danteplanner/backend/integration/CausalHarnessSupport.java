@@ -121,6 +121,8 @@ abstract class CausalHarnessSupport {
         registry.add("spring.flyway.password", PRIMARY::getPassword);
         registry.add("redis.auth.host", AUTH_REDIS::getRedisHost);
         registry.add("redis.auth.port", AUTH_REDIS::getRedisPort);
+        registry.add("redis.auth-local.host", AUTH_REDIS::getRedisHost);
+        registry.add("redis.auth-local.port", AUTH_REDIS::getRedisPort);
         registry.add("redis.rate-limit.host", RATE_LIMIT_REDIS::getRedisHost);
         registry.add("redis.rate-limit.port", RATE_LIMIT_REDIS::getRedisPort);
     }

@@ -1,6 +1,6 @@
 {
-  "totalPhases": 15,
-  "currentPhase": 13,
+  "totalPhases": 16,
+  "currentPhase": 14,
   "reviewMode": "end",
   "infraPhasesMode": "authored-as-code, apply consent-gated with user AWS credentials",
   "phases": [
@@ -17,6 +17,7 @@
     { "name": "FE SSE invalidate->patch + errorCode UX", "status": "done" },
     { "name": "Pre-Seoul gates - recorded measurements", "status": "done" },
     { "name": "Oregon k3s fleet + ArgoCD + CI arm64 - infra", "status": "done", "note": "OPERATIONALLY VERIFIED 2026-07-13: fleet live, ArgoCD Synced/Healthy, all danteplanner pods Running (backend reaches private RDS over VPC peering); unattended rebuild (destroy+apply) proven to re-converge hands-free; cattle app-node kill proven (ASG replacement Ready ~14s). Durable fixes committed: ECR as data source, standalone routes, kubelet ECR credential provider, enableServiceLinks:false, default AppProject, targetRevision wiring, submodule-fetch disable, Secrets Manager runtime-config bundle. Open follow-up: orphan NotReady node GC (no CCM on self-managed k3s)." },
+    { "name": "14a: Auth-Redis read-local/write-global split (Phase 14 carve-out)", "status": "done" },
     { "name": "Seoul + GA + peering + ECR replication - infra", "status": "pending" },
     { "name": "Drills + portfolio write-ups - infra", "status": "pending" }
   ]

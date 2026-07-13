@@ -245,6 +245,9 @@ class DegradationIT {
         registry.add("redis.auth.host", DEGRADATION_TOXIPROXY::getHost);
         registry.add("redis.auth.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(PROXY_LISTEN_PORT));
 
+        registry.add("redis.auth-local.host", DEGRADATION_TOXIPROXY::getHost);
+        registry.add("redis.auth-local.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(PROXY_LISTEN_PORT));
+
         registry.add("redis.rate-limit.host", DEGRADATION_TOXIPROXY::getHost);
         registry.add("redis.rate-limit.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(RATE_LIMIT_PROXY_LISTEN_PORT));
     }
