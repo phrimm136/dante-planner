@@ -197,9 +197,15 @@ jobs:
           ref: ${{ github.ref_name }}
           token: ${{ secrets.GH_DEPLOY_PAT }}
 
+      # Pinned direct download: the upstream install script resolves "latest"
+      # through the GitHub REST API, which shared-runner IPs get rate-limited
+      # on; release-asset URLs carry no API rate limit.
       - name: Install kustomize
+        env:
+          KUSTOMIZE_VERSION: v5.8.1
         run: |
-          curl -sfL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          curl -sfLo kustomize.tar.gz "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
+          tar -xzf kustomize.tar.gz kustomize
           sudo mv kustomize /usr/local/bin/
 
       - name: Bump image tag in BOTH overlays
