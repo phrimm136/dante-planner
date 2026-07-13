@@ -24,6 +24,7 @@ module "fleet" {
   rds_peering_auto_accept = false
 
   ingress_eip_allocation_id = var.ingress_eip_allocation_id
+  enable_global_accelerator = true
   tags                      = var.tags
 }
 
