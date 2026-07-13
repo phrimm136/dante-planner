@@ -21,7 +21,7 @@ export const STATIC_DATA_STALE_TIME = 7 * 24 * 60 * 60 * 1000
 /**
  * Discord server invite URL
  */
-export const DISCORD_INVITE_URL = 'https://discord.gg/DMGGsP2EWS'
+export const DISCORD_INVITE_URL = 'https://discord.gg/Z6DWySQ7B2'
 
 /**
  * Discord brand color (Blurple)
