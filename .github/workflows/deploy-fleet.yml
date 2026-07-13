@@ -9,10 +9,10 @@ name: "Deploy (multi-region k3s): arm64 -> ECR x2 -> GitOps"
 # yet replicated to Seoul).
 on:
   push:
-    # feat/034-oregon-k3s is the pre-promotion GitOps branch (deploy overlays live
-    # here, not on frozen main); include it so a push builds the image directly,
-    # since workflow_dispatch requires the workflow on the default branch.
-    branches: [main, feat/034-oregon-k3s]
+    # dev is the integration branch ArgoCD tracks pre-promotion (deploy overlays
+    # live here, not on frozen main); main stays listed for the eventual
+    # promotion cutover.
+    branches: [main, dev]
     paths:
       - 'backend/**'
       - '.github/workflows/deploy-fleet.yml'

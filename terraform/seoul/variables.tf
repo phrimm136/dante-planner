@@ -15,7 +15,7 @@ variable "region" {
 }
 
 variable "gitops_target_revision" {
-  description = "Git revision Seoul's ArgoCD tracks. MUST match the branch that carries deploy/overlays/seoul (Oregon currently tracks feat/034-oregon-k3s; keep them consistent or merge to main first)."
+  description = "Git revision Seoul's ArgoCD tracks. MUST match Oregon's gitops_target_revision — both regions sync the same branch (dev pre-promotion, main after)."
   type        = string
   default     = "main"
 }
