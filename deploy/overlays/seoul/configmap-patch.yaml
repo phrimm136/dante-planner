@@ -4,13 +4,13 @@ metadata:
   name: backend-config
 data:
   DEPLOY_REGION: ap-northeast-2
-  # Read-local / write-global auth Redis (Phase 14a split, now semantically live).
-  # WRITES (blacklist add, rotation, tombstone write) must reach the OREGON PRIMARY
-  # redis-auth over the Seoul<->Oregon peering; a Seoul-local write would hit the
-  # read-only REPLICAOF replica and fail. This endpoint + the Seoul<->Oregon
-  # peering are wired in chunk 4 (Redis REPLICAOF topology) — placeholder until
-  # then; do NOT deploy Seoul with this unset (it would fall to a dead localhost).
-  REDIS_AUTH_HOST: OREGON_PRIMARY_REDIS_ENDPOINT_PENDING_CHUNK4
+  # Read-local / write-global auth Redis (Phase 14a split, live). WRITES (blacklist
+  # add, rotation, tombstone write) reach the OREGON PRIMARY redis-auth over the
+  # peering by its stable internal name (Route53 private zone, terraform/oregon
+  # internal-dns.tf; resolves to the data node over the peering), on the NodePort.
+  # A Seoul-local write would hit the read-only REPLICAOF replica and fail.
+  REDIS_AUTH_HOST: redis-auth.oregon.danteplanner.internal
+  REDIS_AUTH_PORT: "31637"
   # READS resolve against the Seoul-LOCAL replica (in-cluster redis-auth, a
   # read-only REPLICAOF of the Oregon primary). This is the whole point of the
   # split: blacklist/tombstone reads stay in-region instead of ~130ms to Oregon.

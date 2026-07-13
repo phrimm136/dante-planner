@@ -18,6 +18,11 @@ output "vpc_cidr" {
   value       = module.fleet.vpc_cidr
 }
 
+output "internal_zone_id_for_seoul" {
+  description = "Private hosted zone id — Seoul reads this via remote_state to associate its VPC (resolve redis-auth.oregon.danteplanner.internal)."
+  value       = aws_route53_zone.internal.zone_id
+}
+
 output "ingress_instance_id" {
   description = "Oregon ingress EC2 instance id — read by terraform/global-accelerator (remote state) as the Oregon GA endpoint."
   value       = module.fleet.ingress_instance_id

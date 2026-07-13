@@ -43,6 +43,11 @@ output "cp_private_ip" {
   value       = aws_instance.cp.private_ip
 }
 
+output "data_node_private_ip" {
+  description = "Data node private IP (where the auth-redis StatefulSet runs). Backs the internal DNS A record a peer region uses to reach the auth-redis NodePort."
+  value       = aws_instance.data.private_ip
+}
+
 output "cp_instance_id" {
   description = "Control-plane instance id — the `aws ssm send-command` target for scripts/ops/oregon-verify.sh."
   value       = aws_instance.cp.id

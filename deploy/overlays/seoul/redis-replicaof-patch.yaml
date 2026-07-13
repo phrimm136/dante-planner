@@ -36,21 +36,27 @@ spec:
             - -c
             - |
               if [ -n "$REDIS_AUTH_PASSWORD" ]; then
+                # Password provisioned: REPLICAOF the Oregon primary over peering,
+                # authenticated (masterauth) and password-protected (requirepass),
+                # protected-mode yes. This is the only path that replicates
+                # cross-region — never without auth.
                 exec docker-entrypoint.sh redis-server \
                   --appendonly yes \
                   --appendfsync everysec \
                   --aof-use-rdb-preamble yes \
                   --replica-read-only yes \
-                  --replicaof REPLICAOF_ENDPOINT_HOST REPLICAOF_ENDPOINT_PORT \
+                  --replicaof redis-auth.oregon.danteplanner.internal 31637 \
                   --protected-mode yes \
                   --requirepass "$REDIS_AUTH_PASSWORD" \
                   --masterauth "$REDIS_AUTH_PASSWORD"
               else
+                # No password yet: run STANDALONE (no cross-region REPLICAOF) so an
+                # unprovisioned Seoul never replicates the auth store over the
+                # peering without auth. Serves as a local store until the password
+                # rollout, then the if-branch takes over on restart.
                 exec docker-entrypoint.sh redis-server \
                   --appendonly yes \
                   --appendfsync everysec \
                   --aof-use-rdb-preamble yes \
-                  --replica-read-only yes \
-                  --replicaof REPLICAOF_ENDPOINT_HOST REPLICAOF_ENDPOINT_PORT \
                   --protected-mode no
               fi
