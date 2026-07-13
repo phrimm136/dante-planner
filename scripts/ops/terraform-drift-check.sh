@@ -11,7 +11,7 @@ set -uo pipefail
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 GH_REPO="phrimm136/dante-planner"
 ISSUE_LABEL="terraform-drift"
-STACKS=(iam-bootstrap oregon oregon-edge seoul rds secrets global-accelerator)
+STACKS=(iam-bootstrap oregon seoul rds secrets global-accelerator)
 
 drifted=()
 failed=()
