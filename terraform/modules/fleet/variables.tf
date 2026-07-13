@@ -10,6 +10,30 @@ variable "name_prefix" {
   default     = "danteplanner"
 }
 
+variable "region_name_suffix" {
+  description = "Short region label baked into resource names, tags, and SSM paths (IAM role names are account-global, so this MUST differ per region to avoid collisions). Oregon = 'oregon' (default keeps existing names byte-identical); Seoul passes 'seoul'."
+  type        = string
+  default     = "oregon"
+}
+
+variable "rds_vpc_cidr" {
+  description = "RDS VPC CIDR for the fleet→RDS route. Empty (Oregon, same-region) = data-source it from rds_vpc_id. Set (Seoul, cross-region) = passed explicitly, since a data.aws_vpc lookup only resolves in the provider's own region."
+  type        = string
+  default     = ""
+}
+
+variable "rds_peer_region" {
+  description = "Region of the RDS VPC when it is in a DIFFERENT region than this fleet (cross-region peering, e.g. Seoul→us-west-2 RDS). null = same-region peering (Oregon). When set, rds_peering_auto_accept must be false and the caller provides an aws_vpc_peering_connection_accepter in the RDS region."
+  type        = string
+  default     = null
+}
+
+variable "rds_peering_auto_accept" {
+  description = "true for same-region peering (Oregon auto-accepts). false for cross-region (Seoul): AWS requires an explicit accepter in the peer's region."
+  type        = bool
+  default     = true
+}
+
 # --- Network ----------------------------------------------------------------
 
 variable "vpc_cidr" {
@@ -40,10 +64,27 @@ variable "ingress_allowed_cidrs" {
   type        = list(string)
 }
 
+variable "enable_global_accelerator" {
+  description = "When true, allowlist the AWS-managed Global Accelerator prefix list on the ingress SG (443) so GA's direct health checks reach /healthz-local. Set alongside applying terraform/global-accelerator; default false keeps the single-region SG surface unchanged."
+  type        = bool
+  default     = false
+}
+
 variable "redis_cross_region_cidr" {
-  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort (Seoul's fleet CIDR, 10.30.0.0/16, so its replica can REPLICAOF and its pods can write auth state to the Oregon primary). Empty (default) = no rule; the auth Redis stays region-private. Set in terraform.tfvars when Seoul goes live. Never 0.0.0.0/0."
+  description = "Peer-region fleet CIDR admitted to the auth Redis NodePort over VPC peering (Oregon passes Seoul's 10.30.0.0/16 so the Seoul replica can REPLICAOF and Seoul pods can write blacklist/rotation/tombstone state). Empty (default) creates NO rule — the auth Redis stays region-private and the single-region SG surface is unchanged. The auth Redis holds revocation state: scope this to the one peer fleet CIDR, never a broad range."
   type        = string
   default     = ""
+
+  validation {
+    condition     = var.redis_cross_region_cidr != "0.0.0.0/0"
+    error_message = "The auth Redis NodePort must never be open to 0.0.0.0/0; set the peer region's fleet CIDR only."
+  }
+}
+
+variable "redis_auth_nodeport" {
+  description = "NodePort exposing the auth Redis primary on the fleet nodes. MUST match the nodePort in deploy/overlays/oregon/redis-auth-nodeport.yaml."
+  type        = number
+  default     = 31637
 }
 
 # --- Instance shape ---------------------------------------------------------
@@ -120,6 +161,12 @@ variable "gateway_api_version" {
   default     = "v1.1.0"
 }
 
+variable "traefik_version" {
+  description = "Pinned Traefik release tag for the traefik.io CRDs installed at CP bootstrap (must match the traefik:<tag> image in deploy/base/traefik-controller.yaml). Enables the mTLS TLSOption."
+  type        = string
+  default     = "v3.1"
+}
+
 variable "external_secrets_chart_version" {
   description = "Pinned External Secrets Operator Helm chart version. The CP installs ESO (CRDs + controller) at bootstrap, pinned to role=app nodes so its SDK-default-chain credential is the app node role granted secretsmanager:GetSecretValue."
   type        = string
@@ -178,16 +225,4 @@ variable "ingress_eip_allocation_id" {
   description = "Allocation id (eipalloc-…) of a DURABLE Elastic IP allocated OUTSIDE this rebuild-disposable stack (terraform/oregon-edge) to bind to the ingress node. Empty = ephemeral public IP (no stable entry). Set in terraform.tfvars. A destroy+apply of this stack re-creates only the association, never the address."
   type        = string
   default     = ""
-}
-
-variable "enable_global_accelerator" {
-  description = "Allowlist the GA managed prefix list on the ingress SG (443) for GA direct health checks. Set true when applying terraform/global-accelerator. Default false = unchanged SG."
-  type        = bool
-  default     = false
-}
-
-variable "seoul_region" {
-  description = "Second region (ap-northeast-2) that ECR replicates the backend image to, so Seoul app nodes pull a local copy. Root-only — the reusable module never mirrors back."
-  type        = string
-  default     = "ap-northeast-2"
 }

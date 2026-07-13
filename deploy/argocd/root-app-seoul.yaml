@@ -1,0 +1,26 @@
+# App-of-apps root Application for the Seoul cluster. ArgoCD core runs per cluster
+# (hub-spoke rejected), so Seoul's CP owns this Application pointing at its own
+# overlay. Mirror of root-app-oregon.yaml, differing only by name + overlay path.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: danteplanner-seoul
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    # Confirm this matches gitops_repo_url in terraform/seoul at apply time.
+    repoURL: https://github.com/phrimm136/dante-planner.git
+    targetRevision: main
+    path: deploy/overlays/seoul
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: danteplanner
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

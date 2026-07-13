@@ -4,7 +4,7 @@
 # surge and load headroom). Nodes join unattended via user-data + the SSM join
 # token. LimitNOFILE=65536 is set on the k3s-agent service (SSE fd stampede).
 resource "aws_launch_template" "app" {
-  name_prefix   = "${var.name_prefix}-oregon-app-"
+  name_prefix   = "${var.name_prefix}-${var.region_name_suffix}-app-"
   image_id      = data.aws_ssm_parameter.node_ami.value
   instance_type = var.instance_type
   key_name      = var.ssh_key_name != "" ? var.ssh_key_name : null
@@ -40,14 +40,14 @@ resource "aws_launch_template" "app" {
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge(var.tags, { Name = "${var.name_prefix}-oregon-app", Role = "app" })
+    tags          = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-app", Role = "app" })
   }
 
   tags = var.tags
 }
 
 resource "aws_autoscaling_group" "app" {
-  name                = "${var.name_prefix}-oregon-app"
+  name                = "${var.name_prefix}-${var.region_name_suffix}-app"
   min_size            = var.app_asg_min_size
   desired_capacity    = var.app_asg_desired_capacity
   max_size            = var.app_asg_max_size
@@ -70,7 +70,7 @@ resource "aws_autoscaling_group" "app" {
 
   tag {
     key                 = "Name"
-    value               = "${var.name_prefix}-oregon-app"
+    value               = "${var.name_prefix}-${var.region_name_suffix}-app"
     propagate_at_launch = true
   }
 

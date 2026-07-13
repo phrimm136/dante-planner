@@ -31,5 +31,5 @@ resource "aws_instance" "data" {
     encrypted   = true
   }
 
-  tags = merge(var.tags, { Name = "${var.name_prefix}-oregon-data", Role = "data" })
+  tags = merge(var.tags, { Name = "${var.name_prefix}-${var.region_name_suffix}-data", Role = "data" })
 }

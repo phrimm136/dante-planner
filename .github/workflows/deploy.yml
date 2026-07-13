@@ -1,15 +1,11 @@
-name: Deploy to Production
+name: Deploy to Production (SUPERSEDED - legacy single-EC2)
 
+# SUPERSEDED by deploy-fleet.yml (the two-region k3s GitOps deploy). This built
+# backend+nginx+mysql and deployed to the single EC2 over docker-compose; that
+# host is decommissioned after the k3s cutover. The push trigger is removed so it
+# no longer auto-fires (and never races the fleet deploy); kept as workflow_dispatch
+# only for break-glass reference to the legacy EC2 path. Delete once the EC2 is gone.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'backend/**'
-      - 'nginx/**'
-      - 'mysql/**'
-      - 'docker-compose.yml'
-      - 'scripts/deploy/**'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 concurrency:

@@ -4,6 +4,12 @@ set -euxo pipefail
 command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
 command -v git >/dev/null 2>&1 || dnf install -y git
 
+# CP private IP (IMDSv2 — IMDSv1 is disabled). Used as a k3s API cert SAN and in
+# the published kubeconfig so operators reach the API in-VPC without SSH. The CP
+# cannot get this from Terraform (self-reference in its own user_data = cycle).
+IMDS_TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-aws-ec2-metadata-token-ttl-seconds: 300')
+CP_PRIVATE_IP=$(curl -sf -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+
 TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
   --name "${token_param}" --query 'Parameter.Value' --output text)
 umask 077
@@ -16,6 +22,7 @@ echo "$TOKEN" > /etc/k3s-token
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --cluster-init \
   --token-file /etc/k3s-token \
+  --tls-san $CP_PRIVATE_IP \
   --disable traefik \
   --disable servicelb \
   --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule \
@@ -27,6 +34,15 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
 
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 until kubectl get nodes >/dev/null 2>&1; do sleep 5; done
+
+# Publish the admin kubeconfig to SSM (loopback rewritten to the CP private IP,
+# a cert SAN via --tls-san) so operators fetch cluster access without SSH.
+# set +x so the embedded client key never lands in the cloud-init log.
+set +x
+aws ssm put-parameter --region ${region} --name "${kubeconfig_param}" \
+  --type SecureString --tier Intelligent-Tiering --overwrite \
+  --value "$(sed 's#https://127.0.0.1:6443#https://'"$CP_PRIVATE_IP"':6443#' /etc/rancher/k3s/k3s.yaml)"
+set -x
 
 # ArgoCD core per cluster (reconciler only, no API server / UI — hub-spoke
 # rejected, no cross-region deploy dependency).
@@ -55,6 +71,14 @@ kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=300s || tru
 kubectl apply -f \
   https://github.com/kubernetes-sigs/gateway-api/releases/download/${gateway_api_version}/standard-install.yaml
 
+# Traefik's OWN CRDs (traefik.io/v1alpha1) — needed for the mTLS TLSOption that
+# enforces Cloudflare Authenticated Origin Pull. --disable traefik removed the
+# bundled path, and the kustomize base ships only Gateway API resources, so these
+# CRDs must be installed here or a TLSOption fails the whole ArgoCD sync. Pinned to
+# the Traefik minor running in the base (traefik:v3.1).
+kubectl apply -f \
+  https://raw.githubusercontent.com/traefik/traefik/${traefik_version}/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
+
 # External Secrets Operator (CRDs + controller), pinned to role=app nodes so its
 # AWS SDK default-chain credential resolves to the app node instance profile —
 # the role granted secretsmanager:GetSecretValue (no-IRSA boundary). App nodes
@@ -74,10 +98,10 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
 # deploy/overlays/oregon so the cluster is GitOps-managed from here on.
 git clone --depth 1 --branch ${gitops_revision} ${gitops_repo_url} /opt/gitops
 kubectl apply -f /opt/gitops/deploy/argocd/project.yaml
-kubectl apply -f /opt/gitops/deploy/argocd/root-app.yaml
+kubectl apply -f /opt/gitops/deploy/argocd/root-app-${region_suffix}.yaml
 
 # Inject the ECR registry host (account id) as a kustomize image override at
 # sync time. The host is never committed to git — it is rendered here from
 # Terraform state. The override sets only newName (:* preserves the overlay's
 # CI-bumped newTag), so the git-committed tag still selects the image.
-kubectl -n argocd patch application danteplanner-oregon --type merge -p '{"spec":{"source":{"targetRevision":"${gitops_revision}","kustomize":{"images":["${ecr_image}"]}}}}'
+kubectl -n argocd patch application danteplanner-${region_suffix} --type merge -p '{"spec":{"source":{"targetRevision":"${gitops_revision}","kustomize":{"images":["${ecr_image}"]}}}}'

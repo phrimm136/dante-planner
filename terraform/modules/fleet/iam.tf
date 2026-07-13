@@ -14,25 +14,25 @@ data "aws_iam_policy_document" "ec2_assume" {
 }
 
 resource "aws_iam_role" "cp" {
-  name               = "${var.name_prefix}-oregon-cp"
+  name               = "${var.name_prefix}-${var.region_name_suffix}-cp"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
   tags               = var.tags
 }
 
 resource "aws_iam_role" "ingress" {
-  name               = "${var.name_prefix}-oregon-ingress"
+  name               = "${var.name_prefix}-${var.region_name_suffix}-ingress"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
   tags               = var.tags
 }
 
 resource "aws_iam_role" "data" {
-  name               = "${var.name_prefix}-oregon-data"
+  name               = "${var.name_prefix}-${var.region_name_suffix}-data"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
   tags               = var.tags
 }
 
 resource "aws_iam_role" "app" {
-  name               = "${var.name_prefix}-oregon-app"
+  name               = "${var.name_prefix}-${var.region_name_suffix}-app"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume.json
   tags               = var.tags
 }
@@ -44,8 +44,9 @@ locals {
     data    = aws_iam_role.data.name
     app     = aws_iam_role.app.name
   }
-  # Token param ARN pattern (the parameter itself is defined in cp.tf).
-  token_param_arn = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${aws_ssm_parameter.k3s_token.name}"
+  # SSM param ARNs (the parameters themselves are defined in cp.tf).
+  token_param_arn      = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${aws_ssm_parameter.k3s_token.name}"
+  kubeconfig_param_arn = "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${aws_ssm_parameter.kubeconfig.name}"
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_core" {
@@ -68,6 +69,11 @@ data "aws_iam_policy_document" "cp" {
     resources = [local.token_param_arn]
   }
   statement {
+    sid       = "PublishKubeconfig"
+    actions   = ["ssm:PutParameter"]
+    resources = [local.kubeconfig_param_arn]
+  }
+  statement {
     sid       = "EtcdSnapshotBucket"
     actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
     resources = [aws_s3_bucket.etcd_snapshots.arn]
@@ -80,7 +86,7 @@ data "aws_iam_policy_document" "cp" {
 }
 
 resource "aws_iam_role_policy" "cp" {
-  name   = "${var.name_prefix}-oregon-cp"
+  name   = "${var.name_prefix}-${var.region_name_suffix}-cp"
   role   = aws_iam_role.cp.id
   policy = data.aws_iam_policy_document.cp.json
 }
@@ -95,19 +101,19 @@ data "aws_iam_policy_document" "read_join_token" {
 }
 
 resource "aws_iam_role_policy" "ingress_join" {
-  name   = "${var.name_prefix}-oregon-ingress-join"
+  name   = "${var.name_prefix}-${var.region_name_suffix}-ingress-join"
   role   = aws_iam_role.ingress.id
   policy = data.aws_iam_policy_document.read_join_token.json
 }
 
 resource "aws_iam_role_policy" "data_join" {
-  name   = "${var.name_prefix}-oregon-data-join"
+  name   = "${var.name_prefix}-${var.region_name_suffix}-data-join"
   role   = aws_iam_role.data.id
   policy = data.aws_iam_policy_document.read_join_token.json
 }
 
 resource "aws_iam_role_policy" "app_join" {
-  name   = "${var.name_prefix}-oregon-app-join"
+  name   = "${var.name_prefix}-${var.region_name_suffix}-app-join"
   role   = aws_iam_role.app.id
   policy = data.aws_iam_policy_document.read_join_token.json
 }
@@ -127,28 +133,28 @@ data "aws_iam_policy_document" "app_secrets" {
 }
 
 resource "aws_iam_role_policy" "app_secrets" {
-  name   = "${var.name_prefix}-oregon-app-secrets"
+  name   = "${var.name_prefix}-${var.region_name_suffix}-app-secrets"
   role   = aws_iam_role.app.id
   policy = data.aws_iam_policy_document.app_secrets.json
 }
 
 # --- Instance profiles ------------------------------------------------------
 resource "aws_iam_instance_profile" "cp" {
-  name = "${var.name_prefix}-oregon-cp"
+  name = "${var.name_prefix}-${var.region_name_suffix}-cp"
   role = aws_iam_role.cp.name
 }
 
 resource "aws_iam_instance_profile" "ingress" {
-  name = "${var.name_prefix}-oregon-ingress"
+  name = "${var.name_prefix}-${var.region_name_suffix}-ingress"
   role = aws_iam_role.ingress.name
 }
 
 resource "aws_iam_instance_profile" "data" {
-  name = "${var.name_prefix}-oregon-data"
+  name = "${var.name_prefix}-${var.region_name_suffix}-data"
   role = aws_iam_role.data.name
 }
 
 resource "aws_iam_instance_profile" "app" {
-  name = "${var.name_prefix}-oregon-app"
+  name = "${var.name_prefix}-${var.region_name_suffix}-app"
   role = aws_iam_role.app.name
 }

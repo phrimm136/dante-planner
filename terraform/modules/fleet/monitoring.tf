@@ -3,7 +3,7 @@
 # us_east_1 provider alias regardless of the fleet region.
 resource "aws_cloudwatch_metric_alarm" "billing" {
   provider            = aws.us_east_1
-  alarm_name          = "${var.name_prefix}-oregon-billing"
+  alarm_name          = "${var.name_prefix}-${var.region_name_suffix}-billing"
   alarm_description   = "Estimated monthly AWS charges exceeded threshold (steady state ~$145-190/mo)"
   namespace           = "AWS/Billing"
   metric_name         = "EstimatedCharges"
@@ -31,7 +31,7 @@ locals {
 
 resource "aws_cloudwatch_metric_alarm" "auto_recovery" {
   for_each            = local.pet_instances
-  alarm_name          = "${var.name_prefix}-oregon-${each.key}-recover"
+  alarm_name          = "${var.name_prefix}-${var.region_name_suffix}-${each.key}-recover"
   alarm_description   = "Auto-recover the ${each.key} node on a failed system status check"
   namespace           = "AWS/EC2"
   metric_name         = "StatusCheckFailed_System"
