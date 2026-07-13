@@ -49,7 +49,7 @@ export function Footer() {
           </a>
           <span className="text-muted-foreground/50">·</span>
           <a
-            href="https://discord.gg/DMGGsP2EWS"
+            href="https://discord.gg/Z6DWySQ7B2"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"

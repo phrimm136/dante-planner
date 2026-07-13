@@ -16,7 +16,7 @@ export function SideLinkSection() {
           style={{ backgroundColor: DISCORD_BLURPLE }}
         >
           <DiscordIcon size={24} className="shrink-0" />
-          <span className="text-sm font-semibold">Discord</span>
+          <span className="text-sm font-semibold">Discord (new!)</span>
         </a>
 
         {/* Ko-fi placeholder */}
