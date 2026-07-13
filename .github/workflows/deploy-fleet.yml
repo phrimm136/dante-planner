@@ -185,9 +185,16 @@ jobs:
     env:
       GIT_SHA: ${{ github.sha }}
     steps:
+      # Owner-scoped fine-grained PAT (contents:write). The bump push must carry
+      # the repository-admin identity: dev/main sit behind a code-scanning
+      # ruleset whose only usable bypass on a personal account is the admin
+      # role — the github-actions app cannot be a bypass actor outside an org.
+      # [skip ci] + the backend-only path filter keep the PAT push from
+      # retriggering this workflow.
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.ref_name }}
+          token: ${{ secrets.GH_DEPLOY_PAT }}
 
       - name: Install kustomize
         run: |
