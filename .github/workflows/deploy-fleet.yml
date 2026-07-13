@@ -101,6 +101,7 @@ jobs:
   surge-up:
     needs: build-push
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 20
     steps:
       - name: Configure AWS credentials
@@ -229,6 +230,7 @@ jobs:
   settle-down:
     needs: [bump-tag, surge-up]
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 25
     env:
       GIT_SHA: ${{ github.sha }}
