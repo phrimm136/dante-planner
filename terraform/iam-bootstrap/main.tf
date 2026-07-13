@@ -261,3 +261,55 @@ resource "aws_iam_role_policy" "rds_fleet_peering" {
   role   = var.rds_provisioner_role_name
   policy = data.aws_iam_policy_document.rds_fleet_peering[0].json
 }
+
+# --- CI deploy-surge grant (github-actions-deploy user) ----------------------
+# Zero-downtime deploys on the DaemonSet app tier need a second NODE per region
+# (node count = pod count; two Spring heaps do not fit one 2GiB app node), so
+# the deploy workflow scales each app ASG 1->2 around the rollout and verifies
+# completion over SSM on each region's CP. Scoped to the two app ASGs and to
+# CP instances by Name tag. The user itself predates terraform and stays
+# unmanaged; only this grant is code-managed.
+data "aws_iam_policy_document" "deploy_surge" {
+  statement {
+    sid     = "SurgeScale"
+    actions = ["autoscaling:SetDesiredCapacity", "autoscaling:TerminateInstanceInAutoScalingGroup"]
+    resources = [
+      "arn:aws:autoscaling:us-west-2:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${var.name_prefix}-oregon-app",
+      "arn:aws:autoscaling:ap-northeast-2:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${var.name_prefix}-seoul-app",
+    ]
+  }
+
+  statement {
+    sid       = "SurgeObserve"
+    actions   = ["autoscaling:DescribeAutoScalingGroups", "ec2:DescribeInstances", "ssm:GetCommandInvocation"]
+    resources = ["*"] # Describe*/Get* do not support resource-level ARNs.
+  }
+
+  statement {
+    sid       = "SurgeSsmDocument"
+    actions   = ["ssm:SendCommand"]
+    resources = ["arn:aws:ssm:*::document/AWS-RunShellScript"]
+  }
+
+  statement {
+    sid       = "SurgeSsmTargets"
+    actions   = ["ssm:SendCommand"]
+    resources = ["arn:aws:ec2:*:${data.aws_caller_identity.current.account_id}:instance/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "ssm:resourceTag/Name"
+      values   = ["${var.name_prefix}-oregon-cp", "${var.name_prefix}-seoul-cp"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "deploy_surge" {
+  name   = "${var.name_prefix}-deploy-surge"
+  policy = data.aws_iam_policy_document.deploy_surge.json
+  tags   = var.tags
+}
+
+resource "aws_iam_user_policy_attachment" "deploy_surge" {
+  user       = "github-actions-deploy"
+  policy_arn = aws_iam_policy.deploy_surge.arn
+}

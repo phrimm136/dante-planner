@@ -3,11 +3,6 @@ output "ingress_public_ip" {
   value       = module.fleet.ingress_public_ip
 }
 
-output "ingress_eip" {
-  description = "Stable Seoul ingress IP (empty until a durable EIP is allocated and set)."
-  value       = module.fleet.ingress_eip
-}
-
 output "cp_instance_id" {
   description = "Seoul control-plane instance id (scripts/ops verify target)."
   value       = module.fleet.cp_instance_id

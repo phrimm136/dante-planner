@@ -174,12 +174,6 @@ variable "rds_vpc_id" {
   type        = string
 }
 
-variable "ingress_eip_allocation_id" {
-  description = "Allocation id (eipalloc-…) of a DURABLE Elastic IP allocated OUTSIDE this rebuild-disposable stack (terraform/oregon-edge) to bind to the ingress node. Empty = ephemeral public IP (no stable entry). Set in terraform.tfvars. A destroy+apply of this stack re-creates only the association, never the address."
-  type        = string
-  default     = ""
-}
-
 variable "enable_global_accelerator" {
   description = "Allowlist the GA managed prefix list on the ingress SG (443) for GA direct health checks. Set true when applying terraform/global-accelerator. Default false = unchanged SG."
   type        = bool

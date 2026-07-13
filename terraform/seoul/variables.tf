@@ -15,7 +15,7 @@ variable "region" {
 }
 
 variable "gitops_target_revision" {
-  description = "Git revision Seoul's ArgoCD tracks. MUST match the branch that carries deploy/overlays/seoul (Oregon currently tracks feat/034-oregon-k3s; keep them consistent or merge to main first)."
+  description = "Git revision Seoul's ArgoCD tracks. MUST match Oregon's gitops_target_revision — both regions sync the same branch (dev pre-promotion, main after)."
   type        = string
   default     = "main"
 }
@@ -52,12 +52,6 @@ variable "rds_vpc_id" {
 variable "ingress_allowed_cidrs" {
   description = "CIDRs allowed to reach the Seoul ingress on 443 (Cloudflare edge + Global Accelerator health-check ranges), same posture as Oregon."
   type        = list(string)
-}
-
-variable "ingress_eip_allocation_id" {
-  description = "Allocation id of the DURABLE Seoul ingress EIP (allocate in a Seoul edge stack, mirroring terraform/oregon-edge). Empty = ephemeral IP."
-  type        = string
-  default     = ""
 }
 
 variable "tags" {

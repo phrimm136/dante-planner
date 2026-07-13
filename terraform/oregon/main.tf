@@ -33,5 +33,4 @@ module "fleet" {
   etcd_snapshot_retention         = var.etcd_snapshot_retention
   tags                            = var.tags
   rds_vpc_id                      = var.rds_vpc_id
-  ingress_eip_allocation_id       = var.ingress_eip_allocation_id
 }
