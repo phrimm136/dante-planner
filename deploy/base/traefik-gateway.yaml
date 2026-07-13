@@ -64,10 +64,22 @@ spec:
       backendRefs:
         - name: backend
           port: 8080
-# mTLS Authenticated Origin Pull (client-cert verification) is DEFERRED: it needs a
-# Traefik-proprietary TLSOption (traefik.io/v1alpha1), but this cluster runs Traefik
-# via Gateway API only and the traefik.io CRDs are not installed (--disable traefik
-# removed the bundled path). A TLSOption here invalidates the whole ArgoCD sync.
-# Follow-up to restore it: install the traefik.io CRDs at CP bootstrap, then re-add
-# the TLSOption + origin-client-ca ExternalSecret. Until then the ingress SG
-# (Cloudflare + GA ranges only) is the origin gate.
+---
+# mTLS Authenticated Origin Pull: Traefik requires+verifies Cloudflare's origin-pull
+# client cert on 443 (traefik.io CRDs installed at CP bootstrap). This is the REAL
+# origin gate — the SG (Cloudflare + GA ranges) is defense-in-depth.
+#
+# VerifyClientCertIfGiven, NOT RequireAndVerifyClientCert: Global Accelerator health
+# checks /healthz-local certless and cannot present Cloudflare's cert, so a hard
+# requirement would fail every health check and blackhole the region. Verify-if-given
+# lets the certless GA prober (SG-restricted) complete the handshake and get 200,
+# while real Cloudflare traffic presents and IS verified against origin-client-ca.
+apiVersion: traefik.io/v1alpha1
+kind: TLSOption
+metadata:
+  name: default
+spec:
+  clientAuth:
+    secretNames:
+      - origin-client-ca
+    clientAuthType: VerifyClientCertIfGiven
