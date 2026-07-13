@@ -1,4 +1,4 @@
-name: "Deploy (multi-region k3s): arm64 -> ECR x2 -> GitOps"
+name: "Deploy (multi-region k3s)"
 
 # Production GitOps deploy for the two-region k3s fleet (supersedes the legacy
 # single-EC2 deploy.yml). Build the arm64 backend image once, push it to BOTH
