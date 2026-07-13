@@ -101,7 +101,7 @@ jobs:
   surge-up:
     needs: build-push
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -134,6 +134,47 @@ jobs:
           }
           wait_asg "${{ secrets.AWS_REGION }}" danteplanner-oregon-app
           wait_asg "$SEOUL_REGION" danteplanner-seoul-app
+
+      # ASG InService is EC2-level only; the DaemonSet can start rolling as soon
+      # as the bump syncs, so the surge node must be a READY k3s node first or
+      # the roll can still hit a 0-ready window. Counting happens runner-side
+      # (grep -cw skips NotReady) so the remote command stays quote-free.
+      - name: Wait until both clusters see 2 Ready app nodes
+        run: |
+          ssm_out() {
+            local region="$1" iid="$2" cmd="$3" cid status=Pending
+            cid=$(aws ssm send-command --region "$region" --instance-ids "$iid" \
+              --document-name AWS-RunShellScript \
+              --parameters commands="$cmd" \
+              --query Command.CommandId --output text)
+            for _ in $(seq 1 24); do
+              sleep 5
+              status=$(aws ssm get-command-invocation --region "$region" --command-id "$cid" \
+                --instance-id "$iid" --query Status --output text 2>/dev/null || echo Pending)
+              case "$status" in Success|Failed|TimedOut|Cancelled) break;; esac
+            done
+            aws ssm get-command-invocation --region "$region" --command-id "$cid" \
+              --instance-id "$iid" --query StandardOutputContent --output text
+            [ "$status" = Success ]
+          }
+          cp_id() {
+            aws ec2 describe-instances --region "$1" \
+              --filters "Name=tag:Name,Values=$2" "Name=instance-state-name,Values=running" \
+              --query 'Reservations[0].Instances[0].InstanceId' --output text
+          }
+          wait_ready() {
+            local region="$1" cp="$2" iid n=0
+            iid=$(cp_id "$region" "$cp")
+            for _ in $(seq 1 30); do
+              n=$(ssm_out "$region" "$iid" "sudo k3s kubectl get nodes -l role=app --no-headers" | grep -cw Ready || true)
+              [ "$n" -ge 2 ] && return 0
+              sleep 15
+            done
+            echo "::error::$cp never reached 2 Ready app nodes (last: $n)"
+            return 1
+          }
+          wait_ready "${{ secrets.AWS_REGION }}" danteplanner-oregon-cp
+          wait_ready "$SEOUL_REGION" danteplanner-seoul-cp
 
   bump-tag:
     needs: [build-push, surge-up]
