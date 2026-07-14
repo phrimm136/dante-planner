@@ -33,13 +33,9 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SENTRY_DSN: ${SENTRY_DSN:-}
-      # Redis topology (034 multi-region). auth = durable store (blacklist,
-      # rotation, tombstones, SSE pub/sub); rate-limit = ephemeral buckets;
-      # sse-local = the pod's local subscribe target (= auth host single-region).
-      # Hosts default to the compose service names; override via env for a
-      # managed or multi-region endpoint.
       AUTH_REDIS_HOST: ${AUTH_REDIS_HOST:-redis-auth}
       AUTH_REDIS_PORT: ${AUTH_REDIS_PORT:-6379}
+      AUTH_REDIS_PASSWORD: ${AUTH_REDIS_PASSWORD:-}
       RATE_LIMIT_REDIS_HOST: ${RATE_LIMIT_REDIS_HOST:-redis-ratelimit}
       RATE_LIMIT_REDIS_PORT: ${RATE_LIMIT_REDIS_PORT:-6379}
       SSE_LOCAL_REDIS_HOST: ${SSE_LOCAL_REDIS_HOST:-redis-auth}
@@ -116,7 +112,19 @@ services:
       dockerfile: Dockerfile
     container_name: danteplanner-redis-auth
     restart: unless-stopped
-    command: ["redis-server", "/etc/redis/redis-auth.conf"]
+    environment:
+      AUTH_REDIS_PASSWORD: ${AUTH_REDIS_PASSWORD:-}
+    command:
+      - sh
+      - -c
+      - |
+        if [ -n "$$AUTH_REDIS_PASSWORD" ]; then
+          exec docker-entrypoint.sh redis-server /etc/redis/redis-auth.conf \
+            --protected-mode yes \
+            --requirepass "$$AUTH_REDIS_PASSWORD"
+        else
+          exec docker-entrypoint.sh redis-server /etc/redis/redis-auth.conf
+        fi
     volumes:
       - redis-auth-data:/data
     networks:
@@ -128,7 +136,7 @@ services:
         reservations:
           memory: 128M
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli $${AUTH_REDIS_PASSWORD:+-a \"$$AUTH_REDIS_PASSWORD\" --no-auth-warning} ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -140,8 +148,6 @@ services:
         awslogs-group: /ecs/danteplanner/redis-auth
         awslogs-create-group: "true"
 
-  # Per-region ephemeral rate-limit store: no persistence, memory-bounded (see
-  # redis-ephemeral.conf). Same image as redis-auth, different command/config.
   redis-ratelimit:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-redis:${IMAGE_TAG}
     build:
@@ -177,8 +183,6 @@ services:
 volumes:
   mysql-data:
     driver: local
-  # Durable auth Redis AOF/RDB. In prod it rebuilds from replication; losing it
-  # locally just clears blacklist/rotation/tombstone state (fail-open by design).
   redis-auth-data:
     driver: local
 
