@@ -131,19 +131,23 @@ jobs:
           done < /tmp/new_migrations.txt
 
   build-backend:
-    needs: [test-backend]
+    needs: [checkout, test-backend]
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      # The Dockerfile bakes static/data (private submodule) into the image, so
+      # the build needs the submodule-initialized tree and a repo-root context.
+      - uses: actions/download-artifact@v4
+        with:
+          name: repo-with-submodules
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Mock Build Backend
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
+          context: .
           file: ./backend/Dockerfile
           push: false
           tags: ci/danteplanner-backend:${{ github.sha }}
