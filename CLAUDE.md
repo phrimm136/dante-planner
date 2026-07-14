@@ -18,11 +18,11 @@ Game planning and management tool for Limbus Company.
 4. **NEVER mix concerns** - Separate layers
 5. **ALWAYS validate data** - Zod (FE), Jakarta Validation (BE)
 6. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
-7. **BUG FIX** - Read working → Read broken → State root cause → Resolve. NEVER circumvent or bypass errors.
+7. **BUG FIX** - Run the `diagnose` skill: build a red feedback loop before any hypothesis, state the root cause before resolving. NEVER circumvent or bypass errors to make a symptom disappear.
 8. **BE CONCISE** - No unnecessary explanations or verbose output
 9. **NO inline annotations, NO throwaway code** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes. Don't write comments that restate what the function name already says. Don't add debug prints or verbose formatting you'll remove next edit. Write final-form code on the first Write.
 10. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
-11. **NEVER cd** - Use in-command directory flags (`--cwd`, `-p`, `-C`, etc.) to target subdirectories. `cd` confuses the session's working directory and compound commands with `cd` get blocked by security evaluation.
+11. **NEVER cd** - Use in-command directory flags (`--cwd`, `-p`, `-C`, etc.) to target subdirectories. `cd` confuses the session's working directory and compound commands with `cd` get blocked by security evaluation. Tests/builds MUST target the project root explicitly — `yarn --cwd frontend …`, `./gradlew -p backend …` — a bare `vitest`/`tsc`/`gradlew` at the repo root is hook-blocked.
 
 ---
 
@@ -97,8 +97,9 @@ See `commit-process` skill for the full workflow (validation, branching, message
 | Domain | Alias | Resolves To |
 |--------|-------|-------------|
 | Frontend | `@/` | `frontend/src/` |
+| Frontend | `@/shared` | `frontend/src/shared/` — co-owned domain modules; import only via each `@/shared/<concept>` public API |
 | Frontend | `@static/` | `static/` (has own `CLAUDE.md` — read before touching data, images, or UI layout) |
-| Backend | - | `org.danteplanner.backend.{domain}` |
+| Backend | - | `org.danteplanner.backend.{feature}.{layer}` (feature ∈ admin/auth/comment/moderation/notification/planner/user/shared; layer ∈ controller/service/repository/entity/dto/…) |
 
 ---
 

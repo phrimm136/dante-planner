@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  SPRING_PROFILES_ACTIVE: prod
+  # Region-specific values (DB host, Redis host, replica routing) are patched in
+  # the overlay. Base holds only region-invariant defaults.

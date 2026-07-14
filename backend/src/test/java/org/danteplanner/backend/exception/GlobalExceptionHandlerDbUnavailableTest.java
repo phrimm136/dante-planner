@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +45,11 @@ class GlobalExceptionHandlerDbUnavailableTest {
         public String queryTime() {
             throw new DataAccessResourceFailureException("Unable to acquire JDBC connection");
         }
+
+        @GetMapping("/boom/redis")
+        public String redisDown() {
+            throw new RedisConnectionFailureException("Unable to connect to Redis");
+        }
     }
 
     @BeforeEach
@@ -59,7 +65,7 @@ class GlobalExceptionHandlerDbUnavailableTest {
         mockMvc.perform(get("/boom/transaction"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(header().string("Retry-After", "10"))
-                .andExpect(jsonPath("$.code").value("DB_UNAVAILABLE"));
+                .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
     }
 
     @Test
@@ -68,6 +74,14 @@ class GlobalExceptionHandlerDbUnavailableTest {
         mockMvc.perform(get("/boom/query"))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(header().string("Retry-After", "10"))
-                .andExpect(jsonPath("$.code").value("DB_UNAVAILABLE"));
+                .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
+    }
+
+    @Test
+    @DisplayName("Redis path (RedisConnectionFailureException) maps to AUTH_TEMPORARILY_UNAVAILABLE 503")
+    void redisConnectionFailure_WhenThrown_MapsToAuthUnavailable503() throws Exception {
+        mockMvc.perform(get("/boom/redis"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.code").value("AUTH_TEMPORARILY_UNAVAILABLE"));
     }
 }

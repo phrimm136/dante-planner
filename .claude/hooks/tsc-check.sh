@@ -23,7 +23,7 @@ get_repo_for_file() {
     if [[ "$relative_path" =~ ^([^/]+)/ ]]; then
         local repo="${BASH_REMATCH[1]}"
         case "$repo" in
-            email|exports|form|frontend|projects|uploads|users|utilities|events|database)
+            frontend)
                 echo "$repo"
                 return 0
                 ;;
@@ -145,9 +145,8 @@ $CHECK_OUTPUT"
                     echo "🚨 TypeScript errors found in $ERROR_COUNT repo(s): $FAILED_REPOS"
                     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                     echo ""
-                    echo "👉 IMPORTANT: Use the auto-error-resolver agent to fix the errors"
+                    echo "👉 IMPORTANT: Fix these TypeScript errors before proceeding"
                     echo ""
-                    echo "WE DO NOT LEAVE A MESS BEHIND"
                     echo "Error Preview:"
                     echo "$ERROR_OUTPUT" | grep "error TS" | head -10
                     echo ""

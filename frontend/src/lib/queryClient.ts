@@ -1,14 +1,20 @@
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
 
-import { ServiceUpdatingError, BackendUnavailableError } from './api'
+import {
+  ServiceUpdatingError,
+  BackendUnavailableError,
+  AuthTemporarilyUnavailableError,
+} from './api'
 import { toast } from './toast'
 import i18n from './i18n'
 
-function handleBackendDownError(error: Error): void {
+export function handleBackendDownError(error: Error): void {
   if (error instanceof ServiceUpdatingError) {
     toast.error(i18n.t('errors.serviceUpdating'))
   } else if (error instanceof BackendUnavailableError) {
     toast.error(i18n.t('errors.backendUnavailable'))
+  } else if (error instanceof AuthTemporarilyUnavailableError) {
+    toast.error(i18n.t('errors.authUnavailable'))
   }
 }
 

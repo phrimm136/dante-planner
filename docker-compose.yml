@@ -33,7 +33,19 @@ services:
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      AUTH_REDIS_HOST: ${AUTH_REDIS_HOST:-redis-auth}
+      AUTH_REDIS_PORT: ${AUTH_REDIS_PORT:-6379}
+      AUTH_REDIS_PASSWORD: ${AUTH_REDIS_PASSWORD:-}
+      RATE_LIMIT_REDIS_HOST: ${RATE_LIMIT_REDIS_HOST:-redis-ratelimit}
+      RATE_LIMIT_REDIS_PORT: ${RATE_LIMIT_REDIS_PORT:-6379}
+      SSE_LOCAL_REDIS_HOST: ${SSE_LOCAL_REDIS_HOST:-redis-auth}
+      SSE_LOCAL_REDIS_PORT: ${SSE_LOCAL_REDIS_PORT:-6379}
       JAVA_OPTS: "-Xms256m -Xmx768m -XX:MaxMetaspaceSize=256m"
+    depends_on:
+      redis-auth:
+        condition: service_healthy
+      redis-ratelimit:
+        condition: service_healthy
     networks:
       - danteplanner-network
     deploy:
@@ -91,11 +103,87 @@ services:
         awslogs-group: /ecs/danteplanner/nginx
         awslogs-create-group: "true"
 
+  # Durable auth store (034 mechanics section 1): AOF everysec + RDB preamble,
+  # noeviction. Also serves the single-region sse-local subscribe target.
+  redis-auth:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-redis:${IMAGE_TAG}
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: danteplanner-redis-auth
+    restart: unless-stopped
+    environment:
+      AUTH_REDIS_PASSWORD: ${AUTH_REDIS_PASSWORD:-}
+    command:
+      - sh
+      - -c
+      - |
+        if [ -n "$$AUTH_REDIS_PASSWORD" ]; then
+          exec docker-entrypoint.sh redis-server /etc/redis/redis-auth.conf \
+            --protected-mode yes \
+            --requirepass "$$AUTH_REDIS_PASSWORD"
+        else
+          exec docker-entrypoint.sh redis-server /etc/redis/redis-auth.conf
+        fi
+    volumes:
+      - redis-auth-data:/data
+    networks:
+      - danteplanner-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli $${AUTH_REDIS_PASSWORD:+-a \"$$AUTH_REDIS_PASSWORD\" --no-auth-warning} ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/redis-auth
+        awslogs-create-group: "true"
+
+  redis-ratelimit:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/danteplanner-redis:${IMAGE_TAG}
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: danteplanner-redis-ratelimit
+    restart: unless-stopped
+    command: ["redis-server", "/etc/redis/redis-ephemeral.conf"]
+    networks:
+      - danteplanner-network
+    deploy:
+      resources:
+        limits:
+          memory: 320M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-west-2
+        awslogs-group: /ecs/danteplanner/redis-ratelimit
+        awslogs-create-group: "true"
+
 # Not mounted by any service — retained as the only copy of the pre-RDS prod
 # data (the rollback source). Do NOT `docker compose down -v` or prune it; see
 # docs/tasks/030-rds-migration/runbook.md (Zone 4) for the decommission gate.
 volumes:
   mysql-data:
+    driver: local
+  redis-auth-data:
     driver: local
 
 networks:

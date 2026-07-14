@@ -83,6 +83,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/health/readiness").permitAll()
+                .requestMatchers("/actuator/health/liveness").permitAll()
                 .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers("/api/internal/**").permitAll()
 

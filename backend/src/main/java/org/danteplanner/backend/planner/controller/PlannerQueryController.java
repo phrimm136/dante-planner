@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.config.RateLimitConfig;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
+import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ public class PlannerQueryController {
 
     private final PlannerQueryService plannerQueryService;
     private final RateLimitConfig rateLimitConfig;
+    private final ByIdReadGuard byIdReadGuard;
 
     /**
      * Get all planners for the authenticated user with pagination.
@@ -64,7 +66,8 @@ public class PlannerQueryController {
 
         rateLimitConfig.checkCrudLimit(userId, "get");
         log.debug("Fetching planner {} for user {}", id, userId);
-        PlannerResponse response = plannerQueryService.getPlanner(userId, id);
+        PlannerResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
+                () -> plannerQueryService.getPlanner(userId, id));
         return ResponseEntity.ok(response);
     }
 }

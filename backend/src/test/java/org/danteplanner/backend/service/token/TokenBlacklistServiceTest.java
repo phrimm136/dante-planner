@@ -1,28 +1,64 @@
 package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import com.redis.testcontainers.RedisContainer;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for TokenBlacklistService.
  *
- * <p>Tests in-memory token blacklist behavior including
- * add, check, and TTL expiration functionality.</p>
+ * <p>Tests the Redis-backed token blacklist behavior including
+ * add, check, and TTL expiration functionality over a live Redis container.</p>
  */
+@Tag("containerized")
 class TokenBlacklistServiceTest {
+
+    private static final String REDIS_IMAGE = "redis:7-alpine";
+
+    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
+
+    private static StringRedisTemplate sharedTemplate;
 
     private TokenBlacklistService blacklistService;
 
+    @BeforeAll
+    static void startRedis() {
+        REDIS.start();
+        sharedTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+    }
+
+    private static StringRedisTemplate buildTemplate(String host, int port) {
+        LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        f.afterPropertiesSet();
+        StringRedisTemplate t = new StringRedisTemplate(f);
+        t.afterPropertiesSet();
+        return t;
+    }
+
     @BeforeEach
     void setUp() {
-        blacklistService = new TokenBlacklistService();
+        blacklistService = new TokenBlacklistService(sharedTemplate, sharedTemplate, new SimpleMeterRegistry());
+        blacklistService.clear();
     }
 
     @Nested
@@ -170,26 +206,6 @@ class TokenBlacklistServiceTest {
         }
 
         @Test
-        @DisplayName("cleanupExpired() should remove all expired entries")
-        void cleanupExpired_WhenEntriesExpired_RemovesThem() {
-            // Arrange
-            Date pastExpiry = new Date(System.currentTimeMillis() - 1000);
-            Date futureExpiry = new Date(System.currentTimeMillis() + 60000);
-            blacklistService.blacklistToken("expired1", pastExpiry);
-            blacklistService.blacklistToken("expired2", pastExpiry);
-            blacklistService.blacklistToken("valid", futureExpiry);
-
-            // Act
-            blacklistService.cleanupExpired();
-
-            // Assert
-            assertEquals(1, blacklistService.size());
-            assertTrue(blacklistService.isBlacklisted("valid"));
-            assertFalse(blacklistService.isBlacklisted("expired1"));
-            assertFalse(blacklistService.isBlacklisted("expired2"));
-        }
-
-        @Test
         @DisplayName("size() should return correct count")
         void size_WhenEntriesExist_ReturnsCorrectCount() {
             // Arrange
@@ -310,6 +326,118 @@ class TokenBlacklistServiceTest {
             assertTrue(blacklistService.isBlacklisted(token));
             assertTrue(blacklistService.isBlacklisted(token));
             assertTrue(blacklistService.isBlacklisted(token));
+        }
+    }
+
+    @Nested
+    @DisplayName("Cross-Instance Externalization Tests")
+    class CrossInstanceTests {
+
+        @Test
+        @DisplayName("A blacklisted token is visible to a second service over the same Redis")
+        void blacklistToken_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
+            // Arrange
+            String token = "cross.instance.token";
+            Date futureExpiry = new Date(System.currentTimeMillis() + 60000);
+            blacklistService.blacklistToken(token, futureExpiry);
+
+            // Act - a second service over a fresh template pointing at the SAME container
+            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
+
+            // Assert - externalized revocation is visible across instances
+            assertThat(secondService.isBlacklisted(token)).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("User Invalidation Redis Externalization Tests")
+    class UserInvalidationRedisTests {
+
+        @Test
+        @DisplayName("A user invalidation is visible to a second service over the same Redis")
+        void invalidateUserTokens_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
+            // Arrange
+            Long userId = 4242L;
+            blacklistService.invalidateUserTokens(userId);
+
+            // Act - a second service over a fresh template pointing at the SAME container
+            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
+
+            // Assert - externalized user invalidation is visible across instances
+            assertThat(secondService.isUserTokenInvalidated(userId, 0L)).isTrue();
+        }
+
+        @Test
+        @DisplayName("userInvalidationSize reflects Redis state and clear() resets it")
+        void userInvalidationSize_AfterInvalidateThenClear_ReflectsRedis() {
+            // Arrange
+            Long userId = 777L;
+
+            // Act + Assert - one invalidation yields size 1
+            blacklistService.invalidateUserTokens(userId);
+            assertThat(blacklistService.userInvalidationSize()).isEqualTo(1);
+
+            // Act + Assert - clear() wipes it back to 0
+            blacklistService.clear();
+            assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("clearUserInvalidation removes the user's invalidation")
+        void clearUserInvalidation_WhenCalled_RemovesInvalidation() {
+            // Arrange
+            Long userId = 555L;
+            blacklistService.invalidateUserTokens(userId);
+
+            // Act
+            blacklistService.clearUserInvalidation(userId);
+
+            // Assert
+            assertThat(blacklistService.isUserTokenInvalidated(userId, 0L)).isFalse();
+            assertThat(blacklistService.userInvalidationSize()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    @DisplayName("Read-Path Fail-Open Tests")
+    class FailOpenTests {
+
+        private static final String SKIP_COUNTER = "blacklist_check_skipped_total";
+
+        @Test
+        @DisplayName("isBlacklisted fails open and increments skip counter when Redis read throws")
+        void isBlacklisted_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
+            // Arrange - a template whose read path throws a DataAccessException
+            StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
+            when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
+            SimpleMeterRegistry registry = new SimpleMeterRegistry();
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry);
+
+            // Act
+            boolean result = service.isBlacklisted("t");
+
+            // Assert - fail open (false) and skip counter incremented once
+            assertThat(result).isFalse();
+            assertThat(registry.get(SKIP_COUNTER).counter().count()).isEqualTo(1.0);
+        }
+
+        @Test
+        @DisplayName("isUserTokenInvalidated fails open and increments skip counter when Redis read throws")
+        void isUserTokenInvalidated_WhenRedisReadFails_ReturnsFalseAndIncrementsSkipCounter() {
+            // Arrange - a template whose read path throws a DataAccessException
+            StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
+            when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
+            SimpleMeterRegistry registry = new SimpleMeterRegistry();
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry);
+
+            // Act
+            boolean result = service.isUserTokenInvalidated(1L, 0L);
+
+            // Assert - fail open (false) and skip counter incremented once
+            assertThat(result).isFalse();
+            assertThat(registry.get(SKIP_COUNTER).counter().count()).isEqualTo(1.0);
         }
     }
 }

@@ -71,6 +71,11 @@ public class GlobalExceptionHandler {
         return warnAndRespond(HttpStatus.NOT_FOUND, "Planner not found: {}", "PLANNER_NOT_FOUND", ex.getMessage());
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
+        return warnAndRespond(HttpStatus.NOT_FOUND, "Entity not found: {}", "NOT_FOUND", ex.getMessage());
+    }
+
     @ExceptionHandler(PlannerForbiddenException.class)
     public ResponseEntity<ErrorResponse> handlePlannerForbidden(PlannerForbiddenException ex) {
         return warnAndRespond(HttpStatus.FORBIDDEN, "Planner access forbidden: {}", "PLANNER_FORBIDDEN", ex.getMessage());
@@ -348,7 +353,7 @@ public class GlobalExceptionHandler {
      * rewrites any backend 5xx body to {@code BACKEND_UNAVAILABLE} (or {@code SERVICE_UPDATING}).
      * A 500 would NOT be intercepted and would leak through as a raw INTERNAL_ERROR. So this handler
      * exists to (a) emit 503 so nginx maps it cleanly to BACKEND_UNAVAILABLE for the client, and
-     * (b) keep it out of Sentry. The {@code DB_UNAVAILABLE} code below is internal-only (logs /
+     * (b) keep it out of Sentry. The {@code WRITE_TEMPORARILY_UNAVAILABLE} code below is internal-only (logs /
      * direct backend access); external clients always see BACKEND_UNAVAILABLE.</p>
      */
     @ExceptionHandler({
@@ -360,7 +365,54 @@ public class GlobalExceptionHandler {
         log.warn("Database unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
-            .body(new ErrorResponse("DB_UNAVAILABLE", "Database temporarily unavailable, please retry"));
+            .body(new ErrorResponse(
+                DegradationErrorConstants.DB_UNAVAILABLE_CODE, DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE));
+    }
+
+    /**
+     * Handle Redis being briefly unreachable during authentication (failover, network blip, maintenance).
+     *
+     * <p>The auth path touches Redis for session/token lookups. When Redis is unreachable, Spring Data
+     * surfaces a RedisConnectionFailureException. This is more specific than the DB
+     * DataAccessResourceFailureException below (it is a subclass of DataAccessResourceFailureException),
+     * so Spring dispatches Redis-connection failures here by type specificity. Transient and
+     * self-healing — deliberately NOT sent to Sentry for the same reason as the DB handler: it is
+     * expected during a Redis outage and would otherwise alert-storm.</p>
+     */
+    @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
+    public ResponseEntity<ErrorResponse> handleRedisUnavailable(
+            org.springframework.data.redis.RedisConnectionFailureException ex) {
+        log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Retry-After", "10")
+            .body(new ErrorResponse(
+                DegradationErrorConstants.AUTH_UNAVAILABLE_CODE, DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE));
+    }
+
+    /**
+     * Handle the rate-limit Redis being briefly unreachable or slow (failover, network blip, maintenance).
+     *
+     * <p>The rate limiter uses a RAW Lettuce client (only {@code RedisConnectionConfig} does — bucket4j's
+     * {@code LettuceBasedProxyManager} is handed a raw {@code RedisClient.connect(...)}), so a rate-limit
+     * Redis outage does NOT surface as Spring Data's {@code RedisConnectionFailureException}. It rethrows
+     * the raw {@code io.lettuce.core.RedisException} (RedisConnectionException / RedisCommandTimeoutException /
+     * RedisSystemException) unwrapped. Mapping the common supertype covers every cut variant. Transient and
+     * self-healing — the client reconnects when Redis returns.</p>
+     *
+     * <p>Returning 503 (not letting it fall to the catch-all 500) honours the edge contract: nginx has
+     * {@code proxy_intercept_errors on}, so it rewrites any backend 5xx to {@code BACKEND_UNAVAILABLE}.
+     * A 500 would leak through as a raw INTERNAL_ERROR. Deliberately NOT sent to Sentry, for the same reason
+     * as the DB and auth-Redis handlers: it is expected during a Redis outage and would otherwise alert-storm.
+     * The {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} code is internal-only; external clients see
+     * BACKEND_UNAVAILABLE.</p>
+     */
+    @ExceptionHandler(io.lettuce.core.RedisException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(io.lettuce.core.RedisException ex) {
+        log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Retry-After", "10")
+            .body(new ErrorResponse(
+                DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE_CODE, DegradationErrorConstants.RATE_LIMIT_UNAVAILABLE_MESSAGE));
     }
 
     /**

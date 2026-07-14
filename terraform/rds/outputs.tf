@@ -3,6 +3,16 @@ output "rds_endpoint" {
   value       = aws_db_instance.this.address
 }
 
+output "rds_arn" {
+  description = "Primary RDS instance ARN — read by terraform/seoul (remote state) as the cross-region read-replica source (replicas require the full ARN)."
+  value       = aws_db_instance.this.arn
+}
+
+output "rds_vpc_cidr" {
+  description = "RDS VPC CIDR — read by terraform/seoul (remote state) for the cross-region fleet→RDS route, since Seoul cannot data-source a us-west-2 VPC from ap-northeast-2."
+  value       = data.aws_vpc.this.cidr_block
+}
+
 output "ca_cert_identifier" {
   description = "CA bundle id the RDS instance presents. Download the matching bundle from https://truststore.pki.rds.amazonaws.com/<region>/<region>-bundle.pem for the backend's VERIFY_CA trust store."
   value       = aws_db_instance.this.ca_cert_identifier
@@ -19,7 +29,12 @@ output "rds_security_group_id" {
 }
 
 output "master_user_secret_arn" {
-  description = "Secrets Manager ARN holding the AWS-managed master password (for admin ops: creating the app user in runbook 0.6b)."
-  value       = aws_db_instance.this.master_user_secret[0].secret_arn
+  description = "Secrets Manager ARN of the AWS-managed master password — null now that managed password is disabled (read-replica-source requirement); the password is in var.master_password."
+  value       = length(aws_db_instance.this.master_user_secret) > 0 ? aws_db_instance.this.master_user_secret[0].secret_arn : null
   sensitive   = true
+}
+
+output "seoul_return_route_enabled" {
+  description = "Whether the Seoul fleet return route + 3306 ingress are wired on the RDS side."
+  value       = var.seoul_peering_connection_id != ""
 }

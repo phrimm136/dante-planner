@@ -1,0 +1,98 @@
+# Auth-state Redis (blacklist, rotation families, tombstones, SSE pub/sub) as a
+# StatefulSet on the data node. AOF everysec + RDB preamble, gp3 PVC, AZ-pinned.
+# NO Sentinel, NO auto-promote — an outage is a typed 503 + auto-recovery + AOF
+# replay (requirements: no autonomous writer promotion).
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-auth
+  labels:
+    app: redis-auth
+spec:
+  clusterIP: None
+  selector:
+    app: redis-auth
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis-auth
+spec:
+  serviceName: redis-auth
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-auth
+  template:
+    metadata:
+      labels:
+        app: redis-auth
+    spec:
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          # AUTH is gated on the REDIS_AUTH_PASSWORD env (optional secretKeyRef): the
+          # shell test, not k8s $(VAR) expansion, decides — an absent Secret key would
+          # otherwise pass the literal "$(REDIS_AUTH_PASSWORD)" as the password.
+          # Empty/absent password = protected-mode no with no requirepass, byte-for-byte
+          # today's flags, so single-region Oregon keeps working with no Secret.
+          # Re-invoking docker-entrypoint.sh keeps the image's chown + drop to the
+          # redis user.
+          #
+          # Coordinated password rollout:
+          #   1. Add AUTH_REDIS_PASSWORD to the danteplanner/backend/runtime-config
+          #      Secrets Manager JSON; wait for ESO to refresh backend-runtime-config.
+          #   2. Restart this StatefulSet (redis now requires AUTH).
+          #   3. Rollout-restart the backend DaemonSet (pods pick up the env). Between
+          #      2 and 3 blacklist checks fail-open per INV6; keep the gap short.
+          command:
+            - sh
+            - -c
+            - |
+              if [ -n "$REDIS_AUTH_PASSWORD" ]; then
+                exec docker-entrypoint.sh redis-server \
+                  --appendonly yes \
+                  --appendfsync everysec \
+                  --aof-use-rdb-preamble yes \
+                  --protected-mode yes \
+                  --requirepass "$REDIS_AUTH_PASSWORD"
+              else
+                exec docker-entrypoint.sh redis-server \
+                  --appendonly yes \
+                  --appendfsync everysec \
+                  --aof-use-rdb-preamble yes \
+                  --protected-mode no
+              fi
+          env:
+            - name: REDIS_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-runtime-config
+                  key: AUTH_REDIS_PASSWORD
+                  optional: true
+          ports:
+            - name: redis
+              containerPort: 6379
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 8Gi

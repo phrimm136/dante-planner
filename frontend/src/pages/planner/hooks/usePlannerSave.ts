@@ -6,7 +6,12 @@ import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { serializeSets } from '../schemas/PlannerSchemas'
-import { ConflictError, BannedError, TimedOutError } from '@/lib/api'
+import {
+  ConflictError,
+  BannedError,
+  TimedOutError,
+  WriteTemporarilyUnavailableError,
+} from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
@@ -77,6 +82,7 @@ export type SaveErrorCode =
   | 'quotaExceeded'
   | 'banned'
   | 'timedOut'
+  | 'syncPaused'
   | null
 
 /**
@@ -506,6 +512,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       // Invalidate auth query to trigger banner display
       void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
       setErrorCode('timedOut')
+      return
+    }
+
+    if (error instanceof WriteTemporarilyUnavailableError) {
+      console.warn('Write temporarily unavailable — saved locally, sync paused')
+      setErrorCode('syncPaused')
       return
     }
 

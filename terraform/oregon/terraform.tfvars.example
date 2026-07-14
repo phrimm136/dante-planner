@@ -1,0 +1,32 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Only ingress_allowed_cidrs
+# is required; every other variable has a sensible default in variables.tf.
+
+# REQUIRED: CIDRs allowed to reach the ingress node on 443.
+# Production value = Cloudflare edge ranges + Global Accelerator health-check
+# ranges only (https://www.cloudflare.com/ips/). The mTLS Authenticated Origin
+# Pull at the origin is the real gate; this SG is defense-in-depth. Until GA +
+# Cloudflare are wired (Phase 14), nothing routes here — a single /32 of your own
+# IP is enough for an initial single-region smoke test.
+ingress_allowed_cidrs = ["REPLACE_WITH_CLOUDFLARE_AND_GA_HEALTH_CIDRS"]
+
+# REQUIRED: the RDS (prod) VPC id to peer with for private DB access. Its CIDR
+# must not overlap vpc_cidr (10.20.0.0/16). Do not commit the real value.
+rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
+
+# Optional overrides (defaults are sensible):
+# region                        = "us-west-2"
+# vpc_cidr                      = "10.20.0.0/16"
+# availability_zones            = ["us-west-2a", "us-west-2b"]
+# instance_type                 = "t4g.small"
+# ssh_key_name                  = ""            # break-glass EC2 key; empty = SSM only
+# app_asg_min_size              = 1
+# app_asg_desired_capacity      = 1
+# app_asg_max_size              = 2
+# backend_image_repo            = "danteplanner-backend"
+# rs256_private_key_secret_name = "danteplanner/jwt/rs256-private-key"
+# gitops_repo_url               = "https://github.com/phrimm136/dante-planner.git"
+# gitops_target_revision        = "main"
+# argocd_version                = "v2.13.2"
+# billing_alarm_threshold       = 200
+# alarm_sns_topic_arn           = ""            # SNS topic for notifications; empty = none
+# etcd_snapshot_retention       = 5

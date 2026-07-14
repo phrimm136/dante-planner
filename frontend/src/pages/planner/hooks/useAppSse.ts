@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import i18n from '@/lib/i18n'
 import { SSE_EVENTS } from '@/lib/constants'
 import { formatUsername } from '@/lib/formatUsername'
-import { useSseEngine, useSseStore } from '@/shared/sse'
+import { useSseEngine, useSseStore, SseEnvelopeSchema } from '@/shared/sse'
 import {
   showBrowserNotification,
   isTabHidden,
@@ -16,10 +16,8 @@ import {
 import { useAuthQueryNonBlocking } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
 import { plannerApi } from '../lib/plannerApi'
-import { PlannerSseEventSchema } from '../schemas/PlannerSchemas'
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { plannerQueryKeys } from './usePlannerSync'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
 
 import type { SseNotificationEvent } from '@/shared/notifications'
 
@@ -75,6 +73,16 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
 }
 
 /**
+ * Replace the entry matching `item.id` in a planner list cache, or append it
+ * when absent. Non-mutating; tolerates a non-array/undefined `list`.
+ */
+function upsertById(list: unknown, item: { id?: string } | undefined) {
+  const arr = Array.isArray(list) ? list : []
+  const i = arr.findIndex((p) => p?.id === item?.id)
+  return i >= 0 ? arr.map((p, idx) => (idx === i ? item : p)) : [...arr, item]
+}
+
+/**
  * App-level SSE orchestration — the composition-root hook mounted once in
  * GlobalLayout.
  *
@@ -126,20 +134,24 @@ export function useAppSse(): void {
   const handlePlannerUpdate = useCallback(
     (event: MessageEvent) => {
       try {
-        const data = PlannerSseEventSchema.parse(JSON.parse(event.data as string))
+        const data = SseEnvelopeSchema.parse(JSON.parse(event.data as string))
+        const plannerId = data.entityId ?? data.plannerId
 
         if (data.type === 'deleted') {
-          void saveAdapter.deleteFromLocal(data.plannerId).catch((e) => {
-            console.error('Failed to purge local planner after SSE delete:', e)
-          })
+          const deletedId = data.deletedId ?? plannerId
+          if (deletedId) {
+            void saveAdapter.deleteFromLocal(deletedId).catch((e) => {
+              console.error('Failed to purge local planner after SSE delete:', e)
+            })
+            queryClient.setQueryData(plannerQueryKeys.list(), (prev) =>
+              Array.isArray(prev) ? prev.filter((p) => p?.id !== deletedId) : prev,
+            )
+          }
+        } else if ((data.type === 'created' || data.type === 'updated') && plannerId) {
+          const payload = data.payload as { id?: string } | undefined
+          queryClient.setQueryData(plannerQueryKeys.detail(plannerId), payload)
+          queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, payload))
         }
-
-        // Invalidate relevant caches
-        void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
-        void queryClient.invalidateQueries({
-          queryKey: plannerQueryKeys.detail(data.plannerId),
-        })
-        void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
 
         setLastEventTime(Date.now())
       } catch (e) {
@@ -209,14 +221,25 @@ export function useAppSse(): void {
     (event: MessageEvent) => {
       setLastEventTime(Date.now())
 
-      // Invalidate planner list to show new planner
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
+      let raw: unknown
+
+      // Insert the published planner into the list cache from the payload
+      try {
+        raw = JSON.parse(event.data as string)
+        const envelope = SseEnvelopeSchema.parse(raw)
+        const published = envelope.payload as { id?: string } | undefined
+        if (published?.id) {
+          queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, published))
+        }
+      } catch (e) {
+        console.error('Failed to parse SSE published envelope:', e)
+      }
       // Invalidate notification queries to show new notification in inbox
       void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all })
 
       // Parse and show notification
       try {
-        const parsed = SsePublishedEventSchema.safeParse(JSON.parse(event.data as string))
+        const parsed = SsePublishedEventSchema.safeParse(raw)
         if (!parsed.success) {
           console.warn('SSE published event parse failed:', parsed.error)
           return

@@ -90,6 +90,16 @@ vi.mock('@/shared/auth', () => ({
   useAuthQueryNonBlocking: () => ({ data: h.userRef.current }),
 }))
 
+// Real engine + store (the 10 engine-driven tests rely on them); only the
+// envelope schema is a pass-through so handlers see the raw payload verbatim.
+vi.mock('@/shared/sse', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/sse')>()),
+  SseEnvelopeSchema: {
+    parse: (x: unknown) => x,
+    safeParse: (x: unknown) => ({ success: true, data: x }),
+  },
+}))
+
 vi.mock('@/shared/notifications', () => ({
   showBrowserNotification: h.showBrowserNotification,
   showNotificationToast: h.showNotificationToast,
@@ -228,28 +238,162 @@ describe('useAppSse — event → effect map', () => {
     h.settingsRef.current = SYNC_ON
     const { queryClient, wrapper } = createWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const setDataSpy = vi.spyOn(queryClient, 'setQueryData')
     renderHook(() => useAppSse(), { wrapper })
     await flushConnectDelay()
     const es = lastEventSource()
     act(() => es.fireOpen())
     invalidateSpy.mockClear()
-    return { es, invalidateSpy }
+    setDataSpy.mockClear()
+    return { es, invalidateSpy, setDataSpy, queryClient }
   }
 
-  it('planner-update invalidates planner list, detail, and user-planner caches', async () => {
-    const { es, invalidateSpy } = await connectAndOpen()
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'updated', plannerId: 'p1' }))
+  it('planner-update patches list + detail caches and does not invalidate', async () => {
+    const { es, invalidateSpy, queryClient } = await connectAndOpen()
+    queryClient.setQueryData(
+      ['planners', 'list'],
+      [
+        { id: 'p1', title: 'Old' },
+        { id: 'p2', title: 'Keep' },
+      ],
+    )
+    queryClient.setQueryData(['planners', 'detail', 'p1'], { id: 'p1', title: 'Old' })
+    act(() =>
+      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+        type: 'updated',
+        entityId: 'p1',
+        payload: { id: 'p1', title: 'Changed' },
+      }),
+    )
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['planners', 'detail', 'p1'] })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['userPlanners'] })
+    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
+      id: string
+      title: string
+    }>
+    expect(list).toEqual(
+      expect.arrayContaining([
+        { id: 'p1', title: 'Changed' },
+        { id: 'p2', title: 'Keep' },
+      ]),
+    )
+    expect(queryClient.getQueryData(['planners', 'detail', 'p1'])).toMatchObject({
+      title: 'Changed',
+    })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', 'p1'] })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['userPlanners'] })
+  })
+
+  it("'updated' planner envelope replaces the matching entry in the planner LIST cache from payload", async () => {
+    const { es, queryClient } = await connectAndOpen()
+    queryClient.setQueryData(
+      ['planners', 'list'],
+      [
+        { id: 'p1', title: 'Old' },
+        { id: 'p2', title: 'Keep' },
+      ],
+    )
+    act(() =>
+      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+        type: 'updated',
+        entityId: 'p1',
+        payload: { id: 'p1', title: 'Changed' },
+      }),
+    )
+
+    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
+      id: string
+      title: string
+    }>
+    expect(list).toEqual(
+      expect.arrayContaining([
+        { id: 'p1', title: 'Changed' },
+        { id: 'p2', title: 'Keep' },
+      ]),
+    )
+    expect(list).not.toContainEqual({ id: 'p1', title: 'Old' })
+  })
+
+  it("'created' planner envelope inserts a new entry into the planner LIST cache from payload", async () => {
+    const { es, queryClient } = await connectAndOpen()
+    queryClient.setQueryData(['planners', 'list'], [{ id: 'p2', title: 'Keep' }])
+    act(() =>
+      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+        type: 'created',
+        entityId: 'p9',
+        payload: { id: 'p9', title: 'New' },
+      }),
+    )
+
+    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
+      id: string
+      title: string
+    }>
+    expect(list).toEqual(
+      expect.arrayContaining([
+        { id: 'p9', title: 'New' },
+        { id: 'p2', title: 'Keep' },
+      ]),
+    )
+  })
+
+  it('planner update does NOT invalidate list, detail, or userPlanners', async () => {
+    const { es, invalidateSpy } = await connectAndOpen()
+    act(() =>
+      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+        type: 'updated',
+        entityId: 'p1',
+        payload: { id: 'p1', title: 'Changed' },
+      }),
+    )
+
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', 'p1'] })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['userPlanners'] })
+  })
+
+  it("'updated' planner envelope patches the detail cache from payload and does not invalidate", async () => {
+    const { es, invalidateSpy, queryClient } = await connectAndOpen()
+    queryClient.setQueryData(['planners', 'detail', 'p1'], { id: 'p1', title: 'Old Title' })
+    const envelope = {
+      type: 'updated',
+      entityId: 'p1',
+      payload: { id: 'p1', title: 'Changed Title' },
+    }
+
+    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, envelope))
+
+    expect(queryClient.getQueryData(['planners', 'detail', 'p1'])).toMatchObject({
+      title: 'Changed Title',
+    })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', 'p1'] })
   })
 
   it('planner-update of type "deleted" purges the local planner copy', async () => {
     const { es } = await connectAndOpen()
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', plannerId: 'p1' }))
+    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', deletedId: 'p1' }))
 
     expect(h.deleteFromLocal).toHaveBeenCalledWith('p1')
+  })
+
+  it("'deleted' planner envelope removes the entry from the LIST cache and does not invalidate", async () => {
+    const { es, invalidateSpy, queryClient } = await connectAndOpen()
+    queryClient.setQueryData(
+      ['planners', 'list'],
+      [
+        { id: 'p1', title: 'A' },
+        { id: 'p2', title: 'B' },
+      ],
+    )
+    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', deletedId: 'p1' }))
+
+    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
+      id: string
+      title: string
+    }>
+    expect(list).not.toContainEqual(expect.objectContaining({ id: 'p1' }))
+    expect(list).toContainEqual({ id: 'p2', title: 'B' })
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
   })
 
   it('notification event invalidates notification caches and shows a toast when tab visible', async () => {
@@ -266,6 +410,36 @@ describe('useAppSse — event → effect map', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
     expect(h.showNotificationToast).toHaveBeenCalledTimes(1)
     expect(h.showBrowserNotification).not.toHaveBeenCalled()
+  })
+
+  it("'notify:published' envelope inserts the published planner into the LIST cache from payload and does not invalidate the list, still toasts", async () => {
+    h.isTabHidden.mockReturnValue(false)
+    const { es, invalidateSpy, queryClient } = await connectAndOpen()
+    queryClient.setQueryData(['planners', 'list'], [{ id: 'p2', title: 'B' }])
+    act(() =>
+      es.emit(SSE_EVENTS.NOTIFY_PUBLISHED, {
+        type: 'notify:published',
+        entityId: 'p9',
+        payload: { id: 'p9', title: 'Published' },
+        plannerId: 'p9',
+        plannerTitle: 'Published',
+        authorKeyword: 'auth',
+        authorSuffix: '0001',
+      }),
+    )
+
+    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
+      id: string
+      title: string
+    }>
+    expect(list).toEqual(
+      expect.arrayContaining([
+        { id: 'p9', title: 'Published' },
+        { id: 'p2', title: 'B' },
+      ]),
+    )
+    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
+    expect(h.showNotificationToast).toHaveBeenCalled()
   })
 })
 

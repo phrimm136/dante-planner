@@ -1,0 +1,18 @@
+# ArgoCD core (headless, no argocd-server) does not create the default
+# AppProject that a full install ships, so the CP applies it at bootstrap
+# before the root Application, which references project: default.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+spec:
+  description: Oregon fleet apps (permissive; scope per-source as a hardening follow-up)
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: '*'
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'

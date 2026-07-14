@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -56,49 +54,62 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     }
 
     /**
-     * Broadcast a comment:added event to all subscribers of a planner.
-     * Excludes the author's device to prevent self-notification.
+     * Send a serialized event to the given subscribers of a planner, skipping an optional device
+     * and removing emitters that fail on send.
      *
-     * @param plannerId       the planner ID
-     * @param excludeDeviceId the device ID to exclude (author's device)
+     * @param plannerId       the planner ID whose subscribers receive the event
+     * @param subscribers     the subscriber list to send to
+     * @param eventName       the SSE event name
+     * @param jsonData        the serialized event payload
+     * @param excludeDeviceId the device ID to skip, or {@code null} to send to all
+     * @return the number of subscribers the event was sent to
      */
-    public void broadcastCommentAdded(UUID plannerId, UUID excludeDeviceId) {
-        var subscribers = emitters.get(plannerId);
-        if (subscribers == null || subscribers.isEmpty()) {
-            log.debug("No subscribers for planner {} comment notification", plannerId);
-            return;
-        }
-
-        Map<String, Object> payload = Map.of(
-                "plannerId", plannerId.toString(),
-                "timestamp", Instant.now().toString()
-        );
-
-        String jsonData;
-        try {
-            jsonData = objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize comment:added event for planner {}", plannerId, e);
-            return;
-        }
-
+    private int sendToSubscribers(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> subscribers,
+                                  String eventName, String jsonData, UUID excludeDeviceId) {
         int sent = 0;
         for (EmitterEntry entry : subscribers) {
-            // Skip the author's device
             if (excludeDeviceId != null && entry.deviceId().equals(excludeDeviceId)) {
                 continue;
             }
 
             try {
-                entry.emitter().send(SseEmitter.event().name("comment:added").data(jsonData));
+                entry.emitter().send(SseEmitter.event().name(eventName).data(jsonData));
                 sent++;
             } catch (IOException | IllegalStateException e) {
-                log.debug("Failed to send comment:added to planner {} device {}, removing", plannerId, entry.deviceId());
+                log.debug("Failed to send {} to planner {} device {}, removing", eventName, plannerId, entry.deviceId());
                 removeConnection(plannerId, entry.deviceId());
             }
         }
 
-        log.debug("Broadcast comment:added to {} subscribers for planner {}", sent, plannerId);
+        return sent;
+    }
+
+    /**
+     * Broadcast a payload-carrying comment event to every subscriber of a planner.
+     *
+     * <p>Serializes {@code payload} and sends it under the given event name; dead emitters
+     * are removed on send failure. Used by the cross-node fan-out subscriber.</p>
+     *
+     * @param plannerId the planner ID whose subscribers receive the event
+     * @param eventType the SSE event name
+     * @param payload   the event payload
+     */
+    public void broadcast(UUID plannerId, String eventType, Object payload) {
+        var subscribers = emitters.get(plannerId);
+        if (subscribers == null || subscribers.isEmpty()) {
+            log.debug("No subscribers for planner {} comment event {}", plannerId, eventType);
+            return;
+        }
+
+        String jsonData;
+        try {
+            jsonData = objectMapper.writeValueAsString(payload);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize comment event {} for planner {}", eventType, plannerId, e);
+            return;
+        }
+
+        sendToSubscribers(plannerId, subscribers, eventType, jsonData, null);
     }
 
     /**

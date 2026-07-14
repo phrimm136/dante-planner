@@ -23,6 +23,11 @@ resource "aws_db_subnet_group" "this" {
   tags       = var.tags
 }
 
+# The RDS VPC, for its CIDR (exported so a cross-region fleet can route to it).
+data "aws_vpc" "this" {
+  id = var.vpc_id
+}
+
 # RDS-side security group: the backend on EC2 reaches RDS on 3306.
 resource "aws_security_group" "rds" {
   name        = "${var.name_prefix}-rds"
@@ -125,7 +130,7 @@ resource "aws_db_parameter_group" "this" {
   }
   parameter {
     name  = "long_query_time"
-    value = "1"
+    value = "0.1"
   }
   parameter {
     name  = "log_output"
@@ -158,13 +163,24 @@ resource "aws_db_instance" "this" {
 
   db_name  = var.db_name # empty schema for the dump to load into
   username = var.master_username
-  # Master password is generated + held in Secrets Manager by AWS; never in state/tfvars.
-  manage_master_user_password = true
+  # AWS-managed master password (manage_master_user_password) is unsupported as a
+  # read-replica SOURCE for MySQL, so it is disabled to allow the Seoul cross-region
+  # replica. Password is now supplied via var.master_password (set to the CURRENT
+  # value pulled from the old managed secret, so nothing rotates). The app connects
+  # as the danteplanner user, not master, so this is admin-only. Trade-off vs the
+  # 030 managed-password decision: the master password now lives in state/tfvars.
+  password = var.master_password
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]
   parameter_group_name   = aws_db_parameter_group.this.name
   port                   = 3306
+
+  # Ship the slow query log (slow_query_log=1 in the parameter group) to
+  # CloudWatch Logs as /aws/rds/instance/<id>/slowquery. RDS applies log-export
+  # changes immediately — apply_immediately=false does not defer them — and no
+  # reboot is involved.
+  enabled_cloudwatch_logs_exports = ["slowquery"]
 
   backup_retention_period    = var.backup_retention_period
   backup_window              = var.backup_window
@@ -183,4 +199,60 @@ resource "aws_db_instance" "this" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+# --- Fleet <-> RDS VPC peering (RDS side) -----------------------------------
+# The peering is created + auto-accepted by terraform/oregon; here we add the
+# return route from the RDS VPC to the fleet and allow the fleet cluster SG to
+# reach RDS on 3306 (an SG reference resolves across same-region peering). All
+# guarded so a plain RDS apply (no fleet) is unaffected until fleet_* are set.
+data "aws_route_tables" "rds_vpc" {
+  count  = var.fleet_peering_connection_id != "" ? 1 : 0
+  vpc_id = var.vpc_id
+}
+
+resource "aws_route" "rds_to_fleet" {
+  count                     = var.fleet_peering_connection_id != "" ? length(data.aws_route_tables.rds_vpc[0].ids) : 0
+  route_table_id            = tolist(data.aws_route_tables.rds_vpc[0].ids)[count.index]
+  destination_cidr_block    = var.fleet_vpc_cidr
+  vpc_peering_connection_id = var.fleet_peering_connection_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
+  count                        = var.fleet_cluster_security_group_id != "" ? 1 : 0
+  security_group_id            = aws_security_group.rds.id
+  description                  = "k3s fleet app/data nodes to RDS over VPC peering"
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.fleet_cluster_security_group_id
+}
+
+# --- Seoul fleet <-> RDS VPC peering (RDS side) -------------------------------
+# The cross-region peering is created + accepted by terraform/seoul; here we add
+# the return route from the RDS VPC to the Seoul fleet and open 3306 to Seoul's
+# VPC CIDR. Seoul's cluster SG lives in ap-northeast-2 and SG references do NOT
+# resolve across cross-region peering, so this rule is CIDR-based (unlike the
+# same-region Oregon rule above). All guarded so a plain RDS apply is unaffected
+# until seoul_peering_connection_id is set.
+data "aws_route_tables" "rds_vpc_seoul" {
+  count  = var.seoul_peering_connection_id != "" ? 1 : 0
+  vpc_id = var.vpc_id
+}
+
+resource "aws_route" "rds_to_seoul_fleet" {
+  count                     = var.seoul_peering_connection_id != "" ? length(data.aws_route_tables.rds_vpc_seoul[0].ids) : 0
+  route_table_id            = tolist(data.aws_route_tables.rds_vpc_seoul[0].ids)[count.index]
+  destination_cidr_block    = var.seoul_fleet_cidr
+  vpc_peering_connection_id = var.seoul_peering_connection_id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "seoul_fleet_to_rds" {
+  count             = var.seoul_peering_connection_id != "" ? 1 : 0
+  security_group_id = aws_security_group.rds.id
+  description       = "Seoul k3s fleet (VPC CIDR) to RDS over cross-region peering; SG reference impossible cross-region"
+  from_port         = 3306
+  to_port           = 3306
+  ip_protocol       = "tcp"
+  cidr_ipv4         = var.seoul_fleet_cidr
 }

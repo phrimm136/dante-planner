@@ -18,9 +18,11 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -108,6 +110,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // If refresh fails, SecurityContext remains empty and request proceeds as guest
             try {
                 attemptAutoRefresh(request, response);
+            } catch (RedisConnectionFailureException e) {
+                writeAuthUnavailable(response);
+                return;
             } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
                 writeDbUnavailable(response);
                 return;
@@ -166,6 +171,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 boolean refreshed;
                 try {
                     refreshed = attemptAutoRefresh(request, response);
+                } catch (RedisConnectionFailureException redisEx) {
+                    writeAuthUnavailable(response);
+                    return;
                 } catch (DataAccessResourceFailureException | CannotCreateTransactionException dbEx) {
                     writeDbUnavailable(response);
                     return;
@@ -392,6 +400,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void writeDbUnavailable(HttpServletResponse response) throws IOException {
         SecurityContextHolder.clearContext();
         writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                "DB_UNAVAILABLE", "Database temporarily unavailable, please retry");
+                DegradationErrorConstants.DB_UNAVAILABLE_CODE, DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE);
+    }
+
+    /**
+     * Short-circuits with 503 when the auth store (Redis) is unreachable during token refresh.
+     * The Redis-connection failure is a distinct, retryable transient condition from a DB outage.
+     */
+    private void writeAuthUnavailable(HttpServletResponse response) throws IOException {
+        SecurityContextHolder.clearContext();
+        writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                DegradationErrorConstants.AUTH_UNAVAILABLE_CODE, DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE);
     }
 }

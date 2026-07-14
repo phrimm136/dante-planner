@@ -160,7 +160,7 @@ class JwtAuthenticationFilterLineageTest {
     }
 
     @Test
-    @DisplayName("Flag on: USED token (theft) revokes family, clears context, no auth")
+    @DisplayName("Flag on: RETIRED token (theft) revokes family, clears context, no auth")
     void doFilterInternal_WhenFlagOnAndUsedToken_RevokesFamilyNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "used.jwt";

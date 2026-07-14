@@ -1,15 +1,11 @@
-name: Deploy to Production
+name: Deploy to Production (SUPERSEDED - legacy single-EC2)
 
+# SUPERSEDED by deploy-fleet.yml (the two-region k3s GitOps deploy). This built
+# backend+nginx+mysql and deployed to the single EC2 over docker-compose; that
+# host is decommissioned after the k3s cutover. The push trigger is removed so it
+# no longer auto-fires (and never races the fleet deploy); kept as workflow_dispatch
+# only for break-glass reference to the legacy EC2 path. Delete once the EC2 is gone.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'backend/**'
-      - 'nginx/**'
-      - 'mysql/**'
-      - 'docker-compose.yml'
-      - 'scripts/deploy/**'
-      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 concurrency:
@@ -98,6 +94,21 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
+
+      # The private data submodule is baked into the backend image; fetch it
+      # with a read-only deploy key.
+      - name: Fetch data submodule
+        if: needs.detect-changes.outputs.backend == 'true'
+        env:
+          STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$STATIC_DEPLOY_KEY" > ~/.ssh/static_key
+          chmod 600 ~/.ssh/static_key
+          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+          GIT_SSH_COMMAND="ssh -i ~/.ssh/static_key -o IdentitiesOnly=yes" \
+            git submodule update --init --depth 1 static
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -115,7 +126,7 @@ jobs:
         if: needs.detect-changes.outputs.backend == 'true'
         uses: docker/build-push-action@v7
         with:
-          context: ./backend
+          context: .
           file: ./backend/Dockerfile
           push: true
           tags: ${{ env.ECR_REGISTRY }}/danteplanner-backend:${{ github.sha }}

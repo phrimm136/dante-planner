@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: danteplanner
+
+resources:
+- ../../base
+- redis-auth-nodeport.yaml
+
+# The CI arm64 workflow bumps only newTag via `kustomize edit set image` and
+# commits back (see .github/workflows/deploy-oregon.yml). The registry host
+# (which carries the account id) is never committed: the ArgoCD Application
+# injects it as a kustomize image override at sync, rendered from Terraform state
+# (terraform/oregon/user-data/cp.sh.tftpl). Git holds only the tag.
+images:
+- name: danteplanner-backend
+  newTag: cda232304f77121df94d7834a07337f354cbba96
+
+patches:
+- path: configmap-patch.yaml

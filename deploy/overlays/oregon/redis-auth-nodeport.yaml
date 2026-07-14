@@ -1,0 +1,23 @@
+# Cross-region exposure of the Oregon PRIMARY redis-auth (Oregon overlay ONLY —
+# Seoul's local replica is never exposed). Seoul reaches any fleet node's private
+# IP on 31637 over the VPC peering for REPLICAOF and primary writes
+# (blacklist/rotation/tombstone). Reachability is scoped by the cluster SG rule
+# in terraform/modules/fleet/network.tf (redis_cross_region_cidr, Seoul's fleet
+# CIDR only — never 0.0.0.0/0); the nodePort here and that rule's port
+# (redis_auth_nodeport, default 31637) MUST match. The exposed server requires
+# AUTH once the password secret is provisioned (see base/redis-auth.yaml).
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-auth-nodeport
+  labels:
+    app: redis-auth
+spec:
+  type: NodePort
+  selector:
+    app: redis-auth
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+      nodePort: 31637

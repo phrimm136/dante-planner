@@ -5,11 +5,18 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
+import com.redis.testcontainers.RedisContainer;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -37,19 +44,42 @@ import static org.mockito.Mockito.spy;
  *
  * <p>Exercises the full lineage state machine against a real {@link JwtTokenService}
  * so generated successors carry real lineage claims, plus a {@link SimpleMeterRegistry}
- * to assert outcome metrics. Covers theft scenarios A–D from the spec.</p>
+ * to assert outcome metrics. Family state is externalized to a live Redis container so
+ * theft detection survives across service instances. Covers theft scenarios A–D from
+ * the spec plus cross-instance atomicity.</p>
  */
+@Tag("containerized")
 class RefreshRotationServiceTest {
 
+    private static final String REDIS_IMAGE = "redis:7-alpine";
     private static final long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
+    private static final long RETRY_REUSE_WINDOW_MS = 30000L;
     private static final Long USER_ID = 42L;
     private static final String EMAIL = "rotation@example.com";
+
+    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
+
+    private static StringRedisTemplate sharedTemplate;
 
     private JwtTokenService tokenService;
     private JwtProperties jwtProperties;
     private CookieUtils cookieUtils;
     private SimpleMeterRegistry meterRegistry;
     private RefreshRotationService rotationService;
+
+    @BeforeAll
+    static void startRedis() {
+        REDIS.start();
+        sharedTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+    }
+
+    private static StringRedisTemplate buildTemplate(String host, int port) {
+        LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        f.afterPropertiesSet();
+        StringRedisTemplate t = new StringRedisTemplate(f);
+        t.afterPropertiesSet();
+        return t;
+    }
 
     @BeforeEach
     void setUp() throws Exception {
@@ -71,8 +101,14 @@ class RefreshRotationServiceTest {
         cookieUtils = new CookieUtils(true, "", "Lax");
         meterRegistry = new SimpleMeterRegistry();
 
-        rotationService = new RefreshRotationService(
-                tokenService, tokenService, cookieUtils, jwtProperties, meterRegistry, true);
+        rotationService = serviceWithReuseWindow(RETRY_REUSE_WINDOW_MS);
+        rotationService.clear();
+    }
+
+    private RefreshRotationService serviceWithReuseWindow(long reuseWindowMs) {
+        return new RefreshRotationService(
+                sharedTemplate, tokenService, tokenService, cookieUtils, jwtProperties, meterRegistry,
+                true, reuseWindowMs);
     }
 
     private String freshLoginToken() {
@@ -114,8 +150,8 @@ class RefreshRotationServiceTest {
         }
 
         @Test
-        @DisplayName("Successor first use marks parent USED and drops pendingJwt")
-        void rotate_WhenSuccessorFirstUse_MarksParentUsed() {
+        @DisplayName("Successor first use marks parent RETIRED and drops its memoized successor")
+        void rotate_WhenSuccessorFirstUse_MarksParentRetired() {
             String r1 = freshLoginToken();
             String r1Jti = tokenService.validateToken(r1).jti();
 
@@ -125,7 +161,7 @@ class RefreshRotationServiceTest {
 
             RotationResult.Rotated second = (RotationResult.Rotated) rotationService.rotate(r2, newResponse());
 
-            assertEquals(RotationState.USED, rotationService.stateOf(r1Jti));
+            assertEquals(RotationState.RETIRED, rotationService.stateOf(r1Jti));
             assertEquals(RotationState.PENDING, rotationService.stateOf(r2Jti));
             assertEquals(r2Jti, second.claims().parentJti());
             assertEquals(2.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
@@ -151,20 +187,41 @@ class RefreshRotationServiceTest {
     class Retry {
 
         @Test
-        @DisplayName("Re-presenting parent supersedes prior successor and mints a fresh one")
-        void rotate_WhenParentRepresented_SupersedesPredecessor() {
+        @DisplayName("Re-presenting parent within the reuse window replays the same successor")
+        void rotate_WhenParentRepresentedWithinWindow_ReusesSuccessor() {
             String r1 = freshLoginToken();
 
             RotationResult.Rotated firstAttempt = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+
+            MockHttpServletResponse retryResponse = newResponse();
+            RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1, retryResponse);
+
+            assertEquals(firstAttempt.claims().jti(), retry.claims().jti());
+            assertEquals(firstAttempt.newRefreshJwt(), retry.newRefreshJwt());
+            assertEquals(retry.newRefreshJwt(),
+                    retryResponse.getCookie(CookieConstants.REFRESH_TOKEN).getValue());
+            assertEquals(RotationState.UNUSED_LATEST, rotationService.stateOf(retry.claims().jti()));
+            assertEquals(RotationState.PENDING, rotationService.stateOf(tokenService.validateToken(r1).jti()));
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED));
+        }
+
+        @Test
+        @DisplayName("Re-presenting parent outside the reuse window supersedes prior successor and mints a fresh one")
+        void rotate_WhenParentRepresentedOutsideWindow_SupersedesPredecessor() {
+            RefreshRotationService noReuse = serviceWithReuseWindow(0L);
+            String r1 = freshLoginToken();
+
+            RotationResult.Rotated firstAttempt = (RotationResult.Rotated) noReuse.rotate(r1, newResponse());
             String r2First = firstAttempt.claims().jti();
 
-            RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+            RotationResult.Rotated retry = (RotationResult.Rotated) noReuse.rotate(r1, newResponse());
             String r2Retry = retry.claims().jti();
 
             assertNotEquals(r2First, r2Retry);
-            assertEquals(RotationState.SUPERSEDED, rotationService.stateOf(r2First));
-            assertEquals(RotationState.UNUSED_LATEST, rotationService.stateOf(r2Retry));
-            assertEquals(RotationState.PENDING, rotationService.stateOf(tokenService.validateToken(r1).jti()));
+            assertEquals(RotationState.SUPERSEDED, noReuse.stateOf(r2First));
+            assertEquals(RotationState.UNUSED_LATEST, noReuse.stateOf(r2Retry));
+            assertEquals(RotationState.PENDING, noReuse.stateOf(tokenService.validateToken(r1).jti()));
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_SUPERSEDED));
         }
@@ -187,13 +244,13 @@ class RefreshRotationServiceTest {
     class TheftDetection {
 
         @Test
-        @DisplayName("Scenario D: presenting a USED token revokes the family")
-        void rotate_WhenUsedToken_RevokesFamily() {
+        @DisplayName("Scenario D: presenting a RETIRED token revokes the family")
+        void rotate_WhenRetiredToken_RevokesFamily() {
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
 
             RotationResult.Rotated first = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
-            rotationService.rotate(first.newRefreshJwt(), newResponse()); // R1 -> USED
+            rotationService.rotate(first.newRefreshJwt(), newResponse()); // R1 -> RETIRED
 
             MockHttpServletResponse response = newResponse();
             RotationResult result = rotationService.rotate(r1, response);
@@ -208,19 +265,39 @@ class RefreshRotationServiceTest {
         }
 
         @Test
+        @DisplayName("Entry persisted under the pre-rename USED spelling still reads as RETIRED and trips theft")
+        void rotate_WhenLegacyUsedSpelling_RevokesFamily() {
+            String r1 = freshLoginToken();
+            TokenClaims claims = tokenService.validateToken(r1);
+
+            sharedTemplate.opsForHash().put(
+                    "rt:fam:{" + claims.familyId() + "}", claims.jti(),
+                    "USED||" + claims.expiration().getTime());
+
+            assertEquals(RotationState.RETIRED, rotationService.stateOf(claims.jti()));
+
+            RotationResult result = rotationService.rotate(r1, newResponse());
+
+            assertInstanceOf(RotationResult.Revoked.class, result);
+            assertTrue(rotationService.isFamilyRevoked(claims.familyId()));
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED));
+        }
+
+        @Test
         @DisplayName("Scenarios A/B: presenting a SUPERSEDED token revokes the family")
         void rotate_WhenSupersededToken_RevokesFamily() {
+            RefreshRotationService noReuse = serviceWithReuseWindow(0L);
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
 
-            RotationResult.Rotated attempt1 = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+            RotationResult.Rotated attempt1 = (RotationResult.Rotated) noReuse.rotate(r1, newResponse());
             String r2Superseded = attempt1.newRefreshJwt();
-            rotationService.rotate(r1, newResponse()); // supersedes r2Superseded
+            noReuse.rotate(r1, newResponse()); // outside the window: supersedes r2Superseded
 
-            RotationResult result = rotationService.rotate(r2Superseded, newResponse());
+            RotationResult result = noReuse.rotate(r2Superseded, newResponse());
 
             assertInstanceOf(RotationResult.Revoked.class, result);
-            assertTrue(rotationService.isFamilyRevoked(familyId));
+            assertTrue(noReuse.isFamilyRevoked(familyId));
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED));
         }
     }
@@ -280,8 +357,8 @@ class RefreshRotationServiceTest {
     class ConcurrentRotation {
 
         @Test
-        @DisplayName("Two threads rotating same parent: one transition, one supersede, both valid")
-        void rotate_WhenConcurrentSameParent_OneTransitionOneSupersede() throws Exception {
+        @DisplayName("Two threads rotating same parent converge on one successor: one rotate, one reuse")
+        void rotate_WhenConcurrentSameParent_ConvergesOnOneSuccessor() throws Exception {
             String r1 = freshLoginToken();
             String r1Jti = tokenService.validateToken(r1).jti();
 
@@ -314,74 +391,52 @@ class RefreshRotationServiceTest {
 
             assertEquals(2, results.size());
 
-            // Parent ends PENDING pointing at exactly one of the two minted successors.
+            // Parent ends PENDING pointing at the single shared successor.
             assertEquals(RotationState.PENDING, rotationService.stateOf(r1Jti));
 
             String jtiA = results.get(0).claims().jti();
             String jtiB = results.get(1).claims().jti();
-            assertNotEquals(jtiA, jtiB);
+            assertEquals(jtiA, jtiB);
+            assertEquals(results.get(0).newRefreshJwt(), results.get(1).newRefreshJwt());
+            assertEquals(RotationState.UNUSED_LATEST, rotationService.stateOf(jtiA));
 
-            RotationState stateA = rotationService.stateOf(jtiA);
-            RotationState stateB = rotationService.stateOf(jtiB);
-            List<RotationState> states = List.of(stateA, stateB);
-            assertTrue(states.contains(RotationState.UNUSED_LATEST),
-                    () -> "expected one UNUSED_LATEST winner, got " + states);
-            assertTrue(states.contains(RotationState.SUPERSEDED),
-                    () -> "expected one SUPERSEDED loser, got " + states);
-
-            // Both presenters received a usable distinct JWT.
-            assertNotEquals(results.get(0).newRefreshJwt(), results.get(1).newRefreshJwt());
+            // One racer rotated, the other replayed the memoized successor; no tombstones.
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED));
+            assertEquals(2, rotationService.rotationStateSize());
         }
     }
 
     @Nested
-    @DisplayName("Scheduled cleanup")
-    class Cleanup {
+    @DisplayName("Cross-instance atomicity")
+    class CrossInstanceAtomicity {
 
         @Test
-        @DisplayName("Expired RotationEntry is removed, unexpired kept")
-        void cleanupExpired_WhenEntriesExpired_RemovesThem() {
-            long now = System.currentTimeMillis();
-            rotationService.putEntryForTest("expired-jti", new RotationEntry(
-                    RotationState.UNUSED_LATEST, null, null, "fam", now - 10000, now - 1000));
-            rotationService.putEntryForTest("live-jti", new RotationEntry(
-                    RotationState.UNUSED_LATEST, null, null, "fam", now, now + 60000));
-            assertEquals(2, rotationService.rotationStateSize());
+        @DisplayName("Token driven to RETIRED on instance A is detected as theft when replayed on instance B over shared Redis")
+        void rotate_WhenTokenRetiredOnInstanceA_ReplayOnInstanceB_DetectsTheftOverSharedRedis() {
+            StringRedisTemplate templateA = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            StringRedisTemplate templateB = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
 
-            rotationService.cleanupExpired();
+            RefreshRotationService instanceA = new RefreshRotationService(
+                    templateA, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(),
+                    true, RETRY_REUSE_WINDOW_MS);
+            RefreshRotationService instanceB = new RefreshRotationService(
+                    templateB, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(),
+                    true, RETRY_REUSE_WINDOW_MS);
 
-            assertEquals(1, rotationService.rotationStateSize());
-            assertEquals(RotationState.UNUSED_LATEST, rotationService.stateOf("live-jti"));
-            assertNull(rotationService.stateOf("expired-jti"));
-        }
-
-        @Test
-        @DisplayName("Revoked family past retention is removed")
-        void cleanupExpired_WhenRevokedFamilyPastRetention_RemovesIt() {
-            // Negative retention window: cleanup's cutoff (now - expiry) lands in the future,
-            // so a just-revoked family is already past retention — deterministic, no sleep.
-            jwtProperties.setRefreshTokenExpiry(-1000L);
-            RefreshRotationService svc = new RefreshRotationService(
-                    tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(), true);
-
-            svc.revokeFamily("stale-family");
-            assertEquals(1, svc.revokedFamiliesSize());
-
-            svc.cleanupExpired();
-
-            assertEquals(0, svc.revokedFamiliesSize());
-        }
-
-        @Test
-        @DisplayName("Unexpired entries survive cleanup")
-        void cleanupExpired_WhenEntriesUnexpired_KeepsThem() {
             String r1 = freshLoginToken();
-            rotationService.rotate(r1, newResponse());
-            int before = rotationService.rotationStateSize();
+            String familyId = tokenService.validateToken(r1).familyId();
 
-            rotationService.cleanupExpired();
+            RotationResult.Rotated first = (RotationResult.Rotated) instanceA.rotate(r1, newResponse());
+            instanceA.rotate(first.newRefreshJwt(), newResponse()); // r1 -> RETIRED on A
 
-            assertEquals(before, rotationService.rotationStateSize());
+            MockHttpServletResponse responseB = newResponse();
+            RotationResult replay = instanceB.rotate(r1, responseB);
+
+            assertInstanceOf(RotationResult.Revoked.class, replay);
+            assertTrue(instanceB.isFamilyRevoked(familyId));
+            assertNotNull(responseB.getCookie(CookieConstants.REFRESH_TOKEN));
+            assertEquals(0, responseB.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
         }
     }
 
@@ -399,7 +454,8 @@ class RefreshRotationServiceTest {
 
         private RefreshRotationService serviceWith(TokenValidator validator, boolean legacyAdmit) {
             return new RefreshRotationService(
-                    validator, tokenService, cookieUtils, jwtProperties, meterRegistry, legacyAdmit);
+                    sharedTemplate, validator, tokenService, cookieUtils, jwtProperties, meterRegistry,
+                    legacyAdmit, RETRY_REUSE_WINDOW_MS);
         }
 
         @Test
@@ -436,7 +492,7 @@ class RefreshRotationServiceTest {
         }
 
         @Test
-        @DisplayName("Same legacy token presented twice maps to the same synthesized family")
+        @DisplayName("Same legacy token presented twice converges on the same synthesized family and successor")
         void rotate_WhenSameLegacyTokenTwice_DeterministicFamily() {
             Date issuedAt = new Date();
             JwtTokenService validator = spy(tokenService);
@@ -447,8 +503,10 @@ class RefreshRotationServiceTest {
             RotationResult.Rotated second = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN, newResponse());
 
             assertEquals(first.claims().familyId(), second.claims().familyId());
-            assertNotEquals(first.claims().jti(), second.claims().jti());
-            assertEquals(2.0, outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED));
+            assertEquals(first.claims().jti(), second.claims().jti());
+            assertEquals(first.newRefreshJwt(), second.newRefreshJwt());
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_LEGACY_ADMITTED));
+            assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_RETRY_REUSED));
         }
     }
 }

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  DEPLOY_REGION: ap-northeast-2
+  # Read-local / write-global auth Redis (Phase 14a split, live). WRITES (blacklist
+  # add, rotation, tombstone write) reach the OREGON PRIMARY redis-auth over the
+  # peering by its stable internal name (Route53 private zone, terraform/oregon
+  # internal-dns.tf; resolves to the data node over the peering), on the NodePort.
+  # A Seoul-local write would hit the read-only REPLICAOF replica and fail.
+  REDIS_AUTH_HOST: redis-auth.oregon.danteplanner.internal
+  REDIS_AUTH_PORT: "31637"
+  # READS resolve against the Seoul-LOCAL replica (in-cluster redis-auth, a
+  # read-only REPLICAOF of the Oregon primary). This is the whole point of the
+  # split: blacklist/tombstone reads stay in-region instead of ~130ms to Oregon.
+  REDIS_AUTHLOCAL_HOST: redis-auth.danteplanner.svc.cluster.local
+  # Per-region ephemeral rate-limit store — local, never replicated.
+  REDIS_RATELIMIT_HOST: redis-ratelimit.danteplanner.svc.cluster.local
+  # SSE subscribe target — the Seoul-local replica (a pod subscribes to the store
+  # its region publishes fan-out to). Same relaxed-binding trap as auth-local:
+  # unset resolves to a dead localhost.
+  REDIS_SSELOCAL_HOST: redis-auth.danteplanner.svc.cluster.local
+  # MYSQL_HOST + secrets come from the backend-runtime-config Secrets Manager
+  # bundle, read from the ap-northeast-2 REPLICA (terraform/secrets replication).
+  # That bundle is a byte-copy of Oregon's, so it can only carry the PRIMARY
+  # endpoint — the Seoul-local replica must be wired here, the region-scoped
+  # surface. Reads route to the local RDS replica; writes keep crossing the
+  # peering to the Oregon primary (read-local / write-global, mechanics §5).
+  DATASOURCE_ROUTING_ENABLED: "true"
+  DATASOURCE_REPLICA_ENABLED: "true"
+  MYSQL_REPLICA_HOST: mysql-replica.seoul.danteplanner.internal

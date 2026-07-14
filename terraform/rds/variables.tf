@@ -127,3 +127,39 @@ variable "tags" {
     Phase   = "rds-migration"
   }
 }
+
+variable "fleet_peering_connection_id" {
+  description = "VPC peering connection id from terraform/oregon output rds_peering_connection_id. Empty = no fleet wiring."
+  type        = string
+  default     = ""
+}
+
+variable "fleet_cluster_security_group_id" {
+  description = "k3s fleet cluster SG (terraform/oregon output cluster_security_group_id) allowed to reach RDS on 3306."
+  type        = string
+  default     = ""
+}
+
+variable "fleet_vpc_cidr" {
+  description = "Fleet VPC CIDR, for the RDS-side return route over the peering."
+  type        = string
+  default     = ""
+}
+
+variable "master_password" {
+  description = "Master password for the primary. Managed master password (AWS/Secrets Manager) is disabled because a read-replica source cannot have it enabled. Set to the CURRENT value pulled from the old managed secret so nothing rotates: `aws secretsmanager get-secret-value --secret-id <master_user_secret_arn> --query SecretString --output text` → the `password` field. Set in terraform.tfvars (gitignored) — never commit."
+  type        = string
+  sensitive   = true
+}
+
+variable "seoul_peering_connection_id" {
+  description = "Cross-region VPC peering connection id from terraform/seoul (module.fleet output rds_peering_connection_id). Empty = no Seoul wiring."
+  type        = string
+  default     = ""
+}
+
+variable "seoul_fleet_cidr" {
+  description = "Seoul fleet VPC CIDR, for the RDS-side return route and the CIDR-based 3306 ingress (cross-region SG references are not allowed)."
+  type        = string
+  default     = "10.30.0.0/16"
+}

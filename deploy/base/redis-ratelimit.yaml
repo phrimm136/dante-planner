@@ -1,0 +1,56 @@
+# Local ephemeral rate-limit Redis: buckets must be writable locally and deserve
+# zero durability — no AOF, no replication, emptyDir. Per region (requirements:
+# Data layer). Deployment, not StatefulSet — it holds no state worth keeping.
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-ratelimit
+  labels:
+    app: redis-ratelimit
+spec:
+  selector:
+    app: redis-ratelimit
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-ratelimit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-ratelimit
+  template:
+    metadata:
+      labels:
+        app: redis-ratelimit
+    spec:
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          args:
+            - --save
+            - ""
+            - --appendonly
+            - "no"
+          ports:
+            - name: redis
+              containerPort: 6379
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: data
+          emptyDir: {}

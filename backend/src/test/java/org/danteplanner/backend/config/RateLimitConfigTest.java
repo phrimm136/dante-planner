@@ -1,29 +1,84 @@
 package org.danteplanner.backend.config;
 import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.config.RedisConnectionConfig;
 
 import org.danteplanner.backend.shared.exception.RateLimitExceededException;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import com.redis.testcontainers.RedisContainer;
+
+import io.github.bucket4j.distributed.proxy.ProxyManager;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for RateLimitConfig.
  *
- * <p>Tests Bucket4j rate limiting behavior including:
- * bucket creation, request consumption within limits,
- * rate limit exceeded exceptions, and per-user/per-endpoint isolation.</p>
+ * <p>Tests Bucket4j rate limiting behavior over a Redis-backed bucket4j
+ * {@link ProxyManager}: bucket creation, request consumption within limits,
+ * rate limit exceeded exceptions, per-user/per-endpoint isolation, and that
+ * bucket keys live in the local rate-limit Redis (with a TTL) and never in
+ * the auth Redis.</p>
  */
+@Tag("containerized")
 class RateLimitConfigTest {
+
+    private static final String REDIS_IMAGE = "redis:7-alpine";
+
+    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
+    private static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE);
+
+    private static StringRedisTemplate rateLimitTemplate;
+    private static StringRedisTemplate authTemplate;
 
     private RateLimitConfig rateLimitConfig;
     private RateLimitConfig.BucketConfig testBucketConfig;
 
+    @BeforeAll
+    static void startContainers() {
+        REDIS.start();
+        AUTH_REDIS.start();
+        rateLimitTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+        authTemplate = buildTemplate(AUTH_REDIS.getRedisHost(), AUTH_REDIS.getRedisPort());
+    }
+
+    @AfterAll
+    static void stopContainers() {
+        REDIS.stop();
+        AUTH_REDIS.stop();
+    }
+
+    private static StringRedisTemplate buildTemplate(String host, int port) {
+        LettuceConnectionFactory f = new LettuceConnectionFactory(new RedisStandaloneConfiguration(host, port));
+        f.afterPropertiesSet();
+        StringRedisTemplate t = new StringRedisTemplate(f);
+        t.afterPropertiesSet();
+        return t;
+    }
+
     @BeforeEach
     void setUp() {
-        rateLimitConfig = new RateLimitConfig();
+        // Externalized bucket state: flush both Redis DBs so leftover keys from a
+        // prior test cannot leak into this one.
+        rateLimitTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
+        authTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
+
+        ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+                REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
+        rateLimitConfig = new RateLimitConfig(proxyManager);
 
         // Configure a test bucket: 5 requests per 10 seconds
         testBucketConfig = new RateLimitConfig.BucketConfig();
@@ -529,7 +584,7 @@ class RateLimitConfigTest {
             RateLimitConfig.BucketConfig largeConfig = new RateLimitConfig.BucketConfig();
             largeConfig.setCapacity(1000);
             largeConfig.setRefillTokens(1000);
-            largeConfig.setRefillDurationSeconds(60);
+            largeConfig.setRefillDurationSeconds(86400);
 
             Long userId = 1L;
             String endpoint = "large-test";
@@ -563,6 +618,56 @@ class RateLimitConfigTest {
             // 6th should fail
             assertThrows(RateLimitExceededException.class,
                     () -> rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig));
+        }
+    }
+
+    @Nested
+    @DisplayName("Local Redis Persistence Acceptance Tests")
+    class LocalRedisPersistenceTests {
+
+        @Test
+        @DisplayName("Consuming a token persists the bucket key in the local rate-limit Redis with a positive TTL")
+        void rateLimitBucket_AfterConsume_PersistsInLocalRedisWithTtl() {
+            ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+                    REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
+            RateLimitConfig config = new RateLimitConfig(proxyManager);
+
+            RateLimitConfig.BucketConfig cfg = new RateLimitConfig.BucketConfig();
+            cfg.setCapacity(5);
+            cfg.setRefillTokens(5);
+            cfg.setRefillDurationSeconds(10);
+
+            // Consume one token for the known key "1:ttl-probe"
+            config.checkRateLimit(1L, "ttl-probe", cfg);
+
+            // The bucket key must exist in the local rate-limit Redis...
+            assertThat(rateLimitTemplate.hasKey("1:ttl-probe")).isTrue();
+
+            // ...and carry a positive Redis TTL bounded by the configured bucketTtl (2s).
+            Long ttl = rateLimitTemplate.getExpire("1:ttl-probe");
+            assertThat(ttl).isNotNull();
+            assertThat(ttl).isGreaterThan(0L);
+            assertThat(ttl).isLessThanOrEqualTo(2L);
+        }
+
+        @Test
+        @DisplayName("Consuming a token writes to the rate-limit Redis only, never the auth Redis")
+        void rateLimitBucket_AfterConsume_AbsentFromAuthRedis() {
+            ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
+                    REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
+            RateLimitConfig config = new RateLimitConfig(proxyManager);
+
+            RateLimitConfig.BucketConfig cfg = new RateLimitConfig.BucketConfig();
+            cfg.setCapacity(5);
+            cfg.setRefillTokens(5);
+            cfg.setRefillDurationSeconds(10);
+
+            // Consume one token for the known key "2:auth-probe"
+            config.checkRateLimit(2L, "auth-probe", cfg);
+
+            // Present in the local rate-limit Redis, absent from the auth Redis.
+            assertThat(rateLimitTemplate.hasKey("2:auth-probe")).isTrue();
+            assertThat(authTemplate.hasKey("2:auth-probe")).isFalse();
         }
     }
 }

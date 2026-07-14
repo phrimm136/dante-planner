@@ -1,0 +1,11 @@
+# Terraform — never commit real values or state to this public repo.
+# Patterns have no leading slash, so they match every terraform/ subdirectory
+# (rds, oregon, iam-bootstrap, ...) recursively.
+*.tfstate
+*.tfstate.*
+.terraform/
+# .terraform.lock.hcl IS committed (pins provider versions + hashes).
+terraform.tfvars
+*.auto.tfvars
+!terraform.tfvars.example
+crash.log

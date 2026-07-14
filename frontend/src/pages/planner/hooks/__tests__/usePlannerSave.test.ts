@@ -18,7 +18,7 @@ import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { SaveResult } from '../usePlannerStorage'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
-import { ConflictError } from '@/lib/api'
+import { ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
 
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
@@ -253,6 +253,20 @@ describe('usePlannerSave - error surface', () => {
 
     expect(outcome).toBe(false)
     expect(result.current.errorCode).toBe('quotaExceeded')
+  })
+
+  it('maps WriteTemporarilyUnavailableError to a syncPaused degradation (saved locally, sync paused)', async () => {
+    authenticated()
+    mockSyncToServer.mockRejectedValue(
+      new WriteTemporarilyUnavailableError('Database temporarily unavailable, please retry'),
+    )
+    const { result } = renderHook(() => usePlannerSave(baseOptions()))
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+
+    expect(result.current.errorCode).toBe('syncPaused')
   })
 
   it('clearError resets error state', async () => {

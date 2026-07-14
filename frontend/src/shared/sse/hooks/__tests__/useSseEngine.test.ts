@@ -63,6 +63,7 @@ beforeEach(() => {
   MockEventSource.instances = []
   useSseStore.setState({ isConnected: false, lastEventTime: null, reconnectAttempts: 0 })
   vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.spyOn(Math, 'random').mockReturnValue(0)
 })
 
 afterEach(() => {
@@ -169,6 +170,23 @@ describe('useSseEngine — backoff + reconnect', () => {
     expect(config.createConnection).toHaveBeenCalledTimes(2)
     await advance(SSE_CONNECTION.BASE_DELAY)
     expect(config.createConnection).toHaveBeenCalledTimes(3)
+  })
+
+  it('adds 0–5s jitter on top of the backoff delay', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    const config = makeConfig()
+    renderHook(() => useSseEngine(config))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    act(() => last().fireOpen())
+    act(() => last().fireError())
+
+    // BASE_DELAY alone must NOT trigger the reconnect — jitter (0.5 × 5000 = 2500ms) is still pending.
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(config.createConnection).toHaveBeenCalledTimes(1)
+
+    // After the extra jitter elapses, the reconnect fires.
+    await advance(2500)
+    expect(config.createConnection).toHaveBeenCalledTimes(2)
   })
 
   it('recovers via idle-reset after MAX_ATTEMPTS instead of dying permanently', async () => {

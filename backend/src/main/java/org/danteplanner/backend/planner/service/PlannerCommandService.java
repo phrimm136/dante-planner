@@ -1,6 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.planner.dto.*;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -19,12 +20,17 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,6 +48,7 @@ public class PlannerCommandService {
     private final ContentVersionValidator contentVersionValidator;
     private final PlannerIndexService plannerIndexService;
     private final PlannerAccessGuard accessGuard;
+    private final Optional<ContentTombstoneStore> tombstoneStore;
 
     private final int maxPlannersPerUser;
     private final int currentSchemaVersion;
@@ -53,6 +60,21 @@ public class PlannerCommandService {
             ContentVersionValidator contentVersionValidator,
             PlannerIndexService plannerIndexService,
             PlannerAccessGuard accessGuard,
+            int maxPlannersPerUser,
+            int currentSchemaVersion) {
+        this(plannerRepository, sseService, contentValidator, contentVersionValidator,
+                plannerIndexService, accessGuard, Optional.empty(), maxPlannersPerUser, currentSchemaVersion);
+    }
+
+    @Autowired
+    public PlannerCommandService(
+            PlannerRepository plannerRepository,
+            PlannerSyncEventService sseService,
+            PlannerContentValidator contentValidator,
+            ContentVersionValidator contentVersionValidator,
+            PlannerIndexService plannerIndexService,
+            PlannerAccessGuard accessGuard,
+            Optional<ContentTombstoneStore> tombstoneStore,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.schema-version}") int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
@@ -61,6 +83,7 @@ public class PlannerCommandService {
         this.contentVersionValidator = contentVersionValidator;
         this.plannerIndexService = plannerIndexService;
         this.accessGuard = accessGuard;
+        this.tombstoneStore = tombstoneStore;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.currentSchemaVersion = currentSchemaVersion;
     }
@@ -344,6 +367,16 @@ public class PlannerCommandService {
 
         planner.softDelete();
         plannerRepository.save(planner);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id));
+                }
+            });
+        } else {
+            tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id));
+        }
         log.info("Soft deleted planner {} for user {}", id, userId);
 
         // Notify other devices via SSE
