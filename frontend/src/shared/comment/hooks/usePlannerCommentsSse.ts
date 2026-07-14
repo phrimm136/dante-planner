@@ -140,7 +140,7 @@ export function usePlannerCommentsSse(plannerId: string) {
       reconnectAttemptsRef.current = 0
       setNewCommentsCount(0)
     }
-  }, [plannerId])
+  }, [plannerId, queryClient])
 
   return {
     newCommentsCount,
