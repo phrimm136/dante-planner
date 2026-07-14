@@ -18,7 +18,7 @@ Game planning and management tool for Limbus Company.
 4. **NEVER mix concerns** - Separate layers
 5. **ALWAYS validate data** - Zod (FE), Jakarta Validation (BE)
 6. **ALWAYS extract duplicates** - If similar code exists, refactor into shared utility/component
-7. **BUG FIX** - Read working → Read broken → State root cause → Resolve. NEVER circumvent or bypass errors.
+7. **BUG FIX** - Run the `diagnose` skill: build a red feedback loop before any hypothesis, state the root cause before resolving. NEVER circumvent or bypass errors to make a symptom disappear.
 8. **BE CONCISE** - No unnecessary explanations or verbose output
 9. **NO inline annotations, NO throwaway code** - Don't add `(added for X)` or `(changed from Y)` comments; code is self-documenting, git tracks changes. Don't write comments that restate what the function name already says. Don't add debug prints or verbose formatting you'll remove next edit. Write final-form code on the first Write.
 10. **NO FUCKING EXCLAMATION MARKS** - Never use exclamation marks in responses. Period.
