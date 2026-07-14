@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.entity.SseEventType;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +67,9 @@ public class SsePublisher {
 
     /**
      * Serialize an envelope and publish it on the given Redis channel; a serialization
-     * failure is logged and swallowed so a bad payload cannot break the caller.
+     * failure or an unreachable Redis is logged and swallowed so neither can break the
+     * caller — fan-out is best-effort delivery, and the triggering write must survive a
+     * Redis outage (degrade by operation).
      *
      * @param channel  the Redis pub/sub channel
      * @param envelope the envelope to serialize and publish
@@ -80,6 +83,11 @@ public class SsePublisher {
             return;
         }
 
-        stringRedisTemplate.convertAndSend(channel, json);
+        try {
+            stringRedisTemplate.convertAndSend(channel, json);
+        } catch (DataAccessException e) {
+            log.warn("SSE publish skipped, Redis unreachable (transient): channel {} type {}: {}",
+                    channel, envelope.type(), e.getMessage());
+        }
     }
 }

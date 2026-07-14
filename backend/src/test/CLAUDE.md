@@ -2,7 +2,7 @@
 
 - No `@WebMvcTest`, `@MockBean`, or `@DataJpaTest` anywhere. Two tiers only:
   - Unit: `@ExtendWith(MockitoExtension.class)`, mock at boundaries (external services), test behavior via the public API.
-  - Integration: MySQL/Redis Testcontainers on the `it` profile (`@ActiveProfiles("it")`), tagged `@Tag("containerized")`, run with `-Dgroups=containerized`.
+  - Integration: MySQL/Redis Testcontainers on the `it` profile (`@ActiveProfiles("it")`), tagged `@Tag("containerized")` — included in the default test task (Docker required); exclude with `-PexcludeTags=containerized`.
 - The `it` profile runs Flyway + `ddl-auto=validate` against the real migrated schema — the authoritative schema guard; never weaken it to `create-drop`.
 - Testcontainer tests must register `spring.flyway.url/user/password` (not just `spring.datasource.*`) via `@DynamicPropertySource`, or Flyway connects to the prod-pinned datasource and fails.
 - Naming: `methodName_WhenCondition_ExpectedBehavior`; group with `@Nested` + `@DisplayName`.

@@ -1,6 +1,8 @@
 package org.danteplanner.backend.shared.config;
 
 import java.time.Duration;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +20,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
+import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
+import io.github.bucket4j.distributed.proxy.AsyncProxyManager;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
+import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -123,10 +128,15 @@ public class RedisConnectionConfig {
         return new StringRedisTemplate(authLocalRedisConnectionFactory());
     }
 
+    /**
+     * Building the underlying proxy manager opens a Lettuce connection, and the context must
+     * boot without a live Redis (same invariant as the lazy connection factories above), so
+     * the returned manager defers that connection to the first rate-limit check.
+     */
     @Bean
     public ProxyManager<byte[]> rateLimitProxyManager() {
-        return buildRateLimitProxyManager(
-                rateLimit.getHost(), rateLimit.getPort(), Duration.ofSeconds(rateLimit.getBucketTtlSeconds()));
+        return new LazyConnectingProxyManager(() -> buildRateLimitProxyManager(
+                rateLimit.getHost(), rateLimit.getPort(), Duration.ofSeconds(rateLimit.getBucketTtlSeconds())));
     }
 
     /**
@@ -140,10 +150,70 @@ public class RedisConnectionConfig {
      */
     public static ProxyManager<byte[]> buildRateLimitProxyManager(String host, int port, Duration bucketTtl) {
         RedisClient client = RedisClient.create("redis://" + host + ":" + port);
-        StatefulRedisConnection<byte[], byte[]> connection = client.connect(ByteArrayCodec.INSTANCE);
+        StatefulRedisConnection<byte[], byte[]> connection;
+        try {
+            connection = client.connect(ByteArrayCodec.INSTANCE);
+        } catch (RuntimeException e) {
+            client.shutdown(Duration.ZERO, Duration.ofSeconds(2));
+            throw e;
+        }
         return LettuceBasedProxyManager.builderFor(connection)
                 .withExpirationStrategy(ExpirationAfterWriteStrategy.fixedTimeToLive(bucketTtl))
                 .build();
+    }
+
+    /**
+     * Connects on first use instead of at construction. A failed connection attempt is not
+     * cached — the next call retries, and the raw Lettuce exception propagates so the
+     * degradation handler can map it to a typed 503 rather than a context-boot failure.
+     */
+    private static final class LazyConnectingProxyManager implements ProxyManager<byte[]> {
+
+        private final Supplier<ProxyManager<byte[]>> connector;
+        private volatile ProxyManager<byte[]> target;
+
+        private LazyConnectingProxyManager(Supplier<ProxyManager<byte[]>> connector) {
+            this.connector = connector;
+        }
+
+        private ProxyManager<byte[]> target() {
+            ProxyManager<byte[]> connected = target;
+            if (connected == null) {
+                synchronized (this) {
+                    connected = target;
+                    if (connected == null) {
+                        connected = connector.get();
+                        target = connected;
+                    }
+                }
+            }
+            return connected;
+        }
+
+        @Override
+        public RemoteBucketBuilder<byte[]> builder() {
+            return target().builder();
+        }
+
+        @Override
+        public Optional<BucketConfiguration> getProxyConfiguration(byte[] key) {
+            return target().getProxyConfiguration(key);
+        }
+
+        @Override
+        public void removeProxy(byte[] key) {
+            target().removeProxy(key);
+        }
+
+        @Override
+        public boolean isAsyncModeSupported() {
+            return target().isAsyncModeSupported();
+        }
+
+        @Override
+        public AsyncProxyManager<byte[]> asAsync() {
+            return target().asAsync();
+        }
     }
 
     @Getter
