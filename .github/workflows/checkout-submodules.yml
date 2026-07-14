@@ -17,7 +17,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.STATIC_DEPLOY_KEY }}
       - run: git submodule update --init
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: repo-with-submodules
           path: .
