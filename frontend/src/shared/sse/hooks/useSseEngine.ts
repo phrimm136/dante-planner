@@ -101,7 +101,8 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
         Math.min(
           SSE_CONNECTION.BASE_DELAY * Math.pow(2, attemptsBeforeIncrement),
           SSE_CONNECTION.MAX_DELAY,
-        ) + Math.random() * SSE_CONNECTION.MAX_JITTER
+        ) +
+        Math.random() * SSE_CONNECTION.MAX_JITTER
 
       // Schedule idle reset - if no successful connection in 5 minutes, reset attempts
       if (idleResetTimeoutRef.current) {

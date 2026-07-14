@@ -355,7 +355,11 @@ describe('useAppSse — event → effect map', () => {
   it("'updated' planner envelope patches the detail cache from payload and does not invalidate", async () => {
     const { es, invalidateSpy, queryClient } = await connectAndOpen()
     queryClient.setQueryData(['planners', 'detail', 'p1'], { id: 'p1', title: 'Old Title' })
-    const envelope = { type: 'updated', entityId: 'p1', payload: { id: 'p1', title: 'Changed Title' } }
+    const envelope = {
+      type: 'updated',
+      entityId: 'p1',
+      payload: { id: 'p1', title: 'Changed Title' },
+    }
 
     act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, envelope))
 

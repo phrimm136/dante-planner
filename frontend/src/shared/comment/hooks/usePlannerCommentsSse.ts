@@ -115,7 +115,8 @@ export function usePlannerCommentsSse(plannerId: string) {
           Math.min(
             SSE_CONFIG.BASE_DELAY * Math.pow(2, reconnectAttemptsRef.current),
             SSE_CONFIG.MAX_DELAY,
-          ) + Math.random() * SSE_CONNECTION.MAX_JITTER
+          ) +
+          Math.random() * SSE_CONNECTION.MAX_JITTER
 
         reconnectAttemptsRef.current += 1
 

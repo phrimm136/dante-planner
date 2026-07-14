@@ -1,6 +1,10 @@
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
 
-import { ServiceUpdatingError, BackendUnavailableError, AuthTemporarilyUnavailableError } from './api'
+import {
+  ServiceUpdatingError,
+  BackendUnavailableError,
+  AuthTemporarilyUnavailableError,
+} from './api'
 import { toast } from './toast'
 import i18n from './i18n'
 
