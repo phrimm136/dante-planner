@@ -6,7 +6,11 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { userPlannersQueryKeys, shouldPurgeLocal, adoptSyncedVersion } from '../useMDUserPlannersData'
+import {
+  userPlannersQueryKeys,
+  shouldPurgeLocal,
+  adoptSyncedVersion,
+} from '../useMDUserPlannersData'
 import type { PlannerSummary, SaveablePlanner } from '../../types/PlannerTypes'
 
 describe('userPlannersQueryKeys', () => {

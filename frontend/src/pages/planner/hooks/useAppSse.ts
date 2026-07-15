@@ -153,7 +153,9 @@ export function useAppSse(): void {
           const parsed = SsePlannerPayloadSchema.safeParse(data.payload)
           if (parsed.success) {
             queryClient.setQueryData(plannerQueryKeys.detail(plannerId), parsed.data)
-            queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, parsed.data))
+            queryClient.setQueryData(plannerQueryKeys.list(), (prev) =>
+              upsertById(prev, parsed.data),
+            )
           } else {
             // Contract violation: the payload must be a planner row. Never write
             // an unparsed payload into a cache — mark the row-level caches stale
