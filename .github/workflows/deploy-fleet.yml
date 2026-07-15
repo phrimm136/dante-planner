@@ -291,6 +291,25 @@ jobs:
           wait_cluster "${{ secrets.AWS_REGION }}" danteplanner-oregon-cp
           wait_cluster "$SEOUL_REGION" danteplanner-seoul-cp
 
+      - name: Annotate Grafana with deploy marker
+        env:
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_ANNOTATIONS_TOKEN }}
+          GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+        run: |
+          short_sha=$(printf '%s' "$GIT_SHA" | cut -c1-8)
+          for cluster in oregon seoul; do
+            now_ms=$(date +%s%3N)
+            body=$(cat <<EOF
+          {"tags":["deploy","cluster:$cluster","sha:$GIT_SHA"],"text":"Deployed backend $short_sha to $cluster","time":$now_ms}
+          EOF
+          )
+            curl --silent --show-error --fail -X POST "$GRAFANA_URL/api/annotations" \
+              -H "Authorization: Bearer $GRAFANA_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "$body" \
+              || echo "::warning::Grafana deploy-marker POST failed for $cluster"
+          done
+
       # Scale-in must not black-hole traffic: a bare desired-capacity decrement
       # kills the EC2 without draining, and the dead pod lingers in the Service
       # endpoints while Traefik keeps routing to it (observed as a half-outage
