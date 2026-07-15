@@ -51,7 +51,7 @@ class GtidCookieFilterTest {
     @Test
     void readGet_WhenCookieCaughtUp_ClearsCookieAndDoesNotPin() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
-        request.setCookies(new Cookie(GtidCookie.NAME, GTID));
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
         when(readGate.isCaughtUp(GTID)).thenReturn(true);
 
@@ -71,7 +71,7 @@ class GtidCookieFilterTest {
     @Test
     void readGet_WhenCookieNotCaughtUp_PinsPrimaryRetainsCookieAndClearsPin() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
-        request.setCookies(new Cookie(GtidCookie.NAME, GTID));
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
         when(readGate.isCaughtUp(GTID)).thenReturn(false);
 
@@ -89,7 +89,7 @@ class GtidCookieFilterTest {
     @Test
     void readGet_WhenNotCaughtUpAndChainThrows_StillClearsPin() {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
-        request.setCookies(new Cookie(GtidCookie.NAME, GTID));
+        request.setCookies(new Cookie(GtidCookie.NAME, GtidCookie.of(GTID).getValue()));
         MockHttpServletResponse response = new MockHttpServletResponse();
         when(readGate.isCaughtUp(GTID)).thenReturn(false);
         RuntimeException boom = new RuntimeException("chain blew up");
@@ -119,10 +119,40 @@ class GtidCookieFilterTest {
 
         assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
                 .anySatisfy(header -> assertThat(header)
-                        .contains(GtidCookie.NAME + "=" + GTID)
+                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(GTID).getValue())
                         .contains("HttpOnly")
                         .contains("Secure")
                         .contains("SameSite=Lax"));
+        verifyNoInteractions(readGate);
+    }
+
+    @Test
+    void write_WhenCaptureHasMultiUuidGtidSet_SetsCookieWithoutError() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/api/planners");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        String gtidSet = "3e11fa47-71ca-11e1-9e33-c80aa9429562:1-100,"
+                + "8f9e0d1c-2b3a-4c5d-6e7f-8a9b0c1d2e3f:1-50";
+        when(writeCapture.pollCapturedGtid()).thenReturn(Optional.of(gtidSet));
+
+        filter.doFilter(request, response, new MockFilterChain());
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(gtidSet).getValue()));
+    }
+
+    @Test
+    void readGet_WhenCookieValueUndecodable_TreatedAsAbsent() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
+        request.setCookies(new Cookie(GtidCookie.NAME, "not*base64url*value"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            filter.doFilter(request, response, new MockFilterChain());
+
+            ds.verify(() -> ReadOnlyRoutingDataSource.pinTo(any()), never());
+        }
+
         verifyNoInteractions(readGate);
     }
 }
