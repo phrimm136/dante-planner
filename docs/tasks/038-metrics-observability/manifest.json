@@ -18,8 +18,14 @@
       "followUps": [
         { "type": "live-verify", "note": "CRS etcd metric kube_etcd_snapshot_creation_timestamp_seconds is render-verified only; phase 10 must confirm it populates at runtime (status.creationTime path + CRS GA activation in KSM v2.19)" } ] },
     { "id": "03", "slug": "mysqld-exporter", "title": "mysqld_exporter manifest",
-      "kind": "local-tdd", "deps": ["01"], "status": "pending",
-      "artifacts": { "plan": "plan/phase-03.md" } },
+      "kind": "local-tdd", "deps": ["01"], "status": "done", "verdict": "PASS", "date": "2026-07-15",
+      "artifacts": { "plan": "plan/phase-03.md",
+        "ledger": "phases/03-mysqld-exporter/ledger.md",
+        "verification": "phases/03-mysqld-exporter/verification.md",
+        "dossiers": "~/.local/state/claude-build/LimbusPlanner/038-metrics-observability/phase-03/" },
+      "followUps": [
+        { "type": "live-verify", "note": "Render-verified only: mysqld_exporter up in both regions, digest+QPS metrics visible, and per-instance FreeableMemory before/after perf_schema gate (replica-gate-failure → primary-only fallback as recorded blind spot) all belong to phase 11; the RDS monitoring user + grants (PROCESS, REPLICATION CLIENT, SELECT ON performance_schema.*) and the mysqld-exporter-dsn Secrets Manager secret (keys username/password/primary-endpoint) are provisioned operationally there (INV11)" },
+        { "type": "convention", "note": "Ratified: deploy/CLAUDE.md gains an RDS-endpoint committability rule (primary never committed / region-local replica committed as its Route53 private-zone name at the overlay surface) — candidate for meme decision-fact capture" } ] },
     { "id": "04", "slug": "gap-scrape-wiring", "title": "Gap-cluster scrape wiring",
       "kind": "infra", "deps": ["01"], "status": "pending",
       "artifacts": { "plan": "plan/phase-04.md" } },

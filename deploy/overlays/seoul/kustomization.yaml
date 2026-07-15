@@ -19,3 +19,4 @@ patches:
 - path: redis-replicaof-patch.yaml
 - path: secretstore-region-patch.yaml
 - path: prometheus-cluster-patch.yaml
+- path: mysqld-endpoint-patch.yaml

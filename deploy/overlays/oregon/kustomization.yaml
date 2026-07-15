@@ -19,3 +19,4 @@ images:
 patches:
 - path: configmap-patch.yaml
 - path: prometheus-cluster-patch.yaml
+- path: mysqld-endpoint-patch.yaml

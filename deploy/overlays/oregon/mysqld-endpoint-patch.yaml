@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqld-exporter
+spec:
+  template:
+    spec:
+      containers:
+        - name: mysqld-exporter
+          env:
+            - name: MYSQLD_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: primary-endpoint
