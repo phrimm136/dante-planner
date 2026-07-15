@@ -14,6 +14,7 @@
 
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { queryClient } from '@/lib/queryClient'
 import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { SaveResult } from '../usePlannerStorage'
@@ -71,7 +72,9 @@ vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
   return {
     ...actual,
-    useTranslation: () => ({ t: (_key: string, fallback?: string) => fallback ?? _key }),
+    useTranslation: () => ({
+      t: (_key: string, fallback?: string) => fallback ?? _key,
+    }),
   }
 })
 
@@ -100,7 +103,9 @@ function baseOptions(overrides: Partial<UsePlannerSaveOptions> = {}): UsePlanner
 }
 
 function authenticated() {
-  mockUseAuthQuery.mockReturnValue({ data: { id: 'u1', isBanned: false, isTimedOut: false } })
+  mockUseAuthQuery.mockReturnValue({
+    data: { id: 'u1', isBanned: false, isTimedOut: false },
+  })
 }
 
 beforeEach(() => {
@@ -108,7 +113,9 @@ beforeEach(() => {
   callOrder.length = 0
   mockGetOrCreateDeviceId.mockResolvedValue('device-123')
   mockSaveToLocal.mockResolvedValue({ success: true })
-  mockSyncToServer.mockResolvedValue({ metadata: { syncVersion: 5 } } as SaveablePlanner)
+  mockSyncToServer.mockResolvedValue({
+    metadata: { syncVersion: 5 },
+  } as SaveablePlanner)
 })
 
 describe('usePlannerSave - save() golden master', () => {
@@ -167,7 +174,9 @@ describe('usePlannerSave - save() golden master', () => {
 
   it('adopts the syncVersion returned by the server', async () => {
     authenticated()
-    mockSyncToServer.mockResolvedValue({ metadata: { syncVersion: 42 } } as SaveablePlanner)
+    mockSyncToServer.mockResolvedValue({
+      metadata: { syncVersion: 42 },
+    } as SaveablePlanner)
     const { result } = renderHook(() => usePlannerSave(baseOptions()))
 
     await act(async () => {
@@ -243,7 +252,10 @@ describe('usePlannerSave - draft vs published path selection', () => {
 describe('usePlannerSave - error surface', () => {
   it('maps a quotaExceeded local-save failure to the quotaExceeded error code', async () => {
     authenticated()
-    mockSaveToLocal.mockResolvedValue({ success: false, errorCode: 'quotaExceeded' })
+    mockSaveToLocal.mockResolvedValue({
+      success: false,
+      errorCode: 'quotaExceeded',
+    })
     const { result } = renderHook(() => usePlannerSave(baseOptions()))
 
     let outcome: boolean | undefined
@@ -287,7 +299,9 @@ describe('usePlannerSave - error surface', () => {
   })
 
   it('reports restriction state for a banned user', () => {
-    mockUseAuthQuery.mockReturnValue({ data: { id: 'u1', isBanned: true, banReason: 'spam' } })
+    mockUseAuthQuery.mockReturnValue({
+      data: { id: 'u1', isBanned: true, banReason: 'spam' },
+    })
     const { result } = renderHook(() => usePlannerSave(baseOptions()))
 
     expect(result.current.isRestricted).toBe(true)
@@ -343,7 +357,9 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
   beforeEach(() => {
     // Resolution branches read a server planner; default it to a truthy value with a
     // syncVersion so the if (serverPlanner) blocks execute (fetch -> local -> callbacks).
-    mockFetchFromServer.mockResolvedValue({ metadata: { syncVersion: 9 } } as SaveablePlanner)
+    mockFetchFromServer.mockResolvedValue({
+      metadata: { syncVersion: 9 },
+    } as SaveablePlanner)
   })
 
   it('overwrite force-saves via performSave: sync THEN local, clears conflict', async () => {
@@ -385,7 +401,10 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     authenticated()
     const onServerReload = vi.fn()
     const onKeepBothCreated = vi.fn()
-    const { result } = await driveIntoConflict({ onServerReload, onKeepBothCreated })
+    const { result } = await driveIntoConflict({
+      onServerReload,
+      onKeepBothCreated,
+    })
 
     let outcome: boolean | undefined
     await act(async () => {
@@ -420,5 +439,92 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     expect(outcome).toBe(true)
     expect(callOrder).toEqual(['local', 'fetch', 'local'])
     expect(onKeepBothCreated).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('usePlannerSave - cross-surface version convergence', () => {
+  // performSave mutates the payload object after the server responds (it writes
+  // the returned syncVersion back into `saveable`), so mock.calls[i][0] reads the
+  // post-mutation value — the presented version must be captured at call time.
+  function captureSentVersions(): number[] {
+    const sentVersions: number[] = []
+    mockSyncToServer.mockImplementation((planner: SaveablePlanner) => {
+      sentVersions.push(planner.metadata.syncVersion)
+      return Promise.resolve({
+        metadata: { syncVersion: planner.metadata.syncVersion + 1 },
+      } as SaveablePlanner)
+    })
+    return sentVersions
+  }
+
+  it('presents the advanced initialSyncVersion on the next save after a rerender', async () => {
+    authenticated()
+    const plannerId = '11111111-1111-4111-8111-111111111111'
+    const sentVersions = captureSentVersions()
+    const { result, rerender } = renderHook(
+      (props: UsePlannerSaveOptions) => usePlannerSave(props),
+      {
+        initialProps: baseOptions({
+          initialPlannerId: plannerId,
+          initialSyncVersion: 1,
+        }),
+      },
+    )
+
+    // Another surface (publish header, conflict force) advanced the server
+    // version; its write-through re-renders this hook with the new version.
+    rerender(baseOptions({ initialPlannerId: plannerId, initialSyncVersion: 5 }))
+
+    await act(async () => {
+      await result.current.save()
+    })
+
+    expect(sentVersions).toEqual([5])
+  })
+
+  it('never rolls the version back when a lagging initialSyncVersion arrives', async () => {
+    authenticated()
+    const plannerId = '11111111-1111-4111-8111-111111111111'
+    const sentVersions = captureSentVersions()
+    const { result, rerender } = renderHook(
+      (props: UsePlannerSaveOptions) => usePlannerSave(props),
+      {
+        initialProps: baseOptions({
+          initialPlannerId: plannerId,
+          initialSyncVersion: 6,
+        }),
+      },
+    )
+
+    await act(async () => {
+      await result.current.save()
+    })
+
+    rerender(baseOptions({ initialPlannerId: plannerId, initialSyncVersion: 3 }))
+
+    await act(async () => {
+      await result.current.save()
+    })
+
+    expect(sentVersions).toEqual([6, 7])
+  })
+
+  it('refreshes the planner and userPlanners caches after a synced save', async () => {
+    authenticated()
+    const plannerId = '11111111-1111-4111-8111-111111111111'
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() =>
+      usePlannerSave(baseOptions({ initialPlannerId: plannerId, initialSyncVersion: 1 })),
+    )
+
+    await act(async () => {
+      await result.current.save()
+    })
+
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: ['planner', plannerId],
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['userPlanners'] })
+    invalidateSpy.mockRestore()
   })
 })

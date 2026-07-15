@@ -4,6 +4,8 @@ import i18n from '@/lib/i18n'
 import { useAuthQuery } from '@/shared/auth'
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
+import { plannerQueryKeys } from './useSavedPlannerQuery'
+import { userPlannersQueryKeys } from './useMDUserPlannersData'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { serializeSets } from '../schemas/PlannerSchemas'
 import {
@@ -348,6 +350,17 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Track sync version for optimistic locking
   const syncVersionRef = useRef<number>(initialSyncVersion ?? 1)
 
+  // Another surface (publish header, conflict resolution) may advance the server
+  // version while this instance stays mounted; its cache write-through re-renders
+  // this hook with a newer initialSyncVersion. Adopt forward-only — a lagging
+  // prop must never roll back a version this instance already holds, or the next
+  // save would present a stale version and conflict (409).
+  useEffect(() => {
+    if (initialSyncVersion !== undefined && initialSyncVersion > syncVersionRef.current) {
+      syncVersionRef.current = initialSyncVersion
+    }
+  }, [initialSyncVersion])
+
   // Error state
   const [errorCode, setErrorCode] = useState<SaveErrorCode>(null)
   const [errorI18nKey, setErrorI18nKey] = useState<string | null>(null)
@@ -366,16 +379,31 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * Used in both performSave and resolveConflict to surface validation failures.
    */
   const throwValidationError = (friendly: { key: string; params?: Record<string, string> }) => {
-    const errorMessage = JSON.stringify({ key: friendly.key, params: friendly.params })
+    const errorMessage = JSON.stringify({
+      key: friendly.key,
+      params: friendly.params,
+    })
     const error = new Error(errorMessage)
     ;(
-      error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }
+      error as Error & {
+        code: string
+        i18nKey: string
+        i18nParams?: Record<string, string>
+      }
     ).code = 'userFriendlyValidation'
     ;(
-      error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }
+      error as Error & {
+        code: string
+        i18nKey: string
+        i18nParams?: Record<string, string>
+      }
     ).i18nKey = friendly.key
     ;(
-      error as Error & { code: string; i18nKey: string; i18nParams?: Record<string, string> }
+      error as Error & {
+        code: string
+        i18nKey: string
+        i18nParams?: Record<string, string>
+      }
     ).i18nParams = friendly.params
     throw error
   }
@@ -449,8 +477,10 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       }
 
       // If authenticated AND (syncEnabled OR forceSync), sync to server first to get new syncVersion
+      let didSync = false
       if (isAuthenticated && (syncEnabled || forceSync)) {
         const synced = await syncAdapter.syncToServer(saveable, force)
+        didSync = true
 
         // Update sync version from server response
         if (synced.metadata.syncVersion) {
@@ -465,6 +495,18 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         const error = new Error(`Local save failed: ${localResult.errorCode}`)
         ;(error as Error & { code: string }).code = localResult.errorCode ?? 'saveFailed'
         throw error
+      }
+
+      // Write-through: every mounted consumer (publish header, list pages) must
+      // see the server-assigned version without relying on an SSE echo — the
+      // originating device is excluded from its own events by design.
+      if (didSync) {
+        void queryClient.invalidateQueries({
+          queryKey: plannerQueryKeys.detail(plannerId),
+        })
+        void queryClient.invalidateQueries({
+          queryKey: userPlannersQueryKeys.all,
+        })
       }
 
       return true
