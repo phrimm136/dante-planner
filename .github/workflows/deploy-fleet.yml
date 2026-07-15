@@ -60,15 +60,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Log in to BOTH regional ECR registries (the action logs into the
-      # credentials' default region = us-west-2; Seoul needs an explicit login).
+      # Log in to BOTH regional ECR registries. The action has no region input;
+      # it targets the region resolved from AWS_REGION (us-west-2 by default),
+      # so the Seoul step shadows AWS_REGION for that step only.
       - name: Login to Amazon ECR (Oregon)
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Login to Amazon ECR (Seoul)
-        run: |
-          aws ecr get-login-password --region "$SEOUL_REGION" \
-            | docker login --username AWS --password-stdin "$ECR_REGISTRY_SEOUL"
+        uses: aws-actions/amazon-ecr-login@v2
+        env:
+          AWS_REGION: ${{ env.SEOUL_REGION }}
+          AWS_DEFAULT_REGION: ${{ env.SEOUL_REGION }}
 
       # arm64 (Graviton t4g fleet) built on the amd64 runner via QEMU emulation.
       - name: Set up QEMU
