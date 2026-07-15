@@ -47,7 +47,9 @@ public class GtidCookieFilter extends OncePerRequestFilter {
 
     private void handleRead(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        String gtid = readCookie(request);
+        String gtid = Optional.ofNullable(readCookie(request))
+                .flatMap(GtidCookie::decode)
+                .orElse(null);
         if (gtid == null) {
             filterChain.doFilter(request, response);
             return;
