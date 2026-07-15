@@ -695,6 +695,16 @@ export const PlannerSseEventSchema = z
   .strict()
 
 /**
+ * SSE planner-update payload schema
+ *
+ * A partial planner row carried inside an SSE envelope. Requires `id` so the
+ * row can be located in caches; every other field is optional because events
+ * may carry summaries. Strict: an unrecognized shape must fail parsing rather
+ * than be written into a cache.
+ */
+export const SsePlannerPayloadSchema = ServerPlannerResponseSchema.partial().required({ id: true })
+
+/**
  * Planner configuration schema from backend
  * Contains current versions for data format and game content
  */

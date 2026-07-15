@@ -16,8 +16,10 @@ import {
 import { useAuthQueryNonBlocking } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
 import { plannerApi } from '../lib/plannerApi'
+import { SsePlannerPayloadSchema } from '../schemas/PlannerSchemas'
 import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
 import { plannerQueryKeys } from './usePlannerSync'
+import { userPlannersQueryKeys } from './useMDUserPlannersData'
 
 import type { SseNotificationEvent } from '@/shared/notifications'
 
@@ -148,9 +150,22 @@ export function useAppSse(): void {
             )
           }
         } else if ((data.type === 'created' || data.type === 'updated') && plannerId) {
-          const payload = data.payload as { id?: string } | undefined
-          queryClient.setQueryData(plannerQueryKeys.detail(plannerId), payload)
-          queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, payload))
+          const parsed = SsePlannerPayloadSchema.safeParse(data.payload)
+          if (parsed.success) {
+            queryClient.setQueryData(plannerQueryKeys.detail(plannerId), parsed.data)
+            queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, parsed.data))
+          } else {
+            // Contract violation: the payload must be a planner row. Never write
+            // an unparsed payload into a cache — mark the row-level caches stale
+            // and let consumers refetch.
+            console.error('SSE planner payload failed schema parse; falling back to invalidation')
+            void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
+            void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
+          }
+          // userPlanners reads IndexedDB, so this refetch cannot race replica
+          // replication; without it, mounted pages keep a pre-save syncVersion
+          // and later present it to the server (409).
+          void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
         }
 
         setLastEventTime(Date.now())

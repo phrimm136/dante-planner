@@ -31,6 +31,7 @@ class SsePublisherTest {
 
         publisher.publishUserEvent(
                 1L,
+                null,
                 SseEventType.UPDATED,
                 "planner-9",
                 Map.of("plannerId", "planner-9", "title", "Deck"));

@@ -28,13 +28,16 @@ public class SsePublisher {
     /**
      * Publish a user-targeted event carrying its full payload to the primary Redis.
      *
-     * @param userId   the target user ID
-     * @param type     the event type
-     * @param entityId the affected entity id
-     * @param payload  the event payload (patched into the recipient's cache)
+     * @param userId          the target user ID
+     * @param excludeDeviceId the originating device to exclude from delivery (nullable)
+     * @param type            the event type
+     * @param entityId        the affected entity id
+     * @param payload         the event payload (patched into the recipient's cache)
      */
-    public void publishUserEvent(Long userId, SseEventType type, String entityId, Object payload) {
-        publish(SseChannels.USER, SseEnvelope.userEvent(userId, type, entityId, payload));
+    public void publishUserEvent(Long userId, java.util.UUID excludeDeviceId, SseEventType type,
+            String entityId, Object payload) {
+        publish(SseChannels.USER, SseEnvelope.userEvent(userId, type, entityId,
+                excludeDeviceId != null ? excludeDeviceId.toString() : null, payload));
     }
 
     /**

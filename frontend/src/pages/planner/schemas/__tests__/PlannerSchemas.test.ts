@@ -13,6 +13,7 @@ import {
   RRConfigSchema,
   PlannerConfigDiscriminatedSchema,
   SaveablePlannerSchema,
+  SsePlannerPayloadSchema,
   validateSaveablePlanner,
 } from '../PlannerSchemas'
 import { validateNoteSizes } from '../../lib/plannerValidation'
@@ -401,5 +402,31 @@ describe('import path: oversized note tolerated by storage, gated at save', () =
       key: 'pages.plannerMD.validation.noteTooLarge',
       params: { section: 'intro', limit: String(MAX_NOTE_BYTES) },
     })
+  })
+})
+
+describe('SsePlannerPayloadSchema', () => {
+  const P1 = '11111111-1111-4111-8111-111111111111'
+
+  it('accepts a partial planner row carrying id and syncVersion', () => {
+    const result = SsePlannerPayloadSchema.safeParse({
+      id: P1,
+      title: 'Deck',
+      syncVersion: 7,
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects an envelope-routing payload that is not a planner row', () => {
+    const result = SsePlannerPayloadSchema.safeParse({ plannerId: P1, type: 'updated' })
+
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects a payload without an id', () => {
+    const result = SsePlannerPayloadSchema.safeParse({ title: 'Deck', syncVersion: 7 })
+
+    expect(result.success).toBe(false)
   })
 })

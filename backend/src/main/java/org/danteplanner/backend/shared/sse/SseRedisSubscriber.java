@@ -53,7 +53,10 @@ public class SseRedisSubscriber implements MessageListener {
             if (envelope.type() == SseEventType.SETTINGS_INVALIDATED) {
                 sseService.invalidateSettingsCache(envelope.userId());
             } else {
-                sseService.sendToUser(envelope.userId(), envelope.type().getValue(), envelope);
+                UUID excludeDeviceId = envelope.excludeDeviceId() != null
+                        ? UUID.fromString(envelope.excludeDeviceId())
+                        : null;
+                sseService.sendToUser(envelope.userId(), excludeDeviceId, envelope.type().getValue(), envelope);
             }
         }
     }
