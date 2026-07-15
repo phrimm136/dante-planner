@@ -7,7 +7,6 @@ import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -32,14 +31,13 @@ public class PlannerSyncEventService {
      * @param excludeDeviceId the device ID to exclude from notification (can be null)
      * @param plannerId       the ID of the affected planner
      * @param eventType       the type of event (created, updated, deleted)
+     * @param payload         the changed planner row recipients patch into their caches;
+     *                        null when the event carries no row (deleted)
      */
-    public void notifyPlannerUpdate(Long userId, UUID excludeDeviceId, UUID plannerId, String eventType) {
-        Map<String, String> data = Map.of(
-                "plannerId", plannerId.toString(),
-                "type", eventType
-        );
-
-        ssePublisher.publishUserEvent(userId, SseEventType.fromValue(eventType), plannerId.toString(), data);
+    public void notifyPlannerUpdate(Long userId, UUID excludeDeviceId, UUID plannerId, String eventType,
+            Object payload) {
+        ssePublisher.publishUserEvent(userId, excludeDeviceId, SseEventType.fromValue(eventType),
+                plannerId.toString(), payload);
         log.debug("Sent planner-update event: user={}, planner={}, type={}", userId, plannerId, eventType);
     }
 

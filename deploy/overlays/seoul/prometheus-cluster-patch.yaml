@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  template:
+    spec:
+      containers:
+        - name: prometheus
+          env:
+            - name: CLUSTER_NAME
+              value: seoul

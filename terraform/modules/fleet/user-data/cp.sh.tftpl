@@ -43,6 +43,7 @@ curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server \
   --disable traefik \
   --disable servicelb \
   --node-taint node-role.kubernetes.io/control-plane=true:NoSchedule \
+  --etcd-expose-metrics=true \
   --etcd-s3 \
   --etcd-s3-bucket ${s3_bucket} \
   --etcd-s3-region ${region} \
@@ -110,6 +111,15 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
   --set nodeSelector.role=app \
   --set webhook.nodeSelector.role=app \
   --set certController.nodeSelector.role=app
+
+# Expose three platform controllers to Prometheus role:pod discovery by writing
+# scrape annotations onto the POD TEMPLATE (spec.template.metadata.annotations),
+# not the workload object — role:pod reads pod annotations. Each carries a
+# distinct job label; the merge patch SETS every key, overriding any bundled
+# annotation (k3s CoreDNS ships prometheus.io/* that would otherwise mislabel it).
+kubectl -n argocd patch statefulset argocd-application-controller --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"8082","prometheus.io/path":"/metrics","prometheus.io/job":"argocd"}}}}}'
+kubectl -n external-secrets patch deployment external-secrets --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"8080","prometheus.io/path":"/metrics","prometheus.io/job":"external-secrets"}}}}}'
+kubectl -n kube-system patch deployment coredns --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"9153","prometheus.io/path":"/metrics","prometheus.io/job":"coredns"}}}}}'
 
 # App-of-apps: apply the root Application, which points ArgoCD at the region's
 # overlay so the cluster is GitOps-managed from here on. gitops_revision may be a

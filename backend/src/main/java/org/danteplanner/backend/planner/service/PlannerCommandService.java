@@ -205,10 +205,12 @@ public class PlannerCommandService {
         Planner saved = plannerRepository.save(planner);
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
-        // Notify other devices via SSE
-        sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), SseEventType.CREATED.getValue());
+        PlannerResponse response = PlannerResponse.fromEntity(saved);
 
-        return PlannerResponse.fromEntity(saved);
+        // Notify other devices via SSE
+        sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), SseEventType.CREATED.getValue(), response);
+
+        return response;
     }
 
     /**
@@ -266,8 +268,9 @@ public class PlannerCommandService {
                 plannerIndexService.reindex(saved.getId(), saved.getContent());
             }
 
-            sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue());
-            return UpsertResult.updated(PlannerResponse.fromEntity(saved));
+            PlannerResponse response = PlannerResponse.fromEntity(saved);
+            sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
+            return UpsertResult.updated(response);
         }
 
         // Check if user's own planner was soft-deleted (prevents PRIMARY KEY collision)
@@ -337,10 +340,12 @@ public class PlannerCommandService {
             plannerIndexService.reindex(saved.getId(), saved.getContent());
         }
 
-        // Notify other devices via SSE
-        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue());
+        PlannerResponse response = PlannerResponse.fromEntity(saved);
 
-        return PlannerResponse.fromEntity(saved);
+        // Notify other devices via SSE
+        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
+
+        return response;
     }
 
     /**
@@ -380,7 +385,7 @@ public class PlannerCommandService {
         log.info("Soft deleted planner {} for user {}", id, userId);
 
         // Notify other devices via SSE
-        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.DELETED.getValue());
+        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.DELETED.getValue(), null);
     }
 
     /**

@@ -29,6 +29,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
@@ -90,10 +91,11 @@ class SseFanoutIT extends CausalHarnessSupport {
         String entityId = "planner-9";
         Map<String, Object> payload = Map.of("plannerId", entityId, "title", "Refactored deck");
 
-        ssePublisher.publishUserEvent(userId, SseEventType.UPDATED, entityId, payload);
+        ssePublisher.publishUserEvent(userId, null, SseEventType.UPDATED, entityId, payload);
 
         verify(sseService, timeout(5000)).sendToUser(
                 eq(userId),
+                isNull(),
                 eq(SseEventType.UPDATED.getValue()),
                 argThat(data -> data != null && data.toString().contains(entityId)));
     }
@@ -142,6 +144,7 @@ class SseFanoutIT extends CausalHarnessSupport {
 
         verify(sseService, timeout(5000)).sendToUser(
                 eq(userId),
+                eq(deviceId),
                 eq(SseEventType.UPDATED.getValue()),
                 argThat(env -> env != null && env.toString().contains(plannerId.toString())));
     }

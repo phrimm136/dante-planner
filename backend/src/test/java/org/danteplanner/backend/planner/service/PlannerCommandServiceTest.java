@@ -226,7 +226,7 @@ class PlannerCommandServiceTest {
             assertEquals("5F", response.category());
             assertEquals(1L, response.syncVersion());
             verify(contentValidator).validate(request.content(), request.category());
-            verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"));
+            verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"), eq(response));
         }
 
         @Test
@@ -244,7 +244,7 @@ class PlannerCommandServiceTest {
 
             assertTrue(exception.getMessage().contains(String.valueOf(maxPlannersPerUser)));
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
+            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
         }
 
         @Test
@@ -266,7 +266,7 @@ class PlannerCommandServiceTest {
             assertEquals(nonExistentUserId, exception.getUserId());
             assertTrue(exception.getMessage().contains(nonExistentUserId.toString()));
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
+            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
         }
 
         @Test
@@ -359,7 +359,7 @@ class PlannerCommandServiceTest {
             // Assert
             assertEquals(6L, response.syncVersion());
             assertEquals("Updated Title", response.title());
-            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "updated");
+            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "updated", response);
         }
 
         @Test
@@ -382,7 +382,7 @@ class PlannerCommandServiceTest {
 
             assertEquals(5L, exception.getActualVersion());
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
+            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
         }
 
         @Test
@@ -470,7 +470,7 @@ class PlannerCommandServiceTest {
             assertNotNull(planner.getDeletedAt());
             assertTrue(planner.isDeleted());
             verify(plannerRepository).save(planner);
-            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "deleted");
+            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "deleted", null);
         }
 
         @Test
@@ -488,7 +488,7 @@ class PlannerCommandServiceTest {
             );
 
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any());
+            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
         }
 
         @Test

@@ -6,8 +6,12 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { userPlannersQueryKeys, shouldPurgeLocal } from '../useMDUserPlannersData'
-import type { PlannerSummary } from '../../types/PlannerTypes'
+import {
+  userPlannersQueryKeys,
+  shouldPurgeLocal,
+  adoptSyncedVersion,
+} from '../useMDUserPlannersData'
+import type { PlannerSummary, SaveablePlanner } from '../../types/PlannerTypes'
 
 describe('userPlannersQueryKeys', () => {
   it('creates consistent base key', () => {
@@ -86,5 +90,39 @@ describe('shouldPurgeLocal', () => {
         makeSummary({ status: 'saved', savedAt: '2026-06-01T00:00:00.000Z', syncVersion: 99 }),
       ),
     ).toBe(true)
+  })
+})
+
+describe('adoptSyncedVersion', () => {
+  function makePlanner(syncVersion: number, title: string): SaveablePlanner {
+    return {
+      metadata: {
+        id: '11111111-2222-3333-4444-555555555555',
+        title,
+        status: 'draft',
+        syncVersion,
+        savedAt: null,
+      },
+      config: { type: 'MIRROR_DUNGEON', category: '5F' },
+      content: { title },
+    } as unknown as SaveablePlanner
+  }
+
+  it('keeps the local content but adopts the server-assigned syncVersion', () => {
+    const local = makePlanner(1, 'Local draft')
+    const synced = makePlanner(7, 'Server echo')
+
+    const saved = adoptSyncedVersion(local, synced)
+
+    expect(saved.metadata.syncVersion).toBe(7)
+    expect(saved.content).toEqual(local.content)
+    expect(saved.metadata.title).toBe('Local draft')
+  })
+
+  it('marks the planner saved with a savedAt timestamp', () => {
+    const saved = adoptSyncedVersion(makePlanner(1, 'A'), makePlanner(2, 'A'))
+
+    expect(saved.metadata.status).toBe('saved')
+    expect(saved.metadata.savedAt).not.toBeNull()
   })
 })

@@ -13,6 +13,8 @@ rules:
   - apiGroups: [""]
     resources: ["nodes", "nodes/metrics", "services", "endpoints", "pods"]
     verbs: ["get", "list", "watch"]
+  - nonResourceURLs: ["/metrics"]
+    verbs: ["get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -35,6 +37,8 @@ data:
   prometheus.yml: |
     global:
       scrape_interval: 30s
+      external_labels:
+        cluster: ${CLUSTER_NAME}
     scrape_configs:
       - job_name: backend
         metrics_path: /actuator/prometheus
@@ -52,6 +56,37 @@ data:
             action: replace
             regex: ([^:]+)(?::\d+)?;(\d+)
             replacement: $1:$2
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_job]
+            action: replace
+            target_label: job
+            regex: (.+)
+      - job_name: prometheus
+        static_configs:
+          - targets: ['localhost:9090']
+      - job_name: apiserver
+        kubernetes_sd_configs:
+          - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+      - job_name: etcd
+        kubernetes_sd_configs:
+          - role: node
+        scheme: http
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_node_label_node_role_kubernetes_io_control_plane]
+            action: keep
+            regex: .+
+          - source_labels: [__meta_kubernetes_node_address_InternalIP]
+            action: replace
+            regex: (.+)
+            replacement: $1:2381
             target_label: __address__
 ---
 apiVersion: apps/v1
@@ -77,6 +112,7 @@ spec:
           args:
             - --config.file=/etc/prometheus/prometheus.yml
             - --storage.tsdb.retention.time=7d
+            - --enable-feature=expand-external-labels
           ports:
             - name: web
               containerPort: 9090

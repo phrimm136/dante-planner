@@ -72,6 +72,27 @@ export function shouldPurgeLocal(local: PlannerSummary): boolean {
   return true
 }
 
+/**
+ * Build the local save for a planner whose content won a conflict resolution:
+ * keeps the local content but adopts the server-assigned syncVersion from the
+ * sync response. Persisting the pre-sync version would make every subsequent
+ * non-forced upload conflict (409) until the versions realign.
+ */
+export function adoptSyncedVersion(
+  local: SaveablePlanner,
+  synced: SaveablePlanner,
+): SaveablePlanner {
+  return {
+    ...local,
+    metadata: {
+      ...local.metadata,
+      status: 'saved',
+      syncVersion: synced.metadata.syncVersion,
+      savedAt: new Date().toISOString(),
+    },
+  }
+}
+
 // ============================================================================
 // Hook Options Interface
 // ============================================================================
@@ -453,17 +474,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
           // Validate before syncing local draft to server
           validateBeforeSync(conflict.localPlanner)
           // Keep local draft, force push to server
-          await syncAdapter.syncToServer(conflict.localPlanner, true)
-          // Update local with saved status
-          const saved: SaveablePlanner = {
-            ...conflict.localPlanner,
-            metadata: {
-              ...conflict.localPlanner.metadata,
-              status: 'saved',
-              savedAt: new Date().toISOString(),
-            },
-          }
-          await saveAdapter.saveToLocal(saved)
+          const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
+          await saveAdapter.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced))
         } else if (resolution.choice === 'discard') {
           // Use server version, discard local draft
           await saveAdapter.saveToLocal(conflict.serverPlanner)

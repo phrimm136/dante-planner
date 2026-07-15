@@ -1,0 +1,72 @@
+# mysqld_exporter per region on the data node, scraped locally by Prometheus.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqld-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysqld-exporter
+  template:
+    metadata:
+      labels:
+        app: mysqld-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9104"
+        prometheus.io/job: mysqld
+    spec:
+      nodeSelector:
+        role: data
+      containers:
+        - name: mysqld-exporter
+          image: prom/mysqld-exporter:v0.19.0
+          args:
+            - --mysqld.username=$(MYSQL_EXPORTER_USER)
+            - --collect.perf_schema.eventsstatements
+            - --collect.perf_schema.tableiowaits
+            - --mysqld.address=$(MYSQLD_ADDRESS)
+          env:
+            - name: MYSQL_EXPORTER_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: username
+            - name: MYSQLD_EXPORTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: password
+          ports:
+            - name: http-metrics
+              containerPort: 9104
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: mysqld-exporter-dsn
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: mysqld-exporter-dsn
+    creationPolicy: Owner
+  data:
+    - secretKey: username
+      remoteRef:
+        key: danteplanner/mysqld-exporter/username
+    - secretKey: password
+      remoteRef:
+        key: danteplanner/mysqld-exporter/password
+    - secretKey: primary-endpoint
+      remoteRef:
+        key: danteplanner/mysqld-exporter/primary-endpoint

@@ -1,0 +1,120 @@
+# kube-state-metrics per region on the data node, scraped locally by Prometheus.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kube-state-metrics
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-state-metrics
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "pods"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["k3s.cattle.io"]
+    resources: ["etcdsnapshotfiles"]
+    verbs: ["list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-state-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-state-metrics
+subjects:
+  - kind: ServiceAccount
+    name: kube-state-metrics
+    namespace: danteplanner
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-state-metrics-crs-config
+data:
+  crs-config.yaml: |
+    kind: CustomResourceStateMetrics
+    spec:
+      resources:
+        - groupVersionKind:
+            group: k3s.cattle.io
+            version: "v1"
+            kind: ETCDSnapshotFile
+          metricNamePrefix: kube_etcd
+          labelsFromPath:
+            name: [metadata, name]
+            node: [spec, nodeName]
+          metrics:
+            - name: snapshot_creation_timestamp_seconds
+              help: "Unix timestamp of the etcd snapshot creation time; age = time() - this metric"
+              each:
+                type: Gauge
+                gauge:
+                  path: [status, creationTime]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-state-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-state-metrics
+  template:
+    metadata:
+      labels:
+        app: kube-state-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/job: kube-state-metrics
+    spec:
+      serviceAccountName: kube-state-metrics
+      nodeSelector:
+        role: data
+      containers:
+        - name: kube-state-metrics
+          image: registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.19.1
+          args:
+            - --resources=nodes,pods,daemonsets
+            - --custom-resource-state-config-file=/etc/kube-state-metrics/crs-config.yaml
+            - --metric-allowlist=kube_node_status_condition,kube_node_spec_taint,kube_pod_status_phase,kube_pod_status_ready,kube_pod_container_status_restarts_total,kube_pod_container_status_waiting_reason,kube_daemonset_status_desired_number_scheduled,kube_daemonset_status_number_ready,kube_etcd_snapshot_creation_timestamp_seconds
+          volumeMounts:
+            - name: crs-config
+              mountPath: /etc/kube-state-metrics
+              readOnly: true
+          ports:
+            - name: http-metrics
+              containerPort: 8080
+            - name: telemetry
+              containerPort: 8081
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+      volumes:
+        - name: crs-config
+          configMap:
+            name: kube-state-metrics-crs-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-state-metrics
+  labels:
+    app: kube-state-metrics
+spec:
+  selector:
+    app: kube-state-metrics
+  ports:
+    - name: http-metrics
+      port: 8080
+      targetPort: http-metrics
