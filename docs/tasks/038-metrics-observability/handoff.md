@@ -33,9 +33,10 @@ burstable-credit exhaustion), not by enabling textbook catalogs.
   (`--metrics.prometheus`), Traefik access logs, any tracing.
 - Domain counters already exposed by the app: `replica_miss_promoted_total`,
   `blacklist_check_skipped_total`, `jwt_rotation_outcome_total`.
-- Deploys are GitOps on the **dev** branch (ArgoCD both regions; main promotion is a
-  planned later cutover). Anything you deploy goes through `deploy/base` +
-  `deploy/overlays/{oregon,seoul}` and rolls via the surge pipeline automatically.
+- Deploys are GitOps: ArgoCD syncs from the **main** branch in both regions (the live
+  GitOps branch); 038's additions staged on `dev` stay inert until main promotion.
+  Anything you deploy goes through `deploy/base` + `deploy/overlays/{oregon,seoul}` and
+  rolls via the surge pipeline automatically.
 
 ## Selected metrics (final)
 
@@ -108,6 +109,12 @@ burstable-credit exhaustion), not by enabling textbook catalogs.
   that lives or dies by buffer pool hit ratio. Enable digest + table_io instruments
   only, and compare FreeableMemory before/after enabling. RDS Performance Insights is
   likely unsupported on this instance class — verify before planning around it.
+- **Refinement:** mysqld_exporter runs one instance **per region** against its
+  region-local endpoint (Oregon → primary, Seoul → replica — observability follows the
+  read path), each behind a per-instance `FreeableMemory` gate; a replica-gate failure
+  falls back to primary-only as a recorded blind spot. EXPLAIN ANALYZE is dropped from
+  the design — an on-demand drill, not a recorded metric. Exporter contract in
+  `mechanics.md §6`.
 
 ### H. Distributed tracing (phase 2 of this task, after metrics)
 - OpenTelemetry: Traefik v3 native tracing + Spring via micrometer-tracing/OTel agent
@@ -134,21 +141,64 @@ burstable-credit exhaustion), not by enabling textbook catalogs.
 - Domain: idempotent-issuance hit counter = live frequency of the concurrent-refresh
   race that was fixed on 2026-07-13 (the bug's fix doubles as its own profiler).
 
+### J. Kubernetes object state (kube-state-metrics)
+- Per-cluster **kube-state-metrics** Deployment (via `deploy/base`, so both regions get
+  it identically): an incident-driven allowlist, not the default firehose.
+- Watches Pod/Node condition state that **lives only in the apiserver** —
+  node_exporter/kubelet cannot see it (readiness, taints, phase, container waiting
+  reasons, DaemonSet ready counts).
+- Motivating gap: no cloud-controller-manager on this fleet, so orphaned **NotReady**
+  nodes are never garbage-collected — nothing else surfaces them.
+- Exact allowlist, image, placement, and RBAC in `mechanics.md §1`.
+
+### K. Prometheus prerequisites (ship FIRST)
+- Per-region `cluster` **external label** — without it, remote_write merges Oregon and
+  Seoul into one indistinguishable stream.
+- Generic `prometheus.io/job` **relabel** — today every annotated pod lands under
+  `job="backend"`, which poisons the planned `absent(up{job=...})` dead-man alerts.
+- Prometheus **self-scrape** — feeds the staleness meta-alert (§L / alerts).
+- Exact YAML (external_labels, relabel rule, self-scrape job) in `mechanics.md §2`.
+
+### L. Coverage-gap clusters
+- Unifying rationale: **control planes fail silent, data planes fail loud** — the
+  metrics above watch the loud data planes; these four clusters watch the silent control
+  planes.
+- (1) **GitOps plane** — ArgoCD sync/health + ESO sync failures.
+- (2) **CP/etcd health** — apiserver latency + etcd fsync, plus a dead-man on the S3
+  etcd snapshots (the only CP restore path).
+- (3) **Alert-pipeline self-monitoring** — Prometheus self-scrape + per-cluster
+  staleness meta-alert, so remote_write breakage cannot blind alerting silently.
+- (4) **Deploy markers** — Grafana annotations from the deploy workflow (both motivating
+  postmortems were deploy-window incidents).
+- Free riders: blackbox **cert expiry** and node_exporter **clock skew** ride with their
+  step-2 exporters and are DEFERRED to step-2; only the **CoreDNS** scrape lands now.
+- Per-cluster wiring in `mechanics.md §4`.
+
 ## Alerts (minimum set, from incident history)
-1. Seoul replica `DatabaseConnections == 0` sustained (15m) — **postmortem action item,
-   due 2026-07-27.**
+1. Seoul replica `DatabaseConnections == 0` sustained (15m) — a **Grafana
+   CloudWatch-datasource** rule (born Discord-native, independent of remote_write);
+   **postmortem action item, due 2026-07-27.**
 2. `absent(up{job=...})` for every scrape target (dead-man generalization).
 3. Hikari `pending > 0` sustained.
 4. Redis `used_memory/maxmemory` threshold + `keys_expiring` monotonic-growth.
 5. CPUCreditBalance floor.
 6. GTID gate primary-fallback ratio spike (replication lag became user-visible).
+7. **Node not Ready** sustained (15m — outlasts a routine surge window).
+8. Backend **DaemonSet** ready count `== 0` (5m).
+9. Container stuck **waiting** on `CrashLoopBackOff`/`ImagePullBackOff` (10m).
+- **Staleness meta-alert** (unnumbered, "M" in mechanics): per-cluster no-recent-data on
+  `up{cluster=...}`, so remote_write breakage or region egress death fires from the
+  surviving vantage.
+- **Delivery:** every rule evaluates in **Grafana Cloud** (never in-cluster); one
+  notification policy, Discord webhook (primary) + Slack incoming webhook (fallback).
+- Expression sketches and thresholds in `mechanics.md §3`.
 
 ## Implementation order (suggested)
 1. Micrometer config (B) + histogram flags — config-only, immediate value.
 2. Exporters via GitOps (`deploy/base` + overlays): redis_exporter, node_exporter,
    Traefik metrics+access logs, blackbox (D/E/F bases).
 3. Grafana Cloud wiring: Prometheus remote_write + CloudWatch datasource (A);
-   dashboards; the 6 alerts above.
+   dashboards; the alerts above.
 4. Niche sidecars (C jcmd exporter, D prefix sampler) — custom containers; respect the
    fixed-label cardinality rules; measure the observation cost you add.
 5. DB depth (G) with the perf_schema memory check.

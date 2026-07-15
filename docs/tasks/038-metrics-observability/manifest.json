@@ -44,8 +44,11 @@
       "followUps": [
         { "type": "live-verify", "note": "Authored-only (live-only consent boundary): kind=authored, not done. USER must (1) create a Grafana Cloud service account with annotation-write (Editor) role and generate a token; (2) set the GitHub Actions secret GRAFANA_ANNOTATIONS_TOKEN and the repository variable GRAFANA_URL (base instance URL, e.g. https://<slug>.grafana.net) on this repo — names are character-coupled to deploy-fleet.yml settle-down; (3) confirm on the next production deploy-fleet.yml rollout that a per-cluster annotation (tags deploy/cluster:oregon|seoul/sha:<full-sha>) appears in Grafana (Done-When item 7). POST is non-fatal (curl --fail || ::warning::) so an unprovisioned secret degrades to a warning, not a failed deploy." } ] },
     { "id": "06", "slug": "handoff-amendment", "title": "Handoff amendment",
-      "kind": "local-tdd", "deps": [], "status": "pending",
-      "artifacts": { "plan": "plan/phase-06.md" } },
+      "kind": "local-tdd", "deps": [], "status": "done", "verdict": "PASS", "date": "2026-07-15",
+      "artifacts": { "plan": "plan/phase-06.md",
+        "ledger": "phases/06-handoff-amendment/ledger.md",
+        "verification": "phases/06-handoff-amendment/verification.md",
+        "dossiers": "~/.local/state/claude-build/LimbusPlanner/038-metrics-observability/phase-06/" } },
     { "id": "07", "slug": "alert-delivery", "title": "Alert delivery pipeline",
       "kind": "infra", "deps": [], "status": "pending",
       "artifacts": { "plan": "plan/phase-07.md" } },
