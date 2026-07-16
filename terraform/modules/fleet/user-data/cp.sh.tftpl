@@ -117,9 +117,37 @@ helm upgrade --install external-secrets external-secrets/external-secrets \
 # not the workload object — role:pod reads pod annotations. Each carries a
 # distinct job label; the merge patch SETS every key, overriding any bundled
 # annotation (k3s CoreDNS ships prometheus.io/* that would otherwise mislabel it).
-kubectl -n argocd patch statefulset argocd-application-controller --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"8082","prometheus.io/path":"/metrics","prometheus.io/job":"argocd"}}}}}'
-kubectl -n external-secrets patch deployment external-secrets --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"8080","prometheus.io/path":"/metrics","prometheus.io/job":"external-secrets"}}}}}'
-kubectl -n kube-system patch deployment coredns --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"9153","prometheus.io/path":"/metrics","prometheus.io/job":"coredns"}}}}}'
+# Installed as a k3s-start-triggered oneshot, not an inline loop: k3s rewrites and
+# re-applies its bundled CoreDNS manifest on EVERY server start, reverting the
+# patch — the unit re-converges it after each restart or reboot. The settle sleep
+# lets the addon controller finish its re-apply before we patch over it.
+cat >/usr/local/bin/scrape-annotate.sh <<'EOF'
+#!/bin/sh
+set -u
+KUBECTL="/usr/local/bin/k3s kubectl"
+until $KUBECTL -n kube-system get deployment coredns >/dev/null 2>&1; do sleep 10; done
+sleep 60
+until $KUBECTL -n argocd patch statefulset argocd-application-controller --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"8082","prometheus.io/path":"/metrics","prometheus.io/job":"argocd"}}}}}'; do sleep 10; done
+until $KUBECTL -n external-secrets patch deployment external-secrets --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"8080","prometheus.io/path":"/metrics","prometheus.io/job":"external-secrets"}}}}}'; do sleep 10; done
+until $KUBECTL -n kube-system patch deployment coredns --type merge -p '{"spec":{"template":{"metadata":{"annotations":{"prometheus.io/scrape":"true","prometheus.io/port":"9153","prometheus.io/path":"/metrics","prometheus.io/job":"coredns"}}}}}'; do sleep 10; done
+EOF
+chmod +x /usr/local/bin/scrape-annotate.sh
+cat >/etc/systemd/system/scrape-annotate.service <<'EOF'
+[Unit]
+Description=Re-apply Prometheus scrape annotations after k3s start
+After=k3s.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=600
+ExecStart=/usr/local/bin/scrape-annotate.sh
+
+[Install]
+WantedBy=k3s.service
+EOF
+systemctl daemon-reload
+systemctl enable scrape-annotate.service
+/usr/local/bin/scrape-annotate.sh
 
 # App-of-apps: apply the root Application, which points ArgoCD at the region's
 # overlay so the cluster is GitOps-managed from here on. gitops_revision may be a
