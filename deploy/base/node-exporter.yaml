@@ -1,0 +1,61 @@
+# node_exporter on every node via DaemonSet — host memory, PSI, and saturation
+# signals that neither KSM (apiserver state only) nor CloudWatch basic EC2
+# metrics (no memory) can see. Collector set is restricted to the incident-
+# driven families; the remote_write keep-list further bounds what ships.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+spec:
+  selector:
+    matchLabels:
+      app: node-exporter
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9100"
+        prometheus.io/path: /metrics
+        prometheus.io/job: node
+    spec:
+      hostPID: true
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:v1.8.2
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --collector.disable-defaults
+            - --collector.meminfo
+            - --collector.cpu
+            - --collector.pressure
+            - --collector.filesystem
+            - --collector.loadavg
+            - --collector.conntrack
+          ports:
+            - name: metrics
+              containerPort: 9100
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 24Mi
+            limits:
+              memory: 48Mi
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys

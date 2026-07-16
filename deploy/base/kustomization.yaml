@@ -18,6 +18,7 @@ resources:
   - kube-state-metrics.yaml
   - mysqld-exporter.yaml
   - redis-exporter.yaml
+  - node-exporter.yaml
 
 configMapGenerator:
   - name: mysqld-tls-cnf
