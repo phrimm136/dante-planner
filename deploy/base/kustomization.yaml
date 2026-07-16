@@ -9,6 +9,7 @@ resources:
   - traefik-gateway.yaml
   - external-secret.yaml
   - jwt-secrets.yaml
+  - grafana-remote-write-secret.yaml
   - origin-tls-secrets.yaml
   - runtime-config.yaml
   - redis-auth.yaml
