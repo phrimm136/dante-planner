@@ -72,6 +72,7 @@ spec:
         app: kube-state-metrics
       annotations:
         prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
         prometheus.io/port: "8080"
         prometheus.io/job: kube-state-metrics
     spec:
