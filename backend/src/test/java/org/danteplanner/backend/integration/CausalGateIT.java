@@ -2,6 +2,8 @@ package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -45,9 +47,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * (filter / interceptor / aspect):</p>
  * <ol>
  *   <li><b>Write sets the cookie.</b> An authenticated write returns a {@code Set-Cookie} carrying a
- *       non-empty GTID with {@code HttpOnly}, {@code Secure}, {@code SameSite=Lax}. The cookie is
- *       identified name-agnostically by its GTID-shaped value (the implementer fixes the name in
- *       green), so this asserts the contract, not a hardcoded name.</li>
+ *       non-empty Base64url-encoded GTID with {@code HttpOnly}, {@code Secure}, {@code SameSite=Lax}.
+ *       The cookie is identified name-agnostically by its GTID-shaped decoded value (the implementer
+ *       fixes the name in green), so this asserts the contract, not a hardcoded name.</li>
  *   <li><b>Read-your-own-write routes to primary while the replica lags.</b> Mirroring the
  *       {@link RoutingSeoulIT} probe technique: the author's planner is replicated, replication is
  *       stopped, the author writes a fresh primary-only value; a cookie-bearing read observes the
@@ -184,21 +186,22 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     /**
-     * Asserts the response set exactly one gate cookie: a {@code Set-Cookie} whose value is a
-     * non-empty GTID, marked {@code HttpOnly}, {@code Secure}, {@code SameSite=Lax}. The cookie is
-     * matched by its GTID-shaped value rather than a hardcoded name.
+     * Asserts the response set exactly one gate cookie: a {@code Set-Cookie} whose Base64url-decoded
+     * value is a non-empty GTID, marked {@code HttpOnly}, {@code Secure}, {@code SameSite=Lax}. The
+     * cookie is matched by its GTID-shaped decoded value rather than a hardcoded name; the wire value
+     * is encoded because raw GTID sets can contain cookie-illegal commas.
      */
     private static GateCookie assertGtidCookie(MvcResult result) {
         List<String> setCookies = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);
         String header = setCookies.stream()
-                .filter(h -> GTID_VALUE.matcher(cookieValue(h)).find())
+                .filter(h -> GTID_VALUE.matcher(decodedCookieValue(h)).find())
                 .findFirst()
                 .orElse(null);
         assertThat(header)
-                .as("a Set-Cookie carrying the transaction GTID (identified by its GTID-shaped value) "
-                        + "among %s", setCookies)
+                .as("a Set-Cookie carrying the transaction GTID (identified by its GTID-shaped "
+                        + "decoded value) among %s", setCookies)
                 .isNotNull();
-        assertThat(cookieValue(header)).as("gate cookie GTID value").isNotBlank();
+        assertThat(decodedCookieValue(header)).as("gate cookie GTID value").isNotBlank();
         assertThat(header).as("gate cookie attributes")
                 .contains("HttpOnly")
                 .contains("Secure")
@@ -238,6 +241,17 @@ class CausalGateIT extends CausalHarnessSupport {
         String pair = setCookieHeader.split(";", 2)[0];
         int eq = pair.indexOf('=');
         return eq < 0 ? "" : pair.substring(eq + 1).trim();
+    }
+
+    /** Base64url-decodes a Set-Cookie value; yields an empty string for non-Base64url values. */
+    private static String decodedCookieValue(String setCookieHeader) {
+        try {
+            return new String(
+                    Base64.getUrlDecoder().decode(cookieValue(setCookieHeader)),
+                    StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException ex) {
+            return "";
+        }
     }
 
     private String upsertBody(UUID id, String title) throws Exception {
