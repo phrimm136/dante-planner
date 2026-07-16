@@ -18,3 +18,11 @@ resources:
   - kube-state-metrics.yaml
   - mysqld-exporter.yaml
   - redis-exporter.yaml
+
+configMapGenerator:
+  - name: mysqld-tls-cnf
+    files:
+      - mysqld-tls.cnf
+  - name: rds-ca-bundle
+    files:
+      - rds-global-bundle.pem
