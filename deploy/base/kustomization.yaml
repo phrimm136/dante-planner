@@ -17,3 +17,4 @@ resources:
   - prometheus.yaml
   - kube-state-metrics.yaml
   - mysqld-exporter.yaml
+  - redis-exporter.yaml
