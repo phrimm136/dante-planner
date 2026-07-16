@@ -1136,9 +1136,9 @@
    }
   },
   {
-   "id": 26,
-   "type": "logs",
-   "title": "Slow query log (primary)",
+   "id": 49,
+   "type": "table",
+   "title": "Slow queries \u2014 rows examined vs sent (per execution)",
    "datasource": {
     "type": "cloudwatch",
     "uid": "${DS_CW}"
@@ -1157,7 +1157,7 @@
      "logGroupNames": [
       "/aws/rds/instance/danteplanner-mysql/slowquery"
      ],
-     "expression": "fields @timestamp, @message | sort @timestamp desc | limit 50"
+     "expression": "parse @message /Query_time: (?<query_time_s>[0-9.]+)\\s+Lock_time: (?<lock_time_s>[0-9.]+).*Rows_sent: (?<rows_sent>[0-9]+)\\s+Rows_examined: (?<rows_examined>[0-9]+)/ | parse @message /Created_tmp_disk_tables: (?<tmp_disk_tables>[0-9]+)/ | parse @message /Sort_merge_passes: (?<sort_merge_passes>[0-9]+)/ | filter ispresent(rows_examined) | display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, tmp_disk_tables, sort_merge_passes, substr(@message, 0, 160) | sort rows_examined desc | limit 50"
     }
    ]
   },
@@ -1236,7 +1236,7 @@
    "targets": [
     {
      "refId": "A",
-     "expr": "{namespace=\"danteplanner\"} | json | level=~\"WARN|ERROR\" | line_format \"{{.level}} {{.logger_name}} {{.message}}\""
+     "expr": "{namespace=\"danteplanner\"} | json | level=~\"WARN|ERROR\" | line_format \"{{.level}} [{{.thread_name}}] {{.logger_name}}{{if .method}} {{.method}} {{.path}}{{end}}{{if .userId}} user={{.userId}}{{end}} \u2014 {{.message}}{{if .stack_trace}}\\n{{.stack_trace}}{{end}}\""
     }
    ]
   },
@@ -1312,32 +1312,6 @@
     },
     "overrides": []
    }
-  },
-  {
-   "id": 49,
-   "type": "table",
-   "title": "Slow queries \u2014 rows examined vs sent (per execution)",
-   "datasource": {
-    "type": "cloudwatch",
-    "uid": "${DS_CW}"
-   },
-   "gridPos": {
-    "x": 0,
-    "y": 116,
-    "w": 24,
-    "h": 9
-   },
-   "targets": [
-    {
-     "refId": "A",
-     "queryMode": "Logs",
-     "region": "us-west-2",
-     "logGroupNames": [
-      "/aws/rds/instance/danteplanner-mysql/slowquery"
-     ],
-     "expression": "parse @message /Query_time: (?<query_time_s>[0-9.]+)\\s+Lock_time: (?<lock_time_s>[0-9.]+).*Rows_sent: (?<rows_sent>[0-9]+)\\s+Rows_examined: (?<rows_examined>[0-9]+)/ | parse @message /Created_tmp_disk_tables: (?<tmp_disk_tables>[0-9]+)/ | parse @message /Sort_merge_passes: (?<sort_merge_passes>[0-9]+)/ | filter ispresent(rows_examined) | display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, tmp_disk_tables, sort_merge_passes, substr(@message, 0, 160) | sort rows_examined desc | limit 50"
-    }
-   ]
   }
  ]
 }
