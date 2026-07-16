@@ -20,3 +20,4 @@ patches:
 - path: secretstore-region-patch.yaml
 - path: prometheus-cluster-patch.yaml
 - path: mysqld-endpoint-patch.yaml
+- path: alloy-cluster-patch.yaml
