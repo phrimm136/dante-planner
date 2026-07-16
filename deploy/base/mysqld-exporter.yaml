@@ -87,3 +87,6 @@ spec:
     - secretKey: primary-endpoint
       remoteRef:
         key: danteplanner/mysqld-exporter/primary-endpoint
+    - secretKey: replica-endpoint
+      remoteRef:
+        key: danteplanner/mysqld-exporter/replica-endpoint

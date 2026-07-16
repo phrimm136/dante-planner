@@ -8,5 +8,9 @@ spec:
       containers:
         - name: mysqld-exporter
           env:
+            # Must dial the name on the server certificate, not the Route53 alias.
             - name: MYSQLD_ADDRESS
-              value: mysql-replica.seoul.danteplanner.internal:3306
+              valueFrom:
+                secretKeyRef:
+                  name: mysqld-exporter-dsn
+                  key: replica-endpoint
