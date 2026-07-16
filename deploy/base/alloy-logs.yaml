@@ -1,0 +1,142 @@
+# Ships pod logs to Grafana Cloud Loki via the kubelet API (no hostPath), labeled
+# with the per-region cluster identity. Loki credentials (stack logs id + token
+# with logs:write) arrive via Secrets Manager -> ESO -> file mounts — the logs id
+# is account-identifying and this repo is public, so only the shared push URL is
+# committed. One Deployment per cluster on the data node, like the other observers.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alloy-logs
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: alloy-logs
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: alloy-logs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alloy-logs
+subjects:
+  - kind: ServiceAccount
+    name: alloy-logs
+    namespace: danteplanner
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: grafana-loki-write
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: SecretStore
+  target:
+    name: grafana-loki-write
+    creationPolicy: Owner
+  data:
+    - secretKey: username
+      remoteRef:
+        key: danteplanner/grafana/loki-username
+    - secretKey: password
+      remoteRef:
+        key: danteplanner/grafana/loki-password
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alloy-logs-config
+data:
+  config.alloy: |
+    discovery.kubernetes "pods" {
+      role = "pod"
+    }
+
+    discovery.relabel "pods" {
+      targets = discovery.kubernetes.pods.targets
+      rule {
+        source_labels = ["__meta_kubernetes_namespace"]
+        target_label  = "namespace"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_name"]
+        target_label  = "pod"
+      }
+      rule {
+        source_labels = ["__meta_kubernetes_pod_label_app"]
+        target_label  = "app"
+      }
+    }
+
+    loki.source.kubernetes "pods" {
+      targets    = discovery.relabel.pods.output
+      forward_to = [loki.write.grafana_cloud.receiver]
+    }
+
+    loki.write "grafana_cloud" {
+      endpoint {
+        url = "https://logs-prod-036.grafana.net/loki/api/v1/push"
+        basic_auth {
+          username_file = "/etc/alloy/loki/username"
+          password_file = "/etc/alloy/loki/password"
+        }
+      }
+      external_labels = {
+        cluster = env("CLUSTER_NAME"),
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alloy-logs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alloy-logs
+  template:
+    metadata:
+      labels:
+        app: alloy-logs
+    spec:
+      serviceAccountName: alloy-logs
+      nodeSelector:
+        role: data
+      containers:
+        - name: alloy
+          image: grafana/alloy:v1.5.1
+          args:
+            - run
+            - /etc/alloy/config.alloy
+            - --storage.path=/tmp/alloy
+          env:
+            - name: CLUSTER_NAME
+              value: placeholder
+          volumeMounts:
+            - name: config
+              mountPath: /etc/alloy
+            - name: loki-auth
+              mountPath: /etc/alloy/loki
+              readOnly: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: alloy-logs-config
+        - name: loki-auth
+          secret:
+            secretName: grafana-loki-write
