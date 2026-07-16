@@ -85,7 +85,7 @@ data:
       endpoint {
         url = "https://logs-prod-036.grafana.net/loki/api/v1/push"
         basic_auth {
-          username_file = "/etc/alloy/loki/username"
+          username      = env("LOKI_USERNAME")
           password_file = "/etc/alloy/loki/password"
         }
       }
@@ -121,6 +121,11 @@ spec:
           env:
             - name: CLUSTER_NAME
               value: placeholder
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-loki-write
+                  key: username
           volumeMounts:
             - name: config
               mountPath: /etc/alloy
