@@ -1,0 +1,1215 @@
+{
+ "title": "DantePlanner Fleet Health",
+ "uid": "danteplanner-fleet",
+ "timezone": "browser",
+ "refresh": "1m",
+ "time": {
+  "from": "now-6h",
+  "to": "now"
+ },
+ "templating": {
+  "list": [
+   {
+    "name": "DS_PROM",
+    "type": "datasource",
+    "query": "prometheus",
+    "label": "Prometheus"
+   },
+   {
+    "name": "DS_CW",
+    "type": "datasource",
+    "query": "cloudwatch",
+    "label": "CloudWatch"
+   },
+   {
+    "name": "DS_LOKI",
+    "type": "datasource",
+    "query": "loki",
+    "label": "Loki",
+    "regex": "/-logs$/"
+   }
+  ]
+ },
+ "annotations": {
+  "list": [
+   {
+    "name": "Deploys",
+    "datasource": {
+     "type": "datasource",
+     "uid": "-- Grafana --"
+    },
+    "enable": true,
+    "iconColor": "purple",
+    "target": {
+     "type": "tags",
+     "tags": [
+      "deploy"
+     ],
+     "limit": 100
+    }
+   }
+  ]
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "stat",
+   "title": "Healthy scrape targets",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 6
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "count(up == 1) by (cluster)",
+     "legendFormat": "{{cluster}}",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "steps": [
+       {
+        "color": "red",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 7
+       },
+       {
+        "color": "green",
+        "value": 9
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 2,
+   "type": "stat",
+   "title": "Nodes Ready",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 6
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "count(kube_node_status_condition{condition=\"Ready\",status=\"true\"} == 1) by (cluster)",
+     "legendFormat": "{{cluster}}",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "steps": [
+       {
+        "color": "red",
+        "value": null
+       },
+       {
+        "color": "green",
+        "value": 3
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 3,
+   "type": "stat",
+   "title": "Backend daemonset ready pods",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 6
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "kube_daemonset_status_number_ready{daemonset=\"backend\"}",
+     "legendFormat": "{{cluster}}",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "steps": [
+       {
+        "color": "red",
+        "value": null
+       },
+       {
+        "color": "green",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 4,
+   "type": "stat",
+   "title": "etcd snapshot age (hours)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 18,
+    "y": 0,
+    "w": 6,
+    "h": 6
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "(time() - max by (cluster)(kube_etcd_snapshot_creation_timestamp_seconds)) / 3600",
+     "legendFormat": "{{cluster}}",
+     "instant": true
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "h",
+     "decimals": 1,
+     "thresholds": {
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 13
+       },
+       {
+        "color": "red",
+        "value": 18
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "Scrape targets over time",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 6,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(up) by (cluster, job)",
+     "legendFormat": "{{cluster}}/{{job}}"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "Containers stuck waiting (CrashLoop / ImagePull)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 6,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(kube_pod_container_status_waiting_reason{reason=~\"CrashLoopBackOff|ImagePullBackOff\"}) by (cluster, reason)",
+     "legendFormat": "{{cluster}} {{reason}}"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "TSDB head series (cardinality budget)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 14,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "prometheus_tsdb_head_series",
+     "legendFormat": "{{cluster}}"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "remote_write failure rate",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 14,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(prometheus_remote_storage_samples_failed_total[5m])",
+     "legendFormat": "{{cluster}}"
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "type": "row",
+   "title": "Application",
+   "gridPos": {
+    "x": 0,
+    "y": 22,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 11,
+   "type": "timeseries",
+   "title": "HTTP request rate (req/min) by status",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 23,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(rate(http_server_requests_seconds_count[5m])) by (cluster, status) * 60",
+     "legendFormat": "{{cluster}} {{status}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "suffix:req/min",
+     "decimals": 1
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 12,
+   "type": "table",
+   "title": "Slowest endpoints \u2014 p50 / p90 / p99 per cluster (SSE excluded)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 23,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "instant": true,
+     "format": "table",
+     "expr": "histogram_quantile(0.50, avg_over_time(uri:http_server_requests_seconds_bucket:rate5m{cluster=\"oregon\"}[$__range])) > 0"
+    },
+    {
+     "refId": "B",
+     "instant": true,
+     "format": "table",
+     "expr": "histogram_quantile(0.50, avg_over_time(uri:http_server_requests_seconds_bucket:rate5m{cluster=\"seoul\"}[$__range])) > 0"
+    },
+    {
+     "refId": "C",
+     "instant": true,
+     "format": "table",
+     "expr": "histogram_quantile(0.90, avg_over_time(uri:http_server_requests_seconds_bucket:rate5m{cluster=\"oregon\"}[$__range])) > 0"
+    },
+    {
+     "refId": "D",
+     "instant": true,
+     "format": "table",
+     "expr": "histogram_quantile(0.90, avg_over_time(uri:http_server_requests_seconds_bucket:rate5m{cluster=\"seoul\"}[$__range])) > 0"
+    },
+    {
+     "refId": "E",
+     "instant": true,
+     "format": "table",
+     "expr": "histogram_quantile(0.99, avg_over_time(uri:http_server_requests_seconds_bucket:rate5m{cluster=\"oregon\"}[$__range])) > 0"
+    },
+    {
+     "refId": "F",
+     "instant": true,
+     "format": "table",
+     "expr": "histogram_quantile(0.99, avg_over_time(uri:http_server_requests_seconds_bucket:rate5m{cluster=\"seoul\"}[$__range])) > 0"
+    },
+    {
+     "refId": "G",
+     "instant": true,
+     "format": "table",
+     "expr": "sum by (uri) (avg_over_time(uri:http_server_requests_seconds_count:rate5m[$__range])) * $__range_s > 0"
+    }
+   ],
+   "transformations": [
+    {
+     "id": "joinByField",
+     "options": {
+      "byField": "uri",
+      "mode": "outer"
+     }
+    },
+    {
+     "id": "organize",
+     "options": {
+      "excludeByName": {
+       "Time": true,
+       "Time 1": true,
+       "Time 2": true,
+       "Time 3": true,
+       "Time 4": true,
+       "Time 5": true,
+       "Time 6": true,
+       "Time 7": true,
+       "cluster": true,
+       "cluster 1": true,
+       "cluster 2": true,
+       "cluster 3": true,
+       "cluster 4": true,
+       "cluster 5": true,
+       "cluster 6": true,
+       "cluster 7": true
+      },
+      "renameByName": {
+       "Value #A": "p50 (oregon)",
+       "Value #B": "p50 (seoul)",
+       "Value #C": "p90 (oregon)",
+       "Value #D": "p90 (seoul)",
+       "Value #E": "p99 (oregon)",
+       "Value #F": "p99 (seoul)",
+       "Value #G": "requests"
+      },
+      "indexByName": {
+       "uri": 0,
+       "p50 (oregon)": 1,
+       "p50 (seoul)": 2,
+       "p90 (oregon)": 3,
+       "p90 (seoul)": 4,
+       "p99 (oregon)": 5,
+       "p99 (seoul)": 6,
+       "requests": 7
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "fields": {},
+      "sort": [
+       {
+        "field": "p99 (oregon)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "decimals": 3
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byRegexp",
+       "options": "p\\d+ \\(.*\\)"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "suffix: s"
+       },
+       {
+        "id": "decimals",
+        "value": 3
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "requests"
+      },
+      "properties": [
+       {
+        "id": "decimals",
+        "value": 0
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": 13,
+   "type": "timeseries",
+   "title": "HTTP 5xx rate (req/min)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 23,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m])) by (cluster, status) * 60",
+     "legendFormat": "{{cluster}} {{status}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 0.1
+       }
+      ]
+     },
+     "unit": "suffix:req/min"
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 14,
+   "type": "timeseries",
+   "title": "Log events WARN / ERROR (count)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 31,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(increase(logback_events_total{level=~\"warn|error\"}[$__interval])) by (cluster, level)",
+     "legendFormat": "{{cluster}} {{level}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "decimals": 0,
+     "custom": {
+      "drawStyle": "bars",
+      "fillOpacity": 60
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 15,
+   "type": "timeseries",
+   "title": "Hikari connections (active / pending) by pool",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 31,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(hikaricp_connections_active) by (cluster, pool)",
+     "legendFormat": "{{cluster}} {{pool}} active"
+    },
+    {
+     "refId": "B",
+     "expr": "sum(hikaricp_connections_pending) by (cluster, pool)",
+     "legendFormat": "{{cluster}} {{pool}} pending"
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "type": "timeseries",
+   "title": "JVM heap used / GC pause rate",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 31,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(jvm_memory_used_bytes{area=\"heap\"}) by (cluster)",
+     "legendFormat": "{{cluster}} heap"
+    },
+    {
+     "refId": "B",
+     "expr": "sum(rate(jvm_gc_pause_seconds_sum[5m])) by (cluster) * 1000",
+     "legendFormat": "{{cluster}} gc"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byFrameRefID",
+       "options": "B"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "ms"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": 17,
+   "type": "timeseries",
+   "title": "JVM threads by state",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 39,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(jvm_threads_states_threads) by (cluster, state)",
+     "legendFormat": "{{cluster}} {{state}}"
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "type": "timeseries",
+   "title": "Replica misses promoted to primary (read-consistency gate)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 39,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(rate(replica_miss_promoted_total[5m])) by (cluster)",
+     "legendFormat": "{{cluster}}"
+    }
+   ]
+  },
+  {
+   "id": 40,
+   "type": "row",
+   "title": "Redis",
+   "gridPos": {
+    "x": 0,
+    "y": 47,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 41,
+   "type": "timeseries",
+   "title": "Redis memory used (ratio where maxmemory set)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 48,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "redis_memory_used_bytes",
+     "legendFormat": "{{cluster}} {{job}} used"
+    },
+    {
+     "refId": "B",
+     "expr": "redis_memory_used_bytes / (redis_memory_max_bytes > 0)",
+     "legendFormat": "{{cluster}} {{job}} ratio"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes"
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byFrameRefID",
+       "options": "B"
+      },
+      "properties": [
+       {
+        "id": "unit",
+        "value": "percentunit"
+       },
+       {
+        "id": "custom.axisPlacement",
+        "value": "right"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": 42,
+   "type": "timeseries",
+   "title": "Memory fragmentation ratio",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 48,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "redis_mem_fragmentation_ratio",
+     "legendFormat": "{{cluster}} {{job}}"
+    }
+   ]
+  },
+  {
+   "id": 43,
+   "type": "timeseries",
+   "title": "Keyspace hit ratio",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 48,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(redis_keyspace_hits_total[5m]) / clamp_min(rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m]), 1e-9)",
+     "legendFormat": "{{cluster}} {{job}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "max": 1
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 44,
+   "type": "timeseries",
+   "title": "Clients (connected / blocked)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 56,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "redis_connected_clients",
+     "legendFormat": "{{cluster}} {{job}} connected"
+    },
+    {
+     "refId": "B",
+     "expr": "redis_blocked_clients",
+     "legendFormat": "{{cluster}} {{job}} blocked"
+    }
+   ]
+  },
+  {
+   "id": 45,
+   "type": "timeseries",
+   "title": "Keys expiring (token-accumulation trend)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 56,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(redis_db_keys_expiring) by (cluster, job)",
+     "legendFormat": "{{cluster}} {{job}}"
+    }
+   ]
+  },
+  {
+   "id": 46,
+   "type": "timeseries",
+   "title": "Replication offset (auth, cross-region delta)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 56,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "redis_master_repl_offset{job=\"redis-auth\"}",
+     "legendFormat": "{{cluster}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes"
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 20,
+   "type": "row",
+   "title": "Database",
+   "gridPos": {
+    "x": 0,
+    "y": 64,
+    "w": 24,
+    "h": 1
+   },
+   "panels": []
+  },
+  {
+   "id": 21,
+   "type": "timeseries",
+   "title": "Slow queries rate",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 65,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mysql_global_status_slow_queries[5m])",
+     "legendFormat": "{{cluster}}"
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "type": "timeseries",
+   "title": "RDS connections \u2014 primary and replica side by side",
+   "datasource": {
+    "type": "cloudwatch",
+    "uid": "${DS_CW}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 73,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "namespace": "AWS/RDS",
+     "metricName": "DatabaseConnections",
+     "statistic": "Maximum",
+     "period": "60",
+     "region": "us-west-2",
+     "matchExact": false,
+     "dimensions": {
+      "DBInstanceIdentifier": "*"
+     },
+     "label": "us-west-2 ${PROP('Dim.DBInstanceIdentifier')}",
+     "queryMode": "Metrics",
+     "metricQueryType": 0,
+     "metricEditorMode": 0,
+     "expression": "",
+     "id": ""
+    },
+    {
+     "refId": "B",
+     "namespace": "AWS/RDS",
+     "metricName": "DatabaseConnections",
+     "statistic": "Maximum",
+     "period": "60",
+     "region": "ap-northeast-2",
+     "matchExact": false,
+     "dimensions": {
+      "DBInstanceIdentifier": "*"
+     },
+     "label": "ap-northeast-2 ${PROP('Dim.DBInstanceIdentifier')}",
+     "queryMode": "Metrics",
+     "metricQueryType": 0,
+     "metricEditorMode": 0,
+     "expression": "",
+     "id": ""
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "type": "timeseries",
+   "title": "RDS FreeableMemory",
+   "datasource": {
+    "type": "cloudwatch",
+    "uid": "${DS_CW}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 73,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "namespace": "AWS/RDS",
+     "metricName": "FreeableMemory",
+     "statistic": "Average",
+     "period": "300",
+     "region": "us-west-2",
+     "matchExact": false,
+     "dimensions": {
+      "DBInstanceIdentifier": "*"
+     },
+     "label": "us-west-2 ${PROP('Dim.DBInstanceIdentifier')}",
+     "queryMode": "Metrics",
+     "metricQueryType": 0,
+     "metricEditorMode": 0,
+     "expression": "",
+     "id": ""
+    },
+    {
+     "refId": "B",
+     "namespace": "AWS/RDS",
+     "metricName": "FreeableMemory",
+     "statistic": "Average",
+     "period": "300",
+     "region": "ap-northeast-2",
+     "matchExact": false,
+     "dimensions": {
+      "DBInstanceIdentifier": "*"
+     },
+     "label": "ap-northeast-2 ${PROP('Dim.DBInstanceIdentifier')}",
+     "queryMode": "Metrics",
+     "metricQueryType": 0,
+     "metricEditorMode": 0,
+     "expression": "",
+     "id": ""
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bytes"
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 26,
+   "type": "logs",
+   "title": "Slow query log (primary)",
+   "datasource": {
+    "type": "cloudwatch",
+    "uid": "${DS_CW}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 81,
+    "w": 24,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "queryMode": "Logs",
+     "region": "us-west-2",
+     "logGroupNames": [
+      "/aws/rds/instance/danteplanner-mysql/slowquery"
+     ],
+     "expression": "fields @timestamp, @message | sort @timestamp desc | limit 50"
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "type": "timeseries",
+   "title": "EC2 burstable CPU credits",
+   "datasource": {
+    "type": "cloudwatch",
+    "uid": "${DS_CW}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 90,
+    "w": 24,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "namespace": "AWS/EC2",
+     "metricName": "CPUCreditBalance",
+     "statistic": "Average",
+     "period": "300",
+     "region": "us-west-2",
+     "matchExact": false,
+     "dimensions": {
+      "InstanceId": "*"
+     },
+     "label": "us-west-2 ${PROP('Dim.InstanceId')}",
+     "queryMode": "Metrics",
+     "metricQueryType": 0,
+     "metricEditorMode": 0,
+     "expression": "",
+     "id": ""
+    },
+    {
+     "refId": "B",
+     "namespace": "AWS/EC2",
+     "metricName": "CPUCreditBalance",
+     "statistic": "Average",
+     "period": "300",
+     "region": "ap-northeast-2",
+     "matchExact": false,
+     "dimensions": {
+      "InstanceId": "*"
+     },
+     "label": "ap-northeast-2 ${PROP('Dim.InstanceId')}",
+     "queryMode": "Metrics",
+     "metricQueryType": 0,
+     "metricEditorMode": 0,
+     "expression": "",
+     "id": ""
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "type": "logs",
+   "title": "Recent WARN / ERROR (application logs)",
+   "datasource": {
+    "type": "loki",
+    "uid": "${DS_LOKI}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 98,
+    "w": 24,
+    "h": 10
+   },
+   "options": {
+    "showTime": true,
+    "sortOrder": "Descending",
+    "wrapLogMessage": true
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "{namespace=\"danteplanner\"} | json | level=~\"WARN|ERROR\" | line_format \"{{.level}} {{.logger_name}} {{.message}}\""
+    }
+   ]
+  },
+  {
+   "id": 47,
+   "type": "timeseries",
+   "title": "Node memory occupation",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 108,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+     "legendFormat": "{{cluster}} {{instance}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "max": 1,
+     "thresholds": {
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "yellow",
+        "value": 0.8
+       },
+       {
+        "color": "red",
+        "value": 0.9
+       }
+      ]
+     }
+    },
+    "overrides": []
+   }
+  },
+  {
+   "id": 48,
+   "type": "timeseries",
+   "title": "Node memory pressure (PSI, 10s avg)",
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 108,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(node_pressure_memory_waiting_seconds_total[5m])",
+     "legendFormat": "{{cluster}} {{instance}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit"
+    },
+    "overrides": []
+   }
+  }
+ ]
+}
