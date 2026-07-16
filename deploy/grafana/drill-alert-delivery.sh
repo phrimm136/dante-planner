@@ -11,7 +11,7 @@ noprov=(-H "X-Disable-Provenance: true")
 
 FOLDER="${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}"
 FOLDER_UID=$(curl -s "${auth[@]}" "${GRAFANA_URL}/api/folders" |
-  jq -r '[.[] | select(.title=="${FOLDER}")][0].uid // empty')
+  jq -r --arg t "$FOLDER" '[.[] | select(.title==$t)][0].uid // empty')
 [ -n "$FOLDER_UID" ] || { echo "folder ${FOLDER} not found — run import-alert-rules.sh first"; exit 1; }
 
 echo "== creating scratch rule delivery-drill (fires immediately; vector(1) needs no stored data)"
@@ -32,15 +32,15 @@ resp=$(jq -n --arg ds "${DS_UID:-grafanacloud-prom}" --arg folder "$FOLDER_UID" 
     "${GRAFANA_URL}/api/v1/provisioning/alert-rules" -d @-)
 code=${resp##*$'\n'}; body=${resp%$'\n'*}
 [ "$code" = 201 ] || { echo "create failed (HTTP $code): $body"; exit 1; }
-UID=$(printf '%s' "$body" | jq -r .uid)
-echo "   created uid $UID — the group evaluates every ~1m; the firing then routes through"
+RULE_UID=$(printf '%s' "$body" | jq -r .uid)
+echo "   created uid $RULE_UID — the group evaluates every ~1m; the firing then routes through"
 echo "   the Default policy. WATCH BOTH channels now (Discord #alerts AND Slack)."
 echo
 read -rp "Did the SAME 'delivery-drill' firing arrive in BOTH Discord and Slack? [y/n] " seen
 
 echo "== deleting scratch rule"
 del=$(curl -s -o /dev/null -w '%{http_code}' "${auth[@]}" "${noprov[@]}" -X DELETE \
-  "${GRAFANA_URL}/api/v1/provisioning/alert-rules/${UID}")
+  "${GRAFANA_URL}/api/v1/provisioning/alert-rules/${RULE_UID}")
 echo "   delete HTTP ${del} (204 = gone)"
 
 if [ "$seen" = y ]; then

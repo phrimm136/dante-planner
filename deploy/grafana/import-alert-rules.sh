@@ -42,7 +42,7 @@ folders=$(curl -s -w '\n%{http_code}' "${auth[@]}" "${GRAFANA_URL}/api/folders")
 code=${folders##*$'\n'}
 [ "$code" = 200 ] || { echo "   listing folders failed (HTTP ${code}): ${folders%$'\n'*}"; exit 1; }
 FOLDER_UID=$(printf '%s' "${folders%$'\n'*}" |
-  jq -r '[.[] | select(.title=="${FOLDER}")][0].uid // empty')
+  jq -r --arg t "$FOLDER" '[.[] | select(.title==$t)][0].uid // empty')
 if [ -z "$FOLDER_UID" ]; then
   created=$(curl -s -w '\n%{http_code}' "${auth[@]}" -X POST "${GRAFANA_URL}/api/folders" \
     -d '{"title":"${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}"}')

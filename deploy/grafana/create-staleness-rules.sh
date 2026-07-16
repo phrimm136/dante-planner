@@ -31,7 +31,7 @@ for c in oregon seoul; do
 done
 
 FOLDER_UID=$(curl -s "${auth[@]}" "${GRAFANA_URL}/api/folders" |
-  jq -r '[.[] | select(.title=="${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}")][0].uid // empty')
+  jq -r --arg t "${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}" '[.[] | select(.title==$t)][0].uid // empty')
 [ -n "$FOLDER_UID" ] || { echo "folder ${GRAFANA_ALERT_FOLDER:-danteplanner-alerts} not found"; exit 1; }
 
 for c in oregon seoul; do
