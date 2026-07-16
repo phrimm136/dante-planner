@@ -36,15 +36,16 @@ else
   echo "   datasource ok"
 fi
 
-echo "== ensuring folder 'danteplanner-alerts'"
+FOLDER="${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}"
+echo "== ensuring folder '${FOLDER}'"
 folders=$(curl -s -w '\n%{http_code}' "${auth[@]}" "${GRAFANA_URL}/api/folders")
 code=${folders##*$'\n'}
 [ "$code" = 200 ] || { echo "   listing folders failed (HTTP ${code}): ${folders%$'\n'*}"; exit 1; }
 FOLDER_UID=$(printf '%s' "${folders%$'\n'*}" |
-  jq -r '[.[] | select(.title=="danteplanner-alerts")][0].uid // empty')
+  jq -r --arg t "$FOLDER" '[.[] | select(.title==$t)][0].uid // empty')
 if [ -z "$FOLDER_UID" ]; then
   created=$(curl -s -w '\n%{http_code}' "${auth[@]}" -X POST "${GRAFANA_URL}/api/folders" \
-    -d '{"title":"danteplanner-alerts"}')
+    -d '{"title":"${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}"}')
   code=${created##*$'\n'}
   [ "$code" = 200 ] || { echo "   creating folder failed (HTTP ${code}): ${created%$'\n'*}"; exit 1; }
   FOLDER_UID=$(printf '%s' "${created%$'\n'*}" | jq -r .uid)
@@ -97,5 +98,5 @@ post_rule "eso-secret-not-ready" "15m" \
 post_rule "etcd-snapshot-deadman" "1m" \
   "(time() - kube_etcd_snapshot_creation_timestamp_seconds) > (1.5 * ${ETCD_INTERVAL})"
 
-echo "== done: 6 rules in folder danteplanner-alerts, group cluster-rules (1m interval)"
+echo "== done: 6 rules in folder ${FOLDER}, group cluster-rules (1m interval)"
 echo "   All noDataState=OK — non-paging while their series are absent. Staleness rules are created separately by create-staleness-rules.sh."

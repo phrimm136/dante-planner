@@ -12,7 +12,7 @@ noprov=(-H "X-Disable-Provenance: true")
 echo "== pre-flight: is up{cluster=...} actually arriving in Grafana Cloud?"
 for c in oregon seoul; do
   resp=$(curl -s -w '\n%{http_code}' "${auth[@]}" \
-    "${GRAFANA_URL}/api/datasources/proxy/uid/grafanacloud-prom/api/v1/query?query=count(up%7Bcluster%3D%22${c}%22%7D)")
+    "${GRAFANA_URL}/api/datasources/proxy/uid/${DS_UID:-grafanacloud-prom}/api/v1/query?query=count(up%7Bcluster%3D%22${c}%22%7D)")
   code=${resp##*$'\n'}; body=${resp%$'\n'*}
   if [ "$code" != 200 ]; then
     echo "   PRE-FLIGHT QUERY FAILED for cluster=${c} (HTTP ${code}) — this is a query/permission"
@@ -31,11 +31,11 @@ for c in oregon seoul; do
 done
 
 FOLDER_UID=$(curl -s "${auth[@]}" "${GRAFANA_URL}/api/folders" |
-  jq -r '[.[] | select(.title=="danteplanner-alerts")][0].uid // empty')
-[ -n "$FOLDER_UID" ] || { echo "folder danteplanner-alerts not found"; exit 1; }
+  jq -r --arg t "${GRAFANA_ALERT_FOLDER:-danteplanner-alerts}" '[.[] | select(.title==$t)][0].uid // empty')
+[ -n "$FOLDER_UID" ] || { echo "folder ${GRAFANA_ALERT_FOLDER:-danteplanner-alerts} not found"; exit 1; }
 
 for c in oregon seoul; do
-  resp=$(jq -n --arg ds grafanacloud-prom --arg folder "$FOLDER_UID" --arg c "$c" '
+  resp=$(jq -n --arg ds "${DS_UID:-grafanacloud-prom}" --arg folder "$FOLDER_UID" --arg c "$c" '
     { title:("staleness-meta-" + $c), ruleGroup:"cluster-rules", folderUID:$folder,
       condition:"C", for:"2m", noDataState:"OK", execErrState:"OK",
       data:[

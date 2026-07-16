@@ -922,6 +922,79 @@
    ]
   },
   {
+   "id": 50,
+   "type": "timeseries",
+   "title": "Temp tables \u2014 disk spill vs in-memory (per min)",
+   "gridPos": {
+    "x": 8,
+    "y": 65,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mysql_global_status_created_tmp_disk_tables[5m]) * 60",
+     "legendFormat": "{{cluster}} disk"
+    },
+    {
+     "refId": "B",
+     "expr": "rate(mysql_global_status_created_tmp_tables[5m]) * 60",
+     "legendFormat": "{{cluster}} memory"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "suffix:/min",
+     "decimals": 1
+    },
+    "overrides": []
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   }
+  },
+  {
+   "id": 51,
+   "type": "timeseries",
+   "title": "Sort pathology (per min)",
+   "gridPos": {
+    "x": 16,
+    "y": 65,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mysql_global_status_sort_merge_passes[5m]) * 60",
+     "legendFormat": "{{cluster}} merge passes"
+    },
+    {
+     "refId": "B",
+     "expr": "rate(mysql_global_status_select_full_join[5m]) * 60",
+     "legendFormat": "{{cluster}} full joins"
+    },
+    {
+     "refId": "C",
+     "expr": "rate(mysql_global_status_select_scan[5m]) * 60",
+     "legendFormat": "{{cluster}} full scans"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "suffix:/min",
+     "decimals": 1
+    },
+    "overrides": []
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
+   }
+  },
+  {
    "id": 24,
    "type": "timeseries",
    "title": "RDS connections \u2014 primary and replica side by side",
@@ -1031,6 +1104,35 @@
      "unit": "bytes"
     },
     "overrides": []
+   }
+  },
+  {
+   "id": 52,
+   "type": "timeseries",
+   "title": "Row reads \u2014 scan share (read_rnd_next / all handler reads)",
+   "gridPos": {
+    "x": 16,
+    "y": 73,
+    "w": 8,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mysql_global_status_handlers_total{handler=\"read_rnd_next\"}[5m]) / sum by (cluster)(rate(mysql_global_status_handlers_total{handler=~\"read_rnd_next|read_key|read_next|read_first|read_prev\"}[5m]))",
+     "legendFormat": "{{cluster}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percentunit",
+     "max": 1
+    },
+    "overrides": []
+   },
+   "datasource": {
+    "type": "prometheus",
+    "uid": "${DS_PROM}"
    }
   },
   {
@@ -1210,6 +1312,32 @@
     },
     "overrides": []
    }
+  },
+  {
+   "id": 49,
+   "type": "table",
+   "title": "Slow queries \u2014 rows examined vs sent (per execution)",
+   "datasource": {
+    "type": "cloudwatch",
+    "uid": "${DS_CW}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 116,
+    "w": 24,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "queryMode": "Logs",
+     "region": "us-west-2",
+     "logGroupNames": [
+      "/aws/rds/instance/danteplanner-mysql/slowquery"
+     ],
+     "expression": "parse @message /Query_time: (?<query_time_s>[0-9.]+)\\s+Lock_time: (?<lock_time_s>[0-9.]+).*Rows_sent: (?<rows_sent>[0-9]+)\\s+Rows_examined: (?<rows_examined>[0-9]+)/ | parse @message /Created_tmp_disk_tables: (?<tmp_disk_tables>[0-9]+)/ | parse @message /Sort_merge_passes: (?<sort_merge_passes>[0-9]+)/ | filter ispresent(rows_examined) | display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, tmp_disk_tables, sort_merge_passes, substr(@message, 0, 160) | sort rows_examined desc | limit 50"
+    }
+   ]
   }
  ]
 }

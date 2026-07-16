@@ -132,6 +132,12 @@ resource "aws_db_parameter_group" "this" {
     name  = "long_query_time"
     value = "0.1"
   }
+  # Adds handler counters, tmp/sort stats, and lock wait detail to every slow
+  # log entry — per-execution diagnosis without in-memory instrumentation.
+  parameter {
+    name  = "log_slow_extra"
+    value = "1"
+  }
   parameter {
     name  = "log_output"
     value = "FILE"
