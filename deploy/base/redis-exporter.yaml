@@ -1,0 +1,85 @@
+# One redis_exporter per Redis instance: annotation-based discovery cannot carry
+# per-target query params, so multi-target mode is out and each instance gets its
+# own exporter under its own job label. Auth instance password rides the same
+# optional backend-runtime-config key the server itself uses — absent key means
+# passwordless, matching the server's gated AUTH bootstrap. Observers live on the
+# data node, untouched by the surge pipeline.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter-auth
+  template:
+    metadata:
+      labels:
+        app: redis-exporter-auth
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+        prometheus.io/path: /metrics
+        prometheus.io/job: redis-auth
+    spec:
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.66.0
+          env:
+            - name: REDIS_ADDR
+              value: redis://redis-auth:6379
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-runtime-config
+                  key: AUTH_REDIS_PASSWORD
+                  optional: true
+          ports:
+            - name: metrics
+              containerPort: 9121
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-exporter-ratelimit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-exporter-ratelimit
+  template:
+    metadata:
+      labels:
+        app: redis-exporter-ratelimit
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+        prometheus.io/path: /metrics
+        prometheus.io/job: redis-ratelimit
+    spec:
+      nodeSelector:
+        role: data
+      containers:
+        - name: redis-exporter
+          image: oliver006/redis_exporter:v1.66.0
+          env:
+            - name: REDIS_ADDR
+              value: redis://redis-ratelimit:6379
+          ports:
+            - name: metrics
+              containerPort: 9121
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi

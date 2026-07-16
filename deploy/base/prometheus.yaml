@@ -34,16 +34,39 @@ kind: ConfigMap
 metadata:
   name: prometheus-config
 data:
+  rules.yml: |
+    groups:
+      - name: remote-write-aggregations
+        interval: 60s
+        rules:
+          # Pod- and method/status-merged latency histogram per endpoint: the raw
+          # per-pod buckets stay local-only; only these aggregates are shipped
+          # (remote_write keep-list admits the uri: prefix). SSE endpoints hold
+          # connections open for their lifetime and are excluded as non-latency.
+          - record: uri:http_server_requests_seconds_bucket:rate5m
+            expr: sum by (uri, le) (rate(http_server_requests_seconds_bucket{uri!~".*/events|.*/subscribe|/api/sse/.*|UNKNOWN"}[5m]))
+          - record: uri:http_server_requests_seconds_count:rate5m
+            expr: sum by (uri) (rate(http_server_requests_seconds_count{uri!~".*/events|.*/subscribe|/api/sse/.*|UNKNOWN"}[5m]))
   prometheus.yml: |
     global:
-      scrape_interval: 30s
+      scrape_interval: 60s
       external_labels:
         cluster: ${CLUSTER_NAME}
+    rule_files:
+      - /etc/prometheus/rules.yml
     remote_write:
       - url: https://prometheus-prod-56-prod-us-east-2.grafana.net/api/prom/push
         basic_auth:
           username_file: /etc/prometheus/remote-write/username
           password_file: /etc/prometheus/remote-write/password
+        # Ship only the series the Grafana-managed alerts and the fleet dashboard
+        # query — the free-plan active-series budget cannot absorb full-fidelity
+        # apiserver/argocd/micrometer output. Local TSDB keeps everything for 7d;
+        # any metric a new cloud alert or panel needs must be added here.
+        write_relabel_configs:
+          - source_labels: [__name__]
+            action: keep
+            regex: up|uri:.+|prometheus_tsdb_head_series|prometheus_remote_storage_samples_total|prometheus_remote_storage_samples_failed_total|kube_.+|http_server_requests_seconds_(count|sum|max)|logback_events_total|hikaricp_connections_(active|pending)|jvm_memory_used_bytes|jvm_gc_pause_seconds_(sum|count)|jvm_threads_states_threads|replica_miss_promoted_total|blacklist_check_skipped_total|jwt_rotation_outcome_total|mysql_up|mysql_global_status_slow_queries|mysql_global_status_threads_running|mysql_perf_schema_events_statements_(seconds|rows_examined|rows_sent)_total|mysql_perf_schema_table_io_waits_seconds_total|redis_up|redis_memory_used_bytes|redis_memory_max_bytes|redis_mem_fragmentation_ratio|redis_keyspace_(hits|misses)_total|redis_connected_clients|redis_blocked_clients|redis_db_keys_expiring|redis_master_repl_offset|argocd_app_info|externalsecret_status_condition|etcd_disk_wal_fsync_duration_seconds_(sum|count)|etcd_disk_backend_commit_duration_seconds_(sum|count)|etcd_server_has_leader|apiserver_current_inflight_requests|coredns_dns_requests_total|coredns_dns_response_rcode_count_total
     scrape_configs:
       - job_name: backend
         metrics_path: /actuator/prometheus

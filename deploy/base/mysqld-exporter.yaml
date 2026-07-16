@@ -27,6 +27,16 @@ spec:
             - --collect.perf_schema.eventsstatements
             - --collect.perf_schema.tableiowaits
             - --mysqld.address=$(MYSQLD_ADDRESS)
+            # RDS enforces require_secure_transport; the flag mode has no TLS
+            # knob, so ssl-ca arrives via cnf — flags still win for address/user.
+            - --config.my-cnf=/etc/mysqld/mysqld-tls.cnf
+          volumeMounts:
+            - name: tls-cnf
+              mountPath: /etc/mysqld
+              readOnly: true
+            - name: rds-ca
+              mountPath: /etc/mysqld-certs
+              readOnly: true
           env:
             - name: MYSQL_EXPORTER_USER
               valueFrom:
@@ -47,6 +57,13 @@ spec:
               memory: 32Mi
             limits:
               memory: 64Mi
+      volumes:
+        - name: tls-cnf
+          configMap:
+            name: mysqld-tls-cnf
+        - name: rds-ca
+          configMap:
+            name: rds-ca-bundle
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
