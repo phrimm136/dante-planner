@@ -123,7 +123,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             // Validate token and extract claims (includes expiry check)
-            TokenClaims claims = tokenValidator.validateToken(token);
+            TokenClaims claims = tokenValidator.validateAccessToken(token);
 
             // Check if token is blacklisted (revoked)
             if (tokenBlacklistService.isBlacklisted(token)) {
@@ -186,7 +186,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 // Other token errors (malformed, invalid signature, etc.) - don't refresh
                 String errorCode = mapReasonToErrorCode(e.getReason());
-                logSecurityEvent(errorCode, request);
+                logSecurityEvent(errorCode + " (" + e.getReason() + ")", request);
                 SecurityContextHolder.clearContext();
             }
         }
@@ -234,7 +234,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             // Validate refresh token
-            TokenClaims claims = tokenValidator.validateToken(refreshToken);
+            TokenClaims claims = tokenValidator.validateRefreshToken(refreshToken);
 
             // Verify it's a refresh token
             if (!claims.isRefreshToken()) {

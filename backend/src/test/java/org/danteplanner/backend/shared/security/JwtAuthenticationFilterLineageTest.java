@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -119,7 +120,7 @@ class JwtAuthenticationFilterLineageTest {
 
         when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
         when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
-        when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims(userId, null, null));
+        lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims(userId, null, null));
         when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
         when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), any(Long.class))).thenReturn(false);
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
@@ -266,7 +267,7 @@ class JwtAuthenticationFilterLineageTest {
         TokenClaims successorClaims = refreshClaims(userId, "successor-jti", "fam-2");
 
         when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(accessToken);
-        when(tokenValidator.validateToken(accessToken))
+        lenient().when(tokenValidator.validateAccessToken(accessToken))
                 .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
         when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))

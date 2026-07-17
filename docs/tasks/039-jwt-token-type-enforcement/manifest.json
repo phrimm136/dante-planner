@@ -9,8 +9,10 @@
       "artifacts": { "plan": "plan/phase-01.md",
         "ledger": "/home/user/.local/state/claude-build/LimbusPlanner/039-jwt-token-type-enforcement/phase-01/ledger.md" } },
     { "id": "02", "slug": "access-path-enforcement", "title": "Filter access + flag-off refresh routing, audit-log reason pin",
-      "kind": "local-tdd", "deps": ["01"], "status": "pending",
-      "artifacts": { "plan": "plan/phase-02.md" } },
+      "kind": "local-tdd", "deps": ["01"], "status": "done",
+      "verdict": "DONE", "date": "2026-07-17",
+      "artifacts": { "plan": "plan/phase-02.md",
+        "ledger": "/home/user/.local/state/claude-build/LimbusPlanner/039-jwt-token-type-enforcement/phase-02/ledger.md" } },
     { "id": "03", "slug": "refresh-path-routing", "title": "Rotation + facade + logout-all routing to typed parsers",
       "kind": "local-tdd", "deps": ["01"], "status": "pending",
       "artifacts": { "plan": "plan/phase-03.md" } }
