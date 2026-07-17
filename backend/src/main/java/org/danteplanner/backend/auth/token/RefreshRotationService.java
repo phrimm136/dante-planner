@@ -191,8 +191,8 @@ public class RefreshRotationService {
             return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
         }
 
-        // An access token has null jti+familyId and would otherwise hit the legacy-admit
-        // branch and be upgraded to a refresh token; reject it regardless of the flag.
+        // Defense in depth: reject non-refresh tokens with a type check independent of the
+        // upstream refresh-typed parser, so admission never relies on its configuration alone.
         if (!claims.isRefreshToken()) {
             incrementOutcome(OUTCOME_REJECTED_INVALID);
             return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);

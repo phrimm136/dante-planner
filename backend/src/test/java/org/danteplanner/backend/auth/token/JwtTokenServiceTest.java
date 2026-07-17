@@ -465,6 +465,29 @@ class JwtTokenServiceTest {
             assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
             assertNotEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
         }
+
+        @Test
+        @DisplayName("Typed validators reject a token with no type claim as INVALID_TYPE, not MALFORMED")
+        void typedValidators_WhenTypeClaimAbsent_ThrowInvalidType() {
+            String token = io.jsonwebtoken.Jwts.builder()
+                    .subject("3001")
+                    .issuedAt(new java.util.Date())
+                    .expiration(new java.util.Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+                    .signWith(testKeyPair.getPrivate(), io.jsonwebtoken.SignatureAlgorithm.RS256)
+                    .compact();
+
+            InvalidTokenException accessException = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateAccessToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, accessException.getReason());
+
+            InvalidTokenException refreshException = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateRefreshToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, refreshException.getReason());
+        }
     }
 
     @Nested
