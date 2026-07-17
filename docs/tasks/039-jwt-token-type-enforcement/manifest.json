@@ -14,10 +14,15 @@
       "artifacts": { "plan": "plan/phase-02.md",
         "ledger": "/home/user/.local/state/claude-build/LimbusPlanner/039-jwt-token-type-enforcement/phase-02/ledger.md" } },
     { "id": "03", "slug": "refresh-path-routing", "title": "Rotation + facade + logout-all routing to typed parsers",
-      "kind": "local-tdd", "deps": ["01"], "status": "pending",
-      "artifacts": { "plan": "plan/phase-03.md" } }
+      "kind": "local-tdd", "deps": ["01"], "status": "done",
+      "verdict": "DONE", "date": "2026-07-17",
+      "artifacts": { "plan": "plan/phase-03.md",
+        "ledger": "/home/user/.local/state/claude-build/LimbusPlanner/039-jwt-token-type-enforcement/phase-03/ledger.md" } }
   ],
   "followUps": [
-    "Scoped/fast-gate commands in the plan and task brief use `./gradlew -p backend`, but no repo-root gradlew wrapper exists — only `backend/gradlew -p <abs backend>` runs. Phases 02/03 inherit the same command string. Correct the handed-down command (and reconcile CLAUDE.md rule 11, which assumes a root `./gradlew`) — unknowable from phase scope whether the root wrapper should exist or the doc is stale."
+    "Scoped/fast-gate commands in the plan and task brief use `./gradlew -p backend`, but no repo-root gradlew wrapper exists — only `backend/gradlew -p <abs backend>` runs. Phases 02/03 inherit the same command string. Correct the handed-down command (and reconcile CLAUDE.md rule 11, which assumes a root `./gradlew`) — unknowable from phase scope whether the root wrapper should exist or the doc is stale.",
+    "JwtAuthenticationFilterTest:231 (C-B5, null-cookie guest): `verify(tokenValidator, never()).validateToken(any())` is vacuous post-reroute — no filter site can call the neutral method. C-B5's real assertion (guest on null cookie) is intact. Candidate cleanup at review/verification, not a phase re-open.",
+    "Phase 03 scoped/verify commands (and the task fast-gate) pass `-PexcludeTags=containerized`, but phase 03's own target tests RefreshRotationServiceTest and AuthControllerLogoutAllTest are `@Tag(\"containerized\")`; that flag tag-excludes them (zero executed reads as false green — a command that names AuthControllerLogoutAllTest via --tests and then tag-excludes it is self-contradictory). Phase 03 close ran the phase's own tests WITHOUT excludeTags (docker available) and kept excludeTags only for the wide fast-tier regression net (else it pulls SecurityIntegrationTest + containerized controllers = the task-level deep tier). Reconcile the handed-down command the same way as the `./gradlew` followUp.",
+    "Phase 03 left the dying neutral `validateToken` stubs in the migrated facade/lineage/rotation tests as `lenient()` (harmless, no UnnecessaryStubbingException) rather than contracting them — an optional cosmetic cleanup for review, not a correctness item."
   ]
 }

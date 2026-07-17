@@ -36,8 +36,11 @@ import org.danteplanner.backend.user.entity.UserRole;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for {@link RefreshRotationService}.
@@ -350,6 +353,25 @@ class RefreshRotationServiceTest {
             assertEquals(0, rotationService.rotationStateSize());
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_INVALID));
         }
+
+        @Test
+        @DisplayName("Access token into a real rotate: Rejected(INVALID), no successor minted, family untouched")
+        void rotate_WhenAccessTokenClaims_RejectedAndFamilyUntouched() {
+            JwtTokenService generatorSpy = spy(tokenService);
+            RefreshRotationService svc = new RefreshRotationService(
+                    sharedTemplate, tokenService, generatorSpy, cookieUtils, jwtProperties, meterRegistry,
+                    true, RETRY_REUSE_WINDOW_MS);
+            String accessToken = tokenService.generateAccessToken(USER_ID, UserRole.NORMAL);
+
+            RotationResult result = svc.rotate(accessToken, newResponse());
+
+            assertInstanceOf(RotationResult.Rejected.class, result);
+            assertEquals(RotationResult.Rejected.Reason.INVALID,
+                    ((RotationResult.Rejected) result).reason());
+            verify(generatorSpy, never()).generateRefreshToken(any(), any(), any());
+            verify(generatorSpy, never()).generateRefreshToken(any());
+            assertEquals(0, svc.rotationStateSize());
+        }
     }
 
     @Nested
@@ -463,6 +485,7 @@ class RefreshRotationServiceTest {
         void rotate_WhenLegacyAdmitOn_AdmitsAndRotates() {
             JwtTokenService validator = spy(tokenService);
             doReturn(legacyClaims(new Date())).when(validator).validateToken(LEGACY_TOKEN);
+            doReturn(legacyClaims(new Date())).when(validator).validateRefreshToken(LEGACY_TOKEN);
             RefreshRotationService svc = serviceWith(validator, true);
 
             RotationResult result = svc.rotate(LEGACY_TOKEN, newResponse());
@@ -480,6 +503,7 @@ class RefreshRotationServiceTest {
         void rotate_WhenLegacyAdmitOff_Rejects() {
             JwtTokenService validator = spy(tokenService);
             doReturn(legacyClaims(new Date())).when(validator).validateToken(LEGACY_TOKEN);
+            doReturn(legacyClaims(new Date())).when(validator).validateRefreshToken(LEGACY_TOKEN);
             RefreshRotationService svc = serviceWith(validator, false);
 
             RotationResult result = svc.rotate(LEGACY_TOKEN, newResponse());
@@ -497,6 +521,7 @@ class RefreshRotationServiceTest {
             Date issuedAt = new Date();
             JwtTokenService validator = spy(tokenService);
             doReturn(legacyClaims(issuedAt)).when(validator).validateToken(LEGACY_TOKEN);
+            doReturn(legacyClaims(issuedAt)).when(validator).validateRefreshToken(LEGACY_TOKEN);
             RefreshRotationService svc = serviceWith(validator, true);
 
             RotationResult.Rotated first = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN, newResponse());

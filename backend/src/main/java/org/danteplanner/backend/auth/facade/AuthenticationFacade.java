@@ -156,7 +156,7 @@ public class AuthenticationFacade {
         }
 
         // Validate refresh token
-        TokenClaims claims = tokenValidator.validateToken(refreshToken);
+        TokenClaims claims = tokenValidator.validateRefreshToken(refreshToken);
 
         // Verify it's a refresh token
         if (!claims.isRefreshToken()) {
@@ -245,7 +245,7 @@ public class AuthenticationFacade {
         // Blacklist access token if present and valid
         if (accessToken != null) {
             try {
-                TokenClaims accessClaims = tokenValidator.validateToken(accessToken);
+                TokenClaims accessClaims = tokenValidator.validateAccessToken(accessToken);
                 tokenBlacklistService.blacklistToken(accessToken, accessClaims.expiration());
             } catch (InvalidTokenException e) {
                 // Token already expired or invalid - no need to blacklist
@@ -256,7 +256,7 @@ public class AuthenticationFacade {
         // Blacklist refresh token if present and valid
         if (refreshToken != null) {
             try {
-                TokenClaims refreshClaims = tokenValidator.validateToken(refreshToken);
+                TokenClaims refreshClaims = tokenValidator.validateRefreshToken(refreshToken);
                 tokenBlacklistService.blacklistToken(refreshToken, refreshClaims.expiration());
                 if (lineageRotationFlag.isEnabled() && refreshClaims.familyId() != null) {
                     refreshRotationService.revokeFamily(refreshClaims.familyId());
@@ -288,7 +288,7 @@ public class AuthenticationFacade {
 
         if (accessToken != null) {
             try {
-                TokenClaims accessClaims = tokenValidator.validateToken(accessToken);
+                TokenClaims accessClaims = tokenValidator.validateAccessToken(accessToken);
                 tokenBlacklistService.blacklistToken(accessToken, accessClaims.expiration());
             } catch (InvalidTokenException e) {
                 log.debug("Access token already invalid, skipping blacklist");

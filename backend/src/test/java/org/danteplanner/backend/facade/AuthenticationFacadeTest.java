@@ -13,10 +13,12 @@ import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
+import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.shared.config.JwtProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Optional;
 
@@ -264,7 +269,8 @@ class AuthenticationFacadeTest {
                     expiration
             );
 
-            when(tokenValidator.validateToken(oldRefreshToken)).thenReturn(claims);
+            lenient().when(tokenValidator.validateToken(oldRefreshToken)).thenReturn(claims);
+            lenient().when(tokenValidator.validateRefreshToken(oldRefreshToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(oldRefreshToken)).thenReturn(false);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
@@ -300,7 +306,9 @@ class AuthenticationFacadeTest {
                     new Date(System.currentTimeMillis() + 60000)
             );
 
-            when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateRefreshToken(accessToken))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
 
             // Act & Assert
             InvalidTokenException exception = assertThrows(
@@ -329,7 +337,8 @@ class AuthenticationFacadeTest {
                     new Date(System.currentTimeMillis() + 60000)
             );
 
-            when(tokenValidator.validateToken(blacklistedToken)).thenReturn(claims);
+            lenient().when(tokenValidator.validateToken(blacklistedToken)).thenReturn(claims);
+            lenient().when(tokenValidator.validateRefreshToken(blacklistedToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(blacklistedToken)).thenReturn(true);
 
             // Act & Assert
@@ -350,7 +359,9 @@ class AuthenticationFacadeTest {
             // Arrange
             String expiredToken = "expired-refresh-token";
 
-            when(tokenValidator.validateToken(expiredToken))
+            lenient().when(tokenValidator.validateToken(expiredToken))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
+            lenient().when(tokenValidator.validateRefreshToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
 
             // Act & Assert
@@ -389,7 +400,8 @@ class AuthenticationFacadeTest {
                     .build();
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
 
-            when(tokenValidator.validateToken(refreshToken)).thenReturn(claims);
+            lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(claims);
+            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
             when(userService.findById(testUser.getId())).thenReturn(deletedUser);
 
@@ -430,8 +442,10 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
-            when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
-            when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
+            lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
+            lenient().when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
 
             // Act
             authenticationFacade.logout(accessToken, refreshToken);
@@ -451,14 +465,15 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
-            when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
+            lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
+            when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
 
             // Act
             authenticationFacade.logout(null, refreshToken);
 
             // Assert - only refresh token blacklisted
             verify(tokenBlacklistService).blacklistToken(refreshToken, refreshExpiry);
-            verify(tokenValidator, times(1)).validateToken(anyString());
+            verify(tokenValidator, times(1)).validateRefreshToken(anyString());
         }
 
         @Test
@@ -471,14 +486,15 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
-            when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+            when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
 
             // Act
             authenticationFacade.logout(accessToken, null);
 
             // Assert - only access token blacklisted
             verify(tokenBlacklistService).blacklistToken(accessToken, accessExpiry);
-            verify(tokenValidator, times(1)).validateToken(anyString());
+            verify(tokenValidator, times(1)).validateAccessToken(anyString());
         }
 
         @Test
@@ -503,9 +519,12 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
-            when(tokenValidator.validateToken(invalidAccessToken))
+            lenient().when(tokenValidator.validateToken(invalidAccessToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            when(tokenValidator.validateToken(validRefreshToken)).thenReturn(refreshClaims);
+            lenient().when(tokenValidator.validateToken(validRefreshToken)).thenReturn(refreshClaims);
+            lenient().when(tokenValidator.validateAccessToken(invalidAccessToken))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
+            lenient().when(tokenValidator.validateRefreshToken(validRefreshToken)).thenReturn(refreshClaims);
 
             // Act
             authenticationFacade.logout(invalidAccessToken, validRefreshToken);
@@ -526,8 +545,11 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
-            when(tokenValidator.validateToken(validAccessToken)).thenReturn(accessClaims);
-            when(tokenValidator.validateToken(invalidRefreshToken))
+            lenient().when(tokenValidator.validateToken(validAccessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateToken(invalidRefreshToken))
+                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
+            lenient().when(tokenValidator.validateAccessToken(validAccessToken)).thenReturn(accessClaims);
+            lenient().when(tokenValidator.validateRefreshToken(invalidRefreshToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
 
             // Act
@@ -536,6 +558,101 @@ class AuthenticationFacadeTest {
             // Assert - only access token blacklisted
             verify(tokenBlacklistService, times(1)).blacklistToken(any(), any());
             verify(tokenBlacklistService).blacklistToken(validAccessToken, accessExpiry);
+        }
+    }
+
+    /**
+     * TW6 — type enforcement at the facade seams, exercised with a REAL {@link JwtTokenService}
+     * so minted tokens carry a real {@code type} claim and the typed parser actually enforces it.
+     * A {@code @Mock TokenValidator} returns canned claims and can never exercise type enforcement,
+     * so these cases wire their own facade with a real validator, leaving the mocked cases intact.
+     */
+    @Nested
+    @DisplayName("Typed-parser enforcement with real tokens (TW6)")
+    class TypedParserRealTokenTests {
+
+        private static final Long REAL_USER_ID = 123L;
+
+        private JwtTokenService realTokenService;
+        private AuthenticationFacade realFacade;
+
+        @BeforeEach
+        void setUpRealValidator() throws Exception {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+            byte[] aesKey = new byte[32];
+            new SecureRandom().nextBytes(aesKey);
+
+            JwtProperties realProperties = new JwtProperties();
+            realProperties.setPrivateKey(keyPair.getPrivate());
+            realProperties.setPublicKey(keyPair.getPublic());
+            realProperties.setEncryptionKeyBytes(aesKey);
+            realProperties.setAccessTokenExpiry(900000L);
+            realProperties.setRefreshTokenExpiry(604800000L);
+
+            realTokenService = new JwtTokenService(realProperties);
+
+            realFacade = new AuthenticationFacade(
+                    providerRegistry,
+                    tokenGenerator,
+                    realTokenService,
+                    tokenBlacklistService,
+                    userService,
+                    lifecycleService,
+                    userRepository,
+                    refreshRotationService,
+                    cookieUtils,
+                    jwtProperties,
+                    new LineageRotationFlag(false)
+            );
+        }
+
+        @Test
+        @DisplayName("TW6a: real access token into refreshTokens (flag off) is rejected INVALID_TYPE and not blacklisted")
+        void refreshTokens_realAccessTokenFlagOff_rejectedInvalidTypeNotBlacklisted() {
+            String accessJwt = realTokenService.generateAccessToken(REAL_USER_ID, UserRole.NORMAL);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> realFacade.refreshTokens(accessJwt, response)
+            );
+
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+            verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
+            verify(tokenBlacklistService, never()).blacklistToken(any(), any());
+        }
+
+        @Test
+        @DisplayName("TW6b: real access token into logout REFRESH slot is not blacklisted and family not revoked")
+        void logout_realAccessTokenInRefreshSlot_notBlacklistedFamilyNotRevoked() {
+            String accessJwt = realTokenService.generateAccessToken(REAL_USER_ID, UserRole.NORMAL);
+
+            realFacade.logout(null, accessJwt);
+
+            verify(tokenBlacklistService, never()).blacklistToken(eq(accessJwt), any());
+            verify(refreshRotationService, never()).revokeFamily(any());
+        }
+
+        @Test
+        @DisplayName("TW6c: real refresh token into logout ACCESS slot is not blacklisted")
+        void logout_realRefreshTokenInAccessSlot_notBlacklisted() {
+            String refreshJwt = realTokenService.generateRefreshToken(REAL_USER_ID);
+
+            realFacade.logout(refreshJwt, null);
+
+            verify(tokenBlacklistService, never()).blacklistToken(eq(refreshJwt), any());
+        }
+
+        @Test
+        @DisplayName("TW6d: real refresh token into logoutAll ACCESS slot is not blacklisted (user invalidation still runs)")
+        void logoutAll_realRefreshTokenInAccessSlot_notBlacklisted() {
+            String refreshJwt = realTokenService.generateRefreshToken(REAL_USER_ID);
+
+            realFacade.logoutAll(REAL_USER_ID, refreshJwt);
+
+            verify(tokenBlacklistService, never()).blacklistToken(eq(refreshJwt), any());
         }
     }
 }

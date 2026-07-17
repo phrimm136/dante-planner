@@ -185,7 +185,7 @@ public class RefreshRotationService {
     public RotationResult rotate(String refreshToken, HttpServletResponse response) {
         TokenClaims claims;
         try {
-            claims = tokenValidator.validateToken(refreshToken);
+            claims = tokenValidator.validateRefreshToken(refreshToken);
         } catch (InvalidTokenException e) {
             incrementOutcome(OUTCOME_REJECTED_INVALID);
             return new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID);
@@ -216,7 +216,7 @@ public class RefreshRotationService {
         String parentJti = claims.parentJti() != null ? claims.parentJti() : "";
 
         String successorJwt = tokenGenerator.generateRefreshToken(claims.userId(), familyId, jti);
-        TokenClaims successorClaims = tokenValidator.validateToken(successorJwt);
+        TokenClaims successorClaims = tokenValidator.validateRefreshToken(successorJwt);
         String successorJti = successorClaims.jti();
         long succExpiryMs = successorClaims.expiration().getTime();
         long nowMs = System.currentTimeMillis();
@@ -238,7 +238,7 @@ public class RefreshRotationService {
             // Concurrent retry: replay the memoized successor so every racer converges
             // on one cookie; the JWT this call optimistically signed is discarded.
             String storedJwt = result.substring(REUSED_RESULT_PREFIX.length());
-            TokenClaims storedClaims = tokenValidator.validateToken(storedJwt);
+            TokenClaims storedClaims = tokenValidator.validateRefreshToken(storedJwt);
             cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, storedJwt,
                     jwtProperties.getRefreshTokenExpirySeconds());
             incrementOutcome(OUTCOME_RETRY_REUSED);

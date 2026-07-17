@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -157,8 +158,10 @@ class AuthenticationFacadeLineageTest {
                 new Date(), accessExpiry);
         TokenClaims refresh = refreshClaims("jti-1", "fam-logout", null);
 
-        when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
-        when(tokenValidator.validateToken(refreshToken)).thenReturn(refresh);
+        lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+        lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(refresh);
+        lenient().when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
+        lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refresh);
 
         facade.logout(accessToken, refreshToken);
 
@@ -175,7 +178,8 @@ class AuthenticationFacadeLineageTest {
                 testUser.getId(), testUser.getEmail(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
                 new Date(), accessExpiry);
 
-        when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+        lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
+        lenient().when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
 
         facade.logout(accessToken, null);
 
