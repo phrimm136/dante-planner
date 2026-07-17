@@ -42,10 +42,6 @@ Create or update `.claude/settings.json` in your project root:
           {
             "type": "command",
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/stop-build-check-enhanced.sh"
-          },
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/error-handling-reminder.sh"
           }
         ]
       }
@@ -148,18 +144,6 @@ if [[ -f "$project_root/config/.prettierrc" ]]; then
     echo "$project_root/config/.prettierrc"
     return
 fi
-```
-
-### Error Handling Reminders
-
-Configure file category detection in `.claude/hooks/error-handling-reminder.ts`:
-
-```typescript
-function getFileCategory(filePath: string): 'backend' | 'frontend' | 'database' | 'other' {
-    // Add custom patterns
-    if (filePath.includes('/my-custom-dir/')) return 'backend';
-    // ... existing patterns
-}
 ```
 
 ### Error Threshold Configuration
