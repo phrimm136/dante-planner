@@ -316,6 +316,8 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
       // Re-scan and copy: no original paths stored in manifest
       const files = scanFiles(options.staticDir)
       for (const file of files) {
+        // Root-level files (robots.txt, sitemap.xml, …) are served at stable paths, never hash-addressed
+        if (!file.includes('/')) continue
         if (path.extname(file) === '.json') continue
 
         const src = path.join(distDir, file)

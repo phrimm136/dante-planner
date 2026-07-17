@@ -9,6 +9,8 @@ import { hashStaticPlugin } from './vite-plugin-hash-static'
 
 const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
+// Well-known files that must be served at stable root paths, outside the hashed pipeline
+const STATIC_ROOT_FILES = ['sitemap.xml', 'robots.txt', 'favicon.ico', '_headers']
 
 function serveWhitelistedStatic(): Plugin {
   return {
@@ -39,6 +41,12 @@ function serveWhitelistedStatic(): Plugin {
             recursive: true,
             filter: (s) => !s.endsWith('.png'),
           })
+        }
+      }
+      for (const file of STATIC_ROOT_FILES) {
+        const src = path.join(STATIC_ROOT, file)
+        if (fs.existsSync(src)) {
+          await fs.promises.copyFile(src, path.join(distRoot, file))
         }
       }
     },
