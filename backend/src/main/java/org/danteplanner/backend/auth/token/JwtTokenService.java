@@ -2,7 +2,9 @@ package org.danteplanner.backend.auth.token;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -40,7 +42,9 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
     private final JwtProperties jwtProperties;
     private final PrivateKey privateKey;
     private final PublicKey publicKey;
-    private final JwtParser jwtParser;
+    private final JwtParser neutralParser;
+    private final JwtParser accessParser;
+    private final JwtParser refreshParser;
     private final Clock clock;
 
     @Autowired
@@ -53,9 +57,19 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         this.clock = clock;
         this.privateKey = jwtProperties.getPrivateKey();
         this.publicKey = jwtProperties.getPublicKey();
-        this.jwtParser = Jwts.parser()
+        this.neutralParser = Jwts.parser()
                 .verifyWith(publicKey)
                 .clock(() -> Date.from(clock.instant()))
+                .build();
+        this.accessParser = Jwts.parser()
+                .verifyWith(publicKey)
+                .clock(() -> Date.from(clock.instant()))
+                .require(CLAIM_TYPE, TokenClaims.TYPE_ACCESS)
+                .build();
+        this.refreshParser = Jwts.parser()
+                .verifyWith(publicKey)
+                .clock(() -> Date.from(clock.instant()))
+                .require(CLAIM_TYPE, TokenClaims.TYPE_REFRESH)
                 .build();
     }
 
@@ -106,8 +120,20 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
     @Override
     public TokenClaims validateToken(String token) {
-        Claims claims = parseToken(token);
+        return toTokenClaims(parseToken(neutralParser, token));
+    }
 
+    @Override
+    public TokenClaims validateAccessToken(String token) {
+        return toTokenClaims(parseToken(accessParser, token));
+    }
+
+    @Override
+    public TokenClaims validateRefreshToken(String token) {
+        return toTokenClaims(parseToken(refreshParser, token));
+    }
+
+    private TokenClaims toTokenClaims(Claims claims) {
         String subject = claims.getSubject();
         if (subject == null) {
             throw new InvalidTokenException(InvalidTokenException.Reason.MISSING_CLAIMS);
@@ -195,9 +221,9 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         }
     }
 
-    private Claims parseToken(String token) {
+    private Claims parseToken(JwtParser parser, String token) {
         try {
-            return jwtParser
+            return parser
                     .parseSignedClaims(token)
                     .getPayload();
 
@@ -207,6 +233,8 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
             throw new InvalidTokenException(InvalidTokenException.Reason.MALFORMED, e);
         } catch (SignatureException e) {
             throw new InvalidTokenException(InvalidTokenException.Reason.INVALID_SIGNATURE, e);
+        } catch (IncorrectClaimException | MissingClaimException e) {
+            throw new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE, e);
         } catch (JwtException e) {
             throw new InvalidTokenException(InvalidTokenException.Reason.MALFORMED, e);
         } catch (Exception e) {

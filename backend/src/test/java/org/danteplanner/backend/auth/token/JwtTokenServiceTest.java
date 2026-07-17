@@ -356,6 +356,118 @@ class JwtTokenServiceTest {
     }
 
     @Nested
+    @DisplayName("Neutral validateToken Type-Agnostic Characterization (B8)")
+    class NeutralValidateTokenTypeAgnosticTests {
+
+        @Test
+        @DisplayName("Neutral validateToken returns claims for an access token")
+        void validateToken_WhenAccessToken_ReturnsClaimsWithAccessType() {
+            // B8 preserved: neutral parser accepts any validly-signed unexpired JWT regardless of type
+            String token = tokenService.generateAccessToken(555L, UserRole.NORMAL);
+
+            TokenClaims claims = tokenService.validateToken(token);
+
+            assertNotNull(claims);
+            assertEquals(555L, claims.userId());
+            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+        }
+
+        @Test
+        @DisplayName("Neutral validateToken returns claims for a refresh token")
+        void validateToken_WhenRefreshToken_ReturnsClaimsWithRefreshType() {
+            // B8 preserved: neutral parser (backs getTokenType) still accepts refresh tokens
+            String token = tokenService.generateRefreshToken(555L);
+
+            TokenClaims claims = tokenService.validateToken(token);
+
+            assertNotNull(claims);
+            assertEquals(555L, claims.userId());
+            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
+        }
+    }
+
+    @Nested
+    @DisplayName("Typed Validator Type Enforcement (S1-S5 + Acceptance)")
+    class TypedValidatorTypeEnforcementTests {
+
+        @Test
+        @DisplayName("S1: validateAccessToken accepts an access token and returns its claims")
+        void validateAccessToken_WhenAccessToken_ReturnsClaims() {
+            String token = tokenService.generateAccessToken(1001L, UserRole.NORMAL);
+
+            TokenClaims claims = tokenService.validateAccessToken(token);
+
+            assertNotNull(claims);
+            assertEquals(1001L, claims.userId());
+            assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
+        }
+
+        @Test
+        @DisplayName("S2: validateAccessToken rejects a refresh token with INVALID_TYPE")
+        void validateAccessToken_WhenRefreshToken_ThrowsInvalidType() {
+            String token = tokenService.generateRefreshToken(1002L);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateAccessToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("S3: validateRefreshToken accepts a refresh token and returns its claims")
+        void validateRefreshToken_WhenRefreshToken_ReturnsClaims() {
+            String token = tokenService.generateRefreshToken(1003L);
+
+            TokenClaims claims = tokenService.validateRefreshToken(token);
+
+            assertNotNull(claims);
+            assertEquals(1003L, claims.userId());
+            assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
+        }
+
+        @Test
+        @DisplayName("S4: validateRefreshToken rejects an access token with INVALID_TYPE")
+        void validateRefreshToken_WhenAccessToken_ThrowsInvalidType() {
+            String token = tokenService.generateAccessToken(1004L, UserRole.NORMAL);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateRefreshToken(token)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+        }
+
+        @Test
+        @DisplayName("S5 (INV4): generated tokens round-trip through their matching typed validator")
+        void typedValidators_WhenGeneratedTokens_RoundTripWithCorrectClaims() {
+            String accessToken = tokenService.generateAccessToken(1005L, UserRole.NORMAL);
+            String refreshToken = tokenService.generateRefreshToken(1005L);
+
+            TokenClaims accessClaims = tokenService.validateAccessToken(accessToken);
+            TokenClaims refreshClaims = tokenService.validateRefreshToken(refreshToken);
+
+            assertEquals(1005L, accessClaims.userId());
+            assertEquals(TokenClaims.TYPE_ACCESS, accessClaims.type());
+            assertEquals(1005L, refreshClaims.userId());
+            assertEquals(TokenClaims.TYPE_REFRESH, refreshClaims.type());
+        }
+
+        @Test
+        @DisplayName("ACCEPTANCE: wrong-type token maps to INVALID_TYPE, not MALFORMED")
+        void acceptance_WrongTypeToken_MapsToInvalidTypeNotMalformed() {
+            String refreshToken = tokenService.generateRefreshToken(2001L);
+
+            InvalidTokenException exception = assertThrows(
+                    InvalidTokenException.class,
+                    () -> tokenService.validateAccessToken(refreshToken)
+            );
+            assertEquals(InvalidTokenException.Reason.INVALID_TYPE, exception.getReason());
+            assertNotEquals(InvalidTokenException.Reason.MALFORMED, exception.getReason());
+        }
+    }
+
+    @Nested
     @DisplayName("getUserIdFromToken Tests")
     class GetUserIdFromTokenTests {
 

@@ -1,0 +1,21 @@
+{
+  "schema": 3,
+  "task": "039-jwt-token-type-enforcement",
+  "branch": "build/039-jwt-token-type-enforcement",
+  "phases": [
+    { "id": "01", "slug": "parser-split", "title": "Type-scoped JWT parsers + INVALID_TYPE mapping",
+      "kind": "local-tdd", "deps": [], "status": "done",
+      "verdict": "DONE", "date": "2026-07-17",
+      "artifacts": { "plan": "plan/phase-01.md",
+        "ledger": "/home/user/.local/state/claude-build/LimbusPlanner/039-jwt-token-type-enforcement/phase-01/ledger.md" } },
+    { "id": "02", "slug": "access-path-enforcement", "title": "Filter access + flag-off refresh routing, audit-log reason pin",
+      "kind": "local-tdd", "deps": ["01"], "status": "pending",
+      "artifacts": { "plan": "plan/phase-02.md" } },
+    { "id": "03", "slug": "refresh-path-routing", "title": "Rotation + facade + logout-all routing to typed parsers",
+      "kind": "local-tdd", "deps": ["01"], "status": "pending",
+      "artifacts": { "plan": "plan/phase-03.md" } }
+  ],
+  "followUps": [
+    "Scoped/fast-gate commands in the plan and task brief use `./gradlew -p backend`, but no repo-root gradlew wrapper exists — only `backend/gradlew -p <abs backend>` runs. Phases 02/03 inherit the same command string. Correct the handed-down command (and reconcile CLAUDE.md rule 11, which assumes a root `./gradlew`) — unknowable from phase scope whether the root wrapper should exist or the doc is stale."
+  ]
+}
