@@ -158,7 +158,9 @@ describe('StartBuffMiniCard', () => {
       const nameElements = screen.getAllByText('Test Buff')
       // The visible element should have the color
       const visibleElement = nameElements.find((el) => !el.getAttribute('aria-hidden'))
-      expect(visibleElement?.style.color).toBe('rgb(0, 255, 204)') // #00ffcc
+      // toHaveStyle normalizes both sides, so the assertion is independent of how the
+      // DOM implementation serializes color values (hex vs rgb())
+      expect(visibleElement).toHaveStyle({ color: '#00ffcc' })
     })
 
     it('has correct dimensions (w-24 h-24)', () => {
