@@ -7,10 +7,10 @@ Companion to `requirements.md`; transcribed from the 2026-07-18 design session. 
 Numbers are the next free Flyway slots at implementation time (V046+ as of transcription). Ordering within the PR is binding; index names carry their own migration number (version-prefix convention, precedent V007).
 
 1. **Index swap** — create before drop so coverage never gaps:
-   `CREATE INDEX idx_v0NN_published_recent ON planners (published, deleted_at, created_at, category)`,
+   `CREATE INDEX idx_v0NN_published_recent ON planners (published, deleted_at, taken_down_at, created_at, category)`,
    then `DROP INDEX idx_v006_published_views`, then `DROP INDEX idx_published`. Index-only → no seed update.
 2. **Settings backfill** — `INSERT INTO user_settings (user_id) SELECT id FROM users u WHERE NOT EXISTS (SELECT 1 FROM user_settings s WHERE s.user_id = u.id)`; defaults apply, `sync_enabled` stays NULL. Modifies data → update `migration-test-seed.sql`.
-3. **planner_stats** — `CREATE TABLE planner_stats (planner_id BINARY(16) PRIMARY KEY, view_count INT NOT NULL DEFAULT 0, upvotes INT NOT NULL DEFAULT 0, CONSTRAINT fk_stats_planner FOREIGN KEY (planner_id) REFERENCES planners(id) ON DELETE CASCADE)` plus backfill from `planners`. Modifies data → seed update.
+3. **planner_stats** — `CREATE TABLE planner_stats (planner_id BINARY(16) PRIMARY KEY, view_count INT NOT NULL DEFAULT 0, upvotes INT NOT NULL DEFAULT 0, CONSTRAINT fk_stats_planner FOREIGN KEY (planner_id) REFERENCES planners(id) ON DELETE CASCADE)` plus unfiltered backfill `INSERT INTO planner_stats (planner_id, view_count, upvotes) SELECT id, view_count, upvotes FROM planners` — no WHERE clause, drafts included. Modifies data → seed update.
 
 ## 2. Published-list projection
 
@@ -21,7 +21,7 @@ JPQL shape: `SELECT new ...PlannerSummaryRow(...) FROM Planner p JOIN p.user u W
 
 ## 3. View-recording pipeline
 
-Request thread (readOnly tx): serve from the replica, record `(plannerId, viewerHash, viewDate)` into a per-pod concurrent buffer, no I/O. A `@Scheduled` flush (5s, default) drains it in one transaction: batched `INSERT IGNORE INTO planner_views`, then per-planner increments equal to actually-inserted row counts — never increment on ignored duplicates. NOT ShedLocked (per-pod buffers, not a singleton job; `ShedLockConfig` is for singletons). Loss bound: one flush window per pod death. From phase 03 the increment dual-writes `planners` and `planner_stats` unconditionally.
+Request thread (readOnly tx): serve from the replica, record `(plannerId, viewerHash, viewDate)` into a per-pod concurrent buffer, no I/O. A `@Scheduled` flush (5s, default) drains it in one transaction: batched `INSERT IGNORE INTO planner_views`, then per-planner increments equal to actually-inserted row counts — never increment on ignored duplicates. NOT ShedLocked (per-pod buffers, not a singleton job; `ShedLockConfig` is for singletons). Loss bound: one flush window per pod death. From phase 03 the increment dual-writes `planners` and `planner_stats` unconditionally, and planner creation inserts a zeroed `planner_stats` row in the same transaction (both `PlannerCommandService` creation sites) — every planner carries a stats row from birth, so the cutover checksum can converge.
 
 ## 4. Logout revocation script
 
@@ -31,7 +31,7 @@ One `EVALSHA` via Spring `RedisScript` (exemplar: `RefreshRotationService.ROTATE
 
 - Flag: property `planner.stats.reads-enabled` ← env `PLANNER_STATS_READS_ENABLED`, declared in both overlay ConfigMaps, default `false` (exemplar: `DATASOURCE_ROUTING_ENABLED`, `deploy/overlays/seoul/configmap-patch.yaml:30`; `configMapGenerator` hash-suffixing turns the edit into the rollout).
 - This PR ships: migration 3 + unconditional dual-write + flag-gated reads.
-- Flip (operational, post-merge): reconciliation checksum `SELECT COUNT(*) FROM planners p JOIN planner_stats s ON s.planner_id = p.id WHERE p.view_count <> s.view_count OR p.upvotes <> s.upvotes` must return 0, then set the env true in both overlays and apply.
+- Flip (operational, post-merge): reconciliation checksum `SELECT COUNT(*) FROM planners p LEFT JOIN planner_stats s ON s.planner_id = p.id WHERE s.planner_id IS NULL OR p.view_count <> s.view_count OR p.upvotes <> s.upvotes` must return 0, then set the env true in both overlays and apply. LEFT JOIN is binding: an INNER JOIN silently drops planners missing their stats row — the exact divergence class the gate exists to catch.
 - Follow-up PR (deferred): remove flag + dual-write, drop legacy columns (online INPLACE rebuild), remove the `updatable=false` guard.
 
 ## 6. Resolution seams
