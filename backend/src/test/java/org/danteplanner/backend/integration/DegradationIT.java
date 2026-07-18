@@ -141,6 +141,9 @@ class DegradationIT {
 
     private static final Network DEGRADATION_NETWORK = Network.newNetwork();
 
+    // Relaxed durability and no performance_schema: throwaway test databases need no
+    // crash-safety, and GTID replication depends on neither fsync timing nor
+    // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
             .withNetwork(DEGRADATION_NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
@@ -152,7 +155,11 @@ class DegradationIT {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
             .withNetwork(DEGRADATION_NETWORK)
@@ -164,7 +171,11 @@ class DegradationIT {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final GenericContainer<?> DEDICATED_AUTH_REDIS = new GenericContainer<>(
             DockerImageName.parse(REDIS_IMAGE))

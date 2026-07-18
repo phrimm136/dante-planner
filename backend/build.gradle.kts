@@ -98,6 +98,9 @@ tasks.withType<Test> {
         }
     }
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    // Test JVMs are short-lived and dominated by Spring context startup: C1-only JIT
+    // and the throughput collector favor fast warmup over peak speed the fork never reaches
+    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseParallelGC")
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")

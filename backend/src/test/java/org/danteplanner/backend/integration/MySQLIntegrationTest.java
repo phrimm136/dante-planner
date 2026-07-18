@@ -74,11 +74,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import(TestConfig.class)
 class MySQLIntegrationTest {
 
+    // Relaxed durability and no performance_schema: a throwaway test database needs no
+    // crash-safety — the flags cut boot time and per-instance memory.
     @Container
     static MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0")
             .withDatabaseName("testdb")
             .withUsername("test")
-            .withPassword("test");
+            .withPassword("test")
+            .withCommand(
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {

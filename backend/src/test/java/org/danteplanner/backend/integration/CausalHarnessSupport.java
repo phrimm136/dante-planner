@@ -55,6 +55,9 @@ abstract class CausalHarnessSupport {
 
     private static final Network NETWORK = Network.newNetwork();
 
+    // Relaxed durability and no performance_schema: throwaway test databases need no
+    // crash-safety, and GTID replication depends on neither fsync timing nor
+    // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
             .withNetwork(NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
@@ -66,7 +69,11 @@ abstract class CausalHarnessSupport {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
             .withNetwork(NETWORK)
@@ -78,7 +85,11 @@ abstract class CausalHarnessSupport {
                     "--log-bin=mysql-bin",
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
-                    "--enforce-gtid-consistency=ON");
+                    "--enforce-gtid-consistency=ON",
+                    "--innodb-flush-log-at-trx-commit=0",
+                    "--sync-binlog=0",
+                    "--performance-schema=OFF",
+                    "--skip-name-resolve");
 
     static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE);
 
