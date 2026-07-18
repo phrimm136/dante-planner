@@ -18,5 +18,17 @@ variable "secret_names" {
     "danteplanner/jwt/rs256-private-key",
     "danteplanner/jwt/rs256-public-key",
     "danteplanner/jwt/encryption-key",
+    # Telemetry credentials — containers enrolled here; values are injected by
+    # scripts/ops/provision-*.sh into the PRIMARY region only (replication
+    # carries the versions to Seoul). Both endpoint entries hold region-invariant
+    # RDS hostnames, so replication cannot clobber a region-specific value.
+    "danteplanner/grafana/loki-username",
+    "danteplanner/grafana/loki-password",
+    "danteplanner/grafana/remote-write-username",
+    "danteplanner/grafana/remote-write-password",
+    "danteplanner/mysqld-exporter/username",
+    "danteplanner/mysqld-exporter/password",
+    "danteplanner/mysqld-exporter/primary-endpoint",
+    "danteplanner/mysqld-exporter/replica-endpoint",
   ]
 }

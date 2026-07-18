@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Create the three mysqld-exporter Secrets Manager entries in BOTH
-# regions (each region's SecretStore resolves only its own region), print the SQL
-# for the RDS monitoring user, then watch the ExternalSecret/pod heal.
+# Inject the mysqld-exporter secret VALUES (monitoring user, both RDS endpoints),
+# print the SQL for the RDS monitoring user, then watch the ExternalSecret/pod heal.
+# The secret containers are Terraform-managed (terraform/secrets, cross-region
+# replication included) — this script only writes versions into the PRIMARY
+# region; AWS replicates them to Seoul. A missing container means the secrets
+# stack was never applied.
 # Usage: c1-provision-secrets.sh
 # Values are prompted, never echoed, never written to disk (secrets never enter the repo).
 set -euo pipefail
@@ -9,25 +12,24 @@ set -euo pipefail
 read -rp    "monitoring username [exporter]: " EXP_USER; EXP_USER=${EXP_USER:-exporter}
 read -rsp   "monitoring password (hidden): " EXP_PASS; echo
 read -rp    "Oregon RDS primary endpoint (host:3306): " PRIMARY_EP
+read -rp    "Seoul RDS replica endpoint (host:3306): " REPLICA_EP
 
-put() { # region name value
-  local region=$1 name=$2 value=$3
-  if aws secretsmanager create-secret --region "$region" --name "$name" \
-       --secret-string "$value" >/dev/null 2>&1; then
-    echo "  created  $region  $name"
+put() { # name value
+  local name=$1 value=$2
+  if aws secretsmanager put-secret-value --region us-west-2 --secret-id "$name" \
+       --secret-string "$value" >/dev/null; then
+    echo "  updated  $name  (replicates to ap-northeast-2)"
   else
-    aws secretsmanager put-secret-value --region "$region" --secret-id "$name" \
-      --secret-string "$value" >/dev/null
-    echo "  updated  $region  $name"
+    echo "ERROR: put-secret-value failed for $name — if the secret does not exist," >&2
+    echo "the container is Terraform-managed: apply terraform/secrets first." >&2
+    exit 1
   fi
 }
 
-for region in us-west-2 ap-northeast-2; do
-  echo "== $region"
-  put "$region" danteplanner/mysqld-exporter/username         "$EXP_USER"
-  put "$region" danteplanner/mysqld-exporter/password         "$EXP_PASS"
-  put "$region" danteplanner/mysqld-exporter/primary-endpoint "$PRIMARY_EP"
-done
+put danteplanner/mysqld-exporter/username         "$EXP_USER"
+put danteplanner/mysqld-exporter/password         "$EXP_PASS"
+put danteplanner/mysqld-exporter/primary-endpoint "$PRIMARY_EP"
+put danteplanner/mysqld-exporter/replica-endpoint "$REPLICA_EP"
 
 cat <<SQL
 
