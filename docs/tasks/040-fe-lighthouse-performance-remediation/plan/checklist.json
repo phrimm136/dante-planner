@@ -1,0 +1,372 @@
+{
+  "schema": 1,
+  "task": "040-fe-lighthouse-performance-remediation",
+  "base": "95d9d9d87f7dc36c9235f01fae58036920fc1224",
+  "ambientDirty": [
+    ".claude/commands/route-research-for-testing.md",
+    ".claude/harness-changelog.md",
+    ".claude/hooks/check-output-redirect.sh",
+    ".claude/skills/announcement/SKILL.md",
+    ".claude/skills/commit-process/SKILL.md",
+    "backend/CLAUDE.md",
+    "deploy/base/spring-daemonset.yaml",
+    "docs/tasks/038-metrics-observability/phases/03-mysqld-exporter/ledger.md",
+    "docs/tasks/038-metrics-observability/phases/04-gap-scrape-wiring/ledger.md",
+    "docs/tasks/038-metrics-observability/phases/07-alert-delivery/verification.md",
+    "docs/tasks/038-metrics-observability/requirements.md",
+    "docs/tasks/039-jwt-token-type-enforcement/requirements.md",
+    "docs/tasks/040-ga-to-cloudflare-tunnel-lb/mechanics.md",
+    "docs/tasks/040-ga-to-cloudflare-tunnel-lb/requirements.md",
+    "docs/tasks/041-fe-lighthouse-performance-remediation/mechanics.md",
+    "docs/tasks/041-fe-lighthouse-performance-remediation/requirements.md",
+    "docs/tasks/042-cross-region-latency-remediation/plan/checklist.json",
+    "docs/tasks/042-cross-region-latency-remediation/review-findings.md",
+    "frontend/vite-plugin-hash-static.ts",
+    "frontend/vite.config.ts",
+    "scripts/ops/lib/dashboard.sh",
+    "scripts/ops/lib/insights.sh",
+    "scripts/ops/lib/retention.sh",
+    "static",
+    ".claude/settings.local.json",
+    ".claude/skills/image-analyzer/SKILL.md",
+    ".claude/skills/verify/",
+    ".githooks/",
+    ".github/workflows/verify-rds-ca.yml",
+    "docker-compose.loadtest.yml",
+    "docs/RUNBOOK.md",
+    "docs/cicd-flowchart.drawio",
+    "docs/code-quality-analysis.md",
+    "docs/skill-breakdown-plan.md",
+    "docs/tasks/010-backend-revision/11-integration-test/",
+    "docs/tasks/014-deploy/03-aws/plan.md",
+    "docs/tasks/014-deploy/03-aws/requirements.md",
+    "docs/tasks/014-deploy/03-aws/research.md",
+    "docs/tasks/014-deploy/03-aws/review.md",
+    "docs/tasks/014-deploy/environment-setup.md",
+    "docs/tasks/014-deploy/epic.md",
+    "docs/tasks/016-deck-builder/02-compact-editor/",
+    "docs/tasks/020-keyword/",
+    "docs/tasks/021-asset-refinement/",
+    "docs/tasks/023-fe-feature-first-migration/",
+    "docs/tasks/024-fe-structure-refactor/",
+    "docs/tasks/031-fe-structure-refactor/",
+    "docs/tasks/034-multi-region-k8s-architecture/architecture-diagram.md",
+    "docs/tasks/034-multi-region-k8s-architecture/phase-15-notes.md",
+    "docs/tasks/038-metrics-observability/plan/",
+    "docs/tasks/039-jwt-token-type-enforcement/plan/",
+    "docs/tasks/039-jwt-token-type-enforcement/verification.md",
+    "docs/tasks/041-ga-to-cloudflare-tunnel-lb/",
+    "docs/tasks/042-cross-region-latency-remediation/deferred.md",
+    "docs/tasks/042-cross-region-latency-remediation/seams.json",
+    "docs/tasks/042-cross-region-latency-remediation/verification.json",
+    "docs/tasks/042-cross-region-latency-remediation/verification.md",
+    "frontend/.claude/",
+    "frontend/.wrangler/",
+    "frontend/scripts/dev-r2-sync.ts",
+    "terraform/secrets/.terraform.lock.hcl"
+  ],
+  "phases": [
+    {
+      "id": "01",
+      "slug": "",
+      "kind": "infra",
+      "deps": [],
+      "status": "pending",
+      "rows": [
+        "harness-selftest-reproduces-baseline",
+        "harness-deps-isolated"
+      ],
+      "touches": [],
+      "stubAllow": [
+        "scripts/perf/**"
+      ],
+      "testExceptions": [],
+      "validation": "node scripts/perf/selftest.mjs",
+      "checks": [
+        "node scripts/perf/eager-gate.mjs --help"
+      ],
+      "timeboxMin": 45,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "02",
+      "slug": "",
+      "kind": "local-tdd",
+      "deps": [
+        "01"
+      ],
+      "status": "pending",
+      "rows": [
+        "eager-set-within-budget",
+        "shared-no-pages-import",
+        "sse-single-auth-gated-subscription",
+        "sync-dialog-first-login",
+        "settings-query-nonblocking",
+        "gesellschaft-loader-prefetch-contract"
+      ],
+      "touches": [
+        "frontend/src/shared/sse/**",
+        "frontend/src/components/layout/GlobalLayout.tsx",
+        "frontend/src/lib/router.tsx",
+        "frontend/src/pages/planner/index.ts",
+        "frontend/src/pages/settings/index.ts",
+        "frontend/src/pages/planner/hooks/useAppSse.ts",
+        "frontend/src/pages/settings/**"
+      ],
+      "stubAllow": [
+        "**/shared/sse/**",
+        "**/shared/userSettings/**"
+      ],
+      "testExceptions": [],
+      "validation": "yarn --cwd frontend vitest run src/shared/sse src/shared/userSettings src/lib",
+      "checks": [
+        "yarn --cwd frontend lint",
+        "yarn --cwd frontend typecheck",
+        "node scripts/perf/eager-gate.mjs"
+      ],
+      "timeboxMin": 40,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "03",
+      "slug": "",
+      "kind": "local-tdd",
+      "deps": [
+        "01"
+      ],
+      "status": "pending",
+      "rows": [
+        "globals-references-subset-css",
+        "fonts-byte-unchanged"
+      ],
+      "touches": [
+        "frontend/src/styles/globals.css"
+      ],
+      "stubAllow": [
+        "frontend/src/styles/__tests__/**"
+      ],
+      "testExceptions": [],
+      "validation": "yarn --cwd frontend vitest run src/styles",
+      "checks": [
+        "yarn --cwd frontend typecheck"
+      ],
+      "timeboxMin": 20,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "04",
+      "slug": "",
+      "kind": "infra",
+      "deps": [],
+      "status": "pending",
+      "rows": [
+        "thumbnails-emitted-and-sized",
+        "shared-assets-resolves-thumb",
+        "grid-cards-consume-thumb"
+      ],
+      "touches": [
+        "static/scripts/**",
+        "static/images/**",
+        "frontend/src/shared/assets/**",
+        "frontend/src/pages/ego/components/EGOCard.tsx",
+        "frontend/src/pages/identity/components/IdentityCard.tsx",
+        "frontend/src/pages/abEvent/components/AbEventCard.tsx",
+        "frontend/src/pages/themePack/components/ThemePackCard.tsx"
+      ],
+      "stubAllow": [
+        "frontend/src/shared/assets/**",
+        "frontend/src/pages/**/__tests__/**",
+        "static/scripts/**"
+      ],
+      "testExceptions": [
+        "static/**/fixtures/*"
+      ],
+      "validation": "yarn --cwd frontend vitest run src/shared/assets src/pages/ego",
+      "checks": [
+        "yarn --cwd frontend lint"
+      ],
+      "timeboxMin": 40,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "05",
+      "slug": "",
+      "kind": "local-tdd",
+      "deps": [
+        "04"
+      ],
+      "status": "pending",
+      "rows": [
+        "abevent-card-lazy-async",
+        "themepack-card-lazy-async"
+      ],
+      "touches": [
+        "frontend/src/pages/abEvent/components/AbEventCard.tsx",
+        "frontend/src/pages/themePack/components/ThemePackCard.tsx"
+      ],
+      "stubAllow": [
+        "frontend/src/pages/abEvent/components/__tests__/**",
+        "frontend/src/pages/themePack/components/__tests__/**"
+      ],
+      "testExceptions": [],
+      "validation": "yarn --cwd frontend vitest run src/pages/abEvent src/pages/themePack",
+      "checks": [
+        "yarn --cwd frontend typecheck"
+      ],
+      "timeboxMin": 15,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "06",
+      "slug": "",
+      "kind": "local-tdd",
+      "deps": [],
+      "status": "pending",
+      "rows": [
+        "home-async-section-skeleton-fixed-height"
+      ],
+      "touches": [
+        "frontend/src/pages/home/**",
+        "frontend/src/pages/planner/PlannerMDGesellschaftPage.tsx",
+        "frontend/src/components/feedback/LoadingState.tsx"
+      ],
+      "stubAllow": [
+        "frontend/src/pages/home/**",
+        "frontend/src/components/feedback/**"
+      ],
+      "testExceptions": [],
+      "validation": "yarn --cwd frontend vitest run src/pages/home src/components/feedback",
+      "checks": [
+        "yarn --cwd frontend typecheck"
+      ],
+      "timeboxMin": 25,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "07",
+      "slug": "",
+      "kind": "local-tdd",
+      "deps": [],
+      "status": "pending",
+      "rows": [
+        "readonly-note-renders-without-editor-mount"
+      ],
+      "touches": [
+        "frontend/src/pages/planner/PlannerMDGesellschaftDetailPage.tsx",
+        "frontend/src/pages/planner/PlannerMDNewPage.tsx",
+        "frontend/src/pages/planner/components/plannerViewer/**"
+      ],
+      "stubAllow": [
+        "frontend/src/pages/planner/components/plannerViewer/**"
+      ],
+      "testExceptions": [],
+      "validation": "yarn --cwd frontend vitest run src/pages/planner",
+      "checks": [
+        "yarn --cwd frontend typecheck"
+      ],
+      "timeboxMin": 30,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "08",
+      "slug": "",
+      "kind": "local-tdd",
+      "deps": [
+        "02",
+        "07"
+      ],
+      "status": "pending",
+      "rows": [
+        "router-preload-intent",
+        "plan-detail-shell-first",
+        "grid-skeleton-count-from-pagesize",
+        "deck-fallback-uses-card-dimensions",
+        "planner-card-constant-single-source"
+      ],
+      "touches": [
+        "frontend/src/lib/router.tsx",
+        "frontend/src/pages/planner/components/plannerViewer/**",
+        "frontend/src/components/feedback/ListPageSkeleton.tsx",
+        "frontend/src/lib/constants.ts"
+      ],
+      "stubAllow": [
+        "frontend/src/lib/__tests__/**",
+        "frontend/src/pages/planner/**/__tests__/**",
+        "frontend/src/components/feedback/**"
+      ],
+      "testExceptions": [],
+      "validation": "yarn --cwd frontend vitest run src/lib src/pages/planner src/components/feedback",
+      "checks": [
+        "yarn --cwd frontend lint",
+        "yarn --cwd frontend typecheck"
+      ],
+      "timeboxMin": 40,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    },
+    {
+      "id": "09",
+      "slug": "",
+      "kind": "live-only",
+      "deps": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08"
+      ],
+      "status": "pending",
+      "rows": [
+        "mobile-budgets-met",
+        "plan-content-p50-improved"
+      ],
+      "touches": [],
+      "stubAllow": [
+        "scripts/perf/**"
+      ],
+      "testExceptions": [],
+      "validation": "node scripts/perf/sweep.mjs && node scripts/perf/profile.mjs && node scripts/perf/geometry.mjs",
+      "checks": [],
+      "timeboxMin": 30,
+      "pct": 0,
+      "startedAt": null,
+      "receipts": {},
+      "runs": {},
+      "findings": []
+    }
+  ]
+}

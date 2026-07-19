@@ -252,8 +252,8 @@
     { "id": "D15", "text": "Heavy measurement tooling keeps its deps out of the app build graph (scripts/perf/package.json)", "enforcement": "scripts/perf/lib/font-diff style grep gate on frontend/package.json" }
   ],
   "touches": {
-    "01": ["scripts/perf/**"],
-    "02": ["frontend/src/shared/sse/**", "frontend/src/shared/userSettings/**", "frontend/src/components/layout/GlobalLayout.tsx", "frontend/src/lib/router.tsx", "frontend/src/pages/planner/index.ts", "frontend/src/pages/settings/index.ts", "frontend/src/pages/planner/hooks/useAppSse.ts", "frontend/src/pages/settings/**"],
+    "01": [],
+    "02": ["frontend/src/shared/sse/**", "frontend/src/components/layout/GlobalLayout.tsx", "frontend/src/lib/router.tsx", "frontend/src/pages/planner/index.ts", "frontend/src/pages/settings/index.ts", "frontend/src/pages/planner/hooks/useAppSse.ts", "frontend/src/pages/settings/**"],
     "03": ["frontend/src/styles/globals.css"],
     "04": ["static/scripts/**", "static/images/**", "frontend/src/shared/assets/**", "frontend/src/pages/ego/components/EGOCard.tsx", "frontend/src/pages/identity/components/IdentityCard.tsx", "frontend/src/pages/abEvent/components/AbEventCard.tsx", "frontend/src/pages/themePack/components/ThemePackCard.tsx"],
     "05": ["frontend/src/pages/abEvent/components/AbEventCard.tsx", "frontend/src/pages/themePack/components/ThemePackCard.tsx"],
@@ -264,7 +264,14 @@
   },
   "stubAllow": {
     "01": ["scripts/perf/**"],
-    "02": ["**/shared/sse/**", "**/shared/userSettings/**"]
+    "02": ["**/shared/sse/**", "**/shared/userSettings/**"],
+    "03": ["frontend/src/styles/__tests__/**"],
+    "04": ["frontend/src/shared/assets/**", "frontend/src/pages/**/__tests__/**", "static/scripts/**"],
+    "05": ["frontend/src/pages/abEvent/components/__tests__/**", "frontend/src/pages/themePack/components/__tests__/**"],
+    "06": ["frontend/src/pages/home/**", "frontend/src/components/feedback/**"],
+    "07": ["frontend/src/pages/planner/components/plannerViewer/**"],
+    "08": ["frontend/src/lib/__tests__/**", "frontend/src/pages/planner/**/__tests__/**", "frontend/src/components/feedback/**"],
+    "09": ["scripts/perf/**"]
   },
   "testExceptions": {
     "04": ["static/**/fixtures/*"]
@@ -280,10 +287,10 @@
     "02": { "kind": "local-tdd", "deps": ["01"], "validation": "yarn --cwd frontend vitest run src/shared/sse src/shared/userSettings src/lib", "checks": ["yarn --cwd frontend lint", "yarn --cwd frontend typecheck", "node scripts/perf/eager-gate.mjs"], "timeboxMin": 40 },
     "03": { "kind": "local-tdd", "deps": ["01"], "validation": "yarn --cwd frontend vitest run src/styles", "checks": ["yarn --cwd frontend typecheck"], "timeboxMin": 20 },
     "04": { "kind": "infra", "deps": [], "validation": "yarn --cwd frontend vitest run src/shared/assets src/pages/ego", "checks": ["yarn --cwd frontend lint"], "timeboxMin": 40 },
-    "05": { "kind": "local-tdd", "deps": [], "validation": "yarn --cwd frontend vitest run src/pages/abEvent src/pages/themePack", "checks": ["yarn --cwd frontend typecheck"], "timeboxMin": 15 },
+    "05": { "kind": "local-tdd", "deps": ["04"], "validation": "yarn --cwd frontend vitest run src/pages/abEvent src/pages/themePack", "checks": ["yarn --cwd frontend typecheck"], "timeboxMin": 15 },
     "06": { "kind": "local-tdd", "deps": [], "validation": "yarn --cwd frontend vitest run src/pages/home src/components/feedback", "checks": ["yarn --cwd frontend typecheck"], "timeboxMin": 25 },
     "07": { "kind": "local-tdd", "deps": [], "validation": "yarn --cwd frontend vitest run src/pages/planner", "checks": ["yarn --cwd frontend typecheck"], "timeboxMin": 30 },
-    "08": { "kind": "local-tdd", "deps": ["07"], "validation": "yarn --cwd frontend vitest run src/lib src/pages/planner src/components/feedback", "checks": ["yarn --cwd frontend lint", "yarn --cwd frontend typecheck"], "timeboxMin": 40 },
+    "08": { "kind": "local-tdd", "deps": ["02", "07"], "validation": "yarn --cwd frontend vitest run src/lib src/pages/planner src/components/feedback", "checks": ["yarn --cwd frontend lint", "yarn --cwd frontend typecheck"], "timeboxMin": 40 },
     "09": { "kind": "live-only", "deps": ["01", "02", "03", "04", "05", "06", "07", "08"], "validation": "node scripts/perf/sweep.mjs && node scripts/perf/profile.mjs && node scripts/perf/geometry.mjs", "checks": [], "timeboxMin": 30 }
   }
 }
