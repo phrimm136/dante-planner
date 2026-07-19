@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -24,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlannerViewRecorder {
 
-    private static final long FLUSH_INTERVAL_MS = 5_000;
+    private static final long FLUSH_INTERVAL_MS = 500;
 
     private final PlannerRepository plannerRepository;
     private final PlannerViewRepository plannerViewRepository;
@@ -47,14 +48,15 @@ public class PlannerViewRecorder {
     @Transactional
     public void flush() {
         Set<PlannerViewId> drained = new LinkedHashSet<>(buffer);
-        buffer.removeAll(drained);
-        for (PlannerViewId id : drained) {
-            int inserted = plannerViewRepository.insertIgnore(
-                    id.getPlannerId(), id.getViewerHash(), id.getViewDate(), Instant.now());
-            if (inserted > 0) {
-                plannerRepository.incrementViewCount(id.getPlannerId());
-                plannerStatsRepository.incrementViewCount(id.getPlannerId());
-            }
+        if (drained.isEmpty()) {
+            return;
         }
+        buffer.removeAll(drained);
+        Map<UUID, Integer> newViewsByPlanner =
+                plannerViewRepository.insertIgnoreReturningNewCounts(drained, Instant.now());
+        newViewsByPlanner.forEach((plannerId, delta) -> {
+            plannerRepository.incrementViewCountBy(plannerId, delta);
+            plannerStatsRepository.incrementViewCountBy(plannerId, delta);
+        });
     }
 }

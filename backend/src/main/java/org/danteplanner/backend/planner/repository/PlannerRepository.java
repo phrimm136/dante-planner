@@ -168,6 +168,17 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID>, JpaSpec
     int incrementViewCount(@Param("plannerId") UUID plannerId);
 
     /**
+     * Atomically add a batch of new views to a planner's count in one statement.
+     *
+     * @param plannerId the planner ID
+     * @param delta     the number of new views to add
+     * @return number of rows updated (1 if the planner exists, 0 otherwise)
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Planner p SET p.viewCount = p.viewCount + :delta WHERE p.id = :plannerId")
+    int incrementViewCountBy(@Param("plannerId") UUID plannerId, @Param("delta") int delta);
+
+    /**
      * Find planner by ID with pessimistic write lock (SELECT FOR UPDATE).
      * Acquires exclusive lock on the planner row to prevent deadlocks during concurrent view recording.
      *

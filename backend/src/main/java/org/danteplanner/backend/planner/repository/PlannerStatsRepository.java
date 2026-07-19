@@ -11,9 +11,9 @@ import org.springframework.data.repository.query.Param;
 public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID> {
 
     @Modifying
-    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes) VALUES (:id, 1, 0) "
-            + "ON DUPLICATE KEY UPDATE view_count = view_count + 1", nativeQuery = true)
-    void incrementViewCount(@Param("id") UUID plannerId);
+    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes) VALUES (:id, :delta, 0) "
+            + "ON DUPLICATE KEY UPDATE view_count = view_count + :delta", nativeQuery = true)
+    void incrementViewCountBy(@Param("id") UUID plannerId, @Param("delta") int delta);
 
     @Modifying
     @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes) VALUES (:id, 0, 1) "
