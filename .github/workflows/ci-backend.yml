@@ -50,6 +50,16 @@ jobs:
         working-directory: ./backend
         run: ./gradlew check -q
 
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            backend/build/reports/tests/
+            backend/build/test-results/
+          retention-days: 7
+
   test-migration:
     needs: check-origin
     if: >-
