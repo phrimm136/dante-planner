@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
+
 import org.danteplanner.backend.planner.entity.PlannerViewId;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -21,8 +23,11 @@ public class PlannerViewRepositoryImpl implements PlannerViewRepositoryCustom {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public PlannerViewRepositoryImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    // Build over the @Primary (routing) datasource rather than an autoconfigured JdbcTemplate,
+    // which backs off when multiple datasources are present. The batch insert is non-read-only,
+    // so the routing datasource sends it to the primary. Mirrors GtidWriteCapture.
+    public PlannerViewRepositoryImpl(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
