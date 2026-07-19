@@ -98,9 +98,13 @@ tasks.withType<Test> {
         }
     }
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    // Cap each fork's heap so maxParallelForks × maxHeapSize leaves the runner headroom
+    // for Docker and the Testcontainers MySQL/Redis/Toxiproxy set; an unbounded default
+    // heap lets two forks swap the box and thrash into GC-overhead failures.
+    maxHeapSize = "2g"
     // Test JVMs are short-lived and dominated by Spring context startup: C1-only JIT
     // and the throughput collector favor fast warmup over peak speed the fork never reaches
-    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseParallelGC")
+    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseParallelGC", "-XX:+HeapDumpOnOutOfMemoryError")
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")
