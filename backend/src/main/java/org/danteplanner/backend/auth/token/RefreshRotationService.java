@@ -47,9 +47,9 @@ public class RefreshRotationService {
     private static final String LEGACY_FAMILY_SYNTHESIS_FORMAT = "legacy-family:%d:%d";
     private static final String LEGACY_JTI_SYNTHESIS_FORMAT = "legacy-jti:%d:%d";
 
-    private static final String FAMILY_KEY_PREFIX = "rt:fam:";
+    static final String FAMILY_KEY_PREFIX = "rt:fam:";
     private static final String FAMILY_KEY_PATTERN = FAMILY_KEY_PREFIX + "*";
-    private static final String REVOKED_FIELD = "__revoked__";
+    static final String REVOKED_FIELD = "__revoked__";
     private static final String SUCCESSOR_JWT_FIELD_PREFIX = "succjwt:";
     private static final String FIELD_SEPARATOR = "|";
     private static final String ROTATED_RESULT = "ROTATED";

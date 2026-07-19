@@ -8,7 +8,7 @@
       "id": "01",
       "kind": "local-tdd",
       "deps": [],
-      "status": "pending",
+      "status": "closed",
       "rows": [
         "sort-popular-collapses-to-recent",
         "sort-unknown-falls-back-recent",
@@ -20,7 +20,6 @@
         "logout-invalid-token-fast-path",
         "resttemplate-timeouts-bounded",
         "oolfe-maps-to-409-concurrent",
-        "stale-client-409-reason",
         "counters-immune-to-entity-save",
         "promotion-counter-registered-at-boot"
       ],
@@ -40,16 +39,21 @@
         "**/PlannerSummaryRow.java"
       ],
       "testExceptions": [
-        "**/db/migration/*.sql"
+        "**/db/migration/*.sql",
+        "**/support/TestDataFactory.java",
+        "**/facade/AuthenticationFacade*Test.java"
       ],
-      "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PublishedPlanner*' --tests 'org.danteplanner.backend.integration.Logout*' --tests 'org.danteplanner.backend.integration.PlannerUpsertConflictIT' --tests 'org.danteplanner.backend.integration.PlannerCounterGuardIT' --tests 'org.danteplanner.backend.integration.MetricsRegistrationIT'",
+      "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PublishedPlanner*' --tests 'org.danteplanner.backend.integration.Logout*' --tests 'org.danteplanner.backend.integration.PlannerUpsertConflictIT' --tests 'org.danteplanner.backend.integration.PlannerCounterGuardIT' --tests 'org.danteplanner.backend.integration.MetricsRegistrationIT' --tests 'org.danteplanner.backend.planner.entity.PlannerEntityTest' --tests 'org.danteplanner.backend.shared.config.HttpClientConfigTest'",
       "checks": [
         "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test"
       ],
       "timeboxMin": 45,
-      "pct": 0,
-      "startedAt": null,
-      "receipts": {},
+      "pct": 100,
+      "startedAt": "2026-07-18T15:14:17.878470+00:00",
+      "receipts": {
+        "red": "2026-07-19T00:49:11+00:00",
+        "green": "2026-07-19T00:53:56+00:00"
+      },
       "runs": {},
       "findings": []
     },

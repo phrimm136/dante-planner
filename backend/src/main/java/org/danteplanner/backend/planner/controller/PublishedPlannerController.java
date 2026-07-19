@@ -175,9 +175,8 @@ public class PublishedPlannerController {
     private Pageable createPageable(int page, int size, String sort) {
         Sort.Direction direction = Sort.Direction.DESC;
         String property = switch (sort) {
-            case "popular" -> "viewCount";
             case "votes" -> "upvotes";
-            default -> "createdAt"; // "recent" or any other value
+            default -> "createdAt";
         };
         return PageRequest.of(page, Math.min(size, 100), Sort.by(direction, property));
     }

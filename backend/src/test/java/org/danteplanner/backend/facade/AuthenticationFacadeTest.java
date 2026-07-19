@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -451,8 +452,8 @@ class AuthenticationFacadeTest {
             authenticationFacade.logout(accessToken, refreshToken);
 
             // Assert
-            verify(tokenBlacklistService).blacklistToken(accessToken, accessExpiry);
-            verify(tokenBlacklistService).blacklistToken(refreshToken, refreshExpiry);
+            verify(tokenBlacklistService).revokeLogoutSession(
+                    eq(accessToken), eq(accessExpiry), eq(refreshToken), eq(refreshExpiry), isNull());
         }
 
         @Test
@@ -472,7 +473,8 @@ class AuthenticationFacadeTest {
             authenticationFacade.logout(null, refreshToken);
 
             // Assert - only refresh token blacklisted
-            verify(tokenBlacklistService).blacklistToken(refreshToken, refreshExpiry);
+            verify(tokenBlacklistService).revokeLogoutSession(
+                    isNull(), isNull(), eq(refreshToken), eq(refreshExpiry), isNull());
             verify(tokenValidator, times(1)).validateRefreshToken(anyString());
         }
 
@@ -493,7 +495,8 @@ class AuthenticationFacadeTest {
             authenticationFacade.logout(accessToken, null);
 
             // Assert - only access token blacklisted
-            verify(tokenBlacklistService).blacklistToken(accessToken, accessExpiry);
+            verify(tokenBlacklistService).revokeLogoutSession(
+                    eq(accessToken), eq(accessExpiry), isNull(), isNull(), isNull());
             verify(tokenValidator, times(1)).validateAccessToken(anyString());
         }
 
@@ -530,8 +533,8 @@ class AuthenticationFacadeTest {
             authenticationFacade.logout(invalidAccessToken, validRefreshToken);
 
             // Assert - only refresh token blacklisted
-            verify(tokenBlacklistService, times(1)).blacklistToken(any(), any());
-            verify(tokenBlacklistService).blacklistToken(validRefreshToken, refreshExpiry);
+            verify(tokenBlacklistService).revokeLogoutSession(
+                    isNull(), isNull(), eq(validRefreshToken), eq(refreshExpiry), isNull());
         }
 
         @Test
@@ -556,8 +559,8 @@ class AuthenticationFacadeTest {
             authenticationFacade.logout(validAccessToken, invalidRefreshToken);
 
             // Assert - only access token blacklisted
-            verify(tokenBlacklistService, times(1)).blacklistToken(any(), any());
-            verify(tokenBlacklistService).blacklistToken(validAccessToken, accessExpiry);
+            verify(tokenBlacklistService).revokeLogoutSession(
+                    eq(validAccessToken), eq(accessExpiry), isNull(), isNull(), isNull());
         }
     }
 

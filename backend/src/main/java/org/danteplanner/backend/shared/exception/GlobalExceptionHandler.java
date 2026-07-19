@@ -25,6 +25,7 @@ import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsE
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -182,6 +183,13 @@ public class GlobalExceptionHandler {
         log.warn("Planner sync conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
             .body(new ConflictErrorResponse("SYNC_CONFLICT", ex.getMessage(), ex.getActualVersion()));
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ConflictErrorResponse> handleOptimisticLocking(ObjectOptimisticLockingFailureException ex) {
+        log.warn("Concurrent write conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+            .body(new ConflictErrorResponse("CONCURRENT_WRITE", "The resource was modified concurrently", null));
     }
 
     @ExceptionHandler(PlannerLimitExceededException.class)

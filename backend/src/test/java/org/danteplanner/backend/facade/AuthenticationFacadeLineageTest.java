@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -165,8 +166,8 @@ class AuthenticationFacadeLineageTest {
 
         facade.logout(accessToken, refreshToken);
 
-        verify(tokenBlacklistService).blacklistToken(accessToken, accessExpiry);
-        verify(refreshRotationService).revokeFamily("fam-logout");
+        verify(tokenBlacklistService).revokeLogoutSession(
+                eq(accessToken), eq(accessExpiry), eq(refreshToken), any(), eq("fam-logout"));
     }
 
     @Test
@@ -183,7 +184,7 @@ class AuthenticationFacadeLineageTest {
 
         facade.logout(accessToken, null);
 
-        verify(tokenBlacklistService).blacklistToken(accessToken, accessExpiry);
-        verify(refreshRotationService, never()).revokeFamily(any());
+        verify(tokenBlacklistService).revokeLogoutSession(
+                eq(accessToken), eq(accessExpiry), isNull(), isNull(), isNull());
     }
 }

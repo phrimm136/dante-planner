@@ -27,6 +27,7 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -242,30 +243,35 @@ public class AuthenticationFacade {
     public void logout(String accessToken, String refreshToken) {
         log.info("Processing logout");
 
-        // Blacklist access token if present and valid
+        String validAccessToken = null;
+        Date accessExpiry = null;
         if (accessToken != null) {
             try {
-                TokenClaims accessClaims = tokenValidator.validateAccessToken(accessToken);
-                tokenBlacklistService.blacklistToken(accessToken, accessClaims.expiration());
+                accessExpiry = tokenValidator.validateAccessToken(accessToken).expiration();
+                validAccessToken = accessToken;
             } catch (InvalidTokenException e) {
-                // Token already expired or invalid - no need to blacklist
                 log.debug("Access token already invalid, skipping blacklist");
             }
         }
 
-        // Blacklist refresh token if present and valid
+        String validRefreshToken = null;
+        Date refreshExpiry = null;
+        String familyId = null;
         if (refreshToken != null) {
             try {
                 TokenClaims refreshClaims = tokenValidator.validateRefreshToken(refreshToken);
-                tokenBlacklistService.blacklistToken(refreshToken, refreshClaims.expiration());
+                refreshExpiry = refreshClaims.expiration();
+                validRefreshToken = refreshToken;
                 if (lineageRotationFlag.isEnabled() && refreshClaims.familyId() != null) {
-                    refreshRotationService.revokeFamily(refreshClaims.familyId());
+                    familyId = refreshClaims.familyId();
                 }
             } catch (InvalidTokenException e) {
-                // Token already expired or invalid - no need to blacklist
                 log.debug("Refresh token already invalid, skipping blacklist");
             }
         }
+
+        tokenBlacklistService.revokeLogoutSession(
+                validAccessToken, accessExpiry, validRefreshToken, refreshExpiry, familyId);
 
         log.info("Logout completed");
     }

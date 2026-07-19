@@ -17,8 +17,6 @@ public class TestDataFactory {
 
     private static final String VALID_CONTENT = """
         {
-            "title":"Test",
-            "category":"5F",
             "selectedKeywords":[],
             "selectedBuffIds":[100,201],
             "selectedGiftKeyword":"Combustion",

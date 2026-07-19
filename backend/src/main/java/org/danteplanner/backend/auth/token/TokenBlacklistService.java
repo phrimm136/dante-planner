@@ -6,14 +6,19 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
+
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
 
@@ -54,6 +59,18 @@ public class TokenBlacklistService {
 
     private static final String BLACKLIST_CHECK_SKIPPED_COUNTER = "blacklist_check_skipped_total";
 
+    private static final String LOGOUT_NOOP_KEY = "bl:__logout_noop__";
+
+    private static final String LOGOUT_REVOKE_SCRIPT =
+            "if tonumber(ARGV[2]) > 0 then redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2]) end\n"
+            + "if tonumber(ARGV[3]) > 0 then redis.call('SET', KEYS[2], ARGV[1], 'PX', ARGV[3]) end\n"
+            + "if ARGV[4] ~= '' then redis.call('HSET', KEYS[3], '"
+            + RefreshRotationService.REVOKED_FIELD + "', ARGV[4]) end\n"
+            + "return 'OK'";
+
+    private final DefaultRedisScript<String> logoutRevokeScript =
+            new DefaultRedisScript<>(LOGOUT_REVOKE_SCRIPT, String.class);
+
     /**
      * Refresh token expiry in milliseconds (injected from config).
      * Used to calculate TTL for user invalidation entries.
@@ -78,6 +95,60 @@ public class TokenBlacklistService {
         this.stringRedisTemplate = stringRedisTemplate;
         this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
         this.meterRegistry = meterRegistry;
+    }
+
+    @PostConstruct
+    void preloadLogoutRevokeScript() {
+        try {
+            stringRedisTemplate.execute((RedisCallback<String>) connection ->
+                    connection.scriptingCommands().scriptLoad(
+                            LOGOUT_REVOKE_SCRIPT.getBytes(StandardCharsets.UTF_8)));
+        } catch (DataAccessException e) {
+            log.warn("Could not preload logout revocation script; it loads on first use", e);
+        }
+    }
+
+    /**
+     * Blacklists the access and refresh tokens and revokes the refresh family in one atomic
+     * Redis round trip. A token with no remaining lifetime and an absent family are skipped
+     * inside the script; when nothing needs writing, no Redis command is issued.
+     *
+     * @param accessToken   the access token to blacklist, or null to skip
+     * @param accessExpiry  the access token's expiration, or null to skip
+     * @param refreshToken  the refresh token to blacklist, or null to skip
+     * @param refreshExpiry the refresh token's expiration, or null to skip
+     * @param familyId      the refresh family to revoke, or null to skip
+     */
+    public void revokeLogoutSession(String accessToken, Date accessExpiry,
+            String refreshToken, Date refreshExpiry, String familyId) {
+        long now = System.currentTimeMillis();
+        long accessTtl = ttlMillis(accessToken, accessExpiry, now);
+        long refreshTtl = ttlMillis(refreshToken, refreshExpiry, now);
+        boolean revokeFamily = familyId != null;
+        if (accessTtl <= 0 && refreshTtl <= 0 && !revokeFamily) {
+            return;
+        }
+
+        String value = encode(true, now);
+        String accessKey = accessTtl > 0 ? blacklistKey(accessToken) : LOGOUT_NOOP_KEY;
+        String refreshKey = refreshTtl > 0 ? blacklistKey(refreshToken) : LOGOUT_NOOP_KEY;
+        String familyKey = revokeFamily
+                ? RefreshRotationService.FAMILY_KEY_PREFIX + "{" + familyId + "}"
+                : LOGOUT_NOOP_KEY;
+
+        stringRedisTemplate.execute(logoutRevokeScript,
+                List.of(accessKey, refreshKey, familyKey),
+                value,
+                Long.toString(Math.max(accessTtl, 0)),
+                Long.toString(Math.max(refreshTtl, 0)),
+                revokeFamily ? Long.toString(now) : "");
+    }
+
+    private long ttlMillis(String token, Date expiry, long now) {
+        if (token == null || expiry == null) {
+            return 0;
+        }
+        return expiry.getTime() - now;
     }
 
     /**

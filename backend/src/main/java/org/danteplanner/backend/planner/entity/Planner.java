@@ -114,7 +114,7 @@ public class Planner {
     @JdbcTypeCode(SqlTypes.CHAR)
     private Set<String> selectedKeywords;
 
-    @Column(name = "view_count", nullable = false)
+    @Column(name = "view_count", nullable = false, updatable = false)
     @Setter
     @Builder.Default
     private Integer viewCount = 0;
