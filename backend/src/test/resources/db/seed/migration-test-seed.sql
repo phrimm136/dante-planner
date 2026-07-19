@@ -41,7 +41,8 @@ VALUES
 INSERT IGNORE INTO user_settings (user_id, sync_enabled, notify_comments, notify_recommendations, notify_new_publications)
 VALUES
     (1, TRUE, TRUE, TRUE, FALSE),
-    (2, TRUE, TRUE, TRUE, TRUE);
+    (2, TRUE, TRUE, TRUE, TRUE),
+    (3, NULL, TRUE, TRUE, FALSE);
 
 -- ============================================================================
 -- planners — exercises SET, ENUM, JSON, VARCHAR columns

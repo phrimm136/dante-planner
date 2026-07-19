@@ -14,8 +14,11 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +39,19 @@ public class PlannerPublishingService {
     private final SseService notificationSseService;
     private final NotificationService notificationService;
     private final PlannerAccessGuard accessGuard;
+    private final ApplicationEventPublisher eventPublisher;
+
+    /**
+     * Carries the publish SSE broadcast so it can be emitted only after the publishing
+     * transaction commits.
+     */
+    public record PlannerPublishedEvent(Long excludeUserId, String eventType, Map<String, Object> data) {
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onPlannerPublished(PlannerPublishedEvent event) {
+        notificationSseService.broadcastToAll(event.excludeUserId(), event.eventType(), event.data());
+    }
 
     /**
      * Toggle the published status of a planner.
@@ -89,14 +105,15 @@ public class PlannerPublishingService {
                 // Create DB notifications for users with setting enabled
                 notificationService.notifyPlannerPublished(userId, plannerId, saved.getTitle());
 
-                // Broadcast SSE to all connected users except author
+                // Broadcast SSE to all connected users except author, only after commit
                 User author = saved.getUser();
-                notificationSseService.broadcastToAll(userId, SseEventType.NOTIFY_PUBLISHED.getValue(), Map.of(
+                eventPublisher.publishEvent(new PlannerPublishedEvent(
+                        userId, SseEventType.NOTIFY_PUBLISHED.getValue(), Map.of(
                         "plannerId", plannerId.toString(),
                         "plannerTitle", saved.getTitle(),
                         "authorEpithet", author.getUsernameEpithet(),
                         "authorSuffix", author.getUsernameSuffix()
-                ));
+                )));
                 log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
             }
         }

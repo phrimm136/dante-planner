@@ -1554,15 +1554,15 @@ class PlannerControllerTest {
         }
 
         @Test
-        @DisplayName("Should increment view count on first view")
-        void getPublishedPlanner_FirstView_IncrementsViewCount() throws Exception {
+        @DisplayName("Should return the pre-request view count on first view")
+        void getPublishedPlanner_FirstView_ReturnsPreRequestViewCount() throws Exception {
             Planner planner = createPublishedPlannerWithViewCount(testUser, 5);
 
             mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
                             .header("X-Forwarded-For", "10.0.0.1")
                             .header("User-Agent", "TestBrowser/1.0"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.viewCount").value(6));
+                    .andExpect(jsonPath("$.viewCount").value(5));
         }
 
         @Test

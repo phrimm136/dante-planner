@@ -11,12 +11,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.springframework.stereotype.Service;
@@ -45,11 +43,11 @@ public class PublishedPlannerQueryService {
     private final PlannerRepository plannerRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
-    private final PlannerViewRepository plannerViewRepository;
     private final PlannerCommentRepository commentRepository;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
     private final PlannerEngagementService engagementService;
+    private final PlannerViewRecorder plannerViewRecorder;
 
     private final int recommendedThreshold;
 
@@ -57,20 +55,20 @@ public class PublishedPlannerQueryService {
             PlannerRepository plannerRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
-            PlannerViewRepository plannerViewRepository,
             PlannerCommentRepository commentRepository,
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
             PlannerEngagementService engagementService,
+            PlannerViewRecorder plannerViewRecorder,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
-        this.plannerViewRepository = plannerViewRepository;
         this.commentRepository = commentRepository;
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
         this.engagementService = engagementService;
+        this.plannerViewRecorder = plannerViewRecorder;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -352,39 +350,22 @@ public class PublishedPlannerQueryService {
      * @return the published planner detail response with content, user context, and updated view count
      * @throws PlannerNotFoundException if planner not found or not published
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public PublishedPlannerDetailResponse getPublishedPlanner(
             UUID plannerId, Long userId, String clientIp, String userAgent) {
-        // Acquire write lock upfront — consistent lock ordering prevents deadlock
-        // with concurrent view increments (planners → planner_views)
-        Planner planner = plannerRepository.findByIdForUpdate(plannerId)
+        Planner planner = plannerRepository.findById(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         if (!Boolean.TRUE.equals(planner.getPublished())) {
             throw new PlannerNotFoundException(plannerId);
         }
 
-        // Record view with daily deduplication
         String viewerHash = userId != null
                 ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
                 : ViewerHashUtil.hashForAnonymousUser(clientIp, userAgent, plannerId);
 
-        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        plannerViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
         int viewCount = planner.getViewCount();
-
-        if (!plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(plannerId, viewerHash, today)) {
-            try {
-                plannerViewRepository.save(new PlannerView(plannerId, viewerHash, today));
-                plannerRepository.incrementViewCount(plannerId);
-                viewCount = planner.getViewCount() + 1;
-                log.debug("Recorded new view for planner {} by viewer hash {}", plannerId, viewerHash.substring(0, 8));
-            } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                // Race condition: another concurrent request already inserted this view
-                log.debug("Race condition: duplicate view for planner {} - ignoring", plannerId);
-            }
-        } else {
-            log.debug("Duplicate view for planner {} by viewer hash {} on {}", plannerId, viewerHash.substring(0, 8), today);
-        }
 
         // Get comment count (excluding soft-deleted comments)
         long commentCount = commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId);

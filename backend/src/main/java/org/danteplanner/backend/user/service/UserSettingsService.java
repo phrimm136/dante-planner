@@ -23,6 +23,11 @@ public class UserSettingsService {
 
     private static final Logger log = LoggerFactory.getLogger(UserSettingsService.class);
 
+    private static final Boolean DEFAULT_SYNC_ENABLED = null;
+    private static final boolean DEFAULT_NOTIFY_COMMENTS = true;
+    private static final boolean DEFAULT_NOTIFY_RECOMMENDATIONS = true;
+    private static final boolean DEFAULT_NOTIFY_NEW_PUBLICATIONS = false;
+
     private final UserSettingsRepository userSettingsRepository;
     private final UserRepository userRepository;
 
@@ -33,10 +38,15 @@ public class UserSettingsService {
      * @param userId the user ID
      * @return the user settings response
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public UserSettingsResponse getSettings(Long userId) {
-        UserSettings settings = getOrCreateEntity(userId);
-        return UserSettingsResponse.fromEntity(settings);
+        return userSettingsRepository.findByUserId(userId)
+                .map(UserSettingsResponse::fromEntity)
+                .orElseGet(() -> new UserSettingsResponse(
+                        DEFAULT_SYNC_ENABLED,
+                        DEFAULT_NOTIFY_COMMENTS,
+                        DEFAULT_NOTIFY_RECOMMENDATIONS,
+                        DEFAULT_NOTIFY_NEW_PUBLICATIONS));
     }
 
     /**
@@ -89,10 +99,10 @@ public class UserSettingsService {
 
         UserSettings settings = UserSettings.builder()
                 .user(user)
-                .syncEnabled(null)
-                .notifyComments(true)
-                .notifyRecommendations(true)
-                .notifyNewPublications(false)
+                .syncEnabled(DEFAULT_SYNC_ENABLED)
+                .notifyComments(DEFAULT_NOTIFY_COMMENTS)
+                .notifyRecommendations(DEFAULT_NOTIFY_RECOMMENDATIONS)
+                .notifyNewPublications(DEFAULT_NOTIFY_NEW_PUBLICATIONS)
                 .build();
 
         log.info("Created default settings for user {}", userId);

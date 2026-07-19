@@ -6,7 +6,6 @@ import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -87,23 +85,11 @@ class UserSettingsServiceTest {
         }
 
         @Test
-        @DisplayName("Should create default settings for new user (lazy creation)")
-        void getSettings_newUser_createsDefaultSettings() {
+        @DisplayName("Should return default settings without persisting for a missing row")
+        void getSettings_newUser_returnsDefaultsWithoutPersisting() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.empty());
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
-
-            UserSettings savedSettings = UserSettings.builder()
-                    .user(testUser)
-                    .syncEnabled(null)
-                    .notifyComments(true)
-                    .notifyRecommendations(true)
-                    .notifyNewPublications(false)
-                    .build();
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenReturn(savedSettings);
 
             // Act
             UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
@@ -113,34 +99,25 @@ class UserSettingsServiceTest {
             assertTrue(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertFalse(result.notifyNewPublications());
-
-            // Verify save was called with default values
-            ArgumentCaptor<UserSettings> captor = ArgumentCaptor.forClass(UserSettings.class);
-            verify(userSettingsRepository).save(captor.capture());
-            UserSettings captured = captor.getValue();
-            assertNull(captured.getSyncEnabled());
-            assertTrue(captured.isNotifyComments());
-            assertTrue(captured.isNotifyRecommendations());
-            assertFalse(captured.isNotifyNewPublications());
+            verify(userSettingsRepository, never()).save(any());
         }
 
         @Test
-        @DisplayName("Should throw UserNotFoundException for non-existent user")
-        void getSettings_nonExistentUser_throwsException() {
+        @DisplayName("Should return default settings for a user with no settings row")
+        void getSettings_nonExistentUser_returnsDefaults() {
             // Arrange
             Long nonExistentId = 999L;
             when(userSettingsRepository.findByUserId(nonExistentId))
                     .thenReturn(Optional.empty());
-            when(userRepository.findById(nonExistentId))
-                    .thenReturn(Optional.empty());
 
-            // Act & Assert
-            UserNotFoundException exception = assertThrows(
-                    UserNotFoundException.class,
-                    () -> userSettingsService.getSettings(nonExistentId)
-            );
+            // Act
+            UserSettingsResponse result = userSettingsService.getSettings(nonExistentId);
 
-            assertEquals(nonExistentId, exception.getUserId());
+            // Assert
+            assertNull(result.syncEnabled());
+            assertTrue(result.notifyComments());
+            assertTrue(result.notifyRecommendations());
+            assertFalse(result.notifyNewPublications());
         }
     }
 

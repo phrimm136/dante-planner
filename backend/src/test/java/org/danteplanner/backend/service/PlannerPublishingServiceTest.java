@@ -66,6 +66,9 @@ class PlannerPublishingServiceTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     private PlannerPublishingService publishingService;
 
     private User testUser;
@@ -83,7 +86,8 @@ class PlannerPublishingServiceTest {
                 subscriptionService,
                 notificationSseService,
                 notificationService,
-                accessGuard
+                accessGuard,
+                eventPublisher
         );
 
         testUser = User.builder()

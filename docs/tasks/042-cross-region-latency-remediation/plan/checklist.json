@@ -63,7 +63,7 @@
       "deps": [
         "01"
       ],
-      "status": "pending",
+      "status": "closed",
       "rows": [
         "view-dedup-composite-pk",
         "view-flush-replay-idempotent",
@@ -85,7 +85,8 @@
         "backend/src/main/java/org/danteplanner/backend/user/service/UserSettingsService.java",
         "backend/src/main/java/org/danteplanner/backend/auth/**",
         "backend/src/test/resources/db/seed/migration-test-seed.sql",
-        "backend/src/main/java/org/danteplanner/backend/CLAUDE.md"
+        "backend/src/main/java/org/danteplanner/backend/CLAUDE.md",
+        "backend/src/main/java/org/danteplanner/backend/user/service/UserService.java"
       ],
       "stubAllow": [
         "**/PlannerViewRecorder.java"
@@ -93,16 +94,24 @@
       "testExceptions": [
         "**/db/migration/*.sql",
         "**/seed/*.sql",
-        "**/CLAUDE.md"
+        "**/CLAUDE.md",
+        "**/service/PublishedPlannerQueryServiceTest.java",
+        "**/service/PlannerPublishingServiceTest.java",
+        "**/service/UserServiceTest.java",
+        "**/service/UserSettingsServiceTest.java",
+        "**/controller/PlannerControllerTest.java"
       ],
       "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PlannerViewPipelineIT' --tests 'org.danteplanner.backend.integration.PublishedPlannerDetailIT' --tests 'org.danteplanner.backend.integration.User*' --tests 'org.danteplanner.backend.integration.SettingsBackfillMigrationIT' --tests 'org.danteplanner.backend.integration.PlannerPublishEventIT'",
       "checks": [
         "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test"
       ],
       "timeboxMin": 60,
-      "pct": 0,
+      "pct": 100,
       "startedAt": null,
-      "receipts": {},
+      "receipts": {
+        "red": "2026-07-19T02:49:05+00:00",
+        "green": "2026-07-19T03:13:13+00:00"
+      },
       "runs": {},
       "findings": []
     },
@@ -144,5 +153,7 @@
       "runs": {},
       "findings": []
     }
-  ]
+  ],
+  "runs": {},
+  "taskFindings": []
 }

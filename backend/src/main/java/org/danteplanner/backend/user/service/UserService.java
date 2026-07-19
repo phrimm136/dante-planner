@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -42,14 +43,32 @@ public class UserService {
     private final RandomUsernameGenerator usernameGenerator;
     private final EpithetConfig epithetConfig;
     private final ModerationActionRepository moderationActionRepository;
+    private final UserSettingsService userSettingsService;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
     public User findOrCreateUser(String provider, Map<String, String> userInfo) {
         AuthProviderType providerType = AuthProviderType.fromValue(provider);
         String providerId = userInfo.get("id");
 
-        return userRepository.findByProviderAndProviderId(providerType, providerId)
-                .orElseGet(() -> createUserWithUniqueUsername(providerType, userInfo));
+        Optional<User> existing = userRepository.findByProviderAndProviderId(providerType, providerId);
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+        try {
+            return transactionTemplate.execute(status -> createOrRecover(providerType, userInfo));
+        } catch (DataIntegrityViolationException | UsernameGenerationException e) {
+            // Lost the create race on uk_provider_provider_id (the username retry masks the
+            // provider-id collision as exhaustion); the winner committed, so re-look-up in a
+            // fresh transaction and converge on it.
+            return userRepository.findByProviderAndProviderId(providerType, providerId)
+                    .orElseThrow(() -> e);
+        }
+    }
+
+    private User createOrRecover(AuthProviderType providerType, Map<String, String> userInfo) {
+        User user = createUserWithUniqueUsername(providerType, userInfo);
+        userSettingsService.getOrCreateEntity(user.getId());
+        return user;
     }
 
     /**

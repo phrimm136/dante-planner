@@ -10,13 +10,12 @@ import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerViewRepository;
+import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,7 +67,7 @@ class PublishedPlannerQueryServiceTest {
     private PlannerBookmarkRepository plannerBookmarkRepository;
 
     @Mock
-    private PlannerViewRepository plannerViewRepository;
+    private PlannerViewRecorder plannerViewRecorder;
 
     @Mock
     private PlannerCommentRepository commentRepository;
@@ -108,11 +107,11 @@ class PublishedPlannerQueryServiceTest {
                 plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                plannerViewRepository,
                 commentRepository,
                 subscriptionService,
                 reportService,
                 engagementService,
+                plannerViewRecorder,
                 recommendedThreshold
         );
 
@@ -345,12 +344,8 @@ class PublishedPlannerQueryServiceTest {
         }
 
         private void mockNewView(UUID plannerId) {
-            when(plannerRepository.findByIdForUpdate(plannerId))
+            when(plannerRepository.findById(plannerId))
                     .thenReturn(Optional.of(createPublishedPlannerWithId(plannerId)));
-            when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
-                    .thenReturn(false);
-            when(plannerViewRepository.save(any(PlannerView.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
             when(commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId)).thenReturn(0L);
         }
 
@@ -370,8 +365,8 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should record view and increment count for anonymous visitor")
-        void getPublishedPlanner_NewAnonymousView_IncrementsCount() {
+        @DisplayName("Should buffer view and return pre-request count for anonymous visitor")
+        void getPublishedPlanner_NewAnonymousView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -381,14 +376,14 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
-            verify(plannerViewRepository).save(any(PlannerView.class));
-            verify(plannerRepository).incrementViewCount(plannerId);
-            assertEquals(11, result.viewCount());
+            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
+            verify(plannerRepository, never()).incrementViewCount(any());
+            assertEquals(10, result.viewCount());
         }
 
         @Test
-        @DisplayName("Should record view and increment count for authenticated visitor")
-        void getPublishedPlanner_NewAuthenticatedView_IncrementsCount() {
+        @DisplayName("Should buffer view and return pre-request count for authenticated visitor")
+        void getPublishedPlanner_NewAuthenticatedView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -399,28 +394,7 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
-            verify(plannerViewRepository).save(any(PlannerView.class));
-            verify(plannerRepository).incrementViewCount(plannerId);
-            assertEquals(11, result.viewCount());
-        }
-
-        @Test
-        @DisplayName("Should not increment count for duplicate view same day")
-        void getPublishedPlanner_DuplicateView_NoIncrement() {
-            // Arrange
-            UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdForUpdate(plannerId))
-                    .thenReturn(Optional.of(createPublishedPlannerWithId(plannerId)));
-            when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
-                    .thenReturn(true);
-            when(commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId)).thenReturn(0L);
-
-            // Act
-            PublishedPlannerDetailResponse result =
-                    publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
-
-            // Assert
-            verify(plannerViewRepository, never()).save(any());
+            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
             verify(plannerRepository, never()).incrementViewCount(any());
             assertEquals(10, result.viewCount());
         }
@@ -432,14 +406,13 @@ class PublishedPlannerQueryServiceTest {
             UUID plannerId = UUID.randomUUID();
             Planner unpublished = createTestPlanner();
             unpublished.setId(plannerId);
-            when(plannerRepository.findByIdForUpdate(plannerId)).thenReturn(Optional.of(unpublished));
+            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(unpublished));
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
                     () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
 
-            verify(plannerViewRepository, never()).existsByPlannerIdAndViewerHashAndViewDate(any(), any(), any());
-            verify(plannerViewRepository, never()).save(any());
+            verify(plannerViewRecorder, never()).record(any(), any(), any());
             verify(plannerRepository, never()).incrementViewCount(any());
         }
 
@@ -448,7 +421,7 @@ class PublishedPlannerQueryServiceTest {
         void getPublishedPlanner_PlannerNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdForUpdate(plannerId)).thenReturn(Optional.empty());
+            when(plannerRepository.findById(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
@@ -466,7 +439,7 @@ class PublishedPlannerQueryServiceTest {
             assertDoesNotThrow(() ->
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null));
 
-            verify(plannerViewRepository).save(any(PlannerView.class));
+            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
         }
 
         @Test
@@ -477,27 +450,22 @@ class PublishedPlannerQueryServiceTest {
             mockNewView(plannerId);
             mockUserContext(plannerId);
 
-            ArgumentCaptor<PlannerView> anonCaptor = ArgumentCaptor.forClass(PlannerView.class);
+            ArgumentCaptor<String> anonHash = ArgumentCaptor.forClass(String.class);
 
             // Act - anonymous first
             publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
-            verify(plannerViewRepository).save(anonCaptor.capture());
+            verify(plannerViewRecorder).record(eq(plannerId), anonHash.capture(), any());
 
-            // Reset mock for authenticated call
-            reset(plannerViewRepository);
-            when(plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(eq(plannerId), any(), any()))
-                    .thenReturn(false);
-            when(plannerViewRepository.save(any(PlannerView.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
-
-            ArgumentCaptor<PlannerView> authCaptor = ArgumentCaptor.forClass(PlannerView.class);
+            // Reset the recorder for the authenticated call
+            reset(plannerViewRecorder);
+            ArgumentCaptor<String> authHash = ArgumentCaptor.forClass(String.class);
 
             // Act - authenticated
             publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
-            verify(plannerViewRepository).save(authCaptor.capture());
+            verify(plannerViewRecorder).record(eq(plannerId), authHash.capture(), any());
 
             // Assert - hashes must differ
-            assertNotEquals(anonCaptor.getValue().getViewerHash(), authCaptor.getValue().getViewerHash());
+            assertNotEquals(anonHash.getValue(), authHash.getValue());
         }
     }
 
