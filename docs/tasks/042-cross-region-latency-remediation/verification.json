@@ -1,0 +1,123 @@
+{
+  "task": "042-cross-region-latency-remediation",
+  "generatedAt": "2026-07-19T04:25:46+00:00",
+  "rows": {
+    "met": [
+      "sort-popular-collapses-to-recent",
+      "sort-unknown-falls-back-recent",
+      "list-excludes-nonpublic",
+      "list-field-parity",
+      "takedown-unpublishes-entity",
+      "republish-blocked-while-taken-down",
+      "logout-revocations-atomic",
+      "logout-invalid-token-fast-path",
+      "resttemplate-timeouts-bounded",
+      "oolfe-maps-to-409-concurrent",
+      "counters-immune-to-entity-save",
+      "promotion-counter-registered-at-boot",
+      "view-dedup-composite-pk",
+      "view-flush-replay-idempotent",
+      "detail-read-holds-no-lock",
+      "detail-response-precedes-view-write",
+      "publish-sse-after-commit-only",
+      "settings-get-absent-row-defaults",
+      "settings-null-sync-semantics",
+      "settings-created-with-user",
+      "settings-backfill-covers-legacy",
+      "oauth-race-loser-converges",
+      "returning-login-no-insert",
+      "stats-dual-write-consistent",
+      "stats-flag-on-reads-stats",
+      "stats-flag-off-reads-legacy"
+    ],
+    "unmet": []
+  },
+  "spikes": [
+    {
+      "id": "probe-explain-composite-index",
+      "phase": "01",
+      "verdict": "alive",
+      "resolution": "amended by amend-idx-carry-taken-down-at"
+    },
+    {
+      "id": "probe-lua-evalsha-atomicity",
+      "phase": "01",
+      "verdict": "alive",
+      "resolution": ""
+    },
+    {
+      "id": "probe-stats-backfill-checksum",
+      "phase": "03",
+      "verdict": "alive",
+      "resolution": "amended by amend-stats-cutover-gate-honesty"
+    }
+  ],
+  "amendments": [
+    {
+      "id": "amend-idx-carry-taken-down-at",
+      "phase": "01",
+      "kind": "decision",
+      "origin": "spike probe-explain-composite-index (dead)",
+      "text": "Index swap DDL must carry taken_down_at before created_at: CREATE INDEX idx_v0NN_published_recent ON planners (published, deleted_at, taken_down_at, created_at, category). The ratified shape omits taken_down_at, so the count query (WHERE taken_down_at IS NULL) can never be covering \u2014 spike-verified. Corrected shape: no-category count covering, both page variants filesort-free. DROP list unchanged. Residual decision: category-filtered count stays non-covering unless a second index (published, category, deleted_at, taken_down_at) is added \u2014 cost-based optimizer choice, cannot be promised by one ordered index.",
+      "enforcement": "task-tier EXPLAIN probe re-run against migrated MySQL",
+      "status": "ratified",
+      "at": "2026-07-18T15:11:21.234758+00:00",
+      "resolution": "user ratified as filed (5-tuple); second covering index for category count dismissed; manifest decision D19"
+    },
+    {
+      "id": "amend-stats-cutover-gate-honesty",
+      "phase": "03",
+      "kind": "decision",
+      "origin": "spike probe-stats-backfill-checksum (dead)",
+      "text": "Three coupled changes before phase 03: (1) replace the mechanics \u00a75 INNER JOIN reconciliation with LEFT JOIN + IS NULL predicate (or pair it with a count-parity assertion) \u2014 the INNER JOIN reports false-clean when a planner lacks a stats row, and \u00a75 is the cutover flip gate; (2) enforce the invariant every planner has a planner_stats row: create the stats row in the planner-creation transaction OR make dual-write increments INSERT ... ON DUPLICATE KEY UPDATE \u2014 mechanics \u00a73 covers only the increment path; (3) pin the backfill to the unfiltered form (no WHERE published). Fixing only (1) leaves the gate dirty forever; fixing only (2) trusts upstream perfection. Happy-path backfill and dual-write mechanics spike-verified sound.",
+      "enforcement": "stats-dual-write-consistent row + reconciliation checksum in SettingsBackfillMigrationIT-style migration test",
+      "status": "ratified",
+      "at": "2026-07-18T15:11:21.234758+00:00",
+      "resolution": "user ratified with mechanism A only (creation-transaction insert, both PlannerCommandService sites) + unfiltered backfill; upsert hardening declined; manifest decision D20"
+    },
+    {
+      "id": "amend-01-conflict-reason-scope",
+      "phase": "01",
+      "kind": "touch-scope",
+      "origin": "green-leg discovery: stale-client-409-reason",
+      "text": "D14 replaces the single SYNC_CONFLICT 409 code with a reason discriminator STALE_CLIENT|CONCURRENT_WRITE. CONCURRENT_WRITE is a new ObjectOptimisticLockingFailureException handler in GlobalExceptionHandler (in scope). STALE_CLIENT requires PlannerConflictException to map to STALE_CLIENT instead of SYNC_CONFLICT. The existing PlannerControllerTest#updatePlanner_VersionMismatch_Returns409 (client version 999, ahead of server) asserts code=SYNC_CONFLICT and runs in the close-gate full suite; it is not in phase-01 scope. No in-scope-only change satisfies both the new stale row and that existing test. Proposed: add backend/src/test/java/org/danteplanner/backend/controller/PlannerControllerTest.java to phase-01 testExceptions so its one assertion updates SYNC_CONFLICT->STALE_CLIENT (serverVersion assertion unchanged).",
+      "enforcement": "green-gate re-run with PlannerControllerTest in testExceptions; close-gate full suite green",
+      "status": "resolved-defer",
+      "at": "2026-07-19T00:07:12.057460+00:00",
+      "resolution": "User rejected the touch-scope expansion; deferred stale-client-409-reason. CONCURRENT_WRITE (oolfe row) implemented in-scope; SYNC_CONFLICT public code left intact."
+    },
+    {
+      "id": "amend-02-user-resolution-touch",
+      "phase": "02",
+      "kind": "touch-scope",
+      "origin": "green-leg: settings-created-with-user + oauth-race-loser-converges drive UserService.findOrCreateUser",
+      "text": "The two ratified user-resolution rows drive userService.findOrCreateUser (the user-creation entry the tests call), but UserService.java was omitted from phase-02 touches (which lists UserSettingsService and auth/**). Add backend/src/main/java/org/danteplanner/backend/user/service/UserService.java to phase-02 touches so the resolution refactor (atomic user+settings creation; fresh-transaction retry on the uk_provider_provider_id duplicate-key race) can land. Touch-map completion for already-ratified rows, not a new feature.",
+      "enforcement": "green-gate + close-gate over the two rows",
+      "status": "ratified",
+      "at": "2026-07-19T03:05:13+00:00"
+    },
+    {
+      "id": "amend-03-stats-flag-stub",
+      "phase": "03",
+      "kind": "stub-allow",
+      "origin": "green-leg: flag-gated read rows need a runtime-mutable flag the test flips",
+      "text": "The flag-on/flag-off read rows live in one test class (PlannerStatsCutoverIT) and must exercise both states, so the flag must be runtime-mutable (seeded from planner.stats.reads-enabled, flippable via setEnabled), matching the LineageRotationFlag exemplar. Add **/StatsReadsFlag.java to phase-03 stubAllow so the flag component (in planner/service, already in touches) can be created during the red window for the tests to reference.",
+      "enforcement": "green-gate over the two flag rows",
+      "status": "ratified",
+      "at": "2026-07-19T03:34:36+00:00"
+    }
+  ],
+  "taskLevel": [
+    {
+      "id": "R11",
+      "attested": true
+    }
+  ],
+  "openBlockers": [],
+  "deepSet": null,
+  "deferredCount": 0,
+  "exceptions": [
+    "deep set never ran at HEAD (collect --kick <HEAD>)"
+  ],
+  "verdict": "fail"
+}

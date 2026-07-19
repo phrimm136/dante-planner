@@ -1,0 +1,96 @@
+{
+  "task": "040-fe-lighthouse-performance-remediation",
+  "generatedAt": "2026-07-19T06:35:12+00:00",
+  "rows": {
+    "met": [],
+    "unmet": [
+      "harness-selftest-reproduces-baseline",
+      "harness-deps-isolated",
+      "eager-set-within-budget",
+      "shared-no-pages-import",
+      "sse-single-auth-gated-subscription",
+      "sync-dialog-first-login",
+      "settings-query-nonblocking",
+      "gesellschaft-loader-prefetch-contract",
+      "globals-references-subset-css",
+      "fonts-byte-unchanged",
+      "thumbnails-emitted-and-sized",
+      "shared-assets-resolves-thumb",
+      "grid-cards-consume-thumb",
+      "abevent-card-lazy-async",
+      "themepack-card-lazy-async",
+      "home-async-section-skeleton-fixed-height",
+      "readonly-note-renders-without-editor-mount",
+      "router-preload-intent",
+      "plan-detail-shell-first",
+      "grid-skeleton-count-from-pagesize",
+      "deck-fallback-uses-card-dimensions",
+      "planner-card-constant-single-source",
+      "mobile-budgets-met",
+      "plan-content-p50-improved"
+    ]
+  },
+  "spikes": [
+    {
+      "id": "probe-harness-env",
+      "phase": "01",
+      "verdict": "alive",
+      "resolution": ""
+    },
+    {
+      "id": "probe-thumbnail-resize",
+      "phase": "04",
+      "verdict": "alive",
+      "resolution": ""
+    },
+    {
+      "id": "probe-full-stack-measure",
+      "phase": "09",
+      "verdict": "alive",
+      "resolution": ""
+    }
+  ],
+  "amendments": [],
+  "taskLevel": [
+    {
+      "id": "INV8",
+      "attested": false
+    },
+    {
+      "id": "INV11",
+      "attested": false
+    }
+  ],
+  "openBlockers": [],
+  "deepSet": null,
+  "deferredCount": 0,
+  "exceptions": [
+    "row harness-selftest-reproduces-baseline (phase 01): receipts []",
+    "row harness-deps-isolated (phase 01): receipts []",
+    "row eager-set-within-budget (phase 02): receipts []",
+    "row shared-no-pages-import (phase 02): receipts []",
+    "row sse-single-auth-gated-subscription (phase 02): receipts []",
+    "row sync-dialog-first-login (phase 02): receipts []",
+    "row settings-query-nonblocking (phase 02): receipts []",
+    "row gesellschaft-loader-prefetch-contract (phase 02): receipts []",
+    "row globals-references-subset-css (phase 03): receipts []",
+    "row fonts-byte-unchanged (phase 03): receipts []",
+    "row thumbnails-emitted-and-sized (phase 04): receipts []",
+    "row shared-assets-resolves-thumb (phase 04): receipts []",
+    "row grid-cards-consume-thumb (phase 04): receipts []",
+    "row abevent-card-lazy-async (phase 05): receipts []",
+    "row themepack-card-lazy-async (phase 05): receipts []",
+    "row home-async-section-skeleton-fixed-height (phase 06): receipts []",
+    "row readonly-note-renders-without-editor-mount (phase 07): receipts []",
+    "row router-preload-intent (phase 08): receipts []",
+    "row plan-detail-shell-first (phase 08): receipts []",
+    "row grid-skeleton-count-from-pagesize (phase 08): receipts []",
+    "row deck-fallback-uses-card-dimensions (phase 08): receipts []",
+    "row planner-card-constant-single-source (phase 08): receipts []",
+    "row mobile-budgets-met (phase 09): receipts []",
+    "row plan-content-p50-improved (phase 09): receipts []",
+    "taskLevel INV8: no attest receipt (record via join --attest)",
+    "taskLevel INV11: no attest receipt (record via join --attest)"
+  ],
+  "verdict": "fail"
+}

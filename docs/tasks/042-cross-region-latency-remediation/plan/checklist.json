@@ -163,6 +163,31 @@
       "findings": []
     }
   ],
-  "runs": {},
+  "runs": {
+    "deepSet": {
+      "head": "7f2d674588c8adccd807bf862108f87c0cb3acac",
+      "verdict": "fail",
+      "failed": [
+        "org.danteplanner.backend.controller.PlannerControllerTest$CreatePlannerTests#Should return 201 when creating planner with valid data",
+        "org.danteplanner.backend.controller.PlannerControllerTest$EdgeCaseTests#Content well under 50KB should succeed",
+        "org.danteplanner.backend.controller.PlannerControllerTest$EdgeCaseTests#Creating 100th planner should succeed",
+        "org.danteplanner.backend.controller.PlannerControllerTest$EdgeCaseTests#Deleted planners should not count toward limit",
+        "org.danteplanner.backend.controller.PlannerControllerTest$ImportPlannersTests#Should return 201 when importing planners within limit",
+        "org.danteplanner.backend.controller.PlannerControllerTest$TogglePublishTests#Should return 200 when owner toggles publish status",
+        "org.danteplanner.backend.controller.PlannerControllerTest$UpdatePlannerTests#Should increment syncVersion on successful update",
+        "org.danteplanner.backend.controller.PlannerControllerTest$UpdatePlannerTests#Should persist updated contentVersion on upsert update",
+        "org.danteplanner.backend.converter.KeywordParityTest#VALID_KEYWORDS equals the FE plannerKeywords.json id set",
+        "org.danteplanner.backend.integration.CausalGateIT#Author write sets a GTID cookie; the cookie-bearing read routes to the fresh primary while the replica lags, then serves the replica and clears the cookie once caught up",
+        "org.danteplanner.backend.integration.DegradationIT#INV5: primary DB cut \u2192 readiness stays UP, write returns WRITE_TEMPORARILY_UNAVAILABLE, list read still serves the replica",
+        "org.danteplanner.backend.integration.HibernateInsertBatchingIT#importPlanners: prepared-statement count is bounded, not one INSERT per row",
+        "org.danteplanner.backend.integration.PlannerPublishEventIT#publish_WhenRolledBack_EmitsNoSseEvent",
+        "org.danteplanner.backend.integration.PlannerUpsertConflictIT#upsert_WhenConcurrent_Yields409ConcurrentWrite",
+        "org.danteplanner.backend.integration.RedisConnectionRecoveryIT#Rate-limit Redis restored: the typed 503 gives way to normal request handling"
+      ],
+      "analyzer": [],
+      "coverage": null,
+      "at": "2026-07-19T04:53:48+00:00"
+    }
+  },
   "taskFindings": []
 }

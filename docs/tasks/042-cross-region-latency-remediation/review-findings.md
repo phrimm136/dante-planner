@@ -35,8 +35,9 @@ plus a follow-up fix commit. Security lane verdict: ACCEPTABLE (no new exploitab
 - **REL-1 residual:** a transient DB error mid-flush still loses the drained batch (buffer cleared
   before commit). Fully robust fix = re-queue on rollback via `TransactionSynchronization`; new
   untested behavior, warrants its own row.
-- **PERF-2 (performance):** `flush()` is O(n) round trips per buffered view; batchable
-  (`existsBy...In` / batch save / aggregated increments). Not a correctness issue.
+- **PERF-2 (performance) — FIXED (10615b8d, tested 31b8a539):** the flush now issues one multi-row
+  `INSERT IGNORE` per planner and one delta increment per store, and the flush window dropped to
+  500ms. Was: O(n) round trips per buffered view.
 - **ARCH-2 (architecture, ACCEPTABLE):** `StatsReadsFlag` lives in `planner/service` with no runtime
   toggle endpoint (only env-seeded + test `setEnabled`); the exemplar `LineageRotationFlag` has an
   internal toggle. Either wire a toggle or drop the AtomicBoolean pretense; move to `planner/config`.
