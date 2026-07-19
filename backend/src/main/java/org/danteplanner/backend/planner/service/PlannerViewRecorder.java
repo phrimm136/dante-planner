@@ -12,6 +12,7 @@ import org.danteplanner.backend.planner.entity.PlannerViewId;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class PlannerViewRecorder {
+
+    private static final long FLUSH_INTERVAL_MS = 5_000;
 
     private final PlannerRepository plannerRepository;
     private final PlannerViewRepository plannerViewRepository;
@@ -37,6 +40,7 @@ public class PlannerViewRecorder {
         buffer.add(new PlannerViewId(plannerId, viewerHash, viewDate));
     }
 
+    @Scheduled(fixedDelay = FLUSH_INTERVAL_MS)
     @Transactional
     public void flush() {
         Set<PlannerViewId> drained = new LinkedHashSet<>(List.copyOf(buffer));
