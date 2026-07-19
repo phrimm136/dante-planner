@@ -81,6 +81,12 @@ class PublishedPlannerQueryServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.service.StatsReadsFlag statsReadsFlag;
+
     private PlannerEngagementService engagementService;
     private PublishedPlannerQueryService publishedQueryService;
 
@@ -99,6 +105,7 @@ class PublishedPlannerQueryServiceTest {
                 plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
+                plannerStatsRepository,
                 eventPublisher,
                 recommendedThreshold
         );
@@ -112,6 +119,8 @@ class PublishedPlannerQueryServiceTest {
                 reportService,
                 engagementService,
                 plannerViewRecorder,
+                plannerStatsRepository,
+                statsReadsFlag,
                 recommendedThreshold
         );
 

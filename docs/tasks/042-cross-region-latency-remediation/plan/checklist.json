@@ -121,7 +121,7 @@
       "deps": [
         "02"
       ],
-      "status": "pending",
+      "status": "closed",
       "rows": [
         "stats-dual-write-consistent",
         "stats-flag-on-reads-stats",
@@ -131,25 +131,34 @@
         "backend/src/main/java/org/danteplanner/backend/planner/service/**",
         "backend/src/test/resources/db/seed/migration-test-seed.sql",
         "deploy/overlays/oregon/configmap-patch.yaml",
-        "deploy/overlays/seoul/configmap-patch.yaml"
+        "deploy/overlays/seoul/configmap-patch.yaml",
+        "backend/src/main/resources/db/migration/**",
+        "backend/src/main/java/org/danteplanner/backend/planner/entity/PlannerStats.java",
+        "backend/src/main/java/org/danteplanner/backend/planner/repository/PlannerStatsRepository.java"
       ],
       "stubAllow": [
         "**/PlannerStats.java",
-        "**/PlannerStatsRepository.java"
+        "**/PlannerStatsRepository.java",
+        "**/StatsReadsFlag.java"
       ],
       "testExceptions": [
         "**/db/migration/*.sql",
         "**/seed/*.sql",
-        "deploy/overlays/**"
+        "deploy/overlays/**",
+        "**/service/PublishedPlannerQueryServiceTest.java",
+        "**/service/PlannerEngagementServiceTest.java"
       ],
       "validation": "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test --tests 'org.danteplanner.backend.integration.PlannerStats*'",
       "checks": [
         "/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test"
       ],
       "timeboxMin": 45,
-      "pct": 0,
-      "startedAt": null,
-      "receipts": {},
+      "pct": 100,
+      "startedAt": "2026-07-19T03:32:01.724534+00:00",
+      "receipts": {
+        "red": "2026-07-19T03:58:09+00:00",
+        "green": "2026-07-19T03:59:42+00:00"
+      },
       "runs": {},
       "findings": []
     }

@@ -17,6 +17,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ public class PlannerEngagementService {
     private final PlannerRepository plannerRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
+    private final PlannerStatsRepository plannerStatsRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     private final int recommendedThreshold;
@@ -42,11 +44,13 @@ public class PlannerEngagementService {
             PlannerRepository plannerRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
+            PlannerStatsRepository plannerStatsRepository,
             ApplicationEventPublisher eventPublisher,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
+        this.plannerStatsRepository = plannerStatsRepository;
         this.eventPublisher = eventPublisher;
         this.recommendedThreshold = recommendedThreshold;
     }
@@ -97,6 +101,7 @@ public class PlannerEngagementService {
 
         // Atomic increment for upvote
         plannerRepository.incrementUpvotes(plannerId);
+        plannerStatsRepository.incrementUpvotes(plannerId);
 
         // Re-fetch planner to get updated counts after atomic increment
         Planner updatedPlanner = plannerRepository.findById(plannerId)

@@ -30,3 +30,6 @@ data:
   DATASOURCE_ROUTING_ENABLED: "true"
   DATASOURCE_REPLICA_ENABLED: "true"
   MYSQL_REPLICA_HOST: mysql-replica.seoul.danteplanner.internal
+  # Serve planner counter reads from planner_stats. Stays false until the
+  # reconciliation checksum is clean; the flip is a post-merge overlay edit.
+  PLANNER_STATS_READS_ENABLED: "false"

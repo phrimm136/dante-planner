@@ -19,6 +19,9 @@ data:
   # to a dead localhost (same relaxed-binding trap as auth-local) and silently
   # kills the Redis subscribe path. Seoul repoints this at the local replica.
   REDIS_SSELOCAL_HOST: redis-auth.danteplanner.svc.cluster.local
+  # Serve planner counter reads from planner_stats. Stays false until the
+  # reconciliation checksum is clean; the flip is a post-merge overlay edit.
+  PLANNER_STATS_READS_ENABLED: "false"
   # DB connection (MYSQL_HOST/DATABASE/USER/PASSWORD) + SENTRY_DSN come from the
   # backend-runtime-config Secrets Manager bundle (runtime-config.yaml), not here —
   # environment-specific and secret values stay out of the committed overlay.

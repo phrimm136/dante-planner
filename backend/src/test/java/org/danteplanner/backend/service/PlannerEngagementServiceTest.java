@@ -53,6 +53,9 @@ class PlannerEngagementServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+
     private PlannerEngagementService engagementService;
 
     @Value("${planner.recommended-threshold}")
@@ -68,6 +71,7 @@ class PlannerEngagementServiceTest {
                 plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
+                plannerStatsRepository,
                 eventPublisher,
                 recommendedThreshold
         );

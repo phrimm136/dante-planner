@@ -12,9 +12,11 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,8 @@ public class PublishedPlannerQueryService {
     private final PlannerReportService reportService;
     private final PlannerEngagementService engagementService;
     private final PlannerViewRecorder plannerViewRecorder;
+    private final PlannerStatsRepository plannerStatsRepository;
+    private final StatsReadsFlag statsReadsFlag;
 
     private final int recommendedThreshold;
 
@@ -60,6 +64,8 @@ public class PublishedPlannerQueryService {
             PlannerReportService reportService,
             PlannerEngagementService engagementService,
             PlannerViewRecorder plannerViewRecorder,
+            PlannerStatsRepository plannerStatsRepository,
+            StatsReadsFlag statsReadsFlag,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
@@ -69,6 +75,8 @@ public class PublishedPlannerQueryService {
         this.reportService = reportService;
         this.engagementService = engagementService;
         this.plannerViewRecorder = plannerViewRecorder;
+        this.plannerStatsRepository = plannerStatsRepository;
+        this.statsReadsFlag = statsReadsFlag;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -365,7 +373,11 @@ public class PublishedPlannerQueryService {
                 : ViewerHashUtil.hashForAnonymousUser(clientIp, userAgent, plannerId);
 
         plannerViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
-        int viewCount = planner.getViewCount();
+        int viewCount = statsReadsFlag.isEnabled()
+                ? plannerStatsRepository.findById(plannerId)
+                        .map(PlannerStats::getViewCount)
+                        .orElseGet(planner::getViewCount)
+                : planner.getViewCount();
 
         // Get comment count (excluding soft-deleted comments)
         long commentCount = commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId);

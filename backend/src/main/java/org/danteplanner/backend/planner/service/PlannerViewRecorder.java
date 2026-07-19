@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.planner.entity.PlannerViewId;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,12 +29,15 @@ public class PlannerViewRecorder {
 
     private final PlannerRepository plannerRepository;
     private final PlannerViewRepository plannerViewRepository;
+    private final PlannerStatsRepository plannerStatsRepository;
     private final List<PlannerViewId> buffer = new CopyOnWriteArrayList<>();
 
     public PlannerViewRecorder(PlannerRepository plannerRepository,
-            PlannerViewRepository plannerViewRepository) {
+            PlannerViewRepository plannerViewRepository,
+            PlannerStatsRepository plannerStatsRepository) {
         this.plannerRepository = plannerRepository;
         this.plannerViewRepository = plannerViewRepository;
+        this.plannerStatsRepository = plannerStatsRepository;
     }
 
     public void record(UUID plannerId, String viewerHash, LocalDate viewDate) {
@@ -54,6 +58,7 @@ public class PlannerViewRecorder {
                 plannerViewRepository.save(
                         new PlannerView(id.getPlannerId(), id.getViewerHash(), id.getViewDate()));
                 plannerRepository.incrementViewCount(id.getPlannerId());
+                plannerStatsRepository.incrementViewCount(id.getPlannerId());
             } catch (DataIntegrityViolationException e) {
                 // A concurrent flush already inserted this view; the counter stays consistent.
             }
