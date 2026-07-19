@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -132,9 +133,16 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
                 MockHttpServletResponse ra = a.get(10, TimeUnit.SECONDS);
                 MockHttpServletResponse rb = b.get(10, TimeUnit.SECONDS);
                 MockHttpServletResponse loser = pickLoser(ra, rb);
-                if (loser != null) {
-                    return loser;
+                if (loser == null) {
+                    continue;
                 }
+                // InnoDB can resolve the same-row collision as a deadlock (503 DEADLOCK)
+                // instead of letting the loser reach the @Version check (409). The deadlock
+                // is a retryable transient, not the conflict under test, so race again.
+                if (loser.getStatus() == HttpStatus.SERVICE_UNAVAILABLE.value()) {
+                    continue;
+                }
+                return loser;
             }
             throw new AssertionError("no version-race conflict observed after 60 attempts");
         } finally {
