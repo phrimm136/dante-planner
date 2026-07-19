@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Runtime-mutable feature flag gating whether planner counter fields are served from the
- * new {@code planner_stats} store instead of the legacy {@code planners} columns.
+ * Runtime-mutable feature flag gating whether the published-planner detail view count is served
+ * from the new {@code planner_stats} store instead of the legacy {@code planners.view_count}
+ * column. Other counter reads (upvotes, the list/search paths) remain on the legacy columns
+ * until later cutover steps.
  *
  * <p>Seeded at startup from {@code planner.stats.reads-enabled} (env
  * {@code PLANNER_STATS_READS_ENABLED}, default {@code false}) and backed by an

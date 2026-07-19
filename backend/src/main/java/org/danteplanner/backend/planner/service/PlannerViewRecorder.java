@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -7,12 +8,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.planner.entity.PlannerViewId;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,20 +46,14 @@ public class PlannerViewRecorder {
     @Scheduled(fixedDelay = FLUSH_INTERVAL_MS)
     @Transactional
     public void flush() {
-        Set<PlannerViewId> drained = new LinkedHashSet<>(List.copyOf(buffer));
-        buffer.clear();
+        Set<PlannerViewId> drained = new LinkedHashSet<>(buffer);
+        buffer.removeAll(drained);
         for (PlannerViewId id : drained) {
-            if (plannerViewRepository.existsByPlannerIdAndViewerHashAndViewDate(
-                    id.getPlannerId(), id.getViewerHash(), id.getViewDate())) {
-                continue;
-            }
-            try {
-                plannerViewRepository.save(
-                        new PlannerView(id.getPlannerId(), id.getViewerHash(), id.getViewDate()));
+            int inserted = plannerViewRepository.insertIgnore(
+                    id.getPlannerId(), id.getViewerHash(), id.getViewDate(), Instant.now());
+            if (inserted > 0) {
                 plannerRepository.incrementViewCount(id.getPlannerId());
                 plannerStatsRepository.incrementViewCount(id.getPlannerId());
-            } catch (DataIntegrityViolationException e) {
-                // A concurrent flush already inserted this view; the counter stays consistent.
             }
         }
     }

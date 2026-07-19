@@ -58,10 +58,12 @@ public class UserService {
             return transactionTemplate.execute(status -> createOrRecover(providerType, userInfo));
         } catch (DataIntegrityViolationException | UsernameGenerationException e) {
             // Lost the create race on uk_provider_provider_id (the username retry masks the
-            // provider-id collision as exhaustion); the winner committed, so re-look-up in a
-            // fresh transaction and converge on it.
-            return userRepository.findByProviderAndProviderId(providerType, providerId)
-                    .orElseThrow(() -> e);
+            // provider-id collision as exhaustion). The winner committed on the primary, so the
+            // recovery re-lookup must run read-write to route there — a bare finder is readOnly
+            // and would hit a replica that may not have caught up yet.
+            return transactionTemplate.execute(status ->
+                    userRepository.findByProviderAndProviderId(providerType, providerId)
+                            .orElseThrow(() -> e));
         }
     }
 

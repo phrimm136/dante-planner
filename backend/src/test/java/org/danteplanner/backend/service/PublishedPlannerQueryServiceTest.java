@@ -174,7 +174,7 @@ class PublishedPlannerQueryServiceTest {
             );
             Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable))
+            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable))
                     .thenReturn(plannerPage);
 
             // Act
@@ -194,7 +194,7 @@ class PublishedPlannerQueryServiceTest {
             List<Planner> planners = List.of(createPublishedPlanner("F5 Planner"));
             Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
 
-            when(plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable))
+            when(plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(category, pageable))
                     .thenReturn(plannerPage);
 
             // Act
@@ -202,7 +202,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+            verify(plannerRepository).findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(category, pageable);
         }
 
         @Test
@@ -212,7 +212,7 @@ class PublishedPlannerQueryServiceTest {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable))
+            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable))
                     .thenReturn(emptyPage);
 
             // Act
@@ -490,7 +490,7 @@ class PublishedPlannerQueryServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
             Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable)).thenReturn(plannerPage);
+            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable)).thenReturn(plannerPage);
             when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
@@ -499,7 +499,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findByPublishedTrueAndDeletedAtIsNull(pageable);
+            verify(plannerRepository).findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable);
         }
     }
 

@@ -91,9 +91,9 @@ public class PublishedPlannerQueryService {
     public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category) {
         Page<Planner> planners;
         if (category == null) {
-            planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
+            planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable);
         } else {
-            planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+            planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(category, pageable);
         }
         return planners.map(PublicPlannerResponse::fromEntity);
     }
@@ -155,9 +155,9 @@ public class PublishedPlannerQueryService {
             }
         } else {
             if (category == null) {
-                planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNull(pageable);
+                planners = plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable);
             } else {
-                planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNull(category, pageable);
+                planners = plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(category, pageable);
             }
         }
 
@@ -346,16 +346,17 @@ public class PublishedPlannerQueryService {
     /**
      * Get a single published planner with full content, user context, and view recording.
      *
-     * <p>Records a view in the same transaction using daily deduplication:
-     * same viewer (by userId or IP+UA hash) counts at most once per UTC day.
-     * The response reflects the already-updated view count so no follow-up
-     * refetch is needed by the caller.</p>
+     * <p>Buffers a view for asynchronous recording with daily deduplication:
+     * same viewer (by userId or IP+UA hash) counts at most once per UTC day,
+     * applied when the buffer flushes. The response carries the view count as of
+     * this request (from {@code planner_stats} when the stats-read flag is on,
+     * else the legacy column), so the just-buffered view is not yet reflected.</p>
      *
      * @param plannerId the planner ID
      * @param userId    optional user ID for vote/bookmark/subscription context (null for anonymous)
      * @param clientIp  viewer's IP address (used for anonymous deduplication)
      * @param userAgent viewer's User-Agent header (used for anonymous deduplication)
-     * @return the published planner detail response with content, user context, and updated view count
+     * @return the published planner detail response with content, user context, and current view count
      * @throws PlannerNotFoundException if planner not found or not published
      */
     @Transactional(readOnly = true)

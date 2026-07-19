@@ -65,7 +65,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID>, JpaSpec
      * @return page of published planners
      */
     @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByPublishedTrueAndDeletedAtIsNull(Pageable pageable);
+    Page<Planner> findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(Pageable pageable);
 
     /**
      * Find published non-deleted planners filtered by category.
@@ -76,7 +76,7 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID>, JpaSpec
      * @return page of published planners in the specified category
      */
     @EntityGraph(attributePaths = {"user"})
-    Page<Planner> findByPublishedTrueAndCategoryAndDeletedAtIsNull(String category, Pageable pageable);
+    Page<Planner> findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(String category, Pageable pageable);
 
     /**
      * Find recommended planners (net votes >= threshold), all categories.
