@@ -16,9 +16,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mysql.MySQLContainer;
 
 import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
@@ -36,30 +33,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
-@Testcontainers
 @Tag("containerized")
 @Import(TestConfig.class)
-class UserResolutionIT {
-
-    @Container
-    static MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withCommand(
-                    "--innodb-flush-log-at-trx-commit=0",
-                    "--sync-binlog=0",
-                    "--performance-schema=OFF",
-                    "--skip-name-resolve");
+class UserResolutionIT extends SharedMySqlContainerSupport {
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        registry.add("spring.flyway.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", mysqlContainer::getUsername);
-        registry.add("spring.flyway.password", mysqlContainer::getPassword);
+        registerSharedMysql(registry, "user_resolution_it");
     }
 
     @Autowired

@@ -24,9 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mysql.MySQLContainer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -39,30 +36,13 @@ import static org.mockito.Mockito.verify;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
-@Testcontainers
 @Tag("containerized")
 @Import({TestConfig.class, PlannerPublishEventIT.CountingSseConfig.class})
-class PlannerPublishEventIT {
-
-    @Container
-    static MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withCommand(
-                    "--innodb-flush-log-at-trx-commit=0",
-                    "--sync-binlog=0",
-                    "--performance-schema=OFF",
-                    "--skip-name-resolve");
+class PlannerPublishEventIT extends SharedMySqlContainerSupport {
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        registry.add("spring.flyway.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", mysqlContainer::getUsername);
-        registry.add("spring.flyway.password", mysqlContainer::getPassword);
+        registerSharedMysql(registry, "planner_publish_event_it");
     }
 
     @TestConfiguration

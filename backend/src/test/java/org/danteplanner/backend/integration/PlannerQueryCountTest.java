@@ -32,9 +32,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mysql.MySQLContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,10 +55,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
-@Testcontainers
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerQueryCountTest {
+class PlannerQueryCountTest extends SharedMySqlContainerSupport {
 
     private static final int SMALL_SET = 3;
     private static final int LARGE_SET = 8;
@@ -70,27 +66,9 @@ class PlannerQueryCountTest {
     // N+1 only.
     private static final Pageable PAGE = PageRequest.of(0, 20);
 
-    // Relaxed durability and no performance_schema: a throwaway test database needs no
-    // crash-safety — the flags cut boot time and per-instance memory.
-    @Container
-    static MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withCommand(
-                    "--innodb-flush-log-at-trx-commit=0",
-                    "--sync-binlog=0",
-                    "--performance-schema=OFF",
-                    "--skip-name-resolve");
-
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        registry.add("spring.flyway.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", mysqlContainer::getUsername);
-        registry.add("spring.flyway.password", mysqlContainer::getPassword);
+        registerSharedMysql(registry, "planner_query_count_test");
         // Enable Hibernate statistics so getPrepareStatementCount() reflects real SQL issued.
         registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");
         registry.add("logging.level.org.hibernate.SQL", () -> "DEBUG");

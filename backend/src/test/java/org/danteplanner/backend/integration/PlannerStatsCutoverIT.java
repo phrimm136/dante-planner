@@ -21,9 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.mysql.MySQLContainer;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,33 +33,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
-@Testcontainers
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerStatsCutoverIT {
+class PlannerStatsCutoverIT extends SharedMySqlContainerSupport {
 
     private static final int LEGACY_VIEWS = 5;
     private static final int STATS_VIEWS = 99;
 
-    @Container
-    static MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withCommand(
-                    "--innodb-flush-log-at-trx-commit=0",
-                    "--sync-binlog=0",
-                    "--performance-schema=OFF",
-                    "--skip-name-resolve");
-
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        registry.add("spring.flyway.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", mysqlContainer::getUsername);
-        registry.add("spring.flyway.password", mysqlContainer::getPassword);
+        registerSharedMysql(registry, "planner_stats_cutover_it");
     }
 
     @Autowired

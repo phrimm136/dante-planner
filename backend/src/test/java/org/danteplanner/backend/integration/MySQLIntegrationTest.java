@@ -32,9 +32,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.mysql.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -69,34 +66,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
-@Testcontainers
 @Tag("containerized")
 @Import(TestConfig.class)
-class MySQLIntegrationTest {
-
-    // Relaxed durability and no performance_schema: a throwaway test database needs no
-    // crash-safety — the flags cut boot time and per-instance memory.
-    @Container
-    static MySQLContainer mysqlContainer = new MySQLContainer("mysql:8.0")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withCommand(
-                    "--innodb-flush-log-at-trx-commit=0",
-                    "--sync-binlog=0",
-                    "--performance-schema=OFF",
-                    "--skip-name-resolve");
+class MySQLIntegrationTest extends SharedMySqlContainerSupport {
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mysqlContainer::getUsername);
-        registry.add("spring.datasource.password", mysqlContainer::getPassword);
-        // Flyway has explicit url/user/password in application.properties; without
-        // pointing them at the container it connects to the production DB and fails.
-        registry.add("spring.flyway.url", mysqlContainer::getJdbcUrl);
-        registry.add("spring.flyway.user", mysqlContainer::getUsername);
-        registry.add("spring.flyway.password", mysqlContainer::getPassword);
+        registerSharedMysql(registry, "mysql_integration_test");
     }
 
     @Autowired

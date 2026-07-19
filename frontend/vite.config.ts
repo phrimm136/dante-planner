@@ -12,6 +12,14 @@ const STATIC_WHITELIST = ['images', 'data', 'i18n']
 // Well-known files that must be served at stable root paths, outside the hashed pipeline
 const STATIC_ROOT_FILES = ['sitemap.xml', 'robots.txt', 'favicon.ico', '_headers']
 
+// Mount real Tiptap/ProseMirror editors, which need jsdom's fuller Range/Selection/
+// contenteditable support — run in the src-editor project, not under happy-dom
+const EDITOR_TESTS = [
+  'src/shared/noteEditor/**/__tests__/**',
+  'src/pages/planner/__tests__/PlannerMDEditPage.test.tsx',
+  'src/pages/planner/components/planner/__tests__/PlannerMDEditorContent.test.tsx',
+]
+
 function serveWhitelistedStatic(): Plugin {
   return {
     name: 'serve-whitelisted-static',
@@ -62,7 +70,7 @@ function staticFile404Plugin(): Plugin {
         const url = req.url ?? ''
         // Check if request is for a static file (images, data, i18n)
         const staticPrefixes = ['/images/', '/data/', '/i18n/']
-        const isStaticRequest = staticPrefixes.some(prefix => url.startsWith(prefix))
+        const isStaticRequest = staticPrefixes.some((prefix) => url.startsWith(prefix))
         if (isStaticRequest && !url.includes('?')) {
           const filePath = path.resolve(__dirname, '../static', url.slice(1))
           if (!fs.existsSync(filePath)) {
@@ -85,8 +93,8 @@ export default defineConfig({
     hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
     react({
       babel: {
-        plugins: ['babel-plugin-react-compiler']
-      }
+        plugins: ['babel-plugin-react-compiler'],
+      },
     }),
     tailwindcss(),
   ],
@@ -128,7 +136,10 @@ export default defineConfig({
             { name: 'react-vendor', test: /node_modules\/(react-dom|react)\// },
             { name: 'tanstack', test: /node_modules\/@tanstack\/(react-query|react-router)/ },
             { name: 'radix', test: /node_modules\/@radix-ui\// },
-            { name: 'i18n', test: /node_modules\/(i18next|react-i18next|i18next-browser-languagedetector)/ },
+            {
+              name: 'i18n',
+              test: /node_modules\/(i18next|react-i18next|i18next-browser-languagedetector)/,
+            },
             { name: 'icons', test: /node_modules\/lucide-react/ },
             { name: 'zod', test: /node_modules\/zod/ },
             { name: 'sonner', test: /node_modules\/sonner/ },
@@ -170,11 +181,46 @@ export default defineConfig({
       ],
     },
 
-    // Process pool for stability
-    pool: 'forks',
-
     // Better mock management
     clearMocks: true,
     restoreMocks: true,
+
+    // Three projects, split by environment need. Per-file isolation stays ON everywhere:
+    // 75 test files rely on top-level vi.mock with partial factories, which bleed across
+    // files if the module registry is shared (verified: isolate:false breaks 20 files).
+    // - src: happy-dom on worker threads — environment setup is several times cheaper
+    //   than jsdom, and these tests only query/interact via testing-library
+    // - src-editor: real Tiptap/ProseMirror mounts need jsdom's fuller Range/Selection/
+    //   contenteditable support
+    // - plugin: process.chdir() is unavailable in worker threads, so forks
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'src',
+          include: ['src/**/*.{test,spec}.{ts,tsx}'],
+          exclude: EDITOR_TESTS,
+          pool: 'threads',
+          environment: 'happy-dom',
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'src-editor',
+          include: EDITOR_TESTS,
+          pool: 'threads',
+          environment: 'jsdom',
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'plugin',
+          include: ['vite-plugin-hash-static.test.ts'],
+          pool: 'forks',
+        },
+      },
+    ],
   },
 })
