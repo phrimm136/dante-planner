@@ -211,6 +211,50 @@ interface RecentlyReleasedSectionProps {
  * Recently Released section for home page.
  * Shows Identity and EGO cards grouped by release date.
  */
+/**
+ * Loading placeholder for RecentlyReleasedSection. Mirrors the real layout —
+ * header row, bordered content box, and date-grouped 112px card cells — so the
+ * home left column reserves its height and does not shove the footer when the
+ * data resolves. Card count/rows are representative, not exact; the goal is a
+ * stable row height for the two-column grid, not pixel identity.
+ */
+export function RecentlyReleasedSkeleton() {
+  return (
+    <section className="flex flex-col gap-4">
+      {/* Header: title + browse links */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-7 w-40" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-5 w-20" />
+          <Skeleton className="h-5 w-16" />
+        </div>
+      </div>
+
+      {/* Content box with date groups */}
+      <div className="bg-muted border border-border rounded-md p-6">
+        <div className="flex flex-col gap-4">
+          {Array.from({ length: 3 }).map((_, groupIdx) => (
+            <div key={groupIdx}>
+              <Skeleton className="mb-3 h-4 w-24" />
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: 'repeat(auto-fit, 112px)', justifyContent: 'start' }}
+              >
+                {Array.from({ length: 7 }).map((_, cardIdx) => (
+                  <div key={cardIdx} className="flex flex-col items-center gap-1 w-28">
+                    <Skeleton className="w-28 h-28 rounded-lg" />
+                    <Skeleton className="h-3 w-20" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionProps) {
   const { t } = useTranslation('common')
 

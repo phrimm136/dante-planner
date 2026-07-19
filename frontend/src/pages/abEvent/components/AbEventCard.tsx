@@ -27,6 +27,7 @@ export function AbEventCard({
           <img
             src={getAbEventImagePath(illustId ?? eventId)}
             alt=""
+            loading="lazy"
             className="w-full h-full object-cover"
           />
         ) : (

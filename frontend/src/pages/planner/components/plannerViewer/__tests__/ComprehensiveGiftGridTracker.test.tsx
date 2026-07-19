@@ -105,6 +105,28 @@ describe('ComprehensiveGiftGridTracker', () => {
 
       expect(container.textContent).toContain('pages.plannerMD.emptyState.noEgoGifts')
     })
+
+    // The populated grid reserves a fixed scroll height. The Suspense skeleton in
+    // GuideModeViewer / TrackerModeViewer hardcodes the same md:h-[178px]
+    // lg:h-[416px] so the section does not jump when the grid resolves. If this
+    // height changes, those two skeletons must change with it.
+    it('reserves the fixed scroll height that the Suspense skeleton mirrors', () => {
+      const floorSelections: SerializableFloorSelection[] = [
+        { themePackId: 'pack1', difficulty: 0, giftIds: ['gift1'] },
+      ]
+
+      const { container } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={floorSelections}
+          comprehensiveGiftIds={['gift1']}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      expect(container.innerHTML).toContain('md:h-[178px]')
+      expect(container.innerHTML).toContain('lg:h-[416px]')
+    })
   })
 
   describe('comprehensiveGiftIds as authoritative source', () => {

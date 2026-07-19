@@ -18,12 +18,14 @@
   font-display: swap;
 }
 
-/* Pretendard Regular - Modern Korean/Latin body font (optimized woff2) */
+/* Pretendard Regular - Modern Korean/Latin body font.
+   Uses the vendored glyph-subset build (Latin + common Hangul, ~260KB vs ~747KB
+   full). Bold/medium/semibold weights are faux-synthesized from this face, as
+   before — no additional weight faces are declared, keeping one font fetch. */
 @font-face {
   font-family: 'Pretendard';
-  src: url('../assets/fonts/Pretendard-1.3.9/web/static/woff2/Pretendard-Regular.woff2') format('woff2'),
-       url('../assets/fonts/Pretendard-1.3.9/web/static/woff/Pretendard-Regular.woff') format('woff'),
-       url('../assets/fonts/Pretendard-1.3.9/public/static/Pretendard-Regular.otf') format('opentype');
+  src: url('../assets/fonts/Pretendard-1.3.9/web/static/woff2-subset/Pretendard-Regular.subset.woff2') format('woff2'),
+       url('../assets/fonts/Pretendard-1.3.9/web/static/woff-subset/Pretendard-Regular.subset.woff') format('woff');
   font-weight: 400;
   font-style: normal;
   font-display: swap;

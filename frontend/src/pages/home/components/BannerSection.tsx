@@ -144,6 +144,8 @@ export function BannerSection() {
                 src={slide.background}
                 alt={getSlideTitle(slide)}
                 className="size-full object-cover"
+                fetchPriority={index === activeIndex ? 'high' : 'low'}
+                loading={index === activeIndex ? 'eager' : 'lazy'}
               />
             ) : (
               <div className={cn('size-full', slide.background)} />

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
-import { PlannerNotFound } from './components/PlannerNotFound'
+import { PlannerNotFound } from '@/components/feedback/PlannerNotFound'
 import {
   PlannerEditorStoreProvider,
   createDefaultSectionNotes,

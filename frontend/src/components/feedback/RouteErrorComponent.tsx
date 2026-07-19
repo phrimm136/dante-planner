@@ -1,7 +1,7 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from '@tanstack/react-router'
-import { PlannerNotFound } from '@/pages/planner'
+import { PlannerNotFound } from './PlannerNotFound'
 import { Button } from '@/components/ui/button'
 import { NotFoundError } from '@/lib/api'
 import NotFoundPage from './NotFoundPage'

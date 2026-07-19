@@ -3,7 +3,6 @@
 // Components
 export { PublishedPlannerCard } from './components/plannerList/PublishedPlannerCard'
 export { PlannerExportImportSection } from './components/PlannerExportImportSection'
-export { PlannerNotFound } from './components/PlannerNotFound'
 export { PlannerSection } from './components/PlannerSection'
 
 // Hooks

@@ -20,7 +20,10 @@ import { BannerSection } from './components/BannerSection'
 import { AnnouncementContent } from './components/AnnouncementContent'
 import { AnnouncementSkeleton } from './components/AnnouncementSection'
 import { SideLinkSection } from './components/SideLinkSection'
-import { RecentlyReleasedSection } from './components/RecentlyReleasedSection'
+import {
+  RecentlyReleasedSection,
+  RecentlyReleasedSkeleton,
+} from './components/RecentlyReleasedSection'
 import { CommunityPlansSection } from './components/CommunityPlansSection'
 
 import { useRecentlyReleasedData } from './hooks/useHomePageData'
@@ -63,7 +66,7 @@ function HomePageContent() {
       {/* Two-column layout: Recently Released + Community Plans */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left column: Recently Released */}
-        <Suspense fallback={<LoadingState />}>
+        <Suspense fallback={<RecentlyReleasedSkeleton />}>
           <RecentlyReleasedContent />
         </Suspense>
 

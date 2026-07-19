@@ -534,6 +534,11 @@ export const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFoundPage,
   defaultErrorComponent: RouteErrorComponent,
+  // Preload a route's chunk + loader on link hover/touch so the ~100ms serial
+  // chunk-fetch window is paid before the click, not after it. Loaders are
+  // cache-idempotent (query-cache prefetch with staleTime), so a hover that
+  // never converts to a navigation only warms the cache.
+  defaultPreload: 'intent',
   // Scroll to top on navigation; hash fragments (e.g., #comment-uuid) auto-scroll to element
   scrollRestoration: true,
   // Show pending component immediately on navigation (no delay)

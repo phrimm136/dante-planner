@@ -128,4 +128,14 @@ describe('ThemePackCard', () => {
       expect(selectLayer.className).not.toContain('opacity-0')
     })
   })
+
+  describe('Lazy loading', () => {
+    it('lazy-loads the theme pack art so off-screen grid cards defer their fetch', () => {
+      const { container } = render(<ThemePackCard {...defaultProps} />)
+
+      const art = getImages(container)[0]
+      expect(art).toHaveAttribute('src', '/images/themePack/pack1.webp')
+      expect(art).toHaveAttribute('loading', 'lazy')
+    })
+  })
 })

@@ -243,8 +243,8 @@ export function GuideModeViewer({ planner }: GuideModeViewerProps) {
         <PlannerSection title={t('pages.plannerMD.comprehensiveEgoGiftListView')}>
           <Suspense
             fallback={
-              <div className="text-center text-gray-500 py-8">
-                {t('pages.plannerMD.loading.EGOGiftData')}
+              <div className="space-y-2">
+                <Skeleton className="w-full rounded-md md:h-[178px] lg:h-[416px]" />
               </div>
             }
           >
