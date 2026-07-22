@@ -76,9 +76,6 @@ class PlannerCommandServiceTest {
     private ContentVersionValidator contentVersionValidator;
 
     @Mock
-    private PlannerFilterService plannerFilterService;
-
-    @Mock
     private PlannerCatalogService plannerCatalogService;
 
     private PlannerCommandService commandService;
@@ -104,7 +101,6 @@ class PlannerCommandServiceTest {
                 sseService,
                 contentValidator,
                 contentVersionValidator,
-                plannerFilterService,
                 plannerCatalogService,
                 accessGuard,
                 maxPlannersPerUser,
@@ -193,8 +189,7 @@ class PlannerCommandServiceTest {
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
-            verify(plannerCatalogService).syncScalarCopy(any(Planner.class));
-            verify(plannerFilterService, never()).requestRebuild(any(), any(), any());
+            verify(plannerCatalogService).onVisibleEditCommitted(any(Planner.class), eq(false));
         }
 
         @Test
@@ -211,8 +206,7 @@ class PlannerCommandServiceTest {
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
-            verify(plannerFilterService).requestRebuild(
-                    planner.getId(), "{\"data\": \"changed\"}", planner.getSelectedKeywords());
+            verify(plannerCatalogService).onVisibleEditCommitted(any(Planner.class), eq(true));
         }
     }
 

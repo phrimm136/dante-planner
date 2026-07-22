@@ -52,7 +52,6 @@ public class PlannerCommandService {
     private final PlannerSyncEventService sseService;
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
-    private final PlannerFilterService plannerFilterService;
     private final PlannerCatalogService plannerCatalogService;
     private final PlannerAccessGuard accessGuard;
     private final Optional<ContentTombstoneStore> tombstoneStore;
@@ -66,13 +65,12 @@ public class PlannerCommandService {
             PlannerSyncEventService sseService,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
-            PlannerFilterService plannerFilterService,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
         this(plannerRepository, statsRepository, sseService, contentValidator, contentVersionValidator,
-                plannerFilterService, plannerCatalogService, accessGuard, Optional.empty(),
+                plannerCatalogService, accessGuard, Optional.empty(),
                 maxPlannersPerUser, currentSchemaVersion);
     }
 
@@ -83,7 +81,6 @@ public class PlannerCommandService {
             PlannerSyncEventService sseService,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
-            PlannerFilterService plannerFilterService,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
             Optional<ContentTombstoneStore> tombstoneStore,
@@ -94,7 +91,6 @@ public class PlannerCommandService {
         this.sseService = sseService;
         this.contentValidator = contentValidator;
         this.contentVersionValidator = contentVersionValidator;
-        this.plannerFilterService = plannerFilterService;
         this.plannerCatalogService = plannerCatalogService;
         this.accessGuard = accessGuard;
         this.tombstoneStore = tombstoneStore;
@@ -296,11 +292,7 @@ public class PlannerCommandService {
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
 
             if (Boolean.TRUE.equals(saved.getPublished())) {
-                plannerCatalogService.syncScalarCopy(saved);
-                if (compositionChanged) {
-                    plannerFilterService.requestRebuild(saved.getId(), saved.getContentJson(),
-                            saved.getSelectedKeywords());
-                }
+                plannerCatalogService.onVisibleEditCommitted(saved, compositionChanged);
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
@@ -372,11 +364,7 @@ public class PlannerCommandService {
         log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, saved.getSyncVersion());
 
         if (Boolean.TRUE.equals(saved.getPublished())) {
-            plannerCatalogService.syncScalarCopy(saved);
-            if (compositionChanged) {
-                plannerFilterService.requestRebuild(saved.getId(), saved.getContentJson(),
-                        saved.getSelectedKeywords());
-            }
+            plannerCatalogService.onVisibleEditCommitted(saved, compositionChanged);
         }
 
         PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
@@ -410,8 +398,7 @@ public class PlannerCommandService {
 
         planner.softDelete();
         plannerRepository.save(planner);
-        plannerCatalogService.remove(id);
-        plannerFilterService.requestClear(id);
+        plannerCatalogService.onBecameInvisible(id);
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override

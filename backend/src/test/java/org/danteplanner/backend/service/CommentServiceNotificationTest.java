@@ -133,7 +133,7 @@ class CommentServiceNotificationTest {
                 .contentVersion(6)
                 .published(true)
                 .build();
-        planner.getPublication().setOwnerNotificationsEnabled(true);
+        planner.setOwnerNotificationsEnabled(true);
     }
 
     @Nested
@@ -144,7 +144,7 @@ class CommentServiceNotificationTest {
         @DisplayName("Should send notification when owner notifications enabled")
         void createTopLevelComment_NotificationEnabled_SendsNotification() {
             // Arrange
-            planner.getPublication().setOwnerNotificationsEnabled(true);
+            planner.setOwnerNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
@@ -174,7 +174,7 @@ class CommentServiceNotificationTest {
         @DisplayName("Should NOT send notification when owner notifications disabled")
         void createTopLevelComment_NotificationDisabled_NoNotification() {
             // Arrange
-            planner.getPublication().setOwnerNotificationsEnabled(false);
+            planner.setOwnerNotificationsEnabled(false);
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
@@ -201,7 +201,7 @@ class CommentServiceNotificationTest {
         @DisplayName("Should NOT send notification when owner comments on own planner")
         void createTopLevelComment_SelfComment_NoNotification() {
             // Arrange
-            planner.getPublication().setOwnerNotificationsEnabled(true);
+            planner.setOwnerNotificationsEnabled(true);
             when(userRepository.findById(OWNER_ID)).thenReturn(Optional.of(owner));
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));

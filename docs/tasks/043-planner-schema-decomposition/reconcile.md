@@ -93,6 +93,29 @@ Ranked; verdicts applied before this record was written.
    parity abort. **Skipped** — the parity assertion is the designed backstop;
    failure diagnosis cost accepted.
 
+## Review lanes
+
+Scoped architecture and security reviews over the same diff (fresh context).
+
+Security: no findings — search input is parameter-bound end to end, the
+content-carrying publish path cannot cross owners, facets read only the
+visible-only catalog, migration procedures concatenate hardcoded identifiers
+only.
+
+Architecture: three findings, verdicted.
+1. Visibility-transition choreography repeated per write seam (MEDIUM) —
+   **fixed**: `PlannerCatalogService` gained the transition intents
+   (`onBecameVisible` / `onBecameInvisible` / `onVisibleEditCommitted`)
+   that pair the synchronous catalog op with the post-commit filter event, so
+   callers express intent instead of wiring two services in lockstep.
+2. Satellite transition mutators reachable around the root's guards (MEDIUM) —
+   **fixed**: publication/moderation transitions are package-private (only the
+   root can call them) and the owner-notification preference goes through a
+   root delegator, making the takedown-blocks-republish invariant structural.
+3. Dual query mechanisms on the catalog repository (LOW) — **skipped**: the
+   derived finders name the fixed browse shapes the row tests pin; divergence
+   between the two idioms is caught by those tests.
+
 ## Diagrams
 
 <pre>

@@ -50,9 +50,6 @@ class ModerationServiceTest {
     private org.danteplanner.backend.planner.service.PlannerCatalogService plannerCatalogService;
 
     @Mock
-    private org.danteplanner.backend.planner.service.PlannerFilterService plannerFilterService;
-
-    @Mock
     private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
 
     @Mock
@@ -67,7 +64,7 @@ class ModerationServiceTest {
     @BeforeEach
     void setUp() {
         moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository,
-                plannerStatsRepository, plannerCatalogService, plannerFilterService, moderationActionRepository, sseService);
+                plannerStatsRepository, plannerCatalogService, moderationActionRepository, sseService);
 
         adminUser = User.builder()
                 .id(1L)

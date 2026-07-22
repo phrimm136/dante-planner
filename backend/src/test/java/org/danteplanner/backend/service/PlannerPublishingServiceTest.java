@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 
@@ -59,9 +58,6 @@ class PlannerPublishingServiceTest {
     private PlannerContentValidator contentValidator;
 
     @Mock
-    private PlannerFilterService plannerFilterService;
-
-    @Mock
     private org.danteplanner.backend.planner.service.PlannerCommandService plannerCommandService;
 
     @Mock
@@ -94,7 +90,6 @@ class PlannerPublishingServiceTest {
                 plannerStatsRepository,
                 plannerCommandService,
                 contentValidator,
-                plannerFilterService,
                 plannerCatalogService,
                 subscriptionService,
                 notificationSseService,

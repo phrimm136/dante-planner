@@ -40,7 +40,6 @@ public class PlannerPublishingService {
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerCommandService plannerCommandService;
     private final PlannerContentValidator contentValidator;
-    private final PlannerFilterService plannerFilterService;
     private final PlannerCatalogService plannerCatalogService;
     private final PlannerSubscriptionService subscriptionService;
     private final SseService notificationSseService;
@@ -97,11 +96,9 @@ public class PlannerPublishingService {
         Planner saved = plannerRepository.save(planner);
 
         if (nowPublished) {
-            plannerCatalogService.add(saved);
-            plannerFilterService.requestRebuild(plannerId, saved.getContentJson(), saved.getSelectedKeywords());
+            plannerCatalogService.onBecameVisible(saved);
         } else {
-            plannerCatalogService.remove(plannerId);
-            plannerFilterService.requestClear(plannerId);
+            plannerCatalogService.onBecameInvisible(plannerId);
         }
 
         // Auto-subscribe owner when publishing (not unpublishing)
@@ -179,7 +176,7 @@ public class PlannerPublishingService {
             throw new PlannerForbiddenException(plannerId);
         }
 
-        planner.getPublication().setOwnerNotificationsEnabled(enabled);
+        planner.setOwnerNotificationsEnabled(enabled);
         plannerRepository.save(planner);
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);

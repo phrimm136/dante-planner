@@ -62,18 +62,18 @@ public class PlannerModeration {
         return takenDownAt != null;
     }
 
-    public void takeDown() {
+    void takeDown() {
         this.takenDownAt = Instant.now();
     }
 
-    public void hide(Long moderatorId, String reason) {
+    void hide(Long moderatorId, String reason) {
         this.hiddenFromRecommended = true;
         this.hiddenByModeratorId = moderatorId;
         this.hiddenReason = reason;
         this.hiddenAt = Instant.now();
     }
 
-    public void unhide() {
+    void unhide() {
         this.hiddenFromRecommended = false;
         this.hiddenByModeratorId = null;
         this.hiddenReason = null;

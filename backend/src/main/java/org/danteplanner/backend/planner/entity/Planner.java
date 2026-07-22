@@ -215,6 +215,13 @@ public class Planner implements Persistable<UUID> {
     }
 
     /**
+     * Update the owner's comment-notification preference.
+     */
+    public void setOwnerNotificationsEnabled(boolean enabled) {
+        publication.setOwnerNotificationsEnabled(enabled);
+    }
+
+    /**
      * Toggle the published state. On the first transition to published, stamps
      * firstPublishedAt once.
      *

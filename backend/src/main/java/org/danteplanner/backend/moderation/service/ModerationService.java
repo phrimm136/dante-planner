@@ -19,7 +19,6 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
-import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +45,6 @@ public class ModerationService {
     private final PlannerCommentRepository plannerCommentRepository;
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerCatalogService plannerCatalogService;
-    private final PlannerFilterService plannerFilterService;
     private final ModerationActionRepository moderationActionRepository;
     private final SseService sseService;
 
@@ -278,8 +276,7 @@ public class ModerationService {
 
         planner.takeDown();
         Planner saved = plannerRepository.save(planner);
-        plannerCatalogService.remove(plannerId);
-        plannerFilterService.requestClear(plannerId);
+        plannerCatalogService.onBecameInvisible(plannerId);
 
         // Log to audit trail
         logModerationAction(actorId, plannerId.toString(),
@@ -321,8 +318,7 @@ public class ModerationService {
 
         planner.unpublish();
         Planner saved = plannerRepository.save(planner);
-        plannerCatalogService.remove(plannerId);
-        plannerFilterService.requestClear(plannerId);
+        plannerCatalogService.onBecameInvisible(plannerId);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;

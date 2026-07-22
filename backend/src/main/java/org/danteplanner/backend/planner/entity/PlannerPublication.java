@@ -49,7 +49,7 @@ public class PlannerPublication {
     private Instant firstPublishedAt;
 
     @Column(name = "owner_notifications_enabled", nullable = false)
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     @Builder.Default
     private Boolean ownerNotificationsEnabled = true;
 
@@ -58,7 +58,7 @@ public class PlannerPublication {
      *
      * @return the new published state
      */
-    public boolean toggle() {
+    boolean toggle() {
         boolean nowPublished = !published;
         this.published = nowPublished;
         if (nowPublished && firstPublishedAt == null) {
@@ -67,7 +67,7 @@ public class PlannerPublication {
         return nowPublished;
     }
 
-    public void unpublish() {
+    void unpublish() {
         this.published = false;
     }
 }

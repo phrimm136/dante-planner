@@ -26,15 +26,54 @@ public class PlannerCatalogService {
 
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerStatsRepository statsRepository;
+    private final PlannerFilterService filterService;
     private final int recommendedThreshold;
 
     public PlannerCatalogService(
             PlannerCatalogRepository catalogRepository,
             PlannerStatsRepository statsRepository,
+            PlannerFilterService filterService,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.catalogRepository = catalogRepository;
         this.statsRepository = statsRepository;
+        this.filterService = filterService;
         this.recommendedThreshold = recommendedThreshold;
+    }
+
+    /**
+     * A planner became visible (publish): insert its catalog row and rebuild
+     * both filter indexes after commit. The single entry point for the
+     * became-visible transition, so no caller wires the pair by hand.
+     */
+    @Transactional
+    public void onBecameVisible(Planner planner) {
+        add(planner);
+        filterService.requestRebuild(planner.getId(), planner.getContentJson(),
+                planner.getSelectedKeywords());
+    }
+
+    /**
+     * A planner became invisible (unpublish, delete, takedown): remove its
+     * catalog row and clear both filter indexes after commit.
+     */
+    @Transactional
+    public void onBecameInvisible(UUID plannerId) {
+        remove(plannerId);
+        filterService.requestClear(plannerId);
+    }
+
+    /**
+     * A visible planner was edited by its owner: synchronize the catalog scalar
+     * copies (read-your-writes for the list) and rebuild the filter indexes only
+     * when the searchable composition changed.
+     */
+    @Transactional
+    public void onVisibleEditCommitted(Planner planner, boolean compositionChanged) {
+        syncScalarCopy(planner);
+        if (compositionChanged) {
+            filterService.requestRebuild(planner.getId(), planner.getContentJson(),
+                    planner.getSelectedKeywords());
+        }
     }
 
     /**
