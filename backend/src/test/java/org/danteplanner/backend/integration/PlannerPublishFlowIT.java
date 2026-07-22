@@ -128,7 +128,7 @@ class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("published-title-edit-consistent: a title edit shows in the public list and detail immediately; a title-only edit leaves the filter index alone")
-    void publishedTitleEditConsistent_ListAndDetailImmediate() throws Exception {
+    void publishedTitleEditConsistent_WhenTitleEdited_ListAndDetailImmediate() throws Exception {
         Planner planner = TestDataFactory.planner(owner)
                 .title("Before Edit")
                 .published(true)
@@ -166,7 +166,7 @@ class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("publish-single-request: one content-carrying request creates the draft server-side and publishes it atomically; unpublish stays a bodyless toggle")
-    void publishSingleRequest_ContentCarryingPublish() throws Exception {
+    void publishSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
         // The draft exists only client-side: nothing on the server yet
         UUID plannerId = UUID.randomUUID();
         String content = TestDataFactory.planner(owner).build().getContentJson();

@@ -135,7 +135,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("entity-facet-filter: only planners whose entity index contains the entity are returned")
-    void entityFacetFilter_ReturnsOnlyMatchingPlanners() throws Exception {
+    void entityFacetFilter_WhenFiltered_ReturnsOnlyMatchingPlanners() throws Exception {
         publishWithFilters("With Entities", Set.of("Sinking"));
         // A planner with empty content indexes nothing
         Planner empty = TestDataFactory.planner(owner)
@@ -165,7 +165,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("keyword-facet-filter: only planners whose keyword index contains the keyword are returned")
-    void keywordFacetFilter_ReturnsOnlyMatchingPlanners() throws Exception {
+    void keywordFacetFilter_WhenFiltered_ReturnsOnlyMatchingPlanners() throws Exception {
         publishWithFilters("Sinking Build", Set.of("Sinking"));
         publishWithFilters("Burn Build", Set.of("Combustion"));
 
@@ -181,7 +181,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("keyword-rename-normalized-on-write: a legacy client name is stored, indexed, and filterable as the current id; unknown keywords drop without failing the save")
-    void keywordRenameNormalizedOnWrite_LegacyNameBecomesCurrentId() throws Exception {
+    void keywordRenameNormalizedOnWrite_WhenLegacyNameSynced_StoredAsCurrentId() throws Exception {
         Planner planner = publishWithFilters("Legacy Keywords", Set.of("Sinking"));
 
         // A stale client syncs the pre-rename name plus an unknown keyword
@@ -213,7 +213,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("keyword-read-passthrough-total: legacy names at rest read back current; malformed storage reads as empty, never throws")
-    void keywordReadPassthroughTotal_LegacyAndMalformedStorage() throws Exception {
+    void keywordReadPassthroughTotal_WhenLegacyOrMalformedStorage_ReadsWithoutError() throws Exception {
         Planner planner = publishWithFilters("At Rest", Set.of("Sinking"));
         JdbcTemplate jdbc = new JdbcTemplate(dataSource);
 

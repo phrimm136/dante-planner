@@ -140,7 +140,7 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("comment-count-maintained: create/reply increment, author and moderator deletes decrement, floor at zero")
-    void commentCountMaintained_OnCreateAndDeleteTransitions() {
+    void commentCountMaintained_OnCreateAndDeleteTransitions_CounterTracks() {
         seedStats(0, 0, 0);
 
         UUID topLevelId = commentService.createComment(planner.getId(), commenter.getId(), null,
@@ -172,7 +172,7 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("counter-reads-from-stats: list and detail serve seeded stats values, not derived counts")
-    void counterReadsFromStats_ListAndDetailServeStatsValues() throws Exception {
+    void counterReadsFromStats_WhenStatsSeeded_ListAndDetailServeThem() throws Exception {
         // No comment rows exist: any non-zero commentCount can only come from planner_stats
         seedStats(42, 5, 7);
 
@@ -191,7 +191,7 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("detail-view-count-async: detail serves the pre-request count; the buffered view lands in planner_stats on flush")
-    void detailViewCountAsync_PreRequestCountServedIncrementLandsOnFlush() throws Exception {
+    void detailViewCountAsync_WhenViewed_PreRequestCountServedThenFlushIncrements() throws Exception {
         seedStats(10, 0, 0);
 
         mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))

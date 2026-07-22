@@ -126,7 +126,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("list-card-fields: the public list card carries firstPublishedAt and drops contentVersion and lastModifiedAt")
-    void listCardFields_TrimmedCardShape() throws Exception {
+    void listCardFields_WhenListed_TrimmedCardShape() throws Exception {
         org.danteplanner.backend.planner.entity.PlannerStats stats =
                 org.danteplanner.backend.planner.entity.PlannerStats.builder()
                         .plannerId(published.getId())
@@ -148,7 +148,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("unpublished-changes-visible-to-owner: the owner detail carries status and published so the FE derives modified-but-not-published")
-    void unpublishedChangesVisibleToOwner_StatusAndPublishedCarried() throws Exception {
+    void unpublishedChangesVisibleToOwner_WhenStatusDirty_StatusAndPublishedCarried() throws Exception {
         // A published planner whose edit state went dirty (draft) after publish
         published.getContent().setStatus(org.danteplanner.backend.planner.entity.PlannerStatus.DRAFT);
         plannerRepository.save(published);

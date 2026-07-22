@@ -145,7 +145,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("catalog-membership-on-transition: row exists after publish, absent after unpublish, delete, and takedown")
-    void catalogMembership_FollowsVisibilityTransitions() {
+    void catalogMembership_OnVisibilityTransitions_RowPresenceMatches() {
         // publish -> row
         Planner planner = draft();
         publishingService.togglePublish(owner.getId(), planner.getId());
@@ -171,7 +171,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("list-recency-sort: newest first_published_at first, served without a filesort")
-    void listRecencySort_NewestFirstFilesortFree() throws Exception {
+    void listRecencySort_WhenBrowsing_NewestFirstFilesortFree() throws Exception {
         Instant now = Instant.now();
         for (int i = 0; i < 3; i++) {
             Planner planner = TestDataFactory.planner(owner)
@@ -201,7 +201,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("recommended-flag-and-detail: vote crossing sets catalog.recommended; hide clears it; unhide restores it")
-    void recommendedFlag_FollowsVoteAndModerationTransitions() {
+    void recommendedFlag_OnVoteAndModerationTransitions_TracksDerivation() {
         Planner planner = draft();
         publishingService.togglePublish(owner.getId(), planner.getId());
         assertThat(catalogRepository.findById(planner.getId())
@@ -237,7 +237,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("takedown-blocks-republish: a moderator-taken-down planner rejects the owner's publish and gains no catalog row")
-    void takedownBlocksRepublish_NoCatalogRowCreated() {
+    void takedownBlocksRepublish_WhenOwnerPublishes_RejectedWithoutCatalogRow() {
         Planner planner = draft();
         publishingService.togglePublish(owner.getId(), planner.getId());
         moderationService.deletePlanner(admin.getId(), planner.getId(), "violation");

@@ -134,7 +134,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("reconciler-detects-drift: each seeded divergence yields a structured record and is not auto-repaired")
-    void reconcilerDetectsDrift_ReportsWithoutRepair() {
+    void reconcilerDetectsDrift_WhenDriftSeeded_ReportsWithoutRepair() {
         // A clean planner: must produce no records
         Planner clean = publishClean("Clean");
 

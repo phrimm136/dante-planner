@@ -113,7 +113,7 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("user-delete-sweeps-aggregate: hard delete removes every planner row across aggregate, projection, filter, and child tables, then the user")
-    void userDeleteSweepsAggregate_NoOrphansRemain() {
+    void userDeleteSweepsAggregate_WhenHardDeleted_NoOrphansRemain() {
         // Published planner with the full projection set and third-party engagement
         Planner published = TestDataFactory.planner(owner)
                 .title("Sweep Published")

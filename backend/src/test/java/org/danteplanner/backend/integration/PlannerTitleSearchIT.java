@@ -117,7 +117,7 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("title-search-ngram: substrings of two or more characters match, Latin and CJK")
-    void titleSearchNgram_SubstringMatchesLatinAndCjk() throws Exception {
+    void titleSearchNgram_WhenSubstringQueried_MatchesLatinAndCjk() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "eed"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1))
@@ -131,7 +131,7 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("title-search-ngram: multi-word input matches regardless of word order")
-    void titleSearchNgram_WordOrderIndependent() throws Exception {
+    void titleSearchNgram_WhenWordsReordered_StillMatches() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "team bleed"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].title").value("Bleed Team"));
@@ -139,7 +139,7 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("title-search-ngram: input shorter than the ngram token size matches nothing")
-    void titleSearchNgram_SingleCharMatchesNothing() throws Exception {
+    void titleSearchNgram_WhenSingleChar_MatchesNothing() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "e"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -147,7 +147,7 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("title-search-ngram: boolean-mode operators in the input are inert, not syntax")
-    void titleSearchNgram_OperatorsAreEscaped() throws Exception {
+    void titleSearchNgram_WhenOperatorsInInput_TreatedAsText() throws Exception {
         // A dangling double quote is a boolean-mode syntax error when unescaped
         mockMvc.perform(get("/api/planner/md/published").param("q", "\"eed"))
                 .andExpect(status().isOk())
@@ -161,7 +161,7 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("q-matches-title-or-keyword: a keyword-only match is returned alongside title search")
-    void qMatchesTitleOrKeyword_KeywordOnlyMatchReturned() throws Exception {
+    void qMatchesTitleOrKeyword_WhenKeywordOnlyMatch_Returned() throws Exception {
         // "Kit Collection" has no 'sinking' in its title — only the keyword
         mockMvc.perform(get("/api/planner/md/published").param("q", "Sinking"))
                 .andExpect(status().isOk())
