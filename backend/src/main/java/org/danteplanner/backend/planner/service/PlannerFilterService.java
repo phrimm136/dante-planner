@@ -6,10 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
+import org.danteplanner.backend.planner.event.PlannerFilterRebuildEvent;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 import java.util.Set;
@@ -18,8 +23,10 @@ import java.util.UUID;
 /**
  * Maintains both search inverted indexes for a planner: content entities
  * ({@code planner_entity_filter}) and keywords ({@code planner_keyword_filter}).
- * Rows exist only while the planner is visible; callers clear on
- * unpublish/delete/takedown.
+ * Rows exist only while the planner is visible. Writers request maintenance via
+ * {@link #requestRebuild}/{@link #requestClear}: the multi-statement index work
+ * runs AFTER the owning transaction commits, in its own transaction, keeping
+ * the cross-region write path short.
  */
 @Service
 @RequiredArgsConstructor
@@ -29,6 +36,29 @@ public class PlannerFilterService {
     private final PlannerEntityFilterRepository entityFilterRepository;
     private final PlannerKeywordFilterRepository keywordFilterRepository;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher eventPublisher;
+
+    /**
+     * Request a post-commit rebuild of both filter indexes from the given
+     * content snapshot. Call from the owning transaction.
+     */
+    public void requestRebuild(UUID plannerId, String contentJson, Set<String> selectedKeywords) {
+        eventPublisher.publishEvent(PlannerFilterRebuildEvent.rebuild(plannerId, contentJson, selectedKeywords));
+    }
+
+    /**
+     * Request a post-commit clear of both filter indexes
+     * (unpublish/delete/takedown). Call from the owning transaction.
+     */
+    public void requestClear(UUID plannerId) {
+        eventPublisher.publishEvent(PlannerFilterRebuildEvent.clear(plannerId));
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void onFilterRebuildRequested(PlannerFilterRebuildEvent event) {
+        rebuildFilters(event.plannerId(), event.contentJson(), event.selectedKeywords());
+    }
 
     /**
      * Rebuild both filter tables for a planner from its content JSON and keyword set.

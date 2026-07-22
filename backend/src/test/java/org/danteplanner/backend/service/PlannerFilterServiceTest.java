@@ -35,6 +35,9 @@ class PlannerFilterServiceTest {
     @Mock
     private PlannerKeywordFilterRepository keywordFilterRepository;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher eventPublisher;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
@@ -48,7 +51,7 @@ class PlannerFilterServiceTest {
 
     @BeforeEach
     void setUp() {
-        filterService = new PlannerFilterService(entityFilterRepository, keywordFilterRepository, objectMapper);
+        filterService = new PlannerFilterService(entityFilterRepository, keywordFilterRepository, objectMapper, eventPublisher);
         plannerId = UUID.randomUUID();
     }
 

@@ -7,7 +7,7 @@ import org.danteplanner.backend.shared.config.RateLimitConfig;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
-import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,16 +41,26 @@ public class PlannerPublishingController {
      * <p>Only the owner of the planner can toggle its publish status.
      * Returns 401 if not authenticated, 403 if not the owner.</p>
      *
-     * @param userId the authenticated user ID (must be owner)
-     * @param id     the planner ID
+     * <p>With a content-carrying body, the request upserts the document and
+     * publishes it atomically (one round trip for "publish this draft").
+     * Without a body it stays the lightweight toggle used for unpublish.</p>
+     *
+     * @param userId  the authenticated user ID (must be owner)
+     * @param id      the planner ID
+     * @param request optional content payload to upsert before publishing
      * @return the updated planner response
      */
     @PutMapping("/{id}/publish")
     public ResponseEntity<PlannerResponse> togglePublish(
             @AuthenticationPrincipal Long userId,
-            @PathVariable UUID id) {
+            @PathVariable UUID id,
+            @RequestBody(required = false) @Valid UpsertPlannerRequest request) {
 
         rateLimitConfig.checkCrudLimit(userId, "publish");
+        if (request != null) {
+            log.info("Publishing planner {} with content by user {}", id, userId);
+            return ResponseEntity.ok(plannerPublishingService.publishWithContent(userId, id, request));
+        }
         log.info("Toggling publish status for planner {} by user {}", id, userId);
         return ResponseEntity.ok(plannerPublishingService.togglePublish(userId, id));
     }

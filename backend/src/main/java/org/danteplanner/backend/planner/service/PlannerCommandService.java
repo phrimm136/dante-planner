@@ -124,8 +124,10 @@ public class PlannerCommandService {
      *                              only if it differs from the current value, and unchanged content
      *                              is re-validated on a category change; update semantics when false:
      *                              category is validated whenever provided, content is never re-validated
+     * @return whether the searchable composition (content or keywords) changed,
+     *         deciding whether the filter indexes need a rebuild
      */
-    private void applyRequestFields(Planner planner, String title, PlannerStatus status,
+    private boolean applyRequestFields(Planner planner, String title, PlannerStatus status,
             String category, String content, Set<String> selectedKeywords, UUID deviceId,
             boolean skipUnchangedCategory) {
         PlannerContent contentRow = planner.getContent();
@@ -147,21 +149,28 @@ public class PlannerCommandService {
             categoryChanged = true;
         }
 
+        boolean contentChanged = false;
         if (content != null) {
             contentValidator.validate(content, contentRow.getCategory(), planner.getPublished());
+            contentChanged = !content.equals(contentRow.getContent());
             contentRow.setContent(content);
         } else if (categoryChanged && skipUnchangedCategory) {
             contentValidator.validate(contentRow.getContent(), contentRow.getCategory(), planner.getPublished());
         }
 
+        boolean keywordsChanged = false;
         if (selectedKeywords != null) {
             // Normalize at the domain boundary so the entity (and everything fed
             // from it — column, filter index, facets) carries current ids only
-            contentRow.setSelectedKeywords(PlannerKeywords.fromClient(selectedKeywords).asSet());
+            Set<String> normalized = PlannerKeywords.fromClient(selectedKeywords).asSet();
+            Set<String> existing = contentRow.getSelectedKeywords();
+            keywordsChanged = !normalized.equals(existing != null ? existing : Set.of());
+            contentRow.setSelectedKeywords(normalized);
         }
         if (deviceId != null) {
             contentRow.setDeviceId(deviceId);
         }
+        return contentChanged || keywordsChanged;
     }
 
     /**
@@ -273,8 +282,8 @@ public class PlannerCommandService {
                 throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
             }
 
-            applyRequestFields(planner, req.title(), req.status(), req.category(),
-                    req.content(), req.selectedKeywords(), deviceId, true);
+            boolean compositionChanged = applyRequestFields(planner, req.title(), req.status(),
+                    req.category(), req.content(), req.selectedKeywords(), deviceId, true);
 
             if (req.contentVersion() != null) {
                 planner.getContent().setGameContentVersion(req.contentVersion());
@@ -288,8 +297,10 @@ public class PlannerCommandService {
 
             if (Boolean.TRUE.equals(saved.getPublished())) {
                 plannerCatalogService.syncScalarCopy(saved);
-                plannerFilterService.rebuildFilters(saved.getId(), saved.getContentJson(),
-                        saved.getSelectedKeywords());
+                if (compositionChanged) {
+                    plannerFilterService.requestRebuild(saved.getId(), saved.getContentJson(),
+                            saved.getSelectedKeywords());
+                }
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
@@ -352,8 +363,8 @@ public class PlannerCommandService {
             throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
         }
 
-        applyRequestFields(planner, req.title(), req.status(), req.category(),
-                req.content(), req.selectedKeywords(), deviceId, false);
+        boolean compositionChanged = applyRequestFields(planner, req.title(), req.status(),
+                req.category(), req.content(), req.selectedKeywords(), deviceId, false);
 
         planner.recordSave();
 
@@ -362,8 +373,10 @@ public class PlannerCommandService {
 
         if (Boolean.TRUE.equals(saved.getPublished())) {
             plannerCatalogService.syncScalarCopy(saved);
-            plannerFilterService.rebuildFilters(saved.getId(), saved.getContentJson(),
-                    saved.getSelectedKeywords());
+            if (compositionChanged) {
+                plannerFilterService.requestRebuild(saved.getId(), saved.getContentJson(),
+                        saved.getSelectedKeywords());
+            }
         }
 
         PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
@@ -398,7 +411,7 @@ public class PlannerCommandService {
         planner.softDelete();
         plannerRepository.save(planner);
         plannerCatalogService.remove(id);
-        plannerFilterService.clearFilters(id);
+        plannerFilterService.requestClear(id);
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override

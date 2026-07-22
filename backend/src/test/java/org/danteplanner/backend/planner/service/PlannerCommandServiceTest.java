@@ -176,6 +176,47 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
+    @DisplayName("Filter maintenance on published upserts")
+    class FilterMaintenanceTests {
+
+        @Test
+        @DisplayName("Title-only edit of a published planner skips the filter rebuild")
+        void upsertPlanner_TitleOnlyEdit_SkipsFilterRebuild() {
+            Planner planner = testPlanner(5L, true);
+            UpsertPlannerRequest request = new UpsertPlannerRequest(
+                    planner.getId().toString(), "5F", "New Title", null,
+                    planner.getContentJson(), null, PlannerType.MIRROR_DUNGEON, 5L, null);
+
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+
+            verify(plannerCatalogService).syncScalarCopy(any(Planner.class));
+            verify(plannerFilterService, never()).requestRebuild(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("Content change on a published planner requests the filter rebuild")
+        void upsertPlanner_ContentChanged_RequestsFilterRebuild() {
+            Planner planner = testPlanner(5L, true);
+            UpsertPlannerRequest request = new UpsertPlannerRequest(
+                    planner.getId().toString(), "5F", null, null,
+                    "{\"data\": \"changed\"}", null, PlannerType.MIRROR_DUNGEON, 5L, null);
+
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+
+            verify(plannerFilterService).requestRebuild(
+                    planner.getId(), "{\"data\": \"changed\"}", planner.getSelectedKeywords());
+        }
+    }
+
+    @Nested
     @DisplayName("isValidCategory Tests")
     class IsValidCategoryTests {
 

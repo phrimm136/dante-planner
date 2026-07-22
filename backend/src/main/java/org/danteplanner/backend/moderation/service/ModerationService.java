@@ -279,7 +279,7 @@ public class ModerationService {
         planner.takeDown();
         Planner saved = plannerRepository.save(planner);
         plannerCatalogService.remove(plannerId);
-        plannerFilterService.clearFilters(plannerId);
+        plannerFilterService.requestClear(plannerId);
 
         // Log to audit trail
         logModerationAction(actorId, plannerId.toString(),
@@ -322,7 +322,7 @@ public class ModerationService {
         planner.unpublish();
         Planner saved = plannerRepository.save(planner);
         plannerCatalogService.remove(plannerId);
-        plannerFilterService.clearFilters(plannerId);
+        plannerFilterService.requestClear(plannerId);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;

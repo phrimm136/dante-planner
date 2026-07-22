@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -37,6 +38,7 @@ public class PlannerPublishingService {
 
     private final PlannerRepository plannerRepository;
     private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerCommandService plannerCommandService;
     private final PlannerContentValidator contentValidator;
     private final PlannerFilterService plannerFilterService;
     private final PlannerCatalogService plannerCatalogService;
@@ -96,10 +98,10 @@ public class PlannerPublishingService {
 
         if (nowPublished) {
             plannerCatalogService.add(saved);
-            plannerFilterService.rebuildFilters(plannerId, saved.getContentJson(), saved.getSelectedKeywords());
+            plannerFilterService.requestRebuild(plannerId, saved.getContentJson(), saved.getSelectedKeywords());
         } else {
             plannerCatalogService.remove(plannerId);
-            plannerFilterService.clearFilters(plannerId);
+            plannerFilterService.requestClear(plannerId);
         }
 
         // Auto-subscribe owner when publishing (not unpublishing)
@@ -131,6 +133,30 @@ public class PlannerPublishingService {
                 .map(PlannerStats::getUpvotes)
                 .orElse(0);
         return PlannerResponse.fromEntity(saved, upvotes);
+    }
+
+    /**
+     * Publish with content in one request: upsert the carried document (creating
+     * the planner if it never synced), then ensure it is published — atomically.
+     * A stale-content conflict or takedown rejection rolls back both halves.
+     *
+     * @param userId    the user ID (must be owner)
+     * @param plannerId the planner ID
+     * @param req       the content-carrying upsert payload
+     * @return the updated planner response
+     */
+    @Transactional
+    public PlannerResponse publishWithContent(Long userId, UUID plannerId, UpsertPlannerRequest req) {
+        plannerCommandService.upsertPlanner(userId, null, plannerId, req, false);
+        Planner planner = plannerRepository.findAggregateForOwner(plannerId, userId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        if (!Boolean.TRUE.equals(planner.getPublished())) {
+            return togglePublish(userId, plannerId);
+        }
+        int upvotes = plannerStatsRepository.findById(plannerId)
+                .map(PlannerStats::getUpvotes)
+                .orElse(0);
+        return PlannerResponse.fromEntity(planner, upvotes);
     }
 
     /**

@@ -62,6 +62,9 @@ class PlannerPublishingServiceTest {
     private PlannerFilterService plannerFilterService;
 
     @Mock
+    private org.danteplanner.backend.planner.service.PlannerCommandService plannerCommandService;
+
+    @Mock
     private PlannerCatalogService plannerCatalogService;
 
     @Mock
@@ -89,6 +92,7 @@ class PlannerPublishingServiceTest {
         publishingService = new PlannerPublishingService(
                 plannerRepository,
                 plannerStatsRepository,
+                plannerCommandService,
                 contentValidator,
                 plannerFilterService,
                 plannerCatalogService,
