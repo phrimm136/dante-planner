@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -44,7 +43,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -170,8 +168,8 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
     class ConcurrentCastVoteTests {
 
         @Test
-        @DisplayName("N concurrent castVote() calls: upvotes == vote rows and exactly one recommended notification")
-        void concurrentCastVote_throughService_atomicCountAndSingleNotification() throws InterruptedException {
+        @DisplayName("concurrent-vote-no-deadlock: N concurrent castVote() calls succeed without retry, upvotes == vote rows, exactly one recommended notification")
+        void concurrentVote_NoDeadlock_AllCountedAndSingleNotification() throws InterruptedException {
             // Seed to one below the threshold sequentially (no notification yet), then run a
             // concurrent burst that crosses it — many burst transactions read upvotes==threshold-1,
             // so the CAS (trySetRecommendedNotified) must dedupe them to exactly one notification.
@@ -197,7 +195,10 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
                 executor.submit(() -> {
                     try {
                         startLatch.await();
-                        castVoteWithDeadlockRetry(voter.getId(), testPlanner.getId());
+                        // No deadlock retry: every voter writes only planner_stats
+                        // (atomic upsert) and the vote row's FK targets the
+                        // write-once planner core, so no lock upgrade can cycle
+                        plannerEngagementService.castVote(voter.getId(), testPlanner.getId(), VoteType.UP);
                     } catch (Throwable t) {
                         failures.add(t);
                     } finally {
@@ -226,24 +227,6 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
                     .filter(n -> n.getNotificationType() == NotificationType.PLANNER_RECOMMENDED)
                     .count();
             assertThat(recommendedNotifications).isEqualTo(1);
-        }
-
-        // Concurrent votes deadlock on the planner_votes FK + upvotes update (InnoDB
-        // lock upgrade); production maps this to a retryable error, so retry like a client.
-        private void castVoteWithDeadlockRetry(Long userId, UUID plannerId) {
-            for (int attempt = 1; ; attempt++) {
-                try {
-                    plannerEngagementService.castVote(userId, plannerId, VoteType.UP);
-                    return;
-                } catch (CannotAcquireLockException deadlock) {
-                    if (attempt >= 25) {
-                        throw deadlock;
-                    }
-                    // Backoff before retrying so the winning transaction can commit and
-                    // release its locks (parkNanos, not a synchronizer — the retry is the wait).
-                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(5));
-                }
-            }
         }
     }
 

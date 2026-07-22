@@ -41,7 +41,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 /**
  * Upsert conflict seam. A client whose {@code syncVersion} trails the server yields
  * 409 STALE_CLIENT; a true optimistic-lock race (both writers passed the syncVersion check,
- * one loses at flush) yields 409 CONCURRENT_WRITE. Both carry the server version.
+ * one loses at flush) yields 409 CONCURRENT_WRITE — deterministically, never a 503:
+ * the owner write touches only the PK-only planner_content row, which nothing
+ * FK-references, so no InnoDB lock upgrade can deadlock two racers.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -136,12 +138,9 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
                 if (loser == null) {
                     continue;
                 }
-                // InnoDB can resolve the same-row collision as a deadlock (503 DEADLOCK)
-                // instead of letting the loser reach the @Version check (409). The deadlock
-                // is a retryable transient, not the conflict under test, so race again.
-                if (loser.getStatus() == HttpStatus.SERVICE_UNAVAILABLE.value()) {
-                    continue;
-                }
+                assertThat(loser.getStatus())
+                        .as("a same-row race must lose at the optimistic-lock check (409), never as a 503 deadlock")
+                        .isNotEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());
                 return loser;
             }
             throw new AssertionError("no version-race conflict observed after 60 attempts");
