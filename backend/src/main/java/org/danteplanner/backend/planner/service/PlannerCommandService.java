@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.planner.dto.*;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -154,7 +155,9 @@ public class PlannerCommandService {
         }
 
         if (selectedKeywords != null) {
-            contentRow.setSelectedKeywords(selectedKeywords);
+            // Normalize at the domain boundary so the entity (and everything fed
+            // from it — column, filter index, facets) carries current ids only
+            contentRow.setSelectedKeywords(PlannerKeywords.fromClient(selectedKeywords).asSet());
         }
         if (deviceId != null) {
             contentRow.setDeviceId(deviceId);
@@ -176,7 +179,9 @@ public class PlannerCommandService {
                         .title(req.title() != null ? req.title() : "Untitled")
                         .status(req.status() != null ? req.status() : PlannerStatus.DRAFT)
                         .category(req.category())
-                        .selectedKeywords(req.selectedKeywords())
+                        .selectedKeywords(req.selectedKeywords() != null
+                                ? PlannerKeywords.fromClient(req.selectedKeywords()).asSet()
+                                : null)
                         .content(req.content())
                         .gameContentVersion(req.contentVersion())
                         .deviceId(deviceId)

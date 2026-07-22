@@ -1,5 +1,6 @@
 package org.danteplanner.backend.converter;
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -105,7 +106,7 @@ class KeywordSetConverterTest {
         @Test
         @DisplayName("all valid keywords are accepted")
         void convertToDatabaseColumn_WhenAllValidKeywords_RoundTripsAll() {
-            Set<String> all = new HashSet<>(KeywordSetConverter.VALID_KEYWORDS);
+            Set<String> all = new HashSet<>(PlannerKeywords.VALID_KEYWORDS);
             String result = converter.convertToDatabaseColumn(all);
             Set<String> resultSet = converter.convertToEntityAttribute(result);
             assertEquals(all, resultSet);

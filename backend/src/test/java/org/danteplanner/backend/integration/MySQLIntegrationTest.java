@@ -20,6 +20,7 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.converter.KeywordSetConverter;
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.repository.*;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
@@ -434,14 +435,14 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
             // set must survive the converter's write and read paths end-to-end, which
             // is why it lives in the containerized tier.
             Planner planner = TestDataFactory.planner(testUser)
-                    .selectedKeywords(new HashSet<>(KeywordSetConverter.VALID_KEYWORDS))
+                    .selectedKeywords(new HashSet<>(PlannerKeywords.VALID_KEYWORDS))
                     .save(plannerRepository);
 
             // No surrounding @Transactional: save commits in its own session, so this
             // findById re-reads from the DB and exercises the converter's read path.
             Planner reloaded = plannerRepository.findById(planner.getId()).orElseThrow();
             assertThat(reloaded.getSelectedKeywords())
-                    .containsExactlyInAnyOrderElementsOf(KeywordSetConverter.VALID_KEYWORDS);
+                    .containsExactlyInAnyOrderElementsOf(PlannerKeywords.VALID_KEYWORDS);
         }
     }
 }
