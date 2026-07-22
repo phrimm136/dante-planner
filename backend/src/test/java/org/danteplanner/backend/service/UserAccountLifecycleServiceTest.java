@@ -70,6 +70,12 @@ class UserAccountLifecycleServiceTest {
     private org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository plannerCommentVoteRepository;
 
     @Mock
+    private org.danteplanner.backend.moderation.repository.PlannerReportRepository plannerReportRepository;
+
+    @Mock
+    private org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository plannerCommentReportRepository;
+
+    @Mock
     private TokenBlacklistService tokenBlacklistService;
 
     private UserAccountLifecycleService lifecycleService;
@@ -93,6 +99,8 @@ class UserAccountLifecycleServiceTest {
                 plannerVoteRepository,
                 plannerCommentRepository,
                 plannerCommentVoteRepository,
+                plannerReportRepository,
+                plannerCommentReportRepository,
                 tokenBlacklistService,
                 GRACE_PERIOD_DAYS
         );

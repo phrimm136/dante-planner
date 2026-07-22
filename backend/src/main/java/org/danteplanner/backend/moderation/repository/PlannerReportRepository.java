@@ -31,4 +31,12 @@ public interface PlannerReportRepository extends JpaRepository<PlannerReport, Lo
      * @return report count
      */
     long countByPlannerId(UUID plannerId);
+
+    /**
+     * Hard-delete sweep by planner ids (user account deletion): reports carry a
+     * no-action FK to the planner core, so they must go before the core cascade.
+     */
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM PlannerReport r WHERE r.plannerId IN :plannerIds")
+    void deleteAllByPlannerIds(@org.springframework.data.repository.query.Param("plannerIds") java.util.Collection<java.util.UUID> plannerIds);
 }

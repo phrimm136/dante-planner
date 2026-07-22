@@ -4,6 +4,8 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
+import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerContentRepository;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
@@ -59,6 +61,8 @@ public class UserAccountLifecycleService {
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerCommentRepository plannerCommentRepository;
     private final PlannerCommentVoteRepository plannerCommentVoteRepository;
+    private final PlannerReportRepository plannerReportRepository;
+    private final PlannerCommentReportRepository plannerCommentReportRepository;
     private final TokenBlacklistService tokenBlacklistService;
     private final int gracePeriodDays;
 
@@ -75,6 +79,8 @@ public class UserAccountLifecycleService {
             PlannerVoteRepository plannerVoteRepository,
             PlannerCommentRepository plannerCommentRepository,
             PlannerCommentVoteRepository plannerCommentVoteRepository,
+            PlannerReportRepository plannerReportRepository,
+            PlannerCommentReportRepository plannerCommentReportRepository,
             TokenBlacklistService tokenBlacklistService,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
@@ -89,6 +95,8 @@ public class UserAccountLifecycleService {
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerCommentRepository = plannerCommentRepository;
         this.plannerCommentVoteRepository = plannerCommentVoteRepository;
+        this.plannerReportRepository = plannerReportRepository;
+        this.plannerCommentReportRepository = plannerCommentReportRepository;
         this.tokenBlacklistService = tokenBlacklistService;
         this.gracePeriodDays = gracePeriodDays;
     }
@@ -174,6 +182,10 @@ public class UserAccountLifecycleService {
         // the core rows (and the FK-bearing child tables) away.
         List<UUID> plannerIds = plannerRepository.findIdsByUserId(userId);
         if (!plannerIds.isEmpty()) {
+            // Reports carry no-action FKs (to the core and to comments) and would
+            // block the cascade the user delete relies on
+            plannerCommentReportRepository.deleteAllByPlannerIds(plannerIds);
+            plannerReportRepository.deleteAllByPlannerIds(plannerIds);
             plannerEntityFilterRepository.deleteAllByPlannerIds(plannerIds);
             plannerKeywordFilterRepository.deleteAllByPlannerIds(plannerIds);
             plannerCatalogRepository.deleteAllByPlannerIds(plannerIds);

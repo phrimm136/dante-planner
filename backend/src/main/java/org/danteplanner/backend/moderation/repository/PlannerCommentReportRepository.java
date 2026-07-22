@@ -32,4 +32,13 @@ public interface PlannerCommentReportRepository extends JpaRepository<PlannerCom
      * @return the report if exists
      */
     Optional<PlannerCommentReport> findByReporterIdAndCommentId(Long reporterId, Long commentId);
+
+    /**
+     * Hard-delete sweep by planner ids (user account deletion): comment reports
+     * carry a no-action FK to comments, so they must go before the comment cascade.
+     */
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query("DELETE FROM PlannerCommentReport r WHERE r.commentId IN "
+            + "(SELECT c.id FROM PlannerComment c WHERE c.plannerId IN :plannerIds)")
+    void deleteAllByPlannerIds(@org.springframework.data.repository.query.Param("plannerIds") java.util.Collection<java.util.UUID> plannerIds);
 }
