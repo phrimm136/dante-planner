@@ -173,20 +173,22 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
     @Test
     @DisplayName("counter-reads-from-stats: list and detail serve seeded stats values, not derived counts")
     void counterReadsFromStats_WhenStatsSeeded_ListAndDetailServeThem() throws Exception {
-        // No comment rows exist: any non-zero commentCount can only come from planner_stats
+        // No comment rows exist: any non-zero commentCount can only come from planner_stats.
+        // The list is asserted BEFORE the detail: the detail request buffers a view
+        // whose scheduled flush would otherwise race the list's viewCount read.
         seedStats(42, 5, 7);
-
-        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.viewCount").value(42))
-                .andExpect(jsonPath("$.upvotes").value(5))
-                .andExpect(jsonPath("$.commentCount").value(7));
 
         mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].viewCount").value(42))
                 .andExpect(jsonPath("$.content[0].upvotes").value(5))
                 .andExpect(jsonPath("$.content[0].commentCount").value(7));
+
+        mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.viewCount").value(42))
+                .andExpect(jsonPath("$.upvotes").value(5))
+                .andExpect(jsonPath("$.commentCount").value(7));
     }
 
     @Test
