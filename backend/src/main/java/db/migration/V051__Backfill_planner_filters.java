@@ -1,8 +1,10 @@
 package db.migration;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.service.PlannerContentEntityExtractor;
 import org.flywaydb.core.api.migration.BaseJavaMigration;
 import org.flywaydb.core.api.migration.Context;
@@ -11,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,34 +55,53 @@ public class V051__Backfill_planner_filters extends BaseJavaMigration {
 
                 String content = rows.getString("content");
                 if (content != null && !content.isBlank()) {
-                    JsonNode root = MAPPER.readTree(content);
-                    Set<PlannerContentEntityExtractor.EntityRef> refs =
-                            PlannerContentEntityExtractor.extract(root);
-                    for (PlannerContentEntityExtractor.EntityRef ref : refs) {
-                        insertEntity.setString(1, ref.type().name());
-                        insertEntity.setInt(2, ref.id());
-                        insertEntity.setBytes(3, plannerId);
-                        insertEntity.addBatch();
+                    JsonNode root = parseOrNull(content);
+                    if (root != null) {
+                        Set<PlannerContentEntityExtractor.EntityRef> refs =
+                                PlannerContentEntityExtractor.extract(root);
+                        for (PlannerContentEntityExtractor.EntityRef ref : refs) {
+                            insertEntity.setString(1, ref.type().name());
+                            insertEntity.setInt(2, ref.id());
+                            insertEntity.setBytes(3, plannerId);
+                            insertEntity.addBatch();
+                        }
                     }
                 }
 
-                String keywordsJson = rows.getString("selected_keywords");
-                if (keywordsJson != null && !keywordsJson.isBlank()) {
-                    JsonNode keywords = MAPPER.readTree(keywordsJson);
-                    if (keywords.isArray()) {
-                        for (JsonNode keyword : keywords) {
-                            if (keyword.isTextual() && !keyword.asText().isEmpty()) {
-                                insertKeyword.setString(1, keyword.asText());
-                                insertKeyword.setBytes(2, plannerId);
-                                insertKeyword.addBatch();
-                            }
-                        }
-                    }
+                // Same normalization as the runtime write path: renames applied,
+                // unknown members dropped, so the index answers the current ids
+                for (String keyword : normalizedKeywords(rows.getString("selected_keywords"))) {
+                    insertKeyword.setString(1, keyword);
+                    insertKeyword.setBytes(2, plannerId);
+                    insertKeyword.addBatch();
                 }
             }
 
             insertEntity.executeBatch();
             insertKeyword.executeBatch();
+        }
+    }
+
+    private static JsonNode parseOrNull(String json) {
+        try {
+            return MAPPER.readTree(json);
+        } catch (Exception e) {
+            // Mirror the runtime tolerance: an unindexable document is skipped,
+            // never allowed to abort the whole migration
+            return null;
+        }
+    }
+
+    private static Set<String> normalizedKeywords(String keywordsJson) {
+        if (keywordsJson == null || keywordsJson.isBlank()) {
+            return Set.of();
+        }
+        try {
+            List<String> stored = MAPPER.readValue(keywordsJson, new TypeReference<List<String>>() {
+            });
+            return PlannerKeywords.fromStorage(stored).asSet();
+        } catch (Exception e) {
+            return Set.of();
         }
     }
 }

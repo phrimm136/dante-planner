@@ -11,7 +11,9 @@ DROP PROCEDURE IF EXISTS planner_decompose_repoint;
 CREATE PROCEDURE planner_decompose_repoint(
     IN p_table VARCHAR(64), IN p_fk VARCHAR(64), IN p_cascade BOOLEAN)
 BEGIN
-    -- Repoint only while the FK still targets the legacy planners table.
+    -- Two independent guards so a crash between the DROP and the ADD reruns
+    -- cleanly: drop while the FK still targets legacy planners, add while the
+    -- name is absent (whatever the reason).
     IF EXISTS (SELECT 1 FROM information_schema.key_column_usage
                WHERE constraint_schema = DATABASE()
                  AND table_name = p_table
@@ -19,6 +21,11 @@ BEGIN
                  AND referenced_table_name = 'planners') THEN
         SET @ddl = CONCAT('ALTER TABLE ', p_table, ' DROP FOREIGN KEY ', p_fk);
         PREPARE stmt FROM @ddl; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints
+                   WHERE constraint_schema = DATABASE()
+                     AND table_name = p_table
+                     AND constraint_name = p_fk) THEN
         SET @ddl = CONCAT('ALTER TABLE ', p_table,
             ' ADD CONSTRAINT ', p_fk,
             ' FOREIGN KEY (planner_id) REFERENCES planner(id)',
