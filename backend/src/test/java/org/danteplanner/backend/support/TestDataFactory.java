@@ -2,6 +2,9 @@ package org.danteplanner.backend.support;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
@@ -11,6 +14,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 public class TestDataFactory {
@@ -77,21 +81,121 @@ public class TestDataFactory {
     }
 
     public static Planner createTestPlanner(PlannerRepository plannerRepository, User owner, boolean published) {
-        Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(owner)
-                .title("Test Planner")
-                .category("5F")
-                .status(published ? PlannerStatus.SAVED : PlannerStatus.DRAFT)
-                .content(VALID_CONTENT)
-                .syncVersion(1L)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .published(published)
-                .savedAt(Instant.now())
-                .build();
-        return plannerRepository.save(planner);
+        return planner(owner).published(published).save(plannerRepository);
+    }
+
+    public static PlannerBuilder planner(User owner) {
+        return new PlannerBuilder(owner);
+    }
+
+    /**
+     * Fluent aggregate builder: assembles the planner core plus its content,
+     * publication, and moderation satellites in one call chain.
+     */
+    public static class PlannerBuilder {
+        private final User owner;
+        private UUID id = UUID.randomUUID();
+        private String title = "Test Planner";
+        private String category = "5F";
+        private PlannerStatus status;
+        private String content = VALID_CONTENT;
+        private Integer schemaVersion = 1;
+        private Integer contentVersion = 6;
+        private PlannerType plannerType = PlannerType.MIRROR_DUNGEON;
+        private Set<String> selectedKeywords;
+        private boolean published;
+        private Instant firstPublishedAt;
+
+        private PlannerBuilder(User owner) {
+            this.owner = owner;
+        }
+
+        public PlannerBuilder id(UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public PlannerBuilder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public PlannerBuilder category(String category) {
+            this.category = category;
+            return this;
+        }
+
+        public PlannerBuilder status(PlannerStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public PlannerBuilder content(String content) {
+            this.content = content;
+            return this;
+        }
+
+        public PlannerBuilder schemaVersion(Integer schemaVersion) {
+            this.schemaVersion = schemaVersion;
+            return this;
+        }
+
+        public PlannerBuilder contentVersion(Integer contentVersion) {
+            this.contentVersion = contentVersion;
+            return this;
+        }
+
+        public PlannerBuilder plannerType(PlannerType plannerType) {
+            this.plannerType = plannerType;
+            return this;
+        }
+
+        public PlannerBuilder selectedKeywords(Set<String> selectedKeywords) {
+            this.selectedKeywords = selectedKeywords;
+            return this;
+        }
+
+        public PlannerBuilder published(boolean published) {
+            this.published = published;
+            return this;
+        }
+
+        public PlannerBuilder firstPublishedAt(Instant firstPublishedAt) {
+            this.firstPublishedAt = firstPublishedAt;
+            return this;
+        }
+
+        public Planner build() {
+            Planner planner = Planner.builder()
+                    .id(id)
+                    .user(owner)
+                    .plannerType(plannerType)
+                    .build();
+            planner.attach(
+                    PlannerContent.builder()
+                            .title(title)
+                            .category(category)
+                            .status(status != null ? status
+                                    : (published ? PlannerStatus.SAVED : PlannerStatus.DRAFT))
+                            .content(content)
+                            .contentSchemaVersion(schemaVersion)
+                            .gameContentVersion(contentVersion)
+                            .selectedKeywords(selectedKeywords)
+                            .build(),
+                    PlannerPublication.builder().build(),
+                    PlannerModeration.builder().build());
+            if (published) {
+                planner.togglePublished();
+            }
+            if (firstPublishedAt != null) {
+                planner.getPublication().setFirstPublishedAt(firstPublishedAt);
+            }
+            return planner;
+        }
+
+        public Planner save(PlannerRepository plannerRepository) {
+            return plannerRepository.save(build());
+        }
     }
 
     public static String generateAccessToken(JwtTokenService jwtTokenService, User user) {

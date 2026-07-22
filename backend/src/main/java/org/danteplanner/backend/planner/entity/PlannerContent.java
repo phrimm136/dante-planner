@@ -1,0 +1,125 @@
+package org.danteplanner.backend.planner.entity;
+
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import org.danteplanner.backend.planner.converter.KeywordSetConverter;
+import org.danteplanner.backend.planner.converter.PlannerStatusConverter;
+
+import java.time.Instant;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * Owner-mutated planner content row. The only writer is the owning user's save path,
+ * making {@code row_lock_version} the aggregate's single optimistic-lock boundary.
+ * Deliberately bare: no secondary index, no inbound FK (INV6), so a concurrent
+ * same-row write can only serialize on the row's X lock — never deadlock via a
+ * child's shared lock.
+ */
+@Entity
+@Table(name = "planner_content")
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class PlannerContent {
+
+    @Id
+    @Column(name = "planner_id", columnDefinition = "BINARY(16)")
+    private UUID plannerId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "planner_id")
+    @Setter
+    private Planner planner;
+
+    @Column(nullable = false)
+    @Setter
+    @Builder.Default
+    private String title = "Untitled";
+
+    @Column(nullable = false, length = 16)
+    @Setter
+    @Convert(converter = PlannerStatusConverter.class)
+    @Builder.Default
+    private PlannerStatus status = PlannerStatus.DRAFT;
+
+    @Column(nullable = false, length = 50)
+    @Setter
+    private String category;
+
+    @Column(name = "selected_keywords", columnDefinition = "JSON")
+    @Setter
+    @Convert(converter = KeywordSetConverter.class)
+    private Set<String> selectedKeywords;
+
+    @Column(columnDefinition = "JSON", nullable = false)
+    @Setter
+    private String content;
+
+    @Column(name = "content_schema_version", nullable = false)
+    @Setter
+    @Builder.Default
+    private Integer contentSchemaVersion = 2;
+
+    @Column(name = "game_content_version", nullable = false)
+    @Setter
+    private Integer gameContentVersion;
+
+    @Column(name = "sync_version", nullable = false)
+    @Builder.Default
+    private Long syncVersion = 1L;
+
+    @Version
+    @Column(name = "row_lock_version", nullable = false)
+    private Long rowLockVersion;
+
+    @Column(name = "device_id", columnDefinition = "BINARY(16)")
+    @Setter
+    private UUID deviceId;
+
+    @Column(name = "last_modified_at", nullable = false)
+    @Setter
+    private Instant lastModifiedAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (lastModifiedAt == null) {
+            lastModifiedAt = Instant.now();
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastModifiedAt = Instant.now();
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
+    /**
+     * Soft delete: stamped here (not on the core row) so cross-device sync pulls
+     * see the deletion without a join.
+     */
+    public void markDeleted() {
+        this.deletedAt = Instant.now();
+    }
+
+    /**
+     * Record a save: bump the sync version handed back to clients.
+     */
+    public void recordSave() {
+        this.syncVersion = this.syncVersion + 1;
+    }
+}

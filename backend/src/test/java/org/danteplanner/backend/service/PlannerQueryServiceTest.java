@@ -11,6 +11,8 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,7 +28,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,6 +46,9 @@ class PlannerQueryServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     private PlannerQueryService queryService;
@@ -56,7 +60,7 @@ class PlannerQueryServiceTest {
         MockitoAnnotations.openMocks(this);
 
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(userRepository, plannerRepository);
-        queryService = new PlannerQueryService(plannerRepository, accessGuard);
+        queryService = new PlannerQueryService(plannerRepository, plannerStatsRepository, accessGuard);
 
         testUser = User.builder()
                 .id(1L)
@@ -68,21 +72,15 @@ class PlannerQueryServiceTest {
                 .build();
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
+    private TestDataFactory.PlannerBuilder testPlannerBuilder() {
+        return TestDataFactory.planner(testUser)
                 .title("Test Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
                 .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
+                .plannerType(PlannerType.MIRROR_DUNGEON);
     }
 
     private Planner createTestPlanner() {
@@ -98,11 +96,13 @@ class PlannerQueryServiceTest {
         void getPlanners_WhenCalled_ReturnsPaginatedResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            List<Planner> planners = List.of(createTestPlanner(), createTestPlanner());
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+            List<PlannerSummaryResponse> summaries = List.of(
+                    PlannerSummaryResponse.fromEntity(createTestPlanner()),
+                    PlannerSummaryResponse.fromEntity(createTestPlanner()));
+            Page<PlannerSummaryResponse> summaryPage = new PageImpl<>(summaries, pageable, 2);
 
-            when(plannerRepository.findByUserIdAndDeletedAtIsNullOrderByLastModifiedAtDesc(testUser.getId(), pageable))
-                    .thenReturn(plannerPage);
+            when(plannerRepository.findOwnerSummaries(testUser.getId(), pageable))
+                    .thenReturn(summaryPage);
 
             // Act
             Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
@@ -117,9 +117,9 @@ class PlannerQueryServiceTest {
         void getPlanners_NoPlanners_ReturnsEmptyPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            Page<PlannerSummaryResponse> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-            when(plannerRepository.findByUserIdAndDeletedAtIsNullOrderByLastModifiedAtDesc(testUser.getId(), pageable))
+            when(plannerRepository.findOwnerSummaries(testUser.getId(), pageable))
                     .thenReturn(emptyPage);
 
             // Act
@@ -140,8 +140,10 @@ class PlannerQueryServiceTest {
         void getPlanner_Found_ReturnsPlanner() {
             // Arrange
             Planner planner = createTestPlanner();
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
+            when(plannerStatsRepository.findById(planner.getId()))
+                    .thenReturn(Optional.empty());
 
             // Act
             PlannerResponse response = queryService.getPlanner(testUser.getId(), planner.getId());
@@ -157,7 +159,7 @@ class PlannerQueryServiceTest {
         void getPlanner_NotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
 
             // Act & Assert

@@ -5,6 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.planner.dto.*;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.user.entity.User;
@@ -17,6 +21,7 @@ import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
@@ -27,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,10 +47,12 @@ import java.util.UUID;
 public class PlannerCommandService {
 
     private final PlannerRepository plannerRepository;
+    private final PlannerStatsRepository statsRepository;
     private final PlannerSyncEventService sseService;
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
-    private final PlannerIndexService plannerIndexService;
+    private final PlannerFilterService plannerFilterService;
+    private final PlannerCatalogService plannerCatalogService;
     private final PlannerAccessGuard accessGuard;
     private final Optional<ContentTombstoneStore> tombstoneStore;
 
@@ -55,33 +61,40 @@ public class PlannerCommandService {
 
     public PlannerCommandService(
             PlannerRepository plannerRepository,
+            PlannerStatsRepository statsRepository,
             PlannerSyncEventService sseService,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
-            PlannerIndexService plannerIndexService,
+            PlannerFilterService plannerFilterService,
+            PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
-        this(plannerRepository, sseService, contentValidator, contentVersionValidator,
-                plannerIndexService, accessGuard, Optional.empty(), maxPlannersPerUser, currentSchemaVersion);
+        this(plannerRepository, statsRepository, sseService, contentValidator, contentVersionValidator,
+                plannerFilterService, plannerCatalogService, accessGuard, Optional.empty(),
+                maxPlannersPerUser, currentSchemaVersion);
     }
 
     @Autowired
     public PlannerCommandService(
             PlannerRepository plannerRepository,
+            PlannerStatsRepository statsRepository,
             PlannerSyncEventService sseService,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
-            PlannerIndexService plannerIndexService,
+            PlannerFilterService plannerFilterService,
+            PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
             Optional<ContentTombstoneStore> tombstoneStore,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.schema-version}") int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
+        this.statsRepository = statsRepository;
         this.sseService = sseService;
         this.contentValidator = contentValidator;
         this.contentVersionValidator = contentVersionValidator;
-        this.plannerIndexService = plannerIndexService;
+        this.plannerFilterService = plannerFilterService;
+        this.plannerCatalogService = plannerCatalogService;
         this.accessGuard = accessGuard;
         this.tombstoneStore = tombstoneStore;
         this.maxPlannersPerUser = maxPlannersPerUser;
@@ -103,8 +116,8 @@ public class PlannerCommandService {
     }
 
     /**
-     * Copy provided request fields onto an existing planner, validating category and content.
-     * Only non-null fields are applied.
+     * Copy provided request fields onto the aggregate's content row, validating
+     * category and content. Only non-null fields are applied.
      *
      * @param skipUnchangedCategory upsert semantics when true: category is validated and applied
      *                              only if it differs from the current value, and unchanged content
@@ -114,37 +127,63 @@ public class PlannerCommandService {
     private void applyRequestFields(Planner planner, String title, PlannerStatus status,
             String category, String content, Set<String> selectedKeywords, UUID deviceId,
             boolean skipUnchangedCategory) {
+        PlannerContent contentRow = planner.getContent();
         if (title != null) {
-            planner.setTitle(title);
+            contentRow.setTitle(title);
         }
         if (status != null) {
-            planner.setStatus(status);
+            contentRow.setStatus(status);
         }
 
         boolean categoryChanged = false;
-        if (category != null && (!skipUnchangedCategory || !category.equals(planner.getCategory()))) {
+        if (category != null && (!skipUnchangedCategory || !category.equals(contentRow.getCategory()))) {
             if (!isValidCategory(planner.getPlannerType(), category)) {
                 throw new PlannerValidationException(
                         ErrorCode.INVALID_CATEGORY.getCode(),
                         "Invalid category '" + category + "' for planner type " + planner.getPlannerType());
             }
-            planner.setCategory(category);
+            contentRow.setCategory(category);
             categoryChanged = true;
         }
 
         if (content != null) {
-            contentValidator.validate(content, planner.getCategory(), planner.getPublished());
-            planner.setContent(content);
+            contentValidator.validate(content, contentRow.getCategory(), planner.getPublished());
+            contentRow.setContent(content);
         } else if (categoryChanged && skipUnchangedCategory) {
-            contentValidator.validate(planner.getContent(), planner.getCategory(), planner.getPublished());
+            contentValidator.validate(contentRow.getContent(), contentRow.getCategory(), planner.getPublished());
         }
 
         if (selectedKeywords != null) {
-            planner.setSelectedKeywords(selectedKeywords);
+            contentRow.setSelectedKeywords(selectedKeywords);
         }
         if (deviceId != null) {
-            planner.setDeviceId(deviceId.toString());
+            contentRow.setDeviceId(deviceId);
         }
+    }
+
+    /**
+     * Build a fresh aggregate (core + content + publication + moderation) from
+     * request fields.
+     */
+    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest req, UUID deviceId) {
+        Planner planner = Planner.builder()
+                .id(id)
+                .user(user)
+                .plannerType(req.plannerType())
+                .build();
+        planner.attach(
+                PlannerContent.builder()
+                        .title(req.title() != null ? req.title() : "Untitled")
+                        .status(req.status() != null ? req.status() : PlannerStatus.DRAFT)
+                        .category(req.category())
+                        .selectedKeywords(req.selectedKeywords())
+                        .content(req.content())
+                        .gameContentVersion(req.contentVersion())
+                        .deviceId(deviceId)
+                        .build(),
+                PlannerPublication.builder().build(),
+                PlannerModeration.builder().build());
+        return planner;
     }
 
     /**
@@ -169,7 +208,7 @@ public class PlannerCommandService {
         User user = accessGuard.getUserAndCheckRestrictions(userId);
 
         // Check planner count limit
-        long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
+        long currentCount = plannerRepository.countActiveByUserId(userId);
         if (currentCount >= maxPlannersPerUser) {
             throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
         }
@@ -187,25 +226,11 @@ public class PlannerCommandService {
         // Validate content with category context
         contentValidator.validate(req.content(), req.category());
 
-        // Build and save planner (use client-provided ID)
-        Planner planner = Planner.builder()
-                .id(UUID.fromString(req.id()))
-                .user(user)
-                .category(req.category())
-                .title(req.title() != null ? req.title() : "Untitled")
-                .status(req.status() != null ? req.status() : PlannerStatus.DRAFT)
-                .content(req.content())
-                .contentVersion(req.contentVersion())
-                .plannerType(req.plannerType())
-                .selectedKeywords(req.selectedKeywords())
-                .deviceId(deviceId != null ? deviceId.toString() : null)
-                .savedAt(Instant.now())
-                .build();
-
-        Planner saved = plannerRepository.save(planner);
+        Planner saved = plannerRepository.save(buildAggregate(UUID.fromString(req.id()), user, req, deviceId));
+        statsRepository.save(PlannerStats.builder().plannerId(saved.getId()).build());
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
-        PlannerResponse response = PlannerResponse.fromEntity(saved);
+        PlannerResponse response = PlannerResponse.fromEntity(saved, 0);
 
         // Notify other devices via SSE
         sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), SseEventType.CREATED.getValue(), response);
@@ -229,7 +254,7 @@ public class PlannerCommandService {
      */
     @Transactional
     public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
-        var existingPlanner = plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(id, userId);
+        var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);
 
         if (existingPlanner.isPresent()) {
             log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
@@ -237,9 +262,6 @@ public class PlannerCommandService {
 
             // Check if user has any restrictions
             accessGuard.checkUserRestrictions(userId);
-
-            // Preserve moderator takedown status (allow sync but keep taken-down)
-            Instant originalTakenDownAt = planner.getTakenDownAt();
 
             // Check optimistic locking unless force override is requested
             if (!force && req.syncVersion() != null && !planner.getSyncVersion().equals(req.syncVersion())) {
@@ -250,25 +272,22 @@ public class PlannerCommandService {
                     req.content(), req.selectedKeywords(), deviceId, true);
 
             if (req.contentVersion() != null) {
-                planner.setContentVersion(req.contentVersion());
+                planner.getContent().setGameContentVersion(req.contentVersion());
             }
 
-            // Restore moderator takedown status (preserve across syncs)
-            if (originalTakenDownAt != null) {
-                planner.setTakenDownAt(originalTakenDownAt);
-            }
-
-            planner.setSchemaVersion(currentSchemaVersion);
+            planner.getContent().setContentSchemaVersion(currentSchemaVersion);
             planner.recordSave();
 
             Planner saved = plannerRepository.save(planner);
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
 
             if (Boolean.TRUE.equals(saved.getPublished())) {
-                plannerIndexService.reindex(saved.getId(), saved.getContent());
+                plannerCatalogService.syncScalarCopy(saved);
+                plannerFilterService.rebuildFilters(saved.getId(), saved.getContentJson(),
+                        saved.getSelectedKeywords());
             }
 
-            PlannerResponse response = PlannerResponse.fromEntity(saved);
+            PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
             sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
             return UpsertResult.updated(response);
         }
@@ -280,7 +299,7 @@ public class PlannerCommandService {
         }
 
         // Check if planner exists for another user (prevents ID collision)
-        if (plannerRepository.existsByIdAndDeletedAtIsNull(id)) {
+        if (plannerRepository.existsActiveById(id)) {
             log.warn("Planner {} exists but belongs to another user (ID collision)", id);
             throw new PlannerForbiddenException(id);
         }
@@ -337,10 +356,12 @@ public class PlannerCommandService {
         log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, saved.getSyncVersion());
 
         if (Boolean.TRUE.equals(saved.getPublished())) {
-            plannerIndexService.reindex(saved.getId(), saved.getContent());
+            plannerCatalogService.syncScalarCopy(saved);
+            plannerFilterService.rebuildFilters(saved.getId(), saved.getContentJson(),
+                    saved.getSelectedKeywords());
         }
 
-        PlannerResponse response = PlannerResponse.fromEntity(saved);
+        PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
 
         // Notify other devices via SSE
         sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
@@ -366,12 +387,13 @@ public class PlannerCommandService {
         // Auto-unpublish if published (subscriptions cascade at DB level)
         if (planner.getPublished()) {
             planner.unpublish();
-            plannerIndexService.deleteIndex(id);
             log.info("Auto-unpublished planner {} before deletion", id);
         }
 
         planner.softDelete();
         plannerRepository.save(planner);
+        plannerCatalogService.remove(id);
+        plannerFilterService.clearFilters(id);
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
@@ -401,7 +423,7 @@ public class PlannerCommandService {
         // Check restrictions and get user entity (needed for limit check)
         User user = accessGuard.getUserAndCheckRestrictions(userId);
 
-        long currentCount = plannerRepository.countByUserIdAndDeletedAtIsNull(userId);
+        long currentCount = plannerRepository.countActiveByUserId(userId);
         int requestedCount = req.planners().size();
 
         if (currentCount + requestedCount > maxPlannersPerUser) {
@@ -423,20 +445,9 @@ public class PlannerCommandService {
 
             contentValidator.validate(plannerReq.content(), plannerReq.category());
 
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(user)
-                    .category(plannerReq.category())
-                    .title(plannerReq.title() != null ? plannerReq.title() : "Untitled")
-                    .status(plannerReq.status() != null ? plannerReq.status() : PlannerStatus.DRAFT)
-                    .content(plannerReq.content())
-                    .contentVersion(plannerReq.contentVersion())
-                    .plannerType(plannerReq.plannerType())
-                    .selectedKeywords(plannerReq.selectedKeywords())
-                    .savedAt(Instant.now())
-                    .build();
-
-            Planner saved = plannerRepository.save(planner);
+            Planner saved = plannerRepository.save(
+                    buildAggregate(UUID.randomUUID(), user, plannerReq, null));
+            statsRepository.save(PlannerStats.builder().plannerId(saved.getId()).build());
             importedPlanners.add(PlannerSummaryResponse.fromEntity(saved));
         }
 
@@ -447,5 +458,11 @@ public class PlannerCommandService {
                 .total(requestedCount)
                 .planners(importedPlanners)
                 .build();
+    }
+
+    private int currentUpvotes(UUID plannerId) {
+        return statsRepository.findById(plannerId)
+                .map(PlannerStats::getUpvotes)
+                .orElse(0);
     }
 }

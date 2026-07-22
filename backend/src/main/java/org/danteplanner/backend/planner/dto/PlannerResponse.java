@@ -10,7 +10,10 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Response DTO for a single owned planner.
+ * Response DTO for a single owned planner. Wire names are frozen across the
+ * schema decomposition: {@code schemaVersion}/{@code contentVersion} map to the
+ * renamed content columns, and {@code savedAt} is the content row's last
+ * modification time (the save time, now that only owner saves touch that row).
  */
 @Builder
 public record PlannerResponse(
@@ -32,28 +35,29 @@ public record PlannerResponse(
 ) {
 
     /**
-     * Create a PlannerResponse from a Planner entity.
+     * Create a PlannerResponse from a planner aggregate.
      *
-     * @param planner the planner entity
+     * @param planner the planner aggregate root
+     * @param upvotes the planner's upvote count (from planner_stats)
      * @return the response DTO
      */
-    public static PlannerResponse fromEntity(Planner planner) {
+    public static PlannerResponse fromEntity(Planner planner, int upvotes) {
         return PlannerResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
                 .status(planner.getStatus())
-                .content(planner.getContent())
+                .content(planner.getContentJson())
                 .schemaVersion(planner.getSchemaVersion())
                 .contentVersion(planner.getContentVersion())
                 .plannerType(planner.getPlannerType())
                 .syncVersion(planner.getSyncVersion())
-                .deviceId(planner.getDeviceId())
+                .deviceId(planner.getDeviceId() != null ? planner.getDeviceId().toString() : null)
                 .createdAt(planner.getCreatedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
-                .savedAt(planner.getSavedAt())
+                .savedAt(planner.getLastModifiedAt())
                 .published(planner.getPublished())
-                .upvotes(planner.getUpvotes())
+                .upvotes(upvotes)
                 .build();
     }
 }

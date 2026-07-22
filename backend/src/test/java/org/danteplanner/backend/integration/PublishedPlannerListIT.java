@@ -2,9 +2,12 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -23,7 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
-import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -55,6 +57,12 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerRepository plannerRepository;
 
+    @Autowired
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Autowired
+    private PlannerCatalogService catalogService;
+
     private User author;
 
     @BeforeEach
@@ -66,10 +74,8 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
         author = TestDataFactory.createTestUser(userRepository, "author@example.com");
     }
 
-    private Planner.PlannerBuilder base(String title) {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(author)
+    private TestDataFactory.PlannerBuilder base(String title) {
+        return TestDataFactory.planner(author)
                 .title(title)
                 .category("5F")
                 .status(PlannerStatus.SAVED)
@@ -83,6 +89,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     @DisplayName("list_WhenSeeded_ShowsOnlyPublished")
     void list_WhenSeeded_ShowsOnlyPublished() throws Exception {
         Planner p1 = plannerRepository.save(base("P1").published(true).build());
+        catalogService.add(p1);
 
         Planner p2 = plannerRepository.save(base("P2").published(true).build());
         p2.takeDown();
@@ -106,17 +113,20 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
         Planner p = base("Field Parity")
                 .published(true)
                 .selectedKeywords(Set.of("Burst", "Sinking"))
-                .upvotes(7)
-                .viewCount(42)
                 .build();
         p = plannerRepository.save(p);
+        plannerStatsRepository.save(PlannerStats.builder()
+                .plannerId(p.getId())
+                .upvotes(7)
+                .viewCount(42)
+                .build());
+        catalogService.add(p);
 
         mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(p.getId().toString()))
                 .andExpect(jsonPath("$.content[0].title").value("Field Parity"))
                 .andExpect(jsonPath("$.content[0].category").value("5F"))
-                .andExpect(jsonPath("$.content[0].contentVersion").value(6))
                 .andExpect(jsonPath("$.content[0].plannerType").value("MIRROR_DUNGEON"))
                 .andExpect(jsonPath("$.content[0].selectedKeywords").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].authorUsernameEpithet").isNotEmpty())
@@ -124,6 +134,6 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
                 .andExpect(jsonPath("$.content[0].upvotes").value(7))
                 .andExpect(jsonPath("$.content[0].createdAt").isNotEmpty())
                 .andExpect(jsonPath("$.content[0].viewCount").value(42))
-                .andExpect(jsonPath("$.content[0].lastModifiedAt").isNotEmpty());
+                .andExpect(jsonPath("$.content[0].firstPublishedAt").isNotEmpty());
     }
 }

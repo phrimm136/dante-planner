@@ -68,10 +68,6 @@ class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
         return TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
     }
 
-    private int viewCount(UUID plannerId) {
-        return plannerRepository.findById(plannerId).orElseThrow().getViewCount();
-    }
-
     private int statsViewCount(UUID plannerId) {
         Integer v = jdbcTemplate.queryForObject(
                 "SELECT view_count FROM planner_stats WHERE planner_id = UUID_TO_BIN(?)",
@@ -97,7 +93,6 @@ class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
         recorder.flush();
 
         assertThat(viewRows(plannerId)).as("one row per distinct viewer").isEqualTo(3);
-        assertThat(viewCount(plannerId)).as("legacy counter advances by the batch").isEqualTo(3);
         assertThat(statsViewCount(plannerId)).as("stats counter advances by the batch").isEqualTo(3);
     }
 
@@ -112,8 +107,6 @@ class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
         recorder.record(second, "viewer-b", DAY);
         recorder.flush();
 
-        assertThat(viewCount(first)).isEqualTo(1);
-        assertThat(viewCount(second)).isEqualTo(2);
         assertThat(statsViewCount(first)).isEqualTo(1);
         assertThat(statsViewCount(second)).isEqualTo(2);
     }
@@ -129,7 +122,6 @@ class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
         recorder.flush();
 
         assertThat(viewRows(plannerId)).isEqualTo(2);
-        assertThat(viewCount(plannerId)).isEqualTo(2);
         assertThat(statsViewCount(plannerId)).isEqualTo(2);
     }
 }

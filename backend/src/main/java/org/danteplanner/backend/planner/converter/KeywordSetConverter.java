@@ -1,10 +1,12 @@
 package org.danteplanner.backend.planner.converter;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,18 +14,23 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * JPA AttributeConverter for the {@code selected_keywords} MySQL SET column.
- * Converts between {@code Set<String>} and the comma-separated SET storage form,
- * remapping legacy keyword ids (see {@link #RENAME_MAP}) and dropping members no longer
- * in the SET so a stale client's planner cannot fail the sync. The authoritative keyword
- * list is {@link #VALID_KEYWORDS}.
+ * JPA AttributeConverter for the {@code selected_keywords} JSON column.
+ * Converts between {@code Set<String>} and a JSON string array, remapping legacy
+ * keyword ids (see {@link #RENAME_MAP}) and dropping unknown members so a stale
+ * client's planner cannot fail the sync. The authoritative keyword list is
+ * {@link #VALID_KEYWORDS}. Reading is total: malformed storage yields an empty set.
  */
 @Slf4j
 @Converter
 public class KeywordSetConverter implements AttributeConverter<Set<String>, String> {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final TypeReference<List<String>> STRING_LIST = new TypeReference<>() {
+    };
+
     /**
-     * Valid keywords for the SET column - must match MySQL SET definition.
+     * Valid planner keywords; members outside this list are dropped on write.
      */
     public static final Set<String> VALID_KEYWORDS = Set.of(
             // Status effects
@@ -44,9 +51,9 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
 
     /**
      * Legacy keyword aliases from pre-rename clients, mapped to their current ids.
-     * Renamed via migrations V038 (ChargeLoad) and V044 (AccelBullet); the old members
-     * were dropped from the SET column, so an outdated client still syncing the old name
-     * must be normalized before storage. Keys are intentionally absent from VALID_KEYWORDS.
+     * Renamed via migrations V038 (ChargeLoad) and V044 (AccelBullet); an outdated
+     * client still syncing the old name must be normalized before storage. Keys are
+     * intentionally absent from VALID_KEYWORDS.
      */
     private static final Map<String, String> RENAME_MAP = Map.of(
             "AccelBullet", "9828",
@@ -58,9 +65,7 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
         if (attribute == null || attribute.isEmpty()) {
             return null;
         }
-        // Normalize stale client data: remap renamed keywords, drop anything no longer a
-        // SET member. Mirrors convertToEntityAttribute's read tolerance so a pre-rename
-        // keyword from an outdated client cannot fail the whole planner sync.
+        // Normalize stale client data: remap renamed keywords, drop anything unknown.
         Set<String> remapped = attribute.stream()
                 .map(k -> RENAME_MAP.getOrDefault(k, k))
                 .collect(Collectors.toSet());
@@ -72,11 +77,19 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
         if (!dropped.isEmpty()) {
             log.warn("Dropping unknown planner keywords on write: {}", dropped);
         }
-        String csv = remapped.stream()
+        List<String> kept = remapped.stream()
                 .filter(VALID_KEYWORDS::contains)
                 .sorted()
-                .collect(Collectors.joining(","));
-        return csv.isEmpty() ? null : csv;
+                .toList();
+        if (kept.isEmpty()) {
+            return null;
+        }
+        try {
+            return MAPPER.writeValueAsString(kept);
+        } catch (Exception e) {
+            log.error("Failed to serialize planner keywords {}", kept, e);
+            return null;
+        }
     }
 
     @Override
@@ -84,10 +97,15 @@ public class KeywordSetConverter implements AttributeConverter<Set<String>, Stri
         if (dbData == null || dbData.isEmpty()) {
             return new HashSet<>();
         }
-        // Parse comma-separated MySQL SET values
-        return Arrays.stream(dbData.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
+        List<String> parsed;
+        try {
+            parsed = MAPPER.readValue(dbData, STRING_LIST);
+        } catch (Exception e) {
+            log.warn("Unreadable planner keyword storage, treating as empty: {}", dbData, e);
+            return new HashSet<>();
+        }
+        return parsed.stream()
+                .map(k -> RENAME_MAP.getOrDefault(k, k))
                 .filter(VALID_KEYWORDS::contains)
                 .collect(Collectors.toCollection(HashSet::new));
     }

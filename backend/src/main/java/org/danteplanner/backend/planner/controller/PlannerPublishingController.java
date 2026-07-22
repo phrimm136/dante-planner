@@ -52,8 +52,7 @@ public class PlannerPublishingController {
 
         rateLimitConfig.checkCrudLimit(userId, "publish");
         log.info("Toggling publish status for planner {} by user {}", id, userId);
-        Planner planner = plannerPublishingService.togglePublish(userId, id);
-        return ResponseEntity.ok(PlannerResponse.fromEntity(planner));
+        return ResponseEntity.ok(plannerPublishingService.togglePublish(userId, id));
     }
 
     /**

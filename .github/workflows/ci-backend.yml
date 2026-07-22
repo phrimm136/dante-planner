@@ -126,8 +126,14 @@ jobs:
       - name: Run seed data
         if: steps.detect.outputs.has_new == 'true'
         run: |
+          # Seed with the BASE branch copy: the seed runs after the merged
+          # migrations and before the PR's new ones, so it must match the
+          # base-branch schema even when this PR changes both schema and seed.
+          SEED_PATH="backend/src/test/resources/db/seed/migration-test-seed.sql"
+          git show "origin/main:${SEED_PATH}" > /tmp/base-seed.sql 2>/dev/null \
+            || cp "${SEED_PATH}" /tmp/base-seed.sql
           mysql -h 127.0.0.1 -u danteplanner -pdanteplanner danteplanner \
-            < backend/src/test/resources/db/seed/migration-test-seed.sql
+            < /tmp/base-seed.sql
 
       - name: Run new migrations
         if: steps.detect.outputs.has_new == 'true'

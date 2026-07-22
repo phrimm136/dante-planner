@@ -4,6 +4,14 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
+import org.danteplanner.backend.planner.repository.PlannerContentRepository;
+import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
+import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
+import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -13,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Service responsible for user account lifecycle operations.
@@ -38,6 +48,14 @@ public class UserAccountLifecycleService {
     public static final Long SENTINEL_USER_ID = 0L;
 
     private final UserRepository userRepository;
+    private final PlannerRepository plannerRepository;
+    private final PlannerContentRepository plannerContentRepository;
+    private final PlannerPublicationRepository plannerPublicationRepository;
+    private final PlannerModerationRepository plannerModerationRepository;
+    private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerCatalogRepository plannerCatalogRepository;
+    private final PlannerEntityFilterRepository plannerEntityFilterRepository;
+    private final PlannerKeywordFilterRepository plannerKeywordFilterRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerCommentRepository plannerCommentRepository;
     private final PlannerCommentVoteRepository plannerCommentVoteRepository;
@@ -46,12 +64,28 @@ public class UserAccountLifecycleService {
 
     public UserAccountLifecycleService(
             UserRepository userRepository,
+            PlannerRepository plannerRepository,
+            PlannerContentRepository plannerContentRepository,
+            PlannerPublicationRepository plannerPublicationRepository,
+            PlannerModerationRepository plannerModerationRepository,
+            PlannerStatsRepository plannerStatsRepository,
+            PlannerCatalogRepository plannerCatalogRepository,
+            PlannerEntityFilterRepository plannerEntityFilterRepository,
+            PlannerKeywordFilterRepository plannerKeywordFilterRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerCommentRepository plannerCommentRepository,
             PlannerCommentVoteRepository plannerCommentVoteRepository,
             TokenBlacklistService tokenBlacklistService,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
+        this.plannerRepository = plannerRepository;
+        this.plannerContentRepository = plannerContentRepository;
+        this.plannerPublicationRepository = plannerPublicationRepository;
+        this.plannerModerationRepository = plannerModerationRepository;
+        this.plannerStatsRepository = plannerStatsRepository;
+        this.plannerCatalogRepository = plannerCatalogRepository;
+        this.plannerEntityFilterRepository = plannerEntityFilterRepository;
+        this.plannerKeywordFilterRepository = plannerKeywordFilterRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerCommentRepository = plannerCommentRepository;
         this.plannerCommentVoteRepository = plannerCommentVoteRepository;
@@ -114,7 +148,8 @@ public class UserAccountLifecycleService {
      * Permanently delete a user and reassign their votes and comments to the sentinel user.
      * This anonymizes the author while preserving comment content. Upvote counts are
      * denormalized counters, independent of vote rows, so they are unaffected.
-     * CASCADE will delete the user's planners.
+     * Planner satellite/projection/filter rows are swept app-side; the user-row
+     * CASCADE removes the planner cores and FK-bearing children.
      *
      * @param user the user to permanently delete
      */
@@ -134,7 +169,21 @@ public class UserAccountLifecycleService {
         // Reassign comments to sentinel user (preserves comment content)
         plannerCommentRepository.reassignCommentsToSentinel(userId, SENTINEL_USER_ID);
 
-        // Now delete user (CASCADE will delete their planners)
+        // Satellite, projection, and filter rows carry no FK to the planner core,
+        // so they are swept app-side by planner id before the user delete cascades
+        // the core rows (and the FK-bearing child tables) away.
+        List<UUID> plannerIds = plannerRepository.findIdsByUserId(userId);
+        if (!plannerIds.isEmpty()) {
+            plannerEntityFilterRepository.deleteAllByPlannerIds(plannerIds);
+            plannerKeywordFilterRepository.deleteAllByPlannerIds(plannerIds);
+            plannerCatalogRepository.deleteAllByPlannerIds(plannerIds);
+            plannerStatsRepository.deleteAllByPlannerIds(plannerIds);
+            plannerModerationRepository.deleteAllByPlannerIds(plannerIds);
+            plannerPublicationRepository.deleteAllByPlannerIds(plannerIds);
+            plannerContentRepository.deleteAllByPlannerIds(plannerIds);
+        }
+
+        // Now delete user (CASCADE will delete their planner cores and FK children)
         userRepository.delete(user);
     }
 }

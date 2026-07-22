@@ -7,14 +7,11 @@ import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.planner.specification.PlannerSpecifications;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,11 +41,9 @@ public class PublishedPlannerController {
     private final SecurityProperties securityProperties;
     private final ByIdReadGuard byIdReadGuard;
 
-    @Value("${planner.recommended-threshold}")
-    private int recommendedThreshold;
-
     /**
-     * Get all published planners with pagination.
+     * Get all published planners with pagination, ordered by release date
+     * (first published, newest first).
      *
      * <p>This endpoint is public and does not require authentication.
      * Returns planners that have been published by their owners.
@@ -56,7 +51,6 @@ public class PublishedPlannerController {
      *
      * @param page     page number (0-indexed)
      * @param size     page size
-     * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
      * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
      * @param q        optional search term for title/keywords
      * @param userId   optional authenticated user ID (null for anonymous)
@@ -66,7 +60,6 @@ public class PublishedPlannerController {
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "recent") String sort,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String keyword,
@@ -76,13 +69,13 @@ public class PublishedPlannerController {
             @RequestParam(required = false) String themePack,
             @AuthenticationPrincipal Long userId) {
 
-        Pageable pageable = createPageable(page, size, sort);
+        Pageable pageable = createPageable(page, size);
         log.debug("Fetching published planners, category: {}, search: {}, userId: {}, pagination: {}",
                 category, q, userId, pageable);
 
         if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
             Page<PublicPlannerResponse> planners = publishedPlannerQueryService.searchPlanners(
-                    PlannerSpecifications.isPublished(), pageable, category, userId, q,
+                    false, pageable, category, userId, q,
                     parseCsv(keyword), parseCsv(identity), parseCsv(ego),
                     parseCsv(gift), parseCsv(themePack));
             return ResponseEntity.ok(planners);
@@ -101,7 +94,6 @@ public class PublishedPlannerController {
      *
      * @param page     page number (0-indexed)
      * @param size     page size
-     * @param sort     sort option: "recent" (createdAt), "popular" (viewCount), "votes" (upvotes)
      * @param category optional category filter (e.g., "5F", "10F", "15F" for MD)
      * @param q        optional search term for title/keywords
      * @param userId   optional authenticated user ID (null for anonymous)
@@ -111,7 +103,6 @@ public class PublishedPlannerController {
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "votes") String sort,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String keyword,
@@ -121,13 +112,13 @@ public class PublishedPlannerController {
             @RequestParam(required = false) String themePack,
             @AuthenticationPrincipal Long userId) {
 
-        Pageable pageable = createPageable(page, size, sort);
+        Pageable pageable = createPageable(page, size);
         log.debug("Fetching recommended planners, category: {}, search: {}, userId: {}, pagination: {}",
                 category, q, userId, pageable);
 
         if (hasStructuredFilters(keyword, identity, ego, gift, themePack)) {
             Page<PublicPlannerResponse> planners = publishedPlannerQueryService.searchPlanners(
-                    PlannerSpecifications.isRecommended(recommendedThreshold), pageable, category, userId, q,
+                    true, pageable, category, userId, q,
                     parseCsv(keyword), parseCsv(identity), parseCsv(ego),
                     parseCsv(gift), parseCsv(themePack));
             return ResponseEntity.ok(planners);
@@ -165,20 +156,14 @@ public class PublishedPlannerController {
     }
 
     /**
-     * Create a Pageable with mapped sort property.
+     * Create a capped, unsorted Pageable; the read side pins the recency order.
      *
      * @param page page number (0-indexed)
      * @param size page size
-     * @param sort sort option: "recent", "popular", "votes"
-     * @return Pageable with correct sort property
+     * @return Pageable for the catalog queries
      */
-    private Pageable createPageable(int page, int size, String sort) {
-        Sort.Direction direction = Sort.Direction.DESC;
-        String property = switch (sort) {
-            case "votes" -> "upvotes";
-            default -> "createdAt";
-        };
-        return PageRequest.of(page, Math.min(size, 100), Sort.by(direction, property));
+    private Pageable createPageable(int page, int size) {
+        return PageRequest.of(page, Math.min(size, 100));
     }
 
     private boolean hasStructuredFilters(String keyword, String identity, String ego, String gift, String themePack) {

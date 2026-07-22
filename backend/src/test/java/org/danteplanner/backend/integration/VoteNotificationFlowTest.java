@@ -1,11 +1,12 @@
 package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
-import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 
@@ -39,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,6 +80,9 @@ class VoteNotificationFlowTest {
     private PlannerVoteRepository plannerVoteRepository;
 
     @Autowired
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Autowired
     private NotificationRepository notificationRepository;
 
     @PersistenceContext
@@ -99,6 +102,7 @@ class VoteNotificationFlowTest {
         // Clean up
         notificationRepository.deleteAll();
         plannerVoteRepository.deleteAll();
+        plannerStatsRepository.deleteAll();
         plannerRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -144,23 +148,21 @@ class VoteNotificationFlowTest {
         voter3 = userRepository.save(voter3);
 
         // Create published planner with initial vote counts at 0
-        testPlanner = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(plannerOwner)
+        testPlanner = TestDataFactory.planner(plannerOwner)
                 .title("Test Planner for Notification")
-                .category("5F")
-                .status(PlannerStatus.SAVED)
                 .content("{\"data\":\"test\"}")
                 .published(true)
-                .upvotes(0)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .savedAt(Instant.now())
-                .build();
-        testPlanner = plannerRepository.save(testPlanner);
+                .save(plannerRepository);
         plannerRepository.flush();
         entityManager.clear();
+    }
+
+    private void seedStats(int upvotes, Instant recommendedNotifiedAt) {
+        plannerStatsRepository.save(PlannerStats.builder()
+                .plannerId(testPlanner.getId())
+                .upvotes(upvotes)
+                .recommendedNotifiedAt(recommendedNotifiedAt)
+                .build());
     }
 
     /**
@@ -179,9 +181,8 @@ class VoteNotificationFlowTest {
     @DisplayName("IT1: Vote crossing threshold (9→10) creates PLANNER_RECOMMENDED notification")
     void castVote_WhenCrossingThreshold_CreatesNotification() {
         // Arrange - Set planner to 1 vote below threshold
-        testPlanner.setUpvotes(recommendedThreshold - 1);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
+        seedStats(recommendedThreshold - 1, null);
+        plannerStatsRepository.flush();
         entityManager.clear();
 
         // Verify no notification exists before
@@ -207,18 +208,17 @@ class VoteNotificationFlowTest {
         assertFalse(notification.getRead());
         assertNotNull(notification.getCreatedAt());
 
-        // Verify planner flag set
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNotNull(updated.getRecommendedNotifiedAt());
+        // Verify stats flag set
+        PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
+        assertNotNull(stats.getRecommendedNotifiedAt());
     }
 
     @Test
     @DisplayName("IT1.1: Vote below threshold does not create notification")
     void castVote_WhenBelowThreshold_NoNotification() {
         // Arrange - Set planner to 2 votes below threshold
-        testPlanner.setUpvotes(recommendedThreshold - 2);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
+        seedStats(recommendedThreshold - 2, null);
+        plannerStatsRepository.flush();
         entityManager.clear();
 
         // Act - Cast vote that doesn't cross threshold
@@ -232,18 +232,17 @@ class VoteNotificationFlowTest {
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertEquals(0, notificationsCount);
 
-        // Verify planner flag NOT set
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNull(updated.getRecommendedNotifiedAt());
+        // Verify stats flag NOT set
+        PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
+        assertNull(stats.getRecommendedNotifiedAt());
     }
 
     @Test
     @DisplayName("IT1.2: Vote exactly at threshold creates notification")
     void castVote_WhenExactlyAtThreshold_CreatesNotification() {
         // Arrange - Set planner to 1 vote below threshold
-        testPlanner.setUpvotes(recommendedThreshold - 1);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
+        seedStats(recommendedThreshold - 1, null);
+        plannerStatsRepository.flush();
         entityManager.clear();
 
         // Act - Cast vote that exactly meets threshold
@@ -257,8 +256,8 @@ class VoteNotificationFlowTest {
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();
         assertEquals(1, notificationsCount);
 
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(recommendedThreshold, updated.getUpvotes());
+        PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
+        assertEquals(recommendedThreshold, stats.getUpvotes());
     }
 
     // ==================== IT2: Concurrent Votes Create Single Notification ====================
@@ -267,8 +266,7 @@ class VoteNotificationFlowTest {
     @DisplayName("IT2: Concurrent votes on threshold-1 planner create single notification (race condition test)")
     void castVote_WhenConcurrentCrossingThreshold_CreatesSingleNotification() throws Exception {
         // Arrange - Set planner to 1 vote below threshold
-        testPlanner.setUpvotes(recommendedThreshold - 1);
-        plannerRepository.save(testPlanner);
+        seedStats(recommendedThreshold - 1, null);
 
         // Create additional voters for concurrent test
         List<User> voters = new ArrayList<>();
@@ -331,8 +329,8 @@ class VoteNotificationFlowTest {
         assertEquals(NotificationType.PLANNER_RECOMMENDED, notifications.get(0).getNotificationType());
 
         // Verify atomic flag was set exactly once
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertNotNull(updated.getRecommendedNotifiedAt(), "Recommended notification flag should be set");
+        PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
+        assertNotNull(stats.getRecommendedNotifiedAt(), "Recommended notification flag should be set");
 
         // Verify multiple votes were cast (at least some succeeded)
         long voteCount = plannerVoteRepository.count();
@@ -345,9 +343,7 @@ class VoteNotificationFlowTest {
     @DisplayName("IT3: Second threshold crossing does not create duplicate notification")
     void castVote_WhenSecondThresholdCrossing_NoDuplicateNotification() {
         // Arrange - Set planner to exactly threshold with flag already set
-        testPlanner.setUpvotes(recommendedThreshold);
-        testPlanner.setRecommendedNotifiedAt(Instant.now());
-        plannerRepository.save(testPlanner);
+        seedStats(recommendedThreshold, Instant.now());
 
         // Manually create notification (simulating first threshold crossing)
         Notification existingNotification = new Notification(
@@ -378,9 +374,7 @@ class VoteNotificationFlowTest {
     @DisplayName("IT3.1: Vote after threshold maintains single notification")
     void castVote_WhenAfterThreshold_MaintainsSingleNotification() {
         // Arrange - Set planner well above threshold with notification already sent
-        testPlanner.setUpvotes(recommendedThreshold + 5);
-        testPlanner.setRecommendedNotifiedAt(Instant.now());
-        plannerRepository.save(testPlanner);
+        seedStats(recommendedThreshold + 5, Instant.now());
 
         Notification existingNotification = new Notification(
                 plannerOwner.getId(),
@@ -407,9 +401,8 @@ class VoteNotificationFlowTest {
     @DisplayName("IT4: Vote and notification are committed together (transaction consistency)")
     void castVote_WhenCrossingThreshold_CommitsVoteAndNotificationTogether() {
         // Arrange - Set planner to 1 below threshold
-        testPlanner.setUpvotes(recommendedThreshold - 1);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
+        seedStats(recommendedThreshold - 1, null);
+        plannerStatsRepository.flush();
         entityManager.clear();
 
         // Act - Cast vote crossing threshold
@@ -429,11 +422,11 @@ class VoteNotificationFlowTest {
         assertEquals(1, notificationsCount, "Notification should be persisted");
 
         // 3. Planner vote count updated
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(recommendedThreshold, updated.getUpvotes());
+        PlannerStats stats = plannerStatsRepository.findById(testPlanner.getId()).orElseThrow();
+        assertEquals(recommendedThreshold, stats.getUpvotes());
 
         // 4. Atomic flag set
-        assertNotNull(updated.getRecommendedNotifiedAt(), "Atomic flag should be set");
+        assertNotNull(stats.getRecommendedNotifiedAt(), "Atomic flag should be set");
     }
 
     @Test
@@ -468,9 +461,7 @@ class VoteNotificationFlowTest {
     @DisplayName("IT5.1: Notification only sent on upward crossing, not downward")
     void castVote_WhenDownwardCrossing_NoNotification() {
         // Arrange - Planner above threshold, notification sent, then votes drop below
-        testPlanner.setUpvotes(recommendedThreshold);
-        testPlanner.setRecommendedNotifiedAt(Instant.now());
-        plannerRepository.save(testPlanner);
+        seedStats(recommendedThreshold, Instant.now());
 
         // Create notification
         Notification notification = new Notification(

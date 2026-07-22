@@ -84,7 +84,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
         owner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
-        validContent = planner.getContent();
+        validContent = planner.getContentJson();
     }
 
     @AfterEach

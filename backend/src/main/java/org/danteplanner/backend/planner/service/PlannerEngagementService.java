@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -36,6 +37,7 @@ public class PlannerEngagementService {
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerCatalogService plannerCatalogService;
     private final ApplicationEventPublisher eventPublisher;
 
     private final int recommendedThreshold;
@@ -45,12 +47,14 @@ public class PlannerEngagementService {
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerStatsRepository plannerStatsRepository,
+            PlannerCatalogService plannerCatalogService,
             ApplicationEventPublisher eventPublisher,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.plannerStatsRepository = plannerStatsRepository;
+        this.plannerCatalogService = plannerCatalogService;
         this.eventPublisher = eventPublisher;
         this.recommendedThreshold = recommendedThreshold;
     }
@@ -83,7 +87,7 @@ public class PlannerEngagementService {
         }
 
         // Verify planner exists and is published (fail-fast)
-        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+        Planner planner = plannerRepository.findPublishedAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         // Check if vote already exists (immutability enforcement)
@@ -93,26 +97,28 @@ public class PlannerEngagementService {
         }
 
         // Get current upvote count BEFORE voting (for threshold detection)
-        int upvotesBefore = planner.getUpvotes();
+        int upvotesBefore = plannerStatsRepository.findById(plannerId)
+                .map(PlannerStats::getUpvotes)
+                .orElse(0);
 
         // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
         plannerVoteRepository.save(newVote);
 
         // Atomic increment for upvote
-        plannerRepository.incrementUpvotes(plannerId);
         plannerStatsRepository.incrementUpvotes(plannerId);
 
-        // Re-fetch planner to get updated counts after atomic increment
-        Planner updatedPlanner = plannerRepository.findById(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
-
-        int upvotesAfter = updatedPlanner.getUpvotes();
+        // Re-fetch stats to get updated counts after atomic increment
+        int upvotesAfter = plannerStatsRepository.findById(plannerId)
+                .map(PlannerStats::getUpvotes)
+                .orElse(upvotesBefore + 1);
 
         // Check threshold crossing for notification (9→10 net votes)
         if (upvotesBefore < recommendedThreshold && upvotesAfter >= recommendedThreshold) {
+            // Keep the catalog's derived flag in step with the crossing
+            plannerCatalogService.refreshRecommended(plannerId);
             // Try to atomically set notification flag (prevents race condition duplicates)
-            int rowsUpdated = plannerRepository.trySetRecommendedNotified(plannerId, recommendedThreshold);
+            int rowsUpdated = plannerStatsRepository.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
                 // First thread to cross threshold wins - publish event (handled AFTER_COMMIT)
                 eventPublisher.publishEvent(new PlannerRecommendedEvent(
@@ -154,7 +160,7 @@ public class PlannerEngagementService {
     @Transactional
     public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
         // Verify planner exists and is published (fail-fast)
-        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
             throw new PlannerNotFoundException(plannerId);
         }
 

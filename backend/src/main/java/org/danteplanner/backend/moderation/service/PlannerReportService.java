@@ -37,7 +37,7 @@ public class PlannerReportService {
     @Transactional
     public PlannerReport createReport(Long userId, UUID plannerId) {
         // Verify planner exists and is published
-        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
             throw new PlannerNotFoundException(plannerId);
         }
 

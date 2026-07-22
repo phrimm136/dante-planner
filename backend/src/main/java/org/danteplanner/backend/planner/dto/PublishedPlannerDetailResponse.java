@@ -44,15 +44,18 @@ public record PublishedPlannerDetailResponse(
     }
 
     /**
-     * Create a PublishedPlannerDetailResponse from a Planner entity with user context.
+     * Create a PublishedPlannerDetailResponse from a planner aggregate with user
+     * context and stats-sourced counters.
      *
-     * @param planner the planner entity
+     * @param planner the planner aggregate root
      * @param hasUpvoted whether the current user has upvoted (null if not authenticated)
      * @param isBookmarked whether the current user has bookmarked (null if not authenticated)
      * @param isSubscribed whether the current user is subscribed (null if not authenticated)
      * @param hasReported whether the current user has reported (null if not authenticated)
      * @param commentCount total non-deleted comment count for this planner
      * @param ownerNotificationsEnabled whether owner has notifications enabled (only for owner, null otherwise)
+     * @param viewCount the planner's view count (from planner_stats)
+     * @param upvotes the planner's upvote count (from planner_stats)
      * @return the published planner detail response DTO
      */
     public static PublishedPlannerDetailResponse fromEntity(
@@ -62,25 +65,9 @@ public record PublishedPlannerDetailResponse(
             Boolean isSubscribed,
             Boolean hasReported,
             Long commentCount,
-            Boolean ownerNotificationsEnabled) {
-        return fromEntity(planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,
-                commentCount, ownerNotificationsEnabled, planner.getViewCount());
-    }
-
-    /**
-     * Create a PublishedPlannerDetailResponse with an explicit view count.
-     * Used when the view count has been updated atomically in the same request
-     * (the in-memory entity still holds the pre-increment value).
-     */
-    public static PublishedPlannerDetailResponse fromEntity(
-            Planner planner,
-            Boolean hasUpvoted,
-            Boolean isBookmarked,
-            Boolean isSubscribed,
-            Boolean hasReported,
-            Long commentCount,
             Boolean ownerNotificationsEnabled,
-            int viewCount) {
+            int viewCount,
+            int upvotes) {
         return PublishedPlannerDetailResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
@@ -89,13 +76,13 @@ public record PublishedPlannerDetailResponse(
                 .selectedKeywords(planner.getSelectedKeywords())
                 .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
                 .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
-                .upvotes(planner.getUpvotes())
+                .upvotes(upvotes)
                 .viewCount(viewCount)
                 .createdAt(planner.getCreatedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .hasUpvoted(hasUpvoted)
                 .isBookmarked(isBookmarked)
-                .content(planner.getContent())
+                .content(planner.getContentJson())
                 .schemaVersion(planner.getSchemaVersion())
                 .contentVersion(planner.getContentVersion())
                 .status(planner.getStatus())

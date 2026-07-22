@@ -1,8 +1,13 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.user.entity.User;
@@ -63,7 +68,13 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
     private PlannerViewRepository plannerViewRepository;
 
     @Autowired
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Autowired
     private PlannerViewRecorder recorder;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private UserRepository userRepository;
@@ -76,6 +87,7 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         plannerViewRepository.deleteAll();
+        plannerStatsRepository.deleteAll();
         plannerRepository.deleteAll();
         userRepository.findAll().stream()
                 .filter(u -> u.getId() != 0L)
@@ -98,7 +110,7 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         try {
             pool.submit(() -> transactionTemplate.execute(status -> {
-                if (plannerRepository.findByIdForUpdate(plannerId).isEmpty()) {
+                if (entityManager.find(Planner.class, plannerId, LockModeType.PESSIMISTIC_WRITE) == null) {
                     throw new IllegalStateException("planner not found for lock");
                 }
                 locked.countDown();
@@ -134,7 +146,7 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
     @Test
     @DisplayName("detailRead_WhenServed_ReturnsBeforeViewWrite")
     void detailRead_WhenServed_ReturnsBeforeViewWrite() throws Exception {
-        int before = plannerRepository.findById(plannerId).orElseThrow().getViewCount();
+        int before = plannerStatsRepository.findById(plannerId).map(PlannerStats::getViewCount).orElse(0);
 
         int responseViewCount = detailViewCount();
 

@@ -36,7 +36,7 @@ public class PlannerSubscriptionService {
     @Transactional
     public PlannerSubscription toggleSubscription(Long userId, UUID plannerId) {
         // Verify planner exists and is published
-        if (plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId).isEmpty()) {
+        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
             throw new PlannerNotFoundException(plannerId);
         }
 

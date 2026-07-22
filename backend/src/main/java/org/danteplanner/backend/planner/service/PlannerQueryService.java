@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class PlannerQueryService {
 
     private final PlannerRepository plannerRepository;
+    private final PlannerStatsRepository statsRepository;
     private final PlannerAccessGuard accessGuard;
 
     /**
@@ -34,9 +37,7 @@ public class PlannerQueryService {
      */
     @Transactional(readOnly = true)
     public Page<PlannerSummaryResponse> getPlanners(Long userId, Pageable pageable) {
-        return plannerRepository
-                .findByUserIdAndDeletedAtIsNullOrderByLastModifiedAtDesc(userId, pageable)
-                .map(PlannerSummaryResponse::fromEntity);
+        return plannerRepository.findOwnerSummaries(userId, pageable);
     }
 
     /**
@@ -50,6 +51,9 @@ public class PlannerQueryService {
     @Transactional(readOnly = true)
     public PlannerResponse getPlanner(Long userId, UUID id) {
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
-        return PlannerResponse.fromEntity(planner);
+        int upvotes = statsRepository.findById(id)
+                .map(PlannerStats::getUpvotes)
+                .orElse(0);
+        return PlannerResponse.fromEntity(planner, upvotes);
     }
 }

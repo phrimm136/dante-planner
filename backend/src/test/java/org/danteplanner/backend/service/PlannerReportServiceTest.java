@@ -11,6 +11,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +21,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -63,9 +63,8 @@ class PlannerReportServiceTest {
 
         plannerId = UUID.randomUUID();
 
-        publishedPlanner = Planner.builder()
+        publishedPlanner = TestDataFactory.planner(testUser)
                 .id(plannerId)
-                .user(testUser)
                 .title("Published Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
@@ -73,7 +72,6 @@ class PlannerReportServiceTest {
                 .contentVersion(6)
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .published(true)
-                .createdAt(Instant.now())
                 .build();
     }
 
@@ -85,7 +83,7 @@ class PlannerReportServiceTest {
         @DisplayName("Should create report when not previously reported")
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(false);
@@ -110,7 +108,7 @@ class PlannerReportServiceTest {
         @DisplayName("Should throw ReportAlreadyExistsException when already reported")
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(true);
@@ -131,7 +129,7 @@ class PlannerReportServiceTest {
         void createReport_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+            when(plannerRepository.findPublishedAggregate(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -148,7 +146,7 @@ class PlannerReportServiceTest {
         @DisplayName("Should throw PlannerNotFoundException when planner not published")
         void createReport_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -163,7 +161,7 @@ class PlannerReportServiceTest {
         void createReport_WhenPlannerMissing_ValidatesPlannerFirst() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+            when(plannerRepository.findPublishedAggregate(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -173,7 +171,7 @@ class PlannerReportServiceTest {
             );
 
             // Verify order: planner lookup first, then never reaches report check
-            verify(plannerRepository).findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId);
+            verify(plannerRepository).findPublishedAggregate(nonExistentId);
             verify(reportRepository, never()).existsByUserIdAndPlannerId(any(), any());
         }
     }

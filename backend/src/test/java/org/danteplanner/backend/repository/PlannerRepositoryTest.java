@@ -1,5 +1,6 @@
 package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
 
@@ -7,6 +8,7 @@ import jakarta.persistence.EntityManager;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -19,15 +21,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Repository tests for PlannerRepository atomic vote operations.
+ * Repository tests for PlannerStatsRepository atomic counter operations.
  *
- * <p>Tests atomic increment/decrement queries for upvotes
+ * <p>Tests atomic increment queries for upvotes
  * using H2 in-memory database in test profile.</p>
  */
 @SpringBootTest
@@ -38,6 +39,9 @@ class PlannerRepositoryTest {
 
     @Autowired
     private PlannerRepository plannerRepository;
+
+    @Autowired
+    private PlannerStatsRepository statsRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -51,6 +55,7 @@ class PlannerRepositoryTest {
     @BeforeEach
     void setUp() {
         // Clean up
+        statsRepository.deleteAll();
         plannerRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -58,99 +63,35 @@ class PlannerRepositoryTest {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
 
         // Create test planner with initial vote counts at 0
-        testPlanner = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
-                .title("Test Planner")
-                .category("5F")
+        testPlanner = TestDataFactory.planner(testUser)
                 .status(PlannerStatus.DRAFT)
-                .content("{\"data\":\"test\"}")
                 .published(true)
-                .upvotes(0)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(org.danteplanner.backend.planner.entity.PlannerType.MIRROR_DUNGEON)
-                .savedAt(Instant.now())
-                .build();
-        testPlanner = plannerRepository.save(testPlanner);
-        plannerRepository.flush();
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder().plannerId(testPlanner.getId()).build());
+        statsRepository.flush();
+    }
+
+    private void seedUpvotes(int upvotes) {
+        statsRepository.save(PlannerStats.builder()
+                .plannerId(testPlanner.getId())
+                .upvotes(upvotes)
+                .build());
+        statsRepository.flush();
+        entityManager.clear();
     }
 
     // ==================== Upvote Tests ====================
 
     @Test
-    @DisplayName("incrementUpvotes - existing planner returns 1 and increments count")
-    void incrementUpvotes_ExistingPlanner_ReturnsOne() {
+    @DisplayName("incrementUpvotes - existing planner increments count")
+    void incrementUpvotes_ExistingPlanner_IncrementsCount() {
         // Act
-        int rowsUpdated = plannerRepository.incrementUpvotes(testPlanner.getId());
+        statsRepository.incrementUpvotes(testPlanner.getId());
         entityManager.clear(); // Clear persistence context to force re-read
 
         // Assert
-        assertEquals(1, rowsUpdated);
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+        PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
         assertEquals(1, updated.getUpvotes());
-    }
-
-    @Test
-    @DisplayName("incrementUpvotes - non-existent planner returns 0")
-    void incrementUpvotes_NonExistentPlanner_ReturnsZero() {
-        // Arrange
-        UUID nonExistentId = UUID.randomUUID();
-
-        // Act
-        int rowsUpdated = plannerRepository.incrementUpvotes(nonExistentId);
-
-        // Assert
-        assertEquals(0, rowsUpdated);
-    }
-
-    @Test
-    @DisplayName("decrementUpvotes - positive count decrements and returns 1")
-    void decrementUpvotes_PositiveCount_Decrements() {
-        // Arrange - Set upvotes to 5
-        testPlanner.setUpvotes(5);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
-        entityManager.clear();
-
-        // Act
-        int rowsUpdated = plannerRepository.decrementUpvotes(testPlanner.getId());
-        entityManager.clear();
-
-        // Assert
-        assertEquals(1, rowsUpdated);
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(4, updated.getUpvotes());
-    }
-
-    @Test
-    @DisplayName("decrementUpvotes - zero count stays at zero and returns 0")
-    void decrementUpvotes_ZeroCount_StaysAtZero() {
-        // Arrange - upvotes is already 0 from setUp
-        plannerRepository.flush();
-        entityManager.clear();
-
-        // Act
-        int rowsUpdated = plannerRepository.decrementUpvotes(testPlanner.getId());
-        entityManager.clear();
-
-        // Assert
-        assertEquals(0, rowsUpdated);
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-        assertEquals(0, updated.getUpvotes());
-    }
-
-    @Test
-    @DisplayName("decrementUpvotes - non-existent planner returns 0")
-    void decrementUpvotes_NonExistentPlanner_ReturnsZero() {
-        // Arrange
-        UUID nonExistentId = UUID.randomUUID();
-
-        // Act
-        int rowsUpdated = plannerRepository.decrementUpvotes(nonExistentId);
-
-        // Assert
-        assertEquals(0, rowsUpdated);
     }
 
     // ==================== Atomic Notification Flag Tests ====================
@@ -159,18 +100,15 @@ class PlannerRepositoryTest {
     @DisplayName("trySetRecommendedNotified - first call on threshold planner returns 1 and sets flag")
     void trySetRecommendedNotified_FirstCall_ReturnsOne() {
         // Arrange - Set planner to exactly meet threshold (upvotes=10, threshold=10)
-        testPlanner.setUpvotes(10);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
-        entityManager.clear();
+        seedUpvotes(10);
 
         // Act
-        int rowsUpdated = plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        int rowsUpdated = statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
         entityManager.clear();
 
         // Assert
         assertEquals(1, rowsUpdated);
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+        PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
         assertNotNull(updated.getRecommendedNotifiedAt());
     }
 
@@ -178,16 +116,14 @@ class PlannerRepositoryTest {
     @DisplayName("trySetRecommendedNotified - second call returns 0 (atomic flag already set)")
     void trySetRecommendedNotified_SecondCall_ReturnsZero() {
         // Arrange - Set planner to meet threshold and set flag
-        testPlanner.setUpvotes(15);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
+        seedUpvotes(15);
 
         // First call sets the flag
-        plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
         entityManager.clear();
 
         // Act - Second call should return 0
-        int rowsUpdated = plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        int rowsUpdated = statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
 
         // Assert
         assertEquals(0, rowsUpdated);
@@ -197,17 +133,14 @@ class PlannerRepositoryTest {
     @DisplayName("trySetRecommendedNotified - returns 0 when threshold not met")
     void trySetRecommendedNotified_BelowThreshold_ReturnsZero() {
         // Arrange - Planner below threshold (upvotes=5, threshold=10)
-        testPlanner.setUpvotes(5);
-        plannerRepository.save(testPlanner);
-        plannerRepository.flush();
-        entityManager.clear();
+        seedUpvotes(5);
 
         // Act
-        int rowsUpdated = plannerRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
+        int rowsUpdated = statsRepository.trySetRecommendedNotified(testPlanner.getId(), 10);
 
         // Assert
         assertEquals(0, rowsUpdated);
-        Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+        PlannerStats updated = statsRepository.findById(testPlanner.getId()).orElseThrow();
         assertNull(updated.getRecommendedNotifiedAt());
     }
 
@@ -218,7 +151,7 @@ class PlannerRepositoryTest {
         UUID nonExistentId = UUID.randomUUID();
 
         // Act
-        int rowsUpdated = plannerRepository.trySetRecommendedNotified(nonExistentId, 10);
+        int rowsUpdated = statsRepository.trySetRecommendedNotified(nonExistentId, 10);
 
         // Assert
         assertEquals(0, rowsUpdated);

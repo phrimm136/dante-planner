@@ -18,6 +18,7 @@ import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -118,9 +119,8 @@ class CommentServiceNotificationTest {
                 .role(UserRole.NORMAL)
                 .build();
 
-        planner = Planner.builder()
+        planner = TestDataFactory.planner(owner)
                 .id(PLANNER_ID)
-                .user(owner)
                 .title("Test Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
@@ -128,8 +128,8 @@ class CommentServiceNotificationTest {
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .contentVersion(6)
                 .published(true)
-                .ownerNotificationsEnabled(true)
                 .build();
+        planner.getPublication().setOwnerNotificationsEnabled(true);
     }
 
     @Nested
@@ -140,10 +140,10 @@ class CommentServiceNotificationTest {
         @DisplayName("Should send notification when owner notifications enabled")
         void createTopLevelComment_NotificationEnabled_SendsNotification() {
             // Arrange
-            planner.setOwnerNotificationsEnabled(true);
+            planner.getPublication().setOwnerNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
+            when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
@@ -170,9 +170,9 @@ class CommentServiceNotificationTest {
         @DisplayName("Should NOT send notification when owner notifications disabled")
         void createTopLevelComment_NotificationDisabled_NoNotification() {
             // Arrange
-            planner.setOwnerNotificationsEnabled(false);
+            planner.getPublication().setOwnerNotificationsEnabled(false);
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
+            when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
@@ -197,9 +197,9 @@ class CommentServiceNotificationTest {
         @DisplayName("Should NOT send notification when owner comments on own planner")
         void createTopLevelComment_SelfComment_NoNotification() {
             // Arrange
-            planner.setOwnerNotificationsEnabled(true);
+            planner.getPublication().setOwnerNotificationsEnabled(true);
             when(userRepository.findById(OWNER_ID)).thenReturn(Optional.of(owner));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
+            when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
@@ -242,7 +242,7 @@ class CommentServiceNotificationTest {
             parentComment.setAuthorNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
+            when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
@@ -273,7 +273,7 @@ class CommentServiceNotificationTest {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(false);
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
+            when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
@@ -303,7 +303,7 @@ class CommentServiceNotificationTest {
             parentComment.setUserId(COMMENTER_ID); // Same user is replying to their own comment
             parentComment.setAuthorNotificationsEnabled(true);
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(PLANNER_ID))
+            when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));

@@ -1,10 +1,15 @@
 package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -28,7 +33,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -56,6 +60,9 @@ class PlannerRepositoryConstraintTest {
     private PlannerVoteRepository voteRepository;
 
     @Autowired
+    private PlannerStatsRepository statsRepository;
+
+    @Autowired
     private PlannerCommentRepository commentRepository;
 
     @Autowired
@@ -67,6 +74,7 @@ class PlannerRepositoryConstraintTest {
     void setUp() {
         commentRepository.deleteAll();
         voteRepository.deleteAll();
+        statsRepository.deleteAll();
         plannerRepository.deleteAll();
         userRepository.deleteAll(userRepository.findAll().stream()
                 .filter(u -> u.getId() != 0L)
@@ -75,6 +83,24 @@ class PlannerRepositoryConstraintTest {
         entityManager.clear();
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
+    }
+
+    private Planner buildPlanner(User owner, String title) {
+        Planner planner = Planner.builder()
+                .id(UUID.randomUUID())
+                .user(owner)
+                .plannerType(PlannerType.MIRROR_DUNGEON)
+                .build();
+        planner.attach(
+                PlannerContent.builder()
+                        .title(title)
+                        .category("5F")
+                        .content("{}")
+                        .gameContentVersion(1)
+                        .build(),
+                PlannerPublication.builder().build(),
+                PlannerModeration.builder().build());
+        return planner;
     }
 
     @Nested
@@ -335,16 +361,7 @@ class PlannerRepositoryConstraintTest {
         @DisplayName("Missing planner title throws NOT NULL constraint exception")
         void notNullConstraint_MissingTitle_ThrowsException() {
             assertThatThrownBy(() -> {
-                Planner planner = Planner.builder()
-                        .id(UUID.randomUUID())
-                        .user(testUser)
-                        .plannerType(PlannerType.MIRROR_DUNGEON)
-                        .title(null)
-                        .category("5F")
-                        .content("{}")
-                        .contentVersion(1)
-                        .savedAt(Instant.now())
-                        .build();
+                Planner planner = buildPlanner(testUser, null);
                 plannerRepository.save(planner);
                 entityManager.flush();
             }).satisfiesAnyOf(
@@ -357,15 +374,7 @@ class PlannerRepositoryConstraintTest {
         @DisplayName("Missing planner owner throws NOT NULL constraint exception")
         void notNullConstraint_MissingOwner_ThrowsException() {
             assertThatThrownBy(() -> {
-                Planner planner = Planner.builder()
-                        .id(UUID.randomUUID())
-                        .plannerType(PlannerType.MIRROR_DUNGEON)
-                        .title("Test Title")
-                        .category("5F")
-                        .content("{}")
-                        .contentVersion(1)
-                        .savedAt(Instant.now())
-                        .build();
+                Planner planner = buildPlanner(null, "Test Title");
                 plannerRepository.save(planner);
                 entityManager.flush();
             }).satisfiesAnyOf(
@@ -446,32 +455,14 @@ class PlannerRepositoryConstraintTest {
         @Test
         @DisplayName("Empty string title allowed, null forbidden")
         void notNullConstraint_EmptyStringAllowed_NullForbidden() {
-            Planner planner1 = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(testUser)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .title("")
-                    .category("5F")
-                    .content("{}")
-                    .contentVersion(1)
-                    .savedAt(Instant.now())
-                    .build();
+            Planner planner1 = buildPlanner(testUser, "");
             plannerRepository.save(planner1);
             assertThatNoException().isThrownBy(() -> entityManager.flush());
 
             entityManager.clear();
 
             assertThatThrownBy(() -> {
-                Planner planner2 = Planner.builder()
-                        .id(UUID.randomUUID())
-                        .user(testUser)
-                        .plannerType(PlannerType.MIRROR_DUNGEON)
-                        .title(null)
-                        .category("5F")
-                        .content("{}")
-                        .contentVersion(1)
-                        .savedAt(Instant.now())
-                        .build();
+                Planner planner2 = buildPlanner(testUser, null);
                 plannerRepository.save(planner2);
                 entityManager.flush();
             }).satisfiesAnyOf(
@@ -483,16 +474,7 @@ class PlannerRepositoryConstraintTest {
         @Test
         @DisplayName("Default value applied for published field (false)")
         void notNullConstraint_DefaultValueApplied_PublishedFalse() {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(testUser)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .title("Test")
-                    .category("5F")
-                    .content("{}")
-                    .contentVersion(1)
-                    .savedAt(Instant.now())
-                    .build();
+            Planner planner = buildPlanner(testUser, "Test");
             plannerRepository.save(planner);
             entityManager.flush();
 
@@ -503,20 +485,13 @@ class PlannerRepositoryConstraintTest {
         @Test
         @DisplayName("Default value applied for upvotes field (0)")
         void notNullConstraint_DefaultValueApplied_UpvotesZero() {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(testUser)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .title("Test")
-                    .category("5F")
-                    .content("{}")
-                    .contentVersion(1)
-                    .savedAt(Instant.now())
-                    .build();
+            Planner planner = buildPlanner(testUser, "Test");
             plannerRepository.save(planner);
+            statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
             entityManager.flush();
+            entityManager.clear();
 
-            Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
+            PlannerStats saved = statsRepository.findById(planner.getId()).orElseThrow();
             assertThat(saved.getUpvotes()).isZero();
         }
 

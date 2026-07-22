@@ -10,6 +10,7 @@ import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +44,15 @@ class ModerationServiceTest {
     private org.danteplanner.backend.comment.repository.PlannerCommentRepository plannerCommentRepository;
 
     @Mock
+    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.service.PlannerCatalogService plannerCatalogService;
+
+    @Mock
+    private org.danteplanner.backend.planner.service.PlannerFilterService plannerFilterService;
+
+    @Mock
     private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
 
     @Mock
@@ -56,7 +66,8 @@ class ModerationServiceTest {
 
     @BeforeEach
     void setUp() {
-        moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository, moderationActionRepository, sseService);
+        moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository,
+                plannerStatsRepository, plannerCatalogService, plannerFilterService, moderationActionRepository, sseService);
 
         adminUser = User.builder()
                 .id(1L)
@@ -318,9 +329,8 @@ class ModerationServiceTest {
         void unpublishPlanner_moderatorUnpublishes_succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            Planner planner = Planner.builder()
+            Planner planner = TestDataFactory.planner(normalUser)
                     .id(plannerId)
-                    .user(normalUser)
                     .category("5F")
                     .content("{}")
                     .contentVersion(1)
@@ -328,7 +338,7 @@ class ModerationServiceTest {
                     .published(true)
                     .build();
 
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
@@ -344,9 +354,8 @@ class ModerationServiceTest {
         void unpublishPlanner_adminUnpublishes_succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            Planner planner = Planner.builder()
+            Planner planner = TestDataFactory.planner(normalUser)
                     .id(plannerId)
-                    .user(normalUser)
                     .category("5F")
                     .content("{}")
                     .contentVersion(1)
@@ -354,7 +363,7 @@ class ModerationServiceTest {
                     .published(true)
                     .build();
 
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
@@ -369,9 +378,8 @@ class ModerationServiceTest {
         void unpublishPlanner_alreadyUnpublished_succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            Planner planner = Planner.builder()
+            Planner planner = TestDataFactory.planner(normalUser)
                     .id(plannerId)
-                    .user(normalUser)
                     .category("5F")
                     .content("{}")
                     .contentVersion(1)
@@ -379,7 +387,7 @@ class ModerationServiceTest {
                     .published(false)
                     .build();
 
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
@@ -394,7 +402,7 @@ class ModerationServiceTest {
         void unpublishPlanner_nonExistentPlanner_throwsPlannerNotFoundException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(
@@ -408,9 +416,8 @@ class ModerationServiceTest {
         void unpublishPlanner_deletedPlanner_throwsPlannerNotFoundException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            Planner deletedPlanner = Planner.builder()
+            Planner deletedPlanner = TestDataFactory.planner(normalUser)
                     .id(plannerId)
-                    .user(normalUser)
                     .category("5F")
                     .content("{}")
                     .contentVersion(1)
@@ -419,7 +426,8 @@ class ModerationServiceTest {
                     .build();
             deletedPlanner.softDelete();
 
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(deletedPlanner));
+            // findAggregate filters soft-deleted rows at the query level
+            when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(

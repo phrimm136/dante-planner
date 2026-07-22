@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
@@ -8,15 +9,18 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.planner.entity.PlannerCatalog;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -42,6 +46,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -59,6 +64,9 @@ class PublishedPlannerQueryServiceTest {
 
     @Mock
     private PlannerRepository plannerRepository;
+
+    @Mock
+    private PlannerCatalogRepository catalogRepository;
 
     @Mock
     private PlannerVoteRepository plannerVoteRepository;
@@ -79,13 +87,13 @@ class PublishedPlannerQueryServiceTest {
     private PlannerReportService reportService;
 
     @Mock
+    private PlannerCatalogService plannerCatalogService;
+
+    @Mock
     private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
-
-    @Mock
-    private org.danteplanner.backend.planner.service.StatsReadsFlag statsReadsFlag;
 
     private PlannerEngagementService engagementService;
     private PublishedPlannerQueryService publishedQueryService;
@@ -106,12 +114,14 @@ class PublishedPlannerQueryServiceTest {
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerStatsRepository,
+                plannerCatalogService,
                 eventPublisher,
                 recommendedThreshold
         );
 
         publishedQueryService = new PublishedPlannerQueryService(
                 plannerRepository,
+                catalogRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 commentRepository,
@@ -119,9 +129,7 @@ class PublishedPlannerQueryServiceTest {
                 reportService,
                 engagementService,
                 plannerViewRecorder,
-                plannerStatsRepository,
-                statsReadsFlag,
-                recommendedThreshold
+                plannerStatsRepository
         );
 
         testUser = User.builder()
@@ -134,33 +142,23 @@ class PublishedPlannerQueryServiceTest {
                 .build();
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
-                .title("Test Planner")
-                .category("5F")
-                .status(PlannerStatus.DRAFT)
-                .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
-                .schemaVersion(1)
-                .contentVersion(6)
+    private PlannerCatalog catalogRow(String title, boolean recommended) {
+        return PlannerCatalog.builder()
+                .plannerId(UUID.randomUUID())
                 .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
-    }
-
-    private Planner createTestPlanner() {
-        return testPlannerBuilder().build();
+                .category("5F")
+                .title(title)
+                .firstPublishedAt(Instant.now())
+                .recommended(recommended)
+                .build();
     }
 
     @Nested
     @DisplayName("getPublishedPlanners Tests")
     class GetPublishedPlannersTests {
 
-        private Planner createPublishedPlanner(String title) {
-            return testPlannerBuilder().title(title).published(true).build();
+        private PlannerCatalog createPublishedRow(String title) {
+            return catalogRow(title, false);
         }
 
         @Test
@@ -168,14 +166,14 @@ class PublishedPlannerQueryServiceTest {
         void getPublishedPlanners_WhenCalled_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            List<Planner> planners = List.of(
-                    createPublishedPlanner("Planner 1"),
-                    createPublishedPlanner("Planner 2")
+            List<PlannerCatalog> rows = List.of(
+                    createPublishedRow("Planner 1"),
+                    createPublishedRow("Planner 2")
             );
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 2);
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable))
-                    .thenReturn(plannerPage);
+            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
+                    .thenReturn(rowPage);
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
@@ -191,18 +189,18 @@ class PublishedPlannerQueryServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "5F";
-            List<Planner> planners = List.of(createPublishedPlanner("F5 Planner"));
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
+            List<PlannerCatalog> rows = List.of(createPublishedRow("F5 Planner"));
+            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 1);
 
-            when(plannerRepository.findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(category, pageable))
-                    .thenReturn(plannerPage);
+            when(catalogRepository.findByCategoryOrderByFirstPublishedAtDesc(category, pageable))
+                    .thenReturn(rowPage);
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, category);
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findByPublishedTrueAndCategoryAndDeletedAtIsNullAndTakenDownAtIsNull(category, pageable);
+            verify(catalogRepository).findByCategoryOrderByFirstPublishedAtDesc(category, pageable);
         }
 
         @Test
@@ -210,9 +208,9 @@ class PublishedPlannerQueryServiceTest {
         void getPublishedPlanners_NoPlanners_ReturnsEmpty() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            Page<PlannerCatalog> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable))
+            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
                     .thenReturn(emptyPage);
 
             // Act
@@ -228,8 +226,8 @@ class PublishedPlannerQueryServiceTest {
     @DisplayName("getRecommendedPlanners Tests")
     class GetRecommendedPlannersTests {
 
-        private Planner createRecommendedPlanner(String title, int upvotes) {
-            return testPlannerBuilder().title(title).published(true).upvotes(upvotes).build();
+        private PlannerCatalog createRecommendedRow(String title) {
+            return catalogRow(title, true);
         }
 
         @Test
@@ -237,14 +235,14 @@ class PublishedPlannerQueryServiceTest {
         void getRecommendedPlanners_WhenCalled_ReturnsQualifyingPlanners() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            List<Planner> planners = List.of(
-                    createRecommendedPlanner("High Votes", 15),
-                    createRecommendedPlanner("Medium Votes", 12)
+            List<PlannerCatalog> rows = List.of(
+                    createRecommendedRow("High Votes"),
+                    createRecommendedRow("Medium Votes")
             );
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 2);
+            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 2);
 
-            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable))
-                    .thenReturn(plannerPage);
+            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable))
+                    .thenReturn(rowPage);
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
@@ -259,19 +257,19 @@ class PublishedPlannerQueryServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "10F";
-            List<Planner> planners = List.of(createRecommendedPlanner("F10 Planner", 20));
-            Page<Planner> plannerPage = new PageImpl<>(planners, pageable, 1);
+            List<PlannerCatalog> rows = List.of(createRecommendedRow("F10 Planner"));
+            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 1);
 
-            when(plannerRepository.findRecommendedPlannersByCategory(recommendedThreshold, category, pageable))
-                    .thenReturn(plannerPage);
+            when(catalogRepository.findByRecommendedTrueAndCategoryOrderByFirstPublishedAtDesc(category, pageable))
+                    .thenReturn(rowPage);
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, category);
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findRecommendedPlannersByCategory(
-                    recommendedThreshold, category, pageable);
+            verify(catalogRepository).findByRecommendedTrueAndCategoryOrderByFirstPublishedAtDesc(
+                    category, pageable);
         }
 
         @Test
@@ -279,9 +277,9 @@ class PublishedPlannerQueryServiceTest {
         void getRecommendedPlanners_NoneQualify_ReturnsEmpty() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Page<Planner> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            Page<PlannerCatalog> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
-            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable))
+            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable))
                     .thenReturn(emptyPage);
 
             // Act
@@ -301,13 +299,13 @@ class PublishedPlannerQueryServiceTest {
         void incrementViewCount_Success_IncrementsCount() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.incrementViewCount(plannerId)).thenReturn(1);
+            when(plannerRepository.existsActiveById(plannerId)).thenReturn(true);
 
             // Act
             publishedQueryService.incrementViewCount(plannerId);
 
             // Assert
-            verify(plannerRepository).incrementViewCount(plannerId);
+            verify(plannerStatsRepository).incrementViewCountBy(plannerId, 1);
         }
 
         @Test
@@ -315,27 +313,29 @@ class PublishedPlannerQueryServiceTest {
         void incrementViewCount_NotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.incrementViewCount(nonExistentId)).thenReturn(0);
+            when(plannerRepository.existsActiveById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
                     () -> publishedQueryService.incrementViewCount(nonExistentId)
             );
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
         @Test
-        @DisplayName("Should handle deleted planner (returns 0 rows updated)")
+        @DisplayName("Should throw PlannerNotFoundException when planner is soft-deleted")
         void incrementViewCount_DeletedPlanner_ThrowsException() {
-            // Arrange
-            UUID deletedPlannerId = UUID.randomUUID();
-            when(plannerRepository.incrementViewCount(deletedPlannerId)).thenReturn(0);
+            // Arrange: a soft-deleted planner still has a core row but is not active
+            UUID deletedId = UUID.randomUUID();
+            when(plannerRepository.existsActiveById(deletedId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> publishedQueryService.incrementViewCount(deletedPlannerId)
+                    () -> publishedQueryService.incrementViewCount(deletedId)
             );
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
     }
 
@@ -346,22 +346,19 @@ class PublishedPlannerQueryServiceTest {
         private static final String IP_ADDRESS = "192.168.1.100";
         private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
 
-        private Planner createPublishedPlanner() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            planner.setViewCount(10);
-            return planner;
+        private Planner createPublishedPlannerWithId(UUID id) {
+            return TestDataFactory.planner(testUser).id(id).published(true).build();
         }
 
         private void mockNewView(UUID plannerId) {
-            when(plannerRepository.findById(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(createPublishedPlannerWithId(plannerId)));
+            when(plannerStatsRepository.findById(plannerId))
+                    .thenReturn(Optional.of(PlannerStats.builder()
+                            .plannerId(plannerId)
+                            .viewCount(10)
+                            .build()));
             when(commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId)).thenReturn(0L);
-        }
-
-        private Planner createPublishedPlannerWithId(UUID id) {
-            Planner planner = createPublishedPlanner();
-            planner.setId(id);
-            return planner;
         }
 
         private void mockUserContext(UUID plannerId) {
@@ -386,7 +383,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             verify(plannerViewRecorder).record(eq(plannerId), any(), any());
-            verify(plannerRepository, never()).incrementViewCount(any());
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
         }
 
@@ -404,7 +401,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             verify(plannerViewRecorder).record(eq(plannerId), any(), any());
-            verify(plannerRepository, never()).incrementViewCount(any());
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
         }
 
@@ -413,16 +410,15 @@ class PublishedPlannerQueryServiceTest {
         void getPublishedPlanner_UnpublishedPlanner_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            Planner unpublished = createTestPlanner();
-            unpublished.setId(plannerId);
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(unpublished));
+            // findPublishedAggregate filters unpublished rows at the query level
+            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
                     () -> publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT));
 
             verify(plannerViewRecorder, never()).record(any(), any(), any());
-            verify(plannerRepository, never()).incrementViewCount(any());
+            verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
         }
 
         @Test
@@ -430,7 +426,7 @@ class PublishedPlannerQueryServiceTest {
         void getPublishedPlanner_PlannerNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.empty());
+            when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
@@ -487,10 +483,10 @@ class PublishedPlannerQueryServiceTest {
         void getPublishedPlanners_NoSearchAnonymous_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = testPlannerBuilder().published(true).build();
-            Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
+            PlannerCatalog row = catalogRow("Test Planner", false);
+            Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
-            when(plannerRepository.findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable)).thenReturn(plannerPage);
+            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable)).thenReturn(rowPage);
             when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
@@ -499,7 +495,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findByPublishedTrueAndDeletedAtIsNullAndTakenDownAtIsNull(pageable);
+            verify(catalogRepository).findAllByOrderByFirstPublishedAtDesc(pageable);
         }
     }
 
@@ -512,10 +508,10 @@ class PublishedPlannerQueryServiceTest {
         void getRecommendedPlanners_NoSearchAnonymous_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = testPlannerBuilder().published(true).upvotes(20).build();
-            Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
+            PlannerCatalog row = catalogRow("Test Planner", true);
+            Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
-            when(plannerRepository.findRecommendedPlanners(recommendedThreshold, pageable)).thenReturn(plannerPage);
+            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable)).thenReturn(rowPage);
             when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
@@ -524,7 +520,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findRecommendedPlanners(recommendedThreshold, pageable);
+            verify(catalogRepository).findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable);
         }
     }
 
@@ -537,20 +533,19 @@ class PublishedPlannerQueryServiceTest {
         void searchPlanners_AnonymousNoFilters_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Planner planner = testPlannerBuilder().published(true).build();
-            Page<Planner> plannerPage = new PageImpl<>(List.of(planner), pageable, 1);
-            Specification<Planner> baseSpec = (root, query, cb) -> null;
+            PlannerCatalog row = catalogRow("Test Planner", false);
+            Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
-            when(plannerRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(plannerPage);
+            when(catalogRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(rowPage);
             when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    baseSpec, pageable, null, null, null, null, null, null, null, null);
+                    false, pageable, null, null, null, null, null, null, null, null);
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(plannerRepository).findAll(any(Specification.class), eq(pageable));
+            verify(catalogRepository).findAll(any(Specification.class), any(Pageable.class));
         }
     }
 }

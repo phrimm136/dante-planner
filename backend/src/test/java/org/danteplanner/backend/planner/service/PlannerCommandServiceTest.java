@@ -10,6 +10,9 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.dto.*;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerModeration;
+import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
@@ -19,6 +22,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
@@ -57,6 +61,9 @@ class PlannerCommandServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerStatsRepository statsRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -69,7 +76,10 @@ class PlannerCommandServiceTest {
     private ContentVersionValidator contentVersionValidator;
 
     @Mock
-    private PlannerIndexService plannerIndexService;
+    private PlannerFilterService plannerFilterService;
+
+    @Mock
+    private PlannerCatalogService plannerCatalogService;
 
     private PlannerCommandService commandService;
 
@@ -90,10 +100,12 @@ class PlannerCommandServiceTest {
 
         commandService = new PlannerCommandService(
                 plannerRepository,
+                statsRepository,
                 sseService,
                 contentValidator,
                 contentVersionValidator,
-                plannerIndexService,
+                plannerFilterService,
+                plannerCatalogService,
                 accessGuard,
                 maxPlannersPerUser,
                 currentSchemaVersion
@@ -136,25 +148,31 @@ class PlannerCommandServiceTest {
                 r.content(), contentVersion, r.plannerType(), r.syncVersion(), r.selectedKeywords());
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
+    private Planner testPlanner(long syncVersion, boolean published) {
+        Planner planner = Planner.builder()
                 .id(UUID.randomUUID())
                 .user(testUser)
-                .title("Test Planner")
-                .category("5F")
-                .status(PlannerStatus.DRAFT)
-                .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
-                .schemaVersion(1)
-                .contentVersion(6)
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
+                .build();
+        planner.attach(
+                PlannerContent.builder()
+                        .title("Test Planner")
+                        .category("5F")
+                        .status(PlannerStatus.DRAFT)
+                        .content("{\"data\": \"test\"}")
+                        .contentSchemaVersion(1)
+                        .gameContentVersion(6)
+                        .syncVersion(syncVersion)
+                        .lastModifiedAt(Instant.now())
+                        .build(),
+                PlannerPublication.builder().published(published).build(),
+                PlannerModeration.builder().build());
+        return planner;
     }
 
     private Planner createTestPlanner() {
-        return testPlannerBuilder().build();
+        return testPlanner(1L, false);
     }
 
     @Nested
@@ -207,13 +225,13 @@ class PlannerCommandServiceTest {
         void createPlanner_WithinLimit_Success() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(50L);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
@@ -234,7 +252,7 @@ class PlannerCommandServiceTest {
         void createPlanner_AtLimit_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) maxPlannersPerUser);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) maxPlannersPerUser);
 
             // Act & Assert
             PlannerLimitExceededException exception = assertThrows(
@@ -253,7 +271,7 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             Long nonExistentUserId = 999L;
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(nonExistentUserId)).thenReturn(0L);
+            when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
@@ -274,7 +292,7 @@ class PlannerCommandServiceTest {
         void createPlanner_NoTitle_UsesDefault() {
             // Arrange
             UpsertPlannerRequest request = withTitle(createValidRequest(), null);
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
@@ -282,7 +300,7 @@ class PlannerCommandServiceTest {
             when(plannerRepository.save(plannerCaptor.capture())).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
@@ -298,13 +316,13 @@ class PlannerCommandServiceTest {
         void createPlanner_WhenCalled_ValidatesContentBeforeSave() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
@@ -320,7 +338,7 @@ class PlannerCommandServiceTest {
         void createPlanner_InvalidContentVersion_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = withContentVersion(createValidRequest(), 5); // Old version
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             doThrow(new PlannerValidationException("INVALID_CONTENT_VERSION", "Invalid content version"))
                     .when(contentVersionValidator).validateVersionForCreate(any(), eq(5));
 
@@ -344,12 +362,12 @@ class PlannerCommandServiceTest {
         @DisplayName("Should increment syncVersion on successful update")
         void updatePlanner_Success_IncrementsSyncVersion() {
             // Arrange
-            Planner planner = testPlannerBuilder().syncVersion(5L).build();
+            Planner planner = testPlanner(5L, false);
 
             UpdatePlannerRequest request = new UpdatePlannerRequest(
                     "Updated Title", null, null, null, 5L, null);
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -366,12 +384,12 @@ class PlannerCommandServiceTest {
         @DisplayName("Should throw PlannerConflictException on version mismatch")
         void updatePlanner_VersionMismatch_ThrowsException() {
             // Arrange
-            Planner planner = testPlannerBuilder().syncVersion(5L).build();
+            Planner planner = testPlanner(5L, false);
 
             UpdatePlannerRequest request = new UpdatePlannerRequest(
                     "Updated Title", null, null, null, 3L, null); // Wrong version
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
 
             // Act & Assert
@@ -393,7 +411,7 @@ class PlannerCommandServiceTest {
             UpdatePlannerRequest request = new UpdatePlannerRequest(
                     null, null, null, null, 1L, null);
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -411,7 +429,7 @@ class PlannerCommandServiceTest {
             UpdatePlannerRequest request = new UpdatePlannerRequest(
                     null, null, null, "{\"updated\": \"content\"}", planner.getSyncVersion(), null);
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(contentValidator.validate(anyString(), anyString(), anyBoolean())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -428,14 +446,14 @@ class PlannerCommandServiceTest {
         void updatePlanner_PartialUpdate_OnlyUpdatesProvidedFields() {
             // Arrange
             Planner planner = createTestPlanner();
-            planner.setTitle("Original Title");
-            planner.setStatus(PlannerStatus.DRAFT);
+            planner.getContent().setTitle("Original Title");
+            planner.getContent().setStatus(PlannerStatus.DRAFT);
 
             UpdatePlannerRequest request = new UpdatePlannerRequest(
                     "New Title", null, null, null, planner.getSyncVersion(), null);
             // status not provided
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -457,9 +475,9 @@ class PlannerCommandServiceTest {
         void deletePlanner_Success_SoftDeletes() {
             // Arrange
             Planner planner = createTestPlanner();
-            assertNull(planner.getDeletedAt());
+            assertNull(planner.getContent().getDeletedAt());
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -467,7 +485,7 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
 
             // Assert
-            assertNotNull(planner.getDeletedAt());
+            assertNotNull(planner.getContent().getDeletedAt());
             assertTrue(planner.isDeleted());
             verify(plannerRepository).save(planner);
             verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "deleted", null);
@@ -478,7 +496,7 @@ class PlannerCommandServiceTest {
         void deletePlanner_NotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -495,10 +513,10 @@ class PlannerCommandServiceTest {
         @DisplayName("Should auto-unpublish published planner before deletion")
         void deletePlanner_PublishedPlanner_UnpublishesFirst() {
             // Arrange
-            Planner planner = testPlannerBuilder().published(true).build();
+            Planner planner = testPlanner(1L, true);
             assertTrue(planner.getPublished());
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -507,7 +525,7 @@ class PlannerCommandServiceTest {
 
             // Assert
             assertFalse(planner.getPublished()); // Auto-unpublished
-            assertNotNull(planner.getDeletedAt()); // Then soft deleted
+            assertNotNull(planner.getContent().getDeletedAt()); // Then soft deleted
             verify(plannerRepository).save(planner);
         }
 
@@ -515,9 +533,9 @@ class PlannerCommandServiceTest {
         @DisplayName("Should not change unpublished planner on delete")
         void deletePlanner_UnpublishedPlanner_NoPublishChange() {
             // Arrange
-            Planner planner = testPlannerBuilder().published(false).build();
+            Planner planner = testPlanner(1L, false);
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(planner.getId(), testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -526,7 +544,7 @@ class PlannerCommandServiceTest {
 
             // Assert
             assertFalse(planner.getPublished()); // Still unpublished
-            assertNotNull(planner.getDeletedAt());
+            assertNotNull(planner.getContent().getDeletedAt());
         }
     }
 
@@ -538,7 +556,7 @@ class PlannerCommandServiceTest {
         @DisplayName("Should import planners successfully when within limit")
         void importPlanners_WithinLimit_Success() {
             // Arrange
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(50L);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
@@ -554,7 +572,7 @@ class PlannerCommandServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
@@ -573,7 +591,7 @@ class PlannerCommandServiceTest {
         @DisplayName("Should reject import when would exceed limit")
         void importPlanners_ExceedsLimit_ThrowsException() {
             // Arrange
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 2));
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 2));
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -596,7 +614,7 @@ class PlannerCommandServiceTest {
         void importPlanners_UserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentUserId = 999L;
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(nonExistentUserId)).thenReturn(0L);
+            when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
             when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
@@ -618,7 +636,7 @@ class PlannerCommandServiceTest {
         @DisplayName("Should allow import up to exactly max planners")
         void importPlanners_ExactlyToLimit_Success() {
             // Arrange
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
@@ -632,7 +650,7 @@ class PlannerCommandServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
@@ -654,13 +672,13 @@ class PlannerCommandServiceTest {
         void createPlanner_WhenAtMaxMinusOne_Succeeds() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
@@ -674,7 +692,7 @@ class PlannerCommandServiceTest {
         void createPlanner_WhenAtMax_ThrowsLimitExceeded() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn((long) maxPlannersPerUser);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) maxPlannersPerUser);
 
             // Act & Assert
             assertThrows(
@@ -688,24 +706,24 @@ class PlannerCommandServiceTest {
         @Test
         @DisplayName("Should count only non-deleted planners for limit")
         void createPlanner_WhenCheckingLimit_CountsOnlyNonDeleted() {
-            // This is verified by the countByUserIdAndDeletedAtIsNull query being called
+            // This is verified by the countActiveByUserId query being called
             // The service trusts the repository to only count non-deleted planners
 
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId())).thenReturn(0L);
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
-                planner.setLastModifiedAt(Instant.now());
+                planner.getContent().setLastModifiedAt(Instant.now());
                 return planner;
             });
 
             commandService.createPlanner(testUser.getId(), deviceId, request);
 
             // Verify that the correct method is called (the one that excludes deleted)
-            verify(plannerRepository).countByUserIdAndDeletedAtIsNull(testUser.getId());
+            verify(plannerRepository).countActiveByUserId(testUser.getId());
         }
     }
 
@@ -743,7 +761,7 @@ class PlannerCommandServiceTest {
             // Arrange
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId()))
+            when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
             when(plannerRepository.save(any(Planner.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
@@ -780,7 +798,7 @@ class PlannerCommandServiceTest {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
             when(plannerRepository.existsByIdAndUserId(plannerId, testUser.getId()))
                     .thenReturn(true);
@@ -791,7 +809,7 @@ class PlannerCommandServiceTest {
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
             verify(plannerRepository, never()).save(any());
-            verify(plannerRepository, never()).countByUserIdAndDeletedAtIsNull(any());
+            verify(plannerRepository, never()).countActiveByUserId(any());
         }
 
         @Test
@@ -801,15 +819,15 @@ class PlannerCommandServiceTest {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
 
-            when(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, testUser.getId()))
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
             when(plannerRepository.existsByIdAndUserId(plannerId, testUser.getId()))
                     .thenReturn(false);
-            when(plannerRepository.existsByIdAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.existsActiveById(plannerId))
                     .thenReturn(false);
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));
-            when(plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId()))
+            when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
             when(plannerRepository.save(any(Planner.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));

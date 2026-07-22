@@ -1,4 +1,5 @@
 package org.danteplanner.backend.planner.entity;
+
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 
 import java.io.Serializable;
@@ -6,21 +7,20 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Composite primary key for PlannerContentIndex entity.
- * Combines entityType, entityId, and plannerId to index planner content for search.
+ * Composite primary key for PlannerEntityFilter: (entityType, entityId, plannerId).
  */
-public class PlannerContentIndexId implements Serializable {
+public class PlannerEntityFilterId implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private ContentEntityType entityType;
-    private String entityId;
+    private Integer entityId;
     private UUID plannerId;
 
-    public PlannerContentIndexId() {
+    public PlannerEntityFilterId() {
     }
 
-    public PlannerContentIndexId(ContentEntityType entityType, String entityId, UUID plannerId) {
+    public PlannerEntityFilterId(ContentEntityType entityType, Integer entityId, UUID plannerId) {
         this.entityType = entityType;
         this.entityId = entityId;
         this.plannerId = plannerId;
@@ -34,11 +34,11 @@ public class PlannerContentIndexId implements Serializable {
         this.entityType = entityType;
     }
 
-    public String getEntityId() {
+    public Integer getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(String entityId) {
+    public void setEntityId(Integer entityId) {
         this.entityId = entityId;
     }
 
@@ -54,7 +54,7 @@ public class PlannerContentIndexId implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PlannerContentIndexId that = (PlannerContentIndexId) o;
+        PlannerEntityFilterId that = (PlannerEntityFilterId) o;
         return entityType == that.entityType &&
                Objects.equals(entityId, that.entityId) &&
                Objects.equals(plannerId, that.plannerId);

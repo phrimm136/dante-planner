@@ -9,11 +9,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Cutover read model for planner counters, written alongside the legacy {@code planners} columns
- * and served in their place once {@code planner.stats.reads-enabled} is on.
+ * Authoritative planner counters. Every viewer/voter/commenter write lands here as an
+ * atomic increment — never load-mutate-save — so counter traffic cannot contend with
+ * the owner's content row. Carries the recommended-notification CAS stamp because the
+ * vote path that crosses the threshold is the only writer interested in it.
  */
 @Entity
 @Table(name = "planner_stats")
@@ -32,4 +35,10 @@ public class PlannerStats {
 
     @Column(nullable = false)
     private int upvotes;
+
+    @Column(name = "comment_count", nullable = false)
+    private int commentCount;
+
+    @Column(name = "recommended_notified_at")
+    private Instant recommendedNotifiedAt;
 }

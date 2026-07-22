@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,21 +63,10 @@ class PlannerVoteRepositoryTest {
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
 
         // Create test planner
-        testPlanner = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
-                .title("Test Planner")
-                .category("5F")
+        testPlanner = TestDataFactory.planner(testUser)
                 .status(PlannerStatus.DRAFT)
-                .content("{\"data\":\"test\"}")
                 .published(true)
-                .upvotes(0)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(org.danteplanner.backend.planner.entity.PlannerType.MIRROR_DUNGEON)
-                .savedAt(Instant.now())
-                .build();
-        testPlanner = plannerRepository.save(testPlanner);
+                .save(plannerRepository);
     }
 
     @Test
@@ -140,21 +128,12 @@ class PlannerVoteRepositoryTest {
     @DisplayName("Should allow same user to vote on multiple planners")
     void save_WhenSameUserVotesMultiplePlanners_AllPersisted() {
         // Arrange - Create another planner
-        Planner secondPlanner = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
+        Planner secondPlanner = TestDataFactory.planner(testUser)
                 .title("Second Planner")
                 .category("10F")
                 .status(PlannerStatus.DRAFT)
-                .content("{\"data\":\"test2\"}")
                 .published(true)
-                .upvotes(0)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(org.danteplanner.backend.planner.entity.PlannerType.MIRROR_DUNGEON)
-                .savedAt(Instant.now())
-                .build();
-        secondPlanner = plannerRepository.save(secondPlanner);
+                .save(plannerRepository);
 
         // Act - User upvotes both planners
         PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);

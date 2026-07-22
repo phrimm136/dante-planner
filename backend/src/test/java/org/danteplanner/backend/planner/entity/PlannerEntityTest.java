@@ -17,17 +17,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PlannerEntityTest {
 
     private Planner publishedPlanner() {
-        return Planner.builder()
+        Planner planner = Planner.builder()
                 .id(UUID.randomUUID())
-                .title("Test Planner")
-                .category("5F")
-                .content("{}")
-                .contentVersion(6)
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .published(true)
                 .build();
+        planner.attach(
+                PlannerContent.builder()
+                        .title("Test Planner")
+                        .category("5F")
+                        .content("{}")
+                        .gameContentVersion(6)
+                        .build(),
+                PlannerPublication.builder().build(),
+                PlannerModeration.builder().build());
+        planner.togglePublished();
+        return planner;
     }
 
     @Test

@@ -10,6 +10,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,7 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -63,9 +63,8 @@ class PlannerSubscriptionServiceTest {
 
         plannerId = UUID.randomUUID();
 
-        publishedPlanner = Planner.builder()
+        publishedPlanner = TestDataFactory.planner(testUser)
                 .id(plannerId)
-                .user(testUser)
                 .title("Published Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
@@ -73,7 +72,6 @@ class PlannerSubscriptionServiceTest {
                 .contentVersion(6)
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .published(true)
-                .createdAt(Instant.now())
                 .build();
     }
 
@@ -85,7 +83,7 @@ class PlannerSubscriptionServiceTest {
         @DisplayName("Should create new subscription when not subscribed")
         void toggleSubscription_WhenNotSubscribed_CreatesNewSubscription() {
             // Arrange
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.empty());
@@ -113,7 +111,7 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
             // existingSubscription is enabled by default
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(existingSubscription));
@@ -136,7 +134,7 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
             disabledSubscription.toggle(); // Now disabled
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(disabledSubscription));
@@ -156,7 +154,7 @@ class PlannerSubscriptionServiceTest {
         void toggleSubscription_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+            when(plannerRepository.findPublishedAggregate(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -173,7 +171,7 @@ class PlannerSubscriptionServiceTest {
         @DisplayName("Should throw PlannerNotFoundException when planner not published")
         void toggleSubscription_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert

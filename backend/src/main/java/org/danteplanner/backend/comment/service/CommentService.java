@@ -64,8 +64,7 @@ public class CommentService {
      */
     @Transactional(readOnly = true)
     public List<CommentTreeNode> getCommentTree(UUID plannerId, Long currentUserId) {
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         // Check access: published planners are public, unpublished only for owner
@@ -180,7 +179,7 @@ public class CommentService {
         accessGuard.checkUserRestrictions(userId);
 
         // Verify planner exists and is published
-        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+        Planner planner = plannerRepository.findPublishedAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         int depth = 0;
@@ -278,7 +277,7 @@ public class CommentService {
         UUID plannerId = parent.getPlannerId();
 
         // Verify planner exists and is published
-        Planner planner = plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId)
+        Planner planner = plannerRepository.findPublishedAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         // Cannot reply to deleted TOP-LEVEL comments

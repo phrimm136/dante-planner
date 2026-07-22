@@ -71,7 +71,7 @@ class TombstoneRollbackIT extends CausalHarnessSupport {
             status.setRollbackOnly();
         });
 
-        assertThat(plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(plannerId, userId))
+        assertThat(plannerRepository.findAggregateForOwner(plannerId, userId))
                 .as("the rollback must revert the soft-delete: the planner is still live")
                 .isPresent();
 

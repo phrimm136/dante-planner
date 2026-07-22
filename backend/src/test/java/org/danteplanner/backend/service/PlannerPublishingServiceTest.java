@@ -1,23 +1,25 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
-import org.danteplanner.backend.planner.service.PlannerIndexService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 
 import org.danteplanner.backend.notification.service.NotificationService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,7 +30,6 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,13 +50,19 @@ class PlannerPublishingServiceTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     @Mock
     private PlannerContentValidator contentValidator;
 
     @Mock
-    private PlannerIndexService plannerIndexService;
+    private PlannerFilterService plannerFilterService;
+
+    @Mock
+    private PlannerCatalogService plannerCatalogService;
 
     @Mock
     private PlannerSubscriptionService subscriptionService;
@@ -81,8 +88,10 @@ class PlannerPublishingServiceTest {
 
         publishingService = new PlannerPublishingService(
                 plannerRepository,
+                plannerStatsRepository,
                 contentValidator,
-                plannerIndexService,
+                plannerFilterService,
+                plannerCatalogService,
                 subscriptionService,
                 notificationSseService,
                 notificationService,
@@ -102,21 +111,8 @@ class PlannerPublishingServiceTest {
         when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
-                .title("Test Planner")
-                .category("5F")
-                .status(PlannerStatus.DRAFT)
-                .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
+    private TestDataFactory.PlannerBuilder testPlannerBuilder() {
+        return TestDataFactory.planner(testUser);
     }
 
     private Planner createTestPlanner() {
@@ -133,15 +129,14 @@ class PlannerPublishingServiceTest {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.saveAndFlush(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
-            assertTrue(result.getPublished());
+            assertTrue(result.published());
             verify(plannerRepository).save(any(Planner.class));
         }
 
@@ -151,14 +146,14 @@ class PlannerPublishingServiceTest {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
-            assertFalse(result.getPublished());
+            assertFalse(result.published());
         }
 
         @Test
@@ -176,7 +171,7 @@ class PlannerPublishingServiceTest {
             Planner planner = createTestPlanner();
             planner.setUser(otherUser);
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
             // Act & Assert
             PlannerForbiddenException exception = assertThrows(
@@ -193,7 +188,7 @@ class PlannerPublishingServiceTest {
         void togglePublish_NotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findById(nonExistentId)).thenReturn(Optional.empty());
+            when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(
@@ -209,7 +204,8 @@ class PlannerPublishingServiceTest {
             Planner planner = createTestPlanner();
             planner.softDelete();
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            // findAggregate filters soft-deleted rows at the query level
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.empty());
 
             // Act & Assert
             assertThrows(
@@ -224,15 +220,14 @@ class PlannerPublishingServiceTest {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.saveAndFlush(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
-            assertTrue(result.getPublished());
+            assertTrue(result.published());
             verify(subscriptionService).createSubscription(testUser.getId(), planner.getId());
         }
 
@@ -242,14 +237,14 @@ class PlannerPublishingServiceTest {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            Planner result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
-            assertFalse(result.getPublished());
+            assertFalse(result.published());
             verify(subscriptionService, never()).createSubscription(any(), any());
         }
     }
@@ -287,7 +282,7 @@ class PlannerPublishingServiceTest {
         void toggleOwnerNotifications_Owner_UpdatesSetting() {
             // Arrange
             Planner planner = createTestPlanner();
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
@@ -315,7 +310,7 @@ class PlannerPublishingServiceTest {
             Planner planner = createTestPlanner();
             planner.setUser(otherUser);
 
-            when(plannerRepository.findById(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
             // Act & Assert
             assertThrows(

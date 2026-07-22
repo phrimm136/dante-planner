@@ -5,14 +5,17 @@ import org.danteplanner.backend.notification.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -33,8 +36,10 @@ import java.util.UUID;
 public class PlannerPublishingService {
 
     private final PlannerRepository plannerRepository;
+    private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerContentValidator contentValidator;
-    private final PlannerIndexService plannerIndexService;
+    private final PlannerFilterService plannerFilterService;
+    private final PlannerCatalogService plannerCatalogService;
     private final PlannerSubscriptionService subscriptionService;
     private final SseService notificationSseService;
     private final NotificationService notificationService;
@@ -58,17 +63,16 @@ public class PlannerPublishingService {
      *
      * @param userId    the user ID (must be owner)
      * @param plannerId the planner ID
-     * @return the updated planner
+     * @return the updated planner response
      * @throws PlannerNotFoundException  if planner not found
      * @throws PlannerForbiddenException if user is not the owner
      */
     @Transactional
-    public Planner togglePublish(Long userId, UUID plannerId) {
+    public PlannerResponse togglePublish(Long userId, UUID plannerId) {
         // Check if user has any restrictions
         accessGuard.checkUserRestrictions(userId);
 
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         // Verify ownership
@@ -85,15 +89,17 @@ public class PlannerPublishingService {
             if (planner.getTitle() == null || planner.getTitle().isBlank()) {
                 throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
             }
-            contentValidator.validate(planner.getContent(), planner.getCategory(), true);
+            contentValidator.validate(planner.getContentJson(), planner.getCategory(), true);
         }
 
         Planner saved = plannerRepository.save(planner);
 
         if (nowPublished) {
-            plannerIndexService.reindex(plannerId, saved.getContent());
+            plannerCatalogService.add(saved);
+            plannerFilterService.rebuildFilters(plannerId, saved.getContentJson(), saved.getSelectedKeywords());
         } else {
-            plannerIndexService.deleteIndex(plannerId);
+            plannerCatalogService.remove(plannerId);
+            plannerFilterService.clearFilters(plannerId);
         }
 
         // Auto-subscribe owner when publishing (not unpublishing)
@@ -121,7 +127,10 @@ public class PlannerPublishingService {
         log.info("Toggled publish status for planner {} to {} by user {}",
                 plannerId, saved.getPublished(), userId);
 
-        return saved;
+        int upvotes = plannerStatsRepository.findById(plannerId)
+                .map(PlannerStats::getUpvotes)
+                .orElse(0);
+        return PlannerResponse.fromEntity(saved, upvotes);
     }
 
     /**
@@ -137,15 +146,14 @@ public class PlannerPublishingService {
      */
     @Transactional
     public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         if (!planner.isOwnedBy(userId)) {
             throw new PlannerForbiddenException(plannerId);
         }
 
-        planner.setOwnerNotificationsEnabled(enabled);
+        planner.getPublication().setOwnerNotificationsEnabled(enabled);
         plannerRepository.save(planner);
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);

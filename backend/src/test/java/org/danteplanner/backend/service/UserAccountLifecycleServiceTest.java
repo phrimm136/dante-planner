@@ -37,6 +37,30 @@ class UserAccountLifecycleServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private org.danteplanner.backend.planner.repository.PlannerRepository plannerRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerContentRepository plannerContentRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerPublicationRepository plannerPublicationRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerModerationRepository plannerModerationRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerCatalogRepository plannerCatalogRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository plannerEntityFilterRepository;
+
+    @Mock
+    private org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository plannerKeywordFilterRepository;
+
+    @Mock
     private PlannerVoteRepository plannerVoteRepository;
 
     @Mock
@@ -58,6 +82,14 @@ class UserAccountLifecycleServiceTest {
     void setUp() {
         lifecycleService = new UserAccountLifecycleService(
                 userRepository,
+                plannerRepository,
+                plannerContentRepository,
+                plannerPublicationRepository,
+                plannerModerationRepository,
+                plannerStatsRepository,
+                plannerCatalogRepository,
+                plannerEntityFilterRepository,
+                plannerKeywordFilterRepository,
                 plannerVoteRepository,
                 plannerCommentRepository,
                 plannerCommentVoteRepository,

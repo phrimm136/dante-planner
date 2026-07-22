@@ -1,7 +1,9 @@
 package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -82,6 +84,9 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
     private PlannerVoteRepository voteRepository;
 
     @Autowired
+    private PlannerStatsRepository statsRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -103,6 +108,7 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
     void setUp() {
         // Clean up in dependency order (no sentinel user needed for these tests)
         voteRepository.deleteAll();
+        statsRepository.deleteAll();
         plannerRepository.deleteAll();
         notificationRepository.deleteAll();
         userRepository.deleteAll();
@@ -209,9 +215,10 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
 
             // Atomic increment: the denormalized counter equals the real vote-row count (no lost update)
             long voteRows = voteRepository.count();
-            Planner reloaded = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            int upvotes = statsRepository.findById(testPlanner.getId())
+                    .map(PlannerStats::getUpvotes).orElse(0);
             assertThat(voteRows).isEqualTo(totalVoters);
-            assertThat(reloaded.getUpvotes()).isEqualTo(totalVoters);
+            assertThat(upvotes).isEqualTo(totalVoters);
 
             // CAS gate: the recommended-threshold notification fires exactly once
             long recommendedNotifications = notificationRepository.findAll().stream()
@@ -328,15 +335,15 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("SAVED persists as lowercase 'saved' in the ENUM column and reads back as SAVED")
         void plannerStatus_Saved_RoundTripsThroughEnumColumn() {
-            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
-            planner.setStatus(PlannerStatus.SAVED);
-            plannerRepository.save(planner);
+            Planner planner = TestDataFactory.planner(testUser)
+                    .status(PlannerStatus.SAVED)
+                    .save(plannerRepository);
             entityManager.flush();
             entityManager.clear();
 
             String hexId = planner.getId().toString().replace("-", "");
             String rawColumn = (String) entityManager.createNativeQuery(
-                            "SELECT status FROM planners WHERE id = UNHEX(?)")
+                            "SELECT status FROM planner_content WHERE planner_id = UNHEX(?)")
                     .setParameter(1, hexId)
                     .getSingleResult();
             assertThat(rawColumn).isEqualTo("saved");
@@ -434,18 +441,18 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("SelectedKeywords SET Column")
+    @DisplayName("SelectedKeywords JSON Column")
     class SelectedKeywordsTests {
 
         @Test
-        @DisplayName("planner persists and restores every FE keyword through the real SET column")
+        @DisplayName("planner persists and restores every FE keyword through the real JSON column")
         void saveAllKeywords_WhenPersistedAndReloaded_RoundTripsThroughSetColumn() {
-            // The full set joins to ~375 chars; only the MySQL SET(...) column (bitmask
-            // storage) holds it. H2's converter-backed VARCHAR(255) cannot, which is why
-            // this empirical all-keywords save lives in the containerized tier.
-            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, testUser, false);
-            planner.setSelectedKeywords(new HashSet<>(KeywordSetConverter.VALID_KEYWORDS));
-            plannerRepository.save(planner);
+            // Empirical all-keywords save against the real MySQL JSON column: the full
+            // set must survive the converter's write and read paths end-to-end, which
+            // is why it lives in the containerized tier.
+            Planner planner = TestDataFactory.planner(testUser)
+                    .selectedKeywords(new HashSet<>(KeywordSetConverter.VALID_KEYWORDS))
+                    .save(plannerRepository);
 
             // No surrounding @Transactional: save commits in its own session, so this
             // findById re-reads from the DB and exercises the converter's read path.

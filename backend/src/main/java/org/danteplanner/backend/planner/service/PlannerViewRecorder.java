@@ -10,7 +10,6 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.danteplanner.backend.planner.entity.PlannerViewId;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,15 +26,12 @@ public class PlannerViewRecorder {
 
     private static final long FLUSH_INTERVAL_MS = 500;
 
-    private final PlannerRepository plannerRepository;
     private final PlannerViewRepository plannerViewRepository;
     private final PlannerStatsRepository plannerStatsRepository;
     private final List<PlannerViewId> buffer = new CopyOnWriteArrayList<>();
 
-    public PlannerViewRecorder(PlannerRepository plannerRepository,
-            PlannerViewRepository plannerViewRepository,
+    public PlannerViewRecorder(PlannerViewRepository plannerViewRepository,
             PlannerStatsRepository plannerStatsRepository) {
-        this.plannerRepository = plannerRepository;
         this.plannerViewRepository = plannerViewRepository;
         this.plannerStatsRepository = plannerStatsRepository;
     }
@@ -54,9 +50,6 @@ public class PlannerViewRecorder {
         buffer.removeAll(drained);
         Map<UUID, Integer> newViewsByPlanner =
                 plannerViewRepository.insertIgnoreReturningNewCounts(drained, Instant.now());
-        newViewsByPlanner.forEach((plannerId, delta) -> {
-            plannerRepository.incrementViewCountBy(plannerId, delta);
-            plannerStatsRepository.incrementViewCountBy(plannerId, delta);
-        });
+        newViewsByPlanner.forEach(plannerStatsRepository::incrementViewCountBy);
     }
 }

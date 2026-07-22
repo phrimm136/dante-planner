@@ -15,7 +15,11 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +44,9 @@ public class ModerationService {
     private final UserRepository userRepository;
     private final PlannerRepository plannerRepository;
     private final PlannerCommentRepository plannerCommentRepository;
+    private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerCatalogService plannerCatalogService;
+    private final PlannerFilterService plannerFilterService;
     private final ModerationActionRepository moderationActionRepository;
     private final SseService sseService;
 
@@ -266,12 +273,13 @@ public class ModerationService {
      */
     @Transactional
     public Planner deletePlanner(Long actorId, UUID plannerId, String reason) {
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         planner.takeDown();
         Planner saved = plannerRepository.save(planner);
+        plannerCatalogService.remove(plannerId);
+        plannerFilterService.clearFilters(plannerId);
 
         // Log to audit trail
         logModerationAction(actorId, plannerId.toString(),
@@ -308,12 +316,13 @@ public class ModerationService {
      */
     @Transactional
     public Planner unpublishPlanner(Long actorId, UUID plannerId) {
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         planner.unpublish();
         Planner saved = plannerRepository.save(planner);
+        plannerCatalogService.remove(plannerId);
+        plannerFilterService.clearFilters(plannerId);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;
@@ -458,13 +467,13 @@ public class ModerationService {
      */
     @Transactional
     public ModerationResponse hideFromRecommended(UUID plannerId, Long moderatorId, HidePlannerRequest request) {
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         planner.hideFromRecommended(moderatorId, request.reason());
 
         plannerRepository.save(planner);
+        plannerCatalogService.refreshRecommended(plannerId);
 
         log.info("Planner {} hidden from recommended by moderator {} with reason: {}",
                 plannerId, moderatorId, request.reason());
@@ -482,13 +491,13 @@ public class ModerationService {
      */
     @Transactional
     public ModerationResponse unhideFromRecommended(UUID plannerId, Long moderatorId) {
-        Planner planner = plannerRepository.findById(plannerId)
-                .filter(p -> p.getDeletedAt() == null)
+        Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         planner.unhideFromRecommended();
 
         plannerRepository.save(planner);
+        plannerCatalogService.refreshRecommended(plannerId);
 
         log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
 
@@ -503,22 +512,24 @@ public class ModerationService {
      */
     @Transactional(readOnly = true)
     public Page<ModerationResponse> listHiddenPlanners(Pageable pageable) {
-        return plannerRepository.findByHiddenFromRecommendedTrueAndDeletedAtIsNull(pageable)
+        return plannerRepository.findHiddenFromRecommended(pageable)
                 .map(this::buildModerationResponse);
     }
 
     /**
-     * Build ModerationResponse from Planner entity.
+     * Build ModerationResponse from a planner aggregate.
      */
     private ModerationResponse buildModerationResponse(Planner planner) {
         return new ModerationResponse(
                 planner.getId(),
                 planner.getTitle(),
                 planner.getHiddenFromRecommended(),
-                planner.getHiddenByModeratorId(),
-                planner.getHiddenReason(),
-                planner.getHiddenAt(),
-                planner.getUpvotes()
+                planner.getModeration().getHiddenByModeratorId(),
+                planner.getModeration().getHiddenReason(),
+                planner.getModeration().getHiddenAt(),
+                plannerStatsRepository.findById(planner.getId())
+                        .map(PlannerStats::getUpvotes)
+                        .orElse(0)
         );
     }
 }

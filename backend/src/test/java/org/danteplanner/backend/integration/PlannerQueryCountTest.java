@@ -1,21 +1,23 @@
 package org.danteplanner.backend.integration;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.planner.specification.PlannerSpecifications;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
@@ -91,6 +93,15 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Autowired
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Autowired
+    private PlannerCatalogRepository plannerCatalogRepository;
+
+    @Autowired
+    private PlannerCatalogService plannerCatalogService;
+
+    @Autowired
     private PublishedPlannerQueryService publishedPlannerQueryService;
 
     @Autowired
@@ -107,6 +118,8 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
         plannerCommentRepository.deleteAll();
         plannerVoteRepository.deleteAll();
         plannerBookmarkRepository.deleteAll();
+        plannerCatalogRepository.deleteAll();
+        plannerStatsRepository.deleteAll();
         plannerRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -143,7 +156,7 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
         assertConstantStatementCount(() -> {
             statistics.clear();
             publishedPlannerQueryService.searchPlanners(
-                    PlannerSpecifications.isPublished(),
+                    false,
                     PAGE,
                     null,
                     viewerId,
@@ -195,6 +208,7 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
             String unique = UUID.randomUUID().toString();
             User author = TestDataFactory.createTestUser(userRepository, "author-" + unique + "@example.com");
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+            plannerCatalogService.add(planner);
             seededIds.add(planner.getId());
 
             plannerVoteRepository.save(new PlannerVote(viewerId, planner.getId(), VoteType.UP));
@@ -204,25 +218,19 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
         }
 
         if (crossRecommendedThreshold) {
-            // Lift each planner's denormalized upvote counter over the recommended threshold so the
-            // recommended visibility filter (upvotes >= threshold) returns them.
+            // Lift each planner's upvote counter over the recommended threshold and refresh
+            // the derived catalog flag so the recommended listing returns them.
             bumpUpvotesOverThreshold(seededIds);
         }
     }
 
     private void bumpUpvotesOverThreshold(List<UUID> plannerIds) {
-        EntityManager em = entityManagerFactory.createEntityManager();
-        try {
-            em.getTransaction().begin();
-            for (UUID id : plannerIds) {
-                em.createQuery("UPDATE Planner p SET p.upvotes = :v WHERE p.id = :id")
-                        .setParameter("v", recommendedThreshold)
-                        .setParameter("id", id)
-                        .executeUpdate();
-            }
-            em.getTransaction().commit();
-        } finally {
-            em.close();
+        for (UUID id : plannerIds) {
+            plannerStatsRepository.save(PlannerStats.builder()
+                    .plannerId(id)
+                    .upvotes(recommendedThreshold)
+                    .build());
+            plannerCatalogService.refreshRecommended(id);
         }
     }
 }

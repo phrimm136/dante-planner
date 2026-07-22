@@ -73,7 +73,7 @@ public class PlannerAccessGuard {
      * @throws PlannerNotFoundException if planner not found for this user
      */
     public Planner findPlannerOrThrow(Long userId, UUID id) {
-        return plannerRepository.findByIdAndUserIdAndDeletedAtIsNull(id, userId)
+        return plannerRepository.findAggregateForOwner(id, userId)
                 .orElseThrow(() -> new PlannerNotFoundException(id));
     }
 }

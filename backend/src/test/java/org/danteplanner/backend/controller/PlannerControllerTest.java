@@ -7,13 +7,16 @@ import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.VoteRequest;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.entity.PlannerView;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -81,6 +84,12 @@ class PlannerControllerTest {
 
     @Autowired
     private PlannerViewRepository plannerViewRepository;
+
+    @Autowired
+    private PlannerStatsRepository statsRepository;
+
+    @Autowired
+    private PlannerCatalogService catalogService;
 
     private User testUser;
     private User otherUser;
@@ -171,7 +180,7 @@ class PlannerControllerTest {
                 planner.getCategory(),
                 null,
                 null,
-                planner.getContent(),
+                planner.getContentJson(),
                 planner.getContentVersion(),
                 planner.getPlannerType(),
                 planner.getSyncVersion(),
@@ -214,20 +223,26 @@ class PlannerControllerTest {
     }
 
     private Planner createTestPlanner(User user) {
-        Planner planner = Planner.builder()
-                .id(UUID.randomUUID())
-                .user(user)
-                .title("Test Planner")
-                .category("5F")
+        return TestDataFactory.planner(user)
                 .status(PlannerStatus.DRAFT)
                 .content(VALID_CONTENT)
-                .syncVersion(1L)
-                .schemaVersion(1)
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .savedAt(Instant.now())
-                .build();
-        return plannerRepository.save(planner);
+                .save(plannerRepository);
+    }
+
+    private Planner createPublishedPlanner(User user, String title, String category, int upvotes) {
+        Planner planner = TestDataFactory.planner(user)
+                .title(title)
+                .category(category)
+                .status(PlannerStatus.SAVED)
+                .content(VALID_CONTENT)
+                .published(true)
+                .save(plannerRepository);
+        statsRepository.save(PlannerStats.builder()
+                .plannerId(planner.getId())
+                .upvotes(upvotes)
+                .build());
+        catalogService.add(planner);
+        return planner;
     }
 
     @Nested
@@ -710,7 +725,7 @@ class PlannerControllerTest {
 
             // Verify soft delete
             Planner deletedPlanner = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertNotNull(deletedPlanner.getDeletedAt());
+            assertNotNull(deletedPlanner.getContent().getDeletedAt());
             assertTrue(deletedPlanner.isDeleted());
         }
 
@@ -943,7 +958,7 @@ class PlannerControllerTest {
                     .andExpect(status().isCreated());
 
             // Verify count is now 100
-            assertEquals(100, plannerRepository.countByUserIdAndDeletedAtIsNull(testUser.getId()));
+            assertEquals(100, plannerRepository.countActiveByUserId(testUser.getId()));
         }
 
         @Test
@@ -1012,23 +1027,7 @@ class PlannerControllerTest {
     class GetPublishedPlannersTests {
 
         private Planner createPublishedPlanner(User user, String title) {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(user)
-                    .title(title)
-                    .category("5F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(0)
-                    
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            return plannerRepository.save(planner);
+            return PlannerControllerTest.this.createPublishedPlanner(user, title, "5F", 0);
         }
 
         @Test
@@ -1054,23 +1053,7 @@ class PlannerControllerTest {
             // Arrange - Create planners with different categories
             createPublishedPlanner(testUser, "F5 Planner");
 
-            Planner f10Planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(testUser)
-                    .title("F10 Planner")
-                    .category("10F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(0)
-                    
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            plannerRepository.save(f10Planner);
+            PlannerControllerTest.this.createPublishedPlanner(testUser, "F10 Planner", "10F", 0);
 
             // Act & Assert - Filter by F10
             mockMvc.perform(get("/api/planner/md/published")
@@ -1104,22 +1087,7 @@ class PlannerControllerTest {
     class GetRecommendedPlannersTests {
 
         private Planner createRecommendedPlanner(User user, String title, int upvotes) {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(user)
-                    .title(title)
-                    .category("5F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(upvotes)
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            return plannerRepository.save(planner);
+            return createPublishedPlanner(user, title, "5F", upvotes);
         }
 
         @Test
@@ -1215,23 +1183,7 @@ class PlannerControllerTest {
         @DisplayName("Should toggle from published to unpublished")
         void togglePublish_WhenPublished_TogglesToUnpublished() throws Exception {
             // Arrange - Create already published planner
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(testUser)
-                    .title("Published Planner")
-                    .category("5F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(5)
-                    
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            planner = plannerRepository.save(planner);
+            Planner planner = createPublishedPlanner(testUser, "Published Planner", "5F", 5);
             assertTrue(planner.getPublished());
 
             // Act & Assert - Toggle to unpublished
@@ -1247,23 +1199,8 @@ class PlannerControllerTest {
     class CastVoteTests {
 
         private Planner createPublishedPlanner() {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(otherUser)  // Created by other user so test user can vote
-                    .title("Votable Planner")
-                    .category("5F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(5)
-                    
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            return plannerRepository.save(planner);
+            // Created by other user so test user can vote
+            return PlannerControllerTest.this.createPublishedPlanner(otherUser, "Votable Planner", "5F", 5);
         }
 
         @Test
@@ -1352,23 +1289,8 @@ class PlannerControllerTest {
     class ToggleBookmarkTests {
 
         private Planner createPublishedPlanner() {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(otherUser)  // Created by other user so test user can bookmark
-                    .title("Bookmarkable Planner")
-                    .category("5F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(5)
-                    
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            return plannerRepository.save(planner);
+            // Created by other user so test user can bookmark
+            return PlannerControllerTest.this.createPublishedPlanner(otherUser, "Bookmarkable Planner", "5F", 5);
         }
 
         @Test
@@ -1442,23 +1364,8 @@ class PlannerControllerTest {
         @DisplayName("Should allow bookmarking own published planner")
         void toggleBookmark_OwnPlanner_Success() throws Exception {
             // Arrange - Create published planner owned by test user
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(testUser)
-                    .title("My Published Planner")
-                    .category("5F")
-                    .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
-                    .published(true)
-                    .upvotes(0)
-                    
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            plannerRepository.save(planner);
+            Planner planner = PlannerControllerTest.this.createPublishedPlanner(
+                    testUser, "My Published Planner", "5F", 0);
 
             // Act & Assert - Can bookmark own planner
             mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())
@@ -1519,23 +1426,17 @@ class PlannerControllerTest {
     class GetPublishedPlannerDetailTests {
 
         private Planner createPublishedPlannerWithViewCount(User user, int viewCount) {
-            Planner planner = Planner.builder()
-                    .id(UUID.randomUUID())
-                    .user(user)
+            Planner planner = TestDataFactory.planner(user)
                     .title("View Test Planner")
-                    .category("5F")
                     .status(PlannerStatus.SAVED)
                     .content(VALID_CONTENT)
                     .published(true)
-                    .upvotes(0)
+                    .save(plannerRepository);
+            statsRepository.save(PlannerStats.builder()
+                    .plannerId(planner.getId())
                     .viewCount(viewCount)
-                    .syncVersion(1L)
-                    .schemaVersion(1)
-                    .contentVersion(6)
-                    .plannerType(PlannerType.MIRROR_DUNGEON)
-                    .savedAt(Instant.now())
-                    .build();
-            return plannerRepository.save(planner);
+                    .build());
+            return planner;
         }
 
         @Test

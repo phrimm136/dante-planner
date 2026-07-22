@@ -3,10 +3,12 @@ package org.danteplanner.backend.controller;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -51,6 +53,9 @@ class AdminModerationControllerTest {
 
     @Autowired
     private PlannerVoteRepository voteRepository;
+
+    @Autowired
+    private PlannerStatsRepository statsRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -251,8 +256,8 @@ class AdminModerationControllerTest {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenAt()).isNotNull();
-            assertThat(updated.getHiddenAt()).isAfterOrEqualTo(beforeHide);
+            assertThat(updated.getModeration().getHiddenAt()).isNotNull();
+            assertThat(updated.getModeration().getHiddenAt()).isAfterOrEqualTo(beforeHide);
         }
 
         @Test
@@ -271,7 +276,7 @@ class AdminModerationControllerTest {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenByModeratorId()).isEqualTo(adminUser.getId());
+            assertThat(updated.getModeration().getHiddenByModeratorId()).isEqualTo(adminUser.getId());
         }
 
         @Test
@@ -291,7 +296,7 @@ class AdminModerationControllerTest {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenReason()).isEqualTo(reason);
+            assertThat(updated.getModeration().getHiddenReason()).isEqualTo(reason);
         }
 
         @Test
@@ -312,9 +317,9 @@ class AdminModerationControllerTest {
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             assertThat(updated.getHiddenFromRecommended()).isTrue();
-            assertThat(updated.getHiddenAt()).isNotNull();
-            assertThat(updated.getHiddenByModeratorId()).isEqualTo(adminUser.getId());
-            assertThat(updated.getHiddenReason()).isEqualTo(reason);
+            assertThat(updated.getModeration().getHiddenAt()).isNotNull();
+            assertThat(updated.getModeration().getHiddenByModeratorId()).isEqualTo(adminUser.getId());
+            assertThat(updated.getModeration().getHiddenReason()).isEqualTo(reason);
         }
 
         @Test
@@ -326,8 +331,10 @@ class AdminModerationControllerTest {
             PlannerVote vote2 = new PlannerVote(adminUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote2);
 
-            testPlanner.setUpvotes(2);
-            plannerRepository.save(testPlanner);
+            statsRepository.save(PlannerStats.builder()
+                    .plannerId(testPlanner.getId())
+                    .upvotes(2)
+                    .build());
 
             String hideRequest = """
                 {
@@ -344,8 +351,7 @@ class AdminModerationControllerTest {
             assertThat(voteRepository.findByUserIdAndPlannerId(regularUser.getId(), testPlanner.getId())).isPresent();
             assertThat(voteRepository.findByUserIdAndPlannerId(adminUser.getId(), testPlanner.getId())).isPresent();
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getUpvotes()).isEqualTo(2);
+            assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getUpvotes()).isEqualTo(2);
         }
     }
 
@@ -414,7 +420,7 @@ class AdminModerationControllerTest {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenAt()).isNull();
+            assertThat(updated.getModeration().getHiddenAt()).isNull();
         }
 
         @Test
@@ -428,7 +434,7 @@ class AdminModerationControllerTest {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenByModeratorId()).isNull();
+            assertThat(updated.getModeration().getHiddenByModeratorId()).isNull();
         }
 
         @Test
@@ -442,7 +448,7 @@ class AdminModerationControllerTest {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenReason()).isNull();
+            assertThat(updated.getModeration().getHiddenReason()).isNull();
         }
 
         @Test
@@ -457,9 +463,9 @@ class AdminModerationControllerTest {
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
             assertThat(updated.getHiddenFromRecommended()).isFalse();
-            assertThat(updated.getHiddenAt()).isNull();
-            assertThat(updated.getHiddenByModeratorId()).isNull();
-            assertThat(updated.getHiddenReason()).isNull();
+            assertThat(updated.getModeration().getHiddenAt()).isNull();
+            assertThat(updated.getModeration().getHiddenByModeratorId()).isNull();
+            assertThat(updated.getModeration().getHiddenReason()).isNull();
         }
 
         @Test
@@ -487,8 +493,10 @@ class AdminModerationControllerTest {
             PlannerVote vote2 = new PlannerVote(moderatorUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote2);
 
-            testPlanner.setUpvotes(2);
-            plannerRepository.save(testPlanner);
+            statsRepository.save(PlannerStats.builder()
+                    .plannerId(testPlanner.getId())
+                    .upvotes(2)
+                    .build());
 
             mockMvc.perform(post("/api/admin/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -497,8 +505,7 @@ class AdminModerationControllerTest {
             assertThat(voteRepository.findByUserIdAndPlannerId(regularUser.getId(), testPlanner.getId())).isPresent();
             assertThat(voteRepository.findByUserIdAndPlannerId(moderatorUser.getId(), testPlanner.getId())).isPresent();
 
-            Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getUpvotes()).isEqualTo(2);
+            assertThat(statsRepository.findById(testPlanner.getId()).orElseThrow().getUpvotes()).isEqualTo(2);
         }
     }
 }

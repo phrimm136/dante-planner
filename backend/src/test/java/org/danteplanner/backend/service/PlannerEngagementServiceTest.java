@@ -12,6 +12,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +25,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,6 +56,9 @@ class PlannerEngagementServiceTest {
     @Mock
     private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
 
+    @Mock
+    private org.danteplanner.backend.planner.service.PlannerCatalogService plannerCatalogService;
+
     private PlannerEngagementService engagementService;
 
     @Value("${planner.recommended-threshold}")
@@ -72,6 +75,7 @@ class PlannerEngagementServiceTest {
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerStatsRepository,
+                plannerCatalogService,
                 eventPublisher,
                 recommendedThreshold
         );
@@ -86,21 +90,15 @@ class PlannerEngagementServiceTest {
                 .build();
     }
 
-    private Planner.PlannerBuilder testPlannerBuilder() {
-        return Planner.builder()
-                .id(UUID.randomUUID())
-                .user(testUser)
+    private TestDataFactory.PlannerBuilder testPlannerBuilder() {
+        return TestDataFactory.planner(testUser)
                 .title("Test Planner")
                 .category("5F")
                 .status(PlannerStatus.DRAFT)
                 .content("{\"data\": \"test\"}")
-                .syncVersion(1L)
                 .schemaVersion(1)
                 .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .createdAt(Instant.now())
-                .lastModifiedAt(Instant.now())
-                .savedAt(Instant.now());
+                .plannerType(PlannerType.MIRROR_DUNGEON);
     }
 
     private Planner createTestPlanner() {
@@ -123,7 +121,7 @@ class PlannerEngagementServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.empty());
@@ -148,7 +146,7 @@ class PlannerEngagementServiceTest {
             UUID plannerId = planner.getId();
             PlannerBookmark existingBookmark = new PlannerBookmark(testUser.getId(), plannerId);
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(existingBookmark));
@@ -168,7 +166,7 @@ class PlannerEngagementServiceTest {
         void toggleBookmark_PlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(nonExistentId))
+            when(plannerRepository.findPublishedAggregate(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -187,7 +185,7 @@ class PlannerEngagementServiceTest {
             Planner planner = createTestPlanner(); // Not published
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -203,9 +201,14 @@ class PlannerEngagementServiceTest {
     class CastVoteImmutabilityTests {
 
         private Planner createPublishedPlanner() {
-            Planner planner = testPlannerBuilder().published(true).build();
-            planner.setUpvotes(5);
-            return planner;
+            return testPlannerBuilder().published(true).build();
+        }
+
+        private org.danteplanner.backend.planner.entity.PlannerStats statsWithUpvotes(UUID plannerId, int upvotes) {
+            return org.danteplanner.backend.planner.entity.PlannerStats.builder()
+                    .plannerId(plannerId)
+                    .upvotes(upvotes)
+                    .build();
         }
 
         @Test
@@ -217,7 +220,7 @@ class PlannerEngagementServiceTest {
             org.danteplanner.backend.planner.entity.PlannerVoteId voteId =
                 new org.danteplanner.backend.planner.entity.PlannerVoteId(testUser.getId(), plannerId);
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(true);
@@ -231,7 +234,7 @@ class PlannerEngagementServiceTest {
             assertEquals(plannerId, exception.getPlannerId());
             assertEquals(testUser.getId(), exception.getUserId());
             verify(plannerVoteRepository, never()).save(any());
-            verify(plannerRepository, never()).incrementUpvotes(any());
+            verify(plannerStatsRepository, never()).incrementUpvotes(any());
         }
 
         @Test
@@ -240,9 +243,6 @@ class PlannerEngagementServiceTest {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
-
-            when(plannerRepository.findByIdForUpdate(plannerId))
-                    .thenReturn(Optional.of(planner));
 
             // Act & Assert
             IllegalArgumentException exception = assertThrows(
@@ -261,19 +261,17 @@ class PlannerEngagementServiceTest {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
-            Planner updatedPlanner = createPublishedPlanner();
-            updatedPlanner.setId(plannerId);
-            updatedPlanner.setUpvotes(6);
             org.danteplanner.backend.planner.entity.PlannerVoteId voteId =
                 new org.danteplanner.backend.planner.entity.PlannerVoteId(testUser.getId(), plannerId);
 
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
             when(plannerVoteRepository.save(any(org.danteplanner.backend.planner.entity.PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerRepository.findById(plannerId)).thenReturn(Optional.of(updatedPlanner));
+            when(plannerStatsRepository.findById(plannerId))
+                    .thenReturn(Optional.of(statsWithUpvotes(plannerId, 5)), Optional.of(statsWithUpvotes(plannerId, 6)));
 
             // Act
             org.danteplanner.backend.planner.dto.VoteResponse response =
@@ -283,7 +281,7 @@ class PlannerEngagementServiceTest {
             assertEquals(6, response.upvoteCount());
             assertTrue(response.hasUpvoted());
             verify(plannerVoteRepository).save(any(org.danteplanner.backend.planner.entity.PlannerVote.class));
-            verify(plannerRepository).incrementUpvotes(plannerId);
+            verify(plannerStatsRepository).incrementUpvotes(plannerId);
         }
     }
 

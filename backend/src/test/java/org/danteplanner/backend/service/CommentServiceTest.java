@@ -24,6 +24,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -113,9 +114,8 @@ class CommentServiceTest {
                 .build();
 
         plannerId = UUID.randomUUID();
-        publishedPlanner = Planner.builder()
+        publishedPlanner = TestDataFactory.planner(testUser)
                 .id(plannerId)
-                .user(testUser)
                 .category("5F")
                 .content("{}")
                 .contentVersion(1)
@@ -134,7 +134,7 @@ class CommentServiceTest {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.save(any(PlannerComment.class)))
                     .thenAnswer(i -> {
@@ -167,7 +167,7 @@ class CommentServiceTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(parentComment));
@@ -198,7 +198,7 @@ class CommentServiceTest {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
@@ -214,7 +214,7 @@ class CommentServiceTest {
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(nonExistentParentId))
                     .thenReturn(Optional.empty());
@@ -239,7 +239,7 @@ class CommentServiceTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(plannerRepository.findByIdAndPublishedTrueAndDeletedAtIsNull(plannerId))
+            when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
                     .thenReturn(Optional.of(depth5Parent));
@@ -402,7 +402,7 @@ class CommentServiceTest {
         @DisplayName("Returns empty list for planner with no comments")
         void getCommentTree_noComments_returnsEmptyList() {
             // Arrange
-            when(plannerRepository.findById(plannerId))
+            when(plannerRepository.findAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPlannerId(plannerId))
                     .thenReturn(Collections.emptyList());
@@ -418,7 +418,7 @@ class CommentServiceTest {
         @DisplayName("Throws PlannerNotFoundException for non-existent planner")
         void getCommentTree_plannerNotFound_throwsException() {
             // Arrange
-            when(plannerRepository.findById(plannerId))
+            when(plannerRepository.findAggregate(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert

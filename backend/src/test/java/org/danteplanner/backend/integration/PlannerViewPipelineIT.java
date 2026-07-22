@@ -2,7 +2,9 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
 import org.danteplanner.backend.user.entity.User;
@@ -53,6 +55,9 @@ class PlannerViewPipelineIT extends SharedMySqlContainerSupport {
     private PlannerViewRepository plannerViewRepository;
 
     @Autowired
+    private PlannerStatsRepository plannerStatsRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     private UUID plannerId;
@@ -60,6 +65,7 @@ class PlannerViewPipelineIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         plannerViewRepository.deleteAll();
+        plannerStatsRepository.deleteAll();
         plannerRepository.deleteAll();
         userRepository.findAll().stream()
                 .filter(u -> u.getId() != 0L)
@@ -70,7 +76,7 @@ class PlannerViewPipelineIT extends SharedMySqlContainerSupport {
     }
 
     private int viewCount() {
-        return plannerRepository.findById(plannerId).orElseThrow().getViewCount();
+        return plannerStatsRepository.findById(plannerId).map(PlannerStats::getViewCount).orElse(0);
     }
 
     @Test

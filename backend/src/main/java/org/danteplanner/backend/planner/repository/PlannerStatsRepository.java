@@ -1,5 +1,6 @@
 package org.danteplanner.backend.planner.repository;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -8,15 +9,43 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * Repository for the authoritative planner counters. All writes are atomic
+ * upserts/updates — the row is never load-mutate-saved, so counter traffic
+ * takes only this table's row lock.
+ */
 public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID> {
 
-    @Modifying
-    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes) VALUES (:id, :delta, 0) "
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
+            + "VALUES (:id, :delta, 0, 0) "
             + "ON DUPLICATE KEY UPDATE view_count = view_count + :delta", nativeQuery = true)
     void incrementViewCountBy(@Param("id") UUID plannerId, @Param("delta") int delta);
 
-    @Modifying
-    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes) VALUES (:id, 0, 1) "
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
+            + "VALUES (:id, 0, 1, 0) "
             + "ON DUPLICATE KEY UPDATE upvotes = upvotes + 1", nativeQuery = true)
     void incrementUpvotes(@Param("id") UUID plannerId);
+
+    /**
+     * Atomically set the recommended notification stamp if it hasn't been set yet.
+     * This prevents duplicate notifications when multiple votes cross the threshold
+     * simultaneously.
+     *
+     * @return 1 if the stamp was set (first thread wins), 0 if already set or threshold not met
+     */
+    @Modifying
+    @Query(value = "UPDATE planner_stats SET recommended_notified_at = CURRENT_TIMESTAMP(6) "
+            + "WHERE planner_id = :id "
+            + "AND upvotes >= :threshold "
+            + "AND recommended_notified_at IS NULL", nativeQuery = true)
+    int trySetRecommendedNotified(@Param("id") UUID plannerId, @Param("threshold") int threshold);
+
+    /**
+     * Hard-delete sweep by planner ids (user account deletion).
+     */
+    @Modifying
+    @Query("DELETE FROM PlannerStats s WHERE s.plannerId IN :plannerIds")
+    void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
 }
