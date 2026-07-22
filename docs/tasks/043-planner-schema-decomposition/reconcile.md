@@ -72,12 +72,14 @@ Ranked; verdicts applied before this record was written.
    be unsearchable under its current id and would drift the reconciler forever.
    Mitigating fact: the V038/V044 rename migrations rewrote rows and removed
    aliases from the SET definition, so such rows cannot exist in real data.
-   **Fixed** — V051 now routes keywords through PlannerKeywords.fromStorage
-   (same normalization as runtime) and tolerates unparseable documents.
+   **Fixed** — V050 applies the rename mapping in its CSV-to-JSON conversion,
+   so the keyword source V051 indexes is normalized at rest.
 2. **CI migration gate never executes the Java migration** (MEDIUM;
-   ci-backend.yml applies `.sql` only) — a V051 defect cannot fail the
-   migration smoke job; only the Testcontainers tier runs it. **Deferred** —
-   CI-infra change, recorded in the task ledger.
+   ci-backend.yml applies `.sql` only) — a Java migration was invisible to the
+   migration smoke job. **Fixed by design change** (spec amendment A1): the
+   filter backfill was converted to plain SQL (JSON_TABLE over the same paths
+   the runtime extractor indexes), so the CI gate executes the entire chain;
+   runtime parity is enforced by the reconciler's filter check.
 3. **Cross-path AFTER_COMMIT ordering window** (MEDIUM) — an owner-edit rebuild
    event and a moderation clear event have no mutual ordering; a late rebuild
    can repopulate filters for a just-taken-down planner until the reconciler

@@ -2,8 +2,8 @@
 -- and the visible-only catalog from the legacy planners rows. All existing data
 -- (drafts and soft-deleted rows included) is preserved on the aggregate;
 -- planner_catalog is seeded ONLY for visible rows (published AND NOT deleted
--- AND NOT taken down). The entity/keyword filter backfill is V051 (app-side,
--- same code path as runtime maintenance).
+-- AND NOT taken down). The entity/keyword filter backfill is V051 (JSON_TABLE
+-- over the same paths the runtime extractor indexes).
 --
 -- Rerunnable: INSERT IGNORE keyed on the shared PK; stats upsert overwrites
 -- with the authoritative legacy counters.
@@ -22,7 +22,10 @@ SELECT
     status,
     category,
     CASE WHEN selected_keywords IS NULL OR selected_keywords = '' THEN NULL
-         ELSE CONCAT('["', REPLACE(selected_keywords, ',', '","'), '"]')
+         ELSE CONCAT('["', REPLACE(REPLACE(REPLACE(selected_keywords,
+              'AccelBullet', '9828'),
+              'ChargeLoad', 'EmergencyChargeForceField'),
+              ',', '","'), '"]')
     END,
     content,
     schema_version,
@@ -76,7 +79,10 @@ SELECT
     category,
     title,
     CASE WHEN selected_keywords IS NULL OR selected_keywords = '' THEN NULL
-         ELSE CONCAT('["', REPLACE(selected_keywords, ',', '","'), '"]')
+         ELSE CONCAT('["', REPLACE(REPLACE(REPLACE(selected_keywords,
+              'AccelBullet', '9828'),
+              'ChargeLoad', 'EmergencyChargeForceField'),
+              ',', '","'), '"]')
     END,
     COALESCE(first_published_at, created_at),
     (upvotes >= 10 AND hidden_from_recommended = FALSE)

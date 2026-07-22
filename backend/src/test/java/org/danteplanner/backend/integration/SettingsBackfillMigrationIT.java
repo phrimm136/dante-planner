@@ -69,9 +69,7 @@ class SettingsBackfillMigrationIT extends SharedMySqlContainerSupport {
                 .isGreaterThan(0L);
 
         Resource[] migrations = new PathMatchingResourcePatternResolver()
-                // classpath*: because db/migration exists on two classpath roots
-                // (SQL migrations in resources, Java migrations in classes)
-                .getResources("classpath*:db/migration/V*__backfill_user_settings.sql");
+                .getResources("classpath:db/migration/V*__backfill_user_settings.sql");
         assertThat(migrations)
                 .as("the settings backfill migration must exist")
                 .isNotEmpty();
