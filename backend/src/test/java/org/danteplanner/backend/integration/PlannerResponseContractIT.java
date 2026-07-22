@@ -63,6 +63,12 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private org.danteplanner.backend.planner.repository.PlannerStatsRepository statsRepository;
+
+    @Autowired
+    private org.danteplanner.backend.planner.service.PlannerCatalogService catalogService;
+
     private User owner;
     private String token;
     private Planner published;
@@ -116,6 +122,44 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(fieldNames(first)).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "status",
                 "syncVersion", "lastModifiedAt");
+    }
+
+    @Test
+    @DisplayName("list-card-fields: the public list card carries firstPublishedAt and drops contentVersion and lastModifiedAt")
+    void listCardFields_TrimmedCardShape() throws Exception {
+        org.danteplanner.backend.planner.entity.PlannerStats stats =
+                org.danteplanner.backend.planner.entity.PlannerStats.builder()
+                        .plannerId(published.getId())
+                        .build();
+        statsRepository.save(stats);
+        catalogService.add(published);
+
+        String json = mockMvc.perform(get("/api/planner/md/published"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode card = objectMapper.readTree(json).get("content").get(0);
+        assertThat(fieldNames(card)).containsExactlyInAnyOrder(
+                "id", "title", "category", "plannerType", "selectedKeywords",
+                "authorUsernameEpithet", "authorUsernameSuffix", "upvotes",
+                "createdAt", "viewCount", "firstPublishedAt",
+                "hasUpvoted", "isBookmarked", "commentCount");
+    }
+
+    @Test
+    @DisplayName("unpublished-changes-visible-to-owner: the owner detail carries status and published so the FE derives modified-but-not-published")
+    void unpublishedChangesVisibleToOwner_StatusAndPublishedCarried() throws Exception {
+        // A published planner whose edit state went dirty (draft) after publish
+        published.getContent().setStatus(org.danteplanner.backend.planner.entity.PlannerStatus.DRAFT);
+        plannerRepository.save(published);
+
+        mockMvc.perform(get("/api/planner/md/{id}", published.getId())
+                        .cookie(new Cookie("accessToken", token)))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .jsonPath("$.published").value(true))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .jsonPath("$.status").value("draft"));
     }
 
     @Test
