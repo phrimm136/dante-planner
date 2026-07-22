@@ -226,7 +226,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
             plannerCommandService.deletePlanner(userId, UUID.randomUUID(), plannerId);
 
             Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
-                    "SELECT deleted_at FROM planners WHERE id = UUID_TO_BIN(?)",
+                    "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
                     Timestamp.class,
                     plannerId.toString());
             assertThat(replicaDeletedAt)

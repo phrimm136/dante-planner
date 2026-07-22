@@ -103,8 +103,11 @@ tasks.withType<Test> {
     // heap lets two forks swap the box and thrash into GC-overhead failures.
     maxHeapSize = "2g"
     // Test JVMs are short-lived and dominated by Spring context startup: C1-only JIT
-    // and the throughput collector favor fast warmup over peak speed the fork never reaches
-    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseParallelGC", "-XX:+HeapDumpOnOutOfMemoryError")
+    // and the throughput collector favor fast warmup over peak speed the fork never reaches.
+    // The code cache is sized up because a fork hosting the whole suite loads enough
+    // classes to exhaust the adapter space ("Out of space in CodeCache for adapters").
+    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseParallelGC", "-XX:+HeapDumpOnOutOfMemoryError",
+            "-XX:ReservedCodeCacheSize=512m")
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")

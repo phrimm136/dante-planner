@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.domain.Persistable;
 
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
@@ -26,6 +27,9 @@ import java.util.UUID;
  *
  * <p>As the aggregate root it coordinates cross-entity invariants (a taken-down
  * planner cannot be republished) and fronts the satellites with delegating readers.</p>
+ *
+ * <p>Implements Persistable so client-assigned ids take the persist path
+ * (batchable INSERTs) instead of merge's SELECT-then-INSERT.</p>
  */
 @Entity
 @Table(name = "planner")
@@ -33,7 +37,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Planner {
+public class Planner implements Persistable<UUID> {
 
     @Id
     @Setter
@@ -62,6 +66,21 @@ public class Planner {
 
     @OneToOne(mappedBy = "planner", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
     private PlannerModeration moderation;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    protected void markNotNew() {
+        this.isNew = false;
+    }
 
     @PrePersist
     protected void onCreate() {

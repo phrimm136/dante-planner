@@ -3,11 +3,15 @@ package org.danteplanner.backend.planner.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -24,11 +28,31 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlannerStats {
+public class PlannerStats implements Persistable<UUID> {
 
     @Id
     @Column(name = "planner_id", columnDefinition = "BINARY(16)")
     private UUID plannerId;
+
+    @Transient
+    @Builder.Default
+    private boolean isNew = true;
+
+    @Override
+    public UUID getId() {
+        return plannerId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return isNew;
+    }
+
+    @PostPersist
+    @PostLoad
+    protected void markNotNew() {
+        this.isNew = false;
+    }
 
     @Column(name = "view_count", nullable = false)
     private int viewCount;

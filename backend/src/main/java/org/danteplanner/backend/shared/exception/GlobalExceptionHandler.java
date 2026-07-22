@@ -299,8 +299,10 @@ public class GlobalExceptionHandler {
             message.contains("unique") ||
             message.contains("primary key")) {
 
-            // UUID collision on planners table (expected race condition)
-            if (message.contains("planners") && (message.contains("primary") || message.contains("id"))) {
+            // UUID collision on the planner core table (expected race condition);
+            // matched on the qualified key name so child-table duplicates
+            // (planner_votes.PRIMARY etc.) fall through to their own branch
+            if (message.contains("planner.primary")) {
                 log.warn("UUID collision detected (race condition): {}", ex.getMessage());
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ErrorResponse(

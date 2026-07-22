@@ -72,6 +72,11 @@ class PlannerRepositoryTest {
     }
 
     private void seedUpvotes(int upvotes) {
+        // Replace the setUp row: PlannerStats persists as-new, so a second save
+        // of the same id must not meet the first instance in the session
+        statsRepository.deleteById(testPlanner.getId());
+        statsRepository.flush();
+        entityManager.clear();
         statsRepository.save(PlannerStats.builder()
                 .plannerId(testPlanner.getId())
                 .upvotes(upvotes)
