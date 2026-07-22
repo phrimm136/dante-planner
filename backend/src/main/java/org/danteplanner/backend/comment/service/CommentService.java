@@ -24,6 +24,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
@@ -46,6 +47,7 @@ public class CommentService {
     private final PlannerCommentRepository commentRepository;
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final PlannerRepository plannerRepository;
+    private final PlannerStatsRepository plannerStatsRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final PlannerCommentSseService plannerCommentSseService;
@@ -215,6 +217,7 @@ public class CommentService {
         // Create and save comment
         PlannerComment comment = new PlannerComment(plannerId, userId, request.content(), effectiveParentId, depth);
         PlannerComment saved = commentRepository.save(comment);
+        plannerStatsRepository.incrementCommentCount(plannerId);
         log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
         // Send notifications (respecting user notification settings)
@@ -297,6 +300,7 @@ public class CommentService {
         // Create and save reply
         PlannerComment reply = new PlannerComment(plannerId, userId, content, effectiveParentId, depth);
         PlannerComment saved = commentRepository.save(reply);
+        plannerStatsRepository.incrementCommentCount(plannerId);
         log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.getId(), plannerId);
 
         // Send notification to parent author (if not self-reply and author has notifications enabled)
@@ -394,6 +398,7 @@ public class CommentService {
 
         comment.softDelete();
         commentRepository.save(comment);
+        plannerStatsRepository.decrementCommentCount(comment.getPlannerId());
         log.info("User {} deleted comment {}", userId, commentPublicId);
     }
 

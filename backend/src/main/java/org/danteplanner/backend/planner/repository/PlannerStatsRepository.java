@@ -28,6 +28,21 @@ public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID
             + "ON DUPLICATE KEY UPDATE upvotes = upvotes + 1", nativeQuery = true)
     void incrementUpvotes(@Param("id") UUID plannerId);
 
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
+            + "VALUES (:id, 0, 0, 1) "
+            + "ON DUPLICATE KEY UPDATE comment_count = comment_count + 1", nativeQuery = true)
+    void incrementCommentCount(@Param("id") UUID plannerId);
+
+    /**
+     * Decrement the comment counter on a non-deleted-to-deleted transition,
+     * floored at zero so pre-existing drift can never push it negative.
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "UPDATE planner_stats SET comment_count = comment_count - 1 "
+            + "WHERE planner_id = :id AND comment_count > 0", nativeQuery = true)
+    void decrementCommentCount(@Param("id") UUID plannerId);
+
     /**
      * Atomically set the recommended notification stamp if it hasn't been set yet.
      * This prevents duplicate notifications when multiple votes cross the threshold

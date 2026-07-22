@@ -15,7 +15,6 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerViewRecorder;
@@ -78,9 +77,6 @@ class PublishedPlannerQueryServiceTest {
     private PlannerViewRecorder plannerViewRecorder;
 
     @Mock
-    private PlannerCommentRepository commentRepository;
-
-    @Mock
     private PlannerSubscriptionService subscriptionService;
 
     @Mock
@@ -124,7 +120,6 @@ class PublishedPlannerQueryServiceTest {
                 catalogRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                commentRepository,
                 subscriptionService,
                 reportService,
                 engagementService,
@@ -358,7 +353,6 @@ class PublishedPlannerQueryServiceTest {
                             .plannerId(plannerId)
                             .viewCount(10)
                             .build()));
-            when(commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId)).thenReturn(0L);
         }
 
         private void mockUserContext(UUID plannerId) {
@@ -487,7 +481,6 @@ class PublishedPlannerQueryServiceTest {
             Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
             when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable)).thenReturn(rowPage);
-            when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
             Page<PublicPlannerResponse> result =
@@ -512,7 +505,6 @@ class PublishedPlannerQueryServiceTest {
             Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
             when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable)).thenReturn(rowPage);
-            when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
             Page<PublicPlannerResponse> result =
@@ -537,7 +529,6 @@ class PublishedPlannerQueryServiceTest {
             Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
             when(catalogRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(rowPage);
-            when(commentRepository.countByPlannerIdsGrouped(anyList())).thenReturn(List.of());
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(

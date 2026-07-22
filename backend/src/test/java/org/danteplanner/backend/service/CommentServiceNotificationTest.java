@@ -52,6 +52,9 @@ class CommentServiceNotificationTest {
     private PlannerRepository plannerRepository;
 
     @Mock
+    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     @Mock
@@ -82,6 +85,7 @@ class CommentServiceNotificationTest {
                 commentRepository,
                 commentVoteRepository,
                 plannerRepository,
+                plannerStatsRepository,
                 userRepository,
                 notificationService,
                 plannerCommentSseService,

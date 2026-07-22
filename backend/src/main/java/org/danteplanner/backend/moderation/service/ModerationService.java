@@ -417,6 +417,7 @@ public class ModerationService {
 
         comment.softDelete();
         plannerCommentRepository.save(comment);
+        plannerStatsRepository.decrementCommentCount(comment.getPlannerId());
 
         // Log to audit trail
         logModerationAction(actorId, comment.getPublicId().toString(),
@@ -451,6 +452,7 @@ public class ModerationService {
 
         comment.softDelete();
         plannerCommentRepository.save(comment);
+        plannerStatsRepository.decrementCommentCount(comment.getPlannerId());
 
         log.info("Moderator {} deleted comment {} with reason: {}", actorId, commentPublicId, reason);
     }

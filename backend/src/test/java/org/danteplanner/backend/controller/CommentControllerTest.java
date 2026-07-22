@@ -56,8 +56,9 @@ class CommentControllerTest {
                 UserRepository userRepository,
                 org.danteplanner.backend.notification.service.NotificationService notificationService,
                 org.danteplanner.backend.comment.service.PlannerCommentSseService sseService,
-                org.danteplanner.backend.shared.sse.SsePublisher ssePublisher) {
-            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, userRepository, notificationService, sseService,
+                org.danteplanner.backend.shared.sse.SsePublisher ssePublisher,
+                org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository) {
+            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, plannerStatsRepository, userRepository, notificationService, sseService,
                     ssePublisher,
                     new org.danteplanner.backend.planner.service.PlannerAccessGuard(userRepository, plannerRepository));
         }

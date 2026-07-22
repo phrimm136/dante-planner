@@ -18,7 +18,6 @@ import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -53,7 +52,6 @@ public class PublishedPlannerQueryService {
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
-    private final PlannerCommentRepository commentRepository;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
     private final PlannerEngagementService engagementService;
@@ -65,7 +63,6 @@ public class PublishedPlannerQueryService {
             PlannerCatalogRepository catalogRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
-            PlannerCommentRepository commentRepository,
             PlannerSubscriptionService subscriptionService,
             PlannerReportService reportService,
             PlannerEngagementService engagementService,
@@ -75,7 +72,6 @@ public class PublishedPlannerQueryService {
         this.catalogRepository = catalogRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
-        this.commentRepository = commentRepository;
         this.subscriptionService = subscriptionService;
         this.reportService = reportService;
         this.engagementService = engagementService;
@@ -279,7 +275,6 @@ public class PublishedPlannerQueryService {
         List<UUID> plannerIds = rows.getContent().stream()
                 .map(PlannerCatalog::getPlannerId)
                 .collect(Collectors.toList());
-        Map<UUID, Long> commentCountMap = batchFetchCommentCounts(plannerIds);
         Map<UUID, PlannerCoreInfo> coreInfoMap = plannerIds.isEmpty() ? Map.of()
                 : plannerRepository.findCoreInfoByIds(plannerIds).stream()
                         .collect(Collectors.toMap(PlannerCoreInfo::plannerId, Function.identity()));
@@ -327,26 +322,9 @@ public class PublishedPlannerQueryService {
                     .firstPublishedAt(row.getFirstPublishedAt())
                     .hasUpvoted(anonymous ? null : upvotedIds.contains(id))
                     .isBookmarked(anonymous ? null : bookmarkedIds.contains(id))
-                    .commentCount(commentCountMap.getOrDefault(id, 0L))
+                    .commentCount(stats != null ? (long) stats.getCommentCount() : 0L)
                     .build();
         });
-    }
-
-    /**
-     * Batch fetch comment counts for a list of planner IDs.
-     *
-     * @param plannerIds list of planner IDs
-     * @return map of planner ID to non-deleted comment count
-     */
-    private Map<UUID, Long> batchFetchCommentCounts(List<UUID> plannerIds) {
-        if (plannerIds.isEmpty()) {
-            return Map.of();
-        }
-        return commentRepository.countByPlannerIdsGrouped(plannerIds).stream()
-                .collect(Collectors.toMap(
-                        row -> (UUID) row[0],
-                        row -> (Long) row[1]
-                ));
     }
 
     /**
@@ -391,9 +369,7 @@ public class PublishedPlannerQueryService {
         PlannerStats stats = plannerStatsRepository.findById(plannerId).orElse(null);
         int viewCount = stats != null ? stats.getViewCount() : 0;
         int upvotes = stats != null ? stats.getUpvotes() : 0;
-
-        // Get comment count (excluding soft-deleted comments)
-        long commentCount = commentRepository.countByPlannerIdAndDeletedAtIsNull(plannerId);
+        long commentCount = stats != null ? stats.getCommentCount() : 0L;
 
         // Determine owner notification setting:
         // - For owner: actual setting (defaults to true)
