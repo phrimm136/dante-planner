@@ -20,9 +20,13 @@ public interface PlannerKeywordFilterRepository
 
     /**
      * Remove all keyword rows for a planner (filter rebuild / visibility clear).
+     * Bulk DML on purpose: its current read clears rows committed by a
+     * concurrent rebuild that a derived delete's snapshot SELECT would miss,
+     * so the following re-insert cannot collide on the primary key.
      */
     @Modifying
-    void deleteByPlannerId(UUID plannerId);
+    @Query("DELETE FROM PlannerKeywordFilter f WHERE f.plannerId = :plannerId")
+    void deleteByPlannerId(@Param("plannerId") UUID plannerId);
 
     /**
      * Hard-delete sweep by planner ids (user account deletion).
