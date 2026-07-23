@@ -138,6 +138,26 @@ jobs:
           wait_asg "${{ secrets.AWS_REGION }}" danteplanner-oregon-app
           wait_asg "$SEOUL_REGION" danteplanner-seoul-app
 
+      # ASG tag propagation gives both app instances the same Name, so the
+      # surge node is indistinguishable in the console during an incident.
+      # The newest InService instance is the surge node (same LaunchTime
+      # ordering settle-down relies on to pick its termination target).
+      - name: Tag surge instances
+        run: |
+          tag_surge() {
+            local region="$1" asg="$2" ids surge_iid
+            ids=$(aws autoscaling describe-auto-scaling-groups --region "$region" \
+              --auto-scaling-group-names "$asg" \
+              --query 'AutoScalingGroups[0].Instances[?LifecycleState==`InService`].InstanceId' \
+              --output text)
+            surge_iid=$(aws ec2 describe-instances --region "$region" --instance-ids $ids \
+              --query 'sort_by(Reservations[].Instances[], &LaunchTime)[-1].InstanceId' --output text)
+            aws ec2 create-tags --region "$region" --resources "$surge_iid" \
+              --tags "Key=Name,Value=${asg}-surge" "Key=Surge,Value=true"
+          }
+          tag_surge "${{ secrets.AWS_REGION }}" danteplanner-oregon-app
+          tag_surge "$SEOUL_REGION" danteplanner-seoul-app
+
       # ASG InService is EC2-level only; the DaemonSet can start rolling as soon
       # as the bump syncs, so the surge node must be a READY k3s node first or
       # the roll can still hit a 0-ready window. Counting happens runner-side
