@@ -96,6 +96,12 @@ post_rule "node-high-disk" "5m" \
 post_rule "node-low-memory" "15m" \
   'node_memory_MemAvailable_bytes < 209715200'
 
+# MemoryPSI: fraction of wall-time with at least one task stalled on memory
+# reclaim ("some" pressure) > 10% sustained. Catches reclaim thrash that
+# MemAvailable alone hides — a host can hang alive without ever OOM-killing.
+post_rule "node-memory-psi" "5m" \
+  'rate(node_pressure_memory_waiting_seconds_total[5m]) > 0.1'
+
 # HighDiskIOWrite: > 500 MiB written per 5m
 post_rule "node-high-disk-write" "0s" \
   'sum by (cluster, instance) (increase(node_disk_written_bytes_total[5m])) > 524288000'
@@ -111,7 +117,6 @@ post_rule "node-high-network-out" "0s" \
 # TrafficDrop: legacy alarm paged on RequestCount Sum < 1 per 5m for 2 periods —
 # i.e. total silence at the nginx layer of the old host. The fleet-era signal is
 # http_server_requests_seconds_count across two clusters behind Cloudflare.
-# TODO(human): choose and write the traffic-drop expression
 TRAFFIC_DROP_EXPR='sum by (cluster) (increase(http_server_requests_seconds_count[5m])) < 1'
 post_rule "traffic-drop" "10m" "$TRAFFIC_DROP_EXPR"
 
@@ -147,5 +152,5 @@ curl -s -w '\n%{http_code}' "${auth[@]}" "${noprov[@]}" -X POST \
   fi
 }
 
-echo "== done: 13 rules in folder ${FOLDER}, group app-rules"
+echo "== done: 14 rules in folder ${FOLDER}, group app-rules"
 echo "   All noDataState=OK — non-paging while a series is absent; staleness-meta owns absence."

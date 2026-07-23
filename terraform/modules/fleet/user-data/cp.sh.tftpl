@@ -21,6 +21,18 @@ retry() {
 command -v aws >/dev/null 2>&1 || dnf install -y awscli-2 || dnf install -y awscli
 command -v git >/dev/null 2>&1 || dnf install -y git
 
+# 1 GiB swap as an overload valve: without swap, memory exhaustion evicts
+# executable pages and the host thrashes alive (apiserver and SSM stall but the
+# OOM killer never fires). Low swappiness keeps swap out of the steady-state
+# working set. dd, not fallocate — swapon rejects fallocated files on XFS.
+dd if=/dev/zero of=/swapfile bs=1M count=1024
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+echo 'vm.swappiness = 10' > /etc/sysctl.d/90-swappiness.conf
+sysctl --system
+
 # CP private IP (IMDSv2 — IMDSv1 is disabled). Used as a k3s API cert SAN and in
 # the published kubeconfig so operators reach the API in-VPC without SSH. The CP
 # cannot get this from Terraform (self-reference in its own user_data = cycle).
@@ -31,6 +43,16 @@ TOKEN=$(aws ssm get-parameter --with-decryption --region ${region} \
   --name "${token_param}" --query 'Parameter.Value' --output text)
 umask 077
 echo "$TOKEN" > /etc/k3s-token
+
+# Soft-cap the k3s server Go heap (apiserver, etcd, scheduler, controllers in
+# one process — the node's dominant memory consumer). Near the cap the GC
+# collects harder instead of letting the heap grow into host memory exhaustion.
+# Written before the install so the installer's own service start picks it up.
+mkdir -p /etc/systemd/system/k3s.service.d
+cat > /etc/systemd/system/k3s.service.d/gomemlimit.conf <<'EOF'
+[Service]
+Environment=GOMEMLIMIT=800MiB
+EOF
 
 # k3s server with EMBEDDED etcd (--cluster-init) so etcd snapshots exist and
 # ship to S3. SQLite default has no etcd and cannot snapshot. Bundled Traefik
@@ -74,13 +96,17 @@ kubectl apply -n argocd \
 # ArgoCD otherwise reaches over public HTTPS.
 kubectl -n argocd set env deployment/argocd-repo-server ARGOCD_GIT_MODULES_ENABLED=false
 
-# The CP is the only node at bootstrap and carries the control-plane NoSchedule
-# taint (k3s system pods tolerate it; upstream ArgoCD does not). Pin ArgoCD to
-# the CP and tolerate the taint so it schedules here and stays here.
+# ArgoCD runs on the data node, not the CP: the CP cannot absorb ArgoCD's
+# working set on top of the k3s server during node-join bursts. Pods stay
+# Pending until the data node joins (same pattern as ESO on role=app below).
+# The null keys strip the control-plane pin from any object that still carries
+# it, so the patch is idempotent when re-applied to an already-pinned cluster.
 kubectl -n argocd get deploy,statefulset -o name | while read -r obj; do
-  kubectl -n argocd patch "$obj" --type merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/control-plane":"true"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Exists","effect":"NoSchedule"}]}}}}'
+  kubectl -n argocd patch "$obj" --type merge -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-role.kubernetes.io/control-plane":null,"role":"data"},"tolerations":null}}}}'
 done
-kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=300s || true
+# No ApplicationSet resources exist in this fleet; the controller is idle load.
+kubectl -n argocd scale deploy argocd-applicationset-controller --replicas=0
+kubectl -n argocd rollout status deploy/argocd-repo-server --timeout=60s || true
 
 # Platform CRDs/controllers the overlay's custom resources depend on. k3s ships
 # no Gateway API CRDs and --disable traefik removed the bundled path, so the CP
