@@ -1,23 +1,22 @@
 package org.danteplanner.backend.planner.event;
 
-import java.util.Set;
 import java.util.UUID;
 
 /**
- * Requests a filter-index rebuild for a planner after the owning write commits.
- * Null content and keywords clear the indexes (unpublish/delete/takedown).
+ * Requests filter-index maintenance for a planner after the owning write
+ * commits. Content is not carried: the rebuild reads the committed state
+ * server-side, so the index converges to the latest committed content.
  */
 public record PlannerFilterRebuildEvent(
     UUID plannerId,
-    String contentJson,
-    Set<String> selectedKeywords
+    boolean clear
 ) {
 
-    public static PlannerFilterRebuildEvent rebuild(UUID plannerId, String contentJson, Set<String> keywords) {
-        return new PlannerFilterRebuildEvent(plannerId, contentJson, keywords);
+    public static PlannerFilterRebuildEvent rebuild(UUID plannerId) {
+        return new PlannerFilterRebuildEvent(plannerId, false);
     }
 
     public static PlannerFilterRebuildEvent clear(UUID plannerId) {
-        return new PlannerFilterRebuildEvent(plannerId, null, null);
+        return new PlannerFilterRebuildEvent(plannerId, true);
     }
 }

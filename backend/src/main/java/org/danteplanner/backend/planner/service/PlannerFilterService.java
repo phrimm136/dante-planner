@@ -1,11 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.planner.entity.PlannerEntityFilter;
-import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.event.PlannerFilterRebuildEvent;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
@@ -16,17 +12,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
  * Maintains both search inverted indexes for a planner: content entities
  * ({@code planner_entity_filter}) and keywords ({@code planner_keyword_filter}).
  * Rows exist only while the planner is visible. Writers request maintenance via
- * {@link #requestRebuild}/{@link #requestClear}: the multi-statement index work
- * runs AFTER the owning transaction commits, in its own transaction, keeping
- * the cross-region write path short.
+ * {@link #requestRebuild}/{@link #requestClear}: the index work runs AFTER the
+ * owning transaction commits, in its own transaction, keeping the cross-region
+ * write path short. The rebuild is a single server-side procedure call
+ * (migration V053) that clears and re-extracts from the committed content,
+ * guarded by planner visibility so a stale rebuild cannot resurrect rows for a
+ * just-unpublished planner.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,15 +32,14 @@ public class PlannerFilterService {
 
     private final PlannerEntityFilterRepository entityFilterRepository;
     private final PlannerKeywordFilterRepository keywordFilterRepository;
-    private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
-     * Request a post-commit rebuild of both filter indexes from the given
-     * content snapshot. Call from the owning transaction.
+     * Request a post-commit rebuild of both filter indexes from the planner's
+     * committed content. Call from the owning transaction.
      */
-    public void requestRebuild(UUID plannerId, String contentJson, Set<String> selectedKeywords) {
-        eventPublisher.publishEvent(PlannerFilterRebuildEvent.rebuild(plannerId, contentJson, selectedKeywords));
+    public void requestRebuild(UUID plannerId) {
+        eventPublisher.publishEvent(PlannerFilterRebuildEvent.rebuild(plannerId));
     }
 
     /**
@@ -57,42 +53,21 @@ public class PlannerFilterService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onFilterRebuildRequested(PlannerFilterRebuildEvent event) {
-        rebuildFilters(event.plannerId(), event.contentJson(), event.selectedKeywords());
+        if (event.clear()) {
+            clearFilters(event.plannerId());
+        } else {
+            rebuildFilters(event.plannerId());
+        }
     }
 
     /**
-     * Rebuild both filter tables for a planner from its content JSON and keyword set.
+     * Rebuild both filter tables from the planner's committed content and
+     * keyword set, in one server-side procedure call.
      * Must run within an existing transaction (caller provides @Transactional).
      */
     @Transactional
-    public void rebuildFilters(UUID plannerId, String contentJson, Set<String> selectedKeywords) {
-        entityFilterRepository.deleteByPlannerId(plannerId);
-        keywordFilterRepository.deleteByPlannerId(plannerId);
-
-        if (contentJson != null && !contentJson.isBlank()) {
-            JsonNode root;
-            try {
-                root = objectMapper.readTree(contentJson);
-            } catch (Exception e) {
-                log.error("Failed to parse content JSON for planner {}: {}", plannerId, e.getMessage());
-                root = null;
-            }
-            if (root != null) {
-                List<PlannerEntityFilter> entries = PlannerContentEntityExtractor.extract(root).stream()
-                        .map(ref -> new PlannerEntityFilter(ref.type(), ref.id(), plannerId))
-                        .toList();
-                if (!entries.isEmpty()) {
-                    entityFilterRepository.saveAll(entries);
-                }
-            }
-        }
-
-        if (selectedKeywords != null && !selectedKeywords.isEmpty()) {
-            List<PlannerKeywordFilter> keywords = selectedKeywords.stream()
-                    .map(k -> new PlannerKeywordFilter(k, plannerId))
-                    .toList();
-            keywordFilterRepository.saveAll(keywords);
-        }
+    public void rebuildFilters(UUID plannerId) {
+        entityFilterRepository.rebuildPlannerFilters(plannerId);
     }
 
     /**

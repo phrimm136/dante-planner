@@ -1,11 +1,13 @@
 package org.danteplanner.backend.integration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.service.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -26,6 +28,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,6 +66,9 @@ class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private User owner;
 
     @BeforeEach
@@ -93,11 +99,11 @@ class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
                 .published(true)
                 .save(plannerRepository);
 
-        filterService.rebuildFilters(planner.getId(), planner.getContentJson(), planner.getSelectedKeywords());
+        filterService.rebuildFilters(planner.getId());
         long entityRowsAfterFirstBuild = entityFilterRepository.count();
         assertThat(entityRowsAfterFirstBuild).isPositive();
 
-        filterService.rebuildFilters(planner.getId(), planner.getContentJson(), planner.getSelectedKeywords());
+        filterService.rebuildFilters(planner.getId());
 
         assertThat(entityFilterRepository.count()).isEqualTo(entityRowsAfterFirstBuild);
         assertThat(keywordFilterRepository.findAll())
@@ -121,15 +127,36 @@ class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
             // Pin this transaction's InnoDB read view before the concurrent commit
             assertThat(entityFilterRepository.count()).isZero();
 
-            concurrent.executeWithoutResult(inner -> filterService.rebuildFilters(
-                    planner.getId(), planner.getContentJson(), planner.getSelectedKeywords()));
+            concurrent.executeWithoutResult(inner -> filterService.rebuildFilters(planner.getId()));
 
-            filterService.rebuildFilters(
-                    planner.getId(), planner.getContentJson(), planner.getSelectedKeywords());
+            filterService.rebuildFilters(planner.getId());
         });
 
         assertThat(keywordFilterRepository.findAll())
                 .extracting(PlannerKeywordFilter::getKeyword)
                 .containsExactlyInAnyOrder("Sinking", "Combustion");
+    }
+
+    @Test
+    @DisplayName("the procedure's extraction matches the Java oracle the drift reconciler audits with")
+    void rebuildFilters_WhenFactoryContent_MatchesExtractorOracle() throws Exception {
+        Planner planner = TestDataFactory.planner(owner)
+                .published(true)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+
+        Set<String> expected = PlannerContentEntityExtractor
+                .extract(objectMapper.readTree(planner.getContentJson()))
+                .stream()
+                .map(ref -> ref.type().name() + ":" + ref.id())
+                .collect(Collectors.toSet());
+        Set<String> actual = entityFilterRepository.findAll().stream()
+                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .map(f -> f.getEntityType().name() + ":" + f.getEntityId())
+                .collect(Collectors.toSet());
+
+        assertThat(expected).isNotEmpty();
+        assertThat(actual).isEqualTo(expected);
     }
 }

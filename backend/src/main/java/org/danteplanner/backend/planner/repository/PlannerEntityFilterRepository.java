@@ -34,4 +34,14 @@ public interface PlannerEntityFilterRepository
     @Modifying
     @Query("DELETE FROM PlannerEntityFilter f WHERE f.plannerId IN :plannerIds")
     void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
+
+    /**
+     * Rebuild both filter indexes for a planner server-side in one round trip:
+     * clears the rows, then re-extracts from the stored content while the
+     * planner is visible. Extraction contract lives in migration V053 and is
+     * audited against the Java oracle by the drift reconciler.
+     */
+    @Modifying
+    @Query(value = "CALL rebuild_planner_filters(:plannerId)", nativeQuery = true)
+    void rebuildPlannerFilters(@Param("plannerId") UUID plannerId);
 }

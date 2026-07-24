@@ -34,7 +34,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -129,7 +128,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId(), planner.getContentJson(), planner.getSelectedKeywords());
+        filterService.rebuildFilters(planner.getId());
         return planner;
     }
 
@@ -146,7 +145,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(empty.getId()).build());
         catalogService.add(empty);
-        filterService.rebuildFilters(empty.getId(), empty.getContentJson(), empty.getSelectedKeywords());
+        filterService.rebuildFilters(empty.getId());
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10101"))
                 .andExpect(status().isOk())

@@ -48,8 +48,7 @@ public class PlannerCatalogService {
     @Transactional
     public void onBecameVisible(Planner planner) {
         add(planner);
-        filterService.requestRebuild(planner.getId(), planner.getContentJson(),
-                planner.getSelectedKeywords());
+        filterService.requestRebuild(planner.getId());
     }
 
     /**
@@ -71,8 +70,7 @@ public class PlannerCatalogService {
     public void onVisibleEditCommitted(Planner planner, boolean compositionChanged) {
         syncScalarCopy(planner);
         if (compositionChanged) {
-            filterService.requestRebuild(planner.getId(), planner.getContentJson(),
-                    planner.getSelectedKeywords());
+            filterService.requestRebuild(planner.getId());
         }
     }
 

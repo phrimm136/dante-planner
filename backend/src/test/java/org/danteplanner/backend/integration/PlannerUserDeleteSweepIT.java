@@ -2,10 +2,7 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.entity.PlannerVote;
-import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
@@ -28,7 +25,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import javax.sql.DataSource;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -122,8 +118,7 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
         statsRepository.save(PlannerStats.builder()
                 .plannerId(published.getId()).viewCount(3).upvotes(1).build());
         catalogService.add(published);
-        filterService.rebuildFilters(published.getId(), published.getContentJson(),
-                published.getSelectedKeywords());
+        filterService.rebuildFilters(published.getId());
         jdbc.update("INSERT INTO planner_votes (user_id, planner_id, vote_type, created_at, version) "
                 + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", other.getId(), published.getId().toString());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "

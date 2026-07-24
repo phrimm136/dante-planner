@@ -135,7 +135,7 @@ class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(planner.getId()).build());
         catalogService.add(planner);
-        filterService.rebuildFilters(planner.getId(), planner.getContentJson(), planner.getSelectedKeywords());
+        filterService.rebuildFilters(planner.getId());
         long filterRowsBefore = entityFilterRows(planner.getId());
         assertThat(filterRowsBefore).isPositive();
 
