@@ -7,6 +7,7 @@ Game planning and management tool for Limbus Company.
 - **Frontend**: React + TypeScript + TanStack Query + shadcn/ui
 - **Backend**: Spring Boot + Java
 - **Data**: Static JSON files with runtime validation
+- **Prod access** (RDS SQL, Loki logs): only via `scripts/ops/access/` — see `docs/EXTERNAL-ACCESS.md`; never improvise SSH/kubectl paths
 
 ---
 

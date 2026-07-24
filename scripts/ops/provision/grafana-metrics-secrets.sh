@@ -12,8 +12,8 @@ read -rsp "Access-policy token with metrics:write (hidden): " GC_TOKEN; echo
 
 put() { # name value
   local name=$1 value=$2
-  if aws secretsmanager put-secret-value --region us-west-2 --secret-id "$name" \
-       --secret-string "$value" >/dev/null; then
+  if printf %s "$value" | aws secretsmanager put-secret-value --region us-west-2 \
+       --secret-id "$name" --secret-string file:///dev/stdin >/dev/null; then
     echo "  updated  $name  (replicates to ap-northeast-2)"
   else
     echo "ERROR: put-secret-value failed for $name — if the secret does not exist," >&2
