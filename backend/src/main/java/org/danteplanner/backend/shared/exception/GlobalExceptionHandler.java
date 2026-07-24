@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.exception;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -47,6 +49,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private final CookieUtils cookieUtils;
+    private final ObjectMapper objectMapper;
 
     public record ErrorResponse(String code, String message) {}
 
@@ -170,12 +173,18 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USERNAME_GENERATION_FAILED", "Unable to create account. Please try again."));
     }
 
+    /**
+     * Rate limiting is an expected user error (no Sentry). The response is written directly to
+     * bypass content negotiation: SSE endpoints declare {@code produces=text/event-stream}, for
+     * which no converter can serialize the JSON body — returning a {@code ResponseEntity} there
+     * throws {@code HttpMediaTypeNotAcceptableException} and the 429 escapes to Tomcat as a 500.
+     */
     @ExceptionHandler(RateLimitExceededException.class)
-    public ResponseEntity<ErrorResponse> handleRateLimitExceeded(RateLimitExceededException ex) {
-        Sentry.captureException(ex);
+    public void handleRateLimitExceeded(RateLimitExceededException ex, HttpServletResponse response) throws IOException {
         log.warn("Rate limit exceeded: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-            .body(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage()));
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage())));
     }
 
     @ExceptionHandler(PlannerConflictException.class)
