@@ -142,6 +142,21 @@ class GtidCookieFilterTest {
     }
 
     @Test
+    void oauthGoogleCallbackMintsCookie_WhenGetCommitsTx_SetsCookie() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/auth/google/callback");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(writeCapture.pollCapturedGtid()).thenReturn(Optional.of(GTID));
+
+        try (MockedStatic<ReadOnlyRoutingDataSource> ds = mockStatic(ReadOnlyRoutingDataSource.class)) {
+            filter.doFilter(request, response, new MockFilterChain());
+        }
+
+        assertThat(response.getHeaders(HttpHeaders.SET_COOKIE))
+                .anySatisfy(header -> assertThat(header)
+                        .contains(GtidCookie.NAME + "=" + GtidCookie.of(GTID).getValue()));
+    }
+
+    @Test
     void readGet_WhenCookieValueUndecodable_TreatedAsAbsent() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/planners");
         request.setCookies(new Cookie(GtidCookie.NAME, "not*base64url*value"));
