@@ -70,6 +70,7 @@ abstract class CausalHarnessSupport {
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
+                    "--session-track-gtids=OWN_GTID",
                     "--innodb-flush-log-at-trx-commit=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",

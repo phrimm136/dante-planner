@@ -38,10 +38,17 @@ public class GtidCookieFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        if (isSafeMethod(request)) {
-            handleRead(request, response, filterChain);
-        } else {
-            handleWrite(request, response, filterChain);
+        writeCapture.clear();
+        try {
+            if (isSafeMethod(request)) {
+                handleRead(request, response, filterChain);
+            } else {
+                filterChain.doFilter(request, response);
+            }
+            writeCapture.pollCapturedGtid()
+                    .ifPresent(gtid -> addCookie(response, GtidCookie.of(gtid)));
+        } finally {
+            writeCapture.clear();
         }
     }
 
@@ -65,13 +72,6 @@ public class GtidCookieFilter extends OncePerRequestFilter {
         } finally {
             ReadOnlyRoutingDataSource.clear();
         }
-    }
-
-    private void handleWrite(HttpServletRequest request, HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
-        filterChain.doFilter(request, response);
-        Optional<String> captured = writeCapture.pollCapturedGtid();
-        captured.ifPresent(gtid -> addCookie(response, GtidCookie.of(gtid)));
     }
 
     private boolean isSafeMethod(HttpServletRequest request) {

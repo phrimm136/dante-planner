@@ -7,6 +7,9 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import jakarta.persistence.EntityManagerFactory;
 
 /**
  * Wires the read-your-writes GTID gate for the Seoul pods (routing datasource present).
@@ -30,6 +33,12 @@ public class GtidGateConfig {
     @Bean
     public GtidWriteCapture gtidWriteCapture(DataSource dataSource) {
         return new GtidWriteCapture(dataSource);
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(
+            EntityManagerFactory entityManagerFactory, GtidWriteCapture writeCapture, DataSource dataSource) {
+        return new GtidCapturingTransactionManager(entityManagerFactory, writeCapture, dataSource);
     }
 
     @Bean

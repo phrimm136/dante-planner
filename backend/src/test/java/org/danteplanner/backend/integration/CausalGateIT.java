@@ -34,6 +34,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -183,6 +184,28 @@ class CausalGateIT extends CausalHarnessSupport {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();
         }
+    }
+
+    @Test
+    @DisplayName("A Redis-only logout commits no MySQL transaction, so no read-your-writes GTID cookie is minted")
+    void rywNoCookieOnRedisOnlyWrite_WhenLogoutCommitsNoTx_MintsNoGtidCookie() throws Exception {
+        User user = TestDataFactory.createTestUser(
+                userRepository, "logout-gate-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = new Cookie("accessToken",
+                TestDataFactory.generateAccessToken(jwtTokenService, user));
+        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+
+        MvcResult result = mockMvc.perform(post("/api/auth/logout").with(withCsrf())
+                        .cookie(auth, device))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+
+        boolean mintedGtidCookie = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE).stream()
+                .anyMatch(header -> GTID_VALUE.matcher(decodedCookieValue(header)).find());
+        assertThat(mintedGtidCookie)
+                .as("logout must mint no GTID cookie among %s",
+                        result.getResponse().getHeaders(HttpHeaders.SET_COOKIE))
+                .isFalse();
     }
 
     /**
