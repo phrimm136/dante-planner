@@ -144,10 +144,13 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
    */
   const setupEventSource = useCallback(
     (es: EventSource) => {
+      // Not open until onopen fires. onerror reads this to tell a never-opened
+      // or short-lived connection (keep backing off) from a healthy one (reset).
+      connectionStartTimeRef.current = 0
+
       es.onopen = () => {
         connectionStartTimeRef.current = Date.now()
         setConnected(true)
-        resetReconnectAttempts()
 
         // Clear idle reset timer on successful connection
         if (idleResetTimeoutRef.current) {
@@ -192,6 +195,14 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
         es.close()
         eventSourceRef.current = null
         setConnected(false)
+
+        // Credit the connection as healthy only if it stayed open past the
+        // stability floor; a never-opened or short-lived drop keeps the attempt
+        // counter climbing so backoff actually slows a flapping client.
+        const openedAt = connectionStartTimeRef.current
+        if (openedAt > 0 && Date.now() - openedAt >= SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD) {
+          resetReconnectAttempts()
+        }
 
         // Clear proactive timer since connection failed
         if (proactiveReconnectRef.current) {

@@ -105,14 +105,16 @@ describe('useSseEngine — gating', () => {
 })
 
 describe('useSseEngine — connection lifecycle', () => {
-  it('onopen marks connected and resets reconnect attempts', async () => {
+  it('onopen marks connected but does NOT reset attempts on open alone', async () => {
     useSseStore.setState({ reconnectAttempts: 3 })
     const config = makeConfig()
     renderHook(() => useSseEngine(config))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     act(() => last().fireOpen())
     expect(useSseStore.getState().isConnected).toBe(true)
-    expect(useSseStore.getState().reconnectAttempts).toBe(0)
+    // Opening is not proof of health: a stream that opens then immediately drops
+    // must keep the backoff climbing, so the reset waits for a stable duration.
+    expect(useSseStore.getState().reconnectAttempts).toBe(3)
   })
 
   it('dispatches injected handlers for their event type', async () => {
@@ -170,6 +172,48 @@ describe('useSseEngine — backoff + reconnect', () => {
     expect(config.createConnection).toHaveBeenCalledTimes(2)
     await advance(SSE_CONNECTION.BASE_DELAY)
     expect(config.createConnection).toHaveBeenCalledTimes(3)
+  })
+
+  it('keeps backing off when connections open but die before the stability floor', async () => {
+    // The storm regression: under the old code onopen reset the counter, so an
+    // open-then-immediately-drop cycle reconnected at BASE_DELAY forever. With the
+    // stability floor, each short-lived open still counts as a failed attempt.
+    const config = makeConfig()
+    renderHook(() => useSseEngine(config))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+
+    // 1st: open then immediately drop → attempt 1, reconnect after BASE_DELAY.
+    act(() => {
+      last().fireOpen()
+      last().fireError()
+    })
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(config.createConnection).toHaveBeenCalledTimes(2)
+
+    // 2nd: open then immediately drop again → backoff MUST be 2× BASE_DELAY, not reset.
+    act(() => {
+      last().fireOpen()
+      last().fireError()
+    })
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(config.createConnection).toHaveBeenCalledTimes(2)
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(config.createConnection).toHaveBeenCalledTimes(3)
+  })
+
+  it('resets backoff after a connection stays open past the stability floor', async () => {
+    useSseStore.setState({ reconnectAttempts: 5 })
+    const config = makeConfig()
+    renderHook(() => useSseEngine(config))
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    act(() => last().fireOpen())
+
+    // Stay open past the floor, then drop → healthy connection, counter resets, so
+    // the next reconnect uses BASE_DELAY rather than the elevated (5th-attempt) delay.
+    await advance(SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD)
+    act(() => last().fireError())
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(config.createConnection).toHaveBeenCalledTimes(2)
   })
 
   it('adds 0–5s jitter on top of the backoff delay', async () => {

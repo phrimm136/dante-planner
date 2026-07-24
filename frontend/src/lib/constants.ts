@@ -483,6 +483,13 @@ export const SSE_CONNECTION = {
   IDLE_RESET_TIMEOUT: 5 * 60 * 1000,
   /** Random reconnect jitter ceiling (0–5s) to avoid thundering-herd reconnects */
   MAX_JITTER: 5 * 1000,
+  /**
+   * Minimum time (30s) a connection must stay open to count as healthy. A
+   * connection that dies sooner is treated as a failed attempt so backoff keeps
+   * growing — without this floor, a stream that opens then immediately drops
+   * resets the attempt counter and pins the client at ~1 reconnect/sec forever.
+   */
+  STABLE_CONNECTION_THRESHOLD: 30 * 1000,
 } as const
 
 /**
