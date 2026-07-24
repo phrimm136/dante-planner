@@ -10,7 +10,6 @@ import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +40,6 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final SseService sseService;
-    private final UserSettingsRepository userSettingsRepository;
 
     /**
      * Get notification inbox for a user with pagination.
@@ -250,32 +249,12 @@ public class NotificationService {
      * @param plannerId    the planner UUID
      * @param plannerTitle the planner title
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public void notifyPlannerPublished(Long authorId, UUID plannerId, String plannerTitle) {
-        // Only notify users who have notifyNewPublications enabled
-        List<Long> userIds = userSettingsRepository.findUserIdsWithNewPublicationsEnabled(authorId);
-
-        if (userIds.isEmpty()) {
-            log.debug("No users to notify for planner publish {}", plannerId);
-            return;
-        }
-
-        // Create notifications for all users
-        List<Notification> notifications = userIds.stream()
-                .map(userId -> new Notification(
-                        userId,
-                        plannerId.toString(),
-                        NotificationType.PLANNER_PUBLISHED,
-                        plannerId,
-                        plannerTitle,
-                        null, // no comment snippet
-                        null  // no comment public ID
-                ))
-                .toList();
-
-        List<Notification> saved = notificationRepository.saveAll(notifications);
-        log.info("Created {} PLANNER_PUBLISHED notifications for planner {} by author {}",
-                saved.size(), plannerId, authorId);
+        int inserted = notificationRepository.insertPublishedFanout(
+                authorId, plannerId.toString(), plannerTitle);
+        log.info("Fanned out {} PLANNER_PUBLISHED notifications for planner {} by author {}",
+                inserted, plannerId, authorId);
     }
 
     /**

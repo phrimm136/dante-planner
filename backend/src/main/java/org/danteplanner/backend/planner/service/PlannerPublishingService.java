@@ -51,12 +51,15 @@ public class PlannerPublishingService {
      * Carries the publish SSE broadcast so it can be emitted only after the publishing
      * transaction commits.
      */
-    public record PlannerPublishedEvent(Long excludeUserId, String eventType, Map<String, Object> data) {
+    public record PlannerPublishedEvent(
+            Long authorId, UUID plannerId, String plannerTitle, String eventType, Map<String, Object> data) {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onPlannerPublished(PlannerPublishedEvent event) {
-        notificationSseService.broadcastToAll(event.excludeUserId(), event.eventType(), event.data());
+        notificationSseService.broadcastToAll(event.authorId(), event.eventType(), event.data());
+        notificationService.notifyPlannerPublished(
+                event.authorId(), event.plannerId(), event.plannerTitle());
     }
 
     /**
@@ -105,15 +108,13 @@ public class PlannerPublishingService {
         if (nowPublished) {
             subscriptionService.createSubscription(userId, plannerId);
 
-            // First-time publish notification (one-time only)
+            // First-time publish notification (one-time only). The DB fan-out and the SSE
+            // broadcast both run from the AFTER_COMMIT listener, so neither persists nor fires
+            // when the publish rolls back.
             if (firstPublish) {
-                // Create DB notifications for users with setting enabled
-                notificationService.notifyPlannerPublished(userId, plannerId, saved.getTitle());
-
-                // Broadcast SSE to all connected users except author, only after commit
                 User author = saved.getUser();
                 eventPublisher.publishEvent(new PlannerPublishedEvent(
-                        userId, SseEventType.NOTIFY_PUBLISHED.getValue(), Map.of(
+                        userId, plannerId, saved.getTitle(), SseEventType.NOTIFY_PUBLISHED.getValue(), Map.of(
                         "plannerId", plannerId.toString(),
                         "plannerTitle", saved.getTitle(),
                         "authorEpithet", author.getUsernameEpithet(),

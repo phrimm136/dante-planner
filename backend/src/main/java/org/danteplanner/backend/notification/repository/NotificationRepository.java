@@ -67,4 +67,32 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("UPDATE Notification n SET n.deletedAt = :deletedAt WHERE n.userId = :userId AND n.deletedAt IS NULL")
     int softDeleteAllByUserId(@Param("userId") Long userId, @Param("deletedAt") Instant deletedAt);
+
+    /**
+     * Fan a PLANNER_PUBLISHED notification out to every subscriber in one statement.
+     *
+     * <p>Inserts one row per user who has new-publication notifications enabled and is not the
+     * author, selecting straight from {@code user_settings}. {@code INSERT IGNORE} lets the
+     * {@code uk_notification_dedup} unique constraint absorb a re-published planner without a
+     * per-recipient round trip, and the projection generates the required {@code public_id} and
+     * encodes the planner UUID to binary so no application-side row construction is needed.</p>
+     *
+     * @return the number of notification rows inserted
+     */
+    @Modifying
+    @Query(value = """
+            INSERT IGNORE INTO notifications
+                (user_id, content_id, notification_type, public_id, planner_id, planner_title)
+            SELECT s.user_id, :plannerId, 'PLANNER_PUBLISHED', UUID_TO_BIN(UUID()),
+                   UUID_TO_BIN(:plannerId), :plannerTitle
+            FROM user_settings s
+            JOIN users u ON u.id = s.user_id
+            WHERE s.notify_new_publications = true
+              AND u.deleted_at IS NULL
+              AND s.user_id <> :authorId
+            """, nativeQuery = true)
+    int insertPublishedFanout(
+            @Param("authorId") Long authorId,
+            @Param("plannerId") String plannerId,
+            @Param("plannerTitle") String plannerTitle);
 }

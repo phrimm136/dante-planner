@@ -10,7 +10,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
-import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -48,9 +47,6 @@ class NotificationServiceTest {
     @Mock
     private SseService sseService;
 
-    @Mock
-    private UserSettingsRepository userSettingsRepository;
-
     private NotificationService notificationService;
 
     private Long testUserId = 100L;
@@ -58,7 +54,23 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        notificationService = new NotificationService(notificationRepository, sseService, userSettingsRepository);
+        notificationService = new NotificationService(notificationRepository, sseService);
+    }
+
+    @Nested
+    @DisplayName("notifyPlannerPublished Tests")
+    class NotifyPlannerPublishedTests {
+
+        @Test
+        void publishFanoutSingleStatement_WhenSubscribersExist_IssuesOneInsertSelectNotNInserts() {
+            String title = "Fanout Build";
+
+            notificationService.notifyPlannerPublished(testUserId, testPlannerId, title);
+
+            verify(notificationRepository)
+                    .insertPublishedFanout(testUserId, testPlannerId.toString(), title);
+            verify(notificationRepository, never()).saveAll(any());
+        }
     }
 
     @Nested
