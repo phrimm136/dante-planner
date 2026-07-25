@@ -73,11 +73,27 @@ public class PlannerPublishingService {
      */
     @Transactional
     public PlannerResponse togglePublish(Long userId, UUID plannerId) {
-        // Check if user has any restrictions
         accessGuard.checkUserRestrictions(userId);
 
         Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        return togglePublish(userId, planner);
+    }
+
+    /**
+     * Toggle the published status of an already-loaded aggregate.
+     *
+     * @param userId  the user ID (must be owner)
+     * @param planner the loaded planner aggregate
+     * @return the updated planner response
+     * @throws PlannerForbiddenException if user is not the owner
+     */
+    @Transactional
+    public PlannerResponse togglePublish(Long userId, Planner planner) {
+        UUID plannerId = planner.getId();
+
+        // Check if user has any restrictions
+        accessGuard.checkUserRestrictions(userId);
 
         // Verify ownership
         if (!planner.isOwnedBy(userId)) {
@@ -145,11 +161,11 @@ public class PlannerPublishingService {
      */
     @Transactional
     public PlannerResponse publishWithContent(Long userId, UUID plannerId, UpsertPlannerRequest req) {
-        plannerCommandService.upsertPlanner(userId, null, plannerId, req, false);
-        Planner planner = plannerRepository.findAggregateForOwner(plannerId, userId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = plannerCommandService
+                .upsertAggregate(userId, null, plannerId, req, false)
+                .planner();
         if (!Boolean.TRUE.equals(planner.getPublished())) {
-            return togglePublish(userId, plannerId);
+            return togglePublish(userId, planner);
         }
         int upvotes = plannerStatsRepository.findById(plannerId)
                 .map(PlannerStats::getUpvotes)

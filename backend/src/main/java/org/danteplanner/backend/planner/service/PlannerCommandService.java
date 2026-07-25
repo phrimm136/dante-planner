@@ -215,6 +215,20 @@ public class PlannerCommandService {
      */
     @Transactional
     PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest req) {
+        return createAggregate(userId, deviceId, req).response();
+    }
+
+    /**
+     * Create a planner and return the persisted aggregate with its response.
+     *
+     * @param userId   the user ID
+     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param req      the create planner request
+     * @return the persisted aggregate and its response
+     * @throws PlannerLimitExceededException if user has reached max planners
+     * @throws PlannerValidationException    if content exceeds size limit or category is invalid
+     */
+    UpsertedPlanner createAggregate(Long userId, UUID deviceId, UpsertPlannerRequest req) {
         // Check if user has restrictions (timeout or ban) and get user entity
         User user = accessGuard.getUserAndCheckRestrictions(userId);
 
@@ -246,7 +260,13 @@ public class PlannerCommandService {
         // Notify other devices via SSE
         sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), SseEventType.CREATED.getValue(), response);
 
-        return response;
+        return new UpsertedPlanner(saved, response, true);
+    }
+
+    /**
+     * The persisted aggregate of an upsert with its response and whether the planner was created.
+     */
+    public record UpsertedPlanner(Planner planner, PlannerResponse response, boolean created) {
     }
 
     /**
@@ -263,6 +283,14 @@ public class PlannerCommandService {
      * @return upsert result with response and created flag for HTTP status determination
      * @throws PlannerConflictException if syncVersion doesn't match and force is false
      */
+    @Transactional
+    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
+        UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, req, force);
+        return upserted.created()
+                ? UpsertResult.created(upserted.response())
+                : UpsertResult.updated(upserted.response());
+    }
+
     /**
      * Upsert a planner and hand back the persisted aggregate along with its response, so a caller
      * that keeps working on the same planner reuses this load instead of reading it again.
@@ -273,21 +301,11 @@ public class PlannerCommandService {
      * @param req      the planner data
      * @param force    if true, skip syncVersion conflict check
      * @return the persisted aggregate, its response, and whether the planner was created
+     * @throws PlannerConflictException if syncVersion doesn't match and force is false
      */
     @Transactional
     public UpsertedPlanner upsertAggregate(
             Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
-        throw new UnsupportedOperationException("upsertAggregate not yet implemented");
-    }
-
-    /**
-     * The persisted aggregate of an upsert with its response and whether the planner was created.
-     */
-    public record UpsertedPlanner(Planner planner, PlannerResponse response, boolean created) {
-    }
-
-    @Transactional
-    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
         var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);
 
         if (existingPlanner.isPresent()) {
@@ -321,7 +339,7 @@ public class PlannerCommandService {
 
             PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
             sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
-            return UpsertResult.updated(response);
+            return new UpsertedPlanner(saved, response, false);
         }
 
         // One classifying SELECT covers both non-owned-active cases. Another user's soft-deleted
@@ -354,7 +372,7 @@ public class PlannerCommandService {
                 null,
                 req.selectedKeywords());
 
-        return UpsertResult.created(createPlanner(userId, deviceId, createReq));
+        return createAggregate(userId, deviceId, createReq);
     }
 
     /**
