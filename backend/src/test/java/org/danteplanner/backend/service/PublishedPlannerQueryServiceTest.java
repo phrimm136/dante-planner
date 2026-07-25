@@ -6,12 +6,15 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
@@ -190,18 +193,23 @@ class PublishedPlannerQueryServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "5F";
-            List<PlannerCatalog> rows = List.of(createPublishedRow("F5 Planner"));
-            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 1);
+            PlannerCatalog inCategory = createPublishedRow("F5 Planner");
+            PlannerCatalog anyCategory = createPublishedRow("Unfiltered Planner");
 
             when(catalogRepository.findByCategoryOrderByFirstPublishedAtDesc(category, pageable))
-                    .thenReturn(rowPage);
+                    .thenReturn(new PageImpl<>(List.of(inCategory), pageable, 1));
+            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
+                    .thenReturn(new PageImpl<>(List.of(anyCategory), pageable, 1));
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, category);
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(catalogRepository).findByCategoryOrderByFirstPublishedAtDesc(category, pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(inCategory.getPlannerId(), card.id());
+            assertEquals("F5 Planner", card.title());
+            assertEquals(category, card.category());
         }
 
         @Test
@@ -258,19 +266,22 @@ class PublishedPlannerQueryServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "10F";
-            List<PlannerCatalog> rows = List.of(createRecommendedRow("F10 Planner"));
-            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 1);
+            PlannerCatalog inCategory = createRecommendedRow("F10 Planner");
+            PlannerCatalog anyCategory = createRecommendedRow("Unfiltered Planner");
 
             when(catalogRepository.findByRecommendedTrueAndCategoryOrderByFirstPublishedAtDesc(category, pageable))
-                    .thenReturn(rowPage);
+                    .thenReturn(new PageImpl<>(List.of(inCategory), pageable, 1));
+            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable))
+                    .thenReturn(new PageImpl<>(List.of(anyCategory), pageable, 1));
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, category);
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(catalogRepository).findByRecommendedTrueAndCategoryOrderByFirstPublishedAtDesc(
-                    category, pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(inCategory.getPlannerId(), card.id());
+            assertEquals("F10 Planner", card.title());
         }
 
         @Test
@@ -306,6 +317,8 @@ class PublishedPlannerQueryServiceTest {
             publishedQueryService.incrementViewCount(plannerId);
 
             // Assert
+            // The increment returns nothing and the counter lives in planner_stats; reading back
+            // view_count instead of the call needs a committing (containerized) test.
             verify(plannerStatsRepository).incrementViewCountBy(plannerId, 1);
         }
 
@@ -361,12 +374,16 @@ class PublishedPlannerQueryServiceTest {
                             .build()));
         }
 
+        /**
+         * Each of the four context flags carries a distinct value, so a response that crosses
+         * two of them fails rather than matching by coincidence.
+         */
         private void mockUserContext(UUID plannerId) {
             when(plannerVoteRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
-                    .thenReturn(Optional.empty());
+                    .thenReturn(Optional.of(new PlannerVote(testUser.getId(), plannerId, VoteType.UP)));
             when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(false);
-            when(subscriptionService.isSubscribed(testUser.getId(), plannerId)).thenReturn(false);
+            when(subscriptionService.isSubscribed(testUser.getId(), plannerId)).thenReturn(true);
             when(reportService.hasReported(testUser.getId(), plannerId)).thenReturn(false);
         }
 
@@ -382,6 +399,8 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, USER_AGENT);
 
             // Assert
+            // A buffered view has no state form at this tier: it reaches planner_view only when
+            // PlannerViewRecorder.flush() commits, which needs a containerized test.
             verify(plannerViewRecorder).record(eq(plannerId), any(), any());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
@@ -400,9 +419,15 @@ class PublishedPlannerQueryServiceTest {
                     publishedQueryService.getPublishedPlanner(plannerId, testUser.getId(), IP_ADDRESS, USER_AGENT);
 
             // Assert
+            // A buffered view has no state form at this tier: it reaches planner_view only when
+            // PlannerViewRecorder.flush() commits, which needs a containerized test.
             verify(plannerViewRecorder).record(eq(plannerId), any(), any());
             verify(plannerStatsRepository, never()).incrementViewCountBy(any(), anyInt());
             assertEquals(10, result.viewCount());
+            assertTrue(result.hasUpvoted());
+            assertFalse(result.isBookmarked());
+            assertTrue(result.isSubscribed());
+            assertFalse(result.hasReported());
         }
 
         @Test
@@ -440,11 +465,16 @@ class PublishedPlannerQueryServiceTest {
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
 
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() ->
+            // Act
+            PublishedPlannerDetailResponse result = assertDoesNotThrow(() ->
                     publishedQueryService.getPublishedPlanner(plannerId, null, IP_ADDRESS, null));
 
-            verify(plannerViewRecorder).record(eq(plannerId), any(), any());
+            // Assert
+            assertEquals(plannerId, result.id());
+            assertEquals(10, result.viewCount());
+            assertNotNull(result.content());
+            assertNull(result.hasUpvoted());
+            assertNull(result.isBookmarked());
         }
 
         @Test
@@ -455,6 +485,8 @@ class PublishedPlannerQueryServiceTest {
             mockNewView(plannerId);
             mockUserContext(plannerId);
 
+            // The viewer hash never reaches the response; comparing the two forms through state
+            // would mean reading the recorded planner_view rows in a containerized test.
             ArgumentCaptor<String> anonHash = ArgumentCaptor.forClass(String.class);
 
             // Act - anonymous first
@@ -484,9 +516,20 @@ class PublishedPlannerQueryServiceTest {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             PlannerCatalog row = catalogRow("Test Planner", false);
-            Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
+            UUID plannerId = row.getPlannerId();
+            Instant createdAt = Instant.parse("2024-01-02T03:04:05Z");
 
-            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable)).thenReturn(rowPage);
+            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
+                    .thenReturn(new PageImpl<>(List.of(row), pageable, 1));
+            when(plannerRepository.findCoreInfoByIds(List.of(plannerId)))
+                    .thenReturn(List.of(new PlannerCoreInfo(plannerId, createdAt, "W_CORP", "test1")));
+            when(plannerStatsRepository.findAllById(List.of(plannerId)))
+                    .thenReturn(List.of(PlannerStats.builder()
+                            .plannerId(plannerId)
+                            .viewCount(42)
+                            .upvotes(7)
+                            .commentCount(3)
+                            .build()));
 
             // Act
             Page<PublicPlannerResponse> result =
@@ -494,7 +537,20 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(catalogRepository).findAllByOrderByFirstPublishedAtDesc(pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(plannerId, card.id());
+            assertEquals("Test Planner", card.title());
+            assertEquals("5F", card.category());
+            assertEquals(PlannerType.MIRROR_DUNGEON, card.plannerType());
+            assertEquals(row.getFirstPublishedAt(), card.firstPublishedAt());
+            assertEquals("W_CORP", card.authorUsernameEpithet());
+            assertEquals("test1", card.authorUsernameSuffix());
+            assertEquals(createdAt, card.createdAt());
+            assertEquals(42, card.viewCount());
+            assertEquals(7, card.upvotes());
+            assertEquals(3L, card.commentCount());
+            assertNull(card.hasUpvoted());
+            assertNull(card.isBookmarked());
         }
     }
 
@@ -518,7 +574,11 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(catalogRepository).findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable);
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(row.getPlannerId(), card.id());
+            assertEquals("Test Planner", card.title());
+            assertNull(card.hasUpvoted());
+            assertNull(card.isBookmarked());
         }
     }
 
@@ -542,7 +602,11 @@ class PublishedPlannerQueryServiceTest {
 
             // Assert
             assertEquals(1, result.getTotalElements());
-            verify(catalogRepository).findAll(any(Specification.class), any(Pageable.class));
+            PublicPlannerResponse card = result.getContent().get(0);
+            assertEquals(row.getPlannerId(), card.id());
+            assertEquals("Test Planner", card.title());
+            assertNull(card.hasUpvoted());
+            assertNull(card.isBookmarked());
         }
     }
 }

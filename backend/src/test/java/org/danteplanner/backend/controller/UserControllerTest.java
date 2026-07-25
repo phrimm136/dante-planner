@@ -1,8 +1,7 @@
 package org.danteplanner.backend.controller;
 import org.danteplanner.backend.user.controller.UserController;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.RateLimitConfig;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
@@ -21,8 +20,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -59,16 +61,16 @@ class UserControllerTest {
     private AuthenticationFacade authFacade;
 
     @Mock
-    private CookieUtils cookieUtils;
-
-    @Mock
     private Authentication authentication;
 
-    @Mock
-    private HttpServletRequest request;
+    /**
+     * Real, so the auth cookies the controller clears are inspectable state on the response.
+     */
+    @Spy
+    private CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
 
-    @Mock
-    private HttpServletResponse response;
+    private final MockHttpServletRequest request = new MockHttpServletRequest();
+    private final MockHttpServletResponse response = new MockHttpServletResponse();
 
     @InjectMocks
     private UserController userController;
@@ -89,9 +91,10 @@ class UserControllerTest {
     class DeleteMyAccountTests {
 
         @BeforeEach
-        void stubCookies() {
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(TEST_ACCESS_TOKEN);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(TEST_REFRESH_TOKEN);
+        void putAuthCookiesOnRequest() {
+            request.setCookies(
+                    new Cookie(CookieConstants.ACCESS_TOKEN, TEST_ACCESS_TOKEN),
+                    new Cookie(CookieConstants.REFRESH_TOKEN, TEST_REFRESH_TOKEN));
         }
 
         @Test
@@ -115,8 +118,6 @@ class UserControllerTest {
             assertNotNull(body.deletedAt());
             assertEquals(scheduledDeleteAt, body.permanentDeleteAt());
             assertEquals(GRACE_PERIOD_DAYS, body.gracePeriodDays());
-
-            verify(lifecycleService).deleteAccount(TEST_USER_ID);
         }
 
         @Test
@@ -130,12 +131,17 @@ class UserControllerTest {
             // Act
             userController.deleteMyAccount(authentication, request, response);
 
-            // Assert - verify token blacklisting (same as logout)
-            verify(cookieUtils).getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-            verify(cookieUtils).getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+            // Assert - both auth cookies come back expired, so the browser drops them
+            Cookie clearedAccess = response.getCookie(CookieConstants.ACCESS_TOKEN);
+            assertNotNull(clearedAccess);
+            assertEquals(0, clearedAccess.getMaxAge());
+            Cookie clearedRefresh = response.getCookie(CookieConstants.REFRESH_TOKEN);
+            assertNotNull(clearedRefresh);
+            assertEquals(0, clearedRefresh.getMaxAge());
+            // Blacklisting lands in Redis and has no response-visible form; asserting it as state
+            // needs the containerized tier with a live TokenBlacklistService. The arguments prove
+            // both tokens were read from their own cookies.
             verify(authFacade).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
-            verify(cookieUtils).clearCookie(response, CookieConstants.ACCESS_TOKEN);
-            verify(cookieUtils).clearCookie(response, CookieConstants.REFRESH_TOKEN);
         }
 
         @Test
@@ -165,11 +171,12 @@ class UserControllerTest {
             when(lifecycleService.deleteAccount(userId)).thenReturn(scheduledAt);
 
             // Act
-            userController.deleteMyAccount(authentication, request, response);
+            ResponseEntity<UserDeletionResponse> result =
+                    userController.deleteMyAccount(authentication, request, response);
 
-            // Assert
-            verify(authentication).getPrincipal();
-            verify(lifecycleService).deleteAccount(userId);
+            // Assert - the schedule stubbed for this principal's id is the one that comes back,
+            // so the id the controller passed on can only have been that principal's
+            assertEquals(scheduledAt, result.getBody().permanentDeleteAt());
         }
 
         @Test
@@ -209,7 +216,9 @@ class UserControllerTest {
                     userController.updateSettings(authentication, updateRequest);
 
             // Assert - the invalidation must go out for the updated user, after the persist,
-            // so every pod drops its stale settingsCache entry
+            // so every pod drops its stale settingsCache entry. The ordering is only visible at
+            // the publisher seam here; observing the drop itself needs the containerized tier
+            // with a live Redis pub/sub SsePublisher and a second pod.
             assertEquals(200, result.getStatusCode().value());
             assertEquals(persisted, result.getBody());
             InOrder inOrder = inOrder(userSettingsService, ssePublisher);

@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,6 +68,8 @@ class NotificationServiceTest {
 
             notificationService.notifyPlannerPublished(testUserId, testPlannerId, title);
 
+            // The recipient filter runs inside the INSERT ... SELECT, so the rows the fan-out
+            // produces are observable only in a containerized test against the migrated schema.
             verify(notificationRepository)
                     .insertPublishedFanout(testUserId, testPlannerId.toString(), title);
             verify(notificationRepository, never()).saveAll(any());
@@ -93,6 +96,8 @@ class NotificationServiceTest {
             notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
+            // The persisted row is observable only in a containerized test; the captured entity is
+            // the nearest stand-in for what reaches the notifications table.
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
             verify(notificationRepository).save(captor.capture());
 
@@ -122,11 +127,13 @@ class NotificationServiceTest {
         @DisplayName("Should push saved notification to recipient via SSE on success")
         void notifyPlannerRecommended_Success_PushesViaSse() {
             // Arrange
+            UUID[] persistedPublicId = new UUID[1];
             when(notificationRepository.save(any(Notification.class)))
                     .thenAnswer(invocation -> {
                         Notification n = invocation.getArgument(0);
                         n.setPublicId(UUID.randomUUID());
                         n.setCreatedAt(Instant.now());
+                        persistedPublicId[0] = n.getPublicId();
                         return n;
                     });
 
@@ -134,8 +141,20 @@ class NotificationServiceTest {
             notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
+            ArgumentCaptor<String> entityIdCaptor = ArgumentCaptor.forClass(String.class);
+            ArgumentCaptor<Object> payloadCaptor = ArgumentCaptor.forClass(Object.class);
             verify(ssePublisher).publishUserEvent(
-                    eq(testUserId), any(), eq(SseEventType.NOTIFY_RECOMMENDED), any(), any());
+                    eq(testUserId), any(), eq(SseEventType.NOTIFY_RECOMMENDED),
+                    entityIdCaptor.capture(), payloadCaptor.capture());
+
+            assertEquals(persistedPublicId[0].toString(), entityIdCaptor.getValue());
+
+            Map<?, ?> payload = (Map<?, ?>) payloadCaptor.getValue();
+            assertEquals(persistedPublicId[0].toString(), payload.get("id"));
+            assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), payload.get("type"));
+            assertEquals(testPlannerId.toString(), payload.get("contentId"));
+            assertEquals(testPlannerId.toString(), payload.get("plannerId"));
+            assertEquals("Test Planner Title", payload.get("plannerTitle"));
         }
 
         @Test
@@ -181,6 +200,8 @@ class NotificationServiceTest {
                     "Test content", plannerOwnerId, commenterId);
 
             // Assert
+            // The persisted row is observable only in a containerized test; the captured entity is
+            // the nearest stand-in for what reaches the notifications table.
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
             verify(notificationRepository).save(captor.capture());
 
@@ -256,6 +277,8 @@ class NotificationServiceTest {
                     "Reply content", parentAuthorId, replierId);
 
             // Assert
+            // The persisted row is observable only in a containerized test; the captured entity is
+            // the nearest stand-in for what reaches the notifications table.
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
             verify(notificationRepository).save(captor.capture());
 
@@ -474,7 +497,6 @@ class NotificationServiceTest {
             // Assert
             assertTrue(notification.isDeleted());
             assertNotNull(notification.getDeletedAt());
-            verify(notificationRepository).save(notification);
         }
 
         @Test
@@ -524,6 +546,8 @@ class NotificationServiceTest {
             notificationService.cleanupOldNotifications();
 
             // Assert
+            // Which rows the two sweeps remove is observable only in a containerized test seeded
+            // with read and soft-deleted rows on both sides of the cutoffs.
             verify(notificationRepository).softDeleteOldReadNotifications(any(Instant.class), any(Instant.class));
             verify(notificationRepository).hardDeleteOldNotifications(any(Instant.class));
         }
@@ -544,6 +568,8 @@ class NotificationServiceTest {
             notificationService.cleanupOldNotifications();
 
             // Assert - verify cutoff dates are approximately correct
+            // The 90/365-day retention window is only observable as the cutoff arguments here;
+            // asserting which rows survive it needs a containerized test with aged rows.
             Instant now = Instant.now();
             Instant softDeleteCutoff = softDeleteCutoffCaptor.getValue();
             Instant hardDeleteCutoff = hardDeleteCutoffCaptor.getValue();
