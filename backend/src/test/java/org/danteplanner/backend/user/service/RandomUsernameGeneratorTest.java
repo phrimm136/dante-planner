@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import java.util.Locale;
 
 /**
  * Unit tests for RandomUsernameGenerator.
@@ -77,7 +78,7 @@ class RandomUsernameGeneratorTest {
             for (int i = 0; i < 100; i++) {
                 String suffix = generator.generateSuffix();
 
-                assertThat(suffix).isEqualTo(suffix.toLowerCase());
+                assertThat(suffix).isEqualTo(suffix.toLowerCase(Locale.ROOT));
             }
         }
 

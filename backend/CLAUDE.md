@@ -4,9 +4,10 @@ Spring Boot + Java + JPA/Hibernate + Bean Validation (Jakarta) + MySQL + Redis +
 
 ## Build & Tooling
 
-- Gradle: always `/home/user/github/LimbusPlanner/gradlew -p backend` — bare `gradlew` without a project dir is hook-blocked.
+- Gradle: always `/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend` — bare `gradlew` without a project dir is hook-blocked, and a relative `-p` resolves against the shell's current directory.
 - Forbidden patterns are hook-enforced (`.claude/hooks/forbidden-patterns.json`): field injection, empty catch blocks, string concatenation in `@Query`, `@Transactional` on private methods, and more — the hook blocks the write, so fix before saving.
-- Integration tests (MySQL/Redis Testcontainers, tagged `containerized`) run in the default test task and require Docker; exclude them with `-PexcludeTags=containerized`.
+- Unit tier only (no Docker): `/home/user/github/LimbusPlanner/backend/gradlew -p /home/user/github/LimbusPlanner/backend test -PexcludeTags=containerized`. Add `--tests "<pattern>"` to scope further.
+- Full suite (default `test` task) also runs the integration tests (MySQL/Redis Testcontainers, tagged `containerized`), which require Docker.
 - Import order (enforced): java → spring framework → spring boot → spring data jpa → jakarta.validation → jakarta.persistence → third-party → project packages.
 
 ## Comments & Javadoc (main and test)

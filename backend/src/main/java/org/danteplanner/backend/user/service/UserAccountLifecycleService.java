@@ -125,8 +125,8 @@ public class UserAccountLifecycleService {
         userRepository.save(user);
 
         // Immediately revoke existing tokens via the in-memory invalidation check.
-        // The JWT filter no longer does a per-request DB lookup to detect deletion
-        // (token-only auth), so deletion must push the revocation signal here.
+        // Auth is token-only: the JWT filter does no per-request DB lookup, so deletion
+        // must push the revocation signal here.
         tokenBlacklistService.invalidateUserTokens(userId);
 
         return scheduledDeleteAt;

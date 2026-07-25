@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Redis pub/sub listener that fans SSE envelopes out to this node's local emitters.
@@ -37,11 +38,11 @@ public class SseRedisSubscriber implements MessageListener {
         try {
             envelope = objectMapper.readValue(message.getBody(), SseEnvelope.class);
         } catch (IOException e) {
-            log.error("Failed to deserialize SSE envelope from channel {}", new String(message.getChannel()), e);
+            log.error("Failed to deserialize SSE envelope from channel {}", new String(message.getChannel(), StandardCharsets.UTF_8), e);
             return;
         }
 
-        String channel = new String(message.getChannel());
+        String channel = new String(message.getChannel(), StandardCharsets.UTF_8);
         if (SseChannels.COMMENT.equals(channel)) {
             if (envelope.plannerId() == null || envelope.plannerId().isBlank()) {
                 log.error("Comment SSE envelope missing plannerId; dropping");

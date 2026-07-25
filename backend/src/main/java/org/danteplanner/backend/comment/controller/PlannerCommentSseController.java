@@ -18,7 +18,7 @@ import java.util.UUID;
  * REST controller for planner comment SSE subscriptions.
  *
  * <p>Provides a public SSE endpoint for real-time comment notifications.
- * Unlike {@link SseController}, this endpoint does not require authentication,
+ * Unlike {@link org.danteplanner.backend.shared.controller.SseController}, this endpoint does not require authentication,
  * allowing guests to receive comment updates.</p>
  *
  * <p>When a new comment is posted on a planner, all subscribers to that

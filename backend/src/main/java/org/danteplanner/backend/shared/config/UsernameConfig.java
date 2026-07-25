@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.time.ZoneOffset;
 
 /**
  * Configuration for username generation associations.
@@ -87,7 +88,7 @@ public class UsernameConfig implements AssociationProvider {
      */
     @Override
     public int getWeight(String keyword) {
-        return getWeight(keyword, LocalDate.now());
+        return getWeight(keyword, LocalDate.now(ZoneOffset.UTC));
     }
 
     /**

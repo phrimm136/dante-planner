@@ -142,7 +142,7 @@ class UserAccountLifecycleServiceTest {
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
 
             verify(userRepository).save(testUser);
-            // Fix 3: deletion must push token invalidation (filter no longer does a DB lookup)
+            // Auth is token-only, so deletion must push token invalidation itself
             verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 

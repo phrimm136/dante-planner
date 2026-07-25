@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import java.util.Locale;
 
 /**
  * Unit tests for OAuthProviderRegistry.
@@ -76,7 +77,7 @@ class OAuthProviderRegistryTest {
 
             assertTrue(exception.getMessage().contains("unknown"),
                     "Exception message should contain the unknown provider name");
-            assertTrue(exception.getMessage().toLowerCase().contains("unknown oauth provider"),
+            assertTrue(exception.getMessage().toLowerCase(Locale.ROOT).contains("unknown oauth provider"),
                     "Exception message should indicate it's an unknown provider");
         }
 

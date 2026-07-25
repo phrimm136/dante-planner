@@ -162,7 +162,7 @@ class PlannerVoteRepositoryTest {
 
         // Assert - voteType field is final, no setter exists
         assertEquals(VoteType.UP, vote.getVoteType());
-        // This test documents that setVoteType() no longer exists
+        // A vote is immutable: there is no setVoteType()
         // Attempting to change vote type would require creating a new vote (which would violate composite PK)
     }
 }

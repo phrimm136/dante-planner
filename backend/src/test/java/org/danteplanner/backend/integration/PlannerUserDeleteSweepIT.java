@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import java.time.ZoneOffset;
 
 /**
  * User hard-delete sweep: the FK-less satellite, projection, and filter rows
@@ -123,7 +124,7 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
                 + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", other.getId(), published.getId().toString());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",
-                published.getId().toString(), LocalDate.now());
+                published.getId().toString(), LocalDate.now(ZoneOffset.UTC));
         jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
                 + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'a comment', 0, NOW())",
                 UUID.randomUUID().toString(), published.getId().toString(), other.getId());

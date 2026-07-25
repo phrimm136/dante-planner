@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * client in the read-your-writes cookie.
  *
  * <p>Each non-read-only transaction that commits during the request contributes its own GTID via
- * {@code session_track_gtids=OWN_GTID} (recorded through {@link #recordCommit(String)} from an
+ * {@code session_track_gtids=OWN_GTID} (recorded through {@link #recordCommit(String, boolean)} from an
  * {@code afterCommit} synchronization). {@link #pollCapturedGtid()} returns the union of a request's
  * captured GTIDs, so a follow-up replica read gates past every commit (main tx plus the
  * {@code AFTER_COMMIT}/{@code REQUIRES_NEW} filter rebuild), not only the first. When a transaction

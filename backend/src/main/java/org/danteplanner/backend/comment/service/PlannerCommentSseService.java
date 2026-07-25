@@ -16,7 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * SSE service for planner comment notifications.
  *
- * <p>Unlike {@link SseService} which is user-centric, this service is planner-centric.
+ * <p>Unlike {@link org.danteplanner.backend.shared.sse.SseService} which is user-centric, this service is planner-centric.
  * Any device (authenticated or guest) can subscribe to a planner's comment feed
  * and receive notifications when new comments are posted.</p>
  *

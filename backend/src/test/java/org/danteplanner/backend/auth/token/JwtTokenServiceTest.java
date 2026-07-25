@@ -17,6 +17,7 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Unit tests for JwtTokenService.
@@ -62,7 +63,7 @@ class JwtTokenServiceTest {
     private static String decodePayload(String token) {
         String[] parts = token.split("\\.");
         assertEquals(3, parts.length, "JWT should have 3 parts");
-        return new String(Base64.getUrlDecoder().decode(parts[1]));
+        return new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
     }
 
     @Nested

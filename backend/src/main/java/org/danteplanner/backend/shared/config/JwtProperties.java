@@ -22,6 +22,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 /**
  * JWT configuration properties with startup validation.
@@ -125,7 +126,7 @@ public class JwtProperties {
     }
 
     private PrivateKey loadPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String pemContent = new String(Files.readAllBytes(Paths.get(path)));
+        String pemContent = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
         String base64Key = pemContent
             .replace("-----BEGIN PRIVATE KEY-----", "")
             .replace("-----END PRIVATE KEY-----", "")
@@ -149,7 +150,7 @@ public class JwtProperties {
     }
 
     private PublicKey loadPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String pemContent = new String(Files.readAllBytes(Paths.get(path)));
+        String pemContent = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
         String base64Key = pemContent
             .replace("-----BEGIN PUBLIC KEY-----", "")
             .replace("-----END PUBLIC KEY-----", "")

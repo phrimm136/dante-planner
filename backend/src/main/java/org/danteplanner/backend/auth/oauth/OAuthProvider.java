@@ -34,7 +34,7 @@ public interface OAuthProvider {
      * @param redirectUri  Redirect URI used in authorization request (must match)
      * @param codeVerifier PKCE code verifier for enhanced security
      * @return OAuth tokens including access token and optionally refresh/id tokens
-     * @throws OAuthException if token exchange fails
+     * @throws org.danteplanner.backend.auth.exception.OAuthException if token exchange fails
      */
     OAuthTokens exchangeCodeForTokens(String code, String redirectUri, String codeVerifier);
 
@@ -43,7 +43,7 @@ public interface OAuthProvider {
      *
      * @param accessToken Valid access token from token exchange
      * @return User information including provider ID and email
-     * @throws OAuthException if user info retrieval fails
+     * @throws org.danteplanner.backend.auth.exception.OAuthException if user info retrieval fails
      */
     OAuthUserInfo getUserInfo(String accessToken);
 

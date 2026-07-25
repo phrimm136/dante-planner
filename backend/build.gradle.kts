@@ -1,3 +1,5 @@
+import net.ltgt.gradle.errorprone.errorprone
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.10"
@@ -6,6 +8,7 @@ plugins {
     id("org.owasp.dependencycheck") version "12.2.0"
     id("de.aaschmid.cpd") version "3.5"
     id("net.ltgt.errorprone") version "4.3.0"
+    id("info.solidsoft.pitest") version "1.19.0-rc.1"
     checkstyle
     jacoco
 }
@@ -121,7 +124,39 @@ tasks.withType<Test> {
 // Lombok-generated code carries @lombok.Generated (lombok.config) which Error Prone
 // skips, so the generator and the analyzer do not fight. JDK 16+ requires the javac
 // internals to be exported to the Error Prone plugin, via a forked compiler.
+// Mutation coverage, not line coverage: a surviving mutant is a line no test protects.
+// Scoped to the packages carrying the most behavior per line; the threshold is a ratchet, raise only.
+pitest {
+    targetClasses.set(listOf(
+        "org.danteplanner.backend.planner.service.*",
+        "org.danteplanner.backend.auth.token.*",
+        "org.danteplanner.backend.shared.readpath.*"))
+    excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
+    junit5PluginVersion.set("1.2.1")
+    threads.set(4)
+    timestampedReports.set(false)
+    // Measured baseline: 486 mutations, 134 killed (28%). Raise as coverage lands; never lower.
+    // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
+    // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
+    mutationThreshold.set(25)
+}
+
+// Javadoc references are compiler-checked so a comment can cite an invariant test by name and
+// the citation cannot outlive its target. The `missing` group stays off: DTO components and
+// trivial getters are deliberately undocumented.
+tasks.withType<Javadoc>().configureEach {
+    (options as StandardJavadocDocletOptions).apply {
+        addStringOption("Xdoclint:reference", "-quiet")
+        addBooleanOption("Werror", true)
+    }
+}
+
 tasks.withType<JavaCompile>().configureEach {
+    // Environment-dependent behavior is a build failure, not a warning: each of these compiles
+    // clean, passes CI, and then misbehaves under one locale, one charset, or one region's clock.
+    options.errorprone {
+        error("StringCaseLocaleUsage", "DefaultCharset", "JavaTimeDefaultTimeZone")
+    }
     options.forkOptions.jvmArgs!!.addAll(
         listOf(
             "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",

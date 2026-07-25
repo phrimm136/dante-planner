@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 
 import java.util.Set;
+import java.util.Locale;
 
 /**
  * Factory for {@link PlannerValidationException} instances.
@@ -59,7 +60,7 @@ final class ValidationErrors {
         else if (actual.isTextual())              actualDesc = "string \"" + truncateValue(actual.asText()) + "\"";
         else if (actual.isNumber())               actualDesc = "number " + actual;
         else if (actual.isBoolean())              actualDesc = "boolean " + actual.asBoolean();
-        else                                      actualDesc = actual.getNodeType().toString().toLowerCase();
+        else                                      actualDesc = actual.getNodeType().toString().toLowerCase(Locale.ROOT);
         return new PlannerValidationException(ErrorCode.INVALID_FIELD_TYPE.getCode(),
                 String.format("Field '%s' must be %s, got %s", field, expectedType, actualDesc));
     }

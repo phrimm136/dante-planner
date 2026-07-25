@@ -15,9 +15,8 @@ import java.util.List;
  * focused sub-validator and threading a single {@link ValidationContext}
  * through the call chain.
  *
- * <p>Behavior is identical to the previous monolith: same error codes, same
- * messages, same call order, same strict-mode semantics, and the same
- * fail-fast vs. accumulate-and-combine behavior.
+ * <p>Structural failures throw and abort; reference failures accumulate into the
+ * context and are combined once at the end.
  */
 @Component
 @Slf4j
