@@ -27,18 +27,29 @@ public class PlannerAccessGuard {
     private final PlannerRepository plannerRepository;
 
     /**
-     * Get user and check if restricted (timed out or banned).
-     * Returns the user to avoid duplicate DB queries.
+     * Fetch a user without applying any restriction check. Private planner work stays available
+     * under both a timeout and a ban.
      *
      * @param userId the user ID
-     * @return the User entity (not restricted)
+     * @return the User entity
+     * @throws UserNotFoundException if user not found
+     */
+    public User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
+    /**
+     * Reject a user who may not contribute public content: publishing, commenting, replying, or
+     * editing a comment. Both a timeout and a ban withdraw this.
+     *
+     * @param userId the user ID
      * @throws UserNotFoundException if user not found
      * @throws UserTimedOutException if user is currently timed out
      * @throws UserBannedException   if user is currently banned
      */
-    public User getUserAndCheckRestrictions(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+    public void checkNotRestricted(Long userId) {
+        User user = getUser(userId);
 
         if (user.isTimedOut()) {
             throw new UserTimedOutException(userId, user.getTimeoutUntil());
@@ -47,21 +58,22 @@ public class PlannerAccessGuard {
         if (user.isBanned()) {
             throw new UserBannedException(user.getId(), user.getBannedAt());
         }
-
-        return user;
     }
 
     /**
-     * Check if user is restricted (timed out or banned).
-     * Called at the start of write operations that don't need the User entity.
+     * Reject a banned user from acting on someone else's content: voting and reporting. A timeout
+     * does not withdraw this, which is what keeps the two severities distinct.
      *
      * @param userId the user ID
      * @throws UserNotFoundException if user not found
-     * @throws UserTimedOutException if user is currently timed out
      * @throws UserBannedException   if user is currently banned
      */
-    public void checkUserRestrictions(Long userId) {
-        getUserAndCheckRestrictions(userId);
+    public void checkNotBanned(Long userId) {
+        User user = getUser(userId);
+
+        if (user.isBanned()) {
+            throw new UserBannedException(user.getId(), user.getBannedAt());
+        }
     }
 
     /**

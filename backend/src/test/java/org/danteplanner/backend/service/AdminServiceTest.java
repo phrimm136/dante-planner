@@ -19,6 +19,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
  * Unit tests for AdminService.
@@ -34,6 +36,9 @@ class AdminServiceTest {
     @Mock
     private TokenBlacklistService tokenBlacklistService;
 
+    @Mock
+    private ModerationActionRepository moderationActionRepository;
+
     private AdminService adminService;
 
     private User adminUser;
@@ -42,10 +47,12 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(userRepository, tokenBlacklistService);
+        adminService = new AdminService(userRepository, tokenBlacklistService,
+                new ModerationAuditService(moderationActionRepository));
 
         adminUser = User.builder()
                 .id(1L)
+                .publicId(java.util.UUID.randomUUID())
                 .email("admin@example.com")
                 .provider(AuthProviderType.GOOGLE)
                 .providerId("admin-123")
@@ -56,6 +63,7 @@ class AdminServiceTest {
 
         moderatorUser = User.builder()
                 .id(2L)
+                .publicId(java.util.UUID.randomUUID())
                 .email("mod@example.com")
                 .provider(AuthProviderType.GOOGLE)
                 .providerId("mod-123")
@@ -66,6 +74,7 @@ class AdminServiceTest {
 
         normalUser = User.builder()
                 .id(3L)
+                .publicId(java.util.UUID.randomUUID())
                 .email("user@example.com")
                 .provider(AuthProviderType.GOOGLE)
                 .providerId("user-123")
@@ -139,6 +148,7 @@ class AdminServiceTest {
             // Arrange - create another moderator
             User otherModerator = User.builder()
                     .id(4L)
+                    .publicId(java.util.UUID.randomUUID())
                     .email("mod2@example.com")
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("mod2-123")
@@ -203,6 +213,7 @@ class AdminServiceTest {
             // Arrange - per spec: "Cannot modify role of users at equal or higher rank (unless self-demotion)"
             User otherAdmin = User.builder()
                     .id(5L)
+                    .publicId(java.util.UUID.randomUUID())
                     .email("admin2@example.com")
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("admin2-123")

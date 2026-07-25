@@ -9,6 +9,8 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
  * Service for administrative operations.
@@ -21,6 +23,7 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final TokenBlacklistService tokenBlacklistService;
+    private final ModerationAuditService auditService;
 
     /**
      * Change a user's role with safeguards.
@@ -66,8 +69,13 @@ public class AdminService {
         target.setRole(newRole);
         User saved = userRepository.save(target);
 
+        boolean demotion = oldRole.outranks(newRole);
+        auditService.record(actorId, target.getPublicId().toString(),
+                demotion ? ModerationAction.ActionType.DEMOTE : ModerationAction.ActionType.PROMOTE,
+                ModerationAction.TargetType.USER, oldRole + " -> " + newRole, null);
+
         // If demoted, invalidate all their tokens immediately
-        if (oldRole.outranks(newRole)) {
+        if (demotion) {
             tokenBlacklistService.invalidateUserTokens(targetId);
             log.info("User {} demoted from {} to {} by admin {}. Tokens invalidated.",
                     targetId, oldRole, newRole, actorId);

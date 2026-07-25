@@ -44,8 +44,10 @@ class FeatureBoundaryTest {
             noClasses()
                     .that().resideInAPackage("..admin..")
                     .should().dependOnClassesThat()
-                    .resideInAnyPackage("..comment..", "..moderation..", "..notification..", "..planner..")
-                    .as("admin may only depend on auth, user, shared (+ its own package)");
+                    .resideInAnyPackage("..comment..", "..notification..", "..planner..")
+                    .as("admin may only depend on auth, user, shared, moderation (+ its own package)");
+    // moderation is permitted for one reason: a role change is a moderator action and must leave an
+    // audit record in the same transaction, which rules out an after-commit listener as the seam.
 
     @ArchTest
     static final ArchRule auth_only_depends_on_user_shared =

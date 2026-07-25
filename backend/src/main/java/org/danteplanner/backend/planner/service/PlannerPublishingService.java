@@ -77,7 +77,7 @@ public class PlannerPublishingService {
      */
     @Transactional
     public PlannerResponse setPublished(Long userId, UUID plannerId, boolean published) {
-        accessGuard.checkUserRestrictions(userId);
+        accessGuard.checkNotRestricted(userId);
 
         Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
@@ -138,7 +138,7 @@ public class PlannerPublishingService {
     @Deprecated
     @Transactional
     public PlannerResponse togglePublish(Long userId, UUID plannerId) {
-        accessGuard.checkUserRestrictions(userId);
+        accessGuard.checkNotRestricted(userId);
 
         Planner planner = plannerRepository.findAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
@@ -158,7 +158,7 @@ public class PlannerPublishingService {
         UUID plannerId = planner.getId();
 
         // Check if user has any restrictions
-        accessGuard.checkUserRestrictions(userId);
+        accessGuard.checkNotRestricted(userId);
 
         // Verify ownership
         if (!planner.isOwnedBy(userId)) {

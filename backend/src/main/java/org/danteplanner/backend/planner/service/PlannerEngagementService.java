@@ -39,6 +39,7 @@ public class PlannerEngagementService {
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerCatalogService plannerCatalogService;
     private final ApplicationEventPublisher eventPublisher;
+    private final PlannerAccessGuard accessGuard;
 
     private final int recommendedThreshold;
 
@@ -49,6 +50,7 @@ public class PlannerEngagementService {
             PlannerStatsRepository plannerStatsRepository,
             PlannerCatalogService plannerCatalogService,
             ApplicationEventPublisher eventPublisher,
+            PlannerAccessGuard accessGuard,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
@@ -56,6 +58,7 @@ public class PlannerEngagementService {
         this.plannerStatsRepository = plannerStatsRepository;
         this.plannerCatalogService = plannerCatalogService;
         this.eventPublisher = eventPublisher;
+        this.accessGuard = accessGuard;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -81,6 +84,8 @@ public class PlannerEngagementService {
      */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
+        accessGuard.checkNotBanned(userId);
+
         // Validate input (fail-fast)
         if (voteType == null) {
             throw new IllegalArgumentException("Vote type cannot be null - votes are immutable and cannot be removed");

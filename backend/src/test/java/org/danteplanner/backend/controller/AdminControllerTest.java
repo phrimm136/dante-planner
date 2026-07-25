@@ -29,7 +29,7 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
  *
  * <p>Covers the two role-management endpoints ({@code changeRole}, {@code getUserRole}) that
  * {@code AdminModerationControllerTest} does not exercise (that class targets the separate
- * {@code AdminModerationController} at {@code /api/admin/planner}). Pins the
+ * {@code AdminModerationController} at {@code /api/moderation/planner}). Pins the
  * {@code UserRoleResponse} JSON shape plus the ADMIN authorization boundary
  * (non-admin NORMAL &rarr; 403, unauthenticated &rarr; 401).</p>
  *

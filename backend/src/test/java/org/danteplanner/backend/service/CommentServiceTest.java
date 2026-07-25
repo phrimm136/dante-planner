@@ -126,6 +126,10 @@ class CommentServiceTest {
                 .plannerType(PlannerType.MIRROR_DUNGEON)
                 .published(true)
                 .build();
+        // The access guard resolves the principal on every guarded path; an unstubbed
+        // repository would surface as UserNotFoundException instead of the behavior under test.
+        lenient().when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+
     }
 
     @Nested
@@ -478,8 +482,8 @@ class CommentServiceTest {
         }
 
         @Test
-        @DisplayName("Timed-out user cannot vote on comment")
-        void toggleUpvote_timedOutUser_throwsUserTimedOutException() {
+        @DisplayName("Timed-out user may still vote on a comment")
+        void toggleUpvote_timedOutUser_isNotRestricted() {
             // Arrange
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
             testUser.setTimeoutUntil(futureTimeout);
@@ -488,9 +492,9 @@ class CommentServiceTest {
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));
 
-            // Act & Assert
+            // Act & Assert - only a ban withdraws engagement
             assertThrows(
-                    org.danteplanner.backend.user.exception.UserTimedOutException.class,
+                    org.danteplanner.backend.comment.exception.CommentNotFoundException.class,
                     () -> commentService.toggleUpvote(commentId, testUser.getId())
             );
             verify(commentVoteRepository, never()).save(any());

@@ -230,7 +230,7 @@ public class PlannerCommandService {
      */
     UpsertedPlanner createAggregate(Long userId, UUID deviceId, UpsertPlannerRequest req) {
         // Check if user has restrictions (timeout or ban) and get user entity
-        User user = accessGuard.getUserAndCheckRestrictions(userId);
+        User user = accessGuard.getUser(userId);
 
         // Check planner count limit
         long currentCount = plannerRepository.countActiveByUserId(userId);
@@ -313,8 +313,6 @@ public class PlannerCommandService {
             Planner planner = existingPlanner.get();
 
             // Check if user has any restrictions
-            accessGuard.checkUserRestrictions(userId);
-
             // Check optimistic locking unless force override is requested
             if (!force && req.syncVersion() != null && !planner.getSyncVersion().equals(req.syncVersion())) {
                 throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
@@ -391,8 +389,6 @@ public class PlannerCommandService {
     @Transactional
     public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest req, boolean force) {
         // Check if user has any restrictions
-        accessGuard.checkUserRestrictions(userId);
-
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
         // Check optimistic locking unless force override is requested
@@ -431,8 +427,6 @@ public class PlannerCommandService {
     @Transactional
     public void deletePlanner(Long userId, UUID deviceId, UUID id) {
         // Check if user has any restrictions
-        accessGuard.checkUserRestrictions(userId);
-
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
         // Auto-unpublish if published (subscriptions cascade at DB level)
@@ -471,7 +465,7 @@ public class PlannerCommandService {
     @Transactional
     public ImportPlannersResponse importPlanners(Long userId, ImportPlannersRequest req) {
         // Check restrictions and get user entity (needed for limit check)
-        User user = accessGuard.getUserAndCheckRestrictions(userId);
+        User user = accessGuard.getUser(userId);
 
         long currentCount = plannerRepository.countActiveByUserId(userId);
         int requestedCount = req.planners().size();

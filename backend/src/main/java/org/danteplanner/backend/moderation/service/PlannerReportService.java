@@ -23,6 +23,7 @@ public class PlannerReportService {
 
     private final PlannerReportRepository reportRepository;
     private final PlannerRepository plannerRepository;
+    private final org.danteplanner.backend.planner.service.PlannerAccessGuard accessGuard;
 
     /**
      * Create a report for a planner.
@@ -36,6 +37,8 @@ public class PlannerReportService {
      */
     @Transactional
     public PlannerReport createReport(Long userId, UUID plannerId) {
+        accessGuard.checkNotBanned(userId);
+
         // Verify planner exists and is published
         if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
             throw new PlannerNotFoundException(plannerId);

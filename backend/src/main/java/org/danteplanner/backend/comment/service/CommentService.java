@@ -178,7 +178,7 @@ public class CommentService {
      */
     @Transactional
     public CreateCommentResponse createComment(UUID plannerId, Long userId, UUID deviceId, CreateCommentRequest request) {
-        accessGuard.checkUserRestrictions(userId);
+        accessGuard.checkNotRestricted(userId);
 
         // Verify planner exists and is published
         Planner planner = plannerRepository.findPublishedAggregate(plannerId)
@@ -273,6 +273,8 @@ public class CommentService {
      */
     @Transactional
     public CreateCommentResponse createReply(UUID parentPublicId, Long userId, UUID deviceId, String content) {
+        accessGuard.checkNotRestricted(userId);
+
         // Find parent comment by public ID
         PlannerComment parent = commentRepository.findByPublicId(parentPublicId)
                 .orElseThrow(() -> new CommentNotFoundException(parentPublicId));
@@ -351,6 +353,8 @@ public class CommentService {
      */
     @Transactional
     public UpdateCommentResponse updateComment(UUID commentPublicId, Long userId, UpdateCommentRequest request) {
+        accessGuard.checkNotRestricted(userId);
+
         PlannerComment comment = commentRepository.findByPublicId(commentPublicId)
                 .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
 
@@ -411,11 +415,11 @@ public class CommentService {
      * @param userId          the user ID
      * @return the vote response with updated count
      * @throws CommentNotFoundException if comment not found
-     * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
+     * @throws org.danteplanner.backend.planner.exception.VoteAlreadyExistsException if user has already voted (409 Conflict)
      */
     @Transactional
     public CommentVoteResponse toggleUpvote(UUID commentPublicId, Long userId) {
-        accessGuard.checkUserRestrictions(userId);
+        accessGuard.checkNotBanned(userId);
 
         // Verify comment exists and is not deleted
         PlannerComment comment = commentRepository.findByPublicId(commentPublicId)

@@ -46,11 +46,13 @@ public class ModerationService {
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerCatalogService plannerCatalogService;
     private final ModerationActionRepository moderationActionRepository;
+    private final ModerationAuditService auditService;
     private final SsePublisher ssePublisher;
 
     /**
      * Timeout a user for a specified duration.
-     * Timed-out users cannot create, edit, or publish planners.
+     * Timed-out users cannot publish a planner, comment, reply, or edit a comment. Private planner
+     * work, voting, and reporting stay available.
      *
      * @param actorId         the moderator/admin performing the action
      * @param targetId        the user to timeout
@@ -121,7 +123,8 @@ public class ModerationService {
 
     /**
      * Ban a user permanently.
-     * Banned users cannot create, edit, publish planners, or submit comments.
+     * A ban withdraws everything a timeout does, plus voting and reporting: a banned user may not act
+     * on anyone else's content. Private planner work stays available.
      *
      * @param actorId  the admin performing the action
      * @param targetId the user to ban
@@ -291,15 +294,7 @@ public class ModerationService {
      */
     private void logModerationAction(Long actorId, String targetUuid, ModerationAction.ActionType actionType,
                                       ModerationAction.TargetType targetType, String reason, Integer durationMinutes) {
-        ModerationAction action = ModerationAction.builder()
-                .actorId(actorId)
-                .targetUuid(targetUuid)
-                .actionType(actionType)
-                .targetType(targetType)
-                .reason(reason)
-                .durationMinutes(durationMinutes)
-                .build();
-        moderationActionRepository.save(action);
+        auditService.record(actorId, targetUuid, actionType, targetType, reason, durationMinutes);
     }
 
     /**
@@ -319,6 +314,9 @@ public class ModerationService {
         planner.unpublish();
         Planner saved = plannerRepository.save(planner);
         plannerCatalogService.onBecameInvisible(plannerId);
+
+        logModerationAction(actorId, plannerId.toString(),
+                ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER, null, null);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;
@@ -473,6 +471,10 @@ public class ModerationService {
         plannerRepository.save(planner);
         plannerCatalogService.refreshRecommended(plannerId);
 
+        logModerationAction(moderatorId, plannerId.toString(),
+                ModerationAction.ActionType.HIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER,
+                request.reason(), null);
+
         log.info("Planner {} hidden from recommended by moderator {} with reason: {}",
                 plannerId, moderatorId, request.reason());
 
@@ -496,6 +498,9 @@ public class ModerationService {
 
         plannerRepository.save(planner);
         plannerCatalogService.refreshRecommended(plannerId);
+
+        logModerationAction(moderatorId, plannerId.toString(),
+                ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER, null, null);
 
         log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
 

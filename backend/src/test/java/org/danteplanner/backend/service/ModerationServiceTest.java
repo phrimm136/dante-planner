@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
  * Unit tests for ModerationService.
@@ -64,7 +65,8 @@ class ModerationServiceTest {
     @BeforeEach
     void setUp() {
         moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository,
-                plannerStatsRepository, plannerCatalogService, moderationActionRepository, ssePublisher);
+                plannerStatsRepository, plannerCatalogService, moderationActionRepository,
+                new ModerationAuditService(moderationActionRepository), ssePublisher);
 
         adminUser = User.builder()
                 .id(1L)

@@ -33,6 +33,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.repository.UserRepository;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.ArgumentMatchers.anyLong;
 
 /**
  * Unit tests for PlannerEngagementService (immutable voting and bookmark toggling).
@@ -40,6 +44,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PlannerEngagementServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -77,6 +84,7 @@ class PlannerEngagementServiceTest {
                 plannerStatsRepository,
                 plannerCatalogService,
                 eventPublisher,
+                new PlannerAccessGuard(userRepository, plannerRepository),
                 recommendedThreshold
         );
 
@@ -88,6 +96,10 @@ class PlannerEngagementServiceTest {
                 .usernameEpithet("W_CORP")
                 .usernameSuffix("test1")
                 .build();
+        // The access guard resolves the principal on every guarded path; an unstubbed
+        // repository would surface as UserNotFoundException instead of the behavior under test.
+        lenient().when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {

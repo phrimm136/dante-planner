@@ -7,7 +7,6 @@ import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
 import org.danteplanner.backend.moderation.service.ModerationService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +15,11 @@ import java.util.UUID;
 /**
  * REST controller for moderation operations.
  *
- * <p>Provides endpoints for moderators and admins to manage planner visibility
- * in the recommended list. All endpoints require ROLE_MODERATOR or ROLE_ADMIN.</p>
+ * <p>Manages planner visibility in the recommended list. The {@code /api/moderation/**} matcher in
+ * {@code SecurityConfig} requires MODERATOR, and the role hierarchy admits ADMIN through it.</p>
  */
 @RestController
-@RequestMapping("/api/admin/planner")
+@RequestMapping("/api/moderation/planner")
 @RequiredArgsConstructor
 @Slf4j
 public class AdminModerationController {
@@ -39,7 +38,6 @@ public class AdminModerationController {
      * @return moderation response with updated status
      */
     @PostMapping("/{id}/hide-from-recommended")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public ResponseEntity<ModerationResponse> hideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,
             @PathVariable("id") UUID plannerId,
@@ -62,7 +60,6 @@ public class AdminModerationController {
      * @return moderation response with updated status
      */
     @PostMapping("/{id}/unhide-from-recommended")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     public ResponseEntity<ModerationResponse> unhideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,
             @PathVariable("id") UUID plannerId) {

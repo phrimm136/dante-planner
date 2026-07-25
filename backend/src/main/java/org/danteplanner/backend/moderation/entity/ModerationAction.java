@@ -68,7 +68,10 @@ public class ModerationAction {
         PROMOTE,
         DEMOTE,
         DELETE_PLANNER,
-        DELETE_COMMENT
+        DELETE_COMMENT,
+        UNPUBLISH_PLANNER,
+        HIDE_FROM_RECOMMENDED,
+        UNHIDE_FROM_RECOMMENDED
     }
 
     /**

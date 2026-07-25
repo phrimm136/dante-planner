@@ -165,7 +165,7 @@ class SecurityIntegrationTest {
         void adminEndpoint_RegularUser_Returns403() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
                             .cookie(regularUserCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))
@@ -177,7 +177,7 @@ class SecurityIntegrationTest {
         void adminEndpoint_AdminUser_Returns200() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
-            mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
+            mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
                             .cookie(adminCookie())
                             .contentType(APPLICATION_JSON)
                             .content("{\"reason\":\"Test reason for hiding planner\"}"))

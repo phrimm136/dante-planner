@@ -33,6 +33,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import org.springframework.http.HttpStatus;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * Integration tests for ban enforcement across the full stack.
@@ -92,7 +94,7 @@ class BanEnforcementIntegrationTest {
     }
 
     @Test
-    @DisplayName("Banned user cannot upsert planner - returns 403")
+    @DisplayName("Banned user keeps private planner work - upsert succeeds")
     void bannedUser_cannotUpsertPlanner_returns403() throws Exception {
         // Arrange - ban the user
         moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
@@ -118,11 +120,8 @@ class BanEnforcementIntegrationTest {
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code", is("USER_BANNED")));
-
-        // Verify planner was not created
-        assertEquals(0, plannerRepository.count());
+                .andExpect(r -> assertNotEquals(HttpStatus.FORBIDDEN.value(), r.getResponse().getStatus(),
+                        "a ban must not withdraw private planner work"));
     }
 
     @Test
@@ -234,7 +233,7 @@ class BanEnforcementIntegrationTest {
     }
 
     @Test
-    @DisplayName("Concurrent timeout and ban both block actions")
+    @DisplayName("Concurrent timeout and ban still permit private planner work")
     void concurrentRestrictions_WhenTimeoutAndBan_BothBlock() throws Exception {
         // Arrange - both timeout AND ban the user
         moderationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
@@ -253,13 +252,13 @@ class BanEnforcementIntegrationTest {
                 }
                 """.formatted(plannerId);
 
-        // Act & Assert - timeout is checked first, so USER_TIMED_OUT
+        // Act & Assert - neither restriction withdraws private planner work
         mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
                         .cookie(userCookie())
                         .contentType(APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code", is("USER_TIMED_OUT")));
+                .andExpect(r -> assertNotEquals(HttpStatus.FORBIDDEN.value(), r.getResponse().getStatus(),
+                        "neither a timeout nor a ban withdraws private planner work"));
     }
 
     @Test

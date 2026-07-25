@@ -52,6 +52,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.repository.UserRepository;
 
 /**
  * Unit tests for PublishedPlannerQueryService (public catalog read model:
@@ -60,6 +62,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 class PublishedPlannerQueryServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -112,6 +117,7 @@ class PublishedPlannerQueryServiceTest {
                 plannerStatsRepository,
                 plannerCatalogService,
                 eventPublisher,
+                new PlannerAccessGuard(userRepository, plannerRepository),
                 recommendedThreshold
         );
 
