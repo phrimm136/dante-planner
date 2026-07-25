@@ -74,6 +74,16 @@ class DegradeByOperationConfigTest {
             return null;
         }
         String value = url.substring(at + "socketTimeout=".length()).split("&")[0];
-        return Integer.parseInt(value);
+        return Integer.parseInt(defaultOfPlaceholder(value));
+    }
+
+    /** Resolves a {@code ${VAR:default}} property placeholder to its default, or returns the literal. */
+    private static String defaultOfPlaceholder(String value) {
+        if (!value.startsWith("${") || !value.endsWith("}")) {
+            return value.trim();
+        }
+        String body = value.substring(2, value.length() - 1);
+        int colon = body.indexOf(':');
+        return colon < 0 ? body.trim() : body.substring(colon + 1).trim();
     }
 }

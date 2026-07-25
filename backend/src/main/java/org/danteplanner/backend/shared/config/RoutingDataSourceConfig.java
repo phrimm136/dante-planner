@@ -37,6 +37,18 @@ import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
         BulkheadDataSourceProperties.class})
 public class RoutingDataSourceConfig {
 
+    /**
+     * Bound on waiting for a connection on a request-serving pool, so a caller gives up rather than
+     * holding a request thread while a cross-region endpoint hangs.
+     */
+    private static final long REQUEST_CONNECTION_TIMEOUT_MS = 5_000L;
+
+    /**
+     * The bulkhead absorbs slow re-checks by design, so its queue legitimately outlasts the
+     * request-pool bound; it stays bounded, just far more patiently.
+     */
+    private static final long BULKHEAD_CONNECTION_TIMEOUT_MS = 30_000L;
+
     private final DataSourceProperties primaryProperties;
     private final ReplicaDataSourceProperties replicaProperties;
     private final BulkheadDataSourceProperties bulkheadProperties;
@@ -64,6 +76,7 @@ public class RoutingDataSourceConfig {
                 replicaProperties.isEnabled()
                         ? PoolLedger.SEOUL_PRIMARY_POOL
                         : PoolLedger.OREGON_PRIMARY_POOL);
+        config.setConnectionTimeout(REQUEST_CONNECTION_TIMEOUT_MS);
         return config;
     }
 
@@ -72,6 +85,7 @@ public class RoutingDataSourceConfig {
         applyEndpoint(config, replicaProperties.getUrl(),
                 replicaProperties.getUsername(), replicaProperties.getPassword());
         config.setMaximumPoolSize(PoolLedger.SEOUL_REPLICA_POOL);
+        config.setConnectionTimeout(REQUEST_CONNECTION_TIMEOUT_MS);
         return config;
     }
 
@@ -83,6 +97,7 @@ public class RoutingDataSourceConfig {
                 ownEndpoint ? bulkheadProperties.getUsername() : primaryProperties.getUsername(),
                 ownEndpoint ? bulkheadProperties.getPassword() : primaryProperties.getPassword());
         config.setMaximumPoolSize(PoolLedger.BULKHEAD_POOL);
+        config.setConnectionTimeout(BULKHEAD_CONNECTION_TIMEOUT_MS);
         return config;
     }
 

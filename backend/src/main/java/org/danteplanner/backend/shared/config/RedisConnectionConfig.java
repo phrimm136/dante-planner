@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
@@ -69,6 +70,9 @@ import lombok.Setter;
 @Setter
 public class RedisConnectionConfig {
 
+    /** Bound on a cross-region auth Redis command, well below Lettuce's minute-long default. */
+    private static final long AUTH_COMMAND_TIMEOUT_MS = 3_000L;
+
     @Valid
     private Endpoint auth = new Endpoint();
 
@@ -84,7 +88,13 @@ public class RedisConnectionConfig {
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(auth));
+        // The auth endpoint is reached cross-region, so a command must give up well before
+        // Lettuce's minute-long default and let the caller degrade instead of holding its thread.
+        return new LettuceConnectionFactory(
+                standaloneConfiguration(auth),
+                LettuceClientConfiguration.builder()
+                        .commandTimeout(Duration.ofMillis(AUTH_COMMAND_TIMEOUT_MS))
+                        .build());
     }
 
     @Bean

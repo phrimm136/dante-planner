@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.danteplanner.backend.planner.entity.PlannerViewId;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.config.ViewFlushSchedulerConfig;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,7 @@ public class PlannerViewRecorder {
         buffer.add(new PlannerViewId(plannerId, viewerHash, viewDate));
     }
 
-    @Scheduled(fixedDelay = FLUSH_INTERVAL_MS)
+    @Scheduled(fixedDelay = FLUSH_INTERVAL_MS, scheduler = ViewFlushSchedulerConfig.VIEW_FLUSH_SCHEDULER)
     @Transactional
     public void flush() {
         Set<PlannerViewId> drained = new LinkedHashSet<>(buffer);
