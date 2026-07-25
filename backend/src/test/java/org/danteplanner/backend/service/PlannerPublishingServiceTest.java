@@ -1,5 +1,5 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
@@ -71,7 +71,7 @@ class PlannerPublishingServiceTest {
     private PlannerSubscriptionService subscriptionService;
 
     @Mock
-    private SseService notificationSseService;
+    private SsePublisher ssePublisher;
 
     @Mock
     private NotificationService notificationService;
@@ -96,7 +96,7 @@ class PlannerPublishingServiceTest {
                 contentValidator,
                 plannerCatalogService,
                 subscriptionService,
-                notificationSseService,
+                ssePublisher,
                 notificationService,
                 accessGuard,
                 eventPublisher

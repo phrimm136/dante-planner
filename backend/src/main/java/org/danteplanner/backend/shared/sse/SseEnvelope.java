@@ -20,18 +20,36 @@ public record SseEnvelope(
         String entityId,
         String deletedId,
         String excludeDeviceId,
+        Long excludeUserId,
         Object payload
 ) {
     public static SseEnvelope userEvent(Long userId, SseEventType type, String entityId,
             String excludeDeviceId, Object payload) {
-        return new SseEnvelope(type, null, userId, null, entityId, null, excludeDeviceId, payload);
+        return new SseEnvelope(type, null, userId, null, entityId, null, excludeDeviceId, null, payload);
     }
 
     public static SseEnvelope settingsInvalidation(Long userId) {
-        return new SseEnvelope(SseEventType.SETTINGS_INVALIDATED, null, userId, null, null, null, null, null);
+        return new SseEnvelope(SseEventType.SETTINGS_INVALIDATED, null, userId, null, null, null, null, null, null);
     }
 
     public static SseEnvelope commentEvent(java.util.UUID plannerId, SseEventType type, String entityId, Object payload) {
-        return new SseEnvelope(type, null, null, plannerId.toString(), entityId, null, null, payload);
+        return new SseEnvelope(type, null, null, plannerId.toString(), entityId, null, null, null, payload);
+    }
+
+    /**
+     * Event for every connected client except the user named by {@code excludeUserId}, whose own
+     * action raised it. The exclusion must survive the Redis hop, since the pod that dispatches is
+     * not the pod that published.
+     */
+    public static SseEnvelope broadcast(Long excludeUserId, SseEventType type, Object payload) {
+        return new SseEnvelope(type, null, null, null, null, null, null, excludeUserId, payload);
+    }
+
+    /**
+     * Suspension notice addressed to the suspended user, delivered wherever their stream is held.
+     */
+    public static SseEnvelope accountSuspended(Long userId, Object payload) {
+        return new SseEnvelope(
+                SseEventType.ACCOUNT_SUSPENDED, null, userId, null, null, null, null, null, payload);
     }
 }

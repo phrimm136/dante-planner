@@ -49,9 +49,13 @@ public class SseRedisSubscriber implements MessageListener {
             }
             plannerCommentSseService.broadcast(
                     UUID.fromString(envelope.plannerId()), envelope.type().getValue(), envelope);
+        } else if (SseChannels.BROADCAST.equals(channel)) {
+            sseService.broadcastToAll(envelope.excludeUserId(), envelope.type().getValue(), envelope);
         } else if (SseChannels.USER.equals(channel)) {
             if (envelope.type() == SseEventType.SETTINGS_INVALIDATED) {
                 sseService.invalidateSettingsCache(envelope.userId());
+            } else if (envelope.type() == SseEventType.ACCOUNT_SUSPENDED) {
+                sseService.notifyAccountSuspended(envelope.userId(), envelope);
             } else {
                 UUID excludeDeviceId = envelope.excludeDeviceId() != null
                         ? UUID.fromString(envelope.excludeDeviceId())

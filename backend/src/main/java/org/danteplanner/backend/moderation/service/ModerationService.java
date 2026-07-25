@@ -2,7 +2,7 @@ package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -46,7 +46,7 @@ public class ModerationService {
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerCatalogService plannerCatalogService;
     private final ModerationActionRepository moderationActionRepository;
-    private final SseService sseService;
+    private final SsePublisher ssePublisher;
 
     /**
      * Timeout a user for a specified duration.
@@ -89,7 +89,7 @@ public class ModerationService {
         logModerationAction(actorId, target.getPublicId().toString(), ModerationAction.ActionType.TIMEOUT, ModerationAction.TargetType.USER, reason, durationMinutes);
 
         // Notify user via SSE
-        sseService.notifyAccountSuspended(targetId, reason, "TIMEOUT", durationMinutes);
+        ssePublisher.publishAccountSuspended(targetId, reason, "TIMEOUT", durationMinutes);
 
         log.info("User {} timed out until {} by moderator {}", targetId, timeoutUntil, actorId);
         return saved;
@@ -156,7 +156,7 @@ public class ModerationService {
         logModerationAction(actorId, target.getPublicId().toString(), ModerationAction.ActionType.BAN, ModerationAction.TargetType.USER, reason, null);
 
         // Notify user via SSE
-        sseService.notifyAccountSuspended(targetId, reason, "BAN", null);
+        ssePublisher.publishAccountSuspended(targetId, reason, "BAN", null);
 
         log.info("User {} banned by admin {} with reason: {}", targetId, actorId, reason);
         return saved;

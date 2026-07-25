@@ -8,7 +8,7 @@ import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.shared.entity.SseEventType;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final SseService sseService;
+    private final SsePublisher ssePublisher;
 
     /**
      * Get notification inbox for a user with pagination.
@@ -142,7 +142,7 @@ public class NotificationService {
                 null,           // commentSnippet - N/A
                 null            // commentPublicId - N/A
         );
-        createAndPush(plannerOwnerId, SseEventType.NOTIFY_RECOMMENDED.getValue(), notification,
+        createAndPush(plannerOwnerId, SseEventType.NOTIFY_RECOMMENDED, notification,
                 "Created PLANNER_RECOMMENDED notification for user {} on planner {}",
                 new Object[]{plannerOwnerId, plannerId},
                 "Duplicate PLANNER_RECOMMENDED notification prevented for user {} on planner {}",
@@ -188,7 +188,7 @@ public class NotificationService {
                 commentContent,
                 commentPublicId
         );
-        createAndPush(plannerOwnerId, SseEventType.NOTIFY_COMMENT.getValue(), notification,
+        createAndPush(plannerOwnerId, SseEventType.NOTIFY_COMMENT, notification,
                 "Created COMMENT_RECEIVED notification for user {} on planner {} (comment {})",
                 new Object[]{plannerOwnerId, plannerId, commentId},
                 "Duplicate COMMENT_RECEIVED notification prevented for user {} on comment {}",
@@ -234,7 +234,7 @@ public class NotificationService {
                 replyContent,
                 replyPublicId
         );
-        createAndPush(parentAuthorId, SseEventType.NOTIFY_COMMENT.getValue(), notification,
+        createAndPush(parentAuthorId, SseEventType.NOTIFY_COMMENT, notification,
                 "Created REPLY_RECEIVED notification for user {} on planner {} (reply {})",
                 new Object[]{parentAuthorId, plannerId, replyId},
                 "Duplicate REPLY_RECEIVED notification prevented for user {} on reply {}",
@@ -274,7 +274,7 @@ public class NotificationService {
      */
     private void createAndPush(
             Long recipientId,
-            String sseEventType,
+            SseEventType sseEventType,
             Notification notification,
             String infoFormat,
             Object[] infoArgs,
@@ -291,7 +291,7 @@ public class NotificationService {
         }
     }
 
-    private void pushNotification(Long userId, String eventType, Notification notification) {
+    private void pushNotification(Long userId, SseEventType eventType, Notification notification) {
         Map<String, Object> data = new java.util.HashMap<>();
         data.put("id", notification.getPublicId().toString());
         data.put("type", notification.getNotificationType().name());
@@ -310,7 +310,8 @@ public class NotificationService {
         if (notification.getCommentPublicId() != null) {
             data.put("commentPublicId", notification.getCommentPublicId().toString());
         }
-        sseService.sendToUser(userId, eventType, data);
+        ssePublisher.publishUserEvent(
+                userId, null, eventType, notification.getPublicId().toString(), data);
     }
 
     /**

@@ -18,7 +18,7 @@ import org.danteplanner.backend.auth.facade.AuthenticationFacade;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.user.service.UserSettingsService;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class UserController {
     private final UserAccountLifecycleService lifecycleService;
     private final UserService userService;
     private final UserSettingsService userSettingsService;
-    private final SseService sseService;
+    private final SsePublisher ssePublisher;
     private final EpithetConfig epithetConfig;
     private final RateLimitConfig rateLimitConfig;
     private final AuthenticationFacade authFacade;
@@ -163,7 +163,7 @@ public class UserController {
         log.debug("User {} updating settings", userId);
 
         UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);
-        sseService.invalidateSettingsCache(userId);
+        ssePublisher.publishSettingsInvalidation(userId);
         return ResponseEntity.ok(settings);
     }
 }

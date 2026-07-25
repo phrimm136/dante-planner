@@ -7,6 +7,7 @@ public final class SseChannels {
 
     public static final String USER = "sse:user";
     public static final String COMMENT = "sse:comment";
+    public static final String BROADCAST = "sse:broadcast";
 
     private SseChannels() {
     }

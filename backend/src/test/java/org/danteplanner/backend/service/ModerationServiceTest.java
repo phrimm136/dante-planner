@@ -1,5 +1,5 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 
 import org.danteplanner.backend.moderation.service.ModerationService;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
@@ -53,7 +53,7 @@ class ModerationServiceTest {
     private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
 
     @Mock
-    private SseService sseService;
+    private SsePublisher ssePublisher;
 
     private ModerationService moderationService;
 
@@ -64,7 +64,7 @@ class ModerationServiceTest {
     @BeforeEach
     void setUp() {
         moderationService = new ModerationService(userRepository, plannerRepository, plannerCommentRepository,
-                plannerStatsRepository, plannerCatalogService, moderationActionRepository, sseService);
+                plannerStatsRepository, plannerCatalogService, moderationActionRepository, ssePublisher);
 
         adminUser = User.builder()
                 .id(1L)
@@ -457,7 +457,7 @@ class ModerationServiceTest {
             assertEquals(adminUser.getId(), result.getBannedBy());
             verify(userRepository).save(normalUser);
             verify(moderationActionRepository).save(any());
-            verify(sseService).notifyAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq("BAN"), isNull());
+            verify(ssePublisher).publishAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq("BAN"), isNull());
         }
 
         @Test
@@ -499,7 +499,7 @@ class ModerationServiceTest {
             );
             assertTrue(exception.getMessage().contains("Cannot ban administrators"));
             verify(userRepository, never()).save(any());
-            verify(sseService, never()).notifyAccountSuspended(any(), any(), any(), any());
+            verify(ssePublisher, never()).publishAccountSuspended(any(), any(), any(), any());
         }
 
         @Test

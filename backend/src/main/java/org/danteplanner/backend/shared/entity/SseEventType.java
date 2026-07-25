@@ -15,7 +15,8 @@ public enum SseEventType {
     NOTIFY_COMMENT("notify:comment"),
     NOTIFY_PUBLISHED("notify:published"),
     NOTIFY_RECOMMENDED("notify:recommended"),
-    SETTINGS_INVALIDATED("settings:invalidated");
+    SETTINGS_INVALIDATED("settings:invalidated"),
+    ACCOUNT_SUSPENDED("account_suspended");
 
     private final String value;
 

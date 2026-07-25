@@ -1,5 +1,5 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 
 import org.danteplanner.backend.notification.service.NotificationService;
 
@@ -45,7 +45,7 @@ class NotificationServiceTest {
     private NotificationRepository notificationRepository;
 
     @Mock
-    private SseService sseService;
+    private SsePublisher ssePublisher;
 
     private NotificationService notificationService;
 
@@ -54,7 +54,7 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        notificationService = new NotificationService(notificationRepository, sseService);
+        notificationService = new NotificationService(notificationRepository, ssePublisher);
     }
 
     @Nested
@@ -134,7 +134,8 @@ class NotificationServiceTest {
             notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            verify(sseService).sendToUser(eq(testUserId), eq(SseEventType.NOTIFY_RECOMMENDED.getValue()), any());
+            verify(ssePublisher).publishUserEvent(
+                    eq(testUserId), any(), eq(SseEventType.NOTIFY_RECOMMENDED), any(), any());
         }
 
         @Test
@@ -148,7 +149,7 @@ class NotificationServiceTest {
             notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            verify(sseService, never()).sendToUser(any(), any(), any());
+            verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any(), any());
         }
     }
 
