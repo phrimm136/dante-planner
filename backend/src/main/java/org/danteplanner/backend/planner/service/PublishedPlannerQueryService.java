@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
@@ -184,65 +185,39 @@ public class PublishedPlannerQueryService {
      * Search published or recommended planners using composable Specifications
      * over the catalog projection. Applies AND semantics across all provided filters.
      *
-     * @param recommendedOnly restrict to the recommended subset
-     * @param pageable    pagination information
-     * @param category    optional category filter
-     * @param userId      optional user ID for vote/bookmark context
-     * @param q           optional title/keyword search term
-     * @param keywords    optional keyword names (AND-composed via EXISTS)
-     * @param identityIds optional identity IDs (AND-composed via EXISTS)
-     * @param egoIds      optional EGO IDs (AND-composed via EXISTS)
-     * @param giftIds     optional EGO gift IDs (AND-composed via EXISTS)
-     * @param themePackIds optional theme pack IDs (AND-composed via EXISTS)
+     * @param catalogQuery the filter set to compose
+     * @param pageable     pagination information
+     * @param userId       optional user ID for vote/bookmark context
      * @return page of public planner responses with user context
+     * @throws PlannerValidationException if a content-entity id is not numeric
      */
     @Transactional(readOnly = true)
     public Page<PublicPlannerResponse> searchPlanners(
-            boolean recommendedOnly,
-            Pageable pageable,
-            String category,
-            Long userId,
-            String q,
-            List<String> keywords,
-            List<String> identityIds,
-            List<String> egoIds,
-            List<String> giftIds,
-            List<String> themePackIds) {
+            CatalogQuery catalogQuery, Pageable pageable, Long userId) {
 
         Specification<PlannerCatalog> spec = (root, query, cb) -> cb.conjunction();
 
-        if (recommendedOnly) {
+        if (catalogQuery.recommendedOnly()) {
             spec = spec.and(CatalogSpecifications.isRecommended());
         }
-        if (category != null) {
-            spec = spec.and(CatalogSpecifications.hasCategory(category));
+        if (catalogQuery.category() != null) {
+            spec = spec.and(CatalogSpecifications.hasCategory(catalogQuery.category()));
         }
-        if (q != null && !q.isBlank()) {
-            spec = spec.and(CatalogSpecifications.matchesQuery(q.trim()));
+        String searchTerm = catalogQuery.searchTerm();
+        if (searchTerm != null && !searchTerm.isBlank()) {
+            spec = spec.and(CatalogSpecifications.matchesQuery(searchTerm.trim()));
         }
-        if (keywords != null) {
-            for (String keyword : keywords) {
-                spec = spec.and(CatalogSpecifications.hasKeyword(keyword));
+        for (String keyword : catalogQuery.keywords()) {
+            spec = spec.and(CatalogSpecifications.hasKeyword(keyword));
+        }
+        for (Map.Entry<ContentEntityType, List<String>> filter : catalogQuery.entityFilters().entrySet()) {
+            for (String id : filter.getValue()) {
+                spec = spec.and(CatalogSpecifications.containsEntity(filter.getKey(), parseEntityId(id)));
             }
         }
-        spec = andEntityFilters(spec, ContentEntityType.IDENTITY, identityIds);
-        spec = andEntityFilters(spec, ContentEntityType.EGO, egoIds);
-        spec = andEntityFilters(spec, ContentEntityType.EGO_GIFT, giftIds);
-        spec = andEntityFilters(spec, ContentEntityType.THEME_PACK, themePackIds);
 
         Page<PlannerCatalog> rows = catalogRepository.findAll(spec, recencySorted(pageable));
         return mapCatalogWithUserContext(rows, userId);
-    }
-
-    private Specification<PlannerCatalog> andEntityFilters(
-            Specification<PlannerCatalog> spec, ContentEntityType type, List<String> ids) {
-        if (ids == null) {
-            return spec;
-        }
-        for (String id : ids) {
-            spec = spec.and(CatalogSpecifications.containsEntity(type, parseEntityId(id)));
-        }
-        return spec;
     }
 
     /**

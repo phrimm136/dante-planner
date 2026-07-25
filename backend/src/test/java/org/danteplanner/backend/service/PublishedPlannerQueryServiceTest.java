@@ -6,6 +6,7 @@ import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
@@ -17,6 +18,8 @@ import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -43,6 +46,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -598,7 +602,7 @@ class PublishedPlannerQueryServiceTest {
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
-                    false, pageable, null, null, null, null, null, null, null, null);
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
             // Assert
             assertEquals(1, result.getTotalElements());
@@ -607,6 +611,21 @@ class PublishedPlannerQueryServiceTest {
             assertEquals("Test Planner", card.title());
             assertNull(card.hasUpvoted());
             assertNull(card.isBookmarked());
+        }
+
+        @Test
+        @DisplayName("Should reject a non-numeric entity filter id rather than empty the page")
+        void a_malformed_entity_filter_id_is_rejected_not_silently_dropped() {
+            // Arrange
+            CatalogQuery query = new CatalogQuery(false, null, null, null,
+                    Map.of(ContentEntityType.THEME_PACK, List.of("not-a-number")));
+
+            // Act
+            PlannerValidationException thrown = assertThrows(PlannerValidationException.class,
+                    () -> publishedQueryService.searchPlanners(query, PageRequest.of(0, 10), null));
+
+            // Assert
+            assertEquals("INVALID_FILTER_ID", thrown.getErrorCode());
         }
     }
 }

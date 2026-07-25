@@ -2,6 +2,7 @@ package org.danteplanner.backend.integration;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -156,16 +157,7 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
         assertConstantStatementCount(() -> {
             statistics.clear();
             publishedPlannerQueryService.searchPlanners(
-                    false,
-                    PAGE,
-                    null,
-                    viewerId,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null);
+                    new CatalogQuery(false, null, null, null, null), PAGE, viewerId);
             return statistics.getPrepareStatementCount();
         });
     }
