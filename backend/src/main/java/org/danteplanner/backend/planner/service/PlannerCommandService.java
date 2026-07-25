@@ -21,6 +21,7 @@ import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.repository.PlannerClassification;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
@@ -300,16 +301,19 @@ public class PlannerCommandService {
             return UpsertResult.updated(response);
         }
 
-        // Check if user's own planner was soft-deleted (prevents PRIMARY KEY collision)
-        if (plannerRepository.existsByIdAndUserId(id, userId)) {
-            log.warn("Planner {} is soft-deleted for user {} - cannot recreate", id, userId);
-            throw new PlannerNotFoundException(id);
-        }
-
-        // Check if planner exists for another user (prevents ID collision)
-        if (plannerRepository.existsActiveById(id)) {
-            log.warn("Planner {} exists but belongs to another user (ID collision)", id);
-            throw new PlannerForbiddenException(id);
+        // One classifying SELECT covers both non-owned-active cases. Another user's soft-deleted
+        // row matches neither branch and falls through to create, surfacing as a PK collision on save.
+        var classification = plannerRepository.findClassificationById(id);
+        if (classification.isPresent()) {
+            PlannerClassification existing = classification.get();
+            if (existing.getUserId().equals(userId)) {
+                log.warn("Planner {} is soft-deleted for user {} - cannot recreate", id, userId);
+                throw new PlannerNotFoundException(id);
+            }
+            if (existing.getDeletedAt() == null) {
+                log.warn("Planner {} exists but belongs to another user (ID collision)", id);
+                throw new PlannerForbiddenException(id);
+            }
         }
 
         // Planner doesn't exist at all - create new

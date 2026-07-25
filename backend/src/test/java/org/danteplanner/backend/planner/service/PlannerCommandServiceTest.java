@@ -18,7 +18,9 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
+import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.repository.PlannerClassification;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -827,39 +829,59 @@ class PlannerCommandServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw PlannerNotFoundException when user's own planner is soft-deleted")
-        void upsertPlanner_softDeletedByUser_throwsPlannerNotFoundException() {
-            // Arrange
+        @DisplayName("create classification: an owner's soft-deleted planner throws PlannerNotFoundException from one SELECT")
+        void createExistenceTwoSelects_WhenOwnSoftDeleted_ThrowsNotFound() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
-
+            PlannerClassification classification = mock(PlannerClassification.class);
+            lenient().when(classification.getUserId()).thenReturn(testUser.getId());
+            lenient().when(classification.getDeletedAt()).thenReturn(Instant.now());
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
-            when(plannerRepository.existsByIdAndUserId(plannerId, testUser.getId()))
-                    .thenReturn(true);
+            lenient().when(plannerRepository.findClassificationById(plannerId))
+                    .thenReturn(Optional.of(classification));
 
-            // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
+            verify(plannerRepository, never()).existsByIdAndUserId(any(), any());
+            verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).save(any());
             verify(plannerRepository, never()).countActiveByUserId(any());
         }
 
         @Test
-        @DisplayName("Should proceed to create when planner UUID is genuinely new")
-        void upsertPlanner_genuinelyNewUUID_proceeds() {
-            // Arrange
+        @DisplayName("create classification: another user's active planner throws PlannerForbiddenException from one SELECT")
+        void createExistenceTwoSelects_WhenOtherUserActive_ThrowsForbidden() {
             UUID plannerId = UUID.randomUUID();
             UpsertPlannerRequest request = buildRequest();
-
+            PlannerClassification classification = mock(PlannerClassification.class);
+            lenient().when(classification.getUserId()).thenReturn(testUser.getId() + 1);
+            lenient().when(classification.getDeletedAt()).thenReturn(null);
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
                     .thenReturn(Optional.empty());
-            when(plannerRepository.existsByIdAndUserId(plannerId, testUser.getId()))
-                    .thenReturn(false);
-            when(plannerRepository.existsActiveById(plannerId))
-                    .thenReturn(false);
+            lenient().when(plannerRepository.findClassificationById(plannerId))
+                    .thenReturn(Optional.of(classification));
+
+            assertThrows(
+                    PlannerForbiddenException.class,
+                    () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
+            );
+            verify(plannerRepository, never()).existsByIdAndUserId(any(), any());
+            verify(plannerRepository, never()).existsActiveById(any());
+            verify(plannerRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("create classification: a genuinely new id proceeds to create")
+        void createExistenceTwoSelects_WhenGenuinelyNew_Creates() {
+            UUID plannerId = UUID.randomUUID();
+            UpsertPlannerRequest request = buildRequest();
+            when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
+                    .thenReturn(Optional.empty());
+            lenient().when(plannerRepository.findClassificationById(plannerId))
+                    .thenReturn(Optional.empty());
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));
             when(plannerRepository.countActiveByUserId(testUser.getId()))
@@ -867,14 +889,12 @@ class PlannerCommandServiceTest {
             when(plannerRepository.save(any(Planner.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            // Act
             UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, false);
 
-            // Assert
-            assertNotNull(result);
             assertTrue(result.isCreated());
-            verify(plannerRepository).save(any());
+            verify(plannerRepository, never()).existsByIdAndUserId(any(), any());
+            verify(plannerRepository, never()).existsActiveById(any());
         }
     }
 }

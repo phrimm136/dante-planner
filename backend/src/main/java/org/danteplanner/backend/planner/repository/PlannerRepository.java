@@ -82,6 +82,15 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     boolean existsByIdAndUserId(UUID id, Long userId);
 
     /**
+     * Classify a planner id that is not an owned active row, in one SELECT: its owner and
+     * soft-delete state. Distinguishes an owner's soft-deleted planner from another user's row
+     * without a second existence probe.
+     */
+    @Query("SELECT p.user.id AS userId, c.deletedAt AS deletedAt "
+            + "FROM Planner p JOIN p.content c WHERE p.id = :id")
+    Optional<PlannerClassification> findClassificationById(@Param("id") UUID id);
+
+    /**
      * Core + author fields for a batch of planners (public list card assembly).
      */
     @Query("SELECT new org.danteplanner.backend.planner.dto.PlannerCoreInfo("
