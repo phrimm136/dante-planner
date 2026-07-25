@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -102,6 +103,20 @@ class ModerationServiceTest {
                 .build();
     }
 
+    /** The user entity handed to the repository, whose field state is what a commit would write. */
+    private User persistedUser() {
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(captor.capture());
+        return captor.getValue();
+    }
+
+    /** The planner aggregate handed to the repository, whose field state is what a commit would write. */
+    private Planner persistedPlanner() {
+        ArgumentCaptor<Planner> captor = ArgumentCaptor.forClass(Planner.class);
+        verify(plannerRepository).save(captor.capture());
+        return captor.getValue();
+    }
+
     @Nested
     @DisplayName("timeoutUser Tests")
     class TimeoutUserTests {
@@ -121,7 +136,10 @@ class ModerationServiceTest {
 
             // Assert
             assertNotNull(result.getTimeoutUntil());
-            verify(userRepository).save(normalUser);
+
+            User persisted = persistedUser();
+            assertEquals(normalUser.getId(), persisted.getId());
+            assertEquals(result.getTimeoutUntil(), persisted.getTimeoutUntil());
         }
 
         @Test
@@ -291,6 +309,8 @@ class ModerationServiceTest {
         @DisplayName("Moderator can remove timeout from user")
         void removeTimeout_moderatorRemovesTimeout_succeeds() {
             // Arrange
+            normalUser.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
+
             when(userRepository.findByIdAndDeletedAtIsNull(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
@@ -300,7 +320,10 @@ class ModerationServiceTest {
 
             // Assert
             assertNull(result.getTimeoutUntil());
-            verify(userRepository).save(normalUser);
+
+            User persisted = persistedUser();
+            assertEquals(normalUser.getId(), persisted.getId());
+            assertNull(persisted.getTimeoutUntil());
         }
 
         @Test
@@ -345,7 +368,10 @@ class ModerationServiceTest {
 
             // Assert
             assertFalse(result.getPublished());
-            verify(plannerRepository).save(planner);
+
+            Planner persisted = persistedPlanner();
+            assertEquals(plannerId, persisted.getId());
+            assertFalse(persisted.getPublished());
         }
 
         @Test
@@ -425,7 +451,8 @@ class ModerationServiceTest {
                     .build();
             deletedPlanner.softDelete();
 
-            // findAggregate filters soft-deleted rows at the query level
+            // findAggregate filters soft-deleted rows at the query level; proving that filter holds
+            // needs a containerized test against the real schema, not a stubbed empty Optional.
             when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -457,7 +484,12 @@ class ModerationServiceTest {
             assertTrue(result.isBanned());
             assertNotNull(result.getBannedAt());
             assertEquals(adminUser.getId(), result.getBannedBy());
-            verify(userRepository).save(normalUser);
+
+            User persisted = persistedUser();
+            assertEquals(normalUser.getId(), persisted.getId());
+            assertTrue(persisted.isBanned());
+            assertEquals(adminUser.getId(), persisted.getBannedBy());
+
             verify(moderationActionRepository).save(any());
             verify(ssePublisher).publishAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq("BAN"), isNull());
         }
@@ -547,7 +579,12 @@ class ModerationServiceTest {
             assertFalse(result.isBanned());
             assertNull(result.getBannedAt());
             assertNull(result.getBannedBy());
-            verify(userRepository).save(normalUser);
+
+            User persisted = persistedUser();
+            assertEquals(normalUser.getId(), persisted.getId());
+            assertFalse(persisted.isBanned());
+            assertNull(persisted.getBannedBy());
+
             verify(moderationActionRepository).save(any());
         }
 

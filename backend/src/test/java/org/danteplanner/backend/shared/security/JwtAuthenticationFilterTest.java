@@ -1,7 +1,6 @@
 package org.danteplanner.backend.shared.security;
 
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
@@ -28,11 +27,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -74,16 +74,12 @@ class JwtAuthenticationFilterTest {
     private org.danteplanner.backend.auth.token.RefreshRotationService refreshRotationService;
 
     @Mock
-    private HttpServletRequest request;
-
-    @Mock
-    private HttpServletResponse response;
-
-    @Mock
     private FilterChain filterChain;
 
     private JwtAuthenticationFilter filter;
     private ObjectMapper objectMapper;
+    private MockHttpServletRequest request;
+    private MockHttpServletResponse response;
     private Logger filterLogger;
     private ListAppender<ILoggingEvent> logAppender;
 
@@ -92,14 +88,13 @@ class JwtAuthenticationFilterTest {
         objectMapper = new ObjectMapper();
         filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
         SecurityContextHolder.clearContext();
+        request = new MockHttpServletRequest("GET", "/test");
+        response = new MockHttpServletResponse();
         // Capture the filter's WARN security events so audit-log rendering can be asserted.
         filterLogger = (Logger) LoggerFactory.getLogger(JwtAuthenticationFilter.class);
         logAppender = new ListAppender<>();
         logAppender.start();
         filterLogger.addAppender(logAppender);
-        // doFilterInternal reads method+path at the top for MDC — stub to avoid NPE
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getRequestURI()).thenReturn("/test");
     }
 
     @AfterEach
@@ -109,6 +104,12 @@ class JwtAuthenticationFilterTest {
 
     private List<String> loggedMessages() {
         return logAppender.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+    }
+
+    private List<String> grantedAuthorities() {
+        return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
     }
 
     private TokenClaims createValidClaims(Long userId) {
@@ -163,6 +164,7 @@ class JwtAuthenticationFilterTest {
             verify(filterChain).doFilter(request, response);
             assertNotNull(SecurityContextHolder.getContext().getAuthentication());
             assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            assertEquals(List.of("ROLE_" + UserRole.NORMAL.getValue()), grantedAuthorities());
             // The hot path must not touch the DB (keeps auth alive during DB maintenance)
             verify(userService, never()).findActiveById(any());
             verify(userService, never()).findById(any());
@@ -229,7 +231,8 @@ class JwtAuthenticationFilterTest {
 
             verify(filterChain).doFilter(request, response);
             assertNull(SecurityContextHolder.getContext().getAuthentication());
-            verify(tokenValidator, never()).validateToken(any());
+            verify(tokenValidator, never()).validateAccessToken(any());
+            verify(tokenValidator, never()).validateRefreshToken(any());
         }
     }
 
@@ -251,11 +254,10 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             when(userService.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
-            when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
 
             filter.doFilterInternal(request, response, filterChain);
 
-            verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
             verify(filterChain, never()).doFilter(any(), any());
             assertNull(SecurityContextHolder.getContext().getAuthentication());
         }
@@ -274,11 +276,10 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             when(userService.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
-            when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
 
             filter.doFilterInternal(request, response, filterChain);
 
-            verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
             verify(filterChain, never()).doFilter(any(), any());
             assertNull(SecurityContextHolder.getContext().getAuthentication());
         }
@@ -299,11 +300,10 @@ class JwtAuthenticationFilterTest {
             // as CannotCreateTransactionException, NOT DataAccessResourceFailureException.
             when(userService.findActiveById(userId))
                     .thenThrow(new CannotCreateTransactionException("Could not open JPA EntityManager for transaction"));
-            when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
 
             filter.doFilterInternal(request, response, filterChain);
 
-            verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
             verify(filterChain, never()).doFilter(any(), any());
             assertNull(SecurityContextHolder.getContext().getAuthentication());
         }
@@ -314,7 +314,6 @@ class JwtAuthenticationFilterTest {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
             User user = activeUser(userId);
-            StringWriter body = new StringWriter();
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
             when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
@@ -324,13 +323,13 @@ class JwtAuthenticationFilterTest {
             when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
             doThrow(new org.springframework.data.redis.RedisConnectionFailureException("auth redis down"))
                     .when(tokenBlacklistService).blacklistTokenForRotation(eq(refreshToken), any());
-            when(response.getWriter()).thenReturn(new PrintWriter(body));
 
             filter.doFilterInternal(request, response, filterChain);
 
-            verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            String body = response.getContentAsString();
+            assertEquals(HttpServletResponse.SC_SERVICE_UNAVAILABLE, response.getStatus());
             verify(filterChain, never()).doFilter(any(), any());
-            assertTrue(body.toString().contains("AUTH_TEMPORARILY_UNAVAILABLE"),
+            assertTrue(body.contains("AUTH_TEMPORARILY_UNAVAILABLE"),
                     "Redis auth-write failure must write AUTH_TEMPORARILY_UNAVAILABLE, got: " + body);
         }
 
@@ -340,7 +339,6 @@ class JwtAuthenticationFilterTest {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
-            StringWriter body = new StringWriter();
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
             when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
@@ -349,11 +347,11 @@ class JwtAuthenticationFilterTest {
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             when(userService.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
-            when(response.getWriter()).thenReturn(new PrintWriter(body));
 
             filter.doFilterInternal(request, response, filterChain);
 
-            assertTrue(body.toString().contains("WRITE_TEMPORARILY_UNAVAILABLE"),
+            String body = response.getContentAsString();
+            assertTrue(body.contains("WRITE_TEMPORARILY_UNAVAILABLE"),
                     "DB-down refresh must write WRITE_TEMPORARILY_UNAVAILABLE body code, got: " + body);
         }
     }
@@ -485,6 +483,8 @@ class JwtAuthenticationFilterTest {
             filter.doFilterInternal(request, response, filterChain);
 
             // The reroute contract: the auto-refresh site must delegate to the refresh-typed validator.
+            // Routing through validateAccessToken instead ends in the same guest outcome, so only a real
+            // TokenValidator behind a real refresh cookie could separate the two by outcome alone.
             verify(tokenValidator).validateRefreshToken(refreshCookieToken);
             // Preserved-behavior anchor: still a guest, still no rotation.
             assertNull(SecurityContextHolder.getContext().getAuthentication(),
