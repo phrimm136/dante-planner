@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file.
+
+# Scoped token: Tunnel edit + Load Balancer edit + DNS edit. Nothing wider.
+cloudflare_api_token = "REPLACE_ME"
+
+account_id = "REPLACE_ME"
+zone_id    = "REPLACE_ME"
+
+# Defaults cover the rest. Override only when a value genuinely differs:
+#
+# api_hostname             = "api.dante-planner.com"
+# origin_server_name       = "api.dante-planner.com"
+# origin_ca_pool_path      = "/etc/cloudflared/origin-ca.pem"
+# health_check_path        = "/healthz-local"
+# monitor_interval_seconds = 60
+#
+# Cutover uses a throwaway hostname first, so both paths are live and production traffic is
+# untouched while the tunnels are verified:
+# api_hostname = "edge-test.dante-planner.com"
