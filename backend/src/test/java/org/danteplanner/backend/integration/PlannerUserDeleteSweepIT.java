@@ -37,6 +37,10 @@ import org.danteplanner.backend.support.TestDataCleanup;
  * User hard-delete sweep: the FK-less satellite, projection, and filter rows
  * are removed app-side by planner id, the core cascade takes the FK-bearing
  * children, and nothing planner-related survives the account.
+ *
+ * <p>The rows the deleted account cast elsewhere run the other way: votes are
+ * reassigned to the sentinel account so they outlive the {@code ON DELETE CASCADE}
+ * that the users row would otherwise carry them off with.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
@@ -107,6 +111,38 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
         return count != null ? count : -1;
     }
 
+    private List<Long> plannerVoterIds(UUID plannerId) {
+        return jdbc.queryForList(
+                "SELECT user_id FROM planner_votes WHERE planner_id = UUID_TO_BIN(?)",
+                Long.class, plannerId.toString());
+    }
+
+    private List<Long> commentVoterIds(Long commentId) {
+        return jdbc.queryForList(
+                "SELECT user_id FROM planner_comment_votes WHERE comment_id = ?",
+                Long.class, commentId);
+    }
+
+    private Long insertComment(UUID plannerId, Long authorId) {
+        UUID publicId = UUID.randomUUID();
+        jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
+                + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'a comment', 0, NOW())",
+                publicId.toString(), plannerId.toString(), authorId);
+        return jdbc.queryForObject(
+                "SELECT id FROM planner_comments WHERE public_id = UUID_TO_BIN(?)",
+                Long.class, publicId.toString());
+    }
+
+    private void insertPlannerVote(Long userId, UUID plannerId) {
+        jdbc.update("INSERT INTO planner_votes (user_id, planner_id, vote_type, created_at, version) "
+                + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", userId, plannerId.toString());
+    }
+
+    private void insertCommentVote(Long userId, Long commentId) {
+        jdbc.update("INSERT INTO planner_comment_votes (comment_id, user_id, vote_type, created_at, version) "
+                + "VALUES (?, ?, 'UP', NOW(), 0)", commentId, userId);
+    }
+
     @Test
     @DisplayName("user-delete-sweeps-aggregate: hard delete removes every planner row across aggregate, projection, filter, and child tables, then the user")
     void userDeleteSweepsAggregate_WhenHardDeleted_NoOrphansRemain() {
@@ -119,14 +155,11 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
                 .plannerId(published.getId()).viewCount(3).upvotes(1).build());
         catalogService.add(published);
         filterService.rebuildFilters(published.getId());
-        jdbc.update("INSERT INTO planner_votes (user_id, planner_id, vote_type, created_at, version) "
-                + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", other.getId(), published.getId().toString());
+        insertPlannerVote(other.getId(), published.getId());
         jdbc.update("INSERT INTO planner_views (planner_id, viewer_hash, view_date, created_at) "
                 + "VALUES (UUID_TO_BIN(?), SHA2('viewer', 256), ?, NOW())",
                 published.getId().toString(), LocalDate.now(ZoneOffset.UTC));
-        jdbc.update("INSERT INTO planner_comments (public_id, planner_id, user_id, content, depth, created_at) "
-                + "VALUES (UUID_TO_BIN(?), UUID_TO_BIN(?), ?, 'a comment', 0, NOW())",
-                UUID.randomUUID().toString(), published.getId().toString(), other.getId());
+        insertComment(published.getId(), other.getId());
         jdbc.update("INSERT INTO planner_bookmarks (user_id, planner_id, created_at) "
                 + "VALUES (?, UUID_TO_BIN(?), NOW())", other.getId(), published.getId().toString());
         jdbc.update("INSERT INTO planner_subscriptions (user_id, planner_id, enabled, created_at) "
@@ -155,5 +188,57 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
                         .isZero();
             }
         }
+    }
+
+    @Test
+    @DisplayName("vote-outlives-voter: a hard-deleted user's planner vote survives the users cascade, carried by the live sentinel account")
+    void a_reassigned_planner_vote_points_at_the_live_sentinel_account() {
+        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+                .title("Sweep Voted")
+                .published(true)
+                .save(plannerRepository);
+        insertPlannerVote(owner.getId(), thirdPartyPlanner.getId());
+
+        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+
+        assertThat(userRepository.findById(owner.getId())).as("the deleted account row is gone").isEmpty();
+        assertThat(plannerVoterIds(thirdPartyPlanner.getId()))
+                .as("the vote outlives the voter, now cast by the sentinel")
+                .containsExactly(UserAccountLifecycleService.SENTINEL_USER_ID);
+        assertThat(userRepository.findById(UserAccountLifecycleService.SENTINEL_USER_ID))
+                .as("the sentinel the vote was handed to is a real account row, not a dangling id")
+                .isPresent();
+    }
+
+    @Test
+    @DisplayName("vote-reassignment-spans-both-tables: neither planner nor comment votes keep a row for the deleted account, and third-party votes are untouched")
+    void no_vote_row_in_either_table_survives_pointing_at_the_deleted_account() {
+        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+                .title("Sweep Both Vote Tables")
+                .published(true)
+                .save(plannerRepository);
+        Long comment = insertComment(thirdPartyPlanner.getId(), other.getId());
+        insertPlannerVote(owner.getId(), thirdPartyPlanner.getId());
+        insertPlannerVote(other.getId(), thirdPartyPlanner.getId());
+        insertCommentVote(owner.getId(), comment);
+        insertCommentVote(other.getId(), comment);
+
+        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+
+        assertThat(plannerVoterIds(thirdPartyPlanner.getId()))
+                .as("the planner vote moved to the sentinel and the third party's own vote stayed put")
+                .containsExactlyInAnyOrder(UserAccountLifecycleService.SENTINEL_USER_ID, other.getId());
+        assertThat(commentVoterIds(comment))
+                .as("the comment vote moved to the sentinel and the third party's own vote stayed put")
+                .containsExactlyInAnyOrder(UserAccountLifecycleService.SENTINEL_USER_ID, other.getId());
+    }
+
+    @Test
+    @DisplayName("empty-sweep-still-removes-account: an account owning nothing and having voted nowhere is removed anyway")
+    void an_account_with_nothing_to_reassign_is_still_removed() {
+        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+
+        assertThat(userRepository.findById(owner.getId())).as("the account row is gone").isEmpty();
+        assertThat(userRepository.findById(other.getId())).as("the untouched third party survives").isPresent();
     }
 }

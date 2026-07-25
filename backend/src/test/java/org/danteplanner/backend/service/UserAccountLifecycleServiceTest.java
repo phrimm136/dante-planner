@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -289,74 +288,6 @@ class UserAccountLifecycleServiceTest {
             inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             inOrder.verify(userRepository).delete(testUser);
-        }
-
-        @Test
-        @DisplayName("Should use correct sentinel user ID")
-        void performHardDelete_WhenCalled_UsesCorrectSentinelId() {
-            // Arrange
-            ArgumentCaptor<Long> userIdCaptor = ArgumentCaptor.forClass(Long.class);
-            ArgumentCaptor<Long> sentinelIdCaptor = ArgumentCaptor.forClass(Long.class);
-            when(plannerVoteRepository.reassignUserVotes(userIdCaptor.capture(), sentinelIdCaptor.capture()))
-                    .thenReturn(3);
-            when(plannerCommentVoteRepository.reassignUserVotes(any(), any()))
-                    .thenReturn(2);
-            when(plannerCommentRepository.reassignCommentsToSentinel(any(), any()))
-                    .thenReturn(1);
-            doNothing().when(userRepository).delete(testUser);
-
-            // Act
-            lifecycleService.performHardDelete(testUser);
-
-            // Assert
-            // The outcome form — planner_vote rows now carrying user_id 0 — needs a
-            // containerized test against the seeded sentinel row; the arguments are all
-            // this tier can observe.
-            assertEquals(testUser.getId(), userIdCaptor.getValue());
-            assertEquals(0L, sentinelIdCaptor.getValue()); // SENTINEL_USER_ID = 0
-        }
-
-        @Test
-        @DisplayName("Should reassign both planner votes and comment votes")
-        void performHardDelete_WhenCalled_ReassignsBothVoteTypes() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(5);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(3);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(2);
-            doNothing().when(userRepository).delete(testUser);
-
-            // Act
-            lifecycleService.performHardDelete(testUser);
-
-            // Assert
-            // Both vote tables surviving the sweep is a two-table row-state claim, which
-            // needs a containerized test; the calls are all this tier can observe.
-            verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-            verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
-        }
-
-        @Test
-        @DisplayName("Should handle zero votes reassignment gracefully")
-        void performHardDelete_zeroVotes_stillDeletesUser() {
-            // Arrange
-            when(plannerVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            when(plannerCommentVoteRepository.reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            when(plannerCommentRepository.reassignCommentsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID))
-                    .thenReturn(0);
-            doNothing().when(userRepository).delete(testUser);
-
-            // Act
-            lifecycleService.performHardDelete(testUser);
-
-            // Assert
-            // The outcome form — the user row is gone — needs a containerized test;
-            // the delete call is all this tier can observe.
-            verify(userRepository).delete(testUser);
         }
 
         @Test

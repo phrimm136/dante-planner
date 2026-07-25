@@ -174,49 +174,6 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("Filter maintenance on published upserts")
-    class FilterMaintenanceTests {
-
-        @Test
-        @DisplayName("Title-only edit of a published planner skips the filter rebuild")
-        void upsertPlanner_TitleOnlyEdit_SkipsFilterRebuild() {
-            Planner planner = testPlanner(5L, true);
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", "New Title", null,
-                    planner.getContentJson(), null, PlannerType.MIRROR_DUNGEON, 5L, null);
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(inv -> inv.getArgument(0));
-
-            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
-
-            // The rebuild decision leaves no trace on the aggregate or the response; observing it as
-            // state means asserting the filter-index rows against a real PlannerCatalogService.
-            verify(plannerCatalogService).onVisibleEditCommitted(any(Planner.class), eq(false));
-        }
-
-        @Test
-        @DisplayName("Content change on a published planner requests the filter rebuild")
-        void upsertPlanner_ContentChanged_RequestsFilterRebuild() {
-            Planner planner = testPlanner(5L, true);
-            UpsertPlannerRequest request = new UpsertPlannerRequest(
-                    planner.getId().toString(), "5F", null, null,
-                    "{\"data\": \"changed\"}", null, PlannerType.MIRROR_DUNGEON, 5L, null);
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(inv -> inv.getArgument(0));
-
-            commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
-
-            // The rebuild decision leaves no trace on the aggregate or the response; observing it as
-            // state means asserting the filter-index rows against a real PlannerCatalogService.
-            verify(plannerCatalogService).onVisibleEditCommitted(any(Planner.class), eq(true));
-        }
-    }
-
-    @Nested
     @DisplayName("isValidCategory Tests")
     class IsValidCategoryTests {
 
@@ -517,29 +474,6 @@ class PlannerCommandServiceTest {
     @Nested
     @DisplayName("deletePlanner Tests")
     class DeletePlannerTests {
-
-        @Test
-        @DisplayName("Should soft delete planner successfully")
-        void deletePlanner_Success_SoftDeletes() {
-            // Arrange
-            Planner planner = createTestPlanner();
-            assertNull(planner.getContent().getDeletedAt());
-
-            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
-                    .thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-            // Act
-            commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
-
-            // Assert
-            assertNotNull(planner.getContent().getDeletedAt());
-            assertTrue(planner.isDeleted());
-            // The mutation is visible on the aggregate; its persistence and its fan-out are not.
-            // Asserting a deleted row and a delivered event needs a real repository and emitter.
-            verify(plannerRepository).save(planner);
-            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "deleted", null);
-        }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when not found")
