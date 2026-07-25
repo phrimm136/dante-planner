@@ -6,6 +6,12 @@ import java.util.Properties;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+
+import org.danteplanner.backend.planner.config.ViewFlushSchedulerConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,15 +35,26 @@ class DegradeByOperationConfigTest {
     }
 
     @Test
-    @DisplayName("the scheduler pool has room for a stalled task without starving SSE heartbeats")
-    void schedulerNotStarvedByCrossRegionHang_WhenTaskStalls_PoolHasSpareThreads() throws IOException {
-        String poolSize = load("/application.properties").getProperty("spring.task.scheduling.pool.size");
+    @DisplayName("the scheduler a stalled task shares has spare threads, and the view flush has its own")
+    void schedulerNotStarvedByCrossRegionHang_WhenTaskStalls_PoolHasSpareThreads() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(TaskSchedulingAutoConfiguration.class))
+                .withUserConfiguration(ViewFlushSchedulerConfig.class)
+                .withPropertyValues("spring.task.scheduling.pool.size=4")
+                .run(context -> {
+                    ThreadPoolTaskScheduler shared = context.getBean("taskScheduler", ThreadPoolTaskScheduler.class);
+                    ThreadPoolTaskScheduler viewFlush = context.getBean(
+                            ViewFlushSchedulerConfig.VIEW_FLUSH_SCHEDULER, ThreadPoolTaskScheduler.class);
 
-        assertThat(poolSize)
-                .as("spring.task.scheduling.pool.size must be set; the default single thread lets one "
-                        + "hung cross-region task stop every other scheduled task")
-                .isNotNull();
-        assertThat(Integer.parseInt(poolSize.trim())).isGreaterThanOrEqualTo(MIN_SCHEDULER_POOL);
+                    assertThat(shared.getScheduledThreadPoolExecutor().getCorePoolSize())
+                            .as("the scheduler shared by every @Scheduled task must have spare threads, "
+                                    + "or one task blocked on a cross-region write stops the rest")
+                            .isGreaterThanOrEqualTo(MIN_SCHEDULER_POOL);
+                    assertThat(viewFlush)
+                            .as("the 500ms view flush must not share the pool it could exhaust")
+                            .isNotSameAs(shared);
+                    assertThat(viewFlush.getScheduledThreadPoolExecutor().getCorePoolSize()).isEqualTo(1);
+                });
     }
 
     @Test

@@ -101,6 +101,35 @@ class SseFanoutIT extends CausalHarnessSupport {
     }
 
     @Test
+    @DisplayName("Broadcast published on the primary Redis reaches a subscriber on another node, carrying the payload and not the envelope")
+    void sseBroadcastCrossPod_WhenPublishedOnPrimary_DeliveredWithRawPayload() {
+        Long authorId = 5150L;
+        String plannerId = "planner-broadcast-1";
+        Map<String, Object> payload = Map.of("plannerId", plannerId, "plannerTitle", "Cross-pod build");
+
+        ssePublisher.publishBroadcast(authorId, SseEventType.NOTIFY_PUBLISHED, payload);
+
+        verify(sseService, timeout(5000)).broadcastToAll(
+                eq(authorId),
+                eq(SseEventType.NOTIFY_PUBLISHED.getValue()),
+                argThat(data -> data instanceof Map<?, ?> map
+                        && plannerId.equals(map.get("plannerId"))
+                        && !map.containsKey("excludeUserId")));
+    }
+
+    @Test
+    @DisplayName("Suspension published on the primary Redis reaches the suspended user's stream on another node")
+    void sseSuspensionCrossPod_WhenPublishedOnPrimary_DeliveredToSuspendedUser() {
+        Long suspendedUserId = 6161L;
+
+        ssePublisher.publishAccountSuspended(suspendedUserId, "spam", "BAN", null);
+
+        verify(sseService, timeout(5000)).notifyAccountSuspended(
+                eq(suspendedUserId),
+                argThat(data -> data instanceof Map<?, ?> map && "BAN".equals(map.get("suspensionType"))));
+    }
+
+    @Test
     @DisplayName("Settings-cache invalidation published on the primary Redis invalidates the local cache")
     void settingsInvalidate_WhenPublishedOnPrimary_InvalidatesLocalSettingsCache() {
         Long userId = 7777L;

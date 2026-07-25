@@ -38,7 +38,7 @@ public class GtidCookieFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        writeCapture.clear();
+        writeCapture.begin();
         try {
             if (isSafeMethod(request)) {
                 handleRead(request, response, filterChain);

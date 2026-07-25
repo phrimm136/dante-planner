@@ -30,8 +30,9 @@ import org.springframework.util.StringUtils;
  * falls back to {@code SELECT @@gtid_executed} — a conservative superset. When no transaction
  * committed at all (a Redis-only write, or a pure read), it returns empty and no cookie is minted.</p>
  *
- * <p>State is held per request thread and cleared by {@link GtidCookieFilter}, mirroring the
- * {@link org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource} routing ThreadLocal.</p>
+ * <p>State is held per thread for the duration of a window that {@link GtidCookieFilter} opens and
+ * closes, mirroring the {@link org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource}
+ * routing ThreadLocal. Commits on threads with no open window are ignored.</p>
  */
 public class GtidWriteCapture {
 
@@ -51,19 +52,29 @@ public class GtidWriteCapture {
     }
 
     /**
-     * Records that a non-read-only transaction committed on this request thread, carrying its
+     * Opens a capture window on this thread. Only commits made inside a window are accumulated, so
+     * transactions on threads that serve no request — scheduled tasks, listeners — record nothing
+     * and leave no state behind on a thread that would otherwise never be cleared.
+     */
+    public void begin() {
+        accumulator.set(new Accumulator());
+    }
+
+    /**
+     * Records that a non-read-only transaction committed inside the open window, carrying its
      * OWN_GTID when the tracker produced one. A blank {@code ownGtid} still marks the commit, so a
      * later poll falls back to the global superset rather than reporting no write.
      */
     public void recordCommit(String ownGtid) {
         Accumulator acc = accumulator.get();
         if (acc == null) {
-            acc = new Accumulator();
-            accumulator.set(acc);
+            return;
         }
         acc.committed = true;
         if (StringUtils.hasText(ownGtid)) {
             acc.ownGtids.add(ownGtid.replaceAll("\\s+", ""));
+        } else {
+            acc.missedGtid = true;
         }
     }
 
@@ -72,7 +83,10 @@ public class GtidWriteCapture {
         if (acc == null || !acc.committed) {
             return Optional.empty();
         }
-        if (!acc.ownGtids.isEmpty()) {
+        // A commit whose tracker yielded nothing is not covered by the union, so the whole request
+        // falls back to the global superset rather than handing back a set that gates only part of
+        // the work it claims to.
+        if (!acc.missedGtid && !acc.ownGtids.isEmpty()) {
             return Optional.of(unionGtidSets(acc.ownGtids));
         }
         return readGlobalGtidExecuted();
@@ -154,6 +168,7 @@ public class GtidWriteCapture {
 
     private static final class Accumulator {
         private boolean committed;
+        private boolean missedGtid;
         private final Set<String> ownGtids = new LinkedHashSet<>();
     }
 }

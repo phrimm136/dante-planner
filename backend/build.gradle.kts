@@ -54,6 +54,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0")
 
     implementation("com.mysql:mysql-connector-j")
+    implementation("com.github.ben-manes.caffeine:caffeine")
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

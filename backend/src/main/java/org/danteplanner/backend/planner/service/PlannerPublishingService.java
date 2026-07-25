@@ -52,7 +52,7 @@ public class PlannerPublishingService {
      * transaction commits.
      */
     public record PlannerPublishedEvent(
-            Long authorId, UUID plannerId, String plannerTitle, String eventType, Map<String, Object> data) {
+            Long authorId, UUID plannerId, String plannerTitle, Map<String, Object> data) {
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -195,7 +195,7 @@ public class PlannerPublishingService {
             if (firstPublish) {
                 User author = saved.getUser();
                 eventPublisher.publishEvent(new PlannerPublishedEvent(
-                        userId, plannerId, saved.getTitle(), SseEventType.NOTIFY_PUBLISHED.getValue(), Map.of(
+                        userId, plannerId, saved.getTitle(), Map.of(
                         "plannerId", plannerId.toString(),
                         "plannerTitle", saved.getTitle(),
                         "authorEpithet", author.getUsernameEpithet(),

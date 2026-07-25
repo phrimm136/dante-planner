@@ -13,7 +13,11 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Central SSE service managing connections and settings-aware event dispatch.
@@ -38,10 +42,21 @@ public class SseService extends AbstractSseService<Long> {
     private static final long HEARTBEAT_INTERVAL_MS = 10_000L;
     private static final long CLEANUP_INTERVAL_MS = 60_000L;
 
+    private static final Duration SETTINGS_CACHE_TTL = Duration.ofMinutes(5);
+    private static final long SETTINGS_CACHE_MAX_ENTRIES = 10_000;
+
     private final ObjectMapper objectMapper;
     private final UserSettingsService userSettingsService;
 
-    private final ConcurrentHashMap<Long, CachedSettings> settingsCache = new ConcurrentHashMap<>();
+    /**
+     * Per-node cache of the settings that gate event delivery. Entries expire on their own so a node
+     * that misses an invalidation — its Redis hop dropped, or it joined after the change — serves
+     * stale settings for a bounded time instead of until restart.
+     */
+    private final Cache<Long, CachedSettings> settingsCache = Caffeine.newBuilder()
+            .expireAfterWrite(SETTINGS_CACHE_TTL)
+            .maximumSize(SETTINGS_CACHE_MAX_ENTRIES)
+            .build();
 
     private record CachedSettings(
             Boolean syncEnabled,
@@ -193,7 +208,7 @@ public class SseService extends AbstractSseService<Long> {
      * @param userId the user ID
      */
     public void invalidateSettingsCache(Long userId) {
-        settingsCache.remove(userId);
+        settingsCache.invalidate(userId);
         log.debug("Invalidated settings cache for user {}", userId);
     }
 
@@ -233,7 +248,7 @@ public class SseService extends AbstractSseService<Long> {
 
     @Override
     protected void afterKeyRemoved(Long userId) {
-        settingsCache.remove(userId);
+        settingsCache.invalidate(userId);
     }
 
     @Override
@@ -252,10 +267,7 @@ public class SseService extends AbstractSseService<Long> {
     }
 
     private boolean isEventAllowed(Long userId, String eventType) {
-        CachedSettings settings = settingsCache.get(userId);
-        if (settings == null) {
-            settings = cacheSettingsIfAbsent(userId);
-        }
+        CachedSettings settings = cacheSettingsIfAbsent(userId);
 
         return switch (eventType) {
             case "sync:planner" -> Boolean.TRUE.equals(settings.syncEnabled());
@@ -267,7 +279,7 @@ public class SseService extends AbstractSseService<Long> {
     }
 
     private CachedSettings cacheSettingsIfAbsent(Long userId) {
-        return settingsCache.computeIfAbsent(userId, id -> {
+        return settingsCache.get(userId, id -> {
             UserSettings settings = userSettingsService.getOrCreateEntity(id);
             return CachedSettings.from(settings);
         });

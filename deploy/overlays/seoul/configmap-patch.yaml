@@ -33,3 +33,6 @@ data:
   # Serve planner counter reads from planner_stats. Stays false until the
   # reconciliation checksum is clean; the flip is a post-merge overlay edit.
   PLANNER_STATS_READS_ENABLED: "false"
+  # Lineage-based refresh rotation. Deployment-controlled so a region can be flipped
+  # without a rebuild and every pod in it agrees across restarts.
+  JWT_ROTATION_LINEAGE_ENABLED: "true"

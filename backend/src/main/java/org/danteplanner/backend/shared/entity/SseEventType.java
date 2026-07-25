@@ -8,20 +8,33 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * via {@link #getValue()}; a typo now fails to compile instead of silently dropping a client event.
  */
 public enum SseEventType {
-    CREATED("created"),
-    UPDATED("updated"),
-    DELETED("deleted"),
-    COMMENT_ADDED("comment:added"),
-    NOTIFY_COMMENT("notify:comment"),
-    NOTIFY_PUBLISHED("notify:published"),
-    NOTIFY_RECOMMENDED("notify:recommended"),
-    SETTINGS_INVALIDATED("settings:invalidated"),
-    ACCOUNT_SUSPENDED("account_suspended");
+    CREATED("created", false),
+    UPDATED("updated", false),
+    DELETED("deleted", false),
+    COMMENT_ADDED("comment:added", false),
+    NOTIFY_COMMENT("notify:comment", true),
+    NOTIFY_PUBLISHED("notify:published", true),
+    NOTIFY_RECOMMENDED("notify:recommended", true),
+    SETTINGS_INVALIDATED("settings:invalidated", false),
+    ACCOUNT_SUSPENDED("account_suspended", true);
 
     private final String value;
+    private final boolean rawPayloadDelivery;
 
-    SseEventType(String value) {
+    SseEventType(String value, boolean rawPayloadDelivery) {
         this.value = value;
+        this.rawPayloadDelivery = rawPayloadDelivery;
+    }
+
+    /**
+     * Whether clients receive this event's payload directly rather than the fan-out envelope.
+     *
+     * <p>Sync events carry the envelope, because the client reads its routing fields alongside the
+     * payload. Notification-style events predate the envelope on the wire and their client schemas
+     * require the payload's own fields at the top level, so the envelope stays server-side.</p>
+     */
+    public boolean deliversRawPayload() {
+        return rawPayloadDelivery;
     }
 
     @JsonValue
