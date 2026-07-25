@@ -38,6 +38,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -119,6 +120,39 @@ class PlannerPublishingServiceTest {
 
     private Planner createTestPlanner() {
         return testPlannerBuilder().build();
+    }
+
+    @Nested
+    @DisplayName("setPublished Tests")
+    class SetPublishedTests {
+
+        @Test
+        @DisplayName("publishing an already-published planner twice leaves it published")
+        void publishIdempotentStateTargeted_WhenSentTwice_StaysPublished() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            PlannerResponse first = publishingService.setPublished(testUser.getId(), planner.getId(), true);
+            PlannerResponse second = publishingService.setPublished(testUser.getId(), planner.getId(), true);
+
+            assertTrue(first.published());
+            assertTrue(second.published(), "a repeated publish must not flip the planner back");
+            verify(plannerRepository, times(1)).save(any(Planner.class));
+        }
+
+        @Test
+        @DisplayName("unpublishing an already-unpublished planner leaves it unpublished")
+        void publishIdempotentStateTargeted_WhenUnpublishRepeated_StaysUnpublished() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), false);
+
+            assertFalse(result.published());
+            verify(plannerRepository, never()).save(any(Planner.class));
+        }
     }
 
     @Nested

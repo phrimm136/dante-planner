@@ -149,6 +149,23 @@ public class PlannerEngagementService {
     }
 
     /**
+     * Drive a planner's bookmark to an explicit state for a user.
+     *
+     * <p>Idempotent: a request naming the state the bookmark is already in leaves it untouched, so a
+     * retried or failed-over mutation never un-bookmarks.</p>
+     *
+     * @param userId     the user ID
+     * @param plannerId  the planner ID
+     * @param bookmarked the desired bookmark state
+     * @return the bookmark response in the requested state
+     * @throws PlannerNotFoundException if planner not found or not published
+     */
+    @Transactional
+    public BookmarkResponse setBookmark(Long userId, UUID plannerId, boolean bookmarked) {
+        throw new UnsupportedOperationException("setBookmark not yet implemented");
+    }
+
+    /**
      * Toggle bookmark state for a planner.
      * If bookmarked, removes the bookmark. If not bookmarked, adds it.
      *
@@ -156,7 +173,11 @@ public class PlannerEngagementService {
      * @param plannerId the planner ID
      * @return the bookmark response with current state
      * @throws PlannerNotFoundException if planner not found or not published
+     * @deprecated superseded by {@link #setBookmark(Long, UUID, boolean)}; retained so tabs still
+     *             running a previously cached bundle keep working. Remove once its usage counter
+     *             reaches zero.
      */
+    @Deprecated
     @Transactional
     public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
         // Verify planner exists and is published (fail-fast)

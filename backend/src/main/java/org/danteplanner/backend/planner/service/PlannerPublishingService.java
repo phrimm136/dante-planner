@@ -63,6 +63,40 @@ public class PlannerPublishingService {
     }
 
     /**
+     * Drive a planner to an explicit published state.
+     *
+     * <p>Idempotent: a request naming the state the planner is already in leaves it untouched, so a
+     * retried or failed-over mutation never flips it back.</p>
+     *
+     * @param userId    the user ID (must be owner)
+     * @param plannerId the planner ID
+     * @param published the desired published state
+     * @return the planner response in the requested state
+     * @throws PlannerNotFoundException  if planner not found
+     * @throws PlannerForbiddenException if user is not the owner
+     */
+    @Transactional
+    public PlannerResponse setPublished(Long userId, UUID plannerId, boolean published) {
+        throw new UnsupportedOperationException("setPublished not yet implemented");
+    }
+
+    /**
+     * Upsert the carried document and drive the planner to an explicit published state in one
+     * request, idempotently.
+     *
+     * @param userId    the user ID (must be owner)
+     * @param plannerId the planner ID
+     * @param req       the content-carrying upsert payload
+     * @param published the desired published state
+     * @return the planner response in the requested state
+     */
+    @Transactional
+    public PlannerResponse setPublishedWithContent(
+            Long userId, UUID plannerId, UpsertPlannerRequest req, boolean published) {
+        throw new UnsupportedOperationException("setPublishedWithContent not yet implemented");
+    }
+
+    /**
      * Toggle the published status of a planner.
      *
      * @param userId    the user ID (must be owner)
@@ -70,7 +104,11 @@ public class PlannerPublishingService {
      * @return the updated planner response
      * @throws PlannerNotFoundException  if planner not found
      * @throws PlannerForbiddenException if user is not the owner
+     * @deprecated superseded by {@link #setPublished(Long, UUID, boolean)}; retained so tabs still
+     *             running a previously cached bundle keep working. Remove once its usage counter
+     *             reaches zero.
      */
+    @Deprecated
     @Transactional
     public PlannerResponse togglePublish(Long userId, UUID plannerId) {
         accessGuard.checkUserRestrictions(userId);

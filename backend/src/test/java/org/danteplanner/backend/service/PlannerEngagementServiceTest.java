@@ -106,6 +106,45 @@ class PlannerEngagementServiceTest {
     }
 
     @Nested
+    @DisplayName("setBookmark Tests")
+    class SetBookmarkTests {
+
+        @Test
+        @DisplayName("bookmarking an already-bookmarked planner leaves the bookmark in place")
+        void bookmarkIdempotentStateTargeted_WhenSentTwice_StaysBookmarked() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.of(new PlannerBookmark(testUser.getId(), plannerId)));
+
+            BookmarkResponse response = engagementService.setBookmark(testUser.getId(), plannerId, true);
+
+            assertTrue(response.bookmarked(), "a repeated bookmark must not un-bookmark");
+            verify(plannerBookmarkRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("removing an absent bookmark leaves it absent")
+        void bookmarkIdempotentStateTargeted_WhenRemoveRepeated_StaysUnbookmarked() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            UUID plannerId = planner.getId();
+
+            when(plannerRepository.findPublishedAggregate(plannerId))
+                    .thenReturn(Optional.of(planner));
+            when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
+                    .thenReturn(Optional.empty());
+
+            BookmarkResponse response = engagementService.setBookmark(testUser.getId(), plannerId, false);
+
+            assertFalse(response.bookmarked());
+            verify(plannerBookmarkRepository, never()).save(any(PlannerBookmark.class));
+        }
+    }
+
+    @Nested
     @DisplayName("toggleBookmark Tests")
     class ToggleBookmarkTests {
 
