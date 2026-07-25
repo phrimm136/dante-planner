@@ -324,8 +324,23 @@ class ClientIpResolverTest {
         }
 
         @Test
-        @DisplayName("Should use CF-Connecting-IP if present and valid")
-        void resolveClientIdentifier_CfHeader_UsesCfIp() {
+        @DisplayName("Should use CF-Connecting-IP when the peer is a trusted proxy")
+        void resolveClientIdentifier_CfHeaderFromTrustedProxy_UsesCfIp() {
+            HttpServletRequest request = mock(HttpServletRequest.class);
+            when(request.getRemoteAddr()).thenReturn("172.18.0.2");
+            when(request.getHeader("CF-Connecting-IP")).thenReturn("203.0.113.100");
+            when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+
+            Set<String> trustedProxies = Set.of("172.18.0.2");
+
+            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
+
+            assertEquals("ip:203.0.113.100", result, "Should prefer CF-Connecting-IP");
+        }
+
+        @Test
+        @DisplayName("Should ignore CF-Connecting-IP from an untrusted peer")
+        void resolveClientIdentifier_CfHeaderFromUntrustedPeer_IsIgnored() {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getRemoteAddr()).thenReturn("172.18.0.2");
             when(request.getHeader("CF-Connecting-IP")).thenReturn("203.0.113.100");
@@ -335,7 +350,8 @@ class ClientIpResolverTest {
 
             String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
 
-            assertEquals("ip:203.0.113.100", result, "Should prefer CF-Connecting-IP");
+            assertEquals("device:12345678-1234-1234-1234-123456789abc", result,
+                    "A spoofable header must not let a caller choose its own rate-limit bucket");
         }
 
         @Test

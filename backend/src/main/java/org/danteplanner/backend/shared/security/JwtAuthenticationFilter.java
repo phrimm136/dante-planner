@@ -43,6 +43,9 @@ import java.util.Set;
 
 import org.danteplanner.backend.user.entity.UserRole;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.TransactionException;
+import org.danteplanner.backend.shared.config.JwtProperties;
 
 /**
  * JWT authentication filter that validates access tokens from cookies.
@@ -73,6 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenGenerator tokenGenerator;
     private final RefreshRotationService refreshRotationService;
     private final LineageRotationFlag lineageRotationFlag;
+    private final JwtProperties jwtProperties;
 
     /**
      * Skip JWT validation for:
@@ -112,9 +116,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 attemptAutoRefresh(request, response);
             } catch (RedisConnectionFailureException e) {
                 writeAuthUnavailable(response);
+                MDC.clear();
                 return;
             } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
                 writeDbUnavailable(response);
+                MDC.clear();
                 return;
             }
             filterChain.doFilter(request, response);
@@ -173,9 +179,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     refreshed = attemptAutoRefresh(request, response);
                 } catch (RedisConnectionFailureException redisEx) {
                     writeAuthUnavailable(response);
+                    MDC.clear();
                     return;
                 } catch (DataAccessResourceFailureException | CannotCreateTransactionException dbEx) {
                     writeDbUnavailable(response);
+                    MDC.clear();
                     return;
                 }
                 if (!refreshed) {
@@ -275,8 +283,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
 
             // Set new cookies (15 minutes for access, 7 days for refresh)
-            cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken, 900);
-            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, newRefreshToken, 604800);
+            cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
+                    jwtProperties.getAccessTokenExpirySeconds());
+            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, newRefreshToken,
+                    jwtProperties.getRefreshTokenExpirySeconds());
 
             // Set authentication for this request
             setAuthentication(user.getId(), user.getRole(), request);
@@ -284,9 +294,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.debug("Auto-refreshed tokens for user: {}", user.getEmail());
             return true;
 
-        } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
-            // DB unreachable during refresh (query-time or transaction-begin) — propagate so the
-            // caller returns 503 instead of silently downgrading the user to a guest session.
+        } catch (DataAccessException | TransactionException e) {
+            // Any datastore failure during refresh propagates so the caller returns 503. Narrower
+            // types let a Redis command timeout fall through to the catch below, which downgraded
+            // the session to guest and reported it only at DEBUG.
             throw e;
         } catch (Exception e) {
             log.debug("Auto-refresh failed: {}", e.getMessage());
@@ -334,7 +345,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String newAccessToken = tokenGenerator.generateAccessToken(
                 user.getId(), user.getRole()
         );
-        cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken, 900);
+        cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
+                    jwtProperties.getAccessTokenExpirySeconds());
 
         setAuthentication(user.getId(), user.getRole(), request);
 

@@ -233,9 +233,12 @@ public final class ClientIpResolver {
     ) {
         String ip = null;
 
-        // Priority 1: CF-Connecting-IP (Cloudflare)
+        // Priority 1: CF-Connecting-IP, honoured only when the peer is a trusted proxy. The edge
+        // forwards this header verbatim, so an ungated read lets any caller pick their own
+        // rate-limit bucket. isValidIp checks shape, never provenance.
         String cfIp = request.getHeader(CF_CONNECTING_IP);
-        if (cfIp != null && !cfIp.isBlank() && isValidIp(cfIp.trim())) {
+        if (cfIp != null && !cfIp.isBlank() && isValidIp(cfIp.trim())
+                && securityProperties.isTrustedProxy(request.getRemoteAddr())) {
             ip = cfIp.trim();
         }
 
@@ -283,9 +286,12 @@ public final class ClientIpResolver {
     ) {
         String ip = null;
 
-        // Priority 1: CF-Connecting-IP (Cloudflare)
+        // Priority 1: CF-Connecting-IP, honoured only when the peer is a trusted proxy. The edge
+        // forwards this header verbatim, so an ungated read lets any caller pick their own
+        // rate-limit bucket. isValidIp checks shape, never provenance.
         String cfIp = request.getHeader(CF_CONNECTING_IP);
-        if (cfIp != null && !cfIp.isBlank() && isValidIp(cfIp.trim())) {
+        if (cfIp != null && !cfIp.isBlank() && isValidIp(cfIp.trim())
+                && trustedProxyIps.contains(request.getRemoteAddr())) {
             ip = cfIp.trim();
         }
 

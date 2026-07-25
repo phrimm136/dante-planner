@@ -39,6 +39,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import org.danteplanner.backend.shared.config.JwtProperties;
 
 /**
  * Integration tests for {@link JwtAuthenticationFilter} lineage-rotation behavior.
@@ -89,7 +90,8 @@ class JwtAuthenticationFilterLineageTest {
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {
         return new JwtAuthenticationFilter(
                 tokenValidator, tokenBlacklistService, cookieUtils, userService,
-                objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled));
+                objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled),
+                new JwtProperties());
     }
 
     private TokenClaims refreshClaims(Long userId, String jti, String familyId) {

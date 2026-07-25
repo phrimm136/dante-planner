@@ -196,7 +196,8 @@ class AuthLocalReadSplitIT {
         TokenBlacklistService blSvc =
                 new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry);
         ContentTombstoneStore tsSvc =
-                new ContentTombstoneStore(stringRedisTemplate, deadTemplate);
+                new ContentTombstoneStore(stringRedisTemplate, deadTemplate,
+                        new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
         String token = "phase14a-failopen-token";
         Date futureExpiry = new Date(System.currentTimeMillis() + Duration.ofHours(1).toMillis());

@@ -41,6 +41,11 @@ public class GameDataRegistry {
     @PostConstruct
     public void init() {
         refresh();
+        if (!isPopulated()) {
+            throw new IllegalStateException(
+                    "Game data is empty or unreadable at '" + dataPath
+                            + "'; every planner save would be rejected as an invalid id reference");
+        }
     }
 
     /**

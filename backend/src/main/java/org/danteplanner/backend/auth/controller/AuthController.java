@@ -159,6 +159,9 @@ public class AuthController {
             // Return the user to where they started auth (validated + sealed at /start).
             return redirect(transaction.get().returnTo());
         } catch (Exception e) {
+            // The redirect is deliberate for a browser endpoint, but it makes a total login outage
+            // indistinguishable from a user declining consent, so the cause is reported here.
+            io.sentry.Sentry.captureException(e);
             log.warn("OAuth callback failed: {}", e.getMessage());
             return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
         }

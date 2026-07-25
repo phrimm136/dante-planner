@@ -40,6 +40,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -301,7 +302,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             org.springframework.dao.DataIntegrityViolationException ex) {
 
-        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
 
         // Detect PRIMARY KEY or UNIQUE constraint violations
         if (message.contains("duplicate") ||
@@ -452,7 +453,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IOException.class)
     public void handleIOException(IOException ex) {
-        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
         String className = ex.getClass().getName();
 
         // SSE client disconnection (broken pipe, connection reset)

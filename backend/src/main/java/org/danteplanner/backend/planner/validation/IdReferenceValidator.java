@@ -101,7 +101,12 @@ class IdReferenceValidator {
             }
 
             JsonNode idNode = ego.get("id");
-            if (idNode == null || !idNode.isTextual()) {
+            if (idNode == null || idNode.isNull()) {
+                continue;
+            }
+            if (!idNode.isTextual()) {
+                context.addError(ValidationErrors.invalidFieldType(
+                        "equipment." + sinnerKey + ".egos." + egoType + ".id", "string", idNode));
                 continue;
             }
 

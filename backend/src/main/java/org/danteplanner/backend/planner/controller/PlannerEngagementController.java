@@ -88,7 +88,7 @@ public class PlannerEngagementController {
     public ResponseEntity<BookmarkResponse> setBookmark(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
-            @RequestBody(required = false) BookmarkRequest request) {
+            @Valid @RequestBody(required = false) BookmarkRequest request) {
 
         rateLimitConfig.checkCrudLimit(userId, "bookmark");
 

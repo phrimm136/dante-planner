@@ -42,6 +42,7 @@ import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.shared.config.JwtProperties;
 
 /**
  * Unit tests for JwtAuthenticationFilter.
@@ -89,7 +90,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(false));
+        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
         SecurityContextHolder.clearContext();
         // Capture the filter's WARN security events so audit-log rendering can be asserted.
         filterLogger = (Logger) LoggerFactory.getLogger(JwtAuthenticationFilter.class);

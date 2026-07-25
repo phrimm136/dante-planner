@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
 
 /**
  * Service for the public planner catalog read model (CQRS read side).
@@ -245,13 +246,14 @@ public class PublishedPlannerQueryService {
     }
 
     /**
-     * Entity ids are integers by contract; an unparseable value must match nothing.
+     * Entity ids are integers by contract. A sentinel would AND a never-satisfiable predicate onto
+     * the whole specification, so one malformed element would silently empty an otherwise valid page.
      */
     private static Integer parseEntityId(String raw) {
         try {
             return Integer.parseInt(raw);
         } catch (NumberFormatException e) {
-            return -1;
+            throw new PlannerValidationException("INVALID_FILTER_ID", "Filter id must be numeric: " + raw);
         }
     }
 
