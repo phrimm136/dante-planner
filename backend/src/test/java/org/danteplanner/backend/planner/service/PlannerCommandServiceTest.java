@@ -191,6 +191,8 @@ class PlannerCommandServiceTest {
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
+            // The rebuild decision leaves no trace on the aggregate or the response; observing it as
+            // state means asserting the filter-index rows against a real PlannerCatalogService.
             verify(plannerCatalogService).onVisibleEditCommitted(any(Planner.class), eq(false));
         }
 
@@ -208,6 +210,8 @@ class PlannerCommandServiceTest {
 
             commandService.upsertPlanner(testUser.getId(), deviceId, planner.getId(), request, false);
 
+            // The rebuild decision leaves no trace on the aggregate or the response; observing it as
+            // state means asserting the filter-index rows against a real PlannerCatalogService.
             verify(plannerCatalogService).onVisibleEditCommitted(any(Planner.class), eq(true));
         }
     }
@@ -264,7 +268,6 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -280,7 +283,8 @@ class PlannerCommandServiceTest {
             assertEquals("Test Planner", response.title());
             assertEquals("5F", response.category());
             assertEquals(1L, response.syncVersion());
-            verify(contentValidator).validate(request.content(), request.category());
+            // The fan-out has no state form at this tier; observing the delivered event means a real
+            // PlannerSyncEventService with a subscribed emitter.
             verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"), eq(response));
         }
 
@@ -355,19 +359,19 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
-            });
+            // Only this exact content-and-category pair is rejected, so a validation call carrying
+            // anything else leaves the stub unmatched and the create completes without throwing.
+            when(contentValidator.validate(request.content(), request.category()))
+                    .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
-            // Act
-            commandService.createPlanner(testUser.getId(), deviceId, request);
+            // Act & Assert
+            PlannerValidationException exception = assertThrows(
+                    PlannerValidationException.class,
+                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
+            );
 
-            // Assert - verify validation happens
-            verify(contentValidator).validate(request.content(), request.category());
+            assertEquals("INVALID_CONTENT", exception.getErrorCode());
+            verify(plannerRepository, never()).save(any());
         }
 
         @Test
@@ -414,6 +418,8 @@ class PlannerCommandServiceTest {
             // Assert
             assertEquals(6L, response.syncVersion());
             assertEquals("Updated Title", response.title());
+            // The fan-out has no state form at this tier; observing the delivered event means a real
+            // PlannerSyncEventService with a subscribed emitter.
             verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "updated", response);
         }
 
@@ -468,14 +474,19 @@ class PlannerCommandServiceTest {
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
-            when(contentValidator.validate(anyString(), anyString(), anyBoolean())).thenReturn(mock(JsonNode.class));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            // A request without a category must validate against the planner's own. Only that exact
+            // triple is rejected, so any other combination leaves the stub unmatched and succeeds.
+            when(contentValidator.validate(request.content(), planner.getCategory(), planner.getPublished()))
+                    .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
-            // Act
-            commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false);
+            // Act & Assert
+            PlannerValidationException exception = assertThrows(
+                    PlannerValidationException.class,
+                    () -> commandService.updatePlanner(testUser.getId(), deviceId, planner.getId(), request, false)
+            );
 
-            // Assert - uses planner's category when request.category is null
-            verify(contentValidator).validate(request.content(), planner.getCategory(), planner.getPublished());
+            assertEquals("INVALID_CONTENT", exception.getErrorCode());
+            verify(plannerRepository, never()).save(any());
         }
 
         @Test
@@ -524,6 +535,8 @@ class PlannerCommandServiceTest {
             // Assert
             assertNotNull(planner.getContent().getDeletedAt());
             assertTrue(planner.isDeleted());
+            // The mutation is visible on the aggregate; its persistence and its fan-out are not.
+            // Asserting a deleted row and a delivered event needs a real repository and emitter.
             verify(plannerRepository).save(planner);
             verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "deleted", null);
         }
@@ -595,7 +608,6 @@ class PlannerCommandServiceTest {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
@@ -620,7 +632,10 @@ class PlannerCommandServiceTest {
             assertEquals(3, response.imported());
             assertEquals(3, response.total());
             assertEquals(3, response.planners().size());
-            verify(plannerRepository, times(3)).save(any(Planner.class));
+            assertEquals(List.of("Imported 0", "Imported 1", "Imported 2"),
+                    response.planners().stream().map(PlannerSummaryResponse::title).toList());
+            // Validation of a batch member leaves no state behind on the success path; proving each
+            // one was screened as an outcome needs a rejected member and a real validator.
             verify(contentValidator, times(3)).validate(anyString(), anyString());
         }
 
@@ -675,7 +690,6 @@ class PlannerCommandServiceTest {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -696,7 +710,8 @@ class PlannerCommandServiceTest {
 
             // Assert
             assertEquals(5, response.imported());
-            verify(plannerRepository, times(5)).save(any(Planner.class));
+            assertEquals(5, response.total());
+            assertEquals(5, response.planners().size());
         }
     }
 
@@ -711,7 +726,6 @@ class PlannerCommandServiceTest {
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -720,8 +734,12 @@ class PlannerCommandServiceTest {
             });
 
             // Act & Assert - should not throw
-            assertDoesNotThrow(() -> commandService.createPlanner(testUser.getId(), deviceId, request));
-            verify(plannerRepository).save(any(Planner.class));
+            PlannerResponse response = assertDoesNotThrow(
+                    () -> commandService.createPlanner(testUser.getId(), deviceId, request));
+
+            assertEquals(UUID.fromString(request.id()), response.id());
+            assertEquals("Test Planner", response.title());
+            assertEquals(1L, response.syncVersion());
         }
 
         @Test
@@ -743,24 +761,19 @@ class PlannerCommandServiceTest {
         @Test
         @DisplayName("Should count only non-deleted planners for limit")
         void createPlanner_WhenCheckingLimit_CountsOnlyNonDeleted() {
-            // This is verified by the countActiveByUserId query being called
-            // The service trusts the repository to only count non-deleted planners
-
             UpsertPlannerRequest request = createValidRequest();
-            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
-                Planner planner = invocation.getArgument(0);
-                planner.setCreatedAt(Instant.now());
-                planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
-            });
+            // Only the deleted-excluding count is stubbed, and with a value no other source could
+            // supply, so the verdict can only carry it if that count is what the limit reads.
+            long activeCount = maxPlannersPerUser + 7L;
+            when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(activeCount);
 
-            commandService.createPlanner(testUser.getId(), deviceId, request);
+            PlannerLimitExceededException exception = assertThrows(
+                    PlannerLimitExceededException.class,
+                    () -> commandService.createPlanner(testUser.getId(), deviceId, request)
+            );
 
-            // Verify that the correct method is called (the one that excludes deleted)
-            verify(plannerRepository).countActiveByUserId(testUser.getId());
+            assertTrue(exception.getMessage().contains(String.valueOf(activeCount)));
+            verify(plannerRepository, never()).save(any());
         }
     }
 
@@ -813,12 +826,14 @@ class PlannerCommandServiceTest {
             UUID plannerId = UUID.randomUUID();
 
             // Act
-            org.danteplanner.backend.planner.dto.UpsertResult result = commandService.upsertPlanner(
+            UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, false);
 
             // Assert
             assertNotNull(result);
-            verify(plannerRepository).save(any());
+            assertTrue(result.isCreated());
+            assertEquals(plannerId, result.response().id());
+            assertEquals("Test Planner", result.response().title());
         }
     }
 

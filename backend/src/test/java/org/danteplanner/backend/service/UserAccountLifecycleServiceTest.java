@@ -18,6 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -123,8 +125,12 @@ class UserAccountLifecycleServiceTest {
         @DisplayName("Should set deletedAt and scheduledDate on first deletion")
         void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
+            List<User> persisted = new ArrayList<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                persisted.add(invocation.getArgument(0));
+                return invocation.getArgument(0);
+            });
 
             // Act
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
@@ -141,8 +147,16 @@ class UserAccountLifecycleServiceTest {
             assertTrue(scheduledDate.isAfter(expectedScheduleMin));
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
 
-            verify(userRepository).save(testUser);
-            // Auth is token-only, so deletion must push token invalidation itself
+            assertEquals(1, persisted.size());
+            User persistedUser = persisted.get(0);
+            assertEquals(testUser.getId(), persistedUser.getId());
+            assertTrue(persistedUser.isDeleted());
+            assertNotNull(persistedUser.getDeletedAt());
+            assertEquals(scheduledDate, persistedUser.getPermanentDeleteScheduledAt());
+
+            // Auth is token-only, so deletion must push token invalidation itself.
+            // The outcome form — a request carrying the old token is rejected — is only
+            // reachable through the filter chain, so it needs a MockMvc-tier test.
             verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 
@@ -193,8 +207,12 @@ class UserAccountLifecycleServiceTest {
             testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
             assertTrue(testUser.isDeleted());
 
+            List<User> persisted = new ArrayList<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                persisted.add(invocation.getArgument(0));
+                return invocation.getArgument(0);
+            });
 
             // Act
             lifecycleService.reactivateAccount(testUser.getId());
@@ -204,7 +222,12 @@ class UserAccountLifecycleServiceTest {
             assertNull(testUser.getDeletedAt());
             assertNull(testUser.getPermanentDeleteScheduledAt());
 
-            verify(userRepository).save(testUser);
+            assertEquals(1, persisted.size());
+            User persistedUser = persisted.get(0);
+            assertEquals(testUser.getId(), persistedUser.getId());
+            assertFalse(persistedUser.isDeleted());
+            assertNull(persistedUser.getDeletedAt());
+            assertNull(persistedUser.getPermanentDeleteScheduledAt());
         }
 
         @Test
@@ -286,6 +309,9 @@ class UserAccountLifecycleServiceTest {
             lifecycleService.performHardDelete(testUser);
 
             // Assert
+            // The outcome form — planner_vote rows now carrying user_id 0 — needs a
+            // containerized test against the seeded sentinel row; the arguments are all
+            // this tier can observe.
             assertEquals(testUser.getId(), userIdCaptor.getValue());
             assertEquals(0L, sentinelIdCaptor.getValue()); // SENTINEL_USER_ID = 0
         }
@@ -306,6 +332,8 @@ class UserAccountLifecycleServiceTest {
             lifecycleService.performHardDelete(testUser);
 
             // Assert
+            // Both vote tables surviving the sweep is a two-table row-state claim, which
+            // needs a containerized test; the calls are all this tier can observe.
             verify(plannerVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             verify(plannerCommentVoteRepository).reassignUserVotes(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
         }
@@ -326,6 +354,8 @@ class UserAccountLifecycleServiceTest {
             lifecycleService.performHardDelete(testUser);
 
             // Assert
+            // The outcome form — the user row is gone — needs a containerized test;
+            // the delete call is all this tier can observe.
             verify(userRepository).delete(testUser);
         }
 

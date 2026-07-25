@@ -31,6 +31,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -133,10 +134,10 @@ class AuthenticationFacadeTest {
 
             when(providerRegistry.getProvider(providerName)).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(code, redirectUri, codeVerifier)).thenReturn(oauthTokens);
-            when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
+            when(oauthProvider.getUserInfo(oauthTokens)).thenReturn(userInfo);
             when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123"))
                     .thenReturn(Optional.of(testUser));
-            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
+            when(tokenGenerator.generateAccessToken(testUser.getId(), UserRole.NORMAL))
                     .thenReturn("jwt-access-token");
             when(tokenGenerator.generateRefreshToken(testUser.getId()))
                     .thenReturn("jwt-refresh-token");
@@ -152,14 +153,6 @@ class AuthenticationFacadeTest {
             assertEquals("jwt-access-token", result.accessToken());
             assertEquals("jwt-refresh-token", result.refreshToken());
             assertFalse(result.reactivated());
-
-            // Verify flow
-            verify(providerRegistry).getProvider(providerName);
-            verify(oauthProvider).exchangeCodeForTokens(code, redirectUri, codeVerifier);
-            verify(oauthProvider).getUserInfo(any(OAuthTokens.class));
-            verify(userRepository).findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123");
-            verify(tokenGenerator).generateAccessToken(eq(testUser.getId()), any(UserRole.class));
-            verify(tokenGenerator).generateRefreshToken(testUser.getId());
         }
 
         @Test
@@ -196,9 +189,10 @@ class AuthenticationFacadeTest {
                     .thenReturn(Optional.empty());
             when(userRepository.findByProviderAndProviderId(any(), any()))
                     .thenReturn(Optional.empty());
-            when(userService.findOrCreateUser(any(), any())).thenReturn(testUser);
-            when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
-            when(tokenGenerator.generateRefreshToken(any())).thenReturn("refresh");
+            when(userService.findOrCreateUser("google", Map.of("id", "provider-id-123", "email", "user@email.com")))
+                    .thenReturn(testUser);
+            when(tokenGenerator.generateAccessToken(testUser.getId(), UserRole.NORMAL)).thenReturn("access");
+            when(tokenGenerator.generateRefreshToken(testUser.getId())).thenReturn("refresh");
 
             // Act
             AuthenticationFacade.AuthResult result = authenticationFacade.authenticateWithOAuth(
@@ -206,10 +200,9 @@ class AuthenticationFacadeTest {
 
             // Assert
             assertFalse(result.reactivated());
-            verify(userService).findOrCreateUser(eq("google"), argThat(map ->
-                    "provider-id-123".equals(map.get("id")) &&
-                    "user@email.com".equals(map.get("email"))
-            ));
+            assertSame(testUser, result.user());
+            assertEquals("access", result.accessToken());
+            assertEquals("refresh", result.refreshToken());
         }
 
         @Test
@@ -246,6 +239,7 @@ class AuthenticationFacadeTest {
             // Assert
             assertTrue(result.reactivated());
             assertSame(deletedUser, result.user());
+            // Reactivation is only observable as a cleared deleted_at row, which needs a containerized test.
             verify(lifecycleService).reactivateAccount(deletedUser.getId());
         }
     }
@@ -270,11 +264,10 @@ class AuthenticationFacadeTest {
                     expiration
             );
 
-            lenient().when(tokenValidator.validateToken(oldRefreshToken)).thenReturn(claims);
-            lenient().when(tokenValidator.validateRefreshToken(oldRefreshToken)).thenReturn(claims);
+            when(tokenValidator.validateRefreshToken(oldRefreshToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(oldRefreshToken)).thenReturn(false);
             when(userService.findById(testUser.getId())).thenReturn(testUser);
-            when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
+            when(tokenGenerator.generateAccessToken(testUser.getId(), UserRole.NORMAL))
                     .thenReturn("new-access-token");
             when(tokenGenerator.generateRefreshToken(testUser.getId()))
                     .thenReturn("new-refresh-token");
@@ -289,7 +282,7 @@ class AuthenticationFacadeTest {
             assertEquals("new-refresh-token", result.refreshToken());
             assertFalse(result.reactivated());
 
-            // Verify old token blacklisted (rotation with grace period)
+            // Rotation revokes the presented token in Redis; observing the entry needs a containerized test.
             verify(tokenBlacklistService).blacklistTokenForRotation(oldRefreshToken, expiration);
         }
 
@@ -298,17 +291,8 @@ class AuthenticationFacadeTest {
         void refreshTokens_WhenInvalidTokenType_Throws() {
             // Arrange - access token instead of refresh token
             String accessToken = "access-token";
-            TokenClaims accessClaims = new TokenClaims(
-                    123L,
-                    "test@example.com",
-                    TokenClaims.TYPE_ACCESS, // Wrong type
-                    UserRole.NORMAL,
-                    new Date(),
-                    new Date(System.currentTimeMillis() + 60000)
-            );
 
-            lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
-            lenient().when(tokenValidator.validateRefreshToken(accessToken))
+            when(tokenValidator.validateRefreshToken(accessToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
 
             // Act & Assert
@@ -338,8 +322,7 @@ class AuthenticationFacadeTest {
                     new Date(System.currentTimeMillis() + 60000)
             );
 
-            lenient().when(tokenValidator.validateToken(blacklistedToken)).thenReturn(claims);
-            lenient().when(tokenValidator.validateRefreshToken(blacklistedToken)).thenReturn(claims);
+            when(tokenValidator.validateRefreshToken(blacklistedToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(blacklistedToken)).thenReturn(true);
 
             // Act & Assert
@@ -360,9 +343,7 @@ class AuthenticationFacadeTest {
             // Arrange
             String expiredToken = "expired-refresh-token";
 
-            lenient().when(tokenValidator.validateToken(expiredToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            lenient().when(tokenValidator.validateRefreshToken(expiredToken))
+            when(tokenValidator.validateRefreshToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
 
             // Act & Assert
@@ -401,8 +382,7 @@ class AuthenticationFacadeTest {
                     .build();
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
 
-            lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(claims);
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(claims);
+            when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(claims);
             when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
             when(userService.findById(testUser.getId())).thenReturn(deletedUser);
 
@@ -414,7 +394,7 @@ class AuthenticationFacadeTest {
 
             assertEquals(testUser.getId(), exception.getUserId());
 
-            // Verify old token was blacklisted before the check (rotation with grace period)
+            // Rotation revokes the token even on this path; the Redis entry itself needs a containerized test.
             verify(tokenBlacklistService).blacklistTokenForRotation(refreshToken, expiration);
 
             // Verify no new tokens generated
@@ -423,6 +403,7 @@ class AuthenticationFacadeTest {
         }
     }
 
+    /** logout is void: the revoked-session entry lands in Redis, observable only in a containerized test. */
     @Nested
     @DisplayName("logout Tests")
     class LogoutTests {
@@ -443,10 +424,8 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
-            lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
-            lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
-            lenient().when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
-            lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
+            when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
+            when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
 
             // Act
             authenticationFacade.logout(accessToken, refreshToken);
@@ -466,7 +445,6 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
-            lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(refreshClaims);
             when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
 
             // Act
@@ -475,7 +453,6 @@ class AuthenticationFacadeTest {
             // Assert - only refresh token blacklisted
             verify(tokenBlacklistService).revokeLogoutSession(
                     isNull(), isNull(), eq(refreshToken), eq(refreshExpiry), isNull());
-            verify(tokenValidator, times(1)).validateRefreshToken(anyString());
         }
 
         @Test
@@ -488,7 +465,6 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
-            lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
             when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
 
             // Act
@@ -497,7 +473,6 @@ class AuthenticationFacadeTest {
             // Assert - only access token blacklisted
             verify(tokenBlacklistService).revokeLogoutSession(
                     eq(accessToken), eq(accessExpiry), isNull(), isNull(), isNull());
-            verify(tokenValidator, times(1)).validateAccessToken(anyString());
         }
 
         @Test
@@ -522,12 +497,9 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
-            lenient().when(tokenValidator.validateToken(invalidAccessToken))
+            when(tokenValidator.validateAccessToken(invalidAccessToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            lenient().when(tokenValidator.validateToken(validRefreshToken)).thenReturn(refreshClaims);
-            lenient().when(tokenValidator.validateAccessToken(invalidAccessToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
-            lenient().when(tokenValidator.validateRefreshToken(validRefreshToken)).thenReturn(refreshClaims);
+            when(tokenValidator.validateRefreshToken(validRefreshToken)).thenReturn(refreshClaims);
 
             // Act
             authenticationFacade.logout(invalidAccessToken, validRefreshToken);
@@ -548,11 +520,8 @@ class AuthenticationFacadeTest {
                     123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
-            lenient().when(tokenValidator.validateToken(validAccessToken)).thenReturn(accessClaims);
-            lenient().when(tokenValidator.validateToken(invalidRefreshToken))
-                    .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
-            lenient().when(tokenValidator.validateAccessToken(validAccessToken)).thenReturn(accessClaims);
-            lenient().when(tokenValidator.validateRefreshToken(invalidRefreshToken))
+            when(tokenValidator.validateAccessToken(validAccessToken)).thenReturn(accessClaims);
+            when(tokenValidator.validateRefreshToken(invalidRefreshToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
 
             // Act
