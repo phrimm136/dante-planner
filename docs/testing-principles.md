@@ -257,6 +257,16 @@ fails with a null-pointer somewhere downstream, which is indistinguishable from 
 and tells you nothing about which branch ran. Stub the sibling branch with a distinct value instead,
 so the correct branch is identified by what came back rather than by what crashed.
 
+**A new assertion is unproven until you have watched it fail.** Vacuous assertions survive for
+years because nobody breaks them on purpose. After writing one, change the expected value, confirm
+the test fails, then change it back. This is the only check that distinguishes an assertion from a
+restatement of the fixture, and it is cheap: two edits and one scoped run.
+
+A related trap: if the arrangement stub sets the very field being asserted, the assertion tests the
+fixture rather than the code. Three creation tests here asserted `assertNotNull(response.id())`
+while their own `thenAnswer` stub assigned that id. Reduce the stub to identity and let the value
+come from production.
+
 **Mocking a holder hides the outcome you wanted.** A mocked `HttpServletResponse` cannot report a
 status or a cookie, so every outcome has to be read back as `verify(response).setStatus(503)`. The
 Spring mock-web objects are real implementations, not doubles: `MockHttpServletResponse` makes the

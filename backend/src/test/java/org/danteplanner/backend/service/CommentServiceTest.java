@@ -39,10 +39,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -61,6 +61,8 @@ class CommentServiceTest {
     @Mock
     private PlannerRepository plannerRepository;
 
+    // The comment counter lives on the stats aggregate, reachable only through this repository;
+    // its value becomes observable only in a tier that commits.
     @Mock
     private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
 
@@ -73,6 +75,8 @@ class CommentServiceTest {
     @Mock
     private PlannerCommentSseService plannerCommentSseService;
 
+    // Comment fan-out publishes to Redis and returns; delivery to a subscriber has no in-process
+    // path, so no create test here can assert it.
     @Mock
     private SsePublisher ssePublisher;
 
@@ -141,6 +145,7 @@ class CommentServiceTest {
         void createComment_topLevel_succeeds() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
+            AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
@@ -150,6 +155,7 @@ class CommentServiceTest {
                         c.setId(100L);
                         c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
+                        persisted.set(c);
                         return c;
                     });
 
@@ -158,9 +164,14 @@ class CommentServiceTest {
             CreateCommentResponse response = commentService.createComment(plannerId, testUser.getId(), deviceId, request);
 
             // Assert
-            assertNotNull(response.id());
-            assertNotNull(response.createdAt());
-            verify(commentRepository).save(any(PlannerComment.class));
+            PlannerComment stored = persisted.get();
+            assertEquals(plannerId, stored.getPlannerId());
+            assertEquals(testUser.getId(), stored.getUserId());
+            assertEquals("Test comment", stored.getContent());
+            assertEquals(0, stored.getDepth());
+            assertNull(stored.getParentCommentId());
+            assertEquals(stored.getPublicId(), response.id());
+            assertEquals(stored.getCreatedAt(), response.createdAt());
         }
 
         @Test
@@ -174,6 +185,7 @@ class CommentServiceTest {
             parentComment.setCreatedAt(Instant.now());
 
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
+            AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
@@ -187,6 +199,7 @@ class CommentServiceTest {
                         c.setId(101L);
                         c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
+                        persisted.set(c);
                         return c;
                     });
 
@@ -195,9 +208,12 @@ class CommentServiceTest {
             CreateCommentResponse response = commentService.createComment(plannerId, testUser.getId(), deviceId, request);
 
             // Assert
-            assertNotNull(response.id());
-            assertNotNull(response.createdAt());
-            verify(commentRepository).save(argThat(c -> c.getDepth() == 1 && c.getParentCommentId().equals(50L)));
+            PlannerComment stored = persisted.get();
+            assertEquals("Reply comment", stored.getContent());
+            assertEquals(1, stored.getDepth());
+            assertEquals(50L, stored.getParentCommentId());
+            assertEquals(stored.getPublicId(), response.id());
+            assertEquals(stored.getCreatedAt(), response.createdAt());
         }
 
         @Test
@@ -246,6 +262,7 @@ class CommentServiceTest {
             depth5Parent.setParentCommentId(40L);
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
+            AtomicReference<PlannerComment> persisted = new AtomicReference<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
@@ -259,6 +276,7 @@ class CommentServiceTest {
                         c.setId(102L);
                         c.setPublicId(UUID.randomUUID());
                         c.setCreatedAt(Instant.now());
+                        persisted.set(c);
                         return c;
                     });
 
@@ -267,10 +285,12 @@ class CommentServiceTest {
             CreateCommentResponse response = commentService.createComment(plannerId, testUser.getId(), deviceId, request);
 
             // Assert
-            assertNotNull(response.id());
-            assertNotNull(response.createdAt());
-            // With unlimited MAX_DEPTH, reply is direct child of parent at depth 6
-            verify(commentRepository).save(argThat(c -> c.getDepth() == 6 && c.getParentCommentId().equals(50L)));
+            PlannerComment stored = persisted.get();
+            assertEquals(6, stored.getDepth());
+            // 40L is the parent's own parent: a flattening implementation reparents the reply there.
+            assertEquals(50L, stored.getParentCommentId());
+            assertEquals(stored.getPublicId(), response.id());
+            assertEquals(stored.getCreatedAt(), response.createdAt());
         }
     }
 
@@ -290,17 +310,15 @@ class CommentServiceTest {
 
             UpdateCommentRequest request = new UpdateCommentRequest("Updated content");
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
-            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(i -> {
-                PlannerComment c = i.getArgument(0);
-                c.setEditedAt(Instant.now());
-                return c;
-            });
+            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             UpdateCommentResponse response = commentService.updateComment(commentPublicId, testUser.getId(), request);
 
             // Assert
-            assertNotNull(response.editedAt());
+            assertEquals("Updated content", comment.getContent());
+            assertNotNull(comment.getEditedAt());
+            assertEquals(comment.getEditedAt(), response.editedAt());
         }
 
         @Test
@@ -362,7 +380,6 @@ class CommentServiceTest {
             // Assert
             assertTrue(comment.isDeleted());
             assertEquals("", comment.getContent()); // Content cleared on soft delete
-            verify(commentRepository).save(comment);
         }
 
         @Test

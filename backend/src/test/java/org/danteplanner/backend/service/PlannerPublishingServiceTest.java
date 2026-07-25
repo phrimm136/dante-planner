@@ -13,6 +13,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
@@ -171,10 +172,12 @@ class PlannerPublishingServiceTest {
                     testUser.getId(), null, planner.getId(), request, false))
                     .thenReturn(new PlannerCommandService.UpsertedPlanner(
                             planner, PlannerResponse.fromEntity(planner, 0), false));
+            // Decoys: a reload by either route would succeed and stay silent, so the prohibitions
+            // below fail on the reload itself rather than on a null downstream.
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class)))
+            when(plannerRepository.save(planner))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             PlannerResponse result =
@@ -197,14 +200,20 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerRepository.save(planner)).thenAnswer(invocation -> invocation.getArgument(0));
+            // An upvote count no other source could supply, so the response can only carry it by
+            // having read this planner's own stats row.
+            when(plannerStatsRepository.findById(planner.getId())).thenReturn(
+                    Optional.of(PlannerStats.builder().plannerId(planner.getId()).upvotes(12).build()));
 
             // Act
             PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
 
             // Assert
             assertTrue(result.published());
-            verify(plannerRepository).save(any(Planner.class));
+            assertEquals(planner.getId(), result.id());
+            assertEquals("Test Planner", result.title());
+            assertEquals(12, result.upvotes());
         }
 
         @Test
@@ -295,6 +304,8 @@ class PlannerPublishingServiceTest {
 
             // Assert
             assertTrue(result.published());
+            // The subscription is a row in another aggregate and never reaches this response;
+            // asserting it as state needs a containerized test with a real subscription repository.
             verify(subscriptionService).createSubscription(testUser.getId(), planner.getId());
         }
 
@@ -359,6 +370,8 @@ class PlannerPublishingServiceTest {
             // Assert
             assertFalse(response.ownerNotificationsEnabled());
             assertFalse(planner.getOwnerNotificationsEnabled());
+            // The flip is visible on the aggregate; its persistence is not. Asserting the stored
+            // row needs a containerized test against a real repository.
             verify(plannerRepository).save(planner);
         }
 

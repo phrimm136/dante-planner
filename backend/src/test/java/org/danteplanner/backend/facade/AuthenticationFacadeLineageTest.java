@@ -2,7 +2,7 @@ package org.danteplanner.backend.facade;
 import org.danteplanner.backend.auth.facade.AuthenticationFacade;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
@@ -26,17 +26,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,8 +45,8 @@ import static org.mockito.Mockito.when;
  * Integration tests for {@link AuthenticationFacade} lineage-rotation behavior
  * with the {@code jwt.rotation.lineage-enabled} flag turned on.
  *
- * <p>Verifies that {@code refreshTokens} delegates to {@link RefreshRotationService}
- * and that {@code logout} revokes the current refresh-token family while still
+ * <p>Verifies that {@code refreshTokens} produces the rotated token pair and access
+ * cookie, and that {@code logout} revokes the current refresh-token family while still
  * blacklisting the access token immediately.</p>
  */
 @ExtendWith(MockitoExtension.class)
@@ -76,16 +76,11 @@ class AuthenticationFacadeLineageTest {
     @Mock
     private RefreshRotationService refreshRotationService;
 
-    @Mock
-    private CookieUtils cookieUtils;
-
-    @Mock
-    private JwtProperties jwtProperties;
-
-    @Mock
-    private HttpServletResponse response;
+    private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
+    private final JwtProperties jwtProperties = new JwtProperties();
 
     private AuthenticationFacade facade;
+    private MockHttpServletResponse response;
     private User testUser;
 
     @BeforeEach
@@ -94,6 +89,8 @@ class AuthenticationFacadeLineageTest {
                 providerRegistry, tokenGenerator, tokenValidator, tokenBlacklistService,
                 userService, lifecycleService, userRepository, refreshRotationService,
                 cookieUtils, jwtProperties, new LineageRotationFlag(true));
+
+        response = new MockHttpServletResponse();
 
         testUser = User.builder()
                 .id(123L)
@@ -123,15 +120,16 @@ class AuthenticationFacadeLineageTest {
         when(userService.findById(testUser.getId())).thenReturn(testUser);
         when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
                 .thenReturn("new.access.jwt");
-        when(jwtProperties.getCookieExpirySeconds()).thenReturn(604800);
 
         AuthenticationFacade.AuthResult result = facade.refreshTokens(oldRefresh, response);
 
         assertSame(testUser, result.user());
         assertEquals("new.access.jwt", result.accessToken());
         assertEquals("new.refresh.jwt", result.refreshToken());
-        verify(refreshRotationService).rotate(oldRefresh, response);
-        verify(cookieUtils).setCookie(eq(response), eq(CookieConstants.ACCESS_TOKEN), eq("new.access.jwt"), anyInt());
+        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
+        assertNotNull(accessCookie);
+        assertEquals("new.access.jwt", accessCookie.getValue());
+        assertEquals(jwtProperties.getCookieExpirySeconds(), accessCookie.getMaxAge());
         verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
     }
 
@@ -159,15 +157,15 @@ class AuthenticationFacadeLineageTest {
                 new Date(), accessExpiry);
         TokenClaims refresh = refreshClaims("jti-1", "fam-logout", null);
 
-        lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
-        lenient().when(tokenValidator.validateToken(refreshToken)).thenReturn(refresh);
-        lenient().when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
-        lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refresh);
+        when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
+        when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refresh);
 
         facade.logout(accessToken, refreshToken);
 
+        // The logout revocation lands in Redis and has no response-visible form;
+        // asserting it as state needs the containerized tier with a live TokenBlacklistService.
         verify(tokenBlacklistService).revokeLogoutSession(
-                eq(accessToken), eq(accessExpiry), eq(refreshToken), any(), eq("fam-logout"));
+                eq(accessToken), eq(accessExpiry), eq(refreshToken), eq(refresh.expiration()), eq("fam-logout"));
     }
 
     @Test
@@ -179,11 +177,12 @@ class AuthenticationFacadeLineageTest {
                 testUser.getId(), testUser.getEmail(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
                 new Date(), accessExpiry);
 
-        lenient().when(tokenValidator.validateToken(accessToken)).thenReturn(accessClaims);
-        lenient().when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
+        when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
 
         facade.logout(accessToken, null);
 
+        // The access-token blacklist entry lands in Redis and has no response-visible form;
+        // asserting it as state needs the containerized tier with a live TokenBlacklistService.
         verify(tokenBlacklistService).revokeLogoutSession(
                 eq(accessToken), eq(accessExpiry), isNull(), isNull(), isNull());
     }
