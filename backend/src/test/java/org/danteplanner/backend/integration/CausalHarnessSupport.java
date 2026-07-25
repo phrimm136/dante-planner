@@ -125,7 +125,9 @@ abstract class CausalHarnessSupport {
 
     @DynamicPropertySource
     static void primaryDatasourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", PRIMARY::getJdbcUrl);
+        // The driver surfaces OWN_GTID session-state changes only when asked to track them,
+        // so the app url mirrors production and the capture path is exercised for real.
+        registry.add("spring.datasource.url", () -> withSessionStateTracking(PRIMARY.getJdbcUrl()));
         registry.add("spring.datasource.username", PRIMARY::getUsername);
         registry.add("spring.datasource.password", PRIMARY::getPassword);
         registry.add("spring.flyway.url", PRIMARY::getJdbcUrl);
@@ -145,6 +147,11 @@ abstract class CausalHarnessSupport {
         replicaJdbcTemplate.execute("START REPLICA");
         toxiproxyControl = new ToxiproxyControl(APP_TO_PRIMARY_PROXY);
         toxiproxyControl.removeWan();
+    }
+
+    /** Appends the driver flag, respecting any query string the container url already carries. */
+    static String withSessionStateTracking(String jdbcUrl) {
+        return jdbcUrl + (jdbcUrl.contains("?") ? "&" : "?") + "trackSessionState=true";
     }
 
     /**

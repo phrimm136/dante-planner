@@ -39,28 +39,33 @@ class GtidCommitSynchronization implements TransactionSynchronization {
 
     @Override
     public void afterCommit() {
-        capture.recordCommit(readOwnGtid());
-    }
-
-    private String readOwnGtid() {
         Connection connection = DataSourceUtils.getConnection(dataSource);
         try {
-            ServerSessionStateController controller =
-                    connection.unwrap(JdbcConnection.class).getServerSessionStateController();
-            List<SessionStateChange> changes =
-                    controller.getSessionStateChanges().getSessionStateChangesList();
-            for (SessionStateChange change : changes) {
-                if (change.getType() == ServerSessionStateController.SESSION_TRACK_GTIDS
-                        && !change.getValues().isEmpty()) {
-                    return change.getValues().get(0);
-                }
-            }
-            return null;
+            capture.recordCommit(readOwnGtid(connection), true);
         } catch (Exception e) {
             log.debug("OWN_GTID tracker read failed; falling back to @@gtid_executed", e);
-            return null;
+            capture.recordCommit(null, false);
         } finally {
             DataSourceUtils.releaseConnection(connection, dataSource);
         }
+    }
+
+    /**
+     * The GTID the server attributed to this transaction, or null when it named none — which means
+     * the transaction wrote nothing, provided the server is tracking at all. Throws when the tracker
+     * cannot be reached, which the caller reads as "unknown" rather than "nothing".
+     */
+    private String readOwnGtid(Connection connection) throws java.sql.SQLException {
+        ServerSessionStateController controller =
+                connection.unwrap(JdbcConnection.class).getServerSessionStateController();
+        List<SessionStateChange> changes =
+                controller.getSessionStateChanges().getSessionStateChangesList();
+        for (SessionStateChange change : changes) {
+            if (change.getType() == ServerSessionStateController.SESSION_TRACK_GTIDS
+                    && !change.getValues().isEmpty()) {
+                return change.getValues().get(0);
+            }
+        }
+        return null;
     }
 }

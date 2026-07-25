@@ -39,6 +39,14 @@ public class GtidWriteCapture {
     private static final Logger log = LoggerFactory.getLogger(GtidWriteCapture.class);
 
     private static final String CAPTURE_GTID_SQL = "SELECT @@gtid_executed";
+    /**
+     * Set once this process has actually seen a transaction's own GTID. Only then does a commit that
+     * reported none mean it wrote nothing; before that, silence is indistinguishable from a tracker
+     * that is switched off, misconfigured, or unreachable, and the conservative superset is the only
+     * safe reading. Positive evidence rather than configuration, because the server naming a tracking
+     * mode does not prove the driver surfaces it.
+     */
+    private volatile boolean ownGtidObserved;
 
     private final JdbcTemplate jdbcTemplate;
     private final ThreadLocal<Accumulator> accumulator = new ThreadLocal<>();
@@ -65,17 +73,24 @@ public class GtidWriteCapture {
      * OWN_GTID when the tracker produced one. A blank {@code ownGtid} still marks the commit, so a
      * later poll falls back to the global superset rather than reporting no write.
      */
-    public void recordCommit(String ownGtid) {
+    public void recordCommit(String ownGtid, boolean trackerReadable) {
         Accumulator acc = accumulator.get();
         if (acc == null) {
             return;
         }
-        acc.committed = true;
         if (StringUtils.hasText(ownGtid)) {
+            ownGtidObserved = true;
+            acc.committed = true;
             acc.ownGtids.add(ownGtid.replaceAll("\\s+", ""));
-        } else {
-            acc.missedGtid = true;
+            return;
         }
+        if (trackerReadable && ownGtidObserved) {
+            // The server would have named a GTID had this transaction written anything, so it wrote
+            // nothing: an idempotent no-op leaves no trace and gates no read.
+            return;
+        }
+        acc.committed = true;
+        acc.missedGtid = true;
     }
 
     public Optional<String> pollCapturedGtid() {

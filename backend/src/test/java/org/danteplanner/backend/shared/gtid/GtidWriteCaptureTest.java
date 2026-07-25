@@ -29,8 +29,8 @@ class GtidWriteCaptureTest {
 
     @Test
     void ownGtidUnionAcrossCommits_WhenTwoCommits_UnionsGtids() {
-        capture.recordCommit(UUID_A + ":100");
-        capture.recordCommit(UUID_A + ":101");
+        capture.recordCommit(UUID_A + ":100", true);
+        capture.recordCommit(UUID_A + ":101", true);
 
         assertThat(capture.pollCapturedGtid()).contains(UUID_A + ":100-101");
     }
@@ -39,7 +39,7 @@ class GtidWriteCaptureTest {
     void ownGtidFallbackOnEmptyTracker_WhenTrackerEmpty_ReadsGlobalGtidExecuted() {
         when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
                 .thenReturn(GLOBAL_GTID);
-        capture.recordCommit(null);
+        capture.recordCommit(null, false);
 
         assertThat(capture.pollCapturedGtid()).contains(GLOBAL_GTID);
     }
@@ -48,8 +48,8 @@ class GtidWriteCaptureTest {
     void ownGtidFallbackOnEmptyTracker_WhenOneCommitOfTwoMissesGtid_ReadsGlobalGtidExecuted() {
         when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
                 .thenReturn(GLOBAL_GTID);
-        capture.recordCommit(UUID_A + ":100");
-        capture.recordCommit(null);
+        capture.recordCommit(UUID_A + ":100", true);
+        capture.recordCommit(null, false);
 
         assertThat(capture.pollCapturedGtid())
                 .as("a union covering only part of the request would gate less than it claims")
@@ -59,11 +59,38 @@ class GtidWriteCaptureTest {
     @Test
     void ownGtidUnionAcrossCommits_WhenNoWindowOpen_RecordsNothing() {
         capture.clear();
-        capture.recordCommit(UUID_A + ":100");
+        capture.recordCommit(UUID_A + ":100", true);
 
         assertThat(capture.pollCapturedGtid())
                 .as("a commit on a thread serving no request must leave no state behind")
                 .isEmpty();
+    }
+
+    @Test
+    void publishIdempotentStateTargeted_WhenCommitWroteNothing_MintsNoCookie() {
+        // A real GTID first, so the tracker has proven it reports; only then does silence mean
+        // "wrote nothing" rather than "cannot tell".
+        capture.recordCommit(UUID_A + ":100", true);
+        capture.clear();
+        capture.begin();
+
+        capture.recordCommit(null, true);
+
+        assertThat(capture.pollCapturedGtid())
+                .as("an idempotent no-op leaves no trace, so it must gate no read")
+                .isEmpty();
+    }
+
+    @Test
+    void ownGtidFallbackOnEmptyTracker_WhenServerNotTracking_ReadsGlobalGtidExecuted() {
+        when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
+                .thenReturn(GLOBAL_GTID);
+
+        capture.recordCommit(null, true);
+
+        assertThat(capture.pollCapturedGtid())
+                .as("with tracking off, no reported GTID cannot be read as no write")
+                .contains(GLOBAL_GTID);
     }
 
     @Test

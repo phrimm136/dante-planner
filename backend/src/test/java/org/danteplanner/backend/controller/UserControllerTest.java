@@ -4,9 +4,13 @@ import org.danteplanner.backend.user.controller.UserController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
+import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.auth.facade.AuthenticationFacade;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,6 +45,12 @@ class UserControllerTest {
 
     @Mock
     private UserAccountLifecycleService lifecycleService;
+
+    @Mock
+    private UserSettingsService userSettingsService;
+
+    @Mock
+    private SsePublisher ssePublisher;
 
     @Mock
     private RateLimitConfig rateLimitConfig;
@@ -71,15 +82,17 @@ class UserControllerTest {
     void setUp() {
         // Set the grace period field using reflection since it's @Value injected
         ReflectionTestUtils.setField(userController, "gracePeriodDays", GRACE_PERIOD_DAYS);
-
-        // Setup default cookie behavior
-        when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(TEST_ACCESS_TOKEN);
-        when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(TEST_REFRESH_TOKEN);
     }
 
     @Nested
     @DisplayName("deleteMyAccount Tests")
     class DeleteMyAccountTests {
+
+        @BeforeEach
+        void stubCookies() {
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(TEST_ACCESS_TOKEN);
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(TEST_REFRESH_TOKEN);
+        }
 
         @Test
         @DisplayName("Should return success response with deletion details")
@@ -175,6 +188,33 @@ class UserControllerTest {
 
             // Assert
             assertEquals(customGracePeriod, result.getBody().gracePeriodDays());
+        }
+    }
+
+    @Nested
+    @DisplayName("updateSettings Tests")
+    class UpdateSettingsTests {
+
+        @Test
+        @DisplayName("Publishes the cross-pod SSE settings invalidation after persisting the update")
+        void sseSettingsInvalidationCrossPod_WhenSettingsUpdated_PublishesInvalidationForUser() {
+            // Arrange
+            UpdateUserSettingsRequest updateRequest = new UpdateUserSettingsRequest(true, null, null, null);
+            UserSettingsResponse persisted = new UserSettingsResponse(true, true, true, false);
+            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
+            when(userSettingsService.updateSettings(TEST_USER_ID, updateRequest)).thenReturn(persisted);
+
+            // Act
+            ResponseEntity<UserSettingsResponse> result =
+                    userController.updateSettings(authentication, updateRequest);
+
+            // Assert - the invalidation must go out for the updated user, after the persist,
+            // so every pod drops its stale settingsCache entry
+            assertEquals(200, result.getStatusCode().value());
+            assertEquals(persisted, result.getBody());
+            InOrder inOrder = inOrder(userSettingsService, ssePublisher);
+            inOrder.verify(userSettingsService).updateSettings(TEST_USER_ID, updateRequest);
+            inOrder.verify(ssePublisher).publishSettingsInvalidation(TEST_USER_ID);
         }
     }
 }

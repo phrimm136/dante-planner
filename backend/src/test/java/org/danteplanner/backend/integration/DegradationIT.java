@@ -112,6 +112,14 @@ class DegradationIT {
     private static final String COUNTER_NAME = "blacklist_check_skipped_total";
     private static final long ONE_HOUR_MS = 3_600_000L;
 
+    /**
+     * Wall-clock bounds for the blackholed write: the floor separates a genuine hang from an
+     * instant refusal; the ceiling allows the JDBC socketTimeout plus generous pool/validation
+     * headroom without letting the request hang unbounded.
+     */
+    private static final long BLACKHOLE_WRITE_FAILURE_FLOOR_MS = 1_000;
+    private static final long BLACKHOLE_WRITE_FAILURE_CEILING_MS = 25_000;
+
     /** Minimal planner content that passes {@code PlannerContentValidator} (from CausalGateIT). */
     private static final String VALID_CONTENT = """
         {
@@ -263,9 +271,18 @@ class DegradationIT {
         registry.add("redis.rate-limit.port", () -> DEGRADATION_TOXIPROXY.getMappedPort(RATE_LIMIT_PROXY_LISTEN_PORT));
     }
 
+    // Production's JDBC URL carries these (application-prod.properties, DB_CONNECT_TIMEOUT_MS /
+    // DB_SOCKET_TIMEOUT_MS defaults). The driver's own defaults are infinite, so without them a
+    // blackholed primary would hang a request forever instead of failing within the bound the
+    // blackhole test asserts.
+    private static final long JDBC_CONNECT_TIMEOUT_MS = 10_000;
+    private static final long JDBC_SOCKET_TIMEOUT_MS = 10_000;
+
     private static String primaryUrlThroughProxy() {
         return "jdbc:mysql://" + DEGRADATION_TOXIPROXY.getHost() + ":"
-                + DEGRADATION_TOXIPROXY.getMappedPort(PRIMARY_DB_PROXY_LISTEN_PORT) + "/testdb";
+                + DEGRADATION_TOXIPROXY.getMappedPort(PRIMARY_DB_PROXY_LISTEN_PORT) + "/testdb"
+                + "?connectTimeout=" + JDBC_CONNECT_TIMEOUT_MS
+                + "&socketTimeout=" + JDBC_SOCKET_TIMEOUT_MS;
     }
 
     @BeforeEach
@@ -381,6 +398,66 @@ class DegradationIT {
     }
 
     /**
+     * With the primary blackholed — {@code timeout} toxics hold every connection open and forward
+     * nothing, so a connect hangs rather than refuses — a write must fail typed within the JDBC
+     * timeout budget while reads keep serving 200 from the healthy replica. Severing the route
+     * instead, so connections are refused, fails in milliseconds and exercises no timeout at all,
+     * which is why this case is driven separately. The wall-clock floor proves the cut really hung;
+     * the ceiling proves no request outlives the connectTimeout/socketTimeout the production url
+     * carries.
+     */
+    @Test
+    @DisplayName("primary blackholed (hangs, not refuses) → write 503 WRITE_TEMPORARILY_UNAVAILABLE within the timeout budget, read still 200 from the replica")
+    void writeHangReadsSurvive_WhenPrimaryBlackholed_WriteFails503WithinTimeoutWhileReadStillServes()
+            throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "degradation-blackhole-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = new Cookie("accessToken",
+                TestDataFactory.generateAccessToken(jwtTokenService, author));
+        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        UUID seedPlannerId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/planner/md/" + seedPlannerId).with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content(upsertBody(seedPlannerId, "degradation-blackhole-seed")))
+                .andExpect(status().is2xxSuccessful());
+
+        new ReplicationControl(degradationPrimaryJdbcTemplate, degradationReplicaJdbcTemplate)
+                .awaitCaughtUp();
+
+        blackholePrimaryDb();
+        try {
+            long startNanos = System.nanoTime();
+            UUID writePlannerId = UUID.randomUUID();
+            mockMvc.perform(put("/api/planner/md/" + writePlannerId).with(withCsrf())
+                            .cookie(auth, device)
+                            .contentType(APPLICATION_JSON)
+                            .content(upsertBody(writePlannerId, "degradation-blackhole-write")))
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(jsonPath("$.code").value("WRITE_TEMPORARILY_UNAVAILABLE"));
+            long elapsedMillis = (System.nanoTime() - startNanos) / 1_000_000;
+
+            assertThat(elapsedMillis)
+                    .as("a blackholed primary must hold the write until a timeout fires — "
+                            + "sub-second failure means the connection was refused, not hung")
+                    .isGreaterThan(BLACKHOLE_WRITE_FAILURE_FLOOR_MS);
+            assertThat(elapsedMillis)
+                    .as("the write must fail within the JDBC timeout budget (socketTimeout %sms "
+                            + "plus pool headroom), not hang open", JDBC_SOCKET_TIMEOUT_MS)
+                    .isLessThan(BLACKHOLE_WRITE_FAILURE_CEILING_MS);
+
+            mockMvc.perform(get("/api/planner/md").cookie(auth))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isNotEmpty());
+        } finally {
+            for (Toxic toxic : PRIMARY_DB_PROXY.toxics().getAll()) {
+                toxic.remove();
+            }
+        }
+    }
+
+    /**
      * F2: with the rate-limit Redis route severed (Toxiproxy proxy disabled) and every other path
      * healthy, a rate-limited write endpoint must degrade by operation — the raw-Lettuce failure the
      * bucket4j {@code tryConsume} raises at controller entry must be mapped to a typed
@@ -421,6 +498,16 @@ class DegradationIT {
 
     private void cutPrimaryDb() throws IOException {
         PRIMARY_DB_PROXY.disable();
+    }
+
+    /**
+     * Blackholes the app→primary path: the proxy keeps ACCEPTING connections but {@code timeout}
+     * toxics (0 = never close) swallow all data in both directions, so the MySQL handshake and
+     * every in-flight command hang instead of being refused — a peering loss, not a downed host.
+     */
+    private void blackholePrimaryDb() throws IOException {
+        PRIMARY_DB_PROXY.toxics().timeout("primary-blackhole-upstream", ToxicDirection.UPSTREAM, 0);
+        PRIMARY_DB_PROXY.toxics().timeout("primary-blackhole-downstream", ToxicDirection.DOWNSTREAM, 0);
     }
 
     private void cutRateLimitRedis() throws IOException {

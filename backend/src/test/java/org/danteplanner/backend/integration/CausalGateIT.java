@@ -6,12 +6,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -19,10 +22,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -67,7 +75,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import(TestConfig.class)
+@Import({TestConfig.class, CausalGateIT.RecordingCaptureConfig.class})
 class CausalGateIT extends CausalHarnessSupport {
 
     private static final String REPLICATED_TITLE = "causal-old-replicated";
@@ -115,6 +123,13 @@ class CausalGateIT extends CausalHarnessSupport {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    @Qualifier("primaryJdbcTemplate")
+    private JdbcTemplate primaryJdbc;
+
+    @Autowired
+    private RecordingGtidWriteCapture gtidWriteCapture;
 
     @DynamicPropertySource
     static void routingProperties(DynamicPropertyRegistry registry) {
@@ -209,6 +224,114 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     /**
+     * A first publish commits more than once on the
+     * request thread — the main transaction, then the AFTER_COMMIT {@code REQUIRES_NEW} listener
+     * transactions (filter rebuild, notification fan-out). Two properties are pinned through a
+     * real request, with the primary's own {@code GTID_SUBTRACT}/{@code GTID_SUBSET} arbitrating:
+     * the transaction manager registered a commit capture for EACH of those transactions (the
+     * recording decorator observed one {@code recordCommit} per committed GTID), and the minted
+     * cookie covers every GTID the request committed, so a follow-up replica read gates past the
+     * filter rebuild, not only the main commit.
+     *
+     * <p>Coverage, not equality: Connector/J surfaces OWN_GTID session-state changes only when
+     * the JDBC URL sets {@code trackSessionState=true}, which the app's URL does not, so every
+     * capture takes the documented {@code @@gtid_executed} fallback — a superset that still
+     * satisfies the gate. Asserting the cookie equals the exact per-request union would demand a
+     * datasource-URL change in production, not in this test.</p>
+     */
+    @Test
+    @DisplayName("A first publish commits more than once; every commit is captured and the ryw cookie gates past all of them")
+    void ownGtidUnionAcrossCommits_WhenPublishCommitsTwice_EveryCommitIsCapturedAndCookieCoversAll()
+            throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "gtid-union-author-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = new Cookie("accessToken",
+                TestDataFactory.generateAccessToken(jwtTokenService, author));
+        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        UUID plannerId = UUID.randomUUID();
+
+        mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content(upsertBody(plannerId, "gtid-union-draft")))
+                .andExpect(status().is2xxSuccessful());
+
+        String executedBefore = primaryJdbc.queryForObject(
+                "SELECT @@GLOBAL.gtid_executed", String.class);
+        int recordingsBefore = gtidWriteCapture.commitRecordings();
+
+        MvcResult published = mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish")
+                        .with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content("{\"published\":true}"))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+
+        int recordingsDuringPublish = gtidWriteCapture.commitRecordings() - recordingsBefore;
+        String executedAfter = primaryJdbc.queryForObject(
+                "SELECT @@GLOBAL.gtid_executed", String.class);
+        String requestCommits = primaryJdbc.queryForObject(
+                "SELECT GTID_SUBTRACT(?, ?)", String.class, executedAfter, executedBefore);
+        String cookieGtidSet = new String(
+                Base64.getUrlDecoder().decode(assertGtidCookie(published).value()),
+                StandardCharsets.UTF_8);
+        long committedTransactions = countTransactions(requestCommits);
+
+        assertThat(committedTransactions)
+                .as("the publish request must commit MORE THAN ONE transaction on the primary "
+                        + "(main tx + the AFTER_COMMIT REQUIRES_NEW listener txs); committed: %s",
+                        requestCommits)
+                .isGreaterThanOrEqualTo(2);
+        assertThat(countByPlannerId("planner_entity_filter", plannerId))
+                .as("the filter rebuild (the AFTER_COMMIT REQUIRES_NEW commit) must have "
+                        + "populated the entity index")
+                .isPositive();
+        assertThat((long) recordingsDuringPublish)
+                .as("the transaction manager must register a commit capture for EACH transaction "
+                        + "the request committed (%s GTIDs minted), not only the main one",
+                        committedTransactions)
+                .isGreaterThanOrEqualTo(committedTransactions);
+        assertThat(gtidSubset(requestCommits, cookieGtidSet))
+                .as("the ryw cookie (%s) must cover EVERY GTID the request committed (%s), "
+                        + "so a replica read gates past the filter rebuild, not only the main commit",
+                        cookieGtidSet, requestCommits)
+                .isTrue();
+    }
+
+    private boolean gtidSubset(String candidate, String containing) {
+        Long subset = primaryJdbc.queryForObject(
+                "SELECT GTID_SUBSET(?, ?)", Long.class, candidate, containing);
+        return subset != null && subset == 1L;
+    }
+
+    private int countByPlannerId(String table, UUID plannerId) {
+        Integer count = primaryJdbc.queryForObject(
+                "SELECT COUNT(*) FROM " + table + " WHERE planner_id = UUID_TO_BIN(?)",
+                Integer.class, plannerId.toString());
+        return count == null ? 0 : count;
+    }
+
+    /** Sums the transaction count over a canonical {@code gtid_set} ({@code uuid:a-b[:c-d],...}). */
+    private static long countTransactions(String gtidSet) {
+        if (gtidSet == null || gtidSet.isBlank()) {
+            return 0;
+        }
+        long total = 0;
+        for (String sourceSet : gtidSet.replaceAll("\\s+", "").split(",")) {
+            String[] parts = sourceSet.split(":");
+            for (int i = 1; i < parts.length; i++) {
+                int dash = parts[i].indexOf('-');
+                total += dash < 0
+                        ? 1
+                        : Long.parseLong(parts[i].substring(dash + 1))
+                                - Long.parseLong(parts[i].substring(0, dash)) + 1;
+            }
+        }
+        return total;
+    }
+
+    /**
      * Asserts the response set exactly one gate cookie: a {@code Set-Cookie} whose Base64url-decoded
      * value is a non-empty GTID, marked {@code HttpOnly}, {@code Secure}, {@code SameSite=Lax}. The
      * cookie is matched by its GTID-shaped decoded value rather than a hardcoded name; the wire value
@@ -285,5 +408,41 @@ class CausalGateIT extends CausalHarnessSupport {
     }
 
     private record GateCookie(String name, String value) {
+    }
+
+    /**
+     * Replaces the gate's {@link GtidWriteCapture} with a delegating subclass that counts
+     * {@code recordCommit} invocations, making "the transaction manager registered a
+     * synchronization for each committed transaction" observable from outside the request —
+     * the production accumulator state is thread-local and already cleared when
+     * {@code mockMvc.perform} returns.
+     */
+    @TestConfiguration(proxyBeanMethods = false)
+    static class RecordingCaptureConfig {
+
+        @Bean
+        @Primary
+        RecordingGtidWriteCapture recordingGtidWriteCapture(DataSource dataSource) {
+            return new RecordingGtidWriteCapture(dataSource);
+        }
+    }
+
+    static class RecordingGtidWriteCapture extends GtidWriteCapture {
+
+        private final AtomicInteger commitRecordings = new AtomicInteger();
+
+        RecordingGtidWriteCapture(DataSource dataSource) {
+            super(dataSource);
+        }
+
+        @Override
+        public void recordCommit(String ownGtid, boolean trackerReadable) {
+            commitRecordings.incrementAndGet();
+            super.recordCommit(ownGtid, trackerReadable);
+        }
+
+        int commitRecordings() {
+            return commitRecordings.get();
+        }
     }
 }
