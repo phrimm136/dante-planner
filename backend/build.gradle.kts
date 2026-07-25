@@ -131,14 +131,17 @@ pitest {
         "org.danteplanner.backend.planner.service.*",
         "org.danteplanner.backend.auth.token.*",
         "org.danteplanner.backend.shared.readpath.*"))
+    // Without this, PIT derives targetTests from targetClasses and misses any test whose package
+    // differs from the class under test.
+    targetTests.set(listOf("org.danteplanner.backend.*"))
     excludedTestClasses.set(listOf("*IT", "*IntegrationTest", "*ControllerTest"))
     junit5PluginVersion.set("1.2.1")
     threads.set(4)
     timestampedReports.set(false)
-    // Measured baseline: 486 mutations, 134 killed (28%). Raise as coverage lands; never lower.
+    // Measured baseline: 485 mutations, 277 killed (57%). Raise as coverage lands; never lower.
     // Pinned to 1.19.0-rc.1: the 1.19.0 release crashes the coverage minion on this project
     // (UNKNOWN_ERROR) across every pitest core from 1.19.6 to 1.22.1.
-    mutationThreshold.set(25)
+    mutationThreshold.set(50)
 }
 
 // Javadoc references are compiler-checked so a comment can cite an invariant test by name and
