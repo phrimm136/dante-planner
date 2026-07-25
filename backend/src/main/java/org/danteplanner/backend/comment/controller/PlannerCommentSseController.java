@@ -3,7 +3,8 @@ package org.danteplanner.backend.comment.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,7 @@ import java.util.UUID;
 public class PlannerCommentSseController {
 
     private final PlannerCommentSseService plannerCommentSseService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
 
     /**
      * Subscribe to comment notifications for a specific planner.
@@ -52,7 +53,7 @@ public class PlannerCommentSseController {
             @PathVariable UUID plannerId,
             @DeviceId UUID deviceId) {
 
-        rateLimitConfig.checkPlannerCommentSseLimit(deviceId);
+        rateLimitService.check(RateLimitPolicy.PLANNER_COMMENT_SSE, deviceId);
         log.debug("Comment SSE subscription for planner {} device {}", plannerId, deviceId);
         return plannerCommentSseService.subscribe(plannerId, deviceId);
     }

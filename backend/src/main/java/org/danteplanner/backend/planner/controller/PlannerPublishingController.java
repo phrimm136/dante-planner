@@ -3,7 +3,8 @@ package org.danteplanner.backend.planner.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishRequest;
@@ -37,7 +38,7 @@ public class PlannerPublishingController {
     private static final String LEGACY_TOGGLE_COUNTER = "planner.legacy_toggle";
 
     private final PlannerPublishingService plannerPublishingService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
     private final MeterRegistry meterRegistry;
 
     /**
@@ -62,7 +63,7 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @RequestBody(required = false) @Valid PublishRequest request) {
 
-        rateLimitConfig.checkCrudLimit(userId, "publish");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "publish");
 
         if (request != null && request.namesState()) {
             log.info("Setting planner {} published={} by user {}", id, request.published(), userId);

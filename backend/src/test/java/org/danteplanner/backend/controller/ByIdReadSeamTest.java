@@ -16,7 +16,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class ByIdReadSeamTest {
     PlannerQueryService plannerQueryService;
 
     @Mock
-    RateLimitConfig rateLimitConfig;
+    RateLimitService rateLimitService;
 
     @Mock
     PublishedPlannerQueryService publishedPlannerQueryService;

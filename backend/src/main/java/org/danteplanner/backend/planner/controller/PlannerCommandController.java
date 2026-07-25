@@ -4,7 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -38,7 +39,7 @@ import java.util.UUID;
 public class PlannerCommandController {
 
     private final PlannerCommandService plannerCommandService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
 
     /**
      * Upsert a planner (create if not exists, update if exists).
@@ -60,7 +61,7 @@ public class PlannerCommandController {
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        rateLimitConfig.checkCrudLimit(userId, "upsert");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "upsert");
         log.info("Upserting planner {} for user {}, force={}", id, userId, force);
         UpsertResult result = plannerCommandService.upsertPlanner(userId, deviceId, id, request, force);
 
@@ -82,7 +83,7 @@ public class PlannerCommandController {
             @DeviceId UUID deviceId,
             @PathVariable UUID id) {
 
-        rateLimitConfig.checkCrudLimit(userId, "delete");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "delete");
         log.info("Deleting planner {} for user {}", id, userId);
         plannerCommandService.deletePlanner(userId, deviceId, id);
         return ResponseEntity.noContent().build();
@@ -102,7 +103,7 @@ public class PlannerCommandController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ImportPlannersRequest request) {
 
-        rateLimitConfig.checkImportLimit(userId);
+        rateLimitService.check(RateLimitPolicy.IMPORT, userId);
         log.info("Importing {} planners for user {}", request.planners().size(), userId);
         ImportPlannersResponse response = plannerCommandService.importPlanners(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

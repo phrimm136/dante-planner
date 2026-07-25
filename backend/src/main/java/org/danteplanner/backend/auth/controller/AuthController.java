@@ -8,7 +8,8 @@ import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.OAuthProperties;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.user.entity.User;
@@ -54,7 +55,7 @@ public class AuthController {
     private final AuthenticationFacade authFacade;
     private final TokenValidator tokenValidator;
     private final UserService userService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;
@@ -135,7 +136,7 @@ public class AuthController {
                     securityProperties,
                     deviceId
             );
-            rateLimitConfig.checkAuthLimit(identifier);
+            rateLimitService.check(RateLimitPolicy.AUTH, identifier);
 
             if (error != null || code == null || code.isBlank() || state == null) {
                 return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
@@ -178,7 +179,7 @@ public class AuthController {
                 securityProperties,
                 deviceId
         );
-        rateLimitConfig.checkAuthLimit(identifier);
+        rateLimitService.check(RateLimitPolicy.AUTH, identifier);
 
         // Apple OAuth not yet implemented
         return ResponseEntity.badRequest().build();

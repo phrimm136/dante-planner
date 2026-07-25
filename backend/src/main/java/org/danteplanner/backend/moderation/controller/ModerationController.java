@@ -14,6 +14,8 @@ import org.danteplanner.backend.moderation.dto.TimeoutResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ModerationController {
 
     private final ModerationService moderationService;
-    private final org.danteplanner.backend.shared.config.RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
 
     /**
      * Timeout a user for a specified duration.
@@ -56,7 +58,7 @@ public class ModerationController {
             @PathVariable String usernameSuffix,
             @Valid @RequestBody TimeoutRequest request) {
 
-        rateLimitConfig.checkModerationLimit(actorId);
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} timing out user with suffix {} for {} minutes with reason: {}",
                 actorId, usernameSuffix, request.durationMinutes(), request.reason());
@@ -81,7 +83,7 @@ public class ModerationController {
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitConfig.checkModerationLimit(actorId);
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
@@ -131,7 +133,7 @@ public class ModerationController {
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitConfig.checkModerationLimit(actorId);
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Admin {} banning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
@@ -158,7 +160,7 @@ public class ModerationController {
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitConfig.checkModerationLimit(actorId);
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Admin {} unbanning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
@@ -242,7 +244,7 @@ public class ModerationController {
             @PathVariable UUID plannerId,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitConfig.checkModerationLimit(actorId);
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} taking down planner {} with reason: {}", actorId, plannerId, request.reason());
 
@@ -270,7 +272,7 @@ public class ModerationController {
             @PathVariable UUID commentPublicId,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitConfig.checkModerationLimit(actorId);
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} deleting comment {} with reason: {}", actorId, commentPublicId, request.reason());
         moderationService.deleteCommentByPublicId(actorId, commentPublicId, request.reason());

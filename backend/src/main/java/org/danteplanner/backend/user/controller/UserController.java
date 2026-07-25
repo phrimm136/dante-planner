@@ -5,7 +5,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.user.dto.EpithetListResponse;
@@ -47,7 +48,7 @@ public class UserController {
     private final UserSettingsService userSettingsService;
     private final SsePublisher ssePublisher;
     private final EpithetConfig epithetConfig;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
     private final AuthenticationFacade authFacade;
     private final CookieUtils cookieUtils;
 
@@ -83,7 +84,7 @@ public class UserController {
             @Valid @RequestBody UpdateUsernameEpithetRequest request) {
         Long userId = (Long) authentication.getPrincipal();
 
-        rateLimitConfig.checkCrudLimit(userId, "user-epithet-update");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-epithet-update");
         log.info("User {} updating username epithet to {}", userId, request.epithet());
 
         User updatedUser = userService.updateUsernameEpithet(userId, request.epithet());
@@ -110,7 +111,7 @@ public class UserController {
             HttpServletResponse response) {
         Long userId = (Long) authentication.getPrincipal();
 
-        rateLimitConfig.checkCrudLimit(userId, "user-delete");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-delete");
         log.info("User {} requested account deletion", userId);
 
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
@@ -159,7 +160,7 @@ public class UserController {
             @Valid @RequestBody UpdateUserSettingsRequest request) {
         Long userId = (Long) authentication.getPrincipal();
 
-        rateLimitConfig.checkCrudLimit(userId, "user-settings-update");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-settings-update");
         log.debug("User {} updating settings", userId);
 
         UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);

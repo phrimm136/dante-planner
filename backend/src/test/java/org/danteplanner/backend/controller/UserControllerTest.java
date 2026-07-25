@@ -2,7 +2,7 @@ package org.danteplanner.backend.controller;
 import org.danteplanner.backend.user.controller.UserController;
 
 import jakarta.servlet.http.Cookie;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
@@ -55,7 +55,7 @@ class UserControllerTest {
     private SsePublisher ssePublisher;
 
     @Mock
-    private RateLimitConfig rateLimitConfig;
+    private RateLimitService rateLimitService;
 
     @Mock
     private AuthenticationFacade authFacade;

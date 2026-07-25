@@ -1,6 +1,8 @@
-package org.danteplanner.backend.config;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.config.RateLimitProperties;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 
 import org.danteplanner.backend.shared.exception.RateLimitExceededException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -25,16 +27,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for RateLimitConfig.
+ * Unit tests for RateLimitService.
  *
  * <p>Tests Bucket4j rate limiting behavior over a Redis-backed bucket4j
  * {@link ProxyManager}: bucket creation, request consumption within limits,
  * rate limit exceeded exceptions, per-user/per-endpoint isolation, and that
  * bucket keys live in the local rate-limit Redis (with a TTL) and never in
  * the auth Redis.</p>
+ *
+ * <p>A test needing a bucket shape of its own rebinds the {@code crud} bucket and charges
+ * {@link RateLimitPolicy#CRUD} with a caller-named endpoint, so the key under test stays
+ * {@code userId:endpoint}.</p>
  */
 @Tag("containerized")
-class RateLimitConfigTest {
+class RateLimitServiceTest {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
 
@@ -44,8 +50,9 @@ class RateLimitConfigTest {
     private static StringRedisTemplate rateLimitTemplate;
     private static StringRedisTemplate authTemplate;
 
-    private RateLimitConfig rateLimitConfig;
-    private RateLimitConfig.BucketConfig testBucketConfig;
+    private RateLimitProperties properties;
+    private RateLimitService rateLimitService;
+    private RateLimitProperties.BucketConfig testBucketConfig;
 
     @BeforeAll
     static void startContainers() {
@@ -78,34 +85,35 @@ class RateLimitConfigTest {
 
         ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
                 REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(60));
-        rateLimitConfig = new RateLimitConfig(proxyManager);
+        properties = new RateLimitProperties();
+        rateLimitService = new RateLimitService(proxyManager, properties);
 
         // Configure a test bucket: 5 requests per 10 seconds
-        testBucketConfig = new RateLimitConfig.BucketConfig();
+        testBucketConfig = new RateLimitProperties.BucketConfig();
         testBucketConfig.setCapacity(5);
         testBucketConfig.setRefillTokens(5);
         testBucketConfig.setRefillDurationSeconds(10);
 
-        // Set up CRUD config for checkCrudLimit tests
-        RateLimitConfig.BucketConfig crudConfig = new RateLimitConfig.BucketConfig();
+        // Set up CRUD config for CRUD policy tests
+        RateLimitProperties.BucketConfig crudConfig = new RateLimitProperties.BucketConfig();
         crudConfig.setCapacity(10);
         crudConfig.setRefillTokens(10);
         crudConfig.setRefillDurationSeconds(60);
-        rateLimitConfig.setCrud(crudConfig);
+        properties.setCrud(crudConfig);
 
-        // Set up import config for checkImportLimit tests
-        RateLimitConfig.BucketConfig importConfig = new RateLimitConfig.BucketConfig();
+        // Set up import config for IMPORT policy tests
+        RateLimitProperties.BucketConfig importConfig = new RateLimitProperties.BucketConfig();
         importConfig.setCapacity(3);
         importConfig.setRefillTokens(3);
         importConfig.setRefillDurationSeconds(300);
-        rateLimitConfig.setImportConfig(importConfig);
+        properties.setImportConfig(importConfig);
 
-        // Set up SSE config for checkSseLimit tests
-        RateLimitConfig.BucketConfig sseConfig = new RateLimitConfig.BucketConfig();
+        // Set up SSE config for SSE policy tests
+        RateLimitProperties.BucketConfig sseConfig = new RateLimitProperties.BucketConfig();
         sseConfig.setCapacity(2);
         sseConfig.setRefillTokens(2);
         sseConfig.setRefillDurationSeconds(60);
-        rateLimitConfig.setSse(sseConfig);
+        properties.setSse(sseConfig);
     }
 
     @Nested
@@ -117,10 +125,11 @@ class RateLimitConfigTest {
         void checkRateLimit_WithinLimit_Succeeds() {
             Long userId = 1L;
             String endpoint = "test-endpoint";
+            properties.setCrud(testBucketConfig);
 
             // Should not throw for 5 requests (capacity = 5)
             for (int i = 0; i < 5; i++) {
-                assertDoesNotThrow(() -> rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig),
+                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint),
                         "Request " + (i + 1) + " should succeed");
             }
         }
@@ -132,7 +141,7 @@ class RateLimitConfigTest {
 
             // Should not throw for 10 requests (CRUD capacity = 10)
             for (int i = 0; i < 10; i++) {
-                assertDoesNotThrow(() -> rateLimitConfig.checkCrudLimit(userId, "planners"),
+                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"),
                         "CRUD request " + (i + 1) + " should succeed");
             }
         }
@@ -144,7 +153,7 @@ class RateLimitConfigTest {
 
             // Should not throw for 3 requests (import capacity = 3)
             for (int i = 0; i < 3; i++) {
-                assertDoesNotThrow(() -> rateLimitConfig.checkImportLimit(userId),
+                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.IMPORT, userId),
                         "Import request " + (i + 1) + " should succeed");
             }
         }
@@ -156,7 +165,7 @@ class RateLimitConfigTest {
 
             // Should not throw for 2 requests (SSE capacity = 2)
             for (int i = 0; i < 2; i++) {
-                assertDoesNotThrow(() -> rateLimitConfig.checkSseLimit(userId),
+                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.SSE, userId),
                         "SSE request " + (i + 1) + " should succeed");
             }
         }
@@ -171,16 +180,17 @@ class RateLimitConfigTest {
         void checkRateLimit_ExceedsLimit_ThrowsException() {
             Long userId = 1L;
             String endpoint = "test-endpoint";
+            properties.setCrud(testBucketConfig);
 
             // Consume all 5 tokens
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint);
             }
 
             // 6th request should fail
             RateLimitExceededException exception = assertThrows(
                     RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig)
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint)
             );
 
             assertEquals(userId, exception.getUserId());
@@ -196,13 +206,13 @@ class RateLimitConfigTest {
 
             // Consume all 10 tokens
             for (int i = 0; i < 10; i++) {
-                rateLimitConfig.checkCrudLimit(userId, "planners");
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners");
             }
 
             // 11th request should fail
             RateLimitExceededException exception = assertThrows(
                     RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkCrudLimit(userId, "planners")
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners")
             );
 
             assertEquals(userId, exception.getUserId());
@@ -216,13 +226,13 @@ class RateLimitConfigTest {
 
             // Consume all 3 tokens
             for (int i = 0; i < 3; i++) {
-                rateLimitConfig.checkImportLimit(userId);
+                rateLimitService.check(RateLimitPolicy.IMPORT, userId);
             }
 
             // 4th request should fail
             RateLimitExceededException exception = assertThrows(
                     RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkImportLimit(userId)
+                    () -> rateLimitService.check(RateLimitPolicy.IMPORT, userId)
             );
 
             assertEquals(userId, exception.getUserId());
@@ -236,13 +246,13 @@ class RateLimitConfigTest {
 
             // Consume all 2 tokens
             for (int i = 0; i < 2; i++) {
-                rateLimitConfig.checkSseLimit(userId);
+                rateLimitService.check(RateLimitPolicy.SSE, userId);
             }
 
             // 3rd request should fail
             RateLimitExceededException exception = assertThrows(
                     RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkSseLimit(userId)
+                    () -> rateLimitService.check(RateLimitPolicy.SSE, userId)
             );
 
             assertEquals(userId, exception.getUserId());
@@ -258,18 +268,19 @@ class RateLimitConfigTest {
         @DisplayName("Should maintain separate buckets for different endpoints")
         void checkRateLimit_DifferentEndpoints_SeparateBuckets() {
             Long userId = 1L;
+            properties.setCrud(testBucketConfig);
 
             // Exhaust capacity for endpoint1
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(userId, "endpoint1", testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint1");
             }
 
             // Should still allow requests to endpoint2 (separate bucket)
-            assertDoesNotThrow(() -> rateLimitConfig.checkRateLimit(userId, "endpoint2", testBucketConfig));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint2"));
 
             // endpoint1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(userId, "endpoint1", testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "endpoint1"));
         }
 
         @Test
@@ -279,15 +290,15 @@ class RateLimitConfigTest {
 
             // Exhaust CRUD capacity
             for (int i = 0; i < 10; i++) {
-                rateLimitConfig.checkCrudLimit(userId, "planners");
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners");
             }
 
             // Import should still work (separate bucket)
-            assertDoesNotThrow(() -> rateLimitConfig.checkImportLimit(userId));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.IMPORT, userId));
 
             // CRUD should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkCrudLimit(userId, "planners"));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners"));
         }
 
         @Test
@@ -297,11 +308,11 @@ class RateLimitConfigTest {
 
             // Exhaust capacity for planners endpoint
             for (int i = 0; i < 10; i++) {
-                rateLimitConfig.checkCrudLimit(userId, "planners");
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, "planners");
             }
 
             // Should still allow requests to different endpoint
-            assertDoesNotThrow(() -> rateLimitConfig.checkCrudLimit(userId, "other-resource"));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, "other-resource"));
         }
     }
 
@@ -315,18 +326,19 @@ class RateLimitConfigTest {
             Long user1 = 1L;
             Long user2 = 2L;
             String endpoint = "test-endpoint";
+            properties.setCrud(testBucketConfig);
 
             // Exhaust user1's capacity
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(user1, endpoint, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, user1, endpoint);
             }
 
             // User2 should still be able to make requests (separate bucket)
-            assertDoesNotThrow(() -> rateLimitConfig.checkRateLimit(user2, endpoint, testBucketConfig));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, user2, endpoint));
 
             // User1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(user1, endpoint, testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, user1, endpoint));
         }
 
         @Test
@@ -337,15 +349,15 @@ class RateLimitConfigTest {
 
             // Exhaust user1's CRUD capacity
             for (int i = 0; i < 10; i++) {
-                rateLimitConfig.checkCrudLimit(user1, "planners");
+                rateLimitService.check(RateLimitPolicy.CRUD, user1, "planners");
             }
 
             // User2 should still be able to make requests
-            assertDoesNotThrow(() -> rateLimitConfig.checkCrudLimit(user2, "planners"));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, user2, "planners"));
 
             // User1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkCrudLimit(user1, "planners"));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, user1, "planners"));
         }
 
         @Test
@@ -356,15 +368,15 @@ class RateLimitConfigTest {
 
             // Exhaust user1's import capacity
             for (int i = 0; i < 3; i++) {
-                rateLimitConfig.checkImportLimit(user1);
+                rateLimitService.check(RateLimitPolicy.IMPORT, user1);
             }
 
             // User2 should still be able to import
-            assertDoesNotThrow(() -> rateLimitConfig.checkImportLimit(user2));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.IMPORT, user2));
 
             // User1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkImportLimit(user1));
+                    () -> rateLimitService.check(RateLimitPolicy.IMPORT, user1));
         }
 
         @Test
@@ -375,15 +387,15 @@ class RateLimitConfigTest {
 
             // Exhaust user1's SSE capacity
             for (int i = 0; i < 2; i++) {
-                rateLimitConfig.checkSseLimit(user1);
+                rateLimitService.check(RateLimitPolicy.SSE, user1);
             }
 
             // User2 should still be able to connect
-            assertDoesNotThrow(() -> rateLimitConfig.checkSseLimit(user2));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.SSE, user2));
 
             // User1 should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkSseLimit(user1));
+                    () -> rateLimitService.check(RateLimitPolicy.SSE, user1));
         }
     }
 
@@ -404,30 +416,31 @@ class RateLimitConfigTest {
             Long user2 = 2L;
             String endpointA = "endpoint-a";
             String endpointB = "endpoint-b";
+            properties.setCrud(testBucketConfig);
 
             // Each combination should allow up to 5 requests independently
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(user1, endpointA, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, user1, endpointA);
             }
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(user1, endpointB, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, user1, endpointB);
             }
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(user2, endpointA, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, user2, endpointA);
             }
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkRateLimit(user2, endpointB, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, user2, endpointB);
             }
 
             // All combinations should now be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(user1, endpointA, testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, user1, endpointA));
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(user1, endpointB, testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, user1, endpointB));
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(user2, endpointA, testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, user2, endpointA));
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(user2, endpointB, testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, user2, endpointB));
         }
     }
 
@@ -438,7 +451,7 @@ class RateLimitConfigTest {
         @Test
         @DisplayName("Should correctly store and retrieve capacity")
         void bucketConfig_Capacity_StoredCorrectly() {
-            RateLimitConfig.BucketConfig config = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setCapacity(100);
 
             assertEquals(100, config.getCapacity());
@@ -447,7 +460,7 @@ class RateLimitConfigTest {
         @Test
         @DisplayName("Should correctly store and retrieve refill tokens")
         void bucketConfig_RefillTokens_StoredCorrectly() {
-            RateLimitConfig.BucketConfig config = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setRefillTokens(50);
 
             assertEquals(50, config.getRefillTokens());
@@ -456,7 +469,7 @@ class RateLimitConfigTest {
         @Test
         @DisplayName("Should correctly store and retrieve refill duration")
         void bucketConfig_RefillDuration_StoredCorrectly() {
-            RateLimitConfig.BucketConfig config = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig config = new RateLimitProperties.BucketConfig();
             config.setRefillDurationSeconds(120);
 
             assertEquals(120, config.getRefillDurationSeconds());
@@ -471,87 +484,87 @@ class RateLimitConfigTest {
         @DisplayName("Should create separate buckets for different identifiers")
         void checkAuthLimit_DifferentIdentifiers_SeparateBuckets() {
             // Set up auth config
-            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(5);
             authConfig.setRefillTokens(5);
             authConfig.setRefillDurationSeconds(60);
-            rateLimitConfig.setAuth(authConfig);
+            properties.setAuth(authConfig);
 
             String ipIdentifier = "ip:203.0.113.1";
             String deviceIdentifier = "device:abc-123";
 
             // Exhaust IP identifier bucket
             for (int i = 0; i < 5; i++) {
-                rateLimitConfig.checkAuthLimit(ipIdentifier);
+                rateLimitService.check(RateLimitPolicy.AUTH, ipIdentifier);
             }
 
             // Device identifier should still work (separate bucket)
-            assertDoesNotThrow(() -> rateLimitConfig.checkAuthLimit(deviceIdentifier));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.AUTH, deviceIdentifier));
 
             // IP identifier should still be exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkAuthLimit(ipIdentifier));
+                    () -> rateLimitService.check(RateLimitPolicy.AUTH, ipIdentifier));
         }
 
         @Test
         @DisplayName("Should isolate buckets between ip and device prefixes")
         void checkAuthLimit_IpVsDevice_Isolated() {
-            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(3);
             authConfig.setRefillTokens(3);
             authConfig.setRefillDurationSeconds(60);
-            rateLimitConfig.setAuth(authConfig);
+            properties.setAuth(authConfig);
 
             // Different identifiers should not collide
-            rateLimitConfig.checkAuthLimit("ip:192.168.1.1");
-            rateLimitConfig.checkAuthLimit("ip:192.168.1.1");
-            rateLimitConfig.checkAuthLimit("ip:192.168.1.1");
+            rateLimitService.check(RateLimitPolicy.AUTH, "ip:192.168.1.1");
+            rateLimitService.check(RateLimitPolicy.AUTH, "ip:192.168.1.1");
+            rateLimitService.check(RateLimitPolicy.AUTH, "ip:192.168.1.1");
 
             // ip:192.168.1.1 exhausted
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkAuthLimit("ip:192.168.1.1"));
+                    () -> rateLimitService.check(RateLimitPolicy.AUTH, "ip:192.168.1.1"));
 
             // device:192.168.1.1 should have separate bucket
-            assertDoesNotThrow(() -> rateLimitConfig.checkAuthLimit("device:192.168.1.1"));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.AUTH, "device:192.168.1.1"));
         }
 
         @Test
         @DisplayName("Should use unified bucket key format identifier:auth")
         void checkAuthLimit_BucketKeyFormat_IdentifierColonAuth() {
-            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(2);
             authConfig.setRefillTokens(2);
             authConfig.setRefillDurationSeconds(60);
-            rateLimitConfig.setAuth(authConfig);
+            properties.setAuth(authConfig);
 
             String identifier = "device:test-device";
 
             // Use 2 tokens
-            rateLimitConfig.checkAuthLimit(identifier);
-            rateLimitConfig.checkAuthLimit(identifier);
+            rateLimitService.check(RateLimitPolicy.AUTH, identifier);
+            rateLimitService.check(RateLimitPolicy.AUTH, identifier);
 
             // 3rd should fail
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkAuthLimit(identifier));
+                    () -> rateLimitService.check(RateLimitPolicy.AUTH, identifier));
         }
 
         @Test
         @DisplayName("Should handle unknown device identifier")
         void checkAuthLimit_UnknownDevice_Works() {
-            RateLimitConfig.BucketConfig authConfig = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig authConfig = new RateLimitProperties.BucketConfig();
             authConfig.setCapacity(1);
             authConfig.setRefillTokens(1);
             authConfig.setRefillDurationSeconds(60);
-            rateLimitConfig.setAuth(authConfig);
+            properties.setAuth(authConfig);
 
             String unknownIdentifier = "device:unknown";
 
             // Should work for first request
-            assertDoesNotThrow(() -> rateLimitConfig.checkAuthLimit(unknownIdentifier));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.AUTH, unknownIdentifier));
 
             // Should fail for second (bucket exhausted)
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkAuthLimit(unknownIdentifier));
+                    () -> rateLimitService.check(RateLimitPolicy.AUTH, unknownIdentifier));
         }
     }
 
@@ -562,41 +575,43 @@ class RateLimitConfigTest {
         @Test
         @DisplayName("Should handle single capacity bucket correctly")
         void checkRateLimit_SingleCapacity_ExhaustsAfterOne() {
-            RateLimitConfig.BucketConfig singleConfig = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig singleConfig = new RateLimitProperties.BucketConfig();
             singleConfig.setCapacity(1);
             singleConfig.setRefillTokens(1);
             singleConfig.setRefillDurationSeconds(60);
+            properties.setCrud(singleConfig);
 
             Long userId = 1L;
             String endpoint = "single-test";
 
             // First request should succeed
-            assertDoesNotThrow(() -> rateLimitConfig.checkRateLimit(userId, endpoint, singleConfig));
+            assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
 
             // Second request should fail
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(userId, endpoint, singleConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
         }
 
         @Test
         @DisplayName("Should handle large capacity bucket correctly")
         void checkRateLimit_LargeCapacity_HandlesCorrectly() {
-            RateLimitConfig.BucketConfig largeConfig = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig largeConfig = new RateLimitProperties.BucketConfig();
             largeConfig.setCapacity(1000);
             largeConfig.setRefillTokens(1000);
             largeConfig.setRefillDurationSeconds(86400);
+            properties.setCrud(largeConfig);
 
             Long userId = 1L;
             String endpoint = "large-test";
 
             // Should allow 1000 requests
             for (int i = 0; i < 1000; i++) {
-                rateLimitConfig.checkRateLimit(userId, endpoint, largeConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint);
             }
 
             // 1001st should fail
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(userId, endpoint, largeConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
         }
 
         @Test
@@ -604,20 +619,21 @@ class RateLimitConfigTest {
         void checkRateLimit_SameKey_ReusesBucket() {
             Long userId = 1L;
             String endpoint = "reuse-test";
+            properties.setCrud(testBucketConfig);
 
             // Use 3 tokens
             for (int i = 0; i < 3; i++) {
-                rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig);
+                rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint);
             }
 
             // Use 2 more tokens (should work, total 5)
             for (int i = 0; i < 2; i++) {
-                assertDoesNotThrow(() -> rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig));
+                assertDoesNotThrow(() -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
             }
 
             // 6th should fail
             assertThrows(RateLimitExceededException.class,
-                    () -> rateLimitConfig.checkRateLimit(userId, endpoint, testBucketConfig));
+                    () -> rateLimitService.check(RateLimitPolicy.CRUD, userId, endpoint));
         }
     }
 
@@ -630,15 +646,17 @@ class RateLimitConfigTest {
         void rateLimitBucket_AfterConsume_PersistsInLocalRedisWithTtl() {
             ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
                     REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
-            RateLimitConfig config = new RateLimitConfig(proxyManager);
 
-            RateLimitConfig.BucketConfig cfg = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
             cfg.setCapacity(5);
             cfg.setRefillTokens(5);
             cfg.setRefillDurationSeconds(10);
+            RateLimitProperties ttlProperties = new RateLimitProperties();
+            ttlProperties.setCrud(cfg);
+            RateLimitService service = new RateLimitService(proxyManager, ttlProperties);
 
             // Consume one token for the known key "1:ttl-probe"
-            config.checkRateLimit(1L, "ttl-probe", cfg);
+            service.check(RateLimitPolicy.CRUD, 1L, "ttl-probe");
 
             // The bucket key must exist in the local rate-limit Redis...
             assertThat(rateLimitTemplate.hasKey("1:ttl-probe")).isTrue();
@@ -655,15 +673,17 @@ class RateLimitConfigTest {
         void rateLimitBucket_AfterConsume_AbsentFromAuthRedis() {
             ProxyManager<byte[]> proxyManager = RedisConnectionConfig.buildRateLimitProxyManager(
                     REDIS.getRedisHost(), REDIS.getRedisPort(), Duration.ofSeconds(2));
-            RateLimitConfig config = new RateLimitConfig(proxyManager);
 
-            RateLimitConfig.BucketConfig cfg = new RateLimitConfig.BucketConfig();
+            RateLimitProperties.BucketConfig cfg = new RateLimitProperties.BucketConfig();
             cfg.setCapacity(5);
             cfg.setRefillTokens(5);
             cfg.setRefillDurationSeconds(10);
+            RateLimitProperties authProbeProperties = new RateLimitProperties();
+            authProbeProperties.setCrud(cfg);
+            RateLimitService service = new RateLimitService(proxyManager, authProbeProperties);
 
             // Consume one token for the known key "2:auth-probe"
-            config.checkRateLimit(2L, "auth-probe", cfg);
+            service.check(RateLimitPolicy.CRUD, 2L, "auth-probe");
 
             // Present in the local rate-limit Redis, absent from the auth Redis.
             assertThat(rateLimitTemplate.hasKey("2:auth-probe")).isTrue();

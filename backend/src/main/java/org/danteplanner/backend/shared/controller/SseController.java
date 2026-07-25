@@ -3,7 +3,8 @@ package org.danteplanner.backend.shared.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +28,7 @@ import java.util.UUID;
 public class SseController {
 
     private final SseService sseService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
 
     /**
      * Subscribe to Server-Sent Events for all user notifications.
@@ -44,7 +45,7 @@ public class SseController {
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId) {
 
-        rateLimitConfig.checkSseLimit(userId);
+        rateLimitService.check(RateLimitPolicy.SSE, userId);
         log.info("SSE subscription for user {} device {}", userId, deviceId);
         return sseService.subscribe(userId, deviceId);
     }

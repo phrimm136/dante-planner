@@ -3,7 +3,8 @@ package org.danteplanner.backend.planner.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.planner.dto.BookmarkRequest;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
@@ -43,7 +44,7 @@ public class PlannerEngagementController {
     private final PlannerEngagementService plannerEngagementService;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
     private final MeterRegistry meterRegistry;
 
     /**
@@ -63,7 +64,7 @@ public class PlannerEngagementController {
             @PathVariable UUID id,
             @Valid @RequestBody VoteRequest request) {
 
-        rateLimitConfig.checkCrudLimit(userId, "vote");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "vote");
         log.info("User {} casting immutable upvote on planner {}", userId, id);
         VoteResponse response = plannerEngagementService.castVote(userId, id, request.voteType());
         return ResponseEntity.ok(response);
@@ -90,7 +91,7 @@ public class PlannerEngagementController {
             @PathVariable UUID id,
             @Valid @RequestBody(required = false) BookmarkRequest request) {
 
-        rateLimitConfig.checkCrudLimit(userId, "bookmark");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "bookmark");
 
         if (request != null && request.namesState()) {
             log.info("User {} setting bookmark={} on planner {}", userId, request.bookmarked(), id);
@@ -118,7 +119,7 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        rateLimitConfig.checkCrudLimit(userId, "subscribe");
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "subscribe");
         log.info("User {} toggling subscription on planner {}", userId, id);
         var subscription = subscriptionService.toggleSubscription(userId, id);
         SubscriptionResponse response = SubscriptionResponse.builder()
@@ -143,7 +144,7 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        rateLimitConfig.checkReportLimit(userId);
+        rateLimitService.check(RateLimitPolicy.REPORT, userId);
         log.info("User {} reporting planner {}", userId, id);
         reportService.createReport(userId, id);
         ReportResponse response = ReportResponse.builder()

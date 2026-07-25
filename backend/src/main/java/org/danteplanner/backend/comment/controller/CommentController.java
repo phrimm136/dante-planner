@@ -7,7 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.RateLimitConfig;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CommentVoteResponse;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
@@ -45,7 +46,7 @@ public class CommentController {
 
     private final CommentService commentService;
     private final CommentReportService commentReportService;
-    private final RateLimitConfig rateLimitConfig;
+    private final RateLimitService rateLimitService;
 
     /**
      * Get all comments for a planner.
@@ -87,7 +88,7 @@ public class CommentController {
             @PathVariable UUID plannerId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        rateLimitConfig.checkCommentLimit(userId);
+        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} creating comment on planner {}", userId, plannerId);
         CreateCommentResponse response = commentService.createComment(plannerId, userId, deviceId, request);
@@ -114,7 +115,7 @@ public class CommentController {
             @PathVariable UUID parentCommentId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        rateLimitConfig.checkCommentLimit(userId);
+        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} creating reply to comment {}", userId, parentCommentId);
         CreateCommentResponse response = commentService.createReply(parentCommentId, userId, deviceId, request.content());
@@ -138,7 +139,7 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody UpdateCommentRequest request) {
 
-        rateLimitConfig.checkCommentLimit(userId);
+        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} editing comment {}", userId, commentId);
         UpdateCommentResponse response = commentService.updateComment(commentId, userId, request);
@@ -181,7 +182,7 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
 
-        rateLimitConfig.checkCommentLimit(userId);
+        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         CommentVoteResponse response = commentService.toggleUpvote(commentId, userId);
         return ResponseEntity.ok(response);
@@ -227,7 +228,7 @@ public class CommentController {
     //         @PathVariable UUID commentId,
     //         @Valid @RequestBody CommentReportRequest request) {
     //
-    //     rateLimitConfig.checkCommentLimit(userId);
+    //     rateLimitService.check(RateLimitPolicy.COMMENT, userId);
     //
     //     log.info("User {} reporting comment {}", userId, commentId);
     //     CommentReportResponse response = commentReportService.createReport(commentId, userId, request);
