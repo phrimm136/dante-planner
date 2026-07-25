@@ -3,6 +3,7 @@ import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 
 import org.danteplanner.backend.notification.service.NotificationService;
@@ -10,7 +11,9 @@ import org.danteplanner.backend.notification.service.NotificationService;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -116,6 +119,37 @@ class PlannerPublishingServiceTest {
 
     private Planner createTestPlanner() {
         return testPlannerBuilder().build();
+    }
+
+    @Nested
+    @DisplayName("publishWithContent Tests")
+    class PublishWithContentTests {
+
+        @Test
+        @DisplayName("publish-with-content reuses the aggregate the upsert already loaded")
+        void publishLoadsAggregateOnce_WhenContentCarried_ReusesUpsertedAggregate() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            UpsertPlannerRequest request = new UpsertPlannerRequest(
+                    planner.getId().toString(), "5F", "Reused Aggregate", null, "{}", 1,
+                    PlannerType.MIRROR_DUNGEON, null, null);
+
+            when(plannerCommandService.upsertAggregate(
+                    testUser.getId(), null, planner.getId(), request, false))
+                    .thenReturn(new PlannerCommandService.UpsertedPlanner(
+                            planner, PlannerResponse.fromEntity(planner, 0), false));
+            when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
+                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            PlannerResponse result =
+                    publishingService.publishWithContent(testUser.getId(), planner.getId(), request);
+
+            assertTrue(result.published());
+            verify(plannerRepository, never()).findAggregateForOwner(any(), any());
+            verify(plannerRepository, never()).findAggregate(any());
+        }
     }
 
     @Nested

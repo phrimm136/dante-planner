@@ -263,6 +263,29 @@ public class PlannerCommandService {
      * @return upsert result with response and created flag for HTTP status determination
      * @throws PlannerConflictException if syncVersion doesn't match and force is false
      */
+    /**
+     * Upsert a planner and hand back the persisted aggregate along with its response, so a caller
+     * that keeps working on the same planner reuses this load instead of reading it again.
+     *
+     * @param userId   the user ID
+     * @param deviceId the device ID making the request (for SSE notification exclusion)
+     * @param id       the planner ID (from URL path)
+     * @param req      the planner data
+     * @param force    if true, skip syncVersion conflict check
+     * @return the persisted aggregate, its response, and whether the planner was created
+     */
+    @Transactional
+    public UpsertedPlanner upsertAggregate(
+            Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
+        throw new UnsupportedOperationException("upsertAggregate not yet implemented");
+    }
+
+    /**
+     * The persisted aggregate of an upsert with its response and whether the planner was created.
+     */
+    public record UpsertedPlanner(Planner planner, PlannerResponse response, boolean created) {
+    }
+
     @Transactional
     public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
         var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);
