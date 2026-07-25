@@ -250,10 +250,10 @@ class CommentServiceTest {
         }
 
         @Test
-        @DisplayName("Allows deeply nested replies without flattening (MAX_DEPTH is unlimited)")
+        @DisplayName("Allows nesting below MAX_DEPTH without flattening")
         void createComment_deepNesting_allowedWithoutFlattening() {
             // Arrange
-            // MAX_DEPTH is Integer.MAX_VALUE, so no flattening occurs
+            // depth 5 sits well below MAX_DEPTH (127), so no flattening occurs
             UUID parentPublicId = UUID.randomUUID();
             PlannerComment depth5Parent = new PlannerComment(plannerId, otherUser.getId(), "Deep", 40L, 5);
             depth5Parent.setId(50L);
