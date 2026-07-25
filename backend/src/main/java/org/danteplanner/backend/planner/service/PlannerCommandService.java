@@ -114,60 +114,87 @@ public class PlannerCommandService {
     }
 
     /**
-     * Copy provided request fields onto the aggregate's content row, validating
-     * category and content. Only non-null fields are applied.
+     * Copy an upsert request's provided fields onto the aggregate's content row.
+     * The category is validated and applied only when it differs from the current
+     * value, and content left out of the request is re-validated whenever the
+     * category changes under it.
      *
-     * @param skipUnchangedCategory upsert semantics when true: category is validated and applied
-     *                              only if it differs from the current value, and unchanged content
-     *                              is re-validated on a category change; update semantics when false:
-     *                              category is validated whenever provided, content is never re-validated
-     * @return whether the searchable composition (content or keywords) changed,
-     *         deciding whether the filter indexes need a rebuild
+     * @throws PlannerValidationException if the category is invalid for the planner type,
+     *                                    or the content fails validation
      */
-    private boolean applyRequestFields(Planner planner, String title, PlannerStatus status,
-            String category, String content, Set<String> selectedKeywords, UUID deviceId,
-            boolean skipUnchangedCategory) {
+    private void applyUpsertFields(Planner planner, UpsertPlannerRequest req, UUID deviceId) {
         PlannerContent contentRow = planner.getContent();
+        applyTitleAndStatus(contentRow, req.title(), req.status());
+
+        boolean categoryChanged = req.category() != null && !req.category().equals(contentRow.getCategory());
+        if (categoryChanged) {
+            applyCategory(planner, req.category());
+        }
+
+        if (req.content() != null) {
+            applyContent(planner, req.content());
+        } else if (categoryChanged) {
+            contentValidator.validate(contentRow.getContent(), contentRow.getCategory(), planner.getPublished());
+        }
+
+        applyKeywordsAndDeviceId(contentRow, req.selectedKeywords(), deviceId);
+    }
+
+    /**
+     * Copy an update request's provided fields onto the aggregate's content row.
+     * The category is validated whenever the request carries one, and content is
+     * validated only when the request carries content.
+     *
+     * @throws PlannerValidationException if the category is invalid for the planner type,
+     *                                    or the content fails validation
+     */
+    private void applyUpdateFields(Planner planner, UpdatePlannerRequest req, UUID deviceId) {
+        PlannerContent contentRow = planner.getContent();
+        applyTitleAndStatus(contentRow, req.title(), req.status());
+
+        if (req.category() != null) {
+            applyCategory(planner, req.category());
+        }
+        if (req.content() != null) {
+            applyContent(planner, req.content());
+        }
+
+        applyKeywordsAndDeviceId(contentRow, req.selectedKeywords(), deviceId);
+    }
+
+    private void applyTitleAndStatus(PlannerContent contentRow, String title, PlannerStatus status) {
         if (title != null) {
             contentRow.setTitle(title);
         }
         if (status != null) {
             contentRow.setStatus(status);
         }
+    }
 
-        boolean categoryChanged = false;
-        if (category != null && (!skipUnchangedCategory || !category.equals(contentRow.getCategory()))) {
-            if (!isValidCategory(planner.getPlannerType(), category)) {
-                throw new PlannerValidationException(
-                        ErrorCode.INVALID_CATEGORY.getCode(),
-                        "Invalid category '" + category + "' for planner type " + planner.getPlannerType());
-            }
-            contentRow.setCategory(category);
-            categoryChanged = true;
+    private void applyCategory(Planner planner, String category) {
+        if (!isValidCategory(planner.getPlannerType(), category)) {
+            throw new PlannerValidationException(
+                    ErrorCode.INVALID_CATEGORY.getCode(),
+                    "Invalid category '" + category + "' for planner type " + planner.getPlannerType());
         }
+        planner.getContent().setCategory(category);
+    }
 
-        boolean contentChanged = false;
-        if (content != null) {
-            contentValidator.validate(content, contentRow.getCategory(), planner.getPublished());
-            contentChanged = !content.equals(contentRow.getContent());
-            contentRow.setContent(content);
-        } else if (categoryChanged && skipUnchangedCategory) {
-            contentValidator.validate(contentRow.getContent(), contentRow.getCategory(), planner.getPublished());
-        }
+    private void applyContent(Planner planner, String content) {
+        PlannerContent contentRow = planner.getContent();
+        contentValidator.validate(content, contentRow.getCategory(), planner.getPublished());
+        contentRow.setContent(content);
+    }
 
-        boolean keywordsChanged = false;
+    private void applyKeywordsAndDeviceId(PlannerContent contentRow, Set<String> selectedKeywords, UUID deviceId) {
         if (selectedKeywords != null) {
             // Normalize at the domain boundary so the entity (and everything fed
             // from it — column, filter index, facets) carries current ids only
-            Set<String> normalized = PlannerKeywords.fromClient(selectedKeywords).asSet();
-            Set<String> existing = contentRow.getSelectedKeywords();
-            keywordsChanged = !normalized.equals(existing != null ? existing : Set.of());
-            contentRow.setSelectedKeywords(normalized);
+            contentRow.setSelectedKeywords(PlannerKeywords.fromClient(selectedKeywords).asSet());
         }
         if (deviceId != null) {
             contentRow.setDeviceId(deviceId);
         }
-        return contentChanged || keywordsChanged;
     }
 
     /**
@@ -318,8 +345,7 @@ public class PlannerCommandService {
                 throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
             }
 
-            boolean compositionChanged = applyRequestFields(planner, req.title(), req.status(),
-                    req.category(), req.content(), req.selectedKeywords(), deviceId, true);
+            applyUpsertFields(planner, req, deviceId);
 
             if (req.contentVersion() != null) {
                 planner.getContent().setGameContentVersion(req.contentVersion());
@@ -332,7 +358,7 @@ public class PlannerCommandService {
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
 
             if (Boolean.TRUE.equals(saved.getPublished())) {
-                plannerCatalogService.onVisibleEditCommitted(saved, compositionChanged);
+                plannerCatalogService.onVisibleEditCommitted(saved);
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
@@ -396,8 +422,7 @@ public class PlannerCommandService {
             throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
         }
 
-        boolean compositionChanged = applyRequestFields(planner, req.title(), req.status(),
-                req.category(), req.content(), req.selectedKeywords(), deviceId, false);
+        applyUpdateFields(planner, req, deviceId);
 
         planner.recordSave();
 
@@ -405,7 +430,7 @@ public class PlannerCommandService {
         log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, saved.getSyncVersion());
 
         if (Boolean.TRUE.equals(saved.getPublished())) {
-            plannerCatalogService.onVisibleEditCommitted(saved, compositionChanged);
+            plannerCatalogService.onVisibleEditCommitted(saved);
         }
 
         PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));

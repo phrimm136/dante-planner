@@ -120,6 +120,14 @@ public class Planner implements Persistable<UUID> {
         return content.getContent();
     }
 
+    /**
+     * The content document as it was read from storage, before any field this
+     * transaction applied.
+     */
+    public String getLoadedContentJson() {
+        return content.getLoadedContent();
+    }
+
     public Integer getSchemaVersion() {
         return content.getContentSchemaVersion();
     }
@@ -142,6 +150,14 @@ public class Planner implements Persistable<UUID> {
 
     public Set<String> getSelectedKeywords() {
         return content.getSelectedKeywords();
+    }
+
+    /**
+     * The keyword set as it was read from storage, before any field this
+     * transaction applied.
+     */
+    public Set<String> getLoadedKeywords() {
+        return content.getLoadedSelectedKeywords();
     }
 
     public Boolean getPublished() {

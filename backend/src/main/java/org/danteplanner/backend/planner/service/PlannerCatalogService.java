@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -67,11 +69,29 @@ public class PlannerCatalogService {
      * when the searchable composition changed.
      */
     @Transactional
-    public void onVisibleEditCommitted(Planner planner, boolean compositionChanged) {
+    public void onVisibleEditCommitted(Planner planner) {
         syncScalarCopy(planner);
-        if (compositionChanged) {
+        if (searchableCompositionChanged(planner)) {
             filterService.requestRebuild(planner.getId());
         }
+    }
+
+    /**
+     * Whether the edit moved anything the filter indexes are extracted from: the
+     * content document or the keyword set.
+     *
+     * <p>Both are read off the in-memory aggregate against the values it carried at
+     * load. Re-reading the stored column instead would answer "changed" every time,
+     * because MySQL re-serializes a JSON column and hands back a different string
+     * than the one written.</p>
+     */
+    private boolean searchableCompositionChanged(Planner planner) {
+        return !Objects.equals(planner.getContentJson(), planner.getLoadedContentJson())
+                || !orEmpty(planner.getSelectedKeywords()).equals(orEmpty(planner.getLoadedKeywords()));
+    }
+
+    private static Set<String> orEmpty(Set<String> keywords) {
+        return keywords != null ? keywords : Set.of();
     }
 
     /**

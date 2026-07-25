@@ -92,6 +92,24 @@ public class PlannerContent {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    /**
+     * The searchable values as this row was read. MySQL re-serializes a JSON column,
+     * so the stored form is not the string that was written and a comparison made
+     * after the flush always reports a change; only a value captured at load answers
+     * whether the transaction actually moved the document or the keyword set.
+     */
+    @Transient
+    private String loadedContent;
+
+    @Transient
+    private Set<String> loadedSelectedKeywords;
+
+    @PostLoad
+    protected void onLoad() {
+        loadedContent = content;
+        loadedSelectedKeywords = selectedKeywords;
+    }
+
     @PrePersist
     protected void onCreate() {
         if (lastModifiedAt == null) {
