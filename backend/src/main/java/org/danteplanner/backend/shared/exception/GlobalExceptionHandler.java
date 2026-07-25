@@ -5,6 +5,7 @@ import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
@@ -295,54 +296,30 @@ public class GlobalExceptionHandler {
     /**
      * Handle database constraint violations (PRIMARY KEY, UNIQUE, FOREIGN KEY, NOT NULL).
      *
-     * <p>UUID collisions from race conditions are expected and return 409 Conflict.
-     * Other constraint violations indicate bugs and are sent to Sentry.</p>
+     * <p>{@link ConstraintViolationClassifier} decides the outcome from typed driver signals and the
+     * {@link KnownConstraint} table; this method only renders it. Expected races (a UUID collision, a
+     * repeated user action) return 409 without an alert; anything else is a defect and reaches
+     * Sentry.</p>
      */
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
             org.springframework.dao.DataIntegrityViolationException ex) {
 
-        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
+        ConstraintViolationOutcome outcome = ConstraintViolationClassifier.classify(ex);
 
-        // Detect PRIMARY KEY or UNIQUE constraint violations
-        if (message.contains("duplicate") ||
-            message.contains("unique") ||
-            message.contains("primary key")) {
-
-            // UUID collision on the planner core table (expected race condition);
-            // matched on the qualified key name so child-table duplicates
-            // (planner_votes.PRIMARY etc.) fall through to their own branch
-            if (message.contains("planner.primary")) {
-                log.warn("UUID collision detected (race condition): {}", ex.getMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse(
-                        "UUID_COLLISION",
-                        "Plan ID already exists. Please retry with a new ID."
-                    ));
-            }
-
-            // Duplicate vote/bookmark/report (expected user behavior, but should be caught earlier)
-            if (message.contains("planner_votes") ||
-                message.contains("planner_bookmarks") ||
-                message.contains("planner_reports") ||
-                message.contains("comment_reports")) {
-                log.warn("Duplicate action bypassed application check: {}", ex.getMessage());
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse("DUPLICATE_ACTION", "Action already performed"));
-            }
-
-            // Other unique constraint violations (unexpected)
-            log.warn("Unexpected unique constraint violation: {}", ex.getMessage());
-            Sentry.captureException(ex);
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("CONFLICT", "Resource conflict"));
+        switch (outcome) {
+            case UUID_COLLISION -> log.warn("UUID collision detected (race condition): {}", ex.getMessage());
+            case DUPLICATE_ACTION -> log.warn("Duplicate action bypassed application check: {}", ex.getMessage());
+            case UNEXPECTED_CONFLICT -> log.warn("Unexpected unique constraint violation: {}", ex.getMessage());
+            case INVALID_DATA -> log.error("Database constraint violation", ex);
         }
 
-        // Foreign key or NOT NULL violations (indicate bugs)
-        Sentry.captureException(ex);
-        log.error("Database constraint violation", ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(new ErrorResponse("INVALID_REQUEST", "Invalid data"));
+        if (outcome.reportToSentry()) {
+            Sentry.captureException(ex);
+        }
+
+        return ResponseEntity.status(outcome.status())
+            .body(new ErrorResponse(outcome.code(), outcome.clientMessage()));
     }
 
     @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)
@@ -453,23 +430,30 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IOException.class)
     public void handleIOException(IOException ex) {
-        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
-        String className = ex.getClass().getName();
-
-        // SSE client disconnection (broken pipe, connection reset)
-        // Also catches Tomcat's ClientAbortException which extends IOException
-        if (message.contains("broken pipe") ||
-            message.contains("connection reset") ||
-            message.contains("connection abort") ||
-            message.contains("stream closed") ||
-            className.contains("ClientAbortException")) {
-            log.debug("SSE client disconnected ({}): {}", className, ex.getMessage());
+        if (ex instanceof ClientAbortException || carriesDisconnectStrerror(ex)) {
+            log.debug("SSE client disconnected ({}): {}", ex.getClass().getName(), ex.getMessage());
             return;
         }
 
         // Other IOExceptions are unexpected and should be sent to Sentry
         Sentry.captureException(ex);
         log.error("Unexpected IOException", ex);
+    }
+
+    /**
+     * Socket teardown reaches the JVM as a plain {@link IOException} carrying the OS strerror text
+     * and nothing else — no subclass, no code — so these phrases are the only available signal.
+     * {@code Locale.ROOT} keeps the default locale out of the decision.
+     */
+    private static final java.util.List<String> CLIENT_DISCONNECT_STRERRORS = java.util.List.of(
+            "broken pipe",
+            "connection reset",
+            "connection abort",
+            "stream closed");
+
+    private static boolean carriesDisconnectStrerror(IOException ex) {
+        String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
+        return CLIENT_DISCONNECT_STRERRORS.stream().anyMatch(message::contains);
     }
 
     /**
