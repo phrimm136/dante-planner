@@ -22,6 +22,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Settings backfill seam: the backfill migration gives every existing user a settings row, so a
@@ -46,9 +47,7 @@ class SettingsBackfillMigrationIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private long usersWithoutSettings() {

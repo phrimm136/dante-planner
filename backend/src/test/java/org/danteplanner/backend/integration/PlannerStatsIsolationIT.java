@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Counter isolation: planner_stats is the single home of view/upvote/comment
@@ -116,9 +117,7 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
         commentRepository.deleteAll();
         statsRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private void seedStats(int viewCount, int upvotes, int commentCount) {

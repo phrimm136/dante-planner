@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.time.ZoneOffset;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * User hard-delete sweep: the FK-less satellite, projection, and filter rows
@@ -95,9 +96,7 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
                 "planner_content", "planner")) {
             jdbc.update("DELETE FROM " + table);
         }
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private int rowsFor(String table, UUID plannerId) {

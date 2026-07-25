@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Constraint validation tests for Planner-related entities.
@@ -76,9 +77,7 @@ class PlannerRepositoryConstraintTest {
         voteRepository.deleteAll();
         statsRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.deleteAll(userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .toList());
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         entityManager.flush();
         entityManager.clear();
 

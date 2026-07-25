@@ -23,6 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Tier-2 wire-contract tests for {@link AdminController}.
@@ -59,9 +60,7 @@ class AdminControllerTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         regularUser = TestDataFactory.createTestUser(userRepository, "user@example.com");
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");

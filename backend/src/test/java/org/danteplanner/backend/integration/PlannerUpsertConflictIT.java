@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Upsert conflict seam. A client whose {@code syncVersion} trails the server yields
@@ -80,9 +81,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);

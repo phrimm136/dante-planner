@@ -30,6 +30,7 @@ import java.util.Set;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Published-list projection seam: the public catalog excludes non-public planners
@@ -68,9 +69,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         author = TestDataFactory.createTestUser(userRepository, "author@example.com");
     }
 

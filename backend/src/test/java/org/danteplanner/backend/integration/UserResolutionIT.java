@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * User resolution seam: resolving a brand-new provider identity creates the user and its
@@ -53,9 +54,7 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private Map<String, String> identity(String providerId) {

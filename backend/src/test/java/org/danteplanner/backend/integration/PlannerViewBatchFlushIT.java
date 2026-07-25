@@ -22,6 +22,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Batch flush seam: draining many buffered views persists one row per distinct (planner, viewer,
@@ -58,9 +59,7 @@ class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "batch-owner@example.com");
     }
 

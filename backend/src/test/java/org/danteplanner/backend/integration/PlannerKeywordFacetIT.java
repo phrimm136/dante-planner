@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Faceted search over the inverted indexes and keyword normalization:
@@ -111,9 +112,7 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
         catalogRepository.deleteAll();
         statsRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     /**

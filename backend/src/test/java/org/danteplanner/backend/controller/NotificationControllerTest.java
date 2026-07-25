@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -61,9 +62,7 @@ class NotificationControllerTest {
     void setUp() {
         notificationRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");

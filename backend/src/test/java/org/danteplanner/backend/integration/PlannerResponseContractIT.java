@@ -30,6 +30,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Wire-contract pin for the detail and owner-list planner DTOs: the serialized field
@@ -76,9 +77,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "contract-owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         published = TestDataFactory.createTestPlanner(plannerRepository, owner, true);

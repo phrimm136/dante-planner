@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Integration tests for POST /api/auth/logout-all.
@@ -80,9 +81,7 @@ class AuthControllerLogoutAllTest {
     void setUp() {
         tokenBlacklistService.clear();
 
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         testUser = TestDataFactory.createTestUser(userRepository, "logoutall@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);

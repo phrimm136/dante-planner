@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Publish-event seam: the publish SSE broadcast must be emitted only after the publishing
@@ -73,9 +74,7 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     void setUp() {
         Mockito.reset(sseService);
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "publisher@example.com");
         plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
     }

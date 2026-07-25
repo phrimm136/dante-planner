@@ -37,6 +37,7 @@ import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Detail read seam: serving a published planner does not take a row lock (so a second reader
@@ -89,9 +90,7 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
         plannerViewRepository.deleteAll();
         plannerStatsRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         User owner = TestDataFactory.createTestUser(userRepository, "detail-owner@example.com");
         plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
     }

@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Filter rebuild over existing rows: rebuilding a visible planner's filter
@@ -86,9 +87,7 @@ class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
         entityFilterRepository.deleteAll();
         keywordFilterRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     @Test

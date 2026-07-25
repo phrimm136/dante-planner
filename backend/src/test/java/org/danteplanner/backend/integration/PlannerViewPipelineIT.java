@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * View pipeline seam: the flush dedups on the (planner, viewer, day) composite key, so
@@ -67,9 +68,7 @@ class PlannerViewPipelineIT extends SharedMySqlContainerSupport {
         plannerViewRepository.deleteAll();
         plannerStatsRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         User owner = TestDataFactory.createTestUser(userRepository, "viewer-owner@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
         plannerId = planner.getId();

@@ -36,6 +36,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Reconciler drill: seeded drift in every audited dimension is detected and
@@ -108,9 +109,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 "planner_content", "planner")) {
             jdbc.update("DELETE FROM " + table);
         }
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private Planner publishClean(String title) {

@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Publish flow over the projections: an owner's title edit on a published
@@ -115,9 +116,7 @@ class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
         catalogRepository.deleteAll();
         statsRepository.deleteAll();
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private long entityFilterRows(UUID plannerId) {

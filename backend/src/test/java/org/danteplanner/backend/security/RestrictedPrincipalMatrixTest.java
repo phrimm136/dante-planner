@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * A ban withdraws distribution, never possession.
@@ -93,9 +94,7 @@ class RestrictedPrincipalMatrixTest {
     @BeforeEach
     void setUp() {
         plannerRepository.deleteAll();
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         User banned = TestDataFactory.createTestUser(userRepository, "banned@example.com");
         banned.setBannedAt(Instant.now());

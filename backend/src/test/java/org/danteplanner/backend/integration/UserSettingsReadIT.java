@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Settings read seam: a GET on a missing settings row returns defaults with a 200 and writes
@@ -64,9 +65,7 @@ class UserSettingsReadIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        userRepository.findAll().stream()
-                .filter(u -> u.getId() != 0L)
-                .forEach(userRepository::delete);
+        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         user = TestDataFactory.createTestUser(userRepository, "settings@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, user);
     }
