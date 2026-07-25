@@ -133,18 +133,6 @@ class CsrfDoubleSubmitFilterTest {
             assertThat(chain.getRequest()).isSameAs(req);
         }
 
-        @Test
-        @DisplayName("POST to /api/internal/** is not blocked (machine-to-machine)")
-        void internalEndpoint_whenUnsafeMethod_notBlocked() throws Exception {
-            MockHttpServletRequest req = request("POST", "/api/internal/refresh-game-data");
-            MockHttpServletResponse res = new MockHttpServletResponse();
-            MockFilterChain chain = new MockFilterChain();
-
-            filter.doFilter(req, res, chain);
-
-            assertThat(res.getStatus()).isEqualTo(HttpServletResponse.SC_OK);
-            assertThat(chain.getRequest()).isSameAs(req);
-        }
     }
 
     @Nested

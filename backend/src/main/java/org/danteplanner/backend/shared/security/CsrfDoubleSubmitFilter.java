@@ -37,8 +37,7 @@ import java.util.Set;
  *       or the request is rejected with 403 and the chain is not continued.</li>
  * </ol>
  *
- * <p>Safe methods (GET/HEAD/OPTIONS) and machine-to-machine {@code /api/internal/**}
- * endpoints (own API-key gate, no browser origin) are exempt from enforcement.</p>
+ * <p>Safe methods (GET/HEAD/OPTIONS) are exempt from enforcement.</p>
  *
  * @see <a href="https://owasp.org/www-community/attacks/csrf">OWASP CSRF</a>
  */
@@ -68,7 +67,6 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     static final int COOKIE_MAX_AGE_SECONDS = 604800;
 
     private static final Set<String> SAFE_METHODS = Set.of("GET", "HEAD", "OPTIONS");
-    private static final String INTERNAL_PATH_PREFIX = "/api/internal/";
 
     private final CookieUtils cookieUtils;
     private final ObjectMapper objectMapper;
@@ -112,11 +110,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     }
 
     private boolean requiresEnforcement(HttpServletRequest request) {
-        if (SAFE_METHODS.contains(request.getMethod())) {
-            return false;
-        }
-        String path = request.getRequestURI();
-        return path == null || !path.startsWith(INTERNAL_PATH_PREFIX);
+        return !SAFE_METHODS.contains(request.getMethod());
     }
 
     private boolean tokensMatch(String cookieToken, String headerToken) {

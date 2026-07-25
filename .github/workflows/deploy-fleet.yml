@@ -15,6 +15,7 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - 'static/**'
       - '.github/workflows/deploy-fleet.yml'
   workflow_dispatch:
 

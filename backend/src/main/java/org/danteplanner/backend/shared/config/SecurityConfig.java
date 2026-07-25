@@ -86,7 +86,6 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health/readiness").permitAll()
                 .requestMatchers("/actuator/health/liveness").permitAll()
                 .requestMatchers("/actuator/prometheus").permitAll()
-                .requestMatchers("/api/internal/**").permitAll()
 
                 // Public planner endpoints (no auth required for config and browsing)
                 .requestMatchers("/api/planner/md/config").permitAll()
