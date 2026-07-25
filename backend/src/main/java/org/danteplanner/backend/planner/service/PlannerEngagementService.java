@@ -162,7 +162,30 @@ public class PlannerEngagementService {
      */
     @Transactional
     public BookmarkResponse setBookmark(Long userId, UUID plannerId, boolean bookmarked) {
-        throw new UnsupportedOperationException("setBookmark not yet implemented");
+        // Verify planner exists and is published (fail-fast)
+        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
+            throw new PlannerNotFoundException(plannerId);
+        }
+
+        var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
+        if (existingBookmark.isPresent() == bookmarked) {
+            return BookmarkResponse.builder()
+                    .plannerId(plannerId)
+                    .bookmarked(bookmarked)
+                    .build();
+        }
+
+        if (bookmarked) {
+            plannerBookmarkRepository.save(new PlannerBookmark(userId, plannerId));
+            log.debug("User {} bookmarked planner {}", userId, plannerId);
+        } else {
+            plannerBookmarkRepository.delete(existingBookmark.get());
+            log.debug("User {} removed bookmark from planner {}", userId, plannerId);
+        }
+        return BookmarkResponse.builder()
+                .plannerId(plannerId)
+                .bookmarked(bookmarked)
+                .build();
     }
 
     /**

@@ -77,7 +77,11 @@ public class PlannerPublishingService {
      */
     @Transactional
     public PlannerResponse setPublished(Long userId, UUID plannerId, boolean published) {
-        throw new UnsupportedOperationException("setPublished not yet implemented");
+        accessGuard.checkUserRestrictions(userId);
+
+        Planner planner = plannerRepository.findAggregate(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        return applyPublishedState(userId, planner, published);
     }
 
     /**
@@ -93,7 +97,30 @@ public class PlannerPublishingService {
     @Transactional
     public PlannerResponse setPublishedWithContent(
             Long userId, UUID plannerId, UpsertPlannerRequest req, boolean published) {
-        throw new UnsupportedOperationException("setPublishedWithContent not yet implemented");
+        Planner planner = plannerCommandService
+                .upsertAggregate(userId, null, plannerId, req, false)
+                .planner();
+        return applyPublishedState(userId, planner, published);
+    }
+
+    /**
+     * Move an already-loaded aggregate to the requested publication state, leaving it untouched when
+     * it is already there.
+     */
+    private PlannerResponse applyPublishedState(Long userId, Planner planner, boolean published) {
+        if (Boolean.TRUE.equals(planner.getPublished()) == published) {
+            if (!planner.isOwnedBy(userId)) {
+                throw new PlannerForbiddenException(planner.getId());
+            }
+            return PlannerResponse.fromEntity(planner, currentUpvotes(planner.getId()));
+        }
+        return togglePublish(userId, planner);
+    }
+
+    private int currentUpvotes(UUID plannerId) {
+        return plannerStatsRepository.findById(plannerId)
+                .map(PlannerStats::getUpvotes)
+                .orElse(0);
     }
 
     /**

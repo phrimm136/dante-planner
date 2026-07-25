@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.RateLimitConfig;
+import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.planner.dto.BookmarkRequest;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.moderation.dto.ReportResponse;
 import org.danteplanner.backend.planner.dto.SubscriptionResponse;
@@ -35,10 +37,14 @@ import java.util.UUID;
 @Slf4j
 public class PlannerEngagementController {
 
+    /** Counts calls still using the pre-state-targeted toggle shape, tagged by operation. */
+    private static final String LEGACY_TOGGLE_COUNTER = "planner.legacy_toggle";
+
     private final PlannerEngagementService plannerEngagementService;
     private final PlannerSubscriptionService subscriptionService;
     private final PlannerReportService reportService;
     private final RateLimitConfig rateLimitConfig;
+    private final MeterRegistry meterRegistry;
 
     /**
      * Cast an immutable vote on a planner.
@@ -64,24 +70,37 @@ public class PlannerEngagementController {
     }
 
     /**
-     * Toggle the bookmark state of a planner.
+     * Set the bookmark state of a planner.
      *
-     * <p>Requires authentication. Toggles bookmark on/off for the authenticated user.
-     * Returns 401 if not authenticated, 404 if planner not found or not published.</p>
+     * <p>Requires authentication. Returns 401 if not authenticated, 404 if planner not found or not
+     * published.</p>
      *
-     * @param userId the authenticated user ID
-     * @param id     the planner ID
+     * <p>A body naming {@code bookmarked} drives the bookmark to that state idempotently, so a
+     * retry never un-bookmarks. A body that omits it — or no body at all — takes the legacy toggle
+     * path, counted so it can be retired once tabs on previously cached bundles have gone.</p>
+     *
+     * @param userId  the authenticated user ID
+     * @param id      the planner ID
+     * @param request the desired bookmark state
      * @return the updated bookmark state
      */
     @PostMapping("/{id}/bookmark")
-    public ResponseEntity<BookmarkResponse> toggleBookmark(
+    public ResponseEntity<BookmarkResponse> setBookmark(
             @AuthenticationPrincipal Long userId,
-            @PathVariable UUID id) {
+            @PathVariable UUID id,
+            @RequestBody(required = false) BookmarkRequest request) {
 
         rateLimitConfig.checkCrudLimit(userId, "bookmark");
+
+        if (request != null && request.namesState()) {
+            log.info("User {} setting bookmark={} on planner {}", userId, request.bookmarked(), id);
+            return ResponseEntity.ok(
+                    plannerEngagementService.setBookmark(userId, id, request.bookmarked()));
+        }
+
+        meterRegistry.counter(LEGACY_TOGGLE_COUNTER, "operation", "bookmark").increment();
         log.info("User {} toggling bookmark on planner {}", userId, id);
-        BookmarkResponse response = plannerEngagementService.toggleBookmark(userId, id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(plannerEngagementService.toggleBookmark(userId, id));
     }
 
     /**
