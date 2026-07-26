@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * filter or be rejected by the SET column. These tests fail the build instead.</p>
  *
  * <p>The expensive empirical round-trip of the full set through the real SET column lives in
- * {@code MySQLIntegrationTest} (Docker-gated); H2 cannot store all members because the
+ * {@code MySQLIT} (Docker-gated); H2 cannot store all members because the
  * converter column has no explicit length and defaults to VARCHAR(255) under JPA auto-DDL.</p>
  *
  * <p><b>Proxy note:</b> the FE source of truth is read from

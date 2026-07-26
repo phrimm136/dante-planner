@@ -55,7 +55,7 @@ class PlannerReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        reportService = new PlannerReportService(reportRepository, plannerRepository,
+        reportService = new PlannerReportService(reportRepository,
                 new PlannerAccessGuard(userRepository, plannerRepository));
 
         testUser = User.builder()

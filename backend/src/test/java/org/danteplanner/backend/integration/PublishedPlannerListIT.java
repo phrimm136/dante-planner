@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -20,17 +22,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Published-list projection seam: the public catalog excludes non-public planners
@@ -40,14 +39,12 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @AutoConfigureMockMvc
 @ActiveProfiles("it")
 @Tag("containerized")
-@Transactional
 @Import(TestConfig.class)
 class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "published_planner_list_it");
-    }
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -68,14 +65,24 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         author = TestDataFactory.createTestUser(userRepository, "author@example.com");
+    }
+
+    /**
+     * Titles carry a per-test marker so a list query can be narrowed to rows this test created.
+     * The endpoint answers with every published planner, so an unnarrowed count is a claim about
+     * the table, true only while the test runs alone.
+     */
+    private final String marker = "m" + UUID.randomUUID().toString().replace("-", "");
+
+    /** The stored title, as the fixture composes it. */
+    private String titled(String title) {
+        return marker + " " + title;
     }
 
     private TestDataFactory.PlannerBuilder base(String title) {
         return TestDataFactory.planner(author)
-                .title(title)
+                .title(titled(title))
                 .category("5F")
                 .status(PlannerStatus.SAVED)
                 .content("{}")
@@ -100,7 +107,7 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
 
         plannerRepository.save(base("P4").published(false).build());
 
-        mockMvc.perform(get("/api/planner/md/published"))
+        mockMvc.perform(get("/api/planner/md/published").param("q", marker))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].id").value(p1.getId().toString()));
@@ -121,10 +128,10 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
                 .build());
         catalogService.add(p);
 
-        mockMvc.perform(get("/api/planner/md/published"))
+        mockMvc.perform(get("/api/planner/md/published").param("q", marker))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(p.getId().toString()))
-                .andExpect(jsonPath("$.content[0].title").value("Field Parity"))
+                .andExpect(jsonPath("$.content[0].title").value(titled("Field Parity")))
                 .andExpect(jsonPath("$.content[0].category").value("5F"))
                 .andExpect(jsonPath("$.content[0].plannerType").value("MIRROR_DUNGEON"))
                 .andExpect(jsonPath("$.content[0].selectedKeywords").isNotEmpty())

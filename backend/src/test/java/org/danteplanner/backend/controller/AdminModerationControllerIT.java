@@ -1,6 +1,8 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -23,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -34,14 +35,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Transactional
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-class AdminModerationControllerTest {
+class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -71,9 +71,6 @@ class AdminModerationControllerTest {
 
     @BeforeEach
     void setUp() {
-        voteRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         regularUser = TestDataFactory.createTestUser(userRepository, "user@example.com");
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");
@@ -361,8 +358,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 200 when admin role unhides planner")
         void unhideFromRecommended_AdminRole_Returns200() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -386,8 +387,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should return 403 when regular user attempts to unhide planner")
         void unhideFromRecommended_RegularUser_Returns403() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(regularUserCookie()))
@@ -397,8 +402,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenFromRecommended flag")
         void unhideFromRecommended_HiddenPlanner_ClearsHiddenFlag() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -411,8 +420,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenAt timestamp")
         void unhideFromRecommended_HiddenPlanner_ClearsHiddenAt() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -425,8 +438,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hiddenByModeratorId")
         void unhideFromRecommended_HiddenPlanner_ClearsModeratorId() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -439,8 +456,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should clear hideReason")
         void unhideFromRecommended_HiddenPlanner_ClearsHideReason() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
@@ -483,8 +504,12 @@ class AdminModerationControllerTest {
         @Test
         @DisplayName("Should preserve votes when unhiding planner")
         void unhideFromRecommended_WithVotes_PreservesVotes() throws Exception {
-            testPlanner.hideFromRecommended(adminUser.getId(), "Test hide reason");
-            plannerRepository.save(testPlanner);
+            // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
+            // listeners run and bump this row's version, leaving the instance from @BeforeEach
+            // stale.
+            Planner hidden = plannerRepository.findById(testPlanner.getId()).orElseThrow();
+            hidden.hideFromRecommended(adminUser.getId(), "Test hide reason");
+            plannerRepository.save(hidden);
 
             PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote1);

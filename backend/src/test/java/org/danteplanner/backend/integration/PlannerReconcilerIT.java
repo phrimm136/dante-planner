@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -26,8 +28,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import javax.sql.DataSource;
 import java.util.List;
@@ -36,7 +36,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Reconciler drill: seeded drift in every audited dimension is detected and
@@ -48,10 +47,7 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class PlannerReconcilerIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_reconciler_it");
-    }
+
 
     @Autowired
     private UserRepository userRepository;
@@ -109,7 +105,6 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 "planner_content", "planner")) {
             jdbc.update("DELETE FROM " + table);
         }
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private Planner publishClean(String title) {

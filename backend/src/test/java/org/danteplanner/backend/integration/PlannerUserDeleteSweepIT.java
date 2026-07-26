@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -21,8 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import javax.sql.DataSource;
 import java.time.LocalDate;
@@ -31,7 +31,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import java.time.ZoneOffset;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * User hard-delete sweep: the FK-less satellite, projection, and filter rows
@@ -46,12 +45,17 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
+class PlannerUserDeleteSweepIT {
 
+    /**
+     * Its own database: the sweep hard-deletes by criteria over the whole users table, so in the
+     * shared one it removes rows belonging to every concurrently running class.
+     */
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_user_delete_sweep_it");
+    static void ownDatabase(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "user_delete_sweep");
     }
+
 
     @Autowired
     private UserRepository userRepository;
@@ -100,7 +104,6 @@ class PlannerUserDeleteSweepIT extends SharedMySqlContainerSupport {
                 "planner_content", "planner")) {
             jdbc.update("DELETE FROM " + table);
         }
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private int rowsFor(String table, UUID plannerId) {

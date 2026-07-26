@@ -1,6 +1,8 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.facade.AuthenticationFacade;
@@ -20,7 +22,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,10 +43,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import({TestConfig.class, AuthControllerBffTest.MockAuthFacadeConfig.class})
-@Transactional
-class AuthControllerBffTest {
+@ActiveProfiles("it")
+@Tag("containerized")
+@Import({TestConfig.class, AuthControllerBffIT.MockAuthFacadeConfig.class})
+class AuthControllerBffIT extends SharedMySqlContainerSupport {
 
     @TestConfiguration
     static class MockAuthFacadeConfig {

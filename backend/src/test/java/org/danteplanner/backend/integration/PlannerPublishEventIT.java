@@ -21,14 +21,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Publish-event seam: the publish SSE broadcast must be emitted only after the publishing
@@ -41,10 +38,6 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import({TestConfig.class, PlannerPublishEventIT.CountingSseConfig.class})
 class PlannerPublishEventIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_publish_event_it");
-    }
 
     @TestConfiguration
     static class CountingSseConfig {
@@ -73,8 +66,6 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         Mockito.reset(sseService);
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "publisher@example.com");
         plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, false).getId();
     }

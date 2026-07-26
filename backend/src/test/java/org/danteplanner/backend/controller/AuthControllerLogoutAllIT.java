@@ -1,6 +1,7 @@
 package org.danteplanner.backend.controller;
 
 import com.redis.testcontainers.RedisContainer;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
@@ -18,17 +19,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Integration tests for POST /api/auth/logout-all.
@@ -39,27 +36,15 @@ import org.danteplanner.backend.support.TestDataCleanup;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import(TestConfig.class)
-@Transactional
+@ActiveProfiles("it")
 @Tag("containerized")
-class AuthControllerLogoutAllTest {
-
-    private static final String REDIS_IMAGE = "redis:7-alpine";
-
-    static final RedisContainer AUTH_REDIS = new RedisContainer(REDIS_IMAGE);
+@Import(TestConfig.class)
+@Tag("containerized")
+class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
 
     static {
-        AUTH_REDIS.start();
     }
 
-    @DynamicPropertySource
-    static void authRedisProperties(DynamicPropertyRegistry registry) {
-        registry.add("redis.auth.host", AUTH_REDIS::getRedisHost);
-        registry.add("redis.auth.port", AUTH_REDIS::getRedisPort);
-        registry.add("redis.auth-local.host", AUTH_REDIS::getRedisHost);
-        registry.add("redis.auth-local.port", AUTH_REDIS::getRedisPort);
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,7 +66,6 @@ class AuthControllerLogoutAllTest {
     void setUp() {
         tokenBlacklistService.clear();
 
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         testUser = TestDataFactory.createTestUser(userRepository, "logoutall@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);

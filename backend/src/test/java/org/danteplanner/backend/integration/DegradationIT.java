@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zaxxer.hikari.HikariDataSource;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import eu.rekawek.toxiproxy.model.Toxic;
@@ -11,6 +12,8 @@ import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -37,6 +40,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -153,6 +157,7 @@ class DegradationIT {
     // crash-safety, and GTID replication depends on neither fsync timing nor
     // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(DEGRADATION_NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
             .withDatabaseName("testdb")
@@ -164,12 +169,17 @@ class DegradationIT {
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(DEGRADATION_NETWORK)
             .withDatabaseName("testdb")
             .withUsername("test")
@@ -180,7 +190,11 @@ class DegradationIT {
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
@@ -237,6 +251,9 @@ class DegradationIT {
 
     @Autowired
     private JwtTokenService jwtTokenService;
+
+    @Autowired
+    private DataSource appDataSource;
 
     @Autowired
     @Qualifier("degradationPrimaryJdbcTemplate")
@@ -302,10 +319,33 @@ class DegradationIT {
             toxic.remove();
         }
         PRIMARY_DB_PROXY.enable();
+        evictPooledPrimaryConnections();
         for (Toxic toxic : RATE_LIMIT_REDIS_PROXY.toxics().getAll()) {
             toxic.remove();
         }
         RATE_LIMIT_REDIS_PROXY.enable();
+    }
+
+    /**
+     * Disabling the proxy closes every established connection, and re-enabling it only restores the
+     * route for new ones. Hikari skips {@code isValid()} inside its 500 ms alive-bypass window, so
+     * without this the next test can be handed a dead socket and fail with {@code EOFException} on
+     * its first statement.
+     */
+    private void evictPooledPrimaryConnections() {
+        for (DataSource target : resolvedTargets(appDataSource)) {
+            if (target instanceof HikariDataSource hikari && hikari.isRunning()) {
+                hikari.getHikariPoolMXBean().softEvictConnections();
+            }
+        }
+    }
+
+    private static List<DataSource> resolvedTargets(DataSource dataSource) {
+        if (dataSource instanceof AbstractRoutingDataSource routing) {
+            Map<Object, DataSource> resolved = routing.getResolvedDataSources();
+            return List.copyOf(resolved.values());
+        }
+        return List.of(dataSource);
     }
 
     @Test

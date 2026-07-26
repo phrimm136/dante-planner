@@ -18,11 +18,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Settings backfill seam: the backfill migration gives every existing user a settings row, so a
@@ -34,10 +31,6 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class SettingsBackfillMigrationIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "settings_backfill_migration_it");
-    }
 
     @Autowired
     private UserRepository userRepository;
@@ -47,7 +40,6 @@ class SettingsBackfillMigrationIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private long usersWithoutSettings() {

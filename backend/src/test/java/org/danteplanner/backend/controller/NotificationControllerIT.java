@@ -1,6 +1,10 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
+import java.time.temporal.ChronoUnit;
+import static org.assertj.core.api.Assertions.within;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
@@ -20,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,14 +32,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
-class NotificationControllerTest {
+class NotificationControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,9 +62,6 @@ class NotificationControllerTest {
 
     @BeforeEach
     void setUp() {
-        notificationRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");
@@ -348,7 +347,9 @@ class NotificationControllerTest {
                     .andExpect(jsonPath("$.read").value(true));
 
             Notification updated = notificationRepository.findById(notification.getId()).orElseThrow();
-            assertThat(updated.getReadAt()).isEqualTo(firstReadAt);
+            // MySQL DATETIME(6) truncates the nanoseconds an in-memory Instant carries; with no
+            // test transaction the value round-trips instead of coming back from the session.
+            assertThat(updated.getReadAt()).isCloseTo(firstReadAt, within(1, ChronoUnit.MILLIS));
         }
 
         @Test
@@ -427,7 +428,10 @@ class NotificationControllerTest {
                     .andExpect(jsonPath("$").value(1));
 
             Notification unchanged = notificationRepository.findById(read.getId()).orElseThrow();
-            assertThat(unchanged.getReadAt()).isEqualTo(firstReadAt);
+            // Compared at millisecond precision: with no test transaction the entity is
+            // re-read from MySQL, whose DATETIME(6) does not carry the nanoseconds an
+            // in-memory Instant holds.
+            assertThat(unchanged.getReadAt()).isCloseTo(firstReadAt, within(1, ChronoUnit.MILLIS));
         }
 
         @Test

@@ -178,7 +178,7 @@ from the code rather than typing it out:
 
 A derived axis grows on its own, so a new member is covered without anyone remembering. A typed
 list covers what its author thought of, and the gaps are exactly where defects sit.
-`security/RestrictedPrincipalMatrixTest` and `moderation/ModerationAuditMatrixTest` both work this
+`security/RestrictedPrincipalMatrixIT` and `moderation/ModerationAuditMatrixTest` both work this
 way; the second found two enum constants that no code wrote.
 
 Two rules for a derived matrix:
@@ -274,7 +274,96 @@ same facts directly assertable, and so does a real `CookieUtils`.
 
 ---
 
-## 13. If you change one of these, check the others
+## 13. A test owns the rows it creates, and nothing else
+
+Every integration class shares one database and they run concurrently. Three claims are therefore
+false however natural they read:
+
+- **"This table holds only my rows."** `deleteAll()` in `@BeforeEach` asserts it and enforces it by
+  deleting everyone else's. It is a global assertion disguised as cleanup, true only when the class
+  runs alone.
+- **"Index 0 is mine."** `$.content[0].title`, `actions.get(0)`, `$[0].usernameSuffix` — position in
+  a global list belongs to whoever sorted first.
+- **"The count is mine."** `repository.count()`, `hasSize(3)`, `$.totalElements`. A before/after
+  delta is the same claim twice with a race between the reads.
+
+Scope to an identity the test owns. A parameterized query already does this — `findByPlannerId(mine)`
+is correct where `findAll()` is not, and a list endpoint narrowed by an auth cookie is scoped by the
+caller. An audit that flags every `count()` and `hasSize()` will be wrong about most of them.
+
+Prefer a negative: "my row is absent" survives any amount of neighbouring data, where "exactly N rows"
+cannot. Converting `hasSize(1)` to `hasItem(mine)` plus `not(hasItem(theirs))` usually *strengthens*
+the test, because the original passes when the single row present belongs to someone else.
+
+**Acting globally counts too.** A sweep that hard-deletes by criteria, or a stored procedure that
+rebuilds an index, touches every class's rows. `PlannerUserDeleteSweepIT` deleted other classes'
+users and surfaced as foreign-key violations in three unrelated classes.
+
+A shared context is a shared object graph, not only a shared connection. A test whose subject is
+in-memory state in a singleton — a write buffer, a cache, a scheduler, a metric registry — owns
+nothing it can narrow an assertion to, because the state belongs to the bean rather than to a row.
+Three classes asserting on one view recorder's buffer failed intermittently for a day before that
+was named. The remedy is the same escape hatch: a private database is really a private context, and
+a private context is a private bean.
+
+The rule is about stores, not about SQL. `flushAll()` and `flushDb()` are `deleteAll()` for Redis,
+and a literal foreign key is the same claim in miniature: `.actorId(1L)` asserts that user 1 exists
+and is yours, which holds only on a database nobody else writes to and no engine enforces. A class
+that wipes its Redis keeps its own container for the same reason a class that truncates keeps its
+own database.
+
+When the subject genuinely is a whole table or index — title search, keyword facets, a global
+rebuild — take `registerOwnDatabase`. It costs one application context, so reach for a narrowed
+assertion first.
+
+---
+
+## 14. `@Transactional` is not a cleanup mechanism
+
+Use it only where the transaction boundary is the subject: a constraint that surfaces at flush, a
+lazy graph that needs an open session. Never for rollback-as-cleanup — unique fixtures give that for
+free, and the transaction costs three things that are all silent.
+
+- **`@TransactionalEventListener(AFTER_COMMIT)` never fires.** A rolled-back controller test drives
+  a path production never takes. Removing the annotation surfaces real behaviour: listeners bump a
+  row's version, so an entity captured in `@BeforeEach` is stale by the time the test mutates it,
+  and saving it raises `ObjectOptimisticLockingFailureException`. Re-read before mutating.
+- **InnoDB flushes its FULLTEXT cache at commit.** `MATCH ... AGAINST` cannot see the test's own
+  uncommitted rows, so a search returns nothing and looks like a broken query.
+- **It binds a transaction to a `ThreadLocal`.** JUnit's executor blocks in `ForkJoinTask.join()`,
+  and a blocked ForkJoin thread runs another task while waiting; that task inherits the binding.
+
+A test that stays inside the first-level cache asserts object identity while appearing to assert
+persisted equality. One here compared an `Instant` for exact equality and only passed because both
+reads returned the same instance; once the value round-tripped, MySQL's `DATETIME(6)` dropped the
+nanoseconds a Java `Instant` carries.
+
+---
+
+## 15. What the parallelism annotations cannot express
+
+- **`@Execution(CONCURRENT)` propagates to a node's descendants.** On a class it also makes the
+  methods concurrent, and methods share that class's `@BeforeEach` fixtures. "Classes parallel,
+  methods sequential" exists only in `junit-platform.properties`, which forces isolation to be
+  opt-out rather than opt-in.
+- **`@ResourceLock` excludes only other lock holders.** A locked class truncating a shared table
+  still clobbers every class that did not declare the lock. It is also an in-JVM lock and cannot
+  reach across Gradle forks.
+- **Sibling `@BeforeEach` methods have no defined order.** Cleanup must be the first statements of
+  the one setup method, not a second method beside it. Spring collects `@DynamicPropertySource`
+  from a class hierarchy with the same absence of ordering: a subclass binding its own database
+  while inheriting one that binds the shared database is a coin flip.
+
+> Contention is a naming problem before it is a concurrency problem. Names can be enumerated
+> statically; interleavings cannot.
+
+Three remedies, in order of preference: **rename** (make the name unique), **privatize** (give the
+test its own instance), **serialize** (order access). Serialization is the fallback, and it only
+coordinates participants — a developer's own running Redis never agreed to take your lock.
+
+---
+
+## 16. If you change one of these, check the others
 
 - Adding a constructor dependency to a service breaks every test that builds it positionally.
   That cost is the measure of how mock-heavy the suite is around that service, and it is worth
@@ -286,3 +375,11 @@ same facts directly assertable, and so does a real `CookieUtils`.
 - Mutation coverage measures whether a line is protected; line coverage measures only whether it
   ran. When `targetTests` is unset, PIT derives it from `targetClasses` and silently ignores tests
   whose package differs from the class under test.
+- Removing `@Transactional` from a test makes its `AFTER_COMMIT` effects real. Expect stale-entity
+  failures where the test held a reference across a mutating call, and cleanup ordering failures
+  where a delete now actually commits.
+- `deleteAll()` cascades to child entities; `deleteAllInBatch()` issues one `DELETE FROM` and does
+  not. Swapping them to avoid a version conflict leaves orphaned satellite rows.
+- An in-memory database named explicitly in `spring.datasource.url` is shared by every context on
+  that profile. Paired with `ddl-auto=create-drop`, a closing context drops the schema under the
+  ones still running. Boot's `generate-unique-name` default exists to prevent exactly this.

@@ -1,5 +1,7 @@
 package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
@@ -32,10 +34,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * using H2 in-memory database in test profile.</p>
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
 @Transactional
-class PlannerRepositoryTest {
+class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -55,9 +58,6 @@ class PlannerRepositoryTest {
     @BeforeEach
     void setUp() {
         // Clean up
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        userRepository.deleteAll();
 
         // Create test user
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");

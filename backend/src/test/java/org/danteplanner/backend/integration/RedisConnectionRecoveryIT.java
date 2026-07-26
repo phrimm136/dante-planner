@@ -149,6 +149,7 @@ class RedisConnectionRecoveryIT {
     // crash-safety, and GTID replication depends on neither fsync timing nor
     // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(RECOVERY_NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
             .withDatabaseName("testdb")
@@ -160,12 +161,17 @@ class RedisConnectionRecoveryIT {
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(RECOVERY_NETWORK)
             .withDatabaseName("testdb")
             .withUsername("test")
@@ -176,7 +182,11 @@ class RedisConnectionRecoveryIT {
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",
                     "--skip-name-resolve");

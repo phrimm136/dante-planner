@@ -101,17 +101,31 @@ tasks.withType<Test> {
             excludeTags(*excludeTags.toTypedArray())
         }
     }
-    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
-    // Cap each fork's heap so maxParallelForks × maxHeapSize leaves the runner headroom
-    // for Docker and the Testcontainers MySQL/Redis/Toxiproxy set; an unbounded default
-    // heap lets two forks swap the box and thrash into GC-overhead failures.
-    maxHeapSize = "2g"
-    // Test JVMs are short-lived and dominated by Spring context startup: C1-only JIT
-    // and the throughput collector favor fast warmup over peak speed the fork never reaches.
-    // The code cache is sized up because a fork hosting the whole suite loads enough
-    // classes to exhaust the adapter space ("Out of space in CodeCache for adapters").
-    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseParallelGC", "-XX:+HeapDumpOnOutOfMemoryError",
-            "-XX:ReservedCodeCacheSize=512m")
+    // Fork count sets when the longest class starts, not how fast it runs: the heavy replication
+    // and recovery harnesses sit behind ~40 classes in their fork's queue, and a wider pool drains
+    // that queue sooner. The ceiling is memory, not cores — each fork holds its own heap and its
+    // own Testcontainers set, whose data directories are tmpfs.
+    // The TestContext cache is a static map with a default bound of 32 and no concurrency
+    // guarantees; past the bound it evicts and closes contexts other test classes are still using.
+    systemProperty("spring.test.context.cache.maxSize", "64")
+    maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(2)
+    // Measured: a worker sits near 1 GB resident, and the containers it drives total well under
+    // that, so the JVMs are what the box has to fit. maxParallelForks × maxHeapSize must leave
+    // room for Docker, the Testcontainers set, and their tmpfs data directories.
+    maxHeapSize = "1g"
+    // Test JVMs are short-lived and dominated by Spring context startup, so C1-only JIT favors
+    // fast warmup over peak speed the fork never reaches.
+    //
+    // G1 rather than the throughput collector because it uncommits: a fork that peaks during one
+    // heavy context would otherwise hold that heap for the whole run, six forks ratcheting upward
+    // independently and never coming back down. The free-ratio bounds are what make it give the
+    // memory back between contexts.
+    //
+    // The code cache is sized up because a fork hosting the whole suite loads enough classes to
+    // exhaust the adapter space ("Out of space in CodeCache for adapters").
+    jvmArgs("-XX:TieredStopAtLevel=1", "-XX:+UseG1GC", "-XX:+HeapDumpOnOutOfMemoryError",
+            "-XX:MinHeapFreeRatio=10", "-XX:MaxHeapFreeRatio=30",
+            "-XX:ReservedCodeCacheSize=256m")
     filter {
         includeTestsMatching("*Test")
         includeTestsMatching("*Tests")

@@ -20,8 +20,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -30,7 +28,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Wire-contract pin for the detail and owner-list planner DTOs: the serialized field
@@ -44,10 +41,6 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_response_contract_it");
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -76,17 +69,11 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "contract-owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         published = TestDataFactory.createTestPlanner(plannerRepository, owner, true);
     }
 
-    @AfterEach
-    void tearDown() {
-        plannerRepository.deleteAll();
-    }
 
     private List<String> fieldNames(JsonNode node) {
         List<String> names = new ArrayList<>();

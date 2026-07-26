@@ -1,5 +1,7 @@
 package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 
@@ -34,10 +36,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * to batch-fetch comment counts for list views without N+1 queries.</p>
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
 @Transactional
-class PlannerCommentRepositoryTest {
+class PlannerCommentRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerCommentRepository commentRepository;
@@ -57,9 +60,6 @@ class PlannerCommentRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        commentRepository.deleteAll();
-        plannerRepository.deleteAll();
-        userRepository.deleteAll();
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         plannerA = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);

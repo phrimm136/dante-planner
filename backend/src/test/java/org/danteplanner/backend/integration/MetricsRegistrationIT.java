@@ -35,7 +35,7 @@ class MetricsRegistrationIT extends SharedMySqlContainerSupport {
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
-        String url = registerSharedMysql(registry, "metrics_registration_it");
+        String url = registerSharedMysql(registry);
         registry.add("datasource.routing.enabled", () -> "true");
         registry.add("datasource.replica.enabled", () -> "true");
         registry.add("datasource.replica.url", () -> url);

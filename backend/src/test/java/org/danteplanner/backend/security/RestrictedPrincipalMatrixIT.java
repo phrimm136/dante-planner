@@ -1,6 +1,10 @@
 package org.danteplanner.backend.security;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
+import org.springframework.context.annotation.Import;
+import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -34,7 +38,6 @@ import java.util.stream.Stream;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * A ban withdraws distribution, never possession.
@@ -48,8 +51,10 @@ import org.danteplanner.backend.support.TestDataCleanup;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-class RestrictedPrincipalMatrixTest {
+@ActiveProfiles("it")
+@Tag("containerized")
+@Import(TestConfig.class)
+class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
 
     /**
      * Out of scope for ban semantics. {@code /api/auth} is {@code permitAll} by design, so a banned
@@ -93,8 +98,6 @@ class RestrictedPrincipalMatrixTest {
 
     @BeforeEach
     void setUp() {
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         User banned = TestDataFactory.createTestUser(userRepository, "banned@example.com");
         banned.setBannedAt(Instant.now());
@@ -151,7 +154,7 @@ class RestrictedPrincipalMatrixTest {
 
     private Stream<Endpoint> mutatingApiEndpoints() {
         return handlerMapping.getHandlerMethods().keySet().stream()
-                .flatMap(RestrictedPrincipalMatrixTest::expand)
+                .flatMap(RestrictedPrincipalMatrixIT::expand)
                 .filter(e -> e.pattern().startsWith("/api/"))
                 .filter(e -> EXEMPT_PREFIXES.stream().noneMatch(e.pattern()::startsWith))
                 .filter(e -> MUTATING_METHODS.contains(e.method()))

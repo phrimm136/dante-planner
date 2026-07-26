@@ -2,6 +2,10 @@ package org.danteplanner.backend.controller;
 
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
@@ -29,7 +33,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -37,14 +40,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import({TestConfig.class, CommentControllerTest.MockCommentServiceConfig.class})
-@Transactional
-class CommentControllerTest {
+@ActiveProfiles("it")
+@Tag("containerized")
+@Import({TestConfig.class, CommentControllerIT.MockCommentServiceConfig.class})
+class CommentControllerIT extends SharedMySqlContainerSupport {
+
+
+
 
     @TestConfiguration
     static class MockCommentServiceConfig {
@@ -92,10 +97,6 @@ class CommentControllerTest {
 
     @BeforeEach
     void setUp() {
-        commentRepository.deleteAll();
-        notificationRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         otherUser = TestDataFactory.createTestUser(userRepository, "other@example.com");

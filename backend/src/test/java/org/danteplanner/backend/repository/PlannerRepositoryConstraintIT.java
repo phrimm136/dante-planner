@@ -1,5 +1,7 @@
 package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -36,7 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Constraint validation tests for Planner-related entities.
@@ -46,10 +47,11 @@ import org.danteplanner.backend.support.TestDataCleanup;
  * Separate from business logic tests - focuses on database integrity.</p>
  */
 @SpringBootTest
-@ActiveProfiles("test")
-@Transactional
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-class PlannerRepositoryConstraintTest {
+@Transactional
+class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private UserRepository userRepository;
@@ -73,11 +75,6 @@ class PlannerRepositoryConstraintTest {
 
     @BeforeEach
     void setUp() {
-        commentRepository.deleteAll();
-        voteRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         entityManager.flush();
         entityManager.clear();
 
@@ -105,19 +102,14 @@ class PlannerRepositoryConstraintTest {
     @Nested
     @DisplayName("Foreign Key Constraint Tests")
     class ForeignKeyTests {
-
-        @org.junit.jupiter.api.Disabled("H2 database does not enforce FK constraints in test mode. Enable for MySQL/PostgreSQL.")
         @Test
         @DisplayName("Invalid planner ID in vote throws FK constraint exception")
         void foreignKey_InvalidPlannerId_ThrowsException() {
             assertThatThrownBy(() -> {
                 PlannerVote vote = new PlannerVote(testUser.getId(), UUID.randomUUID(), VoteType.UP);
-                voteRepository.save(vote);
-                entityManager.flush();
+                voteRepository.saveAndFlush(vote);
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
-
-        @org.junit.jupiter.api.Disabled("H2 database does not enforce FK constraints in test mode. Enable for MySQL/PostgreSQL.")
         @Test
         @DisplayName("Invalid user ID in vote throws FK constraint exception")
         void foreignKey_InvalidUserId_ThrowsException() {
@@ -125,12 +117,9 @@ class PlannerRepositoryConstraintTest {
 
             assertThatThrownBy(() -> {
                 PlannerVote vote = new PlannerVote(99999L, planner.getId(), VoteType.UP);
-                voteRepository.save(vote);
-                entityManager.flush();
+                voteRepository.saveAndFlush(vote);
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
-
-        @org.junit.jupiter.api.Disabled("H2 database does not enforce FK constraints in test mode. Enable for MySQL/PostgreSQL.")
         @Test
         @DisplayName("Invalid planner ID in comment throws FK constraint exception")
         void foreignKey_InvalidPlannerIdInComment_ThrowsException() {
@@ -146,8 +135,6 @@ class PlannerRepositoryConstraintTest {
                 entityManager.flush();
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
-
-        @org.junit.jupiter.api.Disabled("H2 database does not enforce FK constraints in test mode. Enable for MySQL/PostgreSQL.")
         @Test
         @DisplayName("Invalid user ID in comment throws FK constraint exception")
         void foreignKey_InvalidUserIdInComment_ThrowsException() {
@@ -165,8 +152,6 @@ class PlannerRepositoryConstraintTest {
                 entityManager.flush();
             }).isInstanceOf(DataIntegrityViolationException.class);
         }
-
-        @org.junit.jupiter.api.Disabled("H2 database does not enforce FK constraints in test mode. Enable for MySQL/PostgreSQL.")
         @Test
         @DisplayName("Cascade delete on planner removes associated votes")
         void foreignKey_CascadeDelete_DeletesChildVotes() {
@@ -176,17 +161,15 @@ class PlannerRepositoryConstraintTest {
             voteRepository.save(vote);
             entityManager.flush();
 
-            long votesBeforeDelete = voteRepository.count();
+            long votesBeforeDelete = countVotesFor(planner.getId());
             assertThat(votesBeforeDelete).isEqualTo(1);
 
             plannerRepository.delete(planner);
             entityManager.flush();
 
-            long votesAfterDelete = voteRepository.count();
+            long votesAfterDelete = countVotesFor(planner.getId());
             assertThat(votesAfterDelete).isZero();
         }
-
-        @org.junit.jupiter.api.Disabled("H2 database does not enforce FK constraints in test mode. Enable for MySQL/PostgreSQL.")
         @Test
         @DisplayName("Cascade delete on planner removes associated comments")
         void foreignKey_CascadeDelete_DeletesChildComments() {
@@ -202,14 +185,26 @@ class PlannerRepositoryConstraintTest {
             commentRepository.save(comment);
             entityManager.flush();
 
-            long commentsBeforeDelete = commentRepository.count();
+            long commentsBeforeDelete = countCommentsFor(planner.getId());
             assertThat(commentsBeforeDelete).isEqualTo(1);
 
             plannerRepository.delete(planner);
             entityManager.flush();
 
-            long commentsAfterDelete = commentRepository.count();
+            long commentsAfterDelete = countCommentsFor(planner.getId());
             assertThat(commentsAfterDelete).isZero();
+        }
+
+        private long countVotesFor(UUID plannerId) {
+            return voteRepository.findAll().stream()
+                    .filter(vote -> plannerId.equals(vote.getPlannerId()))
+                    .count();
+        }
+
+        private long countCommentsFor(UUID plannerId) {
+            return commentRepository.findAll().stream()
+                    .filter(comment -> plannerId.equals(comment.getPlannerId()))
+                    .count();
         }
     }
 
@@ -305,7 +300,7 @@ class PlannerRepositoryConstraintTest {
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("google-123")
                     .usernameEpithet("TEST")
-                    .usernameSuffix("00001")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user1);
@@ -317,7 +312,7 @@ class PlannerRepositoryConstraintTest {
                         .provider(AuthProviderType.GOOGLE)
                         .providerId("google-123")
                         .usernameEpithet("TEST")
-                        .usernameSuffix("00002")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                         .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user2);
@@ -333,7 +328,7 @@ class PlannerRepositoryConstraintTest {
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("123")
                     .usernameEpithet("TEST")
-                    .usernameSuffix("00001")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user1);
@@ -343,7 +338,7 @@ class PlannerRepositoryConstraintTest {
                     .provider(AuthProviderType.APPLE)
                     .providerId("123")
                     .usernameEpithet("TEST")
-                    .usernameSuffix("00002")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .role(UserRole.NORMAL)
                     .build();
             userRepository.save(user2);
@@ -409,7 +404,7 @@ class PlannerRepositoryConstraintTest {
                         .provider(AuthProviderType.GOOGLE)
                         .providerId("google-123")
                         .usernameEpithet("TEST")
-                        .usernameSuffix("test1")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                         .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user);
@@ -426,7 +421,7 @@ class PlannerRepositoryConstraintTest {
                         .provider(null)
                         .providerId("google-123")
                         .usernameEpithet("TEST")
-                        .usernameSuffix("test1")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                         .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user);
@@ -443,7 +438,7 @@ class PlannerRepositoryConstraintTest {
                         .provider(AuthProviderType.GOOGLE)
                         .providerId(null)
                         .usernameEpithet("TEST")
-                        .usernameSuffix("test1")
+                        .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                         .role(UserRole.NORMAL)
                         .build();
                 userRepository.save(user);

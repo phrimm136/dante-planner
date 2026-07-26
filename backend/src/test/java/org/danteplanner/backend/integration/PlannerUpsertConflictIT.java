@@ -23,8 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.concurrent.CyclicBarrier;
@@ -37,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Upsert conflict seam. A client whose {@code syncVersion} trails the server yields
@@ -53,10 +50,6 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_upsert_conflict_it");
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -80,18 +73,12 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
         planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         validContent = planner.getContentJson();
     }
 
-    @AfterEach
-    void tearDown() {
-        plannerRepository.deleteAll();
-    }
 
     private String body(Long syncVersion) throws Exception {
         return objectMapper.writeValueAsString(new UpsertPlannerRequest(

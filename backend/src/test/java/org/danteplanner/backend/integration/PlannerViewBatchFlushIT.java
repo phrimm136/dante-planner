@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import java.time.LocalDate;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
 import java.util.UUID;
 
 import org.danteplanner.backend.config.TestConfig;
@@ -18,11 +20,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Batch flush seam: draining many buffered views persists one row per distinct (planner, viewer,
@@ -33,14 +32,20 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
+class PlannerViewBatchFlushIT {
+
+    /**
+     * Its own database, and so its own context: the subject is the recorder's process-wide buffer,
+     * which is one bean per context. Sharing a context means sharing the buffer with every class in
+     * it, and a neighbour's flush drains the batch this test is about to assert on.
+     */
+    @DynamicPropertySource
+    static void ownDatabase(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "view_batch_flush");
+    }
 
     private static final LocalDate DAY = LocalDate.of(2026, 3, 1);
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_view_batch_flush_it");
-    }
 
     @Autowired
     private PlannerViewRecorder recorder;
@@ -58,8 +63,6 @@ class PlannerViewBatchFlushIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         owner = TestDataFactory.createTestUser(userRepository, "batch-owner@example.com");
     }
 

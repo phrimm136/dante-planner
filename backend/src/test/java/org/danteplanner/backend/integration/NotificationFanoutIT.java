@@ -17,8 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,10 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestConfig.class)
 class NotificationFanoutIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "notification_fanout_it");
-    }
 
     @Autowired
     private UserRepository userRepository;
@@ -51,12 +45,6 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @BeforeEach
-    void clean() {
-        notificationRepository.deleteAll();
-        userSettingsRepository.deleteAll();
-        userRepository.deleteAll();
-    }
 
     @Test
     @Transactional

@@ -1,5 +1,7 @@
 package org.danteplanner.backend.repository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 
@@ -35,10 +37,11 @@ import static org.junit.jupiter.api.Assertions.*;
  * are obsolete and have been deleted.</p>
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
 @Transactional
-class PlannerVoteRepositoryTest {
+class PlannerVoteRepositoryIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlannerVoteRepository plannerVoteRepository;
@@ -55,9 +58,6 @@ class PlannerVoteRepositoryTest {
     @BeforeEach
     void setUp() {
         // Clean up
-        plannerVoteRepository.deleteAll();
-        plannerRepository.deleteAll();
-        userRepository.deleteAll();
 
         // Create test user
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");

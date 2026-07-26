@@ -1,12 +1,12 @@
 package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.redis.testcontainers.RedisContainer;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -31,11 +31,7 @@ import static org.mockito.Mockito.when;
  * add, check, and TTL expiration functionality over a live Redis container.</p>
  */
 @Tag("containerized")
-class TokenBlacklistServiceTest {
-
-    private static final String REDIS_IMAGE = "redis:7-alpine";
-
-    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
+class TokenBlacklistServiceIT {
 
     private static StringRedisTemplate sharedTemplate;
 
@@ -43,8 +39,7 @@ class TokenBlacklistServiceTest {
 
     @BeforeAll
     static void startRedis() {
-        REDIS.start();
-        sharedTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+        sharedTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
     }
 
     private static StringRedisTemplate buildTemplate(String host, int port) {
@@ -342,7 +337,7 @@ class TokenBlacklistServiceTest {
             blacklistService.blacklistToken(token, futureExpiry);
 
             // Act - a second service over a fresh template pointing at the SAME container
-            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            StringRedisTemplate secondTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
             TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
 
             // Assert - externalized revocation is visible across instances
@@ -362,7 +357,7 @@ class TokenBlacklistServiceTest {
             blacklistService.invalidateUserTokens(userId);
 
             // Act - a second service over a fresh template pointing at the SAME container
-            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            StringRedisTemplate secondTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
             TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
 
             // Assert - externalized user invalidation is visible across instances

@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
@@ -25,7 +23,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * User resolution seam: resolving a brand-new provider identity creates the user and its
@@ -38,10 +35,6 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class UserResolutionIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "user_resolution_it");
-    }
 
     @Autowired
     private UserService userService;
@@ -54,7 +47,6 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private Map<String, String> identity(String providerId) {
@@ -110,14 +102,17 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
     @DisplayName("userResolve_WhenReturningUser_NoWrites")
     void userResolve_WhenReturningUser_NoWrites() {
         User existing = TestDataFactory.createTestUser(userRepository, "returning@example.com");
-        long before = userRepository.count();
 
         User resolved = userService.findOrCreateUser("google", Map.of(
                 "id", existing.getProviderId(), "email", existing.getEmail()));
 
         assertThat(resolved.getId()).isEqualTo(existing.getId());
-        assertThat(userRepository.count())
+        // Counting rows for this provider id rather than the table: a bare count() would also
+        // move when a concurrent class inserts, and a before/after delta races the same way.
+        assertThat(userRepository.findAll().stream()
+                        .filter(user -> existing.getProviderId().equals(user.getProviderId()))
+                        .count())
                 .as("resolving a returning user inserts nothing")
-                .isEqualTo(before);
+                .isEqualTo(1L);
     }
 }

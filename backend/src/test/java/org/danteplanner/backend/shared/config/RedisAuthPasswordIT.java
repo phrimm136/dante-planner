@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Import(TestConfig.class)
 @Tag("containerized")
-class RedisAuthPasswordTest {
+class RedisAuthPasswordIT {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
     private static final String REDIS_PASSWORD = "testpass";

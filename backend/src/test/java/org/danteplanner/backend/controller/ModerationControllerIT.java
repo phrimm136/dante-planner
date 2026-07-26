@@ -1,6 +1,9 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
+import static org.hamcrest.Matchers.hasItem;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -20,13 +23,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Tier-2 wire-contract tests for {@link ModerationController}.
@@ -41,10 +42,13 @@ import org.danteplanner.backend.support.TestDataCleanup;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
-class ModerationControllerTest {
+class ModerationControllerIT extends SharedMySqlContainerSupport {
+
+    private static final String MINE =
+            "$[?(@.reason == 'Spam behaviour in comments')]";
 
     @Autowired
     private MockMvc mockMvc;
@@ -71,9 +75,6 @@ class ModerationControllerTest {
 
     @BeforeEach
     void setUp() {
-        plannerCommentRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         regularUser = TestDataFactory.createTestUser(userRepository, "user@example.com");
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");
@@ -220,6 +221,22 @@ class ModerationControllerTest {
                     .andExpect(jsonPath("$.message").value("User banned successfully"));
         }
 
+        /**
+         * A moderator clears the endpoint's role check and is refused by the service instead, so
+         * this is the arm that pins the authorization failure's rendered body — status, code, and
+         * the message the actor is shown.
+         */
+        @Test
+        void banUser_WhenModerator_Returns403WithForbiddenBody() throws Exception {
+            mockMvc.perform(post("/api/moderation/user/{suffix}/ban", regularUser.getUsernameSuffix()).with(withCsrf())
+                            .cookie(moderatorCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"reason\":\"Ban evasion and repeated violations\"}"))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value("FORBIDDEN"))
+                    .andExpect(jsonPath("$.message").value("Only administrators can ban users"));
+        }
+
         @Test
         void banUser_WhenNormalUser_Returns403() throws Exception {
             mockMvc.perform(post("/api/moderation/user/{suffix}/ban", regularUser.getUsernameSuffix()).with(withCsrf())
@@ -318,9 +335,11 @@ class ModerationControllerTest {
                             .cookie(moderatorCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$[0].usernameSuffix").value(regularUser.getUsernameSuffix()))
-                    .andExpect(jsonPath("$[0].timeoutUntil").exists())
-                    .andExpect(jsonPath("$[0].userId").doesNotExist());
+                    // The endpoint answers with every timed-out user, so index 0 is whichever
+                    // one sorted first, not necessarily this test's.
+                    .andExpect(jsonPath("$[*].usernameSuffix", hasItem(regularUser.getUsernameSuffix())))
+                    .andExpect(jsonPath("$[*].timeoutUntil").exists())
+                    .andExpect(jsonPath("$[*].userId").doesNotExist());
         }
 
         @Test
@@ -349,12 +368,13 @@ class ModerationControllerTest {
                             .cookie(moderatorCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$[0].actionType").value("TIMEOUT"))
-                    .andExpect(jsonPath("$[0].targetType").value("USER"))
-                    .andExpect(jsonPath("$[0].targetUuid").exists())
-                    .andExpect(jsonPath("$[0].reason").value("Spam behaviour in comments"))
-                    .andExpect(jsonPath("$[0].durationMinutes").value(60))
-                    .andExpect(jsonPath("$[0].createdAt").exists())
+                    // Selected by this test's own reason: index 0 belongs to whoever the table
+                    // sorted first, which is any concurrently running class.
+                    .andExpect(jsonPath(MINE + ".actionType").value(hasItem("TIMEOUT")))
+                    .andExpect(jsonPath(MINE + ".targetType").value(hasItem("USER")))
+                    .andExpect(jsonPath(MINE + ".targetUuid").exists())
+                    .andExpect(jsonPath(MINE + ".durationMinutes").value(hasItem(60)))
+                    .andExpect(jsonPath(MINE + ".createdAt").exists())
                     .andExpect(jsonPath("$[0].actorUsernameEpithet").value(moderatorUser.getUsernameEpithet()))
                     .andExpect(jsonPath("$[0].actorUsernameSuffix").value(moderatorUser.getUsernameSuffix()))
                     .andExpect(jsonPath("$[0].actorId").doesNotExist());

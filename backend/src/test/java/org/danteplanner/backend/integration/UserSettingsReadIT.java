@@ -17,8 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +24,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Settings read seam: a GET on a missing settings row returns defaults with a 200 and writes
@@ -40,10 +37,6 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class UserSettingsReadIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "user_settings_read_it");
-    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,7 +58,6 @@ class UserSettingsReadIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         user = TestDataFactory.createTestUser(userRepository, "settings@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, user);
     }

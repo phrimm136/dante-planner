@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * {@code userId:endpoint}.</p>
  */
 @Tag("containerized")
-class RateLimitServiceTest {
+class RateLimitServiceIT {
 
     private static final String REDIS_IMAGE = "redis:7-alpine";
 

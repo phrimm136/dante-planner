@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
@@ -21,8 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -31,7 +31,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Filter rebuild over existing rows: rebuilding a visible planner's filter
@@ -42,12 +41,16 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
+class PlannerFilterRebuildIT {
 
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_filter_rebuild_it");
+    static void ownIndex(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "filter_rebuild");
     }
+
+
+
+
 
     @Autowired
     private UserRepository userRepository;
@@ -74,6 +77,11 @@ class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
+        // First statement of the only @BeforeEach: JUnit does not order sibling
+        // @BeforeEach methods, so a separate wipe method could run after setup.
+        entityFilterRepository.deleteAll();
+        keywordFilterRepository.deleteAll();
+        plannerRepository.deleteAll();
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "rebuild-owner@example.com");
     }
@@ -84,10 +92,6 @@ class PlannerFilterRebuildIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     @Test

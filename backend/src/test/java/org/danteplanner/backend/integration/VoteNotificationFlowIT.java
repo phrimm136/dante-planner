@@ -1,5 +1,8 @@
 package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -26,7 +29,6 @@ import org.danteplanner.backend.repository.*;
 import org.danteplanner.backend.notification.service.NotificationService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -50,19 +51,23 @@ import static org.junit.jupiter.api.Assertions.*;
  * <p>Tests the complete end-to-end flow from vote crossing threshold
  * → atomic flag check → notification creation with race condition prevention.</p>
  *
- * <p>DISABLED: Cannot test AFTER_COMMIT events in @Transactional tests.
- * The transaction never commits due to test rollback, so @TransactionalEventListener(AFTER_COMMIT)
- * never fires. TestTransaction.flagForCommit() approach conflicts with service layer transactions.</p>
- *
  * @see <a href="https://www.baeldung.com/spring-test-programmatic-transactions">Baeldung - Programmatic Transactions</a>
  */
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
-@Disabled("AFTER_COMMIT events incompatible with @Transactional test rollback. " +
-          "TestTransaction.flagForCommit() conflicts with service layer transactions.")
-class VoteNotificationFlowTest {
+class VoteNotificationFlowIT {
+
+    /**
+     * Its own database: two of these assert about the notifications table as a whole (the UNIQUE
+     * constraint that collapses duplicates, and what concurrent votes leave behind), which cannot
+     * be narrowed to a row the test created.
+     */
+    @DynamicPropertySource
+    static void ownDatabase(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "vote_notification_flow");
+    }
 
     @Autowired
     private PlannerEngagementService plannerEngagementService;
@@ -99,53 +104,15 @@ class VoteNotificationFlowTest {
 
     @BeforeEach
     void setUp() {
-        // Clean up
-        notificationRepository.deleteAll();
-        plannerVoteRepository.deleteAll();
-        plannerStatsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        userRepository.deleteAll();
-
-        // Recreate sentinel user using native SQL (JPA IDENTITY ignores explicit IDs)
-        org.danteplanner.backend.config.TestDataInitializer.createSentinelUser(entityManager);
-
         // Create planner owner
-        plannerOwner = User.builder()
-                .email("owner@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-owner")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("own01")
-                .build();
-        plannerOwner = userRepository.save(plannerOwner);
+        plannerOwner = TestDataFactory.createTestUser(userRepository, "owner@example.com");
 
         // Create voters
-        voter1 = User.builder()
-                .email("voter1@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-voter1")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("vot01")
-                .build();
-        voter1 = userRepository.save(voter1);
+        voter1 = TestDataFactory.createTestUser(userRepository, "voter1@example.com");
 
-        voter2 = User.builder()
-                .email("voter2@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-voter2")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("vot02")
-                .build();
-        voter2 = userRepository.save(voter2);
+        voter2 = TestDataFactory.createTestUser(userRepository, "voter2@example.com");
 
-        voter3 = User.builder()
-                .email("voter3@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-voter3")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("vot03")
-                .build();
-        voter3 = userRepository.save(voter3);
+        voter3 = TestDataFactory.createTestUser(userRepository, "voter3@example.com");
 
         // Create published planner with initial vote counts at 0
         testPlanner = TestDataFactory.planner(plannerOwner)
@@ -163,16 +130,6 @@ class VoteNotificationFlowTest {
                 .upvotes(upvotes)
                 .recommendedNotifiedAt(recommendedNotifiedAt)
                 .build());
-    }
-
-    /**
-     * Commits the current transaction to trigger AFTER_COMMIT listeners,
-     * then starts a new transaction for assertions.
-     */
-    private void commitAndStartNewTransaction() {
-        TestTransaction.flagForCommit();
-        TestTransaction.end();
-        TestTransaction.start();
     }
 
     // ==================== IT1: Vote Crossing Threshold Creates Notification ====================
@@ -194,7 +151,6 @@ class VoteNotificationFlowTest {
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger AFTER_COMMIT listener, then start new transaction for assertions
-        commitAndStartNewTransaction();
 
         // Assert - Notification created
         List<Notification> notifications = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
@@ -225,7 +181,6 @@ class VoteNotificationFlowTest {
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger any listeners, then start new transaction for assertions
-        commitAndStartNewTransaction();
 
         // Assert - No notification created
         long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
@@ -249,7 +204,6 @@ class VoteNotificationFlowTest {
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger AFTER_COMMIT listener
-        commitAndStartNewTransaction();
 
         // Assert - Notification created
         long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
@@ -271,18 +225,10 @@ class VoteNotificationFlowTest {
         // Create additional voters for concurrent test
         List<User> voters = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            User voter = User.builder()
-                    .email("concurrent" + i + "@example.com")
-                    .provider(AuthProviderType.GOOGLE)
-                    .providerId("google-concurrent-" + i)
-                    .usernameEpithet("W_CORP")
-                    .usernameSuffix("conc" + i)
-                    .build();
-            voters.add(userRepository.save(voter));
+            voters.add(TestDataFactory.createTestUser(userRepository, "concurrent" + i + "@example.com"));
         }
 
         // Commit setup data so concurrent threads can see it
-        commitAndStartNewTransaction();
 
         // Act - Simulate concurrent votes using ExecutorService
         // Each thread will run in its own transaction (managed by service layer)
@@ -333,7 +279,9 @@ class VoteNotificationFlowTest {
         assertNotNull(stats.getRecommendedNotifiedAt(), "Recommended notification flag should be set");
 
         // Verify multiple votes were cast (at least some succeeded)
-        long voteCount = plannerVoteRepository.count();
+        long voteCount = plannerVoteRepository.findAll().stream()
+                .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
+                .count();
         assertTrue(voteCount > 0, "At least one vote should succeed");
     }
 
@@ -362,7 +310,6 @@ class VoteNotificationFlowTest {
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit and verify
-        commitAndStartNewTransaction();
 
         // Assert - No new notification created
         long notificationsAfter = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
@@ -387,7 +334,6 @@ class VoteNotificationFlowTest {
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit and verify
-        commitAndStartNewTransaction();
 
         // Assert - Still only 1 notification
         long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
@@ -409,7 +355,6 @@ class VoteNotificationFlowTest {
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
         // Commit to trigger AFTER_COMMIT listener
-        commitAndStartNewTransaction();
 
         // Assert - Both vote and notification persisted
         // 1. Vote exists
@@ -472,7 +417,6 @@ class VoteNotificationFlowTest {
         notificationRepository.save(notification);
 
         // Commit setup
-        commitAndStartNewTransaction();
 
         long notificationsBefore = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
                 plannerOwner.getId(), org.springframework.data.domain.PageRequest.of(0, 10)).getTotalElements();

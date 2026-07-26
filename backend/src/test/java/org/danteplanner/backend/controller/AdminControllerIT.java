@@ -1,6 +1,8 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -17,19 +19,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Tier-2 wire-contract tests for {@link AdminController}.
  *
  * <p>Covers the two role-management endpoints ({@code changeRole}, {@code getUserRole}) that
- * {@code AdminModerationControllerTest} does not exercise (that class targets the separate
+ * {@code AdminModerationControllerIT} does not exercise (that class targets the separate
  * {@code AdminModerationController} at {@code /api/moderation/planner}). Pins the
  * {@code UserRoleResponse} JSON shape plus the ADMIN authorization boundary
  * (non-admin NORMAL &rarr; 403, unauthenticated &rarr; 401).</p>
@@ -39,10 +39,10 @@ import org.danteplanner.backend.support.TestDataCleanup;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
-class AdminControllerTest {
+class AdminControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,7 +60,6 @@ class AdminControllerTest {
 
     @BeforeEach
     void setUp() {
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         regularUser = TestDataFactory.createTestUser(userRepository, "user@example.com");
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");

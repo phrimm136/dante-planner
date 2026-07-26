@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
@@ -28,8 +30,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Faceted search over the inverted indexes and keyword normalization:
@@ -53,12 +52,16 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
+class PlannerKeywordFacetIT {
 
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_keyword_facet_it");
+    static void ownIndex(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "keyword_facet");
     }
+
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -97,6 +100,13 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
+        // First statement of the only @BeforeEach: JUnit does not order sibling
+        // @BeforeEach methods, so a separate wipe method could run after setup.
+        catalogRepository.deleteAll();
+        entityFilterRepository.deleteAll();
+        keywordFilterRepository.deleteAll();
+        plannerRepository.deleteAll();
+        statsRepository.deleteAll();
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "facet-owner@example.com");
     }
@@ -107,12 +117,6 @@ class PlannerKeywordFacetIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        catalogRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     /**

@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -29,8 +31,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -42,7 +42,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Publish flow over the projections: an owner's title edit on a published
@@ -55,12 +54,16 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
+class PlannerPublishFlowIT {
 
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_publish_flow_it");
+    static void ownIndex(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "publish_flow");
     }
+
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -100,6 +103,13 @@ class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
+        // First statement of the only @BeforeEach: JUnit does not order sibling
+        // @BeforeEach methods, so a separate wipe method could run after setup.
+        catalogRepository.deleteAll();
+        entityFilterRepository.deleteAll();
+        keywordFilterRepository.deleteAll();
+        statsRepository.deleteAll();
+        plannerRepository.deleteAll();
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "publish-owner@example.com");
         token = TestDataFactory.generateAccessToken(jwtTokenService, owner);
@@ -111,12 +121,6 @@ class PlannerPublishFlowIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        catalogRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private long entityFilterRows(UUID plannerId) {

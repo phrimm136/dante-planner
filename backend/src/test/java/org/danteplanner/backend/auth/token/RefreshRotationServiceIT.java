@@ -1,6 +1,7 @@
 package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import com.redis.testcontainers.RedisContainer;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -52,15 +52,11 @@ import static org.mockito.Mockito.verify;
  * the spec plus cross-instance atomicity.</p>
  */
 @Tag("containerized")
-class RefreshRotationServiceTest {
-
-    private static final String REDIS_IMAGE = "redis:7-alpine";
+class RefreshRotationServiceIT {
     private static final long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
     private static final long RETRY_REUSE_WINDOW_MS = 30000L;
     private static final Long USER_ID = 42L;
     private static final String EMAIL = "rotation@example.com";
-
-    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
 
     private static StringRedisTemplate sharedTemplate;
 
@@ -72,8 +68,7 @@ class RefreshRotationServiceTest {
 
     @BeforeAll
     static void startRedis() {
-        REDIS.start();
-        sharedTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+        sharedTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
     }
 
     private static StringRedisTemplate buildTemplate(String host, int port) {
@@ -436,8 +431,8 @@ class RefreshRotationServiceTest {
         @Test
         @DisplayName("Token driven to RETIRED on instance A is detected as theft when replayed on instance B over shared Redis")
         void rotate_WhenTokenRetiredOnInstanceA_ReplayOnInstanceB_DetectsTheftOverSharedRedis() {
-            StringRedisTemplate templateA = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            StringRedisTemplate templateB = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
+            StringRedisTemplate templateA = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
+            StringRedisTemplate templateB = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
 
             RefreshRotationService instanceA = new RefreshRotationService(
                     templateA, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(),

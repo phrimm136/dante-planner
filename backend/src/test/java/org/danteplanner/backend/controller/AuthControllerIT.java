@@ -1,6 +1,8 @@
 package org.danteplanner.backend.controller;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.facade.AuthenticationFacade;
@@ -22,7 +24,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -30,14 +31,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import({TestConfig.class, AuthControllerTest.MockAuthFacadeConfig.class})
-@Transactional
-class AuthControllerTest {
+@ActiveProfiles("it")
+@Tag("containerized")
+@Import({TestConfig.class, AuthControllerIT.MockAuthFacadeConfig.class})
+class AuthControllerIT extends SharedMySqlContainerSupport {
 
     @TestConfiguration
     static class MockAuthFacadeConfig {
@@ -67,7 +67,6 @@ class AuthControllerTest {
     void setUp() {
         Mockito.reset(authFacade);
 
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);

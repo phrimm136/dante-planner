@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
@@ -23,8 +25,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Set;
@@ -32,7 +32,6 @@ import java.util.Set;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Free-text search over the catalog: ngram FULLTEXT on titles (substrings of
@@ -44,12 +43,16 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
+class PlannerTitleSearchIT {
 
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_title_search_it");
+    static void ownIndex(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "title_search");
     }
+
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -82,6 +85,13 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
+        // First statement of the only @BeforeEach: JUnit does not order sibling
+        // @BeforeEach methods, so a separate wipe method could run after setup.
+        catalogRepository.deleteAll();
+        entityFilterRepository.deleteAll();
+        keywordFilterRepository.deleteAll();
+        plannerRepository.deleteAll();
+        statsRepository.deleteAll();
         cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "search-owner@example.com");
         publish("Bleed Team", null);
@@ -95,12 +105,6 @@ class PlannerTitleSearchIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        catalogRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private void publish(String title, Set<String> keywords) {

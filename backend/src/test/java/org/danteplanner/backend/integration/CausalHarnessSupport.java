@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import com.redis.testcontainers.RedisContainer;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import eu.rekawek.toxiproxy.Proxy;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
 import java.io.IOException;
@@ -36,7 +37,15 @@ import org.testcontainers.toxiproxy.ToxiproxyContainer;
  * {@link ReplicationControl#awaitCaughtUp()} on the caller's side, never a sleep.</p>
  */
 @Import(CausalHarnessSupport.HarnessDataSourceConfig.class)
+@ResourceLock(CausalHarnessSupport.SHARED_HARNESS)
 abstract class CausalHarnessSupport {
+
+    /**
+     * The thirteen subclasses drive replication state and toxics through one primary/replica pair,
+     * one Redis, and one Toxiproxy held as per-fork statics. Unlike the single-database tests they
+     * cannot isolate by owning a database, so they serialize against each other instead.
+     */
+    static final String SHARED_HARNESS = "causal-harness";
 
     private static final Logger log = LoggerFactory.getLogger(CausalHarnessSupport.class);
 
@@ -59,6 +68,7 @@ abstract class CausalHarnessSupport {
     // crash-safety, and GTID replication depends on neither fsync timing nor
     // performance_schema — the flags cut boot time and per-instance memory.
     static final MySQLContainer PRIMARY = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(NETWORK)
             .withNetworkAliases(PRIMARY_ALIAS)
             .withDatabaseName("testdb")
@@ -71,12 +81,17 @@ abstract class CausalHarnessSupport {
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
                     "--session-track-gtids=OWN_GTID",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",
                     "--skip-name-resolve");
 
     static final MySQLContainer REPLICA = new MySQLContainer(MYSQL_IMAGE)
+            .withTmpFs(java.util.Map.of("/var/lib/mysql", "rw,size=512m"))
             .withNetwork(NETWORK)
             .withDatabaseName("testdb")
             .withUsername("test")
@@ -87,7 +102,11 @@ abstract class CausalHarnessSupport {
                     "--binlog-format=ROW",
                     "--gtid-mode=ON",
                     "--enforce-gtid-consistency=ON",
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
+                    "--innodb-doublewrite=0",
                     "--sync-binlog=0",
                     "--performance-schema=OFF",
                     "--skip-name-resolve");

@@ -1,5 +1,8 @@
 package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.junit.jupiter.api.BeforeEach;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -31,8 +34,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -69,12 +70,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class MySQLIntegrationTest extends SharedMySqlContainerSupport {
+class MySQLIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "mysql_integration_test");
-    }
+
+
+
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -106,11 +106,6 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         // Clean up in dependency order (no sentinel user needed for these tests)
-        voteRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        notificationRepository.deleteAll();
-        userRepository.deleteAll();
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
         testPlanner = TestDataFactory.createTestPlanner(plannerRepository, testUser, true);
@@ -159,7 +154,11 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
             executor.shutdown();
 
             // Verify all 20 votes counted
-            long voteCount = voteRepository.count();
+            // Scoped to this test's planner: the database is shared with every other integration
+            // class, so a bare count() also sees their rows and this class's earlier methods'.
+            long voteCount = voteRepository.findAll().stream()
+                    .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
+                    .count();
             assertThat(voteCount).isEqualTo(20);
         }
     }
@@ -184,7 +183,11 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
             for (int i = 0; i < seedVotes; i++) {
                 plannerEngagementService.castVote(users.get(i).getId(), testPlanner.getId(), VoteType.UP);
             }
-            assertThat(notificationRepository.count()).isZero();
+            assertThat(notificationRepository.findAll().stream()
+                            .filter(n -> testPlanner.getId().equals(n.getPlannerId()))
+                            .count())
+                    .as("seeding below the threshold raises no recommendation notification")
+                    .isZero();
 
             ExecutorService executor = Executors.newFixedThreadPool(burstVoters);
             CountDownLatch startLatch = new CountDownLatch(1);
@@ -216,7 +219,9 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
             assertThat(failures).isEmpty();
 
             // Atomic increment: the denormalized counter equals the real vote-row count (no lost update)
-            long voteRows = voteRepository.count();
+            long voteRows = voteRepository.findAll().stream()
+                    .filter(vote -> testPlanner.getId().equals(vote.getPlannerId()))
+                    .count();
             int upvotes = statsRepository.findById(testPlanner.getId())
                     .map(PlannerStats::getUpvotes).orElse(0);
             assertThat(voteRows).isEqualTo(totalVoters);
@@ -263,7 +268,7 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("duplicate-provider-id")
                     .usernameEpithet("W_CORP")
-                    .usernameSuffix("00001")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
             userRepository.save(user1);
             entityManager.flush();
@@ -275,7 +280,7 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("duplicate-provider-id")
                     .usernameEpithet("W_CORP")
-                    .usernameSuffix("00002")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
 
             assertThatThrownBy(() -> {
@@ -293,7 +298,7 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
                     .provider(AuthProviderType.GOOGLE)
                     .providerId("roundtrip-provider-id")
                     .usernameEpithet("W_CORP")
-                    .usernameSuffix("00003")
+                    .usernameSuffix(TestDataFactory.uniqueSuffix(""))
                     .build();
             userRepository.save(user);
             entityManager.flush();
@@ -393,8 +398,12 @@ class MySQLIntegrationTest extends SharedMySqlContainerSupport {
             overrideCreatedAt(n3.getId(), base.plusNanos(20_000));
             entityManager.clear();
 
-            List<Notification> notifications = notificationRepository.findAll();
-            notifications.sort(Comparator.comparing(Notification::getCreatedAt));
+            // The three this test wrote, in created order: the table also holds every other
+            // class's notifications.
+            List<Notification> notifications = notificationRepository.findAll().stream()
+                    .filter(n -> List.of(n1.getId(), n2.getId(), n3.getId()).contains(n.getId()))
+                    .sorted(Comparator.comparing(Notification::getCreatedAt))
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             assertThat(notifications).hasSize(3);
             assertThat(notifications.get(0).getId()).isEqualTo(n1.getId());

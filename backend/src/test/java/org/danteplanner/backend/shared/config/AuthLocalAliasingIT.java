@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.config;
 
 import com.redis.testcontainers.RedisContainer;
+import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.config.TestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -25,20 +26,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Import(TestConfig.class)
 @Tag("containerized")
-class AuthLocalAliasingTest {
-
-    private static final String REDIS_IMAGE = "redis:7-alpine";
-
-    static final RedisContainer ALIAS_REDIS = new RedisContainer(REDIS_IMAGE);
+class AuthLocalAliasingIT {
 
     static {
-        ALIAS_REDIS.start();
     }
 
     @DynamicPropertySource
     static void authRedisProperties(DynamicPropertyRegistry registry) {
-        registry.add("AUTH_REDIS_HOST", ALIAS_REDIS::getRedisHost);
-        registry.add("AUTH_REDIS_PORT", ALIAS_REDIS::getRedisPort);
+        registry.add("AUTH_REDIS_HOST", SharedRedisContainerSupport::host);
+        registry.add("AUTH_REDIS_PORT", SharedRedisContainerSupport::port);
     }
 
     @Autowired
@@ -59,6 +55,6 @@ class AuthLocalAliasingTest {
 
         assertThat(authLocalHost).isEqualTo(authHost);
         assertThat(authLocalPort).isEqualTo(authPort);
-        assertThat(authPort).isEqualTo(ALIAS_REDIS.getRedisPort());
+        assertThat(authPort).isEqualTo(SharedRedisContainerSupport.port());
     }
 }

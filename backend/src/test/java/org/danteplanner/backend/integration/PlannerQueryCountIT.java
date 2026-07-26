@@ -60,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerQueryCountTest extends SharedMySqlContainerSupport {
+class PlannerQueryCountIT extends SharedMySqlContainerSupport {
 
     private static final int SMALL_SET = 3;
     private static final int LARGE_SET = 8;
@@ -71,7 +71,7 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_query_count_test");
+        registerSharedMysql(registry);
         // Enable Hibernate statistics so getPrepareStatementCount() reflects real SQL issued.
         registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");
         registry.add("logging.level.org.hibernate.SQL", () -> "DEBUG");
@@ -116,13 +116,6 @@ class PlannerQueryCountTest extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        plannerCommentRepository.deleteAll();
-        plannerVoteRepository.deleteAll();
-        plannerBookmarkRepository.deleteAll();
-        plannerCatalogRepository.deleteAll();
-        plannerStatsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        userRepository.deleteAll();
 
         // A distinct viewer drives the authenticated read-path (vote + bookmark + comment batches).
         viewerId = TestDataFactory.createTestUser(userRepository, "viewer@example.com").getId();

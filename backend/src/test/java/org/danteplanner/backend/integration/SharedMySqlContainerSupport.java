@@ -4,35 +4,48 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.mysql.MySQLContainer;
 
 /**
- * Shared MySQL harness for the single-database integration tests: one {@code mysqld} process
- * per Gradle fork, with every subclass bound to its own database inside that one process.
+ * One {@code mysqld} per Gradle fork, one database, one Spring context for every subclass.
  *
- * <p>The container is a per-fork singleton — started once in a static block and reused by each
- * subclass in the JVM, so the suite boots one MySQL per fork instead of one per class. Data
- * isolation is preserved by handing each subclass a distinct database via the JDBC
- * {@code createDatabaseIfNotExist} flag; the {@code test} user is granted global privileges at
- * startup so that flag can materialize the database on first connect.</p>
+ * <p>The property source is declared here rather than per subclass, which is what collapses them
+ * onto a single cached context: Spring keys the cache on the set of dynamic-property methods, so a
+ * shared method means a shared context, a shared database, and one schema build for the fork
+ * instead of one per class.</p>
  *
- * <p>Subclasses must declare their OWN {@code @DynamicPropertySource} method (calling
- * {@link #registerSharedMysql}) rather than inheriting one: Spring keys its context cache on the
- * set of dynamic-property methods, so a shared method would collapse subclasses onto a single
- * context — and thus a single database — reintroducing cross-test bleed for the committing tests.</p>
+ * <p>That only holds while subclasses isolate themselves by the rows they write. A test that
+ * truncates a table or counts every row observes its neighbours; see
+ * {@code backend/src/test/CLAUDE.md} for what a test may assume about data it did not create.</p>
+ *
+ * <p>The data directory is a tmpfs. DDL is metadata-heavy and the schema build is the tier's
+ * dominant cost, so the win is large and the loss is nothing: the container is discarded when the
+ * fork ends, making durability worthless.</p>
  */
-abstract class SharedMySqlContainerSupport {
+public abstract class SharedMySqlContainerSupport {
 
     static final MySQLContainer MYSQL = new MySQLContainer("mysql:8.0")
+            .withDatabaseName("it")
             .withUsername("test")
             .withPassword("test")
+            .withTmpFs(Map.of("/var/lib/mysql", "rw,size=512m"))
             .withCommand(
+                    // The data directory is a tmpfs, so a large buffer pool caches RAM in
+                    // RAM; a test database is a schema and a few hundred rows.
+                    "--innodb-buffer-pool-size=64M",
                     "--innodb-flush-log-at-trx-commit=0",
                     "--sync-binlog=0",
+                    "--innodb-doublewrite=0",
+                    "--skip-log-bin",
                     "--performance-schema=OFF",
-                    "--skip-name-resolve");
+                    "--skip-name-resolve",
+                    // Every cached context keeps its pool open, and concurrent classes raise how
+                    // many are live at once.
+                    "--max-connections=1000");
 
     static {
         MYSQL.start();
@@ -40,25 +53,9 @@ abstract class SharedMySqlContainerSupport {
     }
 
     /**
-     * Registers the datasource and Flyway against a per-subclass database in the shared container.
-     * Each subclass passes a name unique to it, so committing tests never observe each other's rows.
-     *
-     * @param registry the Spring dynamic property registry
-     * @param database the subclass-owned database name, created on first connect
-     * @return the JDBC URL bound to that database, for subclasses that need it (e.g. a replica datasource)
+     * The {@code test} user needs CREATE globally, or the {@code createDatabaseIfNotExist} flag a
+     * per-class database is materialized with cannot run.
      */
-    protected static String registerSharedMysql(DynamicPropertyRegistry registry, String database) {
-        String url = "jdbc:mysql://" + MYSQL.getHost() + ":" + MYSQL.getFirstMappedPort()
-                + "/" + database + "?createDatabaseIfNotExist=true";
-        registry.add("spring.datasource.url", () -> url);
-        registry.add("spring.datasource.username", MYSQL::getUsername);
-        registry.add("spring.datasource.password", MYSQL::getPassword);
-        registry.add("spring.flyway.url", () -> url);
-        registry.add("spring.flyway.user", MYSQL::getUsername);
-        registry.add("spring.flyway.password", MYSQL::getPassword);
-        return url;
-    }
-
     private static void grantGlobalPrivilegesToTestUser() {
         try (Connection connection = DriverManager.getConnection(
                         MYSQL.getJdbcUrl(), "root", MYSQL.getPassword());
@@ -68,5 +65,57 @@ abstract class SharedMySqlContainerSupport {
         } catch (SQLException e) {
             throw new IllegalStateException("Failed to grant privileges to the shared MySQL test user", e);
         }
+    }
+
+    @DynamicPropertySource
+    static void sharedDatasource(DynamicPropertyRegistry registry) {
+        registerSharedMysql(registry);
+    }
+
+    /**
+     * Binds a subclass to a database of its own.
+     *
+     * <p>For a test whose subject is a whole table or index rather than a row it created: an
+     * assertion over every published planner, or over what a search term returns, has nothing to
+     * narrow. Such a test truncates, and truncating the shared database deletes rows its concurrent
+     * neighbours are still using; a lock does not help, since it excludes only other lock holders
+     * while the rest of the suite carries on.</p>
+     *
+     * <p>Costs one Spring context per caller, the database name being part of the context cache
+     * key. Prefer narrowing the assertion to rows the test created.</p>
+     *
+     * @param registry the Spring dynamic property registry
+     * @param database a name unique to the calling class
+     * @return the JDBC URL bound to that database
+     */
+    static String registerOwnDatabase(DynamicPropertyRegistry registry, String database) {
+        String url = "jdbc:mysql://" + MYSQL.getHost() + ":" + MYSQL.getFirstMappedPort()
+                + "/" + database + "?createDatabaseIfNotExist=true";
+        registry.add("spring.datasource.url", () -> url);
+        registry.add("spring.datasource.username", MYSQL::getUsername);
+        registry.add("spring.datasource.password", MYSQL::getPassword);
+        registry.add("spring.flyway.url", () -> url);
+        registry.add("spring.flyway.user", MYSQL::getUsername);
+        registry.add("spring.flyway.password", MYSQL::getPassword);
+        SharedRedisContainerSupport.registerSharedRedis(registry);
+        return url;
+    }
+
+    /**
+     * For the few subclasses that need extra properties and therefore their own context. They still
+     * share this database; a distinct context is not distinct data.
+     *
+     * @param registry the Spring dynamic property registry
+     * @return the shared JDBC URL, for subclasses that also bind a replica to it
+     */
+    protected static String registerSharedMysql(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", MYSQL::getJdbcUrl);
+        registry.add("spring.datasource.username", MYSQL::getUsername);
+        registry.add("spring.datasource.password", MYSQL::getPassword);
+        registry.add("spring.flyway.url", MYSQL::getJdbcUrl);
+        registry.add("spring.flyway.user", MYSQL::getUsername);
+        registry.add("spring.flyway.password", MYSQL::getPassword);
+        SharedRedisContainerSupport.registerSharedRedis(registry);
+        return MYSQL.getJdbcUrl();
     }
 }

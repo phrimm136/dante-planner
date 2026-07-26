@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
+import org.mockito.ArgumentCaptor;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
@@ -185,7 +186,11 @@ class PlannerEngagementServiceTest {
             // Assert
             assertTrue(response.bookmarked());
             assertEquals(plannerId, response.plannerId());
-            verify(plannerBookmarkRepository).save(any(PlannerBookmark.class));
+            ArgumentCaptor<PlannerBookmark> bookmarkCaptor =
+                    ArgumentCaptor.forClass(PlannerBookmark.class);
+            verify(plannerBookmarkRepository).save(bookmarkCaptor.capture());
+            assertEquals(testUser.getId(), bookmarkCaptor.getValue().getUserId());
+            assertEquals(plannerId, bookmarkCaptor.getValue().getPlannerId());
             verify(plannerBookmarkRepository, never()).delete(any());
         }
 
@@ -331,7 +336,13 @@ class PlannerEngagementServiceTest {
             // Assert
             assertEquals(6, response.upvoteCount());
             assertTrue(response.hasUpvoted());
-            verify(plannerVoteRepository).save(any(org.danteplanner.backend.planner.entity.PlannerVote.class));
+            ArgumentCaptor<org.danteplanner.backend.planner.entity.PlannerVote> voteCaptor =
+                    ArgumentCaptor.forClass(org.danteplanner.backend.planner.entity.PlannerVote.class);
+            verify(plannerVoteRepository).save(voteCaptor.capture());
+            assertEquals(testUser.getId(), voteCaptor.getValue().getUserId());
+            assertEquals(plannerId, voteCaptor.getValue().getPlannerId());
+            assertEquals(org.danteplanner.backend.planner.entity.VoteType.UP,
+                    voteCaptor.getValue().getVoteType());
             verify(plannerStatsRepository).incrementUpvotes(plannerId);
         }
     }

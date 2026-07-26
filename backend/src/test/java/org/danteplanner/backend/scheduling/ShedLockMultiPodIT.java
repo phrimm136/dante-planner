@@ -1,13 +1,13 @@
 package org.danteplanner.backend.scheduling;
 
 import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.user.scheduler.UserCleanupScheduler;
 
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
-import com.redis.testcontainers.RedisContainer;
 
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockProvider;
@@ -15,7 +15,6 @@ import net.javacrumbs.shedlock.core.SimpleLock;
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -35,27 +34,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Both target job methods must carry {@link SchedulerLock} to bind to that shared lock.</p>
  */
 @Tag("containerized")
-class ShedLockMultiPodTest {
-
-    private static final String REDIS_IMAGE = "redis:7-alpine";
-
-    private static final RedisContainer REDIS = new RedisContainer(REDIS_IMAGE);
+class ShedLockMultiPodIT {
 
     private static RedisConnectionFactory connectionFactory;
 
     @BeforeAll
     static void startRedis() {
-        REDIS.start();
         LettuceConnectionFactory f = new LettuceConnectionFactory(
-            new RedisStandaloneConfiguration(REDIS.getRedisHost(), REDIS.getRedisPort()));
+            new RedisStandaloneConfiguration(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port()));
         f.afterPropertiesSet();
         connectionFactory = f;
     }
 
-    @AfterAll
-    static void stopRedis() {
-        REDIS.stop();
-    }
 
     @Test
     @DisplayName("Two pods sharing one Redis lock store: first acquires the lock, concurrent second is refused")

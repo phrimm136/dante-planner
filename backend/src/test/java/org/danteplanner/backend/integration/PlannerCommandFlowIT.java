@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -22,7 +24,6 @@ import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
-import org.danteplanner.backend.support.TestDataCleanup;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -35,8 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.Set;
 import java.util.UUID;
@@ -61,10 +60,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestConfig.class)
 class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_command_flow_it");
-    }
+
+
+
 
     /**
      * A theme-pack id no fixture content yields. Planted in the entity index, it survives
@@ -127,12 +125,6 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        entityFilterRepository.deleteAll();
-        keywordFilterRepository.deleteAll();
-        catalogRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private Planner publishedPlanner(String title, Set<String> keywords) {
@@ -221,6 +213,9 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         UUID plannerId = planner.getId();
         plantUnreachableEntityRow(plannerId);
 
+        // Re-read: publishing fires AFTER_COMMIT listeners that bump this row's version, so the
+        // instance returned by publishedPlanner() is already stale by the time the edit is built.
+        planner = plannerRepository.findById(plannerId).orElseThrow();
         commandService.upsertPlanner(owner.getId(), deviceId, plannerId,
                 edit(planner, "Keyword Edit", Set.of("Combustion", "Burst")), false);
 

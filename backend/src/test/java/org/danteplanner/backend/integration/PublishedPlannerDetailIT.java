@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.danteplanner.backend.config.TestConfig;
@@ -22,8 +24,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -37,7 +37,6 @@ import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Detail read seam: serving a published planner does not take a row lock (so a second reader
@@ -51,10 +50,9 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "published_planner_detail_it");
-    }
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -87,10 +85,6 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
 
     @BeforeEach
     void setUp() {
-        plannerViewRepository.deleteAll();
-        plannerStatsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
         User owner = TestDataFactory.createTestUser(userRepository, "detail-owner@example.com");
         plannerId = TestDataFactory.createTestPlanner(plannerRepository, owner, true).getId();
     }
@@ -154,7 +148,9 @@ class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
                 .isEqualTo(before);
 
         recorder.flush();
-        assertThat(plannerViewRepository.count())
+        assertThat(plannerViewRepository.findAll().stream()
+                        .filter(view -> plannerId.equals(view.getPlannerId()))
+                        .count())
                 .as("the view is persisted by the later flush")
                 .isEqualTo(1L);
     }

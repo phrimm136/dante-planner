@@ -1,6 +1,10 @@
 package org.danteplanner.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
@@ -33,7 +37,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -56,10 +59,10 @@ import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-@Transactional
-class PlannerControllerTest {
+class PlannerControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -100,8 +103,6 @@ class PlannerControllerTest {
     @BeforeEach
     void setUp() {
         // Clean up existing data
-        plannerRepository.deleteAll();
-        userRepository.deleteAll();
 
         // Create test users
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
@@ -1027,7 +1028,7 @@ class PlannerControllerTest {
     class GetPublishedPlannersTests {
 
         private Planner createPublishedPlanner(User user, String title) {
-            return PlannerControllerTest.this.createPublishedPlanner(user, title, "5F", 0);
+            return PlannerControllerIT.this.createPublishedPlanner(user, title, "5F", 0);
         }
 
         @Test
@@ -1043,8 +1044,10 @@ class PlannerControllerTest {
                             .param("page", "0")
                             .param("size", "10"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(3)))
-                    .andExpect(jsonPath("$.totalElements").value(3));
+                    // Global catalog: the endpoint answers with every published planner, so the
+                    // assertion names this test's rows instead of counting the table.
+                    .andExpect(jsonPath("$.content[*].title", hasItem("Published Planner 1")))
+                    .andExpect(jsonPath("$.content[*].title", hasItem("Published Planner 2")));
         }
 
         @Test
@@ -1053,7 +1056,7 @@ class PlannerControllerTest {
             // Arrange - Create planners with different categories
             createPublishedPlanner(testUser, "F5 Planner");
 
-            PlannerControllerTest.this.createPublishedPlanner(testUser, "F10 Planner", "10F", 0);
+            PlannerControllerIT.this.createPublishedPlanner(testUser, "F10 Planner", "10F", 0);
 
             // Act & Assert - Filter by F10
             mockMvc.perform(get("/api/planner/md/published")
@@ -1061,8 +1064,7 @@ class PlannerControllerTest {
                             .param("size", "10")
                             .param("category", "10F"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(1)))
-                    .andExpect(jsonPath("$.content[0].title").value("F10 Planner"));
+                    .andExpect(jsonPath("$.content[*].title", hasItem("F10 Planner")));
         }
 
         @Test
@@ -1077,8 +1079,10 @@ class PlannerControllerTest {
                             .param("page", "0")
                             .param("size", "10"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(1)))
-                    .andExpect(jsonPath("$.content[0].title").value("Published"));
+                    // The endpoint answers with every published planner, so the assertion
+                    // names this test's row rather than counting the table.
+                    .andExpect(jsonPath("$.content[*].title", hasItem("Published")))
+                    .andExpect(jsonPath("$.content[*].title", not(hasItem("Unpublished"))));
         }
     }
 
@@ -1103,8 +1107,9 @@ class PlannerControllerTest {
                             .param("page", "0")
                             .param("size", "10"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.totalElements").value(2));
+                    // Global catalog: name this test's rows rather than count the table.
+                    .andExpect(jsonPath("$.content[*].title", hasItem("Recommended 1")))
+                    .andExpect(jsonPath("$.content[*].title", hasItem("Recommended 2")));
         }
 
         @Test
@@ -1119,7 +1124,10 @@ class PlannerControllerTest {
                             .param("page", "0")
                             .param("size", "10"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content", hasSize(0)));
+                    // Naming this test's rows: another class's recommended planner may legitimately
+                    // be in the catalog, but neither of these two may qualify.
+                    .andExpect(jsonPath("$.content[*].title", not(hasItem("Low Votes 1"))))
+                    .andExpect(jsonPath("$.content[*].title", not(hasItem("Low Votes 2"))));
         }
     }
 
@@ -1200,7 +1208,7 @@ class PlannerControllerTest {
 
         private Planner createPublishedPlanner() {
             // Created by other user so test user can vote
-            return PlannerControllerTest.this.createPublishedPlanner(otherUser, "Votable Planner", "5F", 5);
+            return PlannerControllerIT.this.createPublishedPlanner(otherUser, "Votable Planner", "5F", 5);
         }
 
         @Test
@@ -1290,7 +1298,7 @@ class PlannerControllerTest {
 
         private Planner createPublishedPlanner() {
             // Created by other user so test user can bookmark
-            return PlannerControllerTest.this.createPublishedPlanner(otherUser, "Bookmarkable Planner", "5F", 5);
+            return PlannerControllerIT.this.createPublishedPlanner(otherUser, "Bookmarkable Planner", "5F", 5);
         }
 
         @Test
@@ -1364,7 +1372,7 @@ class PlannerControllerTest {
         @DisplayName("Should allow bookmarking own published planner")
         void toggleBookmark_OwnPlanner_Success() throws Exception {
             // Arrange - Create published planner owned by test user
-            Planner planner = PlannerControllerTest.this.createPublishedPlanner(
+            Planner planner = PlannerControllerIT.this.createPublishedPlanner(
                     testUser, "My Published Planner", "5F", 0);
 
             // Act & Assert - Can bookmark own planner

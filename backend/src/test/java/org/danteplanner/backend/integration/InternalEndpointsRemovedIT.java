@@ -16,8 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -45,10 +43,6 @@ class InternalEndpointsRemovedIT extends SharedMySqlContainerSupport {
     private static final String REFRESH_GAME_DATA_PATH = "/api/internal/refresh-game-data";
     private static final String LINEAGE_ROTATION_PATH = "/api/internal/feature-flags/lineage-rotation";
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "internal_endpoints_removed_it");
-    }
 
     @Autowired
     private MockMvc mockMvc;
