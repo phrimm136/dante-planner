@@ -294,19 +294,25 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         void getAllUsers_WhenModerator_Returns200WithUserShape() throws Exception {
+            // Selected by this test's own user: index 0 belongs to whoever the roster sorted
+            // first, which is any concurrently running class. The restriction flags read as
+            // values rather than existence because they are false for an unrestricted user, and
+            // exists() rejects a null.
+            String mine = "$[?(@.usernameSuffix == '" + regularUser.getUsernameSuffix() + "')]";
+
             mockMvc.perform(get("/api/moderation/users")
                             .cookie(moderatorCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
-                    .andExpect(jsonPath("$[0].usernameEpithet").exists())
-                    .andExpect(jsonPath("$[0].usernameSuffix").exists())
-                    .andExpect(jsonPath("$[0].role").exists())
-                    .andExpect(jsonPath("$[0].isBanned").exists())
-                    .andExpect(jsonPath("$[0].bannedAt").exists())
-                    .andExpect(jsonPath("$[0].isTimedOut").exists())
-                    .andExpect(jsonPath("$[0].timeoutUntil").exists())
-                    .andExpect(jsonPath("$[0].userId").doesNotExist())
-                    .andExpect(jsonPath("$[0].id").doesNotExist());
+                    .andExpect(jsonPath(mine + ".usernameEpithet")
+                            .value(hasItem(regularUser.getUsernameEpithet())))
+                    .andExpect(jsonPath(mine + ".role").value(hasItem("NORMAL")))
+                    .andExpect(jsonPath(mine + ".isBanned").value(hasItem(false)))
+                    .andExpect(jsonPath(mine + ".isTimedOut").value(hasItem(false)))
+                    .andExpect(jsonPath(mine + ".bannedAt").hasJsonPath())
+                    .andExpect(jsonPath(mine + ".timeoutUntil").hasJsonPath())
+                    .andExpect(jsonPath(mine + ".userId").doesNotExist())
+                    .andExpect(jsonPath(mine + ".id").doesNotExist());
         }
 
         @Test
@@ -375,9 +381,11 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath(MINE + ".targetUuid").exists())
                     .andExpect(jsonPath(MINE + ".durationMinutes").value(hasItem(60)))
                     .andExpect(jsonPath(MINE + ".createdAt").exists())
-                    .andExpect(jsonPath("$[0].actorUsernameEpithet").value(moderatorUser.getUsernameEpithet()))
-                    .andExpect(jsonPath("$[0].actorUsernameSuffix").value(moderatorUser.getUsernameSuffix()))
-                    .andExpect(jsonPath("$[0].actorId").doesNotExist());
+                    .andExpect(jsonPath(MINE + ".actorUsernameEpithet")
+                            .value(hasItem(moderatorUser.getUsernameEpithet())))
+                    .andExpect(jsonPath(MINE + ".actorUsernameSuffix")
+                            .value(hasItem(moderatorUser.getUsernameSuffix())))
+                    .andExpect(jsonPath(MINE + ".actorId").doesNotExist());
         }
 
         @Test

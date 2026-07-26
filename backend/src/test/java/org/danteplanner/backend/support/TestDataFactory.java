@@ -61,6 +61,20 @@ public class TestDataFactory {
     // someone typed into a fixture.
     private static final AtomicLong SUFFIX_SEQUENCE = new AtomicLong(10L * 36 * 36 * 36 * 36);
 
+    // Seeded past any id a fixture would plausibly hard-code.
+    private static final AtomicLong USER_ID_SEQUENCE = new AtomicLong(9_000_000L);
+
+    /**
+     * A user id no other class in this JVM will use. Services key Redis entries by user id
+     * ({@code uinv:<id>}), and classes sharing the per-fork Redis therefore share that namespace:
+     * a literal id claims a name any other class may also claim.
+     *
+     * @return an id unique within this JVM
+     */
+    public static Long nextUserId() {
+        return USER_ID_SEQUENCE.getAndIncrement();
+    }
+
     /**
      * A suffix unique by construction rather than by luck. {@code username_suffix} is UNIQUE, and
      * the column holds five characters: a random four of them is a 65k space, which a suite

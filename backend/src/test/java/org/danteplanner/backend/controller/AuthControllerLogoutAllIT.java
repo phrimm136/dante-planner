@@ -59,15 +59,14 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     private TokenBlacklistService tokenBlacklistService;
 
     private User testUser;
+    private User bystander;
     private String accessToken;
     private String refreshToken;
 
     @BeforeEach
     void setUp() {
-        tokenBlacklistService.clear();
-
-
         testUser = TestDataFactory.createTestUser(userRepository, "logoutall@example.com");
+        bystander = TestDataFactory.createTestUser(userRepository, "logoutall-bystander@example.com");
         accessToken = TestDataFactory.generateAccessToken(jwtTokenService, testUser);
         refreshToken = jwtTokenService.generateRefreshToken(testUser.getId());
     }
@@ -122,15 +121,17 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Should invalidate all of the user's tokens")
         void logoutAll_Authenticated_InvalidatesUserTokens() throws Exception {
-            assertThat(tokenBlacklistService.userInvalidationSize()).isZero();
+            assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isFalse();
 
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(accessTokenCookie())
                             .cookie(refreshTokenCookie()))
                     .andExpect(status().isNoContent());
 
-            assertThat(tokenBlacklistService.userInvalidationSize()).isEqualTo(1);
             assertThat(tokenBlacklistService.isUserTokenInvalidated(testUser.getId(), 0L)).isTrue();
+            assertThat(tokenBlacklistService.isUserTokenInvalidated(bystander.getId(), 0L))
+                    .as("invalidation is scoped to the acting user")
+                    .isFalse();
         }
     }
 

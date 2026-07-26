@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import jakarta.servlet.http.Cookie;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
@@ -35,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
@@ -132,6 +135,8 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
         // Act & Assert
         mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish").with(withCsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"published\":true}")
                         .cookie(userCookie()))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code", is("USER_BANNED")));
@@ -177,9 +182,11 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
         assertFalse(refreshed.isBanned());
         assertNull(refreshed.getBannedAt());
 
-        // Verify both actions logged
-        List<ModerationAction> actions = moderationActionRepository.findAll();
-        assertTrue(actions.size() >= 2);
+        // Scoped to the user this test moderated: the table also holds every other test's actions.
+        List<ModerationAction> actions = moderationActionRepository.findAll().stream()
+                .filter(action -> regularUser.getPublicId().toString().equals(action.getTargetUuid()))
+                .toList();
+        assertEquals(2, actions.size());
         assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationAction.ActionType.BAN));
         assertTrue(actions.stream().anyMatch(a -> a.getActionType() == ModerationAction.ActionType.UNBAN));
     }

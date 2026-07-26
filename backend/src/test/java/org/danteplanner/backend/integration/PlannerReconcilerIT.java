@@ -18,7 +18,6 @@ import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -88,23 +87,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     @BeforeEach
     void setUp() {
         jdbc = new JdbcTemplate(dataSource);
-        cleanUp();
         owner = TestDataFactory.createTestUser(userRepository, "reconciler-owner@example.com");
-    }
-
-    @AfterEach
-    void tearDown() {
-        cleanUp();
-    }
-
-    private void cleanUp() {
-        for (String table : List.of(
-                "planner_comments", "planner_votes",
-                "planner_entity_filter", "planner_keyword_filter", "planner_catalog",
-                "planner_stats", "planner_moderation", "planner_publication",
-                "planner_content", "planner")) {
-            jdbc.update("DELETE FROM " + table);
-        }
     }
 
     private Planner publishClean(String title) {

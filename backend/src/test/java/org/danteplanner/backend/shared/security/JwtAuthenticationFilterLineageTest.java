@@ -16,6 +16,7 @@ import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,6 +82,14 @@ class JwtAuthenticationFilterLineageTest {
         request = new MockHttpServletRequest("GET", "/test");
         response = new MockHttpServletResponse();
         filterChain = new MockFilterChain();
+    }
+
+    @AfterEach
+    void clearAuthentication() {
+        // SecurityContextHolder's default strategy is a ThreadLocal that outlives this class, and
+        // MockMvc elsewhere runs its filter chain on the same thread; a leftover authentication
+        // makes a later class's request run as this test's user.
+        SecurityContextHolder.clearContext();
     }
 
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {

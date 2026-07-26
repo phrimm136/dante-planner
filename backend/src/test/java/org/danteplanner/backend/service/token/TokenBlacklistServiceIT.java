@@ -1,6 +1,6 @@
 package org.danteplanner.backend.service.token;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
-import org.danteplanner.backend.integration.SharedRedisContainerSupport;
+import org.danteplanner.backend.support.TestDataFactory;
 
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -8,6 +8,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 
+import com.redis.testcontainers.RedisContainer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -29,17 +30,24 @@ import static org.mockito.Mockito.when;
  *
  * <p>Tests the Redis-backed token blacklist behavior including
  * add, check, and TTL expiration functionality over a live Redis container.</p>
+ *
+ * <p>The container is this class's own, not the fork-shared one: {@code size()},
+ * {@code userInvalidationSize()} and {@code clear()} are the subject here, and all three span the
+ * whole keyspace, so there is no id to narrow them to.</p>
  */
 @Tag("containerized")
 class TokenBlacklistServiceIT {
 
-    private static StringRedisTemplate sharedTemplate;
+    private static final RedisContainer REDIS = new RedisContainer("redis:7-alpine");
+
+    private static StringRedisTemplate ownTemplate;
 
     private TokenBlacklistService blacklistService;
 
     @BeforeAll
     static void startRedis() {
-        sharedTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
+        REDIS.start();
+        ownTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
     }
 
     private static StringRedisTemplate buildTemplate(String host, int port) {
@@ -52,7 +60,7 @@ class TokenBlacklistServiceIT {
 
     @BeforeEach
     void setUp() {
-        blacklistService = new TokenBlacklistService(sharedTemplate, sharedTemplate, new SimpleMeterRegistry());
+        blacklistService = new TokenBlacklistService(ownTemplate, ownTemplate, new SimpleMeterRegistry());
         blacklistService.clear();
     }
 
@@ -337,7 +345,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, futureExpiry);
 
             // Act - a second service over a fresh template pointing at the SAME container
-            StringRedisTemplate secondTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
+            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
             TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
 
             // Assert - externalized revocation is visible across instances
@@ -353,11 +361,11 @@ class TokenBlacklistServiceIT {
         @DisplayName("A user invalidation is visible to a second service over the same Redis")
         void invalidateUserTokens_WhenCalled_IsVisibleToASecondServiceOverTheSameRedis() {
             // Arrange
-            Long userId = 4242L;
+            Long userId = TestDataFactory.nextUserId();
             blacklistService.invalidateUserTokens(userId);
 
             // Act - a second service over a fresh template pointing at the SAME container
-            StringRedisTemplate secondTemplate = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
+            StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
             TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
 
             // Assert - externalized user invalidation is visible across instances
@@ -368,7 +376,7 @@ class TokenBlacklistServiceIT {
         @DisplayName("userInvalidationSize reflects Redis state and clear() resets it")
         void userInvalidationSize_AfterInvalidateThenClear_ReflectsRedis() {
             // Arrange
-            Long userId = 777L;
+            Long userId = TestDataFactory.nextUserId();
 
             // Act + Assert - one invalidation yields size 1
             blacklistService.invalidateUserTokens(userId);
@@ -383,7 +391,7 @@ class TokenBlacklistServiceIT {
         @DisplayName("clearUserInvalidation removes the user's invalidation")
         void clearUserInvalidation_WhenCalled_RemovesInvalidation() {
             // Arrange
-            Long userId = 555L;
+            Long userId = TestDataFactory.nextUserId();
             blacklistService.invalidateUserTokens(userId);
 
             // Act

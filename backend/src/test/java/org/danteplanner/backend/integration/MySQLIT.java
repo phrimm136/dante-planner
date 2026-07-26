@@ -127,6 +127,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
             ExecutorService executor = Executors.newFixedThreadPool(20);
             CountDownLatch startLatch = new CountDownLatch(1);
             CountDownLatch doneLatch = new CountDownLatch(20);
+            List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
 
             // Submit 20 concurrent vote tasks
             for (User user : users) {
@@ -136,10 +137,12 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
                         PlannerVote vote = new PlannerVote(user.getId(), testPlanner.getId(), VoteType.UP);
                         voteRepository.save(vote);
-
-                        doneLatch.countDown();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                    } catch (RuntimeException e) {
+                        failures.add(e);
+                    } finally {
+                        doneLatch.countDown();
                     }
                 });
             }
@@ -147,8 +150,10 @@ class MySQLIT extends SharedMySqlContainerSupport {
             // Start all threads simultaneously
             startLatch.countDown();
 
-            // Wait for completion (5 second timeout - reduced from 10s)
-            boolean completed = doneLatch.await(5, TimeUnit.SECONDS);
+            // The writers queue through a Hikari pool of five that concurrent classes on this
+            // context also draw from, so this wait covers contention, not the subject.
+            boolean completed = doneLatch.await(30, TimeUnit.SECONDS);
+            assertThat(failures).as("every concurrent vote commits").isEmpty();
             assertThat(completed).isTrue();
 
             executor.shutdown();

@@ -46,6 +46,93 @@ class TestIsolationConventionTest {
                 .isEmpty();
     }
 
+    /**
+     * A {@code DELETE} or {@code TRUNCATE} carrying no {@code WHERE}, as the driver receives it.
+     *
+     * <p>The rule above scans for {@code deleteAll}, a method name the constant pool carries. Raw
+     * SQL has the same effect under a name no scan recognizes, so it is matched as text; a
+     * statement naming the row it removes is left alone.</p>
+     */
+    private static final java.util.regex.Pattern UNSCOPED_DELETE = java.util.regex.Pattern.compile(
+            "\"\\s*(?:DELETE\\s+FROM|TRUNCATE)(?![^\"]*\\bWHERE\\b)[^\"]*\"",
+            java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    @Test
+    @DisplayName("only a class owning its database empties a table in SQL")
+    void unscoped_deletion_is_confined_to_classes_that_own_their_database() {
+        List<String> offenders = containerizedSources().entrySet().stream()
+                .filter(entry -> boundToTheSharedDatabase(entry.getValue()))
+                .filter(entry -> UNSCOPED_DELETE.matcher(entry.getValue()).find())
+                .map(java.util.Map.Entry::getKey)
+                .sorted()
+                .toList();
+
+        assertThat(offenders)
+                .as("these empty a table their concurrent neighbours are still reading; add a WHERE "
+                        + "naming the test's own rows, or take registerOwnDatabase")
+                .isEmpty();
+    }
+
+    /** True for a class drawing on the fork's shared database rather than one of its own. */
+    private static boolean boundToTheSharedDatabase(String source) {
+        return (source.contains("extends SharedMySqlContainerSupport")
+                        || source.contains("registerSharedMysql"))
+                && !source.contains("registerOwnDatabase");
+    }
+
+    /**
+     * Redis calls whose scope is the whole keyspace, as owner to method names.
+     *
+     * <p>A blacklist entry is keyed by a hash of its own token, so classes sharing the fork's Redis
+     * cannot collide on one. A scan is the exception: it counts and deletes keys written by classes
+     * it has never heard of, and no id exists to narrow it to.</p>
+     */
+    private static final java.util.Map<String, java.util.Set<String>> KEYSPACE_WIDE_CALLS =
+            java.util.Map.of(
+                    "org.danteplanner.backend.auth.token.TokenBlacklistService",
+                    java.util.Set.of("clear", "size", "userInvalidationSize"),
+                    "org.springframework.data.redis.connection.RedisServerCommands",
+                    java.util.Set.of("flushAll", "flushDb"));
+
+    @Test
+    @DisplayName("only a class owning its Redis scans the whole keyspace")
+    void keyspace_scans_are_confined_to_classes_that_own_their_redis() {
+        List<String> offenders = TEST_CLASSES.stream()
+                .filter(TestIsolationConventionTest::scansTheKeyspace)
+                .map(TestIsolationConventionTest::outermost)
+                .filter(TestIsolationConventionTest::isTestClass)
+                .filter(clazz -> !mentions(clazz, "com/redis/testcontainers/RedisContainer"))
+                .map(JavaClass::getSimpleName)
+                .distinct()
+                .sorted()
+                .toList();
+
+        assertThat(offenders)
+                .as("these delete or count keys their concurrent neighbours wrote; assert about the "
+                        + "token or user the test owns, or start a RedisContainer of its own")
+                .isEmpty();
+    }
+
+    private static boolean scansTheKeyspace(JavaClass clazz) {
+        return clazz.getMethodCallsFromSelf().stream()
+                .anyMatch(call -> KEYSPACE_WIDE_CALLS
+                        .getOrDefault(call.getTarget().getOwner().getName(), java.util.Set.of())
+                        .contains(call.getTarget().getName()));
+    }
+
+    /**
+     * The top-level class enclosing a {@code @Nested} one. A nested class holds the calls while the
+     * container that exempts them is a field on the outer class, and its simple name ends in
+     * {@code Tests}, which {@link #isTestClass} does not accept.
+     */
+    private static JavaClass outermost(JavaClass clazz) {
+        JavaClass current = clazz;
+        while (current.getEnclosingClass().isPresent()) {
+            current = current.getEnclosingClass().get();
+        }
+        return current;
+    }
+
     @Test
     @DisplayName("no test class carries @Execution")
     void execution_mode_is_never_declared_on_a_class() {
@@ -130,6 +217,97 @@ class TestIsolationConventionTest {
     }
 
     /**
+     * A literal in a shared namespace reads as a constant and is really a claim of exclusive
+     * ownership. Three shapes have cost a debugging session each: a foreign key
+     * ({@code actorId(1L)}), a UNIQUE column ({@code usernameSuffix("00001")}), and the user id a
+     * service derives a Redis key from ({@code uinv:4242}). The value must come from a sequence,
+     * so no second writer can pick the same one.
+     */
+    private static final java.util.regex.Pattern LITERAL_IDENTITY = java.util.regex.Pattern.compile(
+            "\\.(actorId|usernameSuffix|targetUuid)\\(\\s*[\"0-9]"
+                    + "|\\b(?:Long|long)\\s+\\w*(?:[Uu]serId|[Aa]ctorId|[Oo]wnerId|[Vv]iewerId)\\s*=\\s*[0-9]+L");
+
+    @Test
+    @DisplayName("identities in shared namespaces come from a sequence, not a literal")
+    void shared_identities_are_not_hard_coded() {
+        List<String> offenders = containerizedSources().entrySet().stream()
+                // A class that stands up its own infrastructure owns the namespace it writes into,
+                // so a literal there claims nothing anyone else can claim.
+                .filter(entry -> !entry.getValue().contains("@DynamicPropertySource")
+                        && !entry.getValue().contains("new RedisContainer")
+                        && !entry.getValue().contains("new GenericContainer"))
+                .filter(entry -> LITERAL_IDENTITY.matcher(entry.getValue()).find())
+                .map(java.util.Map.Entry::getKey)
+                .sorted()
+                .toList();
+
+        assertThat(offenders)
+                .as("a hard-coded id claims a name every concurrently running class may also claim; "
+                        + "take TestDataFactory.nextUserId() or uniqueSuffix(), which cannot collide")
+                .isEmpty();
+    }
+
+    /**
+     * An {@code @AfterEach} whose body clears the security context.
+     *
+     * <p>Clearing only in setup protects the class that does it and nobody else. The holder's
+     * default strategy is a {@code ThreadLocal} that outlives the class, MockMvc runs its filter
+     * chain on the calling thread, and {@code JwtAuthenticationFilter} sets a principal only when
+     * none is present — so a leftover authentication makes a later class's request run as this
+     * test's user, which surfaces as a 403, a 404, or a response carrying a stranger's data.</p>
+     */
+    private static final java.util.regex.Pattern CLEARS_AFTER_EACH = java.util.regex.Pattern.compile(
+            "@AfterEach\\b[^{]*\\{[^}]*clearContext", java.util.regex.Pattern.DOTALL);
+
+    @Test
+    @DisplayName("a test filling the security context clears it on the way out")
+    void the_security_context_is_cleared_after_each_test() {
+        List<String> offenders = testSources().entrySet().stream()
+                // Excludes this file: the token it searches for is a literal in its own source, so
+                // a scanner that scans itself reports itself.
+                .filter(entry -> !entry.getKey().equals("TestIsolationConventionTest.java"))
+                .filter(entry -> entry.getValue().contains("SecurityContextHolder"))
+                .filter(entry -> !CLEARS_AFTER_EACH.matcher(entry.getValue()).find())
+                .map(java.util.Map.Entry::getKey)
+                .sorted()
+                .toList();
+
+        assertThat(offenders)
+                .as("these leave an Authentication on the thread for whatever runs next; clear it "
+                        + "in an @AfterEach, not only in setup")
+                .isEmpty();
+    }
+
+    /** Source text of every class tagged containerized, keyed by file name. */
+    private static java.util.Map<String, String> containerizedSources() {
+        return testSources().entrySet().stream()
+                .filter(entry -> entry.getValue().contains("@Tag(\"containerized\")"))
+                .collect(java.util.stream.Collectors.toMap(
+                        java.util.Map.Entry::getKey, java.util.Map.Entry::getValue));
+    }
+
+    /** Source text of every test class, keyed by file name. */
+    private static java.util.Map<String, String> testSources() {
+        try (java.util.stream.Stream<java.nio.file.Path> files =
+                java.nio.file.Files.walk(java.nio.file.Path.of("src/test/java"))) {
+            return files.filter(path -> path.toString().endsWith(".java"))
+                    .collect(java.util.stream.Collectors.toMap(
+                            path -> path.getFileName().toString(),
+                            TestIsolationConventionTest::readSource));
+        } catch (IOException e) {
+            throw new UncheckedIOException("could not read the test sources", e);
+        }
+    }
+
+    private static String readSource(java.nio.file.Path path) {
+        try {
+            return java.nio.file.Files.readString(path);
+        } catch (IOException e) {
+            throw new UncheckedIOException("could not read " + path, e);
+        }
+    }
+
+    /**
      * Each class declaring its own {@code @DynamicPropertySource} keys a distinct application
      * context. Past the cache bound Spring evicts, and eviction closes a context while other
      * classes are still running against it — which surfaces as rows that vanish mid-test, in some
@@ -137,7 +315,7 @@ class TestIsolationConventionTest {
      * low is what prevents it. The budget sits at the current count, so any addition is a
      * deliberate decision rather than a silent slide toward the bound.
      */
-    private static final int CONTEXT_BUDGET = 26;
+    private static final int CONTEXT_BUDGET = 28;
 
     @Test
     @DisplayName("the suite stays within its application-context budget")

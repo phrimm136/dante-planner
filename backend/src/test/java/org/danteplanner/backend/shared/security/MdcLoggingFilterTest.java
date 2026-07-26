@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,6 +45,14 @@ class MdcLoggingFilterTest {
         filter = new MdcLoggingFilter();
         SecurityContextHolder.clearContext();
         MDC.clear();
+    }
+
+    @AfterEach
+    void clearAuthentication() {
+        // SecurityContextHolder's default strategy is a ThreadLocal that outlives this class, and
+        // MockMvc elsewhere runs its filter chain on the same thread; a leftover authentication
+        // makes a later class's request run as this test's user.
+        SecurityContextHolder.clearContext();
     }
 
     @Nested

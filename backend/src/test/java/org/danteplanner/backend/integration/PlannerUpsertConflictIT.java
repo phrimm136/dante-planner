@@ -124,6 +124,12 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
                 if (loser == null) {
                     continue;
                 }
+                // The two requests serialized: the second read the winner's committed syncVersion
+                // and lost at the version check rather than at the flush, which is a different
+                // conflict from the one under test.
+                if (loser.getContentAsString().contains("SYNC_CONFLICT")) {
+                    continue;
+                }
                 assertThat(loser.getStatus())
                         .as("a same-row race must lose at the optimistic-lock check (409), never as a 503 deadlock")
                         .isNotEqualTo(HttpStatus.SERVICE_UNAVAILABLE.value());

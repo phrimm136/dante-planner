@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +54,12 @@ import org.danteplanner.backend.shared.config.JwtProperties;
  * path returns 503 rather than a 500 or a silent guest downgrade.</p>
  */
 @ExtendWith(MockitoExtension.class)
+/**
+ * Runs exclusively: the security-event assertions read a Logback appender attached at runtime,
+ * and Spring Boot re-initializes the logging system on every context refresh, detaching it. A
+ * concurrent class booting a context would empty the capture mid-test.
+ */
+@Isolated
 class JwtAuthenticationFilterTest {
 
     @Mock
@@ -100,6 +107,11 @@ class JwtAuthenticationFilterTest {
     @AfterEach
     void tearDown() {
         filterLogger.detachAppender(logAppender);
+        // The filter under test populates SecurityContextHolder, whose default strategy is a
+        // ThreadLocal that outlives this class. MockMvc runs its filter chain on the calling
+        // thread, and JwtAuthenticationFilter sets a principal only when none is present, so a
+        // leftover authentication makes a later class's request run as this test's user.
+        SecurityContextHolder.clearContext();
     }
 
     private List<String> loggedMessages() {

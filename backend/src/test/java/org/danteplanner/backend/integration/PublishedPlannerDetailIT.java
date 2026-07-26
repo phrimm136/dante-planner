@@ -48,10 +48,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PublishedPlannerDetailIT extends SharedMySqlContainerSupport {
+class PublishedPlannerDetailIT {
 
-
-
+    /**
+     * The subject includes {@link PlannerViewRecorder}'s flush buffer, a per-context singleton. On a
+     * shared context its timer drains one batch spanning every class, and the drain removes entries
+     * before the write commits, so a neighbour's failing entry takes this class's view with it.
+     */
+    @DynamicPropertySource
+    static void ownDatabase(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "published_detail");
+    }
 
 
     @Autowired

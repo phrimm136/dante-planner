@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -22,6 +23,8 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -37,6 +40,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -86,7 +91,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * control API, never a wall-clock timeout — the primary write path fails within Hikari's
  * production connection-timeout (a production constant, not a test timing window), and replication
  * readiness is gated by {@link ReplicationControl#awaitCaughtUp()}; {@code appendfsync always}
- * makes the AOF replay deterministic. No sleeps.</p>
+ * makes the AOF replay deterministic. No assertion waits on a sleep; teardown polls for the
+ * Lettuce clients to reconnect, which they do on their own backoff rather than on next call.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -107,6 +113,13 @@ class DegradationIT {
     private static final int PRIMARY_DB_PROXY_LISTEN_PORT = 8667;
     private static final String RATE_LIMIT_REDIS_PROXY_NAME = "degradation-app-to-rate-limit-redis";
     private static final int RATE_LIMIT_PROXY_LISTEN_PORT = 8668;
+
+    /** A killed socket fails on the first packet, so the retries cost milliseconds, not waiting. */
+    private static final int CONNECTION_PROBE_ATTEMPTS = 20;
+
+    /** Matches RedisConnectionRecoveryIT: a client reconnect is not instant, so poll to a deadline. */
+    private static final long REDIS_RECOVERY_DEADLINE_MS = 30_000L;
+    private static final long REDIS_POLL_INTERVAL_MS = 250L;
     private static final String ROOT_USER = "root";
     private static final String REPL_USER = "repl";
     private static final String REPL_PASSWORD = "repl-pass";
@@ -241,6 +254,9 @@ class DegradationIT {
     private LettuceConnectionFactory authRedisConnectionFactory;
 
     @Autowired
+    private RateLimitService rateLimitService;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -320,10 +336,107 @@ class DegradationIT {
         }
         PRIMARY_DB_PROXY.enable();
         evictPooledPrimaryConnections();
+        awaitLivePooledConnections();
         for (Toxic toxic : RATE_LIMIT_REDIS_PROXY.toxics().getAll()) {
             toxic.remove();
         }
         RATE_LIMIT_REDIS_PROXY.enable();
+        awaitLiveAuthRedis();
+        awaitLiveRateLimitRedis();
+    }
+
+    /**
+     * Pings the auth Redis until it answers.
+     *
+     * <p>The blacklist read fails open, so a connection the cut killed does not raise here — it
+     * quietly reports every token as clean, and the next test asserting that a blacklisted token
+     * stays rejected fails on an outage it never asked for.</p>
+     */
+    private void awaitLiveAuthRedis() {
+        authRedisConnectionFactory.resetConnection();
+        if (!awaitTrue(this::authRedisAnswers)) {
+            throw new IllegalStateException("the auth Redis never came back after the cut");
+        }
+    }
+
+    private boolean authRedisAnswers() {
+        try (RedisConnection connection = authRedisConnectionFactory.getConnection()) {
+            connection.ping();
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Charges a throwaway bucket until the limiter answers.
+     *
+     * <p>Re-enabling the proxy restores the route, but bucket4j's proxy manager holds a Lettuce
+     * connection the cut killed and reconnects on its own schedule. Until it does, the next test's
+     * first rate-limited write degrades to 503 — the code F2 asserts — and reads as a broken write
+     * path. The subject comes from a sequence, so no probe ever drains a bucket a test uses.</p>
+     */
+    private void awaitLiveRateLimitRedis() {
+        if (!awaitTrue(this::rateLimiterAnswers)) {
+            throw new IllegalStateException("the rate limiter never came back after the cut");
+        }
+    }
+
+    private boolean rateLimiterAnswers() {
+        try {
+            rateLimitService.check(RateLimitPolicy.CRUD, TestDataFactory.nextUserId(), "degradation-probe");
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Polls to a deadline rather than spinning: a Lettuce client reconnects on its own backoff
+     * schedule, not on the next call, so immediate retries all fail while the client is still
+     * waiting out its delay.
+     */
+    private static boolean awaitTrue(BooleanSupplier condition) {
+        long deadline = System.nanoTime() + REDIS_RECOVERY_DEADLINE_MS * 1_000_000L;
+        while (System.nanoTime() < deadline) {
+            if (condition.getAsBoolean()) {
+                return true;
+            }
+            try {
+                Thread.sleep(REDIS_POLL_INTERVAL_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return condition.getAsBoolean();
+    }
+
+    /**
+     * Probes every pooled target until it answers, evicting again between attempts.
+     *
+     * <p>Re-enabling the proxy restores the route but not instantly, so a connection the pool
+     * refills inside that window is half-open while eviction has already run. The next test then
+     * draws it and its first statement dies on a socket the cut killed.</p>
+     */
+    private void awaitLivePooledConnections() {
+        for (DataSource target : resolvedTargets(appDataSource)) {
+            DataAccessException unreachable = null;
+            for (int attempt = 0; attempt < CONNECTION_PROBE_ATTEMPTS; attempt++) {
+                try {
+                    new JdbcTemplate(target).queryForObject("SELECT 1", Integer.class);
+                    unreachable = null;
+                    break;
+                } catch (DataAccessException e) {
+                    unreachable = e;
+                    evictPooledPrimaryConnections();
+                }
+            }
+            if (unreachable != null) {
+                throw new IllegalStateException(
+                        "a pooled connection never recovered from the cut", unreachable);
+            }
+        }
     }
 
     /**

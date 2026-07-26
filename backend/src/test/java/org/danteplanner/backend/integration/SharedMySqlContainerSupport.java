@@ -82,13 +82,14 @@ public abstract class SharedMySqlContainerSupport {
      * while the rest of the suite carries on.</p>
      *
      * <p>Costs one Spring context per caller, the database name being part of the context cache
-     * key. Prefer narrowing the assertion to rows the test created.</p>
+     * key, plus a {@code redis-server} of its own. Prefer narrowing the assertion to rows the test
+     * created.</p>
      *
      * @param registry the Spring dynamic property registry
      * @param database a name unique to the calling class
      * @return the JDBC URL bound to that database
      */
-    static String registerOwnDatabase(DynamicPropertyRegistry registry, String database) {
+    public static String registerOwnDatabase(DynamicPropertyRegistry registry, String database) {
         String url = "jdbc:mysql://" + MYSQL.getHost() + ":" + MYSQL.getFirstMappedPort()
                 + "/" + database + "?createDatabaseIfNotExist=true";
         registry.add("spring.datasource.url", () -> url);
@@ -97,7 +98,7 @@ public abstract class SharedMySqlContainerSupport {
         registry.add("spring.flyway.url", () -> url);
         registry.add("spring.flyway.user", MYSQL::getUsername);
         registry.add("spring.flyway.password", MYSQL::getPassword);
-        SharedRedisContainerSupport.registerSharedRedis(registry);
+        SharedRedisContainerSupport.registerOwnRedis(registry, database);
         return url;
     }
 

@@ -35,7 +35,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class ModerationAuditTrailBoundIT extends SharedMySqlContainerSupport {
+class ModerationAuditTrailBoundIT {
+
+    /**
+     * The subject is the whole audit trail: the assertions compare a bounded page against the
+     * newest record in the table, and there is no id to narrow either side to. A neighbour
+     * moderating anything between the two reads puts a newer record outside the page.
+     */
+    @DynamicPropertySource
+    static void ownDatabase(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "audit_trail_bound");
+    }
 
 
     /** Comfortably more than the dashboard's page, so truncation has something to remove. */

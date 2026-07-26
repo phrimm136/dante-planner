@@ -51,6 +51,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * the number of result rows. A regression that drops an {@code @EntityGraph}/JOIN FETCH or
  * a batch {@code findBy...In} would make the count grow with row count, failing the equality.</p>
  *
+ * <p>The database is this class's own: the measured calls are list reads over every published
+ * planner, so a neighbour publishing between the two measurements adds rows to the same page and
+ * with them the per-row {@code UserSettings} load, which is the slope the assertion bounds.</p>
+ *
  * <p>The class is deliberately NOT {@code @Transactional}: each measured service call runs in
  * its own fresh read-only transaction (a new Hibernate session), so the author and the
  * vote/bookmark/comment context must actually be fetched from the database rather than served
@@ -60,7 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerQueryCountIT extends SharedMySqlContainerSupport {
+class PlannerQueryCountIT {
 
     private static final int SMALL_SET = 3;
     private static final int LARGE_SET = 8;
@@ -71,7 +75,7 @@ class PlannerQueryCountIT extends SharedMySqlContainerSupport {
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry);
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "query_count");
         // Enable Hibernate statistics so getPrepareStatementCount() reflects real SQL issued.
         registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");
         registry.add("logging.level.org.hibernate.SQL", () -> "DEBUG");
