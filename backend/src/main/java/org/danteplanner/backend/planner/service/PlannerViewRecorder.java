@@ -48,9 +48,12 @@ public class PlannerViewRecorder {
         if (drained.isEmpty()) {
             return;
         }
-        buffer.removeAll(drained);
         Map<UUID, Integer> newViewsByPlanner =
                 plannerViewRepository.insertIgnoreReturningNewCounts(drained, Instant.now());
         newViewsByPlanner.forEach(plannerStatsRepository::incrementViewCountBy);
+        // Drained last: a lock wait or deadlock here throws before the removal, so the batch stays
+        // buffered for the next tick. Removing first loses every view in it, the insert being
+        // rolled back with it.
+        buffer.removeAll(drained);
     }
 }
