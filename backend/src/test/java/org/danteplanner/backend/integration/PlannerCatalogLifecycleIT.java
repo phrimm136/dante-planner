@@ -1,9 +1,12 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
+import static org.hamcrest.Matchers.hasItems;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -32,8 +35,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.sql.DataSource;
@@ -47,7 +48,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Catalog projection lifecycle: membership equals visibility, ordering is
@@ -61,10 +61,9 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @Import(TestConfig.class)
 class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
-    @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_catalog_lifecycle_it");
-    }
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -100,7 +99,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     private PlannerCatalogService catalogService;
 
     @Autowired
-    private ModerationService moderationService;
+    private PlannerModerationService plannerModerationService;
 
     @Autowired
     private DataSource dataSource;
@@ -124,12 +123,6 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        moderationActionRepository.deleteAll();
-        voteRepository.deleteAll();
-        catalogRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private Planner draft() {
@@ -164,7 +157,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         Planner takenDown = draft();
         publishingService.togglePublish(owner.getId(), takenDown.getId());
         assertThat(hasCatalogRow(takenDown.getId())).isTrue();
-        moderationService.deletePlanner(admin.getId(), takenDown.getId(), "violation");
+        plannerModerationService.deletePlanner(admin.getId(), takenDown.getId(), "violation");
         assertThat(hasCatalogRow(takenDown.getId())).as("taken-down planner has no catalog row").isFalse();
     }
 
@@ -184,9 +177,15 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
         mockMvc.perform(get("/api/planner/md/published"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("Recency 2"))
-                .andExpect(jsonPath("$.content[1].title").value("Recency 1"))
-                .andExpect(jsonPath("$.content[2].title").value("Recency 0"));
+                // Relative order among this test's rows: the catalog also holds its neighbours',
+                // so absolute positions belong to whoever published most recently.
+                .andExpect(jsonPath("$.content[*].title", hasItems("Recency 2", "Recency 1", "Recency 0")))
+                .andExpect(result -> {
+                    List<String> titles = com.jayway.jsonpath.JsonPath.read(
+                            result.getResponse().getContentAsString(), "$.content[*].title");
+                    assertThat(titles.indexOf("Recency 2")).isLessThan(titles.indexOf("Recency 1"));
+                    assertThat(titles.indexOf("Recency 1")).isLessThan(titles.indexOf("Recency 0"));
+                });
 
         // The browse shape must ride idx_catalog_recent instead of sorting rows
         String plan = new JdbcTemplate(dataSource).queryForList(
@@ -223,12 +222,12 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
                 .as("threshold crossing sets recommended").isTrue();
 
         // moderation hide clears it; unhide recomputes it from stats
-        moderationService.hideFromRecommended(planner.getId(), admin.getId(), new HidePlannerRequest("off-list"));
+        plannerModerationService.hideFromRecommended(planner.getId(), admin.getId(), new HidePlannerRequest("off-list"));
         assertThat(catalogRepository.findById(planner.getId())
                 .map(PlannerCatalog::getRecommended).orElseThrow())
                 .as("hidden planner is not recommended").isFalse();
 
-        moderationService.unhideFromRecommended(planner.getId(), admin.getId());
+        plannerModerationService.unhideFromRecommended(planner.getId(), admin.getId());
         assertThat(catalogRepository.findById(planner.getId())
                 .map(PlannerCatalog::getRecommended).orElseThrow())
                 .as("unhide restores the stats-derived flag").isTrue();
@@ -239,7 +238,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     void takedownBlocksRepublish_WhenOwnerPublishes_RejectedWithoutCatalogRow() {
         Planner planner = draft();
         publishingService.togglePublish(owner.getId(), planner.getId());
-        moderationService.deletePlanner(admin.getId(), planner.getId(), "violation");
+        plannerModerationService.deletePlanner(admin.getId(), planner.getId(), "violation");
         assertThat(hasCatalogRow(planner.getId())).isFalse();
 
         assertThatThrownBy(() -> publishingService.togglePublish(owner.getId(), planner.getId()))

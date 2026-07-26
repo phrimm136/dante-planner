@@ -376,9 +376,51 @@ public class CommentService {
     }
 
     /**
+     * Require the comment carrying an internal id.
+     *
+     * @param commentId the comment's internal ID
+     * @return the comment
+     * @throws CommentNotFoundException if comment not found
+     */
+    @Transactional(readOnly = true)
+    public PlannerComment requireById(Long commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+    }
+
+    /**
+     * Require the comment carrying a public UUID, the id every API surface exposes.
+     *
+     * @param commentPublicId the comment's public UUID
+     * @return the comment
+     * @throws CommentNotFoundException if comment not found
+     */
+    @Transactional(readOnly = true)
+    public PlannerComment requireByPublicId(UUID commentPublicId) {
+        return commentRepository.findByPublicId(commentPublicId)
+                .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
+    }
+
+    /**
+     * Withdraw a comment from view, keeping its row so the thread beneath it survives, and settle
+     * the planner's comment counter in the same transaction.
+     *
+     * <p>Not idempotent on its own: a caller that may be re-entered has to check
+     * {@link PlannerComment#isDeleted()} first, or the counter drops twice.</p>
+     *
+     * @param comment the comment to withdraw
+     */
+    @Transactional
+    public void softDelete(PlannerComment comment) {
+        comment.softDelete();
+        commentRepository.save(comment);
+        plannerStatsRepository.decrementCommentCount(comment.getPlannerId());
+    }
+
+    /**
      * Soft-delete a comment.
      * Only the comment author can delete their own comment.
-     * Use ModerationService.deleteComment for moderator deletion.
+     * Use CommentModerationService.deleteComment for moderator deletion.
      *
      * @param commentPublicId the comment public UUID
      * @param userId          the user ID (must be author)
@@ -387,8 +429,7 @@ public class CommentService {
      */
     @Transactional
     public void deleteComment(UUID commentPublicId, Long userId) {
-        PlannerComment comment = commentRepository.findByPublicId(commentPublicId)
-                .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
+        PlannerComment comment = requireByPublicId(commentPublicId);
 
         // Already deleted - idempotent
         if (comment.isDeleted()) {
@@ -400,9 +441,7 @@ public class CommentService {
             throw new CommentForbiddenException(comment.getId(), "Only the author can delete this comment");
         }
 
-        comment.softDelete();
-        commentRepository.save(comment);
-        plannerStatsRepository.decrementCommentCount(comment.getPlannerId());
+        softDelete(comment);
         log.info("User {} deleted comment {}", userId, commentPublicId);
     }
 

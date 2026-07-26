@@ -9,11 +9,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.BanRequest;
+import org.danteplanner.backend.moderation.dto.ModerationActionDto;
 import org.danteplanner.backend.moderation.dto.TimeoutRequest;
 import org.danteplanner.backend.moderation.dto.TimeoutResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.CommentModerationService;
+import org.danteplanner.backend.moderation.service.ModerationQueryService;
+import org.danteplanner.backend.moderation.service.PlannerModerationService;
+import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +42,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ModerationController {
 
-    private final ModerationService moderationService;
+    private final UserModerationService userModerationService;
+    private final PlannerModerationService plannerModerationService;
+    private final CommentModerationService commentModerationService;
+    private final ModerationQueryService moderationQueryService;
     private final RateLimitService rateLimitService;
 
     /**
@@ -63,7 +70,7 @@ public class ModerationController {
         log.info("Moderator {} timing out user with suffix {} for {} minutes with reason: {}",
                 actorId, usernameSuffix, request.durationMinutes(), request.reason());
 
-        User user = moderationService.timeoutUserBySuffix(actorId, usernameSuffix, request.durationMinutes(), request.reason());
+        User user = userModerationService.timeoutUserBySuffix(actorId, usernameSuffix, request.durationMinutes(), request.reason());
         return ResponseEntity.ok(TimeoutResponse.fromUser(user, "User timed out successfully"));
     }
 
@@ -87,7 +94,7 @@ public class ModerationController {
 
         log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
-        User user = moderationService.removeTimeoutBySuffix(actorId, usernameSuffix, request.reason());
+        User user = userModerationService.removeTimeoutBySuffix(actorId, usernameSuffix, request.reason());
         return ResponseEntity.ok(TimeoutResponse.fromUser(user, "Timeout removed successfully"));
     }
 
@@ -108,7 +115,7 @@ public class ModerationController {
 
         log.info("Moderator {} unpublishing planner {}", actorId, plannerId);
 
-        Planner planner = moderationService.unpublishPlanner(actorId, plannerId);
+        Planner planner = plannerModerationService.unpublishPlanner(actorId, plannerId);
         return ResponseEntity.ok(Map.of(
                 "plannerId", planner.getId(),
                 "published", planner.getPublished(),
@@ -137,7 +144,7 @@ public class ModerationController {
 
         log.info("Admin {} banning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
-        User user = moderationService.banUserBySuffix(actorId, usernameSuffix, request.reason());
+        User user = userModerationService.banUserBySuffix(actorId, usernameSuffix, request.reason());
         return ResponseEntity.ok(Map.of(
                 "banned", user.isBanned(),
                 "message", "User banned successfully"
@@ -164,7 +171,7 @@ public class ModerationController {
 
         log.info("Admin {} unbanning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
-        User user = moderationService.unbanUserBySuffix(actorId, usernameSuffix, request.reason());
+        User user = userModerationService.unbanUserBySuffix(actorId, usernameSuffix, request.reason());
         return ResponseEntity.ok(Map.of(
                 "banned", user.isBanned(),
                 "message", "User unbanned successfully"
@@ -180,7 +187,7 @@ public class ModerationController {
      */
     @GetMapping("/users")
     public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
-        List<User> users = moderationService.getAllUsers();
+        List<User> users = moderationQueryService.getAllUsers();
         List<Map<String, Object>> responses = users.stream()
                 .map(user -> {
                     Map<String, Object> map = new HashMap<>();
@@ -207,7 +214,7 @@ public class ModerationController {
      */
     @GetMapping("/users/timed-out")
     public ResponseEntity<List<TimeoutResponse>> getTimedOutUsers() {
-        List<User> timedOutUsers = moderationService.getTimedOutUsers();
+        List<User> timedOutUsers = moderationQueryService.getTimedOutUsers();
         List<TimeoutResponse> responses = timedOutUsers.stream()
                 .map(user -> TimeoutResponse.fromUser(user, null))
                 .toList();
@@ -222,8 +229,8 @@ public class ModerationController {
      * @return list of moderation actions
      */
     @GetMapping("/actions")
-    public ResponseEntity<List<org.danteplanner.backend.moderation.dto.ModerationActionDto>> getModerationActions() {
-        List<org.danteplanner.backend.moderation.dto.ModerationActionDto> actions = moderationService.getModerationActionsWithActors();
+    public ResponseEntity<List<ModerationActionDto>> getModerationActions() {
+        List<ModerationActionDto> actions = moderationQueryService.getModerationActionsWithActors();
         return ResponseEntity.ok(actions);
     }
 
@@ -248,7 +255,7 @@ public class ModerationController {
 
         log.info("Moderator {} taking down planner {} with reason: {}", actorId, plannerId, request.reason());
 
-        moderationService.deletePlanner(actorId, plannerId, request.reason());
+        plannerModerationService.deletePlanner(actorId, plannerId, request.reason());
         return ResponseEntity.ok(Map.of(
                 "plannerId", plannerId,
                 "message", "Planner taken down successfully"
@@ -275,7 +282,7 @@ public class ModerationController {
         rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} deleting comment {} with reason: {}", actorId, commentPublicId, request.reason());
-        moderationService.deleteCommentByPublicId(actorId, commentPublicId, request.reason());
+        commentModerationService.deleteCommentByPublicId(actorId, commentPublicId, request.reason());
         return ResponseEntity.noContent().build();
     }
 }

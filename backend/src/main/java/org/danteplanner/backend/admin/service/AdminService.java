@@ -10,6 +10,7 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
@@ -32,8 +33,8 @@ public class AdminService {
      * @param targetId  the user whose role is being changed
      * @param newRole   the new role to assign
      * @return the updated user
-     * @throws UserNotFoundException if target user not found
-     * @throws IllegalArgumentException if safeguard violated
+     * @throws UserNotFoundException        if target user not found
+     * @throws ModerationForbiddenException if a rank safeguard rejects the change
      */
     @Transactional
     public User changeRole(Long actorId, Long targetId, UserRole newRole) {
@@ -48,19 +49,19 @@ public class AdminService {
 
         // Safeguard 1: Cannot grant role higher than own
         if (newRole.outranks(actorRole)) {
-            throw new IllegalArgumentException("Cannot grant role higher than your own");
+            throw new ModerationForbiddenException("Cannot grant role higher than your own");
         }
 
         // Safeguard 2: Cannot modify user of equal or higher rank (unless self-demotion)
         if (!actorId.equals(targetId) && targetCurrentRole.hasRankAtLeast(actorRole)) {
-            throw new IllegalArgumentException("Cannot modify user of equal or higher rank");
+            throw new ModerationForbiddenException("Cannot modify user of equal or higher rank");
         }
 
         // Safeguard 3: Cannot demote last admin
         if (targetCurrentRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
             long adminCount = userRepository.countByRole(UserRole.ADMIN);
             if (adminCount <= 1) {
-                throw new IllegalArgumentException("Cannot demote the last administrator");
+                throw new ModerationForbiddenException("Cannot demote the last administrator");
             }
         }
 

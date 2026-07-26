@@ -88,4 +88,17 @@ public class PlannerAccessGuard {
         return plannerRepository.findAggregateForOwner(id, userId)
                 .orElseThrow(() -> new PlannerNotFoundException(id));
     }
+
+    /**
+     * Require a planner to be publicly visible, whoever is asking. An unpublished, taken-down, or
+     * soft-deleted planner is indistinguishable from a missing one to a non-owner.
+     *
+     * @param id the planner ID
+     * @return the published planner
+     * @throws PlannerNotFoundException if no published planner carries the id
+     */
+    public Planner requirePublished(UUID id) {
+        return plannerRepository.findPublishedAggregate(id)
+                .orElseThrow(() -> new PlannerNotFoundException(id));
+    }
 }

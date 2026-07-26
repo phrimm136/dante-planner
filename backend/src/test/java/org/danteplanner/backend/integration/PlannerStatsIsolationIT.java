@@ -1,11 +1,13 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentService;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -28,8 +30,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
@@ -38,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Counter isolation: planner_stats is the single home of view/upvote/comment
@@ -49,12 +48,20 @@ import org.danteplanner.backend.support.TestDataCleanup;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
+class PlannerStatsIsolationIT {
 
+    /**
+     * Its own database, and so its own context: these assert what the view recorder has buffered
+     * versus flushed, and the recorder is one bean per context. A neighbour recording or flushing
+     * moves the number this test is about to read.
+     */
     @DynamicPropertySource
-    static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry, "planner_stats_isolation_it");
+    static void ownDatabase(DynamicPropertyRegistry registry) {
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "stats_isolation");
     }
+
+
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -78,7 +85,7 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
     private CommentService commentService;
 
     @Autowired
-    private ModerationService moderationService;
+    private CommentModerationService commentModerationService;
 
     @Autowired
     private PlannerCatalogService catalogService;
@@ -113,11 +120,6 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
     }
 
     private void cleanUp() {
-        moderationActionRepository.deleteAll();
-        commentRepository.deleteAll();
-        statsRepository.deleteAll();
-        plannerRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
     }
 
     private void seedStats(int viewCount, int upvotes, int commentCount) {
@@ -155,10 +157,10 @@ class PlannerStatsIsolationIT extends SharedMySqlContainerSupport {
         commentService.deleteComment(replyId, owner.getId());
         assertThat(commentCount()).as("repeated delete is idempotent (already deleted)").isEqualTo(1);
 
-        moderationService.deleteCommentByPublicId(admin.getId(), topLevelId, "cleanup");
+        commentModerationService.deleteCommentByPublicId(admin.getId(), topLevelId, "cleanup");
         assertThat(commentCount()).as("moderator delete decrements").isEqualTo(0);
 
-        moderationService.deleteCommentByPublicId(admin.getId(), topLevelId, "cleanup again");
+        commentModerationService.deleteCommentByPublicId(admin.getId(), topLevelId, "cleanup again");
         assertThat(commentCount()).as("idempotent moderator delete does not decrement").isEqualTo(0);
 
         // Floor: a live comment row the counter never accounted for (drift) must

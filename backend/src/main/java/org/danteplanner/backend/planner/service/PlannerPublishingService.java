@@ -19,6 +19,8 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
@@ -26,6 +28,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 /**
  * Service for the publish lifecycle of a planner.
@@ -121,6 +124,71 @@ public class PlannerPublishingService {
         return plannerStatsRepository.findById(plannerId)
                 .map(PlannerStats::getUpvotes)
                 .orElse(0);
+    }
+
+    /**
+     * Withdraw a planner from public view on a moderator's authority and drop the catalog row that
+     * makes it listable.
+     *
+     * <p>The caller supplies the aggregate transition it wants (takedown, unpublish); which
+     * projection has to follow is not the caller's to remember.</p>
+     *
+     * @param plannerId  the planner to withdraw
+     * @param withdrawal the transition to apply to the aggregate
+     * @return the persisted planner
+     * @throws PlannerNotFoundException if no non-deleted planner carries the id
+     */
+    @Transactional
+    public Planner withdrawFromPublicView(UUID plannerId, Consumer<Planner> withdrawal) {
+        Planner planner = plannerRepository.findAggregate(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        withdrawal.accept(planner);
+        Planner saved = plannerRepository.save(planner);
+        plannerCatalogService.onBecameInvisible(plannerId);
+        return saved;
+    }
+
+    /**
+     * Apply a moderator's change to a planner's standing in the recommended list and recompute the
+     * derived flag the public list reads. The planner stays reachable by direct link either way.
+     *
+     * @param plannerId the planner whose standing changes
+     * @param change    the transition to apply to the aggregate
+     * @return the persisted planner
+     * @throws PlannerNotFoundException if no non-deleted planner carries the id
+     */
+    @Transactional
+    public Planner changeRecommendedListing(UUID plannerId, Consumer<Planner> change) {
+        Planner planner = plannerRepository.findAggregate(plannerId)
+                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+
+        change.accept(planner);
+        Planner saved = plannerRepository.save(planner);
+        plannerCatalogService.refreshRecommended(plannerId);
+        return saved;
+    }
+
+    /**
+     * The planners a moderator has taken off the recommended list.
+     *
+     * @param pageable the page to read
+     * @return one page of hidden planners
+     */
+    @Transactional(readOnly = true)
+    public Page<Planner> listHiddenFromRecommended(Pageable pageable) {
+        return plannerRepository.findHiddenFromRecommended(pageable);
+    }
+
+    /**
+     * The upvote count shown alongside a planner.
+     *
+     * @param plannerId the planner ID
+     * @return the upvote count, zero when the planner has no stats row yet
+     */
+    @Transactional(readOnly = true)
+    public int upvoteCount(UUID plannerId) {
+        return currentUpvotes(plannerId);
     }
 
     /**

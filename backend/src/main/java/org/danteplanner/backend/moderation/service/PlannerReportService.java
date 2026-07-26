@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,6 @@ import java.util.UUID;
 public class PlannerReportService {
 
     private final PlannerReportRepository reportRepository;
-    private final PlannerRepository plannerRepository;
     private final org.danteplanner.backend.planner.service.PlannerAccessGuard accessGuard;
 
     /**
@@ -40,9 +38,7 @@ public class PlannerReportService {
         accessGuard.checkNotBanned(userId);
 
         // Verify planner exists and is published
-        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
-            throw new PlannerNotFoundException(plannerId);
-        }
+        accessGuard.requirePublished(plannerId);
 
         // Check if already reported (one report per user per planner)
         if (reportRepository.existsByUserIdAndPlannerId(userId, plannerId)) {

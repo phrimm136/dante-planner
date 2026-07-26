@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
@@ -134,8 +135,8 @@ class AdminServiceTest {
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
                     () -> adminService.changeRole(moderatorUser.getId(), normalUser.getId(), UserRole.ADMIN)
             );
             assertTrue(exception.getMessage().contains("higher than your own"));
@@ -164,8 +165,8 @@ class AdminServiceTest {
                     .thenReturn(Optional.of(otherModerator));
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
                     () -> adminService.changeRole(moderatorUser.getId(), otherModerator.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
@@ -182,8 +183,8 @@ class AdminServiceTest {
                     .thenReturn(Optional.of(adminUser));
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
                     () -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
@@ -199,8 +200,8 @@ class AdminServiceTest {
             when(userRepository.countByRole(UserRole.ADMIN)).thenReturn(1L);
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
                     () -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("last administrator"));
@@ -229,8 +230,8 @@ class AdminServiceTest {
                     .thenReturn(Optional.of(otherAdmin));
 
             // Act & Assert - admin cannot demote another admin (only self-demotion allowed)
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
                     () -> adminService.changeRole(adminUser.getId(), otherAdmin.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));

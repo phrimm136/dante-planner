@@ -1,13 +1,28 @@
 package org.danteplanner.backend.moderation.repository;
 
 import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ModerationActionRepository extends JpaRepository<ModerationAction, Long> {
+
+    /**
+     * Read the newest audit records, newest first, bounded by the requested page.
+     *
+     * <p>Ties on {@code createdAt} break by insertion order so the page is stable across reads
+     * rather than left to the storage engine.</p>
+     *
+     * @param pageable the page to read
+     * @return the requested page of records, newest first
+     */
+    @Query("SELECT a FROM ModerationAction a ORDER BY a.createdAt DESC, a.id ASC")
+    List<ModerationAction> findRecent(Pageable pageable);
 
     /**
      * Find the most recent moderation action of a specific type for a target.

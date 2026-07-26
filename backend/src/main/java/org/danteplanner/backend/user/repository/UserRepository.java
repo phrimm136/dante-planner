@@ -68,6 +68,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findWithLockByIdAndDeletedAtIsNull(Long id);
 
     /**
+     * Find every active (non-deleted) user except the one holding the given id.
+     * Used by the moderation dashboard to list accounts while excluding the sentinel user.
+     *
+     * @param id the user ID to exclude
+     * @return list of active users other than the excluded one
+     */
+    List<User> findByDeletedAtIsNullAndIdNot(Long id);
+
+    /**
      * Find all active users with timeouts that haven't expired yet.
      * Uses the V014 partial index on timeout_until for efficient lookup.
      * Useful for moderation dashboards to see currently timed-out users.

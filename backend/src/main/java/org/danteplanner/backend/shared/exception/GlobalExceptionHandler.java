@@ -24,6 +24,7 @@ import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
+import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -142,11 +143,14 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse("USER_BANNED", "Your account has been suspended"));
     }
 
+    @ExceptionHandler(ModerationForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleModerationForbidden(ModerationForbiddenException ex) {
+        return warnAndRespond(HttpStatus.FORBIDDEN, "Moderation action forbidden: {}", "FORBIDDEN", ex.getMessage());
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Illegal argument: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(new ErrorResponse("FORBIDDEN", ex.getMessage()));
+        return warnAndRespond(HttpStatus.FORBIDDEN, "Illegal argument: {}", "FORBIDDEN", ex.getMessage());
     }
 
     @ExceptionHandler(InvalidTokenException.class)
@@ -205,9 +209,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PlannerLimitExceededException.class)
     public ResponseEntity<ErrorResponse> handlePlannerLimitExceeded(PlannerLimitExceededException ex) {
-        log.warn("Planner limit exceeded: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(new ErrorResponse("PLANNER_LIMIT_EXCEEDED", ex.getMessage()));
+        return warnAndRespond(HttpStatus.CONFLICT, "Planner limit exceeded: {}", "PLANNER_LIMIT_EXCEEDED", ex.getMessage());
     }
 
     @ExceptionHandler(VoteAlreadyExistsException.class)

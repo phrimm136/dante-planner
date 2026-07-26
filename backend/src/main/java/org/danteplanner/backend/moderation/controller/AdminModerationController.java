@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class AdminModerationController {
 
-    private final ModerationService moderationService;
+    private final PlannerModerationService plannerModerationService;
 
     /**
      * Hide a planner from the recommended list.
@@ -45,7 +45,7 @@ public class AdminModerationController {
 
         log.info("Moderator {} hiding planner {} from recommended (reason: {})",
                 moderatorId, plannerId, request.reason());
-        ModerationResponse response = moderationService.hideFromRecommended(plannerId, moderatorId, request);
+        ModerationResponse response = plannerModerationService.hideFromRecommended(plannerId, moderatorId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -65,7 +65,7 @@ public class AdminModerationController {
             @PathVariable("id") UUID plannerId) {
 
         log.info("Moderator {} unhiding planner {} from recommended", moderatorId, plannerId);
-        ModerationResponse response = moderationService.unhideFromRecommended(plannerId, moderatorId);
+        ModerationResponse response = plannerModerationService.unhideFromRecommended(plannerId, moderatorId);
         return ResponseEntity.ok(response);
     }
 }

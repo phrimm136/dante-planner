@@ -1,6 +1,8 @@
 package org.danteplanner.backend.integration;
 
 import jakarta.servlet.http.Cookie;
+import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
+import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
@@ -10,7 +12,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import org.springframework.http.HttpStatus;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import org.danteplanner.backend.support.TestDataCleanup;
 
 /**
  * Integration tests for ban enforcement across the full stack.
@@ -43,10 +43,10 @@ import org.danteplanner.backend.support.TestDataCleanup;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Transactional
+@ActiveProfiles("it")
+@Tag("containerized")
 @Import(TestConfig.class)
-class BanEnforcementIntegrationTest {
+class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private MockMvc mockMvc;
@@ -61,7 +61,7 @@ class BanEnforcementIntegrationTest {
     private ModerationActionRepository moderationActionRepository;
 
     @Autowired
-    private ModerationService moderationService;
+    private UserModerationService userModerationService;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -73,9 +73,6 @@ class BanEnforcementIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        plannerRepository.deleteAll();
-        moderationActionRepository.deleteAll();
-        TestDataCleanup.deleteUsersExceptSentinel(userRepository);
 
         regularUser = TestDataFactory.createTestUser(userRepository, "user@example.com");
         adminUser = TestDataFactory.createAdmin(userRepository, "admin@example.com");
@@ -96,7 +93,7 @@ class BanEnforcementIntegrationTest {
     @DisplayName("Banned user keeps private planner work - upsert succeeds")
     void bannedUser_cannotUpsertPlanner_returns403() throws Exception {
         // Arrange - ban the user
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
         UpsertPlannerRequest request = new UpsertPlannerRequest(
                 null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
@@ -131,7 +128,7 @@ class BanEnforcementIntegrationTest {
         UUID plannerId = planner.getId();
 
         // Ban the user
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
         // Act & Assert
         mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish").with(withCsrf())
@@ -151,7 +148,7 @@ class BanEnforcementIntegrationTest {
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
         // Ban the user
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Spam");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Spam");
 
         String json = """
                 {
@@ -172,8 +169,8 @@ class BanEnforcementIntegrationTest {
     @DisplayName("Unbanned user can resume operations - verified by audit trail")
     void unbanUser_WhenUnbanned_CanResumeOperations() {
         // Arrange - ban then unban
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
-        moderationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
+        userModerationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
 
         // Assert - user is no longer banned
         User refreshed = userRepository.findById(regularUser.getId()).orElseThrow();
@@ -191,10 +188,13 @@ class BanEnforcementIntegrationTest {
     @DisplayName("Ban action is logged to audit trail")
     void banUser_WhenBanned_LogsAuditAction() {
         // Arrange & Act
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
 
         // Assert - verify audit log
-        List<ModerationAction> actions = moderationActionRepository.findAll();
+        // Scoped to the user this test moderated: the table also holds every other test's actions.
+        List<ModerationAction> actions = moderationActionRepository.findAll().stream()
+                .filter(a -> regularUser.getPublicId().toString().equals(a.getTargetUuid()))
+                .toList();
         assertEquals(1, actions.size());
 
         ModerationAction action = actions.get(0);
@@ -209,13 +209,16 @@ class BanEnforcementIntegrationTest {
     @DisplayName("Unban action is logged to audit trail")
     void unbanUser_WhenUnbanned_LogsAuditAction() {
         // Arrange
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
         // Act
-        moderationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
+        userModerationService.unbanUser(adminUser.getId(), regularUser.getId(), "Test unban");
 
         // Assert - verify both BAN and UNBAN logged
-        List<ModerationAction> actions = moderationActionRepository.findAll();
+        // Scoped to the user this test moderated: the table also holds every other test's actions.
+        List<ModerationAction> actions = moderationActionRepository.findAll().stream()
+                .filter(action -> regularUser.getPublicId().toString().equals(action.getTargetUuid()))
+                .toList();
         assertEquals(2, actions.size());
 
         ModerationAction banAction = actions.stream()
@@ -235,8 +238,8 @@ class BanEnforcementIntegrationTest {
     @DisplayName("Concurrent timeout and ban still permit private planner work")
     void concurrentRestrictions_WhenTimeoutAndBan_BothBlock() throws Exception {
         // Arrange - both timeout AND ban the user
-        moderationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
+        userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 60, "Test timeout");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Also banned");
 
         UUID plannerId = UUID.randomUUID();
 
@@ -264,7 +267,7 @@ class BanEnforcementIntegrationTest {
     @DisplayName("GET /me returns ban status for banned user")
     void getMe_bannedUser_returnsBanStatus() throws Exception {
         // Arrange
-        moderationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
+        userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
 
         // Act & Assert
         mockMvc.perform(get("/api/auth/me")
@@ -279,7 +282,7 @@ class BanEnforcementIntegrationTest {
     @DisplayName("GET /me returns timeout status for timed-out user")
     void getMe_timedOutUser_returnsTimeoutStatus() throws Exception {
         // Arrange
-        moderationService.timeoutUser(adminUser.getId(), regularUser.getId(), 30, "Test timeout");
+        userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 30, "Test timeout");
 
         // Act & Assert
         mockMvc.perform(get("/api/auth/me")

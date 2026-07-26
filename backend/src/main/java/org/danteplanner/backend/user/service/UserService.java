@@ -18,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -151,6 +154,62 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<User> findActiveById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
+    }
+
+    /**
+     * Find the active account behind a username suffix, the public handle moderation endpoints
+     * carry in place of a numeric id.
+     *
+     * @param usernameSuffix the unique username suffix
+     * @return the active account, or empty if none carries the suffix
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findActiveBySuffix(String usernameSuffix) {
+        return userRepository.findByUsernameSuffixAndDeletedAtIsNull(usernameSuffix);
+    }
+
+    /**
+     * List the accounts a moderator may act on: every active account except the sentinel that owns
+     * anonymized content, which is not a person and cannot be restricted.
+     *
+     * @return the active accounts
+     */
+    @Transactional(readOnly = true)
+    public List<User> listActiveAccounts() {
+        return userRepository.findByDeletedAtIsNullAndIdNot(UserAccountLifecycleService.SENTINEL_USER_ID);
+    }
+
+    /**
+     * List the accounts whose timeout has not yet expired.
+     *
+     * @return the currently timed-out accounts
+     */
+    @Transactional(readOnly = true)
+    public List<User> listTimedOutAccounts() {
+        return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(Instant.now());
+    }
+
+    /**
+     * Resolve a batch of ids to accounts in one query. Deleted accounts are included: an audit
+     * trail still has to name the actor who left it.
+     *
+     * @param ids the account ids to resolve
+     * @return the accounts that exist, in no guaranteed order
+     */
+    @Transactional(readOnly = true)
+    public List<User> findAllByIds(Collection<Long> ids) {
+        return userRepository.findAllById(ids);
+    }
+
+    /**
+     * Persist a restriction a moderator placed on or lifted from an account.
+     *
+     * @param user the account carrying the new restriction state
+     * @return the persisted account
+     */
+    @Transactional
+    public User saveRestriction(User user) {
+        return userRepository.save(user);
     }
 
     /**

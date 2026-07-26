@@ -4,24 +4,25 @@ import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.service.CommentService;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
+import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
-import org.danteplanner.backend.moderation.service.ModerationService;
+import org.danteplanner.backend.moderation.service.PlannerModerationService;
+import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerType;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
@@ -33,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -40,11 +42,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,17 +64,18 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ModerationAuditMatrixTest {
 
+    @Mock UserService userService;
+    @Mock PlannerPublishingService plannerPublishingService;
+    @Mock CommentService commentService;
     @Mock UserRepository userRepository;
-    @Mock PlannerRepository plannerRepository;
-    @Mock PlannerCommentRepository plannerCommentRepository;
-    @Mock PlannerStatsRepository plannerStatsRepository;
-    @Mock PlannerCatalogService plannerCatalogService;
     @Mock ModerationActionRepository moderationActionRepository;
     ModerationAuditService auditService;
     @Mock SsePublisher ssePublisher;
     @Mock TokenBlacklistService tokenBlacklistService;
 
-    private ModerationService moderationService;
+    private UserModerationService userModerationService;
+    private PlannerModerationService plannerModerationService;
+    private CommentModerationService commentModerationService;
     private AdminService adminService;
 
     private static final Long ACTOR = 1L;
@@ -81,23 +86,23 @@ class ModerationAuditMatrixTest {
     private Map<ModerationAction.ActionType, Runnable> auditProducers() {
         Map<ModerationAction.ActionType, Runnable> producers = new LinkedHashMap<>();
         producers.put(ModerationAction.ActionType.TIMEOUT,
-                () -> moderationService.timeoutUser(ACTOR, TARGET, 60, "spam"));
+                () -> userModerationService.timeoutUser(ACTOR, TARGET, 60, "spam"));
         producers.put(ModerationAction.ActionType.CLEAR_TIMEOUT,
-                () -> moderationService.removeTimeout(ACTOR, TARGET, "appealed"));
+                () -> userModerationService.removeTimeout(ACTOR, TARGET, "appealed"));
         producers.put(ModerationAction.ActionType.BAN,
-                () -> moderationService.banUser(ACTOR, TARGET, "repeat offender"));
+                () -> userModerationService.banUser(ACTOR, TARGET, "repeat offender"));
         producers.put(ModerationAction.ActionType.UNBAN,
-                () -> moderationService.unbanUser(ACTOR, TARGET, "appealed"));
+                () -> userModerationService.unbanUser(ACTOR, TARGET, "appealed"));
         producers.put(ModerationAction.ActionType.DELETE_PLANNER,
-                () -> moderationService.deletePlanner(ACTOR, plannerId, "off topic"));
+                () -> plannerModerationService.deletePlanner(ACTOR, plannerId, "off topic"));
         producers.put(ModerationAction.ActionType.UNPUBLISH_PLANNER,
-                () -> moderationService.unpublishPlanner(ACTOR, plannerId));
+                () -> plannerModerationService.unpublishPlanner(ACTOR, plannerId));
         producers.put(ModerationAction.ActionType.DELETE_COMMENT,
-                () -> moderationService.deleteComment(ACTOR, 10L));
+                () -> commentModerationService.deleteComment(ACTOR, 10L));
         producers.put(ModerationAction.ActionType.HIDE_FROM_RECOMMENDED,
-                () -> moderationService.hideFromRecommended(plannerId, ACTOR, new HidePlannerRequest("misleading")));
+                () -> plannerModerationService.hideFromRecommended(plannerId, ACTOR, new HidePlannerRequest("misleading")));
         producers.put(ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED,
-                () -> moderationService.unhideFromRecommended(plannerId, ACTOR));
+                () -> plannerModerationService.unhideFromRecommended(plannerId, ACTOR));
         producers.put(ModerationAction.ActionType.PROMOTE,
                 () -> adminService.changeRole(ACTOR, TARGET, UserRole.MODERATOR));
         producers.put(ModerationAction.ActionType.DEMOTE,
@@ -108,29 +113,31 @@ class ModerationAuditMatrixTest {
     @BeforeEach
     void setUp() {
         auditService = new ModerationAuditService(moderationActionRepository);
-        moderationService = new ModerationService(userRepository, plannerRepository,
-                plannerCommentRepository, plannerStatsRepository, plannerCatalogService,
-                moderationActionRepository, auditService, ssePublisher);
+        userModerationService = new UserModerationService(userService, auditService, ssePublisher);
+        plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
+        commentModerationService = new CommentModerationService(commentService, auditService);
         adminService = new AdminService(userRepository, tokenBlacklistService, auditService);
 
         User actor = user(ACTOR, UserRole.ADMIN);
         User target = user(TARGET, UserRole.MODERATOR);
-        when(userRepository.findByIdAndDeletedAtIsNull(ACTOR)).thenReturn(Optional.of(actor));
-        when(userRepository.findByIdAndDeletedAtIsNull(TARGET)).thenReturn(Optional.of(target));
+        when(userService.findActiveById(ACTOR)).thenReturn(Optional.of(actor));
+        when(userService.findActiveById(TARGET)).thenReturn(Optional.of(target));
+        when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userRepository.findWithLockByIdAndDeletedAtIsNull(ACTOR)).thenReturn(Optional.of(actor));
         when(userRepository.findWithLockByIdAndDeletedAtIsNull(TARGET)).thenReturn(Optional.of(target));
         when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userRepository.countByRole(any())).thenReturn(5L);
 
         Planner planner = plannerAggregate(actor);
-        when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(planner));
-        when(plannerRepository.save(any(Planner.class))).thenAnswer(i -> i.getArgument(0));
-        when(plannerStatsRepository.findById(any())).thenReturn(Optional.empty());
+        when(plannerPublishingService.withdrawFromPublicView(eq(plannerId), any()))
+                .thenAnswer(applyTo(planner));
+        when(plannerPublishingService.changeRecommendedListing(eq(plannerId), any()))
+                .thenAnswer(applyTo(planner));
+        when(plannerPublishingService.upvoteCount(plannerId)).thenReturn(0);
 
         PlannerComment comment = new PlannerComment(plannerId, TARGET, "text", null, 0);
         org.springframework.test.util.ReflectionTestUtils.setField(comment, "publicId", UUID.randomUUID());
-        when(plannerCommentRepository.findById(10L)).thenReturn(Optional.of(comment));
-        when(plannerCommentRepository.save(any(PlannerComment.class))).thenAnswer(i -> i.getArgument(0));
+        when(commentService.requireById(10L)).thenReturn(comment);
     }
 
     @TestFactory
@@ -158,6 +165,14 @@ class ModerationAuditMatrixTest {
 
         assertEquals(declared, EnumSet.copyOf(covered),
                 "an action type with no producer is either an unaudited action or dead weight");
+    }
+
+    /** Drive the publishing seam the way production does: apply the handed transition, hand it back. */
+    private static Answer<Planner> applyTo(Planner planner) {
+        return invocation -> {
+            invocation.<Consumer<Planner>>getArgument(1).accept(planner);
+            return planner;
+        };
     }
 
     private User user(Long id, UserRole role) {
