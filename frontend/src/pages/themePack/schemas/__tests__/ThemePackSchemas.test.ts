@@ -44,7 +44,7 @@ describe('ThemePackDetailSchema', () => {
   })
 
   it('does not include difficulty in parsed output', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [],
       nodeOption: {
         bossPool: [],
@@ -59,14 +59,11 @@ describe('ThemePackDetailSchema', () => {
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect('difficulty' in result.data).toBe(false)
-    }
+    expect('difficulty' in result).toBe(false)
   })
 
   it('accepts nodeOption with specialEventPool', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [],
@@ -82,14 +79,11 @@ describe('ThemePackDetailSchema', () => {
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.nodeOption.specialEventPool).toEqual([971001, 971002])
-    }
+    expect(result.nodeOption.specialEventPool).toEqual([971001, 971002])
   })
 
   it('accepts hidden theme fields', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 1, selectableFloors: [2, 3, 4] }, { dungeonIdx: 2 }],
       nodeOption: {
         bossPool: [2070401],
@@ -107,15 +101,12 @@ describe('ThemePackDetailSchema', () => {
       hiddenThemeRate: 0.0002,
       fixedRewardEgoGifts: [9242, 9083, 9082, 9081],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.hiddenThemeRate).toBe(0.0002)
-      expect(result.data.fixedRewardEgoGifts).toEqual([9242, 9083, 9082, 9081])
-    }
+    expect(result.hiddenThemeRate).toBe(0.0002)
+    expect(result.fixedRewardEgoGifts).toEqual([9242, 9083, 9082, 9081])
   })
 
   it('accepts detail without hidden theme fields', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [],
@@ -130,11 +121,8 @@ describe('ThemePackDetailSchema', () => {
       themePackConfig: { textColor: 'af241c' },
       featuredBosses: [],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.hiddenThemeRate).toBeUndefined()
-      expect(result.data.fixedRewardEgoGifts).toBeUndefined()
-    }
+    expect(result.hiddenThemeRate).toBeUndefined()
+    expect(result.fixedRewardEgoGifts).toBeUndefined()
   })
 
   it('rejects invalid dungeonIdx', () => {
@@ -157,7 +145,7 @@ describe('ThemePackDetailSchema', () => {
   })
 
   it('accepts populated featuredBosses with numeric and string portraitId', () => {
-    const result = ThemePackDetailSchema.safeParse({
+    const result = ThemePackDetailSchema.parse({
       exceptionConditions: [{ dungeonIdx: 0, selectableFloors: [0] }],
       nodeOption: {
         bossPool: [],
@@ -175,13 +163,10 @@ describe('ThemePackDetailSchema', () => {
         { unitId: 1355, portraitId: '1355' },
       ],
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.featuredBosses).toEqual([
-        { unitId: 71001, portraitId: 91001 },
-        { unitId: 1355, portraitId: '1355' },
-      ])
-    }
+    expect(result.featuredBosses).toEqual([
+      { unitId: 71001, portraitId: 91001 },
+      { unitId: 1355, portraitId: '1355' },
+    ])
   })
 
   it('accepts empty featuredBosses', () => {

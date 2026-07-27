@@ -220,12 +220,14 @@ describe('EGOGiftObservationSummary', () => {
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
-    it('does not throw when onClick is undefined', async () => {
+    it('survives a click when onClick is undefined', async () => {
       const user = userEvent.setup()
       render(<EGOGiftObservationSummary {...defaultProps} />)
       const clickableArea = screen.getByRole('button')
-      // Should not throw
+
       await user.click(clickableArea)
+
+      expect(clickableArea).toBeInTheDocument()
     })
   })
 

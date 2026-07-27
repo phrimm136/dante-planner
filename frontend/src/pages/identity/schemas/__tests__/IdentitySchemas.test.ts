@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { ZodError } from 'zod'
 import {
   DefenseTypeSchema,
   IdentityDataSchema,
@@ -16,11 +17,11 @@ describe('DefenseTypeSchema', () => {
   )
 
   it('rejects invalid string', () => {
-    expect(() => DefenseTypeSchema.parse('DODGE')).toThrow()
+    expect(() => DefenseTypeSchema.parse('DODGE')).toThrow(ZodError)
   })
 
   it('rejects empty string', () => {
-    expect(() => DefenseTypeSchema.parse('')).toThrow()
+    expect(() => DefenseTypeSchema.parse('')).toThrow(ZodError)
   })
 })
 
@@ -81,14 +82,11 @@ describe('IdentitySkillI18nSchema flavor field', () => {
   })
 
   it('accepts a skill with a flavor lore line', () => {
-    const result = IdentitySkillI18nSchema.safeParse({
+    const result = IdentitySkillI18nSchema.parse({
       ...baseSkill,
       flavor: 'A technique that cuts through space itself.',
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.flavor).toBe('A technique that cuts through space itself.')
-    }
+    expect(result.flavor).toBe('A technique that cuts through space itself.')
   })
 
   it('rejects non-string flavor', () => {
@@ -102,16 +100,13 @@ describe('IdentitySkillI18nSchema flavor field', () => {
   it('does not bleed flavor into per-uptie desc entries', () => {
     // Flavor lives at the skill level, not inside each desc entry.
     // Verifies the schema does not silently accept flavor on a desc entry shape.
-    const result = IdentitySkillI18nSchema.safeParse({
+    const result = IdentitySkillI18nSchema.parse({
       name: 'X',
       descs: [{ desc: 'a', flavor: 'lore' }],
     })
-    expect(result.success).toBe(true)
     // Even if Zod allows extra unknown props on the inner entry,
     // the canonical place for flavor is on the parsed skill object.
-    if (result.success) {
-      expect(result.data.flavor).toBeUndefined()
-    }
+    expect(result.flavor).toBeUndefined()
   })
 })
 
@@ -127,14 +122,11 @@ describe('IdentityPassiveI18nSchema flavor field', () => {
   })
 
   it('accepts a passive with an optional flavor line', () => {
-    const result = IdentityPassiveI18nSchema.safeParse({
+    const result = IdentityPassiveI18nSchema.parse({
       ...basePassive,
       flavor: "'The things I dread seeing again always come back.'",
     })
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.flavor).toBe("'The things I dread seeing again always come back.'")
-    }
+    expect(result.flavor).toBe("'The things I dread seeing again always come back.'")
   })
 
   it('rejects non-string flavor', () => {

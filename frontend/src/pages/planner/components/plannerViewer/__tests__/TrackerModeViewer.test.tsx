@@ -296,18 +296,6 @@ describe('TrackerModeViewer', () => {
       const deckPanel = screen.getByTestId('deck-tracker-panel')
       expect(deckPanel.textContent).toContain('Faust, YiSang, DonQuixote')
     })
-
-    // Note: This test was testing useTrackerState hook behavior (fallback to planner order).
-    // Since useTrackerState is mocked, the fallback logic is not exercised.
-    // The actual fallback behavior should be tested in useTrackerState.test.ts instead.
-    it.skip('uses planner deployment order when tracker state is empty', () => {
-      mockTrackerState.state.deploymentOrder = []
-      const planner = createMockPlanner(5)
-      render(<TrackerModeViewer planner={planner} />, { wrapper: createWrapper() })
-
-      const deckPanel = screen.getByTestId('deck-tracker-panel')
-      expect(deckPanel.textContent).toContain('YiSang, Faust')
-    })
   })
 
   describe('Unified Floor Data', () => {

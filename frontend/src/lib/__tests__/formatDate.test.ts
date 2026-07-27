@@ -115,7 +115,7 @@ describe('formatPlannerDate', () => {
     it('handles invalid date string by throwing', () => {
       // Invalid dates will cause Intl.DateTimeFormat to throw RangeError
       // This is expected behavior - callers should validate input
-      expect(() => formatPlannerDate('invalid-date')).toThrow()
+      expect(() => formatPlannerDate('invalid-date')).toThrow(RangeError)
     })
   })
 })

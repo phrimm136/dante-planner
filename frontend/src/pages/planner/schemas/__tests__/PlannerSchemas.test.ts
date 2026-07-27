@@ -6,7 +6,7 @@
  * and the two-step validateSaveablePlanner function.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, assert } from 'vitest'
 import { ZodError } from 'zod'
 import {
   MDConfigSchema,
@@ -91,12 +91,9 @@ function createValidSaveablePlanner(configType: 'MIRROR_DUNGEON' | 'REFRACTED_RA
 
 describe('MDConfigSchema', () => {
   it('validates valid MD config', () => {
-    const result = MDConfigSchema.safeParse(validMDConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('MIRROR_DUNGEON')
-      expect(result.data.category).toBe('5F')
-    }
+    const result = MDConfigSchema.parse(validMDConfig)
+    expect(result.type).toBe('MIRROR_DUNGEON')
+    expect(result.category).toBe('5F')
   })
 
   it('validates all MD categories', () => {
@@ -145,12 +142,9 @@ describe('MDConfigSchema', () => {
 
 describe('RRConfigSchema', () => {
   it('validates valid RR config', () => {
-    const result = RRConfigSchema.safeParse(validRRConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('REFRACTED_RAILWAY')
-      expect(result.data.category).toBe('RR_PLACEHOLDER')
-    }
+    const result = RRConfigSchema.parse(validRRConfig)
+    expect(result.type).toBe('REFRACTED_RAILWAY')
+    expect(result.category).toBe('RR_PLACEHOLDER')
   })
 
   it('rejects invalid type', () => {
@@ -178,19 +172,13 @@ describe('RRConfigSchema', () => {
 
 describe('PlannerConfigDiscriminatedSchema', () => {
   it('validates MD config via discriminated union', () => {
-    const result = PlannerConfigDiscriminatedSchema.safeParse(validMDConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('MIRROR_DUNGEON')
-    }
+    const result = PlannerConfigDiscriminatedSchema.parse(validMDConfig)
+    expect(result.type).toBe('MIRROR_DUNGEON')
   })
 
   it('validates RR config via discriminated union', () => {
-    const result = PlannerConfigDiscriminatedSchema.safeParse(validRRConfig)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.type).toBe('REFRACTED_RAILWAY')
-    }
+    const result = PlannerConfigDiscriminatedSchema.parse(validRRConfig)
+    expect(result.type).toBe('REFRACTED_RAILWAY')
   })
 
   it('rejects unknown type', () => {
@@ -239,10 +227,8 @@ describe('validateSaveablePlanner', () => {
       const planner = createValidSaveablePlanner('MIRROR_DUNGEON')
       const result = validateSaveablePlanner(planner, 'draft')
       expect(result.metadata.id).toBe(planner.metadata.id)
-      expect(result.config.type).toBe('MIRROR_DUNGEON')
-      if (result.config.type === 'MIRROR_DUNGEON') {
-        expect(result.config.category).toBe('5F')
-      }
+      assert(result.config.type === 'MIRROR_DUNGEON')
+      expect(result.config.category).toBe('5F')
     })
 
     it('validates valid RR planner in draft mode', () => {
@@ -339,18 +325,14 @@ describe('PlannerSchemas integration', () => {
   it('discriminated union enables type narrowing', () => {
     const mdConfig = PlannerConfigDiscriminatedSchema.parse(validMDConfig)
 
-    // TypeScript should narrow the type based on discriminator
-    if (mdConfig.type === 'MIRROR_DUNGEON') {
-      // Should have access to MD-specific category values
-      expect(['5F', '10F', '15F']).toContain(mdConfig.category)
-    }
+    // Asserting the discriminator both narrows the type and proves the parse chose that arm.
+    assert(mdConfig.type === 'MIRROR_DUNGEON')
+    expect(['5F', '10F', '15F']).toContain(mdConfig.category)
 
     const rrConfig = PlannerConfigDiscriminatedSchema.parse(validRRConfig)
 
-    if (rrConfig.type === 'REFRACTED_RAILWAY') {
-      // Should have access to RR-specific category values
-      expect(rrConfig.category).toBe('RR_PLACEHOLDER')
-    }
+    assert(rrConfig.type === 'REFRACTED_RAILWAY')
+    expect(rrConfig.category).toBe('RR_PLACEHOLDER')
   })
 
   it('full planner roundtrip validation', () => {

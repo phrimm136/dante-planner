@@ -90,9 +90,8 @@ describe('useBattleKeywords', () => {
       // At least the dataset known to ship flavor must survive the merge.
       expect(flavored.length).toBeGreaterThan(0)
 
-      if (entry) {
-        expect(typeof entry.flavor === 'string' || entry.flavor === undefined).toBe(true)
-      }
+      expect(entry).toBeDefined()
+      expect(typeof entry?.flavor === 'string' || entry?.flavor === undefined).toBe(true)
     })
   })
 

@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc"],
+  "plugins": ["eslint", "typescript", "react", "import", "unicorn", "oxc", "vitest"],
   "categories": {
     "correctness": "error"
   },
@@ -68,7 +68,18 @@
     {
       "files": ["**/*.test.{ts,tsx}", "**/__tests__/**"],
       "rules": {
-        "typescript/unbound-method": "off"
+        "typescript/unbound-method": "off",
+        "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "validateFile"] }],
+        "vitest/require-mock-type-parameters": "off"
+      }
+    },
+    {
+      "files": ["src/__tests__/dataIntegrity.test.ts"],
+      "rules": {
+        "vitest/valid-title": "off",
+        "vitest/valid-describe-callback": "off",
+        "vitest/no-conditional-tests": "off",
+        "vitest/expect-expect": "off"
       }
     }
   ]

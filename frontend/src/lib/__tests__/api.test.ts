@@ -156,12 +156,10 @@ describe('ApiClient', () => {
 
       await expect(ApiClient.put('/api/planner/123', { version: 3 })).rejects.toThrow(ConflictError)
 
-      try {
-        await ApiClient.put('/api/planner/123', { version: 3 })
-      } catch (error) {
-        expect(error).toBeInstanceOf(ConflictError)
-        expect((error as ConflictError).serverVersion).toBe(5)
-      }
+      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e) => e)
+
+      expect(error).toBeInstanceOf(ConflictError)
+      expect((error as ConflictError).serverVersion).toBe(5)
     })
 
     it('defaults serverVersion to 1 when response body parsing fails', async () => {
@@ -171,12 +169,10 @@ describe('ApiClient', () => {
         json: vi.fn().mockRejectedValue(new Error('Parse error')),
       })
 
-      try {
-        await ApiClient.put('/api/planner/123', { version: 3 })
-      } catch (error) {
-        expect(error).toBeInstanceOf(ConflictError)
-        expect((error as ConflictError).serverVersion).toBe(1)
-      }
+      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e) => e)
+
+      expect(error).toBeInstanceOf(ConflictError)
+      expect((error as ConflictError).serverVersion).toBe(1)
     })
   })
 
