@@ -2,19 +2,9 @@ package org.danteplanner.backend.user.service;
 
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
-import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
-import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
-import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
-import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
-import org.danteplanner.backend.planner.repository.PlannerContentRepository;
-import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
-import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
-import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
+import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
+import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,53 +40,23 @@ public class UserAccountLifecycleService {
     public static final Long SENTINEL_USER_ID = 0L;
 
     private final UserRepository userRepository;
-    private final PlannerRepository plannerRepository;
-    private final PlannerContentRepository plannerContentRepository;
-    private final PlannerPublicationRepository plannerPublicationRepository;
-    private final PlannerModerationRepository plannerModerationRepository;
-    private final PlannerStatsRepository plannerStatsRepository;
-    private final PlannerCatalogRepository plannerCatalogRepository;
-    private final PlannerEntityFilterRepository plannerEntityFilterRepository;
-    private final PlannerKeywordFilterRepository plannerKeywordFilterRepository;
-    private final PlannerVoteRepository plannerVoteRepository;
-    private final PlannerCommentRepository plannerCommentRepository;
-    private final PlannerCommentVoteRepository plannerCommentVoteRepository;
-    private final PlannerReportRepository plannerReportRepository;
-    private final PlannerCommentReportRepository plannerCommentReportRepository;
+    private final PlannerAccountPurgeService plannerAccountPurgeService;
+    private final CommentAccountPurgeService commentAccountPurgeService;
+    private final ModerationAccountPurgeService moderationAccountPurgeService;
     private final TokenBlacklistService tokenBlacklistService;
     private final int gracePeriodDays;
 
     public UserAccountLifecycleService(
             UserRepository userRepository,
-            PlannerRepository plannerRepository,
-            PlannerContentRepository plannerContentRepository,
-            PlannerPublicationRepository plannerPublicationRepository,
-            PlannerModerationRepository plannerModerationRepository,
-            PlannerStatsRepository plannerStatsRepository,
-            PlannerCatalogRepository plannerCatalogRepository,
-            PlannerEntityFilterRepository plannerEntityFilterRepository,
-            PlannerKeywordFilterRepository plannerKeywordFilterRepository,
-            PlannerVoteRepository plannerVoteRepository,
-            PlannerCommentRepository plannerCommentRepository,
-            PlannerCommentVoteRepository plannerCommentVoteRepository,
-            PlannerReportRepository plannerReportRepository,
-            PlannerCommentReportRepository plannerCommentReportRepository,
+            PlannerAccountPurgeService plannerAccountPurgeService,
+            CommentAccountPurgeService commentAccountPurgeService,
+            ModerationAccountPurgeService moderationAccountPurgeService,
             TokenBlacklistService tokenBlacklistService,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
-        this.plannerRepository = plannerRepository;
-        this.plannerContentRepository = plannerContentRepository;
-        this.plannerPublicationRepository = plannerPublicationRepository;
-        this.plannerModerationRepository = plannerModerationRepository;
-        this.plannerStatsRepository = plannerStatsRepository;
-        this.plannerCatalogRepository = plannerCatalogRepository;
-        this.plannerEntityFilterRepository = plannerEntityFilterRepository;
-        this.plannerKeywordFilterRepository = plannerKeywordFilterRepository;
-        this.plannerVoteRepository = plannerVoteRepository;
-        this.plannerCommentRepository = plannerCommentRepository;
-        this.plannerCommentVoteRepository = plannerCommentVoteRepository;
-        this.plannerReportRepository = plannerReportRepository;
-        this.plannerCommentReportRepository = plannerCommentReportRepository;
+        this.plannerAccountPurgeService = plannerAccountPurgeService;
+        this.commentAccountPurgeService = commentAccountPurgeService;
+        this.moderationAccountPurgeService = moderationAccountPurgeService;
         this.tokenBlacklistService = tokenBlacklistService;
         this.gracePeriodDays = gracePeriodDays;
     }
@@ -165,37 +125,17 @@ public class UserAccountLifecycleService {
     public void performHardDelete(User user) {
         Long userId = user.getId();
 
-        // Drop votes that collide with the sentinel's existing votes on the same target,
-        // then reassign the rest. Reassigning a collision would duplicate the composite PK.
-        // The displayed count lives in the denormalized counter, so it is unaffected.
-        plannerVoteRepository.deleteVotesCollidingWithSentinel(userId, SENTINEL_USER_ID);
-        plannerVoteRepository.reassignUserVotes(userId, SENTINEL_USER_ID);
+        plannerAccountPurgeService.reassignVotesToSentinel(userId, SENTINEL_USER_ID);
+        commentAccountPurgeService.reassignAuthorshipToSentinel(userId, SENTINEL_USER_ID);
 
-        plannerCommentVoteRepository.deleteVotesCollidingWithSentinel(userId, SENTINEL_USER_ID);
-        plannerCommentVoteRepository.reassignUserVotes(userId, SENTINEL_USER_ID);
-
-        // Reassign comments to sentinel user (preserves comment content)
-        plannerCommentRepository.reassignCommentsToSentinel(userId, SENTINEL_USER_ID);
-
-        // Satellite, projection, and filter rows carry no FK to the planner core,
-        // so they are swept app-side by planner id before the user delete cascades
-        // the core rows (and the FK-bearing child tables) away.
-        List<UUID> plannerIds = plannerRepository.findIdsByUserId(userId);
+        List<UUID> plannerIds = plannerAccountPurgeService.plannerIdsOwnedBy(userId);
         if (!plannerIds.isEmpty()) {
-            // Reports carry no-action FKs (to the core and to comments) and would
-            // block the cascade the user delete relies on
-            plannerCommentReportRepository.deleteAllByPlannerIds(plannerIds);
-            plannerReportRepository.deleteAllByPlannerIds(plannerIds);
-            plannerEntityFilterRepository.deleteAllByPlannerIds(plannerIds);
-            plannerKeywordFilterRepository.deleteAllByPlannerIds(plannerIds);
-            plannerCatalogRepository.deleteAllByPlannerIds(plannerIds);
-            plannerStatsRepository.deleteAllByPlannerIds(plannerIds);
-            plannerModerationRepository.deleteAllByPlannerIds(plannerIds);
-            plannerPublicationRepository.deleteAllByPlannerIds(plannerIds);
-            plannerContentRepository.deleteAllByPlannerIds(plannerIds);
+            // Reports first: their no-action FKs would block the cascade the user delete relies on.
+            moderationAccountPurgeService.deleteReportsFor(plannerIds);
+            plannerAccountPurgeService.deleteProjectionsFor(plannerIds);
         }
 
-        // Now delete user (CASCADE will delete their planner cores and FK children)
+        // The user row's CASCADE removes the planner cores and their FK-bearing children.
         userRepository.delete(user);
     }
 }

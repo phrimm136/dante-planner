@@ -5,8 +5,11 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+
 /**
- * Single writer for the moderation audit trail.
+ * The moderation audit trail: single writer, and the restriction reasons read back off it.
  *
  * <p>Deliberately synchronous and inside the caller's transaction: an action that commits without
  * its record is the failure this exists to prevent, so an after-commit listener would be the wrong
@@ -39,5 +42,38 @@ public class ModerationAuditService {
                 .reason(reason)
                 .durationMinutes(durationMinutes)
                 .build());
+    }
+
+    /**
+     * The reason recorded for the ban an account currently carries.
+     *
+     * @param targetPublicId the account's public id
+     * @return the newest ban reason, or empty if the trail holds none
+     */
+    public Optional<String> latestBanReason(UUID targetPublicId) {
+        return latestReason(targetPublicId, ModerationAction.ActionType.BAN);
+    }
+
+    /**
+     * The reason recorded for the timeout an account currently carries.
+     *
+     * @param targetPublicId the account's public id
+     * @return the newest timeout reason, or empty if the trail holds none
+     */
+    public Optional<String> latestTimeoutReason(UUID targetPublicId) {
+        return latestReason(targetPublicId, ModerationAction.ActionType.TIMEOUT);
+    }
+
+    /**
+     * Unannotated like {@link #record}: a caller rendering an account it just restricted would read
+     * a replica under readOnly routing and miss the record its own transaction wrote.
+     *
+     * <p>Returns the reason rather than the record so a caller outside moderation never takes on
+     * {@link ModerationAction}'s shape.</p>
+     */
+    private Optional<String> latestReason(UUID targetPublicId, ModerationAction.ActionType type) {
+        return moderationActionRepository
+                .findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(targetPublicId.toString(), type)
+                .map(ModerationAction::getReason);
     }
 }

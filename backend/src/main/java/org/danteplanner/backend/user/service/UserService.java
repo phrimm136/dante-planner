@@ -1,14 +1,14 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
-import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
     private final EpithetConfig epithetConfig;
-    private final ModerationActionRepository moderationActionRepository;
+    private final ModerationAuditService moderationAuditService;
     private final UserSettingsService userSettingsService;
     private final TransactionTemplate transactionTemplate;
 
@@ -115,26 +115,18 @@ public class UserService {
                 .usernameSuffix(user.getUsernameSuffix())
                 .role(user.getRole().name());
 
-        // Add ban status if user is banned
         if (user.isBanned()) {
             builder.isBanned(true)
                     .bannedAt(user.getBannedAt());
-
-            // Fetch ban reason from audit trail
-            moderationActionRepository.findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(
-                            user.getPublicId().toString(), ModerationAction.ActionType.BAN)
-                    .ifPresent(action -> builder.banReason(action.getReason()));
+            moderationAuditService.latestBanReason(user.getPublicId())
+                    .ifPresent(builder::banReason);
         }
 
-        // Add timeout status if user is timed out
         if (user.isTimedOut()) {
             builder.isTimedOut(true)
                     .timeoutUntil(user.getTimeoutUntil());
-
-            // Fetch timeout reason from audit trail
-            moderationActionRepository.findFirstByTargetUuidAndActionTypeOrderByCreatedAtDesc(
-                            user.getPublicId().toString(), ModerationAction.ActionType.TIMEOUT)
-                    .ifPresent(action -> builder.timeoutReason(action.getReason()));
+            moderationAuditService.latestTimeoutReason(user.getPublicId())
+                    .ifPresent(builder::timeoutReason);
         }
 
         return builder.build();
@@ -219,13 +211,13 @@ public class UserService {
      * @param userId  the user ID
      * @param epithet the new epithet (must be a valid epithet)
      * @return the updated user
-     * @throws IllegalArgumentException if epithet is not valid
+     * @throws InvalidRequestException if epithet is not valid
      * @throws UserNotFoundException    if user not found
      */
     @Transactional
     public User updateUsernameEpithet(Long userId, String epithet) {
         if (!epithetConfig.isValidEpithet(epithet)) {
-            throw new IllegalArgumentException("Invalid epithet: " + epithet);
+            throw new InvalidRequestException("INVALID_EPITHET", "Invalid epithet: " + epithet);
         }
 
         User user = userRepository.findById(userId)

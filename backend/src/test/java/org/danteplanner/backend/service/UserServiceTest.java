@@ -40,7 +40,7 @@ class UserServiceTest {
     private EpithetConfig epithetConfig;
 
     @Mock
-    private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
+    private org.danteplanner.backend.moderation.service.ModerationAuditService moderationAuditService;
 
     @Mock
     private UserSettingsService userSettingsService;
@@ -55,7 +55,7 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userService = new UserService(userRepository, usernameGenerator, epithetConfig,
-                moderationActionRepository, userSettingsService, transactionTemplate);
+                moderationAuditService, userSettingsService, transactionTemplate);
 
         testUser = User.builder()
                 .id(123L)
@@ -88,7 +88,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return empty for deleted user")
-        void findActiveById_deletedUser_returnsEmpty() {
+        void findActiveById_WhenDeletedUser_ReturnsEmpty() {
             // Arrange - user is deleted, repository returns empty
             when(userRepository.findByIdAndDeletedAtIsNull(testUser.getId()))
                     .thenReturn(Optional.empty());
@@ -102,7 +102,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return empty for non-existent user")
-        void findActiveById_nonExistentUser_returnsEmpty() {
+        void findActiveById_WhenNonExistentUser_ReturnsEmpty() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))
@@ -122,7 +122,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should return user when found")
-        void findById_found_returnsUser() {
+        void findById_WhenFound_ReturnsUser() {
             // Arrange
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
 
@@ -135,7 +135,7 @@ class UserServiceTest {
 
         @Test
         @DisplayName("Should throw UserNotFoundException when not found")
-        void findById_notFound_throwsException() {
+        void findById_WhenNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findById(nonExistentId)).thenReturn(Optional.empty());
