@@ -11,103 +11,103 @@ import static org.junit.jupiter.api.Assertions.*;
 class HtmlSanitizerTest {
 
     @Test
-    void sanitize_scriptTag_removesTag() {
+    void sanitize_WhenScriptTag_RemovesTag() {
         String input = "<script>alert('xss')</script>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_scriptTagWithText_removesTagKeepsText() {
+    void sanitize_WhenScriptTagWithText_RemovesTagKeepsText() {
         String input = "Hello <script>alert('xss')</script> World";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("Hello World", result);
     }
 
     @Test
-    void sanitize_htmlTags_removesTags() {
+    void sanitize_WhenHtmlTags_RemovesTags() {
         String input = "Hello <b>bold</b> and <i>italic</i>!";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("Hello bold and italic!", result);
     }
 
     @Test
-    void sanitize_imgTag_removesTag() {
+    void sanitize_WhenImgTag_RemovesTag() {
         String input = "<img src=x onerror=alert('xss')>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_iframeTag_removesTag() {
+    void sanitize_WhenIframeTag_RemovesTag() {
         String input = "<iframe src='javascript:alert(1)'></iframe>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_onEventAttributes_removesAttributes() {
+    void sanitize_WhenEventAttributes_RemovesAttributes() {
         String input = "<div onclick='alert(1)'>Click me</div>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("Click me", result);
     }
 
     @Test
-    void sanitize_styleTag_removesTag() {
+    void sanitize_WhenStyleTag_RemovesTag() {
         String input = "<style>body{background:red}</style>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_plainText_unchanged() {
+    void sanitize_WhenPlainText_Unchanged() {
         String input = "Plain text without HTML";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals(input, result);
     }
 
     @Test
-    void sanitize_null_returnsNull() {
+    void sanitize_WhenNull_ReturnsNull() {
         String result = HtmlSanitizer.sanitize(null);
         assertNull(result);
     }
 
     @Test
-    void sanitize_emptyString_returnsEmpty() {
+    void sanitize_WhenEmptyString_ReturnsEmpty() {
         String result = HtmlSanitizer.sanitize("");
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_blankString_returnsBlank() {
+    void sanitize_WhenBlankString_ReturnsBlank() {
         String input = "   ";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals(input, result);
     }
 
     @Test
-    void sanitize_svgXss_removesTag() {
+    void sanitize_WhenSvgXss_RemovesTag() {
         String input = "<svg onload=alert(1)>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_objectTag_removesTag() {
+    void sanitize_WhenObjectTag_RemovesTag() {
         String input = "<object data='javascript:alert(1)'>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_embedTag_removesTag() {
+    void sanitize_WhenEmbedTag_RemovesTag() {
         String input = "<embed src='javascript:alert(1)'>";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals("", result);
     }
 
     @Test
-    void sanitize_htmlEntities_preservesAsText() {
+    void sanitize_WhenHtmlEntities_PreservesAsText() {
         String input = "&lt;script&gt;alert(1)&lt;/script&gt;";
         String result = HtmlSanitizer.sanitize(input);
         // HTML entities are already safe text, Jsoup preserves them
@@ -116,7 +116,7 @@ class HtmlSanitizerTest {
     }
 
     @Test
-    void sanitize_unicodeCharacters_preserved() {
+    void sanitize_WhenUnicodeCharacters_Preserved() {
         String input = "Hello 世界 🌍";
         String result = HtmlSanitizer.sanitize(input);
         assertEquals(input, result);

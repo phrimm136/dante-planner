@@ -38,7 +38,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should return X-Forwarded-For IP when request is from trusted proxy")
-        void resolve_trustedProxy_returnsForwardedIp() {
+        void resolve_WhenTrustedProxy_ReturnsForwardedIp() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, CLIENT_IP);
@@ -52,7 +52,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should parse first IP from comma-separated X-Forwarded-For")
-        void resolve_trustedProxy_multipleIps_returnsFirstIp() {
+        void resolve_WhenTrustedProxy_MultipleIps_ReturnsFirstIp() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             String multipleIps = CLIENT_IP + ", " + OTHER_CLIENT_IP + ", " + TRUSTED_PROXY_IP;
@@ -67,7 +67,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should trim whitespace from X-Forwarded-For IP")
-        void resolve_trustedProxy_trimWhitespace() {
+        void resolve_WhenTrustedProxy_TrimWhitespace() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, "  " + CLIENT_IP + "  ");
@@ -86,7 +86,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should verify that when a request coomes from an untrusted IP, the X-Forwarded-For header is completely ignored")
-        void resolve_untrusted_ip_ignore_XForwarededFor() {
+        void resolve_WhenUntrusted_Ip_Ignore_XForwarededFor() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(UNTRUSTED_IP, "fake-client-ip");
@@ -100,7 +100,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should fallback to remoteAddr when no X-Forwarded-For header")
-        void resolve_noHeader_returnsRemoteAddr() {
+        void resolve_WhenNoHeader_ReturnsRemoteAddr() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(CLIENT_IP, null);
@@ -114,7 +114,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should fallback to remoteAddr when X-Forwarded-For is blank")
-        void resolve_blankHeader_returnsRemoteAddr() {
+        void resolve_WhenBlankHeader_ReturnsRemoteAddr() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(CLIENT_IP, "   ");
@@ -133,7 +133,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should handle empty trusted proxy set")
-        void resolve_emptyTrustedProxies_alwaysReturnsRemoteAddr() {
+        void resolve_WhenEmptyTrustedProxies_AlwaysReturnsRemoteAddr() {
             // Arrange
             Set<String> trustedProxies = Collections.emptySet();
             HttpServletRequest request = mockRequest(CLIENT_IP, "spoofed-ip");
@@ -147,7 +147,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should handle single IP in X-Forwarded-For (no comma)")
-        void resolve_singleIpInHeader_returnsThatIp() {
+        void resolve_WhenSingleIpInHeader_ReturnsThatIp() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, CLIENT_IP);
@@ -166,7 +166,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should reject malicious script in X-Forwarded-For")
-        void resolve_maliciousScript_fallsBackToDirectIp() {
+        void resolve_WhenMaliciousScript_FallsBackToDirectIp() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, "<script>alert(1)</script>");
@@ -180,7 +180,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should reject javascript: protocol in X-Forwarded-For")
-        void resolve_javascriptProtocol_fallsBackToDirectIp() {
+        void resolve_WhenJavascriptProtocol_FallsBackToDirectIp() {
             // Arrange
             Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
             HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, "javascript:alert(1)");
@@ -194,7 +194,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should accept valid IPv4 address")
-        void isValidIp_validIpv4_returnsTrue() {
+        void isValidIp_WhenValidIpv4_ReturnsTrue() {
             assertTrue(ClientIpResolver.isValidIp("192.168.1.100"));
             assertTrue(ClientIpResolver.isValidIp("10.0.0.1"));
             assertTrue(ClientIpResolver.isValidIp("255.255.255.255"));
@@ -203,7 +203,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should accept valid IPv6 address")
-        void isValidIp_validIpv6_returnsTrue() {
+        void isValidIp_WhenValidIpv6_ReturnsTrue() {
             assertTrue(ClientIpResolver.isValidIp("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
             assertTrue(ClientIpResolver.isValidIp("::1"));
             assertTrue(ClientIpResolver.isValidIp("::"));
@@ -211,7 +211,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should reject invalid IP formats")
-        void isValidIp_invalidFormats_returnsFalse() {
+        void isValidIp_WhenInvalidFormats_ReturnsFalse() {
             assertFalse(ClientIpResolver.isValidIp("not-an-ip"));
             assertFalse(ClientIpResolver.isValidIp("192.168.1"));
             assertFalse(ClientIpResolver.isValidIp("192.168.1.256"));
@@ -227,7 +227,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should detect 10.x.x.x as private")
-        void isPrivateIp_10Network_ReturnsTrue() {
+        void isPrivateIp_When10Network_ReturnsTrue() {
             assertTrue(ClientIpResolver.isPrivateIp("10.0.0.1"));
             assertTrue(ClientIpResolver.isPrivateIp("10.255.255.255"));
             assertTrue(ClientIpResolver.isPrivateIp("10.123.45.67"));
@@ -235,7 +235,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should detect 172.16-31.x.x as private")
-        void isPrivateIp_172Network_ReturnsTrue() {
+        void isPrivateIp_When172Network_ReturnsTrue() {
             assertTrue(ClientIpResolver.isPrivateIp("172.16.0.0"));
             assertTrue(ClientIpResolver.isPrivateIp("172.18.0.2"));
             assertTrue(ClientIpResolver.isPrivateIp("172.31.255.255"));
@@ -244,7 +244,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should detect 192.168.x.x as private")
-        void isPrivateIp_192Network_ReturnsTrue() {
+        void isPrivateIp_When192Network_ReturnsTrue() {
             assertTrue(ClientIpResolver.isPrivateIp("192.168.0.1"));
             assertTrue(ClientIpResolver.isPrivateIp("192.168.1.100"));
             assertTrue(ClientIpResolver.isPrivateIp("192.168.255.255"));
@@ -252,35 +252,35 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should detect 127.x.x.x as private (loopback)")
-        void isPrivateIp_Loopback_ReturnsTrue() {
+        void isPrivateIp_WhenLoopback_ReturnsTrue() {
             assertTrue(ClientIpResolver.isPrivateIp("127.0.0.1"));
             assertTrue(ClientIpResolver.isPrivateIp("127.255.255.255"));
         }
 
         @Test
         @DisplayName("Should detect IPv6 localhost as private")
-        void isPrivateIp_IPv6Localhost_ReturnsTrue() {
+        void isPrivateIp_WhenIPv6Localhost_ReturnsTrue() {
             assertTrue(ClientIpResolver.isPrivateIp("::1"));
             assertTrue(ClientIpResolver.isPrivateIp("::"));
         }
 
         @Test
         @DisplayName("Should reject 172.15.x.x as public (below range)")
-        void isPrivateIp_172BelowRange_ReturnsFalse() {
+        void isPrivateIp_When172BelowRange_ReturnsFalse() {
             assertFalse(ClientIpResolver.isPrivateIp("172.15.255.255"));
             assertFalse(ClientIpResolver.isPrivateIp("172.0.0.1"));
         }
 
         @Test
         @DisplayName("Should reject 172.32.x.x as public (above range)")
-        void isPrivateIp_172AboveRange_ReturnsFalse() {
+        void isPrivateIp_When172AboveRange_ReturnsFalse() {
             assertFalse(ClientIpResolver.isPrivateIp("172.32.0.0"));
             assertFalse(ClientIpResolver.isPrivateIp("172.255.255.255"));
         }
 
         @Test
         @DisplayName("Should reject public IPs")
-        void isPrivateIp_PublicIps_ReturnsFalse() {
+        void isPrivateIp_WhenPublicIps_ReturnsFalse() {
             assertFalse(ClientIpResolver.isPrivateIp("8.8.8.8"));
             assertFalse(ClientIpResolver.isPrivateIp("203.0.113.1"));
             assertFalse(ClientIpResolver.isPrivateIp("1.1.1.1"));
@@ -288,7 +288,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should handle null and invalid IPs")
-        void isPrivateIp_InvalidIps_ReturnsFalse() {
+        void isPrivateIp_WhenInvalidIps_ReturnsFalse() {
             assertFalse(ClientIpResolver.isPrivateIp(null));
             assertFalse(ClientIpResolver.isPrivateIp("not-an-ip"));
             assertFalse(ClientIpResolver.isPrivateIp(""));
@@ -303,7 +303,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should return ip:xxx for public IP")
-        void resolveClientIdentifier_PublicIp_ReturnsIpFormat() {
+        void resolveClientIdentifier_WhenPublicIp_ReturnsIpFormat() {
             HttpServletRequest request = mockRequest("203.0.113.50", null);
             Set<String> trustedProxies = Collections.emptySet();
 
@@ -314,7 +314,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should return device:xxx for private IP")
-        void resolveClientIdentifier_PrivateIp_ReturnsDeviceFormat() {
+        void resolveClientIdentifier_WhenPrivateIp_ReturnsDeviceFormat() {
             HttpServletRequest request = mockRequest("172.18.0.2", null);
             Set<String> trustedProxies = Collections.emptySet();
 
@@ -325,7 +325,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should use CF-Connecting-IP when the peer is a trusted proxy")
-        void resolveClientIdentifier_CfHeaderFromTrustedProxy_UsesCfIp() {
+        void resolveClientIdentifier_WhenCfHeaderFromTrustedProxy_UsesCfIp() {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getRemoteAddr()).thenReturn("172.18.0.2");
             when(request.getHeader("CF-Connecting-IP")).thenReturn("203.0.113.100");
@@ -340,7 +340,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should ignore CF-Connecting-IP from an untrusted peer")
-        void resolveClientIdentifier_CfHeaderFromUntrustedPeer_IsIgnored() {
+        void resolveClientIdentifier_WhenCfHeaderFromUntrustedPeer_IsIgnored() {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getRemoteAddr()).thenReturn("172.18.0.2");
             when(request.getHeader("CF-Connecting-IP")).thenReturn("203.0.113.100");
@@ -356,7 +356,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should fall back to X-Forwarded-For if CF header invalid")
-        void resolveClientIdentifier_InvalidCfHeader_FallsBackToXff() {
+        void resolveClientIdentifier_WhenInvalidCfHeader_FallsBackToXff() {
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getRemoteAddr()).thenReturn("10.0.0.1");
             when(request.getHeader("CF-Connecting-IP")).thenReturn("invalid-ip");
@@ -371,7 +371,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should handle Docker NAT scenario (172.18.0.x)")
-        void resolveClientIdentifier_DockerNat_ReturnsDeviceId() {
+        void resolveClientIdentifier_WhenDockerNat_ReturnsDeviceId() {
             HttpServletRequest request = mockRequest("172.18.0.2", null);
             Set<String> trustedProxies = Collections.emptySet();
 
@@ -382,7 +382,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should return device:unknown if device ID is null")
-        void resolveClientIdentifier_NullDeviceId_ReturnsUnknown() {
+        void resolveClientIdentifier_WhenNullDeviceId_ReturnsUnknown() {
             HttpServletRequest request = mockRequest("10.0.0.1", null);
             Set<String> trustedProxies = Collections.emptySet();
 
@@ -393,7 +393,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should handle trusted proxy with public X-Forwarded-For")
-        void resolveClientIdentifier_TrustedProxyPublicIp_ReturnsIpFormat() {
+        void resolveClientIdentifier_WhenTrustedProxyPublicIp_ReturnsIpFormat() {
             HttpServletRequest request = mockRequest("172.18.0.2", "203.0.113.200");
             Set<String> trustedProxies = Set.of("172.18.0.2");
 
@@ -404,7 +404,7 @@ class ClientIpResolverTest {
 
         @Test
         @DisplayName("Should handle trusted proxy with private X-Forwarded-For")
-        void resolveClientIdentifier_TrustedProxyPrivateIp_ReturnsDeviceFormat() {
+        void resolveClientIdentifier_WhenTrustedProxyPrivateIp_ReturnsDeviceFormat() {
             HttpServletRequest request = mockRequest("127.0.0.1", "192.168.1.50");
             Set<String> trustedProxies = Set.of("127.0.0.1");
 

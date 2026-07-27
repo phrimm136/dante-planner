@@ -35,7 +35,7 @@ class RedisEndpointIsolationTest {
 
     @Test
     @DisplayName("every configured Redis endpoint resolves to the refused port, not the machine's Redis")
-    void every_redis_endpoint_is_isolated_from_the_developer_machine() {
+    void redisEndpoint_WhenConfigured_IsIsolatedFromDeveloperMachine() {
         assertThat(connectionFactories)
                 .as("the axis is derived from the context; an empty map would pass vacuously")
                 .isNotEmpty();

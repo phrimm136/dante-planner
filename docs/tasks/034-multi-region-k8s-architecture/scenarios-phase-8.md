@@ -10,7 +10,7 @@ cookie ONLY — never a server-side/Redis store (mechanics §0 FORBIDDEN). The 0
 not a correctness window (a longer lag simply keeps routing to primary).
 
 ## Acceptance
-- Test: CausalGateIT::causalGate_authorWriteSetsGtidCookie_readYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp
+- Test: CausalGateIT::causalGate_WhenAuthorWriteSetsGtidCookie_ReadYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp
   — opened RED 2026-07-11 (assertion: "a Set-Cookie carrying the transaction GTID ... among []";
   write returned 2xx, no gate cookie — not vacuous). Closed GREEN at scenario 3.
 

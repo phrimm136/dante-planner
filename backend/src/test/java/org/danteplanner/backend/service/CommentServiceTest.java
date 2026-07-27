@@ -142,7 +142,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Creates top-level comment successfully")
-        void createComment_topLevel_succeeds() {
+        void createComment_WhenTopLevel_Succeeds() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
@@ -176,7 +176,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Creates reply comment successfully")
-        void createComment_reply_succeeds() {
+        void createComment_WhenReply_Succeeds() {
             // Arrange
             UUID parentPublicId = UUID.randomUUID();
             PlannerComment parentComment = new PlannerComment(plannerId, otherUser.getId(), "Parent", null, 0);
@@ -218,7 +218,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Throws PlannerNotFoundException for non-existent planner")
-        void createComment_plannerNotFound_throwsException() {
+        void createComment_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -233,7 +233,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Throws CommentNotFoundException for non-existent parent")
-        void createComment_parentNotFound_throwsException() {
+        void createComment_WhenParentNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
@@ -251,7 +251,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Allows nesting below MAX_DEPTH without flattening")
-        void createComment_deepNesting_allowedWithoutFlattening() {
+        void createComment_WhenDeepNesting_AllowedWithoutFlattening() {
             // Arrange
             // depth 5 sits well below MAX_DEPTH (127), so no flattening occurs
             UUID parentPublicId = UUID.randomUUID();
@@ -300,7 +300,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Author can edit their comment")
-        void updateComment_byAuthor_succeeds() {
+        void updateComment_WhenByAuthor_Succeeds() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "Original", null, 0);
@@ -323,7 +323,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Non-author cannot edit comment")
-        void updateComment_byNonAuthor_throwsException() {
+        void updateComment_WhenByNonAuthor_ThrowsException() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "Original", null, 0);
@@ -340,7 +340,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Cannot edit deleted comment")
-        void updateComment_deletedComment_throwsException() {
+        void updateComment_WhenDeletedComment_ThrowsException() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "Original", null, 0);
@@ -363,7 +363,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Author can delete their comment")
-        void deleteComment_byAuthor_succeeds() {
+        void deleteComment_WhenByAuthor_Succeeds() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "To delete", null, 0);
@@ -384,7 +384,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Non-author cannot delete comment")
-        void deleteComment_byNonAuthor_throwsException() {
+        void deleteComment_WhenByNonAuthor_ThrowsException() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), "Protected", null, 0);
@@ -401,7 +401,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Deleting already deleted comment is idempotent")
-        void deleteComment_alreadyDeleted_idempotent() {
+        void deleteComment_WhenAlreadyDeleted_Idempotent() {
             // Arrange
             UUID commentPublicId = UUID.randomUUID();
             PlannerComment comment = new PlannerComment(plannerId, testUser.getId(), null, null, 0);
@@ -425,7 +425,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Returns empty list for planner with no comments")
-        void getCommentTree_noComments_returnsEmptyList() {
+        void getCommentTree_WhenNoComments_ReturnsEmptyList() {
             // Arrange
             when(plannerRepository.findAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
@@ -441,7 +441,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Throws PlannerNotFoundException for non-existent planner")
-        void getCommentTree_plannerNotFound_throwsException() {
+        void getCommentTree_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             when(plannerRepository.findAggregate(plannerId))
                     .thenReturn(Optional.empty());
@@ -458,7 +458,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Timed-out user cannot create comment")
-        void createComment_timedOutUser_throwsUserTimedOutException() {
+        void createComment_WhenTimedOutUser_ThrowsUserTimedOutException() {
             // Arrange
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
             testUser.setTimeoutUntil(futureTimeout);
@@ -479,7 +479,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Banned user cannot create comment")
-        void createComment_bannedUser_throwsUserBannedException() {
+        void createComment_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
@@ -500,7 +500,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Timed-out user may still vote on a comment")
-        void toggleUpvote_timedOutUser_isNotRestricted() {
+        void toggleUpvote_WhenTimedOutUser_IsNotRestricted() {
             // Arrange
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
             testUser.setTimeoutUntil(futureTimeout);
@@ -519,7 +519,7 @@ class CommentServiceTest {
 
         @Test
         @DisplayName("Banned user cannot vote on comment")
-        void toggleUpvote_bannedUser_throwsUserBannedException() {
+        void toggleUpvote_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);

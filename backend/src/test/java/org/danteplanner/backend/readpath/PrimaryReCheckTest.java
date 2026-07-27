@@ -77,7 +77,7 @@ class PrimaryReCheckTest {
 
         @Test
         @DisplayName("is returned unpinned when no tombstone covers it")
-        void live_entity_is_served_from_the_replica() {
+        void liveEntity_WhenReadFromReplica_IsServed() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(false);
 
             String result = reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner");
@@ -89,7 +89,7 @@ class PrimaryReCheckTest {
 
         @Test
         @DisplayName("is masked as absent when a tombstone covers it")
-        void deleted_entity_is_masked_on_replica_hit() {
+        void deletedEntity_WhenReplicaHits_IsMasked() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(true);
 
             assertThrows(EntityNotFoundException.class,
@@ -103,7 +103,7 @@ class PrimaryReCheckTest {
          */
         @Test
         @DisplayName("is served when the tombstone store cannot answer")
-        void tombstone_store_failing_open_serves_the_row() {
+        void tombstoneStore_WhenFailingOpen_ServesTheRow() {
             when(tombstoneStore.isTombstoned(ENTITY_TYPE, id)).thenReturn(false);
 
             assertEquals("planner", reCheck.readWithReCheck(ENTITY_TYPE, id, () -> "planner"));
@@ -116,7 +116,7 @@ class PrimaryReCheckTest {
 
         @Test
         @DisplayName("re-runs the dereference pinned to the bulkhead pool")
-        void miss_is_rechecked_through_the_bulkhead() {
+        void miss_WhenReplicaMisses_IsRecheckedThroughBulkhead() {
             AtomicInteger attempts = new AtomicInteger();
             Supplier<String> dereference = () -> {
                 if (attempts.getAndIncrement() == 0) {
@@ -134,7 +134,7 @@ class PrimaryReCheckTest {
 
         @Test
         @DisplayName("clears the pin once the re-check succeeds")
-        void pin_is_released_after_a_successful_recheck() {
+        void pin_WhenRecheckSucceeds_IsReleased() {
             AtomicInteger attempts = new AtomicInteger();
             reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
                 if (attempts.getAndIncrement() == 0) {
@@ -149,7 +149,7 @@ class PrimaryReCheckTest {
 
         @Test
         @DisplayName("clears the pin when the primary misses too")
-        void pin_is_released_when_the_recheck_also_misses() {
+        void pin_WhenRecheckAlsoMisses_IsReleased() {
             assertThrows(EntityNotFoundException.class, () -> reCheck.readWithReCheck(
                     ENTITY_TYPE, id, () -> {
                         throw new EntityNotFoundException(ENTITY_TYPE, id);
@@ -160,7 +160,7 @@ class PrimaryReCheckTest {
 
         @Test
         @DisplayName("does not consult the tombstone gate on the promoted path")
-        void promoted_read_skips_the_tombstone_gate() {
+        void promotedRead_WhenPromoted_SkipsTombstoneGate() {
             AtomicInteger attempts = new AtomicInteger();
             reCheck.readWithReCheck(ENTITY_TYPE, id, () -> {
                 if (attempts.getAndIncrement() == 0) {

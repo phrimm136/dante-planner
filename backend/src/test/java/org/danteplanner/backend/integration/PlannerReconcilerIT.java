@@ -1,8 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;

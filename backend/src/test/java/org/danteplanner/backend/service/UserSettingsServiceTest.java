@@ -69,7 +69,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should return existing settings when found")
-        void getSettings_existingSettings_returnsSettings() {
+        void getSettings_WhenExistingSettings_ReturnsSettings() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -86,7 +86,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should return default settings without persisting for a missing row")
-        void getSettings_newUser_returnsDefaultsWithoutPersisting() {
+        void getSettings_WhenNewUser_ReturnsDefaultsWithoutPersisting() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.empty());
@@ -104,7 +104,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should return default settings for a user with no settings row")
-        void getSettings_nonExistentUser_returnsDefaults() {
+        void getSettings_WhenNonExistentUser_ReturnsDefaults() {
             // Arrange
             Long nonExistentId = 999L;
             when(userSettingsRepository.findByUserId(nonExistentId))
@@ -127,7 +127,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should update only syncEnabled when only syncEnabled provided")
-        void updateSettings_onlySyncEnabled_updatesOnlySyncEnabled() {
+        void updateSettings_WhenOnlySyncEnabled_UpdatesOnlySyncEnabled() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -152,7 +152,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should update only notification settings when sync not provided")
-        void updateSettings_onlyNotifications_updatesOnlyNotifications() {
+        void updateSettings_WhenOnlyNotifications_UpdatesOnlyNotifications() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -178,7 +178,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should not modify any field when all nulls provided")
-        void updateSettings_allNulls_noChanges() {
+        void updateSettings_WhenAllNulls_NoChanges() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -206,7 +206,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should reuse existing entity")
-        void getOrCreateEntity_existing_reusesEntity() {
+        void getOrCreateEntity_WhenExisting_ReusesEntity() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
@@ -222,7 +222,7 @@ class UserSettingsServiceTest {
 
         @Test
         @DisplayName("Should create new entity when not found")
-        void getOrCreateEntity_notFound_createsNew() {
+        void getOrCreateEntity_WhenNotFound_CreatesNew() {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.empty());

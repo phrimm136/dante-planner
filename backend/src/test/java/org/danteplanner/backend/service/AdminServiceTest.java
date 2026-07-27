@@ -91,7 +91,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Admin can promote normal user to moderator")
-        void changeRole_adminPromotesToModerator_succeeds() {
+        void changeRole_WhenAdminPromotesToModerator_Succeeds() {
             // Arrange - use locking query method
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -109,7 +109,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Admin can demote moderator to normal - tokens invalidated")
-        void changeRole_adminDemotesModerator_invalidatesTokens() {
+        void changeRole_WhenAdminDemotesModerator_InvalidatesTokens() {
             // Arrange - use locking query method
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -127,7 +127,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Cannot grant role higher than own")
-        void changeRole_moderatorGrantsAdmin_throwsException() {
+        void changeRole_WhenModeratorGrantsAdmin_ThrowsException() {
             // Arrange - moderator tries to grant ADMIN (use locking query method)
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -145,7 +145,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Cannot modify user of equal rank")
-        void changeRole_moderatorModifiesModerator_throwsException() {
+        void changeRole_WhenModeratorModifiesModerator_ThrowsException() {
             // Arrange - create another moderator
             User otherModerator = User.builder()
                     .id(4L)
@@ -175,7 +175,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Cannot modify user of higher rank")
-        void changeRole_moderatorModifiesAdmin_throwsException() {
+        void changeRole_WhenModeratorModifiesAdmin_ThrowsException() {
             // Arrange - moderator tries to modify admin (use locking query method)
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -193,7 +193,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Cannot demote last admin")
-        void changeRole_demoteLastAdmin_throwsException() {
+        void changeRole_WhenDemoteLastAdmin_ThrowsException() {
             // Arrange - use locking query method
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -241,7 +241,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Throws UserNotFoundException for non-existent actor")
-        void changeRole_nonExistentActor_throwsUserNotFoundException() {
+        void changeRole_WhenNonExistentActor_ThrowsUserNotFoundException() {
             // Arrange - use locking query method
             Long nonExistentId = 999L;
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(nonExistentId))
@@ -256,7 +256,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Throws UserNotFoundException for non-existent target")
-        void changeRole_nonExistentTarget_throwsUserNotFoundException() {
+        void changeRole_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange - use locking query method
             Long nonExistentId = 999L;
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
@@ -273,7 +273,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Admin can self-demote when multiple admins exist")
-        void changeRole_adminSelfDemotion_succeeds() {
+        void changeRole_WhenAdminSelfDemotion_Succeeds() {
             // Arrange - use locking query method
             when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -312,7 +312,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Should return user role when user exists")
-        void getUserRole_userExists_returnsRole() {
+        void getUserRole_WhenUserExists_ReturnsRole() {
             // Arrange
             when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -326,7 +326,7 @@ class AdminServiceTest {
 
         @Test
         @DisplayName("Should throw UserNotFoundException when user not found")
-        void getUserRole_userNotFound_throwsException() {
+        void getUserRole_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))

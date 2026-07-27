@@ -44,7 +44,7 @@ class PublicPlannerResponseTest {
 
         @Test
         @DisplayName("Should handle null email while returning username components")
-        void fromCatalog_NullEmail_ReturnsUsernameComponents() {
+        void fromCatalog_WhenNullEmail_ReturnsUsernameComponents() {
             User user = createTestUser(null);
             PlannerCatalog row = createCatalogRow();
             PublicPlannerResponse response = fromCatalog(row, user);
@@ -78,7 +78,7 @@ class PublicPlannerResponseTest {
 
         @Test
         @DisplayName("setCommentCount with zero is valid")
-        void setCommentCount_Zero_IsValid() {
+        void setCommentCount_WhenZero_IsValid() {
             User user = createTestUser("test@example.com");
             PlannerCatalog row = createCatalogRow();
             PublicPlannerResponse response = fromCatalog(row, user)

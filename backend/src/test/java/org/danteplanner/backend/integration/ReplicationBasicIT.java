@@ -42,7 +42,7 @@ class ReplicationBasicIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("A row written to the primary is visible on the replica after awaitCaughtUp")
-    void basicReplication_writeOnPrimary_visibleOnReplicaAfterCaughtUp() {
+    void basicReplication_WhenWriteOnPrimary_VisibleOnReplicaAfterCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS replication_basic_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO replication_basic_probe (id) VALUES (1)");
 

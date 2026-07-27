@@ -120,7 +120,7 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
 
     @TestFactory
     @DisplayName("a ban blocks publishing and commenting, and nothing else")
-    Stream<DynamicTest> ban_withdraws_distribution_only() {
+    Stream<DynamicTest> ban_WhenApplied_WithdrawsDistributionOnly() {
         return mutatingApiEndpoints().map(endpoint -> {
             String key = endpoint.method() + " " + endpoint.pattern();
             return DynamicTest.dynamicTest(key, () -> {

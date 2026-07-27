@@ -51,7 +51,7 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("a soft-deleted account is absent from the moderation roster")
-    void the_roster_omits_soft_deleted_accounts() {
+    void roster_WhenAccountSoftDeleted_OmitsIt() {
         User active = TestDataFactory.createTestUser(userRepository, "active@example.com");
         User removed = TestDataFactory.createTestUser(userRepository, "removed@example.com");
         removed.softDelete(Instant.now().plus(30, ChronoUnit.DAYS));
@@ -65,7 +65,7 @@ class ModerationRosterIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("the excluded account is absent from the roster query")
-    void the_roster_query_omits_the_excluded_account() {
+    void rosterQuery_WhenAccountExcluded_OmitsIt() {
         User kept = TestDataFactory.createTestUser(userRepository, "kept@example.com");
         User excluded = TestDataFactory.createTestUser(userRepository, "excluded@example.com");
 

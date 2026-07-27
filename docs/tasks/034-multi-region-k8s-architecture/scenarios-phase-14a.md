@@ -18,7 +18,7 @@ So every container test that binds `redis.auth.*` and reads back through the ser
 `redis.auth-local.*` to the same endpoint (DegradationIT, AuthControllerLogoutAllTest).
 
 ## Acceptance
-- Test: `integration/AuthLocalReadSplitIT::blacklistReadWriteSplit_bl_and_uinv` — the blacklist
+- Test: `integration/AuthLocalReadSplitIT::blacklistReadWriteSplit_WhenBl_And_Uinv` — the blacklist
   read/write split (bl: + uinv:). Opened RED (assertion, `AuthLocalReadSplitIT.java:115`,
   `AssertionFailedError "[auth-local has not caught up ...] Expecting value to be false but was true"`,
   errors=0). Closes GREEN when the blacklist reads reroute to `authLocalStringRedisTemplate` (S2 green).

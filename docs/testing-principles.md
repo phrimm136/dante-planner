@@ -140,29 +140,35 @@ Follow the behavior.
 
 ---
 
-## 7. Name the test after the invariant
+## 7. Name the test subject, condition, expectation
 
-A test named after a method dies with the method, and cannot be cited from a javadoc `@see` once
-the method is renamed. A test named after the rule survives both.
+Every test method is spelled `subject_WhenCondition_Expectation`, enforced by
+`architecture/TestNamingConventionTest`: a camelCase subject, a middle part opening with `When`, and
+one or more PascalCase expectation parts.
 
-| Dies | Survives |
+| Write | Not |
 |---|---|
-| `isTombstoned_WhenRedisDown_ReturnsFalse` | `deleted_planner_is_masked_on_replica_hit` |
-| `upsertPlanner_bannedUser_throws` | `a_ban_does_not_block_private_planner_work` |
+| `findById_WhenExists_ReturnsUser` | `findById_exists_returnsUser` |
+| `upsertPlanner_WhenOwnerBanned_KeepsPrivateWork` | `upsertPlanner_bannedUser_throws` |
+| `deletedEntity_WhenReplicaHits_IsMasked` | `deleted_entity_is_masked_on_replica_hit` |
 
-Both spellings are legitimate and both are enforced by the same rule, in
-`architecture/TestNamingConventionTest`: a name carries three or more underscore-separated parts —
-subject, condition, expectation — with segment casing left free.
+One spelling, no exceptions. `After`, `With` and `Given` each read well in isolation, and admitting
+them is how half the suite drifted into shapes that were neither one thing nor the other; a reader
+scanning a file should not have to hold four forms in mind. Casing is not free either — the segments
+after the subject are PascalCase, so the parts are visible at a glance.
 
-- The **mechanical form** suits ordinary cases, in either casing:
-  `findById_WhenExists_ReturnsUser`, `unsafeMethod_missingHeader_rejected`. A literal `When` is
-  optional; fewer than half the suite uses it.
-- The **invariant phrase** suits anything a comment will cite, because `-Xdoclint:reference` turns
-  that citation into a compile-time link, and the link must outlive the rename of whatever it covers.
+A name whose middle part reads as an outcome — `cannotCreateComment`, `NoDeadlock` — is misnamed
+rather than exempt. The condition belongs in the middle and the outcome at the end, and rewriting it
+that way usually exposes that the two were swapped. One such name in this suite claimed
+`returns403` while asserting the opposite.
 
-Do not tighten the rule toward one spelling. Requiring a literal `When` or PascalCase segments
-rejects several hundred good names, and a minimum-segment-length rule rejects the English articles
-the invariant form needs (`a_`, `an_`, `no_`).
+The cost is real and worth naming: a name beginning with its subject dies with the method it names,
+and cannot be cited from a javadoc `@see` once that method is renamed. The invariant-phrase form
+(`deleted_planner_is_masked_on_replica_hit`) survives both. That form was permitted here for exactly
+that reason and, measured across 1197 test names, **no test was ever cited from a javadoc**. A
+capability nothing used cost the suite its consistency, so the rule now buys consistency instead. If
+a specific invariant genuinely needs a citable name, make it a deliberate exception with a comment
+saying why, not a standing licence.
 
 ---
 

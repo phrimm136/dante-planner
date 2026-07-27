@@ -195,7 +195,7 @@ class PlannerUserDeleteSweepIT {
 
     @Test
     @DisplayName("vote-outlives-voter: a hard-deleted user's planner vote survives the users cascade, carried by the live sentinel account")
-    void a_reassigned_planner_vote_points_at_the_live_sentinel_account() {
+    void reassignedPlannerVote_WhenSwept_PointsAtLiveSentinelAccount() {
         Planner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Voted")
                 .published(true)
@@ -215,7 +215,7 @@ class PlannerUserDeleteSweepIT {
 
     @Test
     @DisplayName("vote-reassignment-spans-both-tables: neither planner nor comment votes keep a row for the deleted account, and third-party votes are untouched")
-    void no_vote_row_in_either_table_survives_pointing_at_the_deleted_account() {
+    void voteRow_WhenAccountDeleted_SurvivesInNeitherTable() {
         Planner thirdPartyPlanner = TestDataFactory.planner(other)
                 .title("Sweep Both Vote Tables")
                 .published(true)
@@ -238,7 +238,7 @@ class PlannerUserDeleteSweepIT {
 
     @Test
     @DisplayName("empty-sweep-still-removes-account: an account owning nothing and having voted nowhere is removed anyway")
-    void an_account_with_nothing_to_reassign_is_still_removed() {
+    void account_WhenNothingToReassign_IsStillRemoved() {
         lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
 
         assertThat(userRepository.findById(owner.getId())).as("the account row is gone").isEmpty();

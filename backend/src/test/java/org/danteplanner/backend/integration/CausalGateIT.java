@@ -142,7 +142,7 @@ class CausalGateIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("Author write sets a GTID cookie; the cookie-bearing read routes to the fresh primary while the replica lags, then serves the replica and clears the cookie once caught up")
-    void causalGate_authorWriteSetsGtidCookie_readYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp()
+    void causalGate_WhenAuthorWriteSetsGtidCookie_ReadYourOwnWriteRoutesPrimaryThenClearsCookieWhenCaughtUp()
             throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "causal-gate-" + UUID.randomUUID() + "@example.com");

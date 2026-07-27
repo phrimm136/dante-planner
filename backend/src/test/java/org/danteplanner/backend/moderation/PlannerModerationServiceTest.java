@@ -109,7 +109,7 @@ class PlannerModerationServiceTest {
 
         @Test
         @DisplayName("Moderator can unpublish planner")
-        void unpublishPlanner_moderatorUnpublishes_succeeds() {
+        void unpublishPlanner_WhenModeratorUnpublishes_Succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             Planner planner = TestDataFactory.planner(normalUser)
@@ -136,7 +136,7 @@ class PlannerModerationServiceTest {
 
         @Test
         @DisplayName("Admin can unpublish planner")
-        void unpublishPlanner_adminUnpublishes_succeeds() {
+        void unpublishPlanner_WhenAdminUnpublishes_Succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             Planner planner = TestDataFactory.planner(normalUser)
@@ -159,7 +159,7 @@ class PlannerModerationServiceTest {
 
         @Test
         @DisplayName("Unpublish already unpublished planner succeeds")
-        void unpublishPlanner_alreadyUnpublished_succeeds() {
+        void unpublishPlanner_WhenAlreadyUnpublished_Succeeds() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             Planner planner = TestDataFactory.planner(normalUser)
@@ -182,7 +182,7 @@ class PlannerModerationServiceTest {
 
         @Test
         @DisplayName("Throws PlannerNotFoundException for non-existent planner")
-        void unpublishPlanner_nonExistentPlanner_throwsPlannerNotFoundException() {
+        void unpublishPlanner_WhenNonExistentPlanner_ThrowsPlannerNotFoundException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerPublishingService.withdrawFromPublicView(eq(nonExistentId), any()))
@@ -197,7 +197,7 @@ class PlannerModerationServiceTest {
 
         @Test
         @DisplayName("Throws PlannerNotFoundException for deleted planner")
-        void unpublishPlanner_deletedPlanner_throwsPlannerNotFoundException() {
+        void unpublishPlanner_WhenDeletedPlanner_ThrowsPlannerNotFoundException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             Planner deletedPlanner = TestDataFactory.planner(normalUser)

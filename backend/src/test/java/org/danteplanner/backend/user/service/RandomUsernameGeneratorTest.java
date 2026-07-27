@@ -168,7 +168,7 @@ class RandomUsernameGeneratorTest {
 
         @Test
         @DisplayName("Should work with single association")
-        void selectWeightedEpithet_WithSingleAssociation_ReturnsThatAssociation() {
+        void selectWeightedEpithet_WhenSingleAssociation_ReturnsThatAssociation() {
             when(epithetProvider.getEpithets()).thenReturn(List.of("ONLY_ONE"));
             when(epithetProvider.getWeight("ONLY_ONE")).thenReturn(1);
 

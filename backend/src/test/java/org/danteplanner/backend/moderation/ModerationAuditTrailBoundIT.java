@@ -79,7 +79,7 @@ class ModerationAuditTrailBoundIT {
 
     @Test
     @DisplayName("the dashboard reads a bounded page, not the whole table")
-    void the_audit_trail_page_is_truncated_by_the_query() {
+    void auditTrailPage_WhenRead_IsTruncatedByTheQuery() {
         List<ModerationAction> page = moderationQueryService.getModerationActions();
 
         assertTrue(page.size() < SEEDED_RECORDS,
@@ -89,7 +89,7 @@ class ModerationAuditTrailBoundIT {
 
     @Test
     @DisplayName("the bounded page is the newest end of the trail, newest first")
-    void the_audit_trail_page_holds_the_newest_records_first() {
+    void auditTrailPage_WhenRead_HoldsNewestRecordsFirst() {
         List<ModerationAction> page = moderationQueryService.getModerationActions();
 
         assertTrue(isNonIncreasing(page), "records are not ordered newest first");

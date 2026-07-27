@@ -58,7 +58,7 @@ which point it costs a debugging session in somebody else's class.
 - A class registering its own datasource must register `spring.flyway.url/user/password` too, not just `spring.datasource.*`, or Flyway connects to the prod-pinned datasource and fails.
 - A class carrying `@Tag("containerized")` ends in `IT`; everything else ends in `Test`. The suffix
   is what the tier rules select on, so a misnamed class silently escapes them.
-- Naming: `methodName_WhenCondition_ExpectedBehavior`, or an invariant phrase for a name a comment cites; enforced by `architecture/TestNamingConventionTest`.
+- Naming: `subject_WhenCondition_Expectation`, one style with no exceptions; enforced by `architecture/TestNamingConventionTest`.
 - Time-dependent JWT tests inject a fixed `Clock` — never 1 ms expiries (see `JwtTokenServiceTest`).
 - Deterministic ordering via `entity.setCreatedAt(now.minusSeconds(n))` — never `Thread.sleep()`.
 - Build reusable entities with `TestDataFactory`.

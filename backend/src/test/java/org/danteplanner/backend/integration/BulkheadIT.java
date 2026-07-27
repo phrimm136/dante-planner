@@ -99,7 +99,7 @@ class BulkheadIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("INV7: a wan-slowed re-check miss-flood saturating the bulkhead never delays a concurrent write on the separate primary write pool")
-    void reCheckFloodOnBulkhead_doesNotDelay_concurrentWrite() throws Exception {
+    void reCheckFlood_WhenBulkheadSaturated_DoesNotDelayConcurrentWrite() throws Exception {
         User owner = TestDataFactory.createTestUser(userRepository, "bulkhead-inv7@example.com");
         Long userId = owner.getId();
         replicationControl.awaitCaughtUp();

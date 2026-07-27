@@ -28,7 +28,7 @@ class ToxiproxyPartitionIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("The partition profile can be applied and removed: timeout toxic present after apply, absent after remove")
-    void partitionProfile_applyThenRemove_toxicPresentThenAbsent() throws Exception {
+    void partitionProfile_WhenApplyThenRemove_ToxicPresentThenAbsent() throws Exception {
         toxiproxyControl.applyPartition();
         assertThat(toxiproxyControl.appToPrimaryProxy().toxics().getAll()).isNotEmpty();
 

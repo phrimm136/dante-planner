@@ -47,7 +47,7 @@ class RedisFactoriesIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("Auth and rate-limit LettuceConnectionFactory beans are distinct injectable instances")
-    void redisFactories_authAndRateLimit_areDistinctInjectableBeans() {
+    void redisFactories_WhenAuthAndRateLimit_AreDistinctInjectableBeans() {
         assertThat(authRedisConnectionFactory).isNotNull();
         assertThat(rateLimitRedisConnectionFactory).isNotNull();
         assertThat(authRedisConnectionFactory).isNotSameAs(rateLimitRedisConnectionFactory);
@@ -55,7 +55,7 @@ class RedisFactoriesIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("auth-local LettuceConnectionFactory bean is a distinct injectable instance")
-    void authLocalFactory_whenContextLoads_isDistinctInjectableBean() {
+    void authLocalFactory_WhenContextLoads_IsDistinctInjectableBean() {
         assertThat(authLocalRedisConnectionFactory).isNotNull();
         assertThat(authLocalRedisConnectionFactory).isNotSameAs(authRedisConnectionFactory);
         assertThat(authLocalRedisConnectionFactory).isNotSameAs(rateLimitRedisConnectionFactory);

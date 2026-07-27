@@ -163,7 +163,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Valid token authenticates from claims WITHOUT any DB lookup")
-        void doFilterInternal_validToken_authenticatesWithoutDbLookup() throws Exception {
+        void doFilterInternal_WhenValidToken_AuthenticatesWithoutDbLookup() throws Exception {
             String token = "valid.jwt.token";
             Long userId = 123L;
 
@@ -189,7 +189,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Token issued before invalidation is rejected (deleted/demoted user)")
-        void doFilterInternal_invalidatedUser_clearsContextAndContinues() throws Exception {
+        void doFilterInternal_WhenInvalidatedUser_ClearsContextAndContinues() throws Exception {
             String token = "valid.jwt.token";
             Long userId = 123L;
 
@@ -214,7 +214,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Should skip authentication for sentinel user (id=0)")
-        void doFilterInternal_sentinelUser_skipsAuthentication() throws Exception {
+        void doFilterInternal_WhenSentinelUser_SkipsAuthentication() throws Exception {
             String token = "sentinel.jwt.token";
             Long sentinelId = 0L;
 
@@ -236,7 +236,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Should continue without authentication when no token present")
-        void doFilterInternal_noToken_continuesWithoutAuth() throws Exception {
+        void doFilterInternal_WhenNoToken_ContinuesWithoutAuth() throws Exception {
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
 
             filter.doFilterInternal(request, response, filterChain);
@@ -254,7 +254,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Expired token + DB down during refresh returns 503, not a silent guest")
-        void doFilterInternal_expiredToken_refreshDbDown_returns503() throws Exception {
+        void doFilterInternal_WhenExpiredToken_RefreshDbDown_Returns503() throws Exception {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
@@ -276,7 +276,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("No access token + refresh present + DB down during refresh returns 503 (Site 1)")
-        void doFilterInternal_noAccessToken_refreshDbDown_returns503() throws Exception {
+        void doFilterInternal_WhenNoAccessToken_RefreshDbDown_Returns503() throws Exception {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
@@ -298,7 +298,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Expired token + tx-begin failure during refresh returns 503, not a silent guest")
-        void doFilterInternal_expiredToken_refreshTxBeginFails_returns503() throws Exception {
+        void doFilterInternal_WhenExpiredToken_RefreshTxBeginFails_Returns503() throws Exception {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
@@ -322,7 +322,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Redis auth-write failure during refresh returns 503 with AUTH_TEMPORARILY_UNAVAILABLE body")
-        void doFilterInternal_refreshRedisWriteFails_returnsAuthTemporarilyUnavailable() throws Exception {
+        void doFilterInternal_WhenRefreshRedisWriteFails_ReturnsAuthTemporarilyUnavailable() throws Exception {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
             User user = activeUser(userId);
@@ -347,7 +347,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("DB down during refresh writes body code WRITE_TEMPORARILY_UNAVAILABLE")
-        void doFilterInternal_refreshDbDown_bodyCodeIsWriteTemporarilyUnavailable() throws Exception {
+        void doFilterInternal_WhenRefreshDbDown_BodyCodeIsWriteTemporarilyUnavailable() throws Exception {
             String expiredToken = "expired.jwt.token";
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
@@ -374,7 +374,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Should attempt auto-refresh for expired token")
-        void doFilterInternal_expiredToken_attemptsAutoRefresh() throws Exception {
+        void doFilterInternal_WhenExpiredToken_AttemptsAutoRefresh() throws Exception {
             String expiredToken = "expired.jwt.token";
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
@@ -390,7 +390,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Should clear SecurityContext for malformed token AND log TOKEN_INVALID (MALFORMED)")
-        void doFilterInternal_malformedToken_clearsContext() throws Exception {
+        void doFilterInternal_WhenMalformedToken_ClearsContext() throws Exception {
             String token = "malformed.jwt.token";
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
@@ -407,7 +407,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Should clear SecurityContext for invalid signature AND log TOKEN_INVALID (INVALID_SIGNATURE)")
-        void doFilterInternal_invalidSignature_clearsContext() throws Exception {
+        void doFilterInternal_WhenInvalidSignature_ClearsContext() throws Exception {
             String token = "tampered.jwt.token";
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
@@ -424,7 +424,7 @@ class JwtAuthenticationFilterTest {
 
         @Test
         @DisplayName("Should clear SecurityContext for revoked token")
-        void doFilterInternal_revokedToken_clearsContext() throws Exception {
+        void doFilterInternal_WhenRevokedToken_ClearsContext() throws Exception {
             String token = "revoked.jwt.token";
 
             when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);

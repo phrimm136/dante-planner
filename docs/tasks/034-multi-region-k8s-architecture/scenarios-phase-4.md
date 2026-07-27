@@ -25,7 +25,7 @@ Dossiers: /home/user/.local/state/claude-build/LimbusPlanner/034-multi-region-k8
 
 Run command (no root gradlew — only `backend/gradlew`): `backend/gradlew -p backend test --tests "org.danteplanner.backend.integration.ReplicaLagIT"`
 
-Scenario "no-tombstone positive still served" is NOT added — the existing `byIdHitOnReplica_servesWithoutReCheck_andDoesNotPromote` (no tombstone written, replica hit, served) is the regression net proving the check does not over-fire.
+Scenario "no-tombstone positive still served" is NOT added — the existing `byIdHitOnReplica_WhenServesWithoutReCheck_AndDoesNotPromote` (no tombstone written, replica hit, served) is the regression net proving the check does not over-fire.
 
 ## List Revisions
 - (seed) none yet — the list held at 2 scenarios; no implementation-driven revision.

@@ -69,7 +69,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("frozenContract")
-    void a_listed_constraint_keeps_its_frozen_response(ContractRow row) {
+    void listedConstraint_WhenMapped_KeepsFrozenResponse(ContractRow row) {
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(duplicateKey(row.constraintName()));
 
         assertEquals(row.status(), response.getStatusCode());
@@ -82,7 +82,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
      * cannot ship without a literal contract row stating what clients will see.
      */
     @Test
-    void every_listed_constraint_carries_a_contract_row() {
+    void listedConstraint_WhenTableChecked_CarriesContractRow() {
         Set<KnownConstraint> covered = frozenContract()
                 .map(ContractRow::constraintName)
                 .map(KnownConstraint::matching)
@@ -93,7 +93,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    void an_unlisted_unique_key_is_reported_as_a_conflict() {
+    void unlistedUniqueKey_WhenMapped_IsReportedAsConflict() {
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(duplicateKey("planner_stats.PRIMARY"));
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
@@ -102,7 +102,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    void a_foreign_key_violation_is_reported_as_invalid_data() {
+    void foreignKeyViolation_WhenMapped_IsReportedAsInvalidData() {
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(otherIntegrityFailure(
                 "Cannot add or update a child row: a foreign key constraint fails", 1452, "fk_vote_planner"));
 
@@ -116,7 +116,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
      * NOT NULL failure out of the duplicate-action branch. Without the gate this returns 409.
      */
     @Test
-    void a_not_null_violation_on_a_listed_table_stays_invalid_data() {
+    void notNullViolation_WhenOnListedTable_StaysInvalidData() {
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response = handle(otherIntegrityFailure(
                 "Column 'planner_id' cannot be null", 1048, "planner_votes.PRIMARY"));
 
@@ -130,7 +130,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
      * unlisted-conflict row rather than the 400 an unrecognised failure would produce.
      */
     @Test
-    void a_vendor_duplicate_code_alone_is_recognised_as_unique() {
+    void vendorDuplicateCode_WhenAlone_IsRecognisedAsUnique() {
         DataIntegrityViolationException ex = new DataIntegrityViolationException("could not execute statement",
                 new SQLIntegrityConstraintViolationException(
                         "Duplicate entry '1-2' for key 'planner_views.PRIMARY'", "23000", 1062));
@@ -142,7 +142,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    void a_duplicate_key_subclass_is_recognised_as_unique() {
+    void duplicateKeySubclass_WhenMapped_IsRecognisedAsUnique() {
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
                 handle(new DuplicateKeyException("a row with that key already exists"));
 
@@ -151,7 +151,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    void an_expected_race_raises_no_alert() {
+    void expectedRace_WhenMapped_RaisesNoAlert() {
         try (MockedStatic<Sentry> sentry = mockStatic(Sentry.class)) {
             handle(duplicateKey("planner_votes.PRIMARY"));
 
@@ -160,7 +160,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
     }
 
     @Test
-    void an_unlisted_conflict_raises_an_alert() {
+    void unlistedConflict_WhenMapped_RaisesAnAlert() {
         try (MockedStatic<Sentry> sentry = mockStatic(Sentry.class)) {
             handle(duplicateKey("planner_stats.PRIMARY"));
 
@@ -193,7 +193,7 @@ class GlobalExceptionHandlerConstraintMappingTest {
      * one a locale-sensitive case fold can break: Turkish folds the I in PRIMARY to a dotless ı.
      */
     @Test
-    void a_capital_i_in_a_key_name_survives_a_turkish_locale() {
+    void capitalIInKeyName_WhenTurkishLocale_Survives() {
         ResponseEntity<GlobalExceptionHandler.ErrorResponse> response =
                 handleUnder(Locale.forLanguageTag("tr"), duplicateKey("planner.PRIMARY"));
 

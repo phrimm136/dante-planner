@@ -22,7 +22,7 @@
 
 ## High Priority Issues - RESOLVED
 
-**R-H1**: Added integration test createPlanner_InvalidContentVersion_ThrowsException in PlannerServiceTest
+**R-H1**: Added integration test createPlanner_WhenInvalidContentVersion_ThrowsException in PlannerServiceTest
 
 **R-H2**: Test already exists (rejects empty rrAvailableVersions array) in usePlannerConfig.test.ts:124-132
 

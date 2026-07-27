@@ -85,7 +85,7 @@ class UserCleanupSchedulerTest {
 
         @Test
         @DisplayName("Should do nothing when no expired users exist")
-        void cleanupExpiredUsers_noExpiredUsers_doesNothing() {
+        void cleanupExpiredUsers_WhenNoExpiredUsers_DoesNothing() {
             // Arrange
             when(userRepository.findByPermanentDeleteScheduledAtBefore(any(Instant.class)))
                     .thenReturn(new ArrayList<>());

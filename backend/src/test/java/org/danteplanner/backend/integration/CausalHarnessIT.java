@@ -54,7 +54,7 @@ class CausalHarnessIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("Replication round-trip: a write made while the replica is stopped is invisible until start+awaitCaughtUp")
-    void replicationRoundTrip_writeWhileStopped_invisibleUntilResumedAndCaughtUp() {
+    void replicationRoundTrip_WhenWriteWhileStopped_InvisibleUntilResumedAndCaughtUp() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS harness_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO harness_probe (id) VALUES (1)");
         replicationControl.awaitCaughtUp();
@@ -71,7 +71,7 @@ class CausalHarnessIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("Two distinct LettuceConnectionFactory beans are injectable by auth and rate-limit qualifiers")
-    void redisFactories_authAndRateLimit_areDistinctInjectableBeans() {
+    void redisFactories_WhenAuthAndRateLimit_AreDistinctInjectableBeans() {
         assertThat(authRedisConnectionFactory).isNotNull();
         assertThat(rateLimitRedisConnectionFactory).isNotNull();
         assertThat(authRedisConnectionFactory).isNotSameAs(rateLimitRedisConnectionFactory);

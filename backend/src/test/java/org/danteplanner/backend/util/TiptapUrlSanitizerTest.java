@@ -15,7 +15,7 @@ class TiptapUrlSanitizerTest {
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
-    void sanitizeJson_javascriptProtocol_replacesWithPlaceholder() throws Exception {
+    void sanitizeJson_WhenJavascriptProtocol_ReplacesWithPlaceholder() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -44,7 +44,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_dataProtocol_replacesWithPlaceholder() throws Exception {
+    void sanitizeJson_WhenDataProtocol_ReplacesWithPlaceholder() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -73,7 +73,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_vbscriptProtocol_replacesWithPlaceholder() throws Exception {
+    void sanitizeJson_WhenVbscriptProtocol_ReplacesWithPlaceholder() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -102,7 +102,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_httpsUrl_preserved() throws Exception {
+    void sanitizeJson_WhenHttpsUrl_Preserved() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -131,7 +131,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_relativeUrl_preserved() throws Exception {
+    void sanitizeJson_WhenRelativeUrl_Preserved() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -160,7 +160,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_imageSrcJavascript_replacesWithPlaceholder() throws Exception {
+    void sanitizeJson_WhenImageSrcJavascript_ReplacesWithPlaceholder() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -180,7 +180,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_imageSrcHttps_preserved() throws Exception {
+    void sanitizeJson_WhenImageSrcHttps_Preserved() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -200,26 +200,26 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_nullInput_returnsNull() {
+    void sanitizeJson_WhenNullInput_ReturnsNull() {
         String result = TiptapUrlSanitizer.sanitizeJson(null);
         assertNull(result);
     }
 
     @Test
-    void sanitizeJson_emptyString_returnsEmpty() {
+    void sanitizeJson_WhenEmptyString_ReturnsEmpty() {
         String result = TiptapUrlSanitizer.sanitizeJson("");
         assertEquals("", result);
     }
 
     @Test
-    void sanitizeJson_invalidJson_returnsOriginal() {
+    void sanitizeJson_WhenInvalidJson_ReturnsOriginal() {
         String input = "{invalid json}";
         String result = TiptapUrlSanitizer.sanitizeJson(input);
         assertEquals(input, result);
     }
 
     @Test
-    void sanitizeJson_mailtoUrl_preserved() throws Exception {
+    void sanitizeJson_WhenMailtoUrl_Preserved() throws Exception {
         String input = """
             {
               "type": "doc",
@@ -248,7 +248,7 @@ class TiptapUrlSanitizerTest {
     }
 
     @Test
-    void sanitizeJson_telUrl_preserved() throws Exception {
+    void sanitizeJson_WhenTelUrl_Preserved() throws Exception {
         String input = """
             {
               "type": "doc",

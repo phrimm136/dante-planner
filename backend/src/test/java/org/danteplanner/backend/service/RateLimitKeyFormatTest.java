@@ -93,7 +93,7 @@ class RateLimitKeyFormatTest {
                     service -> service.check(RateLimitPolicy.PLANNER_COMMENT_SSE, DEVICE_ID)));
 
     @TestFactory
-    Stream<DynamicTest> every_policy_consumes_its_frozen_bucket_key() {
+    Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {
         return FROZEN_KEYS.stream().map(frozen -> DynamicTest.dynamicTest(frozen.policy().name(), () -> {
             BucketRecorder allowing = new BucketRecorder(true);
             frozen.charge().accept(new RateLimitService(allowing.proxyManager, properties()));
@@ -115,7 +115,7 @@ class RateLimitKeyFormatTest {
     }
 
     @Test
-    void a_policy_without_a_frozen_key_is_rejected() {
+    void policy_WhenKeyNotFrozen_IsRejected() {
         Set<RateLimitPolicy> frozen = FROZEN_KEYS.stream()
                 .map(FrozenKey::policy)
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(RateLimitPolicy.class)));

@@ -55,7 +55,7 @@ class RedisAuthPasswordIT {
 
     @Test
     @DisplayName("With AUTH_REDIS_PASSWORD set, a blacklist write+read round-trips against a requirepass Redis")
-    void authRedis_whenPasswordConfigured_blacklistWriteReadRoundTrips() {
+    void authRedis_WhenPasswordConfigured_BlacklistWriteReadRoundTrips() {
         String key = "bl:password-wiring-test";
 
         stringRedisTemplate.opsForValue().set(key, "1");

@@ -57,7 +57,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("POST with cookie but no header → 403, chain not continued")
-        void unsafeMethod_missingHeader_rejected() throws Exception {
+        void unsafeMethod_WhenMissingHeader_Rejected() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(TOKEN));
             MockHttpServletResponse res = new MockHttpServletResponse();
@@ -71,7 +71,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("POST with mismatched header → 403, chain not continued")
-        void unsafeMethod_mismatchedHeader_rejected() throws Exception {
+        void unsafeMethod_WhenMismatchedHeader_Rejected() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(TOKEN));
             req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, "different-token");
@@ -86,7 +86,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("POST with matching cookie + header → passes through")
-        void unsafeMethod_matchingToken_passes() throws Exception {
+        void unsafeMethod_WhenMatchingToken_Passes() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             req.setCookies(csrfCookie(TOKEN));
             req.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, TOKEN);
@@ -101,7 +101,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("PUT/PATCH/DELETE are enforced like POST")
-        void otherUnsafeMethods_whenMissingHeader_rejected() throws Exception {
+        void otherUnsafeMethods_WhenMissingHeader_Rejected() throws Exception {
             for (String method : new String[]{"PUT", "PATCH", "DELETE"}) {
                 MockHttpServletRequest req = request(method, "/api/planner/md/1");
                 req.setCookies(csrfCookie(TOKEN));
@@ -122,7 +122,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("GET is never blocked, even without any token")
-        void safeMethod_whenNoToken_neverBlocked() throws Exception {
+        void safeMethod_WhenNoToken_NeverBlocked() throws Exception {
             MockHttpServletRequest req = request("GET", "/api/planner/md/1");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -141,7 +141,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("Request with no csrf cookie receives a Set-Cookie for csrf")
-        void safeMethod_whenNoCsrfCookie_setsCookieOnResponse() throws Exception {
+        void safeMethod_WhenNoCsrfCookie_SetsCookieOnResponse() throws Exception {
             MockHttpServletRequest req = request("GET", "/api/planner/md/config");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -157,7 +157,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("Guest mutation: Set-Cookie issued AND request rejected 403")
-        void guestMutation_whenNoCsrfCookie_setsCookieThenRejects() throws Exception {
+        void guestMutation_WhenNoCsrfCookie_SetsCookieThenRejects() throws Exception {
             MockHttpServletRequest req = request("POST", "/api/planner/md/1");
             MockHttpServletResponse res = new MockHttpServletResponse();
             MockFilterChain chain = new MockFilterChain();
@@ -171,7 +171,7 @@ class CsrfDoubleSubmitFilterTest {
 
         @Test
         @DisplayName("Retry with echoed cookie + header passes")
-        void retryWithEchoedToken_whenCookieAndHeaderMatch_passes() throws Exception {
+        void retryWithEchoedToken_WhenCookieAndHeaderMatch_Passes() throws Exception {
             MockHttpServletRequest first = request("POST", "/api/planner/md/1");
             MockHttpServletResponse firstRes = new MockHttpServletResponse();
             filter.doFilter(first, firstRes, new MockFilterChain());

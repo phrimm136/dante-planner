@@ -462,7 +462,7 @@ class SecurityIntegrationTest {
     class CorsTests {
 
         @Test
-        void preflight_AllowedOrigin_Returns200() throws Exception {
+        void preflight_WhenAllowedOrigin_Returns200() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                     .header("Origin", "https://limbusplanner.com")
                     .header("Access-Control-Request-Method", "POST"))
@@ -486,7 +486,7 @@ class SecurityIntegrationTest {
 
         @Test
         @WithMockUser(roles = "USER")
-        void adminEndpoint_RegularUser_Returns403() throws Exception {
+        void adminEndpoint_WhenRegularUser_Returns403() throws Exception {
             mockMvc.perform(post("/api/admin/planner/{id}/hide-from-recommended", UUID.randomUUID()))
                     .andExpect(status().isForbidden());
         }
@@ -621,7 +621,7 @@ class MySQLIntegrationTest {
 
     @Test
     @DisplayName("MySQL: UNIQUE constraint on votes prevents duplicates")
-    void uniqueConstraint_DuplicateVote_ThrowsException() {
+    void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
         User user = createTestUser();
         Planner planner = createTestPlanner();
 

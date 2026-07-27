@@ -61,7 +61,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("Returns true for ASYNC dispatch — avoids double MDC population on SSE continuations")
-        void shouldNotFilter_asyncDispatch_returnsTrue() {
+        void shouldNotFilter_WhenAsyncDispatch_ReturnsTrue() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.ASYNC);
 
             assertThat(filter.shouldNotFilter(request)).isTrue();
@@ -69,7 +69,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("Returns false for normal REQUEST dispatch")
-        void shouldNotFilter_normalRequest_returnsFalse() {
+        void shouldNotFilter_WhenNormalRequest_ReturnsFalse() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.REQUEST);
 
             assertThat(filter.shouldNotFilter(request)).isFalse();
@@ -77,7 +77,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("Returns false for ERROR dispatch — generates fresh MDC for error page rendering")
-        void shouldNotFilter_errorDispatch_returnsFalse() {
+        void shouldNotFilter_WhenErrorDispatch_ReturnsFalse() {
             when(request.getDispatcherType()).thenReturn(DispatcherType.ERROR);
 
             assertThat(filter.shouldNotFilter(request)).isFalse();
@@ -90,7 +90,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("Guest request — userId is 'guest'")
-        void doFilterInternal_noAuthentication_setsGuestUserId() throws Exception {
+        void doFilterInternal_WhenNoAuthentication_SetsGuestUserId() throws Exception {
             when(request.getMethod()).thenReturn("GET");
             when(request.getRequestURI()).thenReturn("/api/planner/md/published");
 
@@ -107,7 +107,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("Authenticated request — userId matches Long principal")
-        void doFilterInternal_authenticatedUser_setsNumericUserId() throws Exception {
+        void doFilterInternal_WhenAuthenticatedUser_SetsNumericUserId() throws Exception {
             Long userId = 42L;
             var auth = new UsernamePasswordAuthenticationToken(
                     userId, null, List.of(new SimpleGrantedAuthority("ROLE_NORMAL"))
@@ -130,7 +130,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("AnonymousAuthenticationToken — userId is 'guest', not 'anonymousUser'")
-        void doFilterInternal_springAnonymousToken_setsGuestUserId() throws Exception {
+        void doFilterInternal_WhenSpringAnonymousToken_SetsGuestUserId() throws Exception {
             var anon = new AnonymousAuthenticationToken(
                     "key", "anonymousUser",
                     List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))
@@ -173,7 +173,7 @@ class MdcLoggingFilterTest {
 
         @Test
         @DisplayName("Strips CR and LF from URI — prevents log injection via crafted paths")
-        void doFilterInternal_crlfInUri_sanitizesPath() throws Exception {
+        void doFilterInternal_WhenCrlfInUri_SanitizesPath() throws Exception {
             when(request.getMethod()).thenReturn("GET");
             when(request.getRequestURI()).thenReturn("/api/planner\r\nFAKE LOG ENTRY");
 

@@ -300,7 +300,7 @@ class PlannerSubscriptionServiceTest {
 
         @Test
         @DisplayName("Should return empty list when no subscribers")
-        void getSubscriberUserIds_NoSubscribers_ReturnsEmpty() {
+        void getSubscriberUserIds_WhenNoSubscribers_ReturnsEmpty() {
             // Arrange
             when(subscriptionRepository.findByPlannerIdAndEnabledTrue(plannerId))
                     .thenReturn(List.of());

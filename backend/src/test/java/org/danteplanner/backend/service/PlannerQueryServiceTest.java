@@ -114,7 +114,7 @@ class PlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should return empty page when no planners exist")
-        void getPlanners_NoPlanners_ReturnsEmptyPage() {
+        void getPlanners_WhenNoPlanners_ReturnsEmptyPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             Page<PlannerSummaryResponse> emptyPage = new PageImpl<>(List.of(), pageable, 0);
@@ -137,7 +137,7 @@ class PlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should return planner when found")
-        void getPlanner_Found_ReturnsPlanner() {
+        void getPlanner_WhenFound_ReturnsPlanner() {
             // Arrange
             Planner planner = createTestPlanner();
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
@@ -156,7 +156,7 @@ class PlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when not found")
-        void getPlanner_NotFound_ThrowsException() {
+        void getPlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))

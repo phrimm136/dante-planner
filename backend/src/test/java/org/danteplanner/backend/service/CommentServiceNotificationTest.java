@@ -142,7 +142,7 @@ class CommentServiceNotificationTest {
 
         @Test
         @DisplayName("Should send notification when owner notifications enabled")
-        void createTopLevelComment_NotificationEnabled_SendsNotification() {
+        void createTopLevelComment_WhenNotificationEnabled_SendsNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
@@ -172,7 +172,7 @@ class CommentServiceNotificationTest {
 
         @Test
         @DisplayName("Should NOT send notification when owner notifications disabled")
-        void createTopLevelComment_NotificationDisabled_NoNotification() {
+        void createTopLevelComment_WhenNotificationDisabled_NoNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(false);
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
@@ -199,7 +199,7 @@ class CommentServiceNotificationTest {
 
         @Test
         @DisplayName("Should NOT send notification when owner comments on own planner")
-        void createTopLevelComment_SelfComment_NoNotification() {
+        void createTopLevelComment_WhenSelfComment_NoNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
             when(userRepository.findById(OWNER_ID)).thenReturn(Optional.of(owner));
@@ -241,7 +241,7 @@ class CommentServiceNotificationTest {
 
         @Test
         @DisplayName("Should send reply notification when author notifications enabled")
-        void createReply_AuthorNotificationEnabled_SendsNotification() {
+        void createReply_WhenAuthorNotificationEnabled_SendsNotification() {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
@@ -273,7 +273,7 @@ class CommentServiceNotificationTest {
 
         @Test
         @DisplayName("Should NOT send reply notification when author notifications disabled")
-        void createReply_AuthorNotificationDisabled_NoNotification() {
+        void createReply_WhenAuthorNotificationDisabled_NoNotification() {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(false);
             when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
@@ -302,7 +302,7 @@ class CommentServiceNotificationTest {
 
         @Test
         @DisplayName("Should NOT send notification when replying to own comment")
-        void createReply_SelfReply_NoNotification() {
+        void createReply_WhenSelfReply_NoNotification() {
             // Arrange
             parentComment.setUserId(COMMENTER_ID); // Same user is replying to their own comment
             parentComment.setAuthorNotificationsEnabled(true);

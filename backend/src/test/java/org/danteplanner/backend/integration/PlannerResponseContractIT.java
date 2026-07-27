@@ -10,7 +10,6 @@ import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -82,8 +81,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("responseContractStable_OwnerDetail_FieldSetUnchanged")
-    void responseContractStable_OwnerDetail_FieldSetUnchanged() throws Exception {
+    @DisplayName("responseContractStable_WhenOwnerDetail_FieldSetUnchanged")
+    void responseContractStable_WhenOwnerDetail_FieldSetUnchanged() throws Exception {
         String json = mockMvc.perform(get("/api/planner/md/{id}", published.getId())
                         .cookie(new Cookie("accessToken", token)))
                 .andExpect(status().isOk())
@@ -97,8 +96,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("responseContractStable_OwnerList_FieldSetUnchanged")
-    void responseContractStable_OwnerList_FieldSetUnchanged() throws Exception {
+    @DisplayName("responseContractStable_WhenOwnerList_FieldSetUnchanged")
+    void responseContractStable_WhenOwnerList_FieldSetUnchanged() throws Exception {
         String json = mockMvc.perform(get("/api/planner/md")
                         .cookie(new Cookie("accessToken", token)))
                 .andExpect(status().isOk())
@@ -149,8 +148,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("responseContractStable_PublishedDetail_FieldSetUnchanged")
-    void responseContractStable_PublishedDetail_FieldSetUnchanged() throws Exception {
+    @DisplayName("responseContractStable_WhenPublishedDetail_FieldSetUnchanged")
+    void responseContractStable_WhenPublishedDetail_FieldSetUnchanged() throws Exception {
         String json = mockMvc.perform(get("/api/planner/md/published/{id}", published.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();

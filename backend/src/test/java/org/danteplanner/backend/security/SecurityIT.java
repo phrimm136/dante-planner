@@ -81,7 +81,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 for OPTIONS with allowed origin")
-        void preflight_AllowedOrigin_Returns200() throws Exception {
+        void preflight_WhenAllowedOrigin_Returns200() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET"))
@@ -90,7 +90,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return Access-Control-Allow-Origin header for allowed origin")
-        void preflight_AllowedOrigin_ReturnsAllowOriginHeader() throws Exception {
+        void preflight_WhenAllowedOrigin_ReturnsAllowOriginHeader() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET"))
@@ -100,7 +100,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return Access-Control-Allow-Methods header")
-        void preflight_AllowedOrigin_ReturnsAllowMethodsHeader() throws Exception {
+        void preflight_WhenAllowedOrigin_ReturnsAllowMethodsHeader() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET"))
@@ -110,7 +110,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return Access-Control-Allow-Headers header with configured values")
-        void preflight_AllowedOrigin_ReturnsAllowHeadersHeader() throws Exception {
+        void preflight_WhenAllowedOrigin_ReturnsAllowHeadersHeader() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET")
@@ -121,7 +121,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return Access-Control-Max-Age header with 3600")
-        void preflight_AllowedOrigin_ReturnsMaxAgeHeader() throws Exception {
+        void preflight_WhenAllowedOrigin_ReturnsMaxAgeHeader() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET"))
@@ -131,7 +131,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 for OPTIONS with denied origin")
-        void preflight_DeniedOrigin_Returns403() throws Exception {
+        void preflight_WhenDeniedOrigin_Returns403() throws Exception {
             mockMvc.perform(options("/api/planner/md")
                             .header("Origin", "http://evil.com")
                             .header("Access-Control-Request-Method", "GET"))
@@ -140,7 +140,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should allow actual GET request after successful preflight")
-        void actualRequest_AfterPreflight_Works() throws Exception {
+        void actualRequest_WhenPreflightSucceeded_Works() throws Exception {
             mockMvc.perform(options("/api/planner/md/config")
                             .header("Origin", "http://localhost:5173")
                             .header("Access-Control-Request-Method", "GET"))
@@ -159,7 +159,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when regular user accesses admin endpoint")
-        void adminEndpoint_RegularUser_Returns403() throws Exception {
+        void adminEndpoint_WhenRegularUser_Returns403() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
@@ -171,7 +171,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 when admin user accesses admin endpoint")
-        void adminEndpoint_AdminUser_Returns200() throws Exception {
+        void adminEndpoint_WhenAdminUser_Returns200() throws Exception {
             Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
             mockMvc.perform(post("/api/moderation/planner/{id}/hide-from-recommended", planner.getId()).with(withCsrf())
@@ -183,14 +183,14 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 for public endpoint without authentication")
-        void publicEndpoint_NoAuth_Returns200() throws Exception {
+        void publicEndpoint_WhenNoAuth_Returns200() throws Exception {
             mockMvc.perform(get("/api/planner/md/config"))
                     .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("Should return 401 for protected endpoint without authentication")
-        void protectedEndpoint_NoAuth_Returns401() throws Exception {
+        void protectedEndpoint_WhenNoAuth_Returns401() throws Exception {
             mockMvc.perform(get("/api/planner/md"))
                     .andExpect(status().isUnauthorized());
         }
@@ -210,7 +210,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should allow requests within rate limit for different users")
-        void rateLimit_PerUserIsolation_DifferentBuckets() throws Exception {
+        void rateLimit_WhenPerUserIsolation_DifferentBuckets() throws Exception {
             for (int i = 0; i < 5; i++) {
                 mockMvc.perform(get("/api/planner/md")
                                 .cookie(regularUserCookie()))
@@ -230,7 +230,7 @@ class SecurityIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should maintain separate rate limit buckets per user")
-        void rateLimit_SeparateBucketsPerUser_NoInterference() throws Exception {
+        void rateLimit_WhenSeparateBucketsPerUser_NoInterference() throws Exception {
             for (int i = 0; i < 10; i++) {
                 mockMvc.perform(get("/api/planner/md")
                                 .cookie(regularUserCookie()))

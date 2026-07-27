@@ -99,7 +99,7 @@ class ContentVersionValidatorTest {
 
         @Test
         @DisplayName("Should fail fast with clear error for non-numeric versions")
-        void constructor_InvalidVersionFormat_ThrowsIllegalArgumentException() {
+        void constructor_WhenInvalidVersionFormat_ThrowsIllegalArgumentException() {
             IllegalArgumentException ex = assertThrows(
                     IllegalArgumentException.class,
                     () -> new ContentVersionValidator(6, "6,seven,8", "1,5")

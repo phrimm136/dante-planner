@@ -89,7 +89,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("incrementUpvotes - existing planner increments count")
-    void incrementUpvotes_ExistingPlanner_IncrementsCount() {
+    void incrementUpvotes_WhenExistingPlanner_IncrementsCount() {
         // Act
         statsRepository.incrementUpvotes(testPlanner.getId());
         entityManager.clear(); // Clear persistence context to force re-read
@@ -103,7 +103,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("trySetRecommendedNotified - first call on threshold planner returns 1 and sets flag")
-    void trySetRecommendedNotified_FirstCall_ReturnsOne() {
+    void trySetRecommendedNotified_WhenFirstCall_ReturnsOne() {
         // Arrange - Set planner to exactly meet threshold (upvotes=10, threshold=10)
         seedUpvotes(10);
 
@@ -119,7 +119,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("trySetRecommendedNotified - second call returns 0 (atomic flag already set)")
-    void trySetRecommendedNotified_SecondCall_ReturnsZero() {
+    void trySetRecommendedNotified_WhenSecondCall_ReturnsZero() {
         // Arrange - Set planner to meet threshold and set flag
         seedUpvotes(15);
 
@@ -136,7 +136,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("trySetRecommendedNotified - returns 0 when threshold not met")
-    void trySetRecommendedNotified_BelowThreshold_ReturnsZero() {
+    void trySetRecommendedNotified_WhenBelowThreshold_ReturnsZero() {
         // Arrange - Planner below threshold (upvotes=5, threshold=10)
         seedUpvotes(5);
 
@@ -151,7 +151,7 @@ class PlannerRepositoryIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("trySetRecommendedNotified - returns 0 for non-existent planner")
-    void trySetRecommendedNotified_NonExistentPlanner_ReturnsZero() {
+    void trySetRecommendedNotified_WhenNonExistentPlanner_ReturnsZero() {
         // Arrange
         UUID nonExistentId = UUID.randomUUID();
 

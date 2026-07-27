@@ -85,7 +85,7 @@ class TokenBlacklistServiceIT {
 
         @Test
         @DisplayName("Should handle null token gracefully")
-        void blacklistToken_nullToken_doesNothing() {
+        void blacklistToken_WhenNullToken_DoesNothing() {
             // Arrange
             Date expiry = new Date(System.currentTimeMillis() + 60000);
 
@@ -98,7 +98,7 @@ class TokenBlacklistServiceIT {
 
         @Test
         @DisplayName("Should handle null expiry gracefully")
-        void blacklistToken_nullExpiry_doesNothing() {
+        void blacklistToken_WhenNullExpiry_DoesNothing() {
             // Arrange
             String token = "test.jwt.token";
 
@@ -111,7 +111,7 @@ class TokenBlacklistServiceIT {
 
         @Test
         @DisplayName("Should overwrite existing entry for same token")
-        void blacklistToken_sameToken_overwrites() {
+        void blacklistToken_WhenSameToken_Overwrites() {
             // Arrange
             String token = "test.jwt.token";
             Date expiry1 = new Date(System.currentTimeMillis() + 60000);
@@ -177,7 +177,7 @@ class TokenBlacklistServiceIT {
 
         @Test
         @DisplayName("Should return false for null token")
-        void isBlacklisted_nullToken_returnsFalse() {
+        void isBlacklisted_WhenNullToken_ReturnsFalse() {
             // Act
             boolean result = blacklistService.isBlacklisted(null);
 
@@ -374,7 +374,7 @@ class TokenBlacklistServiceIT {
 
         @Test
         @DisplayName("userInvalidationSize reflects Redis state and clear() resets it")
-        void userInvalidationSize_AfterInvalidateThenClear_ReflectsRedis() {
+        void userInvalidationSize_WhenInvalidatedThenCleared_ReflectsRedis() {
             // Arrange
             Long userId = TestDataFactory.nextUserId();
 

@@ -43,7 +43,7 @@ class ReplicaStopIT extends CausalHarnessSupport {
 
     @Test
     @DisplayName("After stopReplica, a row written to the primary is not visible on the replica")
-    void stopReplica_writeAfterStop_notVisibleOnReplica() {
+    void stopReplica_WhenWriteAfterStop_NotVisibleOnReplica() {
         primaryJdbcTemplate.execute("CREATE TABLE IF NOT EXISTS replica_stop_probe (id INT PRIMARY KEY)");
         primaryJdbcTemplate.update("INSERT INTO replica_stop_probe (id) VALUES (101)");
         replicationControl.awaitCaughtUp();

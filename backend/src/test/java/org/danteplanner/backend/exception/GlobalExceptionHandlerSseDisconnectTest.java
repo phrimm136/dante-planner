@@ -26,7 +26,7 @@ import static org.mockito.Mockito.never;
 class GlobalExceptionHandlerSseDisconnectTest {
 
     @Test
-    void a_client_abort_without_a_message_raises_no_alert() {
+    void clientAbort_WhenWithoutMessage_RaisesNoAlert() {
         try (MockedStatic<Sentry> sentry = mockStatic(Sentry.class)) {
             handle(new ClientAbortException());
 
@@ -35,7 +35,7 @@ class GlobalExceptionHandlerSseDisconnectTest {
     }
 
     @Test
-    void a_socket_teardown_strerror_raises_no_alert() {
+    void socketTeardownStrerror_WhenSeen_RaisesNoAlert() {
         try (MockedStatic<Sentry> sentry = mockStatic(Sentry.class)) {
             handle(new IOException("Broken pipe"));
 
@@ -44,7 +44,7 @@ class GlobalExceptionHandlerSseDisconnectTest {
     }
 
     @Test
-    void an_unrelated_io_failure_raises_an_alert() {
+    void unrelatedIoFailure_WhenSeen_RaisesAnAlert() {
         try (MockedStatic<Sentry> sentry = mockStatic(Sentry.class)) {
             handle(new IOException("No space left on device"));
 

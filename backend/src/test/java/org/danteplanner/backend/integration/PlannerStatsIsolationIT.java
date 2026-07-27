@@ -3,7 +3,6 @@ package org.danteplanner.backend.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.service.CommentService;
 import org.danteplanner.backend.config.TestConfig;
@@ -141,7 +140,7 @@ class PlannerStatsIsolationIT {
 
     @Test
     @DisplayName("comment-count-maintained: create/reply increment, author and moderator deletes decrement, floor at zero")
-    void commentCountMaintained_OnCreateAndDeleteTransitions_CounterTracks() {
+    void commentCountMaintained_WhenCreateAndDeleteTransitions_CounterTracks() {
         seedStats(0, 0, 0);
 
         UUID topLevelId = commentService.createComment(planner.getId(), commenter.getId(), null,

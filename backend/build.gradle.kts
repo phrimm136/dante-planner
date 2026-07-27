@@ -105,9 +105,11 @@ tasks.withType<Test> {
     // and recovery harnesses sit behind ~40 classes in their fork's queue, and a wider pool drains
     // that queue sooner. The ceiling is memory, not cores — each fork holds its own heap and its
     // own Testcontainers set, whose data directories are tmpfs.
-    // The TestContext cache is a static map with a default bound of 32 and no concurrency
-    // guarantees; past the bound it evicts and closes contexts other test classes are still using.
-    systemProperty("spring.test.context.cache.maxSize", "64")
+    // Sized so the cache never evicts. Eviction closes a context while other classes are still
+    // running against it, and the default bound of 32 sits below what this suite creates, so the
+    // failure lands in an unrelated class at full suite size only. Must stay above the
+    // containerized class count; TestIsolationConventionTest budgets the classes that key their own.
+    systemProperty("spring.test.context.cache.maxSize", "512")
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(2)
     // Measured: a worker sits near 1 GB resident, and the containers it drives total well under
     // that, so the JVMs are what the box has to fit. maxParallelForks × maxHeapSize must leave

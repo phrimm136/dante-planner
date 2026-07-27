@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service.oauth;
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
@@ -67,11 +68,11 @@ class OAuthProviderRegistryTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException for unknown provider")
+        @DisplayName("Should throw InvalidRequestException for unknown provider")
         void getProvider_WhenUnknownProvider_Throws() {
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidRequestException exception = assertThrows(
+                    InvalidRequestException.class,
                     () -> registry.getProvider("unknown")
             );
 
@@ -100,7 +101,7 @@ class OAuthProviderRegistryTest {
         void getProvider_WhenEmptyName_Throws() {
             // Act & Assert
             assertThrows(
-                    IllegalArgumentException.class,
+                    InvalidRequestException.class,
                     () -> registry.getProvider("")
             );
         }
@@ -155,7 +156,7 @@ class OAuthProviderRegistryTest {
 
             // Assert
             assertThrows(
-                    IllegalArgumentException.class,
+                    InvalidRequestException.class,
                     () -> emptyRegistry.getProvider("any")
             );
             assertFalse(emptyRegistry.hasProvider("google"));

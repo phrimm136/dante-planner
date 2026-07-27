@@ -60,10 +60,10 @@ class PlannerSchemaDecompositionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("inv6_PlannerContent_NoSecondaryIndexNoInboundFk")
-    void inv6_PlannerContent_NoSecondaryIndexNoInboundFk() {
+    @DisplayName("plannerContent_WhenSchemaIsRead_CarriesOnlyItsPrimaryKeyAndNoInboundFk")
+    void plannerContent_WhenSchemaIsRead_CarriesOnlyItsPrimaryKeyAndNoInboundFk() {
         assertThat(indexes("planner_content"))
-                .as("planner_content carries only its PRIMARY KEY (INV6: no secondary index)")
+                .as("planner_content carries only its PRIMARY KEY; a secondary index would be maintained on every content write")
                 .containsExactly("PRIMARY");
 
         Integer inboundFks = jdbc.queryForObject(
@@ -71,13 +71,13 @@ class PlannerSchemaDecompositionIT extends SharedMySqlContainerSupport {
                         + "WHERE table_schema = DATABASE() AND referenced_table_name = 'planner_content'",
                 Integer.class);
         assertThat(inboundFks)
-                .as("no table FK-references planner_content (INV6: no inbound FK)")
+                .as("nothing FK-references planner_content, so it can be swept by planner id")
                 .isZero();
     }
 
     @Test
-    @DisplayName("schemaDrill_AggregateAndProjectionTables_MatchTargetDdl")
-    void schemaDrill_AggregateAndProjectionTables_MatchTargetDdl() {
+    @DisplayName("schemaDrill_WhenAggregateAndProjectionTables_MatchTargetDdl")
+    void schemaDrill_WhenAggregateAndProjectionTables_MatchTargetDdl() {
         assertThat(tables()).contains(
                 "planner", "planner_content", "planner_publication", "planner_moderation",
                 "planner_stats", "planner_catalog", "planner_entity_filter", "planner_keyword_filter");
@@ -99,8 +99,8 @@ class PlannerSchemaDecompositionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("schemaDrill_LegacyPlannersTables_Dropped")
-    void schemaDrill_LegacyPlannersTables_Dropped() {
+    @DisplayName("schemaDrill_WhenLegacyPlannersTables_Dropped")
+    void schemaDrill_WhenLegacyPlannersTables_Dropped() {
         assertThat(tables())
                 .as("the planners god-table and planner_content_index are dropped by the cutover")
                 .doesNotContain("planners", "planner_content_index");

@@ -1,7 +1,5 @@
 package org.danteplanner.backend.integration;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.junit.jupiter.api.BeforeEach;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -22,7 +20,6 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import jakarta.persistence.EntityManager;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.converter.KeywordSetConverter;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.repository.*;
@@ -43,7 +40,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -117,7 +113,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("20 concurrent votes with no lost updates")
-        void concurrentVotes_20Threads_NoLostUpdates() throws InterruptedException {
+        void concurrentVotes_When20Threads_NoLostUpdates() throws InterruptedException {
             // Create 20 users (reduced from 50 to lower CI resource pressure)
             List<User> users = IntStream.range(0, 20)
                     .mapToObj(i -> TestDataFactory.createTestUser(userRepository, "user" + i + "@example.com"))
@@ -174,7 +170,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("concurrent-vote-no-deadlock: N concurrent castVote() calls succeed without retry, upvotes == vote rows, exactly one recommended notification")
-        void concurrentVote_NoDeadlock_AllCountedAndSingleNotification() throws InterruptedException {
+        void concurrentVote_WhenNoDeadlock_AllCountedAndSingleNotification() throws InterruptedException {
             // Seed to one below the threshold sequentially (no notification yet), then run a
             // concurrent burst that crosses it — many burst transactions read upvotes==threshold-1,
             // so the CAS (trySetRecommendedNotified) must dedupe them to exactly one notification.
@@ -248,7 +244,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("UNIQUE constraint violation throws DataIntegrityViolationException with 'Duplicate entry'")
-        void uniqueConstraint_DuplicateVote_ThrowsException() {
+        void uniqueConstraint_WhenDuplicateVote_ThrowsException() {
             PlannerVote vote1 = new PlannerVote(testUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote1);
             entityManager.flush();
@@ -266,7 +262,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("UNIQUE constraint on provider+providerId validates MySQL error format")
-        void uniqueConstraint_MySQLErrorFormat_ValidatesMessage() {
+        void uniqueConstraint_WhenMySQLErrorFormat_ValidatesMessage() {
             // Create user with specific provider ID
             User user1 = User.builder()
                     .email("user1@example.com")
@@ -297,7 +293,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("GOOGLE persists as lowercase 'google' in the provider VARCHAR column and reads back as GOOGLE")
-        void authProviderType_Google_RoundTripsThroughVarcharColumn() {
+        void authProviderType_WhenGoogle_RoundTripsThroughVarcharColumn() {
             User user = User.builder()
                     .email("provider-roundtrip@example.com")
                     .provider(AuthProviderType.GOOGLE)
@@ -328,7 +324,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("SAVED persists as lowercase 'saved' in the ENUM column and reads back as SAVED")
-        void plannerStatus_Saved_RoundTripsThroughEnumColumn() {
+        void plannerStatus_WhenSaved_RoundTripsThroughEnumColumn() {
             Planner planner = TestDataFactory.planner(testUser)
                     .status(PlannerStatus.SAVED)
                     .save(plannerRepository);
@@ -388,7 +384,7 @@ class MySQLIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Microsecond precision preserved in timestamp ordering")
-        void timestamp_MicrosecondPrecision_Preserved() {
+        void timestamp_WhenMicrosecondPrecision_Preserved() {
             // created_at is @PrePersist-assigned and updatable=false, so set
             // deterministic microsecond-spaced values via native SQL to verify the
             // TIMESTAMP(6) column preserves sub-second ordering (V042).

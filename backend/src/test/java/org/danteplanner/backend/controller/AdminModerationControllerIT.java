@@ -101,7 +101,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 when admin role hides planner")
-        void hideFromRecommended_AdminRole_Returns200() throws Exception {
+        void hideFromRecommended_WhenAdminRole_Returns200() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Inappropriate content violates community guidelines"
@@ -120,7 +120,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should allow a moderator to hide a planner")
-        void hideFromRecommended_ModeratorRole_Returns200() throws Exception {
+        void hideFromRecommended_WhenModeratorRole_Returns200() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Contains misleading information that could harm users"
@@ -136,7 +136,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when regular user attempts to hide planner")
-        void hideFromRecommended_RegularUser_Returns403() throws Exception {
+        void hideFromRecommended_WhenRegularUser_Returns403() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Test reason that should not work"
@@ -152,7 +152,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void hideFromRecommended_Unauthenticated_Returns401() throws Exception {
+        void hideFromRecommended_WhenUnauthenticated_Returns401() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Test reason without authentication"
@@ -167,7 +167,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 with short reason (no min length constraint)")
-        void hideFromRecommended_ShortReason_Returns200() throws Exception {
+        void hideFromRecommended_WhenShortReason_Returns200() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Too short"
@@ -183,7 +183,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when reason is too long")
-        void hideFromRecommended_LongReason_Returns400() throws Exception {
+        void hideFromRecommended_WhenLongReason_Returns400() throws Exception {
             String longReason = "x".repeat(501);
             String hideRequest = String.format("""
                 {
@@ -201,7 +201,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when reason is null")
-        void hideFromRecommended_NullReason_Returns400() throws Exception {
+        void hideFromRecommended_WhenNullReason_Returns400() throws Exception {
             String hideRequest = """
                 {
                     "reason": null
@@ -217,7 +217,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set hiddenFromRecommended flag to true")
-        void hideFromRecommended_ValidReason_SetsHiddenFlag() throws Exception {
+        void hideFromRecommended_WhenValidReason_SetsHiddenFlag() throws Exception {
             String hideRequest = """
                 {
                     "reason": "This planner contains inappropriate content that violates community guidelines"
@@ -236,7 +236,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set hiddenAt timestamp")
-        void hideFromRecommended_ValidReason_SetsHiddenAt() throws Exception {
+        void hideFromRecommended_WhenValidReason_SetsHiddenAt() throws Exception {
             String hideRequest = """
                 {
                     "reason": "This planner violates community standards and must be hidden"
@@ -258,7 +258,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set hiddenByModeratorId to moderator's ID")
-        void hideFromRecommended_ValidReason_SetsModeratorId() throws Exception {
+        void hideFromRecommended_WhenValidReason_SetsModeratorId() throws Exception {
             String hideRequest = """
                 {
                     "reason": "Content violates guidelines and requires moderation action"
@@ -277,7 +277,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set hideReason to provided reason")
-        void hideFromRecommended_ValidReason_SetsHideReason() throws Exception {
+        void hideFromRecommended_WhenValidReason_SetsHideReason() throws Exception {
             String reason = "This planner contains inappropriate content that violates community guidelines";
             String hideRequest = String.format("""
                 {
@@ -297,7 +297,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set all moderation metadata together")
-        void hideFromRecommended_ValidReason_SetsAllMetadata() throws Exception {
+        void hideFromRecommended_WhenValidReason_SetsAllMetadata() throws Exception {
             String reason = "Comprehensive metadata test - violations of community standards detected";
             String hideRequest = String.format("""
                 {
@@ -320,7 +320,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should preserve existing votes when hiding planner")
-        void hideFromRecommended_WithVotes_PreservesVotes() throws Exception {
+        void hideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
             PlannerVote vote1 = new PlannerVote(regularUser.getId(), testPlanner.getId(), VoteType.UP);
             voteRepository.save(vote1);
 
@@ -357,7 +357,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 when admin role unhides planner")
-        void unhideFromRecommended_AdminRole_Returns200() throws Exception {
+        void unhideFromRecommended_WhenAdminRole_Returns200() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
@@ -375,7 +375,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should allow a moderator to unhide a planner")
-        void unhideFromRecommended_ModeratorRole_Returns200() throws Exception {
+        void unhideFromRecommended_WhenModeratorRole_Returns200() throws Exception {
             testPlanner.hideFromRecommended(moderatorUser.getId(), "Test hide reason");
             plannerRepository.save(testPlanner);
 
@@ -386,7 +386,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when regular user attempts to unhide planner")
-        void unhideFromRecommended_RegularUser_Returns403() throws Exception {
+        void unhideFromRecommended_WhenRegularUser_Returns403() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
@@ -401,7 +401,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should clear hiddenFromRecommended flag")
-        void unhideFromRecommended_HiddenPlanner_ClearsHiddenFlag() throws Exception {
+        void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenFlag() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
@@ -419,7 +419,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should clear hiddenAt timestamp")
-        void unhideFromRecommended_HiddenPlanner_ClearsHiddenAt() throws Exception {
+        void unhideFromRecommended_WhenHiddenPlanner_ClearsHiddenAt() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
@@ -437,7 +437,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should clear hiddenByModeratorId")
-        void unhideFromRecommended_HiddenPlanner_ClearsModeratorId() throws Exception {
+        void unhideFromRecommended_WhenHiddenPlanner_ClearsModeratorId() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
@@ -455,7 +455,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should clear hideReason")
-        void unhideFromRecommended_HiddenPlanner_ClearsHideReason() throws Exception {
+        void unhideFromRecommended_WhenHiddenPlanner_ClearsHideReason() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
@@ -473,7 +473,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should clear all moderation metadata together")
-        void unhideFromRecommended_HiddenPlanner_ClearsAllMetadata() throws Exception {
+        void unhideFromRecommended_WhenHiddenPlanner_ClearsAllMetadata() throws Exception {
             testPlanner.hideFromRecommended(adminUser.getId(), "Comprehensive metadata clearing test");
             plannerRepository.save(testPlanner);
 
@@ -490,7 +490,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should be idempotent when unhiding already unhidden planner")
-        void unhideFromRecommended_AlreadyUnhidden_IsIdempotent() throws Exception {
+        void unhideFromRecommended_WhenAlreadyUnhidden_IsIdempotent() throws Exception {
             assertThat(testPlanner.getHiddenFromRecommended()).isFalse();
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
@@ -503,7 +503,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should preserve votes when unhiding planner")
-        void unhideFromRecommended_WithVotes_PreservesVotes() throws Exception {
+        void unhideFromRecommended_WhenVotes_PreservesVotes() throws Exception {
             // Re-read first: with the test no longer wrapped in a transaction, AFTER_COMMIT
             // listeners run and bump this row's version, leaving the instance from @BeforeEach
             // stale.
