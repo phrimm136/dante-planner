@@ -54,20 +54,25 @@ public class PlannerPublication {
     private Boolean ownerNotificationsEnabled = true;
 
     /**
-     * Flip the published state, stamping firstPublishedAt on the first transition.
+     * Drive the published state to {@code target}, stamping firstPublishedAt on the first
+     * transition into published.
      *
-     * @return the new published state
+     * <p>Idempotent by construction rather than by the caller checking first: applying the state
+     * a planner already holds changes nothing, so a retry or a failover cannot flip it back.</p>
+     *
+     * @param target the desired published state
      */
-    boolean toggle() {
-        boolean nowPublished = !published;
-        this.published = nowPublished;
-        if (nowPublished && firstPublishedAt == null) {
+    void setPublished(boolean target) {
+        if (Boolean.TRUE.equals(published) == target) {
+            return;
+        }
+        this.published = target;
+        if (target && firstPublishedAt == null) {
             this.firstPublishedAt = Instant.now();
         }
-        return nowPublished;
     }
 
     void unpublish() {
-        this.published = false;
+        setPublished(false);
     }
 }

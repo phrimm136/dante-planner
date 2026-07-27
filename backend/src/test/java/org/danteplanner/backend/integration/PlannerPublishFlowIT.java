@@ -5,6 +5,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -168,14 +169,14 @@ class PlannerPublishFlowIT {
     }
 
     @Test
-    @DisplayName("publish-single-request: one content-carrying request creates the draft server-side and publishes it atomically; unpublish stays a bodyless toggle")
+    @DisplayName("publish-single-request: one content-carrying request creates the draft server-side and publishes it atomically")
     void publishSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
         // The draft exists only client-side: nothing on the server yet
         UUID plannerId = UUID.randomUUID();
         String content = TestDataFactory.planner(owner).build().getContentJson();
         // Creating strictly requires the CURRENT game content version
-        UpsertPlannerRequest publishRequest = new UpsertPlannerRequest(
-                plannerId.toString(), "5F", "One-Shot Publish", PlannerStatus.SAVED,
+        PublishRequest publishRequest = new PublishRequest(
+                true, plannerId.toString(), "5F", "One-Shot Publish", PlannerStatus.SAVED,
                 content, 7, PlannerType.MIRROR_DUNGEON, null, null);
 
         mockMvc.perform(put("/api/planner/md/{id}/publish", plannerId)
@@ -194,10 +195,11 @@ class PlannerPublishFlowIT {
         assertThat(entityFilterRows(plannerId))
                 .as("the single request built the filter index").isPositive();
 
-        // Unpublish remains the lightweight bodyless toggle
         mockMvc.perform(put("/api/planner/md/{id}/publish", plannerId)
                         .cookie(new Cookie("accessToken", token))
-                        .with(withCsrf()))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content("{\"published\":false}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(false));
         assertThat(catalogRepository.existsById(plannerId)).isFalse();

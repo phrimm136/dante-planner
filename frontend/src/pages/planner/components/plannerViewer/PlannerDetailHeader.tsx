@@ -257,11 +257,11 @@ export function PlannerDetailHeader({
 
   // `base` is the planner the local save is derived from: for publish it's the
   // server-synced planner (carries the server-bumped syncVersion); for unpublish
-  // it's the current savedPlanner (the toggle never bumps syncVersion).
+  // it's the current savedPlanner (unpublishing never bumps syncVersion).
   const callPublishMutation = (wasPublished: boolean, base: SaveablePlanner) => {
     if (!plannerId) return
 
-    publishMutation.mutate(plannerId, {
+    publishMutation.mutate({ plannerId, published: !wasPublished }, {
       onSuccess: async (response) => {
         const updatedPlanner: SaveablePlanner = {
           ...base,

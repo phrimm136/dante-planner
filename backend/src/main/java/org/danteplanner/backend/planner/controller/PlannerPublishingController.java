@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
-import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsRequest;
@@ -34,12 +33,8 @@ import java.util.UUID;
 @Slf4j
 public class PlannerPublishingController {
 
-    /** Counts calls still using the pre-state-targeted toggle shape, tagged by operation. */
-    private static final String LEGACY_TOGGLE_COUNTER = "planner.legacy_toggle";
-
     private final PlannerPublishingService plannerPublishingService;
     private final RateLimitService rateLimitService;
-    private final MeterRegistry meterRegistry;
 
     /**
      * Set the published status of a planner.
@@ -47,10 +42,9 @@ public class PlannerPublishingController {
      * <p>Only the owner of the planner can change its publish status.
      * Returns 401 if not authenticated, 403 if not the owner.</p>
      *
-     * <p>A body naming {@code published} drives the planner to that state idempotently, optionally
-     * upserting a carried document first (one round trip for "publish this draft"). A body that
-     * omits it — or no body at all — takes the legacy toggle path, counted so it can be retired
-     * once tabs on previously cached bundles have gone.</p>
+     * <p>The body's {@code published} flag drives the planner to that state idempotently,
+     * optionally upserting a carried document first, so "publish this draft" costs one round
+     * trip.</p>
      *
      * @param userId  the authenticated user ID (must be owner)
      * @param id      the planner ID
@@ -61,26 +55,15 @@ public class PlannerPublishingController {
     public ResponseEntity<PlannerResponse> setPublished(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
-            @RequestBody(required = false) @Valid PublishRequest request) {
+            @RequestBody @Valid PublishRequest request) {
 
         rateLimitService.check(RateLimitPolicy.CRUD, userId, "publish");
 
-        if (request != null && request.namesState()) {
-            log.info("Setting planner {} published={} by user {}", id, request.published(), userId);
-            return ResponseEntity.ok(request.carriesContent()
-                    ? plannerPublishingService.setPublishedWithContent(
-                            userId, id, request.toUpsertRequest(), request.published())
-                    : plannerPublishingService.setPublished(userId, id, request.published()));
-        }
-
-        meterRegistry.counter(LEGACY_TOGGLE_COUNTER, "operation", "publish").increment();
-        if (request != null && request.carriesContent()) {
-            log.info("Publishing planner {} with content by user {}", id, userId);
-            return ResponseEntity.ok(
-                    plannerPublishingService.publishWithContent(userId, id, request.toUpsertRequest()));
-        }
-        log.info("Toggling publish status for planner {} by user {}", id, userId);
-        return ResponseEntity.ok(plannerPublishingService.togglePublish(userId, id));
+        log.info("Setting planner {} published={} by user {}", id, request.published(), userId);
+        return ResponseEntity.ok(request.carriesContent()
+                ? plannerPublishingService.setPublishedWithContent(
+                        userId, id, request.toUpsertRequest(), request.published())
+                : plannerPublishingService.setPublished(userId, id, request.published()));
     }
 
     /**
@@ -97,6 +80,8 @@ public class PlannerPublishingController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
             @Valid @RequestBody ToggleOwnerNotificationsRequest request) {
+
+        rateLimitService.check(RateLimitPolicy.CRUD, userId, "notifications-toggle");
 
         log.info("User {} toggling owner notifications for planner {}", userId, id);
         ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(userId, id, request.enabled());

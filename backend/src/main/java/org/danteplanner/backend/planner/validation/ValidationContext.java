@@ -14,15 +14,18 @@ import java.util.List;
  */
 public class ValidationContext {
 
-    private final boolean strictMode;
+    private final ValidationPolicy policy;
     private final List<PlannerValidationException> errors = new ArrayList<>();
 
-    public ValidationContext(boolean strictMode) {
-        this.strictMode = strictMode;
+    public ValidationContext(ValidationPolicy policy) {
+        this.policy = policy;
     }
 
-    public boolean isStrictMode() {
-        return strictMode;
+    /**
+     * @return how completely this call requires the document to be filled in
+     */
+    public ValidationPolicy policy() {
+        return policy;
     }
 
     public void addError(PlannerValidationException error) {

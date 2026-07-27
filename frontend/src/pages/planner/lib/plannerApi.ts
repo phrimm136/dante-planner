@@ -117,14 +117,15 @@ export const plannerApi = {
   },
 
   /**
-   * Toggle publish state of a planner
-   * Idempotent operation: publishes if unpublished, unpublishes if published
+   * Drive a planner to an explicit publication state.
+   * Idempotent: a repeated request leaves the planner where it already is.
    *
    * @param id - Planner UUID
-   * @returns Updated planner with toggled published state
+   * @param published - the state the planner should end in
+   * @returns Updated planner in the requested state
    */
-  async togglePublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.put(`${PLANNERS_BASE}/${id}/publish`)
+  async setPublished(id: PlannerId | string, published: boolean): Promise<ServerPlannerResponse> {
+    const data = await ApiClient.put(`${PLANNERS_BASE}/${id}/publish`, { published })
     return ServerPlannerResponseSchema.parse(data)
   },
 

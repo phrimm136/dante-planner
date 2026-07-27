@@ -53,13 +53,21 @@ interface PublishResponse {
  * }
  * ```
  */
+/** The state the caller wants the planner to end in, not a flip of whatever it is now. */
+interface PublishVariables {
+  plannerId: string
+  published: boolean
+}
+
 export function usePlannerPublish() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (plannerId: string): Promise<PublishResponse> => {
-      // PUT toggles publish state
-      const data = await ApiClient.put<PublishResponse>(`/api/planner/md/${plannerId}/publish`)
+    mutationFn: async ({ plannerId, published }: PublishVariables): Promise<PublishResponse> => {
+      const data = await ApiClient.put<PublishResponse>(
+        `/api/planner/md/${plannerId}/publish`,
+        { published },
+      )
       return data
     },
     onSuccess: (response) => {

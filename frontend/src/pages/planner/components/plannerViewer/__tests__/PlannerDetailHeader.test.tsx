@@ -558,7 +558,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
         }),
       )
       expect(mockPublishMutate).toHaveBeenCalledWith(
-        PLANNER_ID,
+        { plannerId: PLANNER_ID, published: true },
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
       expect(screen.queryByTestId('publish-sync-warning')).toBeNull()
@@ -680,7 +680,7 @@ describe('PlannerDetailHeader – unpublish', () => {
     await waitFor(() => {
       expect(mockSyncToServer).not.toHaveBeenCalled()
       expect(mockPublishMutate).toHaveBeenCalledWith(
-        PLANNER_ID,
+        { plannerId: PLANNER_ID, published: false },
         expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
     })

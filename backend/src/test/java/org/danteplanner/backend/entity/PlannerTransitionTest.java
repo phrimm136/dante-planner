@@ -41,38 +41,56 @@ class PlannerTransitionTest {
     }
 
     @Test
-    void togglePublished_WhenTakenDown_Throws() {
+    void setPublished_WhenTakenDown_Throws() {
         UUID plannerId = UUID.randomUUID();
         Planner planner = planner(plannerId,
                 PlannerContent.builder().build(),
                 PlannerPublication.builder().published(false).build(),
                 PlannerModeration.builder().takenDownAt(Instant.now()).build());
 
-        assertThatThrownBy(planner::togglePublished)
+        assertThatThrownBy(() -> planner.setPublished(true))
                 .isInstanceOf(PlannerForbiddenException.class)
                 .extracting(ex -> ((PlannerForbiddenException) ex).getPlannerId())
                 .isEqualTo(plannerId);
     }
 
     @Test
-    void togglePublished_WhenFirstPublish_StampsFirstPublishedAtOnce() {
+    void setPublished_WhenFirstPublish_StampsFirstPublishedAtOnce() {
         Planner planner = planner(UUID.randomUUID(),
                 PlannerContent.builder().build(),
                 PlannerPublication.builder().published(false).build(),
                 PlannerModeration.builder().build());
 
-        boolean afterFirst = planner.togglePublished();
+        planner.setPublished(true);
         Instant firstStamp = planner.getFirstPublishedAt();
 
-        assertThat(afterFirst).isTrue();
+        assertThat(planner.getPublished()).isTrue();
         assertThat(firstStamp).isNotNull();
 
-        boolean afterUnpublish = planner.togglePublished();
-        assertThat(afterUnpublish).isFalse();
+        planner.setPublished(false);
+        assertThat(planner.getPublished()).isFalse();
 
-        boolean afterRepublish = planner.togglePublished();
-        assertThat(afterRepublish).isTrue();
+        planner.setPublished(true);
+        assertThat(planner.getPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt()).isEqualTo(firstStamp);
+    }
+
+    @Test
+    void setPublished_WhenAlreadyInThatState_ChangesNothing() {
+        Planner planner = planner(UUID.randomUUID(),
+                PlannerContent.builder().build(),
+                PlannerPublication.builder().published(false).build(),
+                PlannerModeration.builder().build());
+
+        planner.setPublished(true);
+        Instant firstStamp = planner.getFirstPublishedAt();
+
+        planner.setPublished(true);
+
+        assertThat(planner.getPublished()).isTrue();
+        assertThat(planner.getFirstPublishedAt())
+                .as("re-applying the state a planner already holds is a no-op, stamp included")
+                .isEqualTo(firstStamp);
     }
 
     @Test

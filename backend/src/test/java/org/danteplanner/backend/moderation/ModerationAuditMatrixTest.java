@@ -142,7 +142,7 @@ class ModerationAuditMatrixTest {
 
     @TestFactory
     @DisplayName("every moderator action leaves an audit record of the matching type")
-    Stream<DynamicTest> each_action_writes_its_audit_record() {
+    Stream<DynamicTest> auditRecord_WhenActionPerformed_IsWritten() {
         return auditProducers().entrySet().stream().map(entry -> DynamicTest.dynamicTest(
                 entry.getKey().name(),
                 () -> {
@@ -159,7 +159,7 @@ class ModerationAuditMatrixTest {
 
     @Test
     @DisplayName("no declared action type is left without a producer")
-    void every_action_type_has_a_producer() {
+    void actionType_WhenEnumerated_HasAProducer() {
         Set<ModerationAction.ActionType> covered = auditProducers().keySet();
         Set<ModerationAction.ActionType> declared = EnumSet.allOf(ModerationAction.ActionType.class);
 

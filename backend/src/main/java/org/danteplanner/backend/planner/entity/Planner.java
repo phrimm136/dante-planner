@@ -238,17 +238,20 @@ public class Planner implements Persistable<UUID> {
     }
 
     /**
-     * Toggle the published state. On the first transition to published, stamps
-     * firstPublishedAt once.
+     * Drive the published state to {@code target}, stamping firstPublishedAt on the first
+     * transition into published.
      *
-     * @return the new published state
+     * <p>Idempotent: applying the state the planner already holds changes nothing, so a retry or a
+     * failover cannot flip it back. A moderator takedown blocks publishing but not unpublishing.</p>
+     *
+     * @param target the desired published state
      * @throws PlannerForbiddenException if publishing a planner taken down by a moderator
      */
-    public boolean togglePublished() {
-        if (moderation.isTakenDown() && !publication.getPublished()) {
+    public void setPublished(boolean target) {
+        if (target && moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
         }
-        return publication.toggle();
+        publication.setPublished(target);
     }
 
     /**

@@ -31,7 +31,7 @@ class PlannerEntityTest {
                         .build(),
                 PlannerPublication.builder().build(),
                 PlannerModeration.builder().build());
-        planner.togglePublished();
+        planner.setPublished(true);
         return planner;
     }
 
@@ -47,15 +47,15 @@ class PlannerEntityTest {
     }
 
     @Test
-    @DisplayName("togglePublished_WhenTakenDown_Throws")
-    void togglePublished_WhenTakenDown_Throws() {
+    @DisplayName("setPublished_WhenTakenDown_Throws")
+    void setPublished_WhenTakenDown_Throws() {
         Planner planner = publishedPlanner();
         planner.takeDown();
 
         assertThat(planner.getPublished()).isFalse();
         assertThat(planner.isTakenDown()).isTrue();
 
-        assertThatThrownBy(planner::togglePublished)
+        assertThatThrownBy(() -> planner.setPublished(true))
                 .isInstanceOf(PlannerForbiddenException.class);
     }
 }

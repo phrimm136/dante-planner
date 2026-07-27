@@ -1,9 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import jakarta.servlet.http.Cookie;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -94,7 +91,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("Banned user keeps private planner work - upsert succeeds")
-    void bannedUser_cannotUpsertPlanner_returns403() throws Exception {
+    void upsertPlanner_WhenOwnerBanned_KeepsPrivateWork() throws Exception {
         // Arrange - ban the user
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test ban");
 
@@ -125,7 +122,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("Banned user cannot toggle publish - returns 403")
-    void bannedUser_cannotTogglePublish_returns403() throws Exception {
+    void togglePublish_WhenOwnerBanned_Returns403() throws Exception {
         // Arrange - create planner first (before ban)
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, false);
         UUID plannerId = planner.getId();
@@ -148,7 +145,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("Banned user cannot create comment - returns 403")
-    void bannedUser_cannotCreateComment_returns403() throws Exception {
+    void createComment_WhenAuthorBanned_Returns403() throws Exception {
         // Arrange - create published planner
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, regularUser, true);
 
@@ -272,7 +269,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("GET /me returns ban status for banned user")
-    void getMe_bannedUser_returnsBanStatus() throws Exception {
+    void getMe_WhenBannedUser_ReturnsBanStatus() throws Exception {
         // Arrange
         userModerationService.banUser(adminUser.getId(), regularUser.getId(), "Test reason");
 
@@ -287,7 +284,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("GET /me returns timeout status for timed-out user")
-    void getMe_timedOutUser_returnsTimeoutStatus() throws Exception {
+    void getMe_WhenTimedOutUser_ReturnsTimeoutStatus() throws Exception {
         // Arrange
         userModerationService.timeoutUser(adminUser.getId(), regularUser.getId(), 30, "Test timeout");
 

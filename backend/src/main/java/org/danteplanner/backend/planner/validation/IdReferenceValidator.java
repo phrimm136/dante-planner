@@ -213,7 +213,7 @@ class IdReferenceValidator {
             JsonNode themePackNode = floor.get("themePackId");
             boolean hasThemePack = themePackNode != null && !themePackNode.isNull() && themePackNode.isTextual();
 
-            if (context.isStrictMode()) {
+            if (context.policy().requiresPublishableContent()) {
                 if (!hasThemePack) {
                     log.warn("Validation failed: floorSelections[{}] must have a themePackId for publish", i);
                     context.addError(ValidationErrors.missingRequiredField(Set.of("floorSelections[" + i + "].themePackId")));

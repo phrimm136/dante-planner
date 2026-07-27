@@ -180,8 +180,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(planner))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            PlannerResponse result =
-                    publishingService.publishWithContent(testUser.getId(), planner.getId(), request);
+            PlannerResponse result = publishingService.setPublishedWithContent(
+                    testUser.getId(), planner.getId(), request, true);
 
             assertTrue(result.published());
             verify(plannerRepository, never()).findAggregateForOwner(any(), any());
@@ -190,12 +190,12 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("togglePublish Tests")
-    class TogglePublishTests {
+    @DisplayName("publication state transition Tests")
+    class PublicationStateTransitionTests {
 
         @Test
-        @DisplayName("Should toggle publish status when owner")
-        void togglePublish_Owner_TogglesStatus() {
+        @DisplayName("Should publish when owner")
+        void setPublished_WhenOwner_Publishes() {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
 
@@ -207,7 +207,7 @@ class PlannerPublishingServiceTest {
                     Optional.of(PlannerStats.builder().plannerId(planner.getId()).upvotes(12).build()));
 
             // Act
-            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), true);
 
             // Assert
             assertTrue(result.published());
@@ -217,8 +217,8 @@ class PlannerPublishingServiceTest {
         }
 
         @Test
-        @DisplayName("Should toggle from published to unpublished")
-        void togglePublish_WhenPublished_TogglesToUnpublished() {
+        @DisplayName("Should unpublish a published planner")
+        void setPublished_WhenPublished_Unpublishes() {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
 
@@ -226,7 +226,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), false);
 
             // Assert
             assertFalse(result.published());
@@ -234,7 +234,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerForbiddenException when not owner")
-        void togglePublish_NotOwner_ThrowsException() {
+        void setPublished_WhenNotOwner_ThrowsException() {
             // Arrange
             User otherUser = User.builder()
                     .id(999L)
@@ -252,7 +252,7 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             PlannerForbiddenException exception = assertThrows(
                     PlannerForbiddenException.class,
-                    () -> publishingService.togglePublish(testUser.getId(), planner.getId())
+                    () -> publishingService.setPublished(testUser.getId(), planner.getId(), true)
             );
 
             assertEquals(planner.getId(), exception.getPlannerId());
@@ -261,7 +261,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void togglePublish_NotFound_ThrowsException() {
+        void setPublished_WhenNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
@@ -269,13 +269,13 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> publishingService.togglePublish(testUser.getId(), nonExistentId)
+                    () -> publishingService.setPublished(testUser.getId(), nonExistentId, true)
             );
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner is deleted")
-        void togglePublish_Deleted_ThrowsException() {
+        void setPublished_WhenDeleted_ThrowsException() {
             // Arrange
             Planner planner = createTestPlanner();
             planner.softDelete();
@@ -286,13 +286,13 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> publishingService.togglePublish(testUser.getId(), planner.getId())
+                    () -> publishingService.setPublished(testUser.getId(), planner.getId(), true)
             );
         }
 
         @Test
         @DisplayName("Should auto-subscribe owner when publishing")
-        void togglePublish_Publishing_AutoSubscribesOwner() {
+        void setPublished_WhenPublishing_AutoSubscribesOwner() {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
 
@@ -300,7 +300,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), true);
 
             // Assert
             assertTrue(result.published());
@@ -311,7 +311,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should not auto-subscribe when unpublishing")
-        void togglePublish_Unpublishing_DoesNotAutoSubscribe() {
+        void setPublished_WhenUnpublishing_DoesNotAutoSubscribe() {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
 
@@ -319,7 +319,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse result = publishingService.togglePublish(testUser.getId(), planner.getId());
+            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), false);
 
             // Assert
             assertFalse(result.published());
@@ -332,8 +332,8 @@ class PlannerPublishingServiceTest {
     class BanEnforcementTests {
 
         @Test
-        @DisplayName("Banned user cannot toggle publish")
-        void togglePublish_bannedUser_throwsUserBannedException() {
+        @DisplayName("Banned user cannot change publication state")
+        void setPublished_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
@@ -345,7 +345,7 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertThrows(
                     org.danteplanner.backend.user.exception.UserBannedException.class,
-                    () -> publishingService.togglePublish(testUser.getId(), plannerId)
+                    () -> publishingService.setPublished(testUser.getId(), plannerId, true)
             );
             verify(plannerRepository, never()).save(any());
         }
@@ -357,7 +357,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should update setting when owner")
-        void toggleOwnerNotifications_Owner_UpdatesSetting() {
+        void toggleOwnerNotifications_WhenOwner_UpdatesSetting() {
             // Arrange
             Planner planner = createTestPlanner();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
@@ -377,7 +377,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerForbiddenException when not owner")
-        void toggleOwnerNotifications_NotOwner_ThrowsException() {
+        void toggleOwnerNotifications_WhenNotOwner_ThrowsException() {
             // Arrange
             User otherUser = User.builder()
                     .id(999L)

@@ -1,8 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -181,7 +179,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("an edit that leaves the searchable composition alone syncs the catalog copies and never touches the filter index")
-    void an_edit_without_a_composition_change_leaves_the_filter_index_untouched() {
+    void edit_WhenCompositionUnchanged_LeavesFilterIndexUntouched() {
         Planner planner = publishedPlanner("Before Edit", Set.of("Sinking", "Combustion"));
         UUID plannerId = planner.getId();
         plantUnreachableEntityRow(plannerId);
@@ -208,7 +206,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("an edit that changes the searchable composition rebuilds both filter indexes from the committed row")
-    void an_edit_with_a_composition_change_rebuilds_both_filter_indexes() throws Exception {
+    void edit_WhenCompositionChanged_RebuildsBothFilterIndexes() throws Exception {
         Planner planner = publishedPlanner("Keyword Edit", Set.of("Sinking"));
         UUID plannerId = planner.getId();
         plantUnreachableEntityRow(plannerId);
@@ -234,7 +232,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("a soft delete persists the deletion stamp and withdraws the planner from the owner path, the catalog, and both filter indexes")
-    void a_soft_delete_withdraws_the_planner_from_every_projection() {
+    void softDelete_WhenApplied_WithdrawsPlannerFromEveryProjection() {
         Planner planner = publishedPlanner("Doomed", Set.of("Sinking"));
         UUID plannerId = planner.getId();
         assertThat(entityIndex(plannerId)).isNotEmpty();

@@ -144,7 +144,7 @@ export interface PlannerSaveResult {
   conflictState: ConflictState | null
   /** Clear the current error */
   clearError: () => void
-  /** Trigger manual save, returns true if succeeded. Pass published override for togglePublish. Pass forceSync to upload even when auto-sync is disabled. */
+  /** Trigger manual save, returns true if succeeded. Pass published to drive the publication state. Pass forceSync to upload even when auto-sync is disabled. */
   save: (options?: { published?: boolean; forceSync?: boolean }) => Promise<boolean>
   /** Resolve a conflict (overwrite local or discard and reload), returns true if succeeded */
   resolveConflict: (choice: ConflictResolutionChoice) => Promise<boolean>

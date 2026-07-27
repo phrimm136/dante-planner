@@ -2,8 +2,6 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import static org.hamcrest.Matchers.hasItems;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
@@ -60,10 +58,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Tag("containerized")
 @Import(TestConfig.class)
 class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
-
-
-
-
 
     @Autowired
     private MockMvc mockMvc;
@@ -137,25 +131,25 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("catalog-membership-on-transition: row exists after publish, absent after unpublish, delete, and takedown")
-    void catalogMembership_OnVisibilityTransitions_RowPresenceMatches() {
+    void catalogMembership_WhenVisibilityTransitions_RowPresenceMatches() {
         // publish -> row
         Planner planner = draft();
-        publishingService.togglePublish(owner.getId(), planner.getId());
+        publishingService.setPublished(owner.getId(), planner.getId(), true);
         assertThat(hasCatalogRow(planner.getId())).as("published planner has a catalog row").isTrue();
 
         // unpublish -> gone
-        publishingService.togglePublish(owner.getId(), planner.getId());
+        publishingService.setPublished(owner.getId(), planner.getId(), false);
         assertThat(hasCatalogRow(planner.getId())).as("unpublished planner has no catalog row").isFalse();
 
         // republish then owner delete -> gone
-        publishingService.togglePublish(owner.getId(), planner.getId());
+        publishingService.setPublished(owner.getId(), planner.getId(), true);
         assertThat(hasCatalogRow(planner.getId())).isTrue();
         commandService.deletePlanner(owner.getId(), null, planner.getId());
         assertThat(hasCatalogRow(planner.getId())).as("deleted planner has no catalog row").isFalse();
 
         // fresh published planner, moderator takedown -> gone
         Planner takenDown = draft();
-        publishingService.togglePublish(owner.getId(), takenDown.getId());
+        publishingService.setPublished(owner.getId(), takenDown.getId(), true);
         assertThat(hasCatalogRow(takenDown.getId())).isTrue();
         plannerModerationService.deletePlanner(admin.getId(), takenDown.getId(), "violation");
         assertThat(hasCatalogRow(takenDown.getId())).as("taken-down planner has no catalog row").isFalse();
@@ -199,9 +193,9 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("recommended-flag-and-detail: vote crossing sets catalog.recommended; hide clears it; unhide restores it")
-    void recommendedFlag_OnVoteAndModerationTransitions_TracksDerivation() {
+    void recommendedFlag_WhenVoteAndModerationTransitions_TracksDerivation() {
         Planner planner = draft();
-        publishingService.togglePublish(owner.getId(), planner.getId());
+        publishingService.setPublished(owner.getId(), planner.getId(), true);
         assertThat(catalogRepository.findById(planner.getId())
                 .map(PlannerCatalog::getRecommended).orElseThrow()).isFalse();
 
@@ -237,11 +231,11 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
     @DisplayName("takedown-blocks-republish: a moderator-taken-down planner rejects the owner's publish and gains no catalog row")
     void takedownBlocksRepublish_WhenOwnerPublishes_RejectedWithoutCatalogRow() {
         Planner planner = draft();
-        publishingService.togglePublish(owner.getId(), planner.getId());
+        publishingService.setPublished(owner.getId(), planner.getId(), true);
         plannerModerationService.deletePlanner(admin.getId(), planner.getId(), "violation");
         assertThat(hasCatalogRow(planner.getId())).isFalse();
 
-        assertThatThrownBy(() -> publishingService.togglePublish(owner.getId(), planner.getId()))
+        assertThatThrownBy(() -> publishingService.setPublished(owner.getId(), planner.getId(), true))
                 .as("the aggregate root rejects republishing a taken-down planner")
                 .isInstanceOf(PlannerForbiddenException.class);
         assertThat(hasCatalogRow(planner.getId()))

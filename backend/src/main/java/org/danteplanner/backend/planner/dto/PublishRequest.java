@@ -3,6 +3,7 @@ package org.danteplanner.backend.planner.dto;
 import java.util.Set;
 
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotNull;
 
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
@@ -28,6 +29,7 @@ import org.danteplanner.backend.planner.entity.PlannerType;
  * @param selectedKeywords selected keywords for list-view display (MD planners only)
  */
 public record PublishRequest(
+    @NotNull(message = "published is required")
     Boolean published,
     String id,
     String category,

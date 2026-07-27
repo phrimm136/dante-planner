@@ -28,6 +28,8 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.ValidationPolicy;
+import org.danteplanner.backend.shared.entity.SseEventType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -174,53 +176,12 @@ class PlannerCommandServiceTest {
     }
 
     @Nested
-    @DisplayName("isValidCategory Tests")
-    class IsValidCategoryTests {
-
-        @Test
-        @DisplayName("Should return true for valid MD category with MIRROR_DUNGEON type")
-        void isValidCategory_ValidMdCategory_ReturnsTrue() {
-            assertTrue(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "5F"));
-            assertTrue(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "10F"));
-            assertTrue(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "15F"));
-        }
-
-        @Test
-        @DisplayName("Should return true for valid RR category with REFRACTED_RAILWAY type")
-        void isValidCategory_ValidRrCategory_ReturnsTrue() {
-            assertTrue(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "RR_PLACEHOLDER"));
-        }
-
-        @Test
-        @DisplayName("Should return false for invalid category")
-        void isValidCategory_InvalidCategory_ReturnsFalse() {
-            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "INVALID"));
-            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, ""));
-            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, null));
-        }
-
-        @Test
-        @DisplayName("Should return false when MD category used with RR type")
-        void isValidCategory_MdCategoryWithRrType_ReturnsFalse() {
-            assertFalse(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "5F"));
-            assertFalse(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "10F"));
-            assertFalse(commandService.isValidCategory(PlannerType.REFRACTED_RAILWAY, "15F"));
-        }
-
-        @Test
-        @DisplayName("Should return false when RR category used with MD type")
-        void isValidCategory_RrCategoryWithMdType_ReturnsFalse() {
-            assertFalse(commandService.isValidCategory(PlannerType.MIRROR_DUNGEON, "RR_PLACEHOLDER"));
-        }
-    }
-
-    @Nested
     @DisplayName("createPlanner Tests")
     class CreatePlannerTests {
 
         @Test
         @DisplayName("Should create planner successfully when within limit")
-        void createPlanner_WithinLimit_Success() {
+        void createPlanner_WhenWithinLimit_Succeeds() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
@@ -242,12 +203,12 @@ class PlannerCommandServiceTest {
             assertEquals(1L, response.syncVersion());
             // The fan-out has no state form at this tier; observing the delivered event means a real
             // PlannerSyncEventService with a subscribed emitter.
-            verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq("created"), eq(response));
+            verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq(SseEventType.CREATED), eq(response));
         }
 
         @Test
         @DisplayName("Should throw PlannerLimitExceededException when at max planners")
-        void createPlanner_AtLimit_ThrowsException() {
+        void createPlanner_WhenAtLimit_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) maxPlannersPerUser);
@@ -265,7 +226,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should throw UserNotFoundException when user not found")
-        void createPlanner_UserNotFound_ThrowsException() {
+        void createPlanner_WhenUserNotFound_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             Long nonExistentUserId = 999L;
@@ -287,7 +248,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should use default title when not provided")
-        void createPlanner_NoTitle_UsesDefault() {
+        void createPlanner_WhenNoTitle_UsesDefault() {
             // Arrange
             UpsertPlannerRequest request = withTitle(createValidRequest(), null);
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
@@ -333,7 +294,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerValidationException when content version is invalid")
-        void createPlanner_InvalidContentVersion_ThrowsException() {
+        void createPlanner_WhenInvalidContentVersion_ThrowsException() {
             // Arrange
             UpsertPlannerRequest request = withContentVersion(createValidRequest(), 5); // Old version
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
@@ -358,7 +319,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should increment syncVersion on successful update")
-        void updatePlanner_Success_IncrementsSyncVersion() {
+        void updatePlanner_WhenSuccess_IncrementsSyncVersion() {
             // Arrange
             Planner planner = testPlanner(5L, false);
 
@@ -377,12 +338,12 @@ class PlannerCommandServiceTest {
             assertEquals("Updated Title", response.title());
             // The fan-out has no state form at this tier; observing the delivered event means a real
             // PlannerSyncEventService with a subscribed emitter.
-            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), "updated", response);
+            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), SseEventType.UPDATED, response);
         }
 
         @Test
         @DisplayName("Should throw PlannerConflictException on version mismatch")
-        void updatePlanner_VersionMismatch_ThrowsException() {
+        void updatePlanner_WhenVersionMismatch_ThrowsException() {
             // Arrange
             Planner planner = testPlanner(5L, false);
 
@@ -405,7 +366,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void updatePlanner_NotFound_ThrowsException() {
+        void updatePlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             UpdatePlannerRequest request = new UpdatePlannerRequest(
@@ -423,7 +384,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should validate content on update when provided")
-        void updatePlanner_WithContent_ValidatesContent() {
+        void updatePlanner_WhenContent_ValidatesContent() {
             // Arrange
             Planner planner = createTestPlanner();
             UpdatePlannerRequest request = new UpdatePlannerRequest(
@@ -433,7 +394,8 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
             // A request without a category must validate against the planner's own. Only that exact
             // triple is rejected, so any other combination leaves the stub unmatched and succeeds.
-            when(contentValidator.validate(request.content(), planner.getCategory(), planner.getPublished()))
+            when(contentValidator.validate(request.content(), planner.getCategory(),
+                    ValidationPolicy.forPublicationState(planner.getPublished())))
                     .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
             // Act & Assert
@@ -448,7 +410,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should only update provided fields")
-        void updatePlanner_PartialUpdate_OnlyUpdatesProvidedFields() {
+        void updatePlanner_WhenPartialUpdate_OnlyUpdatesProvidedFields() {
             // Arrange
             Planner planner = createTestPlanner();
             planner.getContent().setTitle("Original Title");
@@ -477,7 +439,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when not found")
-        void deletePlanner_NotFound_ThrowsException() {
+        void deletePlanner_WhenNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerRepository.findAggregateForOwner(plannerId, testUser.getId()))
@@ -495,7 +457,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should auto-unpublish published planner before deletion")
-        void deletePlanner_PublishedPlanner_UnpublishesFirst() {
+        void deletePlanner_WhenPublishedPlanner_UnpublishesFirst() {
             // Arrange
             Planner planner = testPlanner(1L, true);
             assertTrue(planner.getPublished());
@@ -515,7 +477,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should not change unpublished planner on delete")
-        void deletePlanner_UnpublishedPlanner_NoPublishChange() {
+        void deletePlanner_WhenUnpublishedPlanner_NoPublishChange() {
             // Arrange
             Planner planner = testPlanner(1L, false);
 
@@ -538,7 +500,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should import planners successfully when within limit")
-        void importPlanners_WithinLimit_Success() {
+        void importPlanners_WhenWithinLimit_Succeeds() {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -575,7 +537,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should reject import when would exceed limit")
-        void importPlanners_ExceedsLimit_ThrowsException() {
+        void importPlanners_WhenExceedsLimit_ThrowsException() {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 2));
 
@@ -597,7 +559,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should throw UserNotFoundException when user not found during import")
-        void importPlanners_UserNotFound_ThrowsException() {
+        void importPlanners_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentUserId = 999L;
             when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
@@ -620,7 +582,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Should allow import up to exactly max planners")
-        void importPlanners_ExactlyToLimit_Success() {
+        void importPlanners_WhenExactlyToLimit_Success() {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
@@ -717,7 +679,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("A ban does not block private planner work")
-        void upsertPlanner_bannedUser_isNotBlockedByTheGuard() {
+        void upsertPlanner_WhenBannedUser_IsNotBlockedByTheGuard() {
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
 
@@ -745,7 +707,7 @@ class PlannerCommandServiceTest {
 
         @Test
         @DisplayName("Non-banned user can upsert planner")
-        void upsertPlanner_nonBannedUser_succeeds() {
+        void upsertPlanner_WhenNonBannedUser_Succeeds() {
             // Arrange
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));

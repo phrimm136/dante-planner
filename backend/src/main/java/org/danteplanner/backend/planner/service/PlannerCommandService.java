@@ -13,9 +13,6 @@ import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.planner.entity.MDCategory;
-import org.danteplanner.backend.planner.entity.RRCategory;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
@@ -27,6 +24,7 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.springframework.stereotype.Service;
@@ -100,20 +98,6 @@ public class PlannerCommandService {
     }
 
     /**
-     * Validate that the category is valid for the given planner type.
-     *
-     * @param plannerType the planner type
-     * @param category    the category string
-     * @return true if valid, false otherwise
-     */
-    public boolean isValidCategory(PlannerType plannerType, String category) {
-        return switch (plannerType) {
-            case MIRROR_DUNGEON -> MDCategory.isValid(category);
-            case REFRACTED_RAILWAY -> RRCategory.isValid(category);
-        };
-    }
-
-    /**
      * Copy an upsert request's provided fields onto the aggregate's content row.
      * The category is validated and applied only when it differs from the current
      * value, and content left out of the request is re-validated whenever the
@@ -134,7 +118,8 @@ public class PlannerCommandService {
         if (req.content() != null) {
             applyContent(planner, req.content());
         } else if (categoryChanged) {
-            contentValidator.validate(contentRow.getContent(), contentRow.getCategory(), planner.getPublished());
+            contentValidator.validate(contentRow.getContent(), contentRow.getCategory(),
+                    ValidationPolicy.forPublicationState(planner.getPublished()));
         }
 
         applyKeywordsAndDeviceId(contentRow, req.selectedKeywords(), deviceId);
@@ -172,7 +157,7 @@ public class PlannerCommandService {
     }
 
     private void applyCategory(Planner planner, String category) {
-        if (!isValidCategory(planner.getPlannerType(), category)) {
+        if (!planner.getPlannerType().isValidCategory(category)) {
             throw new PlannerValidationException(
                     ErrorCode.INVALID_CATEGORY.getCode(),
                     "Invalid category '" + category + "' for planner type " + planner.getPlannerType());
@@ -182,7 +167,8 @@ public class PlannerCommandService {
 
     private void applyContent(Planner planner, String content) {
         PlannerContent contentRow = planner.getContent();
-        contentValidator.validate(content, contentRow.getCategory(), planner.getPublished());
+        contentValidator.validate(content, contentRow.getCategory(),
+                ValidationPolicy.forPublicationState(planner.getPublished()));
         contentRow.setContent(content);
     }
 
@@ -269,7 +255,7 @@ public class PlannerCommandService {
         contentVersionValidator.validateVersionForCreate(req.plannerType(), req.contentVersion());
 
         // Validate category for planner type
-        if (!isValidCategory(req.plannerType(), req.category())) {
+        if (!req.plannerType().isValidCategory(req.category())) {
             throw new PlannerValidationException(
                     ErrorCode.INVALID_CATEGORY.getCode(),
                     "Invalid category '" + req.category() + "' for planner type " + req.plannerType());
@@ -285,7 +271,7 @@ public class PlannerCommandService {
         PlannerResponse response = PlannerResponse.fromEntity(saved, 0);
 
         // Notify other devices via SSE
-        sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), SseEventType.CREATED.getValue(), response);
+        sseService.notifyPlannerUpdate(userId, deviceId, saved.getId(), SseEventType.CREATED, response);
 
         return new UpsertedPlanner(saved, response, true);
     }
@@ -362,7 +348,7 @@ public class PlannerCommandService {
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
-            sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
+            sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED, response);
             return new UpsertedPlanner(saved, response, false);
         }
 
@@ -436,7 +422,7 @@ public class PlannerCommandService {
         PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
 
         // Notify other devices via SSE
-        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED.getValue(), response);
+        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED, response);
 
         return response;
     }
@@ -476,7 +462,7 @@ public class PlannerCommandService {
         log.info("Soft deleted planner {} for user {}", id, userId);
 
         // Notify other devices via SSE
-        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.DELETED.getValue(), null);
+        sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.DELETED, null);
     }
 
     /**
@@ -506,7 +492,7 @@ public class PlannerCommandService {
             contentVersionValidator.validateVersionForCreate(plannerReq.plannerType(), plannerReq.contentVersion());
 
             // Validate category for planner type
-            if (!isValidCategory(plannerReq.plannerType(), plannerReq.category())) {
+            if (!plannerReq.plannerType().isValidCategory(plannerReq.category())) {
                 throw new PlannerValidationException(
                         ErrorCode.INVALID_CATEGORY.getCode(),
                         "Invalid category '" + plannerReq.category() + "' for planner type " + plannerReq.plannerType());
