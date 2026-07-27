@@ -1,12 +1,15 @@
 # shellcheck shell=bash
 # CloudWatch log-group retention policy.
 
-# Set 30-day retention on all /ecs/danteplanner/* log groups (idempotent)
+# Set 30-day retention on app + RDS slow-query log groups (idempotent).
+# The RDS group is created by the instance's slowquery export with never-expire
+# retention, so it must be capped here like the rest.
 setup_log_retention() {
     log_info "Setting CloudWatch log retention: 30 days"
     local LOG_GROUPS=(
         "/ecs/danteplanner/nginx"
         "/ecs/danteplanner/mysql"
+        "/aws/rds/instance/$RDS_INSTANCE_ID/slowquery"
     )
     for LOG_GROUP in "${LOG_GROUPS[@]}"; do
         aws logs put-retention-policy \

@@ -10,7 +10,9 @@
 #                          digests (prometheus + emit-mysql-query-stats.sh cron)
 #                          — goes stale after the RDS cutover removes local mysqld
 #   RDS                  : Amazon RDS instance metrics (AWS/RDS namespace) —
-#                          CPU/credits, connections, memory, storage, latency, IOPS
+#                          CPU/credits, connections, memory, storage, latency, IOPS,
+#                          plus slow queries via the slowquery log export
+#                          (terraform/rds enabled_cloudwatch_logs_exports)
 #   Spring / Application : error+warn rates, JVM threads, recent error log
 #   Alarms               : alarm status strip
 setup_dashboard() {
@@ -229,7 +231,7 @@ setup_dashboard() {
     {
       "type": "text",
       "x": 0, "y": 46, "width": 24, "height": 1,
-      "properties": { "markdown": "# RDS (Amazon RDS MySQL) — instance CPU/credits, connections, memory, storage, latency, IOPS (AWS/RDS namespace)" }
+      "properties": { "markdown": "# RDS (Amazon RDS MySQL) — instance CPU/credits, connections, memory, storage, latency, IOPS (AWS/RDS namespace) + slow queries (slowquery log export)" }
     },
     {
       "type": "metric",
@@ -323,13 +325,33 @@ setup_dashboard() {
       }
     },
     {
+      "type": "log",
+      "x": 0, "y": 65, "width": 16, "height": 7,
+      "properties": {
+        "title": "RDS Slow Queries — worst by Query_time (slow_query_log, threshold = long_query_time)",
+        "query": "SOURCE '/aws/rds/instance/$RDS_INSTANCE_ID/slowquery' | parse @message /Query_time: (?<query_time_s>[0-9.]+) +Lock_time: (?<lock_time_s>[0-9.]+) +Rows_sent: (?<rows_sent>[0-9]+) +Rows_examined: (?<rows_examined>[0-9]+)/ | filter ispresent(query_time_s) | display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, @message | sort query_time_s desc | limit 25",
+        "region": "$AWS_REGION",
+        "view": "table"
+      }
+    },
+    {
+      "type": "log",
+      "x": 16, "y": 65, "width": 8, "height": 7,
+      "properties": {
+        "title": "Slow Query Count & Duration (/5m)",
+        "query": "SOURCE '/aws/rds/instance/$RDS_INSTANCE_ID/slowquery' | parse @message /Query_time: (?<query_time_s>[0-9.]+)/ | filter ispresent(query_time_s) | stats count(*) as slow_queries, avg(query_time_s) as avg_s, max(query_time_s) as max_s by bin(5m)",
+        "region": "$AWS_REGION",
+        "view": "timeSeries"
+      }
+    },
+    {
       "type": "text",
-      "x": 0, "y": 65, "width": 24, "height": 1,
+      "x": 0, "y": 72, "width": 24, "height": 1,
       "properties": { "markdown": "# Spring / Application — errors, JVM, throughput" }
     },
     {
       "type": "metric",
-      "x": 0, "y": 66, "width": 12, "height": 6,
+      "x": 0, "y": 73, "width": 12, "height": 6,
       "properties": {
         "title": "Error & Warning Rates",
         "metrics": [
@@ -345,7 +367,7 @@ setup_dashboard() {
     },
     {
       "type": "metric",
-      "x": 12, "y": 66, "width": 12, "height": 6,
+      "x": 12, "y": 73, "width": 12, "height": 6,
       "properties": {
         "title": "JVM Heap Memory (used / committed / max)",
         "metrics": [
@@ -361,7 +383,7 @@ setup_dashboard() {
     },
     {
       "type": "metric",
-      "x": 0, "y": 72, "width": 12, "height": 6,
+      "x": 0, "y": 79, "width": 12, "height": 6,
       "properties": {
         "title": "JVM GC Pause",
         "metrics": [
@@ -375,7 +397,7 @@ setup_dashboard() {
     },
     {
       "type": "metric",
-      "x": 12, "y": 72, "width": 12, "height": 6,
+      "x": 12, "y": 79, "width": 12, "height": 6,
       "properties": {
         "title": "Backend JVM Threads",
         "metrics": [
@@ -389,7 +411,7 @@ setup_dashboard() {
     },
     {
       "type": "log",
-      "x": 0, "y": 78, "width": 24, "height": 8,
+      "x": 0, "y": 85, "width": 24, "height": 8,
       "properties": {
         "title": "Recent Backend Errors & Warnings",
         "query": "SOURCE '/ecs/danteplanner/backend' | fields @timestamp, level, logger_name, message, method, path, userId, thread_name | filter level = \"ERROR\" or level = \"WARN\" | sort @timestamp desc | limit 50",
@@ -399,12 +421,12 @@ setup_dashboard() {
     },
     {
       "type": "text",
-      "x": 0, "y": 86, "width": 24, "height": 1,
+      "x": 0, "y": 93, "width": 24, "height": 1,
       "properties": { "markdown": "# Alarms" }
     },
     {
       "type": "alarm",
-      "x": 0, "y": 87, "width": 24, "height": 4,
+      "x": 0, "y": 94, "width": 24, "height": 4,
       "properties": {
         "title": "Alarm Status",
         "alarms": [

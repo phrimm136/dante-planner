@@ -23,7 +23,7 @@ function partialHash(input: string): number {
 
 /** Convert a string to its char code byte array for build-time embedding. */
 function toBytes(s: string): number[] {
-  return Array.from(s).map(c => c.charCodeAt(0))
+  return Array.from(s).map((c) => c.charCodeAt(0))
 }
 
 /**
@@ -34,7 +34,7 @@ function toBytes(s: string): number[] {
 function transformResolveAsset(
   template: string,
   manifest: Record<string, string>,
-  warn: (msg: string) => void
+  warn: (msg: string) => void,
 ): string {
   // Split template on ${...} interpolations
   const interpRegex = /\$\{([^}]+)\}/g
@@ -254,7 +254,7 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
       // Match both single and double quotes (esbuild normalizes to double)
       result = result.replace(
         /import\s*\{\s*resolveAsset\s*\}\s*from\s*['"]\.\/assetManifest['"]/,
-        `import _m from 'virtual:asset-manifest'`
+        `import _m from 'virtual:asset-manifest'`,
       )
 
       // Inject runtime helpers after the last import line
@@ -267,7 +267,8 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
       }
       if (lastMatch) {
         const insertPos = lastMatch.index + lastMatch[0].length
-        result = result.slice(0, insertPos) +
+        result =
+          result.slice(0, insertPos) +
           `\n\n${HELPER_H}\n${HELPER_HB}\n${HELPER_R}\n` +
           result.slice(insertPos)
       }
@@ -282,21 +283,18 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
 
       // 1. Replace map key strings: "../../../static/..." → "abc12345"
       result = result.replace(
-        new RegExp(`"\\.\\.\/\\.\\.\/\\.\\.\/static\/[^"]+\\.json"`, 'g'),
+        new RegExp(`"\\.\\./\\.\\./\\.\\./static/[^"]+\\.json"`, 'g'),
         (match) => {
           const p = match.slice(1, -1)
           return `"${hashKey(p)}"`
-        }
+        },
       )
 
       // 2. Replace template literal lookups: `../../../static/.../${var}.json` → $_hk(...)
-      result = result.replace(
-        /`\.\.\/\.\.\/\.\.\/static\/[^`]+`/g,
-        (match) => {
-          const template = match.slice(1, -1)
-          return transformDynamicImportKey(template)
-        }
-      )
+      result = result.replace(/`\.\.\/\.\.\/\.\.\/static\/[^`]+`/g, (match) => {
+        const template = match.slice(1, -1)
+        return transformDynamicImportKey(template)
+      })
 
       // 3. Inject chunk-level hash helpers if replacements were made
       if (result !== code) {
@@ -331,9 +329,10 @@ export function hashStaticPlugin(options: HashStaticOptions): Plugin {
       }
 
       // Delete all top-level directories that came from staticDir
-      const staticTopDirs = fs.readdirSync(options.staticDir, { withFileTypes: true })
-        .filter(e => e.isDirectory() && e.name !== 'scripts')
-        .map(e => e.name)
+      const staticTopDirs = fs
+        .readdirSync(options.staticDir, { withFileTypes: true })
+        .filter((e) => e.isDirectory() && e.name !== 'scripts')
+        .map((e) => e.name)
 
       for (const dir of staticTopDirs) {
         const dirPath = path.join(distDir, dir)

@@ -1157,7 +1157,7 @@
      "logGroupNames": [
       "/aws/rds/instance/danteplanner-mysql/slowquery"
      ],
-     "expression": "parse @message /Query_time: (?<query_time_s>[0-9.]+)\\s+Lock_time: (?<lock_time_s>[0-9.]+).*Rows_sent: (?<rows_sent>[0-9]+)\\s+Rows_examined: (?<rows_examined>[0-9]+)/ | parse @message /Created_tmp_disk_tables: (?<tmp_disk_tables>[0-9]+)/ | parse @message /Sort_merge_passes: (?<sort_merge_passes>[0-9]+)/ | filter ispresent(rows_examined) | display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, tmp_disk_tables, sort_merge_passes, substr(@message, 0, 160) | sort rows_examined desc | limit 50"
+     "expression": "parse @message /Query_time: (?<query_time_s>[0-9.]+)\\s+Lock_time: (?<lock_time_s>[0-9.]+).*Rows_sent: (?<rows_sent>[0-9]+)\\s+Rows_examined: (?<rows_examined>[0-9]+)/ | parse @message /Created_tmp_disk_tables: (?<tmp_disk_tables>[0-9]+)/ | parse @message /Sort_merge_passes: (?<sort_merge_passes>[0-9]+)/ | filter ispresent(rows_examined) | display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, tmp_disk_tables, sort_merge_passes, @message | sort rows_examined desc | limit 50"
     }
    ]
   },

@@ -144,4 +144,22 @@ setup_insights_queries() {
 | limit 100'
 
     log_info "Saved 2 Insights queries under DantePlanner/MySQL/"
+
+    # ── RDS (slow query log, /aws/rds/instance/<id>/slowquery) ────────────────
+    # Plain-text MySQL slow log shipped by the instance's slowquery export; each
+    # event is one entry: "# Query_time: ..." header lines plus the SQL text.
+    # Not JSON — fields must be extracted with parse().
+    local RDS_SLOWQUERY_LOG_GROUP="/aws/rds/instance/$RDS_INSTANCE_ID/slowquery"
+
+    # scan_ratio = rows examined per row returned — a high ratio is the
+    # missing-index signal, distinct from the dashboard widget's duration sort.
+    upsert_query "DantePlanner/RDS/SlowQueryAnalysis" "$RDS_SLOWQUERY_LOG_GROUP" \
+        'parse @message /Query_time: (?<query_time_s>[0-9.]+) +Lock_time: (?<lock_time_s>[0-9.]+) +Rows_sent: (?<rows_sent>[0-9]+) +Rows_examined: (?<rows_examined>[0-9]+)/
+| filter ispresent(query_time_s)
+| fields rows_examined / greatest(rows_sent, 1) as scan_ratio
+| display @timestamp, query_time_s, lock_time_s, rows_sent, rows_examined, scan_ratio, @message
+| sort scan_ratio desc
+| limit 50'
+
+    log_info "Saved 1 Insights query under DantePlanner/RDS/"
 }
