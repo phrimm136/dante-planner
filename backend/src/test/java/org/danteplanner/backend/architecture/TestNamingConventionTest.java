@@ -27,24 +27,25 @@ class TestNamingConventionTest {
     /**
      * Every JUnit test method (anything meta-annotated {@code @Testable}: {@code @Test},
      * {@code @ParameterizedTest}, {@code @RepeatedTest}, {@code @TestFactory}) carries three or
-     * more underscore-separated parts: subject, condition, expectation.
+     * more underscore-separated parts, spelled {@code subject_WhenCondition_Expectation}: a
+     * camelCase subject, a middle part opening with {@code When}, and PascalCase expectation parts
+     * — {@code findById_WhenExists_ReturnsUser}.
      *
-     * <p>Segment casing is deliberately free, because two spellings are both legitimate and both
-     * in wide use. The mechanical form covers most of the suite, in either casing —
-     * {@code findById_WhenExists_ReturnsUser}, {@code unsafeMethod_missingHeader_rejected}. The
-     * all-lowercase invariant phrase covers tests a comment cites by name, which must survive the
-     * rename of whatever they cover — {@code deleted_planner_is_masked_on_replica_hit}; see
-     * {@code docs/testing-principles.md} §7.</p>
+     * <p>The condition word is fixed rather than drawn from a set. {@code After}, {@code With} and
+     * {@code Given} each read well in isolation, and admitting them is what let half the suite
+     * settle into spellings that were neither mechanical nor invariant; a reader scanning a file
+     * should not have to hold four shapes in mind at once.</p>
      *
-     * <p>Do not tighten this to require a literal {@code When} or PascalCase segments. Fewer than
-     * half the suite spells it that way, and the invariant form uses English articles
-     * ({@code a_}, {@code an_}, {@code no_}) that a minimum-segment-length rule would reject.</p>
+     * <p>A name whose middle part reads as an outcome rather than a condition —
+     * {@code cannotCreateComment}, {@code NoDeadlock} — is misnamed rather than exempt. The
+     * condition belongs in the middle and the outcome at the end, and rewriting it that way
+     * usually exposes that the two had been swapped.</p>
      */
     @ArchTest
     static final ArchRule test_methods_follow_naming_convention =
             methods()
                     .that().areMetaAnnotatedWith("org.junit.platform.commons.annotation.Testable")
-                    .should().haveNameMatching("^[a-z][A-Za-z0-9]*(_[A-Za-z0-9]+){2,}$")
-                    .as("test methods carry three or more underscore-separated parts:"
-                            + " subject, condition, expectation");
+                    .should().haveNameMatching(
+                            "^[a-z][A-Za-z0-9]*_When[A-Z0-9][A-Za-z0-9]*(_[A-Z0-9][A-Za-z0-9]*)+$")
+                    .as("test methods are spelled subject_WhenCondition_Expectation");
 }
