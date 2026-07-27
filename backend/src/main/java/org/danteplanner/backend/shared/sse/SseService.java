@@ -16,6 +16,7 @@ import java.time.Duration;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.danteplanner.backend.shared.entity.SseEventType;
 
 /**
  * Central SSE service managing connections and settings-aware event dispatch.
@@ -195,7 +196,7 @@ public class SseService extends AbstractSseService<Long> {
      * @param payload the suspension detail prepared by the publisher
      */
     public void notifyAccountSuspended(Long userId, Object payload) {
-        sendToUser(userId, org.danteplanner.backend.shared.entity.SseEventType.ACCOUNT_SUSPENDED.getValue(), payload);
+        sendToUser(userId, SseEventType.ACCOUNT_SUSPENDED.getValue(), payload);
         log.info("Sent account_suspended notification to user {}", userId);
     }
 

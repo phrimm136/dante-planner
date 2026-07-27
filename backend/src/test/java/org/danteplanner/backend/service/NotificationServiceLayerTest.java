@@ -2,7 +2,9 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationRetentionService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
+import org.danteplanner.backend.notification.service.NotificationInboxService;
 
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
@@ -37,11 +39,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for NotificationService.
+ * Unit tests for the notification service layer.
  * Tests notification creation, retrieval, and cleanup logic.
  */
 @ExtendWith(MockitoExtension.class)
-class NotificationServiceTest {
+class NotificationServiceLayerTest {
 
     @Mock
     private NotificationRepository notificationRepository;
@@ -49,14 +51,18 @@ class NotificationServiceTest {
     @Mock
     private SsePublisher ssePublisher;
 
-    private NotificationService notificationService;
+    private NotificationInboxService inboxService;
+    private NotificationDispatchService dispatchService;
+    private NotificationRetentionService retentionService;
 
     private Long testUserId = 100L;
     private UUID testPlannerId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
-        notificationService = new NotificationService(notificationRepository, ssePublisher);
+        inboxService = new NotificationInboxService(notificationRepository);
+        dispatchService = new NotificationDispatchService(notificationRepository, ssePublisher);
+        retentionService = new NotificationRetentionService(notificationRepository);
     }
 
     @Nested
@@ -67,7 +73,7 @@ class NotificationServiceTest {
         void publishFanoutSingleStatement_WhenSubscribersExist_IssuesOneInsertSelectNotNInserts() {
             String title = "Fanout Build";
 
-            notificationService.notifyPlannerPublished(testUserId, testPlannerId, title);
+            dispatchService.notifyPlannerPublished(testUserId, testPlannerId, title);
 
             // The recipient filter runs inside the INSERT ... SELECT, so the rows the fan-out
             // produces are observable only in a containerized test against the migrated schema.
@@ -94,7 +100,7 @@ class NotificationServiceTest {
                     });
 
             // Act
-            notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
             // The persisted row is observable only in a containerized test; the captured entity is
@@ -120,7 +126,7 @@ class NotificationServiceTest {
 
             // Act & Assert - should not throw, logs debug message
             assertDoesNotThrow(() ->
-                    notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId)
+                    dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId)
             );
         }
 
@@ -139,7 +145,7 @@ class NotificationServiceTest {
                     });
 
             // Act
-            notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
             ArgumentCaptor<String> entityIdCaptor = ArgumentCaptor.forClass(String.class);
@@ -166,7 +172,7 @@ class NotificationServiceTest {
                     .thenThrow(new DataIntegrityViolationException("Duplicate key violation"));
 
             // Act
-            notificationService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
             verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any(), any());
@@ -196,7 +202,7 @@ class NotificationServiceTest {
                     });
 
             // Act
-            notificationService.notifyCommentReceived(
+            dispatchService.notifyCommentReceived(
                     commentId, commentPublicId, testPlannerId, "Test Planner",
                     "Test content", plannerOwnerId, commenterId);
 
@@ -221,7 +227,7 @@ class NotificationServiceTest {
             UUID commentPublicId = UUID.randomUUID();
 
             // Act
-            notificationService.notifyCommentReceived(
+            dispatchService.notifyCommentReceived(
                     commentId, commentPublicId, testPlannerId, "Test Planner",
                     "Test content", userId, userId);
 
@@ -243,7 +249,7 @@ class NotificationServiceTest {
 
             // Act & Assert - should not throw
             assertDoesNotThrow(() ->
-                    notificationService.notifyCommentReceived(
+                    dispatchService.notifyCommentReceived(
                             commentId, commentPublicId, testPlannerId, "Test Planner",
                             "Test content", plannerOwnerId, commenterId)
             );
@@ -273,7 +279,7 @@ class NotificationServiceTest {
                     });
 
             // Act
-            notificationService.notifyReplyReceived(
+            dispatchService.notifyReplyReceived(
                     replyId, replyPublicId, testPlannerId, "Test Planner",
                     "Reply content", parentAuthorId, replierId);
 
@@ -298,7 +304,7 @@ class NotificationServiceTest {
             UUID replyPublicId = UUID.randomUUID();
 
             // Act
-            notificationService.notifyReplyReceived(
+            dispatchService.notifyReplyReceived(
                     replyId, replyPublicId, testPlannerId, "Test Planner",
                     "Reply content", userId, userId);
 
@@ -324,7 +330,7 @@ class NotificationServiceTest {
                     .thenReturn(page);
 
             // Act
-            NotificationInboxResponse response = notificationService.getInbox(testUserId, 0, 20);
+            NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20);
 
             // Assert
             assertEquals(2, response.notifications().size());
@@ -343,7 +349,7 @@ class NotificationServiceTest {
                     .thenReturn(emptyPage);
 
             // Act
-            NotificationInboxResponse response = notificationService.getInbox(testUserId, 0, 20);
+            NotificationInboxResponse response = inboxService.getInbox(testUserId, 0, 20);
 
             // Assert
             assertTrue(response.notifications().isEmpty());
@@ -363,7 +369,7 @@ class NotificationServiceTest {
                     .thenReturn(5L);
 
             // Act
-            UnreadCountResponse response = notificationService.getUnreadCount(testUserId);
+            UnreadCountResponse response = inboxService.getUnreadCount(testUserId);
 
             // Assert
             assertEquals(5L, response.unreadCount());
@@ -377,7 +383,7 @@ class NotificationServiceTest {
                     .thenReturn(0L);
 
             // Act
-            UnreadCountResponse response = notificationService.getUnreadCount(testUserId);
+            UnreadCountResponse response = inboxService.getUnreadCount(testUserId);
 
             // Assert
             assertEquals(0L, response.unreadCount());
@@ -403,7 +409,7 @@ class NotificationServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            NotificationResponse response = notificationService.markAsRead(publicId, testUserId);
+            NotificationResponse response = inboxService.markAsRead(publicId, testUserId);
 
             // Assert
             assertTrue(notification.getRead());
@@ -421,7 +427,7 @@ class NotificationServiceTest {
 
             // Act & Assert
             assertThrows(EntityNotFoundException.class,
-                    () -> notificationService.markAsRead(publicId, testUserId));
+                    () -> inboxService.markAsRead(publicId, testUserId));
         }
 
         @Test
@@ -437,7 +443,7 @@ class NotificationServiceTest {
 
             // Act & Assert
             assertThrows(EntityNotFoundException.class,
-                    () -> notificationService.markAsRead(publicId, 999L));
+                    () -> inboxService.markAsRead(publicId, 999L));
         }
     }
 
@@ -453,7 +459,7 @@ class NotificationServiceTest {
                     .thenReturn(3);
 
             // Act
-            int count = notificationService.markAllAsRead(testUserId);
+            int count = inboxService.markAllAsRead(testUserId);
 
             // Assert
             assertEquals(3, count);
@@ -467,7 +473,7 @@ class NotificationServiceTest {
                     .thenReturn(0);
 
             // Act
-            int count = notificationService.markAllAsRead(testUserId);
+            int count = inboxService.markAllAsRead(testUserId);
 
             // Assert
             assertEquals(0, count);
@@ -493,7 +499,7 @@ class NotificationServiceTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            notificationService.deleteNotification(publicId, testUserId);
+            inboxService.deleteNotification(publicId, testUserId);
 
             // Assert
             assertTrue(notification.isDeleted());
@@ -510,7 +516,7 @@ class NotificationServiceTest {
 
             // Act & Assert
             assertThrows(EntityNotFoundException.class,
-                    () -> notificationService.deleteNotification(publicId, testUserId));
+                    () -> inboxService.deleteNotification(publicId, testUserId));
         }
 
         @Test
@@ -526,7 +532,7 @@ class NotificationServiceTest {
 
             // Act & Assert
             assertThrows(EntityNotFoundException.class,
-                    () -> notificationService.deleteNotification(publicId, 999L));
+                    () -> inboxService.deleteNotification(publicId, 999L));
         }
     }
 
@@ -544,7 +550,7 @@ class NotificationServiceTest {
                     .thenReturn(5);
 
             // Act
-            notificationService.cleanupOldNotifications();
+            retentionService.purgeExpired();
 
             // Assert
             // Which rows the two sweeps remove is observable only in a containerized test seeded
@@ -566,7 +572,7 @@ class NotificationServiceTest {
                     .thenReturn(0);
 
             // Act
-            notificationService.cleanupOldNotifications();
+            retentionService.purgeExpired();
 
             // Assert - verify cutoff dates are approximately correct
             // The 90/365-day retention window is only observable as the cutoff arguments here;

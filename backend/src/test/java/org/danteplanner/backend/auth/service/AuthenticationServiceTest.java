@@ -5,7 +5,6 @@ import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProvider;
@@ -63,9 +62,6 @@ class AuthenticationServiceTest {
     private UserAccountLifecycleService lifecycleService;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
     private OAuthProvider oauthProvider;
 
     @Mock
@@ -84,7 +80,6 @@ class AuthenticationServiceTest {
                 tokenBlacklistService,
                 userService,
                 lifecycleService,
-                userRepository,
                 new LineageRotationFlag(false)
         );
 
@@ -117,7 +112,7 @@ class AuthenticationServiceTest {
             when(providerRegistry.getProvider(providerName)).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(code, redirectUri, codeVerifier)).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo(oauthTokens)).thenReturn(userInfo);
-            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "google-123"))
+            when(userService.findActiveByProvider(AuthProviderType.GOOGLE, "google-123"))
                     .thenReturn(Optional.of(testUser));
             when(tokenGenerator.generateAccessToken(testUser.getId(), UserRole.NORMAL))
                     .thenReturn("jwt-access-token");
@@ -167,9 +162,9 @@ class AuthenticationServiceTest {
             when(providerRegistry.getProvider(anyString())).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
-            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(any(), any()))
+            when(userService.findActiveByProvider(any(), any()))
                     .thenReturn(Optional.empty());
-            when(userRepository.findByProviderAndProviderId(any(), any()))
+            when(userService.findByProvider(any(), any()))
                     .thenReturn(Optional.empty());
             when(userService.findOrCreateUser("google", Map.of("id", "provider-id-123", "email", "user@email.com")))
                     .thenReturn(testUser);
@@ -207,9 +202,9 @@ class AuthenticationServiceTest {
             when(providerRegistry.getProvider("google")).thenReturn(oauthProvider);
             when(oauthProvider.exchangeCodeForTokens(any(), any(), any())).thenReturn(oauthTokens);
             when(oauthProvider.getUserInfo(any(OAuthTokens.class))).thenReturn(userInfo);
-            when(userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(AuthProviderType.GOOGLE, "deleted-123"))
+            when(userService.findActiveByProvider(AuthProviderType.GOOGLE, "deleted-123"))
                     .thenReturn(Optional.empty());
-            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, "deleted-123"))
+            when(userService.findByProvider(AuthProviderType.GOOGLE, "deleted-123"))
                     .thenReturn(Optional.of(deletedUser));
             when(tokenGenerator.generateAccessToken(any(), any())).thenReturn("access");
             when(tokenGenerator.generateRefreshToken(any())).thenReturn("refresh");

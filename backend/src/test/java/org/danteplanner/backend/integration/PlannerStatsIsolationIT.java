@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 
 /**
  * Counter isolation: planner_stats is the single home of view/upvote/comment
@@ -78,10 +79,10 @@ class PlannerStatsIsolationIT {
     private PlannerCommentRepository commentRepository;
 
     @Autowired
-    private org.danteplanner.backend.moderation.repository.ModerationActionRepository moderationActionRepository;
+    private ModerationActionRepository moderationActionRepository;
 
     @Autowired
-    private CommentService commentService;
+    private CommentCommandService commentCommandService;
 
     @Autowired
     private CommentModerationService commentModerationService;
@@ -143,17 +144,17 @@ class PlannerStatsIsolationIT {
     void commentCountMaintained_WhenCreateAndDeleteTransitions_CounterTracks() {
         seedStats(0, 0, 0);
 
-        UUID topLevelId = commentService.createComment(planner.getId(), commenter.getId(), null,
+        UUID topLevelId = commentCommandService.createComment(planner.getId(), commenter.getId(), null,
                 new CreateCommentRequest("first", null)).id();
         assertThat(commentCount()).as("top-level comment increments").isEqualTo(1);
 
-        UUID replyId = commentService.createReply(topLevelId, owner.getId(), null, "a reply").id();
+        UUID replyId = commentCommandService.createReply(topLevelId, owner.getId(), null, "a reply").id();
         assertThat(commentCount()).as("reply increments").isEqualTo(2);
 
-        commentService.deleteComment(replyId, owner.getId());
+        commentCommandService.deleteComment(replyId, owner.getId());
         assertThat(commentCount()).as("author delete decrements").isEqualTo(1);
 
-        commentService.deleteComment(replyId, owner.getId());
+        commentCommandService.deleteComment(replyId, owner.getId());
         assertThat(commentCount()).as("repeated delete is idempotent (already deleted)").isEqualTo(1);
 
         commentModerationService.deleteCommentByPublicId(admin.getId(), topLevelId, "cleanup");
@@ -166,7 +167,7 @@ class PlannerStatsIsolationIT {
         // not push the counter below zero on delete
         PlannerComment drifted = commentRepository.save(
                 new PlannerComment(planner.getId(), commenter.getId(), "drifted", null, 0));
-        commentService.deleteComment(drifted.getPublicId(), commenter.getId());
+        commentCommandService.deleteComment(drifted.getPublicId(), commenter.getId());
         assertThat(commentCount()).as("decrement floors at zero").isEqualTo(0);
     }
 

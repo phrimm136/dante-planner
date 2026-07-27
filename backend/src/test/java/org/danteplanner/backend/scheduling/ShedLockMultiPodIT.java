@@ -1,6 +1,6 @@
 package org.danteplanner.backend.scheduling;
 
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.scheduler.NotificationCleanupScheduler;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.user.scheduler.UserCleanupScheduler;
 
@@ -68,10 +68,10 @@ class ShedLockMultiPodIT {
     @Test
     @DisplayName("Notification 2AM cleanup job carries @SchedulerLock")
     void cleanupOldNotifications_WhenDeclared_IsAnnotatedWithSchedulerLock() throws NoSuchMethodException {
-        assertThat(NotificationService.class
+        assertThat(NotificationCleanupScheduler.class
             .getDeclaredMethod("cleanupOldNotifications")
             .isAnnotationPresent(SchedulerLock.class))
-            .as("NotificationService.cleanupOldNotifications must be @SchedulerLock to run once across the fleet")
+            .as("NotificationCleanupScheduler.cleanupOldNotifications must be @SchedulerLock to run once across the fleet")
             .isTrue();
     }
 

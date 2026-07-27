@@ -3,7 +3,7 @@ package org.danteplanner.backend.notification.listener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -23,7 +23,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class NotificationEventListener {
 
-    private final NotificationService notificationService;
+    private final NotificationDispatchService notificationDispatchService;
 
     /**
      * Handle planner recommended event by sending notification to the planner owner.
@@ -37,7 +37,7 @@ public class NotificationEventListener {
                 event.getPlannerId(), event.getNetVotesBefore(), event.getNetVotesAfter(),
                 event.getPlannerOwnerId());
 
-        notificationService.notifyPlannerRecommended(
+        notificationDispatchService.notifyPlannerRecommended(
                 event.getPlannerId(),
                 event.getPlannerTitle(),
                 event.getPlannerOwnerId());

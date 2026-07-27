@@ -6,11 +6,12 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.service.PlannerCommentSseService;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
@@ -19,7 +20,7 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,13 +35,14 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 
 /**
- * Unit tests for CommentService notification flag behavior.
+ * Unit tests for CommentCommandService notification flag behavior.
  * Tests that notifications respect ownerNotificationsEnabled and authorNotificationsEnabled settings.
  */
 @ExtendWith(MockitoExtension.class)
-class CommentServiceNotificationTest {
+class CommentCommandServiceNotificationTest {
 
     @Mock
     private PlannerCommentRepository commentRepository;
@@ -52,21 +54,19 @@ class CommentServiceNotificationTest {
     private PlannerRepository plannerRepository;
 
     @Mock
-    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+    private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationDispatchService notificationDispatchService;
 
-    @Mock
-    private PlannerCommentSseService plannerCommentSseService;
 
     @Mock
     private SsePublisher ssePublisher;
 
-    private CommentService service;
+    private CommentCommandService service;
 
     private static final UUID PLANNER_ID = UUID.randomUUID();
     private static final UUID PARENT_PUBLIC_ID = UUID.randomUUID();
@@ -81,17 +81,15 @@ class CommentServiceNotificationTest {
 
     @BeforeEach
     void setUp() {
-        service = new CommentService(
+        service = new CommentCommandService(
                 commentRepository,
-                commentVoteRepository,
-                plannerRepository,
-                plannerStatsRepository,
-                userRepository,
-                notificationService,
-                plannerCommentSseService,
+                new CommentQueryService(commentRepository, commentVoteRepository, userService,
+                        new PlannerAccessGuard(userService, plannerRepository)),
+                userService,
+                notificationDispatchService,
                 ssePublisher,
-                new PlannerAccessGuard(userRepository, plannerRepository)
-        );
+                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerStatsService(plannerStatsRepository));
 
         owner = User.builder()
                 .id(OWNER_ID)
@@ -146,7 +144,8 @@ class CommentServiceNotificationTest {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(userService.findById(COMMENTER_ID))
+.thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -165,7 +164,7 @@ class CommentServiceNotificationTest {
             service.createComment(PLANNER_ID, COMMENTER_ID, deviceId, request);
 
             // Assert - verify notification sent with correct params
-            verify(notificationService).notifyCommentReceived(
+            verify(notificationDispatchService).notifyCommentReceived(
                     eq(1L), eq(savedPublicId), eq(PLANNER_ID), eq("Test Planner"),
                     eq("Test comment"), eq(OWNER_ID), eq(COMMENTER_ID));
         }
@@ -175,7 +174,8 @@ class CommentServiceNotificationTest {
         void createTopLevelComment_WhenNotificationDisabled_NoNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(false);
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(userService.findById(COMMENTER_ID))
+.thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -194,7 +194,7 @@ class CommentServiceNotificationTest {
             service.createComment(PLANNER_ID, COMMENTER_ID, deviceId, request);
 
             // Assert
-            verify(notificationService, never()).notifyCommentReceived(any(), any(), any(), any(), any(), any(), any());
+            verify(notificationDispatchService, never()).notifyCommentReceived(any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -202,7 +202,8 @@ class CommentServiceNotificationTest {
         void createTopLevelComment_WhenSelfComment_NoNotification() {
             // Arrange
             planner.setOwnerNotificationsEnabled(true);
-            when(userRepository.findById(OWNER_ID)).thenReturn(Optional.of(owner));
+            when(userService.findById(OWNER_ID))
+.thenReturn(owner);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -221,7 +222,7 @@ class CommentServiceNotificationTest {
             service.createComment(PLANNER_ID, OWNER_ID, deviceId, request);
 
             // Assert - No notification for self-comment
-            verify(notificationService, never()).notifyCommentReceived(any(), any(), any(), any(), any(), any(), any());
+            verify(notificationDispatchService, never()).notifyCommentReceived(any(), any(), any(), any(), any(), any(), any());
         }
     }
 
@@ -245,7 +246,8 @@ class CommentServiceNotificationTest {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(true);
             UUID savedPublicId = UUID.randomUUID();
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(userService.findById(COMMENTER_ID))
+.thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
@@ -266,7 +268,7 @@ class CommentServiceNotificationTest {
             service.createComment(PLANNER_ID, COMMENTER_ID, deviceId, request);
 
             // Assert - verify notification sent with correct params
-            verify(notificationService).notifyReplyReceived(
+            verify(notificationDispatchService).notifyReplyReceived(
                     eq(101L), eq(savedPublicId), eq(PLANNER_ID), eq("Test Planner"),
                     eq("Reply content"), eq(PARENT_AUTHOR_ID), eq(COMMENTER_ID));
         }
@@ -276,7 +278,8 @@ class CommentServiceNotificationTest {
         void createReply_WhenAuthorNotificationDisabled_NoNotification() {
             // Arrange
             parentComment.setAuthorNotificationsEnabled(false);
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(userService.findById(COMMENTER_ID))
+.thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
@@ -297,7 +300,7 @@ class CommentServiceNotificationTest {
             service.createComment(PLANNER_ID, COMMENTER_ID, deviceId, request);
 
             // Assert
-            verify(notificationService, never()).notifyReplyReceived(any(), any(), any(), any(), any(), any(), any());
+            verify(notificationDispatchService, never()).notifyReplyReceived(any(), any(), any(), any(), any(), any(), any());
         }
 
         @Test
@@ -306,7 +309,8 @@ class CommentServiceNotificationTest {
             // Arrange
             parentComment.setUserId(COMMENTER_ID); // Same user is replying to their own comment
             parentComment.setAuthorNotificationsEnabled(true);
-            when(userRepository.findById(COMMENTER_ID)).thenReturn(Optional.of(commenter));
+            when(userService.findById(COMMENTER_ID))
+.thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
@@ -327,7 +331,7 @@ class CommentServiceNotificationTest {
             service.createComment(PLANNER_ID, COMMENTER_ID, deviceId, request);
 
             // Assert - No notification for self-reply
-            verify(notificationService, never()).notifyReplyReceived(any(), any(), any(), any(), any(), any(), any());
+            verify(notificationDispatchService, never()).notifyReplyReceived(any(), any(), any(), any(), any(), any(), any());
         }
     }
 }

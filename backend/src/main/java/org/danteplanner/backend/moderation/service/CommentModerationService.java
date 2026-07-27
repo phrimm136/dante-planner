@@ -4,7 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,8 @@ import java.util.UUID;
 @Slf4j
 public class CommentModerationService {
 
-    private final CommentService commentService;
+    private final CommentCommandService commentCommandService;
+    private final CommentQueryService commentQueryService;
     private final ModerationAuditService auditService;
 
     /**
@@ -34,13 +36,13 @@ public class CommentModerationService {
      */
     @Transactional
     public void deleteComment(Long actorId, Long commentId) {
-        PlannerComment comment = commentService.requireById(commentId);
+        PlannerComment comment = commentQueryService.requireById(commentId);
 
         if (comment.isDeleted()) {
             return;
         }
 
-        commentService.softDelete(comment);
+        commentCommandService.softDelete(comment);
 
         auditService.record(actorId, comment.getPublicId().toString(),
                 ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, null, null);
@@ -61,7 +63,7 @@ public class CommentModerationService {
      */
     @Transactional
     public void deleteCommentByPublicId(Long actorId, UUID commentPublicId, String reason) {
-        PlannerComment comment = commentService.requireByPublicId(commentPublicId);
+        PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
         auditService.record(actorId, comment.getPublicId().toString(),
                 ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, reason, null);
@@ -71,7 +73,7 @@ public class CommentModerationService {
             return;
         }
 
-        commentService.softDelete(comment);
+        commentCommandService.softDelete(comment);
 
         log.info("Moderator {} deleted comment {} with reason: {}", actorId, commentPublicId, reason);
     }

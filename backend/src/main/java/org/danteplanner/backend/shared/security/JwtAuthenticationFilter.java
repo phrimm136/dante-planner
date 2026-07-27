@@ -10,8 +10,6 @@ import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
-import org.danteplanner.backend.auth.exception.TokenRevokedException;
-import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
@@ -19,31 +17,23 @@ import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.shared.exception.DegradationErrorConstants;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.DispatcherType;
 import org.slf4j.MDC;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.danteplanner.backend.user.entity.UserRole;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionException;
 import org.danteplanner.backend.shared.config.JwtProperties;
@@ -71,9 +61,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenValidator tokenValidator;
     private final TokenBlacklistService tokenBlacklistService;
+    private final AccessTokenAuthenticator accessTokenAuthenticator;
     private final CookieUtils cookieUtils;
     private final UserService userService;
-    private final ObjectMapper objectMapper;
+    private final AuthDegradationResponder degradationResponder;
     private final TokenGenerator tokenGenerator;
     private final RefreshRotationService refreshRotationService;
     private final LineageRotationFlag lineageRotationFlag;
@@ -113,14 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // This handles cookie expiry (MaxAge) vs token expiry (JWT) desync
             // If refresh succeeds, setAuthentication() is called and request proceeds as authenticated
             // If refresh fails, SecurityContext remains empty and request proceeds as guest
-            try {
-                attemptAutoRefresh(request, response);
-            } catch (RedisConnectionFailureException e) {
-                writeAuthUnavailable(response);
-                MDC.clear();
-                return;
-            } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
-                writeDbUnavailable(response);
+            if (refreshOrReportOutage(request, response) == RefreshOutcome.OUTAGE_REPORTED) {
                 MDC.clear();
                 return;
             }
@@ -128,94 +112,63 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        try {
-            // Validate token and extract claims (includes expiry check)
-            TokenClaims claims = tokenValidator.validateAccessToken(token);
+        AccessTokenAuthenticator.AccessTokenVerdict verdict = accessTokenAuthenticator.verify(token, request);
 
-            // Check if token is blacklisted (revoked)
-            if (tokenBlacklistService.isBlacklisted(token)) {
-                throw new TokenRevokedException(TokenClaims.TYPE_ACCESS);
+        if (verdict == AccessTokenAuthenticator.AccessTokenVerdict.EXPIRED) {
+            log.debug("Access token expired, attempting auto-refresh");
+            RefreshOutcome outcome = refreshOrReportOutage(request, response);
+            if (outcome == RefreshOutcome.OUTAGE_REPORTED) {
+                MDC.clear();
+                return;
             }
-
-            // Check if user's tokens were invalidated (e.g., after role demotion)
-            if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
-                throw new TokenRevokedException(TokenClaims.TYPE_ACCESS);
-            }
-
-            Long userId = claims.userId();
-
-            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Guard sentinel user (id=0) from being authenticated
-                if (userId.equals(UserAccountLifecycleService.SENTINEL_USER_ID)) {
-                    log.warn("Attempt to authenticate as sentinel user blocked");
-                    filterChain.doFilter(request, response);
-                    return;
-                }
-
-                // Authenticate from token claims alone — no per-request DB lookup.
-                // Deleted users are rejected by the in-memory isUserTokenInvalidated check
-                // above (deleteAccount() calls invalidateUserTokens; demotion/logout-all too),
-                // so auth keeps working when the DB is briefly unavailable (maintenance window).
-                // Get role from token claims (default NORMAL for backward compat with old tokens)
-                UserRole role = claims.getEffectiveRole();
-                List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + role.getValue())
-                );
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-        } catch (TokenRevokedException e) {
-            logSecurityEvent("TOKEN_REVOKED", request);
-            // Don't try refresh for revoked tokens - revocation should be respected
-            SecurityContextHolder.clearContext();
-        } catch (InvalidTokenException e) {
-            // Try auto-refresh if token is expired
-            if (e.getReason() == InvalidTokenException.Reason.EXPIRED) {
-                log.debug("Access token expired, attempting auto-refresh");
-                boolean refreshed;
-                try {
-                    refreshed = attemptAutoRefresh(request, response);
-                } catch (RedisConnectionFailureException redisEx) {
-                    writeAuthUnavailable(response);
-                    MDC.clear();
-                    return;
-                } catch (DataAccessResourceFailureException | CannotCreateTransactionException dbEx) {
-                    writeDbUnavailable(response);
-                    MDC.clear();
-                    return;
-                }
-                if (!refreshed) {
-                    // Refresh failed - clear any partial auth state
-                    SecurityContextHolder.clearContext();
-                }
-                // Continue either way (refreshed or not)
-            } else {
-                // Other token errors (malformed, invalid signature, etc.) - don't refresh
-                String errorCode = mapReasonToErrorCode(e.getReason());
-                logSecurityEvent(errorCode + " (" + e.getReason() + ")", request);
+            if (outcome == RefreshOutcome.GUEST) {
+                // Refresh failed - clear any partial auth state
                 SecurityContextHolder.clearContext();
             }
+            // Continue either way (refreshed or not)
+        } else if (verdict == AccessTokenAuthenticator.AccessTokenVerdict.REVOKED || verdict == AccessTokenAuthenticator.AccessTokenVerdict.REJECTED) {
+            // A revocation is respected rather than refreshed, and no refresh repairs a malformed
+            // or wrongly-signed token either.
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
     }
 
     /**
-     * Maps InvalidTokenException reason to error code.
-     * TOKEN_EXPIRED is the only code that should trigger client-side refresh.
+     * What a refresh attempt left the request as.
      */
-    private String mapReasonToErrorCode(InvalidTokenException.Reason reason) {
-        return switch (reason) {
-            case EXPIRED -> "TOKEN_EXPIRED";
-            case MALFORMED -> "TOKEN_INVALID";
-            case INVALID_SIGNATURE -> "TOKEN_INVALID";
-            case MISSING_CLAIMS -> "TOKEN_INVALID";
-            case INVALID_TYPE -> "TOKEN_INVALID";
-            case REVOKED -> "TOKEN_REVOKED";
-        };
+    private enum RefreshOutcome {
+        /** New tokens were minted and the security context is populated. */
+        AUTHENTICATED,
+        /** No usable refresh credential; the request continues unauthenticated. */
+        GUEST,
+        /** A datastore is down, the 503 is already written, and the chain must not continue. */
+        OUTAGE_REPORTED
+    }
+
+    /**
+     * Refresh, or answer the request with a 503 when the attempt met a datastore outage.
+     *
+     * <p>An outage must not downgrade the caller to guest: that reads to the client as a logout
+     * caused by a dependency being briefly unreachable.</p>
+     *
+     * @param request  HTTP request to extract the refresh token from
+     * @param response HTTP response to set new cookies or write the 503 to
+     * @return what the request should now be treated as
+     * @throws IOException if writing the outage response fails
+     */
+    private RefreshOutcome refreshOrReportOutage(
+            HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            return attemptAutoRefresh(request, response) ? RefreshOutcome.AUTHENTICATED : RefreshOutcome.GUEST;
+        } catch (RedisConnectionFailureException e) {
+            degradationResponder.writeAuthUnavailable(response);
+            return RefreshOutcome.OUTAGE_REPORTED;
+        } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
+            degradationResponder.writeDbUnavailable(response);
+            return RefreshOutcome.OUTAGE_REPORTED;
+        }
     }
 
     /**
@@ -285,7 +238,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     jwtProperties.getRefreshTokenExpirySeconds());
 
             // Set authentication for this request
-            setAuthentication(user.getId(), user.getRole(), request);
+            accessTokenAuthenticator.authenticateAs(user.getId(), user.getRole(), request);
 
             log.debug("Auto-refreshed tokens for user: {}", user.getEmail());
             return true;
@@ -346,7 +299,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
                     jwtProperties.getAccessTokenExpirySeconds());
 
-        setAuthentication(user.getId(), user.getRole(), request);
+        accessTokenAuthenticator.authenticateAs(user.getId(), user.getRole(), request);
 
         log.debug("Lineage auto-refreshed tokens for user: {}", user.getEmail());
         return true;
@@ -381,74 +334,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return false;
     }
 
-    /**
-     * Sets Spring Security authentication context for the given user.
-     *
-     * @param userId user ID to authenticate
-     * @param role   user role for authorization
-     * @param request HTTP request for authentication details
-     */
-    private void setAuthentication(Long userId, UserRole role, HttpServletRequest request) {
-        List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + role.getValue())
-        );
 
-        UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(userId, null, authorities);
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-    }
 
-    /**
-     * Logs security events for audit and attack detection.
-     */
-    private void logSecurityEvent(String event, HttpServletRequest request) {
-        log.warn("Security event: {} - IP: {}, URI: {}, UA: {}",
-                event,
-                request.getRemoteAddr(),
-                request.getRequestURI(),
-                request.getHeader("User-Agent"));
-    }
-
-    /**
-     * Writes a JSON error response with proper escaping to prevent injection attacks.
-     *
-     * @param response the HTTP response
-     * @param status   the HTTP status code
-     * @param code     the error code
-     * @param message  the error message (properly escaped by ObjectMapper)
-     */
-    private void writeErrorResponse(
-            HttpServletResponse response,
-            int status,
-            String code,
-            String message
-    ) throws IOException {
-        response.setStatus(status);
-        response.setContentType("application/json");
-        response.getWriter().write(
-                objectMapper.writeValueAsString(Map.of("error", code, "message", message))
-        );
-    }
-
-    /**
-     * Short-circuits with 503 when the DB is unreachable during token refresh.
-     * nginx rewrites the body to BACKEND_UNAVAILABLE for external clients; the point is
-     * the 503 status (transient, retryable) instead of a 500 or a silent guest downgrade.
-     */
-    private void writeDbUnavailable(HttpServletResponse response) throws IOException {
-        SecurityContextHolder.clearContext();
-        writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                DegradationErrorConstants.DB_UNAVAILABLE_CODE, DegradationErrorConstants.DB_UNAVAILABLE_MESSAGE);
-    }
-
-    /**
-     * Short-circuits with 503 when the auth store (Redis) is unreachable during token refresh.
-     * The Redis-connection failure is a distinct, retryable transient condition from a DB outage.
-     */
-    private void writeAuthUnavailable(HttpServletResponse response) throws IOException {
-        SecurityContextHolder.clearContext();
-        writeErrorResponse(response, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
-                DegradationErrorConstants.AUTH_UNAVAILABLE_CODE, DegradationErrorConstants.AUTH_UNAVAILABLE_MESSAGE);
-    }
 }

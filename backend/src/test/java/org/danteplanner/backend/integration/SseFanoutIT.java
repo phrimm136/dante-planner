@@ -3,7 +3,7 @@ package org.danteplanner.backend.integration;
 import java.util.Map;
 import java.util.UUID;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
@@ -70,7 +70,7 @@ class SseFanoutIT extends CausalHarnessSupport {
     private PlannerCommandService plannerCommandService;
 
     @Autowired
-    private CommentService commentService;
+    private CommentCommandService commentCommandService;
 
     @Autowired
     private PlannerRepository plannerRepository;
@@ -190,7 +190,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         UUID plannerId = planner.getId();
         UUID deviceId = UUID.randomUUID();
 
-        commentService.createComment(
+        commentCommandService.createComment(
                 plannerId,
                 commenterId,
                 deviceId,

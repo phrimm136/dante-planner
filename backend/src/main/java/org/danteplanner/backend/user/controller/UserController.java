@@ -24,7 +24,7 @@ import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -74,16 +74,14 @@ public class UserController {
      * Update the authenticated user's username epithet.
      * Validates the epithet against allowed epithets.
      *
-     * @param authentication Spring Security authentication containing user ID
+     * @param userId the authenticated user's ID
      * @param request the update request containing the new epithet
      * @return the updated user DTO
      */
     @PutMapping("/me/username-epithet")
     public ResponseEntity<UserDto> updateUsernameEpithet(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUsernameEpithetRequest request) {
-        Long userId = (Long) authentication.getPrincipal();
-
         rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-epithet-update");
         log.info("User {} updating username epithet to {}", userId, request.epithet());
 
@@ -99,18 +97,16 @@ public class UserController {
      * unless the user re-authenticates via OAuth.
      * Also blacklists current tokens and clears auth cookies (same as logout).
      *
-     * @param authentication Spring Security authentication containing user ID
+     * @param userId the authenticated user's ID
      * @param request HTTP request to extract tokens from cookies
      * @param response HTTP response to clear cookies
      * @return Response with deletion details and scheduled permanent delete date
      */
     @DeleteMapping("/me")
     public ResponseEntity<UserDeletionResponse> deleteMyAccount(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             HttpServletRequest request,
             HttpServletResponse response) {
-        Long userId = (Long) authentication.getPrincipal();
-
         rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-delete");
         log.info("User {} requested account deletion", userId);
 
@@ -135,12 +131,11 @@ public class UserController {
      * Get the authenticated user's settings.
      * Creates default settings if none exist (lazy creation).
      *
-     * @param authentication Spring Security authentication containing user ID
+     * @param userId the authenticated user's ID
      * @return the user settings
      */
     @GetMapping("/settings")
-    public ResponseEntity<UserSettingsResponse> getSettings(Authentication authentication) {
-        Long userId = (Long) authentication.getPrincipal();
+    public ResponseEntity<UserSettingsResponse> getSettings(@AuthenticationPrincipal Long userId) {
         UserSettingsResponse settings = userSettingsService.getSettings(userId);
         return ResponseEntity.ok(settings);
     }
@@ -150,16 +145,14 @@ public class UserController {
      * Supports partial updates - only non-null fields are updated.
      * Invalidates SSE settings cache for immediate effect.
      *
-     * @param authentication Spring Security authentication containing user ID
+     * @param userId the authenticated user's ID
      * @param request the update request with optional fields
      * @return the updated user settings
      */
     @PutMapping("/settings")
     public ResponseEntity<UserSettingsResponse> updateSettings(
-            Authentication authentication,
+            @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUserSettingsRequest request) {
-        Long userId = (Long) authentication.getPrincipal();
-
         rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-settings-update");
         log.debug("User {} updating settings", userId);
 

@@ -3,12 +3,17 @@ package org.danteplanner.backend.planner.validation;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.shared.util.GameConstants;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntFunction;
 
 /**
  * Validates that equipment, EGO, gift and floor-selection IDs exist in game
@@ -22,6 +27,46 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 class IdReferenceValidator {
+
+    /**
+     * The difficulty a floor must carry, as the inclusive range a client value has to fall in and
+     * the in-game name a rejection reports.
+     *
+     * @param min   lowest accepted difficulty
+     * @param max   highest accepted difficulty
+     * @param label the difficulty's in-game name
+     */
+    private record DifficultyRule(int min, int max, String label) {}
+
+    /**
+     * What one MD category demands of its floor list: how many floors count, and which difficulty
+     * each of them must carry.
+     *
+     * @param floorCount   floors validated; entries beyond it are ignored
+     * @param difficultyAt the rule for a floor, by its zero-based index
+     */
+    private record FloorRules(int floorCount, IntFunction<DifficultyRule> difficultyAt) {}
+
+    private static final DifficultyRule NORMAL_OR_HARD = new DifficultyRule(0, 1, "Normal or Hard");
+    private static final DifficultyRule HARD = new DifficultyRule(1, 1, "Hard");
+    private static final DifficultyRule EXTREME = new DifficultyRule(3, 3, "Extreme");
+
+    private static final Map<MDCategory, FloorRules> FLOOR_RULES;
+
+    static {
+        Map<MDCategory, FloorRules> byCategory = new EnumMap<>(MDCategory.class);
+        byCategory.put(MDCategory.F5, new FloorRules(5, floor -> NORMAL_OR_HARD));
+        byCategory.put(MDCategory.F10, new FloorRules(10, floor -> HARD));
+        byCategory.put(MDCategory.F15, new FloorRules(15, floor -> floor < 10 ? HARD : EXTREME));
+
+        List<MDCategory> uncovered = Arrays.stream(MDCategory.values())
+                .filter(category -> !byCategory.containsKey(category))
+                .toList();
+        if (!uncovered.isEmpty()) {
+            throw new ExceptionInInitializerError("No floor rules for MD category(s): " + uncovered);
+        }
+        FLOOR_RULES = Map.copyOf(byCategory);
+    }
 
     private final GameDataRegistry gameDataRegistry;
     private final SinnerIdValidator sinnerIdValidator;
@@ -193,12 +238,8 @@ class IdReferenceValidator {
             return;
         }
 
-        int floorCount = switch (category) {
-            case "5F" -> 5;
-            case "10F" -> 10;
-            case "15F" -> 15;
-            default -> 15;
-        };
+        FloorRules rules = FLOOR_RULES.get(MDCategory.fromValue(category));
+        int floorCount = rules.floorCount();
 
         for (int i = 0; i < floorSelections.size(); i++) {
             JsonNode floor = floorSelections.get(i);
@@ -230,29 +271,12 @@ class IdReferenceValidator {
                 JsonNode difficultyNode = floor.get("difficulty");
                 int difficulty = (difficultyNode != null && difficultyNode.isNumber()) ? difficultyNode.asInt() : -1;
 
-                switch (category) {
-                    case "5F" -> {
-                        if (difficulty != 0 && difficulty != 1) {
-                            log.warn("Validation failed: floorSelections[{}] must be Normal or Hard for 5F category", i);
-                            context.addError(ValidationErrors.valueOutOfRange("floorSelections[" + i + "].difficulty", difficulty, 0, 1));
-                        }
-                    }
-                    case "10F" -> {
-                        if (difficulty != 1) {
-                            log.warn("Validation failed: floorSelections[{}] must be Hard for 10F category", i);
-                            context.addError(ValidationErrors.valueOutOfRange("floorSelections[" + i + "].difficulty", difficulty, 1, 1));
-                        }
-                    }
-                    case "15F" -> {
-                        if (i < 10 && difficulty != 1) {
-                            log.warn("Validation failed: floorSelections[{}] must be Hard for 15F category", i);
-                            context.addError(ValidationErrors.valueOutOfRange("floorSelections[" + i + "].difficulty", difficulty, 1, 1));
-                        }
-                        if (i >= 10 && difficulty != 3) {
-                            log.warn("Validation failed: floorSelections[{}] must be Extreme for 15F category", i);
-                            context.addError(ValidationErrors.valueOutOfRange("floorSelections[" + i + "].difficulty", difficulty, 3, 3));
-                        }
-                    }
+                DifficultyRule expected = rules.difficultyAt().apply(i);
+                if (difficulty < expected.min() || difficulty > expected.max()) {
+                    log.warn("Validation failed: floorSelections[{}] must be {} for {} category",
+                            i, expected.label(), category);
+                    context.addError(ValidationErrors.valueOutOfRange(
+                            "floorSelections[" + i + "].difficulty", difficulty, expected.min(), expected.max()));
                 }
             } else if (hasThemePack) {
                 String themePackId = themePackNode.asText();

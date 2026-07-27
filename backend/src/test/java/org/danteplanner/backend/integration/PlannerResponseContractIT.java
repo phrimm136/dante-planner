@@ -27,6 +27,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.entity.PlannerStatus;
 
 /**
  * Wire-contract pin for the detail and owner-list planner DTOs: the serialized field
@@ -57,10 +61,10 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private org.danteplanner.backend.planner.repository.PlannerStatsRepository statsRepository;
+    private PlannerStatsRepository statsRepository;
 
     @Autowired
-    private org.danteplanner.backend.planner.service.PlannerCatalogService catalogService;
+    private PlannerCatalogService catalogService;
 
     private User owner;
     private String token;
@@ -112,8 +116,8 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Test
     @DisplayName("list-card-fields: the public list card carries firstPublishedAt and drops contentVersion and lastModifiedAt")
     void listCardFields_WhenListed_TrimmedCardShape() throws Exception {
-        org.danteplanner.backend.planner.entity.PlannerStats stats =
-                org.danteplanner.backend.planner.entity.PlannerStats.builder()
+        PlannerStats stats =
+                PlannerStats.builder()
                         .plannerId(published.getId())
                         .build();
         statsRepository.save(stats);
@@ -135,7 +139,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @DisplayName("unpublished-changes-visible-to-owner: the owner detail carries status and published so the FE derives modified-but-not-published")
     void unpublishedChangesVisibleToOwner_WhenStatusDirty_StatusAndPublishedCarried() throws Exception {
         // A published planner whose edit state went dirty (draft) after publish
-        published.getContent().setStatus(org.danteplanner.backend.planner.entity.PlannerStatus.DRAFT);
+        published.getContent().setStatus(PlannerStatus.DRAFT);
         plannerRepository.save(published);
 
         mockMvc.perform(get("/api/planner/md/{id}", published.getId())

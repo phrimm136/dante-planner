@@ -36,9 +36,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.anyLong;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.PlannerVoteId;
+import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.planner.dto.VoteResponse;
+import org.danteplanner.backend.planner.entity.VoteType;
 
 /**
  * Unit tests for PlannerEngagementService (immutable voting and bookmark toggling).
@@ -48,7 +56,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 class PlannerEngagementServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -63,10 +71,10 @@ class PlannerEngagementServiceTest {
     private ApplicationEventPublisher eventPublisher;
 
     @Mock
-    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+    private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private org.danteplanner.backend.planner.service.PlannerCatalogService plannerCatalogService;
+    private PlannerCatalogService plannerCatalogService;
 
     private PlannerEngagementService engagementService;
 
@@ -86,7 +94,7 @@ class PlannerEngagementServiceTest {
                 plannerStatsRepository,
                 plannerCatalogService,
                 eventPublisher,
-                new PlannerAccessGuard(userRepository, plannerRepository),
+                new PlannerAccessGuard(userService, plannerRepository),
                 recommendedThreshold
         );
 
@@ -100,7 +108,7 @@ class PlannerEngagementServiceTest {
                 .build();
         // The access guard resolves the principal on every guarded path; an unstubbed
         // repository would surface as UserNotFoundException instead of the behavior under test.
-        lenient().when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
 
     }
 
@@ -261,8 +269,8 @@ class PlannerEngagementServiceTest {
             return testPlannerBuilder().published(true).build();
         }
 
-        private org.danteplanner.backend.planner.entity.PlannerStats statsWithUpvotes(UUID plannerId, int upvotes) {
-            return org.danteplanner.backend.planner.entity.PlannerStats.builder()
+        private PlannerStats statsWithUpvotes(UUID plannerId, int upvotes) {
+            return PlannerStats.builder()
                     .plannerId(plannerId)
                     .upvotes(upvotes)
                     .build();
@@ -274,8 +282,8 @@ class PlannerEngagementServiceTest {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
-            org.danteplanner.backend.planner.entity.PlannerVoteId voteId =
-                new org.danteplanner.backend.planner.entity.PlannerVoteId(testUser.getId(), plannerId);
+            PlannerVoteId voteId =
+                new PlannerVoteId(testUser.getId(), plannerId);
 
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
@@ -283,9 +291,9 @@ class PlannerEngagementServiceTest {
                     .thenReturn(true);
 
             // Act & Assert
-            org.danteplanner.backend.planner.exception.VoteAlreadyExistsException exception = assertThrows(
-                    org.danteplanner.backend.planner.exception.VoteAlreadyExistsException.class,
-                    () -> engagementService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.planner.entity.VoteType.UP)
+            VoteAlreadyExistsException exception = assertThrows(
+                    VoteAlreadyExistsException.class,
+                    () -> engagementService.castVote(testUser.getId(), plannerId, VoteType.UP)
             );
 
             assertEquals(plannerId, exception.getPlannerId());
@@ -318,31 +326,31 @@ class PlannerEngagementServiceTest {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
-            org.danteplanner.backend.planner.entity.PlannerVoteId voteId =
-                new org.danteplanner.backend.planner.entity.PlannerVoteId(testUser.getId(), plannerId);
+            PlannerVoteId voteId =
+                new PlannerVoteId(testUser.getId(), plannerId);
 
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
-            when(plannerVoteRepository.save(any(org.danteplanner.backend.planner.entity.PlannerVote.class)))
+            when(plannerVoteRepository.save(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
             when(plannerStatsRepository.findById(plannerId))
                     .thenReturn(Optional.of(statsWithUpvotes(plannerId, 5)), Optional.of(statsWithUpvotes(plannerId, 6)));
 
             // Act
-            org.danteplanner.backend.planner.dto.VoteResponse response =
-                    engagementService.castVote(testUser.getId(), plannerId, org.danteplanner.backend.planner.entity.VoteType.UP);
+            VoteResponse response =
+                    engagementService.castVote(testUser.getId(), plannerId, VoteType.UP);
 
             // Assert
             assertEquals(6, response.upvoteCount());
             assertTrue(response.hasUpvoted());
-            ArgumentCaptor<org.danteplanner.backend.planner.entity.PlannerVote> voteCaptor =
-                    ArgumentCaptor.forClass(org.danteplanner.backend.planner.entity.PlannerVote.class);
+            ArgumentCaptor<PlannerVote> voteCaptor =
+                    ArgumentCaptor.forClass(PlannerVote.class);
             verify(plannerVoteRepository).save(voteCaptor.capture());
             assertEquals(testUser.getId(), voteCaptor.getValue().getUserId());
             assertEquals(plannerId, voteCaptor.getValue().getPlannerId());
-            assertEquals(org.danteplanner.backend.planner.entity.VoteType.UP,
+            assertEquals(VoteType.UP,
                     voteCaptor.getValue().getVoteType());
             verify(plannerStatsRepository).incrementUpvotes(plannerId);
         }

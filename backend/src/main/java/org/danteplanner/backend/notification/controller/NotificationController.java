@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationInboxService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Slf4j
 public class NotificationController {
 
-    private final NotificationService notificationService;
+    private final NotificationInboxService notificationInboxService;
 
     /**
      * Get user's notification inbox with pagination.
@@ -47,7 +47,7 @@ public class NotificationController {
         int pageSize = Math.min(size, 100);
 
         log.debug("User {} fetching notification inbox (page {}, size {})", userId, page, pageSize);
-        NotificationInboxResponse response = notificationService.getInbox(userId, page, pageSize);
+        NotificationInboxResponse response = notificationInboxService.getInbox(userId, page, pageSize);
         return ResponseEntity.ok(response);
     }
 
@@ -62,7 +62,7 @@ public class NotificationController {
             @AuthenticationPrincipal Long userId) {
 
         log.debug("User {} fetching unread notification count", userId);
-        UnreadCountResponse response = notificationService.getUnreadCount(userId);
+        UnreadCountResponse response = notificationInboxService.getUnreadCount(userId);
         return ResponseEntity.ok(response);
     }
 
@@ -79,7 +79,7 @@ public class NotificationController {
             @PathVariable("id") UUID publicId) {
 
         log.info("User {} marking notification {} as read", userId, publicId);
-        NotificationResponse response = notificationService.markAsRead(publicId, userId);
+        NotificationResponse response = notificationInboxService.markAsRead(publicId, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -94,7 +94,7 @@ public class NotificationController {
             @AuthenticationPrincipal Long userId) {
 
         log.info("User {} marking all notifications as read", userId);
-        int count = notificationService.markAllAsRead(userId);
+        int count = notificationInboxService.markAllAsRead(userId);
         return ResponseEntity.ok(count);
     }
 
@@ -114,7 +114,7 @@ public class NotificationController {
             @PathVariable("id") UUID publicId) {
 
         log.info("User {} deleting notification {}", userId, publicId);
-        notificationService.deleteNotification(publicId, userId);
+        notificationInboxService.deleteNotification(publicId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -129,7 +129,7 @@ public class NotificationController {
             @AuthenticationPrincipal Long userId) {
 
         log.info("User {} deleting all notifications", userId);
-        int count = notificationService.deleteAllNotifications(userId);
+        int count = notificationInboxService.deleteAllNotifications(userId);
         return ResponseEntity.ok(count);
     }
 }

@@ -24,6 +24,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.danteplanner.backend.user.repository.UserRepository;
 
 /**
  * The audit trail the dashboard reads is bounded and ordered by the database, not by the heap.
@@ -58,7 +59,7 @@ class ModerationAuditTrailBoundIT {
     private ModerationActionRepository moderationActionRepository;
 
     @Autowired
-    private org.danteplanner.backend.user.repository.UserRepository userRepository;
+    private UserRepository userRepository;
 
     @BeforeEach
     void setUp() {

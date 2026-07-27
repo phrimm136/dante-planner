@@ -18,7 +18,9 @@ import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.moderation.service.CommentReportService;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentEngagementService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,7 +46,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class CommentController {
 
-    private final CommentService commentService;
+    private final CommentQueryService commentQueryService;
+    private final CommentCommandService commentCommandService;
+    private final CommentEngagementService commentEngagementService;
     private final CommentReportService commentReportService;
     private final RateLimitService rateLimitService;
 
@@ -64,7 +68,7 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID plannerId) {
 
-        List<CommentTreeNode> comments = commentService.getCommentTree(plannerId, userId);
+        List<CommentTreeNode> comments = commentQueryService.getCommentTree(plannerId, userId);
         return ResponseEntity.ok(comments);
     }
 
@@ -91,7 +95,7 @@ public class CommentController {
         rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} creating comment on planner {}", userId, plannerId);
-        CreateCommentResponse response = commentService.createComment(plannerId, userId, deviceId, request);
+        CreateCommentResponse response = commentCommandService.createComment(plannerId, userId, deviceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -118,7 +122,7 @@ public class CommentController {
         rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} creating reply to comment {}", userId, parentCommentId);
-        CreateCommentResponse response = commentService.createReply(parentCommentId, userId, deviceId, request.content());
+        CreateCommentResponse response = commentCommandService.createReply(parentCommentId, userId, deviceId, request.content());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -142,7 +146,7 @@ public class CommentController {
         rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} editing comment {}", userId, commentId);
-        UpdateCommentResponse response = commentService.updateComment(commentId, userId, request);
+        UpdateCommentResponse response = commentCommandService.updateComment(commentId, userId, request);
         return ResponseEntity.ok(response);
     }
 
@@ -162,7 +166,7 @@ public class CommentController {
             @PathVariable UUID commentId) {
 
         log.info("User {} deleting comment {}", userId, commentId);
-        commentService.deleteComment(commentId, userId);
+        commentCommandService.deleteComment(commentId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -184,7 +188,7 @@ public class CommentController {
 
         rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
-        CommentVoteResponse response = commentService.toggleUpvote(commentId, userId);
+        CommentVoteResponse response = commentEngagementService.toggleUpvote(commentId, userId);
         return ResponseEntity.ok(response);
     }
 
@@ -206,7 +210,7 @@ public class CommentController {
             @Valid @RequestBody ToggleNotificationRequest request) {
 
         log.info("User {} toggling notifications for comment {}", userId, commentId);
-        ToggleNotificationResponse response = commentService.toggleNotification(commentId, userId, request.enabled());
+        ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, userId, request.enabled());
         return ResponseEntity.ok(response);
     }
 

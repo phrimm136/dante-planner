@@ -6,7 +6,7 @@ import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -20,7 +20,7 @@ import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +42,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.danteplanner.backend.user.exception.UserBannedException;
 
 /**
  * Unit tests for PlannerPublishingService (publish toggle, owner notification settings).
@@ -57,13 +58,13 @@ class PlannerPublishingServiceTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private PlannerContentValidator contentValidator;
 
     @Mock
-    private org.danteplanner.backend.planner.service.PlannerCommandService plannerCommandService;
+    private PlannerCommandService plannerCommandService;
 
     @Mock
     private PlannerCatalogService plannerCatalogService;
@@ -75,7 +76,7 @@ class PlannerPublishingServiceTest {
     private SsePublisher ssePublisher;
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationDispatchService notificationDispatchService;
 
     @Mock
     private org.springframework.context.ApplicationEventPublisher eventPublisher;
@@ -88,7 +89,7 @@ class PlannerPublishingServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userRepository, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
 
         publishingService = new PlannerPublishingService(
                 plannerRepository,
@@ -98,7 +99,7 @@ class PlannerPublishingServiceTest {
                 plannerCatalogService,
                 subscriptionService,
                 ssePublisher,
-                notificationService,
+                notificationDispatchService,
                 accessGuard,
                 eventPublisher
         );
@@ -112,7 +113,7 @@ class PlannerPublishingServiceTest {
                 .usernameSuffix("test1")
                 .build();
 
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        when(userService.findById(testUser.getId())).thenReturn(testUser);
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {
@@ -339,12 +340,12 @@ class PlannerPublishingServiceTest {
             testUser.setBannedBy(1L);
 
             UUID plannerId = UUID.randomUUID();
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
 
             // Act & Assert
             assertThrows(
-                    org.danteplanner.backend.user.exception.UserBannedException.class,
+                    UserBannedException.class,
                     () -> publishingService.setPublished(testUser.getId(), plannerId, true)
             );
             verify(plannerRepository, never()).save(any());

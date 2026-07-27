@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
 /**
  * Unit tests for UserService.
@@ -40,7 +41,7 @@ class UserServiceTest {
     private EpithetConfig epithetConfig;
 
     @Mock
-    private org.danteplanner.backend.moderation.service.ModerationAuditService moderationAuditService;
+    private ModerationAuditService moderationAuditService;
 
     @Mock
     private UserSettingsService userSettingsService;

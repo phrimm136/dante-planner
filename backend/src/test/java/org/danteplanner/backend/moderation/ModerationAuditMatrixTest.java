@@ -4,7 +4,8 @@ import org.danteplanner.backend.admin.service.AdminService;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
@@ -21,7 +22,6 @@ import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,12 +66,13 @@ class ModerationAuditMatrixTest {
 
     @Mock UserService userService;
     @Mock PlannerPublishingService plannerPublishingService;
-    @Mock CommentService commentService;
-    @Mock UserRepository userRepository;
+    @Mock CommentCommandService commentCommandService;
+    @Mock CommentQueryService commentQueryService;
     @Mock ModerationActionRepository moderationActionRepository;
     ModerationAuditService auditService;
     @Mock SsePublisher ssePublisher;
     @Mock TokenBlacklistService tokenBlacklistService;
+    @Mock org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     private UserModerationService userModerationService;
     private PlannerModerationService plannerModerationService;
@@ -115,18 +116,18 @@ class ModerationAuditMatrixTest {
         auditService = new ModerationAuditService(moderationActionRepository);
         userModerationService = new UserModerationService(userService, auditService, ssePublisher);
         plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
-        commentModerationService = new CommentModerationService(commentService, auditService);
-        adminService = new AdminService(userRepository, tokenBlacklistService, auditService);
+        commentModerationService = new CommentModerationService(commentCommandService, commentQueryService, auditService);
+        adminService = new AdminService(userService, eventPublisher, auditService);
 
         User actor = user(ACTOR, UserRole.ADMIN);
         User target = user(TARGET, UserRole.MODERATOR);
         when(userService.findActiveById(ACTOR)).thenReturn(Optional.of(actor));
         when(userService.findActiveById(TARGET)).thenReturn(Optional.of(target));
         when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
-        when(userRepository.findWithLockByIdAndDeletedAtIsNull(ACTOR)).thenReturn(Optional.of(actor));
-        when(userRepository.findWithLockByIdAndDeletedAtIsNull(TARGET)).thenReturn(Optional.of(target));
-        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
-        when(userRepository.countByRole(any())).thenReturn(5L);
+        when(userService.lockActiveById(ACTOR)).thenReturn(actor);
+        when(userService.lockActiveById(TARGET)).thenReturn(target);
+        when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userService.countByRole(any())).thenReturn(5L);
 
         Planner planner = plannerAggregate(actor);
         when(plannerPublishingService.withdrawFromPublicView(eq(plannerId), any()))
@@ -137,7 +138,7 @@ class ModerationAuditMatrixTest {
 
         PlannerComment comment = new PlannerComment(plannerId, TARGET, "text", null, 0);
         org.springframework.test.util.ReflectionTestUtils.setField(comment, "publicId", UUID.randomUUID());
-        when(commentService.requireById(10L)).thenReturn(comment);
+        when(commentQueryService.requireById(10L)).thenReturn(comment);
     }
 
     @TestFactory

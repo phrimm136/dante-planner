@@ -3,9 +3,10 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
-import org.danteplanner.backend.comment.service.CommentService;
-import org.danteplanner.backend.comment.service.PlannerCommentSseService;
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
@@ -14,7 +15,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserBannedException;
 import org.danteplanner.backend.user.exception.UserTimedOutException;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,6 @@ import org.mockito.quality.Strictness;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,23 +40,26 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class CommentServiceRestrictionsTest {
+class CommentCommandServiceRestrictionsTest {
 
     @Mock PlannerCommentRepository commentRepository;
     @Mock PlannerCommentVoteRepository commentVoteRepository;
     @Mock PlannerRepository plannerRepository;
     @Mock PlannerStatsRepository plannerStatsRepository;
-    @Mock UserRepository userRepository;
-    @Mock NotificationService notificationService;
-    @Mock PlannerCommentSseService plannerCommentSseService;
+    @Mock UserService userService;
+    @Mock NotificationDispatchService notificationDispatchService;
     @Mock SsePublisher ssePublisher;
 
-    private CommentService commentService() {
-        return new CommentService(
-                commentRepository, commentVoteRepository, plannerRepository,
-                plannerStatsRepository, userRepository, notificationService,
-                plannerCommentSseService, ssePublisher,
-                new PlannerAccessGuard(userRepository, plannerRepository));
+    private CommentCommandService commentService() {
+        return new CommentCommandService(
+                commentRepository,
+                new CommentQueryService(commentRepository, commentVoteRepository, userService,
+                        new PlannerAccessGuard(userService, plannerRepository)),
+                userService,
+                notificationDispatchService,
+                ssePublisher,
+                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerStatsService(plannerStatsRepository));
     }
 
     private User restrictedUser() {
@@ -76,7 +79,7 @@ class CommentServiceRestrictionsTest {
     void createReply_WhenUserBanned_ThrowsUserBanned() {
         User banned = restrictedUser();
         banned.setBannedAt(Instant.now());
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(banned));
+        when(userService.findById(anyLong())).thenReturn(banned);
 
         assertThrows(UserBannedException.class, () -> commentService()
                 .createReply(UUID.randomUUID(), banned.getId(), UUID.randomUUID(), "reply body"));
@@ -87,7 +90,7 @@ class CommentServiceRestrictionsTest {
     void createReply_WhenUserTimedOut_ThrowsUserTimedOut() {
         User timedOut = restrictedUser();
         timedOut.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(timedOut));
+        when(userService.findById(anyLong())).thenReturn(timedOut);
 
         assertThrows(UserTimedOutException.class, () -> commentService()
                 .createReply(UUID.randomUUID(), timedOut.getId(), UUID.randomUUID(), "reply body"));

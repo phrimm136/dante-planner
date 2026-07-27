@@ -8,24 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
-import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
-import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
-import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
-import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UserBannedException;
-import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.exception.UserTimedOutException;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
-import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
-import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
-import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
-import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -42,7 +32,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -58,50 +52,39 @@ public class GlobalExceptionHandler {
 
     public record ConflictErrorResponse(String code, String message, Long serverVersion) {}
 
+    private static final Map<ErrorKind, HttpStatus> STATUS_BY_KIND;
+
+    static {
+        Map<ErrorKind, HttpStatus> byKind = new EnumMap<>(ErrorKind.class);
+        byKind.put(ErrorKind.NOT_FOUND, HttpStatus.NOT_FOUND);
+        byKind.put(ErrorKind.FORBIDDEN, HttpStatus.FORBIDDEN);
+        byKind.put(ErrorKind.CONFLICT, HttpStatus.CONFLICT);
+        byKind.put(ErrorKind.INVALID_REQUEST, HttpStatus.BAD_REQUEST);
+
+        List<ErrorKind> unmapped = Arrays.stream(ErrorKind.values())
+                .filter(kind -> !byKind.containsKey(kind))
+                .toList();
+        if (!unmapped.isEmpty()) {
+            throw new ExceptionInInitializerError("No HTTP status for error kind(s): " + unmapped);
+        }
+        STATUS_BY_KIND = Map.copyOf(byKind);
+    }
+
     /**
-     * Log a warning and build an error response for the simple warn -> status -> body handler families.
+     * Answers every business error whose response is fully described by its kind, code, and
+     * message. A subclass needing more of the response than that keeps its own handler below,
+     * which Spring prefers over this one by exception-type specificity.
      *
-     * @param status    the HTTP status to return
-     * @param logFormat the SLF4J warn format (single {} placeholder for the message)
-     * @param code      the client-facing error code
-     * @param message   the error message, used for both the log and the response body
-     * @return the error response entity
+     * @param ex the business error
+     * @return the client-facing error response
      */
-    private ResponseEntity<ErrorResponse> warnAndRespond(HttpStatus status, String logFormat, String code, String message) {
-        log.warn(logFormat, message);
-        return ResponseEntity.status(status)
-            .body(new ErrorResponse(code, message));
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomain(DomainException ex) {
+        log.warn("{}: {}", ex.getErrorCode(), ex.getMessage());
+        return ResponseEntity.status(STATUS_BY_KIND.get(ex.getKind()))
+            .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
     }
 
-    @ExceptionHandler(PlannerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePlannerNotFound(PlannerNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "Planner not found: {}", "PLANNER_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "Entity not found: {}", "NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(PlannerForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handlePlannerForbidden(PlannerForbiddenException ex) {
-        return warnAndRespond(HttpStatus.FORBIDDEN, "Planner access forbidden: {}", "PLANNER_FORBIDDEN", ex.getMessage());
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "User not found: {}", "USER_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(CommentNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCommentNotFound(CommentNotFoundException ex) {
-        return warnAndRespond(HttpStatus.NOT_FOUND, "Comment not found: {}", "COMMENT_NOT_FOUND", ex.getMessage());
-    }
-
-    @ExceptionHandler(CommentForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleCommentForbidden(CommentForbiddenException ex) {
-        return warnAndRespond(HttpStatus.FORBIDDEN, "Comment access forbidden: {}", "COMMENT_FORBIDDEN", ex.getMessage());
-    }
 
     @ExceptionHandler(TokenRevokedException.class)
     public ResponseEntity<ErrorResponse> handleTokenRevoked(TokenRevokedException ex) {
@@ -141,17 +124,6 @@ public class GlobalExceptionHandler {
         log.warn("User banned: user {} since {}", ex.getUserId(), ex.getBannedAt());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(new ErrorResponse("USER_BANNED", "Your account has been suspended"));
-    }
-
-    @ExceptionHandler(ModerationForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleModerationForbidden(ModerationForbiddenException ex) {
-        return warnAndRespond(HttpStatus.FORBIDDEN, "Moderation action forbidden: {}", "FORBIDDEN", ex.getMessage());
-    }
-
-    @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidRequest(InvalidRequestException ex) {
-        return warnAndRespond(
-                HttpStatus.BAD_REQUEST, "Invalid request: {}", ex.getErrorCode(), ex.getMessage());
     }
 
     /**
@@ -219,26 +191,6 @@ public class GlobalExceptionHandler {
         log.warn("Concurrent write conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
             .body(new ConflictErrorResponse("CONCURRENT_WRITE", "The resource was modified concurrently", null));
-    }
-
-    @ExceptionHandler(PlannerLimitExceededException.class)
-    public ResponseEntity<ErrorResponse> handlePlannerLimitExceeded(PlannerLimitExceededException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Planner limit exceeded: {}", "PLANNER_LIMIT_EXCEEDED", ex.getMessage());
-    }
-
-    @ExceptionHandler(VoteAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleVoteAlreadyExists(VoteAlreadyExistsException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Duplicate vote attempt: {}", "VOTE_ALREADY_EXISTS", ex.getMessage());
-    }
-
-    @ExceptionHandler(ReportAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleReportAlreadyExists(ReportAlreadyExistsException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Duplicate report attempt: {}", "REPORT_ALREADY_EXISTS", ex.getMessage());
-    }
-
-    @ExceptionHandler(CommentReportAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleCommentReportAlreadyExists(CommentReportAlreadyExistsException ex) {
-        return warnAndRespond(HttpStatus.CONFLICT, "Duplicate comment report attempt: {}", "COMMENT_REPORT_ALREADY_EXISTS", ex.getMessage());
     }
 
     /**

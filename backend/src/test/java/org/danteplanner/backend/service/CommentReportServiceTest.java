@@ -10,7 +10,7 @@ import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,7 +36,7 @@ class CommentReportServiceTest {
     private PlannerCommentReportRepository reportRepository;
 
     @Mock
-    private CommentService commentService;
+    private CommentQueryService commentQueryService;
 
     private CommentReportService service;
 
@@ -48,7 +48,7 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CommentReportService(reportRepository, commentService);
+        service = new CommentReportService(reportRepository, commentQueryService);
     }
 
     @Nested
@@ -68,7 +68,7 @@ class CommentReportServiceTest {
         @DisplayName("Should create report when comment exists and not already reported")
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
-            when(commentService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
                     .thenReturn(false);
             when(reportRepository.save(any(PlannerCommentReport.class)))
@@ -97,7 +97,7 @@ class CommentReportServiceTest {
         @DisplayName("Should throw CommentNotFoundException when comment not found")
         void createReport_WhenCommentNotFound_ThrowsException() {
             // Arrange
-            when(commentService.requireByPublicId(COMMENT_PUBLIC_ID))
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID))
                     .thenThrow(new CommentNotFoundException(COMMENT_PUBLIC_ID));
             CommentReportRequest request = new CommentReportRequest(REASON);
 
@@ -113,7 +113,7 @@ class CommentReportServiceTest {
         @DisplayName("Should throw CommentReportAlreadyExistsException when already reported")
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
-            when(commentService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
                     .thenReturn(true);
             CommentReportRequest request = new CommentReportRequest(REASON);
@@ -134,7 +134,7 @@ class CommentReportServiceTest {
         void createReport_WhenCommentDeleted_ThrowsException() {
             // Arrange
             comment.softDelete();
-            when(commentService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             CommentReportRequest request = new CommentReportRequest(REASON);
 
             // Act & Assert
@@ -149,7 +149,7 @@ class CommentReportServiceTest {
         @DisplayName("Should validate comment before checking existing report")
         void createReport_WhenCommentMissing_ValidatesCommentFirst() {
             // Arrange
-            when(commentService.requireByPublicId(COMMENT_PUBLIC_ID))
+            when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID))
                     .thenThrow(new CommentNotFoundException(COMMENT_PUBLIC_ID));
             CommentReportRequest request = new CommentReportRequest(REASON);
 
@@ -158,7 +158,7 @@ class CommentReportServiceTest {
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
             // Verify order: comment lookup first, then never reaches report check
-            verify(commentService).requireByPublicId(COMMENT_PUBLIC_ID);
+            verify(commentQueryService).requireByPublicId(COMMENT_PUBLIC_ID);
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
         }
     }

@@ -13,7 +13,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,7 +49,7 @@ class PlannerQueryServiceTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     private PlannerQueryService queryService;
 
@@ -59,7 +59,7 @@ class PlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userRepository, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
         queryService = new PlannerQueryService(plannerRepository, plannerStatsRepository, accessGuard);
 
         testUser = User.builder()

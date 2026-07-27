@@ -33,6 +33,12 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  * {@code planner} (or any feature). The broader {@code shared}-wide planner edges that remain
  * ({@code GlobalExceptionHandler} handling planner exceptions, a config class reading a planner
  * entity) are inherent to those classes living in {@code shared} and are out of this rule's scope.</p>
+ *
+ * <p>The rules above constrain which features may see each other at all. The repository rules below
+ * constrain how: a feature's {@code ..repository..} package is private to that feature, so a
+ * permitted cross-feature edge must land on the owning feature's service, never on its repository.
+ * Without them a feature package can reach straight into another's persistence layer while every
+ * feature-granular rule still passes.</p>
  */
 @AnalyzeClasses(
         packages = "org.danteplanner.backend",
@@ -106,4 +112,39 @@ class FeatureBoundaryTest {
                     .that().resideInAPackage("..user..")
                     .should().dependOnClassesThat().resideInAnyPackage("..admin..", "..notification..")
                     .as("user may depend on auth, comment, moderation, planner, shared — not admin or notification");
+
+    @ArchTest
+    static final ArchRule comment_repositories_are_private_to_comment =
+            noClasses()
+                    .that().resideOutsideOfPackage("..comment..")
+                    .should().dependOnClassesThat().resideInAPackage("..comment.repository..")
+                    .as("comment.repository is private to comment: outside callers go through a comment service");
+
+    @ArchTest
+    static final ArchRule moderation_repositories_are_private_to_moderation =
+            noClasses()
+                    .that().resideOutsideOfPackage("..moderation..")
+                    .should().dependOnClassesThat().resideInAPackage("..moderation.repository..")
+                    .as("moderation.repository is private to moderation: outside callers go through a moderation service");
+
+    @ArchTest
+    static final ArchRule notification_repositories_are_private_to_notification =
+            noClasses()
+                    .that().resideOutsideOfPackage("..notification..")
+                    .should().dependOnClassesThat().resideInAPackage("..notification.repository..")
+                    .as("notification.repository is private to notification: outside callers go through a notification service");
+
+    @ArchTest
+    static final ArchRule planner_repositories_are_private_to_planner =
+            noClasses()
+                    .that().resideOutsideOfPackage("..planner..")
+                    .should().dependOnClassesThat().resideInAPackage("..planner.repository..")
+                    .as("planner.repository is private to planner: outside callers go through a planner service");
+
+    @ArchTest
+    static final ArchRule user_repositories_are_private_to_user =
+            noClasses()
+                    .that().resideOutsideOfPackage("..user..")
+                    .should().dependOnClassesThat().resideInAPackage("..user.repository..")
+                    .as("user.repository is private to user: outside callers go through a user service");
 }

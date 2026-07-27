@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.auth.token.RefreshRotationService;
 
 /**
  * Unit tests for JwtAuthenticationFilter.
@@ -78,7 +79,7 @@ class JwtAuthenticationFilterTest {
     private TokenGenerator tokenGenerator;
 
     @Mock
-    private org.danteplanner.backend.auth.token.RefreshRotationService refreshRotationService;
+    private RefreshRotationService refreshRotationService;
 
     @Mock
     private FilterChain filterChain;
@@ -88,25 +89,32 @@ class JwtAuthenticationFilterTest {
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
     private Logger filterLogger;
+    private Logger authenticatorLogger;
     private ListAppender<ILoggingEvent> logAppender;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService, cookieUtils, userService, objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
+        filter = new JwtAuthenticationFilter(tokenValidator, tokenBlacklistService,
+                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService, new AuthDegradationResponder(objectMapper), tokenGenerator, refreshRotationService, new LineageRotationFlag(false), new JwtProperties());
         SecurityContextHolder.clearContext();
         request = new MockHttpServletRequest("GET", "/test");
         response = new MockHttpServletResponse();
-        // Capture the filter's WARN security events so audit-log rendering can be asserted.
+        // Capture WARN security events so audit-log rendering can be asserted. Both classes on
+        // the authentication path feed the same appender: the assertions are about the event a
+        // rejection renders, which no consumer keys to a logger name.
         filterLogger = (Logger) LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+        authenticatorLogger = (Logger) LoggerFactory.getLogger(AccessTokenAuthenticator.class);
         logAppender = new ListAppender<>();
         logAppender.start();
         filterLogger.addAppender(logAppender);
+        authenticatorLogger.addAppender(logAppender);
     }
 
     @AfterEach
     void tearDown() {
         filterLogger.detachAppender(logAppender);
+        authenticatorLogger.detachAppender(logAppender);
         // The filter under test populates SecurityContextHolder, whose default strategy is a
         // ThreadLocal that outlives this class. MockMvc runs its filter chain on the calling
         // thread, and JwtAuthenticationFilter sets a principal only when none is present, so a

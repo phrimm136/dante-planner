@@ -1,7 +1,7 @@
 package org.danteplanner.backend.planner.service;
 
 import org.danteplanner.backend.shared.sse.SsePublisher;
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +47,7 @@ public class PlannerPublishingService {
     private final PlannerCatalogService plannerCatalogService;
     private final PlannerSubscriptionService subscriptionService;
     private final SsePublisher ssePublisher;
-    private final NotificationService notificationService;
+    private final NotificationDispatchService notificationDispatchService;
     private final PlannerAccessGuard accessGuard;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -62,7 +62,7 @@ public class PlannerPublishingService {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onPlannerPublished(PlannerPublishedEvent event) {
         ssePublisher.publishBroadcast(event.authorId(), SseEventType.NOTIFY_PUBLISHED, event.data());
-        notificationService.notifyPlannerPublished(
+        notificationDispatchService.notifyPlannerPublished(
                 event.authorId(), event.plannerId(), event.plannerTitle());
     }
 

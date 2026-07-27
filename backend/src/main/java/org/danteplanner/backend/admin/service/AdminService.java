@@ -5,9 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.user.event.UserDemotedEvent;
+import org.danteplanner.backend.user.service.UserService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
@@ -22,8 +24,8 @@ import org.danteplanner.backend.moderation.service.ModerationAuditService;
 @Slf4j
 public class AdminService {
 
-    private final UserRepository userRepository;
-    private final TokenBlacklistService tokenBlacklistService;
+    private final UserService userService;
+    private final ApplicationEventPublisher eventPublisher;
     private final ModerationAuditService auditService;
 
     /**
@@ -36,13 +38,11 @@ public class AdminService {
      * @throws UserNotFoundException        if target user not found
      * @throws ModerationForbiddenException if a rank safeguard rejects the change
      */
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public User changeRole(Long actorId, Long targetId, UserRole newRole) {
         // Use pessimistic locking to prevent TOCTOU race conditions
-        User actor = userRepository.findWithLockByIdAndDeletedAtIsNull(actorId)
-                .orElseThrow(() -> new UserNotFoundException(actorId));
-        User target = userRepository.findWithLockByIdAndDeletedAtIsNull(targetId)
-                .orElseThrow(() -> new UserNotFoundException(targetId));
+        User actor = userService.lockActiveById(actorId);
+        User target = userService.lockActiveById(targetId);
 
         UserRole actorRole = actor.getRole();
         UserRole targetCurrentRole = target.getRole();
@@ -59,7 +59,7 @@ public class AdminService {
 
         // Safeguard 3: Cannot demote last admin
         if (targetCurrentRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
-            long adminCount = userRepository.countByRole(UserRole.ADMIN);
+            long adminCount = userService.countByRole(UserRole.ADMIN);
             if (adminCount <= 1) {
                 throw new ModerationForbiddenException("Cannot demote the last administrator");
             }
@@ -68,18 +68,17 @@ public class AdminService {
         // Apply role change
         UserRole oldRole = target.getRole();
         target.setRole(newRole);
-        User saved = userRepository.save(target);
+        User saved = userService.saveRole(target);
 
         boolean demotion = oldRole.outranks(newRole);
         auditService.record(actorId, target.getPublicId().toString(),
                 demotion ? ModerationAction.ActionType.DEMOTE : ModerationAction.ActionType.PROMOTE,
                 ModerationAction.TargetType.USER, oldRole + " -> " + newRole, null);
 
-        // If demoted, invalidate all their tokens immediately
+        // Credentials issued under the old role are withdrawn after this commits
         if (demotion) {
-            tokenBlacklistService.invalidateUserTokens(targetId);
-            log.info("User {} demoted from {} to {} by admin {}. Tokens invalidated.",
-                    targetId, oldRole, newRole, actorId);
+            eventPublisher.publishEvent(new UserDemotedEvent(this, targetId, oldRole, newRole));
+            log.info("User {} demoted from {} to {} by admin {}", targetId, oldRole, newRole, actorId);
         } else {
             log.info("User {} role changed from {} to {} by admin {}",
                     targetId, oldRole, newRole, actorId);
@@ -97,7 +96,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public UserRole getUserRole(Long userId) {
-        User user = userRepository.findByIdAndDeletedAtIsNull(userId)
+        User user = userService.findActiveById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
         return user.getRole();
     }

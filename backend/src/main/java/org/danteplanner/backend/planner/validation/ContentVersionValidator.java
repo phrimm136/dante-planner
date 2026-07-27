@@ -1,7 +1,9 @@
 package org.danteplanner.backend.planner.validation;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -29,19 +31,48 @@ public class ContentVersionValidator {
     private static final String INVALID_CONTENT_VERSION = "INVALID_CONTENT_VERSION";
     private static final String CONTENT_VERSION_REQUIRED = "CONTENT_VERSION_REQUIRED";
 
-    private final int mdCurrentVersion;
-    private final List<Integer> mdAvailableVersions;
-    private final List<Integer> rrAvailableVersions;
+    /**
+     * The versions one planner type accepts, per operation, and the name its rejection message
+     * carries.
+     *
+     * @param forCreate   versions a new planner may declare
+     * @param forUpdate   versions an existing planner may keep
+     * @param displayName the type's name as the client sees it
+     */
+    private record VersionRule(List<Integer> forCreate, List<Integer> forUpdate, String displayName) {}
+
+    private final Map<PlannerType, VersionRule> rules;
 
     public ContentVersionValidator(
             @Value("${planner.md.current-version}") int mdCurrentVersion,
             @Value("${planner.md.available-versions}") String mdAvailableVersionsRaw,
             @Value("${planner.rr.available-versions}") String rrAvailableVersionsRaw) {
-        this.mdCurrentVersion = mdCurrentVersion;
-        this.mdAvailableVersions = parseVersionList(mdAvailableVersionsRaw);
-        this.rrAvailableVersions = parseVersionList(rrAvailableVersionsRaw);
+        List<Integer> mdAvailableVersions = parseVersionList(mdAvailableVersionsRaw);
+        List<Integer> rrAvailableVersions = parseVersionList(rrAvailableVersionsRaw);
+
+        Map<PlannerType, VersionRule> byType = new EnumMap<>(PlannerType.class);
+        byType.put(PlannerType.MIRROR_DUNGEON,
+                new VersionRule(List.of(mdCurrentVersion), mdAvailableVersions, "Mirror Dungeon"));
+        byType.put(PlannerType.REFRACTED_RAILWAY,
+                new VersionRule(rrAvailableVersions, rrAvailableVersions, "Refracted Railway"));
+        this.rules = Map.copyOf(byType);
+
+        requireEveryTypeCovered();
         log.info("ContentVersionValidator initialized: MD current={}, MD available={}, RR available={}",
                 mdCurrentVersion, mdAvailableVersions, rrAvailableVersions);
+    }
+
+    /**
+     * A planner type with no rule would pass every version unchecked, so its absence has to stop
+     * the context from starting rather than surface as accepted bad content later.
+     */
+    private void requireEveryTypeCovered() {
+        List<PlannerType> uncovered = Arrays.stream(PlannerType.values())
+                .filter(type -> !rules.containsKey(type))
+                .toList();
+        if (!uncovered.isEmpty()) {
+            throw new IllegalStateException("No content version rule for planner type(s): " + uncovered);
+        }
     }
 
     private List<Integer> parseVersionList(String raw) {
@@ -66,16 +97,8 @@ public class ContentVersionValidator {
      */
     public void validateVersionForCreate(PlannerType plannerType, Integer contentVersion) {
         requireNonNull(contentVersion);
-
-        if (plannerType == PlannerType.MIRROR_DUNGEON) {
-            if (!contentVersion.equals(mdCurrentVersion)) {
-                log.warn("Validation failed: MD create version {} != current {}", contentVersion, mdCurrentVersion);
-                throw new PlannerValidationException(INVALID_CONTENT_VERSION,
-                        "Invalid content version for Mirror Dungeon");
-            }
-        } else if (plannerType == PlannerType.REFRACTED_RAILWAY) {
-            validateRrVersion(contentVersion, "create");
-        }
+        VersionRule rule = rules.get(plannerType);
+        requireAccepted(rule, rule.forCreate(), contentVersion, "create");
     }
 
     /**
@@ -88,16 +111,8 @@ public class ContentVersionValidator {
      */
     public void validateVersionForUpdate(PlannerType plannerType, Integer contentVersion) {
         requireNonNull(contentVersion);
-
-        if (plannerType == PlannerType.MIRROR_DUNGEON) {
-            if (!mdAvailableVersions.contains(contentVersion)) {
-                log.warn("Validation failed: MD update version {} not in {}", contentVersion, mdAvailableVersions);
-                throw new PlannerValidationException(INVALID_CONTENT_VERSION,
-                        "Invalid content version for Mirror Dungeon");
-            }
-        } else if (plannerType == PlannerType.REFRACTED_RAILWAY) {
-            validateRrVersion(contentVersion, "update");
-        }
+        VersionRule rule = rules.get(plannerType);
+        requireAccepted(rule, rule.forUpdate(), contentVersion, "update");
     }
 
     private void requireNonNull(Integer contentVersion) {
@@ -107,11 +122,12 @@ public class ContentVersionValidator {
         }
     }
 
-    private void validateRrVersion(Integer contentVersion, String operation) {
-        if (!rrAvailableVersions.contains(contentVersion)) {
-            log.warn("Validation failed: RR {} version {} not in {}", operation, contentVersion, rrAvailableVersions);
+    private void requireAccepted(VersionRule rule, List<Integer> accepted, Integer contentVersion, String operation) {
+        if (!accepted.contains(contentVersion)) {
+            log.warn("Validation failed: {} {} version {} not in {}",
+                    rule.displayName(), operation, contentVersion, accepted);
             throw new PlannerValidationException(INVALID_CONTENT_VERSION,
-                    "Invalid content version for Refracted Railway");
+                    "Invalid content version for " + rule.displayName());
         }
     }
 }

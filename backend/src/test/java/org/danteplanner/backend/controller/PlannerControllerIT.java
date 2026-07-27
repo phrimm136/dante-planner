@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 
 /**
  * Integration tests for PlannerController.
@@ -79,7 +80,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     private PlannerRepository plannerRepository;
 
     @Autowired
-    private org.danteplanner.backend.planner.repository.PlannerVoteRepository plannerVoteRepository;
+    private PlannerVoteRepository plannerVoteRepository;
 
     @Autowired
     private jakarta.persistence.EntityManager entityManager;

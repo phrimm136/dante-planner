@@ -4,7 +4,6 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
@@ -53,9 +52,6 @@ class AuthenticationServiceLineageTest {
     @Mock
     private UserAccountLifecycleService lifecycleService;
 
-    @Mock
-    private UserRepository userRepository;
-
 
     private AuthenticationService facade;
     private User testUser;
@@ -64,7 +60,7 @@ class AuthenticationServiceLineageTest {
     void setUp() {
         facade = new AuthenticationService(
                 providerRegistry, tokenGenerator, tokenValidator, tokenBlacklistService,
-                userService, lifecycleService, userRepository, new LineageRotationFlag(true));
+                userService, lifecycleService, new LineageRotationFlag(true));
 
         testUser = User.builder()
                 .id(123L)

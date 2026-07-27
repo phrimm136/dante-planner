@@ -1,7 +1,5 @@
 package org.danteplanner.backend.shared.exception;
 
-import lombok.Getter;
-
 /**
  * A client supplied a value the endpoint cannot accept, mapped to HTTP 400 by
  * {@link GlobalExceptionHandler}.
@@ -14,13 +12,9 @@ import lombok.Getter;
  * caller cannot influence is a bug, not a rejection, and belongs in an
  * {@link IllegalArgumentException} that the handler reports as a server error.</p>
  */
-@Getter
-public class InvalidRequestException extends RuntimeException {
-
-    private final String errorCode;
+public class InvalidRequestException extends DomainException {
 
     public InvalidRequestException(String errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        super(ErrorKind.INVALID_REQUEST, errorCode, message);
     }
 }

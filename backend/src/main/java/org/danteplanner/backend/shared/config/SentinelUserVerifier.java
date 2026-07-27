@@ -2,7 +2,7 @@ package org.danteplanner.backend.shared.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
@@ -27,13 +27,13 @@ public class SentinelUserVerifier implements ApplicationRunner {
      */
     private static final Long SENTINEL_USER_ID = 0L;
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public void run(ApplicationArguments args) {
         log.info("Verifying sentinel user (id={}) exists...", SENTINEL_USER_ID);
 
-        if (!userRepository.existsById(SENTINEL_USER_ID)) {
+        if (!userService.existsById(SENTINEL_USER_ID)) {
             throw new IllegalStateException(
                 String.format(
                     "Sentinel user (id=%d) is missing from the database. " +

@@ -6,7 +6,6 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
-import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProvider;
@@ -41,7 +40,6 @@ public class AuthenticationService {
     private final TokenBlacklistService tokenBlacklistService;
     private final UserService userService;
     private final UserAccountLifecycleService lifecycleService;
-    private final UserRepository userRepository;
     private final LineageRotationFlag lineageRotationFlag;
 
     /**
@@ -85,8 +83,7 @@ public class AuthenticationService {
         boolean reactivated = false;
 
         // 1. Try to find active user
-        Optional<User> activeUser = userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(
-                providerType, providerId);
+        Optional<User> activeUser = userService.findActiveByProvider(providerType, providerId);
 
         User user;
         if (activeUser.isPresent()) {
@@ -94,7 +91,7 @@ public class AuthenticationService {
             user = activeUser.get();
         } else {
             // 2. Try to find soft-deleted user (for reactivation)
-            Optional<User> deletedUser = userRepository.findByProviderAndProviderId(providerType, providerId);
+            Optional<User> deletedUser = userService.findByProvider(providerType, providerId);
 
             if (deletedUser.isPresent() && deletedUser.get().isDeleted()) {
                 // Reactivate the soft-deleted account

@@ -59,7 +59,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 
 /**
  * Unit tests for PublishedPlannerQueryService (public catalog read model:
@@ -70,7 +71,7 @@ import org.danteplanner.backend.user.repository.UserRepository;
 class PublishedPlannerQueryServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -100,7 +101,7 @@ class PublishedPlannerQueryServiceTest {
     private ApplicationEventPublisher eventPublisher;
 
     @Mock
-    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+    private PlannerStatsRepository plannerStatsRepository;
 
     private PlannerEngagementService engagementService;
     private PublishedPlannerQueryService publishedQueryService;
@@ -123,7 +124,7 @@ class PublishedPlannerQueryServiceTest {
                 plannerStatsRepository,
                 plannerCatalogService,
                 eventPublisher,
-                new PlannerAccessGuard(userRepository, plannerRepository),
+                new PlannerAccessGuard(userService, plannerRepository),
                 recommendedThreshold
         );
 

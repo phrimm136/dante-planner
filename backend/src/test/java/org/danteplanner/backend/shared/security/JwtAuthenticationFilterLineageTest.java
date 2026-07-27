@@ -96,8 +96,9 @@ class JwtAuthenticationFilterLineageTest {
 
     private JwtAuthenticationFilter filterWithFlag(boolean lineageEnabled) {
         return new JwtAuthenticationFilter(
-                tokenValidator, tokenBlacklistService, cookieUtils, userService,
-                objectMapper, tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled),
+                tokenValidator, tokenBlacklistService,
+                new AccessTokenAuthenticator(tokenValidator, tokenBlacklistService), cookieUtils, userService,
+                new AuthDegradationResponder(objectMapper), tokenGenerator, refreshRotationService, new LineageRotationFlag(lineageEnabled),
                 jwtProperties);
     }
 

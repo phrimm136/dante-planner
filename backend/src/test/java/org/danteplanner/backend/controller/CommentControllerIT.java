@@ -12,9 +12,18 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentEngagementService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,18 +62,41 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     static class MockCommentServiceConfig {
         @Bean
         @Primary
-        public CommentService commentService(
+        public CommentQueryService commentQueryService(
                 PlannerCommentRepository commentRepository,
-                org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository commentVoteRepository,
+                PlannerCommentVoteRepository commentVoteRepository,
                 PlannerRepository plannerRepository,
-                UserRepository userRepository,
-                org.danteplanner.backend.notification.service.NotificationService notificationService,
-                org.danteplanner.backend.comment.service.PlannerCommentSseService sseService,
-                org.danteplanner.backend.shared.sse.SsePublisher ssePublisher,
-                org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository) {
-            return new CommentService(commentRepository, commentVoteRepository, plannerRepository, plannerStatsRepository, userRepository, notificationService, sseService,
-                    ssePublisher,
-                    new org.danteplanner.backend.planner.service.PlannerAccessGuard(userRepository, plannerRepository));
+                UserService userService) {
+            return new CommentQueryService(commentRepository, commentVoteRepository, userService,
+                    new PlannerAccessGuard(userService, plannerRepository));
+        }
+
+        @Bean
+        @Primary
+        public CommentCommandService commentCommandService(
+                PlannerCommentRepository commentRepository,
+                CommentQueryService commentQueryService,
+                PlannerRepository plannerRepository,
+                UserService userService,
+                NotificationDispatchService notificationDispatchService,
+                SsePublisher ssePublisher,
+                PlannerStatsRepository plannerStatsRepository) {
+            return new CommentCommandService(commentRepository, commentQueryService, userService,
+                    notificationDispatchService, ssePublisher,
+                    new PlannerAccessGuard(userService, plannerRepository),
+                    new PlannerStatsService(plannerStatsRepository));
+        }
+
+        @Bean
+        @Primary
+        public CommentEngagementService commentEngagementService(
+                PlannerCommentRepository commentRepository,
+                PlannerCommentVoteRepository commentVoteRepository,
+                CommentQueryService commentQueryService,
+                PlannerRepository plannerRepository,
+                UserService userService) {
+            return new CommentEngagementService(commentRepository, commentVoteRepository, commentQueryService,
+                    new PlannerAccessGuard(userService, plannerRepository));
         }
     }
 

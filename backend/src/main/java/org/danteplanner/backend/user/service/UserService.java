@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -138,6 +140,29 @@ public class UserService {
     }
 
     /**
+     * Resolve an id to an account, deleted ones included, for callers that treat a missing account
+     * as a displayable state rather than an error.
+     *
+     * @param id the account id
+     * @return the account, or empty if none carries the id
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findOptionalById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    /**
+     * Whether an account row carries the given id, deleted or not.
+     *
+     * @param id the account id
+     * @return true if the row exists
+     */
+    @Transactional(readOnly = true)
+    public boolean existsById(Long id) {
+        return userRepository.existsById(id);
+    }
+
+    /**
      * Find an active (non-deleted) user by ID.
      *
      * @param userId the user ID
@@ -146,6 +171,31 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<User> findActiveById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
+    }
+
+    /**
+     * Find the active account an OAuth identity resolves to.
+     *
+     * @param providerType the OAuth provider
+     * @param providerId   the provider's own id for the account
+     * @return the active account, or empty if none exists or it is soft-deleted
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findActiveByProvider(AuthProviderType providerType, String providerId) {
+        return userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId);
+    }
+
+    /**
+     * Find the account an OAuth identity resolves to, soft-deleted ones included, so a returning
+     * user can be offered reactivation rather than a second account.
+     *
+     * @param providerType the OAuth provider
+     * @param providerId   the provider's own id for the account
+     * @return the account, or empty if none exists
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> findByProvider(AuthProviderType providerType, String providerId) {
+        return userRepository.findByProviderAndProviderId(providerType, providerId);
     }
 
     /**
@@ -194,6 +244,34 @@ public class UserService {
     }
 
     /**
+     * Read an active account under a write lock, so a rank check and the write it guards cannot be
+     * interleaved by a concurrent role change.
+     *
+     * <p>The lock lives only as long as the transaction that took it, which is the caller's:
+     * MANDATORY rejects a call made outside one rather than handing back an unguarded row.</p>
+     *
+     * @param userId the account id
+     * @return the locked active account
+     * @throws UserNotFoundException if no active account carries the id
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public User lockActiveById(Long userId) {
+        return userRepository.findWithLockByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
+    /**
+     * Count the accounts holding a role, deleted ones included.
+     *
+     * @param role the role to count
+     * @return the number of accounts holding it
+     */
+    @Transactional(readOnly = true)
+    public long countByRole(UserRole role) {
+        return userRepository.countByRole(role);
+    }
+
+    /**
      * Persist a restriction a moderator placed on or lifted from an account.
      *
      * @param user the account carrying the new restriction state
@@ -201,6 +279,17 @@ public class UserService {
      */
     @Transactional
     public User saveRestriction(User user) {
+        return userRepository.save(user);
+    }
+
+    /**
+     * Persist a role change an administrator made on an account.
+     *
+     * @param user the account carrying the new role
+     * @return the persisted account
+     */
+    @Transactional
+    public User saveRole(User user) {
         return userRepository.save(user);
     }
 

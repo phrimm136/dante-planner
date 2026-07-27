@@ -25,7 +25,7 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
@@ -52,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.user.exception.UserBannedException;
 
 /**
  * Unit tests for PlannerCommandService (owner CRUD write operations:
@@ -68,7 +69,7 @@ class PlannerCommandServiceTest {
     private PlannerStatsRepository statsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private PlannerSyncEventService sseService;
@@ -97,7 +98,7 @@ class PlannerCommandServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userRepository, plannerRepository);
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
 
         commandService = new PlannerCommandService(
                 plannerRepository,
@@ -122,7 +123,7 @@ class PlannerCommandServiceTest {
 
         deviceId = UUID.randomUUID();
 
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+        when(userService.findById(testUser.getId())).thenReturn(testUser);
     }
 
     private UpsertPlannerRequest createValidRequest() {
@@ -185,7 +186,7 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -232,7 +233,7 @@ class PlannerCommandServiceTest {
             Long nonExistentUserId = 999L;
             when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
-            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+            when(userService.findById(nonExistentUserId)).thenThrow(new UserNotFoundException(nonExistentUserId));
 
             // Act & Assert
             UserNotFoundException exception = assertThrows(
@@ -252,7 +253,7 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = withTitle(createValidRequest(), null);
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(contentValidator.validate(anyString(), anyString())).thenReturn(mock(JsonNode.class));
 
             ArgumentCaptor<Planner> plannerCaptor = ArgumentCaptor.forClass(Planner.class);
@@ -276,7 +277,7 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(0L);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             // Only this exact content-and-category pair is rejected, so a validation call carrying
             // anything else leaves the stub unmatched and the create completes without throwing.
             when(contentValidator.validate(request.content(), request.category()))
@@ -503,7 +504,7 @@ class PlannerCommandServiceTest {
         void importPlanners_WhenWithinLimit_Succeeds() {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn(50L);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
@@ -563,7 +564,7 @@ class PlannerCommandServiceTest {
             // Arrange
             Long nonExistentUserId = 999L;
             when(plannerRepository.countActiveByUserId(nonExistentUserId)).thenReturn(0L);
-            when(userRepository.findById(nonExistentUserId)).thenReturn(Optional.empty());
+            when(userService.findById(nonExistentUserId)).thenThrow(new UserNotFoundException(nonExistentUserId));
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
             requests.add(createValidRequest());
@@ -585,7 +586,7 @@ class PlannerCommandServiceTest {
         void importPlanners_WhenExactlyToLimit_Success() {
             // Arrange
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 5));
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
 
             List<UpsertPlannerRequest> requests = new ArrayList<>();
             for (int i = 0; i < 5; i++) {
@@ -621,7 +622,7 @@ class PlannerCommandServiceTest {
             // Arrange
             UpsertPlannerRequest request = createValidRequest();
             when(plannerRepository.countActiveByUserId(testUser.getId())).thenReturn((long) (maxPlannersPerUser - 1));
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
@@ -683,8 +684,8 @@ class PlannerCommandServiceTest {
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
 
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
 
             UpsertPlannerRequest request = new UpsertPlannerRequest(
                     null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
@@ -693,10 +694,10 @@ class PlannerCommandServiceTest {
 
             // A ban withdraws distribution (publish, comment), never possession. Downstream mock
             // gaps may still fail the call; only the restriction verdict is under test here.
-            org.danteplanner.backend.user.exception.UserBannedException blocked = null;
+            UserBannedException blocked = null;
             try {
                 commandService.upsertPlanner(1L, deviceId, plannerId, request, false);
-            } catch (org.danteplanner.backend.user.exception.UserBannedException e) {
+            } catch (UserBannedException e) {
                 blocked = e;
             } catch (RuntimeException ignored) {
                 // unrelated to the restriction verdict
@@ -709,8 +710,8 @@ class PlannerCommandServiceTest {
         @DisplayName("Non-banned user can upsert planner")
         void upsertPlanner_WhenNonBannedUser_Succeeds() {
             // Arrange
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
             when(plannerRepository.save(any(Planner.class)))
@@ -797,8 +798,8 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.empty());
             lenient().when(plannerRepository.findClassificationById(plannerId))
                     .thenReturn(Optional.empty());
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
             when(plannerRepository.save(any(Planner.class)))

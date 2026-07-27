@@ -25,7 +25,7 @@ import jakarta.persistence.PersistenceContext;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.repository.*;
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,7 +71,7 @@ class VoteNotificationFlowIT {
     private PlannerEngagementService plannerEngagementService;
 
     @Autowired
-    private NotificationService notificationService;
+    private NotificationDispatchService notificationDispatchService;
 
     @Autowired
     private PlannerRepository plannerRepository;

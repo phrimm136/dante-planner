@@ -25,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
@@ -59,9 +58,6 @@ class UserControllerTest {
 
     @Mock
     private AuthenticationService authService;
-
-    @Mock
-    private Authentication authentication;
 
     /**
      * Real, so the auth cookies the controller clears are inspectable state on the response.
@@ -102,11 +98,10 @@ class UserControllerTest {
         void deleteMyAccount_WhenAuthenticated_ReturnsSuccessResponse() {
             // Arrange
             Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
-            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
             when(lifecycleService.deleteAccount(TEST_USER_ID)).thenReturn(scheduledDeleteAt);
 
             // Act
-            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(authentication, request, response);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert
             assertNotNull(result);
@@ -125,11 +120,10 @@ class UserControllerTest {
         void deleteMyAccount_WhenAuthenticated_BlacklistsTokensAndClearsCookies() {
             // Arrange
             Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
-            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
             when(lifecycleService.deleteAccount(TEST_USER_ID)).thenReturn(scheduledDeleteAt);
 
             // Act
-            userController.deleteMyAccount(authentication, request, response);
+            userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert - both auth cookies come back expired, so the browser drops them
             Cookie clearedAccess = response.getCookie(CookieConstants.ACCESS_TOKEN);
@@ -149,11 +143,10 @@ class UserControllerTest {
         void deleteMyAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - simulate second call returning same scheduled date
             Instant originalScheduledAt = Instant.now().plus(Duration.ofDays(25));
-            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
             when(lifecycleService.deleteAccount(TEST_USER_ID)).thenReturn(originalScheduledAt);
 
             // Act
-            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(authentication, request, response);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert
             assertNotNull(result);
@@ -162,20 +155,19 @@ class UserControllerTest {
         }
 
         @Test
-        @DisplayName("Should extract user ID from authentication principal")
-        void deleteMyAccount_WhenAuthenticated_ExtractsUserIdFromPrincipal() {
+        @DisplayName("Should pass the authenticated user ID to the lifecycle service")
+        void deleteMyAccount_WhenAuthenticated_PassesUserIdToLifecycleService() {
             // Arrange
             Long userId = 456L;
             Instant scheduledAt = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS));
-            when(authentication.getPrincipal()).thenReturn(userId);
             when(lifecycleService.deleteAccount(userId)).thenReturn(scheduledAt);
 
             // Act
             ResponseEntity<UserDeletionResponse> result =
-                    userController.deleteMyAccount(authentication, request, response);
+                    userController.deleteMyAccount(userId, request, response);
 
-            // Assert - the schedule stubbed for this principal's id is the one that comes back,
-            // so the id the controller passed on can only have been that principal's
+            // Assert - the schedule stubbed for this id is the one that comes back, so the id the
+            // controller passed on can only have been the one it was handed
             assertEquals(scheduledAt, result.getBody().permanentDeleteAt());
         }
 
@@ -186,12 +178,11 @@ class UserControllerTest {
             int customGracePeriod = 60;
             ReflectionTestUtils.setField(userController, "gracePeriodDays", customGracePeriod);
 
-            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
             when(lifecycleService.deleteAccount(TEST_USER_ID))
                     .thenReturn(Instant.now().plus(Duration.ofDays(customGracePeriod)));
 
             // Act
-            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(authentication, request, response);
+            ResponseEntity<UserDeletionResponse> result = userController.deleteMyAccount(TEST_USER_ID, request, response);
 
             // Assert
             assertEquals(customGracePeriod, result.getBody().gracePeriodDays());
@@ -208,12 +199,11 @@ class UserControllerTest {
             // Arrange
             UpdateUserSettingsRequest updateRequest = new UpdateUserSettingsRequest(true, null, null, null);
             UserSettingsResponse persisted = new UserSettingsResponse(true, true, true, false);
-            when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);
             when(userSettingsService.updateSettings(TEST_USER_ID, updateRequest)).thenReturn(persisted);
 
             // Act
             ResponseEntity<UserSettingsResponse> result =
-                    userController.updateSettings(authentication, updateRequest);
+                    userController.updateSettings(TEST_USER_ID, updateRequest);
 
             // Assert - the invalidation must go out for the updated user, after the persist,
             // so every pod drops its stale settingsCache entry. The ordering is only visible at

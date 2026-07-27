@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 
 /**
  * Unit tests for PlannerReportService.
@@ -42,7 +42,7 @@ class PlannerReportServiceTest {
     private PlannerReportRepository reportRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private PlannerRepository plannerRepository;
@@ -56,7 +56,7 @@ class PlannerReportServiceTest {
     @BeforeEach
     void setUp() {
         reportService = new PlannerReportService(reportRepository,
-                new PlannerAccessGuard(userRepository, plannerRepository));
+                new PlannerAccessGuard(userService, plannerRepository));
 
         testUser = User.builder()
                 .id(1L)
@@ -81,7 +81,7 @@ class PlannerReportServiceTest {
                 .build();
         // The access guard resolves the principal on every guarded path; an unstubbed
         // repository would surface as UserNotFoundException instead of the behavior under test.
-        lenient().when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
 
     }
 

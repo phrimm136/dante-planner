@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 
 /**
  * User resolution seam: resolving a brand-new provider identity creates the user and its
@@ -81,7 +82,7 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
             assertThat(rb).as("second caller resolves a user").isNotNull();
             assertThat(ra.getId()).isEqualTo(rb.getId());
             assertThat(userRepository.findByProviderAndProviderId(
-                    org.danteplanner.backend.auth.entity.AuthProviderType.GOOGLE, "resolve-race-001"))
+                    AuthProviderType.GOOGLE, "resolve-race-001"))
                     .isPresent();
             assertThat(userRepository.findAll().stream()
                     .filter(u -> "resolve-race-001".equals(u.getProviderId()))

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 
 /**
  * Service for managing planner reports.
@@ -21,7 +22,7 @@ import java.util.UUID;
 public class PlannerReportService {
 
     private final PlannerReportRepository reportRepository;
-    private final org.danteplanner.backend.planner.service.PlannerAccessGuard accessGuard;
+    private final PlannerAccessGuard accessGuard;
 
     /**
      * Create a report for a planner.

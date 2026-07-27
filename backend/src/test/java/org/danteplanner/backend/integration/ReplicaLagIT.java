@@ -33,6 +33,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
+import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 
 /**
  * Phase-3 acceptance test (INV1): a replica {@code byId} miss re-checks the primary before
@@ -165,7 +167,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
             assertThat(thrown)
                     .as("a byId absent on both replica and primary must propagate the miss as a 404")
-                    .isInstanceOf(org.danteplanner.backend.planner.exception.PlannerNotFoundException.class);
+                    .isInstanceOf(PlannerNotFoundException.class);
             assertThat(promotedCount() - before)
                     .as("a double-miss must NOT increment " + PROMOTED_COUNTER)
                     .isEqualTo(0.0);
@@ -240,7 +242,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
 
             assertThat(thrown)
                     .as("a delete issues a tombstone synchronously before the response, so a replica-served positive whose del:planner:<id> is present must return 404")
-                    .isInstanceOf(org.danteplanner.backend.shared.exception.EntityNotFoundException.class);
+                    .isInstanceOf(EntityNotFoundException.class);
         } finally {
             replicationControl.startReplica();
             replicationControl.awaitCaughtUp();

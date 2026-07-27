@@ -8,7 +8,7 @@ import org.danteplanner.backend.user.exception.UserBannedException;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.exception.UserTimedOutException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PlannerAccessGuard {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PlannerRepository plannerRepository;
 
     /**
@@ -35,8 +35,7 @@ public class PlannerAccessGuard {
      * @throws UserNotFoundException if user not found
      */
     public User getUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        return userService.findById(userId);
     }
 
     /**
@@ -86,6 +85,19 @@ public class PlannerAccessGuard {
      */
     public Planner findPlannerOrThrow(Long userId, UUID id) {
         return plannerRepository.findAggregateForOwner(id, userId)
+                .orElseThrow(() -> new PlannerNotFoundException(id));
+    }
+
+    /**
+     * Require a planner to exist, published or not, for callers that apply their own visibility
+     * rule to what comes back.
+     *
+     * @param id the planner ID
+     * @return the planner
+     * @throws PlannerNotFoundException if no planner carries the id
+     */
+    public Planner requireExisting(UUID id) {
+        return plannerRepository.findAggregate(id)
                 .orElseThrow(() -> new PlannerNotFoundException(id));
     }
 

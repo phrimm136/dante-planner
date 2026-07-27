@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
+import org.danteplanner.backend.user.repository.UserRepository;
 
 /**
  * Integration tests for POST /api/auth/logout-all.
@@ -49,7 +50,7 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     private MockMvc mockMvc;
 
     @Autowired
-    private org.danteplanner.backend.user.repository.UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;

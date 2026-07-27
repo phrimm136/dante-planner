@@ -5,11 +5,13 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.entity.PlannerComment;
-import org.danteplanner.backend.comment.service.PlannerCommentSseService;
-import org.danteplanner.backend.comment.service.CommentService;
+import org.danteplanner.backend.comment.service.CommentCommandService;
+import org.danteplanner.backend.comment.service.CommentEngagementService;
+import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
-import org.danteplanner.backend.notification.service.NotificationService;
+import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
@@ -25,7 +27,7 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -44,13 +46,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.user.exception.UserBannedException;
+import org.danteplanner.backend.user.exception.UserTimedOutException;
 
 /**
- * Unit tests for CommentService.
+ * Unit tests for the comment service layer.
  * Tests CRUD operations and upvote toggle logic.
  */
 @ExtendWith(MockitoExtension.class)
-class CommentServiceTest {
+class CommentServiceLayerTest {
 
     @Mock
     private PlannerCommentRepository commentRepository;
@@ -64,23 +69,24 @@ class CommentServiceTest {
     // The comment counter lives on the stats aggregate, reachable only through this repository;
     // its value becomes observable only in a tier that commits.
     @Mock
-    private org.danteplanner.backend.planner.repository.PlannerStatsRepository plannerStatsRepository;
+    private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private NotificationService notificationService;
+    private NotificationDispatchService notificationDispatchService;
 
-    @Mock
-    private PlannerCommentSseService plannerCommentSseService;
 
     // Comment fan-out publishes to Redis and returns; delivery to a subscriber has no in-process
     // path, so no create test here can assert it.
     @Mock
     private SsePublisher ssePublisher;
 
-    private CommentService commentService;
+
+    private CommentQueryService queryService;
+    private CommentCommandService commandService;
+    private CommentEngagementService engagementService;
 
     private User testUser;
     private User otherUser;
@@ -89,17 +95,16 @@ class CommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        commentService = new CommentService(
-                commentRepository,
-                commentVoteRepository,
-                plannerRepository,
-                plannerStatsRepository,
-                userRepository,
-                notificationService,
-                plannerCommentSseService,
-                ssePublisher,
-                new PlannerAccessGuard(userRepository, plannerRepository)
-        );
+        queryService = new CommentQueryService(
+                commentRepository, commentVoteRepository, userService,
+                new PlannerAccessGuard(userService, plannerRepository));
+        commandService = new CommentCommandService(
+                commentRepository, queryService, userService, notificationDispatchService, ssePublisher,
+                new PlannerAccessGuard(userService, plannerRepository),
+                new PlannerStatsService(plannerStatsRepository));
+        engagementService = new CommentEngagementService(
+                commentRepository, commentVoteRepository, queryService,
+                new PlannerAccessGuard(userService, plannerRepository));
 
         testUser = User.builder()
                 .id(1L)
@@ -132,7 +137,7 @@ class CommentServiceTest {
                 .build();
         // The access guard resolves the principal on every guarded path; an unstubbed
         // repository would surface as UserNotFoundException instead of the behavior under test.
-        lenient().when(userRepository.findById(anyLong())).thenReturn(Optional.of(testUser));
+        lenient().when(userService.findById(anyLong())).thenReturn(testUser);
 
     }
 
@@ -146,7 +151,7 @@ class CommentServiceTest {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.save(any(PlannerComment.class)))
@@ -161,7 +166,7 @@ class CommentServiceTest {
 
             // Act
             UUID deviceId = UUID.randomUUID();
-            CreateCommentResponse response = commentService.createComment(plannerId, testUser.getId(), deviceId, request);
+            CreateCommentResponse response = commandService.createComment(plannerId, testUser.getId(), deviceId, request);
 
             // Assert
             PlannerComment stored = persisted.get();
@@ -186,7 +191,7 @@ class CommentServiceTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Reply comment", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
@@ -205,7 +210,7 @@ class CommentServiceTest {
 
             // Act
             UUID deviceId = UUID.randomUUID();
-            CreateCommentResponse response = commentService.createComment(plannerId, testUser.getId(), deviceId, request);
+            CreateCommentResponse response = commandService.createComment(plannerId, testUser.getId(), deviceId, request);
 
             // Assert
             PlannerComment stored = persisted.get();
@@ -221,14 +226,14 @@ class CommentServiceTest {
         void createComment_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             CreateCommentRequest request = new CreateCommentRequest("Test", null);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
             UUID deviceId = UUID.randomUUID();
             assertThrows(PlannerNotFoundException.class,
-                    () -> commentService.createComment(plannerId, testUser.getId(), deviceId, request));
+                    () -> commandService.createComment(plannerId, testUser.getId(), deviceId, request));
         }
 
         @Test
@@ -237,7 +242,7 @@ class CommentServiceTest {
             // Arrange
             UUID nonExistentParentId = UUID.randomUUID();
             CreateCommentRequest request = new CreateCommentRequest("Reply", nonExistentParentId);
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(nonExistentParentId))
@@ -246,7 +251,7 @@ class CommentServiceTest {
             // Act & Assert
             UUID deviceId = UUID.randomUUID();
             assertThrows(CommentNotFoundException.class,
-                    () -> commentService.createComment(plannerId, testUser.getId(), deviceId, request));
+                    () -> commandService.createComment(plannerId, testUser.getId(), deviceId, request));
         }
 
         @Test
@@ -263,7 +268,7 @@ class CommentServiceTest {
 
             CreateCommentRequest request = new CreateCommentRequest("Very deep reply", parentPublicId);
             AtomicReference<PlannerComment> persisted = new AtomicReference<>();
-            when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
             when(commentRepository.findByPublicId(parentPublicId))
@@ -282,7 +287,7 @@ class CommentServiceTest {
 
             // Act
             UUID deviceId = UUID.randomUUID();
-            CreateCommentResponse response = commentService.createComment(plannerId, testUser.getId(), deviceId, request);
+            CreateCommentResponse response = commandService.createComment(plannerId, testUser.getId(), deviceId, request);
 
             // Assert
             PlannerComment stored = persisted.get();
@@ -313,7 +318,7 @@ class CommentServiceTest {
             when(commentRepository.save(any(PlannerComment.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
-            UpdateCommentResponse response = commentService.updateComment(commentPublicId, testUser.getId(), request);
+            UpdateCommentResponse response = commandService.updateComment(commentPublicId, testUser.getId(), request);
 
             // Assert
             assertEquals("Updated content", comment.getContent());
@@ -335,7 +340,7 @@ class CommentServiceTest {
 
             // Act & Assert
             assertThrows(CommentForbiddenException.class,
-                    () -> commentService.updateComment(commentPublicId, otherUser.getId(), request));
+                    () -> commandService.updateComment(commentPublicId, otherUser.getId(), request));
         }
 
         @Test
@@ -353,7 +358,7 @@ class CommentServiceTest {
 
             // Act & Assert
             assertThrows(CommentForbiddenException.class,
-                    () -> commentService.updateComment(commentPublicId, testUser.getId(), request));
+                    () -> commandService.updateComment(commentPublicId, testUser.getId(), request));
         }
     }
 
@@ -375,7 +380,7 @@ class CommentServiceTest {
             when(commentRepository.save(any(PlannerComment.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
-            commentService.deleteComment(commentPublicId, testUser.getId());
+            commandService.deleteComment(commentPublicId, testUser.getId());
 
             // Assert
             assertTrue(comment.isDeleted());
@@ -395,7 +400,7 @@ class CommentServiceTest {
 
             // Act & Assert
             assertThrows(CommentForbiddenException.class,
-                    () -> commentService.deleteComment(commentPublicId, otherUser.getId()));
+                    () -> commandService.deleteComment(commentPublicId, otherUser.getId()));
             verify(commentRepository, never()).save(any());
         }
 
@@ -412,7 +417,7 @@ class CommentServiceTest {
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
 
             // Act
-            commentService.deleteComment(commentPublicId, testUser.getId());
+            commandService.deleteComment(commentPublicId, testUser.getId());
 
             // Assert - no exception, no save
             verify(commentRepository, never()).save(any());
@@ -433,7 +438,7 @@ class CommentServiceTest {
                     .thenReturn(Collections.emptyList());
 
             // Act
-            List<CommentTreeNode> comments = commentService.getCommentTree(plannerId, testUser.getId());
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
 
             // Assert
             assertTrue(comments.isEmpty());
@@ -448,7 +453,7 @@ class CommentServiceTest {
 
             // Act & Assert
             assertThrows(PlannerNotFoundException.class,
-                    () -> commentService.getCommentTree(plannerId, testUser.getId()));
+                    () -> queryService.getCommentTree(plannerId, testUser.getId()));
         }
     }
 
@@ -463,15 +468,15 @@ class CommentServiceTest {
             java.time.Instant futureTimeout = java.time.Instant.now().plusSeconds(3600);
             testUser.setTimeoutUntil(futureTimeout);
 
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
 
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
-            org.danteplanner.backend.user.exception.UserTimedOutException exception = assertThrows(
-                    org.danteplanner.backend.user.exception.UserTimedOutException.class,
-                    () -> commentService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
+            UserTimedOutException exception = assertThrows(
+                    UserTimedOutException.class,
+                    () -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
             );
             assertEquals(testUser.getId(), exception.getUserId());
             verify(commentRepository, never()).save(any());
@@ -484,15 +489,15 @@ class CommentServiceTest {
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
 
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
 
             CreateCommentRequest request = new CreateCommentRequest("Test comment", null);
 
             // Act & Assert
-            org.danteplanner.backend.user.exception.UserBannedException exception = assertThrows(
-                    org.danteplanner.backend.user.exception.UserBannedException.class,
-                    () -> commentService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
+            UserBannedException exception = assertThrows(
+                    UserBannedException.class,
+                    () -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
             );
             assertEquals(testUser.getId(), exception.getUserId());
             verify(commentRepository, never()).save(any());
@@ -506,13 +511,13 @@ class CommentServiceTest {
             testUser.setTimeoutUntil(futureTimeout);
 
             UUID commentId = UUID.randomUUID();
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
 
             // Act & Assert - only a ban withdraws engagement
             assertThrows(
-                    org.danteplanner.backend.comment.exception.CommentNotFoundException.class,
-                    () -> commentService.toggleUpvote(commentId, testUser.getId())
+                    CommentNotFoundException.class,
+                    () -> engagementService.toggleUpvote(commentId, testUser.getId())
             );
             verify(commentVoteRepository, never()).save(any());
         }
@@ -525,13 +530,13 @@ class CommentServiceTest {
             testUser.setBannedBy(1L);
 
             UUID commentId = UUID.randomUUID();
-            when(userRepository.findById(testUser.getId()))
-                    .thenReturn(Optional.of(testUser));
+            when(userService.findById(testUser.getId()))
+                    .thenReturn(testUser);
 
             // Act & Assert
             assertThrows(
-                    org.danteplanner.backend.user.exception.UserBannedException.class,
-                    () -> commentService.toggleUpvote(commentId, testUser.getId())
+                    UserBannedException.class,
+                    () -> engagementService.toggleUpvote(commentId, testUser.getId())
             );
             verify(commentVoteRepository, never()).save(any());
         }

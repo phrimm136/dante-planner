@@ -1,0 +1,10 @@
+# 001 admin-role-change-isolation
+epic: none · pr: none
+
+## Decisions
+- @users @role-change @write-skew @isolation — `AdminService.changeRole` runs at `SERIALIZABLE`. Its last-admin guard reads a predicate (`COUNT(*) WHERE role='ADMIN'`), and a row lock cannot cover a predicate: two actors demoting two different admins each read a passing count, write disjoint rows, and commit an admin-less system. Only isolation makes the guard's own read take locks. REJECTED: a `PESSIMISTIC_WRITE` read over the admin set — correct here only because `idx_users_role` makes InnoDB take next-key locks over the range, a guarantee no reader of `AdminService` can see, bought for throughput a handful-of-calls-per-lifetime path does not need. REJECTED: one atomic conditional `UPDATE` carrying the count in a derived table — moves the invariant into SQL, out of the service that states the other two safeguards. REJECTED: a named application lock (`GET_LOCK`) — serializes the callers that take it and nothing else.
+- @users @role-change @pessimistic-lock — the explicit `PESSIMISTIC_WRITE` read of actor and target (`UserService.lockActiveById`) stays under `SERIALIZABLE`. MySQL's `SERIALIZABLE` promotes plain reads to shared locks, so two concurrent changes to one target would both hold S, then deadlock upgrading to X on write; taking X on the read makes the second caller wait instead. REJECTED: dropping the explicit lock as redundant once isolation is raised.
+- @users @concurrency @optimistic-lock — `User` carries no `@Version`. The pessimistic path is the whole concurrency control for role changes, so removing it leaves nothing behind. REJECTED: adding `@Version` to `User` — optimistic locking detects a same-row conflict and would still miss write skew, which is a conflict between disjoint rows.
+
+## Takeaway
+- takeaway: an invariant asserted over a query result rather than over a row. The safeguards were tested one transaction at a time, where each is individually correct, so nothing in the suite could observe that the third one guards a predicate the row locks never reached.

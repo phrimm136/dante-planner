@@ -5,13 +5,15 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
-import org.danteplanner.backend.user.repository.UserRepository;
-import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.event.UserDemotedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,10 +34,10 @@ import org.danteplanner.backend.moderation.service.ModerationAuditService;
 class AdminServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
-    private TokenBlacklistService tokenBlacklistService;
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private ModerationActionRepository moderationActionRepository;
@@ -48,7 +50,7 @@ class AdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(userRepository, tokenBlacklistService,
+        adminService = new AdminService(userService, eventPublisher,
                 new ModerationAuditService(moderationActionRepository));
 
         adminUser = User.builder()
@@ -93,46 +95,48 @@ class AdminServiceTest {
         @DisplayName("Admin can promote normal user to moderator")
         void changeRole_WhenAdminPromotesToModerator_Succeeds() {
             // Arrange - use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(normalUser.getId()))
-                    .thenReturn(Optional.of(normalUser));
-            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.lockActiveById(normalUser.getId()))
+                    .thenReturn(normalUser);
+            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
 
             // Assert
             assertEquals(UserRole.MODERATOR, result.getRole());
-            verify(tokenBlacklistService, never()).invalidateUserTokens(anyLong());
+            verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
 
         @Test
         @DisplayName("Admin can demote moderator to normal - tokens invalidated")
         void changeRole_WhenAdminDemotesModerator_InvalidatesTokens() {
             // Arrange - use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(moderatorUser.getId()))
-                    .thenReturn(Optional.of(moderatorUser));
-            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.lockActiveById(moderatorUser.getId()))
+                    .thenReturn(moderatorUser);
+            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
 
             // Assert
             assertEquals(UserRole.NORMAL, result.getRole());
-            verify(tokenBlacklistService).invalidateUserTokens(moderatorUser.getId());
+            ArgumentCaptor<UserDemotedEvent> demotion = ArgumentCaptor.forClass(UserDemotedEvent.class);
+            verify(eventPublisher).publishEvent(demotion.capture());
+            assertEquals(moderatorUser.getId(), demotion.getValue().getUserId());
         }
 
         @Test
         @DisplayName("Cannot grant role higher than own")
         void changeRole_WhenModeratorGrantsAdmin_ThrowsException() {
             // Arrange - moderator tries to grant ADMIN (use locking query method)
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(moderatorUser.getId()))
-                    .thenReturn(Optional.of(moderatorUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(normalUser.getId()))
-                    .thenReturn(Optional.of(normalUser));
+            when(userService.lockActiveById(moderatorUser.getId()))
+                    .thenReturn(moderatorUser);
+            when(userService.lockActiveById(normalUser.getId()))
+                    .thenReturn(normalUser);
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -140,7 +144,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), normalUser.getId(), UserRole.ADMIN)
             );
             assertTrue(exception.getMessage().contains("higher than your own"));
-            verify(userRepository, never()).save(any());
+            verify(userService, never()).saveRole(any());
         }
 
         @Test
@@ -159,10 +163,10 @@ class AdminServiceTest {
                     .build();
 
             // Use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(moderatorUser.getId()))
-                    .thenReturn(Optional.of(moderatorUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(otherModerator.getId()))
-                    .thenReturn(Optional.of(otherModerator));
+            when(userService.lockActiveById(moderatorUser.getId()))
+                    .thenReturn(moderatorUser);
+            when(userService.lockActiveById(otherModerator.getId()))
+                    .thenReturn(otherModerator);
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -170,17 +174,17 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), otherModerator.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userRepository, never()).save(any());
+            verify(userService, never()).saveRole(any());
         }
 
         @Test
         @DisplayName("Cannot modify user of higher rank")
         void changeRole_WhenModeratorModifiesAdmin_ThrowsException() {
             // Arrange - moderator tries to modify admin (use locking query method)
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(moderatorUser.getId()))
-                    .thenReturn(Optional.of(moderatorUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
+            when(userService.lockActiveById(moderatorUser.getId()))
+                    .thenReturn(moderatorUser);
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -188,16 +192,16 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userRepository, never()).save(any());
+            verify(userService, never()).saveRole(any());
         }
 
         @Test
         @DisplayName("Cannot demote last admin")
         void changeRole_WhenDemoteLastAdmin_ThrowsException() {
             // Arrange - use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.countByRole(UserRole.ADMIN)).thenReturn(1L);
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.countByRole(UserRole.ADMIN)).thenReturn(1L);
 
             // Act & Assert
             ModerationForbiddenException exception = assertThrows(
@@ -205,7 +209,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("last administrator"));
-            verify(userRepository, never()).save(any());
+            verify(userService, never()).saveRole(any());
         }
 
         @Test
@@ -224,10 +228,10 @@ class AdminServiceTest {
                     .build();
 
             // Use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(otherAdmin.getId()))
-                    .thenReturn(Optional.of(otherAdmin));
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.lockActiveById(otherAdmin.getId()))
+                    .thenReturn(otherAdmin);
 
             // Act & Assert - admin cannot demote another admin (only self-demotion allowed)
             ModerationForbiddenException exception = assertThrows(
@@ -235,8 +239,8 @@ class AdminServiceTest {
                     () -> adminService.changeRole(adminUser.getId(), otherAdmin.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userRepository, never()).save(any());
-            verify(tokenBlacklistService, never()).invalidateUserTokens(anyLong());
+            verify(userService, never()).saveRole(any());
+            verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
 
         @Test
@@ -244,8 +248,8 @@ class AdminServiceTest {
         void changeRole_WhenNonExistentActor_ThrowsUserNotFoundException() {
             // Arrange - use locking query method
             Long nonExistentId = 999L;
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(nonExistentId))
-                    .thenReturn(Optional.empty());
+            when(userService.lockActiveById(nonExistentId))
+                    .thenThrow(new UserNotFoundException(nonExistentId));
 
             // Act & Assert
             assertThrows(
@@ -259,10 +263,10 @@ class AdminServiceTest {
         void changeRole_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange - use locking query method
             Long nonExistentId = 999L;
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(nonExistentId))
-                    .thenReturn(Optional.empty());
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.lockActiveById(nonExistentId))
+                    .thenThrow(new UserNotFoundException(nonExistentId));
 
             // Act & Assert
             assertThrows(
@@ -275,34 +279,36 @@ class AdminServiceTest {
         @DisplayName("Admin can self-demote when multiple admins exist")
         void changeRole_WhenAdminSelfDemotion_Succeeds() {
             // Arrange - use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.countByRole(UserRole.ADMIN)).thenReturn(2L);
-            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.countByRole(UserRole.ADMIN)).thenReturn(2L);
+            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
 
             // Assert
             assertEquals(UserRole.MODERATOR, result.getRole());
-            verify(tokenBlacklistService).invalidateUserTokens(adminUser.getId());
+            ArgumentCaptor<UserDemotedEvent> demotion = ArgumentCaptor.forClass(UserDemotedEvent.class);
+            verify(eventPublisher).publishEvent(demotion.capture());
+            assertEquals(adminUser.getId(), demotion.getValue().getUserId());
         }
 
         @Test
         @DisplayName("No token invalidation on promotion")
         void changeRole_WhenPromotion_NoTokenInvalidation() {
             // Arrange - use locking query method
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(adminUser.getId()))
-                    .thenReturn(Optional.of(adminUser));
-            when(userRepository.findWithLockByIdAndDeletedAtIsNull(normalUser.getId()))
-                    .thenReturn(Optional.of(normalUser));
-            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.lockActiveById(adminUser.getId()))
+                    .thenReturn(adminUser);
+            when(userService.lockActiveById(normalUser.getId()))
+                    .thenReturn(normalUser);
+            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.ADMIN);
 
             // Assert
-            verify(tokenBlacklistService, never()).invalidateUserTokens(anyLong());
+            verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
     }
 
@@ -314,7 +320,7 @@ class AdminServiceTest {
         @DisplayName("Should return user role when user exists")
         void getUserRole_WhenUserExists_ReturnsRole() {
             // Arrange
-            when(userRepository.findByIdAndDeletedAtIsNull(adminUser.getId()))
+            when(userService.findActiveById(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
 
             // Act
@@ -329,7 +335,7 @@ class AdminServiceTest {
         void getUserRole_WhenUserNotFound_ThrowsException() {
             // Arrange
             Long nonExistentId = 999L;
-            when(userRepository.findByIdAndDeletedAtIsNull(nonExistentId))
+            when(userService.findActiveById(nonExistentId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
