@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
-import org.danteplanner.backend.shared.entity.SseEventType;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
@@ -42,30 +41,49 @@ public class SseRedisSubscriber implements MessageListener {
             return;
         }
 
-        String channel = new String(message.getChannel(), StandardCharsets.UTF_8);
-        if (SseChannels.COMMENT.equals(channel)) {
-            if (envelope.plannerId() == null || envelope.plannerId().isBlank()) {
-                log.error("Comment SSE envelope missing plannerId; dropping");
-                return;
-            }
-            plannerCommentSseService.broadcast(
-                    UUID.fromString(envelope.plannerId()), envelope.type().getValue(), envelope);
-        } else if (SseChannels.BROADCAST.equals(channel)) {
-            sseService.broadcastToAll(
-                    envelope.excludeUserId(), envelope.type().getValue(), clientPayload(envelope));
-        } else if (SseChannels.USER.equals(channel)) {
-            if (envelope.type() == SseEventType.SETTINGS_INVALIDATED) {
-                sseService.invalidateSettingsCache(envelope.userId());
-            } else if (envelope.type() == SseEventType.ACCOUNT_SUSPENDED) {
-                sseService.notifyAccountSuspended(envelope.userId(), clientPayload(envelope));
-            } else {
-                UUID excludeDeviceId = envelope.excludeDeviceId() != null
-                        ? UUID.fromString(envelope.excludeDeviceId())
-                        : null;
-                sseService.sendToUser(envelope.userId(), excludeDeviceId,
-                        envelope.type().getValue(), clientPayload(envelope));
-            }
+        String topic = new String(message.getChannel(), StandardCharsets.UTF_8);
+        SseChannel channel = SseChannel.fromTopic(topic);
+        if (channel == null) {
+            log.error("SSE envelope arrived on unrecognized channel {}; dropping", topic);
+            return;
         }
+
+        switch (channel) {
+            case COMMENT -> dispatchComment(envelope);
+            case BROADCAST -> sseService.broadcastToAll(
+                    envelope.excludeUserId(), envelope.type().getValue(), clientPayload(envelope));
+            case USER -> dispatchUser(envelope);
+        }
+    }
+
+    private void dispatchComment(SseEnvelope envelope) {
+        if (envelope.plannerId() == null || envelope.plannerId().isBlank()) {
+            log.error("Comment SSE envelope missing plannerId; dropping");
+            return;
+        }
+        plannerCommentSseService.broadcast(
+                UUID.fromString(envelope.plannerId()), envelope.type().getValue(), envelope);
+    }
+
+    /**
+     * The event type names its own delivery, so a type added without one fails to compile here
+     * rather than falling through to the emitters by default.
+     */
+    private void dispatchUser(SseEnvelope envelope) {
+        switch (envelope.type().userDelivery()) {
+            case SETTINGS_CACHE -> sseService.invalidateSettingsCache(envelope.userId());
+            case SUSPENSION_NOTICE -> sseService.notifyAccountSuspended(
+                    envelope.userId(), clientPayload(envelope));
+            case EMITTERS -> sendToEmitters(envelope);
+        }
+    }
+
+    private void sendToEmitters(SseEnvelope envelope) {
+        UUID excludeDeviceId = envelope.excludeDeviceId() != null
+                ? UUID.fromString(envelope.excludeDeviceId())
+                : null;
+        sseService.sendToUser(envelope.userId(), excludeDeviceId,
+                envelope.type().getValue(), clientPayload(envelope));
     }
 
     /**

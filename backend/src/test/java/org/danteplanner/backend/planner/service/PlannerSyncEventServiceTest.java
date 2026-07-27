@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
+import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseRedisSubscriber;
 import org.danteplanner.backend.shared.sse.SseService;
@@ -46,14 +47,14 @@ class PlannerSyncEventServiceTest {
      * receiving node.
      */
     @Test
-    void notifyPlannerUpdate_AfterRedisFanout_ExcludesOriginatingDevice() {
+    void notifyPlannerUpdate_WhenFannedOutThroughRedis_ExcludesOriginatingDevice() {
         SsePublisher publisher = new SsePublisher(stringRedisTemplate, objectMapper);
         PlannerSyncEventService service = new PlannerSyncEventService(sseService, publisher);
         SseRedisSubscriber subscriber = new SseRedisSubscriber(sseService, plannerCommentSseService, objectMapper);
         UUID originatingDeviceId = UUID.randomUUID();
         UUID plannerId = UUID.randomUUID();
 
-        service.notifyPlannerUpdate(1L, originatingDeviceId, plannerId, "updated", null);
+        service.notifyPlannerUpdate(1L, originatingDeviceId, plannerId, SseEventType.UPDATED, null);
 
         ArgumentCaptor<Object> messageCaptor = ArgumentCaptor.forClass(Object.class);
         verify(stringRedisTemplate).convertAndSend(eq(USER_CHANNEL), messageCaptor.capture());
@@ -71,7 +72,7 @@ class PlannerSyncEventServiceTest {
         PlannerSyncEventService service = new PlannerSyncEventService(sseService, publisher);
         UUID plannerId = UUID.randomUUID();
 
-        service.notifyPlannerUpdate(1L, null, plannerId, "updated", Map.of("syncVersion", 7));
+        service.notifyPlannerUpdate(1L, null, plannerId, SseEventType.UPDATED, Map.of("syncVersion", 7));
 
         ArgumentCaptor<Object> messageCaptor = ArgumentCaptor.forClass(Object.class);
         verify(stringRedisTemplate).convertAndSend(eq(USER_CHANNEL), messageCaptor.capture());

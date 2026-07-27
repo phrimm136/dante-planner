@@ -44,9 +44,9 @@ public class SseSubscriberConfig {
         };
         container.setConnectionFactory(sseLocalRedisConnectionFactory);
         container.addMessageListener(sseRedisSubscriber,
-                List.of(new ChannelTopic(SseChannels.USER),
-                        new ChannelTopic(SseChannels.COMMENT),
-                        new ChannelTopic(SseChannels.BROADCAST)));
+                List.of(new ChannelTopic(SseChannel.USER.topic()),
+                        new ChannelTopic(SseChannel.COMMENT.topic()),
+                        new ChannelTopic(SseChannel.BROADCAST.topic())));
         return container;
     }
 }

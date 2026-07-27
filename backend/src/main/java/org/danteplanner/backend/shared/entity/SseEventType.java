@@ -8,22 +8,47 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * via {@link #getValue()}; a typo now fails to compile instead of silently dropping a client event.
  */
 public enum SseEventType {
-    CREATED("created", false),
-    UPDATED("updated", false),
-    DELETED("deleted", false),
-    COMMENT_ADDED("comment:added", false),
-    NOTIFY_COMMENT("notify:comment", true),
-    NOTIFY_PUBLISHED("notify:published", true),
-    NOTIFY_RECOMMENDED("notify:recommended", true),
-    SETTINGS_INVALIDATED("settings:invalidated", false),
-    ACCOUNT_SUSPENDED("account_suspended", true);
+    CREATED("created", false, UserDelivery.EMITTERS),
+    UPDATED("updated", false, UserDelivery.EMITTERS),
+    DELETED("deleted", false, UserDelivery.EMITTERS),
+    COMMENT_ADDED("comment:added", false, UserDelivery.EMITTERS),
+    NOTIFY_COMMENT("notify:comment", true, UserDelivery.EMITTERS),
+    NOTIFY_PUBLISHED("notify:published", true, UserDelivery.EMITTERS),
+    NOTIFY_RECOMMENDED("notify:recommended", true, UserDelivery.EMITTERS),
+    SETTINGS_INVALIDATED("settings:invalidated", false, UserDelivery.SETTINGS_CACHE),
+    ACCOUNT_SUSPENDED("account_suspended", true, UserDelivery.SUSPENSION_NOTICE);
+
+    /**
+     * What a subscriber does with an event that arrives on the user channel.
+     *
+     * <p>Most events reach the user's own emitters. The two exceptions mutate this node's session
+     * state instead, so the subscriber dispatches on this rather than on the event type — a new
+     * event type then picks a delivery here rather than falling through a chain of equality tests.
+     */
+    public enum UserDelivery {
+        /** Send to the user's connected emitters. */
+        EMITTERS,
+        /** Drop this node's cached settings for the user. */
+        SETTINGS_CACHE,
+        /** Tell the user's emitters their account was suspended. */
+        SUSPENSION_NOTICE
+    }
 
     private final String value;
     private final boolean rawPayloadDelivery;
+    private final UserDelivery userDelivery;
 
-    SseEventType(String value, boolean rawPayloadDelivery) {
+    SseEventType(String value, boolean rawPayloadDelivery, UserDelivery userDelivery) {
         this.value = value;
         this.rawPayloadDelivery = rawPayloadDelivery;
+        this.userDelivery = userDelivery;
+    }
+
+    /**
+     * @return what a subscriber does with this event on the user channel
+     */
+    public UserDelivery userDelivery() {
+        return userDelivery;
     }
 
     /**
@@ -42,18 +67,4 @@ public enum SseEventType {
         return value;
     }
 
-    /**
-     * Resolve the enum constant whose wire value equals the given string.
-     *
-     * @param value the wire value; must match a declared constant's {@link #getValue()}
-     * @throws IllegalArgumentException if no constant has the given wire value
-     */
-    public static SseEventType fromValue(String value) {
-        for (SseEventType type : values()) {
-            if (type.value.equals(value)) {
-                return type;
-            }
-        }
-        throw new IllegalArgumentException("Unknown SseEventType value: " + value);
-    }
 }

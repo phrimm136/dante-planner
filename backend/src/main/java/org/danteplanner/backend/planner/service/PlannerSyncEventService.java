@@ -30,13 +30,13 @@ public class PlannerSyncEventService {
      * @param userId          the user ID
      * @param excludeDeviceId the device ID to exclude from notification (can be null)
      * @param plannerId       the ID of the affected planner
-     * @param eventType       the type of event (created, updated, deleted)
+     * @param eventType       the type of event
      * @param payload         the changed planner row recipients patch into their caches;
      *                        null when the event carries no row (deleted)
      */
-    public void notifyPlannerUpdate(Long userId, UUID excludeDeviceId, UUID plannerId, String eventType,
+    public void notifyPlannerUpdate(Long userId, UUID excludeDeviceId, UUID plannerId, SseEventType eventType,
             Object payload) {
-        ssePublisher.publishUserEvent(userId, excludeDeviceId, SseEventType.fromValue(eventType),
+        ssePublisher.publishUserEvent(userId, excludeDeviceId, eventType,
                 plannerId.toString(), payload);
         log.debug("Sent planner-update event: user={}, planner={}, type={}", userId, plannerId, eventType);
     }

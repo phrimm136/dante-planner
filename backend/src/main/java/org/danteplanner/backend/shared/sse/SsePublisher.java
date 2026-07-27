@@ -36,7 +36,7 @@ public class SsePublisher {
      */
     public void publishUserEvent(Long userId, java.util.UUID excludeDeviceId, SseEventType type,
             String entityId, Object payload) {
-        publish(SseChannels.USER, SseEnvelope.userEvent(userId, type, entityId,
+        publish(SseChannel.USER, SseEnvelope.userEvent(userId, type, entityId,
                 excludeDeviceId != null ? excludeDeviceId.toString() : null, payload));
     }
 
@@ -50,13 +50,13 @@ public class SsePublisher {
      * @param userId the user whose settings cache must be invalidated on every node
      */
     public void publishSettingsInvalidation(Long userId) {
-        publish(SseChannels.USER, SseEnvelope.settingsInvalidation(userId));
+        publish(SseChannel.USER, SseEnvelope.settingsInvalidation(userId));
     }
 
     /**
      * Publish a planner-comment event carrying its full payload to the primary Redis.
      *
-     * <p>Rides the {@link SseChannels#COMMENT} channel; the envelope carries the target
+     * <p>Rides the {@link SseChannel#COMMENT} channel; the envelope carries the target
      * {@code plannerId} (routing key) separately from the comment {@code entityId}.</p>
      *
      * @param plannerId the planner whose comment subscribers receive the event
@@ -65,13 +65,13 @@ public class SsePublisher {
      * @param payload   the event payload (patched into the recipient's cache)
      */
     public void publishCommentEvent(java.util.UUID plannerId, SseEventType type, String entityId, Object payload) {
-        publish(SseChannels.COMMENT, SseEnvelope.commentEvent(plannerId, type, entityId, payload));
+        publish(SseChannel.COMMENT, SseEnvelope.commentEvent(plannerId, type, entityId, payload));
     }
 
     /**
      * Publish an event for every connected client except the one whose action raised it.
      *
-     * <p>Rides the {@link SseChannels#BROADCAST} channel; the excluded user travels in the envelope
+     * <p>Rides the {@link SseChannel#BROADCAST} channel; the excluded user travels in the envelope
      * because the pod that dispatches is not the pod that published.</p>
      *
      * @param excludeUserId the user whose action raised the event, and who is not notified
@@ -79,7 +79,7 @@ public class SsePublisher {
      * @param payload       the event payload
      */
     public void publishBroadcast(Long excludeUserId, SseEventType type, Object payload) {
-        publish(SseChannels.BROADCAST, SseEnvelope.broadcast(excludeUserId, type, payload));
+        publish(SseChannel.BROADCAST, SseEnvelope.broadcast(excludeUserId, type, payload));
     }
 
     /**
@@ -97,7 +97,7 @@ public class SsePublisher {
                 "suspensionType", suspensionType,
                 "reason", reason != null ? reason : "",
                 "durationMinutes", durationMinutes != null ? durationMinutes : 0);
-        publish(SseChannels.USER, SseEnvelope.accountSuspended(userId, payload));
+        publish(SseChannel.USER, SseEnvelope.accountSuspended(userId, payload));
     }
 
     /**
@@ -109,7 +109,7 @@ public class SsePublisher {
      * @param channel  the Redis pub/sub channel
      * @param envelope the envelope to serialize and publish
      */
-    private void publish(String channel, SseEnvelope envelope) {
+    private void publish(SseChannel channel, SseEnvelope envelope) {
         String json;
         try {
             json = objectMapper.writeValueAsString(envelope);
@@ -119,7 +119,7 @@ public class SsePublisher {
         }
 
         try {
-            stringRedisTemplate.convertAndSend(channel, json);
+            stringRedisTemplate.convertAndSend(channel.topic(), json);
         } catch (DataAccessException e) {
             log.warn("SSE publish skipped, Redis unreachable (transient): channel {} type {}: {}",
                     channel, envelope.type(), e.getMessage());
