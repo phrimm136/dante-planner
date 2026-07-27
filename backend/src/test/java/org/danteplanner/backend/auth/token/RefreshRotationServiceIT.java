@@ -1,6 +1,7 @@
 package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.JwtProperties;
@@ -55,7 +56,7 @@ import static org.mockito.Mockito.verify;
 class RefreshRotationServiceIT {
     private static final long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
     private static final long RETRY_REUSE_WINDOW_MS = 30000L;
-    private static final Long USER_ID = 42L;
+    private static final Long USER_ID = TestDataFactory.nextUserId();
     private static final String EMAIL = "rotation@example.com";
 
     private static StringRedisTemplate sharedTemplate;

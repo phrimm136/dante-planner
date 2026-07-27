@@ -1,6 +1,5 @@
 package org.danteplanner.backend.shared.config;
 
-import com.redis.testcontainers.RedisContainer;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.config.TestConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +46,7 @@ class AuthLocalAliasingIT {
 
     @Test
     @DisplayName("When AUTH_LOCAL_REDIS_* is unset, auth-local resolves to the same endpoint as auth")
-    void authLocal_whenVarsUnset_aliasesToAuthEndpoint() {
+    void authLocal_WhenVarsUnset_AliasesToAuthEndpoint() {
         String authHost = authFactory.getStandaloneConfiguration().getHostName();
         int authPort = authFactory.getStandaloneConfiguration().getPort();
         String authLocalHost = authLocalFactory.getStandaloneConfiguration().getHostName();

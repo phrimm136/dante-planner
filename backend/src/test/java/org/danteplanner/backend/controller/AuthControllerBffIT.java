@@ -5,8 +5,8 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade.AuthResult;
+import org.danteplanner.backend.auth.service.AuthenticationService;
+import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,8 +52,8 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     static class MockAuthFacadeConfig {
         @Bean
         @Primary
-        public AuthenticationFacade authenticationFacade() {
-            return Mockito.mock(AuthenticationFacade.class);
+        public AuthenticationService authenticationService() {
+            return Mockito.mock(AuthenticationService.class);
         }
     }
 
@@ -64,16 +64,16 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
     private OAuthStateService oAuthStateService;
 
     @Autowired
-    private AuthenticationFacade authFacade;
+    private AuthenticationService authService;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(authFacade);
+        Mockito.reset(authService);
     }
 
     @Test
     @DisplayName("GET /google/start redirects to Google and sets the oauth_tx cookie")
-    void googleStart_whenInvoked_redirectsToGoogleAndSetsOauthTx() throws Exception {
+    void googleStart_WhenInvoked_RedirectsToGoogleAndSetsOauthTx() throws Exception {
         mockMvc.perform(get("/api/auth/google/start"))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", containsString("accounts.google.com")))
@@ -84,14 +84,14 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("GET /google/callback with matching state logs in and clears oauth_tx")
-    void googleCallback_whenStateMatches_setsAuthCookiesAndClearsOauthTx() throws Exception {
+    void googleCallback_WhenStateMatches_SetsAuthCookiesAndClearsOauthTx() throws Exception {
         String state = "state-match";
         String verifier = "verifier-match";
         String returnTo = "http://localhost:5173/planner/1";
         String oauthTx = oAuthStateService.seal(state, verifier, returnTo);
 
         User user = Mockito.mock(User.class);
-        when(authFacade.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), eq(verifier)))
+        when(authService.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), eq(verifier)))
                 .thenReturn(new AuthResult(user, "access-jwt", "refresh-jwt", false));
 
         mockMvc.perform(get("/api/auth/google/callback")
@@ -107,7 +107,7 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
 
     @Test
     @DisplayName("GET /google/callback with mismatched state is rejected and sets no auth cookies (INV2)")
-    void googleCallback_whenStateMismatch_rejectsWithoutAuthCookies() throws Exception {
+    void googleCallback_WhenStateMismatch_RejectsWithoutAuthCookies() throws Exception {
         String oauthTx = oAuthStateService.seal("real-state", "verifier", "http://localhost");
 
         mockMvc.perform(get("/api/auth/google/callback")
@@ -119,12 +119,12 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN))
                 .andExpect(cookie().doesNotExist(CookieConstants.REFRESH_TOKEN));
 
-        verify(authFacade, never()).authenticateWithOAuth(any(), any(), any(), any());
+        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("GET /google/callback with no oauth_tx cookie is rejected (INV2)")
-    void googleCallback_whenNoOauthTx_rejects() throws Exception {
+    void googleCallback_WhenNoOauthTx_Rejects() throws Exception {
         mockMvc.perform(get("/api/auth/google/callback")
                         .param("code", "auth-code")
                         .param("state", "some-state"))
@@ -132,12 +132,12 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
                 .andExpect(header().string("Location", containsString("login=error")))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN));
 
-        verify(authFacade, never()).authenticateWithOAuth(any(), any(), any(), any());
+        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("GET /google/callback with an error param redirects to error and clears oauth_tx")
-    void googleCallback_whenProviderError_redirectsToErrorAndClearsOauthTx() throws Exception {
+    void googleCallback_WhenProviderError_RedirectsToErrorAndClearsOauthTx() throws Exception {
         mockMvc.perform(get("/api/auth/google/callback")
                         .param("error", "access_denied")
                         .cookie(new Cookie(CookieConstants.OAUTH_TX, "sealed-value")))
@@ -146,15 +146,15 @@ class AuthControllerBffIT extends SharedMySqlContainerSupport {
                 .andExpect(cookie().maxAge(CookieConstants.OAUTH_TX, 0))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN));
 
-        verify(authFacade, never()).authenticateWithOAuth(any(), any(), any(), any());
+        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("GET /google/callback redirects to error (no auth cookies) when the exchange throws")
-    void googleCallback_whenExchangeThrows_redirectsToErrorWithoutAuthCookies() throws Exception {
+    void googleCallback_WhenExchangeThrows_RedirectsToErrorWithoutAuthCookies() throws Exception {
         String state = "state-throw";
         String oauthTx = oAuthStateService.seal(state, "verifier", "http://localhost:5173/planner/1");
-        when(authFacade.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), anyString()))
+        when(authService.authenticateWithOAuth(eq("google"), eq("auth-code"), anyString(), anyString()))
                 .thenThrow(new RuntimeException("token endpoint unavailable"));
 
         mockMvc.perform(get("/api/auth/google/callback")

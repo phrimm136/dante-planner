@@ -5,7 +5,7 @@ import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.TestDataFactory;
@@ -43,8 +43,8 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     static class MockAuthFacadeConfig {
         @Bean
         @Primary
-        public AuthenticationFacade authenticationFacade() {
-            return Mockito.mock(AuthenticationFacade.class);
+        public AuthenticationService authenticationService() {
+            return Mockito.mock(AuthenticationService.class);
         }
     }
 
@@ -58,14 +58,14 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     private JwtTokenService jwtTokenService;
 
     @Autowired
-    private AuthenticationFacade authFacade;
+    private AuthenticationService authService;
 
     private User testUser;
     private String accessToken;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(authFacade);
+        Mockito.reset(authService);
 
 
         testUser = TestDataFactory.createTestUser(userRepository, "test@example.com");
@@ -83,7 +83,7 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 with user data when token is valid")
-        void getCurrentUser_ValidToken_Returns200() throws Exception {
+        void getCurrentUser_WhenValidToken_Returns200() throws Exception {
             mockMvc.perform(get("/api/auth/me")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
@@ -92,7 +92,7 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 with null body when no token provided (guest user)")
-        void getCurrentUser_NoToken_Returns200WithNull() throws Exception {
+        void getCurrentUser_WhenNoToken_Returns200WithNull() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").doesNotExist());
@@ -104,7 +104,7 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 with null body when token is malformed (treat as guest)")
-        void getCurrentUser_MalformedToken_Returns200WithNull() throws Exception {
+        void getCurrentUser_WhenMalformedToken_Returns200WithNull() throws Exception {
             Cookie malformedCookie = new Cookie("accessToken", "malformed.token.here");
 
             mockMvc.perform(get("/api/auth/me")
@@ -120,7 +120,7 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 as Apple OAuth not implemented")
-        void appleCallback_NotImplemented_Returns400() throws Exception {
+        void appleCallback_WhenNotImplemented_Returns400() throws Exception {
             mockMvc.perform(post("/api/auth/apple/callback").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"code\":\"apple-code\",\"provider\":\"apple\",\"codeVerifier\":\"verifier\"}"))

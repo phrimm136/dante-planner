@@ -4,8 +4,6 @@ package org.danteplanner.backend.controller;
 import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
@@ -132,7 +130,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 with public access to published planner")
-        void getComments_PublishedPlanner_Returns200() throws Exception {
+        void getComments_WhenPublishedPlanner_Returns200() throws Exception {
             createComment(null, 0);
 
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
@@ -143,7 +141,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when accessing unpublished planner as non-owner")
-        void getComments_UnpublishedPlanner_Returns403() throws Exception {
+        void getComments_WhenUnpublishedPlanner_Returns403() throws Exception {
             mockMvc.perform(get("/api/planner/{id}/comments", unpublishedPlanner.getId())
                             .cookie(otherUserAccessTokenCookie()))
                     .andExpect(status().isForbidden());
@@ -152,7 +150,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return empty array for planner with no comments")
-        void getComments_NoComments_ReturnsEmptyArray() throws Exception {
+        void getComments_WhenNoComments_ReturnsEmptyArray() throws Exception {
             mockMvc.perform(get("/api/planner/{id}/comments", publishedPlanner.getId()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray())
@@ -166,7 +164,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 201 when creating valid top-level comment")
-        void createComment_ValidTopLevel_Returns201() throws Exception {
+        void createComment_WhenValidTopLevel_Returns201() throws Exception {
             String requestBody = "{\"content\":\"New comment\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
@@ -180,7 +178,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set correct depth when replying with parentId")
-        void createComment_WithParent_SetsCorrectDepth() throws Exception {
+        void createComment_WhenParent_SetsCorrectDepth() throws Exception {
             PlannerComment parent = createComment(null, 0);
 
             String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parent.getPublicId() + "\"}";
@@ -203,7 +201,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void createComment_Unauthenticated_Returns401() throws Exception {
+        void createComment_WhenUnauthenticated_Returns401() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
@@ -214,7 +212,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when commenting on unpublished planner")
-        void createComment_UnpublishedPlanner_Returns403() throws Exception {
+        void createComment_WhenUnpublishedPlanner_Returns403() throws Exception {
             String requestBody = "{\"content\":\"Test\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", unpublishedPlanner.getId()).with(withCsrf())
@@ -226,7 +224,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when content is empty")
-        void createComment_EmptyContent_Returns400() throws Exception {
+        void createComment_WhenEmptyContent_Returns400() throws Exception {
             String requestBody = "{\"content\":\"\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
@@ -238,7 +236,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Depth 0 - Top-level comment has depth 0")
-        void createComment_TopLevel_HasDepth0() throws Exception {
+        void createComment_WhenTopLevel_HasDepth0() throws Exception {
             String requestBody = "{\"content\":\"Top-level\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
@@ -256,7 +254,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Depth 1-5 - Replies increment depth correctly")
-        void createComment_Replies_IncrementDepth() throws Exception {
+        void createComment_WhenReplies_IncrementDepth() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             String requestBody1 = "{\"content\":\"Depth 1\",\"parentCommentId\":\"" + depth0.getPublicId() + "\"}";
 
@@ -278,7 +276,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Depth 6 - Comment at depth 6 is allowed (MAX_DEPTH=MAX_VALUE)")
-        void createComment_Depth6_IsAllowed() throws Exception {
+        void createComment_WhenDepth6_IsAllowed() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             PlannerComment depth1 = createComment(depth0.getId(), 1);
             PlannerComment depth2 = createComment(depth1.getId(), 2);
@@ -307,7 +305,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Depth 6 - Comment at depth 6 has correct parent (no flattening)")
-        void createComment_Depth6_HasCorrectParent() throws Exception {
+        void createComment_WhenDepth6_HasCorrectParent() throws Exception {
             PlannerComment depth0 = createComment(null, 0);
             PlannerComment depth1 = createComment(depth0.getId(), 1);
             PlannerComment depth2 = createComment(depth1.getId(), 2);
@@ -332,7 +330,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should create notification when replying to comment")
-        void createComment_ReplyToComment_CreatesNotification() throws Exception {
+        void createComment_WhenReplyToComment_CreatesNotification() throws Exception {
             PlannerComment parentComment = createComment(null, 0);
 
             String requestBody = "{\"content\":\"Reply\",\"parentCommentId\":\"" + parentComment.getPublicId() + "\"}";
@@ -352,7 +350,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should create notification when top-level comment on planner")
-        void createComment_TopLevelOnPlanner_CreatesNotification() throws Exception {
+        void createComment_WhenTopLevelOnPlanner_CreatesNotification() throws Exception {
             String requestBody = "{\"content\":\"Top-level comment\"}";
 
             mockMvc.perform(post("/api/planner/{id}/comments", publishedPlanner.getId()).with(withCsrf())
@@ -375,7 +373,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 when owner edits comment")
-        void updateComment_Owner_Returns200() throws Exception {
+        void updateComment_WhenOwner_Returns200() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             String requestBody = "{\"content\":\"Updated content\"}";
@@ -394,7 +392,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when non-owner tries to edit")
-        void updateComment_NonOwner_Returns403() throws Exception {
+        void updateComment_WhenNonOwner_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             String requestBody = "{\"content\":\"Hacked content\"}";
@@ -408,7 +406,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should persist updated content")
-        void updateComment_Owner_PersistsContent() throws Exception {
+        void updateComment_WhenOwner_PersistsContent() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             String requestBody = "{\"content\":\"Persisted update\"}";
@@ -431,7 +429,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 204 when owner deletes comment")
-        void deleteComment_Owner_Returns204() throws Exception {
+        void deleteComment_WhenOwner_Returns204() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
@@ -441,7 +439,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when non-owner tries to delete")
-        void deleteComment_NonOwner_Returns403() throws Exception {
+        void deleteComment_WhenNonOwner_Returns403() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(delete("/api/comments/{id}", comment.getPublicId()).with(withCsrf())
@@ -457,7 +455,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should create vote on first upvote")
-        void upvote_FirstTime_CreatesVote() throws Exception {
+        void upvote_WhenFirstTime_CreatesVote() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf())
@@ -470,7 +468,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should increment counter atomically")
-        void upvote_AtomicCounter_IncrementsCorrectly() throws Exception {
+        void upvote_WhenAtomicCounter_IncrementsCorrectly() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf())
@@ -483,7 +481,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void upvote_Unauthenticated_Returns401() throws Exception {
+        void upvote_WhenUnauthenticated_Returns401() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf()))
@@ -492,7 +490,7 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return updated vote status")
-        void upvote_Success_ReturnsUpdatedStatus() throws Exception {
+        void upvote_WhenSuccess_ReturnsUpdatedStatus() throws Exception {
             PlannerComment comment = createComment(null, 0);
 
             mockMvc.perform(post("/api/comments/{id}/upvote", comment.getPublicId()).with(withCsrf())

@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,8 +51,8 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
     static class MockAuthFacadeConfig {
         @Bean
         @Primary
-        public AuthenticationFacade authenticationFacade() {
-            return Mockito.mock(AuthenticationFacade.class);
+        public AuthenticationService authenticationService() {
+            return Mockito.mock(AuthenticationService.class);
         }
     }
 
@@ -63,16 +63,16 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
     private OAuthStateService oAuthStateService;
 
     @Autowired
-    private AuthenticationFacade authFacade;
+    private AuthenticationService authService;
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(authFacade);
+        Mockito.reset(authService);
     }
 
     @Test
     @DisplayName("Intercepted code with no server-side verifier cannot redeem (PKCE/BFF core defense)")
-    void interceptedCode_withoutOauthTx_cannotRedeem() throws Exception {
+    void interceptedCode_WhenWithoutOauthTx_CannotRedeem() throws Exception {
         // Attacker has a valid-looking code + state from interception, but no oauth_tx —
         // the code_verifier never left the server, so the exchange is never attempted.
         mockMvc.perform(get("/api/auth/google/callback")
@@ -83,12 +83,12 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN))
                 .andExpect(cookie().doesNotExist(CookieConstants.REFRESH_TOKEN));
 
-        verify(authFacade, never()).authenticateWithOAuth(any(), any(), any(), any());
+        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("Intercepted code paired with a forged oauth_tx is rejected (cannot supply own verifier)")
-    void interceptedCode_withForgedOauthTx_isRejected() throws Exception {
+    void interceptedCode_WhenForgedOauthTx_IsRejected() throws Exception {
         // Attacker forges an oauth_tx to inject a chosen verifier alongside the stolen code.
         // The cookie is not a validly-signed token, so open() fails closed.
         String forgedOauthTx = "attacker.forged.oauth-tx-token";
@@ -101,12 +101,12 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
                 .andExpect(header().string("Location", containsString("login=error")))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN));
 
-        verify(authFacade, never()).authenticateWithOAuth(any(), any(), any(), any());
+        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 
     @Test
     @DisplayName("Tampered (bit-flipped) oauth_tx from a real session is rejected")
-    void interceptedCode_withTamperedOauthTx_isRejected() throws Exception {
+    void interceptedCode_WhenTamperedOauthTx_IsRejected() throws Exception {
         // Attacker captures a genuine oauth_tx and mutates it to alter the sealed verifier/state.
         String genuine = oAuthStateService.seal("victim-state", "victim-verifier", "http://localhost");
         int mid = genuine.length() / 2;
@@ -121,6 +121,6 @@ class OAuthMitmResistanceIT extends SharedMySqlContainerSupport {
                 .andExpect(header().string("Location", containsString("login=error")))
                 .andExpect(cookie().doesNotExist(CookieConstants.ACCESS_TOKEN));
 
-        verify(authFacade, never()).authenticateWithOAuth(any(), any(), any(), any());
+        verify(authService, never()).authenticateWithOAuth(any(), any(), any(), any());
     }
 }

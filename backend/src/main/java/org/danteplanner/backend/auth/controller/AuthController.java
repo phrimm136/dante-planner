@@ -13,8 +13,8 @@ import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade.AuthResult;
+import org.danteplanner.backend.auth.service.AuthenticationService;
+import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
@@ -42,7 +42,7 @@ import java.util.UUID;
 
 /**
  * REST controller for authentication endpoints.
- * Delegates business logic to AuthenticationFacade.
+ * Delegates business logic to AuthenticationService.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -52,7 +52,7 @@ public class AuthController {
 
     private static final String LOGIN_ERROR_PATH = "/?login=error";
 
-    private final AuthenticationFacade authFacade;
+    private final AuthenticationService authService;
     private final TokenValidator tokenValidator;
     private final UserService userService;
     private final RateLimitService rateLimitService;
@@ -148,7 +148,7 @@ public class AuthController {
                 return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
             }
 
-            AuthResult result = authFacade.authenticateWithOAuth(
+            AuthResult result = authService.authenticateWithOAuth(
                     "google",
                     code,
                     oAuthProperties.getGoogle().getRedirectUri(),
@@ -216,7 +216,7 @@ public class AuthController {
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
 
         // Blacklist tokens
-        authFacade.logout(accessToken, refreshToken);
+        authService.logout(accessToken, refreshToken);
 
         // Clear cookies
         cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
@@ -231,7 +231,7 @@ public class AuthController {
         Long userId = (Long) auth.getPrincipal();
 
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        authFacade.logoutAll(userId, accessToken);
+        authService.logoutAll(userId, accessToken);
 
         cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
         cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);

@@ -15,7 +15,7 @@ import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.user.service.UserSettingsService;
@@ -49,7 +49,7 @@ public class UserController {
     private final SsePublisher ssePublisher;
     private final EpithetConfig epithetConfig;
     private final RateLimitService rateLimitService;
-    private final AuthenticationFacade authFacade;
+    private final AuthenticationService authService;
     private final CookieUtils cookieUtils;
 
     @Value("${app.user.deletion.grace-period-days:30}")
@@ -119,7 +119,7 @@ public class UserController {
         // Blacklist tokens and clear cookies (same as logout)
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-        authFacade.logout(accessToken, refreshToken);
+        authService.logout(accessToken, refreshToken);
         cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
         cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
 

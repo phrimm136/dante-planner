@@ -101,7 +101,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return paginated response structure with notifications")
-        void getInbox_WithNotifications_ReturnsPaginatedStructure() throws Exception {
+        void getInbox_WhenNotifications_ReturnsPaginatedStructure() throws Exception {
             for (int i = 0; i < 25; i++) {
                 createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             }
@@ -121,7 +121,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return empty page when inbox is empty")
-        void getInbox_EmptyInbox_ReturnsEmptyPage() throws Exception {
+        void getInbox_WhenEmptyInbox_ReturnsEmptyPage() throws Exception {
             mockMvc.perform(get("/api/notifications/inbox")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
@@ -132,7 +132,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should respect custom page size")
-        void getInbox_CustomPageSize_RespectsSize() throws Exception {
+        void getInbox_WhenCustomPageSize_RespectsSize() throws Exception {
             for (int i = 0; i < 60; i++) {
                 createNotification(testUser, NotificationType.REPLY_RECEIVED);
             }
@@ -147,7 +147,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should enforce max page size of 100")
-        void getInbox_MaxSizeEnforcement_ClampsTo100() throws Exception {
+        void getInbox_WhenMaxSizeEnforcement_ClampsTo100() throws Exception {
             for (int i = 0; i < 150; i++) {
                 createNotification(testUser, NotificationType.PLANNER_RECOMMENDED);
             }
@@ -162,7 +162,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should use default size of 20 when not specified")
-        void getInbox_DefaultSize_Uses20() throws Exception {
+        void getInbox_WhenDefaultSize_Uses20() throws Exception {
             for (int i = 0; i < 30; i++) {
                 createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             }
@@ -176,7 +176,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should order notifications DESC by createdAt (newest first)")
-        void getInbox_Ordering_NewestFirst() throws Exception {
+        void getInbox_WhenOrdering_NewestFirst() throws Exception {
             Instant now = Instant.now();
             Notification old = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             setCreatedAt(old, now.minusSeconds(10));
@@ -192,7 +192,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should exclude soft-deleted notifications from inbox")
-        void getInbox_SoftDeleted_ExcludesFromInbox() throws Exception {
+        void getInbox_WhenSoftDeleted_ExcludesFromInbox() throws Exception {
             Notification active = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             Notification deleted = createNotification(testUser, NotificationType.REPLY_RECEIVED);
             deleted.softDelete();
@@ -207,7 +207,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should only return notifications for authenticated user")
-        void getInbox_UserIsolation_OnlyOwnNotifications() throws Exception {
+        void getInbox_WhenUserIsolation_OnlyOwnNotifications() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
             createNotification(otherUser, NotificationType.PLANNER_RECOMMENDED);
@@ -220,7 +220,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void getInbox_Unauthenticated_Returns401() throws Exception {
+        void getInbox_WhenUnauthenticated_Returns401() throws Exception {
             mockMvc.perform(get("/api/notifications/inbox"))
                     .andExpect(status().isUnauthorized());
         }
@@ -232,7 +232,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return count of unread notifications")
-        void getUnreadCount_WithUnread_ReturnsCorrectCount() throws Exception {
+        void getUnreadCount_WhenUnread_ReturnsCorrectCount() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
             createNotification(testUser, NotificationType.PLANNER_RECOMMENDED);
@@ -245,7 +245,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return zero when no notifications exist")
-        void getUnreadCount_NoNotifications_ReturnsZero() throws Exception {
+        void getUnreadCount_WhenNoNotifications_ReturnsZero() throws Exception {
             mockMvc.perform(get("/api/notifications/unread-count")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
@@ -254,7 +254,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should exclude read notifications from count")
-        void getUnreadCount_MixedReadStatus_ReturnsUnreadOnly() throws Exception {
+        void getUnreadCount_WhenMixedReadStatus_ReturnsUnreadOnly() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             Notification read = createNotification(testUser, NotificationType.REPLY_RECEIVED);
             read.markAsRead();
@@ -268,7 +268,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should exclude soft-deleted notifications from count")
-        void getUnreadCount_SoftDeleted_ExcludesFromCount() throws Exception {
+        void getUnreadCount_WhenSoftDeleted_ExcludesFromCount() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             Notification deleted = createNotification(testUser, NotificationType.REPLY_RECEIVED);
             deleted.softDelete();
@@ -282,7 +282,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should only count authenticated user's notifications")
-        void getUnreadCount_UserIsolation_OnlyCountsOwn() throws Exception {
+        void getUnreadCount_WhenUserIsolation_OnlyCountsOwn() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(otherUser, NotificationType.REPLY_RECEIVED);
             createNotification(otherUser, NotificationType.PLANNER_RECOMMENDED);
@@ -295,7 +295,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void getUnreadCount_Unauthenticated_Returns401() throws Exception {
+        void getUnreadCount_WhenUnauthenticated_Returns401() throws Exception {
             mockMvc.perform(get("/api/notifications/unread-count"))
                     .andExpect(status().isUnauthorized());
         }
@@ -307,7 +307,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should mark unread notification as read and return 200")
-        void markRead_UnreadNotification_Returns200() throws Exception {
+        void markRead_WhenUnreadNotification_Returns200() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             assertThat(notification.getRead()).isFalse();
 
@@ -320,7 +320,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should set readAt timestamp when marking as read")
-        void markRead_UnreadNotification_SetsReadAt() throws Exception {
+        void markRead_WhenUnreadNotification_SetsReadAt() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             assertThat(notification.getReadAt()).isNull();
 
@@ -335,7 +335,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should be idempotent when marking already read notification")
-        void markRead_AlreadyRead_IsIdempotent() throws Exception {
+        void markRead_WhenAlreadyRead_IsIdempotent() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             notification.markAsRead();
             notificationRepository.save(notification);
@@ -353,26 +353,26 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when user is not notification owner")
-        void markRead_NotOwner_Returns403() throws Exception {
+        @DisplayName("Should return 404 when user is not notification owner")
+        void markRead_WhenNotOwner_Returns404() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(post("/api/notifications/{id}/mark-read", otherUserNotification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
-        @DisplayName("Should return 403 when notification does not exist")
-        void markRead_NonexistentId_Returns403() throws Exception {
+        @DisplayName("Should return 404 when notification does not exist")
+        void markRead_WhenNonexistentId_Returns404() throws Exception {
             mockMvc.perform(post("/api/notifications/{id}/mark-read", UUID.randomUUID()).with(withCsrf())
                             .cookie(accessTokenCookie()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void markRead_Unauthenticated_Returns401() throws Exception {
+        void markRead_WhenUnauthenticated_Returns401() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf()))
@@ -386,7 +386,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should mark all unread notifications as read")
-        void markAllRead_MultipleUnread_MarksAll() throws Exception {
+        void markAllRead_WhenMultipleUnread_MarksAll() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(testUser, NotificationType.REPLY_RECEIVED);
             createNotification(testUser, NotificationType.PLANNER_RECOMMENDED);
@@ -414,7 +414,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should not affect already read notifications")
-        void markAllRead_AlreadyRead_Unchanged() throws Exception {
+        void markAllRead_WhenAlreadyRead_Unchanged() throws Exception {
             Notification read = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             read.markAsRead();
             notificationRepository.save(read);
@@ -436,7 +436,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should only mark authenticated user's notifications")
-        void markAllRead_UserIsolation_OnlyMarksOwn() throws Exception {
+        void markAllRead_WhenUserIsolation_OnlyMarksOwn() throws Exception {
             createNotification(testUser, NotificationType.COMMENT_RECEIVED);
             createNotification(otherUser, NotificationType.REPLY_RECEIVED);
 
@@ -451,7 +451,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 0 when no unread notifications exist")
-        void markAllRead_NoUnread_ReturnsZero() throws Exception {
+        void markAllRead_WhenNoUnread_ReturnsZero() throws Exception {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
@@ -460,7 +460,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void markAllRead_Unauthenticated_Returns401() throws Exception {
+        void markAllRead_WhenUnauthenticated_Returns401() throws Exception {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf()))
                     .andExpect(status().isUnauthorized());
         }
@@ -472,7 +472,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should soft-delete notification and return 204")
-        void deleteNotification_ValidRequest_Returns204() throws Exception {
+        void deleteNotification_WhenValidRequest_Returns204() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf())
@@ -485,13 +485,13 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when user is not notification owner")
-        void deleteNotification_NotOwner_Returns403() throws Exception {
+        @DisplayName("Should return 404 when user is not notification owner")
+        void deleteNotification_WhenNotOwner_Returns404() throws Exception {
             Notification otherUserNotification = createNotification(otherUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", otherUserNotification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
@@ -526,16 +526,16 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 403 when notification does not exist")
-        void deleteNotification_NonexistentId_Returns403() throws Exception {
+        @DisplayName("Should return 404 when notification does not exist")
+        void deleteNotification_WhenNonexistentId_Returns404() throws Exception {
             mockMvc.perform(delete("/api/notifications/{id}", UUID.randomUUID()).with(withCsrf())
                             .cookie(accessTokenCookie()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("Should return 401 when unauthenticated")
-        void deleteNotification_Unauthenticated_Returns401() throws Exception {
+        void deleteNotification_WhenUnauthenticated_Returns401() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
 
             mockMvc.perform(delete("/api/notifications/{id}", notification.getPublicId()).with(withCsrf()))

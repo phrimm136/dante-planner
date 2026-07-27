@@ -3,6 +3,8 @@ package org.danteplanner.backend.shared.security;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+
+import java.util.List;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -197,7 +199,7 @@ class JwtAuthenticationFilterLineageTest {
         // attemptAutoRefresh swallows every exception, so a stub-argument mismatch cannot fail
         // the run: only this verify pins that the presented token reached the rotation seam.
         verify(refreshRotationService).rotate(refreshToken, response);
-        assertNull(response.getCookie(CookieConstants.ACCESS_TOKEN));
+        assertSessionCleared();
         assertSame(request, filterChain.getRequest());
         assertSame(response, filterChain.getResponse());
         assertNull(SecurityContextHolder.getContext().getAuthentication());
@@ -235,7 +237,7 @@ class JwtAuthenticationFilterLineageTest {
         // attemptAutoRefresh swallows every exception, so a stub-argument mismatch cannot fail
         // the run: only this verify pins that the presented token reached the rotation seam.
         verify(refreshRotationService).rotate(refreshToken, response);
-        assertNull(response.getCookie(CookieConstants.ACCESS_TOKEN));
+        assertSessionCleared();
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
@@ -281,7 +283,7 @@ class JwtAuthenticationFilterLineageTest {
         // attemptAutoRefresh swallows every exception, so a stub-argument mismatch cannot fail
         // the run: only this verify pins that the presented token reached the rotation seam.
         verify(refreshRotationService).rotate(refreshToken, response);
-        assertNull(response.getCookie(CookieConstants.ACCESS_TOKEN));
+        assertSessionCleared();
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
@@ -316,5 +318,18 @@ class JwtAuthenticationFilterLineageTest {
         verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    }
+
+    /**
+     * Both auth cookies carry a deletion rather than a token. A client left holding dead cookies
+     * re-presents them on every later request, so a rejected rotation has to withdraw them, not
+     * merely decline to mint a replacement.
+     */
+    private void assertSessionCleared() {
+        for (String name : List.of(CookieConstants.ACCESS_TOKEN, CookieConstants.REFRESH_TOKEN)) {
+            Cookie cookie = response.getCookie(name);
+            assertNotNull(cookie, name + " must be withdrawn");
+            assertEquals(0, cookie.getMaxAge(), name + " must be withdrawn, not reissued");
+        }
     }
 }

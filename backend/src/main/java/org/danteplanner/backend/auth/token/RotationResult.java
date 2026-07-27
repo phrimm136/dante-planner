@@ -1,5 +1,8 @@
 package org.danteplanner.backend.auth.token;
 
+import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.auth.exception.SessionRevokedException;
+
 /**
  * Outcome of a refresh-token rotation attempt.
  *
@@ -9,6 +12,28 @@ package org.danteplanner.backend.auth.token;
  */
 public sealed interface RotationResult
         permits RotationResult.Rotated, RotationResult.Revoked, RotationResult.Rejected {
+
+    /**
+     * This outcome as a rotation, or the failure it stands for.
+     *
+     * <p>The single reading of what a non-rotation means, carried by the outcome rather than by
+     * {@link RefreshRotationService} so that both callers share it: the filter chain mocks that
+     * service in its unit tests, and a mapping declared there would be intercepted rather than
+     * run.</p>
+     *
+     * @return this outcome, when it is a successful rotation
+     * @throws SessionRevokedException if the token's family was revoked, by theft or otherwise
+     * @throws InvalidTokenException   if the token is rejected for any other reason
+     */
+    default Rotated orThrow() {
+        return switch (this) {
+            case Rotated rotated -> rotated;
+            case Revoked revoked -> throw new SessionRevokedException(revoked.familyId());
+            case Rejected rejected -> throw rejected.reason() == Rejected.Reason.REVOKED_FAMILY
+                    ? new SessionRevokedException(null)
+                    : new InvalidTokenException(InvalidTokenException.Reason.REVOKED);
+        };
+    }
 
     /**
      * Rotation succeeded; a fresh refresh token was minted.

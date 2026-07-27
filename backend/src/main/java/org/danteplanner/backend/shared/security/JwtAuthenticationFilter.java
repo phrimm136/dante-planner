@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
+import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
@@ -241,32 +242,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return attemptLineageRefresh(refreshToken, request, response);
             }
 
-            // Validate refresh token
             TokenClaims claims = tokenValidator.validateRefreshToken(refreshToken);
 
-            // Verify it's a refresh token
             if (!claims.isRefreshToken()) {
                 log.debug("Invalid token type for refresh: {}", claims.type());
-                return false;
+                return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
             }
 
-            // Check if refresh token is blacklisted (rotation check)
             if (tokenBlacklistService.isBlacklisted(refreshToken)) {
                 log.warn("Attempted auto-refresh with blacklisted token for user: {}", claims.userId());
-                return false;
+                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
             }
 
-            // Check if user's tokens were invalidated (e.g., after role demotion)
             if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
                 log.warn("Attempted auto-refresh for user with invalidated tokens: {}", claims.userId());
-                return false;
+                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
             }
 
-            // Check if user exists and is not deleted
             Optional<User> activeUser = userService.findActiveById(claims.userId());
             if (activeUser.isEmpty()) {
                 log.warn("Attempted auto-refresh for non-existent or deleted user: {}", claims.userId());
-                return false;
+                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
             }
 
             User user = activeUser.get();
@@ -325,11 +321,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        RotationResult result = refreshRotationService.rotate(refreshToken, response);
-
-        if (!(result instanceof RotationResult.Rotated rotated)) {
-            log.debug("Lineage auto-refresh did not rotate: {}", result.getClass().getSimpleName());
-            return false;
+        RotationResult.Rotated rotated;
+        try {
+            rotated = refreshRotationService.rotate(refreshToken, response).orThrow();
+        } catch (SessionRevokedException e) {
+            return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
+        } catch (InvalidTokenException e) {
+            return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
         }
 
         TokenClaims claims = rotated.claims();
@@ -337,7 +335,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Optional<User> activeUser = userService.findActiveById(claims.userId());
         if (activeUser.isEmpty()) {
             log.warn("Lineage auto-refresh for non-existent or deleted user: {}", claims.userId());
-            return false;
+            return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
         }
 
         User user = activeUser.get();
@@ -352,6 +350,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         log.debug("Lineage auto-refreshed tokens for user: {}", user.getEmail());
         return true;
+    }
+
+    /**
+     * Abandon a session whose credentials can never succeed again: a revoked or blacklisted token,
+     * one belonging to a deleted account, or one that is not a refresh token at all.
+     *
+     * <p>Clearing is the point. A client left holding dead cookies re-presents them on every
+     * subsequent request, and each one repeats this rejection, so the session never resolves to
+     * either authenticated or guest. Infrastructure failures deliberately do not come through here:
+     * a Redis outage propagates to the caller as a 503 instead, because logging every user out is
+     * the wrong answer to a dependency being down.</p>
+     *
+     * <p>The error code rides a request attribute rather than an exception because an exception
+     * thrown here would leave the filter chain entirely, missing both the entry point and every
+     * {@code @ControllerAdvice}. A permitAll endpoint ignores the attribute and serves the request
+     * as a guest; a protected one reaches
+     * {@link CustomAuthenticationEntryPoint}, which reads it.</p>
+     *
+     * @param request   the request to name the failure on
+     * @param response  the response to clear auth cookies on
+     * @param errorCode the code the entry point reports to the client
+     * @return false, so callers can {@code return abandonSession(...)}
+     */
+    private boolean abandonSession(
+            HttpServletRequest request, HttpServletResponse response, String errorCode) {
+        request.setAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE, errorCode);
+        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        return false;
     }
 
     /**

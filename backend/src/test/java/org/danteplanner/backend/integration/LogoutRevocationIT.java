@@ -29,7 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -111,7 +111,7 @@ class LogoutRevocationIT {
     }
 
     @Autowired
-    private AuthenticationFacade authFacade;
+    private AuthenticationService authService;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -144,7 +144,7 @@ class LogoutRevocationIT {
                 .isEqualTo(1L);
 
         AUTH_COMMAND_COUNT.set(0L);
-        authFacade.logout(accessToken, refreshToken);
+        authService.logout(accessToken, refreshToken);
         long roundTrips = AUTH_COMMAND_COUNT.get();
 
         assertThat(authStringRedisTemplate.keys("bl:*"))

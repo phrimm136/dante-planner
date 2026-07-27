@@ -1,5 +1,6 @@
 package org.danteplanner.backend.auth.oauth;
 
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,12 +44,12 @@ public class OAuthProviderRegistry {
      *
      * @param name Provider name in lowercase (e.g., "google", "apple")
      * @return The OAuth provider implementation
-     * @throws IllegalArgumentException if provider not found
+     * @throws InvalidRequestException if no provider carries the name
      */
     public OAuthProvider getProvider(String name) {
         OAuthProvider provider = providers.get(name.toLowerCase(Locale.ROOT));
         if (provider == null) {
-            throw new IllegalArgumentException("Unknown OAuth provider: " + name);
+            throw new InvalidRequestException("UNKNOWN_OAUTH_PROVIDER", "Unknown OAuth provider: " + name);
         }
         return provider;
     }

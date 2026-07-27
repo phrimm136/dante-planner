@@ -7,7 +7,7 @@ import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -58,7 +58,7 @@ class UserControllerTest {
     private RateLimitService rateLimitService;
 
     @Mock
-    private AuthenticationFacade authFacade;
+    private AuthenticationService authService;
 
     @Mock
     private Authentication authentication;
@@ -141,12 +141,12 @@ class UserControllerTest {
             // Blacklisting lands in Redis and has no response-visible form; asserting it as state
             // needs the containerized tier with a live TokenBlacklistService. The arguments prove
             // both tokens were read from their own cookies.
-            verify(authFacade).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+            verify(authService).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
         }
 
         @Test
         @DisplayName("Should be idempotent and return existing scheduled date on repeat call")
-        void deleteMyAccount_idempotent_returnsExistingScheduledDate() {
+        void deleteMyAccount_WhenIdempotent_ReturnsExistingScheduledDate() {
             // Arrange - simulate second call returning same scheduled date
             Instant originalScheduledAt = Instant.now().plus(Duration.ofDays(25));
             when(authentication.getPrincipal()).thenReturn(TEST_USER_ID);

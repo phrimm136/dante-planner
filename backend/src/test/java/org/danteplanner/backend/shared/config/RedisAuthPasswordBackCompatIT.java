@@ -1,6 +1,5 @@
 package org.danteplanner.backend.shared.config;
 
-import com.redis.testcontainers.RedisContainer;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
 import org.danteplanner.backend.config.TestConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +41,7 @@ class RedisAuthPasswordBackCompatIT {
 
     @Test
     @DisplayName("With AUTH_REDIS_PASSWORD unset, a write+read round-trips against a no-auth Redis")
-    void authRedis_whenPasswordEmpty_writeReadRoundTripsWithoutAuth() {
+    void authRedis_WhenPasswordEmpty_WriteReadRoundTripsWithoutAuth() {
         String key = "bl:password-backcompat-test";
 
         stringRedisTemplate.opsForValue().set(key, "1");

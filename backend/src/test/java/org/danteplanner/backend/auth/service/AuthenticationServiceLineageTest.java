@@ -1,56 +1,39 @@
-package org.danteplanner.backend.facade;
-import org.danteplanner.backend.auth.facade.AuthenticationFacade;
+package org.danteplanner.backend.auth.service;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
-import jakarta.servlet.http.Cookie;
-import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
-import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
-import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.shared.util.CookieConstants;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Integration tests for {@link AuthenticationFacade} lineage-rotation behavior
- * with the {@code jwt.rotation.lineage-enabled} flag turned on.
+ * {@link AuthenticationService} logout with {@code jwt.rotation.lineage-enabled} turned on.
  *
- * <p>Verifies that {@code refreshTokens} produces the rotated token pair and access
- * cookie, and that {@code logout} revokes the current refresh-token family while still
- * blacklisting the access token immediately.</p>
+ * <p>Logout revokes the current refresh-token family and still blacklists the access token
+ * immediately, so neither half of the pair outlives the session.</p>
  */
 @ExtendWith(MockitoExtension.class)
-class AuthenticationFacadeLineageTest {
+class AuthenticationServiceLineageTest {
 
     @Mock
     private OAuthProviderRegistry providerRegistry;
@@ -73,24 +56,15 @@ class AuthenticationFacadeLineageTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private RefreshRotationService refreshRotationService;
 
-    private final CookieUtils cookieUtils = new CookieUtils(true, "", "Lax");
-    private final JwtProperties jwtProperties = new JwtProperties();
-
-    private AuthenticationFacade facade;
-    private MockHttpServletResponse response;
+    private AuthenticationService facade;
     private User testUser;
 
     @BeforeEach
     void setUp() {
-        facade = new AuthenticationFacade(
+        facade = new AuthenticationService(
                 providerRegistry, tokenGenerator, tokenValidator, tokenBlacklistService,
-                userService, lifecycleService, userRepository, refreshRotationService,
-                cookieUtils, jwtProperties, new LineageRotationFlag(true));
-
-        response = new MockHttpServletResponse();
+                userService, lifecycleService, userRepository, new LineageRotationFlag(true));
 
         testUser = User.builder()
                 .id(123L)
@@ -109,46 +83,11 @@ class AuthenticationFacadeLineageTest {
                 jti, familyId, parentJti);
     }
 
-    @Test
-    @DisplayName("refreshTokens produces lineage claims and access token via rotation when flag on")
-    void refreshTokens_flagOn_delegatesToRotation() {
-        String oldRefresh = "old.refresh.jwt";
-        TokenClaims successorClaims = refreshClaims("successor-jti", "fam-1", "parent-jti");
 
-        when(refreshRotationService.rotate(eq(oldRefresh), eq(response)))
-                .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
-        when(userService.findById(testUser.getId())).thenReturn(testUser);
-        when(tokenGenerator.generateAccessToken(eq(testUser.getId()), any(UserRole.class)))
-                .thenReturn("new.access.jwt");
-
-        AuthenticationFacade.AuthResult result = facade.refreshTokens(oldRefresh, response);
-
-        assertSame(testUser, result.user());
-        assertEquals("new.access.jwt", result.accessToken());
-        assertEquals("new.refresh.jwt", result.refreshToken());
-        Cookie accessCookie = response.getCookie(CookieConstants.ACCESS_TOKEN);
-        assertNotNull(accessCookie);
-        assertEquals("new.access.jwt", accessCookie.getValue());
-        assertEquals(jwtProperties.getCookieExpirySeconds(), accessCookie.getMaxAge());
-        verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
-    }
-
-    @Test
-    @DisplayName("refreshTokens throws SessionRevokedException on revoked family when flag on")
-    void refreshTokens_flagOn_revokedFamilyThrows() {
-        String stolen = "stolen.refresh.jwt";
-        when(refreshRotationService.rotate(eq(stolen), eq(response)))
-                .thenReturn(new RotationResult.Revoked("fam-theft"));
-
-        SessionRevokedException ex = assertThrows(SessionRevokedException.class,
-                () -> facade.refreshTokens(stolen, response));
-        assertEquals("fam-theft", ex.getFamilyId());
-        verify(tokenGenerator, never()).generateAccessToken(any(), any());
-    }
 
     @Test
     @DisplayName("logout revokes current family when flag on; subsequent refresh in same family is revoked")
-    void logout_flagOn_revokesFamily() {
+    void logout_WhenFlagOn_RevokesFamily() {
         String accessToken = "access.jwt";
         String refreshToken = "refresh.jwt";
         Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
@@ -170,7 +109,7 @@ class AuthenticationFacadeLineageTest {
 
     @Test
     @DisplayName("logout still blacklists access token immediately when flag on")
-    void logout_flagOn_blacklistsAccessToken() {
+    void logout_WhenFlagOn_BlacklistsAccessToken() {
         String accessToken = "access.jwt";
         Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
         TokenClaims accessClaims = new TokenClaims(

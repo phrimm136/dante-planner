@@ -38,7 +38,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -252,7 +251,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 201 when creating planner with valid data")
-        void createPlanner_ValidData_Returns201() throws Exception {
+        void createPlanner_WhenValidData_Returns201() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
@@ -273,7 +272,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without JWT cookie")
-        void createPlanner_NoAuth_Returns401() throws Exception {
+        void createPlanner_WhenNoAuth_Returns401() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
@@ -285,7 +284,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when category is missing")
-        void createPlanner_MissingCategory_Returns400() throws Exception {
+        void createPlanner_WhenMissingCategory_Returns400() throws Exception {
             UpsertPlannerRequest request = withCategory(createValidPlannerRequest(), null);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
@@ -299,7 +298,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 generic without echoing the invalid status value")
-        void createPlanner_InvalidStatus_Returns400WithoutEcho() throws Exception {
+        void createPlanner_WhenInvalidStatus_Returns400WithoutEcho() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             String body = objectMapper.writeValueAsString(request)
                     .replace("\"status\":\"draft\"", "\"status\":\"garbage\"");
@@ -316,7 +315,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when content is missing")
-        void createPlanner_MissingContent_Returns400() throws Exception {
+        void createPlanner_WhenMissingContent_Returns400() throws Exception {
             UpsertPlannerRequest request = withContent(createValidPlannerRequest(), null);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
@@ -330,7 +329,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when content exceeds 50KB")
-        void createPlanner_ContentTooLarge_Returns400() throws Exception {
+        void createPlanner_WhenContentTooLarge_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             // Create valid content structure that exceeds 50KB
             String largeTitle = "x".repeat(52000);
@@ -351,7 +350,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when note exceeds 1KB")
-        void createPlanner_NoteTooLarge_Returns400() throws Exception {
+        void createPlanner_WhenNoteTooLarge_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             // Create valid content structure with a note larger than 1KB
             String largeNote = "x".repeat(1100);
@@ -372,7 +371,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when contentVersion is missing")
-        void createPlanner_MissingContentVersion_Returns400() throws Exception {
+        void createPlanner_WhenMissingContentVersion_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withContentVersion(request, null);
 
@@ -387,7 +386,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when plannerType is missing")
-        void createPlanner_MissingPlannerType_Returns400() throws Exception {
+        void createPlanner_WhenMissingPlannerType_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withPlannerType(request, null);
 
@@ -402,7 +401,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when contentVersion is not positive")
-        void createPlanner_NonPositiveContentVersion_Returns400() throws Exception {
+        void createPlanner_WhenNonPositiveContentVersion_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withContentVersion(request, 0);
 
@@ -417,7 +416,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 409 when user exceeds 100 planner limit")
-        void createPlanner_ExceedsLimit_Returns409() throws Exception {
+        void createPlanner_WhenExceedsLimit_Returns409() throws Exception {
             // Create 100 planners for the test user
             for (int i = 0; i < 100; i++) {
                 createTestPlanner(testUser);
@@ -436,7 +435,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when category is invalid for planner type")
-        void createPlanner_InvalidCategoryForType_Returns400() throws Exception {
+        void createPlanner_WhenInvalidCategoryForType_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withCategory(request, "INVALID_CATEGORY");
 
@@ -453,7 +452,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when MD category used with RR planner type")
-        void createPlanner_MdCategoryWithRrType_Returns400() throws Exception {
+        void createPlanner_WhenMdCategoryWithRrType_Returns400() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
             request = withCategory(withPlannerType(request, PlannerType.REFRACTED_RAILWAY), "5F"); // MD category, invalid for RR
 
@@ -513,7 +512,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void getPlanners_NoAuth_Returns401() throws Exception {
+        void getPlanners_WhenNoAuth_Returns401() throws Exception {
             mockMvc.perform(get("/api/planner/md"))
                     .andExpect(status().isUnauthorized());
         }
@@ -543,7 +542,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return planner when owned by user")
-        void getPlanner_OwnedByUser_ReturnsPlanner() throws Exception {
+        void getPlanner_WhenOwnedByUser_ReturnsPlanner() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(get("/api/planner/md/{id}", planner.getId())
@@ -555,7 +554,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for non-existent planner")
-        void getPlanner_NotFound_Returns404() throws Exception {
+        void getPlanner_WhenNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
             mockMvc.perform(get("/api/planner/md/{id}", nonExistentId)
@@ -566,7 +565,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for planner owned by another user")
-        void getPlanner_OwnedByOtherUser_Returns404() throws Exception {
+        void getPlanner_WhenOwnedByOtherUser_Returns404() throws Exception {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
             mockMvc.perform(get("/api/planner/md/{id}", otherUserPlanner.getId())
@@ -577,7 +576,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for soft-deleted planner")
-        void getPlanner_SoftDeleted_Returns404() throws Exception {
+        void getPlanner_WhenSoftDeleted_Returns404() throws Exception {
             Planner planner = createTestPlanner(testUser);
             planner.softDelete();
             plannerRepository.save(planner);
@@ -590,7 +589,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void getPlanner_NoAuth_Returns401() throws Exception {
+        void getPlanner_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(get("/api/planner/md/{id}", planner.getId()))
@@ -604,7 +603,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should increment syncVersion on successful update")
-        void updatePlanner_Success_IncrementsSyncVersion() throws Exception {
+        void updatePlanner_WhenSuccess_IncrementsSyncVersion() throws Exception {
             Planner planner = createTestPlanner(testUser);
             Long initialSyncVersion = planner.getSyncVersion();
 
@@ -623,7 +622,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 409 on syncVersion mismatch")
-        void updatePlanner_VersionMismatch_Returns409() throws Exception {
+        void updatePlanner_WhenVersionMismatch_Returns409() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
@@ -641,7 +640,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 for planner owned by another user")
-        void updatePlanner_OwnedByOtherUser_Returns403() throws Exception {
+        void updatePlanner_WhenOwnedByOtherUser_Returns403() throws Exception {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(otherUserPlanner);
@@ -658,7 +657,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when content exceeds 50KB")
-        void updatePlanner_ContentTooLarge_Returns400() throws Exception {
+        void updatePlanner_WhenContentTooLarge_Returns400() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
@@ -679,7 +678,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void updatePlanner_NoAuth_Returns401() throws Exception {
+        void updatePlanner_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
@@ -694,7 +693,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should persist updated contentVersion on upsert update")
-        void updatePlanner_contentVersionUpdated_PersistsNewVersion() throws Exception {
+        void updatePlanner_WhenContentVersionUpdated_PersistsNewVersion() throws Exception {
             Planner planner = createTestPlanner(testUser); // contentVersion = 6
 
             UpsertPlannerRequest request = createUpsertRequestFromPlanner(planner);
@@ -716,7 +715,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should soft delete planner (set deleted_at)")
-        void deletePlanner_Success_SoftDeletes() throws Exception {
+        void deletePlanner_WhenSuccess_SoftDeletes() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
@@ -732,7 +731,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for planner owned by another user")
-        void deletePlanner_OwnedByOtherUser_Returns404() throws Exception {
+        void deletePlanner_WhenOwnedByOtherUser_Returns404() throws Exception {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
             mockMvc.perform(delete("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
@@ -744,7 +743,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for non-existent planner")
-        void deletePlanner_NotFound_Returns404() throws Exception {
+        void deletePlanner_WhenNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
             mockMvc.perform(delete("/api/planner/md/{id}", nonExistentId).with(withCsrf())
@@ -756,7 +755,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void deletePlanner_NoAuth_Returns401() throws Exception {
+        void deletePlanner_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
@@ -771,7 +770,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 201 when importing planners within limit")
-        void importPlanners_WithinLimit_Returns201() throws Exception {
+        void importPlanners_WhenWithinLimit_Returns201() throws Exception {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             for (int i = 0; i < 3; i++) {
                 UpsertPlannerRequest req = createValidPlannerRequest();
@@ -793,7 +792,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 409 when import would exceed 100 planner limit")
-        void importPlanners_ExceedsLimit_Returns409() throws Exception {
+        void importPlanners_WhenExceedsLimit_Returns409() throws Exception {
             // Create 98 existing planners
             for (int i = 0; i < 98; i++) {
                 createTestPlanner(testUser);
@@ -819,7 +818,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when importing more than 50 planners at once")
-        void importPlanners_ExceedsBatchLimit_Returns400() throws Exception {
+        void importPlanners_WhenExceedsBatchLimit_Returns400() throws Exception {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             for (int i = 0; i < 51; i++) {
                 UpsertPlannerRequest req = createValidPlannerRequest();
@@ -839,7 +838,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void importPlanners_NoAuth_Returns401() throws Exception {
+        void importPlanners_WhenNoAuth_Returns401() throws Exception {
             List<UpsertPlannerRequest> planners = new ArrayList<>();
             planners.add(createValidPlannerRequest());
 
@@ -926,7 +925,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should be accessible without authentication")
-        void getConfig_NoAuth_Success() throws Exception {
+        void getConfig_WhenNoAuth_Success() throws Exception {
             // Config endpoint is public - no auth cookie needed
             mockMvc.perform(get("/api/planner/md/config"))
                     .andExpect(status().isOk())
@@ -1133,17 +1132,18 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
     @Nested
     @DisplayName("PUT /api/planner/md/{id}/publish - Toggle Publish")
-    class TogglePublishTests {
+    class SetPublishedTests {
 
         @Test
         @DisplayName("Should return 200 when owner toggles publish status")
-        void togglePublish_WhenOwner_Returns200() throws Exception {
+        void setPublished_WhenOwner_Returns200() throws Exception {
             // Arrange - Create planner for test user
             Planner planner = createTestPlanner(testUser);
             assertFalse(planner.getPublished());
 
-            // Act & Assert - Toggle to published
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"published\":true}")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(planner.getId().toString()))
@@ -1156,12 +1156,13 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 403 when non-owner attempts to toggle publish")
-        void togglePublish_WhenNonOwner_Returns403() throws Exception {
+        void setPublished_WhenNonOwner_Returns403() throws Exception {
             // Arrange - Create planner for test user, but use other user's token
             Planner planner = createTestPlanner(testUser);
 
-            // Act & Assert - Other user attempts to toggle
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"published\":true}")
                             .cookie(new Cookie("accessToken", otherUserAccessToken)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
@@ -1169,7 +1170,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void togglePublish_NoAuth_Returns401() throws Exception {
+        void setPublished_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf()))
@@ -1178,10 +1179,12 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for non-existent planner")
-        void togglePublish_NotFound_Returns404() throws Exception {
+        void setPublished_WhenNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
             mockMvc.perform(put("/api/planner/md/{id}/publish", nonExistentId).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"published\":true}")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
@@ -1189,13 +1192,14 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should toggle from published to unpublished")
-        void togglePublish_WhenPublished_TogglesToUnpublished() throws Exception {
+        void setPublished_WhenPublished_Unpublishes() throws Exception {
             // Arrange - Create already published planner
             Planner planner = createPublishedPlanner(testUser, "Published Planner", "5F", 5);
             assertTrue(planner.getPublished());
 
-            // Act & Assert - Toggle to unpublished
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"published\":false}")
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(false));
@@ -1232,7 +1236,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 400 when voteType is null (votes are permanent)")
-        void castVote_NullVoteType_Returns400() throws Exception {
+        void castVote_WhenNullVoteType_Returns400() throws Exception {
             // Arrange
             Planner planner = createPublishedPlanner();
 
@@ -1275,7 +1279,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 when voting on unpublished planner")
-        void castVote_UnpublishedPlanner_Returns404() throws Exception {
+        void castVote_WhenUnpublishedPlanner_Returns404() throws Exception {
             // Arrange - Create unpublished planner
             Planner planner = createTestPlanner(otherUser);
             assertFalse(planner.getPublished());
@@ -1303,7 +1307,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 when adding bookmark")
-        void toggleBookmark_AddBookmark_Success() throws Exception {
+        void toggleBookmark_WhenAddBookmark_Success() throws Exception {
             // Arrange
             Planner planner = createPublishedPlanner();
 
@@ -1317,7 +1321,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should toggle bookmark off when already bookmarked")
-        void toggleBookmark_RemoveBookmark_Success() throws Exception {
+        void toggleBookmark_WhenRemoveBookmark_Success() throws Exception {
             // Arrange - Create planner and add bookmark
             Planner planner = createPublishedPlanner();
 
@@ -1337,7 +1341,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401 without authentication")
-        void toggleBookmark_NoAuth_Returns401() throws Exception {
+        void toggleBookmark_WhenNoAuth_Returns401() throws Exception {
             Planner planner = createPublishedPlanner();
 
             mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf()))
@@ -1346,7 +1350,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for non-existent planner")
-        void toggleBookmark_PlannerNotFound_Returns404() throws Exception {
+        void toggleBookmark_WhenPlannerNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
             mockMvc.perform(post("/api/planner/md/{id}/bookmark", nonExistentId).with(withCsrf())
@@ -1357,7 +1361,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for unpublished planner")
-        void toggleBookmark_UnpublishedPlanner_Returns404() throws Exception {
+        void toggleBookmark_WhenUnpublishedPlanner_Returns404() throws Exception {
             // Arrange - Create unpublished planner
             Planner planner = createTestPlanner(otherUser);
             assertFalse(planner.getPublished());
@@ -1370,7 +1374,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should allow bookmarking own published planner")
-        void toggleBookmark_OwnPlanner_Success() throws Exception {
+        void toggleBookmark_WhenOwnPlanner_Success() throws Exception {
             // Arrange - Create published planner owned by test user
             Planner planner = PlannerControllerIT.this.createPublishedPlanner(
                     testUser, "My Published Planner", "5F", 0);
@@ -1389,7 +1393,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for malformed UUID in path variable")
-        void getPublishedPlanner_MalformedUuid_Returns404() throws Exception {
+        void getPublishedPlanner_WhenMalformedUuid_Returns404() throws Exception {
             // Act & Assert - Malformed UUID should return 404, not 500
             mockMvc.perform(get("/api/planner/md/published/{id}", "not-a-uuid"))
                     .andExpect(status().isNotFound())
@@ -1399,7 +1403,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 401/404 for empty UUID in path variable")
-        void getPublishedPlanner_EmptyUuid_Returns404() throws Exception {
+        void getPublishedPlanner_WhenEmptyUuid_Returns404() throws Exception {
             // Act & Assert - Empty path segment routes to different endpoint
             // Spring routing treats "/published/" as a different path that may require auth
             mockMvc.perform(get("/api/planner/md/published/"))
@@ -1408,7 +1412,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for partial UUID in path variable")
-        void getPublishedPlanner_PartialUuid_Returns404() throws Exception {
+        void getPublishedPlanner_WhenPartialUuid_Returns404() throws Exception {
             // Act & Assert - Partial UUID should return 404
             mockMvc.perform(get("/api/planner/md/published/{id}", "123e4567"))
                     .andExpect(status().isNotFound())
@@ -1418,7 +1422,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for malformed UUID on other UUID endpoints")
-        void otherUuidEndpoints_MalformedUuid_Returns404() throws Exception {
+        void otherUuidEndpoints_WhenMalformedUuid_Returns404() throws Exception {
             // Test /api/planner/md/{id}/upvote (requires auth but should fail on UUID first)
             mockMvc.perform(post("/api/planner/md/{id}/upvote", "invalid-uuid").with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1449,7 +1453,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 200 with planner content for anonymous user")
-        void getPublishedPlanner_AnonymousAccess_Returns200() throws Exception {
+        void getPublishedPlanner_WhenAnonymousAccess_Returns200() throws Exception {
             Planner planner = createPublishedPlannerWithViewCount(testUser, 0);
 
             mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
@@ -1464,7 +1468,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return the pre-request view count on first view")
-        void getPublishedPlanner_FirstView_ReturnsPreRequestViewCount() throws Exception {
+        void getPublishedPlanner_WhenFirstView_ReturnsPreRequestViewCount() throws Exception {
             Planner planner = createPublishedPlannerWithViewCount(testUser, 5);
 
             mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
@@ -1476,7 +1480,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should not increment view count for duplicate viewer on same day")
-        void getPublishedPlanner_DuplicateView_DoesNotIncrementViewCount() throws Exception {
+        void getPublishedPlanner_WhenDuplicateView_DoesNotIncrementViewCount() throws Exception {
             Planner planner = createPublishedPlannerWithViewCount(testUser, 5);
 
             String viewerHash = ViewerHashUtil.hashForAnonymousUser(
@@ -1493,7 +1497,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for non-published planner")
-        void getPublishedPlanner_NotPublished_Returns404() throws Exception {
+        void getPublishedPlanner_WhenNotPublished_Returns404() throws Exception {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId()))
@@ -1503,7 +1507,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
         @Test
         @DisplayName("Should return 404 for non-existent planner")
-        void getPublishedPlanner_NotFound_Returns404() throws Exception {
+        void getPublishedPlanner_WhenNotFound_Returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
 
             mockMvc.perform(get("/api/planner/md/published/{id}", nonExistentId))
