@@ -2,6 +2,7 @@ package org.danteplanner.backend.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
@@ -77,12 +78,7 @@ public class NotificationService {
      */
     @Transactional
     public NotificationResponse markAsRead(UUID publicId, Long userId) {
-        Notification notification = notificationRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new IllegalArgumentException("Notification not found: " + publicId));
-
-        if (!notification.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("Notification does not belong to user");
-        }
+        Notification notification = requireOwned(publicId, userId);
 
         notification.markAsRead();
         notificationRepository.save(notification);
@@ -103,15 +99,27 @@ public class NotificationService {
      */
     @Transactional
     public void deleteNotification(UUID publicId, Long userId) {
-        Notification notification = notificationRepository.findByPublicId(publicId)
-                .orElseThrow(() -> new IllegalArgumentException("Notification not found: " + publicId));
-
-        if (!notification.getUserId().equals(userId)) {
-            throw new IllegalArgumentException("Notification does not belong to user");
-        }
+        Notification notification = requireOwned(publicId, userId);
 
         notification.softDelete();
         notificationRepository.save(notification);
+    }
+
+    /**
+     * Resolve a notification the caller owns.
+     *
+     * <p>A notification belonging to someone else reports as missing, so walking public ids cannot
+     * reveal which ones exist.</p>
+     *
+     * @param publicId the notification's public id
+     * @param userId   the caller
+     * @return the caller's notification
+     * @throws EntityNotFoundException if no such notification belongs to this caller
+     */
+    private Notification requireOwned(UUID publicId, Long userId) {
+        return notificationRepository.findByPublicId(publicId)
+                .filter(notification -> notification.getUserId().equals(userId))
+                .orElseThrow(() -> new EntityNotFoundException("Notification", publicId));
     }
 
     /**

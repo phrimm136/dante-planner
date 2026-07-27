@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
@@ -168,7 +169,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should add bookmark when not bookmarked")
-        void toggleBookmark_NotBookmarked_AddsBookmark() {
+        void toggleBookmark_WhenNotBookmarked_AddsBookmark() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
@@ -196,7 +197,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should remove bookmark when already bookmarked")
-        void toggleBookmark_AlreadyBookmarked_RemovesBookmark() {
+        void toggleBookmark_WhenAlreadyBookmarked_RemovesBookmark() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
@@ -219,7 +220,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void toggleBookmark_PlannerNotFound_ThrowsException() {
+        void toggleBookmark_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.findPublishedAggregate(nonExistentId))
@@ -236,7 +237,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not published")
-        void toggleBookmark_PlannerNotPublished_ThrowsException() {
+        void toggleBookmark_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
             Planner planner = createTestPlanner(); // Not published
             UUID plannerId = planner.getId();
@@ -269,7 +270,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should throw VoteAlreadyExistsException when user attempts duplicate vote")
-        void castVote_DuplicateVote_ThrowsException() {
+        void castVote_WhenDuplicateVote_ThrowsException() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
@@ -294,15 +295,15 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException when voteType is null")
-        void castVote_NullVoteType_ThrowsException() {
+        @DisplayName("Should throw InvalidRequestException when voteType is null")
+        void castVote_WhenNullVoteType_ThrowsException() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidRequestException exception = assertThrows(
+                    InvalidRequestException.class,
                     () -> engagementService.castVote(testUser.getId(), plannerId, null)
             );
 
@@ -313,7 +314,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should allow first vote and create new vote record")
-        void castVote_FirstVote_CreatesVote() {
+        void castVote_WhenFirstVote_CreatesVote() {
             // Arrange
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
@@ -353,7 +354,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should return true when bookmark exists")
-        void isBookmarked_Exists_ReturnsTrue() {
+        void isBookmarked_WhenExists_ReturnsTrue() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
@@ -365,7 +366,7 @@ class PlannerEngagementServiceTest {
 
         @Test
         @DisplayName("Should return false when bookmark does not exist")
-        void isBookmarked_NotExists_ReturnsFalse() {
+        void isBookmarked_WhenNotExists_ReturnsFalse() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerBookmarkRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))

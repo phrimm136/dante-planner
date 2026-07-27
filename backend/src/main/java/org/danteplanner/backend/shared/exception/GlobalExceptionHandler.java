@@ -148,9 +148,23 @@ public class GlobalExceptionHandler {
         return warnAndRespond(HttpStatus.FORBIDDEN, "Moderation action forbidden: {}", "FORBIDDEN", ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequest(InvalidRequestException ex) {
+        return warnAndRespond(
+                HttpStatus.BAD_REQUEST, "Invalid request: {}", ex.getErrorCode(), ex.getMessage());
+    }
+
+    /**
+     * A bare {@link IllegalArgumentException} states an invariant the caller cannot influence, so
+     * reaching here is a bug. Its message may name internals and never reaches the client; a
+     * rejection the caller can act on throws {@link InvalidRequestException} instead.
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        return warnAndRespond(HttpStatus.FORBIDDEN, "Illegal argument: {}", "FORBIDDEN", ex.getMessage());
+        log.error("Illegal argument reached the handler", ex);
+        Sentry.captureException(ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
     }
 
     @ExceptionHandler(InvalidTokenException.class)

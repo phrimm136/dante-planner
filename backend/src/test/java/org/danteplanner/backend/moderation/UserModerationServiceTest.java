@@ -1,5 +1,6 @@
 package org.danteplanner.backend.moderation;
 
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
@@ -108,7 +109,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Moderator can timeout normal user")
-        void timeoutUser_moderatorTimeoutsNormalUser_succeeds() {
+        void timeoutUser_WhenModeratorTimeoutsNormalUser_Succeeds() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -129,7 +130,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Admin can timeout normal user")
-        void timeoutUser_adminTimeoutsNormalUser_succeeds() {
+        void timeoutUser_WhenAdminTimeoutsNormalUser_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -146,7 +147,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Admin can timeout moderator")
-        void timeoutUser_adminTimeoutsModerator_succeeds() {
+        void timeoutUser_WhenAdminTimeoutsModerator_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -163,7 +164,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Cannot timeout administrators")
-        void timeoutUser_targetIsAdmin_throwsException() {
+        void timeoutUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
             User targetAdmin = User.builder()
                     .id(5L)
@@ -191,7 +192,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Moderator cannot timeout other moderators")
-        void timeoutUser_moderatorTimeoutsModerator_throwsException() {
+        void timeoutUser_WhenModeratorTimeoutsModerator_ThrowsException() {
             // Arrange
             User otherModerator = User.builder()
                     .id(4L)
@@ -219,7 +220,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Duration must be positive - zero fails")
-        void timeoutUser_zeroDuration_throwsException() {
+        void timeoutUser_WhenZeroDuration_ThrowsException() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -227,8 +228,8 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidRequestException exception = assertThrows(
+                    InvalidRequestException.class,
                     () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 0, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
@@ -237,7 +238,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Duration must be positive - negative fails")
-        void timeoutUser_negativeDuration_throwsException() {
+        void timeoutUser_WhenNegativeDuration_ThrowsException() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -245,8 +246,8 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(normalUser));
 
             // Act & Assert
-            IllegalArgumentException exception = assertThrows(
-                    IllegalArgumentException.class,
+            InvalidRequestException exception = assertThrows(
+                    InvalidRequestException.class,
                     () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), -30, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
@@ -255,7 +256,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Throws UserNotFoundException for non-existent actor")
-        void timeoutUser_nonExistentActor_throwsUserNotFoundException() {
+        void timeoutUser_WhenNonExistentActor_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userService.findActiveById(nonExistentId))
@@ -270,7 +271,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Throws UserNotFoundException for non-existent target")
-        void timeoutUser_nonExistentTarget_throwsUserNotFoundException() {
+        void timeoutUser_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userService.findActiveById(moderatorUser.getId()))
@@ -292,7 +293,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Moderator can remove timeout from user")
-        void removeTimeout_moderatorRemovesTimeout_succeeds() {
+        void removeTimeout_WhenModeratorRemovesTimeout_Succeeds() {
             // Arrange
             normalUser.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
@@ -313,7 +314,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Throws UserNotFoundException for non-existent target")
-        void removeTimeout_nonExistentTarget_throwsUserNotFoundException() {
+        void removeTimeout_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
             when(userService.findActiveById(nonExistentId))
@@ -333,7 +334,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Admin can ban normal user")
-        void banUser_adminBansNormalUser_succeeds() {
+        void banUser_WhenAdminBansNormalUser_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -365,7 +366,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Admin can ban moderator")
-        void banUser_adminBansModerator_succeeds() {
+        void banUser_WhenAdminBansModerator_Succeeds() {
             // Arrange
             when(userService.findActiveById(adminUser.getId()))
                     .thenReturn(Optional.of(adminUser));
@@ -387,7 +388,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Cannot ban administrators")
-        void banUser_targetIsAdmin_throwsException() {
+        void banUser_WhenTargetIsAdmin_ThrowsException() {
             // Arrange
             User targetAdmin = User.builder()
                     .id(5L)
@@ -411,7 +412,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Moderator cannot ban users")
-        void banUser_moderatorBansUser_throwsException() {
+        void banUser_WhenModeratorBansUser_ThrowsException() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
@@ -434,7 +435,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Admin can unban user")
-        void unbanUser_adminUnbansUser_succeeds() {
+        void unbanUser_WhenAdminUnbansUser_Succeeds() {
             // Arrange
             normalUser.setBannedAt(java.time.Instant.now());
             normalUser.setBannedBy(adminUser.getId());
@@ -466,7 +467,7 @@ class UserModerationServiceTest {
 
         @Test
         @DisplayName("Moderator cannot unban user")
-        void unbanUser_moderatorUnbans_throwsException() {
+        void unbanUser_WhenModeratorUnbans_ThrowsException() {
             // Arrange
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));

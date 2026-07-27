@@ -5,6 +5,7 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
@@ -80,7 +81,7 @@ public class PlannerEngagementService {
      * @return the updated vote response with counts
      * @throws PlannerNotFoundException if planner not found or not published
      * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
-     * @throws IllegalArgumentException if voteType is null
+     * @throws InvalidRequestException if voteType is null
      */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
@@ -88,7 +89,8 @@ public class PlannerEngagementService {
 
         // Validate input (fail-fast)
         if (voteType == null) {
-            throw new IllegalArgumentException("Vote type cannot be null - votes are immutable and cannot be removed");
+            throw new InvalidRequestException("INVALID_VOTE_TYPE",
+                    "Vote type cannot be null - votes are immutable and cannot be removed");
         }
 
         // Verify planner exists and is published (fail-fast)

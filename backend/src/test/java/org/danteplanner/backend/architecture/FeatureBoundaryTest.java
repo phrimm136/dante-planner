@@ -16,7 +16,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
  * edge that is not already part of the frozen graph makes the owning feature's rule fail, forcing
  * the edge to be declared here deliberately rather than accreting silently.</p>
  *
- * <p>The universal edges {@code * -> shared} and {@code * -> auth} (AuthenticationFacade, token
+ * <p>The universal edges {@code * -> shared} and {@code * -> auth} (AuthenticationService, token
  * infrastructure) are permitted everywhere and therefore never appear in any disallowed list.</p>
  *
  * <p>{@code shared} is intended as a dependency sink. It is not a <em>pure</em> sink today:

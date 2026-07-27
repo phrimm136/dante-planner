@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
 import org.danteplanner.backend.notification.service.NotificationService;
@@ -112,7 +113,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should handle duplicate notification via UNIQUE constraint gracefully")
-        void notifyPlannerRecommended_Duplicate_CatchesException() {
+        void notifyPlannerRecommended_WhenDuplicate_CatchesException() {
             // Arrange
             when(notificationRepository.save(any(Notification.class)))
                     .thenThrow(new DataIntegrityViolationException("Duplicate key violation"));
@@ -125,7 +126,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should push saved notification to recipient via SSE on success")
-        void notifyPlannerRecommended_Success_PushesViaSse() {
+        void notifyPlannerRecommended_WhenSuccess_PushesViaSse() {
             // Arrange
             UUID[] persistedPublicId = new UUID[1];
             when(notificationRepository.save(any(Notification.class)))
@@ -159,7 +160,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should not push via SSE when save hits duplicate constraint")
-        void notifyPlannerRecommended_Duplicate_DoesNotPush() {
+        void notifyPlannerRecommended_WhenDuplicate_DoesNotPush() {
             // Arrange
             when(notificationRepository.save(any(Notification.class)))
                     .thenThrow(new DataIntegrityViolationException("Duplicate key violation"));
@@ -178,7 +179,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should create COMMENT_RECEIVED notification when commenter is not owner")
-        void notifyCommentReceived_DifferentUser_CreatesNotification() {
+        void notifyCommentReceived_WhenDifferentUser_CreatesNotification() {
             // Arrange
             Long plannerOwnerId = 100L;
             Long commenterId = 200L;
@@ -213,7 +214,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should not notify when commenter is the planner owner")
-        void notifyCommentReceived_SameUser_NoNotification() {
+        void notifyCommentReceived_WhenSameUser_NoNotification() {
             // Arrange
             Long userId = 100L;
             Long commentId = 999L;
@@ -230,7 +231,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should handle duplicate notification via UNIQUE constraint")
-        void notifyCommentReceived_Duplicate_CatchesException() {
+        void notifyCommentReceived_WhenDuplicate_CatchesException() {
             // Arrange
             Long plannerOwnerId = 100L;
             Long commenterId = 200L;
@@ -255,7 +256,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should create REPLY_RECEIVED notification when replier is not parent author")
-        void notifyReplyReceived_DifferentUser_CreatesNotification() {
+        void notifyReplyReceived_WhenDifferentUser_CreatesNotification() {
             // Arrange
             Long replyId = 101L;
             UUID replyPublicId = UUID.randomUUID();
@@ -290,7 +291,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should not notify when replier is the parent comment author")
-        void notifyReplyReceived_SameUser_NoNotification() {
+        void notifyReplyReceived_WhenSameUser_NoNotification() {
             // Arrange
             Long userId = 100L;
             Long replyId = 101L;
@@ -334,7 +335,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should return empty page when no notifications")
-        void getInbox_NoNotifications_ReturnsEmpty() {
+        void getInbox_WhenNoNotifications_ReturnsEmpty() {
             // Arrange
             Page<Notification> emptyPage = new PageImpl<>(List.of());
 
@@ -370,7 +371,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should return 0 when no unread notifications")
-        void getUnreadCount_NoUnread_ReturnsZero() {
+        void getUnreadCount_WhenNoUnread_ReturnsZero() {
             // Arrange
             when(notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUserId))
                     .thenReturn(0L);
@@ -389,7 +390,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should mark notification as read and set readAt timestamp")
-        void markAsRead_Success_SetsReadFlag() {
+        void markAsRead_WhenSuccess_SetsReadFlag() {
             // Arrange
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
@@ -412,20 +413,20 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should throw exception when notification not found")
-        void markAsRead_NotFound_ThrowsException() {
+        void markAsRead_WhenNotFound_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(EntityNotFoundException.class,
                     () -> notificationService.markAsRead(publicId, testUserId));
         }
 
         @Test
         @DisplayName("Should throw exception when notification does not belong to user")
-        void markAsRead_WrongUser_ThrowsException() {
+        void markAsRead_WhenWrongUser_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(100L, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
@@ -435,7 +436,7 @@ class NotificationServiceTest {
                     .thenReturn(Optional.of(notification));
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(EntityNotFoundException.class,
                     () -> notificationService.markAsRead(publicId, 999L));
         }
     }
@@ -460,7 +461,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should return 0 when no unread notifications")
-        void markAllAsRead_NoUnread_ReturnsZero() {
+        void markAllAsRead_WhenNoUnread_ReturnsZero() {
             // Arrange
             when(notificationRepository.markAllAsRead(eq(testUserId), any(Instant.class)))
                     .thenReturn(0);
@@ -479,7 +480,7 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should soft-delete notification successfully")
-        void deleteNotification_Success_SoftDeletes() {
+        void deleteNotification_WhenSuccess_SoftDeletes() {
             // Arrange
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
@@ -501,20 +502,20 @@ class NotificationServiceTest {
 
         @Test
         @DisplayName("Should throw exception when notification not found")
-        void deleteNotification_NotFound_ThrowsException() {
+        void deleteNotification_WhenNotFound_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.empty());
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(EntityNotFoundException.class,
                     () -> notificationService.deleteNotification(publicId, testUserId));
         }
 
         @Test
         @DisplayName("Should throw exception when notification does not belong to user")
-        void deleteNotification_WrongUser_ThrowsException() {
+        void deleteNotification_WhenWrongUser_ThrowsException() {
             // Arrange
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(100L, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
@@ -524,7 +525,7 @@ class NotificationServiceTest {
                     .thenReturn(Optional.of(notification));
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class,
+            assertThrows(EntityNotFoundException.class,
                     () -> notificationService.deleteNotification(publicId, 999L));
         }
     }

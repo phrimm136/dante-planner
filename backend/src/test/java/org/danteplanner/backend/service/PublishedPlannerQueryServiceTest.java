@@ -53,7 +53,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -193,7 +192,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should filter by category when provided")
-        void getPublishedPlanners_WithCategory_FiltersResults() {
+        void getPublishedPlanners_WhenCategory_FiltersResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "5F";
@@ -218,7 +217,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should return empty page when no published planners")
-        void getPublishedPlanners_NoPlanners_ReturnsEmpty() {
+        void getPublishedPlanners_WhenNoPlanners_ReturnsEmpty() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             Page<PlannerCatalog> emptyPage = new PageImpl<>(List.of(), pageable, 0);
@@ -266,7 +265,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should filter by category when provided")
-        void getRecommendedPlanners_WithCategory_FiltersResults() {
+        void getRecommendedPlanners_WhenCategory_FiltersResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             String category = "10F";
@@ -290,7 +289,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should return empty when no planners meet threshold")
-        void getRecommendedPlanners_NoneQualify_ReturnsEmpty() {
+        void getRecommendedPlanners_WhenNoneQualify_ReturnsEmpty() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             Page<PlannerCatalog> emptyPage = new PageImpl<>(List.of(), pageable, 0);
@@ -312,7 +311,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should increment view count atomically")
-        void incrementViewCount_Success_IncrementsCount() {
+        void incrementViewCount_WhenSuccess_IncrementsCount() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerRepository.existsActiveById(plannerId)).thenReturn(true);
@@ -328,7 +327,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void incrementViewCount_NotFound_ThrowsException() {
+        void incrementViewCount_WhenNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.existsActiveById(nonExistentId)).thenReturn(false);
@@ -343,7 +342,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner is soft-deleted")
-        void incrementViewCount_DeletedPlanner_ThrowsException() {
+        void incrementViewCount_WhenDeletedPlanner_ThrowsException() {
             // Arrange: a soft-deleted planner still has a core row but is not active
             UUID deletedId = UUID.randomUUID();
             when(plannerRepository.existsActiveById(deletedId)).thenReturn(false);
@@ -393,7 +392,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should buffer view and return pre-request count for anonymous visitor")
-        void getPublishedPlanner_NewAnonymousView_BuffersView() {
+        void getPublishedPlanner_WhenNewAnonymousView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -412,7 +411,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should buffer view and return pre-request count for authenticated visitor")
-        void getPublishedPlanner_NewAuthenticatedView_BuffersView() {
+        void getPublishedPlanner_WhenNewAuthenticatedView_BuffersView() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -436,7 +435,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException for unpublished planner")
-        void getPublishedPlanner_UnpublishedPlanner_ThrowsException() {
+        void getPublishedPlanner_WhenUnpublishedPlanner_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             // findPublishedAggregate filters unpublished rows at the query level
@@ -452,7 +451,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException for non-existent planner")
-        void getPublishedPlanner_PlannerNotFound_ThrowsException() {
+        void getPublishedPlanner_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             when(plannerRepository.findPublishedAggregate(plannerId)).thenReturn(Optional.empty());
@@ -464,7 +463,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should handle null User-Agent gracefully")
-        void getPublishedPlanner_NullUserAgent_Success() {
+        void getPublishedPlanner_WhenNullUserAgent_Success() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -483,7 +482,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should use different viewer hashes for authenticated vs anonymous")
-        void getPublishedPlanner_AuthVsAnon_DifferentHashes() {
+        void getPublishedPlanner_WhenAuthVsAnon_DifferentHashes() {
             // Arrange
             UUID plannerId = UUID.randomUUID();
             mockNewView(plannerId);
@@ -516,7 +515,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should list published planners without search for anonymous user")
-        void getPublishedPlanners_NoSearchAnonymous_ReturnsPage() {
+        void getPublishedPlanners_WhenNoSearchAnonymous_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             PlannerCatalog row = catalogRow("Test Planner", false);
@@ -564,7 +563,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should list recommended planners without search for anonymous user")
-        void getRecommendedPlanners_NoSearchAnonymous_ReturnsPage() {
+        void getRecommendedPlanners_WhenNoSearchAnonymous_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             PlannerCatalog row = catalogRow("Test Planner", true);
@@ -592,7 +591,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should search planners via specification and map for anonymous user")
-        void searchPlanners_AnonymousNoFilters_ReturnsPage() {
+        void searchPlanners_WhenAnonymousNoFilters_ReturnsPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
             PlannerCatalog row = catalogRow("Test Planner", false);
@@ -615,7 +614,7 @@ class PublishedPlannerQueryServiceTest {
 
         @Test
         @DisplayName("Should reject a non-numeric entity filter id rather than empty the page")
-        void a_malformed_entity_filter_id_is_rejected_not_silently_dropped() {
+        void malformedEntityFilterId_WhenParsed_IsRejectedNotSilentlyDropped() {
             // Arrange
             CatalogQuery query = new CatalogQuery(false, null, null, null,
                     Map.of(ContentEntityType.THEME_PACK, List.of("not-a-number")));

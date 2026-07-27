@@ -2,6 +2,7 @@ package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.shared.sse.SsePublisher;
@@ -41,7 +42,7 @@ public class UserModerationService {
      * @param reason          reason for timeout (for audit trail)
      * @return the updated user
      * @throws UserNotFoundException if target user not found
-     * @throws IllegalArgumentException if the duration is not positive
+     * @throws InvalidRequestException if the duration is not positive
      * @throws ModerationForbiddenException if the actor may not restrict this target
      */
     @Transactional
@@ -50,7 +51,8 @@ public class UserModerationService {
         User target = requireActive(targetId);
 
         if (durationMinutes <= 0) {
-            throw new IllegalArgumentException("Timeout duration must be positive");
+            throw new InvalidRequestException(
+                    "INVALID_TIMEOUT_DURATION", "Timeout duration must be positive");
         }
 
         if (target.getRole() == UserRole.ADMIN) {
