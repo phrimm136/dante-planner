@@ -96,6 +96,25 @@ case PLANNER_REPORT -> "planner_reports";   // whatever the enum says
 Renaming the enum's table left all nine dynamic tests green. The axis was derived; the value was
 not. Reading `constraint.table()` made the same mutation fail immediately.
 
+A literal is not the smell, though, and `SseEventTypeMatrixTest` is the same shape done right:
+
+```java
+rows.put(SseEventType.CREATED, new String[] {"created", "EMITTERS", "envelope"});
+```
+
+Both derive the axis from `values()`, and both write a literal per constant. What separates them is
+what the test compares against. `SseEventTypeMatrixTest` compares the enum to a **published
+contract** a frontend matches on, so a literal has to be one end of it — reading `getValue()` for
+both ends would compare the enum to itself. `ConstraintMappingSchemaIT` compares the enum to the
+**schema**, so both ends are readable and neither should be typed.
+
+Ask what the two ends are. Where one of them lives outside the codebase, the literal is the pin.
+Where both live inside it, a literal is a copy that goes stale.
+
+The same reasoning governs the retired-member list in `PersistedEnumSchemaIT`: `planner_votes`
+still accepts `DOWN` because removing downvotes deleted the rows and left the column. Listing that
+member is pinning a fact about the schema, not restating one the code holds.
+
 ---
 
 ## 9. What earns a deletion
