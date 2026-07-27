@@ -89,6 +89,15 @@ public enum KnownConstraint {
                 && (Keys.ANY_UNIQUE.equals(keyName) || keyName.toLowerCase(Locale.ROOT).equals(violatedKey));
     }
 
+    /**
+     * The table whose violations this row covers, as the driver reports it.
+     *
+     * @return the table name
+     */
+    public String table() {
+        return table;
+    }
+
     public ConstraintViolationOutcome outcome() {
         return outcome;
     }
