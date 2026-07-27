@@ -30,10 +30,10 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("only a class owning its database truncates a table")
-    void truncation_is_confined_to_classes_that_own_their_database() {
+    void truncation_WhenClassSharesTheDatabase_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
-                .filter(clazz -> mentions(clazz, "deleteAll"))
+                .filter(TestIsolationConventionTest::truncatesATable)
                 .filter(clazz -> !mentions(clazz, "registerOwnDatabase"))
                 .map(JavaClass::getSimpleName)
                 .sorted()
@@ -59,7 +59,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("only a class owning its database empties a table in SQL")
-    void unscoped_deletion_is_confined_to_classes_that_own_their_database() {
+    void unscopedDeletion_WhenClassSharesTheDatabase_IsRejected() {
         List<String> offenders = containerizedSources().entrySet().stream()
                 .filter(entry -> boundToTheSharedDatabase(entry.getValue()))
                 .filter(entry -> UNSCOPED_DELETE.matcher(entry.getValue()).find())
@@ -96,7 +96,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("only a class owning its Redis scans the whole keyspace")
-    void keyspace_scans_are_confined_to_classes_that_own_their_redis() {
+    void keyspaceScan_WhenClassSharesTheRedis_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::scansTheKeyspace)
                 .map(TestIsolationConventionTest::outermost)
@@ -135,7 +135,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("no test class carries @Execution")
-    void execution_mode_is_never_declared_on_a_class() {
+    void executionMode_WhenDeclaredOnAClass_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
                 .filter(clazz -> mentions(clazz, "org/junit/jupiter/api/parallel/Execution"))
@@ -152,7 +152,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("a test that drives HTTP does not roll back")
-    void the_committing_tier_does_not_declare_transactional() {
+    void committingTier_WhenDeclaringTransactional_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
                 // Tests that drive HTTP: the endpoint owns the transaction boundary, so wrapping
@@ -178,7 +178,7 @@ class TestIsolationConventionTest {
      */
     @Test
     @DisplayName("a class declares at most one @BeforeEach")
-    void setup_is_declared_once_per_class() {
+    void setup_WhenDeclaredMoreThanOnce_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
                 .filter(clazz -> clazz.getMethods().stream()
@@ -196,7 +196,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("users are built through TestDataFactory, never by hand")
-    void user_fixtures_come_from_the_factory() {
+    void userFixture_WhenBuiltByHand_IsRejected() {
         List<String> offenders = TEST_CLASSES.stream()
                 .filter(TestIsolationConventionTest::isTestClass)
                 // Only where a user is persisted. A Mockito unit test builds one in memory, and an
@@ -229,7 +229,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("identities in shared namespaces come from a sequence, not a literal")
-    void shared_identities_are_not_hard_coded() {
+    void sharedIdentity_WhenHardCoded_IsRejected() {
         List<String> offenders = containerizedSources().entrySet().stream()
                 // A class that stands up its own infrastructure owns the namespace it writes into,
                 // so a literal there claims nothing anyone else can claim.
@@ -261,7 +261,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("a test filling the security context clears it on the way out")
-    void the_security_context_is_cleared_after_each_test() {
+    void securityContext_WhenNotClearedOnExit_IsRejected() {
         List<String> offenders = testSources().entrySet().stream()
                 // Excludes this file: the token it searches for is a literal in its own source, so
                 // a scanner that scans itself reports itself.
@@ -319,7 +319,7 @@ class TestIsolationConventionTest {
 
     @Test
     @DisplayName("the suite stays within its application-context budget")
-    void distinct_contexts_stay_within_budget() {
+    void distinctContexts_WhenOverBudget_IsRejected() {
         List<String> forcing = TEST_CLASSES.stream()
                 .filter(clazz -> clazz.getMethods().stream()
                         .anyMatch(method -> method.isAnnotatedWith(
@@ -339,6 +339,21 @@ class TestIsolationConventionTest {
             return false;
         }
         return clazz.getSimpleName().endsWith("Test") || clazz.getSimpleName().endsWith("IT");
+    }
+
+    /**
+     * Spring Data's whole-table deletions. Matched as exact call targets rather than by name
+     * fragment: a scoped sibling like {@code deleteAllByPlannerIds} names the rows it removes and
+     * is the correct way to clean up, yet it contains {@code deleteAll} and a substring search
+     * rejects it.
+     */
+    private static final java.util.Set<String> WHOLE_TABLE_DELETES =
+            java.util.Set.of("deleteAll", "deleteAllInBatch");
+
+    private static boolean truncatesATable(JavaClass clazz) {
+        return clazz.getMethodCallsFromSelf().stream()
+                .anyMatch(call -> WHOLE_TABLE_DELETES.contains(call.getTarget().getName())
+                        && call.getTarget().getRawParameterTypes().isEmpty());
     }
 
     /**
