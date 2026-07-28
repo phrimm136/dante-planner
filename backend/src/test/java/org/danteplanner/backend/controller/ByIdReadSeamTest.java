@@ -82,11 +82,13 @@ class ByIdReadSeamTest {
         when(request.getRemoteAddr()).thenReturn("1.2.3.4");
         when(securityProperties.isTrustedProxy("1.2.3.4")).thenReturn(false);
         when(request.getHeader("User-Agent")).thenReturn("agent");
+        // No edge in front of this seam, so the viewer identity falls through to the peer address.
+        when(request.getHeader("CF-Connecting-IP")).thenReturn(null);
         when(publishedPlannerQueryService.getPublishedPlanner(eq(id), eq(userId), anyString(), any()))
                 .thenReturn(expected);
 
         ResponseEntity<PublishedPlannerDetailResponse> result =
-                publishedPlannerController.getPublishedPlanner(request, id, userId);
+                publishedPlannerController.getPublishedPlanner(request, id, userId, UUID.randomUUID());
 
         assertThat(result.getBody()).isSameAs(expected);
         verify(byIdReadGuard).read(eq("planner"), eq(id), any());

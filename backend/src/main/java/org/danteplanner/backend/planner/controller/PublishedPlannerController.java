@@ -9,6 +9,7 @@ import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishedPlannerDetailResponse;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
+import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.springframework.data.domain.Page;
@@ -125,13 +126,16 @@ public class PublishedPlannerController {
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
             HttpServletRequest request,
             @PathVariable UUID id,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal Long userId,
+            @DeviceId UUID deviceId) {
 
-        String clientIp = ClientIpResolver.resolve(request, securityProperties);
+        // Cloudflare appends to X-Forwarded-For rather than replacing it, so its leftmost entry is
+        // caller-controlled.
+        String viewerIdentity = ClientIpResolver.resolveClientIdentifier(request, securityProperties, deviceId);
         String userAgent = request.getHeader("User-Agent");
         log.debug("Fetching published planner {} for userId {}", id, userId);
         PublishedPlannerDetailResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
-                () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, clientIp, userAgent));
+                () -> publishedPlannerQueryService.getPublishedPlanner(id, userId, viewerIdentity, userAgent));
         return ResponseEntity.ok(response);
     }
 

@@ -326,20 +326,22 @@ public class PublishedPlannerQueryService {
      *
      * @param plannerId the planner ID
      * @param userId    optional user ID for vote/bookmark/subscription context (null for anonymous)
-     * @param clientIp  viewer's IP address (used for anonymous deduplication)
+     * @param viewerIdentity opaque per-viewer identity for anonymous deduplication, as produced by
+     *                  {@code ClientIpResolver.resolveClientIdentifier} ({@code ip:<addr>} or
+     *                  {@code device:<uuid>}) — never parsed, only hashed
      * @param userAgent viewer's User-Agent header (used for anonymous deduplication)
      * @return the published planner detail response with content, user context, and current view count
      * @throws PlannerNotFoundException if planner not found or not published
      */
     @Transactional(readOnly = true)
     public PublishedPlannerDetailResponse getPublishedPlanner(
-            UUID plannerId, Long userId, String clientIp, String userAgent) {
+            UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
         Planner planner = plannerRepository.findPublishedAggregate(plannerId)
                 .orElseThrow(() -> new PlannerNotFoundException(plannerId));
 
         String viewerHash = userId != null
                 ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
-                : ViewerHashUtil.hashForAnonymousUser(clientIp, userAgent, plannerId);
+                : ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
 
         plannerViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
         PlannerStats stats = plannerStatsRepository.findById(plannerId).orElse(null);

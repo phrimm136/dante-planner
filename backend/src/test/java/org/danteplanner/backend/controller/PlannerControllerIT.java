@@ -1484,12 +1484,17 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void getPublishedPlanner_WhenDuplicateView_DoesNotIncrementViewCount() throws Exception {
             Planner planner = createPublishedPlannerWithViewCount(testUser, 5);
 
+            // 10.0.0.1 is RFC1918, so the viewer identity resolves to the device rather than the
+            // address — which is the point: behind NAT every viewer shares one address, and only
+            // the device id keeps them apart.
+            UUID deviceId = UUID.randomUUID();
             String viewerHash = ViewerHashUtil.hashForAnonymousUser(
-                    "10.0.0.1", "TestBrowser/1.0", planner.getId());
+                    "device:" + deviceId, "TestBrowser/1.0", planner.getId());
             plannerViewRepository.save(
                     new PlannerView(planner.getId(), viewerHash, LocalDate.now(ZoneOffset.UTC)));
 
             mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
+                            .cookie(new Cookie("deviceId", deviceId.toString()))
                             .header("X-Forwarded-For", "10.0.0.1")
                             .header("User-Agent", "TestBrowser/1.0"))
                     .andExpect(status().isOk())
