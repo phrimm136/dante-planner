@@ -22,6 +22,17 @@ java {
     }
 }
 
+// `version` above is a constant, so build-info alone cannot tell one build from the next. The
+// commit is what a post-deploy readiness poll waits on and what lets a metric be labelled by the
+// build that produced it; absent a -PgitSha it degrades to "unknown" rather than failing the build.
+springBoot {
+    buildInfo {
+        properties {
+            additional.put("commit", providers.gradleProperty("gitSha").orElse("unknown"))
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }

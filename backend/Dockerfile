@@ -10,8 +10,12 @@ RUN --mount=type=cache,target=/root/.gradle \
 
 COPY backend/src ./src
 
+# Declared after the dependency layers so a new commit does not invalidate them. Absent (a local
+# build), build-info records "unknown" rather than failing.
+ARG GIT_SHA=unknown
+
 RUN --mount=type=cache,target=/root/.gradle \
-    gradle bootJar --no-daemon
+    gradle bootJar --no-daemon -PgitSha=$GIT_SHA
 
 # Bake the public Amazon RDS CA bundle into a PKCS12 truststore so the backend
 # can verify the RDS server certificate (sslMode=VERIFY_CA). The bundle is

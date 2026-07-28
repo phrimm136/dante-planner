@@ -21,4 +21,6 @@ public class BulkheadDataSourceProperties {
     private String url;
     private String username;
     private String password;
+
+    private long connectionTimeout = 30_000L;
 }
