@@ -13,5 +13,6 @@ terraform {
 # anycast IPs are the two-region front door and must survive either region's
 # rebuild, so they live outside the fleet stacks.
 provider "aws" {
-  region = var.region
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.region
 }

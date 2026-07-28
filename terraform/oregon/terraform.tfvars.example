@@ -1,5 +1,9 @@
-# Copy to terraform.tfvars (gitignored) and fill in. Only ingress_allowed_cidrs
-# is required; every other variable has a sensible default in variables.tf.
+# Copy to terraform.tfvars (gitignored) and fill in. Three values are required —
+# aws_account_id, ingress_allowed_cidrs, rds_vpc_id; the rest have sensible
+# defaults in variables.tf.
+
+# REQUIRED: the account this stack may apply into.
+aws_account_id = "000000000000"
 
 # REQUIRED: CIDRs allowed to reach the ingress node on 443.
 # Production value = Cloudflare edge ranges + Global Accelerator health-check

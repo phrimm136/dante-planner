@@ -1,11 +1,14 @@
 # Copy to terraform.tfvars (gitignored) and fill with YOUR account's real values.
 # Do NOT commit terraform.tfvars — it contains account-specific identifiers.
 
+# REQUIRED: the account this stack may apply into.
+aws_account_id        = "000000000000"
+
 vpc_id                = "vpc-xxxxxxxxxxxxxxxxx"
 db_subnet_ids         = ["subnet-aaaaaaaaaaaaaaaaa", "subnet-bbbbbbbbbbbbbbbbb"] # >=2 AZs
-availability_zone     = "us-west-2a"   # MUST equal the EC2 instance's AZ
 ec2_security_group_id = "sg-xxxxxxxxxxxxxxxxx"
 engine_version        = "8.0.40"       # REQUIRED: pin to >= source @@version (runbook 0.2)
+# availability_zone is rejected alongside multi_az.
 
 # Optional overrides (defaults are sensible):
 # instance_class     = "db.t4g.micro"

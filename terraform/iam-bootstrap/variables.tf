@@ -47,3 +47,13 @@ variable "rds_provisioner_role_name" {
   type        = string
   default     = ""
 }
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
+}

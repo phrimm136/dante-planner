@@ -27,11 +27,6 @@ variable "db_subnet_ids" {
   }
 }
 
-variable "availability_zone" {
-  description = "AZ to pin the single-AZ RDS instance to — MUST match the EC2 instance's AZ."
-  type        = string
-}
-
 variable "ec2_security_group_id" {
   description = "The backend EC2 instance's security group (source of app→RDS ingress; target of the temp replication rule)."
   type        = string
@@ -162,4 +157,14 @@ variable "seoul_fleet_cidr" {
   description = "Seoul fleet VPC CIDR, for the RDS-side return route and the CIDR-based 3306 ingress (cross-region SG references are not allowed)."
   type        = string
   default     = "10.30.0.0/16"
+}
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
 }

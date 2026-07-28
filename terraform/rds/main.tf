@@ -12,7 +12,8 @@ terraform {
 # provisioning identity assumed via STS). No role ARN is hardcoded here so this
 # file is safe to publish in a public repo. See docs/tasks/030-rds-migration/runbook.md.
 provider "aws" {
-  region = var.region
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.region
 }
 
 # --- Networking (referenced, not owned) -------------------------------------
@@ -85,6 +86,13 @@ resource "aws_db_parameter_group" "this" {
     value        = "ON"
     apply_method = "pending-reboot"
   }
+  # Required by docs/multi-region-request-paths.md §4a, with trackSessionState=true on the app url.
+  # Dynamic, but it seeds a SESSION variable at connect time, so pooled connections keep the old
+  # value until they rotate.
+  parameter {
+    name  = "session_track_gtids"
+    value = "OWN_GTID"
+  }
 
   parameter {
     name  = "binlog_format"
@@ -152,9 +160,8 @@ resource "aws_db_instance" "this" {
   engine_version = var.engine_version
   instance_class = var.instance_class
 
-  # Single-AZ, pinned to the EC2 instance's AZ (avoids cross-AZ latency + transfer).
-  availability_zone   = var.availability_zone
-  multi_az            = false
+  # availability_zone is rejected alongside multi_az; AWS owns both placements.
+  multi_az            = true
   publicly_accessible = false
 
   allocated_storage     = var.allocated_storage

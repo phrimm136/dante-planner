@@ -1,0 +1,9 @@
+# Copy to terraform.tfvars (gitignored) and fill in. One value is required; everything else has a
+# sensible default in variables.tf.
+
+# REQUIRED: the account this stack may apply into.
+aws_account_id = "000000000000"
+
+# Optional overrides:
+# region      = "us-west-2"
+# name_prefix = "danteplanner"

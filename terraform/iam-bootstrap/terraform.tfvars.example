@@ -8,6 +8,9 @@
 #   SSO/Identity:  arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_<permset>_<hash>/<user>
 trusted_admin_principal_arn = "arn:aws:iam::000000000000:user/CHANGE-ME"
 
+# REQUIRED: the account this stack may apply into. Normally the same account as the ARN above.
+aws_account_id = "000000000000"
+
 # Optional overrides (defaults are sensible):
 # role_name           = "dante-oregon-provisioner"
 # github_oidc_subject = "repo:phrimm136/dante-planner:ref:refs/heads/main"  # tighter: ...:environment:oregon

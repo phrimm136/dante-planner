@@ -35,5 +35,18 @@ variable "secret_names" {
     "danteplanner/rds/readonly-username",
     "danteplanner/rds/readonly-password",
     "danteplanner/grafana/observability-read-token",
+    # Both regions' tunnel tokens in one entry, keyed by region. Container created by
+    # scripts/ops/provision/cloudflare-tunnel-secrets.sh before enrollment here.
+    "danteplanner/cloudflare/tunnel-tokens",
   ]
+}
+
+variable "aws_account_id" {
+  description = "The 12-digit AWS account this stack may apply into."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.aws_account_id))
+    error_message = "aws_account_id must be the 12-digit AWS account number."
+  }
 }

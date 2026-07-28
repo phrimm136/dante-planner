@@ -16,5 +16,6 @@ terraform {
 # never part of the rebuild-disposable fleet lifecycle. prevent_destroy guards
 # the production secrets against an accidental destroy.
 provider "aws" {
-  region = var.region
+  allowed_account_ids = [var.aws_account_id]
+  region              = var.region
 }
