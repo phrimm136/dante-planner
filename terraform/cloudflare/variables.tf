@@ -35,19 +35,22 @@ variable "api_hostname" {
 
 variable "regions" {
   description = <<-EOT
-    One entry per region, each with the in-cluster origin cloudflared forwards to.
+    One entry per region, each with the origin cloudflared forwards to.
 
     The origin is the ingress node's Traefik listener, not the backend Service: the tunnel
     replaces the accelerator, not the ingress. Traefik terminates TLS with the origin-tls
     certificate, which is why the service is https and why origin_server_name below must match
     that certificate.
+
+    Traefik is a hostNetwork DaemonSet with no Service, so nothing in cluster DNS resolves to it;
+    deploy/base/cloudflared.yaml shares that host network and reaches it on the loopback.
   EOT
   type = map(object({
     origin_service = string
   }))
   default = {
-    oregon = { origin_service = "https://traefik.kube-system.svc.cluster.local:443" }
-    seoul  = { origin_service = "https://traefik.kube-system.svc.cluster.local:443" }
+    oregon = { origin_service = "https://localhost:443" }
+    seoul  = { origin_service = "https://localhost:443" }
   }
 }
 

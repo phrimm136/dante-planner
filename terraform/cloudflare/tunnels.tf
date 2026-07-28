@@ -48,3 +48,11 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "region" {
     ]
   }
 }
+
+# The provider does not expose the token on the tunnel resource; it is served by its own data source.
+data "cloudflare_zero_trust_tunnel_cloudflared_token" "region" {
+  for_each = var.regions
+
+  account_id = var.account_id
+  tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.region[each.key].id
+}

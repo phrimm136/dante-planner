@@ -10,7 +10,7 @@ output "tunnel_tokens" {
     Do not paste these into a manifest. Put each in its region's Secrets Manager entry and let
     the ExternalSecret pull it, matching how the other runtime secrets reach the cluster.
   EOT
-  value       = { for region, tunnel in cloudflare_zero_trust_tunnel_cloudflared.region : region => tunnel.tunnel_token }
+  value       = { for region, t in data.cloudflare_zero_trust_tunnel_cloudflared_token.region : region => t.token }
   sensitive   = true
 }
 

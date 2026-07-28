@@ -1,0 +1,16 @@
+# Both tokens ride in one replicated Secrets Manager entry; the region selects a key.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: cloudflared
+spec:
+  template:
+    spec:
+      containers:
+        - name: cloudflared
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-tunnel-token
+                  key: seoul
