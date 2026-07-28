@@ -7,20 +7,15 @@ name: "Deploy (multi-region k3s)"
 # pulls the image from its LOCAL registry — pushing to both here removes the
 # cross-region ECR-replication race (a bump could otherwise reference a tag not
 # yet replicated to Seoul).
+#
+# TRIGGER: workflow_dispatch only while the stop-the-world release runs from its own gated
+# workflow (docs/tasks/043-planner-schema-decomposition/migration-runbook.md). Restore below:
+#   push:
+#     branches: [main]
+#     paths: ['backend/**', 'static', 'static/**', '.github/workflows/deploy-fleet.yml']
+# ('static' is a submodule: a pointer bump records the path as exactly 'static', which 'static/**'
+# cannot match, so both entries are needed.)
 on:
-  push:
-    # Images are built and pushed to ECR only when a PR merges to main; both
-    # regions' ArgoCD root apps track main. workflow_dispatch remains as the
-    # manual escape hatch.
-    branches: [main]
-    paths:
-      - 'backend/**'
-      # 'static' is a submodule: a pointer bump records the path as exactly 'static',
-      # which 'static/**' cannot match. Both are listed so the deploy fires whether the
-      # data arrives as a pointer bump or as vendored files.
-      - 'static'
-      - 'static/**'
-      - '.github/workflows/deploy-fleet.yml'
   workflow_dispatch:
 
 concurrency:
@@ -96,6 +91,8 @@ jobs:
           tags: |
             ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
             ${{ env.ECR_REGISTRY_SEOUL }}/${{ env.IMAGE_REPO }}:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           cache-from: type=gha,scope=backend-arm64
           cache-to: type=gha,mode=max,scope=backend-arm64
 

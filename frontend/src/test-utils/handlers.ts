@@ -7,7 +7,7 @@ import { http, HttpResponse } from 'msw'
  * `server.use(...)` inside the test that needs them, so the network contract
  * stays local to the behavior under test.
  *
- * @see .claude/rules/frontend/testing.md for the hybrid mocking policy.
+ * @see frontend/CLAUDE.md ("Testing") for which boundary a given test should mock at.
  */
 export const handlers = [
   // Warning: use absolute URLs — Node's fetch (test runtime) rejects relative
