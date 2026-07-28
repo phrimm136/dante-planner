@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.Cookie;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-import javax.sql.DataSource;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -233,11 +233,11 @@ class CausalGateIT extends CausalHarnessSupport {
      * cookie covers every GTID the request committed, so a follow-up replica read gates past the
      * filter rebuild, not only the main commit.
      *
-     * <p>Coverage, not equality: Connector/J surfaces OWN_GTID session-state changes only when
-     * the JDBC URL sets {@code trackSessionState=true}, which the app's URL does not, so every
-     * capture takes the documented {@code @@gtid_executed} fallback — a superset that still
-     * satisfies the gate. Asserting the cookie equals the exact per-request union would demand a
-     * datasource-URL change in production, not in this test.</p>
+     * <p>Coverage, not equality: the cookie must gate past every commit, and a superset satisfies
+     * that as well as the exact union does — which is what this asserts.</p>
+     *
+     * <p>Which branch supplied the value is pinned separately by
+     * {@code ownGtidTracker_WhenWriteCommits_ReportsTransactionOwnGtid}.</p>
      */
     @Test
     @DisplayName("A first publish commits more than once; every commit is captured and the ryw cookie gates past all of them")
@@ -297,6 +297,45 @@ class CausalGateIT extends CausalHarnessSupport {
                         + "so a replica read gates past the filter rebuild, not only the main commit",
                         cookieGtidSet, requestCommits)
                 .isTrue();
+    }
+
+    /**
+     * Regression test for the capture reading session state off the wrong connection. The old
+     * afterCommit synchronization looked the connection up through the lazy proxy, which
+     * materialised a fresh pooled one carrying no session state, so every commit silently took the
+     * superset fallback. Coverage assertions cannot catch that — a superset gates correctly — so
+     * this is the only test that fails if capture stops reaching the connection that committed.
+     */
+    @Test
+    @DisplayName("A committed write reports its own GTID through the session tracker, not the superset fallback")
+    void ownGtidTracker_WhenWriteCommits_ReportsTransactionOwnGtid() throws Exception {
+        User author = TestDataFactory.createTestUser(
+                userRepository, "gtid-tracker-author-" + UUID.randomUUID() + "@example.com");
+        Cookie auth = new Cookie("accessToken",
+                TestDataFactory.generateAccessToken(jwtTokenService, author));
+        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        UUID plannerId = UUID.randomUUID();
+        int trackerBefore = gtidWriteCapture.trackerSourced();
+
+        MvcResult written = mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
+                        .cookie(auth, device)
+                        .contentType(APPLICATION_JSON)
+                        .content(upsertBody(plannerId, "gtid-tracker-draft")))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+
+        assertThat(gtidWriteCapture.trackerSourced() - trackerBefore)
+                .as("the write's GTID must come from the OWN_GTID tracker; zero means capture lost "
+                        + "the committing connection and fell back to SELECT @@gtid_executed, which "
+                        + "still gates correctly and so passes every other assertion here")
+                .isGreaterThanOrEqualTo(1);
+        String cookieGtidSet = new String(
+                Base64.getUrlDecoder().decode(assertGtidCookie(written).value()),
+                StandardCharsets.UTF_8);
+        assertThat(cookieGtidSet)
+                .as("a tracker-sourced cookie names this request's commits, not the primary's whole "
+                        + "executed history")
+                .matches(GTID_VALUE.pattern() + ".*");
     }
 
     private boolean gtidSubset(String candidate, String containing) {
@@ -422,27 +461,36 @@ class CausalGateIT extends CausalHarnessSupport {
 
         @Bean
         @Primary
-        RecordingGtidWriteCapture recordingGtidWriteCapture(DataSource dataSource) {
-            return new RecordingGtidWriteCapture(dataSource);
+        RecordingGtidWriteCapture recordingGtidWriteCapture(MeterRegistry meterRegistry) {
+            return new RecordingGtidWriteCapture(meterRegistry);
         }
     }
 
     static class RecordingGtidWriteCapture extends GtidWriteCapture {
 
         private final AtomicInteger commitRecordings = new AtomicInteger();
+        private final AtomicInteger trackerSourced = new AtomicInteger();
 
-        RecordingGtidWriteCapture(DataSource dataSource) {
-            super(dataSource);
+        RecordingGtidWriteCapture(MeterRegistry meterRegistry) {
+            super(meterRegistry);
         }
 
         @Override
-        public void recordCommit(String ownGtid, boolean trackerReadable) {
+        public void recordCommit(String gtid, boolean fromTracker) {
             commitRecordings.incrementAndGet();
-            super.recordCommit(ownGtid, trackerReadable);
+            if (fromTracker) {
+                trackerSourced.incrementAndGet();
+            }
+            super.recordCommit(gtid, fromTracker);
         }
 
         int commitRecordings() {
             return commitRecordings.get();
+        }
+
+        /** Commits whose GTID came from the server's OWN_GTID tracker rather than the superset. */
+        int trackerSourced() {
+            return trackerSourced.get();
         }
     }
 }

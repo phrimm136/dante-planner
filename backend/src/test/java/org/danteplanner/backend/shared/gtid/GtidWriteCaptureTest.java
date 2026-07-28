@@ -1,21 +1,24 @@
 package org.danteplanner.backend.shared.gtid;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * The capture is a per-request accumulator and nothing else: resolving a commit's GTID — tracker
+ * first, primary's executed set as the fallback — belongs to {@link GtidCapturingDataSource}, which
+ * holds the connection that committed.
+ */
 class GtidWriteCaptureTest {
 
     private static final String UUID_A = "3e11fa47-71ca-11e1-9e33-c80aa9429562";
     private static final String GLOBAL_GTID = UUID_A + ":1-200";
 
-    private final JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-    private final GtidWriteCapture capture = new GtidWriteCapture(jdbcTemplate);
+    private final SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
+    private final GtidWriteCapture capture = new GtidWriteCapture(meterRegistry);
 
     @BeforeEach
     void openWindow() {
@@ -36,20 +39,9 @@ class GtidWriteCaptureTest {
     }
 
     @Test
-    void ownGtidFallbackOnEmptyTracker_WhenTrackerEmpty_ReadsGlobalGtidExecuted() {
-        when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
-                .thenReturn(GLOBAL_GTID);
-        capture.recordCommit(null, false);
-
-        assertThat(capture.pollCapturedGtid()).contains(GLOBAL_GTID);
-    }
-
-    @Test
-    void ownGtidFallbackOnEmptyTracker_WhenOneCommitOfTwoMissesGtid_ReadsGlobalGtidExecuted() {
-        when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
-                .thenReturn(GLOBAL_GTID);
+    void ownGtidUnionAcrossCommits_WhenOneCommitSuppliedTheSuperset_CoversBoth() {
         capture.recordCommit(UUID_A + ":100", true);
-        capture.recordCommit(null, false);
+        capture.recordCommit(GLOBAL_GTID, false);
 
         assertThat(capture.pollCapturedGtid())
                 .as("a union covering only part of the request would gate less than it claims")
@@ -68,12 +60,6 @@ class GtidWriteCaptureTest {
 
     @Test
     void publishIdempotentStateTargeted_WhenCommitWroteNothing_MintsNoCookie() {
-        // A real GTID first, so the tracker has proven it reports; only then does silence mean
-        // "wrote nothing" rather than "cannot tell".
-        capture.recordCommit(UUID_A + ":100", true);
-        capture.clear();
-        capture.begin();
-
         capture.recordCommit(null, true);
 
         assertThat(capture.pollCapturedGtid())
@@ -82,22 +68,19 @@ class GtidWriteCaptureTest {
     }
 
     @Test
-    void ownGtidFallbackOnEmptyTracker_WhenServerNotTracking_ReadsGlobalGtidExecuted() {
-        when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
-                .thenReturn(GLOBAL_GTID);
-
-        capture.recordCommit(null, true);
-
-        assertThat(capture.pollCapturedGtid())
-                .as("with tracking off, no reported GTID cannot be read as no write")
-                .contains(GLOBAL_GTID);
+    void rywNoCookieOnRedisOnlyWrite_WhenNoTxCommitted_ReturnsEmpty() {
+        assertThat(capture.pollCapturedGtid()).isEmpty();
     }
 
     @Test
-    void rywNoCookieOnRedisOnlyWrite_WhenNoTxCommitted_ReturnsEmpty() {
-        when(jdbcTemplate.queryForObject("SELECT @@gtid_executed", String.class))
-                .thenReturn(GLOBAL_GTID);
+    void gtidCaptureCounter_WhenTrackerAndFallbackBothRecorded_TagsEachSource() {
+        capture.recordCommit(UUID_A + ":100", true);
+        capture.recordCommit(GLOBAL_GTID, false);
 
-        assertThat(capture.pollCapturedGtid()).isEmpty();
+        assertThat(meterRegistry.counter("gtid.capture", "source", "tracker").count())
+                .as("a silent degradation is only visible if the branch is counted")
+                .isEqualTo(1.0);
+        assertThat(meterRegistry.counter("gtid.capture", "source", "fallback").count())
+                .isEqualTo(1.0);
     }
 }

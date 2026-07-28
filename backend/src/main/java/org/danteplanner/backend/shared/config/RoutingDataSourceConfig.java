@@ -19,6 +19,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.danteplanner.backend.shared.gtid.GtidCapturingDataSource;
+import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 
@@ -34,38 +36,31 @@ import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
 @EnableConfigurationProperties({
         DataSourceProperties.class,
         ReplicaDataSourceProperties.class,
-        BulkheadDataSourceProperties.class})
+        BulkheadDataSourceProperties.class,
+        HikariTuningProperties.class})
 public class RoutingDataSourceConfig {
-
-    /**
-     * Bound on waiting for a connection on a request-serving pool, so a caller gives up rather than
-     * holding a request thread while a cross-region endpoint hangs.
-     */
-    private static final long REQUEST_CONNECTION_TIMEOUT_MS = 5_000L;
-
-    /**
-     * The bulkhead absorbs slow re-checks by design, so its queue legitimately outlasts the
-     * request-pool bound; it stays bounded, just far more patiently.
-     */
-    private static final long BULKHEAD_CONNECTION_TIMEOUT_MS = 30_000L;
 
     private final DataSourceProperties primaryProperties;
     private final ReplicaDataSourceProperties replicaProperties;
     private final BulkheadDataSourceProperties bulkheadProperties;
+    private final HikariTuningProperties hikariProperties;
 
     public RoutingDataSourceConfig(
             DataSourceProperties primaryProperties, ReplicaDataSourceProperties replicaProperties) {
-        this(primaryProperties, replicaProperties, new BulkheadDataSourceProperties());
+        this(primaryProperties, replicaProperties,
+                new BulkheadDataSourceProperties(), new HikariTuningProperties());
     }
 
     @Autowired
     public RoutingDataSourceConfig(
             DataSourceProperties primaryProperties,
             ReplicaDataSourceProperties replicaProperties,
-            BulkheadDataSourceProperties bulkheadProperties) {
+            BulkheadDataSourceProperties bulkheadProperties,
+            HikariTuningProperties hikariProperties) {
         this.primaryProperties = primaryProperties;
         this.replicaProperties = replicaProperties;
         this.bulkheadProperties = bulkheadProperties;
+        this.hikariProperties = hikariProperties;
     }
 
     public HikariConfig buildPrimaryHikariConfig() {
@@ -76,7 +71,7 @@ public class RoutingDataSourceConfig {
                 replicaProperties.isEnabled()
                         ? PoolLedger.SEOUL_PRIMARY_POOL
                         : PoolLedger.OREGON_PRIMARY_POOL);
-        config.setConnectionTimeout(REQUEST_CONNECTION_TIMEOUT_MS);
+        config.setConnectionTimeout(hikariProperties.getConnectionTimeout());
         return config;
     }
 
@@ -85,7 +80,7 @@ public class RoutingDataSourceConfig {
         applyEndpoint(config, replicaProperties.getUrl(),
                 replicaProperties.getUsername(), replicaProperties.getPassword());
         config.setMaximumPoolSize(PoolLedger.SEOUL_REPLICA_POOL);
-        config.setConnectionTimeout(REQUEST_CONNECTION_TIMEOUT_MS);
+        config.setConnectionTimeout(hikariProperties.getConnectionTimeout());
         return config;
     }
 
@@ -97,7 +92,7 @@ public class RoutingDataSourceConfig {
                 ownEndpoint ? bulkheadProperties.getUsername() : primaryProperties.getUsername(),
                 ownEndpoint ? bulkheadProperties.getPassword() : primaryProperties.getPassword());
         config.setMaximumPoolSize(PoolLedger.BULKHEAD_POOL);
-        config.setConnectionTimeout(BULKHEAD_CONNECTION_TIMEOUT_MS);
+        config.setConnectionTimeout(bulkheadProperties.getConnectionTimeout());
         return config;
     }
 
@@ -109,8 +104,12 @@ public class RoutingDataSourceConfig {
 
     @Bean
     @Primary
-    public DataSource dataSource() {
-        HikariDataSource primary = new HikariDataSource(buildPrimaryHikariConfig());
+    public DataSource dataSource(GtidWriteCapture gtidWriteCapture) {
+        // Wrapped BELOW the routing and lazy proxies: the committed GTID lives as session state on
+        // the physical connection, and this is the only layer where "the connection that committed"
+        // is held rather than looked up. The replica pool takes no writes, so it stays bare.
+        DataSource primary =
+                new GtidCapturingDataSource(new HikariDataSource(buildPrimaryHikariConfig()), gtidWriteCapture);
         Map<Object, Object> targets = new HashMap<>();
         targets.put(RoutingKey.PRIMARY, primary);
         if (replicaProperties.isEnabled()) {

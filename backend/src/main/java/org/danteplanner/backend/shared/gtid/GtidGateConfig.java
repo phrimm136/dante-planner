@@ -7,9 +7,12 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import jakarta.persistence.EntityManagerFactory;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 /**
  * Wires the read-your-writes GTID gate for the Seoul pods (routing datasource present).
@@ -30,15 +33,28 @@ public class GtidGateConfig {
         return new GtidReadGate(dataSource);
     }
 
+    /**
+     * Takes no DataSource: commits are reported by {@link GtidCapturingDataSource} from the
+     * connection that made them, so this holds only the per-request accumulator. The datasource
+     * depends on this bean, not the other way round.
+     */
     @Bean
-    public GtidWriteCapture gtidWriteCapture(DataSource dataSource) {
-        return new GtidWriteCapture(dataSource);
+    public GtidWriteCapture gtidWriteCapture(MeterRegistry meterRegistry) {
+        return new GtidWriteCapture(meterRegistry);
     }
 
+    /**
+     * Plain JPA transaction management. Capture used to hang off a transaction-manager subclass that
+     * registered an {@code afterCommit} synchronization, which had to find the transaction's
+     * connection again after the fact — and found the wrong one. Interception at commit needs no
+     * transaction-manager involvement at all.
+     */
     @Bean
     public PlatformTransactionManager transactionManager(
-            EntityManagerFactory entityManagerFactory, GtidWriteCapture writeCapture, DataSource dataSource) {
-        return new GtidCapturingTransactionManager(entityManagerFactory, writeCapture, dataSource);
+            EntityManagerFactory entityManagerFactory, DataSource dataSource) {
+        JpaTransactionManager transactionManager = new JpaTransactionManager(entityManagerFactory);
+        transactionManager.setDataSource(dataSource);
+        return transactionManager;
     }
 
     @Bean
