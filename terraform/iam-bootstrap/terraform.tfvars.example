@@ -1,23 +1,30 @@
-# Copy to terraform.tfvars (gitignored) and fill with YOUR account's real values.
-# Do NOT commit terraform.tfvars — trusted_admin_principal_arn is account-specific.
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
 
-# The human admin principal (IAM user/role or SSO permission-set role) allowed to
-# assume the provisioning role from a laptop for the initial apply. REQUIRED.
+# --- Required ---------------------------------------------------------------
+
+# The account this stack may apply into; a plan resolving to any other account fails. Normally the
+# same account as the ARN below.
+aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# The human admin principal (IAM user/role or SSO permission-set role) allowed to assume the
+# provisioning role from a laptop for the initial apply.
 #   IAM user:      arn:aws:iam::<account-id>:user/<name>
 #   IAM role:      arn:aws:iam::<account-id>:role/<name>
 #   SSO/Identity:  arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_<permset>_<hash>/<user>
-trusted_admin_principal_arn = "arn:aws:iam::000000000000:user/CHANGE-ME"
+trusted_admin_principal_arn = "REPLACE_WITH_ADMIN_PRINCIPAL_ARN"
 
-# REQUIRED: the account this stack may apply into. Normally the same account as the ARN above.
-aws_account_id = "000000000000"
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
 
-# Optional overrides (defaults are sensible):
-# role_name           = "danteplanner-provisioner"
-# github_oidc_subject = "repo:phrimm136/dante-planner:ref:refs/heads/main"  # tighter: ...:environment:oregon
-# create_github_oidc_provider = true   # set false if the account already has a GitHub OIDC provider
-# region              = "us-west-2"
-# name_prefix         = "danteplanner"  # MUST match terraform/oregon
+# region      = "us-west-2"
+# name_prefix = "danteplanner"                    # MUST match terraform/oregon
+# role_name   = "danteplanner-provisioner"
 
-# The existing role that applies terraform/rds. Set to grant it the ec2 route
-# actions for the fleet<->RDS peering return route (reproducible, vs put-role-policy).
+# The GitHub OIDC subject the trust policy matches. The environment-scoped form is tighter than a
+# branch ref, because a protected environment gates who can start the job.
+# github_oidc_subject         = "repo:phrimm136/dante-planner:ref:refs/heads/main"
+# create_github_oidc_provider = true   # false if the account already has a GitHub OIDC provider
+
+# The existing role that applies terraform/rds. Set to grant it the ec2 route actions for the
+# fleet<->RDS peering return route (reproducible, vs put-role-policy).
 # rds_provisioner_role_name = "terraform-rds"

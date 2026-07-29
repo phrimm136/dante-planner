@@ -1,28 +1,38 @@
-# Copy to terraform.tfvars (gitignored) and fill in. Three values are required —
-# aws_account_id, ingress_allowed_cidrs, rds_vpc_id; the rest have sensible
-# defaults in variables.tf.
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
 
-# REQUIRED: the account this stack may apply into.
-aws_account_id = "000000000000"
+# --- Required ---------------------------------------------------------------
 
-# REQUIRED: CIDRs allowed to reach the ingress node on 443.
-# Production value = Cloudflare edge ranges only (https://www.cloudflare.com/ips/).
-# Requests arrive through a Cloudflare Tunnel, which dials outward, so this SG guards a
-# path nothing normally uses; keep it narrow anyway. A single /32 of your own IP is enough
-# for an initial single-region smoke test.
+# The account this stack may apply into; a plan resolving to any other account fails.
+aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# CIDRs allowed to reach the ingress node on 443. Production value = Cloudflare edge ranges only
+# (https://www.cloudflare.com/ips/). Requests arrive through a Cloudflare Tunnel, which dials
+# outward, so this SG guards a path nothing normally uses; keep it narrow anyway. A single /32 of
+# your own IP is enough for an initial single-region smoke test.
 ingress_allowed_cidrs = ["REPLACE_WITH_CLOUDFLARE_CIDRS"]
 
-# REQUIRED: the RDS (prod) VPC id to peer with for private DB access. Its CIDR
-# must not overlap vpc_cidr (10.20.0.0/16). Do not commit the real value.
+# The RDS (prod) VPC to peer with for private DB access. Its CIDR must not overlap vpc_cidr
+# (10.20.0.0/16).
 rds_vpc_id = "vpc-REPLACE_WITH_RDS_VPC_ID"
 
-# Peer-region fleet CIDR admitted to the auth Redis NodePort over VPC peering, so the Seoul
-# replica can REPLICAOF and Seoul pods can write blacklist/rotation/tombstone state. Empty
-# (the default) creates NO rule and keeps the auth Redis region-private. This store holds
-# revocation state: set the one peer fleet CIDR, never a broad range.
+# --- Count-gated: unsetting these DESTROYS what they created -----------------
+
+# Peer-region fleet CIDR admitted to the auth Redis NodePort over VPC peering, so the Seoul replica
+# can REPLICAOF and Seoul pods can write blacklist/rotation/tombstone state. Empty (the default)
+# creates NO rule and keeps the auth Redis region-private. This store holds revocation state: set
+# the one peer fleet CIDR, never a broad range.
+#
+# Once Seoul is live this is REQUIRED. Clearing it plans a destroy of the ingress rule, which cuts
+# cross-region replication without an error — the replica keeps serving its own diverging copy.
 # redis_cross_region_cidr = "10.30.0.0/16"
 
-# Optional overrides (defaults are sensible):
+# Allowlist the Global Accelerator health-check prefix list on the ingress SG. Same shape: clearing
+# it after the rule exists plans a destroy.
+# enable_global_accelerator = true
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
 # region                        = "us-west-2"
 # vpc_cidr                      = "10.20.0.0/16"
 # availability_zones            = ["us-west-2a", "us-west-2b"]
