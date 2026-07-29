@@ -1,4 +1,13 @@
 terraform {
+  # terraform init -backend-config=../backend.hcl
+  backend "s3" {
+    key                  = "secrets/terraform.tfstate"
+    region               = "us-west-2"
+    workspace_key_prefix = "env"
+    encrypt              = true
+    use_lockfile         = true
+  }
+
   # >= 1.7 for config-driven import blocks WITH for_each (declarative import runs
   # inside the normal apply — no separate `terraform import` command, so enabling
   # replication stays a single unattended apply).

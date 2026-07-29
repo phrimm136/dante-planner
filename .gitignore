@@ -35,3 +35,8 @@ node_modules/
 
 # Local dev JWT keys (docker-compose.local.yml)
 backend/jwt-keys-local/
+
+# State holds the RDS master password and the tunnel secrets in plaintext. Duplicated from
+# terraform/.gitignore, which only covers its own directory.
+*.tfstate
+*.tfstate.*

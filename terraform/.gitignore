@@ -8,4 +8,7 @@
 terraform.tfvars
 *.auto.tfvars
 !terraform.tfvars.example
+# No leading slash, so a per-stack backend.hcl is ignored too.
+backend.hcl
+!backend.hcl.example
 crash.log

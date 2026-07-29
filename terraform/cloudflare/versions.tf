@@ -1,4 +1,13 @@
 terraform {
+  # terraform init -backend-config=../backend.hcl
+  backend "s3" {
+    key                  = "cloudflare/terraform.tfstate"
+    region               = "us-west-2"
+    workspace_key_prefix = "env"
+    encrypt              = true
+    use_lockfile         = true
+  }
+
   required_version = ">= 1.6"
   required_providers {
     cloudflare = {

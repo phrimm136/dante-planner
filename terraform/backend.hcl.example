@@ -1,0 +1,13 @@
+# Copy to terraform/backend.hcl (gitignored) and fill in the bucket.
+#
+# One file serves every stack: the bucket is shared, and each stack's own key, region,
+# workspace prefix and locking are literals in its `backend "s3"` block. Only the bucket
+# lives here, because its name carries the AWS account id.
+#
+# The name is `<name_prefix>-tfstate-<account_id>`; read it from the stack that creates it:
+#   terraform -chdir=terraform/iam-bootstrap output -raw tf_state_bucket
+#
+# Then, from any stack directory:
+#   terraform init -backend-config=../backend.hcl
+
+bucket = "danteplanner-tfstate-111122223333"
