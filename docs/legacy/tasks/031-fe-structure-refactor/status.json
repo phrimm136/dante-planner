@@ -1,0 +1,16 @@
+{
+  "totalPhases": 10,
+  "currentPhase": 10,
+  "phases": [
+    { "name": "Hygiene remainder + CI lint gate", "status": "done" },
+    { "name": "Shared primitives (create + unit tests)", "status": "done" },
+    { "name": "Data-layer adoption", "status": "done" },
+    { "name": "Component-pattern adoption", "status": "done" },
+    { "name": "Parse-boundary type conversions + planner drift guard", "status": "done" },
+    { "name": "Components UI-kit reshuffle + page placements", "status": "done" },
+    { "name": "Shared concept modules", "status": "done" },
+    { "name": "constants/assetPaths codemod split", "status": "done" },
+    { "name": "Boundary rules + sweep", "status": "done" },
+    { "name": "FE doc truth-sync", "status": "done" }
+  ]
+}

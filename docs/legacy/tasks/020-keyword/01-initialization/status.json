@@ -1,0 +1,12 @@
+{
+  "totalPhases": 6,
+  "currentPhase": 6,
+  "phases": [
+    { "name": "Data Files Generation", "status": "done" },
+    { "name": "Schemas + Types + Constants + i18n Labels", "status": "done" },
+    { "name": "Data Hooks + useBattleKeywords Refactor", "status": "done" },
+    { "name": "SearchableMultiSelect + Filters + Routing + Navigation", "status": "done" },
+    { "name": "Keyword List Page", "status": "done" },
+    { "name": "Keyword Detail Page", "status": "done" }
+  ]
+}
