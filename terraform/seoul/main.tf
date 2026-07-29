@@ -8,6 +8,7 @@ module "fleet" {
 
   region                 = var.region
   region_name_suffix     = "seoul"
+  backend_ecr_account_id = var.backend_ecr_account_id
   gitops_target_revision = var.gitops_target_revision
   vpc_cidr               = var.vpc_cidr
   availability_zones     = var.availability_zones

@@ -56,7 +56,7 @@ resource "aws_instance" "cp" {
     gateway_api_version = var.gateway_api_version
     traefik_version     = var.traefik_version
     eso_chart_version   = var.external_secrets_chart_version
-    ecr_image           = "${var.backend_image_repo}=${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.backend_image_repo}:*"
+    ecr_image           = "${var.backend_image_repo}=${local.backend_ecr_repository_url}:*"
 
     install_scrape_annotate = file("${path.module}/user-data/scrape-annotate-install.sh")
   })

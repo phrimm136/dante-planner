@@ -129,6 +129,12 @@ variable "app_asg_max_size" {
 
 # --- Container registry -----------------------------------------------------
 
+variable "backend_ecr_account_id" {
+  description = "Account owning the backend ECR registry. Empty = the account this fleet is applied into. Set it when the fleet lives elsewhere (a staging account pulling production images), and grant that account pull access on the repository policy."
+  type        = string
+  default     = ""
+}
+
 variable "backend_image_repo" {
   description = "ECR repository name for the backend image. Matches the existing single-region deploy (.github/workflows/deploy.yml pushes danteplanner-backend)."
   type        = string

@@ -72,3 +72,9 @@ variable "aws_account_id" {
     error_message = "aws_account_id must be the 12-digit AWS account number."
   }
 }
+
+variable "backend_ecr_account_id" {
+  description = "Account owning the backend ECR registry. Empty = the account this stack is applied into."
+  type        = string
+  default     = ""
+}

@@ -6,5 +6,8 @@
 # before the first image replicates), and the module only needs the URL string,
 # never the resource. Same value as the old data source in Oregon.
 locals {
-  backend_ecr_repository_url = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.backend_image_repo}"
+  backend_ecr_account_id = (
+    var.backend_ecr_account_id != "" ? var.backend_ecr_account_id : data.aws_caller_identity.current.account_id
+  )
+  backend_ecr_repository_url = "${local.backend_ecr_account_id}.dkr.ecr.${var.region}.amazonaws.com/${var.backend_image_repo}"
 }
