@@ -10,8 +10,7 @@ RUN --mount=type=cache,target=/root/.gradle \
 
 COPY backend/src ./src
 
-# Declared after the dependency layers so a new commit does not invalidate them. Absent (a local
-# build), build-info records "unknown" rather than failing.
+# Declared after the dependency layers so a new commit does not invalidate them.
 ARG GIT_SHA=unknown
 
 RUN --mount=type=cache,target=/root/.gradle \

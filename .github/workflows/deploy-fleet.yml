@@ -7,14 +7,6 @@ name: "Deploy (multi-region k3s)"
 # pulls the image from its LOCAL registry — pushing to both here removes the
 # cross-region ECR-replication race (a bump could otherwise reference a tag not
 # yet replicated to Seoul).
-#
-# TRIGGER: workflow_dispatch only while the stop-the-world release runs from its own gated
-# workflow (docs/tasks/043-planner-schema-decomposition/migration-runbook.md). Restore below:
-#   push:
-#     branches: [main]
-#     paths: ['backend/**', 'static', 'static/**', '.github/workflows/deploy-fleet.yml']
-# ('static' is a submodule: a pointer bump records the path as exactly 'static', which 'static/**'
-# cannot match, so both entries are needed.)
 on:
   workflow_dispatch:
 

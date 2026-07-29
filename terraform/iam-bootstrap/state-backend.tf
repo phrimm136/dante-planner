@@ -1,8 +1,4 @@
-# Remote state backend for every other stack. This one stays on local state.
-#
-# `terraform_remote_state` with `backend = "local"` reads a literal filesystem path, so it resolves
-# to the DEFAULT workspace whichever workspace is selected — a staging workspace of terraform/seoul
-# would read production Oregon. S3 + workspace_key_prefix resolves per workspace.
+# Remote state backend for every other stack. This one stays on local state — it creates the bucket.
 
 resource "aws_s3_bucket" "tf_state" {
   bucket = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
