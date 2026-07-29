@@ -11,9 +11,9 @@ variable "name_prefix" {
 }
 
 variable "role_name" {
-  description = "Name of the provisioning role this stack creates. The Oregon CI workflow and the operator's laptop AWS profile assume this role."
+  description = "Name of the provisioning role this stack creates. The CI workflow and the operator's laptop AWS profile assume this role."
   type        = string
-  default     = "dante-oregon-provisioner"
+  default     = "danteplanner-provisioner"
 }
 
 variable "trusted_admin_principal_arn" {

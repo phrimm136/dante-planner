@@ -31,8 +31,16 @@ locals {
   # (oregon/iam.tf: ${name_prefix}-oregon-{cp,ingress,data,app}). The provisioning
   # policy's iam:* and iam:PassRole are scoped to these ARN patterns so a
   # compromised provisioner cannot touch unrelated roles in the account.
-  oregon_role_arn_pattern             = "arn:aws:iam::${local.account_id}:role/${var.name_prefix}-oregon-*"
-  oregon_instance_profile_arn_pattern = "arn:aws:iam::${local.account_id}:instance-profile/${var.name_prefix}-oregon-*"
+  # modules/fleet names every node role ${name_prefix}-${region_name_suffix}-{cp,ingress,data,app},
+  # so a region absent here cannot be applied by this identity.
+  fleet_role_arn_patterns = [
+    for suffix in var.fleet_region_suffixes :
+    "arn:aws:iam::${local.account_id}:role/${var.name_prefix}-${suffix}-*"
+  ]
+  fleet_instance_profile_arn_patterns = [
+    for suffix in var.fleet_region_suffixes :
+    "arn:aws:iam::${local.account_id}:instance-profile/${var.name_prefix}-${suffix}-*"
+  ]
 }
 
 # --- Trust policy: two assumption paths -------------------------------------
@@ -74,7 +82,7 @@ data "aws_iam_policy_document" "assume" {
 
 resource "aws_iam_role" "provisioner" {
   name                 = var.role_name
-  description          = "Least-privilege identity that provisions the Oregon fleet (terraform/oregon). Assumable by an admin laptop (STS) and GitHub Actions CI (OIDC). No instance profile - neither runner is an EC2 instance."
+  description          = "Least-privilege identity that provisions every terraform stack in this account. Assumable by an admin laptop (STS) and GitHub Actions CI (OIDC). No instance profile - neither runner is an EC2 instance."
   assume_role_policy   = data.aws_iam_policy_document.assume.json
   max_session_duration = 3600
   tags                 = var.tags
@@ -194,6 +202,38 @@ data "aws_iam_policy_document" "provisioning" {
     ]
   }
 
+  statement {
+    sid       = "Rds"
+    effect    = "Allow"
+    actions   = ["rds:*"]
+    resources = ["*"]
+  }
+
+  # RDS calls KMS as the caller, so encrypted storage needs grant creation here.
+  statement {
+    sid    = "RdsStorageEncryption"
+    effect = "Allow"
+    actions = [
+      "kms:CreateGrant",
+      "kms:DescribeKey",
+      "kms:ListAliases",
+    ]
+    resources = ["*"] # the aws/rds alias resolves to a key id that differs per region.
+  }
+
+  # A fresh account has no rds.amazonaws.com service-linked role until the first instance.
+  statement {
+    sid       = "RdsServiceLinkedRole"
+    effect    = "Allow"
+    actions   = ["iam:CreateServiceLinkedRole"]
+    resources = ["arn:aws:iam::${local.account_id}:role/aws-service-role/rds.amazonaws.com/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:AWSServiceName"
+      values   = ["rds.amazonaws.com"]
+    }
+  }
+
   # Billing + instance auto-recovery metric alarms.
   statement {
     sid       = "CloudWatch"
@@ -214,7 +254,7 @@ data "aws_iam_policy_document" "provisioning" {
   # them to EC2. Resource-scoped to the exact name patterns terraform/oregon
   # creates so this identity cannot mint or alter privileged roles elsewhere.
   statement {
-    sid    = "OregonNodeRolesAndProfiles"
+    sid    = "FleetNodeRolesAndProfiles"
     effect = "Allow"
     actions = [
       "iam:CreateRole",
@@ -240,16 +280,13 @@ data "aws_iam_policy_document" "provisioning" {
       "iam:UntagInstanceProfile",
       "iam:PassRole",
     ]
-    resources = [
-      local.oregon_role_arn_pattern,
-      local.oregon_instance_profile_arn_pattern,
-    ]
+    resources = concat(local.fleet_role_arn_patterns, local.fleet_instance_profile_arn_patterns)
   }
 }
 
 resource "aws_iam_policy" "provisioning" {
   name        = "${var.role_name}-policy"
-  description = "Service-scoped provisioning permissions for terraform/oregon (EC2/ASG/ECR/SSM/S3/CloudWatch/Logs + oregon-* IAM)."
+  description = "Service-scoped provisioning permissions (EC2/ASG/ECR/SSM/S3/RDS/KMS/CloudWatch/Logs + fleet-region IAM)."
   policy      = data.aws_iam_policy_document.provisioning.json
   tags        = var.tags
 }
@@ -309,6 +346,15 @@ data "aws_iam_policy_document" "deploy_surge" {
     resources = ["arn:aws:ssm:*::document/AWS-RunShellScript"]
   }
 
+  # SendCommand returns a command id; the outcome is a separate GetCommandInvocation call,
+  # whose invocation does not exist when the policy is evaluated.
+  statement {
+    sid       = "SsmCommandResults"
+    effect    = "Allow"
+    actions   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
+    resources = ["*"]
+  }
+
   statement {
     sid       = "SurgeSsmTargets"
     actions   = ["ssm:SendCommand"]
@@ -327,7 +373,33 @@ resource "aws_iam_policy" "deploy_surge" {
   tags   = var.tags
 }
 
-resource "aws_iam_user_policy_attachment" "deploy_surge" {
-  user       = "github-actions-deploy"
+resource "aws_iam_role_policy_attachment" "deploy_surge" {
+  role       = aws_iam_role.provisioner.name
   policy_arn = aws_iam_policy.deploy_surge.arn
+}
+
+# The user is created by hand; no resource here owns it, so an account without one must set
+# legacy_deploy_user = "" or the apply fails on a missing principal.
+resource "aws_iam_user_policy_attachment" "deploy_surge" {
+  count      = var.legacy_deploy_user == "" ? 0 : 1
+  user       = var.legacy_deploy_user
+  policy_arn = aws_iam_policy.deploy_surge.arn
+}
+
+variable "fleet_region_suffixes" {
+  description = "region_name_suffix of every fleet this identity may provision. Each expands to the IAM role and instance-profile name patterns modules/fleet creates."
+  type        = list(string)
+  default     = ["oregon", "seoul"]
+}
+
+variable "legacy_deploy_user" {
+  description = "IAM user the deploy workflow authenticates as, for the surge-scaling policy. Empty = no user attachment (the role attachment above is the only grant), which is what a fresh account wants."
+  type        = string
+  default     = "github-actions-deploy"
+}
+
+# count moved the address to [0]; without this it plans as destroy-then-create.
+moved {
+  from = aws_iam_user_policy_attachment.deploy_surge
+  to   = aws_iam_user_policy_attachment.deploy_surge[0]
 }

@@ -12,7 +12,7 @@ trusted_admin_principal_arn = "arn:aws:iam::000000000000:user/CHANGE-ME"
 aws_account_id = "000000000000"
 
 # Optional overrides (defaults are sensible):
-# role_name           = "dante-oregon-provisioner"
+# role_name           = "danteplanner-provisioner"
 # github_oidc_subject = "repo:phrimm136/dante-planner:ref:refs/heads/main"  # tighter: ...:environment:oregon
 # create_github_oidc_provider = true   # set false if the account already has a GitHub OIDC provider
 # region              = "us-west-2"
