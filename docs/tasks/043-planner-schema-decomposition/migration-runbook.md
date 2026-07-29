@@ -229,9 +229,14 @@ Then freeze writes, per region in that order:
 
 ```bash
 # Pause GitOps so ArgoCD self-heal does not fight the manual scale-down. Pause the ROOT app:
-# the root app-of-apps manages the child Application, so a --sync-policy none set on the child is
+# the root app-of-apps manages the child Application, so a syncPolicy cleared on the child is
 # itself a drift the root reverts.
-argocd app set <root-app> --sync-policy none
+#
+# Patch the Application CR, not `argocd app set`. This fleet runs ArgoCD in CORE mode
+# (cp.sh.tftpl applies core-install.yaml) — there is no API server for the CLI to reach, and no
+# argocd binary is installed on any node. Root app is danteplanner-oregon / danteplanner-seoul.
+kubectl -n argocd patch application danteplanner-<region> --type merge \
+  -p '{"spec":{"syncPolicy":null}}'
 # Drain the write path — scale the backend DaemonSet to zero schedulable pods
 # (patch its nodeSelector to an unschedulable label, or cordon the app nodes):
 kubectl -n danteplanner patch ds/backend --type merge \
@@ -307,8 +312,10 @@ Seoul fault and is not one.
 # Oregon first: restore the nodeSelector (B3), wait Ready, smoke it in-VPC
 kubectl -n danteplanner rollout status ds/backend
 curl -sk https://<oregon-ingress-private-ip>/healthz-local -o /dev/null -w '%{http_code}\n'   # 200
-# only then Seoul
-argocd app set danteplanner --sync-policy automated       # restore self-heal
+# only then Seoul. Restore the policy the root app declares in deploy/argocd/root-app-<region>.yaml
+# — clearing it left no automated sync at all, so nothing reconciles until this lands.
+kubectl -n argocd patch application danteplanner-<region> --type merge \
+  -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}'
 ```
 
 Drive the live path against the migrated fleet (the `/verify` acceptance drive):
