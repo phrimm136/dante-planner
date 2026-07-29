@@ -217,7 +217,7 @@ you'd rather fix forward:
 
 ### Step 6 — Decommission gate (do NOT rush)
 Keep the old EC2 **stopped-not-terminated** for ≥ 3–7 days of clean fleet operation (mirror the
-`docs/tasks/030-rds-migration/runbook.md` Zone-4 discipline). Only after a quiet window: terminate
+`rds-migration.md` Zone-4 discipline). Only after a quiet window: terminate
 the EC2, remove `api-cluster.dante-planner.com`, and delete the old EIP if it was distinct.
 
 ---

@@ -220,7 +220,7 @@ burstable-credit exhaustion), not by enabling textbook catalogs.
   pipeline evicts — don't fight it in exporter design.
 
 ## Related artifacts
-- 034 spec Observability section (`docs/tasks/034-multi-region-k8s-architecture/`)
+- 034 spec Observability section (`docs/legacy/tasks/034-multi-region-k8s-architecture/`)
 - Postmortems: `~/postmortems/2026-07-13-*.md` (timelines + the layer-isolation
   checklist worth encoding into dashboards)
 - Learning report: `~/learning/multi-region-architecture/07-advanced-infra-stack.md`

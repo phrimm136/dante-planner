@@ -1,0 +1,14 @@
+# 019 jpa-entity-and-converter-discipline
+epic: none · pr: none
+
+## Decisions
+- @entity @state-transition (taste) — The placement rule is a procedure, not a preference: a mutation carrying a precondition or a multi-field consistency rule is a state transition, so name it, move it into the entity, and remove the setters it replaces so the transition becomes the only path. A mutation that copies externally-supplied values with no cross-field invariant is mapping and stays at the boundary, because an entity must not consume a request DTO. Entity methods touch their own fields only; repositories, notifications and event dispatch never enter the entity.
+- @entity @lombok @equality — Entities carry getters rather than the full data annotation, with setters retained only where mapping needs them and never restored on moderation or publication fields. REJECTED: the full data annotation on JPA entities — generated equality, hash code and string conversion over a managed entity is a latent bug class, and the codebase already contradicted itself by suppressing individual setters underneath it.
+- @enum @converter @case — The status enum persists through a custom lowercase attribute converter. REJECTED: the standard string enumeration mapping — it writes uppercase names into a lowercase database enum column, which MySQL rejects outright.
+- @enum @null @partial-update — The JSON creator returns null on null input, and the service owns the default. REJECTED: coercing null to the default inside the enum — the update path treats null as "keep existing", so coercion would silently reset the field on every partial update.
+- @validation @errors @no-echo — Deserialization failures map to 400 with a generic body that does not echo the submitted value or enumerate the accepted set. REJECTED: letting them fall through — an unhandled deserialization failure surfaced as 500 for what is plainly a client error, and echoing the valid values leaks the accepted domain to an attacker probing it.
+- @converter @flush-boundary — Persistence converters stay mechanical in both directions and hold no domain rule. REJECTED: validating inside a converter — it runs during flush at commit time, so a rejection is wrapped in a persistence exception and surfaces as 500 rather than as a clean 400. Anything that can reject belongs upstream of the flush boundary.
+- @content @canonical-tree — External content is parsed once at the trust boundary, transformed and validated as a tree, then serialized once on the way to storage. REJECTED: persisting the client's raw bytes — the server owns its storage representation rather than inheriting whatever the client happened to send.
+
+## Takeaway
+- takeaway: where code runs determines what its failures can mean. The same validation is a 400 upstream and a 500 inside a flush-time callback, so the layer a rule lives in is a decision about error semantics before it is a decision about tidiness.

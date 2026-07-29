@@ -15,7 +15,7 @@ order**, with a hard verification gate between them:
    the cutover wants the same quiet period.
 
 Fleet mechanics reused here (kubeconfig fetch, ArgoCD, ingress EIP, RDS reachability) are covered in
-`../034-multi-region-k8s-architecture/oregon-cutover-runbook.md` — read Part A there first if you
+`oregon-cutover.md` — read Part A there first if you
 cannot yet inspect the cluster.
 
 ## The one ordering rule that makes this safe

@@ -8,7 +8,7 @@
 -- MAX_USER_CONNECTIONS caps a runaway client against the shared pool. The real
 -- password lives in Secrets Manager (provision/rds-readonly-secrets.sh, run
 -- FIRST) and is substituted for REPLACE_ME at execution time — see the
--- one-time setup in docs/EXTERNAL-ACCESS.md.
+-- one-time setup in docs/external-access.md.
 
 CREATE USER IF NOT EXISTS 'danteplanner_ro'@'10.%' IDENTIFIED BY 'REPLACE_ME';
 ALTER USER 'danteplanner_ro'@'10.%' IDENTIFIED BY 'REPLACE_ME'

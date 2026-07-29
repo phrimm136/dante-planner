@@ -178,7 +178,7 @@ services:
 
 # Not mounted by any service — retained as the only copy of the pre-RDS prod
 # data (the rollback source). Do NOT `docker compose down -v` or prune it; see
-# docs/tasks/030-rds-migration/runbook.md (Zone 4) for the decommission gate.
+# docs/runbooks/rds-migration.md (Zone 4) for the decommission gate.
 volumes:
   mysql-data:
     driver: local

@@ -53,4 +53,4 @@ you will chase an outage that is not happening. The load balancer's own monitors
 probes and are exempt; deploy-time verification stays on SSM and kubectl.
 
 The window sequence, drills, and teardown ledger live in
-`../../docs/tasks/043-planner-schema-decomposition/migration-runbook.md`.
+`../../docs/runbooks/schema-decomposition-migration.md`.

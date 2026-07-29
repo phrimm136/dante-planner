@@ -51,7 +51,7 @@ terraform apply
 terraform output rds_endpoint     # → put this value into SSM (next step)
 ```
 - [ ] RDS up. Endpoint: __________________________
-- [ ] **Sizing check (supersession from `docs/tasks/034`):** decide micro→small BEFORE cutover —
+- [ ] **Sizing check (supersession from `docs/legacy/tasks/034`):** decide micro→small BEFORE cutover —
       buffer pool, not connections, is the constraint at 50k MAU. A resize now is free; after promote
       it costs a failover/restart window.
 - [ ] **Destroy-guard test:** temporarily edit a replace-forcing attr (e.g. instance identifier) and
@@ -205,7 +205,7 @@ aws ssm get-command-invocation --command-id "$CMD_ID" --instance-id "<EC2_INSTAN
 - [ ] Checksum a Korean-text-bearing table both sides and compare (proves charset round-trip).
 
 ### 0.9b Dry-run the 034 GTID-gate assumption (cheap; the RDS instance is idle anyway)
-> `docs/tasks/034`'s read-your-own-write gate assumes `session_track_gtids=OWN_GTID` is
+> `docs/legacy/tasks/034`'s read-your-own-write gate assumes `session_track_gtids=OWN_GTID` is
 > session-settable on RDS and surfaced by Connector/J. Verify it now on the live replica instead of
 > discovering it mid-build (same SSM transport as 0.7/0.8):
 ```sql
@@ -213,7 +213,7 @@ SET SESSION session_track_gtids = OWN_GTID;   -- must not error
 -- then any write + confirm the OK packet carries the GTID (or fallback: SELECT @@gtid_executed)
 ```
 - [ ] Settable on RDS: yes / no. If no → 034's gate falls back to `SELECT @@gtid_executed` post-commit
-      (one extra round trip); record the finding in `docs/tasks/034/mechanics.md` §9.
+      (one extra round trip); record the finding in `docs/legacy/tasks/034-multi-region-k8s-architecture/mechanics.md` §9.
 
 ### 0.10 Prepare Commit 2 (DO NOT MERGE yet)
 - [ ] Branch with: `docker-compose.yml` — remove `mysql` service + `backend.depends_on.mysql`;
@@ -276,7 +276,7 @@ mysql -h <RDS_ENDPOINT> --ssl-ca=/path/rds-combined-ca-bundle.pem --ssl-mode=VER
 - [ ] **Revert-proof:** trigger a no-op deploy → backend stays on RDS, no local MySQL starts. (proves I3)
 - [ ] RDS CloudWatch alarms live: CPU, FreeableMemory, DatabaseConnections.
 - [ ] Watch p95 latency for N+1 amplification (localhost → network hop). Note any endpoint that regresses.
-- [ ] **Enable Multi-AZ** (supersession from `docs/tasks/034`: bought, deliberately deferred to
+- [ ] **Enable Multi-AZ** (supersession from `docs/legacy/tasks/034`: bought, deliberately deferred to
       post-cutover — a sync standby during Zone 0 only slows catch-up and widens the I2 window).
       `multi_az = true` in `terraform/rds/` → `apply` in a quiet window; expect brief I/O elevation
       while the standby builds. Verify: `aws rds describe-db-instances` shows `MultiAZ: true`.
