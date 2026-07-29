@@ -65,6 +65,43 @@ if echo "$scan" | grep -qE '(yarn\s+(test|typecheck|tsc|build|vitest|lint)|vites
         exit 0
     fi
 
+    # Enforce working-directory targeting: FE commands must set --cwd to the
+    # frontend root, BE commands must set the gradle project dir to backend.
+    # A bare vitest/tsc/gradlew run at the repo root litters it with caches
+    # (node_modules/.vite) and resolves the wrong config. Raw $command is
+    # checked (not $scan — scan strips --cwd for tool detection).
+    dir_ok=true
+    dir_fix=""
+    case "$prefix" in
+        fe-*)
+            if ! echo "$command" | grep -qE -- '--cwd[= ]+\S*frontend(/|[" ]|$)'; then
+                dir_ok=false
+                dir_fix='yarn --cwd frontend <command>'
+            fi
+            ;;
+        be-*)
+            if ! echo "$command" | grep -qE -- '(-p|--project-dir)[= ]+\S*backend(/|[" ]|$)|backend/gradlew'; then
+                dir_ok=false
+                dir_fix='./gradlew -p backend <task>'
+            fi
+            ;;
+    esac
+    if [[ "$dir_ok" != "true" ]]; then
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+        echo "⚠️  PROJECT DIR NOT TARGETED" >&2
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+        echo "" >&2
+        echo "Command: $command" >&2
+        echo "" >&2
+        echo "Tests/builds must run against the FE or BE project root, never the repo root:" >&2
+        echo "  $dir_fix" >&2
+        echo "" >&2
+        echo "WHY: a repo-root run creates stray caches (node_modules/.vite) and picks up" >&2
+        echo "the wrong (or no) config. Use --cwd (yarn) / -p (gradlew) — do NOT cd." >&2
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >&2
+        exit 2
+    fi
+
     # Check if a recent output file already exists (within last 1 minute)
     if [[ -n "$prefix" ]] && ! echo "$command" | grep -qE 'rm -f /tmp/'; then
         recent_file=$(find /tmp -name "${prefix}-*.log" -mmin -1 -print 2>/dev/null | sort | tail -1)

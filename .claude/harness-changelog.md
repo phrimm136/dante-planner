@@ -1,5 +1,61 @@
 # Harness Changelog
 
+## 2026-07-03 — FE boundary-exception closure + notification/publish fixes + /review
+
+**Graduated:**
+- (none — the session's user corrections were one-off task instructions, e.g. "prepend Identity to the file and its related files", not durable cross-cutting rules. Technical gotchas captured to `meme` instead.)
+
+**Evolved:**
+- (none — no rule was obstructive.)
+
+**Validated:**
+- "Skip `code-review-orchestrator` on large diffs; spawn individual dimension reviewers" (meme `note-the-code-review-orchestrator-agent-fans` / `gotcha-the-code-review-orchestrator-agent-type`): FIRED correctly — ran 5 scoped reviewers (architecture/reliability/consistency/security/performance) in parallel on a ~30-file diff where the orchestrator would have overflowed and cannot use Task under background-agent permissions. The reliability reviewer caught a real defect (double-submit 409) the author's own fix had missed.
+- `check-output-redirect.sh`: all tsc/vitest/boundary runs redirected to `/tmp/<prefix>-<session-id>-<suffix>.log` without incident.
+
+**Graduated:**
+- New rule `.claude/rules/backend/architecture/package-by-feature.md` — the scripted package-move mechanic (git mv + sed on package/import lines), the three straggler classes (same-package refs, wildcard-import gaps, inline FQCNs), the zsh/`cp -i` gotchas, and the "delegating pure moves to an agent is safe because the rule targets Read→Write body-drift, which a sed/git-mv mechanic never does." Captured from this session's phase-14 execution.
+
+**Evolved:**
+- (none — no existing rule was obstructive; the constraints held.)
+
+**Validated:**
+- `git-add-guard.sh`: FIRED correctly — blocked a `git add -A scripts/` mid-command; forced the explicit-pathspec staging the rule intends.
+- `check-output-redirect.sh`: load-bearing across ~30 gradle runs — the `/tmp/<prefix>-<session-id>-<suffix>.log` pattern was used throughout.
+- `reference_code_review_orchestrator_overflow.md`: applied — a 337-file diff would have overflowed the orchestrator; ran focused single `code-architecture-reviewer` agents on the semantic hotspots instead.
+- `feedback_filter_reviewer_findings.md` + `lesson-to-verify-a-behavior-preserving-refactor`: load-bearing — every reviewer finding (and 4 audit findings across the session) was resolved against `git show HEAD:<old-path>`; all were confidently-wrong / faithful-vs-preserved. Reviewers lacking Bash correctly flagged they couldn't diff HEAD and handed over exact lines.
+- `invariant-the-backend-s-strict-layering-controller` (add ArchUnit before package-by-feature): honored — `FeatureBoundaryTest` shipped WITH the move and was bite-tested (injected illegal edge → build failed → reverted).
+- Commit hygiene (`pref-do-not-add-co-authored-by`, pathspec commits): the shared-index hazard recurred (phase-0 swept 204 FE staged files); recovered via `git reset --soft` + `git commit -- <pathspec>`.
+
+## 2026-06-30 — RDS commit-1: DB-resilience fixes + terraform review
+
+**Graduated:**
+- (none — no new behavioral pattern surfaced; the rules that mattered already existed.)
+
+**Evolved:**
+- (none.)
+
+**Validated:**
+- `reference_code_review_orchestrator_overflow.md`: applied — on a ~13-file heterogeneous diff (HCL+YAML+Java+TS) ran 3 focused reviewers in parallel instead of the overflow-prone 5-way orchestrator; each returned file:line findings cleanly.
+- `feedback_filter_reviewer_findings.md`: load-bearing — validating every finding against code overturned 4 confidently-wrong reviewer claims (override.yml is gitignored→unsuitable for a prod-side step; timestamp() in final_snapshot_identifier→perpetual plan diff; out-of-scope prod-properties; SSR cross-request leak but app is SPA). Blind application would have shipped a broken migration plus churn.
+- `feedback_question_vs_action.md`: "is it intended?" and "explain the last issue" turns answered explain-only, no edits.
+- bug-fix discipline (read working→read broken→root cause): the 500→503 fix was driven from the actual stack trace (CannotCreateTransactionException → handleUnexpected), not a guess.
+- advisor: caught that a green run was "filter-verified, not symptom-verified" (the controller @ExceptionHandler path was untested) — closed before declaring done.
+
+## 2026-06-29 — OAuth BFF Redesign (4-phase + 2 reviews + live-debug loop)
+
+**Graduated:**
+- None. The session's behavioral patterns (filter-reviewer-findings, behavior-preserving review, never-stop, port-80 topology) were already in `CLAUDE.md` / `meme`. New lessons are project-specific (split-origin absolute-URL, CORS-header-in-4-places, BFF arch) → captured in `meme` (correct home), not cross-cutting `CLAUDE.md` rules.
+
+**Evolved:**
+- None. No `CLAUDE.md` rule was obstructive; no skill mis-triggered.
+
+**Validated:**
+- `check-output-redirect.sh`: fired correctly when a gradle run piped to `tail` instead of redirecting — caught a real violation; re-run with the `/tmp` literal-session-id pattern.
+- `.env` read protection: blocked reading `.env`/`backend/.env` for the redirect-uri value — secrets guard working; diagnosed from tracked files (`docker-compose.yml`, properties) instead. Did not retry the blocked read.
+- `reference_code_review_orchestrator_overflow`: applied again — skipped the 5-way orchestrator on the ~20+-file diff; ran tightly-scoped reviewers (security + reliability) that each returned ACCEPTABLE with file:line findings.
+- `feedback_filter_reviewer_findings`: every reviewer finding dispositioned per-finding (e.g. LOW-2 log-message Skipped with reasoning; ARCH-2/3/6 Skipped as pre-existing/behavior-preserving).
+- Content-filter resilience: a code-writer agent's final report was blocked mid-task (Phase 3); recovered by inspecting the working tree directly + hand-writing the missing tests instead of re-running blind.
+
 ## 2026-06-24 — Planner-core Refactor (4-phase + review)
 
 **Graduated:**

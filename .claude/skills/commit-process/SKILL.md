@@ -33,24 +33,24 @@ If any check fails, diagnose and fix before proceeding. Do not skip checks — a
 
 ### Single-tree
 
-Create a feature branch from `dev`:
+When you are **not** in a linked worktree, commit directly onto the long-lived integration branch. Do not create a feature branch.
 
+Detect single-tree vs. worktree by comparing the git dirs — they match in the main checkout and differ in a linked worktree:
+
+```bash
+[ "$(git rev-parse --git-dir)" = "$(git rev-parse --git-common-dir)" ]  # true => single-tree
 ```
-git checkout -b <type>/<short-description>
+
+Pick the target branch by the first that exists, in order `dev → main → master`, then check it out:
+
+```bash
+for b in dev main master; do
+  if git show-ref --verify --quiet "refs/heads/$b"; then target="$b"; break; fi
+done
+git checkout "$target"
 ```
 
-| Prefix | Use when |
-|--------|----------|
-| `feat/` | Adding new functionality |
-| `fix/` | Correcting a bug |
-| `refactor/` | Restructuring without behavior change |
-| `chore/` | Maintenance, dependencies, CI |
-| `data/` | Static data updates (announcements, game data) |
-| `docs/` | Documentation only |
-
-Branch names use lowercase kebab-case, under 40 characters. The name should make the PR's purpose obvious at a glance.
-
-**Examples:** `feat/add-identity-card`, `fix/refresh-token-rotation-race`, `data/v260317`
+`dev` is the default integration branch; `main`/`master` are fallbacks for repos that don't use a `dev` branch. `git show-ref --verify --quiet` probes a ref by exit code only — no output, no mutation — so it's safe to loop over candidates. Always checkout the target first so the commit lands there even if you were on another branch.
 
 ### Worktree — sync with dev before committing
 
@@ -71,6 +71,10 @@ After this step, your worktree branch == `dev`'s tip. New commits go on top line
 **Why `dev:dev` fetch syntax:** it fetches origin's `dev` and updates your local `dev` ref directly, even though `dev` is checked out in the main worktree. You're not touching the main worktree's checkout — just aligning the ref to origin.
 
 **Why you can't `git checkout dev` inside the worktree:** a git worktree holds an exclusive checkout. `dev` is already checked out in the main worktree, so `git checkout dev` inside a feature worktree errors with "already checked out". Use `git -C <main-repo> ...` when you need to operate on dev directly.
+
+### Submodule
+
+You must not create a feature branch from `main`.
 
 ## Step 3 — Write the Commit Message
 
@@ -184,16 +188,23 @@ git add <specific-files>
 
 Never `git add -A` or `git add .` — these risk pulling in unrelated work, secrets, or temp files.
 
-### Include related docs
+### Include related docs, scripts, and data
 
-Before staging, check `git status` for untracked or modified files under `docs/` that were created as part of the same task — specs, plans, findings, research, reviews. These belong in the same commit as the code they document.
+Before staging, check `git status` for untracked or modified files under `docs/`for the supermodule and the root for the submodule that were created as part of the same task:
+| Type | Example |
+|------|---------|
+| `docs` | specs, plans, findings, research, reviews |
+| `scripts` | `identity.py`, `ego.py` |
+| `data` | `data/identity/*`, `i18n/*` |
+
+These belong in the same commit as the code they document.
 
 ```
 git status docs/
 git add docs/<relevant-subdirectory>/
 ```
 
-If a doc predates the current task and was only coincidentally modified, leave it out — same rule as code.
+If a non-code file predates the current task and was only coincidentally modified, leave it out — same rule as code.
 
 **One logical change per commit.** If your work spans multiple concerns (e.g., a bug fix + a refactor you noticed along the way), split them into separate commits on separate branches.
 
@@ -211,11 +222,13 @@ EOF
 
 ### Single-tree
 
+Nothing to switch back to — the commit already landed on the target branch (`dev`, or its `main`/`master` fallback) from Step 2. Confirm you're where you expect:
+
 ```
-git checkout dev
+git log --oneline -1
 ```
 
-The feature branch is ready for PR creation (separate workflow).
+The branch is ready to push (separate workflow).
 
 ### Worktree — fast-forward dev from the main worktree
 

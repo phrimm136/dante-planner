@@ -16,41 +16,12 @@
       "Read(**/.env.*)"
     ],
     "allow": [
-      "Grep",
-      "Read(./frontend/src/**)",
-      "Read(./backend/src/**)",
-      "Read(./scripts/**)",
-      "Read(./static/**)",
-      "Read(./raw/**)",
-      "Read(./docs/**)",
-      "Edit(**/plan.md)",
-      "Edit(**/status.md)",
-      "NotebookEdit",
-      "Bash(grep:*)",
-      "Bash(yarn:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git show:*)",
-      "Bash(git branch:*)",
-      "Bash(ls:*)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(wc:*)",
-      "Bash(tree:*)",
-      "Bash(find:*)",
-      "Bash(mkdir:*)",
-      "Bash(chmod:*)",
-      "Bash(curl:*)",
-      "Bash(python3:*)",
-      "Bash(./gradlew:*)",
-      "Bash(file:*)",
-      "Bash(xargs:*)",
-      "Bash(cd:*)",
-      "Bash(rm -f /tmp/:*)"
+      "Bash(scripts/ops/access/rds-tunnel.sh:*)",
+      "Bash(scripts/ops/access/rds-query.sh:*)",
+      "Bash(scripts/ops/access/logs-query.sh:*)",
+      "Bash(scripts/ops/access/metrics-query.sh:*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "hooks": {
     "SessionStart": [
