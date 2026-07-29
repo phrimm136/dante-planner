@@ -29,7 +29,7 @@ output "rds_security_group_id" {
 }
 
 output "master_user_secret_arn" {
-  description = "Secrets Manager ARN of the AWS-managed master password — null now that managed password is disabled (read-replica-source requirement); the password is in var.master_password."
+  description = "Secrets Manager ARN of the AWS-managed master password. Always null: manage_master_user_password is off, so the password lives in the entry named by var.master_password_secret_name."
   value       = length(aws_db_instance.this.master_user_secret) > 0 ? aws_db_instance.this.master_user_secret[0].secret_arn : null
   sensitive   = true
 }

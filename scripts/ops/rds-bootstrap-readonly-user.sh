@@ -29,8 +29,9 @@ PW=$(aws secretsmanager get-secret-value --region us-west-2 \
 ADMIN_USER=$(aws rds describe-db-instances --region us-west-2 \
   --db-instance-identifier danteplanner-mysql \
   --query "DBInstances[0].MasterUsername" --output text)
-MYSQL_PWD=$(awk -F'"' '/^[[:space:]]*master_password[[:space:]]*=/ {print $2}' "$TFVARS")
-[ -n "$MYSQL_PWD" ] || { echo "master_password not found in $TFVARS"; exit 1; }
+MYSQL_PWD=$(aws secretsmanager get-secret-value --region us-west-2 \
+  --secret-id danteplanner/rds/master-password --query SecretString --output text)
+[ -n "$MYSQL_PWD" ] || { echo "danteplanner/rds/master-password is empty or unreadable"; exit 1; }
 export PW MYSQL_PWD
 
 perl -pe 's/REPLACE_ME/$ENV{PW}/g' "$OPS_DIR/rds-readonly-user.sql" |

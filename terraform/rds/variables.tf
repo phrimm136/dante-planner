@@ -27,11 +27,6 @@ variable "db_subnet_ids" {
   }
 }
 
-variable "ec2_security_group_id" {
-  description = "The backend EC2 instance's security group (source of app→RDS ingress; target of the temp replication rule)."
-  type        = string
-}
-
 # --- Instance shape ---------------------------------------------------------
 
 variable "instance_class" {
@@ -108,12 +103,6 @@ variable "maintenance_window" {
   default     = "Mon:18:00-Mon:19:00"
 }
 
-variable "enable_replication_ingress" {
-  description = "TEMP toggle: open the EC2 SG to RDS on 3306 so the replica can pull the binlog. true during migration (Zone 0), false at decommission (Zone 4)."
-  type        = bool
-  default     = false
-}
-
 variable "tags" {
   description = "Resource tags."
   type        = map(string)
@@ -141,10 +130,10 @@ variable "fleet_vpc_cidr" {
   default     = ""
 }
 
-variable "master_password" {
-  description = "Master password for the primary. Managed master password (AWS/Secrets Manager) is disabled because a read-replica source cannot have it enabled. Set to the CURRENT value pulled from the old managed secret so nothing rotates: `aws secretsmanager get-secret-value --secret-id <master_user_secret_arn> --query SecretString --output text` → the `password` field. Set in terraform.tfvars (gitignored) — never commit."
+variable "master_password_secret_name" {
+  description = "Secrets Manager entry holding the master password as a plain string. Read at plan time, so it must exist before this stack is applied."
   type        = string
-  sensitive   = true
+  default     = "danteplanner/rds/master-password"
 }
 
 variable "seoul_peering_connection_id" {

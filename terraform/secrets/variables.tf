@@ -34,6 +34,9 @@ variable "secret_names" {
     # scripts/ops/provision/rds-readonly-secrets.sh before enrollment here.
     "danteplanner/rds/readonly-username",
     "danteplanner/rds/readonly-password",
+    # Read by terraform/rds at plan time. Container created by
+    # scripts/ops/provision/rds-master-password-secret.sh before enrollment here.
+    "danteplanner/rds/master-password",
     "danteplanner/grafana/observability-read-token",
     # Both regions' tunnel tokens in one entry, keyed by region. Container created by
     # scripts/ops/provision/cloudflare-tunnel-secrets.sh before enrollment here.

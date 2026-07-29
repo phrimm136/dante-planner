@@ -38,7 +38,12 @@ data "aws_vpc" "this" {
   id = var.vpc_id
 }
 
-# RDS-side security group: the backend on EC2 reaches RDS on 3306.
+# Container created by scripts/ops/provision/rds-master-password-secret.sh and enrolled in
+# terraform/secrets secret_names; apply that stack before this one or the read fails.
+data "aws_secretsmanager_secret_version" "master_password" {
+  secret_id = var.master_password_secret_name
+}
+
 resource "aws_security_group" "rds" {
   name        = "${var.name_prefix}-rds"
   description = "RDS MySQL access"
@@ -46,34 +51,11 @@ resource "aws_security_group" "rds" {
   tags        = var.tags
 }
 
-resource "aws_vpc_security_group_ingress_rule" "app_to_rds" {
-  security_group_id            = aws_security_group.rds.id
-  description                  = "Backend (EC2) to RDS MySQL"
-  referenced_security_group_id = var.ec2_security_group_id
-  from_port                    = 3306
-  to_port                      = 3306
-  ip_protocol                  = "tcp"
-}
-
 resource "aws_vpc_security_group_egress_rule" "rds_all" {
   security_group_id = aws_security_group.rds.id
-  description       = "RDS egress (replication pull to source + AWS APIs)"
+  description       = "RDS egress (AWS APIs)"
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
-}
-
-# TEMPORARY: lets RDS (replica) pull the binlog FROM the on-box source MySQL.
-# Toggled on only during the migration (Zone 0) and removed at decommission
-# (Zone 4) by setting enable_replication_ingress=false and re-applying.
-# Added to the EXISTING EC2 security group so we don't own/replace it.
-resource "aws_vpc_security_group_ingress_rule" "rds_to_source" {
-  count                        = var.enable_replication_ingress ? 1 : 0
-  security_group_id            = var.ec2_security_group_id
-  description                  = "TEMP: RDS replica pulls binlog from source MySQL (remove after cutover)"
-  referenced_security_group_id = aws_security_group.rds.id
-  from_port                    = 3306
-  to_port                      = 3306
-  ip_protocol                  = "tcp"
 }
 
 # --- Parameter group --------------------------------------------------------
@@ -96,11 +78,12 @@ resource "aws_db_parameter_group" "this" {
     apply_method = "pending-reboot"
   }
   # Required by docs/multi-region-request-paths.md §4a, with trackSessionState=true on the app url.
+  # RDS types this boolean and rejects the MySQL enum names, so it takes the ordinal: 1 = OWN_GTID.
   # Dynamic, but it seeds a SESSION variable at connect time, so pooled connections keep the old
   # value until they rotate.
   parameter {
     name  = "session_track_gtids"
-    value = "OWN_GTID"
+    value = "1"
   }
 
   parameter {
@@ -153,7 +136,7 @@ resource "aws_db_parameter_group" "this" {
   # log entry — per-execution diagnosis without in-memory instrumentation.
   parameter {
     name  = "log_slow_extra"
-    value = "1"
+    value = "ON"
   }
   parameter {
     name  = "log_output"
@@ -185,13 +168,11 @@ resource "aws_db_instance" "this" {
 
   db_name  = var.db_name # empty schema for the dump to load into
   username = var.master_username
-  # AWS-managed master password (manage_master_user_password) is unsupported as a
-  # read-replica SOURCE for MySQL, so it is disabled to allow the Seoul cross-region
-  # replica. Password is now supplied via var.master_password (set to the CURRENT
-  # value pulled from the old managed secret, so nothing rotates). The app connects
-  # as the danteplanner user, not master, so this is admin-only. Trade-off vs the
-  # 030 managed-password decision: the master password now lives in state/tfvars.
-  password = var.master_password
+  # manage_master_user_password is deliberately absent, not false: the provider declares it
+  # ConflictsWith password, so naming it at all is an error. An instance whose credentials are
+  # Secrets-Manager-managed also cannot have a read replica CREATED from it, which would leave
+  # the Seoul replica unrebuildable.
+  password = data.aws_secretsmanager_secret_version.master_password.secret_string
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]

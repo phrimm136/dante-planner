@@ -7,8 +7,10 @@ It does **not** load data and does **not** run the cutover — those are operato
 ## Prereqs
 - A dedicated least-privilege **provisioning identity** assumed via STS (kept in private ops notes,
   not this repo). Confirm with `aws sts get-caller-identity` before applying.
-- `cp terraform.tfvars.example terraform.tfvars` and fill your real `vpc_id`, `db_subnet_ids`,
-  `availability_zone` (= the EC2 instance's AZ), `ec2_security_group_id`. `terraform.tfvars` is gitignored.
+- `cp terraform.tfvars.example terraform.tfvars` and fill your real `vpc_id` and `db_subnet_ids`.
+  `terraform.tfvars` is gitignored.
+- Seed the master password once with `scripts/ops/provision/rds-master-password-secret.sh`. It is
+  read from Secrets Manager at plan time, so the entry must exist before the first apply.
 
 ## Usage
 ```bash
@@ -19,11 +21,6 @@ terraform plan        # READ IT — provisioning a prod DB; verify no replace/de
 terraform apply
 terraform output rds_endpoint   # → put the host into SSM MYSQL_HOST (Commit 2)
 ```
-
-## Migration toggle
-- Set `enable_replication_ingress = true` during Zone 0 so the RDS replica can pull the binlog from
-  the on-box source MySQL, then `terraform apply`.
-- After cutover + confidence window (Zone 4), set it back to `false` and `terraform apply` to close the hole.
 
 ## Guards
 `prevent_destroy` + `deletion_protection` + `skip_final_snapshot=false` protect the data-bearing
