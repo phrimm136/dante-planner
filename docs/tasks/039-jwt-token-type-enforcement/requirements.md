@@ -76,7 +76,9 @@ Create or modify:
 - `backend/src/main/java/org/danteplanner/backend/auth/token/JwtTokenService.java` — add access/refresh/neutral parsers + type-aware validate paths + `INVALID_TYPE` mapping
 - `backend/src/main/java/org/danteplanner/backend/auth/token/TokenValidator.java` — extend the interface with the type-scoped validation methods (per `mechanics.md`)
 - `backend/src/main/java/org/danteplanner/backend/shared/security/JwtAuthenticationFilter.java` — route the access path and the auto-refresh path to their typed validators (logging enrichment already applied at `:189`)
-- Tests: `JwtTokenServiceTest`, `JwtAuthenticationFilterTest`, `JwtAuthenticationFilterLineageTest`, `RefreshRotationServiceTest` (all under `backend/src/test/java/org/danteplanner/backend/...`)
+- `backend/src/main/java/org/danteplanner/backend/auth/facade/AuthenticationFacade.java` — route the validate call sites to their typed validators per the mechanics §2 table (`:159` refresh, `:248` access, `:259` refresh, `:291` access)
+- `backend/src/main/java/org/danteplanner/backend/auth/token/RefreshRotationService.java` — route the presented/successor/stored refresh validations (`:188`, `:219`, `:241`) to the refresh validator; the `isRefreshToken` guard (`:196`) stays as belt-and-suspenders
+- Tests: `JwtTokenServiceTest`, `JwtAuthenticationFilterTest`, `JwtAuthenticationFilterLineageTest`, `RefreshRotationServiceTest`, `AuthenticationFacadeTest` (all under `backend/src/test/java/org/danteplanner/backend/...`)
 
 ## Invariants
 
@@ -160,5 +162,6 @@ Seam 3 — `RefreshRotationService` internal validations (migration-critical):
 - [ ] Access JWT rejected by `RefreshRotationService.rotate`, no rotation/family mutation: `backend/src/test/java/org/danteplanner/backend/auth/token/RefreshRotationServiceTest.java`
 - [ ] Access/refresh/neutral parser type behavior + `IncorrectClaimException`→`INVALID_TYPE` mapping: `backend/src/test/java/org/danteplanner/backend/auth/token/JwtTokenServiceTest.java`
 - [ ] Migration round-trip: generate→validate per type, and successor/stored refresh validation: `JwtTokenServiceTest.java` + `RefreshRotationServiceTest.java`
+- [ ] Each `AuthenticationFacade` call site rejects the wrong token type, proven with real tokens (not `TokenValidator` stubs) — refresh-handling sites (`:159`, `:259`) reject an access JWT, access-handling sites (`:248`, `:291`) reject a refresh JWT: `backend/src/test/java/org/danteplanner/backend/facade/AuthenticationFacadeTest.java`
 - [ ] Every invariant in the Invariants section has its test realized here — no invariant ships untested
 - [ ] Every preserved Behavior Inventory row has its characterization test assigned — B1/B2/B3/B5/B6/B7 pinned green before the rewrite, B10/B11 pinned as the migration-safety net

@@ -145,7 +145,14 @@ Runner: `kubectl kustomize deploy/overlays/{oregon,seoul}` (kustomize binary abs
   docs/tasks/038-.../requirements.md (M), docs/tasks/038-.../plan/ (?? task scaffolding, same as phases 01-02),
   docs/tasks/014-deploy/* and all other unrelated ?? dirs. No test debris (render-grep phase, no harness); no
   submodule pointer moved by this phase.
-- staged: [git diff --cached --stat digest — recorded after stage]
+- staged: 10 files, 300 insertions / 2 deletions — deploy/base/mysqld-exporter.yaml (+72, new),
+  deploy/overlays/oregon/mysqld-endpoint-patch.yaml (+15, new), deploy/overlays/seoul/mysqld-endpoint-patch.yaml
+  (+12, new), deploy/base/kustomization.yaml (+1), deploy/overlays/oregon/kustomization.yaml (+1),
+  deploy/overlays/seoul/kustomization.yaml (+1), deploy/CLAUDE.md (+3, dir-convention bullet, constraint-form
+  after rationale trim),
+  manifest.json (10 changed: phase-03 entry), ledger.md (+151, this file), verification.md (+36). Matches
+  the manifest STAGED set exactly; baseline dirt (spring-daemonset.yaml, requirements.md, plan/, 014-deploy/*)
+  NOT staged (verified: git diff --cached --name-only carries no baseline path).
 
 ## Pipeline (post-burndown)
 - (pending)

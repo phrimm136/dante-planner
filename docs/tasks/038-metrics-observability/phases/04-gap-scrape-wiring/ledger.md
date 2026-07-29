@@ -128,4 +128,9 @@ kustomize, would 403 at the live drill. Authored + render-confirmed.
   whole task — surfaced in return: plan/phase-04.md carries the option-A amendment authorizing this
   diff); .meme/drafts (gitignored capture output). Dossiers live outside the repo — never staged.
 - manifest status: phase 04 → authored (verdict PASS static; live drill consent-gated to user)
-- staged: [git diff --cached --stat digest — pending add]
+- staged: git diff --cached --stat = 5 files, +212/-2 — deploy/base/prometheus.yaml (+26),
+  terraform/modules/fleet/user-data/cp.sh.tftpl (+10),
+  docs/tasks/038-metrics-observability/manifest.json (+10/-2),
+  phases/04-gap-scrape-wiring/ledger.md (+131), phases/04-gap-scrape-wiring/verification.md (+37).
+  Matches the manifest STAGED set exactly. Both code files fully staged (no partial hunks).
+  Commit is the USER's — proposal returned; not run here.

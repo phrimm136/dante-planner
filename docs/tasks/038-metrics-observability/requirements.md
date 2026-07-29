@@ -54,7 +54,9 @@ territory, unchanged.
   self-scrape + per-cluster staleness meta-alert, so remote_write breakage cannot blind alerting
   silently. (4) Deploy markers (Grafana annotations from the deploy workflow — both motivating
   postmortems were deploy-window incidents) + free riders on already-selected exporters
-  (blackbox cert expiry, node_exporter clock skew, CoreDNS scrape).
+  (blackbox cert expiry, node_exporter clock skew, CoreDNS scrape). The cert-expiry and
+  clock-skew alerts ride with their exporters, which are handoff step-2 and not yet deployed —
+  both alerts are deferred to step-2; only the CoreDNS scrape lands in this task.
 - Decision (taste): §G query telemetry (QPS, digests, slow queries, skew) runs on BOTH RDS
   instances, memory-gated per instance — observability must follow the read path, not the data:
   in a read-local replicated topology, query telemetry must run on every instance that serves
@@ -169,7 +171,9 @@ Manual (operational, never in-repo — owners and timing in `mechanics.md` §5):
 - [ ] mysqld_exporter up in both regions; digest and QPS metrics visible; per-instance
       FreeableMemory gate results recorded (infra)
 - [ ] Alert rules #7–9, the staleness meta-alert, and the Seoul replica CW-datasource rule
-      exist in Grafana Cloud, routed Discord-primary/Slack-fallback, drill-fired once (infra)
+      exist in Grafana Cloud, routed Discord-primary/Slack-fallback; the delivery path is
+      drill-fired once via contact-point test (INV6); rule-evaluation drills are deferred to
+      step-3 remote_write wiring, which Grafana-managed rules require (infra)
 - [ ] A deploy marker annotation appears in Grafana on the next production rollout (live-only)
 - [ ] `handoff.md` amended: new sections, alerts #7–9, dev→main correction (local-tdd)
 - [ ] All existing tests pass
