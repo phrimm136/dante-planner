@@ -29,9 +29,11 @@ if [[ "${1:-}" == "--confirm" ]]; then
     [[ -n "$confirm_arg" ]] || { log_error "--confirm needs an account id"; exit 1; }
 fi
 
-# 1. Whose credentials are these, and what is the principal?
-if ! caller=$(aws sts get-caller-identity --output text --query 'Account,Arn' 2>/dev/null); then
-    log_error "no usable credentials — export AWS_PROFILE or run 'aws sso login' first"
+# 1. Whose credentials are these, and what is the principal? This is the only check whose
+# failure is fatal rather than a branch, so it reports what the CLI actually said.
+if ! caller=$(aws sts get-caller-identity --output text --query '[Account,Arn]' 2>&1); then
+    log_error "cannot resolve an identity — export AWS_PROFILE or run 'aws sso login' first"
+    printf '%s\n' "$caller" | sed 's/^/  /' >&2
     exit 1
 fi
 ACCOUNT_ID=$(echo "$caller" | cut -f1)
