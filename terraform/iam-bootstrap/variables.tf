@@ -47,6 +47,12 @@ variable "tags" {
   }
 }
 
+variable "rds_master_password_secret_name" {
+  description = "Secrets Manager entry the database stack reads at plan time. Must match that stack's master_password_secret_name; a mismatch is a plan that cannot resolve the password."
+  type        = string
+  default     = "danteplanner/rds/master-password"
+}
+
 variable "rds_provisioner_role_name" {
   description = "Name of the existing role that applies terraform/rds. Empty = skip the peering grant. Set in terraform.tfvars (gitignored)."
   type        = string

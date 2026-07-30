@@ -353,6 +353,63 @@ resource "aws_iam_role" "rds_provisioner" {
   tags               = var.tags
 }
 
+# Object access is scoped to this stack's own keys, unlike the fleet provisioner's bucket-wide
+# grant: a state file carries whatever its stack's providers marked sensitive, so reading another
+# stack's state reads that stack's credentials. Listing stays bucket-wide because the backend
+# enumerates workspaces under env/ and a key name discloses nothing.
+data "aws_iam_policy_document" "rds_state_backend" {
+  statement {
+    sid       = "EnumerateWorkspaces"
+    effect    = "Allow"
+    actions   = ["s3:ListBucket", "s3:GetBucketVersioning"]
+    resources = [aws_s3_bucket.tf_state.arn]
+  }
+
+  statement {
+    sid    = "OwnStateOnly"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:PutObject",
+      "s3:DeleteObject",
+    ]
+    # Both workspace layouts, and the .tflock object the backend writes beside each key.
+    resources = [
+      "${aws_s3_bucket.tf_state.arn}/rds/*",
+      "${aws_s3_bucket.tf_state.arn}/env/*/rds/*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "rds_state_backend" {
+  for_each = local.rds_provisioner
+
+  name   = "state-backend"
+  role   = each.key
+  policy = data.aws_iam_policy_document.rds_state_backend.json
+}
+
+# The database stack reads this entry at PLAN time, not apply, so a missing read is a stack that
+# cannot even be inspected. The role's pre-existing policy can create and describe the secret but
+# not read it, which predates the stack sourcing its password from there.
+data "aws_iam_policy_document" "rds_master_password" {
+  statement {
+    sid       = "ReadMasterPassword"
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${var.rds_master_password_secret_name}-*"]
+  }
+}
+
+resource "aws_iam_role_policy" "rds_master_password" {
+  for_each = local.rds_provisioner
+
+  name   = "master-password"
+  role   = each.key
+  policy = data.aws_iam_policy_document.rds_master_password.json
+}
+
 # --- CI deploy-surge grant (github-actions-deploy user) ----------------------
 # Zero-downtime deploys on the DaemonSet app tier need a second NODE per region
 # (node count = pod count; two Spring heaps do not fit one 2GiB app node), so
