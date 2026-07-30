@@ -9,7 +9,7 @@
 #      has nowhere to attach
 #   3. Every expected organizational unit exists
 #   4. Every member account sits in the unit that governs it, not merely inside the org
-#   5. The workloads unit carries at least the deny-only baseline
+#   5. Every guarded unit carries at least the deny-only baseline
 #   6. Every attached policy is deny-only, so detaching one can never break a working path
 #   7. An organization trail records every account into the log-archive account
 #
@@ -28,8 +28,10 @@ source "$SCRIPT_DIR/../lib/common.sh"
 # The shape RFC 0001 specifies. Override to verify a partially-built organization.
 EXPECTED_OUS="${EXPECTED_OUS:-Security Infrastructure Workloads Sandbox Suspended}"
 EXPECTED_CHILD_OUS="${EXPECTED_CHILD_OUS:-Prod NonProd}"
+# The parent of the child units above; separate from the guarded set, which is about policy.
 WORKLOADS_OU="${WORKLOADS_OU:-Workloads}"
-MIN_WORKLOAD_POLICIES="${MIN_WORKLOAD_POLICIES:-4}"
+GUARDED_OUS="${GUARDED_OUS:-Workloads Security}"
+MIN_GUARDRAIL_POLICIES="${MIN_GUARDRAIL_POLICIES:-4}"
 BASELINE_ALLOW_POLICY="${BASELINE_ALLOW_POLICY:-FullAWSAccess}"
 LOG_ARCHIVE_ACCOUNT="${LOG_ARCHIVE_ACCOUNT:-log-archive}"
 
@@ -109,27 +111,35 @@ while read -r acct_id acct_name; do
     fi
 done < <(aws organizations list-accounts --query 'Accounts[].[Id,Name]' --output text)
 
-# 5 & 6. The workloads baseline, and the deny-only property that makes rollback safe.
+# 5 & 6. The baseline on every guarded unit, and the deny-only property that makes rollback safe.
 #
 # FullAWSAccess is AWS's managed Allow-everything policy, attached the moment the policy
 # type is enabled. Service control policies are a deny-by-default filter, so it is REQUIRED:
 # detaching it permits nothing at all. It is asserted present and exempted from deny-only.
-if [[ -n "${WORKLOADS_ID:-}" && "$WORKLOADS_ID" != "None" ]]; then
-    attached=$(aws organizations list-policies-for-target --target-id "$WORKLOADS_ID" \
+#
+# Security is guarded as well as Workloads: the account holding the organization trail would
+# otherwise be the one account able to stop it recording.
+for ou in $GUARDED_OUS; do
+    ou_id=$(ou_id_by_name "$ou" "$ROOT_ID")
+    if [[ -z "$ou_id" || "$ou_id" == "None" ]]; then
+        continue # its absence is already reported above
+    fi
+
+    attached=$(aws organizations list-policies-for-target --target-id "$ou_id" \
         --filter SERVICE_CONTROL_POLICY --query 'Policies[].[Id,Name]' --output text)
 
     if grep -qw "$BASELINE_ALLOW_POLICY" <<< "$attached"; then
-        log_info "$BASELINE_ALLOW_POLICY attached — the unit can permit anything at all"
+        log_info "$ou: $BASELINE_ALLOW_POLICY attached — the unit can permit anything at all"
     else
-        log_error "$BASELINE_ALLOW_POLICY is NOT attached to $WORKLOADS_OU — every action is denied"
+        log_error "$ou: $BASELINE_ALLOW_POLICY is NOT attached — every action is denied"
         fatal=1
     fi
 
     guardrails=$(grep -vw "$BASELINE_ALLOW_POLICY" <<< "$attached" | grep -c . || true)
-    if [[ "$guardrails" -ge "$MIN_WORKLOAD_POLICIES" ]]; then
-        log_info "$WORKLOADS_OU carries $guardrails guardrail policies"
+    if [[ "$guardrails" -ge "$MIN_GUARDRAIL_POLICIES" ]]; then
+        log_info "$ou: $guardrails guardrail policies"
     else
-        log_error "$WORKLOADS_OU carries $guardrails guardrail policies, expected at least $MIN_WORKLOAD_POLICIES"
+        log_error "$ou: $guardrails guardrail policies, expected at least $MIN_GUARDRAIL_POLICIES"
         fatal=1
     fi
 
@@ -138,13 +148,13 @@ if [[ -n "${WORKLOADS_ID:-}" && "$WORKLOADS_ID" != "None" ]]; then
         [[ "$pol_name" == "$BASELINE_ALLOW_POLICY" ]] && continue
         if aws organizations describe-policy --policy-id "$pol_id" \
                 --query 'Policy.Content' --output text | grep -q '"Effect"[[:space:]]*:[[:space:]]*"Allow"'; then
-            log_error "policy grants rather than denies: $pol_name — detaching it could break a live path"
+            log_error "$ou: policy grants rather than denies: $pol_name — detaching it could break a live path"
             fatal=1
         else
-            log_info "deny-only: $pol_name"
+            log_info "$ou: deny-only: $pol_name"
         fi
     done <<< "$attached"
-fi
+done
 
 # 7. Organization trail, landing outside the accounts it records.
 trail=$(aws cloudtrail describe-trails \
