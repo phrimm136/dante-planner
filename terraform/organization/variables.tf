@@ -66,6 +66,18 @@ variable "assignments" {
   }
 }
 
+variable "name_prefix" {
+  description = "Resource-name prefix, matching the other stacks. The trail destination is <name_prefix>-org-trail-<log-archive account>, so this must match what terraform/log-archive was applied with."
+  type        = string
+  default     = "danteplanner"
+}
+
+variable "trail_name" {
+  description = "Name of the organization trail. The archive's bucket policy admits exactly the ARN built from this name, so the two must agree."
+  type        = string
+  default     = "danteplanner-organization"
+}
+
 variable "tags" {
   description = "Resource tags."
   type        = map(string)
