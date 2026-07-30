@@ -24,8 +24,32 @@ module "fleet" {
   rds_peer_region         = var.rds_region
   rds_peering_auto_accept = false
 
-  enable_global_accelerator = true
-  tags                      = var.tags
+  # Was hardcoded true while Oregon read a variable defaulting false, so the entry-plane
+  # retirement reached one region's config and not the other.
+  enable_global_accelerator = var.enable_global_accelerator
+
+  instance_type                   = var.instance_type
+  ami_ssm_parameter               = var.ami_ssm_parameter
+  ssh_key_name                    = var.ssh_key_name
+  app_asg_min_size                = var.app_asg_min_size
+  app_asg_desired_capacity        = var.app_asg_desired_capacity
+  app_asg_max_size                = var.app_asg_max_size
+  backend_image_repo              = var.backend_image_repo
+  gitops_repo_url                 = var.gitops_repo_url
+  argocd_version                  = var.argocd_version
+  gateway_api_version             = var.gateway_api_version
+  external_secrets_chart_version  = var.external_secrets_chart_version
+  ecr_credential_provider_version = var.ecr_credential_provider_version
+  rs256_private_key_secret_name   = var.rs256_private_key_secret_name
+  billing_alarm_threshold         = var.billing_alarm_threshold
+  alarm_sns_topic_arn             = var.alarm_sns_topic_arn
+  etcd_snapshot_retention         = var.etcd_snapshot_retention
+
+  # Deliberately NOT passed symmetrically: only the primary admits the peer fleet to its auth
+  # Redis, because the secondary's is a replica and writes travel to the primary.
+  redis_cross_region_cidr = var.redis_cross_region_cidr
+
+  tags = var.tags
 }
 
 # Accepter for the cross-region peering, in the RDS region. One apply converges

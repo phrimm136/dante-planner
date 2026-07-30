@@ -183,10 +183,15 @@ data "aws_iam_policy_document" "provisioning" {
     sid     = "S3SnapshotBucket"
     effect  = "Allow"
     actions = ["s3:*"]
-    resources = [
-      "arn:aws:s3:::${var.name_prefix}-oregon-*",
-      "arn:aws:s3:::${var.name_prefix}-oregon-*/*",
-    ]
+    # Every fleet region, not just the first one built: the second region's snapshot bucket is
+    # named for its own suffix, so an oregon-only pattern leaves it unreadable and a refresh
+    # reports the live bucket as absent.
+    resources = flatten([
+      for suffix in var.fleet_region_suffixes : [
+        "arn:aws:s3:::${var.name_prefix}-${suffix}-*",
+        "arn:aws:s3:::${var.name_prefix}-${suffix}-*/*",
+      ]
+    ])
   }
 
   # Terraform's own state. PutObject/DeleteObject also back `use_lockfile`.
