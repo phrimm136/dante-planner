@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
+# account-specific identifiers.
+
+# --- Required ---------------------------------------------------------------
+
+# The account this stack may apply into; a plan resolving to any other account fails. This is
+# the organization's management account, and no other account can apply this stack.
+aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
+
+# The existing organization this stack adopts, rather than creates:
+#   aws organizations describe-organization --query Organization.Id --output text
+organization_id = "o-REPLACE_WITH_ORG_ID"
+
+# --- Optional overrides (defaults in variables.tf are sensible) --------------
+
+# region = "us-west-2"
