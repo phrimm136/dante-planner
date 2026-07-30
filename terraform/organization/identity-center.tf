@@ -15,10 +15,14 @@ locals {
     ReadOnlyAccess      = { session = "PT12H", policy = "arn:aws:iam::aws:policy/ReadOnlyAccess" }
   }
 
-  # accounts is refreshed at read time, so an account vended by a later apply of this stack
-  # is not resolvable here until the next plan. Reference such an account's resource id
-  # directly instead of routing it through this map.
-  account_ids_by_name = { for a in aws_organizations_organization.this.accounts : a.name => a.id }
+  # The organization's accounts attribute is refreshed at read time, so it does not contain an
+  # account created by this same apply. Accounts this stack owns are merged in from their own
+  # resources, which are known, so a new account is assignable in the apply that creates it.
+  account_ids_by_name = merge(
+    { for a in aws_organizations_organization.this.accounts : a.name => a.id },
+    { for name, a in aws_organizations_account.security : name => a.id },
+    { for name, a in aws_organizations_account.nonprod : name => a.id },
+  )
 }
 
 resource "aws_ssoadmin_permission_set" "this" {
