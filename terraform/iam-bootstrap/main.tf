@@ -236,6 +236,55 @@ data "aws_iam_policy_document" "provisioning" {
     resources = ["*"] # the aws/rds alias resolves to a key id that differs per region.
   }
 
+  # The fleet's internal private zone and its records. Route53 is global, so no region scoping.
+  statement {
+    sid    = "Route53InternalZone"
+    effect = "Allow"
+    actions = [
+      "route53:CreateHostedZone",
+      "route53:DeleteHostedZone",
+      "route53:GetHostedZone",
+      "route53:ListHostedZones",
+      "route53:ListHostedZonesByName",
+      "route53:ListHostedZonesByVPC",
+      "route53:AssociateVPCWithHostedZone",
+      "route53:DisassociateVPCFromHostedZone",
+      "route53:ChangeResourceRecordSets",
+      "route53:ListResourceRecordSets",
+      "route53:GetChange",
+      "route53:ChangeTagsForResource",
+      "route53:ListTagsForResource",
+    ]
+    resources = ["*"] # route53 Get/List actions do not accept a hosted-zone ARN.
+  }
+
+  # SSM documents the fleet installs on its nodes.
+  statement {
+    sid    = "SsmDocuments"
+    effect = "Allow"
+    actions = [
+      "ssm:CreateDocument",
+      "ssm:DeleteDocument",
+      "ssm:DescribeDocument",
+      "ssm:DescribeDocumentPermission",
+      "ssm:ModifyDocumentPermission",
+      "ssm:GetDocument",
+      "ssm:ListDocuments",
+      "ssm:UpdateDocument",
+      "ssm:UpdateDocumentDefaultVersion",
+      "ssm:ListTagsForResource",
+      "ssm:AddTagsToResource",
+      "ssm:RemoveTagsFromResource",
+      "ssm:CreateAssociation",
+      "ssm:DeleteAssociation",
+      "ssm:DescribeAssociation",
+      "ssm:DescribeAssociationExecutions",
+      "ssm:ListAssociations",
+      "ssm:UpdateAssociation",
+    ]
+    resources = ["*"] # ssm:ListDocuments is account-level; document ARNs are name-scoped only.
+  }
+
   # A fresh account has no rds.amazonaws.com service-linked role until the first instance.
   statement {
     sid       = "RdsServiceLinkedRole"
