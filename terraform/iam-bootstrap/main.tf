@@ -52,7 +52,7 @@ data "aws_iam_policy_document" "assume" {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "AWS"
-      identifiers = [var.trusted_admin_principal_arn]
+      identifiers = var.trusted_admin_principal_arns
     }
   }
 
@@ -315,6 +315,42 @@ resource "aws_iam_role_policy" "rds_fleet_peering" {
   name   = "fleet-peering"
   role   = var.rds_provisioner_role_name
   policy = data.aws_iam_policy_document.rds_fleet_peering[0].json
+}
+
+# The role itself is adopted, not created: it predates this stack, which until now reached into it
+# only to attach the grant above. Managing it brings its trust policy under review, so the
+# principal it admits changes by editing a variable rather than by hand.
+#
+# The trust is deliberately narrower than the provisioning role's — no OIDC statement, because CI
+# does not assume this role and granting it here would widen who can reach the database stack.
+locals {
+  rds_provisioner = toset(var.rds_provisioner_role_name != "" ? [var.rds_provisioner_role_name] : [])
+}
+
+data "aws_iam_policy_document" "rds_assume" {
+  statement {
+    sid     = "AdminAssumeFromLaptop"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "AWS"
+      identifiers = var.trusted_admin_principal_arns
+    }
+  }
+}
+
+import {
+  for_each = local.rds_provisioner
+  to       = aws_iam_role.rds_provisioner[each.key]
+  id       = each.key
+}
+
+resource "aws_iam_role" "rds_provisioner" {
+  for_each = local.rds_provisioner
+
+  name               = each.key
+  assume_role_policy = data.aws_iam_policy_document.rds_assume.json
+  tags               = var.tags
 }
 
 # --- CI deploy-surge grant (github-actions-deploy user) ----------------------

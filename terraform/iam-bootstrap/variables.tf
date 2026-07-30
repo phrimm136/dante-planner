@@ -16,9 +16,14 @@ variable "role_name" {
   default     = "danteplanner-provisioner"
 }
 
-variable "trusted_admin_principal_arn" {
-  description = "IAM/SSO principal ARN allowed to sts:AssumeRole the provisioning role from a laptop (the human admin who runs the initial `terraform apply` of terraform/oregon). Real value lives in gitignored terraform.tfvars — never commit it. No default (public-repo invariant)."
-  type        = string
+variable "trusted_admin_principal_arns" {
+  description = "Principal ARNs allowed to sts:AssumeRole the provisioning roles from a laptop. A list so an identity-center permission-set role can be admitted alongside the principal it replaces, verified, and the old one then dropped without a window where neither works. Real values live in gitignored terraform.tfvars — never commit them. No default (public-repo invariant)."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.trusted_admin_principal_arns) > 0
+    error_message = "at least one trusted admin principal is required, or the roles become assumable only by CI."
+  }
 }
 
 variable "github_oidc_subject" {
