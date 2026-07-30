@@ -153,18 +153,27 @@ if [[ -n "$trail" && "$trail" != "None" ]]; then
     trail_name=$(echo "$trail" | cut -f1)
     trail_bucket=$(echo "$trail" | cut -f2)
     log_info "organization trail: $trail_name -> $trail_bucket"
-    if aws cloudtrail get-trail-status --name "$trail_name" \
-            --query 'IsLogging' --output text | grep -q true; then
+    # The CLI renders booleans capitalised in text output, so this comparison folds case.
+    logging=$(aws cloudtrail get-trail-status --name "$trail_name" --query 'IsLogging' --output text)
+    if [[ "${logging,,}" == "true" ]]; then
         log_info "trail is logging"
     else
         log_error "trail exists but is not logging"
         fatal=1
     fi
-    if [[ "$trail_bucket" == *"$LOG_ARCHIVE_ACCOUNT"* ]]; then
-        log_info "trail destination names the log-archive account"
+
+    # Resolve the account rather than matching the bucket's name: a destination named for its
+    # purpose instead of its account is still in the right place, and a bucket named after the
+    # archive but sitting in another account is not.
+    archive_id=$(aws organizations list-accounts \
+        --query "Accounts[?Name=='$LOG_ARCHIVE_ACCOUNT'].Id | [0]" --output text)
+    if [[ -z "$archive_id" || "$archive_id" == "None" ]]; then
+        log_warn "no account named '$LOG_ARCHIVE_ACCOUNT' — cannot confirm where the trail lands"
+    elif [[ "$trail_bucket" == *"$archive_id"* ]]; then
+        log_info "trail destination is in the $LOG_ARCHIVE_ACCOUNT account"
     else
-        log_warn "trail bucket '$trail_bucket' does not name '$LOG_ARCHIVE_ACCOUNT' —"
-        log_warn "  confirm it lives in the log-archive account, not in management"
+        log_error "trail bucket '$trail_bucket' is not in the $LOG_ARCHIVE_ACCOUNT account"
+        fatal=1
     fi
 else
     log_error "no organization-wide trail — member activity is not recorded centrally"
