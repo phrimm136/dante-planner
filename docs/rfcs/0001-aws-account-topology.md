@@ -105,10 +105,11 @@ executed the same procedure end to end.
 - organization — an organization with all features and the unit hierarchy, able to carry policy
 - identity-center — every human path is a short-lived session scoped to one account (after: organization)
 - security-accounts — a log archive that cannot be deleted from, and an audit account (after: organization)
-- guardrails — workload accounts constrained by policy, and their activity recorded (after: organization, security-accounts)
 - account-vending — the staging account, in the non-production unit (after: organization)
-- per-account-bootstrap — state and a provisioning identity scoped to one account (after: account-vending, identity-center)
+- per-account-bootstrap — state and a provisioning identity scoped to one account (after: account-vending, identity-center, security-accounts)
+- guardrails — workload accounts constrained by policy, and their activity recorded (after: organization, per-account-bootstrap)
 - registry-access — the backend image readable from every account in the organization (after: per-account-bootstrap)
+- credential-retirement — no credential in any account outlives a session, or its exemption is written down (after: identity-center)
 - staging-stacks — staging serving the application, and destroyable (after: per-account-bootstrap, registry-access)
 - prod-migration — production running under the guardrails (after: staging-stacks, guardrails)
 ```
@@ -230,6 +231,26 @@ Scenario: An account outside the organization is refused a pull
   Given the registry grants pull to the organization
   When a principal in an account outside the organization pulls the backend image
   Then the request is denied
+```
+
+### credential-retirement
+
+```gherkin
+Scenario: No account carries a credential that outlives a session
+  Given every human path is a permission-set session and every automated path a federated role
+  When an account's credential report is read
+  Then it lists no access key in an active state
+
+Scenario: An integration that cannot federate is exempted in writing, not silently
+  Given a third party whose provider offers no way to present a token or assume a role
+  When the credential inventory is reviewed
+  Then that credential appears with a recorded exemption naming what blocks it, rather than as
+       an unexplained failure of the invariant
+
+Scenario: A credential is unreferenced before it is deleted
+  Given a credential named in a trust policy or in a managed configuration
+  When it is removed from every such reference and the change is applied
+  Then deleting it afterwards leaves no policy naming a principal that no longer resolves
 ```
 
 ### staging-stacks
