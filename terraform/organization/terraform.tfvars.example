@@ -30,6 +30,12 @@ security_accounts = {
   "audit"       = "REPLACE_WITH_EMAIL+aws-audit"
 }
 
+# Environment accounts, under the workloads hierarchy, so they inherit its guardrails. The
+# security accounts do not sit here and are governed separately.
+nonprod_accounts = {
+  "danteplanner-staging" = "REPLACE_WITH_EMAIL+aws-staging"
+}
+
 # --- Optional overrides (defaults in variables.tf are sensible) --------------
 
 # region              = "us-west-2"

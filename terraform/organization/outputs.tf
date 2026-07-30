@@ -8,6 +8,11 @@ output "security_account_ids" {
   value       = { for name, a in aws_organizations_account.security : name => a.id }
 }
 
+output "nonprod_account_ids" {
+  description = "Non-production account name to id. Each is the target of a state-backend apply before any stack in it can store state."
+  value       = { for name, a in aws_organizations_account.nonprod : name => a.id }
+}
+
 output "organizational_unit_ids" {
   description = "Unit name to id, both levels. Account vending reads NonProd; the guardrail stack reads Workloads."
   value = merge(

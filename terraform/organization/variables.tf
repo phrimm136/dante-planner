@@ -35,6 +35,17 @@ variable "security_accounts" {
   }
 }
 
+variable "nonprod_accounts" {
+  description = "Account name to root email for the non-production unit. Unlike the security accounts these sit under the workloads hierarchy, so they inherit its guardrails."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = alltrue([for e in values(var.nonprod_accounts) : can(regex("^[^@]+@[^@]+\\.[^@]+$", e))])
+    error_message = "each nonprod_accounts value must be an email address."
+  }
+}
+
 variable "operator_group_name" {
   description = "Identity Center group that account assignments target."
   type        = string

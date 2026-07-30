@@ -18,3 +18,18 @@ resource "aws_organizations_account" "security" {
     ignore_changes = [role_name]
   }
 }
+
+resource "aws_organizations_account" "nonprod" {
+  for_each = var.nonprod_accounts
+
+  name              = each.key
+  email             = each.value
+  parent_id         = aws_organizations_organizational_unit.workload["NonProd"].id
+  role_name         = "OrganizationAccountAccessRole"
+  close_on_deletion = false
+  tags              = var.tags
+
+  lifecycle {
+    ignore_changes = [role_name]
+  }
+}
