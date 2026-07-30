@@ -36,10 +36,13 @@ security_accounts = {
 # operator_group_name = "Operators"
 
 # Account NAME to permission set. Names, not ids, so nothing here identifies an account.
-# The management account takes AdministratorAccess because it is where the organization is
-# applied from; workload accounts take the widest set their environment justifies.
+# Read-only is the default and the wider sets are the exception: Terraform reaches an account
+# through an assumed role, so a console session is for looking rather than changing. The
+# management account is where this stack is applied from, so it takes the administrator set.
 # assignments = {
 #   "REPLACE_WITH_MANAGEMENT_ACCOUNT_NAME" = "AdministratorAccess"
+#   "log-archive"                          = "ReadOnlyAccess"
+#   "audit"                                = "ReadOnlyAccess"
 #   "danteplanner-staging"                 = "AdministratorAccess"
 #   "danteplanner-prod"                    = "ReadOnlyAccess"
 # }
