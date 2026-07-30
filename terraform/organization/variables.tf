@@ -24,6 +24,37 @@ variable "region" {
   default     = "us-west-2"
 }
 
+variable "operator_group_name" {
+  description = "Identity Center group that account assignments target."
+  type        = string
+  default     = "Operators"
+}
+
+variable "operator" {
+  description = "The human operator to create in the Identity Center directory. Real values live in gitignored terraform.tfvars — the email is personal data and the repo is public."
+  type = object({
+    user_name    = string
+    display_name = string
+    given_name   = string
+    family_name  = string
+    email        = string
+  })
+}
+
+variable "assignments" {
+  description = "Account NAME (as listed in the organization) to permission-set name. Keyed by name so no account id is written down; an account absent from the organization fails the plan."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition = alltrue([
+      for ps in values(var.assignments) :
+      contains(["AdministratorAccess", "PowerUserAccess", "ReadOnlyAccess"], ps)
+    ])
+    error_message = "each assignment must name one of AdministratorAccess, PowerUserAccess, ReadOnlyAccess."
+  }
+}
+
 variable "tags" {
   description = "Resource tags."
   type        = map(string)

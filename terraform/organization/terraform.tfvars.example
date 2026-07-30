@@ -11,6 +11,27 @@ aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
 #   aws organizations describe-organization --query Organization.Id --output text
 organization_id = "o-REPLACE_WITH_ORG_ID"
 
+# The human to create in the Identity Center directory. Terraform creates the user without a
+# password; AWS emails a verification link only when you send one from the console, so a user
+# created here cannot sign in until that invitation is sent.
+operator = {
+  user_name    = "REPLACE_WITH_USERNAME"
+  display_name = "REPLACE_WITH_DISPLAY_NAME"
+  given_name   = "REPLACE_WITH_GIVEN_NAME"
+  family_name  = "REPLACE_WITH_FAMILY_NAME"
+  email        = "REPLACE_WITH_EMAIL"
+}
+
 # --- Optional overrides (defaults in variables.tf are sensible) --------------
 
-# region = "us-west-2"
+# region              = "us-west-2"
+# operator_group_name = "Operators"
+
+# Account NAME to permission set. Names, not ids, so nothing here identifies an account.
+# The management account takes AdministratorAccess because it is where the organization is
+# applied from; workload accounts take the widest set their environment justifies.
+# assignments = {
+#   "REPLACE_WITH_MANAGEMENT_ACCOUNT_NAME" = "AdministratorAccess"
+#   "danteplanner-staging"                 = "AdministratorAccess"
+#   "danteplanner-prod"                    = "ReadOnlyAccess"
+# }
