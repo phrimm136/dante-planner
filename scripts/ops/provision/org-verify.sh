@@ -30,6 +30,7 @@ EXPECTED_OUS="${EXPECTED_OUS:-Security Infrastructure Workloads Sandbox Suspende
 EXPECTED_CHILD_OUS="${EXPECTED_CHILD_OUS:-Prod NonProd}"
 WORKLOADS_OU="${WORKLOADS_OU:-Workloads}"
 MIN_WORKLOAD_POLICIES="${MIN_WORKLOAD_POLICIES:-4}"
+BASELINE_ALLOW_POLICY="${BASELINE_ALLOW_POLICY:-FullAWSAccess}"
 LOG_ARCHIVE_ACCOUNT="${LOG_ARCHIVE_ACCOUNT:-log-archive}"
 
 fatal=0
@@ -109,19 +110,32 @@ while read -r acct_id acct_name; do
 done < <(aws organizations list-accounts --query 'Accounts[].[Id,Name]' --output text)
 
 # 5 & 6. The workloads baseline, and the deny-only property that makes rollback safe.
+#
+# FullAWSAccess is AWS's managed Allow-everything policy, attached the moment the policy
+# type is enabled. Service control policies are a deny-by-default filter, so it is REQUIRED:
+# detaching it permits nothing at all. It is asserted present and exempted from deny-only.
 if [[ -n "${WORKLOADS_ID:-}" && "$WORKLOADS_ID" != "None" ]]; then
     attached=$(aws organizations list-policies-for-target --target-id "$WORKLOADS_ID" \
         --filter SERVICE_CONTROL_POLICY --query 'Policies[].[Id,Name]' --output text)
-    count=$(echo "$attached" | grep -c . || true)
-    if [[ "$count" -ge "$MIN_WORKLOAD_POLICIES" ]]; then
-        log_info "$WORKLOADS_OU carries $count service control policies"
+
+    if grep -qw "$BASELINE_ALLOW_POLICY" <<< "$attached"; then
+        log_info "$BASELINE_ALLOW_POLICY attached — the unit can permit anything at all"
     else
-        log_error "$WORKLOADS_OU carries $count policies, expected at least $MIN_WORKLOAD_POLICIES"
+        log_error "$BASELINE_ALLOW_POLICY is NOT attached to $WORKLOADS_OU — every action is denied"
+        fatal=1
+    fi
+
+    guardrails=$(grep -vw "$BASELINE_ALLOW_POLICY" <<< "$attached" | grep -c . || true)
+    if [[ "$guardrails" -ge "$MIN_WORKLOAD_POLICIES" ]]; then
+        log_info "$WORKLOADS_OU carries $guardrails guardrail policies"
+    else
+        log_error "$WORKLOADS_OU carries $guardrails guardrail policies, expected at least $MIN_WORKLOAD_POLICIES"
         fatal=1
     fi
 
     while read -r pol_id pol_name; do
         [[ -n "$pol_id" ]] || continue
+        [[ "$pol_name" == "$BASELINE_ALLOW_POLICY" ]] && continue
         if aws organizations describe-policy --policy-id "$pol_id" \
                 --query 'Policy.Content' --output text | grep -q '"Effect"[[:space:]]*:[[:space:]]*"Allow"'; then
             log_error "policy grants rather than denies: $pol_name — detaching it could break a live path"
