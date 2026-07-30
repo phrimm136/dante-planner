@@ -209,6 +209,16 @@ data "aws_iam_policy_document" "provisioning" {
     resources = ["*"]
   }
 
+  # The database stack resolves this at PLAN time, so without it that stack cannot be inspected,
+  # let alone applied. Not an escalation beyond the statement above: rds:* already permits
+  # resetting the same password, which is the louder way to obtain it.
+  statement {
+    sid       = "RdsMasterPassword"
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = ["arn:aws:secretsmanager:${var.region}:${local.account_id}:secret:${var.rds_master_password_secret_name}-*"]
+  }
+
   # RDS calls KMS as the caller, so encrypted storage needs grant creation here.
   statement {
     sid    = "RdsStorageEncryption"
