@@ -5,7 +5,7 @@ output "provisioner_role_arn" {
 
 output "tf_state_bucket" {
   description = "S3 bucket backing every other stack's state. Use it as the `bucket` in their backend blocks; this stack stays on local state."
-  value       = aws_s3_bucket.tf_state.id
+  value       = var.create_state_bucket ? aws_s3_bucket.tf_state[0].id : local.tf_state_bucket
 }
 
 output "github_oidc_provider_arn" {

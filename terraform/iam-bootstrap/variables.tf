@@ -68,3 +68,9 @@ variable "aws_account_id" {
     error_message = "aws_account_id must be the 12-digit AWS account number."
   }
 }
+
+variable "create_state_bucket" {
+  description = "Create this account's Terraform state bucket here. False for any account added after terraform/state-backend existed, which owns the same resources and nothing else; the provisioning grants address the bucket by name either way."
+  type        = bool
+  default     = true
+}

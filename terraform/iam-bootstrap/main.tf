@@ -27,6 +27,11 @@ locals {
 
   account_id = data.aws_caller_identity.current.account_id
 
+  # Deterministic, so the grants below hold whether this stack owns the bucket or
+  # terraform/state-backend does.
+  tf_state_bucket     = "${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
+  tf_state_bucket_arn = "arn:aws:s3:::${var.name_prefix}-tfstate-${data.aws_caller_identity.current.account_id}"
+
   # The exact node roles/instance-profiles terraform/oregon creates
   # (oregon/iam.tf: ${name_prefix}-oregon-{cp,ingress,data,app}). The provisioning
   # policy's iam:* and iam:PassRole are scoped to these ARN patterns so a
@@ -197,8 +202,8 @@ data "aws_iam_policy_document" "provisioning" {
       "s3:DeleteObject",
     ]
     resources = [
-      aws_s3_bucket.tf_state.arn,
-      "${aws_s3_bucket.tf_state.arn}/*",
+      local.tf_state_bucket_arn,
+      "${local.tf_state_bucket_arn}/*",
     ]
   }
 
@@ -372,7 +377,7 @@ data "aws_iam_policy_document" "rds_state_backend" {
     sid       = "EnumerateWorkspaces"
     effect    = "Allow"
     actions   = ["s3:ListBucket", "s3:GetBucketVersioning"]
-    resources = [aws_s3_bucket.tf_state.arn]
+    resources = [local.tf_state_bucket_arn]
   }
 
   statement {
@@ -386,8 +391,8 @@ data "aws_iam_policy_document" "rds_state_backend" {
     ]
     # Both workspace layouts, and the .tflock object the backend writes beside each key.
     resources = [
-      "${aws_s3_bucket.tf_state.arn}/rds/*",
-      "${aws_s3_bucket.tf_state.arn}/env/*/rds/*",
+      "${local.tf_state_bucket_arn}/rds/*",
+      "${local.tf_state_bucket_arn}/env/*/rds/*",
     ]
   }
 }
