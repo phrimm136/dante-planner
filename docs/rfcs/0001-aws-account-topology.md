@@ -319,6 +319,16 @@ Scenario: The management account holds no workload
   whose only purpose is holding it. REJECTED: the trail writing into the management account — the
   account with the broadest reach would then own the record of its own actions, so the record proves
   nothing against exactly the compromise it exists to detect.
+- @state @accounts @secrets — Terraform state lives in the account whose resources it describes, so
+  the bucket count tracks the account count and no account reads another's state. Terraform
+  serializes every attribute it manages, including the ones providers mark sensitive, which makes a
+  state file a secrets store whether or not anyone intended one. REJECTED: a single bucket in the
+  management account with member stacks assuming a role inward — it deletes a bucket per account and
+  restores the one backend configuration this proposal otherwise gives up, but it gathers every
+  environment's secrets into the account service control policies cannot constrain, and it hands a
+  staging apply write access to production's state. REJECTED: one bucket partitioned by key prefix —
+  a prefix is a convention rather than a boundary, so a misconfigured one is a silent
+  cross-environment write where a wrong account fails at the first call.
 
 ## Drawbacks
 
