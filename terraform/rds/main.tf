@@ -29,13 +29,13 @@ provider "aws" {
 
 resource "aws_db_subnet_group" "this" {
   name       = "${var.name_prefix}-rds"
-  subnet_ids = var.db_subnet_ids # >= 2 subnets across >= 2 AZs (RDS requirement, even for single-AZ)
+  subnet_ids = local.db_subnet_ids # >= 2 subnets across >= 2 AZs (RDS requirement, even for single-AZ)
   tags       = var.tags
 }
 
 # The RDS VPC, for its CIDR (exported so a cross-region fleet can route to it).
 data "aws_vpc" "this" {
-  id = var.vpc_id
+  id = local.vpc_id
 }
 
 # Container created by scripts/ops/provision/rds-master-password-secret.sh and enrolled in
@@ -47,7 +47,7 @@ data "aws_secretsmanager_secret_version" "master_password" {
 resource "aws_security_group" "rds" {
   name        = "${var.name_prefix}-rds"
   description = "RDS MySQL access"
-  vpc_id      = var.vpc_id
+  vpc_id      = local.vpc_id
   tags        = var.tags
 }
 
@@ -211,7 +211,7 @@ resource "aws_db_instance" "this" {
 # guarded so a plain RDS apply (no fleet) is unaffected until fleet_* are set.
 data "aws_route_tables" "rds_vpc" {
   count  = var.fleet_peering_connection_id != "" ? 1 : 0
-  vpc_id = var.vpc_id
+  vpc_id = local.vpc_id
 }
 
 resource "aws_route" "rds_to_fleet" {
@@ -240,7 +240,7 @@ resource "aws_vpc_security_group_ingress_rule" "fleet_to_rds" {
 # until seoul_peering_connection_id is set.
 data "aws_route_tables" "rds_vpc_seoul" {
   count  = var.seoul_peering_connection_id != "" ? 1 : 0
-  vpc_id = var.vpc_id
+  vpc_id = local.vpc_id
 }
 
 resource "aws_route" "rds_to_seoul_fleet" {

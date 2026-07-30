@@ -13,19 +13,34 @@ variable "name_prefix" {
 # --- Networking (operator-supplied via gitignored terraform.tfvars) ---------
 
 variable "vpc_id" {
-  description = "VPC ID the EC2 instance and RDS live in."
+  description = "Existing VPC the database lives in. Ignored when create_vpc is true. An account with no database network sets create_vpc instead of supplying this."
   type        = string
+  default     = ""
 }
 
 variable "db_subnet_ids" {
-  description = "Subnet IDs for the DB subnet group (>= 2 across >= 2 AZs, even for single-AZ)."
+  description = "Subnets for the DB subnet group (>= 2 across >= 2 AZs, even for single-AZ). Ignored when create_vpc is true."
   type        = list(string)
+  default     = []
 
   validation {
-    condition     = length(var.db_subnet_ids) >= 2
+    condition     = length(var.db_subnet_ids) == 0 || length(var.db_subnet_ids) >= 2
     error_message = "RDS requires >= 2 subnets across >= 2 AZs, even for a single-AZ instance."
   }
 }
+
+variable "create_vpc" {
+  description = "Build the database network here rather than taking one as input. False where a VPC predates this stack."
+  type        = bool
+  default     = false
+}
+
+variable "vpc_cidr" {
+  description = "CIDR for the created network. Must not overlap any fleet that will peer with it."
+  type        = string
+  default     = "10.40.0.0/16"
+}
+
 
 # --- Instance shape ---------------------------------------------------------
 
