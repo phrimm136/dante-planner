@@ -7,7 +7,7 @@ in `../README.md`.
 
 | # | Title | Status | Tracking |
 |---|---|---|---|
-| — | *(none yet)* | | |
+| [0001](0001-aws-account-topology.md) | AWS account topology | Accepted | none |
 
 ## Lifecycle
 
