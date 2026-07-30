@@ -201,3 +201,9 @@ variable "backend_ecr_account_id" {
   type        = string
   default     = ""
 }
+
+variable "replicate_registry" {
+  description = "Replicate this account's registry to the second region. False where the fleet pulls from another account's registry, so there is nothing local to mirror."
+  type        = bool
+  default     = true
+}
