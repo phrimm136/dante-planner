@@ -9,7 +9,8 @@
 # Usage: rds-bootstrap-readonly-user.sh
 set -euo pipefail
 OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TFVARS="$OPS_DIR/../../terraform/rds/terraform.tfvars"
+# One file per environment, so nothing auto-loads and nothing is implicit.
+TFVARS="${TFVARS:-$OPS_DIR/../../terraform/rds/prod.tfvars}"
 # Pinned by digest — a floating tag would let a poisoned mysql:8 push run with
 # the live master credential this script hands it. Re-pin on a deliberate bump.
 MYSQL_IMAGE="mysql:8@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6"

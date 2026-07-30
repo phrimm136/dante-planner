@@ -13,7 +13,7 @@ name=danteplanner/rds/master-password
 region=us-west-2
 
 if [[ "${1:-}" == "--from-tfvars" ]]; then
-  tfvars="$repo_root/terraform/rds/terraform.tfvars"
+  tfvars="${RDS_TFVARS:-$repo_root/terraform/rds/prod.tfvars}"
   [[ -f "$tfvars" ]] || { echo "no $tfvars to migrate from" >&2; exit 1; }
   value=$(awk -F'"' '/^[[:space:]]*master_password[[:space:]]*=/ {print $2}' "$tfvars")
   [[ -n "$value" ]] || { echo "master_password not found in $tfvars" >&2; exit 1; }
@@ -35,5 +35,5 @@ unset value
 
 echo "done. Next:"
 echo "  1. terraform -chdir=terraform/secrets apply   # enrols the container for replication"
-echo "  2. delete the master_password line from terraform/rds/terraform.tfvars"
-echo "  3. terraform -chdir=terraform/rds plan        # must show NO change to the instance"
+echo "  2. delete the master_password line from the environment's tfvars"
+echo "  3. terraform -chdir=terraform/rds plan -var-file=<env>.tfvars   # must show NO change"

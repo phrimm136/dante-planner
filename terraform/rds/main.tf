@@ -153,7 +153,7 @@ resource "aws_db_instance" "this" {
   instance_class = var.instance_class
 
   # availability_zone is rejected alongside multi_az; AWS owns both placements.
-  multi_az            = true
+  multi_az            = var.multi_az
   publicly_accessible = false
 
   allocated_storage     = var.allocated_storage

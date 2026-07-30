@@ -1,5 +1,10 @@
-# Copy to terraform.tfvars (gitignored) and fill in. Never commit the real file — it carries
-# account-specific identifiers.
+# Copy to <environment>.tfvars (gitignored) and fill in, then pass it explicitly:
+#   terraform -chdir=terraform/rds plan -var-file=prod.tfvars
+#
+# NOT terraform.tfvars: that name auto-loads on every invocation, including ones passing a
+# different -var-file, so one environment silently inherits another's values.
+#
+# Never commit the real file — it carries account-specific identifiers.
 
 # --- Required ---------------------------------------------------------------
 

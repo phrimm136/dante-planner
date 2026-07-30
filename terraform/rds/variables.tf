@@ -29,6 +29,12 @@ variable "db_subnet_ids" {
   }
 }
 
+variable "multi_az" {
+  description = "Run a standby in a second zone. False for an environment that is rebuilt rather than recovered, where a standby doubles the bill to protect something disposable."
+  type        = bool
+  default     = true
+}
+
 variable "create_vpc" {
   description = "Build the database network here rather than taking one as input. False where a VPC predates this stack."
   type        = bool
