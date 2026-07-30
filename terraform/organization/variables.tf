@@ -24,6 +24,17 @@ variable "region" {
   default     = "us-west-2"
 }
 
+variable "security_accounts" {
+  description = "Account name to root email for the Security unit. Each address must be globally unique across AWS and reachable, because it is the account's root login and the only recovery path. Real values live in gitignored terraform.tfvars — they are personal data and the repo is public."
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition     = alltrue([for e in values(var.security_accounts) : can(regex("^[^@]+@[^@]+\\.[^@]+$", e))])
+    error_message = "each security_accounts value must be an email address."
+  }
+}
+
 variable "operator_group_name" {
   description = "Identity Center group that account assignments target."
   type        = string

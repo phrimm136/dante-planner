@@ -22,6 +22,14 @@ operator = {
   email        = "REPLACE_WITH_EMAIL"
 }
 
+# Member accounts in the Security unit. Each address is that account's ROOT login and its only
+# recovery path, so it must be reachable and globally unique across AWS. Plus-addressing on one
+# inbox satisfies both. Removing an entry does not close the account.
+security_accounts = {
+  "log-archive" = "REPLACE_WITH_EMAIL+aws-logarchive"
+  "audit"       = "REPLACE_WITH_EMAIL+aws-audit"
+}
+
 # --- Optional overrides (defaults in variables.tf are sensible) --------------
 
 # region              = "us-west-2"
