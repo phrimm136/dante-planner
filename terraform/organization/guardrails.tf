@@ -122,3 +122,12 @@ resource "aws_organizations_policy_attachment" "workloads" {
   policy_id = each.value.id
   target_id = aws_organizations_organizational_unit.top["Workloads"].id
 }
+
+# The same four apply to the security unit. Without DenyDisableSecurityServices the account
+# holding the organization trail is the one account able to stop it recording.
+resource "aws_organizations_policy_attachment" "security" {
+  for_each = aws_organizations_policy.guardrail
+
+  policy_id = each.value.id
+  target_id = aws_organizations_organizational_unit.top["Security"].id
+}
