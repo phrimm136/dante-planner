@@ -53,12 +53,6 @@ variable "rds_master_password_secret_name" {
   default     = "danteplanner/rds/master-password"
 }
 
-variable "rds_provisioner_role_name" {
-  description = "Name of the existing role that applies terraform/rds. Empty = skip the peering grant. Set in terraform.tfvars (gitignored)."
-  type        = string
-  default     = ""
-}
-
 variable "aws_account_id" {
   description = "The 12-digit AWS account this stack may apply into."
   type        = string

@@ -25,6 +25,3 @@ trusted_admin_principal_arn = "REPLACE_WITH_ADMIN_PRINCIPAL_ARN"
 # github_oidc_subject         = "repo:phrimm136/dante-planner:ref:refs/heads/main"
 # create_github_oidc_provider = true   # false if the account already has a GitHub OIDC provider
 
-# The existing role that applies terraform/rds. Set to grant it the ec2 route actions for the
-# fleet<->RDS peering return route (reproducible, vs put-role-policy).
-# rds_provisioner_role_name = "terraform-rds"
