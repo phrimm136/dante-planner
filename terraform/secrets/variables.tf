@@ -53,3 +53,15 @@ variable "aws_account_id" {
     error_message = "aws_account_id must be the 12-digit AWS account number."
   }
 }
+
+variable "manage_grafana_datasource_user" {
+  description = "Adopt the Grafana CloudWatch datasource user here. False for an environment with no Grafana datasource, where the import has nothing to adopt and fails the plan."
+  type        = bool
+  default     = true
+}
+
+variable "manage_origin_tls" {
+  description = "Adopt the edge origin-certificate container here. False for an environment that has no edge certificate, where the import has nothing to adopt."
+  type        = bool
+  default     = true
+}
