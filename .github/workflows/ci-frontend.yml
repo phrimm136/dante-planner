@@ -16,28 +16,21 @@ jobs:
     permissions: {}
     uses: ./.github/workflows/check-pr-origin.yml
 
-  checkout:
-    permissions:
-      contents: read
+  test-frontend:
     needs: check-origin
     if: >-
       needs.check-origin.outputs.is-internal == 'true' ||
       github.base_ref == 'dev'
-    uses: ./.github/workflows/checkout-submodules.yml
-    secrets:
-      STATIC_DEPLOY_KEY: ${{ secrets.STATIC_DEPLOY_KEY }}
-
-  test-frontend:
-    needs: checkout
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: ./.github/actions/fetch-static-submodule
         with:
-          name: repo-with-submodules
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38  # v6
         with:
           node-version: '24'
           cache: 'yarn'
@@ -58,16 +51,20 @@ jobs:
         run: yarn fmt:check
 
   build-frontend:
-    needs: [checkout, test-frontend]
+    needs: [check-origin, test-frontend]
+    if: >-
+      needs.check-origin.outputs.is-internal == 'true' ||
+      github.base_ref == 'dev'
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: ./.github/actions/fetch-static-submodule
         with:
-          name: repo-with-submodules
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38  # v6
         with:
           node-version: '24'
           cache: 'yarn'
@@ -83,14 +80,14 @@ jobs:
           NODE_OPTIONS: '--max-old-space-size=6144'
 
   notify-failure:
-    needs: [checkout, test-frontend, build-frontend]
+    needs: [test-frontend, build-frontend]
     if: failure() && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       actions: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
         with:
           sparse-checkout: .github/actions
       - uses: ./.github/actions/notify-ci-failure
@@ -99,7 +96,6 @@ jobs:
           pr-number: ${{ github.event.pull_request.number }}
           jobs-json: |
             [
-              {"name": "Checkout", "result": "${{ needs.checkout.result }}"},
               {"name": "Test", "result": "${{ needs.test-frontend.result }}"},
               {"name": "Build", "result": "${{ needs.build-frontend.result }}"}
             ]
