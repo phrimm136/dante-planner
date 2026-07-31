@@ -30,6 +30,6 @@ class CommentAccountPurgeServiceTest {
         var inOrder = inOrder(plannerCommentVoteRepository, plannerCommentRepository);
         inOrder.verify(plannerCommentVoteRepository).deleteVotesCollidingWithSentinel(USER_ID, SENTINEL_ID);
         inOrder.verify(plannerCommentVoteRepository).reassignUserVotes(USER_ID, SENTINEL_ID);
-        inOrder.verify(plannerCommentRepository).reassignCommentsToSentinel(USER_ID, SENTINEL_ID);
+        inOrder.verify(plannerCommentRepository).anonymizeCommentsToSentinel(USER_ID, SENTINEL_ID);
     }
 }

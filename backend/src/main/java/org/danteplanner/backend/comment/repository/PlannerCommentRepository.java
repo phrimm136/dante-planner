@@ -56,16 +56,19 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
     int decrementUpvoteCount(@Param("commentId") Long commentId);
 
     /**
-     * Reassign all comments from a user to the sentinel user.
-     * Used during hard-delete to preserve comment content while anonymizing the author.
+     * Reassign a user's comments to the sentinel user and clear their text.
      *
-     * @param userId     the user ID whose comments should be reassigned
+     * <p>The row survives so replies keep their parent; the content does not. {@code content} is
+     * NOT NULL, so it is emptied rather than nulled, matching {@link
+     * org.danteplanner.backend.comment.entity.PlannerComment#softDelete()}.</p>
+     *
+     * @param userId     the user ID whose comments should be anonymized
      * @param sentinelId the sentinel user ID to reassign comments to
-     * @return the number of comments reassigned
+     * @return the number of comments anonymized
      */
     @Modifying
-    @Query("UPDATE PlannerComment c SET c.userId = :sentinelId WHERE c.userId = :userId")
-    int reassignCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+    @Query("UPDATE PlannerComment c SET c.userId = :sentinelId, c.content = '' WHERE c.userId = :userId")
+    int anonymizeCommentsToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
 
     /**
      * Count non-deleted comments for a planner.

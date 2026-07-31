@@ -45,10 +45,12 @@ public record CommentTreeNode(
             boolean hasUpvoted,
             List<CommentTreeNode> replies
     ) {
-        // Extract author fields (empty for deleted/sentinel users)
+        // Empty for an absent, sentinel, or deactivated author. A soft-deleted account is loaded
+        // like any other, so it is excluded here rather than by the query that fetched it.
         String authorEpithet = DELETED_VALUE;
         String authorSuffix = DELETED_VALUE;
-        if (author != null && author.getUsernameEpithet() != null && author.getUsernameSuffix() != null) {
+        if (author != null && !author.isDeleted()
+                && author.getUsernameEpithet() != null && author.getUsernameSuffix() != null) {
             authorEpithet = author.getUsernameEpithet();
             authorSuffix = author.getUsernameSuffix();
         }

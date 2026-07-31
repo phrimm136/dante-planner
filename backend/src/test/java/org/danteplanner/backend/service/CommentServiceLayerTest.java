@@ -36,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -442,6 +443,52 @@ class CommentServiceLayerTest {
 
             // Assert
             assertTrue(comments.isEmpty());
+        }
+
+        @Test
+        @DisplayName("A deactivated author is unattributed while an active author is named")
+        void getCommentTree_WhenAuthorAccountDeactivated_OmitsTheAuthorName() {
+            User deactivated = User.builder()
+                    .id(3L)
+                    .email("gone@example.com")
+                    .provider(AuthProviderType.GOOGLE)
+                    .providerId("gone-123")
+                    .usernameEpithet("GONE")
+                    .usernameSuffix("gon01")
+                    .role(UserRole.NORMAL)
+                    .build();
+            deactivated.softDelete(Instant.now().plus(Duration.ofDays(30)));
+
+            PlannerComment byActive =
+                    new PlannerComment(plannerId, otherUser.getId(), "still here", null, 0);
+            byActive.setId(10L);
+            byActive.setPublicId(UUID.randomUUID());
+            byActive.setCreatedAt(Instant.now());
+
+            PlannerComment byDeactivated =
+                    new PlannerComment(plannerId, deactivated.getId(), "also still here", null, 0);
+            byDeactivated.setId(11L);
+            byDeactivated.setPublicId(UUID.randomUUID());
+            byDeactivated.setCreatedAt(Instant.now());
+
+            when(plannerRepository.findAggregate(plannerId)).thenReturn(Optional.of(publishedPlanner));
+            when(commentRepository.findByPlannerId(plannerId))
+                    .thenReturn(List.of(byActive, byDeactivated));
+            when(userService.findAllByIds(anyCollection()))
+                    .thenReturn(List.of(otherUser, deactivated));
+
+            List<CommentTreeNode> comments = queryService.getCommentTree(plannerId, testUser.getId());
+
+            CommentTreeNode active = comments.stream()
+                    .filter(c -> c.id().equals(byActive.getPublicId())).findFirst().orElseThrow();
+            CommentTreeNode hidden = comments.stream()
+                    .filter(c -> c.id().equals(byDeactivated.getPublicId())).findFirst().orElseThrow();
+
+            assertEquals("OTHER", active.authorEpithet(), "an active author is still named");
+            assertEquals("", hidden.authorEpithet(), "a deactivated author is not named");
+            assertEquals("", hidden.authorSuffix(), "nor is their suffix");
+            assertEquals("also still here", hidden.content(),
+                    "the comment itself survives so the thread keeps its shape");
         }
 
         @Test

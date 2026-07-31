@@ -5,6 +5,7 @@ import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
 import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
 import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +42,7 @@ public class UserAccountLifecycleService {
 
     private final UserRepository userRepository;
     private final PlannerAccountPurgeService plannerAccountPurgeService;
+    private final PlannerCatalogService plannerCatalogService;
     private final CommentAccountPurgeService commentAccountPurgeService;
     private final ModerationAccountPurgeService moderationAccountPurgeService;
     private final TokenBlacklistService tokenBlacklistService;
@@ -49,12 +51,14 @@ public class UserAccountLifecycleService {
     public UserAccountLifecycleService(
             UserRepository userRepository,
             PlannerAccountPurgeService plannerAccountPurgeService,
+            PlannerCatalogService plannerCatalogService,
             CommentAccountPurgeService commentAccountPurgeService,
             ModerationAccountPurgeService moderationAccountPurgeService,
             TokenBlacklistService tokenBlacklistService,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
         this.userRepository = userRepository;
         this.plannerAccountPurgeService = plannerAccountPurgeService;
+        this.plannerCatalogService = plannerCatalogService;
         this.commentAccountPurgeService = commentAccountPurgeService;
         this.moderationAccountPurgeService = moderationAccountPurgeService;
         this.tokenBlacklistService = tokenBlacklistService;
@@ -84,6 +88,10 @@ public class UserAccountLifecycleService {
         user.softDelete(scheduledDeleteAt);
         userRepository.save(user);
 
+        // Withdrawn from the public listing, not unpublished: reactivation within the grace
+        // period restores the same set without the owner republishing.
+        plannerCatalogService.hideAllOwnedBy(userId);
+
         // Immediately revoke existing tokens via the in-memory invalidation check.
         // Auth is token-only: the JWT filter does no per-request DB lookup, so deletion
         // must push the revocation signal here.
@@ -110,6 +118,7 @@ public class UserAccountLifecycleService {
 
         user.reactivate();
         userRepository.save(user);
+        plannerCatalogService.restoreAllOwnedBy(userId);
     }
 
     /**

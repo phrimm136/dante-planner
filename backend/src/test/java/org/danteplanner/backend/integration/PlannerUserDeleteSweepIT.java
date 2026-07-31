@@ -120,6 +120,16 @@ class PlannerUserDeleteSweepIT {
                 Long.class, plannerId.toString());
     }
 
+    private String commentContent(Long commentId) {
+        return jdbc.queryForObject(
+                "SELECT content FROM planner_comments WHERE id = ?", String.class, commentId);
+    }
+
+    private Long commentAuthorId(Long commentId) {
+        return jdbc.queryForObject(
+                "SELECT user_id FROM planner_comments WHERE id = ?", Long.class, commentId);
+    }
+
     private List<Long> commentVoterIds(Long commentId) {
         return jdbc.queryForList(
                 "SELECT user_id FROM planner_comment_votes WHERE comment_id = ?",
@@ -211,6 +221,29 @@ class PlannerUserDeleteSweepIT {
         assertThat(userRepository.findById(UserAccountLifecycleService.SENTINEL_USER_ID))
                 .as("the sentinel the vote was handed to is a real account row, not a dangling id")
                 .isPresent();
+    }
+
+    @Test
+    @DisplayName("comment-text-does-not-outlive-its-author: a hard-deleted account's comment keeps its row and loses its content, and a third party's comment is untouched")
+    void commentContent_WhenAuthorHardDeleted_IsEmptiedWhileTheRowSurvives() {
+        Planner thirdPartyPlanner = TestDataFactory.planner(other)
+                .title("Sweep Comment Content")
+                .published(true)
+                .save(plannerRepository);
+        Long ownComment = insertComment(thirdPartyPlanner.getId(), owner.getId());
+        Long thirdPartyComment = insertComment(thirdPartyPlanner.getId(), other.getId());
+
+        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+
+        assertThat(commentAuthorId(ownComment))
+                .as("the row survives so replies keep a parent, now owned by the sentinel")
+                .isEqualTo(UserAccountLifecycleService.SENTINEL_USER_ID);
+        assertThat(commentContent(ownComment))
+                .as("the text does not survive the account that wrote it")
+                .isEmpty();
+        assertThat(commentContent(thirdPartyComment))
+                .as("a third party's comment on the same planner is untouched")
+                .isEqualTo("a comment");
     }
 
     @Test

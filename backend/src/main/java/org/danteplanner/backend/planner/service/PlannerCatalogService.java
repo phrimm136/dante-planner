@@ -64,6 +64,32 @@ public class PlannerCatalogService {
     }
 
     /**
+     * Withdraw every listing a user owns, leaving the planners themselves published.
+     *
+     * <p>Publication state is untouched, so {@link #restoreAllOwnedBy(Long)} puts the same set
+     * back without the owner republishing. The filter indexes are left alone: search is rooted at
+     * the catalog, so a withdrawn planner is unreachable through them.</p>
+     *
+     * @param userId the owning user
+     */
+    @Transactional
+    public void hideAllOwnedBy(Long userId) {
+        int withdrawn = catalogRepository.withdrawAllOwnedBy(userId);
+        log.debug("Withdrew {} catalog rows owned by user {}", withdrawn, userId);
+    }
+
+    /**
+     * Re-list every planner a user owns that is still published and not taken down.
+     *
+     * @param userId the owning user
+     */
+    @Transactional
+    public void restoreAllOwnedBy(Long userId) {
+        int restored = catalogRepository.restoreAllOwnedBy(userId, recommendedThreshold);
+        log.debug("Restored {} catalog rows owned by user {}", restored, userId);
+    }
+
+    /**
      * A visible planner was edited by its owner: synchronize the catalog scalar
      * copies (read-your-writes for the list) and rebuild the filter indexes only
      * when the searchable composition changed.

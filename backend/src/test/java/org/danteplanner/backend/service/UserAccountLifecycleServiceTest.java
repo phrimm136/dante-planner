@@ -7,6 +7,7 @@ import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
 import org.danteplanner.backend.moderation.service.ModerationAccountPurgeService;
 import org.danteplanner.backend.planner.service.PlannerAccountPurgeService;
+import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,9 @@ class UserAccountLifecycleServiceTest {
     private PlannerAccountPurgeService plannerAccountPurgeService;
 
     @Mock
+    private PlannerCatalogService plannerCatalogService;
+
+    @Mock
     private CommentAccountPurgeService commentAccountPurgeService;
 
     @Mock
@@ -63,6 +67,7 @@ class UserAccountLifecycleServiceTest {
         lifecycleService = new UserAccountLifecycleService(
                 userRepository,
                 plannerAccountPurgeService,
+                plannerCatalogService,
                 commentAccountPurgeService,
                 moderationAccountPurgeService,
                 tokenBlacklistService,

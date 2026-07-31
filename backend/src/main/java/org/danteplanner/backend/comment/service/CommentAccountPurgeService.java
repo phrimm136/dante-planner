@@ -37,6 +37,6 @@ public class CommentAccountPurgeService {
     public void reassignAuthorshipToSentinel(Long userId, Long sentinelId) {
         plannerCommentVoteRepository.deleteVotesCollidingWithSentinel(userId, sentinelId);
         plannerCommentVoteRepository.reassignUserVotes(userId, sentinelId);
-        plannerCommentRepository.reassignCommentsToSentinel(userId, sentinelId);
+        plannerCommentRepository.anonymizeCommentsToSentinel(userId, sentinelId);
     }
 }

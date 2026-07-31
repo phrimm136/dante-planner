@@ -53,4 +53,44 @@ public interface PlannerCatalogRepository
     @Modifying
     @Query("DELETE FROM PlannerCatalog c WHERE c.plannerId IN :plannerIds")
     void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
+
+    /**
+     * Withdraw every listing an owner has, leaving publication state alone.
+     *
+     * @param userId the owning user
+     * @return the number of listings withdrawn
+     */
+    @Modifying
+    @Query(value = "DELETE FROM planner_catalog "
+            + "WHERE planner_id IN (SELECT p.id FROM planner p WHERE p.user_id = :userId)",
+            nativeQuery = true)
+    int withdrawAllOwnedBy(@Param("userId") Long userId);
+
+    /**
+     * Re-list an owner's planners that are still visible on their own terms.
+     *
+     * <p>Excludes taken-down planners: a moderator withdrawal must not be undone by the owner
+     * returning.</p>
+     *
+     * @param userId    the owning user
+     * @param threshold upvotes at which a planner counts as recommended
+     * @return the number of listings restored
+     */
+    @Modifying
+    @Query(value = "INSERT INTO planner_catalog "
+            + "(planner_id, planner_type, category, title, selected_keywords, first_published_at, recommended) "
+            + "SELECT p.id, p.planner_type, c.category, c.title, c.selected_keywords, "
+            + "  pub.first_published_at, "
+            + "  (COALESCE(s.upvotes, 0) >= :threshold "
+            + "   AND COALESCE(m.hidden_from_recommended, FALSE) = FALSE) "
+            + "FROM planner p "
+            + "JOIN planner_content c ON c.planner_id = p.id "
+            + "JOIN planner_publication pub ON pub.planner_id = p.id "
+            + "LEFT JOIN planner_moderation m ON m.planner_id = p.id "
+            + "LEFT JOIN planner_stats s ON s.planner_id = p.id "
+            + "WHERE p.user_id = :userId "
+            + "  AND pub.published = TRUE "
+            + "  AND c.deleted_at IS NULL "
+            + "  AND m.taken_down_at IS NULL", nativeQuery = true)
+    int restoreAllOwnedBy(@Param("userId") Long userId, @Param("threshold") int threshold);
 }
