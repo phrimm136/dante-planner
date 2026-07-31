@@ -15,7 +15,7 @@ import type {
   MDPlannerContent,
   RRPlannerContent,
 } from '../types/PlannerTypes'
-import { EgoTypeSchema } from '@/pages/ego'
+import { EgoTypeSchema } from '@/shared/gameData'
 
 /**
  * Planner Schemas

@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import type { SinnerEquipment } from '../../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import type { IdentityListItem } from '@/pages/identity'
 import type { SkillData } from './SinnerGrid'
 import {
@@ -26,7 +26,7 @@ interface SinnerDeckCardProps {
   readOnly?: boolean
 }
 
-const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
+const EGO_RANKS: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 
 /**
  * Deck card showing equipped identity with deployment status, skills, and EGOs.

@@ -13,7 +13,7 @@ import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerEditorStore'
 
 import type { EntityMode } from '../../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 
 import { SearchBar } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
@@ -103,7 +103,7 @@ export function DeckFilterBar() {
   }
 
   const handleEgoTypesChange = (types: Set<string>) => {
-    setFilterState((prev) => ({ ...prev, selectedEgoTypes: types as Set<EGOType> }))
+    setFilterState((prev) => ({ ...prev, selectedEgoTypes: types as Set<EgoType> }))
   }
 
   const handleSeasonsChange = (seasons: typeof filterState.selectedSeasons) => {

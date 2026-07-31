@@ -1,6 +1,8 @@
 import { z } from 'zod'
-import { AffinitySchema } from '@/shared/gameData'
+import { AffinitySchema, EgoTypeSchema } from '@/shared/gameData'
 import { SkillDescEntrySchema } from '@/shared/gameData'
+
+export { EgoTypeSchema }
 
 /**
  * EGO Schemas
@@ -8,9 +10,6 @@ import { SkillDescEntrySchema } from '@/shared/gameData'
  * Zod schemas for runtime validation of EGO data structures.
  * These schemas mirror the TypeScript interfaces in types/EGOTypes.ts.
  */
-
-// EGO type enum (ZAYIN, TETH, HE, WAW, ALEPH)
-export const EgoTypeSchema = z.enum(['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'])
 
 // Skill data entry schema - all fields optional for flexibility
 export const EGOSkillDataEntrySchema = z.object({

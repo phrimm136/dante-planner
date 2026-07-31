@@ -1,6 +1,6 @@
 import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { EGOHeader } from './EGOHeader'
-import type { EGOType } from '../types/EGOTypes'
+import type { EgoType } from '@/shared/gameData'
 
 interface EGOHeaderI18nProps {
   /** EGO ID to look up name */
@@ -11,7 +11,7 @@ interface EGOHeaderWithI18nProps {
   /** EGO ID for i18n lookup */
   id: string
   /** EGO rank (ZAYIN, TETH, HE, WAW, ALEPH) */
-  rank: EGOType
+  rank: EgoType
 }
 
 /**

@@ -2,7 +2,7 @@ import React, { useState, memo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MAX_LEVEL } from '@/shared/gameData'
 import type { UptieTier, ThreadspinTier } from '../../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import { getEGOTierIconPath } from '@/shared/assets'
 
 interface TierLevelSelectorProps {
@@ -12,7 +12,7 @@ interface TierLevelSelectorProps {
   currentThreadspin?: ThreadspinTier
   currentLevel?: number
   isSelected?: boolean
-  egoType?: EGOType
+  egoType?: EgoType
   /** Per-EGO threadspin ceiling (4 or 5). Required for mode='ego', ignored otherwise. */
   maxThreadspin?: ThreadspinTier
   onConfirm: (
@@ -40,7 +40,7 @@ interface TierLevelSelectorInnerProps {
   currentThreadspin: ThreadspinTier
   currentLevel: number
   isSelected: boolean
-  egoType?: EGOType
+  egoType?: EgoType
   maxThreadspin: ThreadspinTier
   onConfirm: (
     entityId: string,

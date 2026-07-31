@@ -1,4 +1,4 @@
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import type {
   Affinity,
   AtkType,
@@ -38,7 +38,7 @@ export interface EquippedEGO {
 /**
  * EGO slots by rank for a sinner
  */
-export type EGOSlots = Partial<Record<EGOType, EquippedEGO>>
+export type EGOSlots = Partial<Record<EgoType, EquippedEGO>>
 
 /**
  * Skill EA (Exchange Allowance) state per offensive skill slot
@@ -121,7 +121,7 @@ export interface DeckFilterState {
   /** Selected identity ranks — applied in identity mode only */
   selectedRaritys: Set<number>
   /** Selected EGO types — applied in EGO mode only */
-  selectedEgoTypes: Set<EGOType>
+  selectedEgoTypes: Set<EgoType>
   /** Selected seasons */
   selectedSeasons: Set<Season>
   /** Selected unit keywords — applied in identity mode only */

@@ -1,7 +1,7 @@
 import { SINNERS } from '@/shared/gameData'
 import { getEGOImagePath, getEGOTypeIconPath } from '@/shared/assets'
 import type { SinnerEquipment } from '../../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import colorCode from '@static/data/colorCode.json'
 
 interface CompactEgoGridProps {
@@ -9,7 +9,7 @@ interface CompactEgoGridProps {
   egoAffinityMap: Record<string, string>
 }
 
-const EGO_RANKS: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
+const EGO_RANKS: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 
 /**
  * Compact grid showing 12 sinner cells, each with 5 ego rank slots.

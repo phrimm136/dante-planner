@@ -1,7 +1,8 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { EGOListItem, EGOType } from '../types/EGOTypes'
+import type { EGOListItem } from '../types/EGOTypes'
+import type { EgoType } from '@/shared/gameData'
 import { useSearchMappingsDeferred } from '@/shared/filter'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useEGOListI18nDeferred } from '../hooks/useEGOListData'
@@ -20,7 +21,7 @@ interface EGOListProps {
   selectedBattleKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
-  selectedEGOTypes: Set<EGOType>
+  selectedEGOTypes: Set<EgoType>
   selectedSeasons: Set<Season>
   searchQuery: string
 }

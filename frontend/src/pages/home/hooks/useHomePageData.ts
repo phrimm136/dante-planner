@@ -19,7 +19,7 @@ const MAX_RECENT_ITEMS = 16
  */
 const MAX_DATE_GROUPS = 4
 
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 
 /** Identity data needed for card display */
 export interface RecentIdentityData {
@@ -33,7 +33,7 @@ export interface RecentIdentityData {
 export interface RecentEGOData {
   id: string
   updateDate: number
-  egoType: EGOType
+  egoType: EgoType
   season: number
 }
 

@@ -1,4 +1,9 @@
-export { SinSchema, AffinitySchema, PassiveI18nSchema } from './schemas/SharedSchemas'
+export {
+  SinSchema,
+  AffinitySchema,
+  EgoTypeSchema,
+  PassiveI18nSchema,
+} from './schemas/SharedSchemas'
 
 export {
   MAX_LEVEL,

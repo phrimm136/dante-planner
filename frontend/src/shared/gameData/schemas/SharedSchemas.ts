@@ -31,6 +31,12 @@ export const AffinitySchema = z.enum([
 ])
 
 /**
+ * EGO type enum validation (ZAYIN, TETH, HE, WAW, ALEPH)
+ * Ordered by ascending rank
+ */
+export const EgoTypeSchema = z.enum(['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH'])
+
+/**
  * PassiveI18n schema - shared between Identity and EGO
  * Used for passive skill internationalization data
  */

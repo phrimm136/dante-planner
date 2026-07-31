@@ -1,7 +1,6 @@
 import type { z } from 'zod'
-import type { AtkType, Season, SkillAttributeType } from '@/shared/gameData'
+import type { AtkType, EgoType, Season, SkillAttributeType } from '@/shared/gameData'
 import type {
-  EgoTypeSchema,
   EGOSkillDataEntrySchema,
   EGOSkillDataTupleSchema,
   EGOSkillEntrySchema,
@@ -14,8 +13,6 @@ import type {
   EGOPassiveI18nSchema,
   EGOI18nSchema,
 } from '../schemas/EGOSchemas'
-
-export type EGOType = z.infer<typeof EgoTypeSchema>
 
 export type { Threadspin } from '@/shared/gameData'
 
@@ -32,7 +29,7 @@ export interface EGOListItem {
   id: string
   /** Optional - populated when i18n is loaded */
   name?: string
-  egoType: EGOType
+  egoType: EgoType
   skillKeywordList: string[]
   battleKeywordList: string[]
   attributeTypes: SkillAttributeType[]

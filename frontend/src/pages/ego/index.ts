@@ -13,7 +13,6 @@ export { useEGOListData, useEGOListSpec, useEGOListI18n } from './hooks/useEGOLi
 export { useEGODetailData, useEGODetailSpec, useEGODetailI18n } from './hooks/useEGODetailData'
 
 export type {
-  EGOType,
   EGOListItem,
   Threadspin,
   EGOSkillEntry,

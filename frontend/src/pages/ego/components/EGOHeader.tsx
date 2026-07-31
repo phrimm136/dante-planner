@@ -13,12 +13,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import type { EGOType } from '../types/EGOTypes'
+import type { EgoType } from '@/shared/gameData'
 
 interface EGOHeaderProps {
   egoId: string
   name: string
-  rank: EGOType
+  rank: EgoType
 }
 
 /**

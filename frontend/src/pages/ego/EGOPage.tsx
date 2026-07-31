@@ -1,7 +1,8 @@
 import { useState, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOListSpec, EGOList } from '@/pages/ego'
-import type { EGOListItem, EGOType } from '@/pages/ego'
+import type { EGOListItem } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -42,7 +43,7 @@ function EGOCardGrid({
   selectedBattleKeywords: Set<string>
   selectedAttributes: Set<SkillAttributeType>
   selectedAtkTypes: Set<AtkType>
-  selectedEGOTypes: Set<EGOType>
+  selectedEGOTypes: Set<EgoType>
   selectedSeasons: Set<Season>
   searchQuery: string
 }) {
@@ -107,7 +108,7 @@ function EGOPageShell() {
     selectedBattleKeywords: new Set<string>(),
     selectedAttributes: new Set<SkillAttributeType>(),
     selectedAtkTypes: new Set<AtkType>(),
-    selectedEGOTypes: new Set<EGOType>(),
+    selectedEGOTypes: new Set<EgoType>(),
     selectedSeasons: new Set<Season>(),
   })
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -180,7 +181,7 @@ function EGOPageShell() {
       >
         <CompactEGOTypeFilter
           selectedEGOTypes={filters.selectedEGOTypes as Set<string>}
-          onSelectionChange={(types) => setters.selectedEGOTypes(types as Set<EGOType>)}
+          onSelectionChange={(types) => setters.selectedEGOTypes(types as Set<EgoType>)}
         />
       </FilterSection>
 

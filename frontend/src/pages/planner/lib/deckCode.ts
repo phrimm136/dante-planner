@@ -19,12 +19,12 @@
 import pako from 'pako'
 import { SINNERS, MAX_LEVEL } from '@/shared/gameData'
 import type { SinnerEquipment } from '../types/DeckTypes'
-import type { EGOType } from '@/pages/ego'
+import type { EgoType } from '@/shared/gameData'
 
 const BITS_PER_SINNER = 46
 const TOTAL_BITS = 560
 
-const EGO_RANK_ORDER: EGOType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
+const EGO_RANK_ORDER: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 const EGO_BIT_LENGTHS = [7, 7, 7, 7, 6] // ZAYIN, TETH, HE, WAW, ALEPH
 
 export interface DecodedDeck {
