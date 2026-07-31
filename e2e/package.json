@@ -1,0 +1,20 @@
+{
+  "name": "danteplanner-e2e",
+  "private": true,
+  "version": "0.0.0",
+  "description": "End-to-end suites driving a running stack over HTTP",
+  "scripts": {
+    "stack:up": "docker compose --project-directory .. -f ../docker-compose.yml -f ../docker-compose.override.yml -f ../docker-compose.e2e.yml -p limbusplanner up -d --build",
+    "stack:down": "docker compose --project-directory .. -f ../docker-compose.yml -f ../docker-compose.override.yml -f ../docker-compose.e2e.yml -p limbusplanner down",
+    "stack:logs": "docker compose --project-directory .. -p limbusplanner logs --tail=100 backend",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "^26.1.2",
+    "typescript": "^5"
+  }
+}

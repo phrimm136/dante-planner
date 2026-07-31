@@ -40,3 +40,10 @@ backend/jwt-keys-local/
 # terraform/.gitignore, which only covers its own directory.
 *.tfstate
 *.tfstate.*
+
+# Temporary files
+tmp/
+
+# Playwright run artifacts
+test-results/
+playwright-report/
