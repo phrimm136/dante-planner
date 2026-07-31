@@ -1,6 +1,6 @@
 import { LegalPage } from './components/LegalPage'
 
-const LAST_UPDATED = '2026-07-06'
+const LAST_UPDATED = '2026-07-31'
 
 const SECTIONS = [
   'intro',
