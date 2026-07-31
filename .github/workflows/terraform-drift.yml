@@ -1,0 +1,71 @@
+name: Terraform drift
+
+# Triggers carry no attacker-controlled payload: schedule and manual dispatch only, so no
+# github.event field reaches a run block. Secrets arrive through env and are dereferenced as
+# shell variables, never interpolated into the script text.
+on:
+  schedule:
+    - cron: "30 19 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: terraform-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    name: Detect drift
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Assume the provisioning role
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_PROVISIONER_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Reconstruct each stack's inputs exactly as they exist on the operator machine. A partial
+      # set is worse than none: variables that gate a resource default to empty, so a plan missing
+      # one reports the resource's destruction as drift.
+      - name: Materialize stack inputs
+        env:
+          TFVARS_OREGON: ${{ secrets.TFVARS_OREGON }}
+          TFVARS_SEOUL: ${{ secrets.TFVARS_SEOUL }}
+          TFVARS_RDS: ${{ secrets.TFVARS_RDS }}
+          TFVARS_SECRETS: ${{ secrets.TFVARS_SECRETS }}
+          TFVARS_GLOBAL_ACCELERATOR: ${{ secrets.TFVARS_GLOBAL_ACCELERATOR }}
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$TFVARS_OREGON"             > terraform/oregon/terraform.tfvars
+          printf '%s' "$TFVARS_SEOUL"              > terraform/seoul/terraform.tfvars
+          printf '%s' "$TFVARS_RDS"                > terraform/rds/prod.tfvars
+          printf '%s' "$TFVARS_SECRETS"            > terraform/secrets/terraform.tfvars
+          printf '%s' "$TFVARS_GLOBAL_ACCELERATOR" > terraform/global-accelerator/terraform.tfvars
+          printf 'bucket = "danteplanner-tfstate-%s"\n' "$AWS_ACCOUNT_ID" > terraform/backend.hcl
+
+      # The script writes every plan to /tmp and emits only stack names and counts. Nothing here
+      # uploads an artifact or prints a log: this repository is public, and a plan body carries
+      # resource ids and topology.
+      - name: Check drift
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          scripts/ops/terraform-drift-check.sh
+          rc=$?
+          if [ "$rc" -eq 2 ]; then
+            echo "drift or plan failure reported to the tracking issue"
+            exit 0
+          fi
+          exit "$rc"
