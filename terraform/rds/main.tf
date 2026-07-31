@@ -40,7 +40,10 @@ data "aws_vpc" "this" {
 
 # Container created by scripts/ops/provision/rds-master-password-secret.sh and enrolled in
 # terraform/secrets secret_names; apply that stack before this one or the read fails.
-data "aws_secretsmanager_secret_version" "master_password" {
+#
+# Ephemeral, so the value is held only for the duration of a run and never reaches state or a
+# plan file. It can therefore be consumed only by a write-only argument.
+ephemeral "aws_secretsmanager_secret_version" "master_password" {
   secret_id = var.master_password_secret_name
 }
 
@@ -172,7 +175,11 @@ resource "aws_db_instance" "this" {
   # ConflictsWith password, so naming it at all is an error. An instance whose credentials are
   # Secrets-Manager-managed also cannot have a read replica CREATED from it, which would leave
   # the Seoul replica unrebuildable.
-  password = data.aws_secretsmanager_secret_version.master_password.secret_string
+  # Raising master_password_version re-sends whatever the secret currently holds. Rotating the
+  # secret alone changes nothing here: Terraform stores no copy to compare against, so it cannot
+  # see that the value moved.
+  password_wo         = ephemeral.aws_secretsmanager_secret_version.master_password.secret_string
+  password_wo_version = var.master_password_version
 
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [aws_security_group.rds.id]

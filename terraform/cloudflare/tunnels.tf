@@ -2,19 +2,14 @@
 # fleet stop accepting public inbound entirely once the accelerator and its security-group CIDR
 # rules are torn down.
 
-resource "random_password" "tunnel_secret" {
-  for_each = var.regions
-
-  length  = 64
-  special = false
-}
-
 resource "cloudflare_zero_trust_tunnel_cloudflared" "region" {
   for_each = var.regions
 
-  account_id    = var.account_id
-  name          = "${var.name_prefix}-${each.key}"
-  tunnel_secret = base64encode(random_password.tunnel_secret[each.key].result)
+  account_id = var.account_id
+  name       = "${var.name_prefix}-${each.key}"
+
+  # tunnel_secret is omitted so Cloudflare mints it. Supplying one puts it in state twice (at the
+  # generator and on this resource), and this provider offers no write-only argument to prevent it.
 
   # Remotely managed: the ingress rules below live in this state, and the pods carry only a
   # token. A locally-configured tunnel would put routing in a ConfigMap and split the source

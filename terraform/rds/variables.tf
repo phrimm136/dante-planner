@@ -151,6 +151,12 @@ variable "fleet_vpc_cidr" {
   default     = ""
 }
 
+variable "master_password_version" {
+  description = "Raise after rotating the Secrets Manager entry to push the new password to the instance. Terraform keeps no copy of the value, so nothing else makes it notice a rotation."
+  type        = number
+  default     = 1
+}
+
 variable "master_password_secret_name" {
   description = "Secrets Manager entry holding the master password as a plain string. Read at plan time, so it must exist before this stack is applied."
   type        = string
