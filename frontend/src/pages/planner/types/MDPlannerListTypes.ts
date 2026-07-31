@@ -109,8 +109,8 @@ export interface PublicPlanner {
   authorName: string
   /** ISO 8601 timestamp when planner was created */
   createdAt: string
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: string | null
+  /** ISO 8601 timestamp when planner was first published */
+  firstPublishedAt: string
   /** Whether current user has upvoted this planner (null if not authenticated) */
   hasUpvoted: boolean | null
   /** Whether current user has bookmarked this planner (null if not authenticated) */

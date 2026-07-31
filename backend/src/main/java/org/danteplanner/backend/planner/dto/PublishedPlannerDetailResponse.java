@@ -26,6 +26,7 @@ public record PublishedPlannerDetailResponse(
     Integer upvotes,
     Integer viewCount,
     Instant createdAt,
+    Instant firstPublishedAt,
     Instant lastModifiedAt,
     Boolean hasUpvoted,
     Boolean isBookmarked,
@@ -79,6 +80,7 @@ public record PublishedPlannerDetailResponse(
                 .upvotes(upvotes)
                 .viewCount(viewCount)
                 .createdAt(planner.getCreatedAt())
+                .firstPublishedAt(planner.getFirstPublishedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .hasUpvoted(hasUpvoted)
                 .isBookmarked(isBookmarked)

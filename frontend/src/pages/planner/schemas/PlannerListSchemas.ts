@@ -57,8 +57,8 @@ export const PublicPlannerSchema = z.object({
   authorUsernameSuffix: z.string(),
   /** ISO 8601 timestamp when planner was created */
   createdAt: z.string(),
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: z.string().nullable(),
+  /** ISO 8601 timestamp when planner was first published */
+  firstPublishedAt: z.string(),
   /** Whether current user has upvoted (null if not authenticated) */
   hasUpvoted: z.boolean().nullable(),
   /** Whether current user has bookmarked (null if not authenticated) */
@@ -147,6 +147,8 @@ export const ReportResponseSchema = z
  * Includes all fields needed to reconstruct SaveablePlanner for PlannerViewer
  */
 export const PublishedPlannerDetailSchema = PublicPlannerSchema.extend({
+  /** ISO 8601 timestamp when the content was last modified */
+  lastModifiedAt: z.string(),
   /** JSON string of planner content */
   content: z.string(),
   /** Schema version for data format migration */

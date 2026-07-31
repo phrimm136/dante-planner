@@ -72,7 +72,7 @@ export async function fetchPublishedPlanner(
     plannerType: apiData.plannerType,
     syncVersion: apiData.syncVersion,
     createdAt: apiData.createdAt,
-    lastModifiedAt: apiData.lastModifiedAt ?? apiData.createdAt,
+    lastModifiedAt: apiData.lastModifiedAt,
     savedAt: apiData.createdAt,
     userId: null,
     deviceId: 'published',

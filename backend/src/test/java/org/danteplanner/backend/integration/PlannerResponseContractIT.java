@@ -161,7 +161,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(fieldNames(objectMapper.readTree(json))).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "selectedKeywords",
                 "authorUsernameEpithet", "authorUsernameSuffix", "upvotes", "viewCount",
-                "createdAt", "lastModifiedAt", "hasUpvoted", "isBookmarked",
+                "createdAt", "firstPublishedAt", "lastModifiedAt", "hasUpvoted", "isBookmarked",
                 "content", "schemaVersion", "contentVersion", "status", "syncVersion",
                 "isSubscribed", "hasReported", "commentCount", "ownerNotificationsEnabled");
     }

@@ -93,8 +93,8 @@ export interface PublicPlanner {
   authorUsernameSuffix: string
   /** ISO 8601 timestamp when planner was created */
   createdAt: string
-  /** ISO 8601 timestamp when planner was last modified */
-  lastModifiedAt: string | null
+  /** ISO 8601 timestamp when planner was first published */
+  firstPublishedAt: string
   /** Whether current user has upvoted this planner (null if not authenticated) */
   hasUpvoted: boolean | null
   /** Whether current user has bookmarked this planner (null if not authenticated) */
@@ -174,6 +174,8 @@ import type { PlannerStatus } from './PlannerTypes'
  * Includes all fields needed to reconstruct SaveablePlanner for PlannerViewer
  */
 export interface PublishedPlannerDetail extends PublicPlanner {
+  /** ISO 8601 timestamp when the content was last modified */
+  lastModifiedAt: string
   /** JSON string of planner content */
   content: string
   /** Schema version for data format migration */
