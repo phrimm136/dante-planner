@@ -81,7 +81,6 @@ public class SecurityConfig {
 
                 // Public endpoints: OAuth callbacks, health checks
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/actuator/health/readiness").permitAll()
                 .requestMatchers("/actuator/health/liveness").permitAll()
