@@ -2,6 +2,7 @@ package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,18 @@ public class ModerationAccountPurgeService {
 
     private final PlannerReportRepository plannerReportRepository;
     private final PlannerCommentReportRepository plannerCommentReportRepository;
+    private final ModerationActionRepository moderationActionRepository;
+
+    /**
+     * Hand every action the departing account performed to the sentinel.
+     *
+     * @param userId     the departing account
+     * @param sentinelId the account that inherits the actions
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void reassignActionsToSentinel(Long userId, Long sentinelId) {
+        moderationActionRepository.reassignActorToSentinel(userId, sentinelId);
+    }
 
     /**
      * Drop every report filed against the given planners or against comments on them.

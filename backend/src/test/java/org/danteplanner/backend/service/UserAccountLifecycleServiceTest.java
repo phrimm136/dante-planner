@@ -239,9 +239,11 @@ class UserAccountLifecycleServiceTest {
         @DisplayName("Should anonymize authorship, sweep planner rows, then delete the user")
         void performHardDelete_WhenUserOwnsPlanners_AnonymizesThenSweepsThenDeletes() {
             List<UUID> plannerIds = List.of(UUID.randomUUID());
+            when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
+                    .thenReturn(Optional.of(testUser));
             when(plannerAccountPurgeService.plannerIdsOwnedBy(testUser.getId())).thenReturn(plannerIds);
 
-            lifecycleService.performHardDelete(testUser);
+            lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
             var inOrder = inOrder(plannerAccountPurgeService, commentAccountPurgeService,
                     moderationAccountPurgeService, userRepository);
@@ -249,27 +251,51 @@ class UserAccountLifecycleServiceTest {
                     .reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             inOrder.verify(commentAccountPurgeService)
                     .reassignAuthorshipToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            // The actor FK is RESTRICT, so the audit rows must change hands before the delete.
+            inOrder.verify(moderationAccountPurgeService)
+                    .reassignActionsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             // Reports hold no-action FKs to the rows the sweep and the cascade remove, so they go first.
             inOrder.verify(moderationAccountPurgeService).deleteReportsFor(plannerIds);
             inOrder.verify(plannerAccountPurgeService).deleteProjectionsFor(plannerIds);
             // Last: the cascade off this row removes the planner cores the sweep left behind.
             inOrder.verify(userRepository).delete(testUser);
+            // A purged account's cookie would otherwise keep authenticating until natural expiry.
+            verify(tokenBlacklistService).invalidateUserTokens(testUser.getId());
         }
 
         @Test
         @DisplayName("Should still anonymize authorship when the account owns no planners")
         void performHardDelete_WhenUserOwnsNoPlanners_SkipsSweepButStillAnonymizes() {
+            when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
+                    .thenReturn(Optional.of(testUser));
             when(plannerAccountPurgeService.plannerIdsOwnedBy(testUser.getId())).thenReturn(List.of());
 
-            lifecycleService.performHardDelete(testUser);
+            lifecycleService.performHardDelete(testUser.getId(), Instant.now());
 
             verify(plannerAccountPurgeService)
                     .reassignVotesToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             verify(commentAccountPurgeService)
                     .reassignAuthorshipToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
+            verify(moderationAccountPurgeService)
+                    .reassignActionsToSentinel(testUser.getId(), UserAccountLifecycleService.SENTINEL_USER_ID);
             verify(moderationAccountPurgeService, never()).deleteReportsFor(any());
             verify(plannerAccountPurgeService, never()).deleteProjectionsFor(any());
             verify(userRepository).delete(testUser);
+        }
+
+        @Test
+        @DisplayName("Should skip and touch nothing when the account was reactivated after listing")
+        void performHardDelete_WhenNoLongerPurgeable_SkipsWithoutDeleting() {
+            when(userRepository.findWithLockPurgeable(eq(testUser.getId()), any(Instant.class)))
+                    .thenReturn(Optional.empty());
+
+            boolean deleted = lifecycleService.performHardDelete(testUser.getId(), Instant.now());
+
+            assertFalse(deleted);
+            verify(userRepository, never()).delete(any(User.class));
+            verify(tokenBlacklistService, never()).invalidateUserTokens(any());
+            verify(plannerAccountPurgeService, never()).reassignVotesToSentinel(any(), any());
+            verify(moderationAccountPurgeService, never()).reassignActionsToSentinel(any(), any());
         }
     }
 }

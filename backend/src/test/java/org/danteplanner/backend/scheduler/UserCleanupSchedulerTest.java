@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -71,16 +73,16 @@ class UserCleanupSchedulerTest {
 
             when(userRepository.findByPermanentDeleteScheduledAtBefore(any(Instant.class)))
                     .thenReturn(expiredUsers);
-            doNothing().when(lifecycleService).performHardDelete(any(User.class));
+            when(lifecycleService.performHardDelete(anyLong(), any(Instant.class))).thenReturn(true);
 
             // Act
             scheduler.cleanupExpiredUsers();
 
             // Assert
-            verify(lifecycleService, times(3)).performHardDelete(any(User.class));
-            verify(lifecycleService).performHardDelete(expiredUsers.get(0));
-            verify(lifecycleService).performHardDelete(expiredUsers.get(1));
-            verify(lifecycleService).performHardDelete(expiredUsers.get(2));
+            verify(lifecycleService, times(3)).performHardDelete(anyLong(), any(Instant.class));
+            for (User expired : expiredUsers) {
+                verify(lifecycleService).performHardDelete(eq(expired.getId()), any(Instant.class));
+            }
         }
 
         @Test
@@ -94,7 +96,7 @@ class UserCleanupSchedulerTest {
             scheduler.cleanupExpiredUsers();
 
             // Assert
-            verify(lifecycleService, never()).performHardDelete(any(User.class));
+            verify(lifecycleService, never()).performHardDelete(anyLong(), any(Instant.class));
         }
 
         @Test
@@ -110,16 +112,16 @@ class UserCleanupSchedulerTest {
                     .thenReturn(expiredUsers);
 
             // First user fails, second and third succeed
-            doThrow(new RuntimeException("Database error"))
-                    .doNothing()
-                    .doNothing()
-                    .when(lifecycleService).performHardDelete(any(User.class));
+            when(lifecycleService.performHardDelete(anyLong(), any(Instant.class)))
+                    .thenThrow(new RuntimeException("Database error"))
+                    .thenReturn(true)
+                    .thenReturn(true);
 
             // Act - should not throw, should continue processing
             scheduler.cleanupExpiredUsers();
 
             // Assert - all users were attempted
-            verify(lifecycleService, times(3)).performHardDelete(any(User.class));
+            verify(lifecycleService, times(3)).performHardDelete(anyLong(), any(Instant.class));
         }
 
         @Test

@@ -68,6 +68,23 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findWithLockByIdAndDeletedAtIsNull(Long id);
 
     /**
+     * Read a purge-eligible account under a row-level lock.
+     *
+     * <p>Empty means the account stopped being eligible after the scheduler listed it —
+     * reactivation nulls both timestamps — so the caller must treat absence as "skip",
+     * not as "missing".</p>
+     *
+     * @param id     the candidate account
+     * @param cutoff the instant the grace period must have expired before
+     * @return the account if it is still purgeable, with a row-level lock
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.deletedAt IS NOT NULL "
+            + "AND u.permanentDeleteScheduledAt IS NOT NULL "
+            + "AND u.permanentDeleteScheduledAt < :cutoff")
+    Optional<User> findWithLockPurgeable(@Param("id") Long id, @Param("cutoff") Instant cutoff);
+
+    /**
      * Find every active (non-deleted) user except the one holding the given id.
      * Used by the moderation dashboard to list accounts while excluding the sentinel user.
      *

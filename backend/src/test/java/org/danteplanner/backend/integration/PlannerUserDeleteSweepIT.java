@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -146,6 +147,17 @@ class PlannerUserDeleteSweepIT {
                 Long.class, publicId.toString());
     }
 
+    /**
+     * Make the account purge-eligible, then purge it. {@code performHardDelete} re-reads
+     * eligibility under a lock, so a live account is skipped rather than deleted.
+     */
+    private void purgeOwner(Long ownerId) {
+        User managed = userRepository.findById(ownerId).orElseThrow();
+        managed.softDelete(Instant.now().minusSeconds(60));
+        userRepository.save(managed);
+        assertThat(lifecycleService.performHardDelete(ownerId, Instant.now())).isTrue();
+    }
+
     private void insertPlannerVote(Long userId, UUID plannerId) {
         jdbc.update("INSERT INTO planner_votes (user_id, planner_id, vote_type, created_at, version) "
                 + "VALUES (?, UUID_TO_BIN(?), 'UP', NOW(), 0)", userId, plannerId.toString());
@@ -186,7 +198,7 @@ class PlannerUserDeleteSweepIT {
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder().plannerId(draft.getId()).build());
 
-        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+        purgeOwner(owner.getId());
 
         assertThat(userRepository.findById(owner.getId())).as("the user row is gone").isEmpty();
         for (UUID plannerId : List.of(published.getId(), draft.getId())) {
@@ -212,7 +224,7 @@ class PlannerUserDeleteSweepIT {
                 .save(plannerRepository);
         insertPlannerVote(owner.getId(), thirdPartyPlanner.getId());
 
-        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+        purgeOwner(owner.getId());
 
         assertThat(userRepository.findById(owner.getId())).as("the deleted account row is gone").isEmpty();
         assertThat(plannerVoterIds(thirdPartyPlanner.getId()))
@@ -233,7 +245,7 @@ class PlannerUserDeleteSweepIT {
         Long ownComment = insertComment(thirdPartyPlanner.getId(), owner.getId());
         Long thirdPartyComment = insertComment(thirdPartyPlanner.getId(), other.getId());
 
-        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+        purgeOwner(owner.getId());
 
         assertThat(commentAuthorId(ownComment))
                 .as("the row survives so replies keep a parent, now owned by the sentinel")
@@ -259,7 +271,7 @@ class PlannerUserDeleteSweepIT {
         insertCommentVote(owner.getId(), comment);
         insertCommentVote(other.getId(), comment);
 
-        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+        purgeOwner(owner.getId());
 
         assertThat(plannerVoterIds(thirdPartyPlanner.getId()))
                 .as("the planner vote moved to the sentinel and the third party's own vote stayed put")
@@ -272,7 +284,7 @@ class PlannerUserDeleteSweepIT {
     @Test
     @DisplayName("empty-sweep-still-removes-account: an account owning nothing and having voted nowhere is removed anyway")
     void account_WhenNothingToReassign_IsStillRemoved() {
-        lifecycleService.performHardDelete(userRepository.findById(owner.getId()).orElseThrow());
+        purgeOwner(owner.getId());
 
         assertThat(userRepository.findById(owner.getId())).as("the account row is gone").isEmpty();
         assertThat(userRepository.findById(other.getId())).as("the untouched third party survives").isPresent();

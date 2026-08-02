@@ -1,5 +1,6 @@
 package org.danteplanner.backend.user.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
@@ -9,12 +10,14 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -30,6 +33,7 @@ import java.util.UUID;
  * <p>Separated from {@link UserService} to follow Single Responsibility Principle.
  */
 @Service
+@Slf4j
 public class UserAccountLifecycleService {
 
     /**
@@ -122,20 +126,42 @@ public class UserAccountLifecycleService {
     }
 
     /**
-     * Permanently delete a user and reassign their votes and comments to the sentinel user.
-     * This anonymizes the author while preserving comment content. Upvote counts are
-     * denormalized counters, independent of vote rows, so they are unaffected.
+     * Permanently delete a user and reassign their votes, comments, and moderation actions to
+     * the sentinel user. This anonymizes the author while preserving comment content. Upvote
+     * counts are denormalized counters, independent of vote rows, so they are unaffected.
      * Planner satellite/projection/filter rows are swept app-side; the user-row
      * CASCADE removes the planner cores and FK-bearing children.
      *
-     * @param user the user to permanently delete
+     * <p>Eligibility is re-read under a row lock rather than trusted from the caller: the
+     * candidate list is built outside this transaction and may be served by a replica, so an
+     * account reactivated in between is still listed. A no-longer-eligible account is skipped.</p>
+     *
+     * @param userId the account to permanently delete
+     * @param cutoff the instant the grace period must have expired before
+     * @return true if the account was deleted, false if it was no longer eligible
      */
     @Transactional
-    public void performHardDelete(User user) {
-        Long userId = user.getId();
+    public boolean performHardDelete(Long userId, Instant cutoff) {
+        Optional<User> purgeable = userRepository.findWithLockPurgeable(userId, cutoff);
+        if (purgeable.isEmpty()) {
+            return false;
+        }
+        User user = purgeable.get();
+
+        // Auth is token-only, so a surviving cookie would outlive the row it names. Guarded
+        // here rather than inside the service: logout-everywhere depends on this write failing
+        // loudly, while a purge blocked on an unreachable Redis would strand every candidate
+        // past its retention deadline.
+        try {
+            tokenBlacklistService.invalidateUserTokens(userId);
+        } catch (DataAccessException e) {
+            log.warn("Token invalidation unavailable for purged user {}; tokens lapse at expiry",
+                    userId, e);
+        }
 
         plannerAccountPurgeService.reassignVotesToSentinel(userId, SENTINEL_USER_ID);
         commentAccountPurgeService.reassignAuthorshipToSentinel(userId, SENTINEL_USER_ID);
+        moderationAccountPurgeService.reassignActionsToSentinel(userId, SENTINEL_USER_ID);
 
         List<UUID> plannerIds = plannerAccountPurgeService.plannerIdsOwnedBy(userId);
         if (!plannerIds.isEmpty()) {
@@ -146,5 +172,6 @@ public class UserAccountLifecycleService {
 
         // The user row's CASCADE removes the planner cores and their FK-bearing children.
         userRepository.delete(user);
+        return true;
     }
 }
