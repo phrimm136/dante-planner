@@ -23,6 +23,8 @@
 --   - status: draft, saved
 --   - vote_type: UP
 --   - entity_type: IDENTITY, EGO, EGO_GIFT, THEME_PACK
+--   - EGO_GIFT ids: base (9xxx) and both enhanced encodings (19xxx, 29xxx),
+--     including a base/enhanced pair of one gift on the same planner
 --   - content: JSON with equipment, gifts, floorSelections structure
 --   - planner_catalog: visible rows only; one recommended (upvotes >= 10)
 
@@ -78,12 +80,12 @@ VALUES (
                 'egos', JSON_ARRAY(JSON_OBJECT('id', '20201'))
             )
         ),
-        'selectedGiftIds', JSON_ARRAY('30001', '30002'),
-        'observationGiftIds', JSON_ARRAY('30003'),
-        'comprehensiveGiftIds', JSON_ARRAY('30004'),
+        'selectedGiftIds', JSON_ARRAY('9001', '19001', '9002'),
+        'observationGiftIds', JSON_ARRAY('9003'),
+        'comprehensiveGiftIds', JSON_ARRAY('29004'),
         'floorSelections', JSON_ARRAY(
-            JSON_OBJECT('giftIds', JSON_ARRAY('30005', '30006'), 'themePackId', '1001'),
-            JSON_OBJECT('giftIds', JSON_ARRAY('30007'), 'themePackId', NULL)
+            JSON_OBJECT('giftIds', JSON_ARRAY('9005', '19006'), 'themePackId', '1001'),
+            JSON_OBJECT('giftIds', JSON_ARRAY('29007'), 'themePackId', NULL)
         )
     ),
     1, 6, 1, 0, NOW(6)
@@ -102,7 +104,7 @@ VALUES (
                 'egos', JSON_ARRAY(JSON_OBJECT('id', '20301'))
             )
         ),
-        'selectedGiftIds', JSON_ARRAY('30010'),
+        'selectedGiftIds', JSON_ARRAY('9010'),
         'observationGiftIds', JSON_ARRAY(),
         'comprehensiveGiftIds', JSON_ARRAY(),
         'floorSelections', JSON_ARRAY()
@@ -123,7 +125,7 @@ VALUES (
                 'egos', JSON_ARRAY(JSON_OBJECT('id', '20401'))
             )
         ),
-        'selectedGiftIds', JSON_ARRAY('30020'),
+        'selectedGiftIds', JSON_ARRAY('9020'),
         'observationGiftIds', JSON_ARRAY(),
         'comprehensiveGiftIds', JSON_ARRAY(),
         'floorSelections', JSON_ARRAY()
@@ -197,8 +199,10 @@ VALUES
     ('IDENTITY',  10201, UNHEX('AAAA0001000000000000000000000001')),
     ('EGO',       20101, UNHEX('AAAA0001000000000000000000000001')),
     ('EGO',       20102, UNHEX('AAAA0001000000000000000000000001')),
-    ('EGO_GIFT',  30001, UNHEX('AAAA0001000000000000000000000001')),
-    ('EGO_GIFT',  30002, UNHEX('AAAA0001000000000000000000000001')),
+    ('EGO_GIFT',   9001, UNHEX('AAAA0001000000000000000000000001')),
+    ('EGO_GIFT',  19001, UNHEX('AAAA0001000000000000000000000001')),
+    ('EGO_GIFT',   9002, UNHEX('AAAA0001000000000000000000000001')),
+    ('EGO_GIFT',  29004, UNHEX('AAAA0001000000000000000000000001')),
     ('THEME_PACK', 1001, UNHEX('AAAA0001000000000000000000000001'));
 
 -- ============================================================================

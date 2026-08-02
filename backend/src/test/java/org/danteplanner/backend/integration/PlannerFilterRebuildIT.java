@@ -162,4 +162,39 @@ class PlannerFilterRebuildIT {
         assertThat(expected).isNotEmpty();
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("enhanced gift ids index under their base, collapsing onto an existing base row")
+    void rebuildFilters_WhenEnhancedGiftIds_IndexesBaseIdOnly() throws Exception {
+        String content = """
+                {"equipment":{},
+                 "selectedGiftIds":["9154","19154","29154"],
+                 "observationGiftIds":["19001"],
+                 "comprehensiveGiftIds":[],
+                 "floorSelections":[{"giftIds":["29002"],"themePackId":null}]}
+                """;
+        Planner planner = TestDataFactory.planner(owner)
+                .published(true)
+                .content(content)
+                .save(plannerRepository);
+
+        filterService.rebuildFilters(planner.getId());
+
+        Set<Integer> gifts = entityFilterRepository.findAll().stream()
+                .filter(f -> f.getPlannerId().equals(planner.getId()))
+                .filter(f -> f.getEntityType().name().equals("EGO_GIFT"))
+                .map(f -> f.getEntityId())
+                .collect(Collectors.toSet());
+
+        // 9154/19154/29154 are one gift, so the three collapse to a single row.
+        assertThat(gifts).containsExactlyInAnyOrder(9154, 9001, 9002);
+
+        Set<String> oracle = PlannerContentEntityExtractor
+                .extract(objectMapper.readTree(content))
+                .stream()
+                .filter(ref -> ref.type().name().equals("EGO_GIFT"))
+                .map(ref -> String.valueOf(ref.id()))
+                .collect(Collectors.toSet());
+        assertThat(oracle).isEqualTo(gifts.stream().map(String::valueOf).collect(Collectors.toSet()));
+    }
 }

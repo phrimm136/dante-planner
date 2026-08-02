@@ -106,9 +106,28 @@ public final class PlannerContentEntityExtractor {
             return;
         }
         try {
-            refs.add(new EntityRef(type, Integer.parseInt(raw)));
+            int id = Integer.parseInt(raw);
+            refs.add(new EntityRef(type, type == ContentEntityType.EGO_GIFT ? baseGiftId(id) : id));
         } catch (NumberFormatException ignored) {
             // entity ids are integers by contract; anything else is not indexable
         }
+    }
+
+    /**
+     * The base gift a stored id refers to, whatever enhancement it carries.
+     *
+     * <p>Content stores an enhanced gift as the enhancement level prefixed onto the four-digit
+     * base id, so {@code 19154} and {@code 29154} both denote gift {@code 9154}. An id outside
+     * those bands is returned unchanged.</p>
+     *
+     * <p>Must agree with the same collapse in the {@code rebuild_planner_filters} procedure;
+     * the two write the same index from different engines.</p>
+     *
+     * @param id a stored gift id in either base or enhanced form
+     * @return the base gift id
+     */
+    static int baseGiftId(int id) {
+        boolean enhanced = (id >= 19000 && id <= 19999) || (id >= 29000 && id <= 29999);
+        return enhanced ? id % 10000 : id;
     }
 }
