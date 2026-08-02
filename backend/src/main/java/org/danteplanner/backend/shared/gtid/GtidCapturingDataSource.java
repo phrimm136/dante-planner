@@ -6,7 +6,10 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.sql.DataSource;
 
@@ -40,10 +43,19 @@ public class GtidCapturingDataSource extends AbstractDataSource {
     private static final Logger log = LoggerFactory.getLogger(GtidCapturingDataSource.class);
 
     private static final String GLOBAL_GTID_SQL = "SELECT @@gtid_executed";
+    private static final String TRACKER_PROBE_SQL = "SELECT @@session_track_gtids";
     private static final String COMMIT = "commit";
 
     private final DataSource delegate;
     private final GtidWriteCapture capture;
+
+    /**
+     * Whether {@code session_track_gtids} is active, per physical connection. The variable is
+     * seeded at connect time, so one probe per connection is authoritative for its lifetime; weak
+     * keys let entries die with the pooled connection.
+     */
+    private final Map<JdbcConnection, Boolean> trackerActiveByConnection =
+            Collections.synchronizedMap(new WeakHashMap<>());
 
     public GtidCapturingDataSource(DataSource delegate, GtidWriteCapture capture) {
         this.delegate = delegate;
@@ -105,6 +117,13 @@ public class GtidCapturingDataSource extends AbstractDataSource {
             if (target.isReadOnly()) {
                 return;
             }
+            // With the tracker verified active on this connection, a commit that named no GTID
+            // wrote nothing and gates no read; recording the fallback superset here would pin the
+            // requester's next read to the primary for a no-op. The fallback survives only for
+            // connections whose tracker is actually off.
+            if (trackerActive(target)) {
+                return;
+            }
             capture.recordCommit(readGlobalGtidExecuted(target), false);
         } catch (SQLException e) {
             log.warn("Could not capture the committed GTID for the read-your-writes cookie", e);
@@ -114,7 +133,8 @@ public class GtidCapturingDataSource extends AbstractDataSource {
     /**
      * The GTID the server attributed to this transaction, or null when it named none — which means
      * either that the transaction wrote nothing or that {@code session_track_gtids} is off. The
-     * caller cannot tell the two apart, so it falls back to the superset rather than to nothing.
+     * caller tells the two apart with {@link #trackerActive}, probed strictly after this read so
+     * the probe's OK packet cannot wipe the tracker state it is judging.
      */
     private String readOwnGtid(Connection target) throws SQLException {
         ServerSessionStateController controller =
@@ -128,6 +148,21 @@ public class GtidCapturingDataSource extends AbstractDataSource {
             }
         }
         return null;
+    }
+
+    private boolean trackerActive(Connection target) throws SQLException {
+        JdbcConnection physical = target.unwrap(JdbcConnection.class);
+        Boolean cached = trackerActiveByConnection.get(physical);
+        if (cached != null) {
+            return cached;
+        }
+        boolean active;
+        try (Statement statement = target.createStatement();
+                java.sql.ResultSet rs = statement.executeQuery(TRACKER_PROBE_SQL)) {
+            active = rs.next() && "OWN_GTID".equalsIgnoreCase(rs.getString(1));
+        }
+        trackerActiveByConnection.put(physical, active);
+        return active;
     }
 
     /** The primary's entire executed set: correct because it is a superset, wide for the same reason. */

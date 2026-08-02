@@ -90,6 +90,19 @@ public class GtidWriteCapture {
         return Optional.of(unionGtidSets(acc.gtids));
     }
 
+    /**
+     * Returns the union like {@link #pollCapturedGtid()} and resets the window, so exactly one of
+     * the two minting sites — the body-write advice or the filter's after-chain fallback — emits
+     * the cookie for a given request.
+     */
+    public Optional<String> takeCapturedGtid() {
+        Optional<String> gtid = pollCapturedGtid();
+        if (gtid.isPresent()) {
+            accumulator.set(new Accumulator());
+        }
+        return gtid;
+    }
+
     public void clear() {
         accumulator.remove();
     }

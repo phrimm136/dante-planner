@@ -153,10 +153,14 @@ from every client. That is *correct* (it is a superset of the user's write) but 
 gate below will almost never consider the replica caught up, so the next read pins to the primary
 and pays the WAN round trip.
 
-The capture cannot tell "the transaction wrote nothing" from "the tracker is off or was clobbered",
-so it takes the superset rather than reporting nothing — a wide gate costs latency, a missing one
-costs correctness. `gtid.capture{source=fallback}` is the metric that says which case you are
-actually in; a ratio near 1 means the precise path is not working.
+"The transaction wrote nothing" and "the tracker is off or was clobbered" both present as a
+tracker that names no GTID. The capture tells them apart with one `SELECT @@session_track_gtids`
+probe per physical connection, run strictly AFTER the tracker read (the probe's own OK packet
+would wipe the state it judges): tracker verified active means the commit wrote nothing and no
+cookie is minted — a write-shaped request that commits an empty transaction must not pin its
+follow-up read — while a tracker that is genuinely off takes the superset, since a wide gate
+costs latency but a missing one costs correctness. `gtid.capture{source=fallback}` is the metric
+that says which world you are in; a ratio near 1 means the precise path is not working.
 
 ### 4c. The gate, on the way in
 

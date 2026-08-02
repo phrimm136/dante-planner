@@ -45,7 +45,9 @@ public class GtidCookieFilter extends OncePerRequestFilter {
             } else {
                 filterChain.doFilter(request, response);
             }
-            writeCapture.pollCapturedGtid()
+            // Reached only for responses without a JSON body (204s): a bodied response is already
+            // committed by the converter's flush, and GtidCookieResponseAdvice minted before it.
+            writeCapture.takeCapturedGtid()
                     .ifPresent(gtid -> addCookie(response, GtidCookie.of(gtid)));
         } finally {
             writeCapture.clear();
