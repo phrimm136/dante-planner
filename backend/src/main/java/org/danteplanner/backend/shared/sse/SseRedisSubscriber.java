@@ -62,7 +62,8 @@ public class SseRedisSubscriber implements MessageListener {
             return;
         }
         plannerCommentSseService.broadcast(
-                UUID.fromString(envelope.plannerId()), envelope.type().getValue(), envelope);
+                UUID.fromString(envelope.plannerId()), envelope.type().getValue(), envelope,
+                envelope.excludeUserId());
     }
 
     /**

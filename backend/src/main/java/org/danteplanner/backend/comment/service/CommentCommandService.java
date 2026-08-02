@@ -287,6 +287,7 @@ public class CommentCommandService {
     private void publishCommentCreated(UUID plannerId, PlannerComment saved, Long authorUserId) {
         User author = userService.findOptionalById(authorUserId).orElse(null);
         CommentTreeNode payload = CommentTreeNode.fromEntity(saved, author, null, false, List.of());
-        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED, saved.getPublicId().toString(), payload);
+        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED,
+                saved.getPublicId().toString(), authorUserId, payload);
     }
 }

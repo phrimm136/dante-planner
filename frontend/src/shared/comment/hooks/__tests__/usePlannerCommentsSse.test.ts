@@ -96,4 +96,24 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
     expect(tree).toContainEqual(expect.objectContaining({ id: 'c1' }))
     expect(tree).toContainEqual(expect.objectContaining({ id: 'c2', content: 'second' }))
   })
+
+  it('a redelivered comment:added counts once and appends once', () => {
+    const { queryClient, wrapper } = createWrapper()
+    queryClient.setQueryData(['comments', 'planner-1'], [])
+
+    const { result } = renderHook(() => usePlannerCommentsSse('planner-1'), { wrapper })
+    const es = lastEventSource()
+    const event = {
+      type: 'created',
+      plannerId: 'planner-1',
+      payload: { id: 'c9', content: 'only once', replies: [] },
+    }
+
+    act(() => es.emit('comment:added', event))
+    act(() => es.emit('comment:added', event))
+
+    const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{ id: string }>
+    expect(tree.filter((c) => c.id === 'c9')).toHaveLength(1)
+    expect(result.current.newCommentsCount).toBe(1)
+  })
 })

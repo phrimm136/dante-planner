@@ -16,6 +16,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,10 +44,27 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PlannerRepository plannerRepository;
+
+    private UUID publishedPlannerId;
+
+    @BeforeEach
+    void setUp() {
+        User owner = TestDataFactory.createTestUser(userRepository, "sse-owner@example.com");
+        Planner planner = TestDataFactory.planner(owner)
+                .published(true)
+                .save(plannerRepository);
+        publishedPlannerId = planner.getId();
+    }
+
     @Test
     @DisplayName("opens a text/event-stream for a guest with no authentication")
     void subscribeToComments_WhenNoAuth_StartsEventStream() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/planner/{plannerId}/comments/events", UUID.randomUUID()))
+        MvcResult result = mockMvc.perform(get("/api/planner/{plannerId}/comments/events", publishedPlannerId))
                 .andExpect(request().asyncStarted())
                 .andReturn();
 
@@ -51,7 +75,7 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
     @Test
     @DisplayName("opens a text/event-stream when a device cookie is present")
     void subscribeToComments_WhenDeviceCookiePresent_StartsEventStream() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/planner/{plannerId}/comments/events", UUID.randomUUID())
+        MvcResult result = mockMvc.perform(get("/api/planner/{plannerId}/comments/events", publishedPlannerId)
                         .cookie(new Cookie("deviceId", UUID.randomUUID().toString())))
                 .andExpect(request().asyncStarted())
                 .andReturn();

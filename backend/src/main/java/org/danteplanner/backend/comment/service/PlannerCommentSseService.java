@@ -45,30 +45,31 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      *
      * @param plannerId the planner ID to subscribe to
      * @param deviceId  the device identifier (from cookie)
+     * @param userId    the authenticated account, or null for a guest
      * @return the SSE emitter for the connection
      */
-    public SseEmitter subscribe(UUID plannerId, UUID deviceId) {
-        SseEmitter emitter = register(plannerId, deviceId);
+    public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) {
+        SseEmitter emitter = register(plannerId, deviceId, userId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;
     }
 
     /**
-     * Send a serialized event to the given subscribers of a planner, skipping an optional device
+     * Send a serialized event to the given subscribers of a planner, skipping every connection of an optional account
      * and removing emitters that fail on send.
      *
      * @param plannerId       the planner ID whose subscribers receive the event
      * @param subscribers     the subscriber list to send to
      * @param eventName       the SSE event name
      * @param jsonData        the serialized event payload
-     * @param excludeDeviceId the device ID to skip, or {@code null} to send to all
+     * @param excludeUserId the account to skip, or {@code null} to send to all
      * @return the number of subscribers the event was sent to
      */
     private int sendToSubscribers(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> subscribers,
-                                  String eventName, String jsonData, UUID excludeDeviceId) {
+                                  String eventName, String jsonData, Long excludeUserId) {
         int sent = 0;
         for (EmitterEntry entry : subscribers) {
-            if (excludeDeviceId != null && entry.deviceId().equals(excludeDeviceId)) {
+            if (excludeUserId != null && excludeUserId.equals(entry.userId())) {
                 continue;
             }
 
@@ -93,8 +94,9 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      * @param plannerId the planner ID whose subscribers receive the event
      * @param eventType the SSE event name
      * @param payload   the event payload
+     * @param excludeUserId the account whose action raised the event, or null
      */
-    public void broadcast(UUID plannerId, String eventType, Object payload) {
+    public void broadcast(UUID plannerId, String eventType, Object payload, Long excludeUserId) {
         var subscribers = emitters.get(plannerId);
         if (subscribers == null || subscribers.isEmpty()) {
             log.debug("No subscribers for planner {} comment event {}", plannerId, eventType);
@@ -109,7 +111,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
             return;
         }
 
-        sendToSubscribers(plannerId, subscribers, eventType, jsonData, null);
+        sendToSubscribers(plannerId, subscribers, eventType, jsonData, excludeUserId);
     }
 
     /**

@@ -62,10 +62,13 @@ public class SsePublisher {
      * @param plannerId the planner whose comment subscribers receive the event
      * @param type      the event type
      * @param entityId  the affected comment id
+     * @param authorUserId the account whose action raised the event, skipped on delivery
      * @param payload   the event payload (patched into the recipient's cache)
      */
-    public void publishCommentEvent(java.util.UUID plannerId, SseEventType type, String entityId, Object payload) {
-        publish(SseChannel.COMMENT, SseEnvelope.commentEvent(plannerId, type, entityId, payload));
+    public void publishCommentEvent(java.util.UUID plannerId, SseEventType type, String entityId,
+            Long authorUserId, Object payload) {
+        publish(SseChannel.COMMENT,
+                SseEnvelope.commentEvent(plannerId, type, entityId, authorUserId, payload));
     }
 
     /**

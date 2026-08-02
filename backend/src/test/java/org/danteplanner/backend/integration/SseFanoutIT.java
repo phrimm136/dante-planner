@@ -27,6 +27,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -146,12 +147,13 @@ class SseFanoutIT extends CausalHarnessSupport {
         String commentId = "comment-123";
         Map<String, Object> payload = Map.of("commentId", commentId, "body", "nice deck");
 
-        ssePublisher.publishCommentEvent(plannerId, SseEventType.CREATED, commentId, payload);
+        ssePublisher.publishCommentEvent(plannerId, SseEventType.CREATED, commentId, null, payload);
 
         verify(plannerCommentSseService, timeout(5000)).broadcast(
                 eq(plannerId),
                 eq(SseEventType.CREATED.getValue()),
-                argThat(data -> data != null && data.toString().contains(commentId)));
+                argThat(data -> data != null && data.toString().contains(commentId)),
+                any());
     }
 
     @Test
@@ -199,6 +201,7 @@ class SseFanoutIT extends CausalHarnessSupport {
         verify(plannerCommentSseService, timeout(5000)).broadcast(
                 eq(plannerId),
                 eq("comment:added"),
-                argThat(data -> data != null && data.toString().contains(plannerId.toString())));
+                argThat(data -> data != null && data.toString().contains(plannerId.toString())),
+                eq(commenterId));
     }
 }

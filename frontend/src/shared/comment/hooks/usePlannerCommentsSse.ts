@@ -87,19 +87,25 @@ export function usePlannerCommentsSse(plannerId: string) {
       })
 
       es.addEventListener('comment:added', (event) => {
-        setNewCommentsCount((c) => c + 1)
-
         try {
           const envelope = SseEnvelopeSchema.parse(JSON.parse(event.data as string))
           const payload = envelope.payload as CommentNode | null
           if (payload && typeof payload === 'object' && typeof payload.id === 'string') {
+            let appended = false
             queryClient.setQueryData(
               commentsQueryKeys.list(plannerId),
               (prev: CommentNode[] | undefined) => {
                 const arr = Array.isArray(prev) ? prev : []
-                return arr.some((c) => c?.id === payload.id) ? arr : [...arr, payload]
+                if (arr.some((c) => c?.id === payload.id)) {
+                  return arr
+                }
+                appended = true
+                return [...arr, payload]
               },
             )
+            if (appended) {
+              setNewCommentsCount((c) => c + 1)
+            }
           }
         } catch (error) {
           console.warn('Planner comment SSE: failed to patch comment tree cache', error)

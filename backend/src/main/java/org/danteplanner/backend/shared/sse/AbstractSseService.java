@@ -29,7 +29,23 @@ public abstract class AbstractSseService<K> {
 
     protected final ConcurrentHashMap<K, CopyOnWriteArrayList<EmitterEntry>> emitters = new ConcurrentHashMap<>();
 
-    protected record EmitterEntry(UUID deviceId, SseEmitter emitter) {}
+    /**
+     * A live connection. {@code deviceId} de-duplicates a client's own reconnects and is
+     * client-supplied; {@code userId} comes from the authenticated principal and is null
+     * for a guest, so only it is safe to address or exclude by.
+     */
+    protected record EmitterEntry(UUID deviceId, Long userId, SseEmitter emitter) {}
+
+    /**
+     * Register an emitter for a key/device with no associated account.
+     *
+     * @param key      the registry key
+     * @param deviceId the device identifier
+     * @return the registered emitter
+     */
+    protected SseEmitter register(K key, UUID deviceId) {
+        return register(key, deviceId, null);
+    }
 
     /**
      * Register an emitter for a key/device, replacing any prior emitter for the
@@ -37,15 +53,16 @@ public abstract class AbstractSseService<K> {
      *
      * @param key      the registry key
      * @param deviceId the device identifier
+     * @param userId   the authenticated account, or null for a guest
      * @return the registered emitter
      */
-    protected SseEmitter register(K key, UUID deviceId) {
+    protected SseEmitter register(K key, UUID deviceId, Long userId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
 
         var connections = emitters.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>());
         connections.removeIf(e -> e.deviceId().equals(deviceId));
         beforeRegister(key, connections);
-        connections.add(new EmitterEntry(deviceId, emitter));
+        connections.add(new EmitterEntry(deviceId, userId, emitter));
         afterRegister(key);
 
         emitter.onCompletion(() -> removeConnection(key, deviceId));

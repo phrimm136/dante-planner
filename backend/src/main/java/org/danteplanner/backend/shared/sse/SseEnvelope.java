@@ -32,8 +32,15 @@ public record SseEnvelope(
         return new SseEnvelope(SseEventType.SETTINGS_INVALIDATED, null, userId, null, null, null, null, null, null);
     }
 
-    public static SseEnvelope commentEvent(java.util.UUID plannerId, SseEventType type, String entityId, Object payload) {
-        return new SseEnvelope(type, null, null, plannerId.toString(), entityId, null, null, null, payload);
+    /**
+     * Comment-channel event, carrying the author so their own connections can be skipped.
+     * The exclusion must survive the Redis hop, since the pod that dispatches is not the
+     * pod that published.
+     */
+    public static SseEnvelope commentEvent(java.util.UUID plannerId, SseEventType type,
+            String entityId, Long authorUserId, Object payload) {
+        return new SseEnvelope(
+                type, null, null, plannerId.toString(), entityId, null, null, authorUserId, payload);
     }
 
     /**
