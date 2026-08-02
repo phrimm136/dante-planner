@@ -21,6 +21,10 @@ logs/
 .claude/projects/
 .claude/worktrees/
 .playwright-mcp/
+**/settings.local.json
+
+# Miniflare's local R2/KV emulation state
+frontend/.wrangler/
 
 # Backup files
 *.backup

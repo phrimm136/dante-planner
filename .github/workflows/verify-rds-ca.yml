@@ -1,0 +1,30 @@
+name: Verify RDS CA Bundle
+
+# The committed bundle (deploy/base/rds-global-bundle.pem) is a snapshot of
+# AWS's published RDS trust anchors. AWS rotates these on a multi-year cycle
+# with long announcement windows; this check turns that rare event into a
+# loud CI failure instead of a silent TLS breakage at the next CA cutover.
+on:
+  schedule:
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-rds-ca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+
+      - name: Compare committed bundle against upstream
+        run: |
+          curl -sf --retry 3 https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /tmp/upstream.pem
+          if ! diff -q deploy/base/rds-global-bundle.pem /tmp/upstream.pem; then
+            echo "::error::RDS CA bundle has drifted from upstream — AWS rotated CAs."
+            echo "::error::Refresh with: curl -sf https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o deploy/base/rds-global-bundle.pem"
+            exit 1
+          fi
+          echo "bundle matches upstream ($(grep -c 'BEGIN CERTIFICATE' /tmp/upstream.pem) certificates)"
