@@ -16,7 +16,7 @@
  * Encoding chain: Binary → Base64 → Gzip → Base64
  */
 
-import pako from 'pako'
+import { gzip, ungzip } from 'pako'
 import { SINNERS, MAX_LEVEL } from '@/shared/gameData'
 import type { SinnerEquipment } from '../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
@@ -26,6 +26,16 @@ const TOTAL_BITS = 560
 
 const EGO_RANK_ORDER: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
 const EGO_BIT_LENGTHS = [7, 7, 7, 7, 6] // ZAYIN, TETH, HE, WAW, ALEPH
+
+/** Offset of the OS field in a gzip member header (RFC 1952 section 2.3) */
+export const GZIP_OS_BYTE_OFFSET = 9
+
+/**
+ * OS field value 10, TOPS-20 (RFC 1952 section 2.3.1). Load-bearing: it fixes
+ * the leading base64 character of every emitted code, so any other value
+ * changes the shape of what this app writes.
+ */
+export const GZIP_OS_TOPS20 = 10
 
 export interface DecodedDeck {
   equipment: Record<string, SinnerEquipment>
@@ -138,8 +148,10 @@ export function encodeDeckCode(
   // First base64 encode
   const firstBase64 = btoa(String.fromCharCode(...bytes))
 
-  // Gzip compress with Windows OS header for compatibility
-  const compressed = pako.gzip(firstBase64, { header: { os: 10 } } as pako.DeflateFunctionOptions)
+  // pako 3 ignores a `header` option on the one-shot gzip(), so the OS byte is
+  // written directly into the emitted header instead.
+  const compressed = gzip(firstBase64)
+  compressed[GZIP_OS_BYTE_OFFSET] = GZIP_OS_TOPS20
 
   // Second base64 encode
   const secondBase64 = btoa(String.fromCharCode(...compressed))
@@ -165,7 +177,7 @@ export function decodeDeckCode(
   }
 
   // Gzip decompress
-  const firstBase64 = pako.ungzip(compressed, { to: 'string' })
+  const firstBase64 = ungzip(compressed, { toText: true })
 
   // First base64 decode
   const bytesStr = atob(firstBase64)
@@ -293,7 +305,7 @@ export function validateDeckCode(code: string): ValidationResult {
     }
 
     // Gzip decompress
-    const firstBase64 = pako.ungzip(compressed, { to: 'string' })
+    const firstBase64 = ungzip(compressed, { toText: true })
 
     // First base64 decode
     atob(firstBase64)

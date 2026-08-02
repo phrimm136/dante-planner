@@ -1,7 +1,7 @@
 import { Suspense, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
-import pako from 'pako'
+import { gzip, ungzip } from 'pako'
 import DOMPurify from 'dompurify'
 
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { BatchConflictDialog } from './BatchConflictDialog'
 import { usePlannerStorage } from '../hooks/usePlannerStorage'
 import { EXPORT_VERSION, EXPORT_FILE_EXTENSION, EXPORT_MAX_FILE_SIZE } from '@/lib/constants'
+import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../lib/deckCode'
 import { ExportEnvelopeSchema } from '../schemas/PlannerSchemas'
 import { isValidUUID } from '@/lib/utils'
 
@@ -124,11 +125,11 @@ function PlannerExportImportSectionContent() {
 
       setProgress(60)
 
-      // Compress with gzip (type assertion for header option not in DefinitelyTyped)
+      // pako 3 ignores a `header` option on the one-shot gzip(), so the OS byte is
+      // written directly into the emitted header instead.
       const jsonString = JSON.stringify(envelope)
-      const compressed = pako.gzip(jsonString, {
-        header: { os: 10 },
-      } as pako.DeflateFunctionOptions)
+      const compressed = gzip(jsonString)
+      compressed[GZIP_OS_BYTE_OFFSET] = GZIP_OS_TOPS20
 
       setProgress(80)
 
@@ -202,7 +203,7 @@ function PlannerExportImportSectionContent() {
       // Decompress
       let jsonString: string
       try {
-        jsonString = pako.ungzip(compressed, { to: 'string' })
+        jsonString = ungzip(compressed, { toText: true })
       } catch {
         toast.error(t('exportImport.decompressFailed', 'Failed to decompress file'))
         resetImportState()
