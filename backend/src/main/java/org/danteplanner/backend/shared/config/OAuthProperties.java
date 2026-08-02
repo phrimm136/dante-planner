@@ -51,5 +51,11 @@ public class OAuthProperties {
 
         @NotBlank(message = "Google OAuth user info URL is required")
         private String userInfoUrl;
+
+        @NotBlank(message = "Google OAuth JWKS URI is required")
+        private String jwksUri;
+
+        @NotBlank(message = "Google OAuth issuer is required")
+        private String issuer;
     }
 }

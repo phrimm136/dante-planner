@@ -2,7 +2,6 @@ package org.danteplanner.backend.auth.oauth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.OAuthProperties;
@@ -17,6 +16,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -37,6 +37,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final OAuthProperties oAuthProperties;
+    private final GoogleIdTokenVerifier idTokenVerifier;
 
     @Override
     public String getProviderName() {
@@ -149,23 +150,27 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
     @Override
     public OAuthUserInfo getUserInfo(OAuthTokens tokens) {
-        if (tokens.idToken() != null) {
-            try {
-                String payload = tokens.idToken().split("\\.")[1];
-                byte[] decoded = Base64.getUrlDecoder().decode(payload);
-                JsonNode json = objectMapper.readTree(decoded);
-                return new OAuthUserInfo(
-                    json.get("sub").asText(),
-                    json.get("email").asText()
-                );
-            } catch (Exception e) {
-                log.warn(
-                    "Failed to extract user info from id_token, falling back to userinfo endpoint",
-                    e
-                );
-            }
+        if (tokens.idToken() == null) {
+            return getUserInfo(tokens.accessToken());
         }
-        return getUserInfo(tokens.accessToken());
+        Jwt verified = idTokenVerifier.verify(tokens.idToken());
+        // Signature validity says nothing about which optional claims the consent screen
+        // granted, and both fields are required downstream.
+        String subject = requireClaim(verified.getSubject(), "sub");
+        String email = requireClaim(verified.getClaimAsString("email"), "email");
+        return new OAuthUserInfo(subject, email);
+    }
+
+    private String requireClaim(String value, String claim) {
+        if (value == null || value.isBlank()) {
+            throw new OAuthException(
+                PROVIDER_NAME,
+                "id_token",
+                "Missing required field: " + claim,
+                null
+            );
+        }
+        return value;
     }
 
     private OAuthTokens parseTokenResponse(String responseBody) {

@@ -1,0 +1,11 @@
+# 040 google-id-token-verification
+epic: none · pr: none
+
+## Decisions
+- @auth @oauth — An `id_token` is verified against the issuer's published signing keys before any claim inside it is read, because the token arrives over an endpoint that is deployment configuration and the transport therefore proves nothing about who minted it. The subject claim becomes the account identity, so trusting an unverified one hands account selection to whoever can set the endpoint. REJECTED: reading claims from the decoded payload and relying on TLS to the token endpoint — the property TLS supplies is that nobody altered the response in flight, not that the responder is the issuer.
+- @auth @oauth — Verification uses the resource-server library's JWKS-backed decoder rather than a hand-rolled fetch, because key selection by identifier, caching, and rotation are the parts that get written wrong and the dependency is already on the classpath for the same reason. REJECTED: pinning the issuer's public key in configuration — removes the network dependency at login, and turns every issuer key rotation into an outage that looks like a break-in.
+- @auth @oauth — A token that fails verification aborts the login instead of falling back to the userinfo endpoint. A genuine flow always yields a verifiable token, so a failure is either an attack or a misconfiguration, and both should surface. The fallback survives only for the case where no token was issued at all. REJECTED: falling back on verification failure — indistinguishable from success to the user and to the logs, and the fallback endpoint is configured from the same place as the token endpoint, so it is not an independent check.
+- @auth @oauth (taste) — Issuer and JWKS location are configuration with production defaults rather than compiled-in constants, matching the endpoints beside them, and both are startup-validated as non-blank so a missing value fails the boot rather than the first login. REJECTED: compiling them in to shrink the trust surface — the surface only shrinks if every OAuth endpoint is compiled in, and a test issuer is the reason they are not.
+
+## Takeaway
+- takeaway: a signature is what makes a bearer's claims checkable without trusting the channel it arrived on, so any code path that reads a claim before checking the signature has silently promoted its transport to an authority.
