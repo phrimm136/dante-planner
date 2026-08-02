@@ -15,7 +15,7 @@ in `../README.md`.
 |---|---|
 | `Draft` | On the default branch, readable and citable, not yet agreed |
 | `Accepted` | Agreed; issues may be cut from it |
-| `Implemented` | Every child issue closed |
+| `Implemented` | Every decomposition node landed and the tracking issue closed |
 | `Rejected` | Argued and declined; kept, because the argument is the value |
 | `Superseded by NNNN` | Replaced by a later proposal |
 
