@@ -15,6 +15,9 @@ updates:
       frontend-deps:
         patterns:
           - "*" # Combines multiple FE updates into one PR to reduce CI load
+        update-types:
+          - "minor"
+          - "patch"
 
   # 2. Backend: Java (Gradle)
   - package-ecosystem: "gradle"
@@ -32,6 +35,9 @@ updates:
           - "org.springframework.*"
           - "com.fasterxml.jackson.*"
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # 3. GitHub Actions: Keep your workflow files secure and updated
   - package-ecosystem: "github-actions"
@@ -39,3 +45,65 @@ updates:
     schedule:
       interval: "monthly"
     target-branch: "dev"
+
+  # 4. E2E harness: Playwright suite, its own manifest
+  - package-ecosystem: "npm"
+    directory: "/e2e"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    labels:
+      - "e2e"
+      - "dependencies"
+    groups:
+      e2e-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # 5. Claude Code hooks: tsx/esbuild toolchain the hooks run on
+  - package-ecosystem: "npm"
+    directory: "/.claude/hooks"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    labels:
+      - "tooling"
+      - "dependencies"
+    groups:
+      hooks-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # 6. Backend container base images
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    target-branch: "dev"
+    labels:
+      - "backend"
+      - "dependencies"
+
+  # 7. Terraform providers, one stack per directory
+  - package-ecosystem: "terraform"
+    directories:
+      - "/terraform/*"
+    schedule:
+      interval: "monthly"
+    target-branch: "dev"
+    labels:
+      - "infra"
+      - "dependencies"
+    groups:
+      terraform-deps:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
