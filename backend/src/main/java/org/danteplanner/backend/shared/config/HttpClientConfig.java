@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,6 +27,14 @@ public class HttpClientConfig {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(CONNECT_TIMEOUT_MS);
         factory.setReadTimeout(READ_TIMEOUT_MS);
-        return new RestTemplate(factory);
+        RestTemplate restTemplate = new RestTemplate(factory);
+        // The JDK's default `Java/<version>` agent is on common WAF bot-signature lists —
+        // Cloudflare's browser integrity check answers it with an HTML 403 — so outbound calls
+        // identify as this product instead.
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            request.getHeaders().set(HttpHeaders.USER_AGENT, "DantePlanner");
+            return execution.execute(request, body);
+        });
+        return restTemplate;
     }
 }
