@@ -32,12 +32,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class GoogleOAuthProvider implements OAuthProvider {
 
     private static final String PROVIDER_NAME = "google";
-    private static final String TOKEN_URL =
-        "https://oauth2.googleapis.com/token";
-    private static final String USER_INFO_URL =
-        "https://www.googleapis.com/oauth2/v2/userinfo";
-    private static final String AUTHORIZE_URL =
-        "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String SCOPE = "openid email";
 
     private final RestTemplate restTemplate;
@@ -51,7 +45,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
     @Override
     public String buildAuthorizationUrl(String state, String codeChallenge) {
-        return UriComponentsBuilder.fromUriString(AUTHORIZE_URL)
+        return UriComponentsBuilder.fromUriString(oAuthProperties.getGoogle().getAuthorizeUrl())
             .queryParam("client_id", oAuthProperties.getGoogle().getClientId())
             .queryParam("redirect_uri", oAuthProperties.getGoogle().getRedirectUri())
             .queryParam("response_type", "code")
@@ -95,7 +89,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
                 redirectUri
             );
             ResponseEntity<String> response = restTemplate.postForEntity(
-                TOKEN_URL,
+                oAuthProperties.getGoogle().getTokenUrl(),
                 request,
                 String.class
             );
@@ -137,7 +131,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(
-                USER_INFO_URL,
+                oAuthProperties.getGoogle().getUserInfoUrl(),
                 HttpMethod.GET,
                 request,
                 String.class

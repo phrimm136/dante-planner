@@ -16,6 +16,9 @@ import org.springframework.validation.annotation.Validated;
  * - oauth.google.client-id: Google OAuth client ID
  * - oauth.google.client-secret: Google OAuth client secret
  * - oauth.google.redirect-uri: OAuth redirect URI
+ * - oauth.google.authorize-url: authorization endpoint
+ * - oauth.google.token-url: token endpoint
+ * - oauth.google.user-info-url: userinfo endpoint
  */
 @Configuration
 @ConfigurationProperties(prefix = "oauth")
@@ -39,5 +42,14 @@ public class OAuthProperties {
 
         @NotBlank(message = "Google OAuth redirect URI is required")
         private String redirectUri;
+
+        @NotBlank(message = "Google OAuth authorize URL is required")
+        private String authorizeUrl;
+
+        @NotBlank(message = "Google OAuth token URL is required")
+        private String tokenUrl;
+
+        @NotBlank(message = "Google OAuth user info URL is required")
+        private String userInfoUrl;
     }
 }
