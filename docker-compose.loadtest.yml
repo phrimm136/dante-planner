@@ -1,0 +1,18 @@
+# Load test overrides
+# Activates the loadtest profile and exposes backend port for actuator monitoring.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.loadtest.yml up -d --build
+#   k6 run -e BASE_URL=http://localhost scripts/load-test.js
+#
+# Monitor pool saturation (separate terminal):
+#   watch -n 1 'curl -s http://localhost:8080/actuator/metrics/hikari_pool_pending | grep value'
+#   watch -n 1 'curl -s http://localhost:8080/actuator/metrics/hikari_pool_active  | grep value'
+#   docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" backend mysql
+
+services:
+  backend:
+    environment:
+      SPRING_PROFILES_ACTIVE: dev,loadtest
+    ports:
+      - "8080:8080"  # actuator metrics only — k6 traffic goes through nginx on :80
