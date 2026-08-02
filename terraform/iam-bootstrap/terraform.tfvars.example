@@ -7,17 +7,19 @@
 # same account as the ARN below.
 aws_account_id = "REPLACE_WITH_ACCOUNT_ID"
 
-# The human admin principal (IAM user/role or SSO permission-set role) allowed to assume the
-# provisioning role from a laptop for the initial apply.
+# The human admin principals (IAM user/role or SSO permission-set role) allowed to assume the
+# provisioning role from a laptop for the initial apply. A list, so a replacement principal is
+# admitted beside the one it supersedes and the old entry drops only once the new one is proven.
 #   IAM user:      arn:aws:iam::<account-id>:user/<name>
 #   IAM role:      arn:aws:iam::<account-id>:role/<name>
-#   SSO/Identity:  arn:aws:sts::<account-id>:assumed-role/AWSReservedSSO_<permset>_<hash>/<user>
-trusted_admin_principal_arn = "REPLACE_WITH_ADMIN_PRINCIPAL_ARN"
+#   SSO/Identity:  arn:aws:iam::<account-id>:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_<permset>_<hash>
+trusted_admin_principal_arns = ["REPLACE_WITH_ADMIN_PRINCIPAL_ARN"]
 
 # --- Optional overrides (defaults in variables.tf are sensible) --------------
 
 # region      = "us-west-2"
 # name_prefix = "danteplanner"                    # MUST match terraform/oregon
+# One role per account, named for the account it provisions.
 # role_name   = "danteplanner-provisioner"
 
 # The GitHub OIDC subject the trust policy matches. The environment-scoped form is tighter than a

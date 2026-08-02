@@ -22,6 +22,7 @@ locals {
     { for a in aws_organizations_organization.this.accounts : a.name => a.id },
     { for name, a in aws_organizations_account.security : name => a.id },
     { for name, a in aws_organizations_account.nonprod : name => a.id },
+    { for name, a in aws_organizations_account.prod : name => a.id },
   )
 }
 
