@@ -73,6 +73,18 @@ public class RedisConnectionConfig {
     /** Bound on a cross-region auth Redis command, well below Lettuce's minute-long default. */
     private static final long AUTH_COMMAND_TIMEOUT_MS = 3_000L;
 
+    /**
+     * Every role needs the same bound, not just the cross-region one: a caller that degrades
+     * gracefully only degrades as fast as its slowest command, and Lettuce's default lets an
+     * unreachable local Redis hold a request thread for a minute — long enough to exhaust the
+     * pool from a dependency the ladder promises to survive.
+     */
+    private static LettuceClientConfiguration boundedClientConfiguration() {
+        return LettuceClientConfiguration.builder()
+                .commandTimeout(Duration.ofMillis(AUTH_COMMAND_TIMEOUT_MS))
+                .build();
+    }
+
     @Valid
     private Endpoint auth = new Endpoint();
 
@@ -90,26 +102,22 @@ public class RedisConnectionConfig {
     public LettuceConnectionFactory authRedisConnectionFactory() {
         // The auth endpoint is reached cross-region, so a command must give up well before
         // Lettuce's minute-long default and let the caller degrade instead of holding its thread.
-        return new LettuceConnectionFactory(
-                standaloneConfiguration(auth),
-                LettuceClientConfiguration.builder()
-                        .commandTimeout(Duration.ofMillis(AUTH_COMMAND_TIMEOUT_MS))
-                        .build());
+        return new LettuceConnectionFactory(standaloneConfiguration(auth), boundedClientConfiguration());
     }
 
     @Bean
     public LettuceConnectionFactory rateLimitRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(rateLimit));
+        return new LettuceConnectionFactory(standaloneConfiguration(rateLimit), boundedClientConfiguration());
     }
 
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(sseLocal));
+        return new LettuceConnectionFactory(standaloneConfiguration(sseLocal), boundedClientConfiguration());
     }
 
     @Bean
     public LettuceConnectionFactory authLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(authLocal));
+        return new LettuceConnectionFactory(standaloneConfiguration(authLocal), boundedClientConfiguration());
     }
 
     /**
