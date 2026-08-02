@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -55,6 +56,7 @@ public class RefreshRotationService {
     private static final String ROTATED_RESULT = "ROTATED";
     private static final String THEFT_RESULT = "THEFT";
     private static final String REVOKED_RESULT = "REVOKED";
+    private static final String INVALIDATED_RESULT = "INVALIDATED";
     private static final String REUSED_RESULT_PREFIX = "REUSED" + FIELD_SEPARATOR;
 
     static final String METRIC_OUTCOME = "jwt_rotation_outcome_total";
@@ -66,13 +68,18 @@ public class RefreshRotationService {
     static final String OUTCOME_THEFT_REVOKED = "theft_revoked";
     static final String OUTCOME_LEGACY_ADMITTED = "legacy_admitted";
     static final String OUTCOME_REJECTED_REVOKED_FAMILY = "rejected_revoked_family";
+    static final String OUTCOME_REJECTED_USER_INVALIDATED = "rejected_user_invalidated";
     static final String OUTCOME_REJECTED_INVALID = "rejected_invalid";
 
     /**
      * Atomic single-family rotation transition (mechanics §2.2).
      *
-     * <p>KEYS[1] = family key; ARGV = jti, parentJti (or ""), successorJti,
-     * succExpiryMs, nowMs, ttlMs, successorJwt, reuseWindowMs. Returns {@code "REVOKED"}
+     * <p>KEYS[1] = family key, KEYS[2] = user-invalidation key; ARGV = jti, parentJti (or ""),
+     * successorJti, succExpiryMs, nowMs, ttlMs, successorJwt, reuseWindowMs, presentedIssuedAtMs.
+     * Both keys are read in one script so "logged out everywhere" is an invariant rotation
+     * enforces rather than a check each caller must remember; they carry no common hash tag,
+     * so this requires a non-clustered Redis. Returns {@code "INVALIDATED"} if the presented
+     * token predates the user's invalidation stamp; {@code "REVOKED"}
      * if the family already carries the revocation marker; {@code "THEFT"} (and revokes
      * the whole family) if the presented token is a replay of a spent
      * ({@code RETIRED}/{@code SUPERSEDED}) token; {@code "REUSED|<jwt>"} if the presented
@@ -92,10 +99,14 @@ public class RefreshRotationService {
      * in Redis.</p>
      */
     private static final String ROTATE_SCRIPT = """
-            -- KEYS[1] = rt:fam:{F}
-            -- ARGV   = jti, parentJti, successorJti, succExpiryMs, nowMs, ttlMs, succJwt, reuseWindowMs
-            local fkey = KEYS[1]
+            -- KEYS = rt:fam:{F}, uinv:{user}
+            -- ARGV = jti, parentJti, successorJti, succExpiryMs, nowMs, ttlMs, succJwt,
+            --        reuseWindowMs, presentedIssuedAtMs
+            local fkey, ikey = KEYS[1], KEYS[2]
             local jti, parent, succ = ARGV[1], ARGV[2], ARGV[3]
+
+            local inv = redis.call('GET', ikey)
+            if inv and tonumber(ARGV[9]) < tonumber(inv) then return 'INVALIDATED' end
 
             if redis.call('HGET', fkey, '__revoked__') then return 'REVOKED' end
 
@@ -229,10 +240,11 @@ public class RefreshRotationService {
 
         String result = authRedisTemplate.execute(
                 rotateScript,
-                List.of(familyKey(familyId)),
+                List.of(familyKey(familyId), userInvalidationKey(claims.userId())),
                 jti, parentJti, successorJti,
                 String.valueOf(succExpiryMs), String.valueOf(nowMs), String.valueOf(ttlMs),
-                successorJwt, String.valueOf(retryReuseWindowMs));
+                successorJwt, String.valueOf(retryReuseWindowMs),
+                String.valueOf(claims.issuedAt().getTime()));
 
         if (result != null && result.startsWith(REUSED_RESULT_PREFIX)) {
             // Concurrent retry: replay the memoized successor so every racer converges
@@ -254,6 +266,11 @@ public class RefreshRotationService {
             case REVOKED_RESULT -> {
                 clearAuthCookies(response);
                 incrementOutcome(OUTCOME_REJECTED_REVOKED_FAMILY);
+                yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
+            }
+            case INVALIDATED_RESULT -> {
+                clearAuthCookies(response);
+                incrementOutcome(OUTCOME_REJECTED_USER_INVALIDATED);
                 yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
             }
             case ROTATED_RESULT -> {
@@ -323,9 +340,7 @@ public class RefreshRotationService {
      */
     private TokenClaims admitLegacy(TokenClaims legacy) {
         long issuedAtMs = legacy.issuedAt().getTime();
-        String synthesizedFamilyId = UUID.nameUUIDFromBytes(
-                String.format(LEGACY_FAMILY_SYNTHESIS_FORMAT, legacy.userId(), issuedAtMs)
-                        .getBytes(StandardCharsets.UTF_8)).toString();
+        String synthesizedFamilyId = legacyFamilyId(legacy.userId(), issuedAtMs);
         String synthesizedJti = UUID.nameUUIDFromBytes(
                 String.format(LEGACY_JTI_SYNTHESIS_FORMAT, legacy.userId(), issuedAtMs)
                         .getBytes(StandardCharsets.UTF_8)).toString();
@@ -333,6 +348,20 @@ public class RefreshRotationService {
                 legacy.userId(), legacy.email(), legacy.type(), legacy.role(),
                 legacy.issuedAt(), legacy.expiration(),
                 synthesizedJti, synthesizedFamilyId, legacy.parentJti());
+    }
+
+    /**
+     * The family a legacy (pre-deploy) refresh token resolves to on admission. Exposed so
+     * logout can revoke that family without the token carrying one.
+     *
+     * @param userId     the token's subject
+     * @param issuedAtMs the token's issue time in milliseconds
+     * @return the synthesized family identifier
+     */
+    public static String legacyFamilyId(Long userId, long issuedAtMs) {
+        return UUID.nameUUIDFromBytes(
+                String.format(LEGACY_FAMILY_SYNTHESIS_FORMAT, userId, issuedAtMs)
+                        .getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     /**
@@ -345,8 +374,12 @@ public class RefreshRotationService {
         if (familyId == null) {
             return;
         }
+        String key = familyKey(familyId);
         authRedisTemplate.opsForHash().put(
-                familyKey(familyId), REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
+                key, REVOKED_FIELD, String.valueOf(System.currentTimeMillis()));
+        // Revoking a family that never rotated creates the hash here, where the rotation
+        // script's sliding PEXPIRE has not run and would not run again.
+        authRedisTemplate.expire(key, Duration.ofMillis(jwtProperties.getRefreshTokenExpiry()));
         log.info("Revoked refresh token family {}", familyId);
     }
 
@@ -359,6 +392,10 @@ public class RefreshRotationService {
 
     private String familyKey(String familyId) {
         return FAMILY_KEY_PREFIX + "{" + familyId + "}";
+    }
+
+    private String userInvalidationKey(Long userId) {
+        return TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + userId;
     }
 
     /**

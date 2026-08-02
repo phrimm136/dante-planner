@@ -53,7 +53,7 @@ public class TokenBlacklistService {
 
     private static final String BLACKLIST_KEY_PREFIX = "bl:";
 
-    private static final String USER_INVALIDATION_KEY_PREFIX = "uinv:";
+    static final String USER_INVALIDATION_KEY_PREFIX = "uinv:";
 
     private static final long DEFAULT_REFRESH_TOKEN_EXPIRY_MS = 604800000;
 
@@ -64,8 +64,13 @@ public class TokenBlacklistService {
     private static final String LOGOUT_REVOKE_SCRIPT =
             "if tonumber(ARGV[2]) > 0 then redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2]) end\n"
             + "if tonumber(ARGV[3]) > 0 then redis.call('SET', KEYS[2], ARGV[1], 'PX', ARGV[3]) end\n"
-            + "if ARGV[4] ~= '' then redis.call('HSET', KEYS[3], '"
-            + RefreshRotationService.REVOKED_FIELD + "', ARGV[4]) end\n"
+            + "if ARGV[4] ~= '' then\n"
+            + "  redis.call('HSET', KEYS[3], '"
+            + RefreshRotationService.REVOKED_FIELD + "', ARGV[4])\n"
+            // Logging out before the session ever rotated creates this hash here, and only the
+            // rotation script's sliding PEXPIRE would otherwise ever give it one.
+            + "  redis.call('PEXPIRE', KEYS[3], ARGV[5])\n"
+            + "end\n"
             + "return 'OK'";
 
     private final DefaultRedisScript<String> logoutRevokeScript =
@@ -141,7 +146,8 @@ public class TokenBlacklistService {
                 value,
                 Long.toString(Math.max(accessTtl, 0)),
                 Long.toString(Math.max(refreshTtl, 0)),
-                revokeFamily ? Long.toString(now) : "");
+                revokeFamily ? Long.toString(now) : "",
+                Long.toString(refreshTokenExpiry));
     }
 
     private long ttlMillis(String token, Date expiry, long now) {
@@ -232,9 +238,13 @@ public class TokenBlacklistService {
         if (userId == null) {
             return;
         }
+        // Floored to the second because a JWT's iat carries no sub-second component: an
+        // unfloored stamp would reject a token minted later in the same second as the
+        // invalidation, which is exactly the token a user logging straight back in receives.
         long now = System.currentTimeMillis();
+        long stamp = now - (now % 1000);
         stringRedisTemplate.opsForValue().set(
-                userInvalidationKey(userId), String.valueOf(now), Duration.ofMillis(refreshTokenExpiry));
+                userInvalidationKey(userId), String.valueOf(stamp), Duration.ofMillis(refreshTokenExpiry));
         log.info("Invalidated all tokens for user {}", userId);
     }
 

@@ -153,6 +153,12 @@ class LogoutRevocationIT {
         assertThat(authStringRedisTemplate.opsForHash().hasKey(familyKey, "__revoked__"))
                 .as("refresh token family is revoked")
                 .isTrue();
+
+        // A session logged out before it ever rotated creates this hash here, and nothing
+        // else would give it a TTL, so it would otherwise outlive every token it names.
+        assertThat(authStringRedisTemplate.getExpire(familyKey))
+                .as("the revoked family hash expires rather than living forever")
+                .isGreaterThan(0);
         assertThat(roundTrips)
                 .as("all three revocations land in a single atomic Redis round trip")
                 .isEqualTo(1L);

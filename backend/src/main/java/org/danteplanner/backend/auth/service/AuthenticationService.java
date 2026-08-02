@@ -12,6 +12,7 @@ import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
+import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -112,10 +113,6 @@ public class AuthenticationService {
             }
         }
 
-        // Clear any previous token invalidation (e.g., from demotion)
-        // This allows the user to get fresh, valid tokens on login
-        tokenBlacklistService.clearUserInvalidation(user.getId());
-
         // Generate JWT tokens
         String accessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
         String refreshToken = tokenGenerator.generateRefreshToken(user.getId());
@@ -153,8 +150,13 @@ public class AuthenticationService {
                 TokenClaims refreshClaims = tokenValidator.validateRefreshToken(refreshToken);
                 refreshExpiry = refreshClaims.expiration();
                 validRefreshToken = refreshToken;
-                if (lineageRotationFlag.isEnabled() && refreshClaims.familyId() != null) {
-                    familyId = refreshClaims.familyId();
+                if (lineageRotationFlag.isEnabled()) {
+                    // A legacy token carries no family, but admission synthesizes one
+                    // deterministically, so the same value is revocable here.
+                    familyId = refreshClaims.familyId() != null
+                            ? refreshClaims.familyId()
+                            : RefreshRotationService.legacyFamilyId(
+                                    refreshClaims.userId(), refreshClaims.issuedAt().getTime());
                 }
             } catch (InvalidTokenException e) {
                 log.debug("Refresh token already invalid, skipping blacklist");

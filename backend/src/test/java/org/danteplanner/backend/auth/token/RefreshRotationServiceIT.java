@@ -12,6 +12,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -367,6 +368,60 @@ class RefreshRotationServiceIT {
             verify(generatorSpy, never()).generateRefreshToken(any(), any(), any());
             verify(generatorSpy, never()).generateRefreshToken(any());
             assertEquals(0, svc.rotationStateSize());
+        }
+    }
+
+    @Nested
+    @DisplayName("User-wide invalidation")
+    class UserInvalidation {
+
+        private static final String UINV_KEY = "uinv:" + USER_ID;
+
+        @AfterEach
+        void clearInvalidation() {
+            sharedTemplate.delete(UINV_KEY);
+        }
+
+        @Test
+        @DisplayName("A refresh token issued before logout-all cannot rotate")
+        void rotate_WhenIssuedBeforeInvalidation_Rejected() {
+            String token = freshLoginToken();
+            sharedTemplate.opsForValue().set(
+                    UINV_KEY, String.valueOf(System.currentTimeMillis() + 60_000));
+
+            MockHttpServletResponse response = newResponse();
+            RotationResult result = rotationService.rotate(token, response);
+
+            assertInstanceOf(RotationResult.Rejected.class, result);
+            assertEquals(0, response.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
+            assertEquals(1.0,
+                    outcomeCount(RefreshRotationService.OUTCOME_REJECTED_USER_INVALIDATED));
+        }
+
+        @Test
+        @DisplayName("A refresh token issued after logout-all rotates normally")
+        void rotate_WhenIssuedAfterInvalidation_Rotates() {
+            sharedTemplate.opsForValue().set(
+                    UINV_KEY, String.valueOf(System.currentTimeMillis() - 60_000));
+            String token = freshLoginToken();
+
+            RotationResult result = rotationService.rotate(token, newResponse());
+
+            assertInstanceOf(RotationResult.Rotated.class, result);
+        }
+
+        @Test
+        @DisplayName("Invalidation outranks a family that would otherwise rotate")
+        void rotate_WhenFamilyHealthyButUserInvalidated_Rejected() {
+            String token = freshLoginToken();
+            RotationResult.Rotated first =
+                    (RotationResult.Rotated) rotationService.rotate(token, newResponse());
+            sharedTemplate.opsForValue().set(
+                    UINV_KEY, String.valueOf(System.currentTimeMillis() + 60_000));
+
+            RotationResult result = rotationService.rotate(first.newRefreshJwt(), newResponse());
+
+            assertInstanceOf(RotationResult.Rejected.class, result);
         }
     }
 
