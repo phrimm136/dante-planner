@@ -15,6 +15,16 @@ output "tunnel_tokens" {
 }
 
 output "load_balancer_hostname" {
-  description = "The public hostname the load balancer answers on."
-  value       = cloudflare_load_balancer.api.name
+  description = "The public hostname the load balancer answers on; null when the load balancer is disabled."
+  value       = one(cloudflare_load_balancer.api[*].name)
+}
+
+output "e2e_endpoints" {
+  description = "Endpoint bundle the suites load; scripts/ops/provision/staging-urls-secret.sh stores it."
+  value       = var.e2e_endpoints
+}
+
+output "origin_server_name" {
+  description = "SNI the origin certificate must carry; staging-e2e-secrets.sh reads it for the cert subject."
+  value       = var.origin_server_name
 }

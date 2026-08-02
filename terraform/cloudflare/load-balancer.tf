@@ -1,7 +1,14 @@
 # The load balancer is the front door: attaching it to the API hostname IS the cutover, and
 # detaching it is the rollback primitive for as long as the accelerator is still standing.
 
+moved {
+  from = cloudflare_load_balancer_monitor.through_tunnel
+  to   = cloudflare_load_balancer_monitor.through_tunnel[0]
+}
+
 resource "cloudflare_load_balancer_monitor" "through_tunnel" {
+  count = var.enable_load_balancer ? 1 : 0
+
   account_id  = var.account_id
   description = "${var.name_prefix} regional readiness, probed through the tunnel"
 
@@ -20,11 +27,11 @@ resource "cloudflare_load_balancer_monitor" "through_tunnel" {
 }
 
 resource "cloudflare_load_balancer_pool" "region" {
-  for_each = var.regions
+  for_each = { for region, config in var.regions : region => config if var.enable_load_balancer }
 
   account_id      = var.account_id
   name            = "${var.name_prefix}-${each.key}"
-  monitor         = cloudflare_load_balancer_monitor.through_tunnel.id
+  monitor         = cloudflare_load_balancer_monitor.through_tunnel[0].id
   enabled         = true
   minimum_origins = 1
 
@@ -39,7 +46,14 @@ resource "cloudflare_load_balancer_pool" "region" {
   }]
 }
 
+moved {
+  from = cloudflare_load_balancer.api
+  to   = cloudflare_load_balancer.api[0]
+}
+
 resource "cloudflare_load_balancer" "api" {
+  count = var.enable_load_balancer ? 1 : 0
+
   zone_id = var.zone_id
   name    = var.api_hostname
   enabled = true

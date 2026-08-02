@@ -24,23 +24,39 @@ resource "cloudflare_zero_trust_tunnel_cloudflared_config" "region" {
   tunnel_id  = cloudflare_zero_trust_tunnel_cloudflared.region[each.key].id
 
   config = {
-    ingress = [
-      {
-        hostname = var.api_hostname
-        service  = each.value.origin_service
+    ingress = concat(
+      [
+        {
+          hostname = var.api_hostname
+          service  = each.value.origin_service
 
-        origin_request = {
-          origin_server_name = var.origin_server_name
-          ca_pool            = var.origin_ca_pool_path
-          http_host_header   = var.api_hostname
+          origin_request = {
+            origin_server_name = var.origin_server_name
+            ca_pool            = var.origin_ca_pool_path
+            http_host_header   = var.api_hostname
+          }
+        },
+      ],
+      [
+        for extra in lookup(var.extra_ingress, each.key, []) : {
+          hostname = extra.hostname
+          service  = extra.service
+
+          origin_request = {
+            origin_server_name = var.origin_server_name
+            ca_pool            = var.origin_ca_pool_path
+            http_host_header   = extra.hostname
+          }
         }
-      },
-      # cloudflared requires a final catch-all. Anything not matching the hostname above is
+      ],
+      # cloudflared requires a final catch-all. Anything not matching a hostname above is
       # not ours to serve.
-      {
-        service = "http_status:404"
-      },
-    ]
+      [
+        {
+          service = "http_status:404"
+        },
+      ],
+    )
   }
 }
 

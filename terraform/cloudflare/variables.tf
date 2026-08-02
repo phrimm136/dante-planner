@@ -100,6 +100,53 @@ variable "monitor_retries" {
   default     = 2
 }
 
+variable "enable_access" {
+  description = <<-EOT
+    Put Cloudflare Access in front of access_protected_hostnames. Mandatory for any environment
+    whose IdP is the stub: it authenticates whoever asks, so an unguarded hostname is an open
+    session factory. Left false for production, which fronts a real IdP and real users.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "access_protected_hostnames" {
+  description = "Hostnames Access guards. Keep every non-production hostname here, the IdP's included."
+  type        = list(string)
+  default     = []
+}
+
+variable "access_allowed_email" {
+  description = "The operator address allowed to reach the guarded hostnames in a browser."
+  type        = string
+  default     = ""
+}
+
+variable "enable_load_balancer" {
+  description = <<-EOT
+    Create the monitor, the pools, and the load balancer. When false, api_hostname is served by
+    a plain proxied record pointing at the first default_pool_order region's tunnel — every
+    hostname still enters through a tunnel, but without the paid front door or its failover.
+  EOT
+  type        = bool
+  default     = true
+}
+
+variable "extra_ingress" {
+  description = <<-EOT
+    Region -> additional hostname routes appended to that region's tunnel ingress ahead of the
+    catch-all. Each hostname also gets a proxied DNS record at that region's tunnel, which is
+    what makes it a deterministic region pin. The service normally stays the Traefik loopback;
+    routing is carried by the per-entry Host header while SNI stays origin_server_name, so the
+    origin certificate never needs to name these hosts.
+  EOT
+  type = map(list(object({
+    hostname = string
+    service  = string
+  })))
+  default = {}
+}
+
 variable "steering_region_pools" {
   description = <<-EOT
     Cloudflare region code -> ordered pool preference. The first entry serves; the rest are the
@@ -118,4 +165,15 @@ variable "default_pool_order" {
   description = "Pool preference for traffic from regions not named in steering_region_pools."
   type        = list(string)
   default     = ["oregon", "seoul"]
+}
+
+variable "e2e_endpoints" {
+  description = <<-EOT
+    Environment-variable name -> URL, handed to the suites through Secrets Manager. Declared as a
+    variable so the deployed hostnames live only in an untracked tfvars: this repository is public
+    and the environment authenticates through a stub IdP, so naming a host in a committed file
+    publishes the way in.
+  EOT
+  type        = map(string)
+  default     = {}
 }
