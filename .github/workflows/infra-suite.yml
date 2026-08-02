@@ -1,0 +1,122 @@
+name: Infra Suite
+
+# The infrastructure verification lane. Runs the e2e suites through the STANDING staging edge
+# (real tunnels, load balancer, Access) with the local compose stack as origin. Triggered by
+# infra-path pull requests, where it blocks, and by a nightly cron, where a failure pages —
+# certificates expire and edges change policy without a commit ever happening.
+#
+# Credentialed lane: assumes the staging role, so it runs only for same-repository PRs; fork
+# PRs are cleanly skipped by the origin check and covered at merge by the push-triggered runs.
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 18 * * *'
+
+# The staging edge hostnames are a shared singleton; two runs would fight over them.
+concurrency:
+  group: staging-edge
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-west-2
+
+jobs:
+  check-origin:
+    permissions: {}
+    uses: ./.github/workflows/check-pr-origin.yml
+
+  changes:
+    needs: check-origin
+    if: needs.check-origin.outputs.is-internal == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      infra: ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+        with:
+          fetch-depth: 0
+      - name: Classify changed paths
+        id: filter
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          CHANGED=$(git diff --name-only "$BASE_SHA"...HEAD)
+          printf '%s\n' "$CHANGED"
+          INFRA_PATHS='^(terraform|deploy)/|^docker-compose|\.infra\.spec\.ts$|^\.github/workflows/(infra-suite|deploy-fleet|pr-gate)\.yml$'
+          if printf '%s\n' "$CHANGED" | grep -qE "$INFRA_PATHS"; then
+            echo "infra=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "infra=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  edge-suites:
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803  # v6
+      - uses: ./.github/actions/fetch-static-submodule
+        with:
+          static-deploy-key: ${{ secrets.STATIC_DEPLOY_KEY }}
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38  # v6
+        with:
+          node-version: '24'
+          cache: 'yarn'
+          cache-dependency-path: e2e/yarn.lock
+
+      - name: Assume the staging role
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c  # v6
+        with:
+          role-to-assume: ${{ secrets.STAGING_PROVISIONER_ROLE_ARN }}
+          aws-region: us-west-2
+
+      # Throwaway credentials for the local origin; the edge-side secrets come from
+      # Secrets Manager in the run step below.
+      - name: Write compose environment
+        run: |
+          cat > .env <<'EOF'
+          MYSQL_ROOT_PASSWORD=testpass
+          MYSQL_DATABASE=danteplanner
+          MYSQL_USER=danteplanner
+          MYSQL_PASSWORD=danteplanner
+          STUB_CLIENT_SECRET=stub-secret
+          EOF
+
+      # One step: the endpoint/Access exports from staging-env.sh and the tunnel tokens
+      # must be in the same shell that starts compose and runs the suites.
+      - name: Bring up the origin behind the standing edge and run the suites
+        env:
+          # The local origin trusts the repo test keypair (override mount); suites sign with it.
+          E2E_STAGING_KEY_FILE: ${{ github.workspace }}/backend/src/test/resources/test-keys/private_key.pem
+        run: |
+          eval "$(scripts/ops/access/staging-env.sh)"
+          tokens=$(aws secretsmanager get-secret-value --region us-west-2 \
+            --secret-id danteplanner/cloudflare/tunnel-tokens \
+            --query SecretString --output text)
+          export CF_TUNNEL_TOKEN_OREGON=$(printf %s "$tokens" | jq -r .oregon)
+          export CF_TUNNEL_TOKEN_SEOUL=$(printf %s "$tokens" | jq -r .seoul)
+          yarn --cwd e2e stack:up:edge
+          yarn --cwd e2e install --frozen-lockfile
+          yarn --cwd e2e playwright install chromium
+          timeout 300 bash -c "until curl -fsS -o /dev/null --max-time 8 \"$E2E_API_URL/healthz-local\"; do sleep 10; done"
+          yarn --cwd e2e test:contract
+          yarn --cwd e2e test:app
+          yarn --cwd e2e test:infra
+
+      - name: Dump backend logs
+        if: failure()
+        run: yarn --cwd e2e stack:logs
