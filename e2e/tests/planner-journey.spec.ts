@@ -1,30 +1,18 @@
-import { test, expect, request as playwrightRequest } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { authenticateContext, createAuthenticatedApi } from '../src/auth'
-import { createUser, deleteUser } from '../src/seed'
-import { PLANNER_CONFIG } from '@/lib/constants'
-import { minimalPlannerContent } from '../src/plannerContent'
+import { closeSeedPool, createUser, deleteUser } from '../src/seed'
+import { plannerPayload } from '../src/plannerContent'
+import { edgeContext } from '../src/edge'
 
 // The owner write path, end to end: a planner is created, published, and then read back through
 // the anonymous list the community page uses. That last hop is the one no other tier covers,
 // because it crosses the write aggregate, the catalog projection, and the client's own schema.
 
-
-function plannerPayload(id: string, title: string) {
-  return {
-    id,
-    category: '5F',
-    title,
-    status: 'saved',
-    content: minimalPlannerContent(),
-    contentVersion: PLANNER_CONFIG.mdCurrentVersion,
-    plannerType: 'MIRROR_DUNGEON',
-    selectedKeywords: ['Burn'],
-  }
-}
+test.afterAll(closeSeedPool)
 
 test('an owner publishes a planner and it reaches the community list', async ({ baseURL }) => {
-  const user = createUser('list')
+  const user = await createUser('list')
   const api = await createAuthenticatedApi(baseURL!, user.id)
   const plannerId = randomUUID()
   const title = `e2e list ${plannerId.slice(0, 8)}`
@@ -41,7 +29,9 @@ test('an owner publishes a planner and it reaches the community list', async ({ 
     expect(published.status(), await published.text()).toBe(200)
 
     // Anonymous, because the community list is what a visitor sees.
-    const anonymous = await playwrightRequest.newContext({ baseURL })
+    const anonymous = await edgeContext({
+      baseURL: process.env.E2E_API_URL ?? baseURL!,
+    })
     const list = await anonymous.get('/api/planner/md/published?page=0&size=50')
     expect(list.status()).toBe(200)
 
@@ -54,12 +44,12 @@ test('an owner publishes a planner and it reaches the community list', async ({ 
     // cascade only reaches the tables that declare one.
     await api.delete(`/api/planner/md/${plannerId}`)
     await api.dispose()
-    deleteUser(user)
+    await deleteUser(user)
   }
 })
 
 test('a published planner is visible on the community page', async ({ page, context, baseURL }) => {
-  const user = createUser('page')
+  const user = await createUser('page')
   const api = await createAuthenticatedApi(baseURL!, user.id)
   const plannerId = randomUUID()
   const title = `e2e page ${plannerId.slice(0, 8)}`
@@ -84,6 +74,6 @@ test('a published planner is visible on the community page', async ({ page, cont
     // cascade only reaches the tables that declare one.
     await api.delete(`/api/planner/md/${plannerId}`)
     await api.dispose()
-    deleteUser(user)
+    await deleteUser(user)
   }
 })

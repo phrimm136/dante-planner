@@ -1,12 +1,18 @@
 import { test, expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
 import {
   PaginatedPlannersSchema,
   PublishedPlannerDetailSchema,
 } from '@/pages/planner/schemas/PlannerListSchemas'
+import { createAuthenticatedApi } from '../src/auth'
+import { closeSeedPool, createUser, deleteUser } from '../src/seed'
+import { plannerPayload } from '../src/plannerContent'
 
 // These parse live responses with the schemas the browser itself uses, so a server field that
 // changes type or disappears fails here rather than in a user's console. Backend tests pin the
 // server's own shape; nothing else compares the two declarations.
+
+test.afterAll(closeSeedPool)
 
 test('the published list envelope matches the client schema', async ({ request }) => {
   const response = await request.get('/api/planner/md/published?page=0&size=20')
@@ -26,22 +32,35 @@ test('the recommended list envelope matches the client schema', async ({ request
   expect(parsed.success).toBe(true)
 })
 
-// An envelope parses on an empty database without ever exercising the item schema, so the item
-// assertion is only meaningful once something is published. planner-journey.spec.ts publishes one;
-// this fails rather than skips when the list is empty, because a check that quietly passes on no
-// data is the one that hides a broken contract.
-test('a published planner item matches the client schema', async ({ request }) => {
-  const listResponse = await request.get('/api/planner/md/published?page=0&size=1')
-  const list = PaginatedPlannersSchema.parse(await listResponse.json())
-  expect(list.content.length).toBeGreaterThan(0)
+// An envelope parses on an empty database without ever exercising the item schema, so this test
+// publishes its own planner rather than depending on one existing — the suites run against fresh
+// databases where ambient data is never guaranteed, and the journey suite deletes what it makes.
+test('a published planner item matches the client schema', async ({ request, baseURL }) => {
+  const user = await createUser('contract')
+  const api = await createAuthenticatedApi(baseURL!, user.id)
+  const plannerId = randomUUID()
 
-  const id = list.content[0]!.id
-  const detailResponse = await request.get(`/api/planner/md/published/${id}`)
-  expect(detailResponse.status()).toBe(200)
+  try {
+    const created = await api.put(`/api/planner/md/${plannerId}`, {
+      data: plannerPayload(plannerId, `e2e contract ${plannerId.slice(0, 8)}`),
+    })
+    expect([200, 201], await created.text()).toContain(created.status())
+    const published = await api.put(`/api/planner/md/${plannerId}/publish`, {
+      data: { published: true },
+    })
+    expect(published.status(), await published.text()).toBe(200)
 
-  const parsed = PublishedPlannerDetailSchema.safeParse(await detailResponse.json())
-  expect(parsed.error?.issues ?? []).toEqual([])
-  expect(parsed.success).toBe(true)
+    const detailResponse = await request.get(`/api/planner/md/published/${plannerId}`)
+    expect(detailResponse.status()).toBe(200)
+
+    const parsed = PublishedPlannerDetailSchema.safeParse(await detailResponse.json())
+    expect(parsed.error?.issues ?? []).toEqual([])
+    expect(parsed.success).toBe(true)
+  } finally {
+    await api.delete(`/api/planner/md/${plannerId}`)
+    await api.dispose()
+    await deleteUser(user)
+  }
 })
 
 test('an unauthenticated identity probe returns an empty body rather than a rejection', async ({

@@ -7,14 +7,20 @@
     "stack:up": "docker compose --project-directory .. -f ../docker-compose.yml -f ../docker-compose.override.yml -f ../docker-compose.e2e.yml -p limbusplanner up -d --build",
     "stack:down": "docker compose --project-directory .. -f ../docker-compose.yml -f ../docker-compose.override.yml -f ../docker-compose.e2e.yml -p limbusplanner down",
     "stack:logs": "docker compose --project-directory .. -p limbusplanner logs --tail=100 backend",
+    "stack:up:rig": "bash ../scripts/ops/local-multiregion-up.sh",
+    "stack:up:edge": "docker compose --project-directory .. -f ../docker-compose.yml -f ../docker-compose.override.yml -f ../docker-compose.e2e.yml -f ../docker-compose.oauth-gtid.yml -f ../docker-compose.edge.yml -p limbusplanner up -d --build",
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
+    "test:app": "playwright test --project=chromium",
+    "test:contract": "playwright test --project=contract",
+    "test:infra": "playwright test --project=infra",
     "test:headed": "playwright test --headed",
     "report": "playwright show-report"
   },
   "devDependencies": {
     "@playwright/test": "1.62.1",
     "@types/node": "^26.1.2",
+    "mysql2": "^3.15.3",
     "typescript": "^5"
   }
 }

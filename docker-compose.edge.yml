@@ -1,0 +1,76 @@
+# Puts the REAL Cloudflare edge in front of the local stack, and runs the suites from a
+# container rather than the host.
+#
+# The criterion this serves: a client request has to traverse the real path (edge, tunnel,
+# hostname, TLS, WAF), because that is where a whole class of defect lives that no local rig can
+# reproduce — a WAF rejecting the JDK's default user agent being the case that actually bit here.
+# The ORIGIN carries no such requirement, so it is these containers rather than a fleet in AWS.
+#
+# What this still cannot decide: geo steering by genuine geography. Cloudflare derives a client's
+# region from the connection, so two tunnels terminating on one host are two paths to the same
+# place, not two places. Pool failover is testable (disable a pool and watch the record follow);
+# "a Seoul client is served by Seoul" is not.
+#
+# Usage:
+#   terraform -chdir=terraform/cloudflare apply -var-file=staging.tfvars
+#   export CF_TUNNEL_TOKEN_OREGON=$(terraform -chdir=terraform/cloudflare output -json tunnel_tokens | jq -r .oregon)
+#   export CF_TUNNEL_TOKEN_SEOUL=$(...  .seoul)
+#   docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.e2e.yml \
+#                  -f docker-compose.oauth-gtid.yml -f docker-compose.edge.yml -p limbusplanner up -d
+services:
+  # One connector per named tunnel. They dial out to Cloudflare, so the host needs no inbound
+  # port and no public address: the edge reaches this stack only through the connection the
+  # container opened, which is the same property the fleet relies on in production.
+  cloudflared-oregon:
+    image: cloudflare/cloudflared:2026.1.1
+    command: tunnel --no-autoupdate --metrics 0.0.0.0:2000 run
+    environment:
+      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN_OREGON}
+    depends_on:
+      - nginx
+    networks:
+      - danteplanner-network
+    restart: unless-stopped
+
+  cloudflared-seoul:
+    image: cloudflare/cloudflared:2026.1.1
+    command: tunnel --no-autoupdate --metrics 0.0.0.0:2000 run
+    environment:
+      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN_SEOUL}
+    depends_on:
+      - nginx
+    networks:
+      - danteplanner-network
+    restart: unless-stopped
+
+  # Runs the suites in the image CI uses, so a green run cannot depend on the host's node,
+  # browser build or system libraries. It reaches the app the way a user does — outward to
+  # Cloudflare and back through a tunnel — rather than over the compose network.
+  e2e-runner:
+    image: mcr.microsoft.com/playwright:v1.62.1-jammy
+    working_dir: /repo/e2e
+    command: sleep infinity
+    volumes:
+      - ./:/repo
+    environment:
+      # Endpoints and the Access token come from the shell, not from this file: the repository is
+      # public and these hostnames front a stub IdP that authenticates whoever asks.
+      #   eval "$(scripts/ops/access/staging-env.sh)"
+      E2E_BASE_URL: ${E2E_APP_URL:?run scripts/ops/access/staging-env.sh first}
+      E2E_APP_URL: ${E2E_APP_URL}
+      E2E_API_URL: ${E2E_API_URL}
+      E2E_API_OREGON_URL: ${E2E_API_OREGON_URL}
+      E2E_API_SEOUL_URL: ${E2E_API_SEOUL_URL}
+      E2E_IDP_URL: ${E2E_IDP_URL}
+      CF_ACCESS_CLIENT_ID: ${CF_ACCESS_CLIENT_ID}
+      CF_ACCESS_CLIENT_SECRET: ${CF_ACCESS_CLIENT_SECRET}
+      # Seeding stays on the compose network: fixtures are a side channel, not client traffic,
+      # and routing them through the edge would prove nothing while adding a failure mode.
+      E2E_DB_HOST: mysql
+      E2E_DB_USER: ${MYSQL_USER}
+      E2E_DB_PASSWORD: ${MYSQL_PASSWORD}
+      E2E_STAGING_KEY_FILE: /repo/backend/src/test/resources/test-keys/private_key.pem
+    depends_on:
+      - cloudflared-oregon
+    networks:
+      - danteplanner-network
