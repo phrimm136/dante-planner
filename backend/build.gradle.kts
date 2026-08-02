@@ -2,7 +2,7 @@ import net.ltgt.gradle.errorprone.errorprone
 
 plugins {
     java
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.sonarqube") version "7.2.3.7755"
     id("org.owasp.dependencycheck") version "12.2.0"
@@ -35,15 +35,12 @@ repositories {
     mavenCentral()
 }
 
-// Override tomcat to fix CLIENT_CERT auth bypass CVE
-extra["tomcat.version"] = "10.1.53"
-
 dependencyManagement {
     imports {
         // Override log4j to fix CVE-2025-68161
         mavenBom("org.apache.logging.log4j:log4j-bom:2.25.4")
-        // Override Spring Security to fix CVE-2026-22732
-        mavenBom("org.springframework.security:spring-security-bom:6.5.9")
+        // Override Jackson to fix CVE-2026-54515
+        mavenBom("com.fasterxml.jackson:jackson-bom:2.21.5")
     }
 }
 
