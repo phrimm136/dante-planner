@@ -19,8 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,12 +27,12 @@ import java.util.Set;
  *
  * <p>Two responsibilities run per request, before {@code JwtAuthenticationFilter}:</p>
  * <ol>
- *   <li><b>Ensure-cookie:</b> if no readable {@code csrf} cookie is present, a fresh
- *       128-bit+ random token is minted and set on the response. Browsers load the SPA
- *       with a GET first, so they always obtain a token before any mutation.</li>
- *   <li><b>Enforce:</b> for unsafe methods (POST/PUT/PATCH/DELETE) the request must carry an
- *       {@code X-CSRF-Token} header equal to the {@code csrf} cookie (constant-time compare),
- *       or the request is rejected with 403 and the chain is not continued.</li>
+ *   <li><b>Ensure-cookie:</b> if the request carries no cookie this server minted, a fresh
+ *       keyed token replaces whatever was there. Browsers load the SPA with a GET first,
+ *       so they always obtain a token before any mutation.</li>
+ *   <li><b>Enforce:</b> for unsafe methods (POST/PUT/PATCH/DELETE) the cookie must be one
+ *       this server minted and the {@code X-CSRF-Token} header must equal it (constant-time
+ *       compare), or the request is rejected with 403 and the chain is not continued.</li>
  * </ol>
  *
  * <p>Safe methods (GET/HEAD/OPTIONS) are exempt from enforcement.</p>
@@ -57,11 +55,6 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     static final String CSRF_ERROR_CODE = "CSRF_TOKEN_INVALID";
 
     /**
-     * Token entropy in bytes (256-bit, well above the 128-bit minimum).
-     */
-    static final int TOKEN_BYTE_LENGTH = 32;
-
-    /**
      * Lifetime of the {@code csrf} cookie in seconds (7 days), matching the refresh window.
      */
     static final int COOKIE_MAX_AGE_SECONDS = 604800;
@@ -70,8 +63,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
 
     private final CookieUtils cookieUtils;
     private final ObjectMapper objectMapper;
-    private final SecureRandom secureRandom = new SecureRandom();
-    private final Base64.Encoder tokenEncoder = Base64.getUrlEncoder().withoutPadding();
+    private final CsrfTokenService csrfTokenService;
 
     /**
      * Skip ASYNC dispatch (SSE continuations): the response is already committed there,
@@ -89,18 +81,21 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String cookieToken = cookieUtils.getCookieValue(request, CookieConstants.CSRF);
+        boolean serverIssued = csrfTokenService.isValid(cookieToken);
 
         // Ensure-cookie: guarantee the browser holds a token before it can mutate.
         // Runs before enforcement, so a guest's first mutation receives a Set-Cookie
-        // and is still rejected (the request-side cookie is still absent).
-        if (cookieToken == null || cookieToken.isEmpty()) {
+        // and is still rejected (the request-side cookie is still absent). A cookie
+        // that fails verification is replaced rather than left in place, which is what
+        // carries browsers holding a token minted before this scheme.
+        if (!serverIssued) {
             cookieUtils.setReadableCookie(
-                    response, CookieConstants.CSRF, generateToken(), COOKIE_MAX_AGE_SECONDS);
+                    response, CookieConstants.CSRF, csrfTokenService.mint(), COOKIE_MAX_AGE_SECONDS);
         }
 
         if (requiresEnforcement(request)) {
             String headerToken = request.getHeader(CSRF_HEADER);
-            if (!tokensMatch(cookieToken, headerToken)) {
+            if (!serverIssued || !tokensMatch(cookieToken, headerToken)) {
                 reject(response);
                 return;
             }
@@ -121,12 +116,6 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
         return MessageDigest.isEqual(
                 cookieToken.getBytes(StandardCharsets.UTF_8),
                 headerToken.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private String generateToken() {
-        byte[] bytes = new byte[TOKEN_BYTE_LENGTH];
-        secureRandom.nextBytes(bytes);
-        return tokenEncoder.encodeToString(bytes);
     }
 
     private void reject(HttpServletResponse response) throws IOException {

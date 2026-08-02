@@ -2,10 +2,14 @@ package org.danteplanner.backend.support;
 
 import jakarta.servlet.http.Cookie;
 
+import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter;
+import org.danteplanner.backend.shared.security.CsrfTokenService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+import java.util.Base64;
 
 /**
  * MockMvc support for the double-submit CSRF filter.
@@ -15,12 +19,25 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
  * to mutating {@code mockMvc.perform(...)} calls so they pass enforcement; the helper
  * <b>merges</b> the csrf cookie into any existing cookies (auth/device) rather than
  * replacing them.</p>
+ *
+ * <p>The token is minted rather than fabricated: the filter admits only values carrying a
+ * MAC under the running key, so it must be derived from the same secret the test profiles
+ * configure.</p>
  */
 public final class CsrfMockMvcSupport {
 
-    private static final String CSRF_TOKEN = "test-csrf-token";
+    /** Mirrors {@code jwt.encryption-key} in application-test.properties and application-it.properties. */
+    private static final String TEST_ENCRYPTION_KEY = "E9dzesGJ+MrmIaVssATsvvP9EOc1M/Cj/u+9Bh1WTBg=";
+
+    private static final CsrfTokenService TOKEN_SERVICE = buildTokenService();
 
     private CsrfMockMvcSupport() {
+    }
+
+    private static CsrfTokenService buildTokenService() {
+        JwtProperties properties = new JwtProperties();
+        properties.setEncryptionKeyBytes(Base64.getDecoder().decode(TEST_ENCRYPTION_KEY));
+        return new CsrfTokenService(properties);
     }
 
     /**
@@ -29,8 +46,9 @@ public final class CsrfMockMvcSupport {
      */
     public static RequestPostProcessor withCsrf() {
         return (MockHttpServletRequest request) -> {
+            String token = TOKEN_SERVICE.mint();
             Cookie[] existing = request.getCookies();
-            Cookie csrfCookie = new Cookie(CookieConstants.CSRF, CSRF_TOKEN);
+            Cookie csrfCookie = new Cookie(CookieConstants.CSRF, token);
             if (existing == null || existing.length == 0) {
                 request.setCookies(csrfCookie);
             } else {
@@ -39,7 +57,7 @@ public final class CsrfMockMvcSupport {
                 merged[existing.length] = csrfCookie;
                 request.setCookies(merged);
             }
-            request.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, CSRF_TOKEN);
+            request.addHeader(CsrfDoubleSubmitFilter.CSRF_HEADER, token);
             return request;
         };
     }
