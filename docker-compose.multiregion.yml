@@ -1,0 +1,148 @@
+# Local two-region rig: a real MySQL replica behind real GTID replication, one backend per
+# region, and Toxiproxy in front of the primary so a fault can be aimed at ONE participant's
+# path instead of the shared dependency.
+#
+# Layered after docker-compose.oauth-gtid.yml. Bring it up with
+# scripts/ops/local-multiregion-up.sh, which clones the primary into the replica and starts
+# replication once Flyway has migrated (the same order RDS creates a read replica in).
+#
+# What this buys over the single-database stack: replication lag becomes a knob
+# (SOURCE_DELAY, or STOP REPLICA SQL_THREAD) rather than a race, so the read-your-writes gate
+# is exercised deterministically instead of passing because the replica happened to keep up.
+#
+# What it still cannot reproduce: the Cloudflare edge, genuine geo steering (the edge derives
+# region from the connection), secret and image delivery, and the failure modes that only come
+# from actual distance. Those stay with the ephemeral 1:1.
+services:
+  # The primary. gtid flags come from docker-compose.oauth-gtid.yml; these add the binlog
+  # identity a replication source needs.
+  mysql:
+    # Same socket-versus-TCP correction as the replica: the base healthcheck probes over the
+    # unix socket, so dependents start while the port still refuses connections. Invisible
+    # while a data volume persists (startup is quick) and reliable after `down -v`.
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
+    command:
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --session-track-gtids=OWN_GTID
+      - --server-id=1
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      - --sql-mode=ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+  mysql-replica:
+    image: mysql:8.0
+    command:
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+      - --session-track-gtids=OWN_GTID
+      - --server-id=2
+      - --log-bin=mysql-bin
+      - --binlog-format=ROW
+      # The bootstrap script starts replication explicitly, after cloning; an auto-start would
+      # race the clone and leave the replica applying transactions it has no base for.
+      - --skip-replica-start
+      - --read-only=ON
+      - --sql-mode=ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # The app user must exist here before the clone: Seoul validates its replica pool at boot,
+      # which happens well before replication is wired.
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    networks:
+      - danteplanner-network
+    healthcheck:
+      # 127.0.0.1, not localhost: the latter connects over the unix socket, which accepts well
+      # before the TCP listener does, so a socket-based probe reports healthy while every
+      # client that dials the port still gets connection refused.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Aims faults at one caller's path. The e2e seeder talks to mysql:3306 directly, so a toxic
+  # applied here degrades the APP's database access while fixtures can still be created —
+  # the distinction `docker pause` cannot express, since it stops the server for everyone.
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.11.0
+    ports:
+      - "8474:8474"   # control API
+      - "23306:23306" # proxied primary
+    networks:
+      - danteplanner-network
+
+  # Seoul: the region that owns the read-your-writes gate. Writes cross to the primary, reads
+  # go to its local replica, and the gate filter registers because routing is enabled.
+  backend:
+    # The replica pool is validated at boot, so the replica must be accepting connections
+    # before this starts; a second MySQL takes appreciably longer to initialise than the first.
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mysql-replica:
+        condition: service_healthy
+    environment:
+      DATASOURCE_ROUTING_ENABLED: "true"
+      DATASOURCE_REPLICA_ENABLED: "true"
+      DEPLOY_REGION: ap-northeast-2
+      # local-multiregion-up.sh migrates the primary before either region starts, because the
+      # replica must already hold the schema for a routing-enabled instance to boot at all.
+      SPRING_FLYWAY_ENABLED: "false"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
+      DATASOURCE_REPLICA_URL: jdbc:mysql://mysql-replica:3306/${MYSQL_DATABASE}?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true&trackSessionState=true
+      DATASOURCE_REPLICA_USERNAME: ${MYSQL_USER}
+      DATASOURCE_REPLICA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8082:8080"
+
+  # Oregon: reads the pool it writes to, so it registers no gate and mints no cookie. Suite C
+  # reads through this instance to prove the cookie carries across regions, not just within one.
+  backend-oregon:
+    image: danteplanner-backend:local
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      # Same source the dev override mounts for the Seoul backend: both regions must sign and
+      # verify with one keypair, exactly as the two fleets share one in production.
+      - ./backend/src/test/resources/test-keys:/app/keys:ro
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DEPLOY_REGION: us-west-2
+      DATASOURCE_ROUTING_ENABLED: "false"
+      # Flyway already ran on the primary from the Seoul instance; a second migrator would
+      # race it for the schema-history lock on boot.
+      SPRING_FLYWAY_ENABLED: "false"
+      JWT_PRIVATE_KEY_PATH: /app/keys/private_key.pem
+      JWT_PUBLIC_KEY_PATH: /app/keys/public_key.pem
+      # Same value the dev override pins for the primary backend: both regions must accept
+      # each other's tokens, exactly as the two fleets share one keypair in production.
+      JWT_ENCRYPTION_KEY: E9dzesGJ+MrmIaVssATsvvP9EOc1M/Cj/u+9Bh1WTBg=
+      REDIS_AUTH_HOST: redis-auth
+      REDIS_RATELIMIT_HOST: redis-ratelimit
+      REDIS_SSELOCAL_HOST: redis-auth
+      REDIS_AUTHLOCAL_HOST: redis-auth
+      GOOGLE_OAUTH_CLIENT_ID: staging-stub
+      GOOGLE_OAUTH_CLIENT_SECRET: ${STUB_CLIENT_SECRET}
+      GOOGLE_OAUTH_REDIRECT_URI: http://localhost/api/auth/google/callback
+      GOOGLE_OAUTH_AUTHORIZE_URL: http://localhost:3000/auth
+      GOOGLE_OAUTH_TOKEN_URL: http://oauth-stub:3000/token
+      GOOGLE_OAUTH_USER_INFO_URL: http://oauth-stub:3000/userinfo
+    ports:
+      - "8081:8080"
+    networks:
+      - danteplanner-network
