@@ -2,7 +2,6 @@ package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -62,14 +61,7 @@ class PlannerQueryServiceTest {
         PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
         queryService = new PlannerQueryService(plannerRepository, plannerStatsRepository, accessGuard);
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
     }
 
     private TestDataFactory.PlannerBuilder testPlannerBuilder() {

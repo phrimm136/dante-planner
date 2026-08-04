@@ -3,9 +3,9 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerCatalog;
-import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.RecommendedSql;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,10 +126,10 @@ public class PlannerCatalogService {
      */
     @Transactional
     public void add(Planner planner) {
-        boolean recommended = statsRepository.findById(planner.getId())
-                .map(PlannerStats::getUpvotes)
-                .orElse(0) >= recommendedThreshold
-                && !Boolean.TRUE.equals(planner.getHiddenFromRecommended());
+        boolean recommended = RecommendedSql.isRecommended(
+                statsRepository.upvotesOf(planner.getId()),
+                planner.getHiddenFromRecommended(),
+                recommendedThreshold);
         catalogRepository.save(PlannerCatalog.builder()
                 .plannerId(planner.getId())
                 .plannerType(planner.getPlannerType())

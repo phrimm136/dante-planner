@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
@@ -51,9 +50,6 @@ public class PlannerQueryService {
     @Transactional(readOnly = true)
     public PlannerResponse getPlanner(Long userId, UUID id) {
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
-        int upvotes = statsRepository.findById(id)
-                .map(PlannerStats::getUpvotes)
-                .orElse(0);
-        return PlannerResponse.fromEntity(planner, upvotes);
+        return PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
     }
 }

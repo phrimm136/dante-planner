@@ -16,6 +16,16 @@ import org.springframework.data.repository.query.Param;
  */
 public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID> {
 
+    /**
+     * The planner's upvote count, zero while it has no counter row.
+     *
+     * @param plannerId the planner ID
+     * @return the current upvote count
+     */
+    default int upvotesOf(UUID plannerId) {
+        return findById(plannerId).map(PlannerStats::getUpvotes).orElse(0);
+    }
+
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
             + "VALUES (:id, :delta, 0, 0) "
