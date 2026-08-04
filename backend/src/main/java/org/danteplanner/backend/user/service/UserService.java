@@ -1,6 +1,7 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserDto;
@@ -12,8 +13,6 @@ import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,9 +32,9 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     /**
      * Maximum retry attempts for username generation.
@@ -43,6 +42,9 @@ public class UserService {
      * but we cap retries to prevent infinite loops in edge cases.
      */
     private static final int MAX_USERNAME_RETRIES = 100;
+
+    /** The unique key on {@code users.username_suffix}, as the driver names it in a violation. */
+    private static final String USERNAME_SUFFIX_CONSTRAINT = "uk_users_username_suffix";
 
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
@@ -61,11 +63,10 @@ public class UserService {
         }
         try {
             return transactionTemplate.execute(status -> createOrRecover(providerType, userInfo));
-        } catch (DataIntegrityViolationException | UsernameGenerationException e) {
-            // Lost the create race on uk_provider_provider_id (the username retry masks the
-            // provider-id collision as exhaustion). The winner committed on the primary, so the
-            // recovery re-lookup must run read-write to route there — a bare finder is readOnly
-            // and would hit a replica that may not have caught up yet.
+        } catch (DataIntegrityViolationException e) {
+            // Lost the create race on uk_provider_provider_id. The winner committed on the primary,
+            // so the recovery re-lookup must run read-write to route there — a bare finder is
+            // readOnly and would hit a replica that may not have caught up yet.
             return transactionTemplate.execute(status ->
                     userRepository.findByProviderAndProviderId(providerType, providerId)
                             .orElseThrow(() -> e));
@@ -82,7 +83,12 @@ public class UserService {
      * Create a new user with a unique username, retrying on suffix collision.
      * With 28.6M possible suffixes (31^5), collisions are extremely rare.
      *
-     * @throws UsernameGenerationException if unable to generate unique username after max retries
+     * <p>Only a suffix collision is retried. Any other integrity violation — a lost create race on
+     * the provider id above all — propagates, because no new suffix can satisfy the constraint that
+     * rejected the insert.</p>
+     *
+     * @throws UsernameGenerationException  if unable to generate unique username after max retries
+     * @throws DataIntegrityViolationException if any other constraint rejects the insert
      */
     private User createUserWithUniqueUsername(AuthProviderType provider, Map<String, String> userInfo) {
         for (int attempt = 1; attempt <= MAX_USERNAME_RETRIES; attempt++) {
@@ -99,15 +105,28 @@ public class UserService {
             try {
                 return userRepository.save(newUser);
             } catch (DataIntegrityViolationException e) {
+                if (!isSuffixCollision(e)) {
+                    throw e;
+                }
                 if (attempt % 10 == 0) {
                     log.warn("Username suffix collision after {} attempts, continuing...", attempt);
                 }
-                // Retry with new suffix
             }
         }
 
         log.error("Failed to generate unique username after {} attempts", MAX_USERNAME_RETRIES);
         throw new UsernameGenerationException(MAX_USERNAME_RETRIES);
+    }
+
+    /**
+     * Whether an integrity violation is the username-suffix constraint rather than another key.
+     *
+     * <p>The violated key is named only in the driver's message; the exception type is the same
+     * for every constraint on the table.</p>
+     */
+    private static boolean isSuffixCollision(DataIntegrityViolationException e) {
+        String message = e.getMostSpecificCause().getMessage();
+        return message != null && message.contains(USERNAME_SUFFIX_CONSTRAINT);
     }
 
     public UserDto toDto(User user) {
@@ -139,104 +158,63 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
-    /**
-     * Resolve an id to an account, deleted ones included, for callers that treat a missing account
-     * as a displayable state rather than an error.
-     *
-     * @param id the account id
-     * @return the account, or empty if none carries the id
-     */
+    /** Resolves an id to an account, deleted ones included; empty when none carries the id. */
     @Transactional(readOnly = true)
     public Optional<User> findOptionalById(Long id) {
         return userRepository.findById(id);
     }
 
-    /**
-     * Whether an account row carries the given id, deleted or not.
-     *
-     * @param id the account id
-     * @return true if the row exists
-     */
+    /** Whether an account row carries the given id, deleted or not. */
     @Transactional(readOnly = true)
     public boolean existsById(Long id) {
         return userRepository.existsById(id);
     }
 
-    /**
-     * Find an active (non-deleted) user by ID.
-     *
-     * @param userId the user ID
-     * @return the active user, or empty if not found or deleted
-     */
+    /** Finds a non-deleted account by id; empty when it is missing or deleted. */
     @Transactional(readOnly = true)
     public Optional<User> findActiveById(Long userId) {
         return userRepository.findByIdAndDeletedAtIsNull(userId);
     }
 
-    /**
-     * Find the active account an OAuth identity resolves to.
-     *
-     * @param providerType the OAuth provider
-     * @param providerId   the provider's own id for the account
-     * @return the active account, or empty if none exists or it is soft-deleted
-     */
+    /** Finds the non-deleted account an OAuth identity resolves to. */
     @Transactional(readOnly = true)
     public Optional<User> findActiveByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(providerType, providerId);
     }
 
     /**
-     * Find the account an OAuth identity resolves to, soft-deleted ones included, so a returning
+     * Finds the account an OAuth identity resolves to, soft-deleted ones included, so a returning
      * user can be offered reactivation rather than a second account.
-     *
-     * @param providerType the OAuth provider
-     * @param providerId   the provider's own id for the account
-     * @return the account, or empty if none exists
      */
     @Transactional(readOnly = true)
     public Optional<User> findByProvider(AuthProviderType providerType, String providerId) {
         return userRepository.findByProviderAndProviderId(providerType, providerId);
     }
 
-    /**
-     * Find the active account behind a username suffix, the public handle moderation endpoints
-     * carry in place of a numeric id.
-     *
-     * @param usernameSuffix the unique username suffix
-     * @return the active account, or empty if none carries the suffix
-     */
+    /** Finds the non-deleted account behind a username suffix, the handle the API exposes. */
     @Transactional(readOnly = true)
     public Optional<User> findActiveBySuffix(String usernameSuffix) {
         return userRepository.findByUsernameSuffixAndDeletedAtIsNull(usernameSuffix);
     }
 
     /**
-     * List the accounts a moderator may act on: every active account except the sentinel that owns
+     * Lists the accounts a moderator may act on: every active one except the sentinel that owns
      * anonymized content, which is not a person and cannot be restricted.
-     *
-     * @return the active accounts
      */
     @Transactional(readOnly = true)
     public List<User> listActiveAccounts() {
         return userRepository.findByDeletedAtIsNullAndIdNot(UserAccountLifecycleService.SENTINEL_USER_ID);
     }
 
-    /**
-     * List the accounts whose timeout has not yet expired.
-     *
-     * @return the currently timed-out accounts
-     */
+    /** Lists the accounts whose timeout has not yet expired. */
     @Transactional(readOnly = true)
     public List<User> listTimedOutAccounts() {
         return userRepository.findByTimeoutUntilAfterAndDeletedAtIsNull(Instant.now());
     }
 
     /**
-     * Resolve a batch of ids to accounts in one query. Deleted accounts are included: an audit
-     * trail still has to name the actor who left it.
-     *
-     * @param ids the account ids to resolve
-     * @return the accounts that exist, in no guaranteed order
+     * Resolves a batch of ids in one query. Deleted accounts are included: an audit trail still
+     * has to name the actor who left it.
      */
     @Transactional(readOnly = true)
     public List<User> findAllByIds(Collection<Long> ids) {
@@ -260,36 +238,20 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
-    /**
-     * Count the accounts holding a role, deleted ones included.
-     *
-     * @param role the role to count
-     * @return the number of accounts holding it
-     */
+    /** Counts the accounts holding a role, deleted ones included. */
     @Transactional(readOnly = true)
     public long countByRole(UserRole role) {
         return userRepository.countByRole(role);
     }
 
     /**
-     * Persist a restriction a moderator placed on or lifted from an account.
+     * Persist a moderator's or administrator's change to an account.
      *
-     * @param user the account carrying the new restriction state
+     * @param user the account carrying the change
      * @return the persisted account
      */
     @Transactional
-    public User saveRestriction(User user) {
-        return userRepository.save(user);
-    }
-
-    /**
-     * Persist a role change an administrator made on an account.
-     *
-     * @param user the account carrying the new role
-     * @return the persisted account
-     */
-    @Transactional
-    public User saveRole(User user) {
+    public User save(User user) {
         return userRepository.save(user);
     }
 

@@ -5,8 +5,10 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.shared.config.EpithetConfig;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
+import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,9 +18,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.support.TransactionCallback;
+
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 
@@ -58,14 +65,61 @@ class UserServiceTest {
         userService = new UserService(userRepository, usernameGenerator, epithetConfig,
                 moderationAuditService, userSettingsService, transactionTemplate);
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
+    }
+
+    @Nested
+    @DisplayName("findOrCreateUser Tests")
+    class FindOrCreateUserTests {
+
+        private static final String PROVIDER_ID = "google-123";
+        private static final Map<String, String> IDENTITY =
+                Map.of("id", PROVIDER_ID, "email", "test@example.com");
+
+        private void runTransactionsInline() {
+            when(transactionTemplate.execute(any())).thenAnswer(invocation ->
+                    invocation.<TransactionCallback<User>>getArgument(0).doInTransaction(null));
+        }
+
+        @Test
+        @DisplayName("A lost provider-id race recovers on the first collision, not after exhausting suffixes")
+        void findOrCreateUser_WhenProviderIdRaceLost_RecoversWithoutRetrying() {
+            runTransactionsInline();
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.empty())
+                    .thenReturn(Optional.of(testUser));
+            when(usernameGenerator.generate())
+                    .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
+            when(userRepository.save(any(User.class))).thenThrow(
+                    new DataIntegrityViolationException(
+                            "Duplicate entry 'GOOGLE-google-123' for key 'uk_provider_provider_id'"));
+
+            User resolved = userService.findOrCreateUser("google", IDENTITY);
+
+            assertEquals(testUser.getId(), resolved.getId());
+            // A constraint no new suffix can satisfy must not be retried against new suffixes.
+            verify(userRepository, times(1)).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Suffix exhaustion surfaces as its own error rather than a lost race")
+        void findOrCreateUser_WhenSuffixesExhausted_ThrowsUsernameGenerationException() {
+            runTransactionsInline();
+            when(userRepository.findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID))
+                    .thenReturn(Optional.empty());
+            when(usernameGenerator.generate())
+                    .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
+            when(userRepository.save(any(User.class))).thenThrow(
+                    new DataIntegrityViolationException(
+                            "Duplicate entry 'test1' for key 'uk_users_username_suffix'"));
+
+            assertThrows(UsernameGenerationException.class,
+                    () -> userService.findOrCreateUser("google", IDENTITY));
+
+            // No recovery lookup: exhaustion is not a race, so there is no winner to find.
+            verify(userRepository, times(1))
+                    .findByProviderAndProviderId(AuthProviderType.GOOGLE, PROVIDER_ID);
+        }
     }
 
     @Nested
