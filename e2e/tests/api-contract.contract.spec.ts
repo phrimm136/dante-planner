@@ -67,6 +67,6 @@ test('an unauthenticated identity probe returns an empty body rather than a reje
   request,
 }) => {
   const response = await request.get('/api/auth/me')
-  expect(response.status()).toBe(200)
+  expect(response.status()).toBe(204)
   expect((await response.text()).trim()).toBe('')
 })

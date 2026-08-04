@@ -13,6 +13,10 @@ export default defineConfig({
 
   use: {
     baseURL,
+    // Actions default to no timeout at all, so a click on an element that never becomes
+    // actionable waits out the whole test budget and reports "Test timeout exceeded" without
+    // naming the locator it was waiting on. Bounding it turns that into a failure that says so.
+    actionTimeout: 10_000,
     trace: 'on-first-retry',
     ignoreHTTPSErrors: false,
     // Cloudflare Access challenges every deployed hostname, so the service token rides each

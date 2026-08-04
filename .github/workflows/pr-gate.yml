@@ -274,9 +274,20 @@ jobs:
         with:
           node-version: '24'
           cache: 'yarn'
-          cache-dependency-path: e2e/yarn.lock
+          cache-dependency-path: |
+            e2e/yarn.lock
+            frontend/yarn.lock
 
-      # Throwaway credentials for the rig; same values the mysql service job uses.
+      - name: Ban networkidle in the browser suites
+        run: |
+          if grep -rn "networkidle" e2e/src e2e/tests; then
+            echo "::error::An authenticated page holds an SSE connection open, so networkidle" \
+                 "never fires. Wait on domcontentloaded plus an explicit assertion."
+            exit 1
+          fi
+
+      # Throwaway credentials for the rig; same values the mysql service job uses. The rig
+      # script and the seeder read them from the environment, not from .env.
       - name: Write compose environment
         run: |
           cat > .env <<'EOF'
@@ -286,9 +297,27 @@ jobs:
           MYSQL_PASSWORD=danteplanner
           STUB_CLIENT_SECRET=stub-secret
           EOF
+          cat .env >> "$GITHUB_ENV"
+          sed -n 's/^MYSQL_USER=/E2E_DB_USER=/p; s/^MYSQL_PASSWORD=/E2E_DB_PASSWORD=/p' .env \
+            >> "$GITHUB_ENV"
+
+      # nginx serves ./frontend/dist through the docker-compose.e2e.yml bind mount and the
+      # image ships no build of its own, so an unbuilt SPA 404s every route the suites request.
+      - name: Build the SPA
+        timeout-minutes: 12
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
+        run: |
+          yarn --cwd frontend install --frozen-lockfile
+          yarn --cwd frontend build
 
       - name: Bring up the two-region rig
-        run: yarn --cwd e2e stack:up:rig
+        run: |
+          yarn --cwd e2e stack:up:rig
+          # The rig publishes no host port for the primary, so the seeder dials the bridge.
+          echo "E2E_DB_HOST=$(docker inspect -f \
+            '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' limbusplanner-mysql-1)" \
+            >> "$GITHUB_ENV"
 
       - name: Run contract and app suites
         env:

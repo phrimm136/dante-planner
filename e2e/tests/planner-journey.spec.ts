@@ -66,7 +66,11 @@ test('a published planner is visible on the community page', async ({ page, cont
     expect(published.status(), await published.text()).toBe(200)
 
     await authenticateContext(context, user.id, baseURL!)
-    await page.goto('/planner/md/gesellschaft', { waitUntil: 'networkidle' })
+    await page.goto('/planner/md/gesellschaft', { waitUntil: 'domcontentloaded' })
+
+    // An authenticated page opens an SSE stream and holds it, so there is no idle to wait for.
+    // React replacing the crawler skeleton is the mount signal instead.
+    await expect(page.locator('#seo-skeleton')).toHaveCount(0, { timeout: 20_000 })
     await expect(page.getByText(title)).toBeVisible()
   } finally {
     // Delete through the API, not the database. Deleting the user row alone leaves the FK-less

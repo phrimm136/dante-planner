@@ -139,6 +139,16 @@ mine". → [why](testing-evidence.md#13-what-sharing-a-database-costs)
 - The rule is about stores, not SQL. `flushAll()` is `deleteAll()` for Redis.
 - When the subject genuinely is a whole table or index, take `registerOwnDatabase`.
 
+**The browser tier is the same rule against a shared deployment.** `e2e/` seeds through `seed.ts`
+into one database that every worker, every other spec, and the environment's own leftovers also
+write to. Assert on the title the spec generated. Never on `content.length`, never on
+`content[0]`, never on a count — a community listing is paged and ordered by recency, so the row a
+passing assertion read was someone else's.
+
+The browser adds a second store to own: `lib/storage.ts` keeps planners in an IndexedDB database
+named `danteplanner`, and auto-save writes it on every keystroke. `e2e/src/browser.ts` drops it
+before the app's first script, so a spec inherits no editor state from its predecessor.
+
 **The parallelism annotations cannot express what you want:** `@Execution(CONCURRENT)` propagates to
 a class's methods, `@ResourceLock` excludes only other lock holders and cannot cross Gradle forks,
 and sibling `@BeforeEach` methods have no defined order.
