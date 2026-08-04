@@ -168,6 +168,8 @@ class JwtAuthenticationFilterLineageTest {
         TokenClaims successorClaims = refreshClaims(userId, "successor-jti", "fam-1");
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "presented-jti", "fam-1"));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
@@ -190,8 +192,12 @@ class JwtAuthenticationFilterLineageTest {
     void doFilterInternal_WhenFlagOnAndUsedToken_RevokesFamilyNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "used.jwt";
+        Long userId = 21L;
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "retired-jti", "fam-theft"));
+        when(userService.findActiveById(userId)).thenReturn(Optional.of(activeUser(userId)));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Revoked("fam-theft"));
 
@@ -212,8 +218,12 @@ class JwtAuthenticationFilterLineageTest {
     void doFilterInternal_WhenFlagOnAndSupersededToken_RevokesFamilyNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "superseded.jwt";
+        Long userId = 22L;
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "superseded-jti", "fam-superseded"));
+        when(userService.findActiveById(userId)).thenReturn(Optional.of(activeUser(userId)));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Revoked("fam-superseded"));
 
@@ -228,8 +238,12 @@ class JwtAuthenticationFilterLineageTest {
     void doFilterInternal_WhenFlagOnAndRevokedFamily_RejectedNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "revoked.family.jwt";
+        Long userId = 23L;
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "revoked-jti", "fam-revoked"));
+        when(userService.findActiveById(userId)).thenReturn(Optional.of(activeUser(userId)));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY));
 
@@ -253,6 +267,8 @@ class JwtAuthenticationFilterLineageTest {
         TokenClaims successorClaims = refreshClaims(userId, "synth-successor-jti", "synth-fam");
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, null, null));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
@@ -274,8 +290,12 @@ class JwtAuthenticationFilterLineageTest {
     void doFilterInternal_WhenFlagOnAndLegacyAdmitOff_RejectedNoAuth() throws Exception {
         JwtAuthenticationFilter filter = filterWithFlag(true);
         String refreshToken = "legacy.refresh.jwt";
+        Long userId = 24L;
 
         request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, null, null));
+        when(userService.findActiveById(userId)).thenReturn(Optional.of(activeUser(userId)));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rejected(RotationResult.Rejected.Reason.INVALID));
 
@@ -304,6 +324,8 @@ class JwtAuthenticationFilterLineageTest {
                 new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
         when(tokenValidator.validateAccessToken(accessToken))
                 .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "presented-jti", "fam-2"));
         when(refreshRotationService.rotate(eq(refreshToken), eq(response)))
                 .thenReturn(new RotationResult.Rotated("new.refresh.jwt", successorClaims));
         when(userService.findActiveById(userId)).thenReturn(Optional.of(user));
@@ -319,6 +341,46 @@ class JwtAuthenticationFilterLineageTest {
         verify(tokenBlacklistService, never()).blacklistTokenForRotation(any(), any());
         assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         assertEquals(userId, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    }
+
+    @Test
+    @DisplayName("Flag on: a blacklisted refresh token is abandoned before any rotation")
+    void doFilterInternal_WhenFlagOnAndBlacklistedToken_AbandonsWithoutRotating() throws Exception {
+        JwtAuthenticationFilter filter = filterWithFlag(true);
+        String refreshToken = "blacklisted.jwt";
+        Long userId = 31L;
+
+        request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "blacklisted-jti", "fam-3"));
+        when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(true);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verifyNoInteractions(refreshRotationService);
+        assertSessionCleared();
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
+    }
+
+    @Test
+    @DisplayName("Flag on: a token issued before the account's invalidation is abandoned before any rotation")
+    void doFilterInternal_WhenFlagOnAndUserTokensInvalidated_AbandonsWithoutRotating() throws Exception {
+        JwtAuthenticationFilter filter = filterWithFlag(true);
+        String refreshToken = "pre-invalidation.jwt";
+        Long userId = 32L;
+
+        request.setCookies(new Cookie(CookieConstants.REFRESH_TOKEN, refreshToken));
+        when(tokenValidator.validateRefreshToken(refreshToken))
+                .thenReturn(refreshClaims(userId, "stale-jti", "fam-4"));
+        when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), any(Long.class))).thenReturn(true);
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verifyNoInteractions(refreshRotationService);
+        assertSessionCleared();
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(tokenGenerator, never()).generateAccessToken(any(), any());
     }
 
     /**

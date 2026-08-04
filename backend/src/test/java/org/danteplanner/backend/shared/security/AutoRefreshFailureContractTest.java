@@ -3,6 +3,7 @@ package org.danteplanner.backend.shared.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
@@ -13,6 +14,7 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -101,12 +104,12 @@ class AutoRefreshFailureContractTest {
      * revoked family, and the legacy path finds the token on the rotation blacklist.
      */
     private void givenTheTokenIsDead(boolean lineageEnabled) {
+        when(tokenValidator.validateRefreshToken(DEAD_REFRESH_TOKEN)).thenReturn(refreshClaims());
         if (lineageEnabled) {
+            when(userService.findActiveById(USER_ID)).thenReturn(Optional.of(activeUser()));
             when(refreshRotationService.rotate(DEAD_REFRESH_TOKEN, response))
                     .thenReturn(new RotationResult.Revoked("fam-revoked"));
         } else {
-            when(tokenValidator.validateRefreshToken(DEAD_REFRESH_TOKEN))
-                    .thenReturn(refreshClaims());
             when(tokenBlacklistService.isBlacklisted(DEAD_REFRESH_TOKEN)).thenReturn(true);
         }
     }
@@ -130,5 +133,16 @@ class AutoRefreshFailureContractTest {
                 USER_ID, "user@example.com", TokenClaims.TYPE_REFRESH, null,
                 new Date(), new Date(System.currentTimeMillis() + 604_800_000L),
                 "jti-1", "fam-1", null);
+    }
+
+    private User activeUser() {
+        return User.builder()
+                .id(USER_ID)
+                .email("user@example.com")
+                .provider(AuthProviderType.GOOGLE)
+                .providerId("google-" + USER_ID)
+                .usernameEpithet("W_CORP")
+                .usernameSuffix("usr42")
+                .build();
     }
 }

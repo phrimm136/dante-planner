@@ -12,16 +12,14 @@ import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
-import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
-import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -97,42 +95,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         MDC.put("method", request.getMethod());
         MDC.put("path", request.getRequestURI().replaceAll("[\r\n]", "_"));
 
-        String token = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-
-        if (token == null) {
-            // Access cookie missing - try auto-refresh if refresh cookie exists
-            // This handles cookie expiry (MaxAge) vs token expiry (JWT) desync
-            // If refresh succeeds, setAuthentication() is called and request proceeds as authenticated
-            // If refresh fails, SecurityContext remains empty and request proceeds as guest
-            if (refreshOrReportOutage(request, response) == RefreshOutcome.OUTAGE_REPORTED) {
-                MDC.clear();
-                return;
-            }
-            filterChain.doFilter(request, response);
+        if (!establishAuthentication(request, response)) {
+            MDC.clear();
             return;
         }
 
-        AccessTokenAuthenticator.AccessTokenVerdict verdict = accessTokenAuthenticator.verify(token, request);
+        filterChain.doFilter(request, response);
+    }
 
-        if (verdict == AccessTokenAuthenticator.AccessTokenVerdict.EXPIRED) {
-            log.debug("Access token expired, attempting auto-refresh");
-            RefreshOutcome outcome = refreshOrReportOutage(request, response);
-            if (outcome == RefreshOutcome.OUTAGE_REPORTED) {
-                MDC.clear();
-                return;
-            }
-            if (outcome == RefreshOutcome.GUEST) {
-                // Refresh failed - clear any partial auth state
-                SecurityContextHolder.clearContext();
-            }
-            // Continue either way (refreshed or not)
-        } else if (verdict == AccessTokenAuthenticator.AccessTokenVerdict.REVOKED || verdict == AccessTokenAuthenticator.AccessTokenVerdict.REJECTED) {
-            // A revocation is respected rather than refreshed, and no refresh repairs a malformed
-            // or wrongly-signed token either.
-            SecurityContextHolder.clearContext();
+    /**
+     * Settle what the request's credentials make it: authenticated, guest, or answered already.
+     *
+     * <p>The verdict switch carries no default arm, so a verdict added to
+     * {@link AccessTokenAuthenticator.AccessTokenVerdict} fails to compile here rather than
+     * defaulting into whatever authentication the request arrived with.</p>
+     *
+     * @param request  the request whose credentials are read
+     * @param response the response new cookies or a 503 are written to
+     * @return false when a datastore outage has already been answered and the chain must not continue
+     * @throws IOException if writing the outage response fails
+     */
+    private boolean establishAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String token = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+
+        if (token == null) {
+            // Cookie expiry (MaxAge) and token expiry (JWT) desync: the access cookie can be gone
+            // while a refresh cookie still carries a live session.
+            return refreshOrReportOutage(request, response) != RefreshOutcome.OUTAGE_REPORTED;
         }
 
-        filterChain.doFilter(request, response);
+        return switch (accessTokenAuthenticator.verify(token, request)) {
+            case AUTHENTICATED -> true;
+            case EXPIRED -> refreshExpiredSession(request, response);
+            case SENTINEL_BLOCKED, REVOKED, REJECTED -> {
+                // A revocation is respected rather than refreshed, no refresh repairs a malformed or
+                // wrongly-signed token, and the sentinel account never authenticates at all.
+                SecurityContextHolder.clearContext();
+                yield true;
+            }
+        };
+    }
+
+    private boolean refreshExpiredSession(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        log.debug("Access token expired, attempting auto-refresh");
+
+        RefreshOutcome outcome = refreshOrReportOutage(request, response);
+        if (outcome == RefreshOutcome.GUEST) {
+            SecurityContextHolder.clearContext();
+        }
+        return outcome != RefreshOutcome.OUTAGE_REPORTED;
     }
 
     /**
@@ -162,10 +175,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             return attemptAutoRefresh(request, response) ? RefreshOutcome.AUTHENTICATED : RefreshOutcome.GUEST;
-        } catch (RedisConnectionFailureException e) {
+        } catch (RedisConnectionFailureException | QueryTimeoutException e) {
             degradationResponder.writeAuthUnavailable(response);
             return RefreshOutcome.OUTAGE_REPORTED;
-        } catch (DataAccessResourceFailureException | CannotCreateTransactionException e) {
+        } catch (DataAccessException | TransactionException e) {
             degradationResponder.writeDbUnavailable(response);
             return RefreshOutcome.OUTAGE_REPORTED;
         }
@@ -173,7 +186,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Attempts to transparently refresh expired access tokens using refresh token.
-     * Implements refresh token rotation for security (old token blacklisted).
+     *
+     * <p>The credential checks and the access-token minting are the same whichever rotation the
+     * {@code jwt.rotation.lineage-enabled} flag selects; only how the refresh cookie is rotated
+     * differs, which is all {@link #rotateRefreshCookie} decides.</p>
      *
      * @param request  HTTP request to extract refresh token from
      * @param response HTTP response to set new cookies
@@ -189,10 +205,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (refreshToken == null) {
                 log.debug("No refresh token available for auto-refresh");
                 return false;
-            }
-
-            if (lineageRotationFlag.isEnabled()) {
-                return attemptLineageRefresh(refreshToken, request, response);
             }
 
             TokenClaims claims = tokenValidator.validateRefreshToken(refreshToken);
@@ -220,24 +232,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             User user = activeUser.get();
 
-            // Blacklist old refresh token (rotation — grace period allows concurrent requests)
-            tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
+            if (!rotateRefreshCookie(refreshToken, claims, user, request, response)) {
+                return false;
+            }
 
-            // Generate new tokens (fetch fresh role from user entity)
-            String newAccessToken = tokenGenerator.generateAccessToken(
-                    user.getId(), user.getRole()
-            );
-            String newRefreshToken = tokenGenerator.generateRefreshToken(
-                    user.getId()
-            );
-
-            // Set new cookies (15 minutes for access, 7 days for refresh)
+            // Fresh role from the user entity, not from the presented token's claims.
+            String newAccessToken = tokenGenerator.generateAccessToken(user.getId(), user.getRole());
             cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
                     jwtProperties.getAccessTokenExpirySeconds());
-            cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, newRefreshToken,
-                    jwtProperties.getRefreshTokenExpirySeconds());
 
-            // Set authentication for this request
             accessTokenAuthenticator.authenticateAs(user.getId(), user.getRole(), request);
 
             log.debug("Auto-refreshed tokens for user: {}", user.getEmail());
@@ -249,59 +252,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // the session to guest and reported it only at DEBUG.
             throw e;
         } catch (Exception e) {
+            // Deliberately total: this runs before the handler chain, so anything escaping here
+            // becomes a 500 on an endpoint the caller may be entitled to reach as a guest.
             log.debug("Auto-refresh failed: {}", e.getMessage());
             return false;
         }
     }
 
     /**
-     * Auto-refresh via the lineage rotation service (flag-on path).
+     * Replace the presented refresh cookie with its successor.
      *
-     * <p>Delegates the refresh-cookie rotation and theft detection to
-     * {@link RefreshRotationService}. On a successful rotation the access token is
-     * minted here with the user's current DB role and set as a cookie, and the
-     * request is authenticated. On a revoked family or rejection the auth context is
-     * cleared and {@code false} is returned so the request proceeds as a guest;
-     * {@code rotate} has already cleared cookies for a revoked family.</p>
+     * <p>With lineage rotation on, {@link RefreshRotationService} owns both the successor and the
+     * theft detection, and sets the cookie itself. With it off, the presented token is blacklisted
+     * for the rotation grace period and a successor is minted here.</p>
      *
      * @param refreshToken the presented refresh JWT
-     * @param request      HTTP request for authentication details
-     * @param response     HTTP response to set new cookies
-     * @return true if rotation succeeded and authentication is set, false otherwise
+     * @param claims       its verified claims
+     * @param user         the active account it names
+     * @param request      HTTP request to name a rejection on
+     * @param response     HTTP response to set the successor cookie on
+     * @return true if the cookie was rotated, false if the session was abandoned instead
      */
-    private boolean attemptLineageRefresh(
+    private boolean rotateRefreshCookie(
             String refreshToken,
+            TokenClaims claims,
+            User user,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        RotationResult.Rotated rotated;
-        try {
-            rotated = refreshRotationService.rotate(refreshToken, response).orThrow();
-        } catch (SessionRevokedException e) {
-            return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
-        } catch (InvalidTokenException e) {
-            return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
+        if (lineageRotationFlag.isEnabled()) {
+            try {
+                refreshRotationService.rotate(refreshToken, response).orThrow();
+                return true;
+            } catch (SessionRevokedException e) {
+                return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
+            } catch (InvalidTokenException e) {
+                return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
+            }
         }
 
-        TokenClaims claims = rotated.claims();
-
-        Optional<User> activeUser = userService.findActiveById(claims.userId());
-        if (activeUser.isEmpty()) {
-            log.warn("Lineage auto-refresh for non-existent or deleted user: {}", claims.userId());
-            return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
-        }
-
-        User user = activeUser.get();
-
-        String newAccessToken = tokenGenerator.generateAccessToken(
-                user.getId(), user.getRole()
-        );
-        cookieUtils.setCookie(response, CookieConstants.ACCESS_TOKEN, newAccessToken,
-                    jwtProperties.getAccessTokenExpirySeconds());
-
-        accessTokenAuthenticator.authenticateAs(user.getId(), user.getRole(), request);
-
-        log.debug("Lineage auto-refreshed tokens for user: {}", user.getEmail());
+        tokenBlacklistService.blacklistTokenForRotation(refreshToken, claims.expiration());
+        cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN,
+                tokenGenerator.generateRefreshToken(user.getId()),
+                jwtProperties.getRefreshTokenExpirySeconds());
         return true;
     }
 

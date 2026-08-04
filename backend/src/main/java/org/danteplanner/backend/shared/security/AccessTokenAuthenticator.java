@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
-import org.danteplanner.backend.auth.exception.TokenRevokedException;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenValidator;
@@ -57,46 +56,45 @@ public class AccessTokenAuthenticator {
      * @return what the token proved
      */
     public AccessTokenVerdict verify(String token, HttpServletRequest request) {
+        TokenClaims claims;
         try {
-            TokenClaims claims = tokenValidator.validateAccessToken(token);
+            claims = tokenValidator.validateAccessToken(token);
+        } catch (InvalidTokenException e) {
+            return switch (e.getReason()) {
+                case EXPIRED -> AccessTokenVerdict.EXPIRED;
+                case REVOKED -> rejected("TOKEN_REVOKED", e.getReason(), request);
+                case MALFORMED, INVALID_SIGNATURE, MISSING_CLAIMS, INVALID_TYPE ->
+                        rejected("TOKEN_INVALID", e.getReason(), request);
+            };
+        }
 
-            if (tokenBlacklistService.isBlacklisted(token)) {
-                throw new TokenRevokedException(TokenClaims.TYPE_ACCESS);
-            }
-
-            // Rejects tokens issued before the subject's tokens were invalidated: a role demotion,
-            // a logout-everywhere, or an account deletion.
-            if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
-                throw new TokenRevokedException(TokenClaims.TYPE_ACCESS);
-            }
-
-            Long userId = claims.userId();
-            if (userId == null || SecurityContextHolder.getContext().getAuthentication() != null) {
-                return AccessTokenVerdict.AUTHENTICATED;
-            }
-
-            if (userId.equals(UserAccountLifecycleService.SENTINEL_USER_ID)) {
-                log.warn("Attempt to authenticate as sentinel user blocked");
-                return AccessTokenVerdict.SENTINEL_BLOCKED;
-            }
-
-            // Authenticate from token claims alone — no per-request DB lookup. Deleted users are
-            // rejected by the in-memory isUserTokenInvalidated check above, so auth keeps working
-            // when the DB is briefly unavailable (maintenance window).
-            authenticateAs(userId, claims.getEffectiveRole(), request);
-            return AccessTokenVerdict.AUTHENTICATED;
-
-        } catch (TokenRevokedException e) {
+        if (tokenBlacklistService.isBlacklisted(token)) {
             logSecurityEvent("TOKEN_REVOKED", request);
             return AccessTokenVerdict.REVOKED;
-        } catch (InvalidTokenException e) {
-            if (e.getReason() == InvalidTokenException.Reason.EXPIRED) {
-                return AccessTokenVerdict.EXPIRED;
-            }
-            String errorCode = mapReasonToErrorCode(e.getReason());
-            logSecurityEvent(errorCode + " (" + e.getReason() + ")", request);
-            return AccessTokenVerdict.REJECTED;
         }
+
+        // Rejects tokens issued before the subject's tokens were invalidated: a role demotion,
+        // a logout-everywhere, or an account deletion.
+        if (tokenBlacklistService.isUserTokenInvalidated(claims.userId(), claims.issuedAt().getTime())) {
+            logSecurityEvent("TOKEN_REVOKED", request);
+            return AccessTokenVerdict.REVOKED;
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            return AccessTokenVerdict.AUTHENTICATED;
+        }
+
+        Long userId = claims.userId();
+        if (userId.equals(UserAccountLifecycleService.SENTINEL_USER_ID)) {
+            log.warn("Attempt to authenticate as sentinel user blocked");
+            return AccessTokenVerdict.SENTINEL_BLOCKED;
+        }
+
+        // Authenticate from token claims alone — no per-request DB lookup. Deleted users are
+        // rejected by the in-memory isUserTokenInvalidated check above, so auth keeps working
+        // when the DB is briefly unavailable (maintenance window).
+        authenticateAs(userId, claims.getEffectiveRole(), request);
+        return AccessTokenVerdict.AUTHENTICATED;
     }
 
     /**
@@ -118,19 +116,10 @@ public class AccessTokenAuthenticator {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    /**
-     * Maps InvalidTokenException reason to error code.
-     * TOKEN_EXPIRED is the only code that should trigger client-side refresh.
-     */
-    private String mapReasonToErrorCode(InvalidTokenException.Reason reason) {
-        return switch (reason) {
-            case EXPIRED -> "TOKEN_EXPIRED";
-            case MALFORMED -> "TOKEN_INVALID";
-            case INVALID_SIGNATURE -> "TOKEN_INVALID";
-            case MISSING_CLAIMS -> "TOKEN_INVALID";
-            case INVALID_TYPE -> "TOKEN_INVALID";
-            case REVOKED -> "TOKEN_REVOKED";
-        };
+    private AccessTokenVerdict rejected(
+            String errorCode, InvalidTokenException.Reason reason, HttpServletRequest request) {
+        logSecurityEvent(errorCode + " (" + reason + ")", request);
+        return AccessTokenVerdict.REJECTED;
     }
 
     /**
