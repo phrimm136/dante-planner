@@ -243,7 +243,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         assertThat(contentRepository.findById(plannerId).orElseThrow().getDeletedAt())
                 .as("the deletion stamp is on the committed row, not only on the in-memory aggregate")
                 .isNotNull();
-        assertThat(publicationRepository.findById(plannerId).orElseThrow().getPublished())
+        assertThat(publicationRepository.findById(plannerId).orElseThrow().isPublished())
                 .as("the auto-unpublish that precedes the delete is committed too")
                 .isFalse();
         assertThat(plannerRepository.findAggregateForOwner(plannerId, owner.getId()))

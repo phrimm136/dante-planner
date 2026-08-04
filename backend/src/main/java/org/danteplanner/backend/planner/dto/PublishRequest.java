@@ -53,13 +53,6 @@ public record PublishRequest(
     }
 
     /**
-     * Whether the request names an explicit publication state rather than asking for a toggle.
-     */
-    public boolean namesState() {
-        return published != null;
-    }
-
-    /**
      * Holds when the request carries either no content at all or a complete content payload,
      * mirroring the field-level constraints of {@link UpsertPlannerRequest}, which cannot be
      * applied directly here because a state-only request legitimately omits every content field.

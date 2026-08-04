@@ -6,7 +6,6 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.dto.*;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -15,6 +14,7 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
@@ -112,14 +112,7 @@ class PlannerCommandServiceTest {
                 currentSchemaVersion
         );
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
 
         deviceId = UUID.randomUUID();
 
@@ -761,7 +754,6 @@ class PlannerCommandServiceTest {
                     PlannerNotFoundException.class,
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
-            verify(plannerRepository, never()).existsByIdAndUserId(any(), any());
             verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).save(any());
             verify(plannerRepository, never()).countActiveByUserId(any());
@@ -784,7 +776,6 @@ class PlannerCommandServiceTest {
                     PlannerForbiddenException.class,
                     () -> commandService.upsertPlanner(testUser.getId(), deviceId, plannerId, request, false)
             );
-            verify(plannerRepository, never()).existsByIdAndUserId(any(), any());
             verify(plannerRepository, never()).existsActiveById(any());
             verify(plannerRepository, never()).save(any());
         }
@@ -809,7 +800,6 @@ class PlannerCommandServiceTest {
                     testUser.getId(), deviceId, plannerId, request, false);
 
             assertTrue(result.isCreated());
-            verify(plannerRepository, never()).existsByIdAndUserId(any(), any());
             verify(plannerRepository, never()).existsActiveById(any());
         }
     }

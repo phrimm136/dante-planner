@@ -62,8 +62,12 @@ public class PlannerModeration {
         return takenDownAt != null;
     }
 
-    void takeDown() {
+    boolean takeDown() {
+        if (takenDownAt != null) {
+            return false;
+        }
         this.takenDownAt = Instant.now();
+        return true;
     }
 
     void hide(Long moderatorId, String reason) {

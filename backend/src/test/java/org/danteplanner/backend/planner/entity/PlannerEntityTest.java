@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.entity;
 
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -36,7 +35,6 @@ class PlannerEntityTest {
     }
 
     @Test
-    @DisplayName("takeDown_WhenInvoked_Unpublishes")
     void takeDown_WhenInvoked_Unpublishes() {
         Planner planner = publishedPlanner();
 
@@ -47,7 +45,6 @@ class PlannerEntityTest {
     }
 
     @Test
-    @DisplayName("setPublished_WhenTakenDown_Throws")
     void setPublished_WhenTakenDown_Throws() {
         Planner planner = publishedPlanner();
         planner.takeDown();

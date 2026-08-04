@@ -5,13 +5,13 @@ import org.danteplanner.backend.notification.service.NotificationDispatchService
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.dto.PlannerPublishedPayload;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.PublicationChange;
 import org.danteplanner.backend.shared.entity.SseEventType;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -56,7 +55,22 @@ public class PlannerPublishingService {
      * transaction commits.
      */
     public record PlannerPublishedEvent(
-            Long authorId, UUID plannerId, String plannerTitle, Map<String, Object> data) {
+            Long authorId, UUID plannerId, String plannerTitle, PlannerPublishedPayload data) {
+    }
+
+    /**
+     * A moderator transition that withdraws a planner from public view.
+     */
+    @FunctionalInterface
+    public interface Withdrawal {
+
+        /**
+         * Apply the transition.
+         *
+         * @param planner the loaded aggregate
+         * @return whether the transition changed it
+         */
+        boolean apply(Planner planner);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -85,8 +99,7 @@ public class PlannerPublishingService {
         // about which planners exist, and the two entry points load through different paths.
         accessGuard.checkNotRestricted(userId);
 
-        Planner planner = plannerRepository.findAggregate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = accessGuard.requireExisting(plannerId);
         return applyPublishedState(userId, planner, published);
     }
 
@@ -118,22 +131,51 @@ public class PlannerPublishingService {
      * <p>Every path into a publication change crosses this method, so the ownership check lives
      * here rather than at each entry point. The restriction check cannot: it has to precede the
      * lookup so a restricted actor learns nothing about which planners exist.</p>
+     *
+     * <p>The aggregate owns the idempotency decision and reports it; the projections and the
+     * first-publish fan-out below read that one report.</p>
      */
     private PlannerResponse applyPublishedState(Long userId, Planner planner, boolean published) {
+        UUID plannerId = planner.getId();
+
         if (!planner.isOwnedBy(userId)) {
-            throw new PlannerForbiddenException(planner.getId());
+            throw new PlannerForbiddenException(plannerId);
         }
 
-        if (Boolean.TRUE.equals(planner.getPublished()) == published) {
-            return PlannerResponse.fromEntity(planner, currentUpvotes(planner.getId()));
+        PublicationChange change = planner.setPublished(published);
+        if (!change.changed()) {
+            return PlannerResponse.fromEntity(planner, plannerStatsRepository.upvotesOf(plannerId));
         }
-        return applyChange(userId, planner, published);
-    }
 
-    private int currentUpvotes(UUID plannerId) {
-        return plannerStatsRepository.findById(plannerId)
-                .map(PlannerStats::getUpvotes)
-                .orElse(0);
+        if (published) {
+            if (planner.getTitle() == null || planner.getTitle().isBlank()) {
+                throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
+            }
+            contentValidator.validate(planner.getContentJson(), planner.getCategory(), ValidationPolicy.PUBLISH);
+        }
+
+        Planner saved = plannerRepository.save(planner);
+
+        if (published) {
+            plannerCatalogService.onBecameVisible(saved);
+            subscriptionService.createSubscription(userId, plannerId);
+
+            // The DB fan-out and the SSE broadcast both run from the AFTER_COMMIT listener, so
+            // neither persists nor fires when the publish rolls back.
+            if (change == PublicationChange.FIRST_PUBLISH) {
+                eventPublisher.publishEvent(new PlannerPublishedEvent(
+                        userId, plannerId, saved.getTitle(),
+                        PlannerPublishedPayload.fromEntity(saved)));
+                log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
+            }
+        } else {
+            plannerCatalogService.onBecameInvisible(plannerId);
+        }
+
+        log.info("Set publish status for planner {} to {} by user {}",
+                plannerId, saved.getPublished(), userId);
+
+        return PlannerResponse.fromEntity(saved, plannerStatsRepository.upvotesOf(plannerId));
     }
 
     /**
@@ -143,17 +185,22 @@ public class PlannerPublishingService {
      * <p>The caller supplies the aggregate transition it wants (takedown, unpublish); which
      * projection has to follow is not the caller's to remember.</p>
      *
+     * <p>Idempotent on the transition's own report: a planner already in the withdrawn state is
+     * neither rewritten nor re-projected.</p>
+     *
      * @param plannerId  the planner to withdraw
      * @param withdrawal the transition to apply to the aggregate
-     * @return the persisted planner
+     * @return the persisted planner, or the untouched one when it was already withdrawn
      * @throws PlannerNotFoundException if no non-deleted planner carries the id
      */
     @Transactional
-    public Planner withdrawFromPublicView(UUID plannerId, Consumer<Planner> withdrawal) {
-        Planner planner = plannerRepository.findAggregate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+    public Planner withdrawFromPublicView(UUID plannerId, Withdrawal withdrawal) {
+        Planner planner = accessGuard.requireExisting(plannerId);
 
-        withdrawal.accept(planner);
+        if (!withdrawal.apply(planner)) {
+            return planner;
+        }
+
         Planner saved = plannerRepository.save(planner);
         plannerCatalogService.onBecameInvisible(plannerId);
         return saved;
@@ -170,8 +217,7 @@ public class PlannerPublishingService {
      */
     @Transactional
     public Planner changeRecommendedListing(UUID plannerId, Consumer<Planner> change) {
-        Planner planner = plannerRepository.findAggregate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = accessGuard.requireExisting(plannerId);
 
         change.accept(planner);
         Planner saved = plannerRepository.save(planner);
@@ -198,68 +244,7 @@ public class PlannerPublishingService {
      */
     @Transactional(readOnly = true)
     public int upvoteCount(UUID plannerId) {
-        return currentUpvotes(plannerId);
-    }
-
-
-    /**
-     * Carry an already-loaded aggregate to a publication state it does not currently hold.
-     *
-     * <p>The caller has established ownership and that the state differs; this applies the change
-     * and the projections that follow from it.</p>
-     *
-     * @param userId    the owner
-     * @param planner   the loaded planner aggregate
-     * @param published the state to drive the planner to
-     * @return the updated planner response
-     */
-    private PlannerResponse applyChange(Long userId, Planner planner, boolean published) {
-        UUID plannerId = planner.getId();
-
-        if (published) {
-            if (planner.getTitle() == null || planner.getTitle().isBlank()) {
-                throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
-            }
-            contentValidator.validate(planner.getContentJson(), planner.getCategory(), ValidationPolicy.PUBLISH);
-        }
-
-        boolean firstPublish = planner.getFirstPublishedAt() == null;
-        planner.setPublished(published);
-
-        Planner saved = plannerRepository.save(planner);
-
-        if (published) {
-            plannerCatalogService.onBecameVisible(saved);
-        } else {
-            plannerCatalogService.onBecameInvisible(plannerId);
-        }
-
-        if (published) {
-            subscriptionService.createSubscription(userId, plannerId);
-
-            // First-time publish notification (one-time only). The DB fan-out and the SSE
-            // broadcast both run from the AFTER_COMMIT listener, so neither persists nor fires
-            // when the publish rolls back.
-            if (firstPublish) {
-                User author = saved.getUser();
-                eventPublisher.publishEvent(new PlannerPublishedEvent(
-                        userId, plannerId, saved.getTitle(), Map.of(
-                        "plannerId", plannerId.toString(),
-                        "plannerTitle", saved.getTitle(),
-                        "authorEpithet", author.getUsernameEpithet(),
-                        "authorSuffix", author.getUsernameSuffix()
-                )));
-                log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
-            }
-        }
-
-        log.info("Set publish status for planner {} to {} by user {}",
-                plannerId, saved.getPublished(), userId);
-
-        int upvotes = plannerStatsRepository.findById(plannerId)
-                .map(PlannerStats::getUpvotes)
-                .orElse(0);
-        return PlannerResponse.fromEntity(saved, upvotes);
+        return plannerStatsRepository.upvotesOf(plannerId);
     }
 
 
@@ -276,8 +261,7 @@ public class PlannerPublishingService {
      */
     @Transactional
     public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
-        Planner planner = plannerRepository.findAggregate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = accessGuard.requireExisting(plannerId);
 
         if (!planner.isOwnedBy(userId)) {
             throw new PlannerForbiddenException(plannerId);

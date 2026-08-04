@@ -343,11 +343,11 @@ public class PlannerCommandService {
             Planner saved = plannerRepository.save(planner);
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
 
-            if (Boolean.TRUE.equals(saved.getPublished())) {
+            if (saved.getPublished()) {
                 plannerCatalogService.onVisibleEditCommitted(saved);
             }
 
-            PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
+            PlannerResponse response = PlannerResponse.fromEntity(saved, statsRepository.upvotesOf(id));
             sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED, response);
             return new UpsertedPlanner(saved, response, false);
         }
@@ -415,11 +415,11 @@ public class PlannerCommandService {
         Planner saved = plannerRepository.save(planner);
         log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, saved.getSyncVersion());
 
-        if (Boolean.TRUE.equals(saved.getPublished())) {
+        if (saved.getPublished()) {
             plannerCatalogService.onVisibleEditCommitted(saved);
         }
 
-        PlannerResponse response = PlannerResponse.fromEntity(saved, currentUpvotes(id));
+        PlannerResponse response = PlannerResponse.fromEntity(saved, statsRepository.upvotesOf(id));
 
         // Notify other devices via SSE
         sseService.notifyPlannerUpdate(userId, deviceId, id, SseEventType.UPDATED, response);
@@ -513,11 +513,5 @@ public class PlannerCommandService {
                 .total(requestedCount)
                 .planners(importedPlanners)
                 .build();
-    }
-
-    private int currentUpvotes(UUID plannerId) {
-        return statsRepository.findById(plannerId)
-                .map(PlannerStats::getUpvotes)
-                .orElse(0);
     }
 }

@@ -42,7 +42,7 @@ public class PlannerPublication {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean published = false;
+    private boolean published = false;
 
     @Column(name = "first_published_at")
     @Setter
@@ -61,18 +61,25 @@ public class PlannerPublication {
      * a planner already holds changes nothing, so a retry or a failover cannot flip it back.</p>
      *
      * @param target the desired published state
+     * @return what the transition turned out to be
      */
-    void setPublished(boolean target) {
-        if (Boolean.TRUE.equals(published) == target) {
-            return;
+    PublicationChange setPublished(boolean target) {
+        if (published == target) {
+            return PublicationChange.NONE;
         }
         this.published = target;
-        if (target && firstPublishedAt == null) {
-            this.firstPublishedAt = Instant.now();
+
+        if (!target) {
+            return PublicationChange.WITHDRAWN;
         }
+        if (firstPublishedAt == null) {
+            this.firstPublishedAt = Instant.now();
+            return PublicationChange.FIRST_PUBLISH;
+        }
+        return PublicationChange.REPUBLISH;
     }
 
-    void unpublish() {
-        setPublished(false);
+    PublicationChange unpublish() {
+        return setPublished(false);
     }
 }

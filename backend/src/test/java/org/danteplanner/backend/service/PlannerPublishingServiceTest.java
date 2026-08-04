@@ -13,7 +13,6 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
@@ -104,14 +103,7 @@ class PlannerPublishingServiceTest {
                 eventPublisher
         );
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
 
         when(userService.findById(testUser.getId())).thenReturn(testUser);
     }
@@ -154,6 +146,53 @@ class PlannerPublishingServiceTest {
 
             assertFalse(result.published());
             verify(plannerRepository, never()).save(any(Planner.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("withdrawFromPublicView Tests")
+    class WithdrawFromPublicViewTests {
+
+        @Test
+        @DisplayName("withdrawing an already-unpublished planner writes nothing and drops no catalog row")
+        void withdrawFromPublicView_WhenAlreadyUnpublished_HasNoSideEffects() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::unpublish);
+
+            assertSame(planner, result);
+            verify(plannerRepository, never()).save(any(Planner.class));
+            verify(plannerCatalogService, never()).onBecameInvisible(any());
+        }
+
+        @Test
+        @DisplayName("withdrawing a published planner persists it and drops its catalog row")
+        void withdrawFromPublicView_WhenPublished_PersistsAndDropsCatalogRow() {
+            Planner planner = testPlannerBuilder().published(true).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::unpublish);
+
+            assertFalse(result.getPublished());
+            verify(plannerRepository).save(planner);
+            verify(plannerCatalogService).onBecameInvisible(planner.getId());
+        }
+
+        @Test
+        @DisplayName("taking down an unpublished planner still persists the moderation stamp")
+        void withdrawFromPublicView_WhenTakedownOfUnpublished_StillPersists() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            when(plannerRepository.save(any(Planner.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::takeDown);
+
+            assertTrue(result.isTakenDown());
+            verify(plannerRepository).save(planner);
         }
     }
 
@@ -204,8 +243,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(planner)).thenAnswer(invocation -> invocation.getArgument(0));
             // An upvote count no other source could supply, so the response can only carry it by
             // having read this planner's own stats row.
-            when(plannerStatsRepository.findById(planner.getId())).thenReturn(
-                    Optional.of(PlannerStats.builder().plannerId(planner.getId()).upvotes(12).build()));
+            when(plannerStatsRepository.upvotesOf(planner.getId())).thenReturn(12);
 
             // Act
             PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), true);

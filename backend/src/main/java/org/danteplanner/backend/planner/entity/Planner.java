@@ -160,8 +160,8 @@ public class Planner implements Persistable<UUID> {
         return content.getLoadedSelectedKeywords();
     }
 
-    public Boolean getPublished() {
-        return publication.getPublished();
+    public boolean getPublished() {
+        return publication.isPublished();
     }
 
     public Instant getFirstPublishedAt() {
@@ -207,10 +207,13 @@ public class Planner implements Persistable<UUID> {
 
     /**
      * Take this planner down as a moderator. Unpublishing is part of the takedown.
+     *
+     * @return whether the takedown changed this planner
      */
-    public void takeDown() {
-        moderation.takeDown();
-        publication.unpublish();
+    public boolean takeDown() {
+        boolean moderated = moderation.takeDown();
+        boolean withdrawn = publication.unpublish().changed();
+        return moderated || withdrawn;
     }
 
     /**
@@ -245,13 +248,14 @@ public class Planner implements Persistable<UUID> {
      * failover cannot flip it back. A moderator takedown blocks publishing but not unpublishing.</p>
      *
      * @param target the desired published state
+     * @return what the transition turned out to be
      * @throws PlannerForbiddenException if publishing a planner taken down by a moderator
      */
-    public void setPublished(boolean target) {
+    public PublicationChange setPublished(boolean target) {
         if (target && moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
         }
-        publication.setPublished(target);
+        return publication.setPublished(target);
     }
 
     /**
@@ -263,8 +267,10 @@ public class Planner implements Persistable<UUID> {
 
     /**
      * Unpublish this planner. No moderation side effects.
+     *
+     * @return whether the planner was published before this call
      */
-    public void unpublish() {
-        publication.unpublish();
+    public boolean unpublish() {
+        return publication.unpublish().changed();
     }
 }
