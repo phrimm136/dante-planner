@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import fs from 'fs'
@@ -11,6 +12,23 @@ const STATIC_ROOT = path.resolve(__dirname, '../static')
 const STATIC_WHITELIST = ['images', 'data', 'i18n']
 // Well-known files that must be served at stable root paths, outside the hashed pipeline
 const STATIC_ROOT_FILES = ['sitemap.xml', 'robots.txt', 'favicon.ico', '_headers']
+
+const I18N_NAMESPACES = [
+  'common',
+  'database',
+  'planner',
+  'extraction',
+  'epithet',
+  'sinnerNames',
+  'moderation',
+]
+const I18N_LANGUAGES = ['EN', 'JP', 'KR', 'CN'] as const
+const I18N_NAMESPACE_CHUNK = Object.fromEntries(
+  I18N_LANGUAGES.map((lng) => [
+    lng,
+    new RegExp(`static/i18n/${lng}/(${I18N_NAMESPACES.join('|')})\\.json$`),
+  ]),
+) as Record<(typeof I18N_LANGUAGES)[number], RegExp>
 
 // Mount real Tiptap/ProseMirror editors, which need jsdom's fuller Range/Selection/
 // contenteditable support — run in the src-editor project, not under happy-dom
@@ -91,11 +109,8 @@ export default defineConfig({
     serveWhitelistedStatic(),
     staticFile404Plugin(),
     hashStaticPlugin({ staticDir: path.resolve(__dirname, '../static') }),
-    react({
-      babel: {
-        plugins: ['babel-plugin-react-compiler'],
-      },
-    }),
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
   resolve: {
@@ -144,6 +159,13 @@ export default defineConfig({
             { name: 'zod', test: /node_modules\/zod/ },
             { name: 'sonner', test: /node_modules\/sonner/ },
             { name: 'tiptap', test: /node_modules\/@tiptap\// },
+            // One chunk per language for the app's own namespaces, so a visitor
+            // fetches their language in a single request and never the others.
+            // Per-entity files under the same directories stay unmatched.
+            { name: 'i18n-en', test: I18N_NAMESPACE_CHUNK.EN },
+            { name: 'i18n-jp', test: I18N_NAMESPACE_CHUNK.JP },
+            { name: 'i18n-kr', test: I18N_NAMESPACE_CHUNK.KR },
+            { name: 'i18n-cn', test: I18N_NAMESPACE_CHUNK.CN },
           ],
         },
       },
