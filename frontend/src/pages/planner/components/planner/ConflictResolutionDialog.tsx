@@ -8,11 +8,13 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
 import type {
   ConflictState,
   ConflictResolutionChoice,
   SaveablePlanner,
 } from '../../types/PlannerTypes'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Props for ConflictResolutionDialog
@@ -64,14 +66,8 @@ export function ConflictResolutionDialog({
   const { t } = useTranslation(['planner', 'common'])
 
   // Format the conflict detection time for display
-  const formatTime = (isoString: string): string => {
-    try {
-      const date = new Date(isoString)
-      return date.toLocaleTimeString()
-    } catch {
-      return ''
-    }
-  }
+  const formatTime = (isoString: string): string =>
+    formatPlannerDate(isoString, undefined, DATE_FORMATS.TIME_ONLY) ?? ''
 
   // Prevent dismissal via ESC key or clicking outside
   const preventDismissal = (e: Event) => {
@@ -108,7 +104,7 @@ export function ConflictResolutionDialog({
         {localPlanner && serverPlanner && (
           <div className="space-y-2 py-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">
+              <span className={SECTION_STYLES.TEXT.muted}>
                 {t('pages.plannerMD.conflict.localVersion', 'Local version')}:
               </span>
               <span className="font-medium truncate max-w-[60%]">
@@ -116,7 +112,7 @@ export function ConflictResolutionDialog({
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">
+              <span className={SECTION_STYLES.TEXT.muted}>
                 {t('pages.plannerMD.conflict.serverVersion', 'Server version')}:
               </span>
               <span className="font-medium truncate max-w-[60%]">
@@ -127,7 +123,7 @@ export function ConflictResolutionDialog({
         )}
 
         {(localPlanner?.metadata.published || serverPlanner?.metadata.published) && (
-          <p className="text-xs text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.captionSmall}>
             {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
           </p>
         )}

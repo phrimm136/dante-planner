@@ -1,18 +1,16 @@
 // React core
-import { useState, useEffect, Suspense, startTransition, useCallback, useRef } from 'react'
+import { useState, useEffect, Suspense, startTransition, useRef } from 'react'
 
 // TanStack
 import { useNavigate } from '@tanstack/react-router'
 import { queryClient } from '@/lib/queryClient'
-import { plannerQueryKeys } from '../../hooks/useSavedPlannerQuery'
+import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from '../../hooks/usePublishedPlannerQuery'
 
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save } from 'lucide-react'
 import { toast } from '@/lib/toast'
-import { formatDistanceToNow } from 'date-fns'
-import { enUS, ja, ko, zhCN } from 'date-fns/locale'
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button'
@@ -40,14 +38,15 @@ import {
   DUNGEON_IDX,
   DEFAULT_SKILL_EA,
 } from '@/shared/gameData'
-import { MAX_NOTE_BYTES } from '@/lib/constants'
+import { STAGGER_STEP_MS, SECTION_STYLES } from '@/lib/constants'
 import { getKeywordIconPath } from '@/shared/assets'
-import { getKeywordDisplayName, calculateByteLength } from '@/lib/utils'
+import { assertNever, calculateByteLength } from '@/lib/utils'
 import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '../../lib/deckCode'
+import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
+import { saveErrorMessage } from '../../lib/plannerSaveErrors'
 
 // Project types & schemas
 import type { MDCategory } from '@/shared/gameData'
-import type { NoteContent } from '@/shared/noteEditor'
 import type {
   SaveablePlanner,
   MDPlannerContent,
@@ -62,156 +61,64 @@ import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/us
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
+import type { SaveOptions } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
 import { useUserSettingsQuery } from '@/pages/settings'
 
 // Project components (@/components)
-import { DeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
+import { StoreBoundDeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
-import { StartBuffSection } from '../startBuff/StartBuffSection'
+import { StoreBoundDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
+import { StoreBoundStartBuffSection } from '../startBuff/StartBuffSection'
 import { StartBuffEditPane } from '../startBuff/StartBuffEditPane'
-import { StartGiftSummary } from '../startGift/StartGiftSummary'
+import { StoreBoundStartGiftSummary } from '../startGift/StartGiftSummary'
 import { StartGiftEditPane } from '../startGift/StartGiftEditPane'
-import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
+import { StoreBoundEGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { EGOGiftObservationEditPane } from '../egoGift/EGOGiftObservationEditPane'
-import { ComprehensiveGiftSummary } from '../egoGift/ComprehensiveGiftSummary'
+import { StoreBoundComprehensiveGiftSummary } from '../egoGift/ComprehensiveGiftSummary'
 import { ComprehensiveGiftSelectorPane } from '../egoGift/ComprehensiveGiftSelectorPane'
-import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
+import { StoreBoundSkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
 import { PlannerSection } from '../PlannerSection'
-import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
+import { StoreBoundSectionNote } from './StoreBoundSectionNote'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
-import { SaveSyncOffWarningDialog } from './SaveSyncOffWarningDialog'
+import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
+import { KeywordSelector } from './KeywordSelector'
+import { LastSavedLabel } from './LastSavedLabel'
+import { staggerDelay } from '@/lib/stagger'
 
 const MAX_TITLE_BYTES = 256
+const SAVE_FAILED_TOAST_KEY = 'pages.plannerMD.save.failed'
 
-interface PlannerMDEditorContentProps {
-  mode: 'new' | 'edit'
-  planner?: SaveablePlanner
+/**
+ * The parts of an editing session the shell cannot derive for itself: which
+ * planner is being edited, at which content and sync version.
+ */
+export interface PlannerEditorSession {
+  /** Game content version the planner is authored against. */
+  contentVersion: number
+  /** Existing planner id; absent means the shell mints one. */
+  initialPlannerId?: string
+  /** Server version to present on the next sync. */
+  initialSyncVersion?: number
+  /** Timestamp to seed the "last saved" label with. */
+  initialSavedAt?: string
 }
 
-interface KeywordSelectorProps {
-  options: readonly string[]
-  selectedOptions: Set<string>
-  onSelectionChange: (options: Set<string>) => void
-  getIconPath: (option: string) => string
-  placeholder: string
-  clearLabel: string
-  selectedCountText: string
-}
+/**
+ * Every editing surface of an MD planner. Both the create and the edit route
+ * render this; they differ only in the session they hand it.
+ */
+export function PlannerEditorShell({
+  contentVersion: mdVersion,
+  initialPlannerId,
+  initialSyncVersion,
+  initialSavedAt,
+}: PlannerEditorSession) {
+  const { t } = useTranslation(['planner', 'common'])
 
-function KeywordSelector({
-  options,
-  selectedOptions,
-  onSelectionChange,
-  getIconPath,
-  placeholder,
-  clearLabel,
-  selectedCountText,
-}: KeywordSelectorProps) {
-  const toggleOption = (option: string) => {
-    const newSelection = new Set(selectedOptions)
-    if (newSelection.has(option)) {
-      newSelection.delete(option)
-    } else {
-      newSelection.add(option)
-    }
-    onSelectionChange(newSelection)
-  }
-
-  const clearAll = () => {
-    onSelectionChange(new Set())
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="min-h-10 w-full p-2 border border-border rounded-md bg-card cursor-pointer hover:border-primary/50 transition-colors flex items-center"
-        >
-          {selectedOptions.size === 0 ? (
-            <span className="text-muted-foreground text-sm">{placeholder}</span>
-          ) : (
-            <div className="flex flex-wrap gap-1">
-              {Array.from(selectedOptions).map((option) => (
-                <div
-                  key={option}
-                  className="w-7 h-7 rounded-md border-2 border-primary bg-primary/10"
-                  title={getKeywordDisplayName(option)}
-                >
-                  <img
-                    src={getIconPath(option)}
-                    alt={getKeywordDisplayName(option)}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-          <ChevronDown className="ml-auto size-4 opacity-50 shrink-0" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-80 p-3">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">{selectedCountText}</span>
-          <Button variant="ghost" size="sm" onClick={clearAll}>
-            {clearLabel}
-          </Button>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {options.map((option) => {
-            const isSelected = selectedOptions.has(option)
-            const label = getKeywordDisplayName(option)
-            return (
-              <button
-                type="button"
-                key={option}
-                onClick={() => {
-                  toggleOption(option)
-                }}
-                className={`shrink-0 w-10 h-10 rounded-md border-2 transition-all ${
-                  isSelected
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border bg-button hover:border-primary/50'
-                }`}
-                title={label}
-              >
-                <img
-                  src={getIconPath(option)}
-                  alt={label}
-                  className="w-full h-full object-contain"
-                />
-              </button>
-            )
-          })}
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContentProps) {
-  const { t, i18n } = useTranslation(['planner', 'common'])
-
-  // Map i18n language to date-fns locale
-  const dateFnsLocale =
-    {
-      EN: enUS,
-      JP: ja,
-      KR: ko,
-      CN: zhCN,
-    }[i18n.language] ?? enUS
   const config = usePlannerConfig()
   const navigate = useNavigate()
-
-  // For existing planners, preserve the original content version (backward compat).
-  // New planners use the current server version.
-  const mdVersion =
-    mode === 'edit' && planner?.metadata.contentVersion
-      ? planner.metadata.contentVersion
-      : config.mdCurrentVersion
 
   // Get user settings for sync preference
   const { data: userSettings } = useUserSettingsQuery()
@@ -221,17 +128,14 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const isIntentionalNavigationRef = useRef(false)
 
   // Callback for "Keep Both" - navigate to the newly created copy
-  const handleKeepBothCreated = useCallback(
-    (newPlannerId: string) => {
-      // Mark as intentional navigation to skip "leave page?" popup
-      isIntentionalNavigationRef.current = true
+  const handleKeepBothCreated = (newPlannerId: string) => {
+    // Mark as intentional navigation to skip "leave page?" popup
+    isIntentionalNavigationRef.current = true
 
-      // Navigate to forked planner edit page, replacing current history entry
-      // Back button will go to original view (which now shows server version)
-      void navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
-    },
-    [navigate],
-  )
+    // Navigate to forked planner edit page, replacing current history entry
+    // Back button will go to original view (which now shows server version)
+    void navigate({ to: '/planner/md/$id/edit', params: { id: newPlannerId }, replace: true })
+  }
 
   // ============================================================================
   // Store API (for imperative access in handlers)
@@ -248,8 +152,6 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   const isPublished = usePlannerEditorStore((s) => s.isPublished)
   const visibleSections = usePlannerEditorStore((s) => s.visibleSections)
   const setVisibleSections = usePlannerEditorStore((s) => s.setVisibleSections)
-  const sectionNotes = usePlannerEditorStore((s) => s.sectionNotes)
-  const updateSectionNote = usePlannerEditorStore((s) => s.updateSectionNote)
   const selectedKeywords = usePlannerEditorStore((s) => s.selectedKeywords)
   const setSelectedKeywords = usePlannerEditorStore((s) => s.setSelectedKeywords)
 
@@ -298,69 +200,50 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
   // ============================================================================
   // SSE Reload Handler - Uses store batch action
   // ============================================================================
-  const handleServerReload = useCallback(
-    (reloadedPlanner: SaveablePlanner) => {
-      if (reloadedPlanner.config.type !== 'MIRROR_DUNGEON') {
-        console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
-        toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
-        return
-      }
+  const handleServerReload = (reloadedPlanner: SaveablePlanner) => {
+    if (reloadedPlanner.config.type !== 'MIRROR_DUNGEON') {
+      console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
+      toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
+      return
+    }
 
-      const content = reloadedPlanner.content as MDPlannerContent
-      initializeFromPlannerAction(content, {
-        title: reloadedPlanner.metadata.title,
-        category: reloadedPlanner.config.category as MDCategory,
-        isPublished: reloadedPlanner.metadata.published ?? false,
-      })
-    },
-    [initializeFromPlannerAction, t],
-  )
-
-  // ============================================================================
-  // Section Note Handler
-  // ============================================================================
-  const handleSectionNoteChange = useCallback(
-    (sectionKey: string, content: NoteContent) => {
-      updateSectionNote(sectionKey, content)
-    },
-    [updateSectionNote],
-  )
+    const content = reloadedPlanner.content as MDPlannerContent
+    initializeFromPlannerAction(content, {
+      title: reloadedPlanner.metadata.title,
+      category: reloadedPlanner.config.category as MDCategory,
+      isPublished: reloadedPlanner.metadata.published ?? false,
+    })
+  }
 
   // ============================================================================
   // Category Change Handler
   // ============================================================================
-  const handleCategoryChange = useCallback(
-    (newCategory: MDCategory) => {
-      const currentCategory = storeApi.getState().category
-      const floorSelections = storeApi.getState().floorSelections
+  const handleCategoryChange = (newCategory: MDCategory) => {
+    const currentCategory = storeApi.getState().category
+    const floorSelections = storeApi.getState().floorSelections
 
-      // Warn if changing from 5F to 10F/15F with Normal difficulty on floors 1-5
-      if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
-        const hasNormalDifficulty = floorSelections
-          .slice(0, 5)
-          .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
+    // Warn if changing from 5F to 10F/15F with Normal difficulty on floors 1-5
+    if (currentCategory === '5F' && (newCategory === '10F' || newCategory === '15F')) {
+      const hasNormalDifficulty = floorSelections
+        .slice(0, 5)
+        .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
 
-        if (hasNormalDifficulty) {
-          toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
-        }
+      if (hasNormalDifficulty) {
+        toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
       }
+    }
 
-      setCategory(newCategory)
-    },
-    [storeApi, setCategory, t],
-  )
+    setCategory(newCategory)
+  }
 
   // Stable getter function - must not be recreated on each render
-  const getState = useCallback(() => storeApi.getState().getPlannerState(), [storeApi])
+  const getState = () => storeApi.getState().getPlannerState()
 
   const {
     plannerId,
     isAutoSaving,
     isSaving,
-    errorCode,
-    errorI18nKey,
-    errorI18nParams,
-    conflictState,
+    error: saveError,
     clearError,
     save,
     resolveConflict,
@@ -372,46 +255,26 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     schemaVersion: config.schemaVersion,
     contentVersion: mdVersion,
     plannerType: 'MIRROR_DUNGEON',
-    initialPlannerId: (() => {
-      const id = mode === 'edit' && planner?.metadata.id ? planner.metadata.id : undefined
-      return id
-    })(),
-    initialSyncVersion:
-      mode === 'edit' && planner?.metadata.syncVersion !== undefined
-        ? planner.metadata.syncVersion
-        : undefined,
-    initialSavedAt:
-      mode === 'edit' && planner?.metadata.lastModifiedAt
-        ? planner.metadata.lastModifiedAt
-        : undefined,
+    initialPlannerId,
+    initialSyncVersion,
+    initialSavedAt,
     published: isPublished,
     onServerReload: handleServerReload,
     onKeepBothCreated: handleKeepBothCreated,
     syncEnabled,
   })
 
-  // Show error toasts
+  // Show error toasts. Errors with their own surface (conflict dialog) or with
+  // none by design (sync paused) yield no message and stay set.
   useEffect(() => {
-    if (!errorCode) return
+    if (!saveError) return
 
-    if (errorCode === 'banned') {
-      toast.error(t('moderation.banned', { ns: 'common' }))
-      clearError()
-    } else if (errorCode === 'timedOut') {
-      toast.error(t('moderation.timedOut', { ns: 'common' }))
-      clearError()
-    } else if (errorCode === 'saveFailed') {
-      // Use user-friendly i18n key if available, otherwise generic error
-      const message = errorI18nKey
-        ? t(errorI18nKey, errorI18nParams ?? {})
-        : t('pages.plannerMD.save.failed')
-      toast.error(message)
-      clearError()
-    } else if (errorCode === 'quotaExceeded') {
-      toast.error(t('pages.plannerMD.save.quotaExceeded', 'Storage quota exceeded'))
-      clearError()
-    }
-  }, [errorCode, errorI18nKey, errorI18nParams, clearError, t])
+    const message = saveErrorMessage(saveError, SAVE_FAILED_TOAST_KEY)
+    if (!message) return
+
+    toast.error(message)
+    clearError()
+  }, [saveError, clearError])
 
   // Warn before closing tab only if there are unsaved local changes (not yet auto-saved to IndexedDB)
   // Skip if intentional navigation (e.g., "Keep Both" conflict resolution)
@@ -502,51 +365,44 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     setPendingImport(null)
   }
 
+  // Drop the stale editor caches, then land on whichever viewer owns this plan.
+  const navigateToViewer = () => {
+    queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
+    if (isPublished) {
+      queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
+      void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
+    } else {
+      void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
+    }
+  }
+
+  const saveThenLeave = async (saveOptions?: SaveOptions) => {
+    // Mark as intentional navigation to skip "leave page?" popup
+    isIntentionalNavigationRef.current = true
+
+    const success = await save(saveOptions)
+    if (!success) {
+      isIntentionalNavigationRef.current = false
+      return
+    }
+
+    toast.success(t('pages.plannerMD.save.success'))
+    navigateToViewer()
+  }
+
   const handleSave = async () => {
-    // Check if sync is disabled and plan is published
+    // A published plan whose sync is off needs the warning dialog first
     if (syncEnabled === false && isPublished) {
-      // Show warning dialog for sync-off save
       setShowSaveWarning(true)
       return
     }
 
-    // Mark as intentional navigation to skip "leave page?" popup
-    isIntentionalNavigationRef.current = true
-
-    const success = await save()
-    if (success) {
-      toast.success(t('pages.plannerMD.save.success'))
-      queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
-      if (isPublished) {
-        queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
-        void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
-      } else {
-        void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
-      }
-    } else {
-      isIntentionalNavigationRef.current = false
-    }
+    await saveThenLeave()
   }
 
   const handleSaveWithSync = async () => {
     setShowSaveWarning(false)
-
-    // Mark as intentional navigation to skip "leave page?" popup
-    isIntentionalNavigationRef.current = true
-
-    const success = await save({ forceSync: true })
-    if (success) {
-      toast.success(t('pages.plannerMD.save.success'))
-      queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
-      if (isPublished) {
-        queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
-        void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
-      } else {
-        void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
-      }
-    } else {
-      isIntentionalNavigationRef.current = false
-    }
+    await saveThenLeave({ forceSync: true })
   }
 
   const handleConflictResolution = async (choice: ConflictResolutionChoice) => {
@@ -554,43 +410,39 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
     isIntentionalNavigationRef.current = true
 
     const success = await resolveConflict(choice)
-    if (success) {
-      // Show appropriate success message based on choice
-      if (choice === 'overwrite') {
-        toast.success(t('pages.plannerMD.conflict.overwriteSuccess'))
-      } else if (choice === 'discard') {
-        toast.success(t('pages.plannerMD.conflict.discardSuccess'))
-      } else if (choice === 'both') {
-        toast.success(t('pages.plannerMD.conflict.keepBothSuccess'))
-      }
-
-      // For 'both', onKeepBothCreated callback handles navigation to new planner
-      // For 'overwrite' and 'discard', navigate to viewer page
-      if (choice !== 'both') {
-        queryClient.removeQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
-        if (isPublished) {
-          queryClient.removeQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
-          void navigate({ to: '/planner/md/gesellschaft/$id', params: { id: plannerId } })
-        } else {
-          void navigate({ to: '/planner/md/$id', params: { id: plannerId } })
-        }
-      }
-    } else {
+    if (!success) {
       // Reset intentional navigation flag if resolution failed
       isIntentionalNavigationRef.current = false
+      toast.error(t(SAVE_FAILED_TOAST_KEY))
+      return
+    }
+
+    toast.success(t(CONFLICT_TOAST_KEY[choice]))
+
+    switch (choice) {
+      case 'overwrite':
+      case 'discard':
+        navigateToViewer()
+        break
+      case 'both':
+        // onKeepBothCreated navigates to the newly created planner
+        break
+      default:
+        assertNever(choice)
     }
   }
 
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       <ConflictResolutionDialog
-        open={errorCode === 'conflict'}
-        conflictState={conflictState}
+        open={saveError?.kind === 'conflict'}
+        conflictState={saveError?.kind === 'conflict' ? saveError.state : null}
         onChoice={handleConflictResolution}
         isResolving={isSaving}
       />
 
-      <SaveSyncOffWarningDialog
+      <SyncOffWarningDialog
+        action="save"
         open={showSaveWarning}
         onOpenChange={setShowSaveWarning}
         onConfirm={handleSaveWithSync}
@@ -598,41 +450,14 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
       />
 
       <div className="flex items-center justify-end gap-2 mb-4">
-        {isAutoSaving && (
-          <span className="text-sm text-muted-foreground">
+        {isAutoSaving ? (
+          <span className={SECTION_STYLES.TEXT.caption}>
             {t('pages.plannerMD.save.autoSaving', 'Saving...')}
-            {lastSavedAt &&
-              (() => {
-                try {
-                  const parsedDate = new Date(lastSavedAt)
-                  if (isNaN(parsedDate.getTime())) return null
-                  return ` - ${t('sync.lastSaved', { time: formatDistanceToNow(parsedDate, { addSuffix: true, locale: dateFnsLocale }) })}`
-                } catch {
-                  return null
-                }
-              })()}
+            <LastSavedLabel lastSavedAt={lastSavedAt} inline />
           </span>
+        ) : (
+          <LastSavedLabel lastSavedAt={lastSavedAt} />
         )}
-        {!isAutoSaving &&
-          lastSavedAt &&
-          (() => {
-            try {
-              const parsedDate = new Date(lastSavedAt)
-              if (isNaN(parsedDate.getTime())) return null
-              return (
-                <span className="text-sm text-muted-foreground">
-                  {t('sync.lastSaved', {
-                    time: formatDistanceToNow(parsedDate, {
-                      addSuffix: true,
-                      locale: dateFnsLocale,
-                    }),
-                  })}
-                </span>
-              )
-            } catch {
-              return null
-            }
-          })()}
         <Button onClick={handleSave} disabled={isSaving} variant="outline">
           <Save className="w-4 h-4 mr-2" />
           {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
@@ -712,13 +537,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         </div>
 
         <PlannerSection title={t('pages.plannerMD.introduction')}>
-          <NoteEditor
-            value={sectionNotes.intro}
-            onChange={(content) => {
-              handleSectionNoteChange('intro', content)
-            }}
+          <StoreBoundSectionNote
+            sectionKey="intro"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            maxBytes={MAX_NOTE_BYTES}
           />
         </PlannerSection>
 
@@ -728,12 +549,12 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               fallback={
                 <div className="space-y-2">
                   <div className="border-2 border-border rounded-lg p-4">
-                    <div className="flex flex-wrap gap-2">
+                    <div className={SECTION_STYLES.LAYOUT.wrap}>
                       {Array.from({ length: 12 }).map((_, i) => (
                         <Skeleton
                           key={i}
                           className="w-16 h-20 rounded-md"
-                          style={{ animationDelay: `${i * 40}ms` }}
+                          style={staggerDelay(i)}
                         />
                       ))}
                     </div>
@@ -741,7 +562,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 </div>
               }
             >
-              <DeckBuilderSummary
+              <StoreBoundDeckBuilderSummary
                 onToggleDeploy={handleToggleDeploy}
                 onImport={handleDeckImport}
                 onExport={handleDeckExport}
@@ -752,16 +573,17 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               />
             </Suspense>
             <Suspense fallback={null}>
-              <DeckBuilderPane
-                open={isDeckPaneOpen}
-                onOpenChange={setIsDeckPaneOpen}
-                onImport={handleDeckImport}
-                onExport={handleDeckExport}
-                onResetOrder={handleResetDeployment}
-                onIdentityChange={(sinnerCode) => {
-                  updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-                }}
-              />
+              <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
+                <StoreBoundDeckBuilderContent
+                  isActive={isDeckPaneOpen}
+                  onImport={handleDeckImport}
+                  onExport={handleDeckExport}
+                  onResetOrder={handleResetDeployment}
+                  onIdentityChange={(sinnerCode) => {
+                    updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+                  }}
+                />
+              </DeckBuilderPane>
             </Suspense>
           </>
         )}
@@ -796,13 +618,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         </Dialog>
 
         {visibleSections >= 1 && (
-          <NoteEditor
-            value={sectionNotes.deckBuilder}
-            onChange={(content) => {
-              handleSectionNoteChange('deckBuilder', content)
-            }}
+          <StoreBoundSectionNote
+            sectionKey="deckBuilder"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            maxBytes={MAX_NOTE_BYTES}
           />
         )}
 
@@ -814,7 +632,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               </div>
             }
           >
-            <StartBuffSection
+            <StoreBoundStartBuffSection
               mdVersion={mdVersion}
               onClick={() => {
                 setIsStartBuffPaneOpen(true)
@@ -825,13 +643,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               onOpenChange={setIsStartBuffPaneOpen}
               mdVersion={mdVersion}
             />
-            <NoteEditor
-              value={sectionNotes.startBuffs}
-              onChange={(content) => {
-                handleSectionNoteChange('startBuffs', content)
-              }}
+            <StoreBoundSectionNote
+              sectionKey="startBuffs"
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-              maxBytes={MAX_NOTE_BYTES}
             />
           </Suspense>
         )}
@@ -844,7 +658,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               </div>
             }
           >
-            <StartGiftSummary
+            <StoreBoundStartGiftSummary
               onClick={() => {
                 setIsStartGiftPaneOpen(true)
               }}
@@ -854,13 +668,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
               onOpenChange={setIsStartGiftPaneOpen}
               mdVersion={mdVersion}
             />
-            <NoteEditor
-              value={sectionNotes.startGifts}
-              onChange={(content) => {
-                handleSectionNoteChange('startGifts', content)
-              }}
+            <StoreBoundSectionNote
+              sectionKey="startGifts"
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-              maxBytes={MAX_NOTE_BYTES}
             />
           </Suspense>
         )}
@@ -872,7 +682,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
                   <div className="space-y-4">
                     <div className="flex justify-end">
-                      <div className="flex items-center gap-1">
+                      <div className={SECTION_STYLES.LAYOUT.rowTight}>
                         <Skeleton className="w-8 h-8 rounded-md" />
                         <Skeleton className="w-12 h-6" />
                       </div>
@@ -882,7 +692,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                         <Skeleton
                           key={i}
                           className="w-24 h-24 rounded-md"
-                          style={{ animationDelay: `${i * 80}ms` }}
+                          style={staggerDelay(i, STAGGER_STEP_MS.LOOSE)}
                         />
                       ))}
                     </div>
@@ -890,7 +700,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 </PlannerSection>
               }
             >
-              <EGOGiftObservationSummary
+              <StoreBoundEGOGiftObservationSummary
                 mdVersion={mdVersion}
                 onClick={() => {
                   setIsObservationPaneOpen(true)
@@ -904,13 +714,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 mdVersion={mdVersion}
               />
             </Suspense>
-            <NoteEditor
-              value={sectionNotes.observation}
-              onChange={(content) => {
-                handleSectionNoteChange('observation', content)
-              }}
+            <StoreBoundSectionNote
+              sectionKey="observation"
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-              maxBytes={MAX_NOTE_BYTES}
             />
           </>
         )}
@@ -925,7 +731,7 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                       <div
                         key={i}
                         className="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-border bg-card"
-                        style={{ animationDelay: `${i * 60}ms` }}
+                        style={staggerDelay(i, STAGGER_STEP_MS.NORMAL)}
                       >
                         <Skeleton className="w-24 h-24 rounded-md" />
                         <div className="flex gap-1">
@@ -939,15 +745,11 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 </PlannerSection>
               }
             >
-              <SkillReplacementSection />
+              <StoreBoundSkillReplacementSection />
             </Suspense>
-            <NoteEditor
-              value={sectionNotes.skillReplacement}
-              onChange={(content) => {
-                handleSectionNoteChange('skillReplacement', content)
-              }}
+            <StoreBoundSectionNote
+              sectionKey="skillReplacement"
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-              maxBytes={MAX_NOTE_BYTES}
             />
           </>
         )}
@@ -956,14 +758,16 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
           <>
             <Suspense
               fallback={
-                <div className="bg-muted border border-border rounded-md p-6">
+                <div className={SECTION_STYLES.panel}>
                   <div className="text-center text-gray-500 py-8">
                     {t('pages.plannerMD.loading.EGOGiftData')}
                   </div>
                 </div>
               }
             >
-              <ComprehensiveGiftSummary onClick={() => setIsComprehensivePaneOpen(true)} />
+              <StoreBoundComprehensiveGiftSummary
+                onClick={() => setIsComprehensivePaneOpen(true)}
+              />
             </Suspense>
             <Suspense fallback={null}>
               <ComprehensiveGiftSelectorPane
@@ -971,13 +775,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                 onOpenChange={setIsComprehensivePaneOpen}
               />
             </Suspense>
-            <NoteEditor
-              value={sectionNotes.comprehensiveGifts}
-              onChange={(content) => {
-                handleSectionNoteChange('comprehensiveGifts', content)
-              }}
+            <StoreBoundSectionNote
+              sectionKey="comprehensiveGifts"
               placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-              maxBytes={MAX_NOTE_BYTES}
             />
           </>
         )}
@@ -1001,13 +801,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
                   return (
                     <div key={floorIndex} className="space-y-2">
                       <FloorThemeGiftSection floorNumber={floorNumber} floorIndex={floorIndex} />
-                      <NoteEditor
-                        value={sectionNotes[floorNoteKey]}
-                        onChange={(content) => {
-                          handleSectionNoteChange(floorNoteKey, content)
-                        }}
+                      <StoreBoundSectionNote
+                        sectionKey={floorNoteKey}
                         placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-                        maxBytes={MAX_NOTE_BYTES}
                       />
                     </div>
                   )
@@ -1018,13 +814,9 @@ export function PlannerMDEditorContent({ mode, planner }: PlannerMDEditorContent
         )}
 
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
-          <NoteEditor
-            value={sectionNotes.outro}
-            onChange={(content) => {
-              handleSectionNoteChange('outro', content)
-            }}
+          <StoreBoundSectionNote
+            sectionKey="outro"
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            maxBytes={MAX_NOTE_BYTES}
           />
         </PlannerSection>
 
