@@ -38,8 +38,11 @@ import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 
 // Project components (@/components)
-import { DeckBuilderSummary } from './components/deckBuilder/DeckBuilderSummary'
+import { StoreBoundDeckBuilderSummary } from './components/deckBuilder/DeckBuilderSummary'
 import { DeckBuilderPane } from './components/deckBuilder/DeckBuilderPane'
+import { StoreBoundDeckBuilderContent } from './components/deckBuilder/DeckBuilderContent'
+import { staggerDelay } from '@/lib/stagger'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /** Sinner card dimensions for skeleton (matches SinnerGrid) */
 const SINNER_CARD = { width: 96, height: 128 }
@@ -49,14 +52,14 @@ const SINNER_CARD = { width: 96, height: 128 }
  */
 function DeckBuilderPageSkeleton() {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       <div className="space-y-4">
         {/* Section header */}
         <Skeleton className="h-8 w-40" />
 
         {/* SinnerGrid placeholder */}
         <div className="border-2 border-border rounded-lg p-4">
-          <div className="flex flex-wrap gap-2">
+          <div className={SECTION_STYLES.LAYOUT.wrap}>
             {Array.from({ length: 12 }).map((_, i) => (
               <Skeleton
                 key={i}
@@ -64,7 +67,7 @@ function DeckBuilderPageSkeleton() {
                 style={{
                   width: SINNER_CARD.width,
                   height: SINNER_CARD.height,
-                  animationDelay: `${i * 40}ms`,
+                  ...staggerDelay(i),
                 }}
               />
             ))}
@@ -176,9 +179,9 @@ function DeckBuilderPageContent() {
   }
 
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Summary view: SinnerGrid + StatusViewer + ActionBar */}
-      <DeckBuilderSummary
+      <StoreBoundDeckBuilderSummary
         onToggleDeploy={handleToggleDeploy}
         onImport={handleImport}
         onExport={handleExport}
@@ -187,16 +190,17 @@ function DeckBuilderPageContent() {
       />
 
       {/* Edit dialog: full card selection grid */}
-      <DeckBuilderPane
-        open={isDeckPaneOpen}
-        onOpenChange={setIsDeckPaneOpen}
-        onImport={handleImport}
-        onExport={handleExport}
-        onResetOrder={handleResetOrder}
-        onIdentityChange={(sinnerCode) => {
-          updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-        }}
-      />
+      <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
+        <StoreBoundDeckBuilderContent
+          isActive={isDeckPaneOpen}
+          onImport={handleImport}
+          onExport={handleExport}
+          onResetOrder={handleResetOrder}
+          onIdentityChange={(sinnerCode) => {
+            updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+          }}
+        />
+      </DeckBuilderPane>
 
       {/* Import Confirmation Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>

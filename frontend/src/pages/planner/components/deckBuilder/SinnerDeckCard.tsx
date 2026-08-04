@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import type { SinnerEquipment } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
 import type { IdentityListItem } from '@/pages/identity'
@@ -22,7 +21,7 @@ interface SinnerDeckCardProps {
   skillData: SkillData
   egoAffinityMap: Record<string, string>
   deploymentOrder: number | null
-  onToggleDeploy: (sinnerIndex: number) => void
+  onToggleDeploy?: (sinnerIndex: number) => void
   readOnly?: boolean
 }
 
@@ -33,7 +32,7 @@ const EGO_RANKS: EgoType[] = ['ZAYIN', 'TETH', 'HE', 'WAW', 'ALEPH']
  * Uses IdentityCard for identity display with deployment order overlay.
  * Memoized to prevent re-renders when sibling sinners' data changes.
  */
-export const SinnerDeckCard = memo(function SinnerDeckCard({
+export const SinnerDeckCard = function SinnerDeckCard({
   sinnerIndex,
   equipment,
   identityData,
@@ -85,7 +84,7 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
       {/* Identity Card with deployment overlay - click here to toggle deploy */}
       <div
         className="group"
-        onClick={readOnly ? undefined : () => onToggleDeploy(sinnerIndex)}
+        onClick={readOnly || !onToggleDeploy ? undefined : () => onToggleDeploy(sinnerIndex)}
         style={{ cursor: readOnly ? 'default' : 'pointer' }}
       >
         <IdentityCard
@@ -154,6 +153,6 @@ export const SinnerDeckCard = memo(function SinnerDeckCard({
       </div>
     </div>
   )
-})
+}
 
 export default SinnerDeckCard

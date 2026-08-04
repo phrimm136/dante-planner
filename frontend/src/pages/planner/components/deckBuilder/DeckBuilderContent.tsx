@@ -1,19 +1,16 @@
-import { useMemo, useCallback, startTransition, useState, useEffect, useRef } from 'react'
-import { MAX_LEVEL, DEFAULT_DEPLOYMENT_MAX, EGO_TYPES } from '@/shared/gameData'
-import { SECTION_STYLES } from '@/lib/constants'
-import { createDefaultDeckFilterState } from '../../stores/usePlannerEditorStore'
+import { startTransition, useState, useEffect, useRef } from 'react'
+import { MAX_LEVEL, EGO_TYPES } from '@/shared/gameData'
+import {
+  PlannerEditorStoreProvider,
+  usePlannerEditorStore,
+} from '../../stores/usePlannerEditorStore'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
 import { useSearchMappingsDeferred } from '@/shared/filter'
-import {
-  usePlannerEditorStoreSafe,
-  usePlannerEditorStoreApiSafe,
-} from '../../stores/usePlannerEditorStore'
 import { matchesDeckFilter } from '../../lib/deckFilter'
 import type {
   UptieTier,
   ThreadspinTier,
-  DeckState,
   SinnerEquipment,
   DeckFilterState,
 } from '../../types/DeckTypes'
@@ -21,98 +18,61 @@ import type { IdentityListItem } from '@/pages/identity'
 import type { EGOListItem } from '@/pages/ego'
 import { getSinnerCodeFromId } from '@/lib/utils'
 import { type SkillData } from './SinnerGrid'
-import { CompactIdentityRow } from './CompactIdentityRow'
-import { CompactEgoGrid } from './CompactEgoGrid'
-import { StatusViewer } from './StatusViewer'
-import { DeckBuilderActionBar } from './DeckBuilderActionBar'
-import { DeckFilterBar } from './DeckFilterBar'
-import { IdentityGrid } from './IdentityGrid'
-import { EgoGrid } from './EgoGrid'
+import { DeckLoadoutSection } from './DeckLoadoutSection'
+import { DeckCatalogSection } from './DeckCatalogSection'
 
-/** Base props shared by both modes */
-interface DeckBuilderContentBaseProps {
+/** The deck the builder edits, and the writers that own it. */
+export interface DeckBuilderDeck {
+  equipment: Record<string, SinnerEquipment>
+  setEquipment: (
+    update: (previous: Record<string, SinnerEquipment>) => Record<string, SinnerEquipment>,
+  ) => void
+  deploymentOrder: number[]
+  setDeploymentOrder: (order: number[]) => void
+}
+
+/** Deck-wide commands owned by the surrounding page. */
+export interface DeckBuilderActions {
   onImport: () => void
   onExport: () => void
   onResetOrder: () => void
-  /** Override equipment from store (for tracker mode) */
-  equipmentOverride?: Record<string, SinnerEquipment>
-  /** Override deploymentOrder from store (for tracker mode) */
-  deploymentOrderOverride?: number[]
-  /** Override setEquipment from store (for tracker mode) */
-  setEquipmentOverride?: React.Dispatch<React.SetStateAction<Record<string, SinnerEquipment>>>
-  /** Override setDeploymentOrder from store (for tracker mode) */
-  setDeploymentOrderOverride?: React.Dispatch<React.SetStateAction<number[]>>
-  /** Callback when identity changes (different ID, not uptie/level). Resets skill EA in edit and tracker modes. */
+  /** Fires when a sinner's identity id changes, so callers can reset its skill EA. */
   onIdentityChange?: (sinnerCode: string) => void
 }
 
-/** Standalone page mode - no dialog tracking needed */
-interface StandaloneModeProps extends DeckBuilderContentBaseProps {
-  mode?: 'standalone'
-  open?: never
+export interface DeckBuilderContentProps extends DeckBuilderDeck, DeckBuilderActions {
+  filterState: DeckFilterState
+  /** False while a closing dialog is still painting its exit animation. */
+  isActive: boolean
 }
-
-/** Dialog mode - requires open state for snapshot timing */
-interface DialogModeProps extends DeckBuilderContentBaseProps {
-  mode: 'dialog'
-  /** Signal that dialog is open - used for snapshot timing */
-  open: boolean
-}
-
-type DeckBuilderContentProps = StandaloneModeProps | DialogModeProps
-
-const BATCH_SIZE = 10
 
 /**
  * Core deck builder UI content.
  * Contains all filtering, sorting, selection, and rendering logic.
- * Used by both DeckBuilderPane (dialog) and DeckBuilderPage (standalone).
  */
-export function DeckBuilderContent(props: DeckBuilderContentProps) {
-  const {
-    onImport,
-    onExport,
-    onResetOrder,
-    equipmentOverride,
-    deploymentOrderOverride,
-    setEquipmentOverride,
-    setDeploymentOrderOverride,
-    onIdentityChange,
-  } = props
-  const isDialogMode = props.mode === 'dialog'
-  const open = isDialogMode ? props.open : true
-
-  // Store state (safe - returns undefined if outside context)
-  const storeEquipment = usePlannerEditorStoreSafe((s) => s.equipment)
-  const storeSetEquipment = usePlannerEditorStoreSafe((s) => s.setEquipment)
-  const storeDeploymentOrder = usePlannerEditorStoreSafe((s) => s.deploymentOrder)
-  const storeSetDeploymentOrder = usePlannerEditorStoreSafe((s) => s.setDeploymentOrder)
-  const storeFilterState = usePlannerEditorStoreSafe((s) => s.deckFilterState)
-
-  // Use override if provided (tracker mode), otherwise use store (editor mode)
-  const equipment = equipmentOverride ?? storeEquipment!
-  const setEquipment = setEquipmentOverride ?? storeSetEquipment!
-  const deploymentOrder = deploymentOrderOverride ?? storeDeploymentOrder!
-  const setDeploymentOrder = setDeploymentOrderOverride ?? storeSetDeploymentOrder!
-
-  // Filter state: Use local state in tracker mode, store in editor mode
-  const [localFilterState] = useState<DeckFilterState>(createDefaultDeckFilterState)
-  const isOverrideMode = equipmentOverride !== undefined
-  const filterState = isOverrideMode
-    ? localFilterState
-    : (storeFilterState ?? createDefaultDeckFilterState())
-
+export function DeckBuilderContent({
+  equipment,
+  setEquipment,
+  deploymentOrder,
+  setDeploymentOrder,
+  filterState,
+  isActive,
+  onImport,
+  onExport,
+  onResetOrder,
+  onIdentityChange,
+}: DeckBuilderContentProps) {
   // Scroll position preservation
   const identityScrollRef = useRef<HTMLDivElement>(null)
   const egoScrollRef = useRef<HTMLDivElement>(null)
   const savedScrollPositionRef = useRef<number>(0)
 
   // Get equipped IDs for selection display
-  const equippedIdentityIds = useMemo(() => {
+  const equippedIdentityIds = (() => {
     return new Set(Object.values(equipment).map((eq) => eq.identity.id))
-  }, [equipment])
+  })()
 
-  const equippedEgoIds = useMemo(() => {
+  const equippedEgoIds = (() => {
     const ids = new Set<string>()
     Object.values(equipment).forEach((eq) => {
       Object.values(eq.egos).forEach((ego) => {
@@ -120,9 +80,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       })
     })
     return ids
-  }, [equipment])
+  })()
 
-  const equippedThreadspinMap = useMemo(() => {
+  const equippedThreadspinMap = (() => {
     const map: Record<string, ThreadspinTier> = {}
     Object.values(equipment).forEach((eq) => {
       Object.values(eq.egos).forEach((ego) => {
@@ -130,9 +90,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       })
     })
     return map
-  }, [equipment])
+  })()
 
-  // Sorting snapshot - captured on mount/open for stable sorting during session
+  // Sorting snapshot - captured on activation for stable sorting during session
   // Equipped items stay at top even if user unequips them (prevents jarring re-sort)
   const [sortingSnapshot, setSortingSnapshot] = useState<{
     identityIds: Set<string>
@@ -140,14 +100,12 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
     entityMode: string
   } | null>(null)
 
-  // Track previous open state to detect dialog open events
-  const prevOpenRef = useRef(open)
+  const prevActiveRef = useRef(isActive)
 
   // Capture snapshot when component activates or entity mode changes
   useEffect(() => {
-    const isActive = isDialogMode ? open : true
-    const justOpened = isDialogMode && open && !prevOpenRef.current
-    prevOpenRef.current = open
+    const justActivated = isActive && !prevActiveRef.current
+    prevActiveRef.current = isActive
 
     if (!isActive) {
       // Dialog closed - clear snapshot for fresh state on next open
@@ -157,10 +115,10 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       return
     }
 
-    // Take snapshot if: first time, just opened dialog, or entity mode changed
+    // Take snapshot if: first time, just reopened, or entity mode changed
     const needsSnapshot =
       sortingSnapshot === null ||
-      justOpened ||
+      justActivated ||
       sortingSnapshot.entityMode !== filterState.entityMode
 
     if (needsSnapshot) {
@@ -170,64 +128,11 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
         entityMode: filterState.entityMode,
       })
     }
-  }, [
-    isDialogMode,
-    open,
-    filterState.entityMode,
-    equippedIdentityIds,
-    equippedEgoIds,
-    sortingSnapshot,
-  ])
+  }, [isActive, filterState.entityMode, equippedIdentityIds, equippedEgoIds, sortingSnapshot])
 
   // Extract snapshot sets for sorting (fall back to current equipped if no snapshot)
   const sortingIdentityIds = sortingSnapshot?.identityIds ?? equippedIdentityIds
   const sortingEgoIds = sortingSnapshot?.egoIds ?? equippedEgoIds
-
-  // Inactive tab renders nothing until after first paint; latches true until close
-  const [hasWarmedInactive, setHasWarmedInactive] = useState(false)
-
-  // Store API for imperative progressive-count updates (no subscription → no re-render here)
-  const storeApi = usePlannerEditorStoreApiSafe()
-
-  // Determine if component is "active" for progressive loading
-  const isActive = isDialogMode ? open : true
-
-  // Reset progressive state on unmount so the next mount starts cold.
-  // Cleanup runs when the dialog closes (DialogContent unmounts).
-  // Doing this on unmount (not on mount) ensures the next mount's first
-  // render already sees deckVisibleCount=BATCH_SIZE, avoiding a full-list
-  // render before a post-commit reset effect can fire.
-  useEffect(() => {
-    if (!isActive) return
-    setHasWarmedInactive(false)
-    return () => {
-      storeApi?.getState().setDeckVisibleCount(BATCH_SIZE)
-    }
-  }, [isActive, storeApi])
-
-  // Warm up the inactive tab after first paint, then persist it for the session
-  useEffect(() => {
-    if (!isActive || hasWarmedInactive) return
-    const raf = requestAnimationFrame(() => {
-      const ric = (
-        window as typeof window & {
-          requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number
-          cancelIdleCallback?: (id: number) => void
-        }
-      ).requestIdleCallback
-      if (ric) {
-        const id = ric(() => setHasWarmedInactive(true), { timeout: 500 })
-        return () => {
-          const cic = (window as typeof window & { cancelIdleCallback?: (id: number) => void })
-            .cancelIdleCallback
-          if (cic) cic(id)
-        }
-      }
-      const timer = setTimeout(() => setHasWarmedInactive(true), 100)
-      return () => clearTimeout(timer)
-    })
-    return () => cancelAnimationFrame(raf)
-  }, [isActive, hasWarmedInactive])
 
   // Restore scroll position after equipment changes
   // Effect runs after render, so DOM is ready - no rAF needed
@@ -248,7 +153,7 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
   const { spec: egoSpec, i18n: egoI18n } = useEGOListData()
 
   // Merge spec and i18n into identity/EGO arrays
-  const identities = useMemo<IdentityListItem[]>(() => {
+  const identities: IdentityListItem[] = (() => {
     return Object.entries(identitySpec).map(([id, specData]) => ({
       id,
       name: identityI18n[id] || id,
@@ -262,9 +167,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       defenseTypes: specData.defenseType,
       season: specData.season,
     }))
-  }, [identitySpec, identityI18n])
+  })()
 
-  const egos = useMemo<EGOListItem[]>(() => {
+  const egos: EGOListItem[] = (() => {
     return Object.entries(egoSpec).map(([id, specData]) => ({
       id,
       name: egoI18n[id] || id,
@@ -277,10 +182,10 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       season: specData.season,
       maxThreadspin: specData.maxThreadspin,
     }))
-  }, [egoSpec, egoI18n])
+  })()
 
-  // Get skill data for SinnerGrid
-  const skillDataMap = useMemo((): Record<string, SkillData> => {
+  // Get skill data for the compact identity row
+  const skillDataMap: Record<string, SkillData> = (() => {
     const map: Record<string, SkillData> = {}
     Object.values(equipment).forEach((eq) => {
       const spec = identitySpec[eq.identity.id]
@@ -292,10 +197,10 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       }
     })
     return map
-  }, [equipment, identitySpec])
+  })()
 
   // Get EGO affinity data
-  const egoAffinityMap = useMemo((): Record<string, string> => {
+  const egoAffinityMap: Record<string, string> = (() => {
     const map: Record<string, string> = {}
     Object.entries(egoSpec).forEach(([id, spec]) => {
       if (spec.attributeType?.[0]) {
@@ -303,13 +208,13 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       }
     })
     return map
-  }, [egoSpec])
+  })()
 
   // Sort identities ONCE (stable order - sorting doesn't change on filter)
   // Uses snapshot of equipped IDs to keep equipped items at top
   const searchMappings = useSearchMappingsDeferred()
 
-  const sortedIdentities = useMemo(() => {
+  const sortedIdentities = (() => {
     return [...identities].sort((a, b) => {
       // Primary: equipped first (using snapshot)
       const aEquipped = sortingIdentityIds.has(a.id) ? 0 : 1
@@ -322,9 +227,9 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       // Quaternary: id descending
       return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
-  }, [identities, sortingIdentityIds])
+  })()
 
-  const sortedEgos = useMemo(() => {
+  const sortedEgos = (() => {
     return [...egos].sort((a, b) => {
       // Primary: equipped first (using snapshot)
       const aEquipped = sortingEgoIds.has(a.id) ? 0 : 1
@@ -343,88 +248,49 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
       // Quinary: id descending
       return parseInt(b.id, 10) - parseInt(a.id, 10)
     })
-  }, [egos, sortingEgoIds])
+  })()
 
   // Compute visible IDs based on filters (fast O(n), no React reconciliation)
-  // Cards toggle visibility via CSS 'hidden' class
-  const visibleIdentityIds = useMemo(() => {
+  const visibleIdentityIds = (() => {
     const ids = new Set<string>()
     for (const identity of sortedIdentities) {
       if (!matchesDeckFilter(identity, filterState, 'identity', searchMappings)) continue
       ids.add(identity.id)
     }
     return ids
-  }, [sortedIdentities, filterState, searchMappings])
+  })()
 
-  const visibleEgoIds = useMemo(() => {
+  const visibleEgoIds = (() => {
     const ids = new Set<string>()
     for (const ego of sortedEgos) {
       if (!matchesDeckFilter(ego, filterState, 'ego', searchMappings)) continue
       ids.add(ego.id)
     }
     return ids
-  }, [sortedEgos, filterState, searchMappings])
-
-  // Progressive rendering: render cards incrementally
-  const totalIdentities = sortedIdentities.length
-  const totalEgos = sortedEgos.length
-
-  // Progressive loading via rAF chain - imperative store writes (no subscription here)
-  useEffect(() => {
-    if (!isActive || !storeApi) return
-    const totalCount = Math.max(totalIdentities, totalEgos)
-    let raf: number | null = null
-
-    const tick = () => {
-      const current = storeApi.getState().deckVisibleCount
-      if (current >= totalCount) return
-      storeApi.getState().setDeckVisibleCount(Math.min(current + BATCH_SIZE, totalCount))
-      raf = requestAnimationFrame(tick)
-    }
-
-    raf = requestAnimationFrame(tick)
-    return () => {
-      if (raf !== null) cancelAnimationFrame(raf)
-    }
-  }, [isActive, totalIdentities, totalEgos, storeApi])
-
-  // Construct deckState for StatusViewer
-  const deckState: DeckState = useMemo(
-    () => ({
-      equipment,
-      deploymentOrder,
-      deploymentConfig: {
-        maxDeployed: DEFAULT_DEPLOYMENT_MAX,
-      },
-    }),
-    [equipment, deploymentOrder],
-  )
+  })()
 
   // Create EGO lookup map
-  const egoMap = useMemo(() => {
+  const egoMap = (() => {
     const map: Record<string, EGOListItem> = {}
     egos.forEach((e) => {
       map[e.id] = e
     })
     return map
-  }, [egos])
+  })()
 
   // Handlers
-  const handleToggleDeploy = useCallback(
-    (sinnerIndex: number) => {
-      startTransition(() => {
-        const currentIndex = deploymentOrder.indexOf(sinnerIndex)
-        if (currentIndex >= 0) {
-          const newOrder = [...deploymentOrder]
-          newOrder.splice(currentIndex, 1)
-          setDeploymentOrder(newOrder)
-        } else {
-          setDeploymentOrder([...deploymentOrder, sinnerIndex])
-        }
-      })
-    },
-    [deploymentOrder, setDeploymentOrder],
-  )
+  const handleToggleDeploy = (sinnerIndex: number) => {
+    startTransition(() => {
+      const currentIndex = deploymentOrder.indexOf(sinnerIndex)
+      if (currentIndex >= 0) {
+        const newOrder = [...deploymentOrder]
+        newOrder.splice(currentIndex, 1)
+        setDeploymentOrder(newOrder)
+      } else {
+        setDeploymentOrder([...deploymentOrder, sinnerIndex])
+      }
+    })
+  }
 
   const handleEquipIdentity = (identityId: string, data: { uptie?: UptieTier; level?: number }) => {
     // Save scroll position before state update
@@ -539,59 +405,83 @@ export function DeckBuilderContent(props: DeckBuilderContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Sinner Grid */}
-      <div className={SECTION_STYLES.container}>
-        {filterState.entityMode === 'identity' ? (
-          <CompactIdentityRow
-            equipment={equipment}
-            deploymentOrder={deploymentOrder}
-            skillDataMap={skillDataMap}
-            onToggleDeploy={handleToggleDeploy}
-          />
-        ) : (
-          <CompactEgoGrid equipment={equipment} egoAffinityMap={egoAffinityMap} />
-        )}
-        {/* Status + Action Bar row */}
-        <div className="mt-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-          <StatusViewer deckState={deckState} />
-          <DeckBuilderActionBar
-            onImport={onImport}
-            onExport={onExport}
-            onResetOrder={onResetOrder}
-          />
-        </div>
-      </div>
+      <DeckLoadoutSection
+        entityMode={filterState.entityMode}
+        equipment={equipment}
+        deploymentOrder={deploymentOrder}
+        skillDataMap={skillDataMap}
+        egoAffinityMap={egoAffinityMap}
+        onToggleDeploy={handleToggleDeploy}
+        onImport={onImport}
+        onExport={onExport}
+        onResetOrder={onResetOrder}
+      />
 
-      {/* Entity Toggle and List */}
-      <div className={`${SECTION_STYLES.container} space-y-4`}>
-        <DeckFilterBar />
-
-        {/* Grids own their progressive-render state via deckVisibleCount store subscription */}
-        {/* Cards are rendered once and filtered via CSS - no React reconciliation on filter changes */}
-        {(filterState.entityMode === 'identity' || hasWarmedInactive) && (
-          <IdentityGrid
-            sortedIdentities={sortedIdentities}
-            visibleIds={visibleIdentityIds}
-            equippedIds={equippedIdentityIds}
-            onEquip={handleEquipIdentity}
-            scrollRef={identityScrollRef}
-            isActive={filterState.entityMode === 'identity'}
-          />
-        )}
-
-        {(filterState.entityMode === 'ego' || hasWarmedInactive) && (
-          <EgoGrid
-            sortedEgos={sortedEgos}
-            visibleIds={visibleEgoIds}
-            equippedIds={equippedEgoIds}
-            equippedThreadspinMap={equippedThreadspinMap}
-            onEquip={handleEquipEgo}
-            onUnequip={handleUnequipEgo}
-            scrollRef={egoScrollRef}
-            isActive={filterState.entityMode === 'ego'}
-          />
-        )}
-      </div>
+      <DeckCatalogSection
+        isActive={isActive}
+        entityMode={filterState.entityMode}
+        sortedIdentities={sortedIdentities}
+        visibleIdentityIds={visibleIdentityIds}
+        equippedIdentityIds={equippedIdentityIds}
+        identityScrollRef={identityScrollRef}
+        onEquipIdentity={handleEquipIdentity}
+        sortedEgos={sortedEgos}
+        visibleEgoIds={visibleEgoIds}
+        equippedEgoIds={equippedEgoIds}
+        equippedThreadspinMap={equippedThreadspinMap}
+        egoScrollRef={egoScrollRef}
+        onEquipEgo={handleEquipEgo}
+        onUnequipEgo={handleUnequipEgo}
+      />
     </div>
   )
+}
+
+/** Props a store-bound caller supplies; the deck and filter come from the store. */
+export type StoreBoundDeckBuilderContentProps = DeckBuilderActions & { isActive: boolean }
+
+/** Renders the builder against the deck and filter held by the planner editor store. */
+export function StoreBoundDeckBuilderContent(props: StoreBoundDeckBuilderContentProps) {
+  const equipment = usePlannerEditorStore((s) => s.equipment)
+  const setEquipment = usePlannerEditorStore((s) => s.setEquipment)
+  const deploymentOrder = usePlannerEditorStore((s) => s.deploymentOrder)
+  const setDeploymentOrder = usePlannerEditorStore((s) => s.setDeploymentOrder)
+  const filterState = usePlannerEditorStore((s) => s.deckFilterState)
+
+  return (
+    <DeckBuilderContent
+      {...props}
+      equipment={equipment}
+      setEquipment={setEquipment}
+      deploymentOrder={deploymentOrder}
+      setDeploymentOrder={setDeploymentOrder}
+      filterState={filterState}
+    />
+  )
+}
+
+/** Props the tracker supplies; its filter state is session-only. */
+export type TrackerDeckBuilderContentProps = Omit<DeckBuilderContentProps, 'filterState'>
+
+/**
+ * Renders the builder against a caller-owned session deck.
+ *
+ * The catalog subtree — filter bar and both grids — reads its own UI state from
+ * the planner editor store, so the tracker gives it a private one. Only the
+ * filter and the progressive render counter are read from that store; the deck
+ * stays with the caller. It lives and dies with this mount, so each visit to
+ * the pane starts from the default filters.
+ */
+export function TrackerDeckBuilderContent(props: TrackerDeckBuilderContentProps) {
+  return (
+    <PlannerEditorStoreProvider>
+      <StoreFilteredDeckBuilderContent {...props} />
+    </PlannerEditorStoreProvider>
+  )
+}
+
+function StoreFilteredDeckBuilderContent(props: TrackerDeckBuilderContentProps) {
+  const filterState = usePlannerEditorStore((s) => s.deckFilterState)
+
+  return <DeckBuilderContent {...props} filterState={filterState} />
 }

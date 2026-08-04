@@ -175,37 +175,37 @@ export function DeckFilterBar() {
         <EntityToggle mode={filterState.entityMode} onModeChange={handleModeChange} />
         <div className={FILTER_BOX}>
           <CompactSinnerFilter
-            selectedSinners={filterState.selectedSinners}
+            selected={filterState.selectedSinners}
             onSelectionChange={handleSinnersChange}
           />
         </div>
         <div className={FILTER_BOX}>
           <CompactKeywordFilter
-            selectedKeywords={filterState.selectedKeywords}
+            selected={filterState.selectedKeywords}
             onSelectionChange={handleKeywordsChange}
           />
         </div>
         <div className={FILTER_BOX}>
           <CompactSkillAttributeFilter
-            selectedAttributes={filterState.selectedAttributes}
+            selected={filterState.selectedAttributes}
             onSelectionChange={handleAttributesChange}
           />
         </div>
         <div className={FILTER_BOX}>
           <CompactAttackTypeFilter
-            selectedTypes={filterState.selectedAtkTypes}
+            selected={filterState.selectedAtkTypes}
             onSelectionChange={handleAtkTypesChange}
           />
         </div>
         <div className={FILTER_BOX}>
           {isIdentityMode ? (
             <CompactDefenseTypeFilter
-              selectedTypes={filterState.selectedDefTypes}
+              selected={filterState.selectedDefTypes}
               onSelectionChange={handleDefTypesChange}
             />
           ) : (
             <CompactEGOTypeFilter
-              selectedEGOTypes={filterState.selectedEgoTypes as Set<string>}
+              selected={filterState.selectedEgoTypes as Set<string>}
               onSelectionChange={handleEgoTypesChange}
             />
           )}
@@ -213,14 +213,14 @@ export function DeckFilterBar() {
         {isIdentityMode && (
           <div className={FILTER_BOX}>
             <CompactRarityFilter
-              selectedRaritys={filterState.selectedRaritys}
+              selected={filterState.selectedRaritys}
               onSelectionChange={handleRaritysChange}
             />
           </div>
         )}
         <Suspense fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
           <SeasonDropdown
-            selectedSeasons={filterState.selectedSeasons}
+            selected={filterState.selectedSeasons}
             onSelectionChange={handleSeasonsChange}
             className="w-48"
           />
@@ -228,7 +228,7 @@ export function DeckFilterBar() {
         {isIdentityMode && (
           <Suspense fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
             <UnitKeywordDropdown
-              selectedUnitKeywords={filterState.selectedUnitKeywords}
+              selected={filterState.selectedUnitKeywords}
               onSelectionChange={handleUnitKeywordsChange}
               className="w-48"
             />
@@ -237,7 +237,7 @@ export function DeckFilterBar() {
         <Suspense fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
           <BattleKeywordDropdown
             entityType={battleKeywordEntityType}
-            selectedBattleKeywords={filterState.selectedBattleKeywords}
+            selected={filterState.selectedBattleKeywords}
             onSelectionChange={handleBattleKeywordsChange}
             className="w-48"
           />
@@ -271,7 +271,7 @@ export function DeckFilterBar() {
             activeCount={filterState.selectedSinners.size}
           >
             <CompactSinnerFilter
-              selectedSinners={filterState.selectedSinners}
+              selected={filterState.selectedSinners}
               onSelectionChange={handleSinnersChange}
             />
           </FilterSection>
@@ -282,7 +282,7 @@ export function DeckFilterBar() {
             activeCount={filterState.selectedKeywords.size}
           >
             <CompactKeywordFilter
-              selectedKeywords={filterState.selectedKeywords}
+              selected={filterState.selectedKeywords}
               onSelectionChange={handleKeywordsChange}
             />
           </FilterSection>
@@ -295,7 +295,7 @@ export function DeckFilterBar() {
                 activeCount={filterState.selectedAttributes.size}
               >
                 <CompactSkillAttributeFilter
-                  selectedAttributes={filterState.selectedAttributes}
+                  selected={filterState.selectedAttributes}
                   onSelectionChange={handleAttributesChange}
                 />
               </FilterSection>
@@ -306,7 +306,7 @@ export function DeckFilterBar() {
                 activeCount={filterState.selectedAtkTypes.size}
               >
                 <CompactAttackTypeFilter
-                  selectedTypes={filterState.selectedAtkTypes}
+                  selected={filterState.selectedAtkTypes}
                   onSelectionChange={handleAtkTypesChange}
                 />
               </FilterSection>
@@ -318,7 +318,7 @@ export function DeckFilterBar() {
                   activeCount={filterState.selectedDefTypes.size}
                 >
                   <CompactDefenseTypeFilter
-                    selectedTypes={filterState.selectedDefTypes}
+                    selected={filterState.selectedDefTypes}
                     onSelectionChange={handleDefTypesChange}
                   />
                 </FilterSection>
@@ -329,7 +329,7 @@ export function DeckFilterBar() {
                   activeCount={filterState.selectedEgoTypes.size}
                 >
                   <CompactEGOTypeFilter
-                    selectedEGOTypes={filterState.selectedEgoTypes as Set<string>}
+                    selected={filterState.selectedEgoTypes as Set<string>}
                     onSelectionChange={handleEgoTypesChange}
                   />
                 </FilterSection>
@@ -342,7 +342,7 @@ export function DeckFilterBar() {
                   activeCount={filterState.selectedRaritys.size}
                 >
                   <CompactRarityFilter
-                    selectedRaritys={filterState.selectedRaritys}
+                    selected={filterState.selectedRaritys}
                     onSelectionChange={handleRaritysChange}
                   />
                 </FilterSection>
@@ -355,7 +355,7 @@ export function DeckFilterBar() {
               >
                 <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
                   <SeasonDropdown
-                    selectedSeasons={filterState.selectedSeasons}
+                    selected={filterState.selectedSeasons}
                     onSelectionChange={handleSeasonsChange}
                   />
                 </Suspense>
@@ -369,7 +369,7 @@ export function DeckFilterBar() {
                 >
                   <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
                     <UnitKeywordDropdown
-                      selectedUnitKeywords={filterState.selectedUnitKeywords}
+                      selected={filterState.selectedUnitKeywords}
                       onSelectionChange={handleUnitKeywordsChange}
                     />
                   </Suspense>
@@ -384,7 +384,7 @@ export function DeckFilterBar() {
                 <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
                   <BattleKeywordDropdown
                     entityType={battleKeywordEntityType}
-                    selectedBattleKeywords={filterState.selectedBattleKeywords}
+                    selected={filterState.selectedBattleKeywords}
                     onSelectionChange={handleBattleKeywordsChange}
                   />
                 </Suspense>
