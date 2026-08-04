@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useSuspenseQuery, useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
@@ -47,6 +46,30 @@ function createUnitKeywordsQueryOptions(language: string) {
   )
 }
 
+function appendToBucket<K, V>(map: Map<K, V[]>, key: K, value: V): void {
+  const bucket = map.get(key)
+  if (bucket) {
+    bucket.push(value)
+  } else {
+    map.set(key, [value])
+  }
+}
+
+/**
+ * Invert an internal-code → display-name record into lowercased display name →
+ * every internal code that renders as it.
+ *
+ * `{ "Burst": "Rupture" }` becomes `{ "rupture": ["Burst"] }`. Distinct codes
+ * can share a display name, so the value is a bucket rather than a scalar.
+ */
+function buildReverseMap(byInternalCode: Record<string, string>): Map<string, string[]> {
+  const reverse = new Map<string, string[]>()
+  for (const [internalCode, displayName] of Object.entries(byInternalCode)) {
+    appendToBucket(reverse, displayName.toLowerCase(), internalCode)
+  }
+  return reverse
+}
+
 export interface SearchMappings {
   /** Maps display name (lowercase) -> internal code(s) for skill keywords */
   keywordToValue: Map<string, string[]>
@@ -71,33 +94,10 @@ export function useSearchMappings(): SearchMappings {
   const { data: keywordMatch } = useSuspenseQuery(createKeywordMatchQueryOptions(i18n.language))
   const { data: unitKeywords } = useSuspenseQuery(createUnitKeywordsQueryOptions(i18n.language))
 
-  // Build reverse mappings: display name (lowercase) -> internal code(s)
-  return useMemo(() => {
-    const keywordToValue = new Map<string, string[]>()
-    const unitKeywordToValue = new Map<string, string[]>()
-
-    // Build reverse map for skill keywords
-    // keywordMatch: { "Burst": "Rupture" } -> keywordToValue: { "rupture": ["Burst"] }
-    Object.entries(keywordMatch).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!keywordToValue.has(lowerDisplay)) {
-        keywordToValue.set(lowerDisplay, [])
-      }
-      keywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    // Build reverse map for unit keywords (traits, associations)
-    // unitKeywords: { "BLADE_LINEAGE": "Blade Lineage" } -> unitKeywordToValue: { "blade lineage": ["BLADE_LINEAGE"] }
-    Object.entries(unitKeywords).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!unitKeywordToValue.has(lowerDisplay)) {
-        unitKeywordToValue.set(lowerDisplay, [])
-      }
-      unitKeywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    return { keywordToValue, unitKeywordToValue }
-  }, [keywordMatch, unitKeywords])
+  return {
+    keywordToValue: buildReverseMap(keywordMatch),
+    unitKeywordToValue: buildReverseMap(unitKeywords),
+  }
 }
 
 // Empty mappings constant for loading state
@@ -119,31 +119,13 @@ export function useSearchMappingsDeferred(): SearchMappings {
   const { data: keywordMatch } = useQuery(createKeywordMatchQueryOptions(i18n.language))
   const { data: unitKeywords } = useQuery(createUnitKeywordsQueryOptions(i18n.language))
 
-  return useMemo(() => {
-    // Return empty mappings while loading
-    if (!keywordMatch || !unitKeywords) {
-      return EMPTY_MAPPINGS
-    }
+  // Empty mappings while loading: cards stay visible, search matches nothing.
+  if (!keywordMatch || !unitKeywords) {
+    return EMPTY_MAPPINGS
+  }
 
-    const keywordToValue = new Map<string, string[]>()
-    const unitKeywordToValue = new Map<string, string[]>()
-
-    Object.entries(keywordMatch).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!keywordToValue.has(lowerDisplay)) {
-        keywordToValue.set(lowerDisplay, [])
-      }
-      keywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    Object.entries(unitKeywords).forEach(([internalCode, displayName]) => {
-      const lowerDisplay = displayName.toLowerCase()
-      if (!unitKeywordToValue.has(lowerDisplay)) {
-        unitKeywordToValue.set(lowerDisplay, [])
-      }
-      unitKeywordToValue.get(lowerDisplay)!.push(internalCode)
-    })
-
-    return { keywordToValue, unitKeywordToValue }
-  }, [keywordMatch, unitKeywords])
+  return {
+    keywordToValue: buildReverseMap(keywordMatch),
+    unitKeywordToValue: buildReverseMap(unitKeywords),
+  }
 }

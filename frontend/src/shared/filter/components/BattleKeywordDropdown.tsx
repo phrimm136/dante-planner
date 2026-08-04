@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useKeywordListSpec, useKeywordListI18n } from '@/shared/gameText'
@@ -8,7 +7,7 @@ type EntityType = 'identity' | 'ego' | 'egoGift'
 
 interface BattleKeywordDropdownProps {
   entityType: EntityType
-  selectedBattleKeywords: Set<string>
+  selected: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
   className?: string
 }
@@ -28,7 +27,7 @@ const BACKLINK_FIELD: Record<EntityType, 'identities' | 'egos' | 'egoGifts'> = {
  */
 export function BattleKeywordDropdown({
   entityType,
-  selectedBattleKeywords,
+  selected,
   onSelectionChange,
   className,
 }: BattleKeywordDropdownProps) {
@@ -38,22 +37,18 @@ export function BattleKeywordDropdown({
 
   const backlinkField = BACKLINK_FIELD[entityType]
 
-  const options = useMemo(
-    () =>
-      Object.entries(spec)
-        .filter(([, entry]) => entry[backlinkField].length > 0)
-        .map(([keywordId, entry]) => ({
-          value: keywordId,
-          label: i18n[keywordId]?.name ?? keywordId,
-          count: entry[backlinkField].length,
-        })),
-    [spec, i18n, backlinkField],
-  )
+  const options = Object.entries(spec)
+    .filter(([, entry]) => entry[backlinkField].length > 0)
+    .map(([keywordId, entry]) => ({
+      value: keywordId,
+      label: i18n[keywordId]?.name ?? keywordId,
+      count: entry[backlinkField].length,
+    }))
 
   return (
     <SearchableMultiSelect
       options={options}
-      selectedValues={selectedBattleKeywords}
+      selectedValues={selected}
       onSelectionChange={onSelectionChange}
       placeholder={t('filters.additionalKeyword', 'Additional Keywords')}
       searchPlaceholder={t('filters.searchAdditionalKeyword', 'Search keywords...')}

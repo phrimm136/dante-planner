@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { SEASONS, type Season } from '@/shared/gameData'
@@ -6,7 +5,7 @@ import { useFilterI18nData } from '../hooks/useFilterI18nData'
 import { SearchableMultiSelect } from './SearchableMultiSelect'
 
 interface SeasonDropdownProps {
-  selectedSeasons: Set<Season>
+  selected: Set<Season>
   onSelectionChange: (seasons: Set<Season>) => void
   /** Entity count per season ID for display */
   counts?: Record<string, number>
@@ -20,7 +19,7 @@ interface SeasonDropdownProps {
  * Fetches i18n data internally - wrap in Suspense boundary.
  */
 export function SeasonDropdown({
-  selectedSeasons,
+  selected,
   onSelectionChange,
   counts,
   className,
@@ -28,21 +27,14 @@ export function SeasonDropdown({
   const { t } = useTranslation(['database', 'common'])
   const { seasonsI18n } = useFilterI18nData()
 
-  const options = useMemo(
-    () =>
-      SEASONS.map((season) => ({
-        value: String(season),
-        label: seasonsI18n[`${season}`] || `Season ${season}`,
-        count: counts?.[String(season)],
-      })),
-    [seasonsI18n, counts],
-  )
+  const options = SEASONS.map((season) => ({
+    value: String(season),
+    label: seasonsI18n[`${season}`] || `Season ${season}`,
+    count: counts?.[String(season)],
+  }))
 
   // Bridge string Set <-> Season Set
-  const selectedStrings = useMemo(
-    () => new Set(Array.from(selectedSeasons).map(String)),
-    [selectedSeasons],
-  )
+  const selectedStrings = new Set(Array.from(selected).map(String))
 
   const handleChange = (values: Set<string>) => {
     onSelectionChange(new Set(Array.from(values).map(Number) as Season[]))

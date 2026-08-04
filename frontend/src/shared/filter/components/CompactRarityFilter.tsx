@@ -5,7 +5,7 @@ import { getRarityIconPath } from '@/shared/assets'
 const RANKS = ['1', '2', '3'] as const
 
 interface CompactRarityFilterProps {
-  selectedRaritys: Set<number>
+  selected: Set<number>
   onSelectionChange: (ranks: Set<number>) => void
 }
 
@@ -17,15 +17,11 @@ interface CompactRarityFilterProps {
  * Reset is handled by parent "Reset All" button, not individual filters.
  *
  * Pattern: Wraps CompactIconFilter like CompactAttackTypeFilter
- * Uses columns={7} for consistency with other compact filters
  */
-export function CompactRarityFilter({
-  selectedRaritys,
-  onSelectionChange,
-}: CompactRarityFilterProps) {
+export function CompactRarityFilter({ selected, onSelectionChange }: CompactRarityFilterProps) {
   // Convert Set<number> to Set<string> for CompactIconFilter
   // Using spread syntax which is optimized by React Compiler
-  const selectedAsStrings = new Set([...selectedRaritys].map(String))
+  const selectedAsStrings = new Set([...selected].map(String))
 
   // Convert Set<string> back to Set<number> for parent
   const handleSelectionChange = (strSet: Set<string>) => {

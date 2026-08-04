@@ -3,7 +3,7 @@ import { EGO_TYPES } from '@/shared/gameData'
 import { getEGOTypeIconPath } from '@/shared/assets'
 
 interface CompactEGOTypeFilterProps {
-  selectedEGOTypes: Set<string>
+  selected: Set<string>
   onSelectionChange: (types: Set<string>) => void
 }
 
@@ -13,19 +13,14 @@ interface CompactEGOTypeFilterProps {
  * Icons stay small and left-aligned, not stretching to fill container width
  *
  * Pattern: Wraps CompactIconFilter like AttackTypeFilter wraps IconFilter
- * Uses columns={7} for consistency with CompactKeywordFilter and CompactSkillAttributeFilter
  */
-export function CompactEGOTypeFilter({
-  selectedEGOTypes,
-  onSelectionChange,
-}: CompactEGOTypeFilterProps) {
+export function CompactEGOTypeFilter({ selected, onSelectionChange }: CompactEGOTypeFilterProps) {
   return (
     <CompactIconFilter
       options={EGO_TYPES}
-      selectedOptions={selectedEGOTypes}
+      selectedOptions={selected}
       onSelectionChange={onSelectionChange}
       getIconPath={getEGOTypeIconPath}
-      columns={7}
     />
   )
 }

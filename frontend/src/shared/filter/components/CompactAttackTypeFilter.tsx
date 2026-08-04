@@ -3,7 +3,7 @@ import { ATK_TYPES, type AtkType } from '@/shared/gameData'
 import { getAttackTypeIconPath } from '@/shared/assets'
 
 interface CompactAttackTypeFilterProps {
-  selectedTypes: Set<AtkType>
+  selected: Set<AtkType>
   onSelectionChange: (types: Set<AtkType>) => void
 }
 
@@ -13,19 +13,17 @@ interface CompactAttackTypeFilterProps {
  * Icons stay small and left-aligned, not stretching to fill container width
  *
  * Pattern: Wraps CompactIconFilter like AttackTypeFilter wraps IconFilter
- * Uses columns={7} for consistency with CompactKeywordFilter and CompactSkillAttributeFilter
  */
 export function CompactAttackTypeFilter({
-  selectedTypes,
+  selected,
   onSelectionChange,
 }: CompactAttackTypeFilterProps) {
   return (
     <CompactIconFilter
       options={ATK_TYPES}
-      selectedOptions={selectedTypes}
+      selectedOptions={selected}
       onSelectionChange={onSelectionChange}
       getIconPath={getAttackTypeIconPath}
-      columns={7}
     />
   )
 }

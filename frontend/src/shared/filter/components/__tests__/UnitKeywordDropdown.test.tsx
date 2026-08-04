@@ -29,7 +29,7 @@ const sorted = [...ASSOCIATIONS].sort((a, b) => `Label_${a}`.localeCompare(`Labe
 
 describe('UnitKeywordDropdown', () => {
   const defaultProps = {
-    selectedUnitKeywords: new Set<string>(),
+    selected: new Set<string>(),
     onSelectionChange: vi.fn(),
   }
 
@@ -43,7 +43,7 @@ describe('UnitKeywordDropdown', () => {
   it('shows selected count when unit keywords are active', () => {
     const selected = new Set([sorted[0], sorted[1]])
 
-    render(<UnitKeywordDropdown {...defaultProps} selectedUnitKeywords={selected} />)
+    render(<UnitKeywordDropdown {...defaultProps} selected={selected} />)
 
     expect(screen.getByText('(2)')).toBeInTheDocument()
   })
@@ -73,10 +73,7 @@ describe('UnitKeywordDropdown', () => {
     const user = userEvent.setup()
 
     render(
-      <UnitKeywordDropdown
-        selectedUnitKeywords={new Set<string>()}
-        onSelectionChange={onSelectionChange}
-      />,
+      <UnitKeywordDropdown selected={new Set<string>()} onSelectionChange={onSelectionChange} />,
     )
 
     await user.click(screen.getByRole('combobox'))
@@ -92,7 +89,7 @@ describe('UnitKeywordDropdown', () => {
 
     render(
       <UnitKeywordDropdown
-        selectedUnitKeywords={new Set([firstAssoc])}
+        selected={new Set([firstAssoc])}
         onSelectionChange={onSelectionChange}
       />,
     )

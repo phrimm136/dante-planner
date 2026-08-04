@@ -3,7 +3,7 @@ import { CompactIconFilter } from './CompactIconFilter'
 import { SINNERS } from '@/shared/gameData'
 
 interface CompactSinnerFilterProps {
-  selectedSinners: Set<string>
+  selected: Set<string>
   onSelectionChange: (sinners: Set<string>) => void
 }
 
@@ -13,17 +13,13 @@ interface CompactSinnerFilterProps {
  *
  * Pattern: Wraps CompactIconFilter like SinnerFilter wraps IconFilter
  */
-export function CompactSinnerFilter({
-  selectedSinners,
-  onSelectionChange,
-}: CompactSinnerFilterProps) {
+export function CompactSinnerFilter({ selected, onSelectionChange }: CompactSinnerFilterProps) {
   return (
     <CompactIconFilter
       options={SINNERS}
-      selectedOptions={selectedSinners}
+      selectedOptions={selected}
       onSelectionChange={onSelectionChange}
       getIconPath={getSinnerIconPath}
-      columns={6}
     />
   )
 }

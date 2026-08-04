@@ -11,20 +11,6 @@ export interface SearchDropdownOption {
 }
 
 /**
- * Injected list-data hook for the name/sinner search dropdowns.
- *
- * The dropdown declares WHAT it needs (a spec map for ids + an id→name map)
- * rather than importing a concrete page hook, keeping `shared/filter` free of
- * any `@/pages/*` import (sink rule). Consumers pass their slice's list hook
- * (e.g. `useEGOListData`); it is called unconditionally inside the dropdown's
- * own Suspense boundary, so per-dropdown granular loading is preserved.
- */
-export type SearchListDataHook = () => {
-  spec: Record<string, unknown>
-  i18n: Record<string, string>
-}
-
-/**
  * Builds options from an id → localized-name map.
  *
  * Used by dropdowns whose entities are not sinner-owned (e.g. EGO gifts) —

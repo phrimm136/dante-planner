@@ -3,7 +3,7 @@ import { CompactIconFilter } from './CompactIconFilter'
 import { STATUS_EFFECTS } from '@/shared/gameData'
 
 interface CompactKeywordFilterProps {
-  selectedKeywords: Set<string>
+  selected: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
 }
 
@@ -12,19 +12,14 @@ interface CompactKeywordFilterProps {
  * 7 status effects displayed in a 7-column grid (1 row)
  *
  * Pattern: Wraps CompactIconFilter like KeywordFilter wraps IconFilter
- * Uses columns prop for grid stretch sizing (same as CompactSinnerFilter)
  */
-export function CompactKeywordFilter({
-  selectedKeywords,
-  onSelectionChange,
-}: CompactKeywordFilterProps) {
+export function CompactKeywordFilter({ selected, onSelectionChange }: CompactKeywordFilterProps) {
   return (
     <CompactIconFilter
       options={STATUS_EFFECTS}
-      selectedOptions={selectedKeywords}
+      selectedOptions={selected}
       onSelectionChange={onSelectionChange}
       getIconPath={getBattleKeywordIconPath}
-      columns={7}
     />
   )
 }

@@ -1,8 +1,11 @@
 import { FilterSidebar } from './FilterSidebar'
 
 interface FilterPageLayoutProps {
-  /** Filter components to render inside the sidebar (desktop uses this) */
-  filterContent: React.ReactNode
+  /**
+   * Filter components to render inside the desktop sidebar.
+   * Defaults to the primary filters followed by the secondary ones.
+   */
+  filterContent?: React.ReactNode
   /** Main content (e.g., list component) */
   children: React.ReactNode
   /** Optional search bar rendered above content */
@@ -47,7 +50,12 @@ export function FilterPageLayout({
         secondaryFilters={secondaryFilters}
         searchBar={searchBar}
       >
-        {filterContent}
+        {filterContent ?? (
+          <>
+            {primaryFilters}
+            {secondaryFilters}
+          </>
+        )}
       </FilterSidebar>
 
       {/* Main content area */}
