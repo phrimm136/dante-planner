@@ -18,16 +18,11 @@ class ContentVersionValidatorTest {
     private ContentVersionValidator validator;
 
     private static final int MD_CURRENT_VERSION = 7;
-    private static final String MD_AVAILABLE_VERSIONS_RAW = "6,7";
     private static final String RR_AVAILABLE_VERSIONS_RAW = "1,5";
 
     @BeforeEach
     void setUp() {
-        validator = new ContentVersionValidator(
-                MD_CURRENT_VERSION,
-                MD_AVAILABLE_VERSIONS_RAW,
-                RR_AVAILABLE_VERSIONS_RAW
-        );
+        validator = new ContentVersionValidator(MD_CURRENT_VERSION, RR_AVAILABLE_VERSIONS_RAW);
     }
 
     @Nested
@@ -102,36 +97,10 @@ class ContentVersionValidatorTest {
         void constructor_WhenInvalidVersionFormat_ThrowsIllegalArgumentException() {
             IllegalArgumentException ex = assertThrows(
                     IllegalArgumentException.class,
-                    () -> new ContentVersionValidator(6, "6,seven,8", "1,5")
+                    () -> new ContentVersionValidator(6, "1,five,8")
             );
             assertTrue(ex.getMessage().contains("Invalid version list format"));
         }
     }
 
-    @Nested
-    @DisplayName("validateVersionForUpdate Tests")
-    class ValidateVersionForUpdateTests {
-
-        @Test
-        @DisplayName("MD: accepts version in available list")
-        void validateVersionForUpdate_WhenMdVersionInList_Succeeds() {
-            assertDoesNotThrow(() -> validator.validateVersionForUpdate(PlannerType.MIRROR_DUNGEON, 6));
-        }
-
-        @Test
-        @DisplayName("MD: rejects version not in available list")
-        void validateVersionForUpdate_WhenMdVersionNotInList_Throws() {
-            PlannerValidationException ex = assertThrows(
-                    PlannerValidationException.class,
-                    () -> validator.validateVersionForUpdate(PlannerType.MIRROR_DUNGEON, 5)
-            );
-            assertEquals("INVALID_CONTENT_VERSION", ex.getErrorCode());
-        }
-
-        @Test
-        @DisplayName("RR: accepts version in list")
-        void validateVersionForUpdate_WhenRrVersionInList_Succeeds() {
-            assertDoesNotThrow(() -> validator.validateVersionForUpdate(PlannerType.REFRACTED_RAILWAY, 5));
-        }
-    }
 }

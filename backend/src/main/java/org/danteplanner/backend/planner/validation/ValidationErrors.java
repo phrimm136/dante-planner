@@ -55,14 +55,21 @@ final class ValidationErrors {
     }
 
     static PlannerValidationException invalidFieldType(String field, String expectedType, JsonNode actual) {
-        String actualDesc;
-        if (actual == null || actual.isNull())    actualDesc = "null";
-        else if (actual.isTextual())              actualDesc = "string \"" + truncateValue(actual.asText()) + "\"";
-        else if (actual.isNumber())               actualDesc = "number " + actual;
-        else if (actual.isBoolean())              actualDesc = "boolean " + actual.asBoolean();
-        else                                      actualDesc = actual.getNodeType().toString().toLowerCase(Locale.ROOT);
         return new PlannerValidationException(ErrorCode.INVALID_FIELD_TYPE.getCode(),
-                String.format("Field '%s' must be %s, got %s", field, expectedType, actualDesc));
+                String.format("Field '%s' must be %s, got %s", field, expectedType, describe(actual)));
+    }
+
+    private static String describe(JsonNode actual) {
+        if (actual == null) {
+            return "null";
+        }
+        return switch (actual.getNodeType()) {
+            case NULL -> "null";
+            case STRING -> "string \"" + truncateValue(actual.asText()) + "\"";
+            case NUMBER -> "number " + actual;
+            case BOOLEAN -> "boolean " + actual.asBoolean();
+            default -> actual.getNodeType().toString().toLowerCase(Locale.ROOT);
+        };
     }
 
     static PlannerValidationException invalidIdReference(String context, String id) {

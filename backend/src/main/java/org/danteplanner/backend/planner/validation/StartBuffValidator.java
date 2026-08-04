@@ -2,7 +2,6 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
@@ -16,7 +15,6 @@ import java.util.Set;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 class StartBuffValidator {
 
     private static final int MAX_START_BUFFS = 10;
@@ -32,9 +30,8 @@ class StartBuffValidator {
         }
 
         if (buffIds.size() > MAX_START_BUFFS) {
-            log.warn("Validation failed: selectedBuffIds has {} items, max is {}",
-                    buffIds.size(), MAX_START_BUFFS);
-            context.addError(ValidationErrors.valueOutOfRange("selectedBuffIds count", buffIds.size(), 0, MAX_START_BUFFS));
+            context.reject("selectedBuffIds count",
+                    p -> ValidationErrors.valueOutOfRange(p, buffIds.size(), 0, MAX_START_BUFFS));
             return;
         }
 
@@ -43,32 +40,29 @@ class StartBuffValidator {
         for (int i = 0; i < buffIds.size(); i++) {
             JsonNode node = buffIds.get(i);
             if (!node.isNumber()) {
-                log.warn("Validation failed: selectedBuffIds[{}] is not a number", i);
-                context.addError(ValidationErrors.invalidFieldType("selectedBuffIds[" + i + "]", "number", node));
+                context.reject("selectedBuffIds[" + i + "]",
+                        p -> ValidationErrors.invalidFieldType(p, "number", node));
                 continue;
             }
 
             int buffId = node.asInt();
 
             if (!gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
-                log.warn("Validation failed: selectedBuffIds[{}] buff ID '{}' not found in game data", i, buffId);
-                context.addError(ValidationErrors.invalidIdReference("selectedBuffIds", String.valueOf(buffId)));
+                context.reject("selectedBuffIds",
+                        p -> ValidationErrors.invalidIdReference(p, String.valueOf(buffId)));
                 continue;
             }
 
             int baseId = buffId % 100;
             if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
-                log.warn("Validation failed: selectedBuffIds[{}] buff ID '{}' has invalid base ID '{}'",
-                        i, buffId, baseId);
-                context.addError(ValidationErrors.valueOutOfRange("selectedBuffIds[" + i + "] base ID", baseId,
-                        MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
+                context.reject("selectedBuffIds[" + i + "] base ID",
+                        p -> ValidationErrors.valueOutOfRange(p, baseId, MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
                 continue;
             }
 
             if (!seenBaseIds.add(baseId)) {
-                log.warn("Validation failed: selectedBuffIds has duplicate base ID '{}' (buff ID '{}')",
-                        baseId, buffId);
-                context.addError(ValidationErrors.duplicateValue("selectedBuffIds base IDs", String.valueOf(baseId)));
+                context.reject("selectedBuffIds base IDs",
+                        p -> ValidationErrors.duplicateValue(p, String.valueOf(baseId)));
             }
         }
     }
@@ -76,12 +70,12 @@ class StartBuffValidator {
     void validateStartGiftIds(JsonNode root, ValidationContext context) {
         JsonNode keywordNode = root.get("selectedGiftKeyword");
         JsonNode giftIdsNode = root.get("selectedGiftIds");
+        JsonNode giftIds = (giftIdsNode != null && giftIdsNode.isArray()) ? giftIdsNode : null;
 
-        boolean hasKeyword = keywordNode != null && !keywordNode.isNull() && keywordNode.isTextual();
-        if (!hasKeyword) {
-            if (giftIdsNode != null && giftIdsNode.isArray() && giftIdsNode.size() > 0) {
-                log.warn("Validation failed: selectedGiftIds has items but selectedGiftKeyword is null");
-                context.addError(ValidationErrors.invalidSequence("selectedGiftIds requires selectedGiftKeyword"));
+        if (keywordNode == null || !keywordNode.isTextual()) {
+            if (giftIds != null && !giftIds.isEmpty()) {
+                context.reject("selectedGiftIds",
+                        p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
             }
             return;
         }
@@ -89,37 +83,35 @@ class StartBuffValidator {
         String keyword = keywordNode.asText();
 
         if (!gameDataRegistry.hasStartGiftKeyword(keyword)) {
-            log.warn("Validation failed: selectedGiftKeyword '{}' is not a valid keyword", keyword);
-            context.addError(ValidationErrors.invalidIdReference("selectedGiftKeyword", keyword));
+            context.reject("selectedGiftKeyword", p -> ValidationErrors.invalidIdReference(p, keyword));
             return;
         }
 
         Set<String> pool = gameDataRegistry.getStartGiftPool(keyword);
+        if (giftIds == null) {
+            return;
+        }
 
-        if (giftIdsNode != null && giftIdsNode.isArray()) {
-            Set<String> seenGiftIds = new HashSet<>();
+        Set<String> seenGiftIds = new HashSet<>();
 
-            for (int i = 0; i < giftIdsNode.size(); i++) {
-                JsonNode node = giftIdsNode.get(i);
-                if (!node.isTextual()) {
-                    log.warn("Validation failed: selectedGiftIds[{}] is not a string", i);
-                    context.addError(ValidationErrors.invalidFieldType("selectedGiftIds[" + i + "]", "string", node));
-                    continue;
-                }
+        for (int i = 0; i < giftIds.size(); i++) {
+            JsonNode node = giftIds.get(i);
+            if (!node.isTextual()) {
+                context.reject("selectedGiftIds[" + i + "]",
+                        p -> ValidationErrors.invalidFieldType(p, "string", node));
+                continue;
+            }
 
-                String giftId = node.asText();
+            String giftId = node.asText();
 
-                if (!seenGiftIds.add(giftId)) {
-                    log.warn("Validation failed: selectedGiftIds has duplicate gift ID '{}'", giftId);
-                    context.addError(ValidationErrors.duplicateValue("selectedGiftIds", giftId));
-                    continue;
-                }
+            if (!seenGiftIds.add(giftId)) {
+                context.reject("selectedGiftIds", p -> ValidationErrors.duplicateValue(p, giftId));
+                continue;
+            }
 
-                if (!pool.contains(giftId)) {
-                    log.warn("Validation failed: selectedGiftIds[{}] gift '{}' not in keyword '{}' pool",
-                            i, giftId, keyword);
-                    context.addError(ValidationErrors.invalidIdReference("selectedGiftIds (not in keyword '" + keyword + "' pool)", giftId));
-                }
+            if (!pool.contains(giftId)) {
+                context.reject("selectedGiftIds (not in keyword '" + keyword + "' pool)",
+                        p -> ValidationErrors.invalidIdReference(p, giftId));
             }
         }
     }

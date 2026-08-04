@@ -104,34 +104,21 @@ class StructuralValidator {
         validateType(root, "equipment", JsonNode::isObject, "object", context);
         validateType(root, "sectionNotes", JsonNode::isObject, "object", context);
 
-        validateOptionalType(root, "selectedBuffIds", JsonNode::isArray, "array", context);
-        validateOptionalType(root, "selectedGiftIds", JsonNode::isArray, "array", context);
-        validateOptionalType(root, "observationGiftIds", JsonNode::isArray, "array", context);
-        validateOptionalType(root, "comprehensiveGiftIds", JsonNode::isArray, "array", context);
-        validateOptionalType(root, "skillEAState", JsonNode::isObject, "object", context);
+        validateType(root, "selectedBuffIds", JsonNode::isArray, "array", context);
+        validateType(root, "selectedGiftIds", JsonNode::isArray, "array", context);
+        validateType(root, "observationGiftIds", JsonNode::isArray, "array", context);
+        validateType(root, "comprehensiveGiftIds", JsonNode::isArray, "array", context);
+        validateType(root, "skillEAState", JsonNode::isObject, "object", context);
 
-        if (root.has("selectedGiftKeyword")) {
-            JsonNode node = root.get("selectedGiftKeyword");
-            if (!node.isTextual() && !node.isNull()) {
-                log.warn("Validation failed: 'selectedGiftKeyword' wrong type");
-                context.addError(ValidationErrors.invalidFieldType("selectedGiftKeyword", "string or null", node));
-            }
-        }
+        validateType(root, "selectedGiftKeyword", node -> node.isTextual() || node.isNull(),
+                "string or null", context);
     }
 
     private void validateType(JsonNode root, String field, Predicate<JsonNode> check, String expected,
                               ValidationContext context) {
         JsonNode node = root.get(field);
         if (node != null && !check.test(node)) {
-            log.warn("Validation failed: '{}' wrong type (expected {})", field, expected);
-            context.addError(ValidationErrors.invalidFieldType(field, expected, node));
-        }
-    }
-
-    private void validateOptionalType(JsonNode root, String field, Predicate<JsonNode> check, String expected,
-                                      ValidationContext context) {
-        if (root.has(field)) {
-            validateType(root, field, check, expected, context);
+            context.reject(field, p -> ValidationErrors.invalidFieldType(p, expected, node));
         }
     }
 

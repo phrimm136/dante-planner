@@ -1,7 +1,6 @@
 package org.danteplanner.backend.planner.validation;
 
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,16 +17,20 @@ import java.util.regex.Pattern;
  * Single responsibility: Store and query ID existence.
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class GameDataRegistry {
 
     private static final Pattern GIFT_ENHANCEMENT_PATTERN = Pattern.compile("^[12]?(9\\d{3})$");
 
     private final GameDataLoader loader;
+    private final String dataPath;
 
-    @Value("${game.data.path:../static/data}")
-    private String dataPath;
+    public GameDataRegistry(
+            GameDataLoader loader,
+            @Value("${game.data.path:../static/data}") String dataPath) {
+        this.loader = loader;
+        this.dataPath = dataPath;
+    }
 
     private Set<String> identityIds = Set.of();
     private Set<String> egoIds = Set.of();

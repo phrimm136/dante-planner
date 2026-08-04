@@ -2,17 +2,25 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -335,19 +343,13 @@ class PlannerContentValidatorTest {
             assertDoesNotThrow(() -> validator.validate(content, "5F"));
         }
 
-        @Test
-        @DisplayName("Should pass validation with all valid categories")
-        void validate_WhenAllValidCategories_Pass() {
+        @ParameterizedTest
+        @EnumSource(MDCategory.class)
+        void validate_WhenCategoryIsValid_Passes(MDCategory category) {
             setupMocksForValidIds();
-            for (String category : new String[]{"5F", "10F", "15F"}) {
-                String content = createValidContent().replace(
-                        "\"category\": \"5F\"",
-                        "\"category\": \"" + category + "\""
-                );
 
-                assertDoesNotThrow(() -> validator.validate(content, "5F"),
-                        "Category " + category + " should be valid");
-            }
+            assertThatCode(() -> validator.validate(createValidContent(), category.getValue()))
+                    .doesNotThrowAnyException();
         }
 
         @Test
@@ -503,135 +505,38 @@ class PlannerContentValidatorTest {
     @DisplayName("Wrong Field Types Tests")
     class WrongFieldTypesTests {
 
-        @Test
-        @DisplayName("Should throw exception when selectedKeywords is not an array")
-        void validate_WhenSelectedKeywordsNotArray_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": "not-array",
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
+        @ParameterizedTest(name = "{0} is {1}")
+        @CsvSource(delimiter = '|', value = {
+            "selectedKeywords    | \"not-array\"",
+            "equipment           | []",
+            "deploymentOrder     | \"not-array\"",
+            "floorSelections     | {}",
+            "sectionNotes        | []",
+            "selectedGiftKeyword | 123",
+            "selectedBuffIds     | \"not-array\"",
+            "skillEAState        | []",
+        })
+        void validate_WhenFieldHasWrongType_ThrowsException(String field, String wrongTypedValue) {
+            String content = contentWithWrongType(field, wrongTypedValue);
 
             assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
         }
 
-        @Test
-        @DisplayName("Should throw exception when equipment is not an object")
-        void validate_WhenEquipmentNotObject_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": [],
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when deploymentOrder is not an array")
-        void validate_WhenDeploymentOrderNotArray_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": "not-array",
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when floorSelections is not an array")
-        void validate_WhenFloorSelectionsNotArray_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": {},
-                    "sectionNotes": {}
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when sectionNotes is not an object")
-        void validate_WhenSectionNotesNotObject_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": []
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when selectedGiftKeyword is not string or null")
-        void validate_WhenSelectedGiftKeywordWrongType_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "selectedGiftKeyword": 123,
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when optional selectedBuffIds is not an array")
-        void validate_WhenSelectedBuffIdsNotArray_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "selectedBuffIds": "not-array",
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
-        }
-
-        @Test
-        @DisplayName("Should throw exception when optional skillEAState is not an object")
-        void validate_WhenSkillEAStateNotObject_ThrowsException() {
-            String content = """
-                {
-                    "selectedKeywords": [],
-                    "skillEAState": [],
-                    "equipment": {},
-                    "deploymentOrder": [],
-                    "floorSelections": [],
-                    "sectionNotes": {}
-                }
-                """;
-
-            assertThrows(PlannerValidationException.class, () -> validator.validate(content, "5F"));
+        /**
+         * The five required fields at their valid empty values, with {@code field} carrying
+         * {@code value} instead — replacing a required field, or adding an optional one.
+         */
+        private String contentWithWrongType(String field, String value) {
+            Map<String, String> fields = new LinkedHashMap<>();
+            fields.put("selectedKeywords", "[]");
+            fields.put("equipment", "{}");
+            fields.put("deploymentOrder", "[]");
+            fields.put("floorSelections", "[]");
+            fields.put("sectionNotes", "{}");
+            fields.put(field, value);
+            return fields.entrySet().stream()
+                    .map(entry -> "\"" + entry.getKey() + "\": " + entry.getValue())
+                    .collect(Collectors.joining(", ", "{", "}"));
         }
     }
 
@@ -1542,6 +1447,130 @@ class PlannerContentValidatorTest {
 
             assertThrows(PlannerValidationException.class,
                     () -> validator.validate(createValidContent(), "5F"));
+        }
+    }
+
+    @Nested
+    class IdReferenceAccumulationTests {
+
+        @Test
+        @DisplayName("Should report the out-of-range level and uptie on one identity together")
+        void validate_WhenLevelAndUptieOutOfRange_ReportsBoth() {
+            setupMocksForValidIds();
+
+            String content = createValidContent().replace(
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 4, \"level\": 45}",
+                    "\"identity\": {\"id\": \"10101\", \"uptie\": 99, \"level\": 999}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("level")),
+                    "Expected the level range failure in sub-errors: " + ex.getSubErrors());
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("uptie")),
+                    "Expected the uptie range failure in sub-errors: " + ex.getSubErrors());
+        }
+
+        @Test
+        @DisplayName("Should report an out-of-range threadspin alongside a failure on another sinner")
+        void validate_WhenThreadspinAndUptieOutOfRange_ReportsBoth() {
+            setupMocksForValidIds();
+
+            String content = createValidContent()
+                    .replace("\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 4}}",
+                            "\"egos\": {\"ZAYIN\": {\"id\": \"20101\", \"threadspin\": 99}}")
+                    .replace("\"identity\": {\"id\": \"10201\", \"uptie\": 4, \"level\": 45}",
+                            "\"identity\": {\"id\": \"10201\", \"uptie\": 99, \"level\": 45}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F"));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("threadspin")),
+                    "Expected the threadspin range failure in sub-errors: " + ex.getSubErrors());
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> e.message().contains("uptie")),
+                    "Expected the uptie range failure in sub-errors: " + ex.getSubErrors());
+        }
+
+        @Test
+        @DisplayName("Should accept a draft floor carrying gifts before a theme pack is chosen")
+        void validate_WhenFloorHasGiftsWithoutThemePack_DoesNotThrow() {
+            setupMocksForValidIds();
+
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]},\n"
+                            + "                    {\"difficulty\": 0, \"giftIds\": [\"9004\"]}");
+
+            assertDoesNotThrow(() -> validator.validate(content, "5F"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Publish Policy Floor Tests")
+    class PublishPolicyTests {
+
+        private void setupMocksWithoutThemePack() {
+            when(gameDataRegistry.hasIdentity(anyString())).thenReturn(true);
+            when(gameDataRegistry.hasEgo(anyString())).thenReturn(true);
+            when(gameDataRegistry.hasEgoGift(anyString())).thenReturn(true);
+            when(sinnerIdValidator.validateMatch(anyString(), anyString())).thenReturn(true);
+            when(gameDataRegistry.hasStartBuff(anyString())).thenReturn(true);
+            when(gameDataRegistry.hasStartGiftKeyword(anyString())).thenReturn(true);
+            when(gameDataRegistry.getStartGiftPool(anyString())).thenReturn(Set.of("9001", "9009", "9103"));
+        }
+
+        @Test
+        @DisplayName("Should accept a fully filled in planner")
+        void validate_WhenPublishPolicyAndFloorsComplete_Passes() {
+            setupMocksForValidIds();
+
+            assertDoesNotThrow(() ->
+                    validator.validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
+        }
+
+        @Test
+        @DisplayName("Should reject a floor without a theme pack")
+        void validate_WhenPublishPolicyAndFloorHasNoThemePack_ReportsMissingField() {
+            setupMocksWithoutThemePack();
+            String content = createValidContent().replace(
+                    "{\"themePackId\": \"1001\", \"difficulty\": 0, \"giftIds\": [\"9002\"]}",
+                    "{\"difficulty\": 0, \"giftIds\": []}");
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(content, "5F", ValidationPolicy.PUBLISH));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "MISSING_REQUIRED_FIELD".equals(e.code())
+                            && "Missing required fields: [floorSelections[0].themePackId]".equals(e.message())),
+                    "Expected the missing themePackId failure in sub-errors: " + ex.getSubErrors());
+        }
+
+        @Test
+        @DisplayName("Should reject a floor whose theme pack is unknown to game data")
+        void validate_WhenPublishPolicyAndThemePackUnknown_ReportsInvalidIdReference() {
+            setupMocksWithoutThemePack();
+            when(gameDataRegistry.hasThemePack(anyString())).thenReturn(false);
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(createValidContent(), "5F", ValidationPolicy.PUBLISH));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "INVALID_ID_REFERENCE".equals(e.code())
+                            && "floorSelections[0].themePackId ID '1001' not found or invalid".equals(e.message())),
+                    "Expected the unknown themePackId failure in sub-errors: " + ex.getSubErrors());
+        }
+
+        @Test
+        @DisplayName("Should reject a 10F floor that is not on Hard")
+        void validate_WhenPublishPolicyAndDifficultyBelowCategoryRule_ReportsOutOfRange() {
+            setupMocksWithoutThemePack();
+            when(gameDataRegistry.hasThemePack(anyString())).thenReturn(true);
+            when(gameDataRegistry.isGiftAffordableForThemePack(anyString(), anyString())).thenReturn(true);
+
+            PlannerValidationException ex = assertThrows(PlannerValidationException.class,
+                    () -> validator.validate(createValidContent(), "10F", ValidationPolicy.PUBLISH));
+
+            assertTrue(ex.getSubErrors().stream().anyMatch(e -> "VALUE_OUT_OF_RANGE".equals(e.code())
+                            && "floorSelections[0].difficulty value 0 is out of range [1-1]".equals(e.message())),
+                    "Expected the difficulty range failure in sub-errors: " + ex.getSubErrors());
         }
     }
 }

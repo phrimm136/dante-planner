@@ -24,11 +24,11 @@ public enum ValidationPolicy {
     /**
      * The policy a planner in the given publication state is held to.
      *
-     * @param published the planner's publication state; null reads as unpublished
+     * @param published the planner's publication state
      * @return {@link #PUBLISH} for a published planner, {@link #DRAFT} otherwise
      */
-    public static ValidationPolicy forPublicationState(Boolean published) {
-        return Boolean.TRUE.equals(published) ? PUBLISH : DRAFT;
+    public static ValidationPolicy forPublicationState(boolean published) {
+        return published ? PUBLISH : DRAFT;
     }
 
     /**

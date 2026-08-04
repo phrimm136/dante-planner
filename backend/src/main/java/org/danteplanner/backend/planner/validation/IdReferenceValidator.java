@@ -2,7 +2,6 @@ package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.danteplanner.backend.shared.util.GameConstants;
 import org.springframework.stereotype.Component;
@@ -19,24 +18,20 @@ import java.util.function.IntFunction;
  * Validates that equipment, EGO, gift and floor-selection IDs exist in game
  * data and are consistent with their sinner keys.
  *
- * <p>Mixes two failure modes, preserved from the original validator: hard
- * out-of-range values for level/uptie/threadspin (global ceilings) throw and
- * abort, while ID-lookup, sinner-match and per-EGO ceiling failures accumulate.
+ * <p>Every failure accumulates on the context, so one document reports all of its
+ * problems in a single pass.
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 class IdReferenceValidator {
 
     /**
-     * The difficulty a floor must carry, as the inclusive range a client value has to fall in and
-     * the in-game name a rejection reports.
+     * The difficulty a floor must carry, as the inclusive range a client value has to fall in.
      *
-     * @param min   lowest accepted difficulty
-     * @param max   highest accepted difficulty
-     * @param label the difficulty's in-game name
+     * @param min lowest accepted difficulty
+     * @param max highest accepted difficulty
      */
-    private record DifficultyRule(int min, int max, String label) {}
+    private record DifficultyRule(int min, int max) {}
 
     /**
      * What one MD category demands of its floor list: how many floors count, and which difficulty
@@ -47,9 +42,9 @@ class IdReferenceValidator {
      */
     private record FloorRules(int floorCount, IntFunction<DifficultyRule> difficultyAt) {}
 
-    private static final DifficultyRule NORMAL_OR_HARD = new DifficultyRule(0, 1, "Normal or Hard");
-    private static final DifficultyRule HARD = new DifficultyRule(1, 1, "Hard");
-    private static final DifficultyRule EXTREME = new DifficultyRule(3, 3, "Extreme");
+    private static final DifficultyRule NORMAL_OR_HARD = new DifficultyRule(0, 1);
+    private static final DifficultyRule HARD = new DifficultyRule(1, 1);
+    private static final DifficultyRule EXTREME = new DifficultyRule(3, 3);
 
     private static final Map<MDCategory, FloorRules> FLOOR_RULES;
 
@@ -100,35 +95,31 @@ class IdReferenceValidator {
         String identityId = idNode.asText();
 
         if (!gameDataRegistry.hasIdentity(identityId)) {
-            log.warn("Validation failed: identity ID '{}' not found in game data", identityId);
-            context.addError(ValidationErrors.invalidIdReference("identity", identityId));
+            context.reject("identity", p -> ValidationErrors.invalidIdReference(p, identityId));
             return;
         }
 
         if (!sinnerIdValidator.validateMatch(sinnerKey, identityId)) {
-            log.warn("Validation failed: identity ID '{}' does not match sinner key '{}'", identityId, sinnerKey);
-            context.addError(ValidationErrors.invalidIdReference("identity for sinner " + sinnerKey, identityId));
+            context.reject("identity for sinner " + sinnerKey,
+                    p -> ValidationErrors.invalidIdReference(p, identityId));
             return;
         }
 
-        JsonNode levelNode = identity.get("level");
-        if (levelNode != null && levelNode.isNumber()) {
-            int level = levelNode.asInt();
-            if (level < GameConstants.MIN_LEVEL || level > GameConstants.MAX_LEVEL) {
-                log.warn("Validation failed: equipment[{}].identity.level {} out of range [{}-{}]",
-                        sinnerKey, level, GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL);
-                throw ValidationErrors.valueOutOfRange("level", level, GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL);
-            }
+        String identityPath = "equipment[" + sinnerKey + "].identity";
+        requireInRange(identity, identityPath, "level", GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL, context);
+        requireInRange(identity, identityPath, "uptie", GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE, context);
+    }
+
+    private void requireInRange(JsonNode owner, String ownerPath, String field, int min, int max,
+                                ValidationContext context) {
+        JsonNode node = owner.get(field);
+        if (node == null || !node.isNumber()) {
+            return;
         }
 
-        JsonNode uptieNode = identity.get("uptie");
-        if (uptieNode != null && uptieNode.isNumber()) {
-            int uptie = uptieNode.asInt();
-            if (uptie < GameConstants.MIN_UPTIE || uptie > GameConstants.MAX_UPTIE) {
-                log.warn("Validation failed: equipment[{}].identity.uptie {} out of range [{}-{}]",
-                        sinnerKey, uptie, GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE);
-                throw ValidationErrors.valueOutOfRange("uptie", uptie, GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE);
-            }
+        int value = node.asInt();
+        if (value < min || value > max) {
+            context.reject(ownerPath + "." + field, p -> ValidationErrors.valueOutOfRange(field, value, min, max));
         }
     }
 
@@ -150,47 +141,52 @@ class IdReferenceValidator {
                 continue;
             }
             if (!idNode.isTextual()) {
-                context.addError(ValidationErrors.invalidFieldType(
-                        "equipment." + sinnerKey + ".egos." + egoType + ".id", "string", idNode));
+                context.reject("equipment." + sinnerKey + ".egos." + egoType + ".id",
+                        p -> ValidationErrors.invalidFieldType(p, "string", idNode));
                 continue;
             }
 
             String egoId = idNode.asText();
 
             if (!gameDataRegistry.hasEgo(egoId)) {
-                log.warn("Validation failed: EGO ID '{}' not found in game data", egoId);
-                context.addError(ValidationErrors.invalidIdReference("EGO", egoId));
+                context.reject("EGO", p -> ValidationErrors.invalidIdReference(p, egoId));
                 continue;
             }
 
             if (!sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
-                log.warn("Validation failed: EGO ID '{}' does not match sinner key '{}'", egoId, sinnerKey);
-                context.addError(ValidationErrors.invalidIdReference("EGO for sinner " + sinnerKey, egoId));
+                context.reject("EGO for sinner " + sinnerKey, p -> ValidationErrors.invalidIdReference(p, egoId));
                 continue;
             }
 
-            JsonNode threadspinNode = ego.get("threadspin");
-            if (threadspinNode != null && threadspinNode.isNumber()) {
-                int threadspin = threadspinNode.asInt();
-                if (threadspin < GameConstants.MIN_THREADSPIN || threadspin > GameConstants.MAX_THREADSPIN) {
-                    log.warn("Validation failed: equipment[{}].egos.{}.threadspin {} out of range [{}-{}]",
-                            sinnerKey, egoType, threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN);
-                    throw ValidationErrors.valueOutOfRange("threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN);
-                }
+            validateThreadspin(ego, sinnerKey, egoType, egoId, context);
+        }
+    }
 
-                Integer egoMax = gameDataRegistry.getEgoMaxThreadspin(egoId);
-                if (egoMax == null) {
-                    log.warn("Validation failed: EGO ID '{}' has no maxThreadspin in registry", egoId);
-                    context.addError(ValidationErrors.invalidIdReference("EGO maxThreadspin", egoId));
-                    continue;
-                }
-                if (threadspin > egoMax) {
-                    log.warn("Validation failed: equipment[{}].egos.{}.threadspin {} exceeds EGO {} max {}",
-                            sinnerKey, egoType, threadspin, egoId, egoMax);
-                    context.addError(ValidationErrors.valueOutOfRange("threadspin for EGO " + egoId, threadspin, GameConstants.MIN_THREADSPIN, egoMax));
-                    continue;
-                }
-            }
+    private void validateThreadspin(JsonNode ego, String sinnerKey, String egoType, String egoId,
+                                    ValidationContext context) {
+        JsonNode threadspinNode = ego.get("threadspin");
+        if (threadspinNode == null || !threadspinNode.isNumber()) {
+            return;
+        }
+
+        String threadspinPath = "equipment[" + sinnerKey + "].egos." + egoType + ".threadspin";
+
+        int threadspin = threadspinNode.asInt();
+        if (threadspin < GameConstants.MIN_THREADSPIN || threadspin > GameConstants.MAX_THREADSPIN) {
+            context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(
+                    "threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN));
+            return;
+        }
+
+        Integer egoMax = gameDataRegistry.getEgoMaxThreadspin(egoId);
+        if (egoMax == null) {
+            context.reject("EGO maxThreadspin", p -> ValidationErrors.invalidIdReference(p, egoId));
+            return;
+        }
+
+        if (threadspin > egoMax) {
+            context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(
+                    "threadspin for EGO " + egoId, threadspin, GameConstants.MIN_THREADSPIN, egoMax));
         }
     }
 
@@ -212,22 +208,19 @@ class IdReferenceValidator {
             JsonNode node = array.get(i);
 
             if (!node.isTextual()) {
-                log.warn("Validation failed: {}[{}] is not a string", fieldName, i);
-                context.addError(ValidationErrors.invalidFieldType(fieldName + "[" + i + "]", "string", node));
+                context.reject(fieldName + "[" + i + "]", p -> ValidationErrors.invalidFieldType(p, "string", node));
                 continue;
             }
 
             String giftId = node.asText();
 
             if (!seenGiftIds.add(giftId)) {
-                log.warn("Validation failed: {}[{}] has duplicate gift ID '{}'", fieldName, i, giftId);
-                context.addError(ValidationErrors.duplicateValue(fieldName, giftId));
+                context.reject(fieldName, p -> ValidationErrors.duplicateValue(p, giftId));
                 continue;
             }
 
             if (!gameDataRegistry.hasEgoGift(giftId)) {
-                log.warn("Validation failed: {}[{}] gift ID '{}' not found in game data", fieldName, i, giftId);
-                context.addError(ValidationErrors.invalidIdReference(fieldName, giftId));
+                context.reject(fieldName, p -> ValidationErrors.invalidIdReference(p, giftId));
             }
         }
     }
@@ -239,100 +232,122 @@ class IdReferenceValidator {
         }
 
         FloorRules rules = FLOOR_RULES.get(MDCategory.fromValue(category));
-        int floorCount = rules.floorCount();
 
-        for (int i = 0; i < floorSelections.size(); i++) {
+        for (int i = 0; i < floorSelections.size() && i < rules.floorCount(); i++) {
             JsonNode floor = floorSelections.get(i);
             if (!floor.isObject()) {
                 continue;
             }
 
-            if (i >= floorCount) {
+            String floorPath = "floorSelections[" + i + "]";
+            JsonNode themePackNode = floor.get("themePackId");
+            boolean themePackChosen = themePackNode != null && themePackNode.isTextual();
+
+            if (!validateThemePackPresence(floorPath, themePackNode, themePackChosen, context)) {
                 continue;
             }
 
-            JsonNode themePackNode = floor.get("themePackId");
-            boolean hasThemePack = themePackNode != null && !themePackNode.isNull() && themePackNode.isTextual();
-
             if (context.policy().requiresPublishableContent()) {
-                if (!hasThemePack) {
-                    log.warn("Validation failed: floorSelections[{}] must have a themePackId for publish", i);
-                    context.addError(ValidationErrors.missingRequiredField(Set.of("floorSelections[" + i + "].themePackId")));
-                    continue;
-                }
-
-                String themePackId = themePackNode.asText();
-                if (themePackId.isEmpty() || !gameDataRegistry.hasThemePack(themePackId)) {
-                    log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
-                    context.addError(ValidationErrors.invalidIdReference("floorSelections[" + i + "].themePackId", themePackId));
-                    continue;
-                }
-
-                JsonNode difficultyNode = floor.get("difficulty");
-                int difficulty = (difficultyNode != null && difficultyNode.isNumber()) ? difficultyNode.asInt() : -1;
-
-                DifficultyRule expected = rules.difficultyAt().apply(i);
-                if (difficulty < expected.min() || difficulty > expected.max()) {
-                    log.warn("Validation failed: floorSelections[{}] must be {} for {} category",
-                            i, expected.label(), category);
-                    context.addError(ValidationErrors.valueOutOfRange(
-                            "floorSelections[" + i + "].difficulty", difficulty, expected.min(), expected.max()));
-                }
-            } else if (hasThemePack) {
-                String themePackId = themePackNode.asText();
-                if (!themePackId.isEmpty() && !gameDataRegistry.hasThemePack(themePackId)) {
-                    log.warn("Validation failed: floorSelections[{}] themePackId '{}' not found", i, themePackId);
-                    context.addError(ValidationErrors.invalidIdReference("floorSelections[" + i + "].themePackId", themePackId));
-                    continue;
-                }
+                validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(i), context);
             }
 
-            if (hasThemePack && i > 0) {
-                JsonNode previousFloor = floorSelections.get(i - 1);
-                if (previousFloor.isObject()) {
-                    JsonNode previousThemePackNode = previousFloor.get("themePackId");
-                    boolean previousHasThemePack = previousThemePackNode != null && !previousThemePackNode.isNull()
-                            && previousThemePackNode.isTextual() && !previousThemePackNode.asText().isEmpty();
-                    if (!previousHasThemePack) {
-                        log.warn("Validation failed: floorSelections[{}] cannot have themePackId because floor {} is missing one", i, i - 1);
-                        context.addError(ValidationErrors.invalidSequence("floorSelections[" + i + "] requires themePackId in floorSelections[" + (i - 1) + "]"));
-                    }
-                }
+            if (themePackChosen && i > 0) {
+                validateThemePackSequence(floorPath, floorSelections.get(i - 1), i - 1, context);
             }
 
-            JsonNode giftIds = floor.get("giftIds");
-            if (giftIds != null && giftIds.isArray()) {
-                Set<String> seenFloorGiftIds = new HashSet<>();
+            validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
+        }
+    }
 
-                for (int j = 0; j < giftIds.size(); j++) {
-                    JsonNode giftNode = giftIds.get(j);
+    /**
+     * @return false when the floor's theme pack is unusable and the rest of the floor is not worth
+     *         validating
+     */
+    private boolean validateThemePackPresence(String floorPath, JsonNode themePackNode, boolean themePackChosen,
+                                              ValidationContext context) {
+        boolean publishable = context.policy().requiresPublishableContent();
 
-                    if (!giftNode.isTextual()) {
-                        log.warn("Validation failed: floorSelections[{}].giftIds[{}] is not a string", i, j);
-                        context.addError(ValidationErrors.invalidFieldType("floorSelections[" + i + "].giftIds[" + j + "]", "string", giftNode));
-                        continue;
-                    }
+        if (!themePackChosen) {
+            if (!publishable) {
+                return true;
+            }
+            context.reject(floorPath + ".themePackId", p -> ValidationErrors.missingRequiredField(Set.of(p)));
+            return false;
+        }
 
-                    String giftId = giftNode.asText();
+        String themePackId = themePackNode.asText();
+        boolean known = !themePackId.isEmpty() && gameDataRegistry.hasThemePack(themePackId);
+        if (known || (!publishable && themePackId.isEmpty())) {
+            return true;
+        }
 
-                    if (!seenFloorGiftIds.add(giftId)) {
-                        log.warn("Validation failed: floorSelections[{}].giftIds has duplicate '{}'", i, giftId);
-                        context.addError(ValidationErrors.duplicateValue("floorSelections[" + i + "].giftIds", giftId));
-                        continue;
-                    }
+        context.reject(floorPath + ".themePackId", p -> ValidationErrors.invalidIdReference(p, themePackId));
+        return false;
+    }
 
-                    if (!gameDataRegistry.hasEgoGift(giftId)) {
-                        log.warn("Validation failed: floorSelections[{}].giftIds[{}] '{}' not found", i, j, giftId);
-                        context.addError(ValidationErrors.invalidIdReference("floorSelections[" + i + "].giftIds", giftId));
-                        continue;
-                    }
+    private void validateDifficultyRange(String floorPath, JsonNode floor, DifficultyRule expected,
+                                         ValidationContext context) {
+        JsonNode difficultyNode = floor.get("difficulty");
+        int difficulty = (difficultyNode != null && difficultyNode.isNumber()) ? difficultyNode.asInt() : -1;
 
-                    String themePackId = themePackNode.asText();
-                    if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
-                        log.warn("Validation failed: floorSelections[{}].giftIds[{}] '{}' not affordable for theme pack '{}'", i, j, giftId, themePackId);
-                        context.addError(ValidationErrors.giftNotAffordable(giftId, themePackId));
-                    }
-                }
+        if (difficulty < expected.min() || difficulty > expected.max()) {
+            context.reject(floorPath + ".difficulty",
+                    p -> ValidationErrors.valueOutOfRange(p, difficulty, expected.min(), expected.max()));
+        }
+    }
+
+    private void validateThemePackSequence(String floorPath, JsonNode previousFloor, int previousIndex,
+                                           ValidationContext context) {
+        if (!previousFloor.isObject()) {
+            return;
+        }
+
+        JsonNode previousThemePackNode = previousFloor.get("themePackId");
+        boolean previousChosen = previousThemePackNode != null && previousThemePackNode.isTextual()
+                && !previousThemePackNode.asText().isEmpty();
+        if (!previousChosen) {
+            context.reject(floorPath, p -> ValidationErrors.invalidSequence(
+                    p + " requires themePackId in floorSelections[" + previousIndex + "]"));
+        }
+    }
+
+    private void validateFloorGiftIds(String floorPath, JsonNode floor, String themePackId,
+                                      ValidationContext context) {
+        JsonNode giftIds = floor.get("giftIds");
+        if (giftIds == null || !giftIds.isArray()) {
+            return;
+        }
+
+        Set<String> seenFloorGiftIds = new HashSet<>();
+
+        for (int j = 0; j < giftIds.size(); j++) {
+            JsonNode giftNode = giftIds.get(j);
+
+            if (!giftNode.isTextual()) {
+                context.reject(floorPath + ".giftIds[" + j + "]",
+                        p -> ValidationErrors.invalidFieldType(p, "string", giftNode));
+                continue;
+            }
+
+            String giftId = giftNode.asText();
+
+            if (!seenFloorGiftIds.add(giftId)) {
+                context.reject(floorPath + ".giftIds", p -> ValidationErrors.duplicateValue(p, giftId));
+                continue;
+            }
+
+            if (!gameDataRegistry.hasEgoGift(giftId)) {
+                context.reject(floorPath + ".giftIds", p -> ValidationErrors.invalidIdReference(p, giftId));
+                continue;
+            }
+
+            if (themePackId == null) {
+                continue;
+            }
+
+            if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
+                context.reject(floorPath + ".giftIds[" + j + "]",
+                        p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
             }
         }
     }
