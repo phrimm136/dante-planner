@@ -10,7 +10,7 @@
  * Content is sanitized with DOMPurify before rendering.
  */
 
-import { useState, useCallback, memo } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import DOMPurify from 'dompurify'
 
@@ -38,28 +38,7 @@ interface CommentCardProps {
   isUpvoting?: boolean
 }
 
-// Custom comparison - only re-render when comment data actually changes
-function commentCardPropsAreEqual(prev: CommentCardProps, next: CommentCardProps): boolean {
-  // Compare comment data fields that affect rendering
-  const prevComment = prev.comment
-  const nextComment = next.comment
-
-  return (
-    prevComment.id === nextComment.id &&
-    prevComment.content === nextComment.content &&
-    prevComment.upvoteCount === nextComment.upvoteCount &&
-    prevComment.hasUpvoted === nextComment.hasUpvoted &&
-    prevComment.isDeleted === nextComment.isDeleted &&
-    prevComment.isUpdated === nextComment.isUpdated &&
-    prevComment.authorNotificationsEnabled === nextComment.authorNotificationsEnabled &&
-    prev.isPublished === next.isPublished &&
-    prev.isAuthenticated === next.isAuthenticated &&
-    prev.isModerator === next.isModerator &&
-    prev.isUpvoting === next.isUpvoting
-  )
-}
-
-export const CommentCard = memo(function CommentCard({
+export const CommentCard = function CommentCard({
   comment,
   isPublished,
   isAuthenticated,
@@ -77,11 +56,6 @@ export const CommentCard = memo(function CommentCard({
   const [showReplyEditor, setShowReplyEditor] = useState(false)
   const [showEditEditor, setShowEditEditor] = useState(false)
 
-  // Show deleted placeholder for deleted comments
-  if (comment.isDeleted) {
-    return <DeletedCommentPlaceholder />
-  }
-
   // Format author name with i18n translation for epithet
   const authorName =
     comment.authorEpithet && comment.authorSuffix
@@ -94,46 +68,45 @@ export const CommentCard = memo(function CommentCard({
   // Sanitize HTML content for XSS protection using DOMPurify
   const sanitizedContent = comment.content ? DOMPurify.sanitize(comment.content) : ''
 
-  const handleReplyClick = useCallback(() => setShowReplyEditor(true), [])
-  const handleEditClick = useCallback(() => setShowEditEditor(true), [])
+  const handleReplyClick = () => setShowReplyEditor(true)
+  const handleEditClick = () => setShowEditEditor(true)
 
   // Delete triggers parent's confirmation dialog
-  const handleDeleteClick = useCallback(() => {
+  const handleDeleteClick = () => {
     onDelete(comment.id)
-  }, [comment.id, onDelete])
+  }
 
   // Moderator delete triggers parent's confirmation dialog
-  const handleModeratorDeleteClick = useCallback(() => {
+  const handleModeratorDeleteClick = () => {
     onModeratorDelete(comment.id)
-  }, [comment.id, onModeratorDelete])
+  }
 
-  const handleReplySubmit = useCallback(
-    (content: string) => {
-      onReply(comment.id, content)
-      setShowReplyEditor(false)
-    },
-    [comment.id, onReply],
-  )
+  const handleReplySubmit = (content: string) => {
+    onReply(comment.id, content)
+    setShowReplyEditor(false)
+  }
 
-  const handleEditSubmit = useCallback(
-    (content: string) => {
-      onEdit(comment.id, content)
-      setShowEditEditor(false)
-    },
-    [comment.id, onEdit],
-  )
+  const handleEditSubmit = (content: string) => {
+    onEdit(comment.id, content)
+    setShowEditEditor(false)
+  }
 
-  const handleUpvote = useCallback(() => {
+  const handleUpvote = () => {
     onUpvote(comment.id)
-  }, [comment.id, onUpvote])
+  }
 
-  const handleToggleNotifications = useCallback(() => {
+  const handleToggleNotifications = () => {
     onToggleNotifications(comment.id)
-  }, [comment.id, onToggleNotifications])
+  }
 
-  const handleReport = useCallback(() => {
+  const handleReport = () => {
     onReport(comment.id)
-  }, [comment.id, onReport])
+  }
+
+  // Show deleted placeholder for deleted comments
+  if (comment.isDeleted) {
+    return <DeletedCommentPlaceholder />
+  }
 
   return (
     <div id={`comment-${comment.id}`} className="py-3 scroll-mt-20">
@@ -199,4 +172,4 @@ export const CommentCard = memo(function CommentCard({
       )}
     </div>
   )
-}, commentCardPropsAreEqual)
+}

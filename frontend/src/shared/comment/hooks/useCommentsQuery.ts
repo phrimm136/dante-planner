@@ -8,9 +8,11 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { CommentTreeSchema } from '../schemas/CommentSchemas'
 
 import type { CommentNode } from '../types/CommentTypes'
+import { STALE_TIME, GC_TIME } from '@/lib/constants'
 
 // ============================================================================
 // Query Keys
@@ -36,17 +38,10 @@ export function useCommentsQuery(plannerId: string): CommentNode[] {
     queryKey: commentsQueryKeys.list(plannerId),
     queryFn: async (): Promise<CommentNode[]> => {
       const data = await ApiClient.get(`/api/planner/${plannerId}/comments`)
-      const result = CommentTreeSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Comments response validation failed:', result.error)
-        throw new Error('Invalid comments response from server')
-      }
-
-      return result.data
+      return validateData(data, CommentTreeSchema, `comments / ${plannerId}`)
     },
-    staleTime: 30 * 1000, // 30 seconds - comments change frequently
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    staleTime: STALE_TIME.FREQUENT,
+    gcTime: GC_TIME.SHORT,
   })
 
   return query.data

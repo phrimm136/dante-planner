@@ -5,10 +5,8 @@
  * - Depth indentation: 24px per level, max 5 levels on mobile (<lg), 10 on desktop
  * - Border-left for nested replies
  * - Renders CommentCard for each node
- * - Memoized to prevent re-renders when sibling comments change
  */
 
-import { memo, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 import { COMMENT_MAX_VISUAL_DEPTH_MOBILE, COMMENT_MAX_VISUAL_DEPTH_DESKTOP } from '@/lib/constants'
 import { CommentCard } from './CommentCard'
@@ -30,36 +28,7 @@ interface CommentThreadProps {
   depth?: number
 }
 
-// Deep compare node data to prevent re-renders from object reference changes
-function nodeDataEqual(prev: CommentNode, next: CommentNode): boolean {
-  if (prev.id !== next.id) return false
-  if (prev.content !== next.content) return false
-  if (prev.upvoteCount !== next.upvoteCount) return false
-  if (prev.hasUpvoted !== next.hasUpvoted) return false
-  if (prev.isDeleted !== next.isDeleted) return false
-  if (prev.isUpdated !== next.isUpdated) return false
-  if (prev.authorNotificationsEnabled !== next.authorNotificationsEnabled) return false
-  if (prev.replies.length !== next.replies.length) return false
-
-  // Check if any reply changed
-  for (let i = 0; i < prev.replies.length; i++) {
-    if (!nodeDataEqual(prev.replies[i], next.replies[i])) return false
-  }
-
-  return true
-}
-
-function commentThreadPropsAreEqual(prev: CommentThreadProps, next: CommentThreadProps): boolean {
-  return (
-    nodeDataEqual(prev.node, next.node) &&
-    prev.isPublished === next.isPublished &&
-    prev.isAuthenticated === next.isAuthenticated &&
-    prev.isModerator === next.isModerator &&
-    prev.depth === next.depth
-  )
-}
-
-export const CommentThread = memo(function CommentThread({
+export function CommentThread({
   node,
   isPublished,
   isAuthenticated,
@@ -81,19 +50,13 @@ export const CommentThread = memo(function CommentThread({
     depth > COMMENT_MAX_VISUAL_DEPTH_MOBILE && depth <= COMMENT_MAX_VISUAL_DEPTH_DESKTOP
 
   // Wrap handlers that need additional logic
-  const handleToggleNotifications = useCallback(
-    (commentId: string) => {
-      onToggleNotifications(commentId, !node.authorNotificationsEnabled)
-    },
-    [node.authorNotificationsEnabled, onToggleNotifications],
-  )
+  const handleToggleNotifications = (commentId: string) => {
+    onToggleNotifications(commentId, !node.authorNotificationsEnabled)
+  }
 
-  const handleReport = useCallback(
-    (commentId: string) => {
-      onReport(commentId, 'OTHER')
-    },
-    [onReport],
-  )
+  const handleReport = (commentId: string) => {
+    onReport(commentId, 'OTHER')
+  }
 
   return (
     <div
@@ -138,4 +101,4 @@ export const CommentThread = memo(function CommentThread({
       ))}
     </div>
   )
-}, commentThreadPropsAreEqual)
+}

@@ -12,6 +12,7 @@
  * - Narrow screens: Dropdown menu with hamburger
  */
 
+import type { ReactNode } from 'react'
 import { Reply, Edit, Trash2, ThumbsUp, Bell, BellOff, MoreHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -42,6 +43,17 @@ interface CommentActionButtonsProps {
   isUpvoting?: boolean
 }
 
+/** One action rendered by both the inline row and the dropdown menu. */
+interface CommentAction {
+  key: string
+  onSelect: () => void
+  inlineIcon: ReactNode
+  inlineClassName?: string
+  menuIcon: ReactNode
+  menuLabel: ReactNode
+  menuClassName?: string
+}
+
 export function CommentActionButtons({
   comment,
   isPublished,
@@ -61,6 +73,67 @@ export function CommentActionButtons({
 
   const hasMenuItems = isAuthenticated || comment.isAuthor || isModerator
 
+  const actions: CommentAction[] = []
+
+  if (isAuthenticated) {
+    actions.push({
+      key: 'reply',
+      onSelect: onReply,
+      inlineIcon: <Reply className="size-3.5" />,
+      menuIcon: <Reply className="size-4 mr-2" />,
+      menuLabel: 'Reply',
+    })
+  }
+
+  if (comment.isAuthor) {
+    actions.push(
+      {
+        key: 'edit',
+        onSelect: onEdit,
+        inlineIcon: <Edit className="size-3.5" />,
+        menuIcon: <Edit className="size-4 mr-2" />,
+        menuLabel: 'Edit',
+      },
+      {
+        key: 'delete',
+        onSelect: onDelete,
+        inlineIcon: <Trash2 className="size-3.5" />,
+        menuIcon: <Trash2 className="size-4 mr-2" />,
+        menuLabel: 'Delete',
+        menuClassName: 'text-destructive',
+      },
+      {
+        key: 'notifications',
+        onSelect: onToggleNotifications,
+        inlineIcon: comment.authorNotificationsEnabled ? (
+          <Bell className="size-3.5 fill-current text-primary" />
+        ) : (
+          <BellOff className="size-3.5 text-muted-foreground" />
+        ),
+        menuIcon: comment.authorNotificationsEnabled ? (
+          <BellOff className="size-4 mr-2" />
+        ) : (
+          <Bell className="size-4 mr-2" />
+        ),
+        menuLabel: comment.authorNotificationsEnabled
+          ? t('comments.muteReplies')
+          : t('comments.unmuteReplies'),
+      },
+    )
+  }
+
+  if (isModerator && !comment.isAuthor) {
+    actions.push({
+      key: 'moderatorDelete',
+      onSelect: onModeratorDelete,
+      inlineIcon: <Trash2 className="size-3.5" />,
+      inlineClassName: 'text-orange-500 hover:text-orange-600',
+      menuIcon: <Trash2 className="size-4 mr-2" />,
+      menuLabel: t('common:moderation.deleteComment', 'Delete (Mod)'),
+      menuClassName: 'text-orange-500',
+    })
+  }
+
   return (
     <div className="flex items-center gap-1 text-muted-foreground">
       {/* Upvote button + count (always visible) */}
@@ -77,43 +150,17 @@ export function CommentActionButtons({
 
       {/* Desktop: Inline buttons (hidden on mobile) */}
       <div className="hidden sm:flex items-center gap-1">
-        {/* Reply button (authenticated only) */}
-        {isAuthenticated && (
-          <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onReply}>
-            <Reply className="size-3.5" />
-          </Button>
-        )}
-
-        {/* Author-only buttons */}
-        {comment.isAuthor && (
-          <>
-            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onEdit}>
-              <Edit className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onDelete}>
-              <Trash2 className="size-3.5" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={onToggleNotifications}>
-              {comment.authorNotificationsEnabled ? (
-                <Bell className="size-3.5 fill-current text-primary" />
-              ) : (
-                <BellOff className="size-3.5 text-muted-foreground" />
-              )}
-            </Button>
-          </>
-        )}
-
-        {/* Moderator-only delete button (only if not author) */}
-        {isModerator && !comment.isAuthor && !comment.isDeleted && (
+        {actions.map((action) => (
           <Button
+            key={action.key}
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-orange-500 hover:text-orange-600"
-            onClick={onModeratorDelete}
+            className={cn('h-7 px-2', action.inlineClassName)}
+            onClick={action.onSelect}
           >
-            <Trash2 className="size-3.5" />
+            {action.inlineIcon}
           </Button>
-        )}
+        ))}
       </div>
 
       {/* Mobile: Dropdown menu (visible only on mobile) */}
@@ -125,44 +172,16 @@ export function CommentActionButtons({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {isAuthenticated && (
-              <DropdownMenuItem onClick={onReply}>
-                <Reply className="size-4 mr-2" />
-                Reply
+            {actions.map((action) => (
+              <DropdownMenuItem
+                key={action.key}
+                onClick={action.onSelect}
+                className={action.menuClassName}
+              >
+                {action.menuIcon}
+                {action.menuLabel}
               </DropdownMenuItem>
-            )}
-            {comment.isAuthor && (
-              <>
-                <DropdownMenuItem onClick={onEdit}>
-                  <Edit className="size-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                  <Trash2 className="size-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={onToggleNotifications}>
-                  {comment.authorNotificationsEnabled ? (
-                    <>
-                      <BellOff className="size-4 mr-2" />
-                      {t('comments.muteReplies')}
-                    </>
-                  ) : (
-                    <>
-                      <Bell className="size-4 mr-2" />
-                      {t('comments.unmuteReplies')}
-                    </>
-                  )}
-                </DropdownMenuItem>
-              </>
-            )}
-            {/* Moderator-only delete option (only if not author) */}
-            {isModerator && !comment.isAuthor && !comment.isDeleted && (
-              <DropdownMenuItem onClick={onModeratorDelete} className="text-orange-500">
-                <Trash2 className="size-4 mr-2" />
-                {t('common:moderation.deleteComment', 'Delete (Mod)')}
-              </DropdownMenuItem>
-            )}
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
