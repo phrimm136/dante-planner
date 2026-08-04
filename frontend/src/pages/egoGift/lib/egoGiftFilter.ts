@@ -1,12 +1,16 @@
 /**
  * egoGiftFilter.ts
  *
- * Utility functions for EGO Gift filtering logic.
- * Extracted from EGOGiftList for testability.
+ * EGO Gift value derivations and facet descriptors, plus the per-item predicate the
+ * grid's card slots subscribe through.
  */
 
-import type { EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
+import type { Facet, SearchMappings } from '@/shared/filter'
+import { applyFacets } from '@/shared/filter'
+import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
 import { EGO_GIFT_TIERS, EGO_GIFT_TIER_TAGS } from '@/shared/gameData'
+import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 
 /** Map tier tag (TIER_1) to display tier (I) */
 const TIER_TAG_TO_DISPLAY: Record<string, EGOGiftTier> = Object.fromEntries(
@@ -47,103 +51,76 @@ export function deriveDifficulty(gift: {
   return 'normal'
 }
 
-/**
- * Check if a gift matches the selected keywords filter
- * Empty selection = no filter (returns true)
- * OR logic: matches if gift keyword is in selected keywords
- */
-export function matchesKeywordFilter(
-  giftKeyword: string | null,
-  selectedKeywords: Set<string>,
-): boolean {
-  if (selectedKeywords.size === 0) return true
-  if (giftKeyword === null) return selectedKeywords.has('None')
-  return selectedKeywords.has(giftKeyword)
+export interface EGOGiftFacetState {
+  selectedKeywords: ReadonlySet<string>
+  selectedBattleKeywords: ReadonlySet<string>
+  selectedDifficulties: ReadonlySet<EGOGiftDifficulty>
+  selectedTiers: ReadonlySet<EGOGiftTier>
+  selectedThemePacks: ReadonlySet<string>
+  selectedAttributeTypes: ReadonlySet<EGOGiftAttributeType>
+  selectedFusioned: ReadonlySet<string>
+  selectedExclusive: ReadonlySet<string>
 }
 
-/**
- * Check if a gift matches the selected difficulties filter
- * Empty selection = no filter (returns true)
- * OR logic: matches if derived difficulty is in selected difficulties
- */
-export function matchesDifficultyFilter(
-  gift: { hardOnly?: boolean; extremeOnly?: boolean },
-  selectedDifficulties: Set<EGOGiftDifficulty>,
-): boolean {
-  if (selectedDifficulties.size === 0) return true
-  const difficulty = deriveDifficulty(gift)
-  return selectedDifficulties.has(difficulty)
+export interface EGOGiftSelectionFacetState {
+  selectedKeywords: ReadonlySet<string>
 }
 
-/**
- * Check if a gift matches the selected tiers filter
- * Empty selection = no filter (returns true)
- * OR logic: matches if extracted tier is in selected tiers
- */
-export function matchesTierFilter(
-  tag: readonly string[],
-  selectedTiers: Set<EGOGiftTier>,
-): boolean {
-  if (selectedTiers.size === 0) return true
-  const tier = extractTier(tag)
-  return tier !== undefined && selectedTiers.has(tier)
-}
+export const EGO_GIFT_FACETS: readonly Facet<EGOGiftListItem, EGOGiftFacetState>[] = [
+  {
+    sel: (s) => s.selectedKeywords,
+    get: (g) => (g.keyword === null ? 'None' : g.keyword),
+    mode: 'any',
+  },
+  { sel: (s) => s.selectedBattleKeywords, get: (g) => g.battleKeywordList ?? [], mode: 'any' },
+  { sel: (s) => s.selectedDifficulties, get: (g) => deriveDifficulty(g), mode: 'any' },
+  { sel: (s) => s.selectedTiers, get: (g) => extractTier(g.tag), mode: 'any' },
+  { sel: (s) => s.selectedThemePacks, get: (g) => (g.themePack ?? []).map(String), mode: 'any' },
+  { sel: (s) => s.selectedAttributeTypes, get: (g) => g.attributeType, mode: 'any' },
+  { sel: (s) => s.selectedFusioned, get: (g) => (g.fusioned === true ? 'Y' : 'N'), mode: 'any' },
+  {
+    sel: (s) => s.selectedExclusive,
+    get: (g) => ((g.themePack ?? []).length > 0 ? 'Y' : 'N'),
+    mode: 'any',
+  },
+]
+
+export const EGO_GIFT_SELECTION_FACETS: readonly Facet<
+  EGOGiftListItem,
+  EGOGiftSelectionFacetState
+>[] = [{ sel: (s) => s.selectedKeywords, get: (g) => g.keyword ?? 'None', mode: 'any' }]
 
 /**
- * Check if a gift matches the selected theme packs filter
- * Empty selection = no filter (returns true)
- * OR logic: matches if any gift theme pack is in selected theme packs
+ * Every lowercased string the search box matches a gift on: its display name plus the
+ * natural-language reading of the keyword it carries.
+ *
+ * Depends only on the i18n payloads, so a filter toggle never invalidates it.
  */
-export function matchesThemePackFilter(
-  themePacks: readonly (string | number)[] | undefined,
-  selectedThemePacks: Set<string>,
-): boolean {
-  if (selectedThemePacks.size === 0) return true
-  const giftThemePacks = themePacks ?? []
-  return giftThemePacks.some((tp) => selectedThemePacks.has(String(tp)))
+export function buildEGOGiftSearchTerms(
+  gift: EGOGiftListItem,
+  giftNames: Record<string, string>,
+  mappings: SearchMappings,
+): string[] {
+  const terms = [(giftNames[gift.id] ?? '').toLowerCase()]
+
+  for (const [naturalLang, pascalValues] of mappings.keywordToValue) {
+    if (gift.keyword && pascalValues.includes(gift.keyword)) {
+      terms.push(naturalLang)
+    }
+  }
+
+  return terms
 }
 
-/**
- * Check if a gift matches the selected attribute types filter
- * Empty selection = no filter (returns true)
- * OR logic: matches if gift attribute type is in selected types
- */
-export function matchesAttributeTypeFilter(
-  attributeType: string | undefined,
-  selectedAttributeTypes: Set<string>,
+/** Whether one gift survives the current facets and search query. */
+export function matchesEGOGift(
+  gift: EGOGiftListItem,
+  state: FilterState<EGOGiftFacetState>,
+  searchTerms: readonly string[],
 ): boolean {
-  if (selectedAttributeTypes.size === 0) return true
-  return attributeType !== undefined && selectedAttributeTypes.has(attributeType)
-}
+  if (!applyFacets(gift, state.values, EGO_GIFT_FACETS)) return false
+  if (!state.searchQuery) return true
 
-/**
- * Check if a gift matches the fusioned filter
- * Empty selection = no filter (returns true)
- * OR logic: N = not fusioned, Y = fusioned
- */
-export function matchesFusionedFilter(
-  fusioned: boolean | undefined,
-  selectedFusioned: Set<string>,
-): boolean {
-  if (selectedFusioned.size === 0) return true
-  const isFusioned = fusioned === true
-  if (selectedFusioned.has('Y') && isFusioned) return true
-  if (selectedFusioned.has('N') && !isFusioned) return true
-  return false
-}
-
-/**
- * Check if a gift matches the theme pack exclusive filter
- * Empty selection = no filter (returns true)
- * OR logic: N = not exclusive, Y = exclusive (has non-empty themePack)
- */
-export function matchesExclusiveFilter(
-  themePacks: readonly string[] | undefined,
-  selectedExclusive: Set<string>,
-): boolean {
-  if (selectedExclusive.size === 0) return true
-  const isExclusive = (themePacks ?? []).length > 0
-  if (selectedExclusive.has('Y') && isExclusive) return true
-  if (selectedExclusive.has('N') && !isExclusive) return true
-  return false
+  const lowerQuery = state.searchQuery.toLowerCase()
+  return searchTerms.some((term) => term.includes(lowerQuery))
 }
