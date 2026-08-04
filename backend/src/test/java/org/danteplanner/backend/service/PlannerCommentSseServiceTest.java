@@ -3,6 +3,7 @@ import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,13 +36,15 @@ class PlannerCommentSseServiceTest {
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500;
 
     private ObjectMapper objectMapper;
+    private PlannerAccessGuard plannerAccessGuard;
     private PlannerCommentSseService service;
     private UUID plannerId;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        service = new PlannerCommentSseService(objectMapper);
+        plannerAccessGuard = mock(PlannerAccessGuard.class);
+        service = new PlannerCommentSseService(objectMapper, plannerAccessGuard);
         plannerId = UUID.randomUUID();
     }
 
@@ -109,7 +112,8 @@ class PlannerCommentSseServiceTest {
         void broadcast_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            PlannerCommentSseService failingService = new PlannerCommentSseService(failingMapper);
+            PlannerCommentSseService failingService =
+                    new PlannerCommentSseService(failingMapper, plannerAccessGuard);
             failingService.subscribe(plannerId, UUID.randomUUID(), null);
 
             assertThatCode(() -> failingService.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString()), null))

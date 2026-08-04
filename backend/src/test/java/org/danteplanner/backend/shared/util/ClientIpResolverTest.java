@@ -1,416 +1,251 @@
 package org.danteplanner.backend.shared.util;
 
+import java.util.UUID;
+
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.DisplayName;
+import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for ClientIpResolver.
- *
- * <p>Tests trusted proxy validation and X-Forwarded-For parsing
- * to ensure rate limit bypass attacks are prevented.</p>
+ * Covers trusted-proxy admission, header parsing, and the private-address fallback that keeps
+ * every caller behind a NAT from sharing one rate-limit bucket.
  */
 class ClientIpResolverTest {
 
     private static final String TRUSTED_PROXY_IP = "10.0.0.1";
+    private static final String PROXY_IN_CIDR = "172.18.0.7";
     private static final String UNTRUSTED_IP = "203.0.113.50";
-    private static final String CLIENT_IP = "192.168.1.100";
-    private static final String OTHER_CLIENT_IP = "192.168.1.200";
+    private static final String PUBLIC_CLIENT_IP = "8.8.8.8";
+    private static final String OTHER_PUBLIC_IP = "1.1.1.1";
+    private static final String PRIVATE_CLIENT_IP = "192.168.1.100";
+    private static final UUID DEVICE_ID = UUID.fromString("11111111-2222-3333-4444-555555555555");
 
-    private HttpServletRequest mockRequest(String remoteAddr, String xForwardedFor) {
+    private static SecurityProperties properties(String trustedProxyIps) {
+        SecurityProperties properties = new SecurityProperties();
+        properties.setTrustedProxyIps(trustedProxyIps);
+        properties.parseTrustedProxyIps();
+        return properties;
+    }
+
+    private static HttpServletRequest request(String remoteAddr, String xForwardedFor) {
+        return request(remoteAddr, xForwardedFor, null);
+    }
+
+    private static HttpServletRequest request(String remoteAddr, String xForwardedFor, String cfConnectingIp) {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn(remoteAddr);
-        when(request.getHeader("X-Forwarded-For")).thenReturn(xForwardedFor);
+        lenientHeader(request, "X-Forwarded-For", xForwardedFor);
+        lenientHeader(request, "CF-Connecting-IP", cfConnectingIp);
         return request;
     }
 
+    private static void lenientHeader(HttpServletRequest request, String name, String value) {
+        when(request.getHeader(name)).thenReturn(value);
+    }
+
     @Nested
-    @DisplayName("Trusted Proxy Tests")
-    class TrustedProxyTests {
+    class Resolve {
 
         @Test
-        @DisplayName("Should return X-Forwarded-For IP when request is from trusted proxy")
-        void resolve_WhenTrustedProxy_ReturnsForwardedIp() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, CLIENT_IP);
+        void resolve_WhenPeerIsTrustedByExactMatch_ReturnsForwardedIp() {
+            String result = ClientIpResolver.resolve(
+                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP));
 
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(CLIENT_IP, result);
+            assertThat(result).isEqualTo(PUBLIC_CLIENT_IP);
         }
 
         @Test
-        @DisplayName("Should parse first IP from comma-separated X-Forwarded-For")
-        void resolve_WhenTrustedProxy_MultipleIps_ReturnsFirstIp() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            String multipleIps = CLIENT_IP + ", " + OTHER_CLIENT_IP + ", " + TRUSTED_PROXY_IP;
-            HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, multipleIps);
+        void resolve_WhenPeerIsTrustedByCidrRange_ReturnsForwardedIp() {
+            String result = ClientIpResolver.resolve(
+                    request(PROXY_IN_CIDR, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"));
 
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(CLIENT_IP, result, "Should return leftmost IP (original client)");
+            assertThat(result).isEqualTo(PUBLIC_CLIENT_IP);
         }
 
         @Test
-        @DisplayName("Should trim whitespace from X-Forwarded-For IP")
-        void resolve_WhenTrustedProxy_TrimWhitespace() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, "  " + CLIENT_IP + "  ");
+        void resolve_WhenPeerIsOutsideEveryCidrRange_IgnoresTheHeader() {
+            String result = ClientIpResolver.resolve(
+                    request(UNTRUSTED_IP, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"));
 
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
+            assertThat(result).isEqualTo(UNTRUSTED_IP);
+        }
 
-            // Assert
-            assertEquals(CLIENT_IP, result);
+        @Test
+        void resolve_WhenHeaderCarriesAChainOfHops_ReturnsTheLeftmost() {
+            String chain = PUBLIC_CLIENT_IP + ", " + OTHER_PUBLIC_IP + ", " + TRUSTED_PROXY_IP;
+
+            String result = ClientIpResolver.resolve(
+                    request(TRUSTED_PROXY_IP, chain), properties(TRUSTED_PROXY_IP));
+
+            assertThat(result).isEqualTo(PUBLIC_CLIENT_IP);
+        }
+
+        @Test
+        void resolve_WhenPeerIsUntrusted_IgnoresTheHeader() {
+            String result = ClientIpResolver.resolve(
+                    request(UNTRUSTED_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP));
+
+            assertThat(result).isEqualTo(UNTRUSTED_IP);
+        }
+
+        @Test
+        void resolve_WhenHeaderIsAbsent_ReturnsTheDirectPeer() {
+            String result = ClientIpResolver.resolve(
+                    request(TRUSTED_PROXY_IP, null), properties(TRUSTED_PROXY_IP));
+
+            assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
+        }
+
+        @Test
+        void resolve_WhenHeaderIsBlank_ReturnsTheDirectPeer() {
+            String result = ClientIpResolver.resolve(
+                    request(TRUSTED_PROXY_IP, "   "), properties(TRUSTED_PROXY_IP));
+
+            assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
+        }
+
+        @Test
+        void resolve_WhenHeaderIsNotAnAddress_ReturnsTheDirectPeer() {
+            String result = ClientIpResolver.resolve(
+                    request(TRUSTED_PROXY_IP, "<script>alert(1)</script>"), properties(TRUSTED_PROXY_IP));
+
+            assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
+        }
+
+        @Test
+        void resolve_WhenNoProxyIsConfigured_IgnoresTheHeader() {
+            String result = ClientIpResolver.resolve(
+                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(""));
+
+            assertThat(result).isEqualTo(TRUSTED_PROXY_IP);
         }
     }
 
     @Nested
-    @DisplayName("Untrusted Source Tests")
-    class UntrustedSourceTests {
+    class ValidIp {
 
         @Test
-        @DisplayName("Should verify that when a request coomes from an untrusted IP, the X-Forwarded-For header is completely ignored")
-        void resolve_WhenUntrusted_Ip_Ignore_XForwarededFor() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(UNTRUSTED_IP, "fake-client-ip");
-            
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(UNTRUSTED_IP, result);
+        void isValidIp_WhenIpv4_ReturnsTrue() {
+            assertThat(ClientIpResolver.isValidIp("192.168.1.100")).isTrue();
+            assertThat(ClientIpResolver.isValidIp("255.255.255.255")).isTrue();
+            assertThat(ClientIpResolver.isValidIp("0.0.0.0")).isTrue();
         }
 
         @Test
-        @DisplayName("Should fallback to remoteAddr when no X-Forwarded-For header")
-        void resolve_WhenNoHeader_ReturnsRemoteAddr() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(CLIENT_IP, null);
-
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(CLIENT_IP, result);
+        void isValidIp_WhenIpv6_ReturnsTrue() {
+            assertThat(ClientIpResolver.isValidIp("2001:0db8:85a3:0000:0000:8a2e:0370:7334")).isTrue();
+            assertThat(ClientIpResolver.isValidIp("::1")).isTrue();
+            assertThat(ClientIpResolver.isValidIp("::")).isTrue();
         }
 
         @Test
-        @DisplayName("Should fallback to remoteAddr when X-Forwarded-For is blank")
-        void resolve_WhenBlankHeader_ReturnsRemoteAddr() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(CLIENT_IP, "   ");
-
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(CLIENT_IP, result);
+        void isValidIp_WhenMalformed_ReturnsFalse() {
+            assertThat(ClientIpResolver.isValidIp("not-an-ip")).isFalse();
+            assertThat(ClientIpResolver.isValidIp("192.168.1")).isFalse();
+            assertThat(ClientIpResolver.isValidIp("192.168.1.256")).isFalse();
+            assertThat(ClientIpResolver.isValidIp("<script>")).isFalse();
+            assertThat(ClientIpResolver.isValidIp("")).isFalse();
+            assertThat(ClientIpResolver.isValidIp(null)).isFalse();
         }
     }
 
     @Nested
-    @DisplayName("Edge Cases")
-    class EdgeCaseTests {
+    class PrivateIp {
 
         @Test
-        @DisplayName("Should handle empty trusted proxy set")
-        void resolve_WhenEmptyTrustedProxies_AlwaysReturnsRemoteAddr() {
-            // Arrange
-            Set<String> trustedProxies = Collections.emptySet();
-            HttpServletRequest request = mockRequest(CLIENT_IP, "spoofed-ip");
-
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(CLIENT_IP, result, "Should ignore header when no proxies trusted");
+        void isPrivateIp_WhenInsideRfc1918_ReturnsTrue() {
+            assertThat(ClientIpResolver.isPrivateIp("10.0.0.1")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("10.255.255.255")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("172.16.0.0")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("172.18.0.2")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("172.31.255.255")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("192.168.0.1")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("192.168.255.255")).isTrue();
         }
 
         @Test
-        @DisplayName("Should handle single IP in X-Forwarded-For (no comma)")
-        void resolve_WhenSingleIpInHeader_ReturnsThatIp() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, CLIENT_IP);
-
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(CLIENT_IP, result);
-        }
-    }
-
-    @Nested
-    @DisplayName("IP Validation Tests (Injection Prevention)")
-    class IpValidationTests {
-
-        @Test
-        @DisplayName("Should reject malicious script in X-Forwarded-For")
-        void resolve_WhenMaliciousScript_FallsBackToDirectIp() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, "<script>alert(1)</script>");
-
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(TRUSTED_PROXY_IP, result, "Should reject invalid IP and use direct connection");
-        }
-
-        @Test
-        @DisplayName("Should reject javascript: protocol in X-Forwarded-For")
-        void resolve_WhenJavascriptProtocol_FallsBackToDirectIp() {
-            // Arrange
-            Set<String> trustedProxies = Set.of(TRUSTED_PROXY_IP);
-            HttpServletRequest request = mockRequest(TRUSTED_PROXY_IP, "javascript:alert(1)");
-
-            // Act
-            String result = ClientIpResolver.resolve(request, trustedProxies);
-
-            // Assert
-            assertEquals(TRUSTED_PROXY_IP, result);
-        }
-
-        @Test
-        @DisplayName("Should accept valid IPv4 address")
-        void isValidIp_WhenValidIpv4_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isValidIp("192.168.1.100"));
-            assertTrue(ClientIpResolver.isValidIp("10.0.0.1"));
-            assertTrue(ClientIpResolver.isValidIp("255.255.255.255"));
-            assertTrue(ClientIpResolver.isValidIp("0.0.0.0"));
-        }
-
-        @Test
-        @DisplayName("Should accept valid IPv6 address")
-        void isValidIp_WhenValidIpv6_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isValidIp("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
-            assertTrue(ClientIpResolver.isValidIp("::1"));
-            assertTrue(ClientIpResolver.isValidIp("::"));
-        }
-
-        @Test
-        @DisplayName("Should reject invalid IP formats")
-        void isValidIp_WhenInvalidFormats_ReturnsFalse() {
-            assertFalse(ClientIpResolver.isValidIp("not-an-ip"));
-            assertFalse(ClientIpResolver.isValidIp("192.168.1"));
-            assertFalse(ClientIpResolver.isValidIp("192.168.1.256"));
-            assertFalse(ClientIpResolver.isValidIp("<script>"));
-            assertFalse(ClientIpResolver.isValidIp(""));
-            assertFalse(ClientIpResolver.isValidIp(null));
-        }
-    }
-
-    @Nested
-    @DisplayName("Private IP Detection Tests (RFC 1918)")
-    class PrivateIpDetectionTests {
-
-        @Test
-        @DisplayName("Should detect 10.x.x.x as private")
-        void isPrivateIp_When10Network_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isPrivateIp("10.0.0.1"));
-            assertTrue(ClientIpResolver.isPrivateIp("10.255.255.255"));
-            assertTrue(ClientIpResolver.isPrivateIp("10.123.45.67"));
-        }
-
-        @Test
-        @DisplayName("Should detect 172.16-31.x.x as private")
-        void isPrivateIp_When172Network_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isPrivateIp("172.16.0.0"));
-            assertTrue(ClientIpResolver.isPrivateIp("172.18.0.2"));
-            assertTrue(ClientIpResolver.isPrivateIp("172.31.255.255"));
-            assertTrue(ClientIpResolver.isPrivateIp("172.24.1.1"));
-        }
-
-        @Test
-        @DisplayName("Should detect 192.168.x.x as private")
-        void isPrivateIp_When192Network_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isPrivateIp("192.168.0.1"));
-            assertTrue(ClientIpResolver.isPrivateIp("192.168.1.100"));
-            assertTrue(ClientIpResolver.isPrivateIp("192.168.255.255"));
-        }
-
-        @Test
-        @DisplayName("Should detect 127.x.x.x as private (loopback)")
         void isPrivateIp_WhenLoopback_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isPrivateIp("127.0.0.1"));
-            assertTrue(ClientIpResolver.isPrivateIp("127.255.255.255"));
+            assertThat(ClientIpResolver.isPrivateIp("127.0.0.1")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("127.255.255.255")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("::1")).isTrue();
+            assertThat(ClientIpResolver.isPrivateIp("::")).isTrue();
         }
 
         @Test
-        @DisplayName("Should detect IPv6 localhost as private")
-        void isPrivateIp_WhenIPv6Localhost_ReturnsTrue() {
-            assertTrue(ClientIpResolver.isPrivateIp("::1"));
-            assertTrue(ClientIpResolver.isPrivateIp("::"));
+        void isPrivateIp_WhenJustOutsideThe172Block_ReturnsFalse() {
+            assertThat(ClientIpResolver.isPrivateIp("172.15.255.255")).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("172.0.0.1")).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("172.32.0.0")).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("172.255.255.255")).isFalse();
         }
 
         @Test
-        @DisplayName("Should reject 172.15.x.x as public (below range)")
-        void isPrivateIp_When172BelowRange_ReturnsFalse() {
-            assertFalse(ClientIpResolver.isPrivateIp("172.15.255.255"));
-            assertFalse(ClientIpResolver.isPrivateIp("172.0.0.1"));
-        }
-
-        @Test
-        @DisplayName("Should reject 172.32.x.x as public (above range)")
-        void isPrivateIp_When172AboveRange_ReturnsFalse() {
-            assertFalse(ClientIpResolver.isPrivateIp("172.32.0.0"));
-            assertFalse(ClientIpResolver.isPrivateIp("172.255.255.255"));
-        }
-
-        @Test
-        @DisplayName("Should reject public IPs")
-        void isPrivateIp_WhenPublicIps_ReturnsFalse() {
-            assertFalse(ClientIpResolver.isPrivateIp("8.8.8.8"));
-            assertFalse(ClientIpResolver.isPrivateIp("203.0.113.1"));
-            assertFalse(ClientIpResolver.isPrivateIp("1.1.1.1"));
-        }
-
-        @Test
-        @DisplayName("Should handle null and invalid IPs")
-        void isPrivateIp_WhenInvalidIps_ReturnsFalse() {
-            assertFalse(ClientIpResolver.isPrivateIp(null));
-            assertFalse(ClientIpResolver.isPrivateIp("not-an-ip"));
-            assertFalse(ClientIpResolver.isPrivateIp(""));
+        void isPrivateIp_WhenPublicOrMalformed_ReturnsFalse() {
+            assertThat(ClientIpResolver.isPrivateIp(PUBLIC_CLIENT_IP)).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("203.0.113.1")).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp(OTHER_PUBLIC_IP)).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("2001:0db8:85a3:0000:0000:8a2e:0370:7334")).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp(null)).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("not-an-ip")).isFalse();
+            assertThat(ClientIpResolver.isPrivateIp("")).isFalse();
         }
     }
 
     @Nested
-    @DisplayName("Client Identifier Resolution Tests")
-    class ClientIdentifierResolutionTests {
-
-        private static final UUID TEST_DEVICE_ID = UUID.fromString("12345678-1234-1234-1234-123456789abc");
+    class ClientIdentifier {
 
         @Test
-        @DisplayName("Should return ip:xxx for public IP")
-        void resolveClientIdentifier_WhenPublicIp_ReturnsIpFormat() {
-            HttpServletRequest request = mockRequest("203.0.113.50", null);
-            Set<String> trustedProxies = Collections.emptySet();
+        void resolveClientIdentifier_WhenPublicIpBehindTrustedProxy_KeysOnTheIp() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(TRUSTED_PROXY_IP, PUBLIC_CLIENT_IP), properties(TRUSTED_PROXY_IP), DEVICE_ID);
 
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("ip:203.0.113.50", result);
+            assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
 
         @Test
-        @DisplayName("Should return device:xxx for private IP")
-        void resolveClientIdentifier_WhenPrivateIp_ReturnsDeviceFormat() {
-            HttpServletRequest request = mockRequest("172.18.0.2", null);
-            Set<String> trustedProxies = Collections.emptySet();
+        void resolveClientIdentifier_WhenProxyIsTrustedByCidrRange_KeysOnTheForwardedIp() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(PROXY_IN_CIDR, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"), DEVICE_ID);
 
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("device:12345678-1234-1234-1234-123456789abc", result);
+            assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
 
         @Test
-        @DisplayName("Should use CF-Connecting-IP when the peer is a trusted proxy")
-        void resolveClientIdentifier_WhenCfHeaderFromTrustedProxy_UsesCfIp() {
-            HttpServletRequest request = mock(HttpServletRequest.class);
-            when(request.getRemoteAddr()).thenReturn("172.18.0.2");
-            when(request.getHeader("CF-Connecting-IP")).thenReturn("203.0.113.100");
-            when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+        void resolveClientIdentifier_WhenCloudflareHeaderArrivesFromTrustedProxy_KeysOnIt() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(PROXY_IN_CIDR, OTHER_PUBLIC_IP, PUBLIC_CLIENT_IP),
+                    properties("172.18.0.0/16"), DEVICE_ID);
 
-            Set<String> trustedProxies = Set.of("172.18.0.2");
-
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("ip:203.0.113.100", result, "Should prefer CF-Connecting-IP");
+            assertThat(result).isEqualTo("ip:" + PUBLIC_CLIENT_IP);
         }
 
         @Test
-        @DisplayName("Should ignore CF-Connecting-IP from an untrusted peer")
-        void resolveClientIdentifier_WhenCfHeaderFromUntrustedPeer_IsIgnored() {
-            HttpServletRequest request = mock(HttpServletRequest.class);
-            when(request.getRemoteAddr()).thenReturn("172.18.0.2");
-            when(request.getHeader("CF-Connecting-IP")).thenReturn("203.0.113.100");
-            when(request.getHeader("X-Forwarded-For")).thenReturn(null);
+        void resolveClientIdentifier_WhenCloudflareHeaderArrivesFromUntrustedPeer_IgnoresIt() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(UNTRUSTED_IP, null, PUBLIC_CLIENT_IP), properties("172.18.0.0/16"), DEVICE_ID);
 
-            Set<String> trustedProxies = Collections.emptySet();
-
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("device:12345678-1234-1234-1234-123456789abc", result,
-                    "A spoofable header must not let a caller choose its own rate-limit bucket");
+            assertThat(result).isEqualTo("ip:" + UNTRUSTED_IP);
         }
 
         @Test
-        @DisplayName("Should fall back to X-Forwarded-For if CF header invalid")
-        void resolveClientIdentifier_WhenInvalidCfHeader_FallsBackToXff() {
-            HttpServletRequest request = mock(HttpServletRequest.class);
-            when(request.getRemoteAddr()).thenReturn("10.0.0.1");
-            when(request.getHeader("CF-Connecting-IP")).thenReturn("invalid-ip");
-            when(request.getHeader("X-Forwarded-For")).thenReturn("192.168.1.100");
+        void resolveClientIdentifier_WhenResolvedIpIsPrivate_FallsBackToTheDeviceId() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(PROXY_IN_CIDR, PRIVATE_CLIENT_IP), properties("172.18.0.0/16"), DEVICE_ID);
 
-            Set<String> trustedProxies = Set.of("10.0.0.1");
-
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("device:12345678-1234-1234-1234-123456789abc", result);
+            assertThat(result).isEqualTo("device:" + DEVICE_ID);
         }
 
         @Test
-        @DisplayName("Should handle Docker NAT scenario (172.18.0.x)")
-        void resolveClientIdentifier_WhenDockerNat_ReturnsDeviceId() {
-            HttpServletRequest request = mockRequest("172.18.0.2", null);
-            Set<String> trustedProxies = Collections.emptySet();
+        void resolveClientIdentifier_WhenResolvedIpIsPrivateAndNoDeviceId_FallsBackToUnknown() {
+            String result = ClientIpResolver.resolveClientIdentifier(
+                    request(PROXY_IN_CIDR, PRIVATE_CLIENT_IP), properties("172.18.0.0/16"), null);
 
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertTrue(result.startsWith("device:"), "Docker NAT IP should use device ID");
-        }
-
-        @Test
-        @DisplayName("Should return device:unknown if device ID is null")
-        void resolveClientIdentifier_WhenNullDeviceId_ReturnsUnknown() {
-            HttpServletRequest request = mockRequest("10.0.0.1", null);
-            Set<String> trustedProxies = Collections.emptySet();
-
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, null);
-
-            assertEquals("device:unknown", result);
-        }
-
-        @Test
-        @DisplayName("Should handle trusted proxy with public X-Forwarded-For")
-        void resolveClientIdentifier_WhenTrustedProxyPublicIp_ReturnsIpFormat() {
-            HttpServletRequest request = mockRequest("172.18.0.2", "203.0.113.200");
-            Set<String> trustedProxies = Set.of("172.18.0.2");
-
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("ip:203.0.113.200", result, "Should use public IP from X-Forwarded-For");
-        }
-
-        @Test
-        @DisplayName("Should handle trusted proxy with private X-Forwarded-For")
-        void resolveClientIdentifier_WhenTrustedProxyPrivateIp_ReturnsDeviceFormat() {
-            HttpServletRequest request = mockRequest("127.0.0.1", "192.168.1.50");
-            Set<String> trustedProxies = Set.of("127.0.0.1");
-
-            String result = ClientIpResolver.resolveClientIdentifier(request, trustedProxies, TEST_DEVICE_ID);
-
-            assertEquals("device:12345678-1234-1234-1234-123456789abc", result);
+            assertThat(result).isEqualTo("device:unknown");
         }
     }
 }

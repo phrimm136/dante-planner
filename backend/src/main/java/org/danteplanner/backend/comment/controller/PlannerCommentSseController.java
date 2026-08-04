@@ -1,12 +1,14 @@
 package org.danteplanner.backend.comment.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
+import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
+import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
-import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +37,7 @@ public class PlannerCommentSseController {
 
     private final PlannerCommentSseService plannerCommentSseService;
     private final RateLimitService rateLimitService;
-    private final PlannerAccessGuard plannerAccessGuard;
+    private final SecurityProperties securityProperties;
 
     /**
      * Subscribe to comment notifications for a specific planner.
@@ -43,12 +45,15 @@ public class PlannerCommentSseController {
      * <p>Returns an SSE stream that sends {@code comment:added} events
      * when new comments are posted on this planner.</p>
      *
-     * <p>No authentication required - guests can subscribe.
-     * Rate limited by device ID to prevent abuse.</p>
+     * <p>No authentication required - guests can subscribe. The bucket is keyed by the resolved
+     * client identifier rather than the device id: an absent device cookie is minted fresh per
+     * request, so a caller that discards cookies would otherwise get an unlimited supply of
+     * buckets and could evict a planner's real subscribers from the connection registry.</p>
      *
-     * @param plannerId the planner ID to subscribe to
-     * @param deviceId  the device identifier (from HTTP-only cookie)
-     * @param userId    the authenticated account, or null for a guest
+     * @param plannerId   the planner ID to subscribe to
+     * @param deviceId    the device identifier (from HTTP-only cookie)
+     * @param userId      the authenticated account, or null for a guest
+     * @param httpRequest the HTTP request the rate-limit identity is resolved from
      * @return the SSE emitter
      * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
      *         if no published planner carries the id
@@ -57,10 +62,12 @@ public class PlannerCommentSseController {
     public SseEmitter subscribeToComments(
             @PathVariable UUID plannerId,
             @DeviceId UUID deviceId,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal Long userId,
+            HttpServletRequest httpRequest) {
 
-        rateLimitService.check(RateLimitPolicy.PLANNER_COMMENT_SSE, deviceId);
-        plannerAccessGuard.requirePublished(plannerId);
+        String identifier = ClientIpResolver.resolveClientIdentifier(
+                httpRequest, securityProperties, deviceId);
+        rateLimitService.check(RateLimitPolicy.PLANNER_COMMENT_SSE, identifier);
         log.debug("Comment SSE subscription for planner {} device {}", plannerId, deviceId);
         return plannerCommentSseService.subscribe(plannerId, deviceId, userId);
     }

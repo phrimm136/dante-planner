@@ -90,7 +90,8 @@ class RateLimitKeyFormatTest {
             new FrozenKey(RateLimitPolicy.PLANNER_COMMENT_SSE,
                     "device:3f2504e0-4f89-41d3-9a0c-0305e82c3301:planner-comment-sse",
                     SSE_CAPACITY, null, "planner-comment-sse",
-                    service -> service.check(RateLimitPolicy.PLANNER_COMMENT_SSE, DEVICE_ID)));
+                    service -> service.check(
+                            RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)));
 
     @TestFactory
     Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {

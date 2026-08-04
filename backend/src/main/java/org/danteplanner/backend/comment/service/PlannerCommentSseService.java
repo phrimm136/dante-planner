@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -39,6 +40,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500; // Prevent DoS
 
     private final ObjectMapper objectMapper;
+    private final PlannerAccessGuard plannerAccessGuard;
 
     /**
      * Subscribe a device to receive comment notifications for a planner.
@@ -47,8 +49,11 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      * @param deviceId  the device identifier (from cookie)
      * @param userId    the authenticated account, or null for a guest
      * @return the SSE emitter for the connection
+     * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
+     *         if no published planner carries the id
      */
     public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) {
+        plannerAccessGuard.requirePublished(plannerId);
         SseEmitter emitter = register(plannerId, deviceId, userId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;
@@ -162,8 +167,9 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
             EmitterEntry oldest = connections.remove(0);
             try {
                 oldest.emitter().complete();
-            } catch (Exception e) {
-                // Ignore completion errors
+            } catch (IllegalStateException e) {
+                log.debug("Evicted comment SSE emitter for planner {} was already closed: {}",
+                        plannerId, e.getMessage());
             }
             log.warn("Comment SSE: Evicted oldest connection for planner {} (max {} reached)",
                     plannerId, MAX_CONNECTIONS_PER_PLANNER);

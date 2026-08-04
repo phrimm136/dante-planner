@@ -125,9 +125,9 @@ public class SecurityProperties {
     }
 
     /**
-     * CIDR range representation for subnet matching.
+     * An IPv4 subnet in CIDR notation, answering whether it contains a given address.
      */
-    private static class CidrRange {
+    public static final class CidrRange {
         private final byte[] networkAddress;
         private final int prefixLength;
 
@@ -136,7 +136,14 @@ public class SecurityProperties {
             this.prefixLength = prefixLength;
         }
 
-        static CidrRange parse(String cidr) {
+        /**
+         * Parses a subnet.
+         *
+         * @param cidr the subnet in {@code address/prefix} notation
+         * @return the parsed range
+         * @throws IllegalArgumentException if the notation, the address, or the prefix is invalid
+         */
+        public static CidrRange parse(String cidr) {
             String[] parts = cidr.split("/");
             if (parts.length != 2) {
                 throw new IllegalArgumentException("Invalid CIDR format: " + cidr);
@@ -156,7 +163,13 @@ public class SecurityProperties {
             }
         }
 
-        boolean contains(String ip) {
+        /**
+         * Whether this subnet contains an address.
+         *
+         * @param ip the address to test
+         * @return true when the address falls inside the subnet
+         */
+        public boolean contains(String ip) {
             try {
                 byte[] ipBytes = InetAddress.getByName(ip).getAddress();
 

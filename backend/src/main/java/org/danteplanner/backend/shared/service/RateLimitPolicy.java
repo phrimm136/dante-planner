@@ -36,8 +36,8 @@ public enum RateLimitPolicy {
     /** Reachable before a user exists, so the subject is a client identifier ({@code ip:} / {@code device:}). */
     AUTH(RateLimitProperties::getAuth, "auth", ""),
 
-    /** Guests may subscribe, so the subject is the device rather than a user id. */
-    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "device:");
+    /** Guests may subscribe, so the subject is a client identifier ({@code ip:} / {@code device:}). */
+    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "");
 
     private final Function<RateLimitProperties, BucketConfig> bucket;
     private final String endpoint;
