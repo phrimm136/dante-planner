@@ -3,6 +3,7 @@ package org.danteplanner.backend.auth.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
@@ -120,6 +121,17 @@ public class AuthenticationService {
         log.info("User authenticated successfully via {}: userId={} (reactivated: {})",
                 providerName, user.getId(), reactivated);
         return new AuthResult(user, accessToken, refreshToken, reactivated);
+    }
+
+    /**
+     * The profile of the account a request is authenticated as.
+     *
+     * @param userId the authenticated user's ID
+     * @return the user's DTO projection
+     * @throws org.danteplanner.backend.user.exception.UserNotFoundException if no user carries the id
+     */
+    public UserDto currentUser(Long userId) {
+        return userService.toDto(userService.findById(userId));
     }
 
     /**

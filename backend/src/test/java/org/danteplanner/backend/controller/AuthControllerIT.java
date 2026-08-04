@@ -6,8 +6,16 @@ import org.junit.jupiter.api.Tag;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.service.AuthenticationService;
+import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
+import org.danteplanner.backend.auth.token.TokenBlacklistService;
+import org.danteplanner.backend.auth.token.TokenGenerator;
+import org.danteplanner.backend.auth.token.TokenValidator;
+import org.danteplanner.backend.shared.config.LineageRotationFlag;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
@@ -43,8 +52,22 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     static class MockAuthFacadeConfig {
         @Bean
         @Primary
-        public AuthenticationService authenticationService() {
-            return Mockito.mock(AuthenticationService.class);
+        public AuthenticationService authenticationService(
+                OAuthProviderRegistry providerRegistry,
+                TokenGenerator tokenGenerator,
+                TokenValidator tokenValidator,
+                TokenBlacklistService tokenBlacklistService,
+                UserService userService,
+                UserAccountLifecycleService lifecycleService,
+                LineageRotationFlag lineageRotationFlag) {
+            return Mockito.spy(new AuthenticationService(
+                    providerRegistry,
+                    tokenGenerator,
+                    tokenValidator,
+                    tokenBlacklistService,
+                    userService,
+                    lifecycleService,
+                    lineageRotationFlag));
         }
     }
 
@@ -73,7 +96,7 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie accessTokenCookie() {
-        return new Cookie("accessToken", accessToken);
+        return AuthCookies.accessToken(accessToken);
     }
 
 
@@ -91,11 +114,11 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
-        @DisplayName("Should return 200 with null body when no token provided (guest user)")
-        void getCurrentUser_WhenNoToken_Returns200WithNull() throws Exception {
+        @DisplayName("Should return 204 when no token provided (guest user)")
+        void getCurrentUser_WhenNoToken_Returns204() throws Exception {
             mockMvc.perform(get("/api/auth/me"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").doesNotExist());
+                    .andExpect(status().isNoContent())
+                    .andExpect(content().string(""));
         }
 
         // Note: Expired token test removed - was testing malformed token, not actual expiration.
@@ -103,14 +126,14 @@ class AuthControllerIT extends SharedMySqlContainerSupport {
         // The malformed token test below covers invalid token rejection.
 
         @Test
-        @DisplayName("Should return 200 with null body when token is malformed (treat as guest)")
-        void getCurrentUser_WhenMalformedToken_Returns200WithNull() throws Exception {
-            Cookie malformedCookie = new Cookie("accessToken", "malformed.token.here");
+        @DisplayName("Should return 204 when token is malformed (treat as guest)")
+        void getCurrentUser_WhenMalformedToken_Returns204() throws Exception {
+            Cookie malformedCookie = AuthCookies.accessToken("malformed.token.here");
 
             mockMvc.perform(get("/api/auth/me")
                             .cookie(malformedCookie))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").doesNotExist());
+                    .andExpect(status().isNoContent())
+                    .andExpect(content().string(""));
         }
     }
 

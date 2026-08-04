@@ -12,10 +12,8 @@ import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.user.dto.UserDto;
-import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
-import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
@@ -54,7 +52,6 @@ public class AuthController {
 
     private final AuthenticationService authService;
     private final TokenValidator tokenValidator;
-    private final UserService userService;
     private final RateLimitService rateLimitService;
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
@@ -193,21 +190,18 @@ public class AuthController {
 
         // No authentication or anonymous user = guest (valid state)
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
-            return ResponseEntity.ok(null);
+            return ResponseEntity.noContent().build();
         }
 
         // Get user ID from SecurityContext (set by filter as Long)
         Object principal = auth.getPrincipal();
         if (!(principal instanceof Long)) {
             log.warn("Unexpected principal type: {}", principal.getClass().getName());
-            return ResponseEntity.ok(null);
+            return ResponseEntity.noContent().build();
         }
 
         Long userId = (Long) principal;
-        User user = userService.findById(userId);
-        UserDto userDto = userService.toDto(user);
-
-        return ResponseEntity.ok(userDto);
+        return ResponseEntity.ok(authService.currentUser(userId));
     }
 
     @PostMapping("/logout")

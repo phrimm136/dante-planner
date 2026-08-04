@@ -2,6 +2,7 @@ package org.danteplanner.backend.auth.service;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.shared.config.LineageRotationFlag;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
@@ -83,14 +84,7 @@ class AuthenticationServiceTest {
                 new LineageRotationFlag(false)
         );
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
     }
 
     @Nested
