@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeft } from 'lucide-react'
 
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { Announcement } from '../types/AnnouncementTypes'
 import { linkifyText } from '@/components/ui/LinkifyText'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Inner Content Component
@@ -27,10 +28,6 @@ function AnnouncementDialogContent({
   const { t } = useTranslation('common')
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId)
 
-  useEffect(() => {
-    setSelectedId(initialSelectedId)
-  }, [initialSelectedId])
-
   const selected = selectedId ? (announcements.find((a) => a.id === selectedId) ?? null) : null
 
   if (selected) {
@@ -46,7 +43,7 @@ function AnnouncementDialogContent({
           {t('announcements.backToList')}
         </Button>
         <h3 className="text-base font-semibold">{selected.title}</h3>
-        <p className="text-sm text-muted-foreground">{selected.formattedDate}</p>
+        <p className={SECTION_STYLES.TEXT.caption}>{selected.formattedDate}</p>
         <p className="whitespace-pre-wrap text-sm mt-2">{linkifyText(selected.body)}</p>
       </div>
     )
@@ -112,7 +109,12 @@ export function AnnouncementDialog({
         </DialogHeader>
 
         <div className="overflow-y-auto max-h-[60vh]">
-          <AnnouncementDialogContent announcements={announcements} initialSelectedId={seed} />
+          {/* Keyed on the seed so a new seed restarts selection state. */}
+          <AnnouncementDialogContent
+            key={seed ?? ''}
+            announcements={announcements}
+            initialSelectedId={seed}
+          />
         </div>
       </DialogContent>
     </Dialog>

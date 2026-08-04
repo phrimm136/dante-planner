@@ -1,5 +1,3 @@
-import { useMemo } from 'react'
-
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
@@ -91,7 +89,7 @@ export function useRecentlyReleasedData(language: string) {
   const identitySpecs = useIdentityListSpec()
   const egoSpecs = useEGOListSpec()
 
-  const dateGroups = useMemo(() => {
+  const dateGroups = (() => {
     // Convert to RecentEntity array with id from record key
     const identities: RecentEntity[] = Object.entries(identitySpecs).map(([id, spec]) => ({
       type: 'identity' as const,
@@ -110,7 +108,7 @@ export function useRecentlyReleasedData(language: string) {
 
     // Group by date
     return groupEntitiesByDate(limited, language)
-  }, [identitySpecs, egoSpecs, language])
+  })()
 
   return { dateGroups }
 }

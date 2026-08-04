@@ -27,6 +27,7 @@ import {
 import { CommunityPlansSection } from './components/CommunityPlansSection'
 
 import { useRecentlyReleasedData } from './hooks/useHomePageData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Inner Content Component
@@ -49,7 +50,7 @@ function RecentlyReleasedContent() {
 
 function HomePageContent() {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Banner carousel */}
       <div className="mb-8">
         <BannerSection />

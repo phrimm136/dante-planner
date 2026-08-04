@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils'
 import { getSeasonColor } from '@/shared/gameData'
 
 import type { DateGroup, RecentEntity } from '../hooks/useHomePageData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Helpers
@@ -220,9 +221,9 @@ interface RecentlyReleasedSectionProps {
  */
 export function RecentlyReleasedSkeleton() {
   return (
-    <section className="flex flex-col gap-4">
+    <section className={SECTION_STYLES.LAYOUT.column}>
       {/* Header: title + browse links */}
-      <div className="flex items-center justify-between">
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <Skeleton className="h-7 w-40" />
         <div className="flex items-center gap-4">
           <Skeleton className="h-5 w-20" />
@@ -231,8 +232,8 @@ export function RecentlyReleasedSkeleton() {
       </div>
 
       {/* Content box with date groups */}
-      <div className="bg-muted border border-border rounded-md p-6">
-        <div className="flex flex-col gap-4">
+      <div className={SECTION_STYLES.panel}>
+        <div className={SECTION_STYLES.LAYOUT.column}>
           {Array.from({ length: 3 }).map((_, groupIdx) => (
             <div key={groupIdx}>
               <Skeleton className="mb-3 h-4 w-24" />
@@ -259,9 +260,9 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
   const { t } = useTranslation('common')
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className={SECTION_STYLES.LAYOUT.column}>
       {/* Header with browse links */}
-      <div className="flex items-center justify-between">
+      <div className={SECTION_STYLES.LAYOUT.rowBetween}>
         <h2 className="text-xl font-semibold">{t('pages.home.recentlyReleased.title')}</h2>
         <div className="flex items-center gap-4 text-sm">
           <Link
@@ -286,8 +287,8 @@ export function RecentlyReleasedSection({ dateGroups }: RecentlyReleasedSectionP
       </div>
 
       {/* Content grouped by date */}
-      <div className="bg-muted border border-border rounded-md p-6">
-        <div className="flex flex-col gap-4">
+      <div className={SECTION_STYLES.panel}>
+        <div className={SECTION_STYLES.LAYOUT.column}>
           {dateGroups.map((group) => (
             <div key={group.date}>
               {/* Date header */}
