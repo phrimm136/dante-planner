@@ -7,11 +7,21 @@ afterEach(() => {
   cleanup()
 })
 
-// Mock window.matchMedia (required by UI libraries like shadcn/ui)
+// Mock window.matchMedia (required by UI libraries like shadcn/ui).
+// Width queries are answered from window.innerWidth so breakpoint hooks report
+// the same viewport the layout code sees; anything else stays unmatched.
+function matchesWidthQuery(query: string): boolean {
+  const min = query.match(/\(min-width:\s*(\d+(?:\.\d+)?)px\)/)
+  if (min) return window.innerWidth >= Number(min[1])
+  const max = query.match(/\(max-width:\s*(\d+(?:\.\d+)?)px\)/)
+  if (max) return window.innerWidth <= Number(max[1])
+  return false
+}
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
+  value: vi.fn().mockImplementation((query: string) => ({
+    matches: matchesWidthQuery(query),
     media: query,
     onchange: null,
     addListener: vi.fn(),
