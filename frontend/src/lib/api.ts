@@ -22,40 +22,49 @@ function readCsrfToken(): string | null {
 }
 
 /**
- * Error response for version conflicts (HTTP 409)
- * Used for optimistic locking during planner sync
- */
-export interface ApiConflictError {
-  /** Error code identifying the conflict type */
-  code: string
-  /** Human-readable error message */
-  message: string
-  /** Current server version (for sync resolution) - REQUIRED for conflict resolution */
-  serverVersion: number
-}
-
-/**
- * Standard error response from backend (403, 400, etc.)
- */
-export interface ApiErrorResponse {
-  /** Error code (e.g., USER_BANNED, USER_TIMED_OUT, PLANNER_FORBIDDEN) */
-  code: string
-  /** Human-readable error message */
-  message: string
-}
-
-/**
  * Custom error class for 409 Conflict responses
  * Enables typed error handling with instanceof checks
+ *
+ * A conflict raised by a concurrent write rather than by optimistic locking
+ * carries no server version; `serverVersion` is null there, and a caller that
+ * needs the version has to read it back rather than assume one.
  */
 export class ConflictError extends Error {
-  /** Server's current version for sync resolution */
-  readonly serverVersion: number
+  /** The backend's conflict code (`SYNC_CONFLICT`, `CONCURRENT_WRITE`) */
+  readonly code: string
+  /** Server's current version for sync resolution, or null when unreported */
+  readonly serverVersion: number | null
 
-  constructor(message: string, serverVersion: number) {
+  constructor(code: string, message: string, serverVersion: number | null) {
     super(message)
     this.name = 'ConflictError'
+    this.code = code
     this.serverVersion = serverVersion
+  }
+}
+
+/**
+ * Custom error class for 429 Too Many Requests responses
+ */
+export class RateLimitError extends Error {
+  readonly code = 'RATE_LIMIT_EXCEEDED'
+
+  constructor(message: string) {
+    super(message)
+    this.name = 'RateLimitError'
+  }
+}
+
+/**
+ * Custom error class for 400 Bad Request responses the backend classified
+ */
+export class ValidationError extends Error {
+  readonly code: string
+
+  constructor(code: string, message: string) {
+    super(message)
+    this.name = 'ValidationError'
+    this.code = code
   }
 }
 
@@ -162,6 +171,58 @@ export class AuthTemporarilyUnavailableError extends Error {
   }
 }
 
+/**
+ * Custom error class for 503 responses the backend says to retry unchanged —
+ * a database deadlock or an unreachable rate limiter.
+ */
+export class RetryableUnavailableError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'RetryableUnavailableError'
+  }
+}
+
+/** Shape every backend error body is read through; every field is best-effort. */
+interface ErrorBody {
+  code?: string
+  message?: string
+  serverVersion?: number
+}
+
+type ApiErrorConstructor = new (message: string) => Error
+
+/** 403 bodies whose code maps to a dedicated restriction error. */
+const RESTRICTION_ERROR_BY_CODE: Record<string, ApiErrorConstructor> = {
+  USER_BANNED: BannedError,
+  USER_TIMED_OUT: TimedOutError,
+}
+
+/** 503 bodies whose code maps to a dedicated unavailability error. */
+const UNAVAILABLE_ERROR_BY_CODE: Record<string, ApiErrorConstructor> = {
+  SERVICE_UPDATING: ServiceUpdatingError,
+  WRITE_TEMPORARILY_UNAVAILABLE: WriteTemporarilyUnavailableError,
+  AUTH_TEMPORARILY_UNAVAILABLE: AuthTemporarilyUnavailableError,
+  RATE_LIMIT_TEMPORARILY_UNAVAILABLE: RetryableUnavailableError,
+  DEADLOCK: RetryableUnavailableError,
+}
+
+const DEFAULT_UNAVAILABLE_MESSAGE = 'Service temporarily unavailable'
+const DEFAULT_RATE_LIMIT_MESSAGE = 'Too many requests'
+const DEFAULT_VALIDATION_MESSAGE = 'Invalid request'
+const DEFAULT_VALIDATION_CODE = 'VALIDATION_ERROR'
+const DEFAULT_CONFLICT_CODE = 'CONFLICT'
+
+/**
+ * Read an error response body, yielding null when it is absent or not JSON.
+ */
+async function readErrorBody(response: Response): Promise<ErrorBody | null> {
+  try {
+    return (await response.json()) as ErrorBody
+  } catch {
+    return null
+  }
+}
+
 export class ApiClient {
   static async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const method = (options.method ?? 'GET').toUpperCase()
@@ -203,28 +264,25 @@ export class ApiClient {
 
     // Handle 403 Forbidden with typed errors based on error code
     if (response.status === 403) {
-      try {
-        const errorBody = (await response.json()) as ApiErrorResponse
-        if (errorBody.code === 'USER_BANNED') {
-          throw new BannedError(errorBody.message)
-        }
-        if (errorBody.code === 'USER_TIMED_OUT') {
-          throw new TimedOutError(errorBody.message)
-        }
-        // Other 403 errors (PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.)
-        throw new ForbiddenError(errorBody.code, errorBody.message)
-      } catch (error) {
-        // If error is already one of our custom types, re-throw it
-        if (
-          error instanceof BannedError ||
-          error instanceof TimedOutError ||
-          error instanceof ForbiddenError
-        ) {
-          throw error
-        }
-        // Body parsing failed, throw generic 403
+      const body = await readErrorBody(response)
+      if (!body) {
         throw new Error('Forbidden')
       }
+      const RestrictionError = RESTRICTION_ERROR_BY_CODE[body.code ?? '']
+      if (RestrictionError) {
+        throw new RestrictionError(body.message ?? '')
+      }
+      // Other 403 errors (PLANNER_FORBIDDEN, COMMENT_FORBIDDEN, etc.)
+      throw new ForbiddenError(body.code ?? '', body.message ?? '')
+    }
+
+    // Handle 400 Bad Request with the code the backend classified it under
+    if (response.status === 400) {
+      const body = await readErrorBody(response)
+      throw new ValidationError(
+        body?.code ?? DEFAULT_VALIDATION_CODE,
+        body?.message || DEFAULT_VALIDATION_MESSAGE,
+      )
     }
 
     // Handle 404 Not Found with typed error
@@ -234,37 +292,27 @@ export class ApiClient {
 
     // Handle 409 conflict with typed error
     if (response.status === 409) {
-      let serverVersion = 1
-      try {
-        const errorBody = (await response.json()) as ApiConflictError
-        serverVersion = errorBody.serverVersion ?? 1
-      } catch {
-        // Body parsing failed, use default
-      }
-      throw new ConflictError(`Conflict: server version ${serverVersion}`, serverVersion)
+      const body = await readErrorBody(response)
+      throw new ConflictError(
+        body?.code ?? DEFAULT_CONFLICT_CODE,
+        body?.message || 'Conflict',
+        body?.serverVersion ?? null,
+      )
+    }
+
+    // Handle 429 Too Many Requests with typed error
+    if (response.status === 429) {
+      const body = await readErrorBody(response)
+      throw new RateLimitError(body?.message || DEFAULT_RATE_LIMIT_MESSAGE)
     }
 
     // Handle 503 Service Unavailable - distinguish planned deploy vs crash
     if (response.status === 503) {
-      let code = ''
-      let message = 'Service temporarily unavailable'
-      try {
-        const errorBody = (await response.json()) as ApiErrorResponse
-        code = errorBody.code || ''
-        message = errorBody.message || message
-      } catch {
-        // Body parsing failed, use defaults
-      }
-      if (code === 'SERVICE_UPDATING') {
-        throw new ServiceUpdatingError(message)
-      }
-      if (code === 'WRITE_TEMPORARILY_UNAVAILABLE') {
-        throw new WriteTemporarilyUnavailableError(message)
-      }
-      if (code === 'AUTH_TEMPORARILY_UNAVAILABLE') {
-        throw new AuthTemporarilyUnavailableError(message)
-      }
-      throw new BackendUnavailableError(message)
+      const body = await readErrorBody(response)
+      const message = body?.message || DEFAULT_UNAVAILABLE_MESSAGE
+      const UnavailableError =
+        UNAVAILABLE_ERROR_BY_CODE[body?.code ?? ''] ?? BackendUnavailableError
+      throw new UnavailableError(message)
     }
 
     if (!response.ok) {

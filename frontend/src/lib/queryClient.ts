@@ -7,6 +7,7 @@ import {
 } from './api'
 import { toast } from './toast'
 import i18n from './i18n'
+import { STALE_TIME, GC_TIME } from '@/lib/constants'
 
 export function handleBackendDownError(error: Error): void {
   if (error instanceof ServiceUpdatingError) {
@@ -36,8 +37,8 @@ export const queryClient = new QueryClient({
   }),
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // 1 minute - data is fresh for 1 min
-      gcTime: 5 * 60 * 1000, // 5 minutes - cache for 5 min (formerly cacheTime)
+      staleTime: STALE_TIME.SHORT,
+      gcTime: GC_TIME.SHORT,
       retry: (failureCount, error) => {
         if (error instanceof ServiceUpdatingError || error instanceof BackendUnavailableError) {
           return false

@@ -47,6 +47,6 @@ export function createStaticDataQueryOptions<T, TKey extends readonly unknown[]>
       return validateData(module.default, schema, context)
     },
     staleTime: STATIC_DATA_STALE_TIME,
-    placeholderData: opts?.keepPrevious ? keepPreviousData : undefined,
+    ...(opts?.keepPrevious ? { placeholderData: keepPreviousData } : {}),
   })
 }

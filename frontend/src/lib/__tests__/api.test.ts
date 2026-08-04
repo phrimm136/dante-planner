@@ -9,6 +9,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   ApiClient,
   ConflictError,
+  RateLimitError,
+  RetryableUnavailableError,
+  ValidationError,
   WriteTemporarilyUnavailableError,
   AuthTemporarilyUnavailableError,
   BackendUnavailableError,
@@ -162,7 +165,7 @@ describe('ApiClient', () => {
       expect((error as ConflictError).serverVersion).toBe(5)
     })
 
-    it('defaults serverVersion to 1 when response body parsing fails', async () => {
+    it('reports no server version when the response body cannot be parsed', async () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 409,
@@ -172,8 +175,76 @@ describe('ApiClient', () => {
       const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e) => e)
 
       expect(error).toBeInstanceOf(ConflictError)
-      expect((error as ConflictError).serverVersion).toBe(1)
+      expect((error as ConflictError).serverVersion).toBeNull()
     })
+
+    it('reports no server version for a concurrent write, and carries its code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 409,
+        json: vi.fn().mockResolvedValue({
+          code: 'CONCURRENT_WRITE',
+          message: 'The resource was modified concurrently',
+          serverVersion: null,
+        }),
+      })
+
+      const error = await ApiClient.put('/api/planner/123', {}).catch((e) => e)
+
+      expect(error).toBeInstanceOf(ConflictError)
+      expect((error as ConflictError).serverVersion).toBeNull()
+      expect((error as ConflictError).code).toBe('CONCURRENT_WRITE')
+    })
+  })
+
+  describe('400 / 429 typed errors', () => {
+    it('400 throws ValidationError carrying the backend code', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: vi.fn().mockResolvedValue({
+          code: 'VALIDATION_ERROR',
+          message: 'Invalid planner content structure',
+        }),
+      })
+
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e) => e)
+
+      expect(error).toBeInstanceOf(ValidationError)
+      expect((error as ValidationError).code).toBe('VALIDATION_ERROR')
+      expect((error as ValidationError).message).toBe('Invalid planner content structure')
+    })
+
+    it('429 throws RateLimitError', async () => {
+      mockFetch.mockResolvedValue({
+        ok: false,
+        status: 429,
+        json: vi.fn().mockResolvedValue({
+          code: 'RATE_LIMIT_EXCEEDED',
+          message: 'Too many requests',
+        }),
+      })
+
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e) => e)
+
+      expect(error).toBeInstanceOf(RateLimitError)
+      expect((error as RateLimitError).code).toBe('RATE_LIMIT_EXCEEDED')
+    })
+
+    it.each(['RATE_LIMIT_TEMPORARILY_UNAVAILABLE', 'DEADLOCK'])(
+      '503 with code %s throws RetryableUnavailableError',
+      async (code) => {
+        mockFetch.mockResolvedValue({
+          ok: false,
+          status: 503,
+          json: vi.fn().mockResolvedValue({ code, message: 'please retry' }),
+        })
+
+        await expect(ApiClient.post('/api/planner/md', {})).rejects.toBeInstanceOf(
+          RetryableUnavailableError,
+        )
+      },
+    )
   })
 
   describe('503 regional failover typed errors', () => {

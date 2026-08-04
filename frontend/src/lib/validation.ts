@@ -18,3 +18,29 @@ export function validateData<T>(data: unknown, schema: z.ZodType<T>, context: st
   }
   return result.data
 }
+
+/**
+ * Validates unknown data against a Zod schema, degrading to `null` on failure
+ * instead of throwing.
+ *
+ * For boundaries where malformed data must not surface as an error — the
+ * authenticated-user query treats an unparseable body as "no user" rather than
+ * failing the query — so the failure is logged rather than propagated.
+ *
+ * @param data - Unknown input (e.g. an API response body)
+ * @param schema - Zod schema describing the expected shape
+ * @param context - Label identifying the data source, e.g. `auth me`
+ * @returns Parsed data, or `null` when validation fails
+ */
+export function validateDataOrNull<T>(
+  data: unknown,
+  schema: z.ZodType<T>,
+  context: string,
+): T | null {
+  const result = schema.safeParse(data)
+  if (!result.success) {
+    console.error(`[${context}] Validation failed:`, result.error)
+    return null
+  }
+  return result.data
+}

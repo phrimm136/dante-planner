@@ -25,8 +25,8 @@ import i18next from 'i18next'
  * formatUsername("", "", "EN") // => "Unknown"
  */
 export function formatUsername(
-  usernameEpithet: string,
-  usernameSuffix: string,
+  usernameEpithet: string | null | undefined,
+  usernameSuffix: string | null | undefined,
   language?: string,
 ): string {
   const lng = language || i18next.language

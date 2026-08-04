@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { formatDistanceToNowStrict, type Locale } from 'date-fns'
@@ -16,6 +15,16 @@ const dateFnsLocales: Record<string, Locale> = {
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Exhaustiveness guard for discriminated unions.
+ *
+ * Compiles only when every union member is already handled, so an added member
+ * turns into a type error at each switch that forgot it.
+ */
+export function assertNever(value: never): never {
+  throw new Error(`Unhandled union member: ${JSON.stringify(value)}`)
 }
 
 /**
@@ -144,18 +153,6 @@ export function getLineHeightForLanguage(language?: string): number {
 }
 
 /**
- * Gets the CSS font-faily value for Title fonts.
- * Used for Title Dante's Planner.
- *
- * @ returns CSS font-family string for Tagmarker
- * @example
- * <span style={{ fontFamily: getDisplayFontForTitle() }}>Dante's Planner</span>
- */
-export function getDisplayFontForTitle(): CSSProperties {
-  return { fontFamily: 'var(--font-tagmarker)', letterSpacing: '0.01em' }
-}
-
-/**
  * Validates if a string is a valid UUID v4 format
  * @param value - String to validate
  * @returns True if valid UUID v4 format
@@ -164,6 +161,40 @@ export function isValidUUID(value: string): boolean {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   return uuidRegex.test(value)
 }
+
+/**
+ * Per-locale abbreviation rules applied to date-fns' full relative phrase.
+ *
+ * `Intl.RelativeTimeFormat` reproduces the English and Korean output exactly but
+ * not the Japanese or Chinese: this UI writes 「ヶ月」 where CLDR writes 「か月」,
+ * and clips 分钟/小时/个月 to 分/时/月. Locales absent from this map keep the
+ * unabbreviated phrase.
+ */
+const RELATIVE_TIME_ABBREVIATIONS = new Map<Locale, Array<[RegExp, string]>>([
+  [
+    enUS,
+    [
+      [/(\d+)\s*seconds?\s*ago/, '$1s ago'],
+      [/(\d+)\s*minutes?\s*ago/, '$1m ago'],
+      [/(\d+)\s*hours?\s*ago/, '$1h ago'],
+      [/(\d+)\s*days?\s*ago/, '$1d ago'],
+      [/(\d+)\s*months?\s*ago/, '$1mo ago'],
+      [/(\d+)\s*years?\s*ago/, '$1y ago'],
+    ],
+  ],
+  [ja, [[/(\d+)か月前/, '$1ヶ月前']]],
+  [
+    zhCN,
+    [
+      [/(\d+)\s*秒钟?前/, '$1秒前'],
+      [/(\d+)\s*分钟前/, '$1分前'],
+      [/(\d+)\s*小时前/, '$1时前'],
+      [/(\d+)\s*天前/, '$1天前'],
+      [/(\d+)\s*个月前/, '$1月前'],
+      [/(\d+)\s*年前/, '$1年前'],
+    ],
+  ],
+])
 
 /**
  * Formats a date to short relative time with i18n support.
@@ -183,40 +214,21 @@ export function formatShortRelativeTime(date: Date | string, language?: string):
 
   const distance = formatDistanceToNowStrict(dateObj, { locale, addSuffix: true })
 
-  // Shorten common patterns for all languages
-  // English: "X seconds/minutes/hours/days/months/years ago"
-  // Korean: "X초/분/시간/일/개월/년 전"
-  // Japanese: "X秒/分/時間/日/か月/年前"
-  // Chinese: "X 秒/分钟/小时/天/个月/年前"
-  return (
-    distance
-      // English
-      .replace(/(\d+)\s*seconds?\s*ago/, '$1s ago')
-      .replace(/(\d+)\s*minutes?\s*ago/, '$1m ago')
-      .replace(/(\d+)\s*hours?\s*ago/, '$1h ago')
-      .replace(/(\d+)\s*days?\s*ago/, '$1d ago')
-      .replace(/(\d+)\s*months?\s*ago/, '$1mo ago')
-      .replace(/(\d+)\s*years?\s*ago/, '$1y ago')
-      // Korean
-      .replace(/(\d+)초 전/, '$1초 전')
-      .replace(/(\d+)분 전/, '$1분 전')
-      .replace(/(\d+)시간 전/, '$1시간 전')
-      .replace(/(\d+)일 전/, '$1일 전')
-      .replace(/(\d+)개월 전/, '$1개월 전')
-      .replace(/(\d+)년 전/, '$1년 전')
-      // Japanese
-      .replace(/(\d+)秒前/, '$1秒前')
-      .replace(/(\d+)分前/, '$1分前')
-      .replace(/(\d+)時間前/, '$1時間前')
-      .replace(/(\d+)日前/, '$1日前')
-      .replace(/(\d+)か月前/, '$1ヶ月前')
-      .replace(/(\d+)年前/, '$1年前')
-      // Chinese
-      .replace(/(\d+)\s*秒钟?前/, '$1秒前')
-      .replace(/(\d+)\s*分钟前/, '$1分前')
-      .replace(/(\d+)\s*小时前/, '$1时前')
-      .replace(/(\d+)\s*天前/, '$1天前')
-      .replace(/(\d+)\s*个月前/, '$1月前')
-      .replace(/(\d+)\s*年前/, '$1年前')
+  const rules = RELATIVE_TIME_ABBREVIATIONS.get(locale) ?? []
+  return rules.reduce(
+    (text, [pattern, replacement]) => text.replace(pattern, replacement),
+    distance,
   )
+}
+
+/**
+ * Clamps a number into the [0, 1] probability range
+ * @param value - Number to clamp
+ * @returns value bounded to [0, 1]
+ * @example
+ * clamp01(1.0000000000000002) // 1
+ * clamp01(-1e-17) // 0
+ */
+export function clamp01(value: number): number {
+  return Math.min(1, Math.max(0, value))
 }

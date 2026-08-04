@@ -13,6 +13,55 @@ import { I18N_LOCALE_MAP } from '@/lib/constants'
 const RECENT_THRESHOLD_HOURS = 24
 
 /**
+ * Intl option sets shared by the planner surfaces.
+ */
+export const DATE_FORMATS = {
+  /** "December 31, 2024" */
+  LONG_DATE: { year: 'numeric', month: 'long', day: 'numeric' },
+  /** "Dec 31, 14:32" */
+  SHORT_DATE_TIME: { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' },
+  /** "Dec 31, 2024, 2:32 PM" */
+  FULL_DATE_TIME_12H: {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  },
+  /** "14:32:07" — matches the Date.toLocaleTimeString() default */
+  TIME_ONLY: { hour: 'numeric', minute: 'numeric', second: 'numeric' },
+} as const satisfies Record<string, Intl.DateTimeFormatOptions>
+
+/**
+ * Format an ISO 8601 timestamp, or return null when it cannot be formatted.
+ *
+ * Null is the "nothing to show" signal for every caller: missing input, a
+ * string `Date` cannot parse, or an `Intl` rejection. Callers pick their own
+ * placeholder rather than sharing one.
+ *
+ * @param dateString - ISO 8601 date string, possibly absent
+ * @param locale - BCP 47 locale string; omit for the runtime default
+ * @param options - Intl.DateTimeFormat options
+ *
+ * @example
+ * formatPlannerDate("2024-12-31T14:32:00Z", "ko-KR", { dateStyle: 'long' })
+ * formatPlannerDate("not a date") // => null
+ */
+export function formatPlannerDate(
+  dateString: string | null | undefined,
+  locale?: string,
+  options?: Intl.DateTimeFormatOptions,
+): string | null {
+  if (!dateString) return null
+
+  const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return null
+
+  return new Intl.DateTimeFormat(locale, options).format(date)
+}
+
+/**
  * Format a date for display based on how old it is.
  *
  * - Less than 24 hours: Show HH:mm (e.g., "14:32")
@@ -25,10 +74,10 @@ const RECENT_THRESHOLD_HOURS = 24
  *
  * @example
  * // If current time is 2024-12-31 15:00
- * formatPlannerDate("2024-12-31T10:30:00Z") // => "10:30" (same day)
- * formatPlannerDate("2024-12-25T10:30:00Z") // => "12/25" (older than 24h)
+ * formatCompactDate("2024-12-31T10:30:00Z") // => "10:30" (same day)
+ * formatCompactDate("2024-12-25T10:30:00Z") // => "12/25" (older than 24h)
  */
-export function formatPlannerDate(dateString: string): string {
+export function formatCompactDate(dateString: string): string {
   const date = new Date(dateString)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()

@@ -14,7 +14,8 @@
  */
 
 const DB_NAME = 'danteplanner'
-const STORE_NAME = 'planner'
+/** Object store holding every persisted row; exported for direct cursor access. */
+export const STORAGE_STORE_NAME = 'planner'
 const DB_VERSION = 1
 
 const isClient = typeof window !== 'undefined'
@@ -38,13 +39,22 @@ function getDB(): Promise<IDBDatabase> {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME)
+      if (!db.objectStoreNames.contains(STORAGE_STORE_NAME)) {
+        db.createObjectStore(STORAGE_STORE_NAME)
       }
     }
   })
 
   return dbPromise
+}
+
+/**
+ * Open the shared IndexedDB connection for operations the key/value API cannot
+ * express, such as cursor iteration. Resolves null during SSR.
+ */
+export async function openStorageDb(): Promise<IDBDatabase | null> {
+  if (!isClient) return null
+  return getDB()
 }
 
 export const storage = {
@@ -58,8 +68,8 @@ export const storage = {
     try {
       const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readonly')
-        const store = transaction.objectStore(STORE_NAME)
+        const transaction = db.transaction(STORAGE_STORE_NAME, 'readonly')
+        const store = transaction.objectStore(STORAGE_STORE_NAME)
         const request = store.get(key)
 
         request.onsuccess = () => {
@@ -84,8 +94,8 @@ export const storage = {
     try {
       const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readwrite')
-        const store = transaction.objectStore(STORE_NAME)
+        const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORAGE_STORE_NAME)
         const request = store.put(value, key)
 
         request.onsuccess = () => resolve()
@@ -106,8 +116,8 @@ export const storage = {
     try {
       const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readwrite')
-        const store = transaction.objectStore(STORE_NAME)
+        const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORAGE_STORE_NAME)
         const request = store.delete(key)
 
         request.onsuccess = () => resolve()
@@ -128,8 +138,8 @@ export const storage = {
     try {
       const db = await getDB()
       return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORE_NAME, 'readwrite')
-        const store = transaction.objectStore(STORE_NAME)
+        const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+        const store = transaction.objectStore(STORAGE_STORE_NAME)
         const request = store.clear()
 
         request.onsuccess = () => resolve()
