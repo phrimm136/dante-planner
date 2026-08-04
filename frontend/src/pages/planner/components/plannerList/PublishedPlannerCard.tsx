@@ -2,14 +2,18 @@ import { useTranslation } from 'react-i18next'
 import { ThumbsUp, Eye, Bookmark, Star, Clock, MessageSquare } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
-import { formatPlannerDate } from '@/lib/formatDate'
+import { formatCompactDate } from '@/lib/formatDate'
 import { formatUsername } from '@/lib/formatUsername'
 import { getKeywordIconPath } from '@/shared/assets'
-import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
-import { PLANNER_LIST, PLANNER_STATUS_BADGE_STYLES, RECOMMENDED_THRESHOLD } from '@/lib/constants'
+import {
+  PLANNER_LIST,
+  PLANNER_STATUS_BADGE_STYLES,
+  RECOMMENDED_THRESHOLD,
+  SECTION_STYLES,
+} from '@/lib/constants'
+import { categoryBadgeStyle } from '../../lib/plannerBadges'
 
 import type { PublicPlanner } from '../../types/PlannerListTypes'
-import type { MDCategory } from '@/shared/gameData'
 import type { PlannerStatusBadge } from '@/lib/constants'
 
 interface PublishedPlannerCardProps {
@@ -95,16 +99,7 @@ export function PublishedPlannerCard({
         <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span
             className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
-            style={{
-              backgroundColor:
-                category in MD_CATEGORY_COLORS
-                  ? MD_CATEGORY_COLORS[category as MDCategory]
-                  : undefined,
-              color:
-                category in MD_CATEGORY_TEXT_COLORS
-                  ? MD_CATEGORY_TEXT_COLORS[category as MDCategory]
-                  : undefined,
-            }}
+            style={categoryBadgeStyle(category)}
           >
             {t(`pages.plannerList.mdCategory.${category}`)}
           </span>
@@ -119,7 +114,7 @@ export function PublishedPlannerCard({
             />
           ))}
           {hasMoreKeywords && (
-            <span className="text-xs text-muted-foreground">
+            <span className={SECTION_STYLES.TEXT.captionSmall}>
               +{keywords.length - PLANNER_LIST.MAX_KEYWORDS_DISPLAY}
             </span>
           )}
@@ -152,25 +147,25 @@ export function PublishedPlannerCard({
       {/* Stats row */}
       <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
         {/* Upvotes */}
-        <span className="flex items-center gap-1">
+        <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <ThumbsUp className="size-3" />
           {upvotes}
         </span>
 
         {/* Downvotes - TODO: Add when backend supports it */}
-        {/* <span className="flex items-center gap-1">
+        {/* <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <ThumbsDown className="size-3" />
           {downvotes}
         </span> */}
 
         {/* Views */}
-        <span className="flex items-center gap-1">
+        <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <Eye className="size-3" />
           {viewCount}
         </span>
 
         {/* Comments */}
-        <span className="flex items-center gap-1">
+        <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <MessageSquare className="size-3" />
           {commentCount}
         </span>
@@ -178,10 +173,10 @@ export function PublishedPlannerCard({
 
       {/* Date & Author */}
       <div className="flex items-center justify-between text-xs text-muted-foreground">
-        {/* formatPlannerDate: <24h shows HH:mm, >=24h shows MM/DD */}
-        <span className="flex items-center gap-1">
+        {/* formatCompactDate: <24h shows HH:mm, >=24h shows MM/DD */}
+        <span className={SECTION_STYLES.LAYOUT.rowTight}>
           <Clock className="size-3" />
-          {createdAt ? formatPlannerDate(createdAt) : '-'}
+          {createdAt ? formatCompactDate(createdAt) : '-'}
         </span>
         <span className="truncate max-w-[60%]">
           {formatUsername(authorUsernameEpithet, authorUsernameSuffix, i18n.language)}

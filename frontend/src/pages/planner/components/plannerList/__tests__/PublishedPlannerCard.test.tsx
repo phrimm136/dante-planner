@@ -22,7 +22,7 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 vi.mock('@/lib/formatDate', () => ({
-  formatPlannerDate: (date: string) => date,
+  formatCompactDate: (date: string) => date,
 }))
 
 vi.mock('@/lib/formatUsername', () => ({

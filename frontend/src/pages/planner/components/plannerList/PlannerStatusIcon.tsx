@@ -1,10 +1,10 @@
 import { Circle, CheckCircle, CloudUpload, Globe, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type PlannerStatus = 'draft' | 'saved' | 'unsynced' | 'synced' | 'published' | 'unpublishedChanges'
+import type { SaveStatus } from '../../lib/plannerBadges'
 
 interface PlannerStatusIconProps {
-  status: PlannerStatus
+  status: SaveStatus
   className?: string
 }
 

@@ -2,7 +2,7 @@
  * MD User Planners Data Hook
  *
  * Fetches personal planners for the /planner/md route.
- * - Guests: IndexedDB only via usePlannerSaveAdapter
+ * - Guests: IndexedDB only via usePlannerStorage
  * - Authenticated + sync ON: Auto-pull from server when:
  *   - Planner doesn't exist locally (server-only)
  *   - Local is not a draft AND local syncVersion < server syncVersion
@@ -11,16 +11,19 @@
  * Pattern: Split adapters + TanStack Query
  */
 
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
 
-import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
+import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
+import { assertNever } from '@/lib/utils'
+import { generateUUID } from '@/lib/uuid'
+import { PLANNER_LIST, STALE_TIME } from '@/lib/constants'
 
 import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 
@@ -132,12 +135,6 @@ export interface MDUserPlannersResult {
 }
 
 // ============================================================================
-// Constants
-// ============================================================================
-
-const PAGE_SIZE = 20
-
-// ============================================================================
 // Main Hook
 // ============================================================================
 
@@ -183,7 +180,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       contentFilters.giftIds.length > 0 ||
       contentFilters.themePackIds.length > 0)
   )
-  const saveAdapter = usePlannerSaveAdapter()
+  const storage = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
   const queryClient = useQueryClient()
   const { data: user } = useAuthQuery()
@@ -212,8 +209,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   const { data: allPlanners } = useSuspenseQuery(
     queryOptions({
       queryKey: userPlannersQueryKeys.list(isAuthenticated),
-      queryFn: () => saveAdapter.listLocal(),
-      staleTime: 30 * 1000,
+      queryFn: () => storage.listLocal(),
+      staleTime: STALE_TIME.FREQUENT,
     }),
   )
 
@@ -221,8 +218,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   // Only fetched when content filters are active. For 1-5 plans, IndexedDB read is near-instant.
   const { data: allFullPlanners } = useQuery({
     queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
-    queryFn: () => saveAdapter.listLocalFull(),
-    staleTime: 30 * 1000,
+    queryFn: () => storage.listLocalFull(),
+    staleTime: STALE_TIME.FREQUENT,
     enabled: hasContentFilters,
   })
 
@@ -244,7 +241,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       try {
         // Fetch ALL server planner metadata
         const serverPlanners = await syncAdapter.listFromServer()
-        const localPlanners = await saveAdapter.listLocal()
+        const localPlanners = await storage.listLocal()
         const localMap = new Map(localPlanners.map((p) => [p.id, p]))
         const serverIds = new Set(serverPlanners.map((p) => p.id))
 
@@ -301,10 +298,11 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         let syncedCount = 0
         for (const serverPlanner of plannersToPull) {
           try {
-            const fullPlanner = await syncAdapter.fetchFromServer(serverPlanner.id)
-            if (fullPlanner) {
+            const fetched = await syncAdapter.fetchFromServer(serverPlanner.id)
+            if (fetched.ok) {
+              const fullPlanner = fetched.value
               console.log(`Saving planner ${serverPlanner.id}:`, fullPlanner.metadata)
-              const result = await saveAdapter.saveToLocal(fullPlanner)
+              const result = await storage.saveToLocal(fullPlanner)
               if (result.success) {
                 syncedCount++
               } else {
@@ -320,7 +318,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         let purgedCount = 0
         for (const local of plannersToPurge) {
           try {
-            await saveAdapter.deleteFromLocal(local.id)
+            await storage.deleteFromLocal(local.id)
             purgedCount++
           } catch (error) {
             console.error(`Failed to purge local planner ${local.id}:`, error)
@@ -335,13 +333,13 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
           const conflicts: ConflictItem[] = []
           for (const sp of conflictServerPlanners) {
             try {
-              const localPlanner = await saveAdapter.loadFromLocal(sp.id)
+              const localPlanner = await storage.loadFromLocal(sp.id)
               const serverPlanner = await syncAdapter.fetchFromServer(sp.id)
-              if (localPlanner && serverPlanner) {
+              if (localPlanner.ok && localPlanner.value && serverPlanner.ok) {
                 conflicts.push({
                   id: sp.id,
-                  localPlanner,
-                  serverPlanner,
+                  localPlanner: localPlanner.value,
+                  serverPlanner: serverPlanner.value,
                 })
               }
             } catch (error) {
@@ -355,7 +353,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
         // Directly update cache with synced planners (avoids re-suspension)
         if (syncedCount > 0 || purgedCount > 0) {
-          const updatedLocal = await saveAdapter.listLocal()
+          const updatedLocal = await storage.listLocal()
           queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
           // Invalidate full planners cache so content filters pick up synced data
           void queryClient.invalidateQueries({
@@ -367,18 +365,16 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         // Mark as synced even on error - no retry
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
-      } finally {
-        setIsSyncing(false)
-        syncInProgressRef.current = false
       }
+
+      setIsSyncing(false)
+      syncInProgressRef.current = false
     }
 
     void runSync()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncKey])
+  }, [syncKey, syncAdapter, storage, queryClient, syncEnabled, isAuthenticated])
 
-  // Memoize filtering to prevent recalculation on unrelated re-renders
-  const { paginatedPlanners, totalCount } = useMemo(() => {
+  const { paginatedPlanners, totalCount } = (() => {
     const normalizedSearch = search?.toLowerCase().trim()
 
     // When content filters are active, filter against full planners using matchesPlannerFilters
@@ -399,9 +395,9 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       )
 
       const filtered = allPlanners.filter((p) => matchedIds.has(p.id))
-      const startIndex = page * PAGE_SIZE
+      const startIndex = page * PLANNER_LIST.PAGE_SIZE
       return {
-        paginatedPlanners: filtered.slice(startIndex, startIndex + PAGE_SIZE),
+        paginatedPlanners: filtered.slice(startIndex, startIndex + PLANNER_LIST.PAGE_SIZE),
         totalCount: filtered.length,
       }
     }
@@ -414,12 +410,12 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     })
 
     // Client-side pagination
-    const startIndex = page * PAGE_SIZE
+    const startIndex = page * PLANNER_LIST.PAGE_SIZE
     return {
-      paginatedPlanners: filtered.slice(startIndex, startIndex + PAGE_SIZE),
+      paginatedPlanners: filtered.slice(startIndex, startIndex + PLANNER_LIST.PAGE_SIZE),
       totalCount: filtered.length,
     }
-  }, [allPlanners, allFullPlanners, category, search, page, hasContentFilters, contentFilters])
+  })()
 
   /**
    * Validate a local planner's content before syncing to server.
@@ -470,45 +466,53 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         const conflict = pendingConflicts.find((c) => c.id === resolution.id)
         if (!conflict) continue
 
-        if (resolution.choice === 'overwrite') {
-          // Validate before syncing local draft to server
-          validateBeforeSync(conflict.localPlanner)
-          // Keep local draft, force push to server
-          const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
-          await saveAdapter.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced))
-        } else if (resolution.choice === 'discard') {
-          // Use server version, discard local draft
-          await saveAdapter.saveToLocal(conflict.serverPlanner)
-        } else if (resolution.choice === 'both') {
-          // Keep both: create copy of local, then use server for original
-          const copyId = crypto.randomUUID()
-          const deviceId = await saveAdapter.getOrCreateDeviceId()
-          const copy: SaveablePlanner = {
-            ...conflict.localPlanner,
-            metadata: {
-              ...conflict.localPlanner.metadata,
-              id: copyId,
-              title: `${conflict.localPlanner.metadata.title} (Copy)`,
-              status: 'saved',
-              syncVersion: 1,
-              deviceId,
-              createdAt: new Date().toISOString(),
-              lastModifiedAt: new Date().toISOString(),
-              savedAt: new Date().toISOString(),
-            },
+        switch (resolution.choice) {
+          case 'overwrite': {
+            // Validate before syncing local draft to server
+            validateBeforeSync(conflict.localPlanner)
+            // Keep local draft, force push to server
+            const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
+            await storage.saveToLocal(adoptSyncedVersion(conflict.localPlanner, synced))
+            break
           }
-          // Validate copy before syncing (same content as localPlanner)
-          validateBeforeSync(copy)
-          await saveAdapter.saveToLocal(copy)
-          await syncAdapter.syncToServer(copy)
-          // Use server version for original
-          await saveAdapter.saveToLocal(conflict.serverPlanner)
+          case 'discard':
+            // Use server version, discard local draft
+            await storage.saveToLocal(conflict.serverPlanner)
+            break
+          case 'both': {
+            // Keep both: create copy of local, then use server for original
+            const copyId = generateUUID()
+            const deviceId = await storage.getOrCreateDeviceId()
+            const copy: SaveablePlanner = {
+              ...conflict.localPlanner,
+              metadata: {
+                ...conflict.localPlanner.metadata,
+                id: copyId,
+                title: `${conflict.localPlanner.metadata.title} (Copy)`,
+                status: 'saved',
+                syncVersion: 1,
+                deviceId,
+                createdAt: new Date().toISOString(),
+                lastModifiedAt: new Date().toISOString(),
+                savedAt: new Date().toISOString(),
+              },
+            }
+            // Validate copy before syncing (same content as localPlanner)
+            validateBeforeSync(copy)
+            await storage.saveToLocal(copy)
+            await syncAdapter.syncToServer(copy)
+            // Use server version for original
+            await storage.saveToLocal(conflict.serverPlanner)
+            break
+          }
+          default:
+            assertNever(resolution.choice)
         }
       }
 
       // Only clear conflicts after ALL resolutions succeed
       setPendingConflicts([])
-      const updatedLocal = await saveAdapter.listLocal()
+      const updatedLocal = await storage.listLocal()
       queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
       void queryClient.invalidateQueries({
         queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
@@ -523,9 +527,9 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       } else {
         console.error('Conflict resolution failed:', error)
       }
-    } finally {
-      setIsResolvingConflicts(false)
     }
+
+    setIsResolvingConflicts(false)
   }
 
   return {
@@ -551,7 +555,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
  * @example
  * ```tsx
  * const invalidate = useInvalidateUserPlanners();
- * await adapter.deletePlanner(id);
+ * await storage.deleteFromLocal(id);
  * invalidate();
  * ```
  */

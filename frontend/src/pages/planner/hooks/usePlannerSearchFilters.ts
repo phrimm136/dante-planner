@@ -11,7 +11,6 @@
  * Pattern: useSearch + useNavigate (same as useMDGesellschaftFilters)
  */
 
-import { useCallback, useMemo } from 'react'
 import { useSearch, useNavigate } from '@tanstack/react-router'
 
 import type { PlannerSearchFilters, PlannerSearchParams } from '../types/PlannerSearchTypes'
@@ -91,60 +90,51 @@ export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
   const navigate = useNavigate()
 
   // Parse URL params to filter state
-  const filters: PlannerSearchFilters = useMemo(
-    () => ({
-      title: search?.q || null,
-      keywords: parseCsvParam(search?.keyword),
-      identityIds: parseCsvParam(search?.identity),
-      egoIds: parseCsvParam(search?.ego),
-      giftIds: parseCsvParam(search?.gift),
-      themePackIds: parseCsvParam(search?.themePack),
-    }),
-    [search?.q, search?.keyword, search?.identity, search?.ego, search?.gift, search?.themePack],
-  )
+  const filters: PlannerSearchFilters = {
+    title: search?.q || null,
+    keywords: parseCsvParam(search?.keyword),
+    identityIds: parseCsvParam(search?.identity),
+    egoIds: parseCsvParam(search?.ego),
+    giftIds: parseCsvParam(search?.gift),
+    themePackIds: parseCsvParam(search?.themePack),
+  }
 
-  const hasActiveFilters = useMemo(
-    () =>
-      filters.title !== null ||
-      filters.keywords.length > 0 ||
-      filters.identityIds.length > 0 ||
-      filters.egoIds.length > 0 ||
-      filters.giftIds.length > 0 ||
-      filters.themePackIds.length > 0,
-    [filters],
-  )
+  const hasActiveFilters =
+    filters.title !== null ||
+    filters.keywords.length > 0 ||
+    filters.identityIds.length > 0 ||
+    filters.egoIds.length > 0 ||
+    filters.giftIds.length > 0 ||
+    filters.themePackIds.length > 0
 
   /**
    * Update filter values in URL
    * Merges with current filters, converts to URL param format.
    * Preserves existing non-search params (category, page, mode).
    */
-  const setFilters = useCallback(
-    (updates: Partial<PlannerSearchFilters>) => {
-      const merged = { ...filters, ...updates }
+  const setFilters = (updates: Partial<PlannerSearchFilters>) => {
+    const merged = { ...filters, ...updates }
 
-      void navigate({
-        to: '.',
-        search: (prev) => ({
-          ...prev,
-          q: merged.title || undefined,
-          keyword: toCsvParam(merged.keywords),
-          identity: toCsvParam(merged.identityIds),
-          ego: toCsvParam(merged.egoIds),
-          gift: toCsvParam(merged.giftIds),
-          themePack: toCsvParam(merged.themePackIds),
-        }),
-        replace: false,
-      })
-    },
-    [filters, navigate],
-  )
+    void navigate({
+      to: '.',
+      search: (prev) => ({
+        ...prev,
+        q: merged.title || undefined,
+        keyword: toCsvParam(merged.keywords),
+        identity: toCsvParam(merged.identityIds),
+        ego: toCsvParam(merged.egoIds),
+        gift: toCsvParam(merged.giftIds),
+        themePack: toCsvParam(merged.themePackIds),
+      }),
+      replace: false,
+    })
+  }
 
   /**
    * Clear all search filters
    * Preserves existing non-search params (category, page, mode)
    */
-  const clearFilters = useCallback(() => {
+  const clearFilters = () => {
     void navigate({
       to: '.',
       search: (prev) => ({
@@ -158,7 +148,7 @@ export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
       }),
       replace: false,
     })
-  }, [navigate])
+  }
 
   return {
     filters,

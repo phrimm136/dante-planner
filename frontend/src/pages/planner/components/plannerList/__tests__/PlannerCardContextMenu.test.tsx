@@ -195,7 +195,7 @@ describe('PlannerCardContextMenu', () => {
 
   describe('vote error handling (409 Conflict)', () => {
     it('usePlannerVote hook handles 409 error internally', () => {
-      const mockError = new ConflictError('Vote already exists')
+      const mockError = new ConflictError('CONCURRENT_WRITE', 'Vote already exists', null)
       vi.mocked(usePlannerVote).mockReturnValue({
         mutate: mockVoteMutate,
         isPending: false,

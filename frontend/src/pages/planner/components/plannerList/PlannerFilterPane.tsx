@@ -19,7 +19,7 @@
  * - HeavySections (inner): Suspense-wrapped. Loads identity/ego/gift/themePack data.
  */
 
-import { useState, useRef, useMemo, useCallback, useEffect, forwardRef, Suspense } from 'react'
+import { useState, useRef, useEffect, forwardRef, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 
@@ -45,6 +45,7 @@ import {
 } from '@/shared/assets'
 
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Constants
@@ -98,32 +99,28 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
   const keywordsI18n = usePlannerKeywordsI18nDeferred()
 
   // Keyword items (always available)
-  const keywordItems = useMemo(
-    (): FilterItem[] =>
-      PLANNER_KEYWORDS.map((kw) => ({
-        id: kw,
-        label: keywordsI18n[kw]?.label ?? kw,
-        category: 'keywords' as FilterCategory,
-      })),
-    [keywordsI18n],
-  )
+  const keywordItems: FilterItem[] = PLANNER_KEYWORDS.map((kw) => ({
+    id: kw,
+    label: keywordsI18n[kw]?.label ?? kw,
+    category: 'keywords' as FilterCategory,
+  }))
 
   // Heavy items populated by HeavySections via callback
   const [heavyItems, setHeavyItems] = useState<FilterItem[]>([])
-  const allItems = useMemo(() => [...keywordItems, ...heavyItems], [keywordItems, heavyItems])
+  const allItems = [...keywordItems, ...heavyItems]
 
   // Filter items by search query
   const lowerQuery = searchQuery.toLowerCase()
-  const filteredItems = useMemo(() => {
+  const filteredItems = (() => {
     if (!lowerQuery) return allItems
     return allItems.filter(
       (item) =>
         item.label.toLowerCase().includes(lowerQuery) || item.id.toLowerCase().includes(lowerQuery),
     )
-  }, [allItems, lowerQuery])
+  })()
 
   // Match counts per category
-  const matchCounts = useMemo(() => {
+  const matchCounts = (() => {
     const counts: Record<FilterCategory, number> = {
       keywords: 0,
       identity: 0,
@@ -135,64 +132,55 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
       counts[item.category]++
     }
     return counts
-  }, [filteredItems])
+  })()
 
   // Get items for a specific category
-  const getItemsForCategory = useCallback(
-    (category: FilterCategory) => {
-      return filteredItems.filter((item) => item.category === category)
-    },
-    [filteredItems],
-  )
+  const getItemsForCategory = (category: FilterCategory) => {
+    return filteredItems.filter((item) => item.category === category)
+  }
 
   // Check if an item is selected
-  const isSelected = useCallback(
-    (category: FilterCategory, id: string): boolean => {
-      switch (category) {
-        case 'keywords':
-          return filters.keywords.includes(id)
-        case 'identity':
-          return filters.identityIds.includes(id)
-        case 'ego':
-          return filters.egoIds.includes(id)
-        case 'gift':
-          return filters.giftIds.includes(id)
-        case 'themePack':
-          return filters.themePackIds.includes(id)
-      }
-    },
-    [filters],
-  )
+  const isSelected = (category: FilterCategory, id: string): boolean => {
+    switch (category) {
+      case 'keywords':
+        return filters.keywords.includes(id)
+      case 'identity':
+        return filters.identityIds.includes(id)
+      case 'ego':
+        return filters.egoIds.includes(id)
+      case 'gift':
+        return filters.giftIds.includes(id)
+      case 'themePack':
+        return filters.themePackIds.includes(id)
+    }
+  }
 
   // Toggle selection of an item
-  const toggleItem = useCallback(
-    (category: FilterCategory, id: string) => {
-      const toggle = (arr: string[]) =>
-        arr.includes(id) ? arr.filter((v) => v !== id) : [...arr, id]
+  const toggleItem = (category: FilterCategory, id: string) => {
+    const toggle = (arr: string[]) =>
+      arr.includes(id) ? arr.filter((v) => v !== id) : [...arr, id]
 
-      switch (category) {
-        case 'keywords':
-          onFiltersChange({ keywords: toggle(filters.keywords) })
-          break
-        case 'identity':
-          onFiltersChange({ identityIds: toggle(filters.identityIds) })
-          break
-        case 'ego':
-          onFiltersChange({ egoIds: toggle(filters.egoIds) })
-          break
-        case 'gift':
-          onFiltersChange({ giftIds: toggle(filters.giftIds) })
-          break
-        case 'themePack':
-          onFiltersChange({ themePackIds: toggle(filters.themePackIds) })
-          break
-      }
-    },
-    [filters, onFiltersChange],
-  )
+    switch (category) {
+      case 'keywords':
+        onFiltersChange({ keywords: toggle(filters.keywords) })
+        break
+      case 'identity':
+        onFiltersChange({ identityIds: toggle(filters.identityIds) })
+        break
+      case 'ego':
+        onFiltersChange({ egoIds: toggle(filters.egoIds) })
+        break
+      case 'gift':
+        onFiltersChange({ giftIds: toggle(filters.giftIds) })
+        break
+      case 'themePack':
+        onFiltersChange({ themePackIds: toggle(filters.themePackIds) })
+        break
+    }
+  }
 
   // Build selected chips — uses allItems for label lookup, falls back to raw ID
-  const selectedChips = useMemo(() => {
+  const selectedChips = (() => {
     const itemMap = new Map(allItems.map((item) => [`${item.category}-${item.id}`, item]))
     const chips: FilterItem[] = []
 
@@ -217,12 +205,16 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
       chips.push({ id, label: found?.label ?? id, category: 'themePack' })
     }
     return chips
-  }, [filters, allItems])
+  })()
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
+  const registerSection = (category: FilterCategory, el: HTMLDivElement | null) => {
+    sectionRefs.current[category] = el
+  }
+
   // Scroll to category section within the pane's scroll container
-  const scrollToCategory = useCallback((category: FilterCategory) => {
+  const scrollToCategory = (category: FilterCategory) => {
     const el = sectionRefs.current[category]
     const container = scrollContainerRef.current
     if (!el || !container) return
@@ -230,7 +222,7 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
       top: el.offsetTop - container.offsetTop,
       behavior: 'instant',
     })
-  }, [])
+  }
 
   // Category display labels
   const categoryLabels: Record<FilterCategory, string> = {
@@ -319,7 +311,7 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
               {/* Keywords section (always rendered, no suspense) */}
               <FilterSection
                 ref={(el) => {
-                  sectionRefs.current.keywords = el
+                  registerSection('keywords', el)
                 }}
                 title={categoryLabels.keywords}
                 visible={matchCounts.keywords > 0 || !lowerQuery}
@@ -361,7 +353,7 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
                     getItemsForCategory={getItemsForCategory}
                     isSelected={isSelected}
                     toggleItem={toggleItem}
-                    sectionRefs={sectionRefs}
+                    registerSection={registerSection}
                     categoryLabels={categoryLabels}
                     matchCounts={matchCounts}
                     onItemsReady={setHeavyItems}
@@ -385,7 +377,7 @@ interface HeavySectionsProps {
   getItemsForCategory: (category: FilterCategory) => FilterItem[]
   isSelected: (category: FilterCategory, id: string) => boolean
   toggleItem: (category: FilterCategory, id: string) => void
-  sectionRefs: React.MutableRefObject<Record<FilterCategory, HTMLDivElement | null>>
+  registerSection: (category: FilterCategory, el: HTMLDivElement | null) => void
   categoryLabels: Record<FilterCategory, string>
   matchCounts: Record<FilterCategory, number>
   onItemsReady: (items: FilterItem[]) => void
@@ -396,7 +388,7 @@ function HeavySections({
   getItemsForCategory,
   isSelected,
   toggleItem,
-  sectionRefs,
+  registerSection,
   categoryLabels,
   matchCounts,
   onItemsReady,
@@ -413,7 +405,7 @@ function HeavySections({
   const { spec: themePackSpec, i18n: themePackI18n } = useThemePackListData()
 
   // Build heavy FilterItem[] from loaded data
-  const heavyItems = useMemo((): FilterItem[] => {
+  const heavyItems: FilterItem[] = (() => {
     const items: FilterItem[] = []
 
     for (const id of Object.keys(identitySpec)) {
@@ -457,17 +449,7 @@ function HeavySections({
     }
 
     return items
-  }, [
-    identitySpec,
-    identityI18n,
-    egoSpec,
-    egoI18n,
-    egoGiftSpec,
-    egoGiftI18n,
-    themePackSpec,
-    themePackI18n,
-    t,
-  ])
+  })()
 
   // Report heavy items to parent so allItems/matchCounts update
   useEffect(() => {
@@ -479,7 +461,7 @@ function HeavySections({
       {/* Identity section (grouped by sinner) */}
       <FilterSection
         ref={(el) => {
-          sectionRefs.current.identity = el
+          registerSection('identity', el)
         }}
         title={categoryLabels.identity}
         visible={matchCounts.identity > 0 || !searchQuery}
@@ -504,7 +486,7 @@ function HeavySections({
       {/* EGO section (grouped by sinner) */}
       <FilterSection
         ref={(el) => {
-          sectionRefs.current.ego = el
+          registerSection('ego', el)
         }}
         title={categoryLabels.ego}
         visible={matchCounts.ego > 0 || !searchQuery}
@@ -529,7 +511,7 @@ function HeavySections({
       {/* EGO Gift section */}
       <FilterSection
         ref={(el) => {
-          sectionRefs.current.gift = el
+          registerSection('gift', el)
         }}
         title={categoryLabels.gift}
         visible={matchCounts.gift > 0 || !searchQuery}
@@ -559,7 +541,7 @@ function HeavySections({
       {/* Theme Pack section */}
       <FilterSection
         ref={(el) => {
-          sectionRefs.current.themePack = el
+          registerSection('themePack', el)
         }}
         title={categoryLabels.themePack}
         visible={matchCounts.themePack > 0 || !searchQuery}
@@ -632,7 +614,7 @@ function SinnerGroupedGrid({ items, isSelected, onToggle, renderIcon }: SinnerGr
   const { t } = useTranslation(['sinnerNames'])
 
   // Group items by sinner, preserving SINNERS order
-  const grouped = useMemo(() => {
+  const grouped = (() => {
     const byGroup = new Map<string, FilterItem[]>()
     for (const item of items) {
       const group = item.group ?? 'Unknown'
@@ -648,7 +630,7 @@ function SinnerGroupedGrid({ items, isSelected, onToggle, renderIcon }: SinnerGr
       }
     }
     return result
-  }, [items])
+  })()
 
   if (grouped.length === 0) return null
 
@@ -658,7 +640,7 @@ function SinnerGroupedGrid({ items, isSelected, onToggle, renderIcon }: SinnerGr
         <div key={sinner}>
           <div className="flex items-center gap-1.5 mb-1">
             <img src={getSinnerIconPath(sinner)} alt="" className="size-4" loading="lazy" />
-            <span className="text-xs text-muted-foreground">{t(`sinnerNames:${sinner}`)}</span>
+            <span className={SECTION_STYLES.TEXT.captionSmall}>{t(`sinnerNames:${sinner}`)}</span>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {sinnerItems.map((item) => (

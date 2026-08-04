@@ -71,7 +71,6 @@ export function PersonalPlannerList({
     total: planners.length,
     step: PROGRESSIVE_REVEAL.CARD_BATCH,
     initial: PROGRESSIVE_REVEAL.CARD_BATCH,
-    resetKey: planners,
   })
 
   // Determine if any filters are active (for empty state messaging)

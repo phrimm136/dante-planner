@@ -39,6 +39,7 @@ import { PublishedPlannerList } from './components/plannerList/PublishedPlannerL
 import { LoadingState } from '@/components/feedback/LoadingState'
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
 // Page Content Component
@@ -59,7 +60,7 @@ function GesellschaftPageContent() {
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Create New Button */}
       <div className="flex justify-end mb-6">
         <Button asChild>

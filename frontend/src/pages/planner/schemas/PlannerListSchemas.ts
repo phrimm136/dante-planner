@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { PLANNER_KEYWORDS, migrateKeywords } from '@/shared/gameData'
-import { MDCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
+import { migrateKeywords } from '@/shared/gameData'
+import { PlannerCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
 
 /**
  * Planner List Schemas
@@ -12,18 +12,6 @@ import { MDCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './Plan
 // ============================================================================
 // Enum Schemas
 // ============================================================================
-
-/**
- * Vote direction schema - only UP votes allowed (downvoting removed)
- */
-export const VoteDirectionSchema = z.literal('UP')
-
-/**
- * Planner keyword schema - validates against PLANNER_KEYWORDS constant
- * Double cast (readonly → unknown → mutable) required for Zod v3 enum()
- */
-const plannerKeywords = PLANNER_KEYWORDS as unknown as [string, ...string[]]
-export const PlannerKeywordSchema = z.enum(plannerKeywords)
 
 // ============================================================================
 // API Response Schemas
@@ -40,29 +28,29 @@ export const PublicPlannerSchema = z.object({
   title: z.string(),
   /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
   plannerType: PlannerTypeSchema,
-  /** MD category (5F, 10F, 15F) */
-  category: MDCategorySchema,
+  /** Category for the planner's type (MD: 5F/10F/15F, RR: placeholder) */
+  category: PlannerCategorySchema,
   /** Selected planner keywords - legacy ids remapped, unknown preserved (null preserved) */
   selectedKeywords: z.preprocess(
     (v) => (v == null ? v : migrateKeywords(v)),
-    z.array(z.string()).nullable(),
+    z.array(z.string()).nullish(),
   ),
   /** Number of upvotes */
   upvotes: z.number().int().min(0),
   /** Number of views */
   viewCount: z.number().int().min(0),
-  /** Author's association keyword */
-  authorUsernameEpithet: z.string(),
-  /** Author's random alphanumeric suffix */
-  authorUsernameSuffix: z.string(),
+  /** Author's association keyword; absent once the account is gone */
+  authorUsernameEpithet: z.string().nullish(),
+  /** Author's random alphanumeric suffix; absent once the account is gone */
+  authorUsernameSuffix: z.string().nullish(),
   /** ISO 8601 timestamp when planner was created */
   createdAt: z.string(),
   /** ISO 8601 timestamp when planner was first published */
   firstPublishedAt: z.string(),
-  /** Whether current user has upvoted (null if not authenticated) */
-  hasUpvoted: z.boolean().nullable(),
-  /** Whether current user has bookmarked (null if not authenticated) */
-  isBookmarked: z.boolean().nullable(),
+  /** Whether current user has upvoted (absent if not authenticated) */
+  hasUpvoted: z.boolean().nullish(),
+  /** Whether current user has bookmarked (absent if not authenticated) */
+  isBookmarked: z.boolean().nullish(),
   /** Total non-deleted comment count */
   commentCount: z.number().int().min(0),
 })
@@ -130,18 +118,6 @@ export const SubscriptionResponseSchema = z
   .strict()
 
 /**
- * Report response schema
- */
-export const ReportResponseSchema = z
-  .object({
-    /** ID of the reported planner */
-    plannerId: z.string().uuid(),
-    /** Response message */
-    message: z.string(),
-  })
-  .strict()
-
-/**
  * Published planner detail schema (extends PublicPlannerSchema with content and metadata)
  * Used for fetching single published planner with full data
  * Includes all fields needed to reconstruct SaveablePlanner for PlannerViewer
@@ -159,37 +135,12 @@ export const PublishedPlannerDetailSchema = PublicPlannerSchema.extend({
   status: PlannerStatusSchema,
   /** Server sync version for optimistic locking */
   syncVersion: z.number().int().positive(),
-  /** Subscription status for authenticated users (null if not authenticated) */
-  isSubscribed: z.boolean().nullable(),
-  /** Report status for authenticated users (null if not authenticated) */
-  hasReported: z.boolean().nullable(),
+  /** Subscription status for authenticated users (absent if not authenticated) */
+  isSubscribed: z.boolean().nullish(),
+  /** Report status for authenticated users (absent if not authenticated) */
+  hasReported: z.boolean().nullish(),
   /** Whether owner has notifications enabled (false for non-owners) */
   ownerNotificationsEnabled: z.boolean(),
   /** Total comment count for this planner */
   commentCount: z.number().int().min(0),
 })
-
-// ============================================================================
-// Inferred Types (use when validated data is needed)
-// ============================================================================
-
-/** Validated public planner type */
-export type PublicPlannerValidated = z.infer<typeof PublicPlannerSchema>
-
-/** Validated paginated planners type */
-export type PaginatedPlannersValidated = z.infer<typeof PaginatedPlannersSchema>
-
-/** Validated bookmark response type */
-export type BookmarkResponseValidated = z.infer<typeof BookmarkResponseSchema>
-
-/** Validated vote response type */
-export type VoteResponseValidated = z.infer<typeof VoteResponseSchema>
-
-/** Validated subscription response type */
-export type SubscriptionResponseValidated = z.infer<typeof SubscriptionResponseSchema>
-
-/** Validated report response type */
-export type ReportResponseValidated = z.infer<typeof ReportResponseSchema>
-
-/** Validated published planner detail type */
-export type PublishedPlannerDetailValidated = z.infer<typeof PublishedPlannerDetailSchema>

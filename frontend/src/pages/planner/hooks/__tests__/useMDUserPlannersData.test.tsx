@@ -5,13 +5,140 @@
  * Uses Vitest for testing query key structure.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { renderHook, waitFor } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from 'react'
+import type { PlannerSummary, SaveablePlanner } from '../../types/PlannerTypes'
+
+const syncMocks = vi.hoisted(() => ({
+  isAuthenticated: true,
+  syncEnabled: true,
+  listFromServer: vi.fn(async (): Promise<unknown[]> => []),
+  listLocal: vi.fn(async (): Promise<unknown[]> => []),
+}))
+
+// Both real hooks return a fresh object literal per render, so the mocks do too:
+// dependency-array stability must not rest on their identity.
+vi.mock('../usePlannerStorage', () => ({
+  usePlannerStorage: () => ({
+    getOrCreateDeviceId: vi.fn(async () => 'test-device'),
+    saveToLocal: vi.fn(async () => ({ success: true })),
+    loadFromLocal: vi.fn(async () => null),
+    listLocal: syncMocks.listLocal,
+    listLocalFull: vi.fn(async () => []),
+    deleteFromLocal: vi.fn(async () => undefined),
+    clearCorruptedLocal: vi.fn(async () => undefined),
+  }),
+}))
+
+vi.mock('../usePlannerSyncAdapter', () => ({
+  usePlannerSyncAdapter: () => ({
+    syncToServer: vi.fn(),
+    fetchFromServer: vi.fn(async () => null),
+    deleteFromServer: vi.fn(),
+    listFromServer: syncMocks.listFromServer,
+  }),
+}))
+
+vi.mock('@/shared/auth', () => ({
+  useAuthQuery: () => ({ data: syncMocks.isAuthenticated ? { id: 'user-1' } : null }),
+}))
+
+vi.mock('@/pages/settings', () => ({
+  useUserSettingsQuery: () => ({ data: { syncEnabled: syncMocks.syncEnabled } }),
+}))
+
+vi.mock('@/pages/egoGift', () => ({
+  useEGOGiftListData: () => ({ spec: null, i18n: null }),
+}))
+
 import {
   userPlannersQueryKeys,
   shouldPurgeLocal,
   adoptSyncedVersion,
+  useMDUserPlannersData,
 } from '../useMDUserPlannersData'
-import type { PlannerSummary, SaveablePlanner } from '../../types/PlannerTypes'
+
+describe('useMDUserPlannersData background sync', () => {
+  function createWrapper() {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    return function Wrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          <React.Suspense fallback={null}>{children}</React.Suspense>
+        </QueryClientProvider>
+      )
+    }
+  }
+
+  beforeEach(() => {
+    syncMocks.isAuthenticated = true
+    syncMocks.syncEnabled = true
+    syncMocks.listFromServer.mockClear()
+    syncMocks.listLocal.mockClear()
+  })
+
+  it('pulls from the server once and stays at once across re-renders', async () => {
+    const { result, rerender } = renderHook(
+      (props: { page: number }) => useMDUserPlannersData(props),
+      {
+        wrapper: createWrapper(),
+        initialProps: { page: 0 },
+      },
+    )
+
+    await waitFor(() => expect(result.current).not.toBeNull())
+    await waitFor(() => expect(syncMocks.listFromServer).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+
+    // Every re-render hands the hook a new options object and new storage/adapter
+    // identities; none of that may re-enter the sync.
+    for (let i = 0; i < 5; i++) rerender({ page: 0 })
+
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+    expect(syncMocks.listFromServer).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not re-pull when auth or sync toggles back to the already-synced state', async () => {
+    const { result, rerender } = renderHook(
+      (props: { page: number }) => useMDUserPlannersData(props),
+      {
+        wrapper: createWrapper(),
+        initialProps: { page: 0 },
+      },
+    )
+
+    await waitFor(() => expect(syncMocks.listFromServer).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+
+    syncMocks.syncEnabled = false
+    rerender({ page: 0 })
+    syncMocks.syncEnabled = true
+    rerender({ page: 0 })
+
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+    expect(syncMocks.listFromServer).toHaveBeenCalledTimes(1)
+  })
+
+  it('never reaches the server for a guest', async () => {
+    syncMocks.isAuthenticated = false
+
+    const { result, rerender } = renderHook(
+      (props: { page: number }) => useMDUserPlannersData(props),
+      {
+        wrapper: createWrapper(),
+        initialProps: { page: 0 },
+      },
+    )
+
+    await waitFor(() => expect(result.current).not.toBeNull())
+    for (let i = 0; i < 3; i++) rerender({ page: 0 })
+
+    expect(syncMocks.listFromServer).not.toHaveBeenCalled()
+    expect(result.current.isAuthenticated).toBe(false)
+  })
+})
 
 describe('userPlannersQueryKeys', () => {
   it('creates consistent base key', () => {
