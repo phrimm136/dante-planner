@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 import { useTraitsI18n } from '../hooks/useTraitsI18n'
-import { applyStrikethrough } from '@/shared/gameText'
+import { applyStrikethrough, extractLeadingColor } from '@/shared/gameText'
 
 /** Keywords to skip in trait display (internal/visual only) */
 const HIDDEN_TRAITS = new Set(['BASE_APPEARANCE', 'SMALL'])
@@ -21,12 +21,7 @@ interface ParsedTrait {
  *       -> { color: "#d40000", text: "<s>Jia Family</s>" }
  */
 function parseUnityRichText(key: string, input: string): ParsedTrait {
-  const colorMatch = input.match(/<color=([^>]+)>/)
-  if (!colorMatch) return { key, text: input }
-
-  const color = colorMatch[1]
-  const text = input.replace(/<color=[^>]+>/g, '').replace(/<\/color>/g, '')
-  return { key, text, color }
+  return { key, ...extractLeadingColor(input) }
 }
 
 function renderTrait(parsed: ParsedTrait): ReactNode {

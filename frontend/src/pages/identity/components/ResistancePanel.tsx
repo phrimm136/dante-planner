@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
 
 import {
-  getResistanceInfo,
   getSlashResistIconPath,
   getPierceResistIconPath,
   getBluntResistIconPath,
 } from '@/shared/assets'
+import { getResistanceInfo } from '@/shared/gameData'
 
 interface ResistancePanelProps {
   slash: number

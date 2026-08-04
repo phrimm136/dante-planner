@@ -12,6 +12,7 @@ import {
 } from '@/shared/assets'
 import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface PassiveCondition {
   type: string
@@ -51,7 +52,7 @@ export function PassiveCard({ name, desc, flavor, condition, isLocked }: Passive
 
   return (
     <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
-      <div className="flex items-center gap-2">
+      <div className={SECTION_STYLES.LAYOUT.row}>
         <StyledSkillName name={name} attributeType="NEUTRAL" />
       </div>
       {isLocked && (
@@ -64,7 +65,7 @@ export function PassiveCard({ name, desc, flavor, condition, isLocked }: Passive
       {condition && (
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
-            <span key={affinity} className="flex items-center gap-1">
+            <span key={affinity} className={SECTION_STYLES.LAYOUT.rowTight}>
               <img src={getAffinityIconPath(affinity)} alt={affinity} className="w-8 h-8" />
               <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
               <span>{count}</span>
@@ -108,7 +109,7 @@ export function PassiveCardWithSuspense({
 
   return (
     <div className={cn('relative space-y-1', isLocked && 'opacity-50')}>
-      <div className="flex items-center gap-2">
+      <div className={SECTION_STYLES.LAYOUT.row}>
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>
           <PassiveNameContent id={id} passiveId={passiveId} />
         </Suspense>
@@ -123,7 +124,7 @@ export function PassiveCardWithSuspense({
       {condition && (
         <div className="flex items-center gap-3 text-md ml-1">
           {Object.entries(condition.values).map(([affinity, count]) => (
-            <span key={affinity} className="flex items-center gap-1">
+            <span key={affinity} className={SECTION_STYLES.LAYOUT.rowTight}>
               <img src={getAffinityIconPath(affinity)} alt={affinity} className="h-8" />
               <img src={getIdentityPassiveCountIconPath()} alt="x" className="w-4 h-4" />
               <span

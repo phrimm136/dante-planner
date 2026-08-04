@@ -1,5 +1,11 @@
 import { useIdentityDetailI18n } from '../hooks/useIdentityDetailData'
-import { SkillCard, mergeSkillDataUpToLevel } from '@/shared/skill'
+import {
+  SkillCard,
+  SkillDescription,
+  getMergedSkillDesc,
+  mergeSkillDataUpToLevel,
+} from '@/shared/skill'
+import { StyledSkillName } from '@/shared/gameText'
 import { getSkillImagePath, getSkillImagePathFromIconID } from '@/shared/assets'
 import type { IdentitySkillEntry, Uptie } from '../types/IdentityTypes'
 
@@ -48,16 +54,65 @@ export function IdentitySkillCardWithGranularI18n({
 
   return (
     <SkillCard
-      entityId={identityId}
-      skillId={textId}
-      level={uptie}
       skillData={mergedData}
       coinString={coinString}
       skillImagePath={skillImagePath}
       skillTier={skillEntry.skillTier ?? skillSlot}
-      useDetailI18n={useIdentityDetailI18n}
+      nameSlot={
+        <IdentitySkillName
+          identityId={identityId}
+          skillId={textId}
+          attributeType={mergedData.attributeType}
+        />
+      }
+      descriptionSlot={
+        <IdentitySkillDescription identityId={identityId} skillId={textId} level={uptie} />
+      }
       isDefenseSkill={isDefenseSkill}
       isLocked={isLocked}
+    />
+  )
+}
+
+/**
+ * Suspending name slot — resolves the skill name from identity detail i18n.
+ */
+function IdentitySkillName({
+  identityId,
+  skillId,
+  attributeType,
+}: {
+  identityId: string
+  skillId: number
+  attributeType?: string
+}) {
+  const i18n = useIdentityDetailI18n(identityId)
+  return (
+    <StyledSkillName
+      name={i18n.skills[String(skillId)]?.name ?? ''}
+      attributeType={attributeType}
+    />
+  )
+}
+
+/**
+ * Suspending description slot — merges identity skill descriptions up to the uptie.
+ */
+function IdentitySkillDescription({
+  identityId,
+  skillId,
+  level,
+}: {
+  identityId: string
+  skillId: number
+  level: Uptie
+}) {
+  const i18n = useIdentityDetailI18n(identityId)
+  const skillI18n = i18n.skills[String(skillId)]
+  return (
+    <SkillDescription
+      descData={getMergedSkillDesc(skillI18n?.descs ?? [], level)}
+      flavor={skillI18n?.flavor}
     />
   )
 }

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
-import { getResistanceInfo, getAffinityIconPath } from '@/shared/assets'
-import { AFFINITIES, type Affinity } from '@/shared/gameData'
+import { getAffinityIconPath } from '@/shared/assets'
+import { AFFINITIES, getResistanceInfo, type Affinity } from '@/shared/gameData'
 
 interface SinResistancePanelProps {
   resistances: Record<string, number>

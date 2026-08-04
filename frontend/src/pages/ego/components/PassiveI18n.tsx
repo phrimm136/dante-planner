@@ -5,6 +5,7 @@ import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface PassiveCardWithSuspenseProps {
   /** EGO ID for i18n lookup */
@@ -23,7 +24,7 @@ interface PassiveCardWithSuspenseProps {
 export function PassiveCardWithSuspense({ id, passiveId, isLocked }: PassiveCardWithSuspenseProps) {
   return (
     <div className={cn('space-y-1', isLocked && 'opacity-50')}>
-      <div className="flex items-center gap-2">
+      <div className={SECTION_STYLES.LAYOUT.row}>
         <Suspense fallback={<StyledNameSkeleton attributeType="NEUTRAL" />}>
           <PassiveNameContent id={id} passiveId={passiveId} />
         </Suspense>

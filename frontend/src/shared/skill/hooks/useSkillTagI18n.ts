@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
-import type { SkillTags } from '../schemas/SkillTagSchemas'
 import { SkillTagSchema } from '../schemas/SkillTagSchemas'
 
 // Query key factory for skill tags
@@ -29,14 +28,4 @@ export function useSkillTagI18n() {
   const { i18n } = useTranslation()
   const { data } = useSuspenseQuery(createSkillTagQueryOptions(i18n.language))
   return { data }
-}
-
-/**
- * Gets translated skill tag text from skill tags data
- * @param skillTags - Skill tags dictionary (validated)
- * @param key - Tag key (e.g., "OnSucceedAttack")
- * @returns Translated display text or original key if not found (no brackets)
- */
-export function getSkillTagText(skillTags: SkillTags, key: string): string {
-  return skillTags[key] ?? key
 }

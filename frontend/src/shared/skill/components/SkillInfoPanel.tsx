@@ -1,10 +1,10 @@
-import { Suspense } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { MAX_LEVEL } from '@/shared/gameData'
-import { SANITY_INDICATOR_COLORS } from '@/lib/constants'
+import { SANITY_INDICATOR_COLORS, SECTION_STYLES } from '@/lib/constants'
 import { getDisplayFontForNumeric } from '@/lib/utils'
-import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
+import { StyledNameSkeleton } from '@/shared/gameText'
 import {
   getAttackWeightIconPath,
   getAttackLevelIconPath,
@@ -19,22 +19,15 @@ interface SkillInfoPanelData {
   targetNum?: number
 }
 
-/** Minimal shape of the per-entity detail-i18n a skill panel needs. */
-interface SkillDetailI18n {
-  skills: Record<string, { name?: string } | undefined>
-}
-
 interface SkillInfoPanelWithSuspenseProps {
-  entityId: string
-  skillId: number
   skillData: SkillInfoPanelData
   coinString: string
   /**
-   * The owning slice's detail-i18n hook, injected so this shared component
-   * stays free of any `@/pages/*` import (sink rule). Identity passes
-   * `useIdentityDetailI18n`; ego passes `useEGODetailI18n`.
+   * The owning slice's skill-name element. It calls the slice's own detail-i18n
+   * hook and suspends inside this panel's boundary, so `shared/skill` stays free
+   * of any `@/pages/*` import (sink rule).
    */
-  useDetailI18n: (id: string) => SkillDetailI18n
+  nameSlot: ReactNode
   /** Identity-only: renders the defense level icon instead of attack. EGO skills are always attack. */
   isDefenseSkill?: boolean
   /** EGO-only: sanity (MP) cost. When provided, renders the sanity-cost stat. */
@@ -54,11 +47,9 @@ interface SkillInfoPanelWithSuspenseProps {
  * `sanityCost` opts into the ego-only sanity stat.
  */
 export function SkillInfoPanelWithSuspense({
-  entityId,
-  skillId,
   skillData,
   coinString,
-  useDetailI18n,
+  nameSlot,
   isDefenseSkill = false,
   sanityCost,
 }: SkillInfoPanelWithSuspenseProps) {
@@ -76,18 +67,13 @@ export function SkillInfoPanelWithSuspense({
 
       {/* Skill name - suspends for i18n */}
       <Suspense fallback={<StyledNameSkeleton attributeType={skillData.attributeType} />}>
-        <SkillNameContent
-          entityId={entityId}
-          skillId={skillId}
-          attributeType={skillData.attributeType}
-          useDetailI18n={useDetailI18n}
-        />
+        {nameSlot}
       </Suspense>
 
       {/* Level and stats display - vertical on mobile, horizontal on desktop */}
       <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3 text-sm">
         {/* Level */}
-        <div className="flex items-center gap-2">
+        <div className={SECTION_STYLES.LAYOUT.row}>
           <img
             src={isDefenseSkill ? getDefenseLevelIconPath() : getAttackLevelIconPath()}
             alt={isDefenseSkill ? 'Defense' : 'Attack'}
@@ -120,23 +106,4 @@ export function SkillInfoPanelWithSuspense({
       </div>
     </div>
   )
-}
-
-/**
- * Internal: fetches the skill name via the injected hook and renders it styled.
- */
-function SkillNameContent({
-  entityId,
-  skillId,
-  attributeType,
-  useDetailI18n,
-}: {
-  entityId: string
-  skillId: number
-  attributeType?: string
-  useDetailI18n: (id: string) => SkillDetailI18n
-}) {
-  const i18n = useDetailI18n(entityId)
-  const skillI18n = i18n.skills[String(skillId)]
-  return <StyledSkillName name={skillI18n?.name ?? ''} attributeType={attributeType} />
 }

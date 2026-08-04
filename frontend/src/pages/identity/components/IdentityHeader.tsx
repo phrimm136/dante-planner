@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
+import { SECTION_STYLES } from '@/lib/constants'
 
 type ImageVariant = 'normal' | 'gacksung'
 
@@ -38,16 +39,18 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
   const [imageVariant, setImageVariant] = useState<ImageVariant>(
     canShowGacksung ? 'gacksung' : 'normal',
   )
+  const [appliedGacksung, setAppliedGacksung] = useState(canShowGacksung)
+
+  // Availability changing discards a manual swap and re-picks the default.
+  if (canShowGacksung !== appliedGacksung) {
+    setAppliedGacksung(canShowGacksung)
+    setImageVariant(canShowGacksung ? 'gacksung' : 'normal')
+  }
 
   // Derive sinner from identity ID and get color
   const sinner = getSinnerFromId(identityId) as Sinner
   const sinnerColor = SINNER_COLORS[sinner] || '#333333'
   const displayStyle = getDisplayFontForLanguage(i18n.language)
-
-  // Sync image variant with gacksung availability
-  useEffect(() => {
-    setImageVariant(canShowGacksung ? 'gacksung' : 'normal')
-  }, [canShowGacksung])
 
   const handleSwapImage = () => {
     setImageVariant((prev: ImageVariant) => (prev === 'gacksung' ? 'normal' : 'gacksung'))
@@ -87,7 +90,10 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
           </div>
           {/* Identity name with sinner color */}
           {name ? (
-            <h1 className="text-2xl font-bold" style={{ color: sinnerColor, ...displayStyle }}>
+            <h1
+              className={SECTION_STYLES.TEXT.pageTitle}
+              style={{ color: sinnerColor, ...displayStyle }}
+            >
               {name}
             </h1>
           ) : (
