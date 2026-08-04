@@ -7,7 +7,7 @@ import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PublishRequest;
-import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsRequest;
+import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
 import org.springframework.http.ResponseEntity;
@@ -79,7 +79,7 @@ public class PlannerPublishingController {
     public ResponseEntity<ToggleOwnerNotificationsResponse> toggleOwnerNotifications(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
-            @Valid @RequestBody ToggleOwnerNotificationsRequest request) {
+            @Valid @RequestBody ToggleNotificationRequest request) {
 
         rateLimitService.check(RateLimitPolicy.CRUD, userId, "notifications-toggle");
 
