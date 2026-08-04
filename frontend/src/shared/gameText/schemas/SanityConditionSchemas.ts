@@ -22,6 +22,4 @@ export const SanityConditionEntrySchema = z
 // Full sanity condition i18n map - function name to entry
 export const SanityConditionI18nSchema = z.record(z.string(), SanityConditionEntrySchema)
 
-// Type exports
-export type SanityConditionEntry = z.infer<typeof SanityConditionEntrySchema>
 export type SanityConditionI18n = z.infer<typeof SanityConditionI18nSchema>
