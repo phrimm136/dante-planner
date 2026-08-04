@@ -96,16 +96,9 @@ public class CookieUtils {
      * @param name cookie name to clear
      */
     public void clearCookie(HttpServletResponse response, String name) {
-        Cookie cookie = new Cookie(name, null);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(secureCookies);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", sameSite);
-        if (cookieDomain != null && !cookieDomain.isEmpty()) {
-            cookie.setDomain(cookieDomain);
-        }
-        response.addCookie(cookie);
+        // A browser drops the stored cookie only when the expiring one matches it on
+        // domain/path/secure, so the attributes must come from the same builder that set it.
+        response.addCookie(buildCookie(name, null, 0, true));
     }
 
     /**
