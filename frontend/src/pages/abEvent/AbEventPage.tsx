@@ -1,13 +1,12 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useThemePackListData } from '@/pages/themePack'
+import { ThemePackFilterDropdown } from '@/pages/themePack'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
-import { ThemePackDropdown } from '@/shared/filter'
-import { EgoGiftSearchDropdown } from '@/shared/filter'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -24,6 +23,7 @@ function AbEventPageShell() {
     values: filters,
     setters,
     resetAll,
+    store,
   } = useSetFilters({
     selectedEgoGifts: new Set<string>(),
     selectedThemePacks: new Set<string>(),
@@ -37,10 +37,9 @@ function AbEventPageShell() {
       activeCount={filters.selectedEgoGifts.size}
     >
       <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-        <EgoGiftSearchDropdown
-          selectedEgoGifts={filters.selectedEgoGifts}
+        <EGOGiftFilterDropdown
+          selected={filters.selectedEgoGifts}
           onSelectionChange={setters.selectedEgoGifts}
-          useListData={useEGOGiftListData}
         />
       </Suspense>
     </FilterSection>
@@ -52,35 +51,22 @@ function AbEventPageShell() {
       activeCount={filters.selectedThemePacks.size}
     >
       <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-        <ThemePackDropdown
-          selectedThemePacks={filters.selectedThemePacks}
+        <ThemePackFilterDropdown
+          selected={filters.selectedThemePacks}
           onThemePacksChange={setters.selectedThemePacks}
-          useListData={useThemePackListData}
         />
       </Suspense>
     </FilterSection>
   )
 
-  const filterContent = (
-    <>
-      {primaryFilters}
-      {secondaryFilters}
-    </>
-  )
-
   return (
     <FilterPageLayout
-      filterContent={filterContent}
       primaryFilters={primaryFilters}
       secondaryFilters={secondaryFilters}
       activeFilterCount={activeFilterCount}
       onResetAll={resetAll}
     >
-      <AbEventList
-        spec={spec}
-        selectedEgoGifts={filters.selectedEgoGifts}
-        selectedThemePacks={filters.selectedThemePacks}
-      />
+      <AbEventList spec={spec} store={store} />
     </FilterPageLayout>
   )
 }
@@ -95,10 +81,8 @@ function AbEventPageShell() {
  */
 export default function AbEventPage() {
   return (
-    <div className="container mx-auto p-8">
-      <Suspense fallback={<ListPageSkeleton preset="abEvent" />}>
-        <AbEventPageShell />
-      </Suspense>
-    </div>
+    <EntityListPage skeleton={<ListPageSkeleton preset="abEvent" />}>
+      <AbEventPageShell />
+    </EntityListPage>
   )
 }

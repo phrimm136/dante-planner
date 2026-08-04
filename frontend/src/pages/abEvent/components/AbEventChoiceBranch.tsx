@@ -6,6 +6,7 @@ import { AFFINITY_COLORS, formatAdderInfo } from '../lib/abEventTextResolver'
 import type { CoinTossI18nContext } from '../lib/abEventTextResolver'
 import type { AbEventChoice, AbEventSelectionEvent, AbEventI18n } from '../schemas/AbEventSchemas'
 import { cn } from '@/lib/utils'
+import { ACCENT_COLORS, SECTION_STYLES } from '@/lib/constants'
 
 type OptionI18n = NonNullable<AbEventI18n['options']>[number]
 type SelectionTextI18n = NonNullable<AbEventI18n['selectionTexts']>[string]
@@ -133,12 +134,12 @@ function BranchCard({
   selfEventId?: string
   ctx: RenderContext
 }) {
-  const isSelfRef = nextEventId && selfEventId && String(nextEventId) === selfEventId
+  const isSelfRef = Boolean(nextEventId && selfEventId && String(nextEventId) === selfEventId)
   return (
     <div className="border border-border rounded-sm overflow-hidden">
       {label && (
         <div className="bg-muted/30 px-2 py-1 border-b border-border">
-          <span className="text-xs text-muted-foreground">{label}</span>
+          <span className={SECTION_STYLES.TEXT.captionSmall}>{label}</span>
         </div>
       )}
       <div className="p-2 space-y-1">
@@ -168,6 +169,56 @@ function BranchLabel(
   if (prob) return `${Math.round(prob.probability * 100)}%`
   if (cond?.condition) return formatConditionLabel(cond.condition, t)
   return undefined
+}
+
+type NextTarget =
+  | { kind: 'subEvent'; id: string }
+  | { kind: 'coinToss'; id: string; selectionEvent: AbEventSelectionEvent }
+  | { kind: 'none' }
+
+/** A nextEventId is either a full sub-event id or, by its last two digits, a coin toss key */
+function resolveNextTarget(nextId: string, ctx: RenderContext): NextTarget {
+  if (ctx.subEvents?.[nextId]) return { kind: 'subEvent', id: nextId }
+
+  const selKey = String(parseInt(nextId.slice(-2), 10))
+  const selectionEvent = ctx.allSelectionEvents?.[selKey]
+  if (selectionEvent?.judgement) return { kind: 'coinToss', id: selKey, selectionEvent }
+
+  return { kind: 'none' }
+}
+
+/**
+ * Render what a nextEventId leads to.
+ *
+ * `selectionCtx` carries the selection events in scope for the coin toss lookup, which a
+ * sub-event widens with its own; the sub-event branch keeps rendering under `ctx`.
+ */
+function NextEventBlock({
+  nextId,
+  ctx,
+  selectionCtx = ctx,
+  className,
+}: {
+  nextId: string
+  ctx: RenderContext
+  selectionCtx?: RenderContext
+  className?: string
+}) {
+  const target = resolveNextTarget(nextId, selectionCtx)
+  if (target.kind === 'none') return null
+
+  const block =
+    target.kind === 'subEvent' ? (
+      <SubEventBlock subEventId={target.id} ctx={ctx} />
+    ) : (
+      <CoinTossSection
+        selectionEvent={target.selectionEvent}
+        selectionText={selectionCtx.allSelectionTexts?.[target.id]}
+        ctx={selectionCtx}
+      />
+    )
+
+  return className ? <div className={className}>{block}</div> : block
 }
 
 // =============================================================================
@@ -211,6 +262,13 @@ export function ChoiceBranch({
     subEventTexts,
     i18nCtx,
   }
+  const outcomes = [
+    choice.directEffects?.length,
+    choice.probabilityResults?.length,
+    choice.conditionalResults?.length,
+    selectionEvent,
+    linkedSubEventId,
+  ].filter(Boolean)
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
@@ -236,11 +294,7 @@ export function ChoiceBranch({
           <EffectList effects={choice.directEffects} ctx={ctx} />
         )}
 
-        {!choice.directEffects?.length &&
-          !choice.probabilityResults?.length &&
-          !choice.conditionalResults?.length &&
-          !selectionEvent &&
-          !linkedSubEventId && <NothingHappened ctx={ctx} />}
+        {outcomes.length === 0 && <NothingHappened ctx={ctx} />}
 
         {linkedSubEventId && subEvents?.[linkedSubEventId] && (
           <SubEventBlock subEventId={linkedSubEventId} ctx={ctx} />
@@ -371,6 +425,18 @@ function SubEventChoice({
   ctx: RenderContext
   t: TFunc
 }) {
+  const outcomes = [
+    choice.directEffects?.length,
+    choice.probabilityResults?.length,
+    choice.conditionalResults?.length,
+    choice.nextEventId,
+  ].filter(Boolean)
+  const selectionCtx: RenderContext = {
+    ...ctx,
+    allSelectionEvents: { ...ctx.allSelectionEvents, ...subEvent.selectionEvents },
+    allSelectionTexts: { ...ctx.allSelectionTexts, ...subText?.selectionTexts },
+  }
+
   return (
     <div className="border border-border rounded-md overflow-hidden">
       <div className="bg-muted/50 px-3 py-2 border-b border-border">
@@ -419,34 +485,16 @@ function SubEventChoice({
         )}
 
         {/* Nothing happened */}
-        {!choice.directEffects?.length &&
-          !choice.probabilityResults?.length &&
-          !choice.conditionalResults?.length &&
-          !choice.nextEventId && <NothingHappened ctx={ctx} />}
+        {outcomes.length === 0 && <NothingHappened ctx={ctx} />}
 
         {/* Coin toss or nested sub-event via nextEventId */}
-        {choice.nextEventId &&
-          (() => {
-            const nextId = String(choice.nextEventId)
-            if (nextId === subEventId) return null
-            if (ctx.subEvents?.[nextId]) {
-              return <SubEventBlock subEventId={nextId} ctx={ctx} />
-            }
-            const selKey = String(parseInt(nextId.slice(-2), 10))
-            const sel = subEvent.selectionEvents?.[selKey] ?? ctx.allSelectionEvents?.[selKey]
-            const selText = subText?.selectionTexts?.[selKey] ?? ctx.allSelectionTexts?.[selKey]
-            if (sel?.judgement) {
-              const mergedCtx: RenderContext = {
-                ...ctx,
-                allSelectionEvents: { ...ctx.allSelectionEvents, ...subEvent.selectionEvents },
-                allSelectionTexts: { ...ctx.allSelectionTexts, ...subText?.selectionTexts },
-              }
-              return (
-                <CoinTossSection selectionEvent={sel} selectionText={selText} ctx={mergedCtx} />
-              )
-            }
-            return null
-          })()}
+        {choice.nextEventId && String(choice.nextEventId) !== subEventId && (
+          <NextEventBlock
+            nextId={String(choice.nextEventId)}
+            ctx={ctx}
+            selectionCtx={selectionCtx}
+          />
+        )}
       </div>
     </div>
   )
@@ -482,7 +530,7 @@ function CoinTossSection({
     <div className="border border-border rounded-md overflow-hidden">
       {/* Coin toss header */}
       <div className="bg-muted/30 px-3 py-2 border-b border-border">
-        <div className="flex items-center gap-2">
+        <div className={SECTION_STYLES.LAYOUT.row}>
           <span className="text-xs font-medium text-muted-foreground">
             {selectionText?.behaveDesc ?? t('abEvent.coinToss', 'Coin Toss')}
           </span>
@@ -557,7 +605,7 @@ function CoinTossOutcome({
     <div className={cn('px-4 py-3 border-b border-border last:border-b-0')}>
       <div
         className="text-xs font-semibold mb-2"
-        style={{ color: isSuccess ? '#00ff9c' : '#e30000' }}
+        style={{ color: isSuccess ? ACCENT_COLORS.SUCCESS : ACCENT_COLORS.FAILURE }}
       >
         {isSuccess ? ctx.i18nCtx.successLabel : ctx.i18nCtx.failureLabel}
       </div>
@@ -565,16 +613,12 @@ function CoinTossOutcome({
       {result.subResults ? (
         <div className="mt-2 space-y-2">
           {result.subResults.map((sub, si) => {
-            const label =
-              sub.probability !== undefined
-                ? `${Math.round(sub.probability * 100)}%`
-                : sub.condition
-                  ? formatConditionLabel(sub.condition, t)
-                  : undefined
+            const prob =
+              sub.probability !== undefined ? { probability: sub.probability } : undefined
             return (
               <BranchCard
                 key={si}
-                label={label}
+                label={BranchLabel(t, prob, sub)}
                 narrativeText={descs[si]}
                 effects={sub.effects}
                 nextEventId={sub.nextEventId}
@@ -598,27 +642,9 @@ function CoinTossOutcome({
         </>
       )}
 
-      {result.nextEventId &&
-        !result.subResults &&
-        (() => {
-          const nextIdStr = String(result.nextEventId)
-          if (ctx.subEvents?.[nextIdStr]) {
-            return (
-              <div className="mt-3">
-                <SubEventBlock subEventId={nextIdStr} ctx={ctx} />
-              </div>
-            )
-          }
-          const chainedKey = String(parseInt(nextIdStr.slice(-2), 10))
-          const chainedSel = ctx.allSelectionEvents?.[chainedKey]
-          const chainedText = ctx.allSelectionTexts?.[chainedKey]
-          if (!chainedSel?.judgement) return null
-          return (
-            <div className="mt-3">
-              <CoinTossSection selectionEvent={chainedSel} selectionText={chainedText} ctx={ctx} />
-            </div>
-          )
-        })()}
+      {result.nextEventId && !result.subResults && (
+        <NextEventBlock nextId={String(result.nextEventId)} ctx={ctx} className="mt-3" />
+      )}
     </div>
   )
 }

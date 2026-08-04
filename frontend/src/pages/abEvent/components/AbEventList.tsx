@@ -1,82 +1,83 @@
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { AbEventSpecList } from '../schemas/AbEventSchemas'
-import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
-import { matchesRelatedEgoGiftFilter, matchesRelatedThemePackFilter } from '../lib/abEventFilter'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { matchesAbEvent, type AbEventFacetState } from '../lib/abEventFilter'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { FilteredCardSlot } from '@/shared/filter'
+import { FilterEmptyState } from '@/shared/filter'
 import { AbEventCardLink } from './AbEventCardLink'
 
 interface AbEventListProps {
   spec: AbEventSpecList
-  selectedEgoGifts: Set<string>
-  selectedThemePacks: Set<string>
+  store: FilterStore<AbEventFacetState>
 }
 
 /**
- * AbEventList - Renders ab event cards with CSS-based filtering.
+ * AbEventList - Renders every ab event card once and lets each one subscribe to its own
+ * visibility, so a filter toggle re-renders only the cards that changed.
  *
- * All cards rendered once, visibility toggled via CSS class.
  * Filter logic: AND between filter types, OR within each type.
  */
-export function AbEventList({ spec, selectedEgoGifts, selectedThemePacks }: AbEventListProps) {
+export function AbEventList({ spec, store }: AbEventListProps) {
   const { t } = useTranslation('database')
 
-  const sortedEvents = useMemo(
-    () => Object.entries(spec).sort(([a], [b]) => a.localeCompare(b)),
-    [spec],
-  )
+  const sortedEvents = Object.entries(spec).sort(([a], [b]) => a.localeCompare(b))
 
   // Progressive rendering
   const displayCount = useProgressiveCount({
     total: sortedEvents.length,
     step: PROGRESSIVE_REVEAL.CARD_BATCH,
     initial: PROGRESSIVE_REVEAL.CARD_BATCH,
-    resetKey: sortedEvents,
   })
 
-  // CSS-based visibility filtering
-  const visibleIds = useMemo(() => {
-    const ids = new Set<string>()
-    for (const [eventId, entry] of sortedEvents) {
-      if (!matchesRelatedEgoGiftFilter(entry, selectedEgoGifts)) continue
-      if (!matchesRelatedThemePackFilter(entry, selectedThemePacks)) continue
-      ids.add(eventId)
-    }
-    return ids
-  }, [sortedEvents, selectedEgoGifts, selectedThemePacks])
-
-  if (visibleIds.size === 0) {
-    return (
-      <div className="bg-muted border border-border rounded-md p-6">
+  return (
+    <div className={SECTION_STYLES.panel}>
+      <FilterEmptyState
+        store={store}
+        selectEmpty={(state) => !sortedEvents.some(([, entry]) => matchesAbEvent(entry, state))}
+      >
         <div className="text-center text-muted-foreground py-8">
           {t('abEvent.emptyState', 'No events found.')}
         </div>
-      </div>
-    )
-  }
+      </FilterEmptyState>
 
-  return (
-    <div className="bg-muted border border-border rounded-md p-6">
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.AB_EVENT} mobileScale={0.8}>
         {sortedEvents.slice(0, displayCount).map(([eventId, entry]) => (
-          <ScaledCardWrapper
-            key={eventId}
-            mobileScale={0.8}
-            cardWidth={CARD_GRID.WIDTH.AB_EVENT}
-            cardHeight={CARD_GRID.HEIGHT.AB_EVENT}
-            className={visibleIds.has(eventId) ? '' : 'hidden'}
-          >
-            <AbEventCardLink
-              eventId={eventId}
-              hasImage={entry.hasImage}
-              illustId={entry.illustId}
-            />
-          </ScaledCardWrapper>
+          <AbEventCardCell key={eventId} eventId={eventId} entry={entry} store={store} />
         ))}
       </ResponsiveCardGrid>
     </div>
   )
 }
+
+interface AbEventCardCellProps {
+  eventId: string
+  entry: AbEventSpecList[string]
+  store: FilterStore<AbEventFacetState>
+}
+
+/**
+ * One event's slot, built inside a `map` and therefore outside the compiler's reach:
+ * without `memo`, each progressive-reveal tick re-renders every card already revealed.
+ */
+const AbEventCardCell = memo(function AbEventCardCell({
+  eventId,
+  entry,
+  store,
+}: AbEventCardCellProps) {
+  return (
+    <FilteredCardSlot
+      store={store}
+      selectVisible={(state) => matchesAbEvent(entry, state)}
+      mobileScale={0.8}
+      cardWidth={CARD_GRID.WIDTH.AB_EVENT}
+      cardHeight={CARD_GRID.HEIGHT.AB_EVENT}
+    >
+      <AbEventCardLink eventId={eventId} hasImage={entry.hasImage} illustId={entry.illustId} />
+    </FilteredCardSlot>
+  )
+})

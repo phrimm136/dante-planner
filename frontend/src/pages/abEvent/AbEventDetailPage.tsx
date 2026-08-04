@@ -26,6 +26,7 @@ import {
   createEffectTextResolver,
 } from '@/pages/abEvent'
 import type { CoinTossI18nContext, AbEventChoice } from '@/pages/abEvent'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // =============================================================================
 // Left Column Components
@@ -60,7 +61,7 @@ function RelatedEgoGifts({ giftIds, label }: { giftIds: string[]; label: string 
       <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
         {label}
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={SECTION_STYLES.LAYOUT.wrap}>
         {giftIds.map((id) => {
           const giftSpec = spec[id]
           if (!giftSpec) return null

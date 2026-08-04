@@ -20,8 +20,6 @@ export const AbEventSpecListEntrySchema = z.object({
 
 export const AbEventSpecListSchema = z.record(z.string(), AbEventSpecListEntrySchema)
 
-export const AbEventNameListSchema = z.record(z.string(), z.string())
-
 // =============================================================================
 // Mechanics (individual abEvent/{id}.json)
 // =============================================================================

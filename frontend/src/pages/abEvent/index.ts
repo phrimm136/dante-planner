@@ -5,14 +5,10 @@ export { AbEventCard } from './components/AbEventCard'
 export { ChoiceBranch } from './components/AbEventChoiceBranch'
 
 export { useAbEventListData, useAbEventListSpec } from './hooks/useAbEventListData'
-export {
-  useAbEventDetailData,
-  useAbEventDetailSpec,
-  useAbEventDetailI18n,
-  useAbEventShared,
-} from './hooks/useAbEventDetailData'
+export { useAbEventDetailData, useAbEventShared } from './hooks/useAbEventDetailData'
 
 export { createEffectTextResolver } from './lib/abEventTextResolver'
+export type { AbEventFacetState } from './lib/abEventFilter'
 
 export {
   AbEventSpecListEntrySchema,

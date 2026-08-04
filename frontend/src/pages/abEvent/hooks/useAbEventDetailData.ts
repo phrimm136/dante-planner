@@ -41,30 +41,6 @@ function createAbEventSharedQueryOptions(language: string) {
 }
 
 /**
- * Hook that loads AbEvent spec data only (no language dependency)
- *
- * @param id - AbEvent ID
- * @returns Validated AbEvent mechanics data
- */
-export function useAbEventDetailSpec(id: string) {
-  const { data: spec } = useSuspenseQuery(createAbEventDataQueryOptions(id))
-  return spec
-}
-
-/**
- * Hook that loads AbEvent i18n data only
- * Suspends while loading - wrap in Suspense boundary
- *
- * @param id - AbEvent ID
- * @returns Validated AbEvent i18n data
- */
-export function useAbEventDetailI18n(id: string) {
-  const { i18n } = useTranslation()
-  const { data: i18nData } = useSuspenseQuery(createAbEventI18nQueryOptions(id, i18n.language))
-  return i18nData
-}
-
-/**
  * Hook that loads AbEvent detail data (spec + i18n)
  * Suspends while loading - wrap in Suspense boundary
  *
