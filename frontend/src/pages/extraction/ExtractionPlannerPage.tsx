@@ -14,6 +14,7 @@ import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ExtractionCalculator } from '@/pages/extraction'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Error fallback component for calculator errors
@@ -57,7 +58,7 @@ function LoadingFallback() {
 
 export default function ExtractionPlannerPage() {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Calculator Section */}
       <div className="bg-background rounded-lg">
         <ErrorBoundary FallbackComponent={ErrorFallback}>

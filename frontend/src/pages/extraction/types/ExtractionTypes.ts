@@ -5,7 +5,6 @@ import {
   ExtractionTargetSchema,
   ExtractionInputSchema,
   TargetProbabilitySchema,
-  SuccessiveProbabilitySchema,
   ExtractionResultSchema,
   EffectiveRatesSchema,
 } from '../schemas/ExtractionSchemas'
@@ -49,11 +48,6 @@ export type ExtractionInput = z.infer<typeof ExtractionInputSchema>
  * Probability result for a single target
  */
 export type TargetProbability = z.infer<typeof TargetProbabilitySchema>
-
-/**
- * Successive probability entry (P(at least k items))
- */
-export type SuccessiveProbability = z.infer<typeof SuccessiveProbabilitySchema>
 
 /**
  * Complete calculation results
