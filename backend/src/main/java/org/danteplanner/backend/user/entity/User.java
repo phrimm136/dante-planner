@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.danteplanner.backend.auth.converter.AuthProviderTypeConverter;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -120,12 +121,28 @@ public class User {
     }
 
     /**
+     * The restriction in force on this account at {@code clock}'s instant.
+     *
+     * <p>A live timeout is reported ahead of a ban, so {@link RestrictionState#BANNED} comes back
+     * only for an account that is not also serving one.</p>
+     *
+     * @param clock the clock a timeout's expiry is measured against
+     * @return the restriction in force
+     */
+    public RestrictionState restrictionState(Clock clock) {
+        if (timeoutUntil != null && clock.instant().isBefore(timeoutUntil)) {
+            return RestrictionState.TIMED_OUT;
+        }
+        return bannedAt != null ? RestrictionState.BANNED : RestrictionState.ACTIVE;
+    }
+
+    /**
      * Check if this user is currently timed out.
      *
      * @return true if user has an active timeout, false otherwise
      */
     public boolean isTimedOut() {
-        return timeoutUntil != null && Instant.now().isBefore(timeoutUntil);
+        return restrictionState(Clock.systemUTC()) == RestrictionState.TIMED_OUT;
     }
 
     /**

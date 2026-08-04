@@ -1,6 +1,5 @@
 package org.danteplanner.backend.planner.service;
 
-import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -9,8 +8,10 @@ import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.exception.UserTimedOutException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.util.UUID;
 
 /**
@@ -20,11 +21,22 @@ import java.util.UUID;
  * publishing, and engagement services. Pairs with {@link Planner#isOwnedBy(Long)}.</p>
  */
 @Service
-@RequiredArgsConstructor
 public class PlannerAccessGuard {
 
     private final UserService userService;
     private final PlannerRepository plannerRepository;
+    private final Clock clock;
+
+    @Autowired
+    public PlannerAccessGuard(UserService userService, PlannerRepository plannerRepository) {
+        this(userService, plannerRepository, Clock.systemUTC());
+    }
+
+    PlannerAccessGuard(UserService userService, PlannerRepository plannerRepository, Clock clock) {
+        this.userService = userService;
+        this.plannerRepository = plannerRepository;
+        this.clock = clock;
+    }
 
     /**
      * Fetch a user without applying any restriction check. Private planner work stays available
@@ -50,12 +62,10 @@ public class PlannerAccessGuard {
     public void checkNotRestricted(Long userId) {
         User user = getUser(userId);
 
-        if (user.isTimedOut()) {
-            throw new UserTimedOutException(userId, user.getTimeoutUntil());
-        }
-
-        if (user.isBanned()) {
-            throw new UserBannedException(user.getId(), user.getBannedAt());
+        switch (user.restrictionState(clock)) {
+            case TIMED_OUT -> throw new UserTimedOutException(userId, user.getTimeoutUntil());
+            case BANNED -> throw new UserBannedException(user.getId(), user.getBannedAt());
+            case ACTIVE -> { }
         }
     }
 

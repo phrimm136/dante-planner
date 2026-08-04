@@ -6,11 +6,10 @@ import org.junit.jupiter.api.Tag;
 import org.springframework.context.annotation.Import;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.auth.token.JwtTokenService;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,9 +35,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * A ban withdraws distribution, never possession.
@@ -90,32 +89,22 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
     private RequestMappingHandlerMapping handlerMapping;
 
     @Autowired private UserRepository userRepository;
-    @Autowired private PlannerRepository plannerRepository;
     @Autowired private JwtTokenService jwtTokenService;
 
-    private Cookie bannedUserCookie;
-    private Long bannedUserId;
-
-    @BeforeEach
-    void setUp() {
-
+    /**
+     * A banned principal no other row has spent anything on.
+     *
+     * <p>Rate-limit buckets are keyed by user id, and controllers charge one before delegating to
+     * the guard. A principal shared across rows therefore lets an earlier row spend the allowance a
+     * later one needs, and a throttled request answers 429 without ever reaching the guard this
+     * asserts about. A fresh principal also makes an endpoint that lifts the restriction visible
+     * where a reused one would hand every later row a false pass.</p>
+     */
+    private Cookie freshBannedPrincipal() {
         User banned = TestDataFactory.createTestUser(userRepository, "banned@example.com");
         banned.setBannedAt(Instant.now());
         userRepository.save(banned);
-
-        bannedUserId = banned.getId();
-        bannedUserCookie = new Cookie("accessToken", TestDataFactory.generateAccessToken(jwtTokenService, banned));
-    }
-
-    /**
-     * Dynamic tests share one {@code @BeforeEach}, so an endpoint that lifts the principal's
-     * restriction would hand every later case a false pass.
-     */
-    private void restoreBannedPrincipal() {
-        userRepository.findById(bannedUserId).ifPresent(user -> {
-            user.setBannedAt(Instant.now());
-            userRepository.save(user);
-        });
+        return AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, banned));
     }
 
     @TestFactory
@@ -124,30 +113,33 @@ class RestrictedPrincipalMatrixIT extends SharedMySqlContainerSupport {
         return mutatingApiEndpoints().map(endpoint -> {
             String key = endpoint.method() + " " + endpoint.pattern();
             return DynamicTest.dynamicTest(key, () -> {
-                restoreBannedPrincipal();
-                MvcResult result = mockMvc.perform(request(endpoint, BLOCKED_FOR_BANNED.get(key))).andReturn();
+                MvcResult result = mockMvc
+                        .perform(request(endpoint, BLOCKED_FOR_BANNED.get(key), freshBannedPrincipal()))
+                        .andReturn();
                 String body = result.getResponse().getContentAsString();
 
                 if (BLOCKED_FOR_BANNED.containsKey(key)) {
-                    // Controllers rate-limit before delegating, so a throttled request never reaches the
-                    // guard. That ordering is intended, and 429 is still a rejection.
-                    int status = result.getResponse().getStatus();
-                    assertTrue(status == 429 || (status == 403 && body.contains(BANNED_CODE)),
-                            key + " must reject a banned user, got " + status + " " + body);
+                    assertThat(result.getResponse().getStatus())
+                            .as("%s must reject a banned user with 403; body: %s", key, body)
+                            .isEqualTo(HttpStatus.FORBIDDEN.value());
+                    assertThat(body)
+                            .as("%s must name the ban as the reason it rejected", key)
+                            .contains(BANNED_CODE);
                 } else {
-                    assertFalse(body.contains(BANNED_CODE),
-                            key + " withdrew a capability a ban does not cover: " + body);
+                    assertThat(body)
+                            .as("%s withdrew a capability a ban does not cover", key)
+                            .doesNotContain(BANNED_CODE);
                 }
             });
         });
     }
 
-    private MockHttpServletRequestBuilder request(Endpoint endpoint, String body) {
+    private MockHttpServletRequestBuilder request(Endpoint endpoint, String body, Cookie principal) {
         String path = endpoint.pattern().replaceAll("\\{[^}]+}", UUID.randomUUID().toString());
         return MockMvcRequestBuilders.request(
                         org.springframework.http.HttpMethod.valueOf(endpoint.method()), path)
                 .with(withCsrf())
-                .cookie(bannedUserCookie)
+                .cookie(principal)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body == null ? "{}" : body);
     }
