@@ -4,14 +4,14 @@
  * Pure functions for choosing which EGO passives are "effective" (visible
  * normally) vs "locked" (dimmed preview of future tiers) at a given threadspin.
  *
- * Mirrors the identity uptie model with one EGO-specific twist: identity
- * dedupes locked passives by a `variant` decoded from the ID, while EGO uses
- * a `slot key` derived from the same ID (everything except the last digit).
- * Two passives that differ only in the last digit (e.g. `2040211` "active at
- * threadspin 2-4" and `2040212` "active at threadspin 5") share a slot and
- * are mutually exclusive — the higher-tier one *replaces* the lower-tier one
- * rather than appearing alongside it.
+ * EGO dedupes by a `slot key` derived from the ID (everything except the last
+ * digit). Two passives that differ only in the last digit (e.g. `2040211`
+ * "active at threadspin 2-4" and `2040212` "active at threadspin 5") share a
+ * slot and are mutually exclusive — the higher-tier one *replaces* the
+ * lower-tier one rather than appearing alongside it.
  */
+
+import { selectEffectivePassives, selectLockedPassives } from '@/shared/passiveSelection'
 
 /**
  * Slot key for an EGO passive — drops the trailing variant digit.
@@ -35,11 +35,7 @@ export function getEffectiveEgoPassives(
   passiveList: string[][],
   threadspinIndex: number,
 ): string[] {
-  for (let i = threadspinIndex; i >= 0; i--) {
-    const slot = passiveList[i]
-    if (slot && slot.length > 0) return slot
-  }
-  return []
+  return selectEffectivePassives(passiveList, threadspinIndex)
 }
 
 /**
@@ -48,23 +44,5 @@ export function getEffectiveEgoPassives(
  * one (same slot key) is hidden, not shown as a dimmed preview.
  */
 export function getLockedEgoPassives(passiveList: string[][], threadspinIndex: number): string[] {
-  const effective = getEffectiveEgoPassives(passiveList, threadspinIndex)
-  const effectiveSet = new Set(effective)
-  const seenSlots = new Set(effective.map(getEgoPassiveSlotKey))
-  const locked: string[] = []
-
-  for (let i = threadspinIndex + 1; i < passiveList.length; i++) {
-    const tier = passiveList[i]
-    if (!tier) continue
-
-    for (const passiveId of tier) {
-      if (effectiveSet.has(passiveId)) continue
-      const slot = getEgoPassiveSlotKey(passiveId)
-      if (seenSlots.has(slot)) continue
-      locked.push(passiveId)
-      seenSlots.add(slot)
-    }
-  }
-
-  return locked
+  return selectLockedPassives(passiveList, threadspinIndex, getEgoPassiveSlotKey)
 }
