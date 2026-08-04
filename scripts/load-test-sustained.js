@@ -12,7 +12,10 @@
  *   - Thread handle exhaustion
  *
  * Run:
- *   k6 run -e BASE_URL=http://localhost scripts/load-test-sustained.js 2>&1 | tee sustained.txt
+ *   k6 run -e BASE_URL=http://localhost -e AUTH_TOKEN=<jwt> scripts/load-test-sustained.js 2>&1 | tee sustained.txt
+ *
+ * AUTH_TOKEN (required):
+ *   Sent as the accessToken cookie; drives the authenticated-reads group.
  *
  * Monitor during the 10-min hold (separate terminals):
  *   # These should stay FLAT. Any upward drift = leak.
@@ -22,7 +25,7 @@
  *   docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" danteplanner-backend danteplanner-mysql
  */
 
-import { setup, runEndpoints } from './lib/load-test-shared.js';
+import { setup, runEndpoints, HTTP_THRESHOLDS } from './lib/load-test-shared.js';
 
 export const options = {
   stages: [
@@ -31,12 +34,7 @@ export const options = {
     { duration: '30s', target: 0    }, // cool down
   ],
 
-  thresholds: {
-    'http_req_duration':                          ['p(95)<2000', 'p(99)<5000'],
-    'http_req_duration{group:::public reads}':    ['p(95)<1500'],
-    'http_req_duration{group:::authenticated reads}': ['p(95)<2000'],
-    'http_req_failed':                            ['rate<0.05'],
-  },
+  thresholds: HTTP_THRESHOLDS,
 };
 
 export { setup };
