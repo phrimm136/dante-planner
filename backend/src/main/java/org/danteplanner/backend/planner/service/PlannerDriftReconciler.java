@@ -1,12 +1,15 @@
 package org.danteplanner.backend.planner.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
+import org.danteplanner.backend.planner.repository.RecommendedSql;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,6 +32,10 @@ import java.util.UUID;
  * recommended flag. Emits one structured drift record (log event + metric) per
  * finding and repairs NOTHING — drift means a maintenance bug to fix, not a
  * table to quietly patch.
+ *
+ * <p>Moderation is joined outer throughout: a planner with no moderation row is nothing-hidden and
+ * not-taken-down, the same reading the catalog write side and {@code RecommendedSql} take. An inner
+ * join would drop exactly those planners from every audit, which is the state most in need of one.</p>
  */
 @Service
 @Slf4j
@@ -39,6 +47,7 @@ public class PlannerDriftReconciler {
     };
 
     private final JdbcTemplate jdbc;
+    private final NamedParameterJdbcTemplate namedJdbc;
     private final ObjectMapper objectMapper;
     private final MeterRegistry meterRegistry;
     private final int recommendedThreshold;
@@ -49,6 +58,7 @@ public class PlannerDriftReconciler {
             MeterRegistry meterRegistry,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.jdbc = new JdbcTemplate(dataSource);
+        this.namedJdbc = new NamedParameterJdbcTemplate(this.jdbc);
         this.objectMapper = objectMapper;
         this.meterRegistry = meterRegistry;
         this.recommendedThreshold = recommendedThreshold;
@@ -90,11 +100,13 @@ public class PlannerDriftReconciler {
     }
 
     private void checkUpvotes(List<DriftRecord> records) {
-        jdbc.query("SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.upvotes, COUNT(v.planner_id) AS votes "
-                        + "FROM planner_stats s "
-                        + "LEFT JOIN planner_votes v ON v.planner_id = s.planner_id "
-                        + "GROUP BY s.planner_id, s.upvotes "
-                        + "HAVING s.upvotes <> votes",
+        jdbc.query("""
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.upvotes, COUNT(v.planner_id) AS votes
+                FROM planner_stats s
+                LEFT JOIN planner_votes v ON v.planner_id = s.planner_id
+                GROUP BY s.planner_id, s.upvotes
+                HAVING s.upvotes <> votes
+                """,
                 rs -> {
                     records.add(new DriftRecord(UUID.fromString(rs.getString("planner_id")),
                             "upvotes", String.valueOf(rs.getLong("votes")),
@@ -103,12 +115,14 @@ public class PlannerDriftReconciler {
     }
 
     private void checkCommentCounts(List<DriftRecord> records) {
-        jdbc.query("SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count, "
-                        + "COUNT(c.planner_id) AS live_comments "
-                        + "FROM planner_stats s "
-                        + "LEFT JOIN planner_comments c ON c.planner_id = s.planner_id AND c.deleted_at IS NULL "
-                        + "GROUP BY s.planner_id, s.comment_count "
-                        + "HAVING s.comment_count <> live_comments",
+        jdbc.query("""
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count,
+                       COUNT(c.planner_id) AS live_comments
+                FROM planner_stats s
+                LEFT JOIN planner_comments c ON c.planner_id = s.planner_id AND c.deleted_at IS NULL
+                GROUP BY s.planner_id, s.comment_count
+                HAVING s.comment_count <> live_comments
+                """,
                 rs -> {
                     records.add(new DriftRecord(UUID.fromString(rs.getString("planner_id")),
                             "comment_count", String.valueOf(rs.getLong("live_comments")),
@@ -118,26 +132,30 @@ public class PlannerDriftReconciler {
 
     private void checkCatalogMembership(List<DriftRecord> records) {
         // Visible planners missing their catalog row
-        jdbc.query("SELECT BIN_TO_UUID(p.id) AS planner_id "
-                        + "FROM planner p "
-                        + "JOIN planner_content c ON c.planner_id = p.id "
-                        + "JOIN planner_publication pub ON pub.planner_id = p.id "
-                        + "JOIN planner_moderation m ON m.planner_id = p.id "
-                        + "LEFT JOIN planner_catalog cat ON cat.planner_id = p.id "
-                        + "WHERE pub.published = TRUE AND c.deleted_at IS NULL "
-                        + "AND m.taken_down_at IS NULL AND cat.planner_id IS NULL",
+        jdbc.query("""
+                SELECT BIN_TO_UUID(p.id) AS planner_id
+                FROM planner p
+                JOIN planner_content c ON c.planner_id = p.id
+                JOIN planner_publication pub ON pub.planner_id = p.id
+                LEFT JOIN planner_moderation m ON m.planner_id = p.id
+                LEFT JOIN planner_catalog cat ON cat.planner_id = p.id
+                WHERE pub.published = TRUE AND c.deleted_at IS NULL
+                  AND m.taken_down_at IS NULL AND cat.planner_id IS NULL
+                """,
                 rs -> {
                     records.add(new DriftRecord(UUID.fromString(rs.getString("planner_id")),
                             "catalog_membership", "row present", "row missing"));
                 });
         // Catalog rows for planners that are no longer visible
-        jdbc.query("SELECT BIN_TO_UUID(cat.planner_id) AS planner_id "
-                        + "FROM planner_catalog cat "
-                        + "LEFT JOIN planner_content c ON c.planner_id = cat.planner_id "
-                        + "LEFT JOIN planner_publication pub ON pub.planner_id = cat.planner_id "
-                        + "LEFT JOIN planner_moderation m ON m.planner_id = cat.planner_id "
-                        + "WHERE pub.planner_id IS NULL OR pub.published = FALSE "
-                        + "OR c.deleted_at IS NOT NULL OR m.taken_down_at IS NOT NULL",
+        jdbc.query("""
+                SELECT BIN_TO_UUID(cat.planner_id) AS planner_id
+                FROM planner_catalog cat
+                LEFT JOIN planner_content c ON c.planner_id = cat.planner_id
+                LEFT JOIN planner_publication pub ON pub.planner_id = cat.planner_id
+                LEFT JOIN planner_moderation m ON m.planner_id = cat.planner_id
+                WHERE pub.planner_id IS NULL OR pub.published = FALSE
+                   OR c.deleted_at IS NOT NULL OR m.taken_down_at IS NOT NULL
+                """,
                 rs -> {
                     records.add(new DriftRecord(UUID.fromString(rs.getString("planner_id")),
                             "catalog_membership", "row absent", "row present"));
@@ -149,20 +167,34 @@ public class PlannerDriftReconciler {
         // over every visible planner's stored content and keywords
         Map<UUID, Set<String>> expectedEntities = new HashMap<>();
         Map<UUID, Set<String>> expectedKeywords = new HashMap<>();
-        jdbc.query("SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.content, c.selected_keywords "
-                        + "FROM planner_content c "
-                        + "JOIN planner_publication pub ON pub.planner_id = c.planner_id "
-                        + "JOIN planner_moderation m ON m.planner_id = c.planner_id "
-                        + "WHERE pub.published = TRUE AND c.deleted_at IS NULL AND m.taken_down_at IS NULL",
+        Set<UUID> unreadable = new HashSet<>();
+        jdbc.query("""
+                SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.content, c.selected_keywords
+                FROM planner_content c
+                JOIN planner_publication pub ON pub.planner_id = c.planner_id
+                LEFT JOIN planner_moderation m ON m.planner_id = c.planner_id
+                WHERE pub.published = TRUE AND c.deleted_at IS NULL AND m.taken_down_at IS NULL
+                """,
                 rs -> {
                     UUID plannerId = UUID.fromString(rs.getString("planner_id"));
-                    expectedEntities.put(plannerId, extractEntityKeys(rs.getString("content")));
-                    expectedKeywords.put(plannerId, parseKeywords(rs.getString("selected_keywords")));
+                    Optional<Set<String>> entities = extractEntityKeys(rs.getString("content"));
+                    Optional<Set<String>> keywords = parseKeywords(rs.getString("selected_keywords"));
+
+                    if (entities.isEmpty() || keywords.isEmpty()) {
+                        log.warn("Planner {} skipped this reconciliation cycle: stored content or "
+                                + "keywords could not be read", plannerId);
+                        unreadable.add(plannerId);
+                        return;
+                    }
+                    expectedEntities.put(plannerId, entities.get());
+                    expectedKeywords.put(plannerId, keywords.get());
                 });
 
         Map<UUID, Set<String>> actualEntities = new HashMap<>();
-        jdbc.query("SELECT BIN_TO_UUID(planner_id) AS planner_id, entity_type, entity_id "
-                        + "FROM planner_entity_filter",
+        jdbc.query("""
+                SELECT BIN_TO_UUID(planner_id) AS planner_id, entity_type, entity_id
+                FROM planner_entity_filter
+                """,
                 rs -> {
                     actualEntities.computeIfAbsent(UUID.fromString(rs.getString("planner_id")),
                                     k -> new HashSet<>())
@@ -176,14 +208,21 @@ public class PlannerDriftReconciler {
                             .add(rs.getString("keyword"));
                 });
 
-        compareIndex(records, "entity_filter", expectedEntities, actualEntities);
-        compareIndex(records, "keyword_filter", expectedKeywords, actualKeywords);
+        compareIndex(records, "entity_filter", expectedEntities, actualEntities, unreadable);
+        compareIndex(records, "keyword_filter", expectedKeywords, actualKeywords, unreadable);
     }
 
+    /**
+     * Compare one index against its rebuild.
+     *
+     * <p>A planner whose stored document could not be rebuilt is left out entirely: its expected
+     * set is unknown, and treating unknown as empty reports every indexed row it has as drift.</p>
+     */
     private void compareIndex(List<DriftRecord> records, String kind,
-            Map<UUID, Set<String>> expected, Map<UUID, Set<String>> actual) {
+            Map<UUID, Set<String>> expected, Map<UUID, Set<String>> actual, Set<UUID> unreadable) {
         Set<UUID> plannerIds = new HashSet<>(expected.keySet());
         plannerIds.addAll(actual.keySet());
+        plannerIds.removeAll(unreadable);
         for (UUID plannerId : plannerIds) {
             Set<String> want = expected.getOrDefault(plannerId, Set.of());
             Set<String> have = actual.getOrDefault(plannerId, Set.of());
@@ -193,9 +232,12 @@ public class PlannerDriftReconciler {
         }
     }
 
-    private Set<String> extractEntityKeys(String contentJson) {
+    /**
+     * @return the entity keys the stored document carries, or empty when it cannot be read
+     */
+    private Optional<Set<String>> extractEntityKeys(String contentJson) {
         if (contentJson == null || contentJson.isBlank()) {
-            return Set.of();
+            return Optional.of(Set.of());
         }
         try {
             Set<String> keys = new HashSet<>();
@@ -203,36 +245,35 @@ public class PlannerDriftReconciler {
                     : PlannerContentEntityExtractor.extract(objectMapper.readTree(contentJson))) {
                 keys.add(ref.type().name() + ":" + ref.id());
             }
-            return keys;
-        } catch (Exception e) {
+            return Optional.of(keys);
+        } catch (JsonProcessingException | IllegalArgumentException e) {
             log.warn("Unreadable planner content during reconciliation: {}", e.getMessage());
-            return Set.of();
+            return Optional.empty();
         }
     }
 
-    private Set<String> parseKeywords(String keywordsJson) {
+    /**
+     * @return the keywords the stored column carries, or empty when it cannot be read
+     */
+    private Optional<Set<String>> parseKeywords(String keywordsJson) {
         if (keywordsJson == null || keywordsJson.isBlank()) {
-            return Set.of();
+            return Optional.of(Set.of());
         }
         try {
-            return PlannerKeywords.fromStorage(objectMapper.readValue(keywordsJson, STRING_LIST)).asSet();
-        } catch (Exception e) {
+            return Optional.of(
+                    PlannerKeywords.fromStorage(objectMapper.readValue(keywordsJson, STRING_LIST)).asSet());
+        } catch (JsonProcessingException | IllegalArgumentException e) {
             log.warn("Unreadable planner keywords during reconciliation: {}", e.getMessage());
-            return Set.of();
+            return Optional.empty();
         }
     }
 
     private void checkRecommended(List<DriftRecord> records) {
-        jdbc.query("SELECT BIN_TO_UUID(cat.planner_id) AS planner_id, cat.recommended, "
-                        + "(COALESCE(s.upvotes, 0) >= ? AND m.hidden_from_recommended = FALSE) AS derived "
-                        + "FROM planner_catalog cat "
-                        + "JOIN planner_moderation m ON m.planner_id = cat.planner_id "
-                        + "LEFT JOIN planner_stats s ON s.planner_id = cat.planner_id "
-                        + "HAVING cat.recommended <> derived",
+        namedJdbc.query(RecommendedSql.DRIFTED_ROWS, Map.of("threshold", recommendedThreshold),
                 rs -> {
                     records.add(new DriftRecord(UUID.fromString(rs.getString("planner_id")),
                             "recommended", String.valueOf(rs.getBoolean("derived")),
                             String.valueOf(rs.getBoolean("recommended"))));
-                }, recommendedThreshold);
+                });
     }
 }

@@ -100,6 +100,11 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         return planner;
     }
 
+    private Integer entityFilterRows(UUID plannerId) {
+        return jdbc.queryForObject("SELECT COUNT(*) FROM planner_entity_filter "
+                + "WHERE planner_id = UUID_TO_BIN(?)", Integer.class, plannerId.toString());
+    }
+
     private Set<String> kindsFor(List<DriftRecord> records, UUID plannerId) {
         return records.stream()
                 .filter(r -> r.plannerId().equals(plannerId))
@@ -179,5 +184,45 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 Integer.class, filterDrift.getId().toString())).isEqualTo(1);
         assertThat(jdbc.queryForObject("SELECT recommended FROM planner_catalog WHERE planner_id = UUID_TO_BIN(?)",
                 Boolean.class, recommendedDrift.getId().toString())).isTrue();
+    }
+
+    @Test
+    @DisplayName("moderation-less planner is audited, not skipped: its recommended drift is still reported")
+    void recommendedDrift_WhenModerationRowMissing_IsStillReported() {
+        Planner noModeration = publishClean("No Moderation Row");
+        jdbc.update("DELETE FROM planner_moderation WHERE planner_id = UUID_TO_BIN(?)",
+                noModeration.getId().toString());
+        jdbc.update("UPDATE planner_catalog SET recommended = TRUE WHERE planner_id = UUID_TO_BIN(?)",
+                noModeration.getId().toString());
+
+        Set<String> kinds = kindsFor(reconciler.reconcile(), noModeration.getId());
+
+        assertThat(kinds)
+                .as("an absent moderation row hides nothing, so the flag derives FALSE and disagrees")
+                .contains("recommended");
+        assertThat(kinds)
+                .as("every other audit reads the planner as visible rather than dropping it")
+                .doesNotContain("catalog_membership", "entity_filter", "keyword_filter");
+    }
+
+    @Test
+    @DisplayName("reconciler-skips-unreadable: a planner whose stored keywords cannot be rebuilt is left out, not reported as drift")
+    void reconcilerSkipsUnreadable_WhenContentCannotBeParsed_ReportsNoFilterDrift() {
+        Planner unreadable = publishClean("Unreadable Content");
+        assertThat(entityFilterRows(unreadable.getId()))
+                .as("the planner starts with a correctly built index").isPositive();
+
+        // The column enforces well-formed JSON, so a document is unreadable by carrying a shape the
+        // rebuild cannot consume rather than by being malformed.
+        jdbc.update("UPDATE planner_content SET selected_keywords = '{\"not\": \"a list\"}' "
+                + "WHERE planner_id = UUID_TO_BIN(?)", unreadable.getId().toString());
+
+        List<DriftRecord> records = reconciler.reconcile();
+
+        assertThat(kindsFor(records, unreadable.getId()))
+                .as("an unrebuildable document is unknown, not empty: its indexed rows are not drift")
+                .doesNotContain("entity_filter", "keyword_filter");
+        assertThat(entityFilterRows(unreadable.getId()))
+                .as("nothing is repaired away either").isPositive();
     }
 }
