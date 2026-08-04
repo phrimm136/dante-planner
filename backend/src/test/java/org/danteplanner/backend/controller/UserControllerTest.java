@@ -1,4 +1,6 @@
 package org.danteplanner.backend.controller;
+import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.controller.UserController;
 
 import jakarta.servlet.http.Cookie;
@@ -7,8 +9,8 @@ import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
-import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
+import org.danteplanner.backend.user.service.UserSessionService;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -18,14 +20,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -48,7 +48,13 @@ class UserControllerTest {
     private UserAccountLifecycleService lifecycleService;
 
     @Mock
+    private UserService userService;
+
+    @Mock
     private UserSettingsService userSettingsService;
+
+    @Mock
+    private EpithetConfig epithetConfig;
 
     @Mock
     private SsePublisher ssePublisher;
@@ -57,7 +63,7 @@ class UserControllerTest {
     private RateLimitService rateLimitService;
 
     @Mock
-    private AuthenticationService authService;
+    private UserSessionService userSessionService;
 
     /**
      * Real, so the auth cookies the controller clears are inspectable state on the response.
@@ -68,7 +74,6 @@ class UserControllerTest {
     private final MockHttpServletRequest request = new MockHttpServletRequest();
     private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-    @InjectMocks
     private UserController userController;
 
     private static final int GRACE_PERIOD_DAYS = 30;
@@ -78,8 +83,12 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Set the grace period field using reflection since it's @Value injected
-        ReflectionTestUtils.setField(userController, "gracePeriodDays", GRACE_PERIOD_DAYS);
+        userController = controllerWithGracePeriod(GRACE_PERIOD_DAYS);
+    }
+
+    private UserController controllerWithGracePeriod(int gracePeriodDays) {
+        return new UserController(lifecycleService, userService, userSettingsService, ssePublisher,
+                epithetConfig, rateLimitService, userSessionService, cookieUtils, gracePeriodDays);
     }
 
     @Nested
@@ -135,7 +144,7 @@ class UserControllerTest {
             // Blacklisting lands in Redis and has no response-visible form; asserting it as state
             // needs the containerized tier with a live TokenBlacklistService. The arguments prove
             // both tokens were read from their own cookies.
-            verify(authService).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+            verify(userSessionService).logout(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
         }
 
         @Test
@@ -176,7 +185,7 @@ class UserControllerTest {
         void deleteMyAccount_WhenConfiguredGracePeriod_UsesItInResponse() {
             // Arrange
             int customGracePeriod = 60;
-            ReflectionTestUtils.setField(userController, "gracePeriodDays", customGracePeriod);
+            userController = controllerWithGracePeriod(customGracePeriod);
 
             when(lifecycleService.deleteAccount(TEST_USER_ID))
                     .thenReturn(Instant.now().plus(Duration.ofDays(customGracePeriod)));

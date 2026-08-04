@@ -3,7 +3,6 @@ package org.danteplanner.backend.user.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
@@ -15,9 +14,9 @@ import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
-import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
+import org.danteplanner.backend.user.service.UserSessionService;
 import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.util.CookieConstants;
@@ -39,7 +38,6 @@ import java.time.Instant;
  */
 @RestController
 @RequestMapping("/api/user")
-@RequiredArgsConstructor
 @Slf4j
 public class UserController {
 
@@ -49,11 +47,30 @@ public class UserController {
     private final SsePublisher ssePublisher;
     private final EpithetConfig epithetConfig;
     private final RateLimitService rateLimitService;
-    private final AuthenticationService authService;
+    private final UserSessionService userSessionService;
     private final CookieUtils cookieUtils;
+    private final int gracePeriodDays;
 
-    @Value("${app.user.deletion.grace-period-days:30}")
-    private int gracePeriodDays;
+    public UserController(
+            UserAccountLifecycleService lifecycleService,
+            UserService userService,
+            UserSettingsService userSettingsService,
+            SsePublisher ssePublisher,
+            EpithetConfig epithetConfig,
+            RateLimitService rateLimitService,
+            UserSessionService userSessionService,
+            CookieUtils cookieUtils,
+            @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
+        this.lifecycleService = lifecycleService;
+        this.userService = userService;
+        this.userSettingsService = userSettingsService;
+        this.ssePublisher = ssePublisher;
+        this.epithetConfig = epithetConfig;
+        this.rateLimitService = rateLimitService;
+        this.userSessionService = userSessionService;
+        this.cookieUtils = cookieUtils;
+        this.gracePeriodDays = gracePeriodDays;
+    }
 
     /**
      * Get all available username epithets.
@@ -115,7 +132,7 @@ public class UserController {
         // Blacklist tokens and clear cookies (same as logout)
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-        authService.logout(accessToken, refreshToken);
+        userSessionService.logout(accessToken, refreshToken);
         cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
         cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
 
