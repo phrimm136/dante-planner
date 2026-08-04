@@ -16,5 +16,18 @@ public enum RotationState {
     UNUSED_LATEST,
     PENDING,
     RETIRED,
-    SUPERSEDED
+    SUPERSEDED;
+
+    private static final String LEGACY_RETIRED_NAME = "USED";
+
+    /**
+     * The state a persisted family-hash entry names.
+     *
+     * @param name the state name as written into Redis
+     * @return the matching state, mapping the legacy {@code USED} spelling onto {@link #RETIRED}
+     * @throws IllegalArgumentException if no state carries the name
+     */
+    static RotationState of(String name) {
+        return LEGACY_RETIRED_NAME.equals(name) ? RETIRED : valueOf(name);
+    }
 }

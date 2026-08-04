@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +59,8 @@ class TokenBlacklistServiceIT {
 
     @BeforeEach
     void setUp() {
-        blacklistService = new TokenBlacklistService(ownTemplate, ownTemplate, new SimpleMeterRegistry());
+        blacklistService = new TokenBlacklistService(ownTemplate, ownTemplate, new SimpleMeterRegistry(),
+                TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         blacklistService.clear();
     }
 
@@ -79,8 +79,8 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry);
 
             // Assert
-            assertTrue(blacklistService.isBlacklisted(token));
-            assertEquals(1, blacklistService.size());
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.size()).isEqualTo(1);
         }
 
         @Test
@@ -93,7 +93,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(null, expiry);
 
             // Assert
-            assertEquals(0, blacklistService.size());
+            assertThat(blacklistService.size()).isEqualTo(0);
         }
 
         @Test
@@ -106,7 +106,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, null);
 
             // Assert
-            assertEquals(0, blacklistService.size());
+            assertThat(blacklistService.size()).isEqualTo(0);
         }
 
         @Test
@@ -122,8 +122,8 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry2);
 
             // Assert - token still blacklisted, size remains 1
-            assertTrue(blacklistService.isBlacklisted(token));
-            assertEquals(1, blacklistService.size());
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.size()).isEqualTo(1);
         }
     }
 
@@ -143,7 +143,7 @@ class TokenBlacklistServiceIT {
             boolean result = blacklistService.isBlacklisted(token);
 
             // Assert
-            assertTrue(result);
+            assertThat(result).isTrue();
         }
 
         @Test
@@ -156,7 +156,7 @@ class TokenBlacklistServiceIT {
             boolean result = blacklistService.isBlacklisted(unknownToken);
 
             // Assert
-            assertFalse(result);
+            assertThat(result).isFalse();
         }
 
         @Test
@@ -171,8 +171,8 @@ class TokenBlacklistServiceIT {
             boolean result = blacklistService.isBlacklisted(token);
 
             // Assert - should return false and remove entry (lazy cleanup)
-            assertFalse(result);
-            assertEquals(0, blacklistService.size()); // Entry should be removed
+            assertThat(result).isFalse();
+            assertThat(blacklistService.size()).isEqualTo(0); // Entry should be removed
         }
 
         @Test
@@ -182,7 +182,7 @@ class TokenBlacklistServiceIT {
             boolean result = blacklistService.isBlacklisted(null);
 
             // Assert
-            assertFalse(result);
+            assertThat(result).isFalse();
         }
     }
 
@@ -198,14 +198,14 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken("token1", expiry);
             blacklistService.blacklistToken("token2", expiry);
             blacklistService.blacklistToken("token3", expiry);
-            assertEquals(3, blacklistService.size());
+            assertThat(blacklistService.size()).isEqualTo(3);
 
             // Act
             blacklistService.clear();
 
             // Assert
-            assertEquals(0, blacklistService.size());
-            assertFalse(blacklistService.isBlacklisted("token1"));
+            assertThat(blacklistService.size()).isEqualTo(0);
+            assertThat(blacklistService.isBlacklisted("token1")).isFalse();
         }
 
         @Test
@@ -215,14 +215,14 @@ class TokenBlacklistServiceIT {
             Date expiry = new Date(System.currentTimeMillis() + 60000);
 
             // Assert initial
-            assertEquals(0, blacklistService.size());
+            assertThat(blacklistService.size()).isEqualTo(0);
 
             // Add tokens
             blacklistService.blacklistToken("token1", expiry);
-            assertEquals(1, blacklistService.size());
+            assertThat(blacklistService.size()).isEqualTo(1);
 
             blacklistService.blacklistToken("token2", expiry);
-            assertEquals(2, blacklistService.size());
+            assertThat(blacklistService.size()).isEqualTo(2);
         }
     }
 
@@ -241,7 +241,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistTokenForRotation(token, expiry);
 
             // Assert - should NOT be considered blacklisted within the grace window
-            assertFalse(blacklistService.isBlacklisted(token));
+            assertThat(blacklistService.isBlacklisted(token)).isFalse();
         }
 
         @Test
@@ -255,7 +255,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry);
 
             // Assert - should be blacklisted immediately, no grace period
-            assertTrue(blacklistService.isBlacklisted(token));
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
         }
 
         @Test
@@ -274,7 +274,7 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry); // overwrite with immediate
 
             // Assert - now rejected
-            assertTrue(blacklistService.isBlacklisted(token));
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
         }
 
         @Test
@@ -286,12 +286,12 @@ class TokenBlacklistServiceIT {
 
             // Act - first rotation (grace), then logout (immediate)
             blacklistService.blacklistTokenForRotation(token, expiry);
-            assertFalse(blacklistService.isBlacklisted(token)); // grace allows
+            assertThat(blacklistService.isBlacklisted(token)).isFalse(); // grace allows
 
             blacklistService.blacklistToken(token, expiry); // logout overrides
 
             // Assert - now immediately blacklisted
-            assertTrue(blacklistService.isBlacklisted(token));
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
         }
     }
 
@@ -311,8 +311,8 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token1, expiry);
 
             // Assert
-            assertTrue(blacklistService.isBlacklisted(token1));
-            assertFalse(blacklistService.isBlacklisted(token2));
+            assertThat(blacklistService.isBlacklisted(token1)).isTrue();
+            assertThat(blacklistService.isBlacklisted(token2)).isFalse();
         }
 
         @Test
@@ -326,9 +326,9 @@ class TokenBlacklistServiceIT {
             blacklistService.blacklistToken(token, expiry);
 
             // Assert - check multiple times to verify consistent hashing
-            assertTrue(blacklistService.isBlacklisted(token));
-            assertTrue(blacklistService.isBlacklisted(token));
-            assertTrue(blacklistService.isBlacklisted(token));
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
+            assertThat(blacklistService.isBlacklisted(token)).isTrue();
         }
     }
 
@@ -346,7 +346,8 @@ class TokenBlacklistServiceIT {
 
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry(),
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized revocation is visible across instances
             assertThat(secondService.isBlacklisted(token)).isTrue();
@@ -366,7 +367,8 @@ class TokenBlacklistServiceIT {
 
             // Act - a second service over a fresh template pointing at the SAME container
             StringRedisTemplate secondTemplate = buildTemplate(REDIS.getRedisHost(), REDIS.getRedisPort());
-            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry());
+            TokenBlacklistService secondService = new TokenBlacklistService(secondTemplate, secondTemplate, new SimpleMeterRegistry(),
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Assert - externalized user invalidation is visible across instances
             assertThat(secondService.isUserTokenInvalidated(userId, 0L)).isTrue();
@@ -416,7 +418,8 @@ class TokenBlacklistServiceIT {
             StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
             when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
             SimpleMeterRegistry registry = new SimpleMeterRegistry();
-            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry);
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry,
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Act
             boolean result = service.isBlacklisted("t");
@@ -433,7 +436,8 @@ class TokenBlacklistServiceIT {
             StringRedisTemplate mockTemplate = mock(StringRedisTemplate.class);
             when(mockTemplate.opsForValue()).thenThrow(new RedisConnectionFailureException("down"));
             SimpleMeterRegistry registry = new SimpleMeterRegistry();
-            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry);
+            TokenBlacklistService service = new TokenBlacklistService(mockTemplate, mockTemplate, registry,
+                    TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
 
             // Act
             boolean result = service.isUserTokenInvalidated(1L, 0L);

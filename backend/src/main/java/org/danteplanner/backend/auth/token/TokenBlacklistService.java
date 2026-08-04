@@ -55,7 +55,8 @@ public class TokenBlacklistService {
 
     static final String USER_INVALIDATION_KEY_PREFIX = "uinv:";
 
-    private static final long DEFAULT_REFRESH_TOKEN_EXPIRY_MS = 604800000;
+    /** Seven days: the refresh-token lifetime a deployment gets when it configures none. */
+    public static final long DEFAULT_REFRESH_TOKEN_EXPIRY_MS = 604800000L;
 
     private static final String BLACKLIST_CHECK_SKIPPED_COUNTER = "blacklist_check_skipped_total";
 
@@ -76,12 +77,8 @@ public class TokenBlacklistService {
     private final DefaultRedisScript<String> logoutRevokeScript =
             new DefaultRedisScript<>(LOGOUT_REVOKE_SCRIPT, String.class);
 
-    /**
-     * Refresh token expiry in milliseconds (injected from config).
-     * Used to calculate TTL for user invalidation entries.
-     */
-    @Value("${jwt.refresh-token-expiry:604800000}")
-    private long refreshTokenExpiry = DEFAULT_REFRESH_TOKEN_EXPIRY_MS;
+    /** Bounds the TTL of a user-invalidation entry: no refresh token outlives it. */
+    private final long refreshTokenExpiry;
 
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -96,7 +93,10 @@ public class TokenBlacklistService {
     public TokenBlacklistService(
             StringRedisTemplate stringRedisTemplate,
             @Qualifier("authLocalStringRedisTemplate") StringRedisTemplate authLocalStringRedisTemplate,
-            MeterRegistry meterRegistry) {
+            MeterRegistry meterRegistry,
+            @Value("${jwt.refresh-token-expiry:" + DEFAULT_REFRESH_TOKEN_EXPIRY_MS + "}")
+            long refreshTokenExpiry) {
+        this.refreshTokenExpiry = refreshTokenExpiry;
         this.stringRedisTemplate = stringRedisTemplate;
         this.authLocalStringRedisTemplate = authLocalStringRedisTemplate;
         this.meterRegistry = meterRegistry;
@@ -127,34 +127,38 @@ public class TokenBlacklistService {
     public void revokeLogoutSession(String accessToken, Date accessExpiry,
             String refreshToken, Date refreshExpiry, String familyId) {
         long now = System.currentTimeMillis();
-        long accessTtl = ttlMillis(accessToken, accessExpiry, now);
-        long refreshTtl = ttlMillis(refreshToken, refreshExpiry, now);
+        long accessTtl = remainingMillis(accessToken, accessExpiry, now);
+        long refreshTtl = remainingMillis(refreshToken, refreshExpiry, now);
         boolean revokeFamily = familyId != null;
-        if (accessTtl <= 0 && refreshTtl <= 0 && !revokeFamily) {
+        if (accessTtl == 0 && refreshTtl == 0 && !revokeFamily) {
             return;
         }
 
-        String value = encode(true, now);
+        String value = encode(BlacklistMode.IMMEDIATE, now);
         String accessKey = accessTtl > 0 ? blacklistKey(accessToken) : LOGOUT_NOOP_KEY;
         String refreshKey = refreshTtl > 0 ? blacklistKey(refreshToken) : LOGOUT_NOOP_KEY;
         String familyKey = revokeFamily
-                ? RefreshRotationService.FAMILY_KEY_PREFIX + "{" + familyId + "}"
+                ? RefreshRotationService.familyKey(familyId)
                 : LOGOUT_NOOP_KEY;
 
         stringRedisTemplate.execute(logoutRevokeScript,
                 List.of(accessKey, refreshKey, familyKey),
                 value,
-                Long.toString(Math.max(accessTtl, 0)),
-                Long.toString(Math.max(refreshTtl, 0)),
+                Long.toString(accessTtl),
+                Long.toString(refreshTtl),
                 revokeFamily ? Long.toString(now) : "",
                 Long.toString(refreshTokenExpiry));
     }
 
-    private long ttlMillis(String token, Date expiry, long now) {
+    /**
+     * The lifetime a token has left, floored at zero so an expired or absent token asks for no
+     * blacklist entry at all.
+     */
+    private long remainingMillis(String token, Date expiry, long now) {
         if (token == null || expiry == null) {
             return 0;
         }
-        return expiry.getTime() - now;
+        return Math.max(expiry.getTime() - now, 0);
     }
 
     /**
@@ -165,7 +169,7 @@ public class TokenBlacklistService {
      * @param expiry the token's expiration date (entries auto-expire after this)
      */
     public void blacklistToken(String token, Date expiry) {
-        addToBlacklist(token, expiry, true);
+        addToBlacklist(token, expiry, BlacklistMode.IMMEDIATE);
     }
 
     /**
@@ -177,22 +181,18 @@ public class TokenBlacklistService {
      * @param expiry the token's expiration date (entries auto-expire after this)
      */
     public void blacklistTokenForRotation(String token, Date expiry) {
-        addToBlacklist(token, expiry, false);
+        addToBlacklist(token, expiry, BlacklistMode.ROTATION_GRACE);
     }
 
-    private void addToBlacklist(String token, Date expiry, boolean immediate) {
-        if (token == null || expiry == null) {
-            return;
-        }
-
+    private void addToBlacklist(String token, Date expiry, BlacklistMode mode) {
         long now = System.currentTimeMillis();
-        long remaining = expiry.getTime() - now;
-        if (remaining <= 0) {
+        long remaining = remainingMillis(token, expiry, now);
+        if (remaining == 0) {
             return;
         }
 
-        String key = blacklistKey(token);
-        stringRedisTemplate.opsForValue().set(key, encode(immediate, now), Duration.ofMillis(remaining));
+        stringRedisTemplate.opsForValue().set(
+                blacklistKey(token), encode(mode, now), Duration.ofMillis(remaining));
     }
 
     /**
@@ -213,15 +213,8 @@ public class TokenBlacklistService {
                 return false;
             }
 
-            long now = System.currentTimeMillis();
-            boolean immediate = decodeImmediate(value);
-            long blacklistedAt = decodeBlacklistedAt(value);
-
-            if (!immediate && now - blacklistedAt < ROTATION_GRACE_PERIOD_MS) {
-                return false;
-            }
-
-            return true;
+            return BlacklistMode.of(value) == BlacklistMode.IMMEDIATE
+                    || System.currentTimeMillis() - decodeBlacklistedAt(value) >= ROTATION_GRACE_PERIOD_MS;
         } catch (DataAccessException e) {
             return failOpen("Blacklist check failed open due to Redis error", e);
         }
@@ -334,16 +327,38 @@ public class TokenBlacklistService {
         return USER_INVALIDATION_KEY_PREFIX + userId;
     }
 
-    private String encode(boolean immediate, long blacklistedAt) {
-        return (immediate ? "1" : "0") + ":" + blacklistedAt;
-    }
-
-    private boolean decodeImmediate(String value) {
-        return value.charAt(0) == '1';
+    private String encode(BlacklistMode mode, long blacklistedAt) {
+        return mode.marker + ":" + blacklistedAt;
     }
 
     private long decodeBlacklistedAt(String value) {
         return Long.parseLong(value.substring(value.indexOf(':') + 1));
+    }
+
+    /**
+     * When a blacklist entry starts rejecting the token it names. The marker is the entry's
+     * leading character in Redis, so entries written by either mode read back the same way.
+     */
+    private enum BlacklistMode {
+
+        /** Rejected from the moment it is written. */
+        IMMEDIATE('1'),
+
+        /**
+         * Tolerated for {@link TokenBlacklistService#ROTATION_GRACE_PERIOD_MS} after it is
+         * written, so requests racing a rotation still pass.
+         */
+        ROTATION_GRACE('0');
+
+        private final char marker;
+
+        BlacklistMode(char marker) {
+            this.marker = marker;
+        }
+
+        static BlacklistMode of(String encoded) {
+            return encoded.charAt(0) == IMMEDIATE.marker ? IMMEDIATE : ROTATION_GRACE;
+        }
     }
 
     /**
