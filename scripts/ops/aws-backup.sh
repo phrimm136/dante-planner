@@ -20,7 +20,9 @@ RETENTION_DAYS=7
 
 # Load environment variables
 if [ -f "$PROJECT_DIR/.env" ]; then
-    export $(grep -v '^#' "$PROJECT_DIR/.env" | xargs)
+    set -a
+    . "$PROJECT_DIR/.env"
+    set +a
 fi
 
 # Validate required variables

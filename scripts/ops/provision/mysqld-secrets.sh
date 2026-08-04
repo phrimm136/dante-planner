@@ -9,6 +9,11 @@
 # Values are prompted, never echoed, never written to disk (secrets never enter the repo).
 set -euo pipefail
 
+repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
+region=us-west-2
+
 read -rp    "monitoring username [exporter]: " EXP_USER; EXP_USER=${EXP_USER:-exporter}
 read -rsp   "monitoring password (hidden): " EXP_PASS; echo
 read -rp    "Oregon RDS primary endpoint (host:3306): " PRIMARY_EP
@@ -16,8 +21,7 @@ read -rp    "Seoul RDS replica endpoint (host:3306): " REPLICA_EP
 
 put() { # name value
   local name=$1 value=$2
-  if printf %s "$value" | aws secretsmanager put-secret-value --region us-west-2 \
-       --secret-id "$name" --secret-string file:///dev/stdin >/dev/null; then
+  if printf %s "$value" | put_secret "$region" "$name"; then
     echo "  updated  $name  (replicates to ap-northeast-2)"
   else
     echo "ERROR: put-secret-value failed for $name — if the secret does not exist," >&2

@@ -6,8 +6,9 @@
 set -euo pipefail
 
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/constants.sh
+source "$repo_root/scripts/ops/lib/constants.sh"
 region=us-west-2
-client="mysql:8@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6"
 
 sm() { aws secretsmanager get-secret-value --region "$region" --secret-id "$1" \
         --query SecretString --output text; }
@@ -22,7 +23,7 @@ exp_pw=$(sm danteplanner/mysqld-exporter/password)
 
 "$repo_root/scripts/ops/access/rds-tunnel.sh" start oregon
 
-docker run --rm -i --network host -e MYSQL_PWD="$master_pw" "$client" \
+docker run --rm -i --network host -e MYSQL_PWD="$master_pw" "$MYSQL_CLIENT_IMAGE" \
   mysql -h 127.0.0.1 -P "${RDS_TUNNEL_PORT:-3306}" -u admin --connect-timeout=15 <<SQL
 CREATE USER IF NOT EXISTS 'danteplanner'@'%' IDENTIFIED BY '$app_pw';
 GRANT ALL PRIVILEGES ON danteplanner.* TO 'danteplanner'@'%';

@@ -6,13 +6,17 @@
 # Usage: h3-provision-loki.sh   (values prompted, never echoed, never on disk)
 set -euo pipefail
 
+repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
+region=us-west-2
+
 read -rp  "Grafana Cloud Loki numeric user ID (from the stack's Loki 'Send Logs' page): " LK_USER
 read -rsp "Access-policy token with logs:write (hidden): " LK_TOKEN; echo
 
 put() { # name value
   local name=$1 value=$2
-  if printf %s "$value" | aws secretsmanager put-secret-value --region us-west-2 \
-       --secret-id "$name" --secret-string file:///dev/stdin >/dev/null; then
+  if printf %s "$value" | put_secret "$region" "$name"; then
     echo "  updated  $name  (replicates to ap-northeast-2)"
   else
     echo "ERROR: put-secret-value failed for $name — if the secret does not exist," >&2

@@ -8,18 +8,22 @@
 # Usage: rds-readonly-secrets.sh
 set -euo pipefail
 
+repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
+region=us-west-2
+
 read -rp "Read-only MySQL username [danteplanner_ro]: " RO_USER
 RO_USER=${RO_USER:-danteplanner_ro}
 RO_PASS=$(openssl rand -base64 24)
 
 put() { # name value
   local name=$1 value=$2
-  if ! aws secretsmanager describe-secret --region us-west-2 --secret-id "$name" >/dev/null 2>&1; then
-    aws secretsmanager create-secret --region us-west-2 --name "$name" >/dev/null
+  if ! secret_exists "$region" "$name"; then
+    create_secret "$region" "$name"
     echo "  created  $name  (enroll it in terraform/secrets secret_names, then apply for replication)"
   fi
-  printf %s "$value" | aws secretsmanager put-secret-value --region us-west-2 \
-    --secret-id "$name" --secret-string file:///dev/stdin >/dev/null
+  printf %s "$value" | put_secret "$region" "$name"
   echo "  updated  $name"
 }
 

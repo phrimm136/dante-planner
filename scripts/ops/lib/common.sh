@@ -1,5 +1,5 @@
 # shellcheck shell=bash
-# Colors and logging helpers, sourced by oregon-verify.sh and ga-preflight.sh.
+# Colors, logging helpers and prerequisite checks.
 
 AWS_REGION="${AWS_REGION:-us-west-2}"
 
@@ -11,3 +11,5 @@ NC='\033[0m'
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+
+require_cmd() { command -v "$1" >/dev/null || { echo "$1 is required" >&2; exit 1; }; }

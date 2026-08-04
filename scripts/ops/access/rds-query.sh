@@ -13,8 +13,8 @@ else SQL=${1:?usage: rds-query.sh \"SELECT ...\" [oregon|seoul]}; shift; fi
 SITE=${1:-oregon}
 LOCAL_PORT=${RDS_TUNNEL_PORT:-3306}
 OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Pinned by digest so a poisoned mysql:8 tag can't run with the live credential.
-MYSQL_IMAGE="mysql:8@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6"
+# shellcheck source=../lib/constants.sh
+source "$OPS_DIR/../lib/constants.sh"
 
 secret() {
   aws secretsmanager get-secret-value --region us-west-2 \
@@ -29,7 +29,7 @@ MYSQL_PWD=$(secret password)
 export MYSQL_PWD
 
 run_client() {
-  docker run --rm -i --network host -e MYSQL_PWD "$MYSQL_IMAGE" \
+  docker run --rm -i --network host -e MYSQL_PWD "$MYSQL_CLIENT_IMAGE" \
     mysql -h 127.0.0.1 -P "$LOCAL_PORT" -u "$RO_USER" \
     --connect-timeout=5 -t danteplanner "$@"
 }

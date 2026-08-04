@@ -82,8 +82,8 @@ existing=$(gh issue list --repo "$GH_REPO" --label "$ISSUE_LABEL" --state open \
 if [ -n "$existing" ] && [ "$existing" != "null" ]; then
   gh issue comment "$existing" --repo "$GH_REPO" --body "$body"
 else
-  gh issue create --repo "$GH_REPO" --title "$title" --label "$ISSUE_LABEL" --body "$body" 2>/dev/null \
-    || gh issue create --repo "$GH_REPO" --title "$title" --body "$body"
+  gh label create "$ISSUE_LABEL" --repo "$GH_REPO" --description "Nightly terraform drift reports" >/dev/null 2>&1 || true
+  gh issue create --repo "$GH_REPO" --title "$title" --label "$ISSUE_LABEL" --body "$body"
 fi
 echo "drift reported: drifted=${drifted[*]:-none} failed=${failed[*]:-none}"
 exit 2

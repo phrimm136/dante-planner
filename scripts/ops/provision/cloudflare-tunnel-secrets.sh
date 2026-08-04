@@ -6,6 +6,8 @@
 set -euo pipefail
 
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
 name=danteplanner/cloudflare/tunnel-tokens
 region=us-west-2
 
@@ -18,14 +20,12 @@ for r in oregon seoul; do
   fi
 done
 
-if ! aws secretsmanager describe-secret --region "$region" --secret-id "$name" >/dev/null 2>&1; then
-  aws secretsmanager create-secret --region "$region" --name "$name" >/dev/null
+if ! secret_exists "$region" "$name"; then
+  create_secret "$region" "$name"
   echo "  created  $name  (already enrolled in terraform/secrets secret_names; apply for replication)"
 fi
 
-# file:///dev/stdin: --secret-string would put the token on the process table.
-printf %s "$tokens" | aws secretsmanager put-secret-value --region "$region" \
-  --secret-id "$name" --secret-string file:///dev/stdin >/dev/null
+printf %s "$tokens" | put_secret "$region" "$name"
 
 echo "done — the ExternalSecret refreshes hourly; force it with:"
 echo "  kubectl -n danteplanner delete secret cloudflare-tunnel-token"

@@ -13,7 +13,7 @@ set -euo pipefail
 
 LOKI_HOST="https://logs-prod-036.grafana.net"
 
-if [ "${1:-}" = "--day" ]; then
+if [[ "${1:-}" = "--day" ]]; then
   DAY=${2:?usage: logs-query.sh --day YYYY-MM-DD '<logql>' [limit]}
   QUERY=${3:?logql query required}
   LIMIT=${4:-500}
@@ -41,5 +41,7 @@ curl -sS -G -K <(printf 'user = "%s:%s"\n' "$LK_USER" "$LK_TOKEN") "${LOKI_HOST}
   --data-urlencode "end=${END}" \
   --data-urlencode "limit=${LIMIT}" \
   --data-urlencode "direction=backward" |
-jq -r '.data.result[] as $s | $s.values[] | "\(.[0][0:19] | tonumber / 1000000000 | todate)  \($s.stream.cluster // "-")  \($s.stream.pod // "-")  \(.[1])"' |
+jq -r '.data.result[] as $s | $s.values[]
+       | (.[0] | tonumber / 1e9 | todate) as $ts
+       | "\($ts)  \($s.stream.cluster // "-")  \($s.stream.pod // "-")  \(.[1])"' |
 sort

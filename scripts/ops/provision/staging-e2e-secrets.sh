@@ -9,6 +9,12 @@
 # one checkout, so local init state cannot be trusted to name the right environment.
 set -euo pipefail
 
+repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
+# shellcheck source=../lib/constants.sh
+source "$repo_root/scripts/ops/lib/constants.sh"
+
 region=us-west-2
 replica_region=ap-northeast-2
 work=$(mktemp -d)
@@ -17,11 +23,8 @@ trap 'rm -rf "$work"' EXIT
 gen() { openssl rand -base64 48 | tr -dc 'A-Za-z0-9' | head -c 32; }
 
 put() { # name file
-  aws secretsmanager describe-secret --region "$region" --secret-id "$1" >/dev/null 2>&1 \
-    || aws secretsmanager create-secret --region "$region" --name "$1" \
-         --add-replica-regions "Region=$replica_region" >/dev/null
-  aws secretsmanager put-secret-value --region "$region" --secret-id "$1" \
-    --secret-string "file://$2" >/dev/null
+  ensure_secret "$region" "$1" --add-replica-regions "Region=$replica_region"
+  put_secret_file "$region" "$1" "$2"
   echo "  provisioned  $1"
 }
 
@@ -67,8 +70,7 @@ put danteplanner/origin-tls "$work/origin-tls.json"
 
 # Master password first — terraform/rds reads it at plan time on the NEXT run, and the
 # app user bootstrap (staging-e2e-db-users.sh) authenticates with it.
-if ! aws secretsmanager describe-secret --region "$region" \
-      --secret-id danteplanner/rds/master-password >/dev/null 2>&1; then
+if ! secret_exists "$region" "$SECRET_RDS_MASTER_PASSWORD"; then
   gen > "$work/master.pw"
   put danteplanner/rds/master-password "$work/master.pw"
 fi

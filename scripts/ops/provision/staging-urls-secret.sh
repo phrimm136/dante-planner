@@ -11,6 +11,8 @@
 set -euo pipefail
 
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
 region=${AWS_REGION:-us-west-2}
 name=danteplanner/staging/e2e-endpoints
 
@@ -50,10 +52,8 @@ bundle["STAGING_ACCOUNT_ID"] = os.environ["WRITER_ACCOUNT"]
 (work / "bundle.json").write_text(json.dumps(bundle, indent=2))
 EOF
 
-aws secretsmanager describe-secret --region "$region" --secret-id "$name" >/dev/null 2>&1 \
-  || aws secretsmanager create-secret --region "$region" --name "$name" >/dev/null
-aws secretsmanager put-secret-value --region "$region" --secret-id "$name" \
-  --secret-string "file://$work/bundle.json" >/dev/null
+ensure_secret "$region" "$name"
+put_secret_file "$region" "$name" "$work/bundle.json"
 
 echo "stored $name"
 echo "load it into a shell with: eval \"\$($repo_root/scripts/ops/access/staging-env.sh)\""

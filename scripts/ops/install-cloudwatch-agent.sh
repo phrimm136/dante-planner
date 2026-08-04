@@ -2,23 +2,19 @@
 # Install and configure the CloudWatch Agent on Amazon Linux 2.
 # Idempotent — safe to run multiple times.
 set -euo pipefail
-SCRIPT_NAME="$(basename "$0")"
-trap 'echo "[ERROR] $SCRIPT_NAME failed at line $LINENO (exit code: $?)" >&2; exit 10' ERR
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=lib/traps.sh
+source "$SCRIPT_DIR/lib/traps.sh"
+install_err_trap "$EXIT_PREREQUISITES"
+
 AGENT_CTL="/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl"
 CONFIG_SOURCE="${SCRIPT_DIR}/cloudwatch-agent-config.json"
 PROMETHEUS_SOURCE="${SCRIPT_DIR}/prometheus.yaml"
 PROMETHEUS_TARGET="/opt/aws/amazon-cloudwatch-agent/etc/prometheus.yaml"
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
-
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
 install_agent() {
     if [ -x "$AGENT_CTL" ]; then
@@ -50,6 +46,13 @@ configure_and_start() {
 
     if [ ! -f "$PROMETHEUS_SOURCE" ]; then
         log_error "Prometheus scrape config not found: $PROMETHEUS_SOURCE"
+        exit 1
+    fi
+
+    local DECLARED_PATH
+    DECLARED_PATH=$(sed -n 's/.*"prometheus_config_path"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CONFIG_SOURCE")
+    if [ "$DECLARED_PATH" != "$PROMETHEUS_TARGET" ]; then
+        log_error "prometheus_config_path in $(basename "$CONFIG_SOURCE") is '${DECLARED_PATH:-<absent>}', but this script installs to '$PROMETHEUS_TARGET'"
         exit 1
     fi
 

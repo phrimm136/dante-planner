@@ -9,7 +9,11 @@
 set -euo pipefail
 
 repo_root=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
-name=danteplanner/rds/master-password
+# shellcheck source=../lib/secrets.sh
+source "$repo_root/scripts/ops/lib/secrets.sh"
+# shellcheck source=../lib/constants.sh
+source "$repo_root/scripts/ops/lib/constants.sh"
+name=$SECRET_RDS_MASTER_PASSWORD
 region=us-west-2
 
 if [[ "${1:-}" == "--from-tfvars" ]]; then
@@ -23,14 +27,12 @@ else
   [[ -n "$value" ]] || { echo "empty value" >&2; exit 1; }
 fi
 
-if ! aws secretsmanager describe-secret --region "$region" --secret-id "$name" >/dev/null 2>&1; then
-  aws secretsmanager create-secret --region "$region" --name "$name" >/dev/null
+if ! secret_exists "$region" "$name"; then
+  create_secret "$region" "$name"
   echo "  created  $name"
 fi
 
-# file:///dev/stdin: --secret-string would put the password on the process table.
-printf %s "$value" | aws secretsmanager put-secret-value --region "$region" \
-  --secret-id "$name" --secret-string file:///dev/stdin >/dev/null
+printf %s "$value" | put_secret "$region" "$name"
 unset value
 
 echo "done. Next:"

@@ -26,6 +26,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
 
 ENV_FILE="$REPO_ROOT/.env"
 DAYS=7
@@ -38,18 +40,41 @@ DEBUG_METRIC="cls"
 ENDPOINT="https://api.cloudflare.com/client/v4/graphql"
 
 usage() {
-  sed -n '2,30p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
-  echo
-  echo "Usage: rum-cwv.sh [--env PATH] [--days N] [--site TAG] [--by-device] [--sites]"
-  echo "                   [--debug PATH [--metric cls|lcp|inp]] [--introspect]"
-  echo "  --sites          list siteTags that have RUM traffic (the API siteTag is NOT the beacon token)"
-  echo "  --site TAG       override CF_SITE_TAG for this run"
-  echo "  --debug PATH     for one requestPath, show WHICH element drives the metric (default cls)"
-  echo "  --metric M       which element to debug: cls (default), lcp, or inp"
+  cat <<'EOF'
+Pull Cloudflare Web Analytics (RUM) Core Web Vitals out of the GraphQL
+Analytics API and print a per-page p75 table.
+
+CWV come from the rumWebVitalsEventsAdaptiveGroups dataset (LCP/INP/CLS/FCP);
+page-load + TTFB from rumPerformanceEventsAdaptiveGroups. Both are joined by
+requestPath. Timing quantiles are microseconds — the script converts them.
+
+Reads three secrets from an .env file (repo root by default; --env to override):
+  CF_API_TOKEN   API token with "Account Analytics: Read"  (mint guide below)
+  CF_ACCOUNT_ID  Cloudflare account id  (the account tag, NOT the zone id)
+  CF_SITE_TAG    the API siteTag — run `rum-cwv.sh --sites` to discover it.
+
+⚠ The API siteTag is NOT the public data-cf-beacon token in the page HTML —
+  they are different values. Use `--sites` (or --site TAG) to get the real one.
+
+── How to mint the token ────────────────────────────────────────────────────
+1. dash.cloudflare.com → My Profile → API Tokens → Create Token → Custom token.
+2. Permissions:  Account · Account Analytics · Read.   (RUM is account-scoped.)
+3. Account Resources:  Include · <your account>.
+4. Create, copy the token (shown once), put it in .env as CF_API_TOKEN.
+CF_ACCOUNT_ID: dashboard right-sidebar "Account ID", or the dash URL segment.
+CF_SITE_TAG:   run `rum-cwv.sh --sites` and copy the tag with the most samples.
+
+Usage: rum-cwv.sh [--env PATH] [--days N] [--site TAG] [--by-device] [--sites]
+                   [--debug PATH [--metric cls|lcp|inp]] [--introspect]
+  --sites          list siteTags that have RUM traffic (the API siteTag is NOT the beacon token)
+  --site TAG       override CF_SITE_TAG for this run
+  --debug PATH     for one requestPath, show WHICH element drives the metric (default cls)
+  --metric M       which element to debug: cls (default), lcp, or inp
+EOF
   exit "${1:-0}"
 }
 
-while [ $# -gt 0 ]; do
+while [[ $# -gt 0 ]]; do
   case "$1" in
     --env) ENV_FILE="$2"; shift 2 ;;
     --days) DAYS="$2"; shift 2 ;;
@@ -64,12 +89,12 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-command -v curl >/dev/null || { echo "curl is required" >&2; exit 1; }
-command -v jq >/dev/null || { echo "jq is required" >&2; exit 1; }
+require_cmd curl
+require_cmd jq
 
 # Parse only the known CF_ keys from .env — do NOT source it (avoids executing
 # arbitrary file contents). Strips surrounding single/double quotes.
-if [ ! -f "$ENV_FILE" ]; then
+if [[ ! -f "$ENV_FILE" ]]; then
   echo "env file not found: $ENV_FILE (use --env PATH)" >&2
   exit 1
 fi
@@ -79,7 +104,7 @@ while IFS='=' read -r key val; do
 done < <(grep -E '^[[:space:]]*(CF_API_TOKEN|CF_ACCOUNT_ID|CF_SITE_TAG)=' "$ENV_FILE" || true)
 
 # --site overrides the .env value for this run.
-[ -n "$SITE_OVERRIDE" ] && CF_SITE_TAG="$SITE_OVERRIDE"
+[[ -n "$SITE_OVERRIDE" ]] && CF_SITE_TAG="$SITE_OVERRIDE"
 
 : "${CF_API_TOKEN:?set CF_API_TOKEN in $ENV_FILE}"
 
@@ -104,12 +129,12 @@ type_fields() {
   gql "$(jq -n --arg t "$1" '{query:"query($t:String!){__type(name:$t){fields{name type{name kind ofType{name kind ofType{name kind ofType{name kind}}}}}}}",variables:{t:$t}}')" \
     | jq -r '(.data.__type.fields // [])[]
         | .name as $n
-        | ([.type, .type.ofType, .type.ofType.ofType, .type.ofType.ofType.ofType]
-            | map(select(.!=null and .name!=null)) | .[0]) as $ct
+        | ([.type | recurse(.ofType | select(. != null))]
+            | map(select(.name != null)) | .[0]) as $ct
         | "\($n)\t\($ct.name // "?")\t\($ct.kind // "?")"'
 }
 
-if [ "$INTROSPECT" -eq 1 ]; then
+if [[ "$INTROSPECT" -eq 1 ]]; then
   echo "Discovering the RUM schema (datasets + where the CWV metrics live)…"
   echo
   echo "▚ RUM datasets available on the Account type:"
@@ -143,7 +168,7 @@ UNTIL="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # --sites: discover which siteTag(s) actually carry RUM traffic. The GraphQL
 # siteTag is an internal analytics id, DISTINCT from the public data-cf-beacon
 # token — so grouping the data by siteTag is the reliable way to find it.
-if [ "$SITES_MODE" -eq 1 ]; then
+if [[ "$SITES_MODE" -eq 1 ]]; then
   echo "siteTags with RUM traffic in the last ${DAYS}d (use one as CF_SITE_TAG):"
   body="$(jq -n --arg a "$CF_ACCOUNT_ID" --arg since "$SINCE" --arg until "$UNTIL" \
     '{query:"query($a:String!,$since:Time!,$until:Time!){viewer{accounts(filter:{accountTag:$a}){rumPageloadEventsAdaptiveGroups(filter:{datetime_geq:$since,datetime_leq:$until},limit:100,orderBy:[count_DESC]){count dimensions{siteTag}}}}}",variables:{a:$a,since:$since,until:$until}}')"
@@ -159,7 +184,7 @@ fi
 
 # --debug PATH: for one requestPath, group by the culprit element dimension so
 # you can see WHICH DOM element drives the poor metric (e.g. what is shifting for CLS).
-if [ -n "$DEBUG_PATH" ]; then
+if [[ -n "$DEBUG_PATH" ]]; then
   case "$DEBUG_METRIC" in
     cls) PREFIX="cumulativeLayoutShift"; UNIT="cls" ;;
     lcp) PREFIX="largestContentfulPaint"; UNIT="us" ;;
@@ -182,7 +207,7 @@ if [ -n "$DEBUG_PATH" ]; then
 fi
 
 DIM='requestPath'
-[ "$BY_DEVICE" -eq 1 ] && DIM='requestPath deviceType'
+[[ "$BY_DEVICE" -eq 1 ]] && DIM='requestPath deviceType'
 
 # Run one dataset query and return its rows array (JSON). $1 dataset, $2 quantile fields.
 query_dataset() {
@@ -206,7 +231,7 @@ VITALS="$(query_dataset rumWebVitalsEventsAdaptiveGroups \
   'largestContentfulPaintP75 interactionToNextPaintP75 cumulativeLayoutShiftP75 firstContentfulPaintP75')"
 PERF="$(query_dataset rumPerformanceEventsAdaptiveGroups 'pageLoadTimeP75 responseTimeP75')"
 
-if [ "$(echo "$VITALS" | jq 'length')" -eq 0 ]; then
+if [[ "$(echo "$VITALS" | jq 'length')" -eq 0 ]]; then
   echo "No RUM rows returned for the last ${DAYS}d." >&2
   echo "Checklist: CF_ACCOUNT_ID is the ACCOUNT id (not zone); CF_SITE_TAG is the" >&2
   echo "Web Analytics beacon token; the site has had real traffic in the window." >&2

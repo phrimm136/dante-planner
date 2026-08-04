@@ -29,6 +29,11 @@ if [ -z "$CF_IPV4" ]; then
     exit 1
 fi
 
+if [ -z "$CF_IPV6" ]; then
+    log "ERROR: Failed to fetch Cloudflare IPv6 ranges"
+    exit 1
+fi
+
 # Save to file for reference
 CACHE_DIR="/tmp/cloudflare-ips"
 mkdir -p "$CACHE_DIR"
@@ -59,6 +64,7 @@ echo "$CURRENT_HASH" > "$LAST_HASH_FILE"
 SG_ID="${CLOUDFLARE_SG_ID:-}"
 if [ -n "$SG_ID" ]; then
     log "Updating Security Group: $SG_ID"
+    FAILED_RULES=()
 
     # Remove old Cloudflare rules (tagged with description "Cloudflare")
     OLD_RULES=$(aws ec2 describe-security-groups --group-ids "$SG_ID" \
@@ -67,7 +73,8 @@ if [ -n "$SG_ID" ]; then
 
     if [ "$OLD_RULES" != "[]" ] && [ -n "$OLD_RULES" ]; then
         log "Removing old Cloudflare rules..."
-        aws ec2 revoke-security-group-ingress --group-id "$SG_ID" --ip-permissions "$OLD_RULES" || true
+        aws ec2 revoke-security-group-ingress --group-id "$SG_ID" --ip-permissions "$OLD_RULES" \
+            || FAILED_RULES+=("revoke: existing Cloudflare rules")
     fi
 
     # Add new rules for port 443
@@ -75,8 +82,17 @@ if [ -n "$SG_ID" ]; then
     for IP in $CF_IPV4; do
         aws ec2 authorize-security-group-ingress --group-id "$SG_ID" \
             --protocol tcp --port 443 --cidr "$IP" \
-            --description "Cloudflare IPv4" 2>/dev/null || true
+            --description "Cloudflare IPv4" \
+            || FAILED_RULES+=("authorize: $IP tcp/443")
     done
+
+    if [ "${#FAILED_RULES[@]}" -gt 0 ]; then
+        log "ERROR: ${#FAILED_RULES[@]} security group rule(s) failed:"
+        for RULE in "${FAILED_RULES[@]}"; do
+            log "  $RULE"
+        done
+        exit 1
+    fi
 
     log "Security Group updated successfully"
 fi
