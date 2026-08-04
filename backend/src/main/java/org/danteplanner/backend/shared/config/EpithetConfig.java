@@ -4,7 +4,6 @@ import org.danteplanner.backend.user.dto.EpithetDto;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.time.ZoneOffset;
@@ -14,22 +13,10 @@ import java.time.ZoneOffset;
  * Tracks when each epithet was added for time-decay weighted random selection.
  * Frontend maps keywords to display names via i18n.
  *
- * <p>Weight calculation (time-decay):
- * <ul>
- *   <li>0-30 days since added: weight 3</li>
- *   <li>31-60 days since added: weight 2</li>
- *   <li>61+ days since added: weight 1</li>
- * </ul>
+ * <p>Selection is weighted by {@link WeightDecay}.</p>
  */
 @Component
 public class EpithetConfig implements EpithetProvider {
-
-    private static final int WEIGHT_NEW = 3;      // 0-30 days
-    private static final int WEIGHT_RECENT = 2;   // 31-60 days
-    private static final int WEIGHT_OLD = 1;      // 61+ days
-
-    private static final int TIER_NEW_DAYS = 30;
-    private static final int TIER_RECENT_DAYS = 60;
 
     /**
      * Epithet keywords mapped to their added dates.
@@ -94,20 +81,7 @@ public class EpithetConfig implements EpithetProvider {
      * @return weight value (1, 2, or 3)
      */
     int getWeight(String keyword, LocalDate referenceDate) {
-        LocalDate addedDate = EPITHETS.get(keyword);
-        if (addedDate == null) {
-            return WEIGHT_OLD;
-        }
-
-        long daysSinceAdded = ChronoUnit.DAYS.between(addedDate, referenceDate);
-
-        if (daysSinceAdded <= TIER_NEW_DAYS) {
-            return WEIGHT_NEW;
-        } else if (daysSinceAdded <= TIER_RECENT_DAYS) {
-            return WEIGHT_RECENT;
-        } else {
-            return WEIGHT_OLD;
-        }
+        return WeightDecay.weightOf(EPITHETS.get(keyword), referenceDate);
     }
 
     /**

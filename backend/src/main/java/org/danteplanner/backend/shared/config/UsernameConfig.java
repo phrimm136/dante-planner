@@ -1,10 +1,8 @@
 package org.danteplanner.backend.shared.config;
 
-import org.danteplanner.backend.user.dto.AssociationDto;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.time.ZoneOffset;
@@ -14,12 +12,7 @@ import java.time.ZoneOffset;
  * Maps association keywords to display names and tracks when each was added
  * for time-decay weighted random selection.
  *
- * <p>Weight calculation (time-decay):
- * <ul>
- *   <li>0-30 days since added: weight 3</li>
- *   <li>31-60 days since added: weight 2</li>
- *   <li>61+ days since added: weight 1</li>
- * </ul>
+ * <p>Selection is weighted by {@link WeightDecay}.</p>
  */
 @Component
 public class UsernameConfig implements AssociationProvider {
@@ -28,13 +21,6 @@ public class UsernameConfig implements AssociationProvider {
      * Association information: display name and date added.
      */
     public record AssociationInfo(String displayName, LocalDate addedDate) {}
-
-    private static final int WEIGHT_NEW = 3;      // 0-30 days
-    private static final int WEIGHT_RECENT = 2;   // 31-60 days
-    private static final int WEIGHT_OLD = 1;      // 61+ days
-
-    private static final int TIER_NEW_DAYS = 30;
-    private static final int TIER_RECENT_DAYS = 60;
 
     /**
      * Static mapping of association keywords to their info.
@@ -101,19 +87,7 @@ public class UsernameConfig implements AssociationProvider {
      */
     int getWeight(String keyword, LocalDate referenceDate) {
         AssociationInfo info = ASSOCIATIONS.get(keyword);
-        if (info == null) {
-            return WEIGHT_OLD;
-        }
-
-        long daysSinceAdded = ChronoUnit.DAYS.between(info.addedDate(), referenceDate);
-
-        if (daysSinceAdded <= TIER_NEW_DAYS) {
-            return WEIGHT_NEW;
-        } else if (daysSinceAdded <= TIER_RECENT_DAYS) {
-            return WEIGHT_RECENT;
-        } else {
-            return WEIGHT_OLD;
-        }
+        return WeightDecay.weightOf(info != null ? info.addedDate() : null, referenceDate);
     }
 
     /**
@@ -124,17 +98,5 @@ public class UsernameConfig implements AssociationProvider {
      */
     public boolean isValidAssociation(String keyword) {
         return ASSOCIATIONS.containsKey(keyword);
-    }
-
-    /**
-     * Get all associations with their display information.
-     * Returns a list of all 14 associations for UI selection.
-     *
-     * @return list of AssociationDto containing keyword and displayName
-     */
-    public List<AssociationDto> getAssociationsWithInfo() {
-        return ASSOCIATIONS.entrySet().stream()
-            .map(entry -> new AssociationDto(entry.getKey(), entry.getValue().displayName()))
-            .toList();
     }
 }
