@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.lettuce.core.RedisException;
 import io.sentry.Sentry;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.validation.ErrorCode;
 import org.danteplanner.backend.user.exception.AccountDeletedException;
 import org.danteplanner.backend.user.exception.UserBannedException;
 import org.danteplanner.backend.user.exception.UserTimedOutException;
@@ -18,6 +20,11 @@ import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.springframework.core.NestedRuntimeException;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,19 +33,19 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestControllerAdvice
 @Slf4j
@@ -52,22 +59,13 @@ public class GlobalExceptionHandler {
 
     public record ConflictErrorResponse(String code, String message, Long serverVersion) {}
 
-    private static final Map<ErrorKind, HttpStatus> STATUS_BY_KIND;
-
-    static {
-        Map<ErrorKind, HttpStatus> byKind = new EnumMap<>(ErrorKind.class);
-        byKind.put(ErrorKind.NOT_FOUND, HttpStatus.NOT_FOUND);
-        byKind.put(ErrorKind.FORBIDDEN, HttpStatus.FORBIDDEN);
-        byKind.put(ErrorKind.CONFLICT, HttpStatus.CONFLICT);
-        byKind.put(ErrorKind.INVALID_REQUEST, HttpStatus.BAD_REQUEST);
-
-        List<ErrorKind> unmapped = Arrays.stream(ErrorKind.values())
-                .filter(kind -> !byKind.containsKey(kind))
-                .toList();
-        if (!unmapped.isEmpty()) {
-            throw new ExceptionInInitializerError("No HTTP status for error kind(s): " + unmapped);
-        }
-        STATUS_BY_KIND = Map.copyOf(byKind);
+    private static HttpStatus statusOf(ErrorKind kind) {
+        return switch (kind) {
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case CONFLICT -> HttpStatus.CONFLICT;
+            case INVALID_REQUEST -> HttpStatus.BAD_REQUEST;
+        };
     }
 
     /**
@@ -81,7 +79,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> handleDomain(DomainException ex) {
         log.warn("{}: {}", ex.getErrorCode(), ex.getMessage());
-        return ResponseEntity.status(STATUS_BY_KIND.get(ex.getKind()))
+        return ResponseEntity.status(statusOf(ex.getKind()))
             .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
     }
 
@@ -203,31 +201,35 @@ public class GlobalExceptionHandler {
      * are structural validation errors that reveal API schema details and are mapped to generic
      * VALIDATION_ERROR to prevent information disclosure and schema probing attacks.</p>
      */
-    private static final java.util.Set<String> USER_FACING_ERROR_CODES = java.util.Set.of(
-            "EMPTY_CONTENT",      // User can provide content
-            "SIZE_EXCEEDED",      // User can reduce content size
-            "MALFORMED_JSON"      // User can fix JSON syntax
-    );
+    private static final Set<String> USER_FACING_ERROR_CODES = Stream.of(
+            ErrorCode.EMPTY_CONTENT,
+            ErrorCode.SIZE_EXCEEDED,
+            ErrorCode.MALFORMED_JSON)
+            .map(ErrorCode::getCode)
+            .collect(Collectors.toUnmodifiableSet());
 
     @ExceptionHandler(PlannerValidationException.class)
     public ResponseEntity<ErrorResponse> handlePlannerValidation(PlannerValidationException ex) {
         if (USER_FACING_ERROR_CODES.contains(ex.getErrorCode())) {
-            log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+            logValidationError(ex.getErrorCode(), ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getErrorCode(), ex.getMessage()));
         }
 
-        // Multi-error: log each sub-error individually for CloudWatch searchability
-        if (!ex.getSubErrors().isEmpty()) {
-            ex.getSubErrors().forEach(e ->
-                log.warn("Planner validation error [{}]: {}", e.code(), e.message()));
+        // Each sub-error is logged on its own line so CloudWatch can search for one code.
+        if (ex.getSubErrors().isEmpty()) {
+            logValidationError(ex.getErrorCode(), ex.getMessage());
         } else {
-            log.warn("Planner validation error [{}]: {}", ex.getErrorCode(), ex.getMessage());
+            ex.getSubErrors().forEach(e -> logValidationError(e.code(), e.message()));
         }
 
         Sentry.captureException(ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse("VALIDATION_ERROR", "Invalid planner content structure"));
+    }
+
+    private static void logValidationError(String code, String message) {
+        log.warn("Planner validation error [{}]: {}", code, message);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -269,9 +271,9 @@ public class GlobalExceptionHandler {
      * repeated user action) return 409 without an alert; anything else is a defect and reaches
      * Sentry.</p>
      */
-    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
-            org.springframework.dao.DataIntegrityViolationException ex) {
+            DataIntegrityViolationException ex) {
 
         ConstraintViolationOutcome outcome = ConstraintViolationClassifier.classify(ex);
 
@@ -290,8 +292,8 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(outcome.code(), outcome.clientMessage()));
     }
 
-    @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)
-    public ResponseEntity<ErrorResponse> handleCannotAcquireLock(org.springframework.dao.CannotAcquireLockException ex) {
+    @ExceptionHandler(CannotAcquireLockException.class)
+    public ResponseEntity<ErrorResponse> handleCannotAcquireLock(CannotAcquireLockException ex) {
         log.warn("Database deadlock detected: {}", ex.getMessage());
         // Return 503 Service Unavailable with retry-after hint
         // Client should retry the request (view recording is idempotent)
@@ -322,11 +324,11 @@ public class GlobalExceptionHandler {
      * direct backend access); external clients always see BACKEND_UNAVAILABLE.</p>
      */
     @ExceptionHandler({
-            org.springframework.dao.DataAccessResourceFailureException.class,
-            org.springframework.transaction.CannotCreateTransactionException.class
+            DataAccessResourceFailureException.class,
+            CannotCreateTransactionException.class
     })
     public ResponseEntity<ErrorResponse> handleDatabaseUnavailable(
-            org.springframework.core.NestedRuntimeException ex) {
+            NestedRuntimeException ex) {
         log.warn("Database unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
@@ -344,9 +346,9 @@ public class GlobalExceptionHandler {
      * self-healing — deliberately NOT sent to Sentry for the same reason as the DB handler: it is
      * expected during a Redis outage and would otherwise alert-storm.</p>
      */
-    @ExceptionHandler(org.springframework.data.redis.RedisConnectionFailureException.class)
+    @ExceptionHandler(RedisConnectionFailureException.class)
     public ResponseEntity<ErrorResponse> handleRedisUnavailable(
-            org.springframework.data.redis.RedisConnectionFailureException ex) {
+            RedisConnectionFailureException ex) {
         log.warn("Redis unavailable during authentication (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
@@ -360,7 +362,7 @@ public class GlobalExceptionHandler {
      * <p>The rate limiter uses a RAW Lettuce client (only {@code RedisConnectionConfig} does — bucket4j's
      * {@code LettuceBasedProxyManager} is handed a raw {@code RedisClient.connect(...)}), so a rate-limit
      * Redis outage does NOT surface as Spring Data's {@code RedisConnectionFailureException}. It rethrows
-     * the raw {@code io.lettuce.core.RedisException} (RedisConnectionException / RedisCommandTimeoutException /
+     * the raw {@code RedisException} (RedisConnectionException / RedisCommandTimeoutException /
      * RedisSystemException) unwrapped. Mapping the common supertype covers every cut variant. Transient and
      * self-healing — the client reconnects when Redis returns.</p>
      *
@@ -371,8 +373,8 @@ public class GlobalExceptionHandler {
      * The {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} code is internal-only; external clients see
      * BACKEND_UNAVAILABLE.</p>
      */
-    @ExceptionHandler(io.lettuce.core.RedisException.class)
-    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(io.lettuce.core.RedisException ex) {
+    @ExceptionHandler(RedisException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(RedisException ex) {
         log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
@@ -413,7 +415,7 @@ public class GlobalExceptionHandler {
      * and nothing else — no subclass, no code — so these phrases are the only available signal.
      * {@code Locale.ROOT} keeps the default locale out of the decision.
      */
-    private static final java.util.List<String> CLIENT_DISCONNECT_STRERRORS = java.util.List.of(
+    private static final List<String> CLIENT_DISCONNECT_STRERRORS = List.of(
             "broken pipe",
             "connection reset",
             "connection abort",
@@ -470,17 +472,5 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
-    }
-
-    private static final int MAX_LOG_CONTENT_LENGTH = 1000;
-
-    private static String truncate(String content) {
-        if (content == null) {
-            return "<null>";
-        }
-        if (content.length() <= MAX_LOG_CONTENT_LENGTH) {
-            return content;
-        }
-        return content.substring(0, MAX_LOG_CONTENT_LENGTH) + "...(truncated)";
     }
 }

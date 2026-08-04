@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.gtid;
 
+import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -13,8 +14,6 @@ import java.util.WeakHashMap;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 
 import com.mysql.cj.jdbc.JdbcConnection;
@@ -38,9 +37,9 @@ import com.mysql.cj.protocol.ServerSessionStateController.SessionStateChange;
  *
  * <p>Wraps the PRIMARY pool only; the replica takes no writes.</p>
  */
+@Slf4j
 public class GtidCapturingDataSource extends AbstractDataSource {
 
-    private static final Logger log = LoggerFactory.getLogger(GtidCapturingDataSource.class);
 
     private static final String GLOBAL_GTID_SQL = "SELECT @@gtid_executed";
     private static final String TRACKER_PROBE_SQL = "SELECT @@session_track_gtids";

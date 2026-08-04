@@ -1,6 +1,7 @@
 package org.danteplanner.backend.auth.oauth;
 
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
@@ -25,8 +26,6 @@ import java.util.List;
 @Component
 @Slf4j
 public class GoogleIdTokenVerifier {
-
-    private static final String PROVIDER_NAME = "google";
 
     private final NimbusJwtDecoder decoder;
 
@@ -60,7 +59,7 @@ public class GoogleIdTokenVerifier {
             return decoder.decode(idToken);
         } catch (JwtException e) {
             log.warn("Rejected an unverifiable Google id_token: {}", e.getMessage());
-            throw new OAuthException(PROVIDER_NAME, "id_token", "id_token failed verification", e);
+            throw new OAuthException(AuthProviderType.GOOGLE.getValue(), "id_token", "id_token failed verification", e);
         }
     }
 }

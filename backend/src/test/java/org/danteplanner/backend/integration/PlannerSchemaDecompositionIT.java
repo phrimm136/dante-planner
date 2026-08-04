@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +59,6 @@ class PlannerSchemaDecompositionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("plannerContent_WhenSchemaIsRead_CarriesOnlyItsPrimaryKeyAndNoInboundFk")
     void plannerContent_WhenSchemaIsRead_CarriesOnlyItsPrimaryKeyAndNoInboundFk() {
         assertThat(indexes("planner_content"))
                 .as("planner_content carries only its PRIMARY KEY; a secondary index would be maintained on every content write")
@@ -76,7 +74,6 @@ class PlannerSchemaDecompositionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("schemaDrill_WhenAggregateAndProjectionTables_MatchTargetDdl")
     void schemaDrill_WhenAggregateAndProjectionTables_MatchTargetDdl() {
         assertThat(tables()).contains(
                 "planner", "planner_content", "planner_publication", "planner_moderation",
@@ -99,7 +96,6 @@ class PlannerSchemaDecompositionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("schemaDrill_WhenLegacyPlannersTables_Dropped")
     void schemaDrill_WhenLegacyPlannersTables_Dropped() {
         assertThat(tables())
                 .as("the planners god-table and planner_content_index are dropped by the cutover")

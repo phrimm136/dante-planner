@@ -10,7 +10,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -72,7 +71,6 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
 
     @Test
     @Transactional
-    @DisplayName("publish_WhenRolledBack_EmitsNoSseEvent")
     void publish_WhenRolledBack_EmitsNoSseEvent() {
         plannerPublishingService.setPublished(owner.getId(), plannerId, true);
 

@@ -1,5 +1,10 @@
 package org.danteplanner.backend.moderation.repository;
 
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
+import java.util.UUID;
+import java.util.Collection;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -37,8 +42,8 @@ public interface PlannerCommentReportRepository extends JpaRepository<PlannerCom
      * Hard-delete sweep by planner ids (user account deletion): comment reports
      * carry a no-action FK to comments, so they must go before the comment cascade.
      */
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.data.jpa.repository.Query("DELETE FROM PlannerCommentReport r WHERE r.commentId IN "
+    @Modifying
+    @Query("DELETE FROM PlannerCommentReport r WHERE r.commentId IN "
             + "(SELECT c.id FROM PlannerComment c WHERE c.plannerId IN :plannerIds)")
-    void deleteAllByPlannerIds(@org.springframework.data.repository.query.Param("plannerIds") java.util.Collection<java.util.UUID> plannerIds);
+    void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
 }

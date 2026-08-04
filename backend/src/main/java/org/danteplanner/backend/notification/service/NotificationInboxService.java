@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * A recipient's own view of their notifications: reading them, and marking or clearing what they
@@ -39,7 +38,7 @@ public class NotificationInboxService {
 
         List<NotificationResponse> notifications = notificationPage.getContent().stream()
                 .map(NotificationResponse::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
 
         return new NotificationInboxResponse(
                 notifications,

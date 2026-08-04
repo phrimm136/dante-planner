@@ -1,6 +1,5 @@
 package org.danteplanner.backend.shared.config;
 
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.InterceptingClientHttpRequestFactory;
@@ -16,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HttpClientConfigTest {
 
     @Test
-    @DisplayName("restTemplate_WhenBuilt_HasBoundedTimeouts")
     void restTemplate_WhenBuilt_HasBoundedTimeouts() {
         RestTemplate restTemplate = new HttpClientConfig().restTemplate();
 
@@ -34,7 +32,6 @@ class HttpClientConfigTest {
     }
 
     @Test
-    @DisplayName("restTemplate_WhenBuilt_SendsProductUserAgent")
     void restTemplate_WhenBuilt_SendsProductUserAgent() {
         RestTemplate restTemplate = new HttpClientConfig().restTemplate();
 

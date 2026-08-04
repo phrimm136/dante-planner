@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,6 @@ class MetricsRegistrationIT extends SharedMySqlContainerSupport {
     private TestRestTemplate restTemplate;
 
     @Test
-    @DisplayName("promotionCounter_WhenBooted_PresentOnScrape")
     void promotionCounter_WhenBooted_PresentOnScrape() {
         ResponseEntity<String> scrape = restTemplate.getForEntity("/actuator/prometheus", String.class);
 

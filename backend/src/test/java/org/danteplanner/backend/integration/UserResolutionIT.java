@@ -7,7 +7,6 @@ import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,6 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("userResolve_WhenNewUser_CreatesSettingsRowAtomically")
     void userResolve_WhenNewUser_CreatesSettingsRowAtomically() {
         User created = userService.findOrCreateUser("google", identity("resolve-new-001"));
 
@@ -66,7 +64,6 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("oauthRace_WhenDuplicateKeyLoser_RetriesAndFinds")
     void oauthRace_WhenDuplicateKeyLoser_RetriesAndFinds() throws Exception {
         Map<String, String> identity = identity("resolve-race-001");
         ExecutorService pool = Executors.newFixedThreadPool(2);
@@ -100,7 +97,6 @@ class UserResolutionIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("userResolve_WhenReturningUser_NoWrites")
     void userResolve_WhenReturningUser_NoWrites() {
         User existing = TestDataFactory.createTestUser(userRepository, "returning@example.com");
 

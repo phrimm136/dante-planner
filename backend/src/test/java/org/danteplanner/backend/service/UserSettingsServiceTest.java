@@ -1,9 +1,9 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.UserSettingsService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -45,14 +45,7 @@ class UserSettingsServiceTest {
     void setUp() {
         userSettingsService = new UserSettingsService(userSettingsRepository, userRepository);
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
 
         existingSettings = UserSettings.builder()
                 .user(testUser)

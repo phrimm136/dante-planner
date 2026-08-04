@@ -43,6 +43,9 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class JwtProperties {
 
+    private static final int MIN_RSA_KEY_BITS = 2048;
+    private static final int AES_256_KEY_BYTES = 32;
+
     private String privateKeyPath;
     private String publicKeyPath;
     private String encryptionKey;
@@ -94,28 +97,14 @@ public class JwtProperties {
      */
     @PostConstruct
     public void loadKeys() {
-        if (privateKeyPath == null || privateKeyPath.isBlank()) {
-            throw new IllegalStateException("JWT private key path is required. Set JWT_PRIVATE_KEY_PATH environment variable.");
-        }
-        if (publicKeyPath == null || publicKeyPath.isBlank()) {
-            throw new IllegalStateException("JWT public key path is required. Set JWT_PUBLIC_KEY_PATH environment variable.");
-        }
-        if (encryptionKey == null || encryptionKey.isBlank()) {
-            throw new IllegalStateException("JWT encryption key is required. Set JWT_ENCRYPTION_KEY environment variable.");
-        }
+        requireConfigured(privateKeyPath, "private key path", "JWT_PRIVATE_KEY_PATH");
+        requireConfigured(publicKeyPath, "public key path", "JWT_PUBLIC_KEY_PATH");
+        requireConfigured(encryptionKey, "encryption key", "JWT_ENCRYPTION_KEY");
 
         try {
             this.privateKey = loadPrivateKey(privateKeyPath);
             this.publicKey = loadPublicKey(publicKeyPath);
             this.encryptionKeyBytes = Base64.getDecoder().decode(encryptionKey);
-
-            if (encryptionKeyBytes.length != 32) {
-                throw new IllegalStateException(
-                    "JWT encryption key must be exactly 32 bytes (256 bits) for AES-256. Got " + encryptionKeyBytes.length + " bytes."
-                );
-            }
-
-            log.info("JWT keys loaded successfully");
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load JWT keys from files", e);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -123,52 +112,56 @@ public class JwtProperties {
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Failed to decode encryption key (invalid Base64)", e);
         }
+
+        if (encryptionKeyBytes.length != AES_256_KEY_BYTES) {
+            throw new IllegalStateException("JWT encryption key must be exactly " + AES_256_KEY_BYTES
+                    + " bytes (256 bits) for AES-256. Got " + encryptionKeyBytes.length + " bytes.");
+        }
+
+        log.info("JWT keys loaded successfully");
+    }
+
+    private static void requireConfigured(String value, String what, String envVar) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT " + what + " is required. Set " + envVar + " environment variable.");
+        }
     }
 
     private PrivateKey loadPrivateKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String pemContent = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
-        String base64Key = pemContent
-            .replace("-----BEGIN PRIVATE KEY-----", "")
-            .replace("-----END PRIVATE KEY-----", "")
-            .replaceAll("\\s", "");
-        byte[] keyBytes = Base64.getDecoder().decode(base64Key);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = keyFactory.generatePrivate(keySpec);
+        byte[] keyBytes = decodePem(path, "PRIVATE KEY");
+        PrivateKey key = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
 
-        if (privateKey instanceof RSAPrivateKey rsaKey) {
-            int keySize = rsaKey.getModulus().bitLength();
-            if (keySize < 2048) {
-                throw new IllegalStateException(
-                    "RSA private key must be at least 2048 bits. Got " + keySize + " bits."
-                );
-            }
-            log.info("Loaded RSA private key ({} bits)", keySize);
+        if (key instanceof RSAPrivateKey rsaKey) {
+            log.info("Loaded RSA private key ({} bits)", requireStrongEnough(rsaKey.getModulus().bitLength(), "private"));
         }
-
-        return privateKey;
+        return key;
     }
 
     private PublicKey loadPublicKey(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        String pemContent = new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
-        String base64Key = pemContent
-            .replace("-----BEGIN PUBLIC KEY-----", "")
-            .replace("-----END PUBLIC KEY-----", "")
-            .replaceAll("\\s", "");
-        byte[] keyBytes = Base64.getDecoder().decode(base64Key);
-        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+        byte[] keyBytes = decodePem(path, "PUBLIC KEY");
+        PublicKey key = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(keyBytes));
 
-        if (publicKey instanceof RSAPublicKey rsaKey) {
-            int keySize = rsaKey.getModulus().bitLength();
-            if (keySize < 2048) {
-                throw new IllegalStateException(
-                    "RSA public key must be at least 2048 bits. Got " + keySize + " bits."
-                );
-            }
+        if (key instanceof RSAPublicKey rsaKey) {
+            requireStrongEnough(rsaKey.getModulus().bitLength(), "public");
         }
+        return key;
+    }
 
-        return publicKey;
+    private static byte[] decodePem(String path, String label) throws IOException {
+        String pemContent = Files.readString(Paths.get(path), StandardCharsets.UTF_8);
+        String base64Key = pemContent
+            .replace("-----BEGIN " + label + "-----", "")
+            .replace("-----END " + label + "-----", "")
+            .replaceAll("\\s", "");
+        return Base64.getDecoder().decode(base64Key);
+    }
+
+    private static int requireStrongEnough(int keySizeBits, String which) {
+        if (keySizeBits < MIN_RSA_KEY_BITS) {
+            throw new IllegalStateException("RSA " + which + " key must be at least "
+                    + MIN_RSA_KEY_BITS + " bits. Got " + keySizeBits + " bits.");
+        }
+        return keySizeBits;
     }
 }

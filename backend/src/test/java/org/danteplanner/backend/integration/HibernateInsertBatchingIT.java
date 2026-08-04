@@ -50,38 +50,13 @@ class HibernateInsertBatchingIT extends SharedMySqlContainerSupport {
     private static final int MD_CURRENT_VERSION = 7;
     private static final long BOUNDED_STATEMENT_THRESHOLD = 12;
 
-    private static final String VALID_CONTENT = """
-        {
-            "selectedKeywords":[],
-            "selectedBuffIds":[100,201],
-            "selectedGiftKeyword":"Combustion",
-            "selectedGiftIds":["9001"],
-            "equipment":{
-                "01":{"identity":{"id":"10101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20101","threadspin":4}}},
-                "02":{"identity":{"id":"10201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20201","threadspin":4}}},
-                "03":{"identity":{"id":"10301","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20301","threadspin":4}}},
-                "04":{"identity":{"id":"10401","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20401","threadspin":4}}},
-                "05":{"identity":{"id":"10501","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20501","threadspin":4}}},
-                "06":{"identity":{"id":"10601","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20601","threadspin":4}}},
-                "07":{"identity":{"id":"10701","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20701","threadspin":4}}},
-                "08":{"identity":{"id":"10801","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20801","threadspin":4}}},
-                "09":{"identity":{"id":"10901","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20901","threadspin":4}}},
-                "10":{"identity":{"id":"11001","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21001","threadspin":4}}},
-                "11":{"identity":{"id":"11101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21101","threadspin":4}}},
-                "12":{"identity":{"id":"11201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21201","threadspin":4}}}
-            },
-            "deploymentOrder":[0,1,2,3,4,5],
-            "floorSelections":[{"themePackId":"1001","difficulty":0,"giftIds":["9002"]}],
-            "sectionNotes":{}
-        }
-        """.trim().replace("\n", "").replace(" ", "");
 
 
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
-        registerSharedMysql(registry);
-        // Its own context, not its own server: the statistics flag is a property, and the
-        // container it used to declare carried settings identical to the shared one.
+        // Statistics is a per-context singleton and the count is a claim about every statement the
+        // context issues, so this class needs a context no other class shares.
+        SharedMySqlContainerSupport.registerOwnDatabase(registry, "insert_batching");
         registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");
     }
 
@@ -116,7 +91,7 @@ class HibernateInsertBatchingIT extends SharedMySqlContainerSupport {
                     "5F",
                     null,
                     null,
-                    VALID_CONTENT,
+                    TestDataFactory.VALID_CONTENT,
                     MD_CURRENT_VERSION,
                     PlannerType.MIRROR_DUNGEON,
                     null,

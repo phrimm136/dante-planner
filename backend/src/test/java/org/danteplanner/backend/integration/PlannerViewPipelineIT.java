@@ -13,7 +13,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,6 @@ class PlannerViewPipelineIT {
     }
 
     @Test
-    @DisplayName("view_WhenSameViewerDay_Noops")
     void view_WhenSameViewerDay_Noops() {
         recorder.record(plannerId, VIEWER, DAY);
         recorder.record(plannerId, VIEWER, DAY);
@@ -105,7 +103,6 @@ class PlannerViewPipelineIT {
     }
 
     @Test
-    @DisplayName("viewFlush_WhenReplayed_NoDoubleCount")
     void viewFlush_WhenReplayed_NoDoubleCount() {
         recorder.record(plannerId, VIEWER, DAY);
         recorder.flush();

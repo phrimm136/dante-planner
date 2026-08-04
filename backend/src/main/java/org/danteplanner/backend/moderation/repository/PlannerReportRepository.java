@@ -1,5 +1,9 @@
 package org.danteplanner.backend.moderation.repository;
 
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
+import java.util.Collection;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -36,7 +40,7 @@ public interface PlannerReportRepository extends JpaRepository<PlannerReport, Lo
      * Hard-delete sweep by planner ids (user account deletion): reports carry a
      * no-action FK to the planner core, so they must go before the core cascade.
      */
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.data.jpa.repository.Query("DELETE FROM PlannerReport r WHERE r.plannerId IN :plannerIds")
-    void deleteAllByPlannerIds(@org.springframework.data.repository.query.Param("plannerIds") java.util.Collection<java.util.UUID> plannerIds);
+    @Modifying
+    @Query("DELETE FROM PlannerReport r WHERE r.plannerId IN :plannerIds")
+    void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
 }

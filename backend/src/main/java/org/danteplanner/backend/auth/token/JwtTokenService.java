@@ -215,7 +215,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
                     .expiration(expiration)
                     .signWith(privateKey, SignatureAlgorithm.RS256)
                     .compact();
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {
             log.error("Token generation failed: {}", e.getMessage(), e);
             throw new TokenGenerationException("Failed to generate JWT token", e);
         }
@@ -237,8 +237,8 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
             throw new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE, e);
         } catch (JwtException e) {
             throw new InvalidTokenException(InvalidTokenException.Reason.MALFORMED, e);
-        } catch (Exception e) {
-            log.error("Unexpected token parsing failure: {}", e.getMessage(), e);
+        } catch (IllegalArgumentException e) {
+            // A null, empty or whitespace-only token never reaches the JJWT parser's own errors.
             throw new InvalidTokenException(InvalidTokenException.Reason.MALFORMED, e);
         }
     }

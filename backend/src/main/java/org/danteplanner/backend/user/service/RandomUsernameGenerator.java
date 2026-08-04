@@ -1,8 +1,7 @@
 package org.danteplanner.backend.user.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.EpithetProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -23,9 +22,9 @@ import java.util.List;
  * providing ~28.6 million unique combinations (31^5).
  */
 @Service
+@Slf4j
 public class RandomUsernameGenerator {
 
-    private static final Logger log = LoggerFactory.getLogger(RandomUsernameGenerator.class);
 
     /**
      * Safe alphanumeric characters for suffix generation.

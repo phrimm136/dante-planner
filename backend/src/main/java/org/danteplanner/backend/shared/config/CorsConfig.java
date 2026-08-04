@@ -13,14 +13,16 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${cors.allowed-origins}")
-    private String allowedOrigins;
+    private final List<String> allowedOrigins;
+
+    public CorsConfig(@Value("${cors.allowed-origins}") String allowedOrigins) {
+        this.allowedOrigins = Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
-                Arrays.stream(allowedOrigins.split(",")).map(String::trim).toList());
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         // Explicit header whitelist - no wildcards for security
         // Content-Type: Required for JSON API calls

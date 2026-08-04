@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -21,11 +22,7 @@ import org.springframework.stereotype.Component;
 @Profile("!test & !it") // Skip verification in test environments (TestDataInitializer handles it)
 public class SentinelUserVerifier implements ApplicationRunner {
 
-    /**
-     * Sentinel user ID used for anonymizing deleted users' votes.
-     * Must match the value in UserAccountLifecycleService.
-     */
-    private static final Long SENTINEL_USER_ID = 0L;
+    private static final Long SENTINEL_USER_ID = UserAccountLifecycleService.SENTINEL_USER_ID;
 
     private final UserService userService;
 

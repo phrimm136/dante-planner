@@ -25,7 +25,6 @@ import io.lettuce.core.protocol.ProtocolKeyword;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -128,7 +127,6 @@ class LogoutRevocationIT {
     }
 
     @Test
-    @DisplayName("logout_WhenLuaRevocation_RevokesAllThreeAtomically")
     void logout_WhenLuaRevocation_RevokesAllThreeAtomically() {
         long userId = 4242L;
         String familyId = "logout-family-42";
@@ -165,7 +163,6 @@ class LogoutRevocationIT {
     }
 
     @Test
-    @DisplayName("logout_WhenTokensAbsent_SucceedsSilently")
     void logout_WhenTokensAbsent_SucceedsSilently() throws Exception {
         AUTH_COMMAND_COUNT.set(0L);
 

@@ -194,7 +194,8 @@ class AuthLocalReadSplitIT {
 
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         TokenBlacklistService blSvc =
-                new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry);
+                new TokenBlacklistService(stringRedisTemplate, deadTemplate, registry,
+                        TokenBlacklistService.DEFAULT_REFRESH_TOKEN_EXPIRY_MS);
         ContentTombstoneStore tsSvc =
                 new ContentTombstoneStore(stringRedisTemplate, deadTemplate,
                         new io.micrometer.core.instrument.simple.SimpleMeterRegistry());

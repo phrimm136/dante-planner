@@ -16,7 +16,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +102,6 @@ class PublishedPlannerDetailIT {
     }
 
     @Test
-    @DisplayName("detailRead_WhenConcurrent_DoesNotSerialize")
     void detailRead_WhenConcurrent_DoesNotSerialize() throws Exception {
         CountDownLatch locked = new CountDownLatch(1);
         CountDownLatch release = new CountDownLatch(1);
@@ -144,7 +142,6 @@ class PublishedPlannerDetailIT {
     }
 
     @Test
-    @DisplayName("detailRead_WhenServed_ReturnsBeforeViewWrite")
     void detailRead_WhenServed_ReturnsBeforeViewWrite() throws Exception {
         int before = plannerStatsRepository.findById(plannerId).map(PlannerStats::getViewCount).orElse(0);
 

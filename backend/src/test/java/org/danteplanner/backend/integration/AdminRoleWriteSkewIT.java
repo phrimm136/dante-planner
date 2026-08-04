@@ -5,7 +5,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +58,6 @@ class AdminRoleWriteSkewIT {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("changeRole_WhenBothRemainingAdminsSelfDemoteConcurrently_LeavesAnAdmin")
     void changeRole_WhenBothRemainingAdminsSelfDemoteConcurrently_LeavesAnAdmin() throws Exception {
         Long firstAdmin = TestDataFactory
                 .createAdmin(userRepository, "skew-a-" + UUID.randomUUID() + "@example.com").getId();

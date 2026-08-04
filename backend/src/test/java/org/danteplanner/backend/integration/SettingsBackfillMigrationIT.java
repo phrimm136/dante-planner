@@ -8,7 +8,6 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,6 @@ class SettingsBackfillMigrationIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("backfill_WhenLegacyUsers_GainSettingsRows")
     void backfill_WhenLegacyUsers_GainSettingsRows() throws Exception {
         // A legacy user created directly (no settings row), as before settings-at-creation existed.
         TestDataFactory.createTestUser(userRepository, "legacy-no-settings@example.com");

@@ -1,10 +1,12 @@
 package org.danteplanner.backend.auth.oauth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.OAuthProperties;
+import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +33,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Slf4j
 public class GoogleOAuthProvider implements OAuthProvider {
 
-    private static final String PROVIDER_NAME = "google";
+    private static final String PROVIDER_NAME = AuthProviderType.GOOGLE.getValue();
     private static final String SCOPE = "openid email";
 
     private final RestTemplate restTemplate;
@@ -204,9 +206,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
                 idToken,
                 expiresIn
             );
-        } catch (OAuthException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new OAuthException(
                 PROVIDER_NAME,
                 "token_parse",
@@ -241,9 +241,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
             }
 
             return new OAuthUserInfo(idNode.asText(), emailNode.asText());
-        } catch (OAuthException e) {
-            throw e;
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             throw new OAuthException(
                 PROVIDER_NAME,
                 "userinfo_parse",

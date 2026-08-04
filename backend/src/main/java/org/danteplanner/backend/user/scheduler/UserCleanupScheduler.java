@@ -64,7 +64,8 @@ public class UserCleanupScheduler {
                     skippedCount++;
                     log.info("Skipped user {}: no longer eligible for deletion", userId);
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
+                // One unusable row must not strand the rest of the batch until the next run.
                 failureCount++;
                 log.error("Failed to hard-delete user {}: {}", userId, e.getMessage(), e);
             }

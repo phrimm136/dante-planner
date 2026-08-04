@@ -1,6 +1,5 @@
 package org.danteplanner.backend.planner.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerConfigResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,22 +18,32 @@ import java.util.List;
  * used by clients when creating planners.</p>
  */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
 @Slf4j
 public class PlannerController {
 
-    @Value("${planner.schema-version}")
-    private Integer schemaVersion;
+    private final int schemaVersion;
+    private final int mdCurrentVersion;
+    private final List<Integer> mdAvailableVersions;
+    private final List<Integer> rrAvailableVersions;
 
-    @Value("${planner.md.current-version}")
-    private Integer mdCurrentVersion;
+    public PlannerController(
+            @Value("${planner.schema-version}") int schemaVersion,
+            @Value("${planner.md.current-version}") int mdCurrentVersion,
+            @Value("${planner.md.available-versions}") String mdAvailableVersionsRaw,
+            @Value("${planner.rr.available-versions}") String rrAvailableVersionsRaw) {
+        this.schemaVersion = schemaVersion;
+        this.mdCurrentVersion = mdCurrentVersion;
+        this.mdAvailableVersions = parseVersionList(mdAvailableVersionsRaw);
+        this.rrAvailableVersions = parseVersionList(rrAvailableVersionsRaw);
+    }
 
-    @Value("${planner.md.available-versions}")
-    private String mdAvailableVersions;
-
-    @Value("${planner.rr.available-versions}")
-    private String rrAvailableVersions;
+    private static List<Integer> parseVersionList(String raw) {
+        return Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .toList();
+    }
 
     /**
      * Get planner configuration including current content versions.
@@ -46,22 +55,11 @@ public class PlannerController {
      */
     @GetMapping("/config")
     public ResponseEntity<PlannerConfigResponse> getConfig() {
-        List<Integer> mdVersions = Arrays.stream(mdAvailableVersions.split(","))
-                .map(String::trim)
-                .map(Integer::parseInt)
-                .toList();
-        List<Integer> rrVersions = Arrays.stream(rrAvailableVersions.split(","))
-                .map(String::trim)
-                .map(Integer::parseInt)
-                .toList();
-
-        PlannerConfigResponse response = PlannerConfigResponse.builder()
+        return ResponseEntity.ok(PlannerConfigResponse.builder()
                 .schemaVersion(schemaVersion)
                 .mdCurrentVersion(mdCurrentVersion)
-                .mdAvailableVersions(mdVersions)
-                .rrAvailableVersions(rrVersions)
-                .build();
-
-        return ResponseEntity.ok(response);
+                .mdAvailableVersions(mdAvailableVersions)
+                .rrAvailableVersions(rrAvailableVersions)
+                .build());
     }
 }

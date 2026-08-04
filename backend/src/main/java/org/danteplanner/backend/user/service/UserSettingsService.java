@@ -1,6 +1,7 @@
 package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserSettingsResponse;
 import org.danteplanner.backend.user.entity.User;
@@ -8,8 +9,6 @@ import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserSettingsService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserSettingsService.class);
 
     private static final Boolean DEFAULT_SYNC_ENABLED = null;
     private static final boolean DEFAULT_NOTIFY_COMMENTS = true;

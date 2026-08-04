@@ -12,7 +12,6 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,6 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("list_WhenSeeded_ShowsOnlyPublished")
     void list_WhenSeeded_ShowsOnlyPublished() throws Exception {
         Planner p1 = plannerRepository.save(base("P1").published(true).build());
         catalogService.add(p1);
@@ -112,7 +110,6 @@ class PublishedPlannerListIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("list_WhenSummaryProjected_MatchesEntityFields")
     void list_WhenSummaryProjected_MatchesEntityFields() throws Exception {
         Planner p = base("Field Parity")
                 .published(true)
