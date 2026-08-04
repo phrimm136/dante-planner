@@ -8,6 +8,7 @@ import org.danteplanner.backend.moderation.repository.ModerationActionRepository
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
@@ -93,7 +94,7 @@ class UserModerationServiceTest {
     /** The user entity handed to the repository, whose field state is what a commit would write. */
     private User persistedUser() {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userService).saveRestriction(captor.capture());
+        verify(userService).save(captor.capture());
         return captor.getValue();
     }
 
@@ -115,7 +116,7 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(moderatorUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 60, "Test timeout");
@@ -136,7 +137,7 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.timeoutUser(adminUser.getId(), normalUser.getId(), 60, "Test timeout");
@@ -153,7 +154,7 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.timeoutUser(adminUser.getId(), moderatorUser.getId(), 60, "Test timeout");
@@ -186,8 +187,8 @@ class UserModerationServiceTest {
                     ModerationForbiddenException.class,
                     () -> moderationService.timeoutUser(adminUser.getId(), targetAdmin.getId(), 60, "Test")
             );
-            assertTrue(exception.getMessage().contains("Cannot timeout administrators"));
-            verify(userService, never()).saveRestriction(any());
+            assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -214,8 +215,8 @@ class UserModerationServiceTest {
                     ModerationForbiddenException.class,
                     () -> moderationService.timeoutUser(moderatorUser.getId(), otherModerator.getId(), 60, "Test")
             );
-            assertTrue(exception.getMessage().contains("cannot timeout other moderators"));
-            verify(userService, never()).saveRestriction(any());
+            assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -233,7 +234,7 @@ class UserModerationServiceTest {
                     () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 0, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
-            verify(userService, never()).saveRestriction(any());
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -251,7 +252,7 @@ class UserModerationServiceTest {
                     () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), -30, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
-            verify(userService, never()).saveRestriction(any());
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -297,9 +298,11 @@ class UserModerationServiceTest {
             // Arrange
             normalUser.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
 
+            when(userService.findActiveById(moderatorUser.getId()))
+                    .thenReturn(Optional.of(moderatorUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.removeTimeout(moderatorUser.getId(), normalUser.getId(), "Test clear timeout");
@@ -317,6 +320,8 @@ class UserModerationServiceTest {
         void removeTimeout_WhenNonExistentTarget_ThrowsUserNotFoundException() {
             // Arrange
             Long nonExistentId = 999L;
+            when(userService.findActiveById(moderatorUser.getId()))
+                    .thenReturn(Optional.of(moderatorUser));
             when(userService.findActiveById(nonExistentId))
                     .thenReturn(Optional.empty());
 
@@ -325,6 +330,58 @@ class UserModerationServiceTest {
                     UserNotFoundException.class,
                     () -> moderationService.removeTimeout(moderatorUser.getId(), nonExistentId, "Test")
             );
+        }
+
+        @Test
+        @DisplayName("Moderator cannot lift a timeout an admin placed on a peer moderator")
+        void removeTimeout_WhenModeratorTargetsModerator_ThrowsException() {
+            // Arrange
+            User otherModerator = User.builder()
+                    .id(4L)
+                    .publicId(UUID.randomUUID())
+                    .role(UserRole.MODERATOR)
+                    .build();
+            otherModerator.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
+
+            when(userService.findActiveById(moderatorUser.getId()))
+                    .thenReturn(Optional.of(moderatorUser));
+            when(userService.findActiveById(otherModerator.getId()))
+                    .thenReturn(Optional.of(otherModerator));
+
+            // Act & Assert
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
+                    () -> moderationService.removeTimeout(moderatorUser.getId(), otherModerator.getId(), "Test")
+            );
+            assertTrue(exception.getMessage()
+                    .contains("Cannot clear the timeout of a user of equal or higher rank"));
+            assertNotNull(otherModerator.getTimeoutUntil());
+            verify(userService, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Normal user cannot clear a timeout")
+        void removeTimeout_WhenActorIsNormalUser_ThrowsException() {
+            // Arrange
+            User target = User.builder()
+                    .id(6L)
+                    .publicId(UUID.randomUUID())
+                    .role(UserRole.NORMAL)
+                    .build();
+            target.setTimeoutUntil(java.time.Instant.now().plusSeconds(3600));
+
+            when(userService.findActiveById(normalUser.getId()))
+                    .thenReturn(Optional.of(normalUser));
+            when(userService.findActiveById(target.getId()))
+                    .thenReturn(Optional.of(target));
+
+            // Act & Assert
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
+                    () -> moderationService.removeTimeout(normalUser.getId(), target.getId(), "Test")
+            );
+            assertTrue(exception.getMessage().contains("Only moderators can clear timeouts"));
+            verify(userService, never()).save(any());
         }
     }
 
@@ -340,7 +397,7 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.banUser(adminUser.getId(), normalUser.getId(), "Test ban reason");
@@ -361,7 +418,7 @@ class UserModerationServiceTest {
             assertEquals(adminUser.getId(), action.getActorId());
             assertEquals("Test ban reason", action.getReason());
 
-            verify(ssePublisher).publishAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq("BAN"), isNull());
+            verify(ssePublisher).publishAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq(SuspensionType.BAN), isNull());
         }
 
         @Test
@@ -372,7 +429,7 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.banUser(adminUser.getId(), moderatorUser.getId(), null);
@@ -405,8 +462,8 @@ class UserModerationServiceTest {
                     ModerationForbiddenException.class,
                     () -> moderationService.banUser(adminUser.getId(), targetAdmin.getId(), "Reason")
             );
-            assertTrue(exception.getMessage().contains("Cannot ban administrators"));
-            verify(userService, never()).saveRestriction(any());
+            assertTrue(exception.getMessage().contains("Cannot ban a user of equal or higher rank"));
+            verify(userService, never()).save(any());
             verify(ssePublisher, never()).publishAccountSuspended(any(), any(), any(), any());
         }
 
@@ -425,7 +482,7 @@ class UserModerationServiceTest {
                     () -> moderationService.banUser(moderatorUser.getId(), normalUser.getId(), "Reason")
             );
             assertTrue(exception.getMessage().contains("Only administrators can ban"));
-            verify(userService, never()).saveRestriction(any());
+            verify(userService, never()).save(any());
         }
     }
 
@@ -444,7 +501,7 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.unbanUser(adminUser.getId(), normalUser.getId(), "Test unban");
@@ -480,7 +537,33 @@ class UserModerationServiceTest {
                     () -> moderationService.unbanUser(moderatorUser.getId(), normalUser.getId(), "Test")
             );
             assertTrue(exception.getMessage().contains("Only administrators can unban"));
-            verify(userService, never()).saveRestriction(any());
+            verify(userService, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Cannot unban administrators")
+        void unbanUser_WhenTargetIsAdmin_ThrowsException() {
+            // Arrange
+            User targetAdmin = User.builder()
+                    .id(5L)
+                    .publicId(UUID.randomUUID())
+                    .role(UserRole.ADMIN)
+                    .build();
+            targetAdmin.setBannedAt(java.time.Instant.now());
+
+            when(userService.findActiveById(adminUser.getId()))
+                    .thenReturn(Optional.of(adminUser));
+            when(userService.findActiveById(targetAdmin.getId()))
+                    .thenReturn(Optional.of(targetAdmin));
+
+            // Act & Assert
+            ModerationForbiddenException exception = assertThrows(
+                    ModerationForbiddenException.class,
+                    () -> moderationService.unbanUser(adminUser.getId(), targetAdmin.getId(), "Test")
+            );
+            assertTrue(exception.getMessage().contains("Cannot unban a user of equal or higher rank"));
+            assertTrue(targetAdmin.isBanned());
+            verify(userService, never()).save(any());
         }
     }
 }

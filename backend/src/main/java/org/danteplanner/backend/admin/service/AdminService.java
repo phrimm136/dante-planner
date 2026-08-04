@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.moderation.service.ModerationPolicy;
 
 /**
  * Service for administrative operations.
@@ -44,20 +45,10 @@ public class AdminService {
         User actor = userService.lockActiveById(actorId);
         User target = userService.lockActiveById(targetId);
 
-        UserRole actorRole = actor.getRole();
         UserRole targetCurrentRole = target.getRole();
 
-        // Safeguard 1: Cannot grant role higher than own
-        if (newRole.outranks(actorRole)) {
-            throw new ModerationForbiddenException("Cannot grant role higher than your own");
-        }
+        ModerationPolicy.requireCanChangeRole(actor, target, newRole);
 
-        // Safeguard 2: Cannot modify user of equal or higher rank (unless self-demotion)
-        if (!actorId.equals(targetId) && targetCurrentRole.hasRankAtLeast(actorRole)) {
-            throw new ModerationForbiddenException("Cannot modify user of equal or higher rank");
-        }
-
-        // Safeguard 3: Cannot demote last admin
         if (targetCurrentRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
             long adminCount = userService.countByRole(UserRole.ADMIN);
             if (adminCount <= 1) {
@@ -68,7 +59,7 @@ public class AdminService {
         // Apply role change
         UserRole oldRole = target.getRole();
         target.setRole(newRole);
-        User saved = userService.saveRole(target);
+        User saved = userService.save(target);
 
         boolean demotion = oldRole.outranks(newRole);
         auditService.record(actorId, target.getPublicId().toString(),

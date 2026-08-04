@@ -99,7 +99,7 @@ class AdminServiceTest {
                     .thenReturn(adminUser);
             when(userService.lockActiveById(normalUser.getId()))
                     .thenReturn(normalUser);
-            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
@@ -117,7 +117,7 @@ class AdminServiceTest {
                     .thenReturn(adminUser);
             when(userService.lockActiveById(moderatorUser.getId()))
                     .thenReturn(moderatorUser);
-            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
@@ -144,7 +144,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), normalUser.getId(), UserRole.ADMIN)
             );
             assertTrue(exception.getMessage().contains("higher than your own"));
-            verify(userService, never()).saveRole(any());
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -174,7 +174,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), otherModerator.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userService, never()).saveRole(any());
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -192,7 +192,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userService, never()).saveRole(any());
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -209,7 +209,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("last administrator"));
-            verify(userService, never()).saveRole(any());
+            verify(userService, never()).save(any());
         }
 
         @Test
@@ -239,7 +239,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(adminUser.getId(), otherAdmin.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userService, never()).saveRole(any());
+            verify(userService, never()).save(any());
             verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
 
@@ -282,7 +282,7 @@ class AdminServiceTest {
             when(userService.lockActiveById(adminUser.getId()))
                     .thenReturn(adminUser);
             when(userService.countByRole(UserRole.ADMIN)).thenReturn(2L);
-            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
@@ -302,7 +302,7 @@ class AdminServiceTest {
                     .thenReturn(adminUser);
             when(userService.lockActiveById(normalUser.getId()))
                     .thenReturn(normalUser);
-            when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
+            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.ADMIN);

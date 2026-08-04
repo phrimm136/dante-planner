@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -91,7 +90,7 @@ class PlannerModerationServiceTest {
     private void seamWithdraws(UUID plannerId, Planner planner) {
         when(plannerPublishingService.withdrawFromPublicView(eq(plannerId), any()))
                 .thenAnswer(invocation -> {
-                    invocation.<Consumer<Planner>>getArgument(1).accept(planner);
+                    invocation.<PlannerPublishingService.Withdrawal>getArgument(1).apply(planner);
                     persisted = planner;
                     return planner;
                 });

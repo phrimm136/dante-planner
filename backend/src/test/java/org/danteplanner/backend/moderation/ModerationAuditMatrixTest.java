@@ -123,15 +123,15 @@ class ModerationAuditMatrixTest {
         User target = user(TARGET, UserRole.MODERATOR);
         when(userService.findActiveById(ACTOR)).thenReturn(Optional.of(actor));
         when(userService.findActiveById(TARGET)).thenReturn(Optional.of(target));
-        when(userService.saveRestriction(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userService.lockActiveById(ACTOR)).thenReturn(actor);
         when(userService.lockActiveById(TARGET)).thenReturn(target);
-        when(userService.saveRole(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userService.countByRole(any())).thenReturn(5L);
 
         Planner planner = plannerAggregate(actor);
         when(plannerPublishingService.withdrawFromPublicView(eq(plannerId), any()))
-                .thenAnswer(applyTo(planner));
+                .thenAnswer(withdraw(planner));
         when(plannerPublishingService.changeRecommendedListing(eq(plannerId), any()))
                 .thenAnswer(applyTo(planner));
         when(plannerPublishingService.upvoteCount(plannerId)).thenReturn(0);
@@ -169,6 +169,13 @@ class ModerationAuditMatrixTest {
     }
 
     /** Drive the publishing seam the way production does: apply the handed transition, hand it back. */
+    private static Answer<Planner> withdraw(Planner planner) {
+        return invocation -> {
+            invocation.<PlannerPublishingService.Withdrawal>getArgument(1).apply(planner);
+            return planner;
+        };
+    }
+
     private static Answer<Planner> applyTo(Planner planner) {
         return invocation -> {
             invocation.<Consumer<Planner>>getArgument(1).accept(planner);
