@@ -2,15 +2,17 @@ import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import type { SortMode } from '@/shared/filter'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 
+/** Unrecognized and absent keywords both sort where 'None' sits. */
+const NONE_CATEGORY_INDEX = KEYWORD_ORDER.indexOf('None')
+
 /**
  * Get the category index for sorting
  * Returns index in KEYWORD_ORDER, or None index if no match
  */
 function getCategoryIndex(keyword: string | null): number {
-  if (!keyword) return KEYWORD_ORDER.indexOf('None')
+  if (!keyword) return NONE_CATEGORY_INDEX
   const index = KEYWORD_ORDER.indexOf(keyword as (typeof KEYWORD_ORDER)[number])
-  // Return index if found, otherwise treat as None (last in order)
-  return index !== -1 ? index : KEYWORD_ORDER.indexOf('None')
+  return index !== -1 ? index : NONE_CATEGORY_INDEX
 }
 
 /**
@@ -34,28 +36,29 @@ function getTierValue(tag: string[]): number {
   return isNaN(tierNum) ? 999 : 6 - tierNum // 5->1, 4->2, 3->3, 2->4, 1->5
 }
 
+type SortKey = (gift: EGOGiftListItem) => number
+
+const categoryKey: SortKey = (gift) => getCategoryIndex(gift.keyword)
+const tierKey: SortKey = (gift) => getTierValue(gift.tag)
+const idKey: SortKey = (gift) => parseInt(gift.id, 10)
+
+/** Ascending key ladder per sort mode; the first key that differs decides. */
+const SORT_KEYS: Record<SortMode, readonly SortKey[]> = {
+  'tier-first': [tierKey, categoryKey, idKey],
+  'keyword-first': [categoryKey, tierKey, idKey],
+}
+
 /**
  * Sort EGO Gifts based on sort mode
  */
 export function sortEGOGifts(gifts: EGOGiftListItem[], sortMode: SortMode): EGOGiftListItem[] {
-  return [...gifts].sort((a, b) => {
-    const aCategoryIndex = getCategoryIndex(a.keyword)
-    const bCategoryIndex = getCategoryIndex(b.keyword)
-    const aTierValue = getTierValue(a.tag)
-    const bTierValue = getTierValue(b.tag)
-    const aId = parseInt(a.id, 10)
-    const bId = parseInt(b.id, 10)
+  const keys = SORT_KEYS[sortMode]
 
-    if (sortMode === 'tier-first') {
-      // tier -> category -> id
-      if (aTierValue !== bTierValue) return aTierValue - bTierValue
-      if (aCategoryIndex !== bCategoryIndex) return aCategoryIndex - bCategoryIndex
-      return aId - bId
-    } else {
-      // category -> tier -> id
-      if (aCategoryIndex !== bCategoryIndex) return aCategoryIndex - bCategoryIndex
-      if (aTierValue !== bTierValue) return aTierValue - bTierValue
-      return aId - bId
+  return [...gifts].sort((a, b) => {
+    for (const key of keys) {
+      const difference = key(a) - key(b)
+      if (difference !== 0) return difference
     }
+    return 0
   })
 }

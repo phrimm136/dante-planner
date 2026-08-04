@@ -6,7 +6,6 @@ import type {
   EGOGiftSpecSchema,
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
-  EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
 } from '../schemas/EGOGiftSchemas'
 
@@ -41,22 +40,4 @@ export interface EGOGiftListItem {
   fusioned?: boolean
 }
 
-/**
- * @deprecated Use EGOGiftListItem instead. Kept for backwards compatibility.
- */
-export interface EGOGiftListItemWithName {
-  id: string
-  /** Optional - only populated when i18n is loaded. Display uses EGOGiftName component. */
-  name?: string
-  tag: string[]
-  keyword: string | null
-  attributeType: string
-  themePack: string[]
-  maxEnhancement: 0 | 1 | 2
-  hardOnly?: boolean
-  extremeOnly?: boolean
-  fusioned?: boolean
-}
-
-export type EGOGiftSpecList = z.infer<typeof EGOGiftSpecListSchema>
 export type EGOGiftNameList = z.infer<typeof EGOGiftNameListSchema>

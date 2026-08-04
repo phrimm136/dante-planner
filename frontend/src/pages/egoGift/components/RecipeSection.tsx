@@ -23,16 +23,11 @@ import type {
   StandardRecipe,
   MixedRecipe,
 } from '../types/EGOGiftTypes'
+import { isMixedRecipe } from '../lib/egoGiftUtils'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface RecipeSectionProps {
   recipe: EGOGiftRecipe
-}
-
-/**
- * Type guard to check if recipe is mixed type (Lunar Memory)
- */
-function isMixedRecipe(recipe: EGOGiftRecipe): recipe is MixedRecipe {
-  return 'type' in recipe && recipe.type === 'mixed'
 }
 
 /**
@@ -125,7 +120,7 @@ function MixedRecipeDisplay({
       {/* Pool A */}
       <div className="space-y-2">
         {showPoolALabel && (
-          <p className="text-sm text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.caption}>
             {t('recipe.selectNofM', { count: recipe.a.count, total: recipe.a.ids.length })}
           </p>
         )}
@@ -157,7 +152,7 @@ function MixedRecipeDisplay({
       {/* Pool B */}
       <div className="space-y-2">
         {showPoolBLabel && (
-          <p className="text-sm text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.caption}>
             {t('recipe.selectNofM', { count: recipe.b.count, total: recipe.b.ids.length })}
           </p>
         )}

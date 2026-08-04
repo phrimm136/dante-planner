@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 import { getEGOGiftTierEXPath } from '@/shared/assets'
 import { getDisplayFontForLabel } from '@/lib/utils'
+import { ACCENT_COLORS } from '@/lib/constants'
 
 interface EGOGiftTierIndicatorProps {
   tier: string
@@ -35,7 +36,7 @@ export function EGOGiftTierIndicator({ tier }: EGOGiftTierIndicatorProps) {
   return (
     <div
       className={`absolute ${textSize}  pointer-events-none top-0 left-2 -translate-y-1`}
-      style={{ color: '#fcba03', fontFamily: getDisplayFontForLabel() }}
+      style={{ color: ACCENT_COLORS.TIER, fontFamily: getDisplayFontForLabel() }}
     >
       {tierText}
     </div>

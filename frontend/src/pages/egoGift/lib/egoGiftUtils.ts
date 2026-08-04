@@ -1,4 +1,5 @@
-import { EGO_GIFT_ENHANCEMENT_BASE_COSTS, ENHANCEMENT_LEVELS } from '@/shared/gameData'
+import { EGO_GIFT_ENHANCEMENT_BASE_COSTS } from '@/shared/gameData'
+import type { EGOGiftRecipe, MixedRecipe } from '../types/EGOGiftTypes'
 
 /**
  * Calculate enhancement cost for a given tier and level
@@ -38,26 +39,12 @@ export function extractEGOGiftTier(tags: string[]): string {
 }
 
 /**
- * Get enhancement levels that should be disabled
- * A level is disabled if its description is empty or missing
- * @param descs - Array of description strings (index 0 = base, 1 = +, 2 = ++)
- * @returns Array of disabled level indices (0, 1, and/or 2)
+ * Whether a recipe is the two-pool "mixed" shape rather than the standard
+ * material-list shape.
+ *
+ * @param recipe - Recipe to classify
+ * @returns True when the recipe carries the mixed discriminant
  */
-export function getDisabledEnhancementLevels(descs: string[]): number[] {
-  return ENHANCEMENT_LEVELS.filter((level) => level >= descs.length || !descs[level]?.trim())
-}
-
-/**
- * Get maximum enhancement level from descriptions array
- * @param descs - Array of description strings (index 0 = base, 1 = +, 2 = ++)
- * @returns Maximum available enhancement level (0, 1, or 2)
- */
-export function getMaxEnhancementLevel(descs: string[]): 0 | 1 | 2 {
-  // Find the highest level with a valid description
-  for (let i = 2; i >= 0; i--) {
-    if (i < descs.length && descs[i]?.trim()) {
-      return i as 0 | 1 | 2
-    }
-  }
-  return 0
+export function isMixedRecipe(recipe: EGOGiftRecipe): recipe is MixedRecipe {
+  return 'type' in recipe && recipe.type === 'mixed'
 }

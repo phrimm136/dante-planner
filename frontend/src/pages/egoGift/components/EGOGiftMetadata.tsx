@@ -18,7 +18,7 @@ import CostDisplay from './CostDisplay'
 import { getEGOGiftEnhancementIconPath } from '@/shared/assets'
 import { useThemePackI18n } from '@/pages/themePack'
 import { ENHANCEMENT_LABELS, type EnhancementLevel } from '@/shared/gameData'
-import { DIFFICULTY_BADGE_STYLES } from '@/lib/constants'
+import { DIFFICULTY_BADGE_STYLES, SECTION_STYLES } from '@/lib/constants'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
@@ -101,7 +101,7 @@ export function EGOGiftMetadata({
 
       {/* Max Enhancement row - always visible */}
       <MetadataRow label={t('egoGift.maxEnhancement', 'Max Enhancement')}>
-        <div className="flex items-center gap-2">
+        <div className={SECTION_STYLES.LAYOUT.row}>
           {maxEnhancement === 0 ? (
             <span className="text-sm font-medium">{ENHANCEMENT_LABELS[maxEnhancement]}</span>
           ) : (

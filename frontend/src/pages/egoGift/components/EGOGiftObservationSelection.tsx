@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useEGOGiftListData } from '../hooks/useEGOGiftListData'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { CARD_GRID } from '@/lib/constants'
@@ -24,23 +23,17 @@ export function EGOGiftObservationSelection({
 }: EGOGiftObservationSelectionProps) {
   const { spec, i18n } = useEGOGiftListData()
 
-  // Breakpoint detection for scaling
-
   // Merge spec and i18n into EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(
-    () =>
-      Object.entries(spec).map(([id, specData]) => ({
-        id,
-        name: i18n[id] || id,
-        tag: specData.tag as EGOGiftListItem['tag'],
-        keyword: specData.keyword,
-        battleKeywordList: specData.battleKeywordList ?? [],
-        attributeType: specData.attributeType,
-        themePack: specData.themePack,
-        maxEnhancement: specData.maxEnhancement,
-      })),
-    [spec, i18n],
-  )
+  const gifts: EGOGiftListItem[] = Object.entries(spec).map(([id, specData]) => ({
+    id,
+    name: i18n[id] || id,
+    tag: specData.tag as EGOGiftListItem['tag'],
+    keyword: specData.keyword,
+    battleKeywordList: specData.battleKeywordList ?? [],
+    attributeType: specData.attributeType,
+    themePack: specData.themePack,
+    maxEnhancement: specData.maxEnhancement,
+  }))
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 

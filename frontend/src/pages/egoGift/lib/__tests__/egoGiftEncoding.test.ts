@@ -48,10 +48,16 @@ describe('decodeGiftSelection', () => {
     expect(result).toEqual({ enhancement: 2, giftId: '9001' })
   })
 
-  it('falls back to enhancement 0 for invalid prefix', () => {
-    const result = decodeGiftSelection('39001')
-    expect(result).toEqual({ enhancement: 0, giftId: '39001' })
+  it('rejects an unsupported enhancement prefix', () => {
+    expect(decodeGiftSelection('39001')).toBeNull()
   })
+
+  it.each(['', '900', '900a', '90011', 'gift1', ' 9001', '9001 ', '-9001'])(
+    'rejects the malformed encoding %j',
+    (encodedId) => {
+      expect(decodeGiftSelection(encodedId)).toBeNull()
+    },
+  )
 })
 
 describe('getBaseGiftId', () => {
@@ -62,6 +68,10 @@ describe('getBaseGiftId', () => {
   it('extracts giftId from enhanced selection', () => {
     expect(getBaseGiftId('19001')).toBe('9001')
     expect(getBaseGiftId('29001')).toBe('9001')
+  })
+
+  it('returns null for a malformed encoding', () => {
+    expect(getBaseGiftId('39001')).toBeNull()
   })
 })
 

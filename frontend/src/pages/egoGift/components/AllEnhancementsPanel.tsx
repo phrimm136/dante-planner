@@ -12,6 +12,7 @@ import { getEGOGiftEnhancementIconPath, getEGOGiftCostIconPath } from '@/shared/
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ENHANCEMENT_LABELS, ENHANCEMENT_LEVELS, type EnhancementLevel } from '@/shared/gameData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface AllEnhancementsPanelProps {
   /** Maximum enhancement level to display (0, 1, or 2) */
@@ -55,7 +56,7 @@ function EnhancementRow({
 
         {/* Enhancement Cost */}
         {cost !== null && (
-          <div className="flex items-center gap-2">
+          <div className={SECTION_STYLES.LAYOUT.row}>
             <img src={getEGOGiftCostIconPath()} alt="Cost" className="w-6 h-6" />
             <span className="text-sm font-semibold">{cost}</span>
           </div>
