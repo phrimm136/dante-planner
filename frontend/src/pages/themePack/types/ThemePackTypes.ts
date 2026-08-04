@@ -1,17 +1,6 @@
 import type { z } from 'zod'
 import type { DungeonIdx } from '@/shared/gameData'
-import type {
-  ExceptionConditionSchema,
-  ThemePackConfigSchema,
-  ThemePackEntrySchema,
-  ThemePackListSchema,
-} from '../schemas/ThemePackSchemas'
-
-/** Exception condition for theme pack floor/difficulty availability (themePackList.json) */
-export type ExceptionCondition = z.infer<typeof ExceptionConditionSchema>
-
-/** Theme pack visual configuration; textColor is the hex (no #) for runtime text overlay */
-export type ThemePackConfig = z.infer<typeof ThemePackConfigSchema>
+import type { ThemePackEntrySchema, ThemePackListSchema } from '../schemas/ThemePackSchemas'
 
 /** Theme pack entry from themePackList.json */
 export type ThemePackEntry = z.infer<typeof ThemePackEntrySchema>

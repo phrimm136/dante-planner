@@ -4,6 +4,7 @@
 export { ThemePackCard } from './components/ThemePackCard'
 export { ThemePackList } from './components/ThemePackList'
 export { ThemePackCardLink } from './components/ThemePackCardLink'
+export { ThemePackFilterDropdown } from './components/ThemePackFilterDropdown'
 
 // Hooks
 export {
@@ -11,23 +12,10 @@ export {
   useThemePackI18n,
   themePackListQueryKeys,
 } from './hooks/useThemePackListData'
-export {
-  useThemePackDetailData,
-  useThemePackDetailSpec,
-  themePackDetailQueryKeys,
-} from './hooks/useThemePackDetailData'
-
-// Lib
-export {
-  matchesDungeonDifficultyFilter,
-  matchesFloorFilter,
-  matchesEgoGiftFilter,
-} from './lib/themePackFilter'
+export { useThemePackDetailData, themePackDetailQueryKeys } from './hooks/useThemePackDetailData'
 
 // Types
 export type {
-  ExceptionCondition,
-  ThemePackConfig,
   ThemePackEntry,
   ThemePackList as ThemePackListType,
   FloorThemeSelection,
@@ -46,3 +34,6 @@ export {
   FeaturedBossSchema,
 } from './schemas/ThemePackSchemas'
 export type { ThemePackDetail, FeaturedBoss } from './schemas/ThemePackSchemas'
+
+// Filters
+export type { ThemePackFacetState } from './lib/themePackFilter'

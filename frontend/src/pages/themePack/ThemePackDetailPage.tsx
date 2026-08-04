@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useThemePackDetailData } from '@/pages/themePack'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
+import { isMixedRecipe } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListData } from '@/pages/abEvent'
 import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
@@ -30,6 +31,7 @@ import {
 import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameData'
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
+import { SECTION_STYLES } from '@/lib/constants'
 
 // =============================================================================
 // Left Column Components
@@ -49,7 +51,7 @@ function DifficultyBadges({ conditions }: { conditions: ThemePackDetail['excepti
   ]
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={SECTION_STYLES.LAYOUT.wrap}>
       {DUNGEON_DISPLAY.filter((d) => dungeonIdxSet.has(d.idx)).map((d) => (
         <span
           key={d.idx}
@@ -194,7 +196,7 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
     if (poolSet.has(id)) continue
     const recipe = giftSpec.recipe
     if (!recipe) continue
-    if ('type' in recipe && recipe.type === 'mixed') {
+    if (isMixedRecipe(recipe)) {
       const allIds = [...(recipe.a?.ids ?? []), ...(recipe.b?.ids ?? [])]
       if (allIds.length > 0 && allIds.every((mid) => poolSet.has(String(mid)))) {
         fusionedIds.push(id)
@@ -209,35 +211,34 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
     }
   }
 
-  const allIds = [...giftIds.map(String), ...fusionedIds]
+  const shownGifts = [...giftIds.map(String), ...fusionedIds].flatMap((id) => {
+    const giftSpec = spec[id]
+    return giftSpec ? [{ id, giftSpec }] : []
+  })
 
   return (
     <div className="flex flex-wrap gap-3">
-      {allIds.map((id) => {
-        const giftSpec = spec[id]
-        if (!giftSpec) return null
-        return (
-          <Link key={id} to="/ego-gift/$id" params={{ id }}>
-            <div className="flex flex-col items-center gap-1">
-              <EGOGiftCard
-                gift={{
-                  id,
-                  tag: giftSpec.tag,
-                  keyword: giftSpec.keyword,
-                  battleKeywordList: giftSpec.battleKeywordList ?? [],
-                  attributeType: giftSpec.attributeType,
-                  themePack: giftSpec.themePack,
-                  maxEnhancement: giftSpec.maxEnhancement,
-                }}
-                enableHoverHighlight
-              />
-              <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-                <EGOGiftName id={id} />
-              </span>
-            </div>
-          </Link>
-        )
-      })}
+      {shownGifts.map(({ id, giftSpec }) => (
+        <Link key={id} to="/ego-gift/$id" params={{ id }}>
+          <div className="flex flex-col items-center gap-1">
+            <EGOGiftCard
+              gift={{
+                id,
+                tag: giftSpec.tag,
+                keyword: giftSpec.keyword,
+                battleKeywordList: giftSpec.battleKeywordList ?? [],
+                attributeType: giftSpec.attributeType,
+                themePack: giftSpec.themePack,
+                maxEnhancement: giftSpec.maxEnhancement,
+              }}
+              enableHoverHighlight
+            />
+            <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
+              <EGOGiftName id={id} />
+            </span>
+          </div>
+        </Link>
+      ))}
     </div>
   )
 }
@@ -329,7 +330,7 @@ function AllEgoGifts({ giftIds }: { giftIds: number[] }) {
   const { spec } = useEGOGiftListData()
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={SECTION_STYLES.LAYOUT.wrap}>
       {giftIds.map((giftId) => {
         const id = String(giftId)
         const giftSpec = spec[id]

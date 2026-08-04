@@ -1,16 +1,16 @@
-import { useState, Suspense } from 'react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/pages/themePack'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
+import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
 import { CompactDungeonDifficultyFilter } from '@/shared/filter'
 import { CompactFloorFilter } from '@/shared/filter'
-import { EgoGiftSearchDropdown } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { ThemePackList } from '@/pages/themePack'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -27,18 +27,15 @@ function ThemePackPageShell() {
   const {
     values: filters,
     setters,
+    searchQuery,
+    setSearchQuery,
     resetAll,
+    store,
   } = useSetFilters({
     selectedDifficulties: new Set<DungeonIdx>(),
     selectedFloors: new Set<ThemePackFloor>(),
     selectedEgoGifts: new Set<string>(),
   })
-  const [searchQuery, setSearchQuery] = useState<string>('')
-
-  const handleResetAll = () => {
-    resetAll()
-    setSearchQuery('')
-  }
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
@@ -48,7 +45,7 @@ function ThemePackPageShell() {
       activeCount={filters.selectedDifficulties.size}
     >
       <CompactDungeonDifficultyFilter
-        selectedDifficulties={filters.selectedDifficulties}
+        selected={filters.selectedDifficulties}
         onSelectionChange={setters.selectedDifficulties}
       />
     </FilterSection>
@@ -58,7 +55,7 @@ function ThemePackPageShell() {
     <>
       <FilterSection title={t('filters.floor', 'Floor')} activeCount={filters.selectedFloors.size}>
         <CompactFloorFilter
-          selectedFloors={filters.selectedFloors}
+          selected={filters.selectedFloors}
           onSelectionChange={setters.selectedFloors}
         />
       </FilterSection>
@@ -68,30 +65,21 @@ function ThemePackPageShell() {
         activeCount={filters.selectedEgoGifts.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <EgoGiftSearchDropdown
-            selectedEgoGifts={filters.selectedEgoGifts}
+          <EGOGiftFilterDropdown
+            selected={filters.selectedEgoGifts}
             onSelectionChange={setters.selectedEgoGifts}
-            useListData={useEGOGiftListData}
           />
         </Suspense>
       </FilterSection>
     </>
   )
 
-  const filterContent = (
-    <>
-      {primaryFilters}
-      {secondaryFilters}
-    </>
-  )
-
   return (
     <FilterPageLayout
-      filterContent={filterContent}
       primaryFilters={primaryFilters}
       secondaryFilters={secondaryFilters}
       activeFilterCount={activeFilterCount}
-      onResetAll={handleResetAll}
+      onResetAll={resetAll}
       searchBar={
         <SearchBar
           searchQuery={searchQuery}
@@ -100,13 +88,7 @@ function ThemePackPageShell() {
         />
       }
     >
-      <ThemePackList
-        spec={spec}
-        selectedDifficulties={filters.selectedDifficulties}
-        selectedFloors={filters.selectedFloors}
-        selectedEgoGifts={filters.selectedEgoGifts}
-        searchQuery={searchQuery}
-      />
+      <ThemePackList spec={spec} store={store} />
     </FilterPageLayout>
   )
 }
@@ -121,10 +103,8 @@ function ThemePackPageShell() {
  */
 export default function ThemePackPage() {
   return (
-    <div className="container mx-auto p-8">
-      <Suspense fallback={<ListPageSkeleton preset="themePack" />}>
-        <ThemePackPageShell />
-      </Suspense>
-    </div>
+    <EntityListPage skeleton={<ListPageSkeleton preset="themePack" />}>
+      <ThemePackPageShell />
+    </EntityListPage>
   )
 }
