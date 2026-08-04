@@ -1,5 +1,4 @@
 export {
-  parseBracketNotation,
   getSelectedIndicatorPath,
   getIdentityInfoImagePath,
   getIdentityProfileImagePath,
@@ -8,9 +7,6 @@ export {
   getIdentityFrameHighlightPath,
   getSinnerBGPath,
   getSinnerIconPath,
-  getSinIconPath,
-  getStatusEffectIconPath,
-  getResistanceInfo,
   getRarityIconPath,
   getIdentityDetailImagePath,
   getSkillImagePath,
@@ -69,7 +65,6 @@ export {
   getSanityDecIconPath,
   getButtonBasePath,
   getButtonOnHoverPath,
-  getButtonSelectedPath,
   getButtonExpandImagePath,
   getButtonSwapImagePath,
   getAttackLevelIconPath,
@@ -82,7 +77,4 @@ export {
   getEGOGiftSelectHighlightPath,
   getBackupIndicatorPath,
   getLogoPath,
-  getTiptapPlaceholderPath,
 } from './assetPaths'
-
-export type { ResistanceCategoryKey, ResistanceInfo } from './assetPaths'
