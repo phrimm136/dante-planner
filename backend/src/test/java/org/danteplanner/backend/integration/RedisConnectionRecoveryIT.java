@@ -22,6 +22,7 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -117,31 +118,6 @@ class RedisConnectionRecoveryIT {
     private static final long SSE_DELIVERY_WAIT_MS = 1_000L;
 
     /** Minimal planner content that passes {@code PlannerContentValidator} (from DegradationIT). */
-    private static final String VALID_CONTENT = """
-        {
-            "selectedKeywords":[],
-            "selectedBuffIds":[100,201],
-            "selectedGiftKeyword":"Combustion",
-            "selectedGiftIds":["9001"],
-            "equipment":{
-                "01":{"identity":{"id":"10101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20101","threadspin":4}}},
-                "02":{"identity":{"id":"10201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20201","threadspin":4}}},
-                "03":{"identity":{"id":"10301","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20301","threadspin":4}}},
-                "04":{"identity":{"id":"10401","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20401","threadspin":4}}},
-                "05":{"identity":{"id":"10501","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20501","threadspin":4}}},
-                "06":{"identity":{"id":"10601","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20601","threadspin":4}}},
-                "07":{"identity":{"id":"10701","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20701","threadspin":4}}},
-                "08":{"identity":{"id":"10801","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20801","threadspin":4}}},
-                "09":{"identity":{"id":"10901","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20901","threadspin":4}}},
-                "10":{"identity":{"id":"11001","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21001","threadspin":4}}},
-                "11":{"identity":{"id":"11101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21101","threadspin":4}}},
-                "12":{"identity":{"id":"11201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21201","threadspin":4}}}
-            },
-            "deploymentOrder":[0,1,2,3,4,5],
-            "floorSelections":[{"themePackId":"1001","difficulty":0,"giftIds":["9002"]}],
-            "sectionNotes":{}
-        }
-        """.trim().replace("\n", "").replace(" ", "");
 
     private static final Network RECOVERY_NETWORK = Network.newNetwork();
 
@@ -340,9 +316,9 @@ class RedisConnectionRecoveryIT {
     void rateLimitedWrite_WhenRateLimitRedisRestored_StopsReturning503() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "recovery-rate-limit-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
 
         RATE_LIMIT_REDIS_PROXY.disable();
 
@@ -395,7 +371,7 @@ class RedisConnectionRecoveryIT {
 
     private String upsertBody(UUID id, String title) throws IOException {
         UpsertPlannerRequest request = new UpsertPlannerRequest(
-                id.toString(), "5F", title, PlannerStatus.DRAFT, VALID_CONTENT, 7,
+                id.toString(), "5F", title, PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT, 7,
                 PlannerType.MIRROR_DUNGEON, null, null);
         return objectMapper.writeValueAsString(request);
     }

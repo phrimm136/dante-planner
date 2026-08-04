@@ -8,6 +8,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,11 +70,11 @@ class AdminControllerIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie adminCookie() {
-        return new Cookie("accessToken", adminToken);
+        return AuthCookies.accessToken(adminToken);
     }
 
     private Cookie regularUserCookie() {
-        return new Cookie("accessToken", regularUserToken);
+        return AuthCookies.accessToken(regularUserToken);
     }
 
     @Nested

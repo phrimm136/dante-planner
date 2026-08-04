@@ -4,11 +4,11 @@ import jakarta.servlet.http.Cookie;
 import java.util.UUID;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,12 +60,11 @@ class InternalEndpointsRemovedIT extends SharedMySqlContainerSupport {
     void setUp() {
         User user = TestDataFactory.createTestUser(
                 userRepository, "internal-removed-" + UUID.randomUUID() + "@example.com");
-        auth = new Cookie("accessToken", TestDataFactory.generateAccessToken(jwtTokenService, user));
-        device = new Cookie("deviceId", UUID.randomUUID().toString());
+        auth = AuthCookies.accessToken(TestDataFactory.generateAccessToken(jwtTokenService, user));
+        device = AuthCookies.freshDeviceId();
     }
 
     @Test
-    @DisplayName("internalEndpointsRemoved_WhenGetRequested_Returns404")
     void internalEndpointsRemoved_WhenGetRequested_Returns404() throws Exception {
         mockMvc.perform(get(REFRESH_GAME_DATA_PATH).cookie(auth, device))
                 .andExpect(status().isNotFound());
@@ -75,7 +74,6 @@ class InternalEndpointsRemovedIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("internalEndpointsRemoved_WhenPostRequestedWithCsrf_Returns404")
     void internalEndpointsRemoved_WhenPostRequestedWithCsrf_Returns404() throws Exception {
         mockMvc.perform(post(REFRESH_GAME_DATA_PATH).with(withCsrf()).cookie(auth, device))
                 .andExpect(status().isNotFound());

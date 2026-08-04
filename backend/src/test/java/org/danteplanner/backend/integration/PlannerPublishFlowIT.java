@@ -3,7 +3,6 @@ package org.danteplanner.backend.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -21,6 +20,7 @@ import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,7 +150,7 @@ class PlannerPublishFlowIT {
                 planner.getContentJson(), 6,
                 PlannerType.MIRROR_DUNGEON, planner.getSyncVersion(), null);
         mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
-                        .cookie(new Cookie("accessToken", token))
+                        .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(titleEdit)))
@@ -180,7 +180,7 @@ class PlannerPublishFlowIT {
                 content, 7, PlannerType.MIRROR_DUNGEON, null, null);
 
         mockMvc.perform(put("/api/planner/md/{id}/publish", plannerId)
-                        .cookie(new Cookie("accessToken", token))
+                        .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(publishRequest)))
@@ -196,7 +196,7 @@ class PlannerPublishFlowIT {
                 .as("the single request built the filter index").isPositive();
 
         mockMvc.perform(put("/api/planner/md/{id}/publish", plannerId)
-                        .cookie(new Cookie("accessToken", token))
+                        .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
                         .content("{\"published\":false}"))

@@ -1,7 +1,7 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
+import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.comment.service.CommentAccountPurgeService;
@@ -74,14 +74,7 @@ class UserAccountLifecycleServiceTest {
                 GRACE_PERIOD_DAYS
         );
 
-        testUser = User.builder()
-                .id(123L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(123L);
     }
 
     @Nested

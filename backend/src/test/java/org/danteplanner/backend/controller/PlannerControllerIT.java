@@ -22,7 +22,10 @@ import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.auth.token.ExpiredTokens;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.shared.config.JwtProperties;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,6 +77,9 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     private JwtTokenService jwtTokenService;
 
     @Autowired
+    private JwtProperties jwtProperties;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -118,45 +124,16 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie accessTokenCookie() {
-        return new Cookie("accessToken", accessToken);
+        return AuthCookies.accessToken(accessToken);
     }
 
     private Cookie deviceIdCookie() {
-        return new Cookie("deviceId", deviceId.toString());
+        return AuthCookies.deviceId(deviceId);
     }
 
-    /**
-     * Minimal valid planner content that passes PlannerContentValidator.
-     * Equipment: 12 sinners (01-12), each with identity + ZAYIN EGO.
-     * DeploymentOrder: 0-indexed (0-11).
-     * selectedBuffIds: valid buff IDs from game data.
-     * selectedGiftKeyword + selectedGiftIds: valid gift selection from Combustion pool.
-     */
-    private static final String VALID_CONTENT = """
-        {
-            "selectedKeywords":[],
-            "selectedBuffIds":[100,201],
-            "selectedGiftKeyword":"Combustion",
-            "selectedGiftIds":["9001"],
-            "equipment":{
-                "01":{"identity":{"id":"10101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20101","threadspin":4}}},
-                "02":{"identity":{"id":"10201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20201","threadspin":4}}},
-                "03":{"identity":{"id":"10301","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20301","threadspin":4}}},
-                "04":{"identity":{"id":"10401","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20401","threadspin":4}}},
-                "05":{"identity":{"id":"10501","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20501","threadspin":4}}},
-                "06":{"identity":{"id":"10601","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20601","threadspin":4}}},
-                "07":{"identity":{"id":"10701","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20701","threadspin":4}}},
-                "08":{"identity":{"id":"10801","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20801","threadspin":4}}},
-                "09":{"identity":{"id":"10901","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20901","threadspin":4}}},
-                "10":{"identity":{"id":"11001","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21001","threadspin":4}}},
-                "11":{"identity":{"id":"11101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21101","threadspin":4}}},
-                "12":{"identity":{"id":"11201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21201","threadspin":4}}}
-            },
-            "deploymentOrder":[0,1,2,3,4,5],
-            "floorSelections":[{"themePackId":"1001","difficulty":0,"giftIds":["9002"]}],
-            "sectionNotes":{}
-        }
-        """.trim().replace("\n", "").replace(" ", "");
+    private Cookie[] session() {
+        return AuthCookies.session(accessToken, deviceId);
+    }
 
     private UpsertPlannerRequest createValidPlannerRequest() {
         return new UpsertPlannerRequest(
@@ -164,7 +141,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 "5F",
                 "Test Planner",
                 PlannerStatus.DRAFT,
-                VALID_CONTENT,
+                TestDataFactory.VALID_CONTENT,
                 7,
                 PlannerType.MIRROR_DUNGEON,
                 null,
@@ -226,7 +203,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     private Planner createTestPlanner(User user) {
         return TestDataFactory.planner(user)
                 .status(PlannerStatus.DRAFT)
-                .content(VALID_CONTENT)
+                .content(TestDataFactory.VALID_CONTENT)
                 .save(plannerRepository);
     }
 
@@ -235,7 +212,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                 .title(title)
                 .category(category)
                 .status(PlannerStatus.SAVED)
-                .content(VALID_CONTENT)
+                .content(TestDataFactory.VALID_CONTENT)
                 .published(true)
                 .save(plannerRepository);
         statsRepository.save(PlannerStats.builder()
@@ -256,8 +233,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated())
@@ -289,8 +265,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = withCategory(createValidPlannerRequest(), null);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -305,8 +280,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .replace("\"status\":\"draft\"", "\"status\":\"garbage\"");
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(body))
                     .andExpect(status().isBadRequest())
@@ -320,8 +294,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = withContent(createValidPlannerRequest(), null);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -341,8 +314,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withContent(request, largeContent);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -362,8 +334,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withContent(request, contentWithLargeNote);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -377,8 +348,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withContentVersion(request, null);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -392,8 +362,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withPlannerType(request, null);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -407,8 +376,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withContentVersion(request, 0);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -426,8 +394,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isConflict())
@@ -443,8 +410,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -460,8 +426,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             // Note: INVALID_CATEGORY is mapped to generic VALIDATION_ERROR in GlobalExceptionHandler
             // to prevent schema probing attacks
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -612,8 +577,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withTitle(request, "Updated Title");
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -630,8 +594,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withSyncVersion(withTitle(request, "Updated Title"), 999L); // Wrong version
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isConflict())
@@ -648,8 +611,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withTitle(request, "Updated Title");
 
             mockMvc.perform(put("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden())
@@ -669,8 +631,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             ));
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
@@ -701,8 +662,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             request = withContentVersion(request, 7);
 
             mockMvc.perform(put("/api/planner/md/{id}", planner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
@@ -720,8 +680,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             Planner planner = createTestPlanner(testUser);
 
             mockMvc.perform(delete("/api/planner/md/{id}", planner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie()))
+                            .cookie(session()))
                     .andExpect(status().isNoContent());
 
             // Verify soft delete
@@ -736,8 +695,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             Planner otherUserPlanner = createTestPlanner(otherUser);
 
             mockMvc.perform(delete("/api/planner/md/{id}", otherUserPlanner.getId()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie()))
+                            .cookie(session()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
         }
@@ -748,8 +706,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UUID nonExistentId = UUID.randomUUID();
 
             mockMvc.perform(delete("/api/planner/md/{id}", nonExistentId).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie()))
+                            .cookie(session()))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.code").value("PLANNER_NOT_FOUND"));
         }
@@ -859,12 +816,19 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Should return 401 for expired/invalid token")
         void getPlanners_WhenExpiredToken_Returns401() throws Exception {
-            // This test verifies behavior with invalid/expired token
-            // Note: Invalid tokens return 401, while missing tokens return 403
-            String invalidToken = "invalid.jwt.token";
+            String expiredToken =
+                    ExpiredTokens.accessToken(jwtProperties, testUser.getId(), UserRole.NORMAL);
 
             mockMvc.perform(get("/api/planner/md")
-                            .cookie(new Cookie("accessToken", invalidToken)))
+                            .cookie(AuthCookies.accessToken(expiredToken)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Should return 401 for a malformed token")
+        void getPlanners_WhenMalformedToken_Returns401() throws Exception {
+            mockMvc.perform(get("/api/planner/md")
+                            .cookie(AuthCookies.accessToken("invalid.jwt.token")))
                     .andExpect(status().isUnauthorized());
         }
 
@@ -952,8 +916,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated());
@@ -974,8 +937,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isConflict())
@@ -1000,8 +962,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             UpsertPlannerRequest request = createValidPlannerRequest();
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated());
@@ -1011,12 +972,11 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @DisplayName("Content well under 50KB should succeed")
         void upsertPlanner_WhenContentUnder50KB_Succeeds() throws Exception {
             UpsertPlannerRequest request = createValidPlannerRequest();
-            // Use VALID_CONTENT which is already well under 50KB
-            request = withContent(request, VALID_CONTENT);
+            // Use TestDataFactory.VALID_CONTENT which is already well under 50KB
+            request = withContent(request, TestDataFactory.VALID_CONTENT);
 
             mockMvc.perform(put("/api/planner/md/{id}", request.id()).with(withCsrf())
-                            .cookie(accessTokenCookie())
-                            .cookie(deviceIdCookie())
+                            .cookie(session())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isCreated());
@@ -1164,7 +1124,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"published\":true}")
-                            .cookie(new Cookie("accessToken", otherUserAccessToken)))
+                            .cookie(AuthCookies.accessToken(otherUserAccessToken)))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
         }
@@ -1442,7 +1402,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
             Planner planner = TestDataFactory.planner(user)
                     .title("View Test Planner")
                     .status(PlannerStatus.SAVED)
-                    .content(VALID_CONTENT)
+                    .content(TestDataFactory.VALID_CONTENT)
                     .published(true)
                     .save(plannerRepository);
             statsRepository.save(PlannerStats.builder()
@@ -1494,7 +1454,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     new PlannerView(planner.getId(), viewerHash, LocalDate.now(ZoneOffset.UTC)));
 
             mockMvc.perform(get("/api/planner/md/published/{id}", planner.getId())
-                            .cookie(new Cookie("deviceId", deviceId.toString()))
+                            .cookie(AuthCookies.deviceId(deviceId))
                             .header("X-Forwarded-For", "10.0.0.1")
                             .header("User-Agent", "TestBrowser/1.0"))
                     .andExpect(status().isOk())

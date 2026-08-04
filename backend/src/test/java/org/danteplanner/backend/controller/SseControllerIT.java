@@ -3,7 +3,6 @@ import org.danteplanner.backend.shared.controller.SseController;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 
-import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -22,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.AuthCookies.performAuthed;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,8 +65,7 @@ class SseControllerIT extends SharedMySqlContainerSupport {
     @Test
     @DisplayName("opens a text/event-stream when authenticated")
     void subscribe_WhenAuthenticated_StartsEventStream() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/sse/subscribe")
-                        .cookie(new Cookie("accessToken", accessToken)))
+        MvcResult result = performAuthed(mockMvc, get("/api/sse/subscribe"), accessToken)
                 .andExpect(request().asyncStarted())
                 .andReturn();
 

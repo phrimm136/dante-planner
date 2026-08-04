@@ -13,6 +13,7 @@ import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,11 +71,11 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie accessTokenCookie() {
-        return new Cookie("accessToken", accessToken);
+        return AuthCookies.accessToken(accessToken);
     }
 
     private Cookie otherUserAccessTokenCookie() {
-        return new Cookie("accessToken", otherUserAccessToken);
+        return AuthCookies.accessToken(otherUserAccessToken);
     }
 
     private Notification createNotification(User recipient, NotificationType type) {

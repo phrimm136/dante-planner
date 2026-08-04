@@ -15,6 +15,7 @@ import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.shared.gtid.GtidWriteCapture;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -85,32 +86,13 @@ class CausalGateIT extends CausalHarnessSupport {
     private static final Pattern GTID_VALUE = Pattern.compile(
             "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}:\\d");
 
-    /** Minimal planner content that passes {@code PlannerContentValidator}. */
-    private static final String VALID_CONTENT = """
-        {
-            "selectedKeywords":[],
-            "selectedBuffIds":[100,201],
-            "selectedGiftKeyword":"Combustion",
-            "selectedGiftIds":["9001"],
-            "equipment":{
-                "01":{"identity":{"id":"10101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20101","threadspin":4}}},
-                "02":{"identity":{"id":"10201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20201","threadspin":4}}},
-                "03":{"identity":{"id":"10301","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20301","threadspin":4}}},
-                "04":{"identity":{"id":"10401","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20401","threadspin":4}}},
-                "05":{"identity":{"id":"10501","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20501","threadspin":4}}},
-                "06":{"identity":{"id":"10601","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20601","threadspin":4}}},
-                "07":{"identity":{"id":"10701","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20701","threadspin":4}}},
-                "08":{"identity":{"id":"10801","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20801","threadspin":4}}},
-                "09":{"identity":{"id":"10901","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"20901","threadspin":4}}},
-                "10":{"identity":{"id":"11001","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21001","threadspin":4}}},
-                "11":{"identity":{"id":"11101","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21101","threadspin":4}}},
-                "12":{"identity":{"id":"11201","uptie":4,"level":45},"egos":{"ZAYIN":{"id":"21201","threadspin":4}}}
-            },
-            "deploymentOrder":[0,1,2,3,4,5],
-            "floorSelections":[{"themePackId":"1001","difficulty":0,"giftIds":["9002"]}],
-            "sectionNotes":{}
-        }
-        """.trim().replace("\n", "").replace(" ", "");
+    /**
+     * The transactions a first publish commits: the main one, the {@code AFTER_COMMIT}
+     * {@code REQUIRES_NEW} filter rebuild, and the notification fan-out. Each is pinned to a row
+     * this test owns, so the count is a property of the fixtures rather than of whatever else the
+     * shared harness database happens to hold.
+     */
+    private static final int PUBLISH_TRANSACTIONS = 3;
 
     @Autowired
     private MockMvc mockMvc;
@@ -146,9 +128,9 @@ class CausalGateIT extends CausalHarnessSupport {
             throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "causal-gate-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
         UUID plannerId = UUID.randomUUID();
 
         try {
@@ -206,9 +188,9 @@ class CausalGateIT extends CausalHarnessSupport {
     void rywNoCookieOnRedisOnlyWrite_WhenLogoutCommitsNoTx_MintsNoGtidCookie() throws Exception {
         User user = TestDataFactory.createTestUser(
                 userRepository, "logout-gate-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, user));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
 
         MvcResult result = mockMvc.perform(post("/api/auth/logout").with(withCsrf())
                         .cookie(auth, device))
@@ -227,11 +209,19 @@ class CausalGateIT extends CausalHarnessSupport {
      * A first publish commits more than once on the
      * request thread — the main transaction, then the AFTER_COMMIT {@code REQUIRES_NEW} listener
      * transactions (filter rebuild, notification fan-out). Two properties are pinned through a
-     * real request, with the primary's own {@code GTID_SUBTRACT}/{@code GTID_SUBSET} arbitrating:
-     * the transaction manager registered a commit capture for EACH of those transactions (the
-     * recording decorator observed one {@code recordCommit} per committed GTID), and the minted
-     * cookie covers every GTID the request committed, so a follow-up replica read gates past the
-     * filter rebuild, not only the main commit.
+     * real request: the transaction manager registered a commit capture for EACH of those
+     * transactions (the recording decorator observed one {@code recordCommit} per committed GTID),
+     * and the minted cookie covers every GTID the request committed, so a follow-up replica read
+     * gates past the filter rebuild, not only the main commit.
+     *
+     * <p>The fan-out writes only for users who asked for publication notices, so the test creates
+     * its own subscriber: without one the fan-out transaction is empty, commits no GTID, and the
+     * request's transaction count becomes a property of whichever neighbour last left a
+     * {@code user_settings} row in the shared harness database. Each of the three transactions is
+     * asserted through a row this test owns, and the counts are read off the request's own capture
+     * and cookie rather than off {@code @@GLOBAL.gtid_executed} — the primary is shared with every
+     * other harness class, whose contexts stay cached and keep committing, so a window on the
+     * global set counts transactions this request never made.</p>
      *
      * <p>Coverage, not equality: the cookie must gate past every commit, and a superset satisfies
      * that as well as the exact union does — which is what this asserts.</p>
@@ -245,9 +235,12 @@ class CausalGateIT extends CausalHarnessSupport {
             throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "gtid-union-author-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        User subscriber = TestDataFactory.createTestUser(
+                userRepository, "gtid-union-subscriber-" + UUID.randomUUID() + "@example.com");
+        subscribeToPublications(subscriber.getId());
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
         UUID plannerId = UUID.randomUUID();
 
         mockMvc.perform(put("/api/planner/md/" + plannerId).with(withCsrf())
@@ -256,8 +249,6 @@ class CausalGateIT extends CausalHarnessSupport {
                         .content(upsertBody(plannerId, "gtid-union-draft")))
                 .andExpect(status().is2xxSuccessful());
 
-        String executedBefore = primaryJdbc.queryForObject(
-                "SELECT @@GLOBAL.gtid_executed", String.class);
         int recordingsBefore = gtidWriteCapture.commitRecordings();
 
         MvcResult published = mockMvc.perform(put("/api/planner/md/" + plannerId + "/publish")
@@ -271,31 +262,34 @@ class CausalGateIT extends CausalHarnessSupport {
         int recordingsDuringPublish = gtidWriteCapture.commitRecordings() - recordingsBefore;
         String executedAfter = primaryJdbc.queryForObject(
                 "SELECT @@GLOBAL.gtid_executed", String.class);
-        String requestCommits = primaryJdbc.queryForObject(
-                "SELECT GTID_SUBTRACT(?, ?)", String.class, executedAfter, executedBefore);
         String cookieGtidSet = new String(
                 Base64.getUrlDecoder().decode(assertGtidCookie(published).value()),
                 StandardCharsets.UTF_8);
-        long committedTransactions = countTransactions(requestCommits);
 
-        assertThat(committedTransactions)
-                .as("the publish request must commit MORE THAN ONE transaction on the primary "
-                        + "(main tx + the AFTER_COMMIT REQUIRES_NEW listener txs); committed: %s",
-                        requestCommits)
-                .isGreaterThanOrEqualTo(2);
+        assertThat(countPublished(plannerId))
+                .as("the main transaction must have published this planner")
+                .isPositive();
         assertThat(countByPlannerId("planner_entity_filter", plannerId))
                 .as("the filter rebuild (the AFTER_COMMIT REQUIRES_NEW commit) must have "
                         + "populated the entity index")
                 .isPositive();
-        assertThat((long) recordingsDuringPublish)
-                .as("the transaction manager must register a commit capture for EACH transaction "
-                        + "the request committed (%s GTIDs minted), not only the main one",
-                        committedTransactions)
-                .isGreaterThanOrEqualTo(committedTransactions);
-        assertThat(gtidSubset(requestCommits, cookieGtidSet))
-                .as("the ryw cookie (%s) must cover EVERY GTID the request committed (%s), "
-                        + "so a replica read gates past the filter rebuild, not only the main commit",
-                        cookieGtidSet, requestCommits)
+        assertThat(countNotifications(subscriber.getId(), plannerId))
+                .as("the fan-out (the other AFTER_COMMIT REQUIRES_NEW commit) must have notified "
+                        + "this test's own subscriber")
+                .isPositive();
+        assertThat(recordingsDuringPublish)
+                .as("the transaction manager must register a commit capture for EACH of the %s "
+                        + "transactions the request committed, not only the main one",
+                        PUBLISH_TRANSACTIONS)
+                .isGreaterThanOrEqualTo(PUBLISH_TRANSACTIONS);
+        assertThat(countTransactions(cookieGtidSet))
+                .as("the ryw cookie (%s) must union all %s of the request's commits, so a replica "
+                        + "read gates past the filter rebuild and the fan-out, not only the main "
+                        + "commit", cookieGtidSet, PUBLISH_TRANSACTIONS)
+                .isGreaterThanOrEqualTo(PUBLISH_TRANSACTIONS);
+        assertThat(gtidSubset(cookieGtidSet, executedAfter))
+                .as("the cookie (%s) must name transactions the primary committed (%s)",
+                        cookieGtidSet, executedAfter)
                 .isTrue();
     }
 
@@ -311,9 +305,9 @@ class CausalGateIT extends CausalHarnessSupport {
     void ownGtidTracker_WhenWriteCommits_ReportsTransactionOwnGtid() throws Exception {
         User author = TestDataFactory.createTestUser(
                 userRepository, "gtid-tracker-author-" + UUID.randomUUID() + "@example.com");
-        Cookie auth = new Cookie("accessToken",
+        Cookie auth = AuthCookies.accessToken(
                 TestDataFactory.generateAccessToken(jwtTokenService, author));
-        Cookie device = new Cookie("deviceId", UUID.randomUUID().toString());
+        Cookie device = AuthCookies.freshDeviceId();
         UUID plannerId = UUID.randomUUID();
         int trackerBefore = gtidWriteCapture.trackerSourced();
 
@@ -351,6 +345,14 @@ class CausalGateIT extends CausalHarnessSupport {
         return count == null ? 0 : count;
     }
 
+    private int countPublished(UUID plannerId) {
+        Integer count = primaryJdbc.queryForObject(
+                "SELECT COUNT(*) FROM planner_publication "
+                        + "WHERE planner_id = UUID_TO_BIN(?) AND published = TRUE",
+                Integer.class, plannerId.toString());
+        return count == null ? 0 : count;
+    }
+
     /** Sums the transaction count over a canonical {@code gtid_set} ({@code uuid:a-b[:c-d],...}). */
     private static long countTransactions(String gtidSet) {
         if (gtidSet == null || gtidSet.isBlank()) {
@@ -368,6 +370,23 @@ class CausalGateIT extends CausalHarnessSupport {
             }
         }
         return total;
+    }
+
+    /** Opts a user into publication notices, which is what makes the fan-out write a row. */
+    private void subscribeToPublications(Long userId) {
+        primaryJdbc.update(
+                "INSERT INTO user_settings (user_id, sync_enabled, notify_comments, "
+                        + "notify_recommendations, notify_new_publications) "
+                        + "VALUES (?, NULL, TRUE, TRUE, TRUE)",
+                userId);
+    }
+
+    private int countNotifications(Long userId, UUID plannerId) {
+        Integer count = primaryJdbc.queryForObject(
+                "SELECT COUNT(*) FROM notifications "
+                        + "WHERE user_id = ? AND planner_id = UUID_TO_BIN(?)",
+                Integer.class, userId, plannerId.toString());
+        return count == null ? 0 : count;
     }
 
     /**
@@ -441,7 +460,7 @@ class CausalGateIT extends CausalHarnessSupport {
 
     private String upsertBody(UUID id, String title) throws Exception {
         UpsertPlannerRequest request = new UpsertPlannerRequest(
-                id.toString(), "5F", title, PlannerStatus.DRAFT, VALID_CONTENT, 7,
+                id.toString(), "5F", title, PlannerStatus.DRAFT, TestDataFactory.VALID_CONTENT, 7,
                 PlannerType.MIRROR_DUNGEON, null, null);
         return objectMapper.writeValueAsString(request);
     }

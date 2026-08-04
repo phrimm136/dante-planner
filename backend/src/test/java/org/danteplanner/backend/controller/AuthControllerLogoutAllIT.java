@@ -7,6 +7,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,11 +73,11 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie accessTokenCookie() {
-        return new Cookie("accessToken", accessToken);
+        return AuthCookies.accessToken(accessToken);
     }
 
     private Cookie refreshTokenCookie() {
-        return new Cookie("refreshToken", refreshToken);
+        return AuthCookies.refreshToken(refreshToken);
     }
 
     @Nested
@@ -93,7 +94,7 @@ class AuthControllerLogoutAllIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Should return 401 when token is malformed")
         void logoutAll_WhenMalformedToken_Returns401() throws Exception {
-            Cookie malformed = new Cookie("accessToken", "malformed.token.here");
+            Cookie malformed = AuthCookies.accessToken("malformed.token.here");
 
             mockMvc.perform(post("/api/auth/logout-all").with(withCsrf())
                             .cookie(malformed))

@@ -20,7 +20,12 @@ import java.util.UUID;
 
 public class TestDataFactory {
 
-    private static final String VALID_CONTENT = """
+    /**
+     * Planner content that passes {@code PlannerContentValidator}: twelve equipped sinners, a
+     * deployment order over them, buff ids and a gift selection drawn from the Combustion pool,
+     * and one floor selection.
+     */
+    public static final String VALID_CONTENT = """
         {
             "selectedKeywords":[],
             "selectedBuffIds":[100,201],
@@ -105,6 +110,25 @@ public class TestDataFactory {
                 .usernameSuffix(uniqueSuffix(""))
                 .build();
         return userRepository.save(user);
+    }
+
+    /**
+     * An in-memory user for the unit tier. Nothing there reaches a database, so the fields only
+     * have to be well-formed; a fixture that will be persisted goes through
+     * {@link #createTestUser} instead, which sub-addresses it.
+     *
+     * @param id the id the user answers with
+     * @return an unsaved user
+     */
+    public static User unsavedUser(Long id) {
+        return User.builder()
+                .id(id)
+                .email("test@example.com")
+                .provider(AuthProviderType.GOOGLE)
+                .providerId("google-123")
+                .usernameEpithet("W_CORP")
+                .usernameSuffix("test1")
+                .build();
     }
 
     public static User createAdmin(UserRepository userRepository, String email) {

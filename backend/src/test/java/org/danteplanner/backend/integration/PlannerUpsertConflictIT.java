@@ -1,7 +1,6 @@
 package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -10,9 +9,9 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +86,7 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
 
     private MockHttpServletResponse doPut(Long syncVersion) throws Exception {
         return mockMvc.perform(put("/api/planner/md/{id}", planner.getId())
-                        .cookie(new Cookie("accessToken", token))
+                        .cookie(AuthCookies.accessToken(token))
                         .with(withCsrf())
                         .contentType(APPLICATION_JSON)
                         .content(body(syncVersion)))
@@ -95,13 +94,13 @@ class PlannerUpsertConflictIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("upsert_WhenConcurrent_Yields409ConcurrentWrite")
     void upsert_WhenConcurrent_Yields409ConcurrentWrite() throws Exception {
         MockHttpServletResponse conflict = raceUntilConflict();
 
         assertThat(conflict.getStatus()).isEqualTo(409);
         assertThat(conflict.getContentAsString()).contains("CONCURRENT_WRITE");
-        assertThat(objectMapper.readTree(conflict.getContentAsString()).has("serverVersion")).isTrue();
+        // A concurrent write reports no version, so the field is absent rather than null.
+        assertThat(objectMapper.readTree(conflict.getContentAsString()).has("serverVersion")).isFalse();
     }
 
     /**
