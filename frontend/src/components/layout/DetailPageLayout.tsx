@@ -1,5 +1,5 @@
 import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
-import { DETAIL_PAGE } from '@/lib/constants'
+import { DETAIL_PAGE, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 interface DetailPageLayoutProps {
@@ -42,7 +42,7 @@ export function DetailPageLayout({
 
   // Desktop: 4:6 ratio two-column grid (using 10-column grid)
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       <div className="grid grid-cols-10 gap-6">
         <div className={cn('col-span-10 space-y-6', DETAIL_PAGE.COLUMN_LEFT)}>{leftColumn}</div>
         <div className={cn('col-span-10 space-y-6', DETAIL_PAGE.COLUMN_RIGHT)}>{rightColumn}</div>

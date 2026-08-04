@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface PlannerNotFoundProps {
   /** Path to the list page (e.g., "/planner/md" or "/planner/md/gesellschaft") */
@@ -17,8 +18,10 @@ export function PlannerNotFound({ listPath }: PlannerNotFoundProps) {
 
   return (
     <div className="space-y-6 text-center py-12">
-      <h1 className="text-2xl font-bold">{t('pages.detail.notFound', 'Plan Not Found')}</h1>
-      <p className="text-muted-foreground">
+      <h1 className={SECTION_STYLES.TEXT.pageTitle}>
+        {t('pages.detail.notFound', 'Plan Not Found')}
+      </h1>
+      <p className={SECTION_STYLES.TEXT.muted}>
         {t('pages.detail.notFoundMessage', 'The plan you are looking for does not exist.')}
       </p>
       <Button asChild variant="outline">

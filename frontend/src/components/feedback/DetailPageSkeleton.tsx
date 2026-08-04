@@ -1,5 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton'
-import { DETAIL_PAGE } from '@/lib/constants'
+import { DETAIL_PAGE, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 /**
@@ -163,7 +163,7 @@ const DETAIL_PRESETS = {
         {/* Section: All gifts */}
         <div className="space-y-3">
           <Skeleton className="h-5 w-40" />
-          <div className="flex flex-wrap gap-2">
+          <div className={SECTION_STYLES.LAYOUT.wrap}>
             {Array.from({ length: 12 }).map((_, i) => (
               <Skeleton key={i} className="w-24 h-24 rounded" />
             ))}

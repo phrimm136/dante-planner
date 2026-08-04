@@ -7,11 +7,11 @@ One vertical folder per route slice: route components at the slice root plus `co
 - Paired singular `useSuspenseQuery` hooks per entity: `use<Entity>ListData` / `use<Entity>DetailData` in the slice's `hooks/`.
 - Build query options with `createStaticDataQueryOptions` (`src/lib/queryOptions.ts`) wrapping a literal dynamic `import('@static/data/...')` — never `fetch('/data/...')`.
 - Query keys come from the factories in `src/lib/queryKeys.ts`; tuple shapes like `['identity', id]` and `['identity', id, 'i18n', language]` are load-bearing cache identities.
-- Spec and i18n staleTime is `STATIC_DATA_STALE_TIME` (7 days, `src/lib/constants.ts`); i18n queries set `keepPrevious` to avoid the language-switch flash.
+- Spec and i18n staleTime is `STATIC_DATA_STALE_TIME` (7 days, `src/lib/constants/api.ts`); server-backed queries pick a named window from `STALE_TIME`/`GC_TIME` in the same module. i18n queries set `keepPrevious` to avoid the language-switch flash.
 
 ## Route components
 
-- Validate route params before calling data hooks; wrap content in `ErrorBoundary` (react-error-boundary) + `Suspense` with `LoadingState`/`ErrorState` from `@/components/feedback` — no early-return spinners.
+- Validate route params before calling data hooks; wrap content in `ErrorBoundary` (react-error-boundary) + `Suspense` with `LoadingState` from `@/components/feedback` — no early-return spinners.
 - Mutations: `useMutation` + `invalidateQueries` + sonner toasts.
 - SSE follows invalidate-then-patch: `useAppSse` (`pages/planner/hooks/`) applies server events with `setQueryData`/`invalidateQueries`; shared connection state lives in `shared/sse/stores/useSseStore`.
 

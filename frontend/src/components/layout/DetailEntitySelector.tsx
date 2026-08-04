@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Slider } from '@/components/ui/slider'
@@ -10,6 +10,7 @@ import {
   MAX_ENTITY_TIER,
   MIN_ENTITY_TIER,
 } from '@/shared/gameData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface DetailEntitySelectorProps {
   /** Entity type determines icon style and tier range */
@@ -51,12 +52,14 @@ export function DetailEntitySelector({
 }: DetailEntitySelectorProps) {
   const { t, i18n } = useTranslation('database')
   const [inputValue, setInputValue] = useState(String(level))
+  const [appliedLevel, setAppliedLevel] = useState(level)
   const displayStyle = getDisplayFontForLanguage(i18n.language)
 
-  // Sync input value when level prop changes
-  useEffect(() => {
+  // A level set from outside replaces whatever is being typed.
+  if (level !== appliedLevel) {
+    setAppliedLevel(level)
     setInputValue(String(level))
-  }, [level])
+  }
 
   const minTier = MIN_ENTITY_TIER[entityType]
   const maxTier = maxTierOverride ?? MAX_ENTITY_TIER[entityType]
@@ -82,7 +85,7 @@ export function DetailEntitySelector({
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
         {/* Tier selector */}
-        <div className="flex items-center gap-2">
+        <div className={SECTION_STYLES.LAYOUT.row}>
           <span className="text-lg font-medium" style={displayStyle}>
             {entityType === 'identity'
               ? t('tierLabel.uptie')

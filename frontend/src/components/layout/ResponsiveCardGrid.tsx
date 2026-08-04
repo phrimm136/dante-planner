@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { CARD_GRID } from '@/lib/constants'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
 interface ResponsiveCardGridProps {
   /** Card width in pixels - determines column size */
@@ -49,18 +49,7 @@ export function ResponsiveCardGrid({
   className,
   mobileScale = 1,
 }: ResponsiveCardGridProps) {
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT,
-  )
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
 
   const scaledCardWidth = cardWidth * mobileScale
   const columnWidth = isDesktop ? cardWidth : scaledCardWidth

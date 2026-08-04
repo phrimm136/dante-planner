@@ -23,6 +23,7 @@ import {
 import { HeaderNav } from '@/components/HeaderNav'
 import { toast } from '@/lib/toast'
 import { startGoogleLogin } from '@/shared/auth'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * UnreadBadge - Renders unread notification count badge on User icon.
@@ -104,7 +105,7 @@ function AuthSection() {
                 <p className="text-sm font-medium">
                   {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
                 </p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+                <p className={SECTION_STYLES.TEXT.captionSmall}>{user.email}</p>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>

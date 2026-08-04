@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
 import { CARD_GRID } from '@/lib/constants'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
 interface ScaledCardWrapperProps {
   /** Card width in pixels (unscaled) */
@@ -31,18 +31,7 @@ export function ScaledCardWrapper({
   className,
   children,
 }: ScaledCardWrapperProps) {
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT,
-  )
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
 
   const scaledWidth = cardWidth * mobileScale
   const scaledHeight = cardHeight * mobileScale
