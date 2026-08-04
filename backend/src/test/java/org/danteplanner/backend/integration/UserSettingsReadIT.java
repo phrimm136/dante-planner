@@ -6,9 +6,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.repository.UserSettingsRepository;
 import org.danteplanner.backend.support.TestDataFactory;
-import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.nullValue;
+import static org.danteplanner.backend.support.AuthCookies.performAuthed;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -62,18 +60,13 @@ class UserSettingsReadIT extends SharedMySqlContainerSupport {
         token = TestDataFactory.generateAccessToken(jwtTokenService, user);
     }
 
-    private Cookie authCookie() {
-        return new Cookie("accessToken", token);
-    }
-
     @Test
-    @DisplayName("settingsGet_WhenRowAbsent_YieldsDefaults")
     void settingsGet_WhenRowAbsent_YieldsDefaults() throws Exception {
         userSettingsRepository.findByUserId(user.getId()).ifPresent(userSettingsRepository::delete);
 
-        mockMvc.perform(get("/api/user/settings").cookie(authCookie()))
+        performAuthed(mockMvc, get("/api/user/settings"), token)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.syncEnabled").value(nullValue()))
+                .andExpect(jsonPath("$.syncEnabled").doesNotExist())
                 .andExpect(jsonPath("$.notifyComments").value(true))
                 .andExpect(jsonPath("$.notifyRecommendations").value(true))
                 .andExpect(jsonPath("$.notifyNewPublications").value(false));
@@ -84,15 +77,14 @@ class UserSettingsReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("settingsGet_WhenSyncNull_PreservesNull")
-    void settingsGet_WhenSyncNull_PreservesNull() throws Exception {
+    void settingsGet_WhenSyncNull_OmitsTheField() throws Exception {
         jdbcTemplate.update(
                 "INSERT INTO user_settings (user_id, sync_enabled, notify_comments, "
                         + "notify_recommendations, notify_new_publications) VALUES (?, NULL, true, true, false)",
                 user.getId());
 
-        mockMvc.perform(get("/api/user/settings").cookie(authCookie()))
+        performAuthed(mockMvc, get("/api/user/settings"), token)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.syncEnabled").value(nullValue()));
+                .andExpect(jsonPath("$.syncEnabled").doesNotExist());
     }
 }

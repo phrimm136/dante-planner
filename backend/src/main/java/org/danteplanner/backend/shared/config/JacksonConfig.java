@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -28,6 +29,10 @@ public class JacksonConfig {
 
         // Don't fail on unknown properties (forward compatibility)
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        // A null-valued field is absent from the payload rather than emitted as null. One policy for
+        // every response, so a client reads one shape and never has to distinguish the two.
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         return mapper;
     }

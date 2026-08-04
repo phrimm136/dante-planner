@@ -5,6 +5,7 @@ import lombok.Builder;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.user.entity.User;
 
 import java.time.Instant;
 import java.util.Set;
@@ -23,8 +24,8 @@ public record PublishedPlannerDetailResponse(
     Set<String> selectedKeywords,
     String authorUsernameEpithet,
     String authorUsernameSuffix,
-    Integer upvotes,
-    Integer viewCount,
+    int upvotes,
+    int viewCount,
     Instant createdAt,
     Instant firstPublishedAt,
     Instant lastModifiedAt,
@@ -37,8 +38,8 @@ public record PublishedPlannerDetailResponse(
     Long syncVersion,
     Boolean isSubscribed,
     Boolean hasReported,
-    Long commentCount,
-    Boolean ownerNotificationsEnabled
+    long commentCount,
+    boolean ownerNotificationsEnabled
 ) {
     public PublishedPlannerDetailResponse {
         selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
@@ -54,7 +55,7 @@ public record PublishedPlannerDetailResponse(
      * @param isSubscribed whether the current user is subscribed (null if not authenticated)
      * @param hasReported whether the current user has reported (null if not authenticated)
      * @param commentCount total non-deleted comment count for this planner
-     * @param ownerNotificationsEnabled whether owner has notifications enabled (only for owner, null otherwise)
+     * @param ownerNotificationsEnabled whether owner has notifications enabled (false for non-owners)
      * @param viewCount the planner's view count (from planner_stats)
      * @param upvotes the planner's upvote count (from planner_stats)
      * @return the published planner detail response DTO
@@ -65,18 +66,19 @@ public record PublishedPlannerDetailResponse(
             Boolean isBookmarked,
             Boolean isSubscribed,
             Boolean hasReported,
-            Long commentCount,
-            Boolean ownerNotificationsEnabled,
+            long commentCount,
+            boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
+        User author = planner.getUser();
         return PublishedPlannerDetailResponse.builder()
                 .id(planner.getId())
                 .title(planner.getTitle())
                 .category(planner.getCategory())
                 .plannerType(planner.getPlannerType())
                 .selectedKeywords(planner.getSelectedKeywords())
-                .authorUsernameEpithet(planner.getUser().getUsernameEpithet())
-                .authorUsernameSuffix(planner.getUser().getUsernameSuffix())
+                .authorUsernameEpithet(author == null ? null : author.getUsernameEpithet())
+                .authorUsernameSuffix(author == null ? null : author.getUsernameSuffix())
                 .upvotes(upvotes)
                 .viewCount(viewCount)
                 .createdAt(planner.getCreatedAt())

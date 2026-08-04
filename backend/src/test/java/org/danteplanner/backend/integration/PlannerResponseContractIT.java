@@ -2,7 +2,6 @@ package org.danteplanner.backend.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -23,8 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.danteplanner.backend.support.AuthCookies.performAuthed;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
@@ -85,10 +86,11 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("responseContractStable_WhenOwnerDetail_FieldSetUnchanged")
     void responseContractStable_WhenOwnerDetail_FieldSetUnchanged() throws Exception {
-        String json = mockMvc.perform(get("/api/planner/md/{id}", published.getId())
-                        .cookie(new Cookie("accessToken", token)))
+        published.getContent().setDeviceId(UUID.randomUUID());
+        plannerRepository.save(published);
+
+        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -100,10 +102,17 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("responseContractStable_WhenOwnerList_FieldSetUnchanged")
+    void responseContractStable_WhenOwnerDetailHasNoDevice_OmitsDeviceId() throws Exception {
+        String json = performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(fieldNames(objectMapper.readTree(json))).doesNotContain("deviceId");
+    }
+
+    @Test
     void responseContractStable_WhenOwnerList_FieldSetUnchanged() throws Exception {
-        String json = mockMvc.perform(get("/api/planner/md")
-                        .cookie(new Cookie("accessToken", token)))
+        String json = performAuthed(mockMvc, get("/api/planner/md"), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -131,8 +140,21 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(fieldNames(card)).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "selectedKeywords",
                 "authorUsernameEpithet", "authorUsernameSuffix", "upvotes",
-                "createdAt", "viewCount", "firstPublishedAt",
-                "hasUpvoted", "isBookmarked", "commentCount");
+                "createdAt", "viewCount", "firstPublishedAt", "commentCount");
+    }
+
+    @Test
+    @DisplayName("list-card-fields: an authenticated list card adds the viewer's vote and bookmark state")
+    void listCardFields_WhenListedAsViewer_CarriesUserContext() throws Exception {
+        statsRepository.save(PlannerStats.builder().plannerId(published.getId()).build());
+        catalogService.add(published);
+
+        String json = performAuthed(mockMvc, get("/api/planner/md/published"), token)
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode card = objectMapper.readTree(json).get("content").get(0);
+        assertThat(fieldNames(card)).contains("hasUpvoted", "isBookmarked");
     }
 
     @Test
@@ -142,8 +164,7 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         published.getContent().setStatus(PlannerStatus.DRAFT);
         plannerRepository.save(published);
 
-        mockMvc.perform(get("/api/planner/md/{id}", published.getId())
-                        .cookie(new Cookie("accessToken", token)))
+        performAuthed(mockMvc, get("/api/planner/md/{id}", published.getId()), token)
                 .andExpect(status().isOk())
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
                         .jsonPath("$.published").value(true))
@@ -152,7 +173,6 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("responseContractStable_WhenPublishedDetail_FieldSetUnchanged")
     void responseContractStable_WhenPublishedDetail_FieldSetUnchanged() throws Exception {
         String json = mockMvc.perform(get("/api/planner/md/published/{id}", published.getId()))
                 .andExpect(status().isOk())
@@ -161,8 +181,19 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         assertThat(fieldNames(objectMapper.readTree(json))).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "selectedKeywords",
                 "authorUsernameEpithet", "authorUsernameSuffix", "upvotes", "viewCount",
-                "createdAt", "firstPublishedAt", "lastModifiedAt", "hasUpvoted", "isBookmarked",
+                "createdAt", "firstPublishedAt", "lastModifiedAt",
                 "content", "schemaVersion", "contentVersion", "status", "syncVersion",
-                "isSubscribed", "hasReported", "commentCount", "ownerNotificationsEnabled");
+                "commentCount", "ownerNotificationsEnabled");
+    }
+
+    @Test
+    void responseContractStable_WhenPublishedDetailAsViewer_CarriesUserContext() throws Exception {
+        String json = performAuthed(
+                mockMvc, get("/api/planner/md/published/{id}", published.getId()), token)
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(fieldNames(objectMapper.readTree(json)))
+                .contains("hasUpvoted", "isBookmarked", "isSubscribed", "hasReported");
     }
 }

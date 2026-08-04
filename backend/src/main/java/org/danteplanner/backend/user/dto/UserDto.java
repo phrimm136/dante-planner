@@ -1,6 +1,5 @@
 package org.danteplanner.backend.user.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -13,7 +12,6 @@ import java.time.Instant;
  * @param role NORMAL, MODERATOR, or ADMIN
  */
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserDto(
     String email,
     String usernameEpithet,
