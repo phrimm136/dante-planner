@@ -5,7 +5,6 @@ import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
 import org.danteplanner.backend.planner.dto.PublicPlannerResponse;
@@ -115,16 +114,18 @@ class PublishedPlannerQueryServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        PlannerAccessGuard accessGuard = new PlannerAccessGuard(userService, plannerRepository);
+
         // engagementService is a real collaborator wired to the mocked repositories,
         // matching how PublishedPlannerQueryService delegates isBookmarked() to it.
         engagementService = new PlannerEngagementService(
-                plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerStatsRepository,
                 plannerCatalogService,
                 eventPublisher,
-                new PlannerAccessGuard(userService, plannerRepository),
+                accessGuard,
+                reportService,
                 recommendedThreshold
         );
 
@@ -137,17 +138,11 @@ class PublishedPlannerQueryServiceTest {
                 reportService,
                 engagementService,
                 plannerViewRecorder,
-                plannerStatsRepository
+                plannerStatsRepository,
+                accessGuard
         );
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
     }
 
     private PlannerCatalog catalogRow(String title, boolean recommended) {
@@ -161,127 +156,109 @@ class PublishedPlannerQueryServiceTest {
                 .build();
     }
 
-    @Nested
-    @DisplayName("getPublishedPlanners Tests")
-    class GetPublishedPlannersTests {
+    /**
+     * Every listing composes one Specification over the catalog projection; the mocked executor
+     * answers whatever page the case seeds, so these assert the composition and the mapping, not
+     * the predicate\u2019s SQL (which belongs to the containerized tier).
+     */
+    private void stubCatalogPage(Page<PlannerCatalog> page) {
+        when(catalogRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(page);
+    }
 
-        private PlannerCatalog createPublishedRow(String title) {
-            return catalogRow(title, false);
-        }
+    private Page<PlannerCatalog> pageOf(Pageable pageable, PlannerCatalog... rows) {
+        return new PageImpl<>(List.of(rows), pageable, rows.length);
+    }
+
+    @Nested
+    @DisplayName("published listing")
+    class PublishedListingTests {
 
         @Test
-        @DisplayName("Should return paginated published planners")
-        void getPublishedPlanners_WhenCalled_ReturnsPage() {
-            // Arrange
+        void publishedListing_WhenRowsExist_ReturnsPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            List<PlannerCatalog> rows = List.of(
-                    createPublishedRow("Planner 1"),
-                    createPublishedRow("Planner 2")
-            );
-            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 2);
+            stubCatalogPage(pageOf(pageable, catalogRow("Planner 1", false), catalogRow("Planner 2", false)));
 
-            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(rowPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
-
-            // Assert
             assertEquals(2, result.getTotalElements());
             assertEquals(2, result.getContent().size());
         }
 
         @Test
-        @DisplayName("Should filter by category when provided")
-        void getPublishedPlanners_WhenCategory_FiltersResults() {
-            // Arrange
+        void publishedListing_WhenCategory_ComposesCategoryPredicate() {
             Pageable pageable = PageRequest.of(0, 10);
-            String category = "5F";
-            PlannerCatalog inCategory = createPublishedRow("F5 Planner");
-            PlannerCatalog anyCategory = createPublishedRow("Unfiltered Planner");
+            PlannerCatalog inCategory = catalogRow("F5 Planner", false);
+            stubCatalogPage(pageOf(pageable, inCategory));
 
-            when(catalogRepository.findByCategoryOrderByFirstPublishedAtDesc(category, pageable))
-                    .thenReturn(new PageImpl<>(List.of(inCategory), pageable, 1));
-            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(new PageImpl<>(List.of(anyCategory), pageable, 1));
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, "5F", null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, category);
-
-            // Assert
             assertEquals(1, result.getTotalElements());
             PublicPlannerResponse card = result.getContent().get(0);
             assertEquals(inCategory.getPlannerId(), card.id());
             assertEquals("F5 Planner", card.title());
-            assertEquals(category, card.category());
+            assertEquals("5F", card.category());
         }
 
         @Test
-        @DisplayName("Should return empty page when no published planners")
-        void getPublishedPlanners_WhenNoPlanners_ReturnsEmpty() {
-            // Arrange
+        void publishedListing_WhenNoRows_ReturnsEmpty() {
             Pageable pageable = PageRequest.of(0, 10);
-            Page<PlannerCatalog> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
-            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(emptyPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getPublishedPlanners(pageable, null);
-
-            // Assert
             assertEquals(0, result.getTotalElements());
             assertTrue(result.getContent().isEmpty());
+        }
+
+        @Test
+        void publishedListing_WhenRowLacksStatsAndCore_DefaultsCountersToZero() {
+            Pageable pageable = PageRequest.of(0, 10);
+            PlannerCatalog row = catalogRow("Counterless", false);
+            stubCatalogPage(pageOf(pageable, row));
+            when(plannerRepository.findCoreInfoByIds(List.of(row.getPlannerId()))).thenReturn(List.of());
+            when(plannerStatsRepository.findAllById(List.of(row.getPlannerId()))).thenReturn(List.of());
+
+            PublicPlannerResponse card = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null)
+                    .getContent().get(0);
+
+            assertEquals(0, card.upvotes());
+            assertEquals(0, card.viewCount());
+            assertEquals(0L, card.commentCount());
+            assertNull(card.authorUsernameEpithet());
+            assertNull(card.authorUsernameSuffix());
+            assertNull(card.createdAt());
         }
     }
 
     @Nested
-    @DisplayName("getRecommendedPlanners Tests")
-    class GetRecommendedPlannersTests {
-
-        private PlannerCatalog createRecommendedRow(String title) {
-            return catalogRow(title, true);
-        }
+    @DisplayName("recommended listing")
+    class RecommendedListingTests {
 
         @Test
-        @DisplayName("Should return planners meeting threshold")
-        void getRecommendedPlanners_WhenCalled_ReturnsQualifyingPlanners() {
-            // Arrange
+        void recommendedListing_WhenRowsExist_ReturnsPage() {
             Pageable pageable = PageRequest.of(0, 10);
-            List<PlannerCatalog> rows = List.of(
-                    createRecommendedRow("High Votes"),
-                    createRecommendedRow("Medium Votes")
-            );
-            Page<PlannerCatalog> rowPage = new PageImpl<>(rows, pageable, 2);
+            stubCatalogPage(pageOf(pageable, catalogRow("High Votes", true), catalogRow("Medium Votes", true)));
 
-            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(rowPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(true, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
-
-            // Assert
             assertEquals(2, result.getTotalElements());
         }
 
         @Test
-        @DisplayName("Should filter by category when provided")
-        void getRecommendedPlanners_WhenCategory_FiltersResults() {
-            // Arrange
+        void recommendedListing_WhenCategory_ComposesCategoryPredicate() {
             Pageable pageable = PageRequest.of(0, 10);
-            String category = "10F";
-            PlannerCatalog inCategory = createRecommendedRow("F10 Planner");
-            PlannerCatalog anyCategory = createRecommendedRow("Unfiltered Planner");
+            PlannerCatalog inCategory = catalogRow("F10 Planner", true);
+            stubCatalogPage(pageOf(pageable, inCategory));
 
-            when(catalogRepository.findByRecommendedTrueAndCategoryOrderByFirstPublishedAtDesc(category, pageable))
-                    .thenReturn(new PageImpl<>(List.of(inCategory), pageable, 1));
-            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(new PageImpl<>(List.of(anyCategory), pageable, 1));
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(true, "10F", null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, category);
-
-            // Assert
             assertEquals(1, result.getTotalElements());
             PublicPlannerResponse card = result.getContent().get(0);
             assertEquals(inCategory.getPlannerId(), card.id());
@@ -289,19 +266,13 @@ class PublishedPlannerQueryServiceTest {
         }
 
         @Test
-        @DisplayName("Should return empty when no planners meet threshold")
-        void getRecommendedPlanners_WhenNoneQualify_ReturnsEmpty() {
-            // Arrange
+        void recommendedListing_WhenNoRows_ReturnsEmpty() {
             Pageable pageable = PageRequest.of(0, 10);
-            Page<PlannerCatalog> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            stubCatalogPage(new PageImpl<>(List.of(), pageable, 0));
 
-            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(emptyPage);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(true, null, null, null, null), pageable, null);
 
-            // Act
-            Page<PublicPlannerResponse> result = publishedQueryService.getRecommendedPlanners(pageable, null);
-
-            // Assert
             assertTrue(result.getContent().isEmpty());
         }
     }
@@ -511,20 +482,17 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getPublishedPlanners with user context Tests")
-    class GetPublishedPlannersWithContextTests {
+    @DisplayName("summary projection")
+    class SummaryProjectionTests {
 
         @Test
-        @DisplayName("Should list published planners without search for anonymous user")
-        void getPublishedPlanners_WhenNoSearchAnonymous_ReturnsPage() {
-            // Arrange
+        void publishedListing_WhenAnonymous_ProjectsEveryCardField() {
             Pageable pageable = PageRequest.of(0, 10);
             PlannerCatalog row = catalogRow("Test Planner", false);
             UUID plannerId = row.getPlannerId();
             Instant createdAt = Instant.parse("2024-01-02T03:04:05Z");
 
-            when(catalogRepository.findAllByOrderByFirstPublishedAtDesc(pageable))
-                    .thenReturn(new PageImpl<>(List.of(row), pageable, 1));
+            stubCatalogPage(pageOf(pageable, row));
             when(plannerRepository.findCoreInfoByIds(List.of(plannerId)))
                     .thenReturn(List.of(new PlannerCoreInfo(plannerId, createdAt, "W_CORP", "test1")));
             when(plannerStatsRepository.findAllById(List.of(plannerId)))
@@ -535,11 +503,9 @@ class PublishedPlannerQueryServiceTest {
                             .commentCount(3)
                             .build()));
 
-            // Act
-            Page<PublicPlannerResponse> result =
-                    publishedQueryService.getPublishedPlanners(pageable, null, null, null);
+            Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(
+                    new CatalogQuery(false, null, null, null, null), pageable, null);
 
-            // Assert
             assertEquals(1, result.getTotalElements());
             PublicPlannerResponse card = result.getContent().get(0);
             assertEquals(plannerId, card.id());
@@ -559,34 +525,6 @@ class PublishedPlannerQueryServiceTest {
     }
 
     @Nested
-    @DisplayName("getRecommendedPlanners with user context Tests")
-    class GetRecommendedPlannersWithContextTests {
-
-        @Test
-        @DisplayName("Should list recommended planners without search for anonymous user")
-        void getRecommendedPlanners_WhenNoSearchAnonymous_ReturnsPage() {
-            // Arrange
-            Pageable pageable = PageRequest.of(0, 10);
-            PlannerCatalog row = catalogRow("Test Planner", true);
-            Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
-
-            when(catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(pageable)).thenReturn(rowPage);
-
-            // Act
-            Page<PublicPlannerResponse> result =
-                    publishedQueryService.getRecommendedPlanners(pageable, null, null, null);
-
-            // Assert
-            assertEquals(1, result.getTotalElements());
-            PublicPlannerResponse card = result.getContent().get(0);
-            assertEquals(row.getPlannerId(), card.id());
-            assertEquals("Test Planner", card.title());
-            assertNull(card.hasUpvoted());
-            assertNull(card.isBookmarked());
-        }
-    }
-
-    @Nested
     @DisplayName("searchPlanners Tests")
     class SearchPlannersTests {
 
@@ -598,7 +536,7 @@ class PublishedPlannerQueryServiceTest {
             PlannerCatalog row = catalogRow("Test Planner", false);
             Page<PlannerCatalog> rowPage = new PageImpl<>(List.of(row), pageable, 1);
 
-            when(catalogRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(rowPage);
+            stubCatalogPage(rowPage);
 
             // Act
             Page<PublicPlannerResponse> result = publishedQueryService.searchPlanners(

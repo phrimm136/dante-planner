@@ -49,6 +49,13 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 @Slf4j
 public class PublishedPlannerQueryService {
 
+    /**
+     * Stand-ins for a planner whose counter row or core projection is missing, so the response
+     * assembly reads one shape. Neither instance is ever persisted.
+     */
+    private static final PlannerStats NO_STATS = PlannerStats.builder().build();
+    private static final PlannerCoreInfo NO_CORE = new PlannerCoreInfo(null, null, null, null);
+
     private final PlannerRepository plannerRepository;
     private final PlannerCatalogRepository catalogRepository;
     private final PlannerVoteRepository plannerVoteRepository;
@@ -58,6 +65,7 @@ public class PublishedPlannerQueryService {
     private final PlannerEngagementService engagementService;
     private final PlannerViewRecorder plannerViewRecorder;
     private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerAccessGuard accessGuard;
 
     public PublishedPlannerQueryService(
             PlannerRepository plannerRepository,
@@ -68,7 +76,8 @@ public class PublishedPlannerQueryService {
             PlannerReportService reportService,
             PlannerEngagementService engagementService,
             PlannerViewRecorder plannerViewRecorder,
-            PlannerStatsRepository plannerStatsRepository) {
+            PlannerStatsRepository plannerStatsRepository,
+            PlannerAccessGuard accessGuard) {
         this.plannerRepository = plannerRepository;
         this.catalogRepository = catalogRepository;
         this.plannerVoteRepository = plannerVoteRepository;
@@ -78,91 +87,7 @@ public class PublishedPlannerQueryService {
         this.engagementService = engagementService;
         this.plannerViewRecorder = plannerViewRecorder;
         this.plannerStatsRepository = plannerStatsRepository;
-    }
-
-    /**
-     * Strip any caller-supplied sort: catalog ordering is fixed to recency by the
-     * repository queries (and must ride the catalog indexes).
-     */
-    private static Pageable unsorted(Pageable pageable) {
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.unsorted());
-    }
-
-    /**
-     * Get all published planners with optional category filter, search, and user context.
-     * When userId is provided, includes user's vote and bookmark state for each planner.
-     *
-     * @param pageable pagination information
-     * @param category optional category filter (null for all categories)
-     * @param userId   optional user ID for vote/bookmark context (null for anonymous)
-     * @param search   optional search term for title/keywords (null or blank to skip)
-     * @return page of public planner responses with user context
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category, Long userId, String search) {
-        Page<PlannerCatalog> rows;
-        boolean hasSearch = search != null && !search.isBlank();
-
-        if (hasSearch) {
-            Specification<PlannerCatalog> spec = CatalogSpecifications.matchesQuery(search.trim());
-            if (category != null) {
-                spec = spec.and(CatalogSpecifications.hasCategory(category));
-            }
-            rows = catalogRepository.findAll(spec, recencySorted(pageable));
-        } else if (category == null) {
-            rows = catalogRepository.findAllByOrderByFirstPublishedAtDesc(unsorted(pageable));
-        } else {
-            rows = catalogRepository.findByCategoryOrderByFirstPublishedAtDesc(category, unsorted(pageable));
-        }
-
-        return mapCatalogWithUserContext(rows, userId);
-    }
-
-    /**
-     * Get all published planners with optional category filter (no user context).
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getPublishedPlanners(Pageable pageable, String category) {
-        return getPublishedPlanners(pageable, category, null, null);
-    }
-
-    /**
-     * Get recommended planners with optional category filter, search, and user context.
-     *
-     * @param pageable pagination information
-     * @param category optional category filter (null for all categories)
-     * @param userId   optional user ID for vote/bookmark context (null for anonymous)
-     * @param search   optional search term for title/keywords (null or blank to skip)
-     * @return page of recommended public planner responses with user context
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, String category, Long userId, String search) {
-        Page<PlannerCatalog> rows;
-        boolean hasSearch = search != null && !search.isBlank();
-
-        if (hasSearch) {
-            Specification<PlannerCatalog> spec = CatalogSpecifications.isRecommended()
-                    .and(CatalogSpecifications.matchesQuery(search.trim()));
-            if (category != null) {
-                spec = spec.and(CatalogSpecifications.hasCategory(category));
-            }
-            rows = catalogRepository.findAll(spec, recencySorted(pageable));
-        } else if (category == null) {
-            rows = catalogRepository.findByRecommendedTrueOrderByFirstPublishedAtDesc(unsorted(pageable));
-        } else {
-            rows = catalogRepository.findByRecommendedTrueAndCategoryOrderByFirstPublishedAtDesc(
-                    category, unsorted(pageable));
-        }
-
-        return mapCatalogWithUserContext(rows, userId);
-    }
-
-    /**
-     * Get recommended planners with optional category filter (no user context).
-     */
-    @Transactional(readOnly = true)
-    public Page<PublicPlannerResponse> getRecommendedPlanners(Pageable pageable, String category) {
-        return getRecommendedPlanners(pageable, category, null, null);
+        this.accessGuard = accessGuard;
     }
 
     /**
@@ -181,8 +106,9 @@ public class PublishedPlannerQueryService {
     }
 
     /**
-     * Search published or recommended planners using composable Specifications
-     * over the catalog projection. Applies AND semantics across all provided filters.
+     * List published or recommended planners using composable Specifications over the catalog
+     * projection, ordered by recency. Applies AND semantics across all provided filters; a query
+     * carrying no filter at all is the plain browse listing.
      *
      * @param catalogQuery the filter set to compose
      * @param pageable     pagination information
@@ -250,7 +176,7 @@ public class PublishedPlannerQueryService {
     private Page<PublicPlannerResponse> mapCatalogWithUserContext(Page<PlannerCatalog> rows, Long userId) {
         List<UUID> plannerIds = rows.getContent().stream()
                 .map(PlannerCatalog::getPlannerId)
-                .collect(Collectors.toList());
+                .toList();
         Map<UUID, PlannerCoreInfo> coreInfoMap = plannerIds.isEmpty() ? Map.of()
                 : plannerRepository.findCoreInfoByIds(plannerIds).stream()
                         .collect(Collectors.toMap(PlannerCoreInfo::plannerId, Function.identity()));
@@ -282,23 +208,23 @@ public class PublishedPlannerQueryService {
         boolean anonymous = userId == null;
         return rows.map(row -> {
             UUID id = row.getPlannerId();
-            PlannerCoreInfo core = coreInfoMap.get(id);
-            PlannerStats stats = statsMap.get(id);
+            PlannerCoreInfo core = coreInfoMap.getOrDefault(id, NO_CORE);
+            PlannerStats stats = statsMap.getOrDefault(id, NO_STATS);
             return PublicPlannerResponse.builder()
                     .id(id)
                     .title(row.getTitle())
                     .category(row.getCategory())
                     .plannerType(row.getPlannerType())
                     .selectedKeywords(row.getSelectedKeywords())
-                    .authorUsernameEpithet(core != null ? core.authorUsernameEpithet() : null)
-                    .authorUsernameSuffix(core != null ? core.authorUsernameSuffix() : null)
-                    .upvotes(stats != null ? stats.getUpvotes() : 0)
-                    .createdAt(core != null ? core.createdAt() : null)
-                    .viewCount(stats != null ? stats.getViewCount() : 0)
+                    .authorUsernameEpithet(core.authorUsernameEpithet())
+                    .authorUsernameSuffix(core.authorUsernameSuffix())
+                    .upvotes(stats.getUpvotes())
+                    .createdAt(core.createdAt())
+                    .viewCount(stats.getViewCount())
                     .firstPublishedAt(row.getFirstPublishedAt())
                     .hasUpvoted(anonymous ? null : upvotedIds.contains(id))
                     .isBookmarked(anonymous ? null : bookmarkedIds.contains(id))
-                    .commentCount(stats != null ? (long) stats.getCommentCount() : 0L)
+                    .commentCount((long) stats.getCommentCount())
                     .build();
         });
     }
@@ -336,18 +262,17 @@ public class PublishedPlannerQueryService {
     @Transactional(readOnly = true)
     public PublishedPlannerDetailResponse getPublishedPlanner(
             UUID plannerId, Long userId, String viewerIdentity, String userAgent) {
-        Planner planner = plannerRepository.findPublishedAggregate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = accessGuard.requirePublished(plannerId);
 
         String viewerHash = userId != null
                 ? ViewerHashUtil.hashForAuthenticatedUser(userId, plannerId)
                 : ViewerHashUtil.hashForAnonymousUser(viewerIdentity, userAgent, plannerId);
 
         plannerViewRecorder.record(plannerId, viewerHash, LocalDate.now(ZoneOffset.UTC));
-        PlannerStats stats = plannerStatsRepository.findById(plannerId).orElse(null);
-        int viewCount = stats != null ? stats.getViewCount() : 0;
-        int upvotes = stats != null ? stats.getUpvotes() : 0;
-        long commentCount = stats != null ? stats.getCommentCount() : 0L;
+        PlannerStats stats = plannerStatsRepository.findById(plannerId).orElse(NO_STATS);
+        int viewCount = stats.getViewCount();
+        int upvotes = stats.getUpvotes();
+        long commentCount = stats.getCommentCount();
 
         // Determine owner notification setting:
         // - For owner: actual setting (defaults to true)

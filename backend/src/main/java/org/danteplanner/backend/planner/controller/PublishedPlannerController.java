@@ -75,7 +75,7 @@ public class PublishedPlannerController {
             @AuthenticationPrincipal Long userId) {
 
         return listPlanners(false, page, size, category, q, keyword,
-                suppliedEntityFilters(identity, ego, gift, themePack), userId);
+                entityFilters(identity, ego, gift, themePack), userId);
     }
 
     /**
@@ -106,7 +106,7 @@ public class PublishedPlannerController {
             @AuthenticationPrincipal Long userId) {
 
         return listPlanners(true, page, size, category, q, keyword,
-                suppliedEntityFilters(identity, ego, gift, themePack), userId);
+                entityFilters(identity, ego, gift, themePack), userId);
     }
 
     /**
@@ -140,8 +140,8 @@ public class PublishedPlannerController {
     }
 
     /**
-     * Shared body of the two catalog listings: a request carrying any structured filter takes the
-     * Specification search, everything else the plain recency listing.
+     * Shared body of the two catalog listings: every request composes one filter set, an empty one
+     * being the plain recency listing.
      *
      * @param recommendedOnly       restrict the result to the recommended subset
      * @param page                  page number (0-indexed)
@@ -149,7 +149,7 @@ public class PublishedPlannerController {
      * @param category              optional category filter
      * @param q                     optional search term for title/keywords
      * @param keyword               optional comma-separated keyword facet values
-     * @param suppliedEntityFilters raw entity filter values, keyed by the type each filters on
+     * @param entityFilters         entity filter ids, keyed by the type each filters on
      * @param userId                optional authenticated user ID (null for anonymous)
      * @return page of public planner summaries with optional user context
      */
@@ -160,24 +160,17 @@ public class PublishedPlannerController {
             String category,
             String q,
             String keyword,
-            Map<ContentEntityType, String> suppliedEntityFilters,
+            Map<ContentEntityType, List<String>> entityFilters,
             Long userId) {
 
         Pageable pageable = createPageable(page, size);
         log.debug("Fetching {} planners, category: {}, search: {}, userId: {}, pagination: {}",
                 recommendedOnly ? "recommended" : "published", category, q, userId, pageable);
 
-        if (keyword != null || !suppliedEntityFilters.isEmpty()) {
-            CatalogQuery catalogQuery = new CatalogQuery(recommendedOnly, category, q,
-                    parseCsv(keyword), parseEntityFilters(suppliedEntityFilters));
-            return ResponseEntity.ok(
-                    publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId));
-        }
-
-        Page<PublicPlannerResponse> planners = recommendedOnly
-                ? publishedPlannerQueryService.getRecommendedPlanners(pageable, category, userId, q)
-                : publishedPlannerQueryService.getPublishedPlanners(pageable, category, userId, q);
-        return ResponseEntity.ok(planners);
+        CatalogQuery catalogQuery = new CatalogQuery(recommendedOnly, category, q,
+                parseCsv(keyword), entityFilters);
+        return ResponseEntity.ok(
+                publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, userId));
     }
 
     /**
@@ -192,30 +185,24 @@ public class PublishedPlannerController {
     }
 
     /**
-     * Key each entity filter parameter by the content type it filters on. A key is present exactly
-     * when the request supplied that parameter, blank included: presence, not content, is what
-     * routes the request onto the Specification search.
+     * Key each entity filter parameter by the content type it filters on.
      */
-    private Map<ContentEntityType, String> suppliedEntityFilters(
+    private Map<ContentEntityType, List<String>> entityFilters(
             String identity, String ego, String gift, String themePack) {
-        Map<ContentEntityType, String> supplied = new EnumMap<>(ContentEntityType.class);
-        putIfSupplied(supplied, ContentEntityType.IDENTITY, identity);
-        putIfSupplied(supplied, ContentEntityType.EGO, ego);
-        putIfSupplied(supplied, ContentEntityType.EGO_GIFT, gift);
-        putIfSupplied(supplied, ContentEntityType.THEME_PACK, themePack);
-        return supplied;
+        Map<ContentEntityType, List<String>> filters = new EnumMap<>(ContentEntityType.class);
+        putIfSupplied(filters, ContentEntityType.IDENTITY, identity);
+        putIfSupplied(filters, ContentEntityType.EGO, ego);
+        putIfSupplied(filters, ContentEntityType.EGO_GIFT, gift);
+        putIfSupplied(filters, ContentEntityType.THEME_PACK, themePack);
+        return filters;
     }
 
-    private void putIfSupplied(Map<ContentEntityType, String> supplied, ContentEntityType type, String value) {
-        if (value != null) {
-            supplied.put(type, value);
+    private void putIfSupplied(
+            Map<ContentEntityType, List<String>> filters, ContentEntityType type, String value) {
+        List<String> ids = parseCsv(value);
+        if (ids != null) {
+            filters.put(type, ids);
         }
-    }
-
-    private Map<ContentEntityType, List<String>> parseEntityFilters(Map<ContentEntityType, String> supplied) {
-        Map<ContentEntityType, List<String>> parsed = new EnumMap<>(ContentEntityType.class);
-        supplied.forEach((type, value) -> parsed.put(type, parseCsv(value)));
-        return parsed;
     }
 
     private List<String> parseCsv(String value) {

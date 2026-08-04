@@ -40,16 +40,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.LongSupplier;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * N+1 guard for the list read-paths.
  *
- * <p>Locks in that the prepared-statement count of {@code getPublishedPlanners},
- * {@code getRecommendedPlanners}, and {@code searchPlanners} is constant with respect to
- * the number of result rows. A regression that drops an {@code @EntityGraph}/JOIN FETCH or
- * a batch {@code findBy...In} would make the count grow with row count, failing the equality.</p>
+ * <p>Locks in the prepared-statement count of the three filter shapes the published and
+ * recommended endpoints compose — plain browse, recommended browse, and title search — both as an
+ * absolute budget for a one-row page and as a slope against the number of result rows. A
+ * regression that drops an {@code @EntityGraph}/JOIN FETCH or a batch {@code findBy...In} would
+ * make the count grow with row count, failing the slope assertion.</p>
  *
  * <p>The database is this class's own: the measured calls are list reads over every published
  * planner, so a neighbour publishing between the two measurements adds rows to the same page and
@@ -73,13 +75,25 @@ class PlannerQueryCountIT {
     // N+1 only.
     private static final Pageable PAGE = PageRequest.of(0, 20);
 
+    // A one-row page keeps the absolute counts independent of how many rows the class has
+    // accumulated: the row-proportional part of the count is pinned at one, and the page is
+    // always full so Spring Data always issues the count query.
+    private static final Pageable ONE_ROW_PAGE = PageRequest.of(0, 1);
+
+    // Seeded titles all carry this token so the title-search shape returns rows in this class's
+    // own database.
+    private static final String SEARCH_MARKER = "querycountmarker";
+
+    // Page + count + core info + stats + votes + bookmarks.
+    private static final long PUBLISHED_LIST_STATEMENTS = 6;
+    private static final long RECOMMENDED_LIST_STATEMENTS = 6;
+    private static final long SEARCH_LIST_STATEMENTS = 6;
+
     @DynamicPropertySource
     static void registerMySqlProperties(DynamicPropertyRegistry registry) {
         SharedMySqlContainerSupport.registerOwnDatabase(registry, "query_count");
         // Enable Hibernate statistics so getPrepareStatementCount() reflects real SQL issued.
         registry.add("spring.jpa.properties.hibernate.generate_statistics", () -> "true");
-        registry.add("logging.level.org.hibernate.SQL", () -> "DEBUG");
-        registry.add("logging.file.name", () -> "/tmp/qct-sql.log");
     }
 
     @Autowired
@@ -128,35 +142,82 @@ class PlannerQueryCountIT {
         statistics.setStatisticsEnabled(true);
     }
 
-    @Test
-    @DisplayName("getPublishedPlanners: statement count is constant across result-set sizes")
-    void getPublishedPlanners_WhenResultSizeVaries_StatementCountConstant() {
-        assertConstantStatementCount(() -> {
-            statistics.clear();
-            publishedPlannerQueryService.getPublishedPlanners(PAGE, null, viewerId, null);
-            return statistics.getPrepareStatementCount();
-        });
+    /** The filter set the {@code /published} endpoint composes for a plain browse. */
+    private static CatalogQuery publishedBrowse() {
+        return new CatalogQuery(false, null, null, null, null);
+    }
+
+    /** The filter set the {@code /recommended} endpoint composes for a plain browse. */
+    private static CatalogQuery recommendedBrowse() {
+        return new CatalogQuery(true, null, null, null, null);
+    }
+
+    /** The filter set either endpoint composes for a title search. */
+    private static CatalogQuery titleSearch() {
+        return new CatalogQuery(false, null, SEARCH_MARKER, null, null);
     }
 
     @Test
-    @DisplayName("getRecommendedPlanners: statement count is constant across result-set sizes")
-    void getRecommendedPlanners_WhenResultSizeVaries_StatementCountConstant() {
-        assertConstantStatementCount(() -> {
-            statistics.clear();
-            publishedPlannerQueryService.getRecommendedPlanners(PAGE, null, viewerId, null);
-            return statistics.getPrepareStatementCount();
-        }, true);
+    @DisplayName("published listing: statement count is constant across result-set sizes")
+    void publishedListing_WhenResultSizeVaries_StatementCountConstant() {
+        assertConstantStatementCount(() -> measure(publishedBrowse(), PAGE));
     }
 
     @Test
-    @DisplayName("searchPlanners: statement count is constant across result-set sizes")
-    void searchPlanners_WhenResultSizeVaries_StatementCountConstant() {
-        assertConstantStatementCount(() -> {
-            statistics.clear();
-            publishedPlannerQueryService.searchPlanners(
-                    new CatalogQuery(false, null, null, null, null), PAGE, viewerId);
-            return statistics.getPrepareStatementCount();
-        });
+    @DisplayName("recommended listing: statement count is constant across result-set sizes")
+    void recommendedListing_WhenResultSizeVaries_StatementCountConstant() {
+        assertConstantStatementCount(() -> measure(recommendedBrowse(), PAGE), true);
+    }
+
+    @Test
+    @DisplayName("search listing: statement count is constant across result-set sizes")
+    void searchListing_WhenResultSizeVaries_StatementCountConstant() {
+        assertConstantStatementCount(() -> measure(titleSearch(), PAGE));
+    }
+
+    @Test
+    @DisplayName("published listing: a one-row page costs a fixed number of statements")
+    void publishedListing_WhenOneRowPage_IssuesFixedStatementCount() {
+        seedPlanners(SMALL_SET, false);
+        assertFixedStatementCount(PlannerQueryCountIT::publishedBrowse, PUBLISHED_LIST_STATEMENTS);
+    }
+
+    @Test
+    @DisplayName("recommended listing: a one-row page costs a fixed number of statements")
+    void recommendedListing_WhenOneRowPage_IssuesFixedStatementCount() {
+        seedPlanners(SMALL_SET, true);
+        assertFixedStatementCount(PlannerQueryCountIT::recommendedBrowse, RECOMMENDED_LIST_STATEMENTS);
+    }
+
+    @Test
+    @DisplayName("search listing: a one-row page costs a fixed number of statements")
+    void searchListing_WhenOneRowPage_IssuesFixedStatementCount() {
+        seedPlanners(SMALL_SET, false);
+        assertFixedStatementCount(PlannerQueryCountIT::titleSearch, SEARCH_LIST_STATEMENTS);
+    }
+
+    private long measure(CatalogQuery catalogQuery, Pageable pageable) {
+        statistics.clear();
+        publishedPlannerQueryService.searchPlanners(catalogQuery, pageable, viewerId);
+        return statistics.getPrepareStatementCount();
+    }
+
+    /**
+     * Runs the listing once to discard one-time bootstrap statements, then asserts the second
+     * run's statement count against the recorded budget.
+     *
+     * <p>The measured page must carry a row: an empty page skips the per-page batch loads, which
+     * would make the budget describe a shape no endpoint serves.</p>
+     */
+    private void assertFixedStatementCount(Supplier<CatalogQuery> catalogQuery, long expected) {
+        assertThat(publishedPlannerQueryService
+                .searchPlanners(catalogQuery.get(), ONE_ROW_PAGE, viewerId).getContent())
+                .as("the measured page carries a row")
+                .isNotEmpty();
+        long count = measure(catalogQuery.get(), ONE_ROW_PAGE);
+        assertThat(count)
+                .as("statement budget for a one-row page")
+                .isEqualTo(expected);
     }
 
     /**
@@ -196,7 +257,10 @@ class PlannerQueryCountIT {
         for (int i = 0; i < count; i++) {
             String unique = UUID.randomUUID().toString();
             User author = TestDataFactory.createTestUser(userRepository, "author-" + unique + "@example.com");
-            Planner planner = TestDataFactory.createTestPlanner(plannerRepository, author, true);
+            Planner planner = TestDataFactory.planner(author)
+                    .title(SEARCH_MARKER + " planner")
+                    .published(true)
+                    .save(plannerRepository);
             plannerCatalogService.add(planner);
             seededIds.add(planner.getId());
 
