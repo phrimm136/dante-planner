@@ -1,22 +1,19 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '../PlannerSection'
 import { EGOGiftCard } from '@/pages/egoGift'
 import { getKeywordIconPath } from '@/shared/assets'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
+import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import { CARD_GRID } from '@/lib/constants'
+import { CARD_GRID, SECTION_STYLES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
-interface StartGiftSummaryProps {
+export interface StartGiftSummaryProps {
+  selectedKeyword: string | null
+  selectedGiftIds: Set<string>
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
-  /** Override selectedKeyword from store (for tracker mode) */
-  selectedKeywordOverride?: string | null
-  /** Override selectedGiftIds from store (for tracker mode) */
-  selectedGiftIdsOverride?: Set<string>
 }
 
 /**
@@ -26,18 +23,12 @@ interface StartGiftSummaryProps {
  * Clicking opens the StartGiftEditPane dialog.
  */
 export function StartGiftSummary({
+  selectedKeyword,
+  selectedGiftIds,
   onClick,
   readOnly = false,
   onViewNotes,
-  selectedKeywordOverride,
-  selectedGiftIdsOverride,
 }: StartGiftSummaryProps) {
-  // Store state (safe - returns undefined if outside context)
-  const storeSelectedKeyword = usePlannerEditorStoreSafe((s) => s.selectedGiftKeyword)
-  const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.selectedGiftIds)
-  const selectedKeyword =
-    selectedKeywordOverride !== undefined ? selectedKeywordOverride : storeSelectedKeyword!
-  const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
   const { spec, i18n } = useEGOGiftListData()
 
@@ -47,7 +38,7 @@ export function StartGiftSummary({
   const hasKeywordSelected = selectedKeyword !== null
 
   // Build gift objects for display
-  const selectedGifts = useMemo(() => {
+  const selectedGifts = (() => {
     if (!hasKeywordSelected || !spec || !i18n || selectedGiftIds.size === 0) return []
 
     return Array.from(selectedGiftIds).map((giftId) => {
@@ -65,7 +56,7 @@ export function StartGiftSummary({
         maxEnhancement: giftSpec?.maxEnhancement ?? 0,
       }
     })
-  }, [hasKeywordSelected, selectedGiftIds, spec, i18n])
+  })()
 
   return (
     <PlannerSection title={t('pages.plannerMD.startEgoGift')} onViewNotes={onViewNotes}>
@@ -94,7 +85,7 @@ export function StartGiftSummary({
             </ScaledCardWrapper>
 
             {/* Selected gift cards (if any) */}
-            <div className="flex flex-wrap gap-2">
+            <div className={SECTION_STYLES.LAYOUT.wrap}>
               {selectedGifts.length > 0 ? (
                 selectedGifts.map((gift) => (
                   <ScaledCardWrapper
@@ -107,7 +98,7 @@ export function StartGiftSummary({
                   </ScaledCardWrapper>
                 ))
               ) : (
-                <span className="text-sm text-muted-foreground">
+                <span className={SECTION_STYLES.TEXT.caption}>
                   {t('pages.plannerMD.noEgoGiftSelected')}
                 </span>
               )}
@@ -116,7 +107,7 @@ export function StartGiftSummary({
         ) : (
           /* Empty state: dashed border placeholder - min-h-28 matches selected state */
           <div className="flex items-center justify-center min-h-28 border-2 border-dashed border-muted-foreground/50 rounded-lg">
-            <span className="text-muted-foreground">
+            <span className={SECTION_STYLES.TEXT.muted}>
               {readOnly
                 ? t('pages.plannerMD.emptyState.noStartGifts')
                 : t('pages.plannerMD.selectStartEgoGift')}
@@ -125,5 +116,25 @@ export function StartGiftSummary({
         )}
       </button>
     </PlannerSection>
+  )
+}
+
+/** Props a store-bound caller supplies; the selection comes from the store. */
+export type StoreBoundStartGiftSummaryProps = Omit<
+  StartGiftSummaryProps,
+  'selectedKeyword' | 'selectedGiftIds'
+>
+
+/** Renders the summary against the gift selection held by the planner editor store. */
+export function StoreBoundStartGiftSummary(props: StoreBoundStartGiftSummaryProps) {
+  const selectedKeyword = usePlannerEditorStore((s) => s.selectedGiftKeyword)
+  const selectedGiftIds = usePlannerEditorStore((s) => s.selectedGiftIds)
+
+  return (
+    <StartGiftSummary
+      {...props}
+      selectedKeyword={selectedKeyword}
+      selectedGiftIds={selectedGiftIds}
+    />
   )
 }

@@ -51,17 +51,6 @@ const mockI18n: EGOGiftNameList = {
   '9002': 'Burning Gift 2',
 }
 
-// Mock planner editor store (safe version)
-vi.mock('../../../stores/usePlannerEditorStore', () => ({
-  usePlannerEditorStoreSafe: (selector: (state: Record<string, unknown>) => unknown) => {
-    const mockState = {
-      selectedGiftKeyword: null,
-      selectedGiftIds: new Set<string>(),
-    }
-    return selector(mockState)
-  },
-}))
-
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: mockSpec,
@@ -93,8 +82,8 @@ vi.mock('@/shared/assets', () => ({
 
 describe('StartGiftSummary', () => {
   const defaultProps = {
-    selectedKeywordOverride: null as string | null,
-    selectedGiftIdsOverride: new Set<string>(),
+    selectedKeyword: null as string | null,
+    selectedGiftIds: new Set<string>(),
     onClick: vi.fn(),
   }
 
@@ -128,8 +117,8 @@ describe('StartGiftSummary', () => {
     it('renders keyword icon and gift cards when selection exists', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set(['9001']),
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set(['9001']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -147,8 +136,8 @@ describe('StartGiftSummary', () => {
     it('renders multiple gift cards', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set(['9001', '9002']),
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set(['9001', '9002']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -160,8 +149,8 @@ describe('StartGiftSummary', () => {
     it('does not render placeholder when selection exists', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set(['9001']),
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set(['9001']),
       }
 
       render(<StartGiftSummary {...props} />)
@@ -223,8 +212,8 @@ describe('StartGiftSummary', () => {
     it('shows keyword with "no EGO gift selected" message when keyword is selected without gifts', () => {
       const props = {
         ...defaultProps,
-        selectedKeywordOverride: 'Burn',
-        selectedGiftIdsOverride: new Set<string>(), // No gifts selected
+        selectedKeyword: 'Burn',
+        selectedGiftIds: new Set<string>(), // No gifts selected
       }
 
       render(<StartGiftSummary {...props} />)

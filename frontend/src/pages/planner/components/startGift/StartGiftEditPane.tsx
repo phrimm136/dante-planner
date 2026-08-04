@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import type { MDVersion } from '@/shared/gameData'
 import { calculateMaxGiftSelection } from '../../lib/startGiftCalculator'
 import { StartGiftRow } from './StartGiftRow'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface StartGiftEditPaneProps {
   open: boolean
@@ -42,10 +43,7 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
   const { data: buffs } = useStartBuffData(mdVersion)
 
   // Calculate max selectable gifts
-  const maxSelectable = useMemo(
-    () => calculateMaxGiftSelection(buffs, selectedBuffIds),
-    [buffs, selectedBuffIds],
-  )
+  const maxSelectable = calculateMaxGiftSelection(buffs, selectedBuffIds)
 
   // Trim excess gifts when EA changes
   useEffect(() => {
@@ -142,7 +140,7 @@ export function StartGiftEditPane({ open, onOpenChange, mdVersion }: StartGiftEd
             <DialogTitle>{t('pages.plannerMD.startEgoGift')}</DialogTitle>
             <div className="flex items-center gap-4 ml-auto">
               {/* EA Counter */}
-              <span className="text-sm text-muted-foreground">
+              <span className={SECTION_STYLES.TEXT.caption}>
                 {t('pages.plannerMD.egoGiftSelection')}: {selectedGiftIds.size}/{maxSelectable}
               </span>
               <div className="flex gap-2">

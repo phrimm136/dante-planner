@@ -32,8 +32,6 @@ export function StartGiftRow({
   onRowSelect,
   onGiftClick,
 }: StartGiftRowProps) {
-  // Breakpoint detection for scaling
-
   // Calculate scaled dimensions
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 

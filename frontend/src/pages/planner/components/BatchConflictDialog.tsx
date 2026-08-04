@@ -10,7 +10,11 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
 import type { ConflictResolutionChoice, SaveablePlanner } from '../types/PlannerTypes'
+import { SECTION_STYLES } from '@/lib/constants'
+
+const MISSING_DATE_LABEL = '-'
 
 /**
  * A single conflict item with local and server planner data
@@ -187,7 +191,7 @@ export function BatchConflictDialog({
 
         {/* Apply to All section - vertical layout */}
         <div className="flex flex-col gap-2 py-3 border-b border-border">
-          <span className="text-sm text-muted-foreground">
+          <span className={SECTION_STYLES.TEXT.caption}>
             {t('pages.plannerMD.batchConflict.applyToAll', 'Apply to all')}
           </span>
           <div className="flex gap-2">
@@ -251,14 +255,14 @@ export function BatchConflictDialog({
                   )}
                 </div>
                 {/* Save dates */}
-                <p className="text-xs text-muted-foreground">
+                <p className={SECTION_STYLES.TEXT.captionSmall}>
                   {t('pages.plannerMD.batchConflict.localModified', 'Local')}: {formatDate(conflict.localPlanner.metadata.lastModifiedAt)}
                   {' | '}
                   {t('pages.plannerMD.batchConflict.serverModified', 'Server')}: {formatDate(conflict.serverPlanner.metadata.lastModifiedAt)}
                 </p>
                 {/* Notification that copy won't be published */}
                 {conflict.localPlanner.metadata.published && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className={SECTION_STYLES.TEXT.captionSmall}>
                     {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
                   </p>
                 )}
@@ -304,17 +308,7 @@ export function BatchConflictDialog({
  * Format ISO date string for display
  */
 function formatDate(isoString: string): string {
-  try {
-    const date = new Date(isoString)
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    })
-  } catch {
-    return '-'
-  }
+  return formatPlannerDate(isoString, undefined, DATE_FORMATS.SHORT_DATE_TIME) ?? MISSING_DATE_LABEL
 }
 
 export default BatchConflictDialog

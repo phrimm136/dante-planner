@@ -1,4 +1,5 @@
 import { getStartBuffStarLightPath } from '@/shared/assets'
+import { ACCENT_COLORS } from '@/lib/constants'
 
 interface StarlightCostDisplayProps {
   cost: number
@@ -37,7 +38,7 @@ export function StarlightCostDisplay({
       />
       <span
         className={`font-bold ${textSize} text-left min-w-[3ch]`}
-        style={{ color: isEnhanced ? '#f8c200' : 'white' }}
+        style={{ color: isEnhanced ? ACCENT_COLORS.ENHANCED : 'white' }}
       >
         {cost}
       </span>

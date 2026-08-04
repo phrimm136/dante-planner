@@ -1,4 +1,5 @@
-import { useMemo, useState, useEffect, type ComponentType } from 'react'
+import { useState } from 'react'
+import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -13,27 +14,10 @@ import {
   deriveEnhancements,
   getBaseIdFromBuffId,
 } from '@/shared/gameText'
-import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
+import type { EnhancementLevel } from '@/shared/gameText'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import { StartBuffCardMD6 } from './StartBuffCardMD6'
-import { StartBuffCardMD7 } from './StartBuffCardMD7'
-
-type StartBuffCardProps = {
-  buff: StartBuff
-  allBuffs: StartBuff[]
-  i18n: StartBuffI18n
-  battleKeywords?: BattleKeywords
-  isSelected: boolean
-  onSelect: (buffId: number) => void
-  enhancement: EnhancementLevel
-  onEnhancementChange: (baseId: number, level: EnhancementLevel) => void
-}
-
-const START_BUFF_CARD_BY_VERSION: Record<number, ComponentType<StartBuffCardProps>> = {
-  6: StartBuffCardMD6,
-  7: StartBuffCardMD7,
-}
+import { StartBuffCard } from './StartBuffCard'
 
 interface StartBuffEditPaneProps {
   open: boolean
@@ -58,25 +42,12 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
     setSelectedBuffIds,
   )
 
-  // Breakpoint detection for scaling
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' && window.innerWidth >= CARD_GRID.LG_BREAKPOINT,
-  )
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= CARD_GRID.LG_BREAKPOINT)
-    }
-
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  const isDesktop = useIsBreakpoint('min', CARD_GRID.LG_BREAKPOINT)
 
   // Calculate scale and dimensions
   const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
   const scale = isDesktop ? 1 : mobileScale
-  const { width: cardWidth, height: cardHeight } =
-    START_BUFF_CARD_SIZE[mdVersion] ?? START_BUFF_CARD_SIZE[6]
+  const { width: cardWidth, height: cardHeight } = START_BUFF_CARD_SIZE
   const scaledWidth = cardWidth * scale
   const scaledHeight = cardHeight * scale
 
@@ -112,14 +83,14 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
   }
 
   // Calculate total cost using preview enhancements for selected buffs
-  const totalCost = useMemo(() => {
+  const totalCost = (() => {
     let sum = 0
     for (const buffId of selectedBuffIds) {
       const buff = buffs.find((b) => Number(b.id) === buffId)
       if (buff) sum += buff.cost
     }
     return sum
-  }, [buffs, selectedBuffIds])
+  })()
 
   // Batch select all buffs at their current preview enhancement
   const handleSelectAll = () => {
@@ -148,8 +119,6 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
       setSelectedBuffIds(newSelection)
     }
   }
-
-  const StartBuffCard = START_BUFF_CARD_BY_VERSION[mdVersion] ?? StartBuffCardMD6
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -251,6 +220,7 @@ export function StartBuffEditPane({ open, onOpenChange, mdVersion }: StartBuffEd
                   cardHeight={cardHeight}
                 >
                   <StartBuffCard
+                    mdVersion={mdVersion}
                     buff={buff}
                     allBuffs={buffs}
                     i18n={i18n}

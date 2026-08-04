@@ -1,8 +1,7 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftObservationData } from '@/pages/egoGift'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
+import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import type { EGOGiftListItem } from '@/pages/egoGift'
@@ -11,13 +10,12 @@ import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { EGOGiftCard } from '@/pages/egoGift'
 
-interface EGOGiftObservationSummaryProps {
+export interface EGOGiftObservationSummaryProps {
   mdVersion: number
+  selectedGiftIds: Set<string>
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
-  /** Override selectedGiftIds from store (for tracker mode) */
-  selectedGiftIdsOverride?: Set<string>
 }
 
 /**
@@ -28,17 +26,12 @@ interface EGOGiftObservationSummaryProps {
  */
 export function EGOGiftObservationSummary({
   mdVersion,
+  selectedGiftIds,
   onClick,
   readOnly = false,
   onViewNotes,
-  selectedGiftIdsOverride,
 }: EGOGiftObservationSummaryProps) {
-  // Store state (safe - returns undefined if outside context)
-  const storeSelectedGiftIds = usePlannerEditorStoreSafe((s) => s.observationGiftIds)
-  const selectedGiftIds = selectedGiftIdsOverride ?? storeSelectedGiftIds!
   const { t } = useTranslation(['planner', 'common'])
-
-  // Breakpoint detection for scaling
 
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
@@ -53,7 +46,7 @@ export function EGOGiftObservationSummary({
     )?.starlightCost || 0
 
   // Build gift list items for selected gifts
-  const selectedGifts = useMemo<EGOGiftListItem[]>(() => {
+  const selectedGifts: EGOGiftListItem[] = (() => {
     const gifts: EGOGiftListItem[] = []
     for (const id of selectedGiftIds) {
       const specData = spec[id]
@@ -71,7 +64,7 @@ export function EGOGiftObservationSummary({
       }
     }
     return gifts
-  }, [selectedGiftIds, spec, i18n])
+  })()
 
   const hasSelectedGifts = selectedGifts.length > 0
 
@@ -117,4 +110,19 @@ export function EGOGiftObservationSummary({
       </button>
     </PlannerSection>
   )
+}
+
+/** Props a store-bound caller supplies; the selection comes from the store. */
+export type StoreBoundEGOGiftObservationSummaryProps = Omit<
+  EGOGiftObservationSummaryProps,
+  'selectedGiftIds'
+>
+
+/** Renders the summary against the observation gifts held by the planner editor store. */
+export function StoreBoundEGOGiftObservationSummary(
+  props: StoreBoundEGOGiftObservationSummaryProps,
+) {
+  const selectedGiftIds = usePlannerEditorStore((s) => s.observationGiftIds)
+
+  return <EGOGiftObservationSummary {...props} selectedGiftIds={selectedGiftIds} />
 }

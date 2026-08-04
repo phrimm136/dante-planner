@@ -87,6 +87,15 @@ export const MDCategorySchema = z.enum(MD_CATEGORIES)
 export const RRCategorySchema = z.enum(RR_CATEGORIES)
 
 /**
+ * Every category a planner of any type can carry.
+ *
+ * The server keys validity off the planner type (MD categories for a Mirror
+ * Dungeon planner, RR categories for a Refracted Railway one), so a response
+ * carrying either set is well-formed.
+ */
+export const PlannerCategorySchema = z.enum([...MD_CATEGORIES, ...RR_CATEGORIES])
+
+/**
  * Dungeon index schema - 0, 1, 2, or 3
  * Matches DUNGEON_IDX constant values
  */
@@ -185,9 +194,6 @@ export const FloorSelectionSaveSchema = FloorSelectionDraftSchema.extend({
   /** Selected theme pack ID - REQUIRED for save */
   themePackId: ThemePackSchema,
 })
-
-/** Alias for backwards compatibility */
-export const SerializableFloorSelectionSchema = FloorSelectionDraftSchema
 
 // ============================================================================
 // Note Content Schemas
@@ -349,14 +355,6 @@ export const RRPlannerContentDraftSchema = z.object({}).strict()
  */
 export const RRPlannerContentSaveSchema = RRPlannerContentDraftSchema
 
-// Backwards compatibility aliases
-/** @deprecated Use MDPlannerContentDraftSchema instead */
-export const PlannerContentDraftSchema = MDPlannerContentDraftSchema
-/** @deprecated Use MDPlannerContentSaveSchema instead */
-export const PlannerContentSaveSchema = MDPlannerContentSaveSchema
-/** @deprecated Use MDPlannerContentDraftSchema instead */
-export const PlannerContentSchema = MDPlannerContentDraftSchema
-
 // ============================================================================
 // Complete Planner Schemas (Draft vs Save)
 // ============================================================================
@@ -372,21 +370,6 @@ export const DraftPlannerSchema = z
     /** Planner config (type discriminator and category) */
     config: PlannerConfigDiscriminatedSchema,
     /** Planner content - allows incomplete floor selections */
-    content: z.record(z.string(), z.unknown()),
-  })
-  .strict()
-
-/**
- * Save planner schema with config layer
- * Requires complete data for explicit save operations
- */
-export const SavePlannerSchema = z
-  .object({
-    /** Planner metadata (id, status, timestamps, etc.) */
-    metadata: PlannerMetadataSchema,
-    /** Planner config (type discriminator and category) */
-    config: PlannerConfigDiscriminatedSchema,
-    /** Planner content - requires complete data */
     content: z.record(z.string(), z.unknown()),
   })
   .strict()
@@ -455,46 +438,6 @@ export function validateSaveablePlanner(
     content,
   } as SaveablePlanner
 }
-
-/**
- * Validate a SaveablePlanner for saving (stricter validation)
- * Convenience wrapper for validateSaveablePlanner with mode='save'
- */
-export function validateSaveablePlannerForSave(data: unknown): SaveablePlanner {
-  return validateSaveablePlanner(data, 'save')
-}
-
-// ============================================================================
-// Summary Schema
-// ============================================================================
-
-/**
- * Category schema for summary - accepts either MD or RR categories
- */
-export const PlannerCategorySchema = z.union([MDCategorySchema, RRCategorySchema])
-
-/**
- * Planner summary schema
- * Lightweight version for list display
- */
-export const PlannerSummarySchema = z
-  .object({
-    /** Unique identifier */
-    id: z.string(),
-    /** Planner title */
-    title: z.string(),
-    /** Type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY) */
-    plannerType: PlannerTypeSchema,
-    /** Category (MD: 5F/10F/15F, RR: placeholder) */
-    category: PlannerCategorySchema,
-    /** Current save status */
-    status: PlannerStatusSchema,
-    /** Last modification timestamp for sorting */
-    lastModifiedAt: z.string(),
-    /** Explicit save timestamp (null if never saved) */
-    savedAt: z.string().nullable(),
-  })
-  .strict()
 
 // ============================================================================
 // Serialization Helpers
@@ -605,7 +548,7 @@ export const ServerPlannerResponseSchema = z
     /** Planner title */
     title: z.string(),
     /** MD category */
-    category: MDCategorySchema,
+    category: PlannerCategorySchema,
     /** Current save status */
     status: PlannerStatusSchema,
     /** Planner content as JSON string */
@@ -644,7 +587,7 @@ export const ServerPlannerSummarySchema = z
     /** Planner title */
     title: z.string(),
     /** MD category */
-    category: MDCategorySchema,
+    category: PlannerCategorySchema,
     /** Type of planner */
     plannerType: PlannerTypeSchema,
     /** Current save status */
@@ -673,24 +616,6 @@ export const ImportPlannersResponseSchema = z
     total: z.number().int().nonnegative(),
     /** Summary of imported planners */
     planners: z.array(ServerPlannerSummarySchema),
-  })
-  .strict()
-
-/**
- * SSE event type for planner updates
- */
-export const PlannerSseEventTypeSchema = z.enum(['created', 'updated', 'deleted'])
-
-/**
- * Server-Sent Event schema for planner updates
- * Used for real-time sync notifications
- */
-export const PlannerSseEventSchema = z
-  .object({
-    /** ID of the affected planner (UUID) */
-    plannerId: PlannerIdSchema,
-    /** Type of change that occurred */
-    type: PlannerSseEventTypeSchema,
   })
   .strict()
 

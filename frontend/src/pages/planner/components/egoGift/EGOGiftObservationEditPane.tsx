@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, startTransition, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -49,7 +49,7 @@ export function EGOGiftObservationEditPane({
   const [sortMode, setSortMode] = useState<SortMode>('tier-first')
 
   // Merge spec and i18n into EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(() => {
+  const gifts: EGOGiftListItem[] = (() => {
     return Object.entries(spec).map(([id, specData]) => ({
       id,
       name: i18n[id] || id,
@@ -60,10 +60,10 @@ export function EGOGiftObservationEditPane({
       themePack: specData.themePack,
       maxEnhancement: specData.maxEnhancement,
     }))
-  }, [spec, i18n])
+  })()
 
   // Sort gifts (apply giftIdFilter + sort)
-  const sortedGifts = useMemo(() => {
+  const sortedGifts = (() => {
     let filtered = gifts
     // Apply ID filter (observation eligible gifts)
     if (observationData.observationEgoGiftDataList.length > 0) {
@@ -71,7 +71,7 @@ export function EGOGiftObservationEditPane({
       filtered = filtered.filter((gift) => idSet.has(gift.id))
     }
     return sortEGOGifts(filtered, sortMode)
-  }, [gifts, observationData.observationEgoGiftDataList, sortMode])
+  })()
 
   // Reset filters when dialog closes
   useEffect(() => {
@@ -82,35 +82,47 @@ export function EGOGiftObservationEditPane({
     }
   }, [open])
 
-  // Use ref to always access latest state in stable callback
-  const selectedGiftIdsRef = useRef(selectedGiftIds)
-  selectedGiftIdsRef.current = selectedGiftIds
-  const comprehensiveGiftIdsRef = useRef(comprehensiveGiftIds)
-  comprehensiveGiftIdsRef.current = comprehensiveGiftIds
+  // Read through a ref so the handler keeps one identity for the pane's lifetime.
+  // Closing over the selection would give every gift cell a new callback on each
+  // toggle, re-rendering all of them to change one card.
+  const latest = useRef({
+    selectedGiftIds,
+    comprehensiveGiftIds,
+    setObservationGiftIds,
+    setComprehensiveGiftIds,
+  })
+  useEffect(() => {
+    latest.current = {
+      selectedGiftIds,
+      comprehensiveGiftIds,
+      setObservationGiftIds,
+      setComprehensiveGiftIds,
+    }
+  })
 
-  // Stable callback - uses ref to get latest state
-  const handleGiftToggle = useCallback(
-    (giftId: string) => {
-      startTransition(() => {
-        const current = selectedGiftIdsRef.current
-        const currentComprehensive = comprehensiveGiftIdsRef.current
-        const newSelection = new Set(current)
-        const newComprehensive = new Set(currentComprehensive)
+  const [handleGiftToggle] = useState(() => (giftId: string) => {
+    startTransition(() => {
+      const {
+        selectedGiftIds: current,
+        comprehensiveGiftIds: currentComprehensive,
+        setObservationGiftIds: notifyObservation,
+        setComprehensiveGiftIds: notifyComprehensive,
+      } = latest.current
+      const newSelection = new Set(current)
+      const newComprehensive = new Set(currentComprehensive)
 
-        if (newSelection.has(giftId)) {
-          newSelection.delete(giftId)
-          newComprehensive.delete(giftId)
-        } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
-          newSelection.add(giftId)
-          newComprehensive.add(giftId)
-        }
+      if (newSelection.has(giftId)) {
+        newSelection.delete(giftId)
+        newComprehensive.delete(giftId)
+      } else if (newSelection.size < MAX_OBSERVABLE_GIFTS) {
+        newSelection.add(giftId)
+        newComprehensive.add(giftId)
+      }
 
-        setObservationGiftIds(newSelection)
-        setComprehensiveGiftIds(newComprehensive)
-      })
-    },
-    [setObservationGiftIds, setComprehensiveGiftIds],
-  )
+      notifyObservation(newSelection)
+      notifyComprehensive(newComprehensive)
+    })
+  })
 
   // Calculate current cost from observation data
   const currentCost =

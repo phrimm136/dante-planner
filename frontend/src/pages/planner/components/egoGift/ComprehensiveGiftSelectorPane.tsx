@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, startTransition, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -17,6 +17,7 @@ import { sortEGOGifts } from '@/pages/egoGift'
 import { EGOGiftFilterBar } from '@/pages/egoGift'
 import { EGOGiftSelectionList } from '@/pages/egoGift'
 import type { SortMode } from '@/shared/filter'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface ComprehensiveGiftSelectorPaneProps {
   open: boolean
@@ -54,7 +55,7 @@ export function ComprehensiveGiftSelectorPane({
   }, [open])
 
   // Convert to EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(() => {
+  const gifts: EGOGiftListItem[] = (() => {
     return Object.entries(spec).map(([id, specData]) => ({
       id,
       name: i18n[id] || id,
@@ -66,34 +67,42 @@ export function ComprehensiveGiftSelectorPane({
       maxEnhancement: specData.maxEnhancement,
       recipe: specData.recipe,
     }))
-  }, [spec, i18n])
+  })()
 
   // Build O(1) lookup map for recipe cascade selection
-  const specById = useMemo(() => {
+  const specById = (() => {
     return new Map(Object.entries(spec))
-  }, [spec])
+  })()
 
   // Sort gifts (no ID filter for comprehensive list)
-  const sortedGifts = useMemo(() => {
+  const sortedGifts = (() => {
     return sortEGOGifts(gifts, sortMode)
-  }, [gifts, sortMode])
+  })()
 
-  // Use ref to always access latest selectedGiftIds in stable callback
-  const selectedGiftIdsRef = useRef(selectedGiftIds)
-  selectedGiftIdsRef.current = selectedGiftIds
+  // Read through a ref so the handler keeps one identity for the pane's lifetime.
+  // Closing over the selection would give every gift cell a new callback on each
+  // toggle, re-rendering all of them to change one card.
+  const latest = useRef({ selectedGiftIds, specById, setComprehensiveGiftIds })
+  useEffect(() => {
+    latest.current = { selectedGiftIds, specById, setComprehensiveGiftIds }
+  })
 
   /**
    * Handle enhancement selection with toggle logic and cascade
    */
-  const handleEnhancementSelect = useCallback(
-    (giftId: string, enhancement: EnhancementLevel) => {
+  const [handleEnhancementSelect] = useState(
+    () => (giftId: string, enhancement: EnhancementLevel) => {
       startTransition(() => {
-        const current = selectedGiftIdsRef.current
+        const {
+          selectedGiftIds: current,
+          specById: specs,
+          setComprehensiveGiftIds: notify,
+        } = latest.current
         const newSelection = new Set(current)
         const existingEncodedId = findEncodedGiftId(giftId, current)
 
         if (existingEncodedId) {
-          const { enhancement: currentEnhancement } = decodeGiftSelection(existingEncodedId)
+          const currentEnhancement = decodeGiftSelection(existingEncodedId)?.enhancement
 
           if (currentEnhancement === enhancement) {
             newSelection.delete(existingEncodedId)
@@ -104,9 +113,9 @@ export function ComprehensiveGiftSelectorPane({
         } else {
           newSelection.add(encodeGiftSelection(enhancement, giftId))
 
-          const giftSpec = specById.get(giftId)
+          const giftSpec = specs.get(giftId)
           if (!giftSpec) {
-            setComprehensiveGiftIds(newSelection)
+            notify(newSelection)
             return
           }
 
@@ -123,10 +132,9 @@ export function ComprehensiveGiftSelectorPane({
           }
         }
 
-        setComprehensiveGiftIds(newSelection)
+        notify(newSelection)
       })
     },
-    [setComprehensiveGiftIds, specById],
   )
 
   return (
@@ -136,7 +144,7 @@ export function ComprehensiveGiftSelectorPane({
         showCloseButton={false}
       >
         <DialogHeader>
-          <div className="flex items-center justify-between">
+          <div className={SECTION_STYLES.LAYOUT.rowBetween}>
             <DialogTitle>{t('pages.plannerMD.comprehensiveEgoGiftList')}</DialogTitle>
             <div className="flex gap-2">
               <Button

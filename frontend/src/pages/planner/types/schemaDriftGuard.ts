@@ -35,7 +35,7 @@ import type {
   PlannerMetadata,
   MDConfig,
   RRConfig,
-  PlannerConfig,
+  PlannerEditorConfig,
   SerializableFloorSelection,
   SerializableNoteContent,
   MDPlannerContent,
@@ -80,7 +80,7 @@ export type PlannerSchemaDriftGuard = [
   Expect<Equal<z.infer<typeof PlannerMetadataSchema>, PlannerMetadata>>,
   Expect<Equal<z.infer<typeof MDConfigSchema>, MDConfig>>,
   Expect<Equal<z.infer<typeof RRConfigSchema>, RRConfig>>,
-  Expect<Equal<z.infer<typeof PlannerConfigDiscriminatedSchema>, PlannerConfig>>,
+  Expect<Equal<z.infer<typeof PlannerConfigDiscriminatedSchema>, PlannerEditorConfig>>,
 
   // --- Composites: one-directional BY DESIGN ---
   // JSONContentSchema is z.ZodType<unknown> (structural Tiptap validation),
@@ -92,7 +92,7 @@ export type PlannerSchemaDriftGuard = [
   // gate — never equal to it.
   Expect<
     Extends<
-      { metadata: PlannerMetadata; config: PlannerConfig; content: MDContentAsRecord },
+      { metadata: PlannerMetadata; config: PlannerEditorConfig; content: MDContentAsRecord },
       z.input<typeof SaveablePlannerSchema>
     >
   >,

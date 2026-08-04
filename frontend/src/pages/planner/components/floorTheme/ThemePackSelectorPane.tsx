@@ -131,13 +131,6 @@ export function ThemePackSelectorPane({
 
   const [selectedDifficulty, setSelectedDifficulty] = useState<DungeonIdx>(availableDifficulties[0])
 
-  const filteredPacks = filterThemePacks(
-    themePackList,
-    floorNumber,
-    selectedDifficulty,
-    usedThemePackIds,
-  )
-
   const handlePackSelect = (packId: string) => {
     startTransition(() => {
       onSelect(packId, selectedDifficulty)
@@ -205,50 +198,54 @@ export function ThemePackSelectorPane({
             ))}
           </TabsList>
 
-          {availableDifficulties.map((diff) => (
-            <TabsContent
-              key={diff}
-              value={String(diff)}
-              className="mt-4 flex-1 overflow-x-hidden overflow-y-auto"
-            >
-              {filteredPacks.length === 0 ? (
-                <div className="flex items-center justify-center h-32 text-muted-foreground">
-                  {t('pages.plannerMD.noThemePacksAvailable')}
-                </div>
-              ) : (
-                <ResponsiveCardGrid
-                  cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                  cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-                  mobileScale={0.6}
-                >
-                  {filteredPacks.map(({ id, entry }) => {
-                    const i18nData = themePackI18n[id]
-                    const name = i18nData?.name || `Pack ${id}`
+          {availableDifficulties.map((diff) => {
+            const packs = filterThemePacks(themePackList, floorNumber, diff, usedThemePackIds)
 
-                    return (
-                      <ScaledCardWrapper
-                        key={id}
-                        cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-                        cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-                        mobileScale={0.6}
-                      >
-                        <ThemePackViewer
-                          packId={id}
-                          packEntry={entry}
-                          packName={name}
-                          specialName={i18nData?.specialName}
-                          onClick={() => {
-                            handlePackSelect(id)
-                          }}
-                          enableHoverHighlight
-                        />
-                      </ScaledCardWrapper>
-                    )
-                  })}
-                </ResponsiveCardGrid>
-              )}
-            </TabsContent>
-          ))}
+            return (
+              <TabsContent
+                key={diff}
+                value={String(diff)}
+                className="mt-4 flex-1 overflow-x-hidden overflow-y-auto"
+              >
+                {packs.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-muted-foreground">
+                    {t('pages.plannerMD.noThemePacksAvailable')}
+                  </div>
+                ) : (
+                  <ResponsiveCardGrid
+                    cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                    cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                    mobileScale={0.6}
+                  >
+                    {packs.map(({ id, entry }) => {
+                      const i18nData = themePackI18n[id]
+                      const name = i18nData?.name || `Pack ${id}`
+
+                      return (
+                        <ScaledCardWrapper
+                          key={id}
+                          cardWidth={CARD_GRID.WIDTH.THEME_PACK}
+                          cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
+                          mobileScale={0.6}
+                        >
+                          <ThemePackViewer
+                            packId={id}
+                            packEntry={entry}
+                            packName={name}
+                            specialName={i18nData?.specialName}
+                            onClick={() => {
+                              handlePackSelect(id)
+                            }}
+                            enableHoverHighlight
+                          />
+                        </ScaledCardWrapper>
+                      )
+                    })}
+                  </ResponsiveCardGrid>
+                )}
+              </TabsContent>
+            )
+          })}
         </Tabs>
       </DialogContent>
     </Dialog>

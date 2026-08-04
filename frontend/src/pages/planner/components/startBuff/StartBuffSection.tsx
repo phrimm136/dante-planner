@@ -1,22 +1,23 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { MDVersion } from '@/shared/gameData'
 import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
+import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import { PlannerSection } from '../PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
 
-interface StartBuffSectionProps {
+/** `useStartBuffSelection` demands a writer; this summary only ever displays. */
+const IGNORE_SELECTION = () => {}
+
+export interface StartBuffSectionProps {
   mdVersion: MDVersion
+  selectedBuffIds: Set<number>
   /** Callback when section is clicked (opens edit pane) */
   onClick?: () => void
   readOnly?: boolean
   onViewNotes?: () => void
-  /** Override selectedBuffIds from store (for tracker mode) */
-  selectedBuffIdsOverride?: Set<number>
 }
 
 /**
@@ -26,21 +27,14 @@ interface StartBuffSectionProps {
  */
 export function StartBuffSection({
   mdVersion,
+  selectedBuffIds,
   onClick,
   readOnly = false,
   onViewNotes,
-  selectedBuffIdsOverride,
 }: StartBuffSectionProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Store state (safe - returns undefined if outside context)
-  const storeSelectedBuffIds = usePlannerEditorStoreSafe((s) => s.selectedBuffIds)
-  const storeSetSelectedBuffIds = usePlannerEditorStoreSafe((s) => s.setSelectedBuffIds)
-  const selectedBuffIds = selectedBuffIdsOverride ?? storeSelectedBuffIds!
-  // No-op setter for viewer mode
-  const setSelectedBuffIds = storeSetSelectedBuffIds ?? (() => {})
-
-  const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, setSelectedBuffIds)
+  const { displayBuffs } = useStartBuffSelection(mdVersion, selectedBuffIds, IGNORE_SELECTION)
 
   // Filter to only show selected buffs
   const selectedBuffs = displayBuffs.filter((buff) => {
@@ -49,10 +43,7 @@ export function StartBuffSection({
   })
 
   // Calculate total star cost of selected buffs
-  const totalCost = useMemo(
-    () => selectedBuffs.reduce((sum, buff) => sum + buff.cost, 0),
-    [selectedBuffs],
-  )
+  const totalCost = selectedBuffs.reduce((sum, buff) => sum + buff.cost, 0)
 
   const hasSelectedBuffs = selectedBuffs.length > 0
 
@@ -95,4 +86,14 @@ export function StartBuffSection({
       </button>
     </PlannerSection>
   )
+}
+
+/** Props a store-bound caller supplies; the selection comes from the store. */
+export type StoreBoundStartBuffSectionProps = Omit<StartBuffSectionProps, 'selectedBuffIds'>
+
+/** Renders the section against the buff selection held by the planner editor store. */
+export function StoreBoundStartBuffSection(props: StoreBoundStartBuffSectionProps) {
+  const selectedBuffIds = usePlannerEditorStore((s) => s.selectedBuffIds)
+
+  return <StartBuffSection {...props} selectedBuffIds={selectedBuffIds} />
 }

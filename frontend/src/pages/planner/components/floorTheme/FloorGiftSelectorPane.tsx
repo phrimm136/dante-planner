@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, startTransition, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -16,6 +16,7 @@ import {
 } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import type { EnhancementLevel, DungeonIdx } from '@/shared/gameData'
+import { SECTION_STYLES } from '@/lib/constants'
 
 interface FloorGiftSelectorPaneProps {
   open: boolean
@@ -64,7 +65,7 @@ export function FloorGiftSelectorPane({
   }, [open])
 
   // Convert to EGOGiftListItem array
-  const gifts = useMemo<EGOGiftListItem[]>(() => {
+  const gifts: EGOGiftListItem[] = (() => {
     return Object.entries(spec).map(([id, specData]) => ({
       id,
       name: i18n[id] || id,
@@ -78,35 +79,41 @@ export function FloorGiftSelectorPane({
       hardOnly: specData.hardOnly,
       extremeOnly: specData.extremeOnly,
     }))
-  }, [spec, i18n])
+  })()
 
   // Build O(1) lookup map for recipe cascade selection
-  const specById = useMemo(() => {
+  const specById = (() => {
     return new Map(Object.entries(spec))
-  }, [spec])
+  })()
 
-  const sortedGifts = useMemo(
-    () => bucketAndSortFloorGifts(gifts, themePackId, difficulty, sortMode),
-    [gifts, sortMode, themePackId, difficulty],
-  )
+  const sortedGifts = bucketAndSortFloorGifts(gifts, themePackId, difficulty, sortMode)
 
-  // Use ref to always access latest state in stable callback
-  const selectedGiftIdsRef = useRef(selectedGiftIds)
-  selectedGiftIdsRef.current = selectedGiftIds
+  // Read through a ref so the handler keeps one identity for the pane's lifetime.
+  // Closing over the selection would give every gift cell a new callback on each
+  // toggle, re-rendering all of them to change one card.
+  const latest = useRef({ selectedGiftIds, specById, themePackId, onGiftSelectionChange })
+  useEffect(() => {
+    latest.current = { selectedGiftIds, specById, themePackId, onGiftSelectionChange }
+  })
 
   /**
    * Handle enhancement selection with toggle logic and cascade
    */
-  const handleEnhancementSelect = useCallback(
-    (giftId: string, enhancement: EnhancementLevel) => {
+  const [handleEnhancementSelect] = useState(
+    () => (giftId: string, enhancement: EnhancementLevel) => {
       startTransition(() => {
-        const current = selectedGiftIdsRef.current
+        const {
+          selectedGiftIds: current,
+          specById: specs,
+          themePackId: packId,
+          onGiftSelectionChange: notify,
+        } = latest.current
         const newSelection = new Set(current)
 
         const existingEncodedId = findEncodedGiftId(giftId, current)
 
         if (existingEncodedId) {
-          const { enhancement: currentEnhancement } = decodeGiftSelection(existingEncodedId)
+          const currentEnhancement = decodeGiftSelection(existingEncodedId)?.enhancement
 
           if (currentEnhancement === enhancement) {
             newSelection.delete(existingEncodedId)
@@ -119,7 +126,7 @@ export function FloorGiftSelectorPane({
           const newEncodedId = encodeGiftSelection(enhancement, giftId)
           newSelection.add(newEncodedId)
 
-          const giftSpec = specById.get(giftId)
+          const giftSpec = specs.get(giftId)
           if (giftSpec) {
             const ingredientIds = getCascadeIngredients(giftSpec.recipe)
             const visited = new Set<string>([giftId])
@@ -129,11 +136,11 @@ export function FloorGiftSelectorPane({
               if (visited.has(ingredientIdStr)) continue
               visited.add(ingredientIdStr)
 
-              const ingredientSpec = specById.get(ingredientIdStr)
+              const ingredientSpec = specs.get(ingredientIdStr)
               const isObtainable =
                 !ingredientSpec ||
                 ingredientSpec.themePack.length === 0 ||
-                ingredientSpec.themePack.includes(themePackId)
+                ingredientSpec.themePack.includes(packId)
 
               // Only add to floor if obtainable in this theme pack
               if (isObtainable && !findEncodedGiftId(ingredientIdStr, newSelection)) {
@@ -143,10 +150,9 @@ export function FloorGiftSelectorPane({
           }
         }
 
-        onGiftSelectionChange(newSelection)
+        notify(newSelection)
       })
     },
-    [onGiftSelectionChange, specById, themePackId],
   )
 
   return (
@@ -156,7 +162,7 @@ export function FloorGiftSelectorPane({
         showCloseButton={false}
       >
         <DialogHeader>
-          <div className="flex items-center justify-between">
+          <div className={SECTION_STYLES.LAYOUT.rowBetween}>
             <DialogTitle>
               {t('pages.plannerMD.selectEgoGiftsForFloor', { floor: floorNumber })}
             </DialogTitle>
