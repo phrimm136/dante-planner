@@ -1,14 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { ConfirmActionDialog } from '@/components/feedback/ConfirmActionDialog'
 
 interface ApplyLatestMirrorDialogProps {
   /** Whether the dialog is open */
@@ -42,25 +34,16 @@ export function ApplyLatestMirrorDialog({
   const { t } = useTranslation(['planner', 'common'])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('pages.plannerMD.applyLatestMirror.title')}</DialogTitle>
-          <DialogDescription>
-            {t('pages.plannerMD.applyLatestMirror.description')}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
-            {t('common:cancel')}
-          </Button>
-          <Button onClick={onConfirm} disabled={isPending}>
-            {isPending
-              ? t('pages.plannerMD.applyLatestMirror.applying')
-              : t('pages.plannerMD.applyLatestMirror.confirm')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <ConfirmActionDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t('pages.plannerMD.applyLatestMirror.title')}
+      description={t('pages.plannerMD.applyLatestMirror.description')}
+      cancelLabel={t('common:cancel')}
+      confirmLabel={t('pages.plannerMD.applyLatestMirror.confirm')}
+      pendingLabel={t('pages.plannerMD.applyLatestMirror.applying')}
+      onConfirm={onConfirm}
+      isPending={isPending}
+    />
   )
 }
