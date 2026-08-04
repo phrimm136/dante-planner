@@ -1,17 +1,19 @@
 package org.danteplanner.backend.moderation.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.BanRequest;
+import org.danteplanner.backend.moderation.dto.BanStatusResponse;
+import org.danteplanner.backend.moderation.dto.ModeratedUserDto;
 import org.danteplanner.backend.moderation.dto.ModerationActionDto;
+import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
 import org.danteplanner.backend.moderation.dto.TimeoutRequest;
 import org.danteplanner.backend.moderation.dto.TimeoutResponse;
+import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
@@ -109,18 +111,17 @@ public class ModerationController {
      * @return success message with planner status
      */
     @PutMapping("/planner/{plannerId}/unpublish")
-    public ResponseEntity<Map<String, Object>> unpublishPlanner(
+    public ResponseEntity<UnpublishPlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long actorId,
             @PathVariable UUID plannerId) {
+
+        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} unpublishing planner {}", actorId, plannerId);
 
         Planner planner = plannerModerationService.unpublishPlanner(actorId, plannerId);
-        return ResponseEntity.ok(Map.of(
-                "plannerId", planner.getId(),
-                "published", planner.getPublished(),
-                "message", "Planner unpublished successfully"
-        ));
+        return ResponseEntity.ok(new UnpublishPlannerResponse(
+                planner.getId(), planner.getPublished(), "Planner unpublished successfully"));
     }
 
     /**
@@ -135,7 +136,7 @@ public class ModerationController {
      * @return success message
      */
     @PostMapping("/user/{usernameSuffix}/ban")
-    public ResponseEntity<Map<String, Object>> banUser(
+    public ResponseEntity<BanStatusResponse> banUser(
             @AuthenticationPrincipal Long actorId,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
@@ -145,10 +146,7 @@ public class ModerationController {
         log.info("Admin {} banning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
         User user = userModerationService.banUserBySuffix(actorId, usernameSuffix, request.reason());
-        return ResponseEntity.ok(Map.of(
-                "banned", user.isBanned(),
-                "message", "User banned successfully"
-        ));
+        return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User banned successfully"));
     }
 
     /**
@@ -162,7 +160,7 @@ public class ModerationController {
      * @return success message
      */
     @PostMapping("/user/{usernameSuffix}/unban")
-    public ResponseEntity<Map<String, Object>> unbanUser(
+    public ResponseEntity<BanStatusResponse> unbanUser(
             @AuthenticationPrincipal Long actorId,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
@@ -172,10 +170,7 @@ public class ModerationController {
         log.info("Admin {} unbanning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
         User user = userModerationService.unbanUserBySuffix(actorId, usernameSuffix, request.reason());
-        return ResponseEntity.ok(Map.of(
-                "banned", user.isBanned(),
-                "message", "User unbanned successfully"
-        ));
+        return ResponseEntity.ok(new BanStatusResponse(user.isBanned(), "User unbanned successfully"));
     }
 
     /**
@@ -186,20 +181,9 @@ public class ModerationController {
      * @return list of users
      */
     @GetMapping("/users")
-    public ResponseEntity<List<Map<String, Object>>> getAllUsers() {
-        List<User> users = moderationQueryService.getAllUsers();
-        List<Map<String, Object>> responses = users.stream()
-                .map(user -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("usernameEpithet", user.getUsernameEpithet());
-                    map.put("usernameSuffix", user.getUsernameSuffix());
-                    map.put("role", user.getRole().name());
-                    map.put("isBanned", user.isBanned());
-                    map.put("bannedAt", user.getBannedAt() != null ? user.getBannedAt().toString() : "");
-                    map.put("isTimedOut", user.isTimedOut());
-                    map.put("timeoutUntil", user.getTimeoutUntil() != null ? user.getTimeoutUntil().toString() : "");
-                    return map;
-                })
+    public ResponseEntity<List<ModeratedUserDto>> getAllUsers() {
+        List<ModeratedUserDto> responses = moderationQueryService.getAllUsers().stream()
+                .map(ModeratedUserDto::fromUser)
                 .toList();
         return ResponseEntity.ok(responses);
     }
@@ -246,7 +230,7 @@ public class ModerationController {
      * @return success message
      */
     @PostMapping("/planner/{plannerId}/takedown")
-    public ResponseEntity<Map<String, Object>> takedownPlanner(
+    public ResponseEntity<PlannerActionResponse> takedownPlanner(
             @AuthenticationPrincipal Long actorId,
             @PathVariable UUID plannerId,
             @Valid @RequestBody BanRequest request) {
@@ -256,10 +240,8 @@ public class ModerationController {
         log.info("Moderator {} taking down planner {} with reason: {}", actorId, plannerId, request.reason());
 
         plannerModerationService.deletePlanner(actorId, plannerId, request.reason());
-        return ResponseEntity.ok(Map.of(
-                "plannerId", plannerId,
-                "message", "Planner taken down successfully"
-        ));
+        return ResponseEntity.ok(
+                new PlannerActionResponse(plannerId, "Planner taken down successfully"));
     }
 
     /**

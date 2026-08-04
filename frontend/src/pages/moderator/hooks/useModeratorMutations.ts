@@ -4,7 +4,8 @@ import { moderatorQueryKeys } from './useModeratorData'
 
 interface BanUserRequest {
   usernameSuffix: string
-  reason?: string
+  /** Recorded in the moderation audit trail; the server rejects a blank one. */
+  reason: string
 }
 
 interface TimeoutUserRequest {

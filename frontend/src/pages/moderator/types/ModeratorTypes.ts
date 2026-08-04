@@ -3,3 +3,5 @@ import type { UserForModSchema, ModerationActionSchema } from '../schemas/Modera
 
 export type UserForMod = z.infer<typeof UserForModSchema>
 export type ModerationAction = z.infer<typeof ModerationActionSchema>
+
+export type ModerationDialogKind = 'ban' | 'unban' | 'timeout' | 'clearTimeout'

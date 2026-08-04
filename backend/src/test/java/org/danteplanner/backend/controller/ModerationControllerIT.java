@@ -12,6 +12,7 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -88,15 +92,15 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie adminCookie() {
-        return new Cookie("accessToken", adminToken);
+        return AuthCookies.accessToken(adminToken);
     }
 
     private Cookie moderatorCookie() {
-        return new Cookie("accessToken", moderatorToken);
+        return AuthCookies.accessToken(moderatorToken);
     }
 
     private Cookie regularUserCookie() {
-        return new Cookie("accessToken", regularUserToken);
+        return AuthCookies.accessToken(regularUserToken);
     }
 
     private void timeoutRegularUser() throws Exception {
@@ -139,6 +143,55 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
                             .contentType(APPLICATION_JSON)
                             .content("{\"durationMinutes\":120,\"reason\":\"Repeated harassment reports\"}"))
                     .andExpect(status().isUnauthorized());
+        }
+    }
+
+    /**
+     * A restriction on the actor is not carried by the access token, and banning invalidates no
+     * token: an admin who bans a rogue moderator rather than demoting them leaves the JWT role
+     * claim {@code SecurityConfig} gates on untouched. Authority has to be re-read from the row.
+     */
+    @Nested
+    @DisplayName("Account restriction on the acting moderator")
+    class RestrictedActorTests {
+
+        @Test
+        void timeoutUser_WhenActorBanned_Returns403() throws Exception {
+            moderatorUser.setBannedAt(Instant.now());
+            moderatorUser.setBannedBy(adminUser.getId());
+            userRepository.save(moderatorUser);
+
+            mockMvc.perform(post("/api/moderation/user/{suffix}/timeout", regularUser.getUsernameSuffix()).with(withCsrf())
+                            .cookie(moderatorCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"durationMinutes\":120,\"reason\":\"Repeated harassment reports\"}"))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void timeoutUser_WhenActorTimedOut_Returns403() throws Exception {
+            moderatorUser.setTimeoutUntil(Instant.now().plus(1, ChronoUnit.HOURS));
+            userRepository.save(moderatorUser);
+
+            mockMvc.perform(post("/api/moderation/user/{suffix}/timeout", regularUser.getUsernameSuffix()).with(withCsrf())
+                            .cookie(moderatorCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"durationMinutes\":120,\"reason\":\"Repeated harassment reports\"}"))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        void removeTimeout_WhenActorBanned_Returns403() throws Exception {
+            timeoutRegularUser();
+            moderatorUser.setBannedAt(Instant.now());
+            moderatorUser.setBannedBy(adminUser.getId());
+            userRepository.save(moderatorUser);
+
+            mockMvc.perform(post("/api/moderation/user/{suffix}/clear-timeout", regularUser.getUsernameSuffix()).with(withCsrf())
+                            .cookie(moderatorCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"reason\":\"Timeout served, appeal accepted\"}"))
+                    .andExpect(status().isForbidden());
         }
     }
 
@@ -297,7 +350,7 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
             // Selected by this test's own user: index 0 belongs to whoever the roster sorted
             // first, which is any concurrently running class. The restriction flags read as
             // values rather than existence because they are false for an unrestricted user, and
-            // exists() rejects a null.
+            // exists() rejects a null. The two timestamps are absent for such a user.
             String mine = "$[?(@.usernameSuffix == '" + regularUser.getUsernameSuffix() + "')]";
 
             mockMvc.perform(get("/api/moderation/users")
@@ -309,8 +362,9 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath(mine + ".role").value(hasItem("NORMAL")))
                     .andExpect(jsonPath(mine + ".isBanned").value(hasItem(false)))
                     .andExpect(jsonPath(mine + ".isTimedOut").value(hasItem(false)))
-                    .andExpect(jsonPath(mine + ".bannedAt").hasJsonPath())
-                    .andExpect(jsonPath(mine + ".timeoutUntil").hasJsonPath())
+                    .andExpect(jsonPath(mine + ".bannedAt").doesNotExist())
+                    .andExpect(jsonPath(mine + ".timeoutUntil").doesNotExist())
+                    .andExpect(jsonPath(mine + ".email").doesNotExist())
                     .andExpect(jsonPath(mine + ".userId").doesNotExist())
                     .andExpect(jsonPath(mine + ".id").doesNotExist());
         }
