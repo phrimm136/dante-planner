@@ -97,6 +97,7 @@ public class CommentCommandService {
         log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
         // Send notifications (respecting user notification settings)
+        UUID parentPublicId = null;
         if (effectiveParentId == null) {
             // Top-level comment - notify planner owner (if not self-comment and owner has notifications enabled)
             Long plannerOwnerId = planner.getUser().getId();
@@ -115,6 +116,7 @@ public class CommentCommandService {
         } else {
             // Reply - notify parent comment author (if not self-reply and author has notifications enabled)
             PlannerComment parentComment = commentRepository.findById(effectiveParentId).orElseThrow();
+            parentPublicId = parentComment.getPublicId();
             Long parentAuthorId = parentComment.getUserId();
             if (!userId.equals(parentAuthorId) && Boolean.TRUE.equals(parentComment.getAuthorNotificationsEnabled())) {
                 notificationDispatchService.notifyReplyReceived(
@@ -130,7 +132,7 @@ public class CommentCommandService {
             }
         }
 
-        publishCommentCreated(plannerId, saved, userId);
+        publishCommentCreated(plannerId, saved, parentPublicId, userId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
@@ -193,7 +195,7 @@ public class CommentCommandService {
             log.debug("Sent REPLY_RECEIVED notification to parent author {}", parentAuthorId);
         }
 
-        publishCommentCreated(plannerId, saved, userId);
+        publishCommentCreated(plannerId, saved, notifyParent.getPublicId(), userId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
@@ -280,13 +282,16 @@ public class CommentCommandService {
      * Fan out a newly created comment to other nodes via Redis pub/sub,
      * carrying the full comment payload for real-time SSE delivery.
      *
-     * @param plannerId    the planner the comment belongs to
-     * @param saved        the persisted comment to broadcast
-     * @param authorUserId the comment author's user ID
+     * @param plannerId      the planner the comment belongs to
+     * @param saved          the persisted comment to broadcast
+     * @param parentPublicId the public UUID of the comment replied to, null at top level
+     * @param authorUserId   the comment author's user ID
      */
-    private void publishCommentCreated(UUID plannerId, PlannerComment saved, Long authorUserId) {
+    private void publishCommentCreated(UUID plannerId, PlannerComment saved, UUID parentPublicId,
+            Long authorUserId) {
         User author = userService.findOptionalById(authorUserId).orElse(null);
-        CommentTreeNode payload = CommentTreeNode.fromEntity(saved, author, null, false, List.of());
+        CommentTreeNode payload =
+                CommentTreeNode.fromEntity(saved, parentPublicId, author, null, false, List.of());
         ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED,
                 saved.getPublicId().toString(), authorUserId, payload);
     }

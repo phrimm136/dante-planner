@@ -1,5 +1,7 @@
 package org.danteplanner.backend.shared.sse;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +36,7 @@ public class SsePublisher {
      * @param entityId        the affected entity id
      * @param payload         the event payload (patched into the recipient's cache)
      */
-    public void publishUserEvent(Long userId, java.util.UUID excludeDeviceId, SseEventType type,
+    public void publishUserEvent(Long userId, UUID excludeDeviceId, SseEventType type,
             String entityId, Object payload) {
         publish(SseChannel.USER, SseEnvelope.userEvent(userId, type, entityId,
                 excludeDeviceId != null ? excludeDeviceId.toString() : null, payload));
@@ -65,7 +67,7 @@ public class SsePublisher {
      * @param authorUserId the account whose action raised the event, skipped on delivery
      * @param payload   the event payload (patched into the recipient's cache)
      */
-    public void publishCommentEvent(java.util.UUID plannerId, SseEventType type, String entityId,
+    public void publishCommentEvent(UUID plannerId, SseEventType type, String entityId,
             Long authorUserId, Object payload) {
         publish(SseChannel.COMMENT,
                 SseEnvelope.commentEvent(plannerId, type, entityId, authorUserId, payload));
@@ -91,16 +93,13 @@ public class SsePublisher {
      *
      * @param userId          the suspended user
      * @param reason          the reason for suspension (optional)
-     * @param suspensionType  the type of suspension ("BAN" or "TIMEOUT")
+     * @param suspensionType  the type of suspension
      * @param durationMinutes the duration for timeouts (null for bans)
      */
     public void publishAccountSuspended(
-            Long userId, String reason, String suspensionType, Integer durationMinutes) {
-        Object payload = java.util.Map.of(
-                "suspensionType", suspensionType,
-                "reason", reason != null ? reason : "",
-                "durationMinutes", durationMinutes != null ? durationMinutes : 0);
-        publish(SseChannel.USER, SseEnvelope.accountSuspended(userId, payload));
+            Long userId, String reason, SuspensionType suspensionType, Integer durationMinutes) {
+        publish(SseChannel.USER, SseEnvelope.accountSuspended(userId,
+                AccountSuspendedPayload.of(suspensionType, reason, durationMinutes)));
     }
 
     /**

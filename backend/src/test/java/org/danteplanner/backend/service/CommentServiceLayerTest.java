@@ -8,6 +8,7 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
@@ -84,6 +85,9 @@ class CommentServiceLayerTest {
     @Mock
     private SsePublisher ssePublisher;
 
+    @Mock
+    private CommentReportService commentReportService;
+
 
     private CommentQueryService queryService;
     private CommentCommandService commandService;
@@ -105,7 +109,8 @@ class CommentServiceLayerTest {
                 new PlannerStatsService(plannerStatsRepository));
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
-                new PlannerAccessGuard(userService, plannerRepository));
+                new PlannerAccessGuard(userService, plannerRepository),
+                commentReportService);
 
         testUser = User.builder()
                 .id(1L)
@@ -586,6 +591,28 @@ class CommentServiceLayerTest {
                     () -> engagementService.toggleUpvote(commentId, testUser.getId())
             );
             verify(commentVoteRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("The vote response carries the counter re-read after the atomic increment")
+        void toggleUpvote_WhenVoteCast_ReportsTheReReadCount() {
+            UUID commentPublicId = UUID.randomUUID();
+            PlannerComment stale = new PlannerComment(plannerId, otherUser.getId(), "text", null, 0);
+            PlannerComment incremented = new PlannerComment(plannerId, otherUser.getId(), "text", null, 0);
+            org.springframework.test.util.ReflectionTestUtils.setField(stale, "id", 10L);
+            org.springframework.test.util.ReflectionTestUtils.setField(stale, "publicId", commentPublicId);
+            org.springframework.test.util.ReflectionTestUtils.setField(incremented, "id", 10L);
+            org.springframework.test.util.ReflectionTestUtils.setField(incremented, "upvoteCount", 8);
+
+            when(userService.findById(testUser.getId())).thenReturn(testUser);
+            when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(stale));
+            when(commentVoteRepository.existsById(any())).thenReturn(false);
+            when(commentRepository.findById(10L)).thenReturn(Optional.of(incremented));
+
+            var response = engagementService.toggleUpvote(commentPublicId, testUser.getId());
+
+            assertEquals(8, response.upvoteCount());
+            verify(commentRepository).incrementUpvoteCount(10L);
         }
     }
 }

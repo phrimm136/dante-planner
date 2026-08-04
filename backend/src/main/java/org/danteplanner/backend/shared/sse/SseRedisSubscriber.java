@@ -62,8 +62,8 @@ public class SseRedisSubscriber implements MessageListener {
             return;
         }
         plannerCommentSseService.broadcast(
-                UUID.fromString(envelope.plannerId()), envelope.type().getValue(), envelope,
-                envelope.excludeUserId());
+                UUID.fromString(envelope.plannerId()), envelope.type().getValue(),
+                clientPayload(envelope), envelope.excludeUserId());
     }
 
     /**
@@ -89,10 +89,12 @@ public class SseRedisSubscriber implements MessageListener {
 
     /**
      * What the client receives: the payload alone for event types whose client schema expects the
-     * payload's fields at the top level, and the whole envelope for the sync events that read its
+     * payload's fields at the top level, and the client-facing event for the ones that read its
      * routing fields.
      */
     private static Object clientPayload(SseEnvelope envelope) {
-        return envelope.type().deliversRawPayload() ? envelope.payload() : envelope;
+        return envelope.type().deliversRawPayload()
+                ? envelope.payload()
+                : ClientSseEvent.from(envelope);
     }
 }

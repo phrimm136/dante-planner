@@ -2,6 +2,7 @@ package org.danteplanner.backend.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.notification.dto.NotificationEventPayload;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
@@ -13,8 +14,6 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -164,25 +163,8 @@ public class NotificationDispatchService {
     }
 
     private void pushNotification(Long userId, SseEventType eventType, Notification notification) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("id", notification.getPublicId().toString());
-        data.put("type", notification.getNotificationType().name());
-        data.put("contentId", notification.getContentId());
-        data.put("createdAt", notification.getCreatedAt().toString());
-        // Rich content fields (may be null for PLANNER_RECOMMENDED)
-        if (notification.getPlannerId() != null) {
-            data.put("plannerId", notification.getPlannerId().toString());
-        }
-        if (notification.getPlannerTitle() != null) {
-            data.put("plannerTitle", notification.getPlannerTitle());
-        }
-        if (notification.getCommentSnippet() != null) {
-            data.put("commentSnippet", notification.getCommentSnippet());
-        }
-        if (notification.getCommentPublicId() != null) {
-            data.put("commentPublicId", notification.getCommentPublicId().toString());
-        }
-        ssePublisher.publishUserEvent(
-                userId, null, eventType, notification.getPublicId().toString(), data);
+        ssePublisher.publishUserEvent(userId, null, eventType,
+                notification.getPublicId().toString(),
+                NotificationEventPayload.fromEntity(notification));
     }
 }

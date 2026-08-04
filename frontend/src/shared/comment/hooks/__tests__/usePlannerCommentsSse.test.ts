@@ -116,4 +116,78 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
     expect(tree.filter((c) => c.id === 'c9')).toHaveLength(1)
     expect(result.current.newCommentsCount).toBe(1)
   })
+
+  it('a reply lands under its parent, not at the top level', () => {
+    const { queryClient, wrapper } = createWrapper()
+    queryClient.setQueryData(
+      ['comments', 'planner-1'],
+      [{ id: 'c1', content: 'root', replies: [] }],
+    )
+
+    renderHook(() => usePlannerCommentsSse('planner-1'), { wrapper })
+    const es = lastEventSource()
+
+    act(() =>
+      es.emit('comment:added', {
+        type: 'comment:added',
+        plannerId: 'planner-1',
+        payload: { id: 'r1', parentCommentId: 'c1', content: 'reply', replies: [] },
+      }),
+    )
+
+    const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{
+      id: string
+      replies: Array<{ id: string }>
+    }>
+    expect(tree).toHaveLength(1)
+    expect(tree[0].replies).toContainEqual(expect.objectContaining({ id: 'r1' }))
+  })
+
+  it('a nested reply lands under a parent that is itself a reply', () => {
+    const { queryClient, wrapper } = createWrapper()
+    queryClient.setQueryData(
+      ['comments', 'planner-1'],
+      [{ id: 'c1', content: 'root', replies: [{ id: 'r1', content: 'reply', replies: [] }] }],
+    )
+
+    renderHook(() => usePlannerCommentsSse('planner-1'), { wrapper })
+    const es = lastEventSource()
+
+    act(() =>
+      es.emit('comment:added', {
+        type: 'comment:added',
+        plannerId: 'planner-1',
+        payload: { id: 'r2', parentCommentId: 'r1', content: 'nested', replies: [] },
+      }),
+    )
+
+    const tree = queryClient.getQueryData(['comments', 'planner-1']) as Array<{
+      replies: Array<{ id: string; replies: Array<{ id: string }> }>
+    }>
+    expect(tree[0].replies[0].replies).toContainEqual(expect.objectContaining({ id: 'r2' }))
+  })
+
+  it('a reply to a parent outside the loaded tree only moves the counter', () => {
+    const { queryClient, wrapper } = createWrapper()
+    queryClient.setQueryData(
+      ['comments', 'planner-1'],
+      [{ id: 'c1', content: 'root', replies: [] }],
+    )
+
+    const { result } = renderHook(() => usePlannerCommentsSse('planner-1'), { wrapper })
+    const es = lastEventSource()
+
+    act(() =>
+      es.emit('comment:added', {
+        type: 'comment:added',
+        plannerId: 'planner-1',
+        payload: { id: 'r9', parentCommentId: 'unloaded', content: 'orphan', replies: [] },
+      }),
+    )
+
+    expect(queryClient.getQueryData(['comments', 'planner-1'])).toEqual([
+      { id: 'c1', content: 'root', replies: [] },
+    ])
+    expect(result.current.newCommentsCount).toBe(1)
+  })
 })

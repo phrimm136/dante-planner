@@ -73,10 +73,10 @@ const h = vi.hoisted(() => {
 vi.mock('../../lib/plannerApi', () => ({
   plannerApi: { createEventsConnection: h.createEventsConnection },
 }))
-vi.mock('../usePlannerSaveAdapter', () => ({
-  usePlannerSaveAdapter: () => ({ deleteFromLocal: h.deleteFromLocal }),
+vi.mock('../usePlannerStorage', () => ({
+  usePlannerStorage: () => ({ deleteFromLocal: h.deleteFromLocal }),
 }))
-vi.mock('../usePlannerSync', () => ({ plannerQueryKeys: h.PLANNER_KEYS }))
+vi.mock('../../lib/plannerQueryKeys', () => ({ plannerQueryKeys: h.PLANNER_KEYS }))
 vi.mock('../useMDUserPlannersData', () => ({ userPlannersQueryKeys: h.USER_PLANNER_KEYS }))
 
 vi.mock('@/pages/settings', () => ({
@@ -250,7 +250,7 @@ describe('useAppSse — event → effect map', () => {
     return { es, invalidateSpy, setDataSpy, queryClient }
   }
 
-  it('planner-update patches list + detail caches and does not invalidate', async () => {
+  it("'updated' patches list + detail caches and does not invalidate", async () => {
     const { es, invalidateSpy, queryClient } = await connectAndOpen()
     queryClient.setQueryData(
       ['planners', 'list'],
@@ -261,7 +261,7 @@ describe('useAppSse — event → effect map', () => {
     )
     queryClient.setQueryData(['planners', 'detail', P1], { id: P1, title: 'Old' })
     act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+      es.emit(SSE_EVENTS.UPDATED, {
         type: 'updated',
         entityId: P1,
         payload: { id: P1, title: 'Changed' },
@@ -295,7 +295,7 @@ describe('useAppSse — event → effect map', () => {
       ],
     )
     act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+      es.emit(SSE_EVENTS.UPDATED, {
         type: 'updated',
         entityId: P1,
         payload: { id: P1, title: 'Changed' },
@@ -319,7 +319,7 @@ describe('useAppSse — event → effect map', () => {
     const { es, queryClient } = await connectAndOpen()
     queryClient.setQueryData(['planners', 'list'], [{ id: 'p2', title: 'Keep' }])
     act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+      es.emit(SSE_EVENTS.CREATED, {
         type: 'created',
         entityId: P9,
         payload: { id: P9, title: 'New' },
@@ -341,7 +341,7 @@ describe('useAppSse — event → effect map', () => {
   it('planner update does NOT invalidate the patched list and detail caches', async () => {
     const { es, invalidateSpy } = await connectAndOpen()
     act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+      es.emit(SSE_EVENTS.UPDATED, {
         type: 'updated',
         entityId: P1,
         payload: { id: P1, title: 'Changed' },
@@ -361,7 +361,7 @@ describe('useAppSse — event → effect map', () => {
       payload: { id: P1, title: 'Changed Title' },
     }
 
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, envelope))
+    act(() => es.emit(SSE_EVENTS.UPDATED, envelope))
 
     expect(queryClient.getQueryData(['planners', 'detail', P1])).toMatchObject({
       title: 'Changed Title',
@@ -369,9 +369,9 @@ describe('useAppSse — event → effect map', () => {
     expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'detail', P1] })
   })
 
-  it('planner-update of type "deleted" purges the local planner copy', async () => {
+  it("'deleted' purges the local planner copy", async () => {
     const { es } = await connectAndOpen()
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', deletedId: 'p1' }))
+    act(() => es.emit(SSE_EVENTS.DELETED, { type: 'deleted', entityId: 'p1' }))
 
     expect(h.deleteFromLocal).toHaveBeenCalledWith('p1')
   })
@@ -385,7 +385,7 @@ describe('useAppSse — event → effect map', () => {
         { id: 'p2', title: 'B' },
       ],
     )
-    act(() => es.emit(SSE_EVENTS.PLANNER_UPDATE, { type: 'deleted', deletedId: 'p1' }))
+    act(() => es.emit(SSE_EVENTS.DELETED, { type: 'deleted', entityId: 'p1' }))
 
     const list = queryClient.getQueryData(['planners', 'list']) as Array<{
       id: string
@@ -396,13 +396,13 @@ describe('useAppSse — event → effect map', () => {
     expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
   })
 
-  it('planner-update whose payload is not a planner row must not clobber the caches', async () => {
+  it('a planner event whose payload is not a planner row must not clobber the caches', async () => {
     const { es, queryClient } = await connectAndOpen()
     queryClient.setQueryData(['planners', 'list'], [{ id: 'p1', title: 'Old' }])
     queryClient.setQueryData(['planners', 'detail', 'p1'], { id: 'p1', title: 'Old' })
 
     act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+      es.emit(SSE_EVENTS.UPDATED, {
         type: 'updated',
         entityId: 'p1',
         payload: { plannerId: 'p1', type: 'updated' },
@@ -420,7 +420,7 @@ describe('useAppSse — event → effect map', () => {
     const { es, invalidateSpy } = await connectAndOpen()
 
     act(() =>
-      es.emit(SSE_EVENTS.PLANNER_UPDATE, {
+      es.emit(SSE_EVENTS.UPDATED, {
         type: 'updated',
         entityId: P1,
         payload: { id: P1, title: 'Changed' },
@@ -446,34 +446,55 @@ describe('useAppSse — event → effect map', () => {
     expect(h.showBrowserNotification).not.toHaveBeenCalled()
   })
 
-  it("'notify:published' envelope inserts the published planner into the LIST cache from payload and does not invalidate the list, still toasts", async () => {
+  it("'notify:published' arrives as a bare payload: it toasts and leaves the personal list alone", async () => {
     h.isTabHidden.mockReturnValue(false)
     const { es, invalidateSpy, queryClient } = await connectAndOpen()
     queryClient.setQueryData(['planners', 'list'], [{ id: 'p2', title: 'B' }])
     act(() =>
       es.emit(SSE_EVENTS.NOTIFY_PUBLISHED, {
-        type: 'notify:published',
-        entityId: 'p9',
-        payload: { id: 'p9', title: 'Published' },
         plannerId: 'p9',
         plannerTitle: 'Published',
-        authorKeyword: 'auth',
+        authorEpithet: 'NAIVE',
         authorSuffix: '0001',
       }),
     )
 
-    const list = queryClient.getQueryData(['planners', 'list']) as Array<{
-      id: string
-      title: string
-    }>
-    expect(list).toEqual(
-      expect.arrayContaining([
-        { id: 'p9', title: 'Published' },
-        { id: 'p2', title: 'B' },
-      ]),
-    )
-    expect(invalidateSpy).not.toHaveBeenCalledWith({ queryKey: ['planners', 'list'] })
+    expect(queryClient.getQueryData(['planners', 'list'])).toEqual([{ id: 'p2', title: 'B' }])
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
     expect(h.showNotificationToast).toHaveBeenCalled()
+  })
+
+  it('an unparseable planner event touches no cache and does not throw', async () => {
+    const { es, invalidateSpy, setDataSpy } = await connectAndOpen()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    act(() => {
+      es.listeners[SSE_EVENTS.UPDATED]?.forEach((cb) =>
+        cb({ data: 'not json at all' } as MessageEvent),
+      )
+    })
+
+    expect(setDataSpy).not.toHaveBeenCalled()
+    expect(invalidateSpy).not.toHaveBeenCalled()
+  })
+
+  it('a planner event with an unknown type is dispatched to nothing', async () => {
+    const { es, invalidateSpy, setDataSpy } = await connectAndOpen()
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    // No entry in the applier table for this type, so nothing is dispatched.
+    act(() => es.emit(SSE_EVENTS.UPDATED, { type: 'renamed', entityId: P1 }))
+
+    expect(setDataSpy).not.toHaveBeenCalled()
+    expect(invalidateSpy).not.toHaveBeenCalled()
+  })
+
+  it("a 'created' envelope with no planner id patches nothing", async () => {
+    const { es, setDataSpy } = await connectAndOpen()
+
+    act(() => es.emit(SSE_EVENTS.CREATED, { type: 'created', payload: { id: P9 } }))
+
+    expect(setDataSpy).not.toHaveBeenCalled()
   })
 })
 

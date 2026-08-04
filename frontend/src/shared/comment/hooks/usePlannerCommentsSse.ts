@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
-import { SSE_CONNECTION } from '@/lib/constants'
+import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
 import { SseEnvelopeSchema } from '@/shared/sse'
 
 import { commentsQueryKeys } from './useCommentsQuery'
@@ -20,6 +20,36 @@ const SSE_CONFIG = {
   /** Maximum reconnection attempts before giving up */
   MAX_ATTEMPTS: 10,
 } as const
+
+/** Whether `id` names a comment anywhere in the loaded tree. */
+function containsComment(nodes: CommentNode[], id: string): boolean {
+  return nodes.some((n) => n?.id === id || containsComment(n?.replies ?? [], id))
+}
+
+/**
+ * Place `added` under the parent it names, or at the top level when it names none.
+ *
+ * Returns null when the named parent is not in the loaded tree — the counter still
+ * moves, but no comment is grafted where it does not belong.
+ */
+function insertComment(nodes: CommentNode[], added: CommentNode): CommentNode[] | null {
+  if (!added.parentCommentId) {
+    return [...nodes, { ...added, replies: added.replies ?? [] }]
+  }
+
+  let grafted = false
+  const graft = (list: CommentNode[]): CommentNode[] =>
+    list.map((node) => {
+      if (node?.id === added.parentCommentId) {
+        grafted = true
+        return { ...node, replies: [...(node.replies ?? []), { ...added, replies: [] }] }
+      }
+      return { ...node, replies: graft(node?.replies ?? []) }
+    })
+
+  const next = graft(nodes)
+  return grafted ? next : null
+}
 
 /**
  * Hook that subscribes to real-time comment notifications for a specific planner.
@@ -61,9 +91,9 @@ export function usePlannerCommentsSse(plannerId: string) {
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reconnectAttemptsRef = useRef(0)
 
-  const resetCount = useCallback(() => {
+  const resetCount = () => {
     setNewCommentsCount(0)
-  }, [])
+  }
 
   useEffect(() => {
     // Skip if no plannerId
@@ -81,35 +111,34 @@ export function usePlannerCommentsSse(plannerId: string) {
 
       eventSourceRef.current = es
 
-      es.addEventListener('connected', () => {
+      es.addEventListener(SSE_EVENTS.CONNECTED, () => {
         // Reset reconnect attempts on successful connection
         reconnectAttemptsRef.current = 0
       })
 
-      es.addEventListener('comment:added', (event) => {
+      es.addEventListener(SSE_EVENTS.COMMENT_ADDED, (event) => {
+        let payload: unknown = null
         try {
-          const envelope = SseEnvelopeSchema.parse(JSON.parse(event.data as string))
-          const payload = envelope.payload as CommentNode | null
-          if (payload && typeof payload === 'object' && typeof payload.id === 'string') {
-            let appended = false
-            queryClient.setQueryData(
-              commentsQueryKeys.list(plannerId),
-              (prev: CommentNode[] | undefined) => {
-                const arr = Array.isArray(prev) ? prev : []
-                if (arr.some((c) => c?.id === payload.id)) {
-                  return arr
-                }
-                appended = true
-                return [...arr, payload]
-              },
-            )
-            if (appended) {
-              setNewCommentsCount((c) => c + 1)
-            }
-          }
+          payload = SseEnvelopeSchema.parse(JSON.parse(event.data as string)).payload
         } catch (error) {
-          console.warn('Planner comment SSE: failed to patch comment tree cache', error)
+          console.warn('Planner comment SSE: failed to parse comment:added event', error)
+          return
         }
+
+        if (!payload || typeof payload !== 'object') return
+        const added = payload as CommentNode
+        if (typeof added.id !== 'string') return
+
+        const listKey = commentsQueryKeys.list(plannerId)
+        const cached = queryClient.getQueryData<CommentNode[]>(listKey)
+        const comments = Array.isArray(cached) ? cached : []
+        if (containsComment(comments, added.id)) return
+
+        const next = insertComment(comments, added)
+        if (next) {
+          queryClient.setQueryData(listKey, next)
+        }
+        setNewCommentsCount((c) => c + 1)
       })
 
       es.onerror = () => {

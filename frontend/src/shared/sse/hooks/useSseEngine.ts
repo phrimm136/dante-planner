@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
 import { useSseStore } from '../stores/useSseStore'
@@ -33,67 +33,58 @@ export interface SseEngineConfig {
  * - Auto-reconnects with exponential backoff on error.
  */
 export function useSseEngine({ shouldConnect, createConnection, handlers }: SseEngineConfig): void {
-  const eventSourceRef = useRef<EventSource | null>(null)
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const proactiveReconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const idleResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const connectionStartTimeRef = useRef<number>(0)
-  // Holds the latest `connect` so the idle-reset timer can re-arm the connection
-  // without depending on `connect` (which would recreate the reconnect callbacks).
-  const connectRef = useRef<() => void>(() => {})
+  // The effect owns the whole lifecycle, so only `shouldConnect` may retrigger
+  // it. Everything else reaches the running connection through this ref, which
+  // the listeners read at dispatch time rather than capturing at attach time.
+  const configRef = useRef({ createConnection, handlers })
+  configRef.current = { createConnection, handlers }
 
-  // SSE store actions - use selectors for actions only, not state
-  // Reading reconnectAttempts via selector would cause connect() to be recreated
-  // on every increment, triggering useEffect and bypassing exponential backoff
   const setConnected = useSseStore((s) => s.setConnected)
   const incrementReconnectAttempts = useSseStore((s) => s.incrementReconnectAttempts)
   const resetReconnectAttempts = useSseStore((s) => s.resetReconnectAttempts)
 
-  /**
-   * Clear all timers
-   */
-  const clearAllTimers = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
-      reconnectTimeoutRef.current = null
-    }
-    if (proactiveReconnectRef.current) {
-      clearTimeout(proactiveReconnectRef.current)
-      proactiveReconnectRef.current = null
-    }
-    if (idleResetTimeoutRef.current) {
-      clearTimeout(idleResetTimeoutRef.current)
-      idleResetTimeoutRef.current = null
-    }
-  }, [])
+  useEffect(() => {
+    let eventSource: EventSource | null = null
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
+    let proactiveReconnect: ReturnType<typeof setTimeout> | null = null
+    let idleResetTimeout: ReturnType<typeof setTimeout> | null = null
+    // 0 until onopen fires. onerror reads this to tell a never-opened or
+    // short-lived connection (keep backing off) from a healthy one (reset).
+    let connectionStartTime = 0
 
-  /**
-   * Disconnect SSE and cleanup
-   */
-  const disconnect = useCallback(() => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close()
-      eventSourceRef.current = null
+    function clearAllTimers() {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+        reconnectTimeout = null
+      }
+      if (proactiveReconnect) {
+        clearTimeout(proactiveReconnect)
+        proactiveReconnect = null
+      }
+      if (idleResetTimeout) {
+        clearTimeout(idleResetTimeout)
+        idleResetTimeout = null
+      }
     }
-    clearAllTimers()
-    setConnected(false)
-  }, [setConnected, clearAllTimers])
 
-  /**
-   * Check if should reconnect (not already connected)
-   * Called BEFORE attempting reconnection to prevent race conditions.
-   * Auth state is checked by the effect's shouldConnect - if it flips false,
-   * the effect will call disconnect() which clears eventSourceRef.
-   */
-  const shouldReconnect = useCallback((): boolean => {
-    return eventSourceRef.current === null
-  }, [])
+    function disconnect() {
+      if (eventSource) {
+        eventSource.close()
+        eventSource = null
+      }
+      clearAllTimers()
+      setConnected(false)
+    }
 
-  /**
-   * Schedule reconnection with exponential backoff
-   */
-  const scheduleReconnect = useCallback(
-    () => {
+    /** The one place a stream is opened. No-ops while one is already live. */
+    function openStream() {
+      if (eventSource) return
+      const es = configRef.current.createConnection()
+      eventSource = es
+      attachListeners(es)
+    }
+
+    function scheduleReconnect() {
       const attemptsBeforeIncrement = useSseStore.getState().reconnectAttempts
       incrementReconnectAttempts()
 
@@ -104,80 +95,46 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
         ) +
         Math.random() * SSE_CONNECTION.MAX_JITTER
 
-      // Schedule idle reset - if no successful connection in 5 minutes, reset attempts
-      if (idleResetTimeoutRef.current) {
-        clearTimeout(idleResetTimeoutRef.current)
+      if (idleResetTimeout) {
+        clearTimeout(idleResetTimeout)
       }
-      idleResetTimeoutRef.current = setTimeout(() => {
+      idleResetTimeout = setTimeout(() => {
         resetReconnectAttempts()
-        // Idle reset alone only clears the counter; without re-arming connect, the
-        // stream stays permanently dead after MAX_ATTEMPTS. Re-attempt if still down.
-        if (eventSourceRef.current === null) {
-          connectRef.current()
-        }
+        // Clearing the counter alone would leave the stream permanently dead
+        // after MAX_ATTEMPTS, so the idle reset also re-arms the connection.
+        openStream()
       }, SSE_CONNECTION.IDLE_RESET_TIMEOUT)
 
-      const doReconnect = () => {
-        // Check auth state BEFORE reconnecting (race condition fix)
-        if (!shouldReconnect()) {
-          return
-        }
+      reconnectTimeout = setTimeout(openStream, delay)
+    }
 
-        const es = createConnection()
-        eventSourceRef.current = es
-        setupEventSource(es)
-      }
-
-      // Backend auto-refresh handles token expiry transparently
-      reconnectTimeoutRef.current = setTimeout(doReconnect, delay)
-    },
-    // setupEventSource (used by doReconnect above) is intentionally omitted: it
-    // depends on scheduleReconnect, so listing it would form a re-creation cycle
-    // that re-runs the mount effect every render and churns the SSE connection.
-    // The captured closure stays valid — setupEventSource's own deps are stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [incrementReconnectAttempts, resetReconnectAttempts, shouldReconnect, createConnection],
-  )
-
-  /**
-   * Setup EventSource event handlers
-   */
-  const setupEventSource = useCallback(
-    (es: EventSource) => {
-      // Not open until onopen fires. onerror reads this to tell a never-opened
-      // or short-lived connection (keep backing off) from a healthy one (reset).
-      connectionStartTimeRef.current = 0
+    function attachListeners(es: EventSource) {
+      connectionStartTime = 0
 
       es.onopen = () => {
-        connectionStartTimeRef.current = Date.now()
+        connectionStartTime = Date.now()
         setConnected(true)
 
-        // Clear idle reset timer on successful connection
-        if (idleResetTimeoutRef.current) {
-          clearTimeout(idleResetTimeoutRef.current)
-          idleResetTimeoutRef.current = null
+        if (idleResetTimeout) {
+          clearTimeout(idleResetTimeout)
+          idleResetTimeout = null
         }
 
-        // Schedule proactive reconnect BEFORE token expires
-        // Backend auto-refresh will handle token expiry on reconnection
-        if (proactiveReconnectRef.current) {
-          clearTimeout(proactiveReconnectRef.current)
+        // Reconnect before the token expires; the backend refreshes it on the
+        // new connection.
+        if (proactiveReconnect) {
+          clearTimeout(proactiveReconnect)
         }
-        proactiveReconnectRef.current = setTimeout(() => {
-          // Proactive reconnect - close and reconnect with fresh token
-          if (eventSourceRef.current) {
-            eventSourceRef.current.close()
-            eventSourceRef.current = null
+        proactiveReconnect = setTimeout(() => {
+          if (eventSource) {
+            eventSource.close()
+            eventSource = null
           }
           setConnected(false)
 
-          reconnectTimeoutRef.current = setTimeout(() => {
+          reconnectTimeout = setTimeout(() => {
             resetReconnectAttempts()
-            if (shouldReconnect()) {
-              const newEs = createConnection()
-              eventSourceRef.current = newEs
-              setupEventSource(newEs)
-            }
+            openStream()
           }, SSE_CONNECTION.INITIAL_DELAY)
         }, SSE_CONNECTION.PROACTIVE_RECONNECT_INTERVAL)
       }
@@ -186,92 +143,63 @@ export function useSseEngine({ shouldConnect, createConnection, handlers }: SseE
         setConnected(true)
       })
 
-      // Domain event listeners injected by the caller
-      Object.entries(handlers).forEach(([type, handler]) => {
-        es.addEventListener(type, handler)
+      // Domain event listeners injected by the caller. The listener resolves the
+      // handler per event, so a live stream never dispatches into a stale one.
+      Object.keys(configRef.current.handlers).forEach((type) => {
+        es.addEventListener(type, (event) => {
+          configRef.current.handlers[type]?.(event as MessageEvent)
+        })
       })
 
       es.onerror = () => {
         es.close()
-        eventSourceRef.current = null
+        eventSource = null
         setConnected(false)
 
         // Credit the connection as healthy only if it stayed open past the
         // stability floor; a never-opened or short-lived drop keeps the attempt
         // counter climbing so backoff actually slows a flapping client.
-        const openedAt = connectionStartTimeRef.current
-        if (openedAt > 0 && Date.now() - openedAt >= SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD) {
+        if (
+          connectionStartTime > 0 &&
+          Date.now() - connectionStartTime >= SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD
+        ) {
           resetReconnectAttempts()
         }
 
-        // Clear proactive timer since connection failed
-        if (proactiveReconnectRef.current) {
-          clearTimeout(proactiveReconnectRef.current)
-          proactiveReconnectRef.current = null
+        if (proactiveReconnect) {
+          clearTimeout(proactiveReconnect)
+          proactiveReconnect = null
         }
 
-        // Check if max attempts reached
-        const currentAttempts = useSseStore.getState().reconnectAttempts
-        if (currentAttempts >= SSE_CONNECTION.MAX_ATTEMPTS) {
+        if (useSseStore.getState().reconnectAttempts >= SSE_CONNECTION.MAX_ATTEMPTS) {
           console.warn('SSE: Max reconnection attempts reached, waiting for idle reset')
           return
         }
 
         scheduleReconnect()
       }
-    },
-    [
-      handlers,
-      setConnected,
-      resetReconnectAttempts,
-      shouldReconnect,
-      scheduleReconnect,
-      createConnection,
-    ],
-  )
-
-  /**
-   * Connect to SSE endpoint
-   */
-  const connect = useCallback(() => {
-    // Guard: already connected
-    if (eventSourceRef.current) return
-
-    // Read reconnectAttempts directly from store to avoid dependency loop
-    const currentAttempts = useSseStore.getState().reconnectAttempts
-
-    // Guard: max attempts reached
-    if (currentAttempts >= SSE_CONNECTION.MAX_ATTEMPTS) {
-      console.warn('SSE: Max reconnection attempts reached, giving up')
-      return
     }
 
-    const es = createConnection()
-    eventSourceRef.current = es
-    setupEventSource(es)
-  }, [setupEventSource, createConnection])
-
-  // Keep the ref pointing at the latest connect for the idle-reset recovery path.
-  connectRef.current = connect
-
-  /**
-   * Manage connection based on the injected shouldConnect gate
-   */
-  useEffect(() => {
-    if (shouldConnect) {
-      // Delay initial connection to let auth cookies settle after login
-      // This prevents 403 errors from race conditions
-      const connectTimeout = setTimeout(connect, SSE_CONNECTION.INITIAL_DELAY)
-      return () => {
-        clearTimeout(connectTimeout)
-        disconnect()
-      }
-    } else {
+    if (!shouldConnect) {
       disconnect()
       resetReconnectAttempts()
-      return () => {
-        disconnect()
-      }
+      return disconnect
     }
-  }, [shouldConnect, connect, disconnect, resetReconnectAttempts])
+
+    // Delay the initial connection so auth cookies settle after login; opening
+    // immediately races them and draws a 403.
+    const connectTimeout = setTimeout(() => {
+      if (eventSource) return
+      if (useSseStore.getState().reconnectAttempts >= SSE_CONNECTION.MAX_ATTEMPTS) {
+        console.warn('SSE: Max reconnection attempts reached, giving up')
+        return
+      }
+      openStream()
+    }, SSE_CONNECTION.INITIAL_DELAY)
+
+    return () => {
+      clearTimeout(connectTimeout)
+      disconnect()
+    }
+  }, [shouldConnect, setConnected, incrementReconnectAttempts, resetReconnectAttempts])
 }

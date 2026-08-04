@@ -1,4 +1,5 @@
 package org.danteplanner.backend.service;
+import org.danteplanner.backend.notification.dto.NotificationEventPayload;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
@@ -29,7 +30,6 @@ import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -156,12 +156,12 @@ class NotificationServiceLayerTest {
 
             assertEquals(persistedPublicId[0].toString(), entityIdCaptor.getValue());
 
-            Map<?, ?> payload = (Map<?, ?>) payloadCaptor.getValue();
-            assertEquals(persistedPublicId[0].toString(), payload.get("id"));
-            assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), payload.get("type"));
-            assertEquals(testPlannerId.toString(), payload.get("contentId"));
-            assertEquals(testPlannerId.toString(), payload.get("plannerId"));
-            assertEquals("Test Planner Title", payload.get("plannerTitle"));
+            NotificationEventPayload payload = (NotificationEventPayload) payloadCaptor.getValue();
+            assertEquals(persistedPublicId[0].toString(), payload.id());
+            assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), payload.type());
+            assertEquals(testPlannerId.toString(), payload.contentId());
+            assertEquals(testPlannerId.toString(), payload.plannerId());
+            assertEquals("Test Planner Title", payload.plannerTitle());
         }
 
         @Test

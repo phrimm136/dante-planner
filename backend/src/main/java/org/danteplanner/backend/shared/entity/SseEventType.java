@@ -2,6 +2,11 @@ package org.danteplanner.backend.shared.entity;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * Server-Sent Event type enum.
  * The wire value (the channel name the frontend listens on) is preserved exactly
@@ -67,4 +72,16 @@ public enum SseEventType {
         return value;
     }
 
+    private static final Map<String, SseEventType> BY_VALUE = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(SseEventType::getValue, Function.identity()));
+
+    /**
+     * Resolve the type a wire value names.
+     *
+     * @param value the wire value carried on the event
+     * @return the matching type, or null when no type carries that value
+     */
+    public static SseEventType fromValue(String value) {
+        return BY_VALUE.get(value);
+    }
 }

@@ -170,7 +170,7 @@ describe('usePlannerSubscription', () => {
         act(async () => {
           await result.current.mutateAsync('123e4567-e89b-12d3-a456-426614174000')
         }),
-      ).rejects.toThrow('Invalid subscription response from server')
+      ).rejects.toThrow(/^\[planner subscription\] Validation failed: /)
     })
   })
 

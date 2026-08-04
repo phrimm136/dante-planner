@@ -26,7 +26,6 @@ import org.danteplanner.backend.shared.entity.SseEventType;
  *
  * <p>Event types and their setting checks:
  * <ul>
- *   <li>{@code sync:planner} - requires syncEnabled == true</li>
  *   <li>{@code notify:comment} - requires notifyComments == true</li>
  *   <li>{@code notify:recommended} - requires notifyRecommendations == true</li>
  *   <li>{@code notify:published} - requires notifyNewPublications == true</li>
@@ -58,14 +57,12 @@ public class SseService extends AbstractSseService<Long> {
             .build();
 
     private record CachedSettings(
-            Boolean syncEnabled,
             boolean notifyComments,
             boolean notifyRecommendations,
             boolean notifyNewPublications
     ) {
         static CachedSettings from(UserSettings settings) {
             return new CachedSettings(
-                    settings.getSyncEnabled(),
                     settings.isNotifyComments(),
                     settings.isNotifyRecommendations(),
                     settings.isNotifyNewPublications()
@@ -91,7 +88,7 @@ public class SseService extends AbstractSseService<Long> {
      * Send an event to a user if their settings allow it.
      *
      * @param userId    the user ID
-     * @param eventType the event type (e.g., "sync:planner", "notify:comment")
+     * @param eventType the event type (e.g., "updated", "notify:comment")
      * @param data      the event data object
      */
     public void sendToUser(Long userId, String eventType, Object data) {
@@ -265,15 +262,27 @@ public class SseService extends AbstractSseService<Long> {
         log.debug("Heartbeat failed for user {} device {}, removing emitter", userId, deviceId);
     }
 
+    /**
+     * Whether the user's settings admit an event of this type.
+     *
+     * <p>The switch carries no default arm, so a type added to {@link SseEventType} fails to compile
+     * here rather than inheriting delivery it was never granted. A value naming no type at all is
+     * not delivered: it can only be a client this node does not understand.</p>
+     */
     private boolean isEventAllowed(Long userId, String eventType) {
+        SseEventType type = SseEventType.fromValue(eventType);
+        if (type == null) {
+            log.warn("Unrecognized SSE event type {}, not delivered to user {}", eventType, userId);
+            return false;
+        }
+
         CachedSettings settings = cacheSettingsIfAbsent(userId);
 
-        return switch (eventType) {
-            case "sync:planner" -> Boolean.TRUE.equals(settings.syncEnabled());
-            case "notify:comment" -> settings.notifyComments();
-            case "notify:recommended" -> settings.notifyRecommendations();
-            case "notify:published" -> settings.notifyNewPublications();
-            default -> true;
+        return switch (type) {
+            case NOTIFY_COMMENT -> settings.notifyComments();
+            case NOTIFY_RECOMMENDED -> settings.notifyRecommendations();
+            case NOTIFY_PUBLISHED -> settings.notifyNewPublications();
+            case CREATED, UPDATED, DELETED, COMMENT_ADDED, SETTINGS_INVALIDATED, ACCOUNT_SUSPENDED -> true;
         };
     }
 

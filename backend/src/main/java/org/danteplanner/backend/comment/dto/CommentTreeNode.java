@@ -14,6 +14,7 @@ import java.util.UUID;
  */
 public record CommentTreeNode(
     UUID id,
+    UUID parentCommentId,
     String content,
     String authorEpithet,
     String authorSuffix,
@@ -32,14 +33,16 @@ public record CommentTreeNode(
     /**
      * Create a tree node from entity with computed fields.
      *
-     * @param comment       the comment entity
-     * @param author        the author user entity (null for deleted users)
-     * @param currentUserId the current user's ID (null if unauthenticated)
-     * @param hasUpvoted    whether current user has upvoted
-     * @param replies       nested child comments
+     * @param comment         the comment entity
+     * @param parentPublicId  the public UUID of the comment this one replies to, null at top level
+     * @param author          the author user entity (null for deleted users)
+     * @param currentUserId   the current user's ID (null if unauthenticated)
+     * @param hasUpvoted      whether current user has upvoted
+     * @param replies         nested child comments
      */
     public static CommentTreeNode fromEntity(
             PlannerComment comment,
+            UUID parentPublicId,
             User author,
             Long currentUserId,
             boolean hasUpvoted,
@@ -70,6 +73,7 @@ public record CommentTreeNode(
 
         return new CommentTreeNode(
                 comment.getPublicId(),
+                parentPublicId,
                 content,
                 authorEpithet,
                 authorSuffix,

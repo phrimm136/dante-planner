@@ -13,6 +13,7 @@ import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -123,11 +124,12 @@ class SseFanoutIT extends CausalHarnessSupport {
     void sseSuspensionCrossPod_WhenPublishedOnPrimary_DeliveredToSuspendedUser() {
         Long suspendedUserId = 6161L;
 
-        ssePublisher.publishAccountSuspended(suspendedUserId, "spam", "BAN", null);
+        ssePublisher.publishAccountSuspended(suspendedUserId, "spam", SuspensionType.BAN, null);
 
         verify(sseService, timeout(5000)).notifyAccountSuspended(
                 eq(suspendedUserId),
-                argThat(data -> data instanceof Map<?, ?> map && "BAN".equals(map.get("suspensionType"))));
+                argThat(data -> data instanceof Map<?, ?> map
+                        && "BAN".equals(map.get("suspensionType"))));
     }
 
     @Test

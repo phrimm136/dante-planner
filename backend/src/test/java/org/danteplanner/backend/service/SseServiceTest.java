@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -123,6 +125,21 @@ class SseServiceTest {
 
             assertThatCode(() -> service.sendToUser(USER_ID, "notify:comment", Map.of("k", "v")))
                     .doesNotThrowAnyException();
+            assertThat(service.getActiveConnectionCount(USER_ID)).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("does not deliver an event type this node does not recognize")
+        void sendToUser_WhenEventTypeUnrecognized_DoesNotDeliver() throws Exception {
+            ObjectMapper watchedMapper = mock(ObjectMapper.class);
+            SseService service = new SseService(watchedMapper, userSettingsService);
+            service.subscribe(USER_ID, UUID.randomUUID());
+
+            service.sendToUser(USER_ID, "notify:something-this-node-cannot-name", Map.of("k", "v"));
+
+            // Serialization is the first step of delivery, so never reaching it is what proves the
+            // event was dropped rather than sent.
+            verify(watchedMapper, never()).writeValueAsString(any());
             assertThat(service.getActiveConnectionCount(USER_ID)).isEqualTo(1);
         }
     }

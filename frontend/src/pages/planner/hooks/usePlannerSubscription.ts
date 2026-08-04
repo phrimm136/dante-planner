@@ -11,6 +11,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { SubscriptionResponseSchema } from '../schemas/PlannerListSchemas'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 
@@ -50,14 +51,7 @@ export function usePlannerSubscription() {
   return useMutation({
     mutationFn: async (plannerId: string): Promise<SubscriptionResponse> => {
       const data = await ApiClient.post(`/api/planner/md/${plannerId}/subscribe`)
-      const result = SubscriptionResponseSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Subscription response validation failed:', result.error)
-        throw new Error('Invalid subscription response from server')
-      }
-
-      return result.data
+      return validateData(data, SubscriptionResponseSchema, 'planner subscription')
     },
     onSuccess: (_data, plannerId) => {
       // Invalidate only the specific planner detail query

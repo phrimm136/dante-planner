@@ -11,6 +11,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.user.entity.User;
+import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,10 +64,9 @@ public class CommentQueryService {
             return Collections.emptyList();
         }
 
-        // Batch load users (exclude sentinel user ID 0)
         Set<Long> userIds = comments.stream()
                 .map(PlannerComment::getUserId)
-                .filter(id -> id != 0L)
+                .filter(id -> !UserAccountLifecycleService.SENTINEL_USER_ID.equals(id))
                 .collect(Collectors.toSet());
         Map<Long, User> userMap = userService.findAllByIds(userIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
@@ -76,7 +76,7 @@ public class CommentQueryService {
         if (currentUserId != null) {
             List<Long> commentIds = comments.stream()
                     .map(PlannerComment::getId)
-                    .collect(Collectors.toList());
+                    .toList();
             upvotedIds = new HashSet<>(commentVoteRepository.findUpvotedCommentIds(commentIds, currentUserId));
         }
 
@@ -130,13 +130,13 @@ public class CommentQueryService {
         List<PlannerComment> topLevel = comments.stream()
                 .filter(c -> c.getParentCommentId() == null)
                 .sorted(Comparator.comparing(PlannerComment::getCreatedAt))
-                .collect(Collectors.toList());
+                .toList();
 
         // Step 3: Recursively build tree nodes with pruning
         return topLevel.stream()
-                .map(c -> buildNode(c, childrenMap, userMap, upvotedIds, currentUserId))
+                .map(c -> buildNode(c, null, childrenMap, userMap, upvotedIds, currentUserId))
                 .filter(Objects::nonNull)  // Prune deleted without children
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -145,6 +145,7 @@ public class CommentQueryService {
      */
     private CommentTreeNode buildNode(
             PlannerComment comment,
+            UUID parentPublicId,
             Map<Long, List<PlannerComment>> childrenMap,
             Map<Long, User> userMap,
             Set<Long> upvotedIds,
@@ -154,9 +155,9 @@ public class CommentQueryService {
         List<PlannerComment> children = childrenMap.getOrDefault(comment.getId(), Collections.emptyList());
         List<CommentTreeNode> childNodes = children.stream()
                 .sorted(Comparator.comparing(PlannerComment::getCreatedAt))
-                .map(c -> buildNode(c, childrenMap, userMap, upvotedIds, currentUserId))
+                .map(c -> buildNode(c, comment.getPublicId(), childrenMap, userMap, upvotedIds, currentUserId))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
 
         // Prune: if deleted AND no children, return null
         if (comment.isDeleted() && childNodes.isEmpty()) {
@@ -167,6 +168,7 @@ public class CommentQueryService {
         User author = userMap.get(comment.getUserId());
         boolean hasUpvoted = upvotedIds.contains(comment.getId());
 
-        return CommentTreeNode.fromEntity(comment, author, currentUserId, hasUpvoted, childNodes);
+        return CommentTreeNode.fromEntity(
+                comment, parentPublicId, author, currentUserId, hasUpvoted, childNodes);
     }
 }
