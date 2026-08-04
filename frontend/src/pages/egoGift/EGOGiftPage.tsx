@@ -1,19 +1,20 @@
-import { useState, Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
-import type { EGOGiftListItem, EGOGiftSpecListSchema } from '@/pages/egoGift'
+import type { EGOGiftListItem, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
 import type { z } from 'zod'
 import type { EGOGiftDifficulty, EGOGiftTier, EGOGiftAttributeType } from '@/shared/gameData'
 import { BOOLEAN_FILTER_OPTIONS } from '@/lib/constants'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
 import { CompactEGOGiftKeywordFilter } from '@/pages/egoGift'
 import { CompactDifficultyFilter } from '@/pages/egoGift'
 import { CompactTierFilter } from '@/pages/egoGift'
-import { ThemePackDropdown } from '@/shared/filter'
-import { useThemePackListData } from '@/pages/themePack'
+import { ThemePackFilterDropdown } from '@/pages/themePack'
 import { BattleKeywordDropdown } from '@/shared/filter'
 import { CompactAttributeTypeFilter } from '@/shared/filter'
 import { CompactIconFilter } from '@/shared/filter'
@@ -28,60 +29,27 @@ import { Skeleton } from '@/components/ui/skeleton'
  */
 function EGOGiftCardGrid({
   spec,
-  selectedKeywords,
-  selectedBattleKeywords,
-  selectedDifficulties,
-  selectedTiers,
-  selectedThemePacks,
-  selectedAttributeTypes,
-  selectedFusioned,
-  selectedExclusive,
-  searchQuery,
+  store,
 }: {
   spec: z.infer<typeof EGOGiftSpecListSchema>
-  selectedKeywords: Set<string>
-  selectedBattleKeywords: Set<string>
-  selectedDifficulties: Set<EGOGiftDifficulty>
-  selectedTiers: Set<EGOGiftTier>
-  selectedThemePacks: Set<string>
-  selectedAttributeTypes: Set<EGOGiftAttributeType>
-  selectedFusioned: Set<string>
-  selectedExclusive: Set<string>
-  searchQuery: string
+  store: FilterStore<EGOGiftFacetState>
 }) {
   // Build EGOGiftListItem array from spec directly
   // Name lookup handled by EGOGiftList's deferred hook
-  const gifts = useMemo<EGOGiftListItem[]>(
-    () =>
-      Object.entries(spec).map(([id, specData]) => ({
-        id,
-        tag: specData.tag as EGOGiftListItem['tag'],
-        keyword: specData.keyword,
-        battleKeywordList: specData.battleKeywordList,
-        attributeType: specData.attributeType,
-        themePack: specData.themePack,
-        maxEnhancement: specData.maxEnhancement,
-        hardOnly: specData.hardOnly,
-        extremeOnly: specData.extremeOnly,
-        fusioned: specData.fusioned,
-      })),
-    [spec],
-  )
+  const gifts: EGOGiftListItem[] = Object.entries(spec).map(([id, specData]) => ({
+    id,
+    tag: specData.tag as EGOGiftListItem['tag'],
+    keyword: specData.keyword,
+    battleKeywordList: specData.battleKeywordList,
+    attributeType: specData.attributeType,
+    themePack: specData.themePack,
+    maxEnhancement: specData.maxEnhancement,
+    hardOnly: specData.hardOnly,
+    extremeOnly: specData.extremeOnly,
+    fusioned: specData.fusioned,
+  }))
 
-  return (
-    <EGOGiftList
-      gifts={gifts}
-      selectedKeywords={selectedKeywords}
-      selectedBattleKeywords={selectedBattleKeywords}
-      selectedDifficulties={selectedDifficulties}
-      selectedTiers={selectedTiers}
-      selectedThemePacks={selectedThemePacks}
-      selectedAttributeTypes={selectedAttributeTypes}
-      selectedFusioned={selectedFusioned}
-      selectedExclusive={selectedExclusive}
-      searchQuery={searchQuery}
-    />
-  )
+  return <EGOGiftList gifts={gifts} store={store} />
 }
 
 /**
@@ -96,7 +64,10 @@ function EGOGiftPageShell() {
   const {
     values: filters,
     setters,
+    searchQuery,
+    setSearchQuery,
     resetAll,
+    store,
   } = useSetFilters({
     selectedKeywords: new Set<string>(),
     selectedBattleKeywords: new Set<string>(),
@@ -107,13 +78,6 @@ function EGOGiftPageShell() {
     selectedFusioned: new Set<string>(),
     selectedExclusive: new Set<string>(),
   })
-  const [searchQuery, setSearchQuery] = useState<string>('')
-
-  // Reset all filters
-  const handleResetAll = () => {
-    resetAll()
-    setSearchQuery('')
-  }
 
   // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
@@ -158,7 +122,7 @@ function EGOGiftPageShell() {
         activeCount={filters.selectedAttributeTypes.size}
       >
         <CompactAttributeTypeFilter
-          selectedAttributeTypes={filters.selectedAttributeTypes}
+          selected={filters.selectedAttributeTypes}
           onAttributeTypesChange={setters.selectedAttributeTypes}
         />
       </FilterSection>
@@ -172,7 +136,6 @@ function EGOGiftPageShell() {
           selectedOptions={filters.selectedFusioned}
           onSelectionChange={setters.selectedFusioned}
           getLabel={(v) => v}
-          columns={5}
         />
       </FilterSection>
 
@@ -185,7 +148,6 @@ function EGOGiftPageShell() {
           selectedOptions={filters.selectedExclusive}
           onSelectionChange={setters.selectedExclusive}
           getLabel={(v) => v}
-          columns={5}
         />
       </FilterSection>
 
@@ -194,10 +156,9 @@ function EGOGiftPageShell() {
         activeCount={filters.selectedThemePacks.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <ThemePackDropdown
-            selectedThemePacks={filters.selectedThemePacks}
+          <ThemePackFilterDropdown
+            selected={filters.selectedThemePacks}
             onThemePacksChange={setters.selectedThemePacks}
-            useListData={useThemePackListData}
           />
         </Suspense>
       </FilterSection>
@@ -209,7 +170,7 @@ function EGOGiftPageShell() {
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <BattleKeywordDropdown
             entityType="egoGift"
-            selectedBattleKeywords={filters.selectedBattleKeywords}
+            selected={filters.selectedBattleKeywords}
             onSelectionChange={setters.selectedBattleKeywords}
           />
         </Suspense>
@@ -217,21 +178,12 @@ function EGOGiftPageShell() {
     </>
   )
 
-  // Combined filter content for desktop sidebar (all filters together)
-  const filterContent = (
-    <>
-      {primaryFilters}
-      {secondaryFilters}
-    </>
-  )
-
   return (
     <FilterPageLayout
-      filterContent={filterContent}
       primaryFilters={primaryFilters}
       secondaryFilters={secondaryFilters}
       activeFilterCount={activeFilterCount}
-      onResetAll={handleResetAll}
+      onResetAll={resetAll}
       searchBar={
         <SearchBar
           searchQuery={searchQuery}
@@ -243,18 +195,7 @@ function EGOGiftPageShell() {
       {/* No Suspense needed - EGOGiftCardGrid doesn't suspend */}
       {/* Spec loading is caught by outer ListPageSkeleton */}
       {/* Name search uses deferred hook in EGOGiftList */}
-      <EGOGiftCardGrid
-        spec={spec}
-        selectedKeywords={filters.selectedKeywords}
-        selectedBattleKeywords={filters.selectedBattleKeywords}
-        selectedDifficulties={filters.selectedDifficulties}
-        selectedTiers={filters.selectedTiers}
-        selectedThemePacks={filters.selectedThemePacks}
-        selectedAttributeTypes={filters.selectedAttributeTypes}
-        selectedFusioned={filters.selectedFusioned}
-        selectedExclusive={filters.selectedExclusive}
-        searchQuery={searchQuery}
-      />
+      <EGOGiftCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
 }
@@ -269,10 +210,8 @@ function EGOGiftPageShell() {
  */
 export default function EGOGiftPage() {
   return (
-    <div className="container mx-auto p-8">
-      <Suspense fallback={<ListPageSkeleton preset="egoGift" />}>
-        <EGOGiftPageShell />
-      </Suspense>
-    </div>
+    <EntityListPage skeleton={<ListPageSkeleton preset="egoGift" />}>
+      <EGOGiftPageShell />
+    </EntityListPage>
   )
 }

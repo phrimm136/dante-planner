@@ -47,7 +47,6 @@ export function CompactEGOGiftKeywordFilter({
       selectedOptions={selectedKeywords}
       onSelectionChange={onSelectionChange}
       getIconPath={getKeywordIconPath}
-      columns={6}
     >
       <button
         onClick={handleNoneClick}

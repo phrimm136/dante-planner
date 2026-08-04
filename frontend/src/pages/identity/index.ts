@@ -1,6 +1,7 @@
 // Public API of the identity entity. Import from '@/pages/identity', not internal paths.
 
 export { IdentityCard } from './components/IdentityCard'
+export { IdentityFilterDropdown } from './components/IdentityFilterDropdown'
 export { IdentityList } from './components/IdentityList'
 export { IdentityHeader } from './components/IdentityHeader'
 export { IdentityHeaderWithI18n } from './components/IdentityHeaderI18n'
@@ -20,14 +21,9 @@ export {
 } from './hooks/useIdentityListData'
 export { useIdentityDetailSpec, useIdentityDetailI18n } from './hooks/useIdentityDetailData'
 
-export type {
-  Identity,
-  IdentityListItem,
-  Uptie,
-  IdentitySkillEntry,
-  IdentitySkillDataEntry,
-  IdentitySkillDescEntry,
-} from './types/IdentityTypes'
+export type { Identity, IdentityListItem, Uptie, IdentitySkillEntry } from './types/IdentityTypes'
+
+export type { IdentityFacetState } from './lib/identityFilter'
 
 export {
   IdentityDataSchema,

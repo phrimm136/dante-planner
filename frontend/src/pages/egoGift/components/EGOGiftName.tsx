@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
 import { KoreanText } from '@/components/ui/KoreanText'
@@ -21,7 +20,7 @@ interface EGOGiftNameProps {
  * @example
  * <EGOGiftName id={gift.id} />
  */
-export const EGOGiftName = memo(function EGOGiftName({ id }: EGOGiftNameProps) {
+export const EGOGiftName = function EGOGiftName({ id }: EGOGiftNameProps) {
   const { i18n } = useTranslation()
   const names = useEGOGiftListI18nDeferred()
   const name = names[id] || ''
@@ -31,4 +30,4 @@ export const EGOGiftName = memo(function EGOGiftName({ id }: EGOGiftNameProps) {
   }
 
   return <>{name}</>
-})
+}

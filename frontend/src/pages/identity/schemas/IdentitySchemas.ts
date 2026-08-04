@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AffinitySchema } from '@/shared/gameData'
+import { AffinitySchema, ATK_TYPES, DEF_TYPES } from '@/shared/gameData'
 import { SkillDescEntrySchema } from '@/shared/gameData'
 
 /**
@@ -140,16 +140,10 @@ export const IdentityI18nSchema = z.object({
  */
 
 // Attack type enum for spec list
-export const AtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
+export const AtkTypeSchema = z.enum(ATK_TYPES)
 
 // Defense type enum for spec list
-export const DefenseTypeSchema = z.enum([
-  'GUARD',
-  'EVADE',
-  'COUNTER',
-  'CLASHABLE_GUARD',
-  'CLASHABLE_COUNTER',
-])
+export const DefenseTypeSchema = z.enum(DEF_TYPES)
 
 // Spec list item schema
 export const IdentitySpecListItemSchema = z.object({

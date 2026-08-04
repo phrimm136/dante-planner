@@ -35,7 +35,6 @@ export function CompactDifficultyFilter({
         onSelectionChange(options as Set<EGOGiftDifficulty>)
       }}
       getLabel={(difficulty) => DIFFICULTY_LABELS[difficulty as EGOGiftDifficulty]}
-      columns={5}
     />
   )
 }

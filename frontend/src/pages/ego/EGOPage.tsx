@@ -1,7 +1,7 @@
-import { useState, Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOListSpec, EGOList } from '@/pages/ego'
-import type { EGOListItem } from '@/pages/ego'
+import type { EGOListItem, EGOFacetState } from '@/pages/ego'
 import type { EgoType } from '@/shared/gameData'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type { Season, SkillAttributeType, AtkType } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { FilterSection } from '@/shared/filter'
 import { CompactSinnerFilter } from '@/shared/filter'
 import { CompactKeywordFilter } from '@/shared/filter'
@@ -17,6 +18,7 @@ import { CompactEGOTypeFilter } from '@/shared/filter'
 import { CompactSkillAttributeFilter } from '@/shared/filter'
 import { SeasonDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
+import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 
 import type { z } from 'zod'
@@ -28,56 +30,26 @@ import type { EGOSpecListSchema } from '@/pages/ego'
  */
 function EGOCardGrid({
   spec,
-  selectedSinners,
-  selectedKeywords,
-  selectedBattleKeywords,
-  selectedAttributes,
-  selectedAtkTypes,
-  selectedEGOTypes,
-  selectedSeasons,
-  searchQuery,
+  store,
 }: {
   spec: z.infer<typeof EGOSpecListSchema>
-  selectedSinners: Set<string>
-  selectedKeywords: Set<string>
-  selectedBattleKeywords: Set<string>
-  selectedAttributes: Set<SkillAttributeType>
-  selectedAtkTypes: Set<AtkType>
-  selectedEGOTypes: Set<EgoType>
-  selectedSeasons: Set<Season>
-  searchQuery: string
+  store: FilterStore<EGOFacetState>
 }) {
   // Build EGOListItem array from spec directly (no transformation needed)
   // Name lookup handled by EGOList's deferred hook
-  const egos = useMemo<EGOListItem[]>(
-    () =>
-      Object.entries(spec).map(([id, specData]) => ({
-        id,
-        egoType: specData.egoType,
-        skillKeywordList: specData.skillKeywordList,
-        battleKeywordList: specData.battleKeywordList,
-        attributeTypes: specData.attributeType,
-        atkTypes: specData.atkType,
-        updateDate: specData.updateDate,
-        season: specData.season,
-        maxThreadspin: specData.maxThreadspin,
-      })),
-    [spec],
-  )
+  const egos: EGOListItem[] = Object.entries(spec).map(([id, specData]) => ({
+    id,
+    egoType: specData.egoType,
+    skillKeywordList: specData.skillKeywordList,
+    battleKeywordList: specData.battleKeywordList,
+    attributeTypes: specData.attributeType,
+    atkTypes: specData.atkType,
+    updateDate: specData.updateDate,
+    season: specData.season,
+    maxThreadspin: specData.maxThreadspin,
+  }))
 
-  return (
-    <EGOList
-      egos={egos}
-      selectedSinners={selectedSinners}
-      selectedKeywords={selectedKeywords}
-      selectedBattleKeywords={selectedBattleKeywords}
-      selectedAttributes={selectedAttributes}
-      selectedAtkTypes={selectedAtkTypes}
-      selectedEGOTypes={selectedEGOTypes}
-      selectedSeasons={selectedSeasons}
-      searchQuery={searchQuery}
-    />
-  )
+  return <EGOList egos={egos} store={store} />
 }
 
 /**
@@ -88,20 +60,23 @@ function EGOPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useEGOListSpec()
 
-  const seasonCounts = useMemo(() => {
+  const seasonCounts = (() => {
     const sc: Record<string, number> = {}
     for (const entry of Object.values(spec)) {
       const key = String(entry.season)
       sc[key] = (sc[key] ?? 0) + 1
     }
     return sc
-  }, [spec])
+  })()
 
   // Filter states
   const {
     values: filters,
     setters,
+    searchQuery,
+    setSearchQuery,
     resetAll,
+    store,
   } = useSetFilters({
     selectedSinners: new Set<string>(),
     selectedKeywords: new Set<string>(),
@@ -111,16 +86,9 @@ function EGOPageShell() {
     selectedEGOTypes: new Set<EgoType>(),
     selectedSeasons: new Set<Season>(),
   })
-  const [searchQuery, setSearchQuery] = useState<string>('')
 
   // Calculate active filter count for mobile badge
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
-
-  // Reset all filters
-  const handleResetAll = () => {
-    resetAll()
-    setSearchQuery('')
-  }
 
   // Primary filters (always visible on mobile): Sinner and Keyword
   const primaryFilters = (
@@ -131,7 +99,7 @@ function EGOPageShell() {
         activeCount={filters.selectedSinners.size}
       >
         <CompactSinnerFilter
-          selectedSinners={filters.selectedSinners}
+          selected={filters.selectedSinners}
           onSelectionChange={setters.selectedSinners}
         />
       </FilterSection>
@@ -142,7 +110,7 @@ function EGOPageShell() {
         activeCount={filters.selectedKeywords.size}
       >
         <CompactKeywordFilter
-          selectedKeywords={filters.selectedKeywords}
+          selected={filters.selectedKeywords}
           onSelectionChange={setters.selectedKeywords}
         />
       </FilterSection>
@@ -158,7 +126,7 @@ function EGOPageShell() {
         activeCount={filters.selectedAttributes.size}
       >
         <CompactSkillAttributeFilter
-          selectedAttributes={filters.selectedAttributes}
+          selected={filters.selectedAttributes}
           onSelectionChange={setters.selectedAttributes}
         />
       </FilterSection>
@@ -169,7 +137,7 @@ function EGOPageShell() {
         activeCount={filters.selectedAtkTypes.size}
       >
         <CompactAttackTypeFilter
-          selectedTypes={filters.selectedAtkTypes}
+          selected={filters.selectedAtkTypes}
           onSelectionChange={setters.selectedAtkTypes}
         />
       </FilterSection>
@@ -180,7 +148,7 @@ function EGOPageShell() {
         activeCount={filters.selectedEGOTypes.size}
       >
         <CompactEGOTypeFilter
-          selectedEGOTypes={filters.selectedEGOTypes as Set<string>}
+          selected={filters.selectedEGOTypes as Set<string>}
           onSelectionChange={(types) => setters.selectedEGOTypes(types as Set<EgoType>)}
         />
       </FilterSection>
@@ -192,7 +160,7 @@ function EGOPageShell() {
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <SeasonDropdown
-            selectedSeasons={filters.selectedSeasons}
+            selected={filters.selectedSeasons}
             onSelectionChange={setters.selectedSeasons}
             counts={seasonCounts}
           />
@@ -207,7 +175,7 @@ function EGOPageShell() {
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
           <BattleKeywordDropdown
             entityType="ego"
-            selectedBattleKeywords={filters.selectedBattleKeywords}
+            selected={filters.selectedBattleKeywords}
             onSelectionChange={setters.selectedBattleKeywords}
           />
         </Suspense>
@@ -215,21 +183,12 @@ function EGOPageShell() {
     </>
   )
 
-  // Combined filter content for desktop sidebar (all filters together)
-  const filterContent = (
-    <>
-      {primaryFilters}
-      {secondaryFilters}
-    </>
-  )
-
   return (
     <FilterPageLayout
-      filterContent={filterContent}
       primaryFilters={primaryFilters}
       secondaryFilters={secondaryFilters}
       activeFilterCount={activeFilterCount}
-      onResetAll={handleResetAll}
+      onResetAll={resetAll}
       searchBar={
         <SearchBar
           searchQuery={searchQuery}
@@ -239,17 +198,7 @@ function EGOPageShell() {
       }
     >
       {/* No Suspense needed - EGOCardGrid doesn't suspend */}
-      <EGOCardGrid
-        spec={spec}
-        selectedSinners={filters.selectedSinners}
-        selectedKeywords={filters.selectedKeywords}
-        selectedBattleKeywords={filters.selectedBattleKeywords}
-        selectedAttributes={filters.selectedAttributes}
-        selectedAtkTypes={filters.selectedAtkTypes}
-        selectedEGOTypes={filters.selectedEGOTypes}
-        selectedSeasons={filters.selectedSeasons}
-        searchQuery={searchQuery}
-      />
+      <EGOCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
 }
@@ -267,10 +216,8 @@ function EGOPageShell() {
  */
 export default function EGOPage() {
   return (
-    <div className="container mx-auto p-8">
-      <Suspense fallback={<ListPageSkeleton preset="ego" />}>
-        <EGOPageShell />
-      </Suspense>
-    </div>
+    <EntityListPage skeleton={<ListPageSkeleton preset="ego" />}>
+      <EGOPageShell />
+    </EntityListPage>
   )
 }

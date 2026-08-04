@@ -115,15 +115,6 @@ export const EGOI18nSchema = z.object({
  * EGO list schemas (for list views)
  */
 
-// EGO list item schema
-export const EGOSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  rank: EgoTypeSchema,
-  attributeType: z.array(z.string()),
-  skillKeywordList: z.array(z.string()),
-})
-
 // Attack type enum for spec list
 export const EGOAtkTypeSchema = z.enum(['SLASH', 'PENETRATE', 'HIT'])
 

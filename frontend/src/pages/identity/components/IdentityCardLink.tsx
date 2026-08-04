@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { IdentityListItem } from '../types/IdentityTypes'
 import { cn } from '@/lib/utils'
@@ -26,20 +26,18 @@ interface IdentityCardLinkProps {
  * // With selection overlay
  * <IdentityCardLink identity={identity} overlay={<SelectedIndicator />} />
  */
-export const IdentityCardLink = memo(
-  function IdentityCardLink({ identity, overlay, className }: IdentityCardLinkProps) {
-    return (
-      <Link
-        to="/identity/$id"
-        params={{ id: identity.id }}
-        className={cn('group block transition-all', className)}
-      >
-        <IdentityCard identity={identity} overlay={overlay} />
-      </Link>
-    )
-  },
-  (prev, next) =>
-    prev.identity.id === next.identity.id &&
-    prev.overlay === next.overlay &&
-    prev.className === next.className,
-)
+export const IdentityCardLink = function IdentityCardLink({
+  identity,
+  overlay,
+  className,
+}: IdentityCardLinkProps) {
+  return (
+    <Link
+      to="/identity/$id"
+      params={{ id: identity.id }}
+      className={cn('group block transition-all', className)}
+    >
+      <IdentityCard identity={identity} overlay={overlay} />
+    </Link>
+  )
+}

@@ -7,6 +7,7 @@ export { EGOGiftName } from './components/EGOGiftName'
 export { EGOGiftMetadata } from './components/EGOGiftMetadata'
 export { EGOGiftTooltip } from './components/EGOGiftTooltip'
 export { EGOGiftFilterBar } from './components/EGOGiftFilterBar'
+export { EGOGiftFilterDropdown } from './components/EGOGiftFilterDropdown'
 export { EGOGiftSelectionList } from './components/EGOGiftSelectionList'
 export { EGOGiftSelectableCard } from './components/EGOGiftSelectableCard'
 export { EGOGiftObservationSelection } from './components/EGOGiftObservationSelection'
@@ -37,22 +38,9 @@ export {
 } from './hooks/useEGOGiftObservationData'
 
 export { sortEGOGifts } from './lib/egoGiftSort'
-export {
-  calculateEnhancementCost,
-  extractEGOGiftTier,
-  getDisabledEnhancementLevels,
-  getMaxEnhancementLevel,
-} from './lib/egoGiftUtils'
-export {
-  deriveDifficulty,
-  matchesKeywordFilter,
-  matchesDifficultyFilter,
-  matchesTierFilter,
-  matchesThemePackFilter,
-  matchesAttributeTypeFilter,
-  matchesFusionedFilter,
-  matchesExclusiveFilter,
-} from './lib/egoGiftFilter'
+export { calculateEnhancementCost, extractEGOGiftTier, isMixedRecipe } from './lib/egoGiftUtils'
+export { deriveDifficulty } from './lib/egoGiftFilter'
+export type { EGOGiftFacetState } from './lib/egoGiftFilter'
 
 export type {
   StandardRecipe,
@@ -62,15 +50,8 @@ export type {
   EGOGiftData,
   EGOGiftI18n,
   EGOGiftListItem,
-  EGOGiftListItemWithName,
-  EGOGiftSpecList,
   EGOGiftNameList,
 } from './types/EGOGiftTypes'
-export type {
-  EGOGiftObservationCost,
-  EGOGiftObservationData,
-} from './types/EGOGiftObservationTypes'
-
 export {
   EGOGiftSpecSchema,
   EGOGiftDataSchema,
@@ -93,5 +74,10 @@ export {
   findEncodedGiftId,
   buildSelectionLookup,
   getCascadeIngredients,
+  decodeGiftSelections,
+  sortGiftSelections,
+  lookupByGiftId,
+  hasGiftId,
+  giftDisplayName,
 } from './lib/egoGiftEncoding'
-export type { GiftSelectionEntry } from './lib/egoGiftEncoding'
+export type { GiftSelectionEntry, DecodedGiftSelection } from './lib/egoGiftEncoding'

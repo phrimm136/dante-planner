@@ -1,9 +1,10 @@
-import { Suspense, memo } from 'react'
+import { Suspense } from 'react'
 import {
   getEGOGiftIconPath,
   getEGOGiftOnHoverPath,
   getEGOGiftSelectHighlightPath,
 } from '@/shared/assets'
+import { extractTier } from '../lib/egoGiftSort'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
@@ -28,24 +29,10 @@ interface EGOGiftCardProps {
   className?: string
 }
 
-// Custom comparison - compare gift by id/keyword, not object reference
-function areGiftCardPropsEqual(prev: EGOGiftCardProps, next: EGOGiftCardProps): boolean {
-  return (
-    prev.gift.id === next.gift.id &&
-    prev.gift.keyword === next.gift.keyword &&
-    prev.enhancement === next.enhancement &&
-    prev.isSelected === next.isSelected &&
-    prev.showName === next.showName &&
-    prev.enableHoverHighlight === next.enableHoverHighlight &&
-    prev.className === next.className
-  )
-}
-
 /**
  * Pure view-only component for rendering an EGO gift card (96x96px).
  * Does NOT include any interaction logic (Link, onClick, tooltip, etc.)
  * Parent component is responsible for wrapping with Tooltip, button, or other interactive elements.
- * Memoized by gift.id and visual props to prevent re-renders during list filtering.
  *
  * @example
  * // With tooltip and click handler (selection grid)
@@ -60,7 +47,7 @@ function areGiftCardPropsEqual(prev: EGOGiftCardProps, next: EGOGiftCardProps): 
  *   </TooltipContent>
  * </Tooltip>
  */
-export const EGOGiftCard = memo(function EGOGiftCard({
+export const EGOGiftCard = function EGOGiftCard({
   gift,
   enhancement = 0,
   isSelected = false,
@@ -70,11 +57,7 @@ export const EGOGiftCard = memo(function EGOGiftCard({
 }: EGOGiftCardProps) {
   const { id } = gift
 
-  // Extract tier from tag array (guaranteed to exist)
-  const tier = gift.tag
-    .filter((t) => t.startsWith('TIER_'))
-    .sort((a) => (a.includes('EX') ? -1 : 1)) // Moves EX to the front
-    [0]?.replace('TIER_', '')
+  const tier = extractTier(gift.tag) ?? ''
 
   return (
     <div
@@ -137,4 +120,4 @@ export const EGOGiftCard = memo(function EGOGiftCard({
       )}
     </div>
   )
-}, areGiftCardPropsEqual)
+}

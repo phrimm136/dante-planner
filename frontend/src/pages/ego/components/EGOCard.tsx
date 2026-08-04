@@ -15,6 +15,7 @@ import {
 } from '@/shared/assets'
 import { getSinnerFromId } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
+import { EGO_CARD_INFO_ROW } from '@/lib/constants'
 import { EGOName } from './EGOName'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -130,9 +131,12 @@ export function EGOCard({
         />
 
         {/* Panel content - three sections */}
-        <div className="absolute left-0 translate-y-4.5 inset-0 flex items-center w-32 h-8">
+        <div
+          className="absolute left-0 translate-y-4.5 inset-0 flex items-center h-8"
+          style={{ width: EGO_CARD_INFO_ROW.WIDTH }}
+        >
           {/* Left: Small Rank Icon */}
-          <div className="items-center w-8 h-8 pl-1">
+          <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
             <img
               src={getEGOSmallRankIconPath(rank)}
               alt={rank}
@@ -143,14 +147,17 @@ export function EGOCard({
           </div>
 
           {/* Center: EGO Name */}
-          <div className="flex text-center justify-center items-center w-[76px] h-8 text-shadow-black text-shadow-xs translate-x-[8px] translate-y-1">
+          <div
+            className="flex text-center justify-center items-center h-8 text-shadow-black text-shadow-xs translate-x-[8px] translate-y-1"
+            style={{ width: EGO_CARD_INFO_ROW.NAME_SLOT }}
+          >
             <Suspense fallback={<Skeleton className="w-12 h-3 inline-block bg-foreground" />}>
               <EGOName id={id} />
             </Suspense>
           </div>
 
           {/* Right: Tier Icon (stretched/tilted) */}
-          <div className="items-center w-8 h-8 pl-1">
+          <div className="items-center h-8 pl-1" style={{ width: EGO_CARD_INFO_ROW.ICON_SLOT }}>
             <img
               src={getEGOTierIconPath(ego.maxThreadspin)}
               alt={`Tier ${ego.maxThreadspin}`}

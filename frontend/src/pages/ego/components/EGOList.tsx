@@ -1,171 +1,60 @@
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { EGOListItem } from '../types/EGOTypes'
-import type { EgoType } from '@/shared/gameData'
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { useSearchMappingsDeferred, type SearchMappings } from '@/shared/filter'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useEGOListI18nDeferred } from '../hooks/useEGOListData'
-import type { Season, SkillAttributeType, AtkType } from '@/shared/gameData'
-import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
+import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
 import { sortEGOByDate } from '@/shared/filter'
-import { getSinnerFromId } from '@/shared/gameData'
+import { buildEGOSearchTerms, matchesEGO, type EGOFacetState } from '../lib/egoFilter'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { FilteredCardSlot } from '@/shared/filter'
+import { FilterEmptyState } from '@/shared/filter'
 import { EGOCardLink } from './EGOCardLink'
 
 interface EGOListProps {
   egos: EGOListItem[]
-  selectedSinners: Set<string>
-  selectedKeywords: Set<string>
-  selectedBattleKeywords: Set<string>
-  selectedAttributes: Set<SkillAttributeType>
-  selectedAtkTypes: Set<AtkType>
-  selectedEGOTypes: Set<EgoType>
-  selectedSeasons: Set<Season>
-  searchQuery: string
+  store: FilterStore<EGOFacetState>
 }
 
 /**
- * EGOList - Renders list of EGO cards with CSS-based filtering
- *
- * All cards are rendered once, visibility is toggled via CSS class.
- * This eliminates React reconciliation on filter changes.
+ * EGOList - Renders every EGO card once and lets each one subscribe to its own
+ * visibility, so a filter toggle re-renders only the cards that changed.
  */
-export function EGOList({
-  egos,
-  selectedSinners,
-  selectedKeywords,
-  selectedBattleKeywords,
-  selectedAttributes,
-  selectedAtkTypes,
-  selectedEGOTypes,
-  selectedSeasons,
-  searchQuery,
-}: EGOListProps) {
+export function EGOList({ egos, store }: EGOListProps) {
   const { t } = useTranslation('database')
   // Non-suspending: returns empty mappings while loading, search won't match until loaded
-  const { keywordToValue } = useSearchMappingsDeferred()
+  const mappings = useSearchMappingsDeferred()
   // Non-suspending: returns empty object while loading, name search won't match until loaded
   const egoNames = useEGOListI18nDeferred()
 
   // Sort all EGOs once (stable order for CSS-based filtering)
-  const sortedEGOs = useMemo(() => sortEGOByDate(egos), [egos])
+  const sortedEGOs = sortEGOByDate(egos)
 
   // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
     total: sortedEGOs.length,
     step: PROGRESSIVE_REVEAL.CARD_BATCH,
     initial: PROGRESSIVE_REVEAL.CARD_BATCH,
-    resetKey: sortedEGOs,
   })
 
-  // Create Set of visible EGO IDs based on filters
-  // This is fast O(n) computation, much cheaper than React reconciliation
-  const visibleIds = useMemo(() => {
-    const ids = new Set<string>()
-
-    // Cache array conversion before loop to avoid O(N×M) allocations
-    const keywordEntries = Array.from(keywordToValue.entries())
-
-    for (const ego of sortedEGOs) {
-      // Sinner filter
-      if (selectedSinners.size > 0) {
-        if (!selectedSinners.has(getSinnerFromId(ego.id))) continue
-      }
-
-      // Keyword filter - EGO must have ALL selected keywords
-      if (selectedKeywords.size > 0) {
-        const hasAllKeywords = Array.from(selectedKeywords).every((selectedKeyword) =>
-          ego.skillKeywordList.includes(selectedKeyword),
-        )
-        if (!hasAllKeywords) continue
-      }
-
-      // Battle keyword filter - OR logic (EGO must have ANY selected battle keyword)
-      if (selectedBattleKeywords.size > 0) {
-        const hasAnyBattleKeyword = (ego.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword),
-        )
-        if (!hasAnyBattleKeyword) continue
-      }
-
-      // Skill attribute filter - AND logic (EGO must have ALL selected attributes)
-      if (selectedAttributes.size > 0) {
-        const hasAllAttributes = Array.from(selectedAttributes).every((attr) =>
-          ego.attributeTypes.includes(attr),
-        )
-        if (!hasAllAttributes) continue
-      }
-
-      // Attack type filter - AND logic (EGO must have ALL selected attack types)
-      if (selectedAtkTypes.size > 0) {
-        const hasAllAtkTypes = Array.from(selectedAtkTypes).every((atkType) =>
-          ego.atkTypes.includes(atkType),
-        )
-        if (!hasAllAtkTypes) continue
-      }
-
-      // EGO type filter - EGO must match one of selected types
-      if (selectedEGOTypes.size > 0) {
-        if (!selectedEGOTypes.has(ego.egoType)) continue
-      }
-
-      // Season filter - EGO must match one of selected seasons
-      if (selectedSeasons.size > 0) {
-        if (!selectedSeasons.has(ego.season)) continue
-      }
-
-      // Search filter - match name OR keyword (both deferred, no suspension)
-      if (searchQuery) {
-        const lowerQuery = searchQuery.toLowerCase()
-
-        // Check name match (partial, case-insensitive)
-        const egoName = egoNames[ego.id] ?? ''
-        const nameMatch = egoName.toLowerCase().includes(lowerQuery)
-
-        // Check keyword match (partial match on natural language, then lookup bracketed values)
-        const keywordMatch = keywordEntries.some(([naturalLang, bracketedValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return bracketedValues.some((bracketedValue) =>
-              ego.skillKeywordList.includes(bracketedValue),
-            )
-          }
-          return false
-        })
-
-        // Must match at least one
-        if (!nameMatch && !keywordMatch) continue
-      }
-
-      ids.add(ego.id)
-    }
-
-    return ids
-  }, [
-    sortedEGOs,
-    selectedSinners,
-    selectedKeywords,
-    selectedBattleKeywords,
-    selectedAttributes,
-    selectedAtkTypes,
-    selectedEGOTypes,
-    selectedSeasons,
-    searchQuery,
-    keywordToValue,
-    egoNames,
-  ])
-
-  if (visibleIds.size === 0) {
-    return (
-      <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">{t('ego.emptyState')}</div>
-      </div>
-    )
-  }
+  const searchTerms = new Map(
+    sortedEGOs.map((ego) => [ego.id, buildEGOSearchTerms(ego, egoNames, mappings)]),
+  )
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6">
+    <div className={SECTION_STYLES.panel}>
+      <FilterEmptyState
+        store={store}
+        selectEmpty={(state) =>
+          !sortedEGOs.some((ego) => matchesEGO(ego, state, searchTerms.get(ego.id) ?? []))
+        }
+      >
+        <div className="text-center text-muted-foreground py-8">{t('ego.emptyState')}</div>
+      </FilterEmptyState>
+
       {/* Responsive grid layout */}
       <div className="pt-4">
         <ResponsiveCardGrid
@@ -174,18 +63,52 @@ export function EGOList({
           mobileScale={0.8}
         >
           {sortedEGOs.slice(0, displayCount).map((ego) => (
-            <ScaledCardWrapper
+            <EGOCardCell
               key={ego.id}
-              mobileScale={0.8}
-              cardWidth={CARD_GRID.WIDTH.EGO}
-              cardHeight={CARD_GRID.HEIGHT.EGO}
-              className={visibleIds.has(ego.id) ? '' : 'hidden'}
-            >
-              <EGOCardLink ego={ego} />
-            </ScaledCardWrapper>
+              ego={ego}
+              egoNames={egoNames}
+              mappings={mappings}
+              store={store}
+            />
           ))}
         </ResponsiveCardGrid>
       </div>
     </div>
   )
 }
+
+interface EGOCardCellProps {
+  ego: EGOListItem
+  egoNames: Record<string, string>
+  mappings: SearchMappings
+  store: FilterStore<EGOFacetState>
+}
+
+/**
+ * One EGO's slot, built inside a `map` and therefore outside the compiler's reach:
+ * without `memo`, each progressive-reveal tick re-renders every card already revealed.
+ *
+ * The cell derives its own search terms. Taking them as a prop would defeat the
+ * comparison: the list's term map is rebuilt on every render, so each array would
+ * arrive with a fresh identity.
+ */
+const EGOCardCell = memo(function EGOCardCell({
+  ego,
+  egoNames,
+  mappings,
+  store,
+}: EGOCardCellProps) {
+  const terms = buildEGOSearchTerms(ego, egoNames, mappings)
+
+  return (
+    <FilteredCardSlot
+      store={store}
+      selectVisible={(state) => matchesEGO(ego, state, terms)}
+      mobileScale={0.8}
+      cardWidth={CARD_GRID.WIDTH.EGO}
+      cardHeight={CARD_GRID.HEIGHT.EGO}
+    >
+      <EGOCardLink ego={ego} />
+    </FilteredCardSlot>
+  )
+})

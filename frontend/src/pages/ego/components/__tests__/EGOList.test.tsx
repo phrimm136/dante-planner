@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { EGOList } from '../EGOList'
+import { createTestFilterStore } from '@/test-utils/filterStore'
+import type { EGOFacetState } from '../../lib/egoFilter'
 import type { EGOListItem } from '../../types/EGOTypes'
 
 // Mock TanStack Router Link component
@@ -99,6 +101,20 @@ const mockEGOs: EGOListItem[] = [
   },
 ]
 
+const EMPTY_FACETS: EGOFacetState = {
+  selectedSinners: new Set(),
+  selectedKeywords: new Set(),
+  selectedBattleKeywords: new Set(),
+  selectedAttributes: new Set(),
+  selectedAtkTypes: new Set(),
+  selectedEGOTypes: new Set(),
+  selectedSeasons: new Set(),
+}
+
+function makeStore(values: Partial<EGOFacetState> = {}, searchQuery = '') {
+  return createTestFilterStore<EGOFacetState>({ ...EMPTY_FACETS, ...values }, searchQuery)
+}
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -127,20 +143,7 @@ describe('EGOList', () => {
 
   describe('rendering', () => {
     it('renders all EGOs when no filters applied', () => {
-      render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
-        />,
-        { wrapper: createWrapper() },
-      )
+      render(<EGOList egos={mockEGOs} store={makeStore()} />, { wrapper: createWrapper() })
 
       // All EGOs should be visible (ResponsiveCardGrid renders twice: mobile + desktop)
       const cards = screen.getAllByRole('link')
@@ -151,14 +154,7 @@ describe('EGOList', () => {
       render(
         <EGOList
           egos={mockEGOs}
-          selectedSinners={new Set(['NonExistentSinner'])}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedSinners: new Set(['NonExistentSinner']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -170,17 +166,7 @@ describe('EGOList', () => {
   describe('filtering', () => {
     it('filters by EGO type', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set(['ZAYIN'])}
-          selectedSeasons={new Set()}
-          searchQuery=""
-        />,
+        <EGOList egos={mockEGOs} store={makeStore({ selectedEGOTypes: new Set(['ZAYIN']) })} />,
         { wrapper: createWrapper() },
       )
 
@@ -195,17 +181,7 @@ describe('EGOList', () => {
 
     it('filters by skill attribute with AND logic (single)', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['AZURE'])}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
-        />,
+        <EGOList egos={mockEGOs} store={makeStore({ selectedAttributes: new Set(['AZURE']) })} />,
         { wrapper: createWrapper() },
       )
 
@@ -220,14 +196,7 @@ describe('EGOList', () => {
       const { container } = render(
         <EGOList
           egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAttributes: new Set(['CRIMSON', 'AZURE']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -241,17 +210,7 @@ describe('EGOList', () => {
 
     it('filters by attack type with AND logic (single)', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set(['PENETRATE'])}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
-        />,
+        <EGOList egos={mockEGOs} store={makeStore({ selectedAtkTypes: new Set(['PENETRATE']) })} />,
         { wrapper: createWrapper() },
       )
 
@@ -266,14 +225,7 @@ describe('EGOList', () => {
       const { container } = render(
         <EGOList
           egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAtkTypes: new Set(['SLASH', 'PENETRATE']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -287,17 +239,7 @@ describe('EGOList', () => {
 
     it('filters by season', () => {
       const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set([1])}
-          searchQuery=""
-        />,
+        <EGOList egos={mockEGOs} store={makeStore({ selectedSeasons: new Set([1]) })} />,
         { wrapper: createWrapper() },
       )
 
@@ -312,14 +254,10 @@ describe('EGOList', () => {
       const { container } = render(
         <EGOList
           egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON'])}
-          selectedAtkTypes={new Set(['SLASH'])}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery=""
+          store={makeStore({
+            selectedAttributes: new Set(['CRIMSON']),
+            selectedAtkTypes: new Set(['SLASH']),
+          })}
         />,
         { wrapper: createWrapper() },
       )
@@ -341,20 +279,9 @@ describe('EGOList', () => {
         unitKeywordToValue: new Map(),
       })
 
-      render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery="rupture"
-        />,
-        { wrapper: createWrapper() },
-      )
+      render(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
+        wrapper: createWrapper(),
+      })
 
       // Search returns no results when mappings are loading
       expect(screen.getByText(/No E\.G\.Os match/)).toBeInTheDocument()
@@ -371,20 +298,9 @@ describe('EGOList', () => {
         unitKeywordToValue: new Map(),
       })
 
-      const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery="rupture"
-        />,
-        { wrapper: createWrapper() },
-      )
+      const { container } = render(<EGOList egos={mockEGOs} store={makeStore({}, 'rupture')} />, {
+        wrapper: createWrapper(),
+      })
 
       // EGOs with Burst keyword should be visible (hidden class is on parent div)
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
@@ -399,20 +315,9 @@ describe('EGOList', () => {
         unitKeywordToValue: new Map(),
       })
 
-      const { container } = render(
-        <EGOList
-          egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set()}
-          selectedSeasons={new Set()}
-          searchQuery="CHARGE"
-        />,
-        { wrapper: createWrapper() },
-      )
+      const { container } = render(<EGOList egos={mockEGOs} store={makeStore({}, 'CHARGE')} />, {
+        wrapper: createWrapper(),
+      })
 
       const hiddenCards = container.querySelectorAll('div.hidden > a[role="link"]')
       const totalCards = container.querySelectorAll('a[role="link"]')
@@ -431,14 +336,7 @@ describe('EGOList', () => {
       const { container } = render(
         <EGOList
           egos={mockEGOs}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedEGOTypes={new Set(['ZAYIN'])}
-          selectedSeasons={new Set()}
-          searchQuery="rupture"
+          store={makeStore({ selectedEGOTypes: new Set(['ZAYIN']) }, 'rupture')}
         />,
         { wrapper: createWrapper() },
       )

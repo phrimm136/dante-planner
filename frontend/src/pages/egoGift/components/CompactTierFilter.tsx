@@ -25,7 +25,6 @@ export function CompactTierFilter({ selectedTiers, onSelectionChange }: CompactT
         onSelectionChange(options as Set<EGOGiftTier>)
       }}
       getLabel={(tier) => tier}
-      columns={6}
     />
   )
 }

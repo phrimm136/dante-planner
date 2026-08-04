@@ -1,44 +1,31 @@
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
-import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
-import { useSearchMappingsDeferred } from '@/shared/filter'
+import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
+import { useSearchMappingsDeferred, type SearchMappings } from '@/shared/filter'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { sortEGOGifts } from '../lib/egoGiftSort'
 import {
-  matchesKeywordFilter,
-  matchesDifficultyFilter,
-  matchesTierFilter,
-  matchesThemePackFilter,
-  matchesAttributeTypeFilter,
-  matchesFusionedFilter,
-  matchesExclusiveFilter,
+  buildEGOGiftSearchTerms,
+  matchesEGOGift,
+  type EGOGiftFacetState,
 } from '../lib/egoGiftFilter'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { FilteredCardSlot } from '@/shared/filter'
+import { FilterEmptyState } from '@/shared/filter'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
 
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]
-  selectedKeywords: Set<string>
-  selectedBattleKeywords: Set<string>
-  selectedDifficulties: Set<EGOGiftDifficulty>
-  selectedTiers: Set<EGOGiftTier>
-  selectedThemePacks: Set<string>
-  selectedAttributeTypes: Set<EGOGiftAttributeType>
-  selectedFusioned: Set<string>
-  selectedExclusive: Set<string>
-  searchQuery: string
+  store: FilterStore<EGOGiftFacetState>
 }
 
 /**
- * EGOGiftList - Renders list of EGO Gift cards with CSS-based filtering
- *
- * All cards are rendered once, visibility is toggled via CSS class.
- * This eliminates React reconciliation on filter changes.
+ * EGOGiftList - Renders every EGO Gift card once and lets each one subscribe to its own
+ * visibility, so a filter toggle re-renders only the cards that changed.
  *
  * Filter Logic:
  * - All filter types use AND between each other
@@ -49,126 +36,86 @@ interface EGOGiftListProps {
  * - Attribute Type: OR logic (any selected attribute type)
  * - Search: OR logic (name OR keyword)
  */
-export function EGOGiftList({
-  gifts,
-  selectedKeywords,
-  selectedBattleKeywords,
-  selectedDifficulties,
-  selectedTiers,
-  selectedThemePacks,
-  selectedAttributeTypes,
-  selectedFusioned,
-  selectedExclusive,
-  searchQuery,
-}: EGOGiftListProps) {
+export function EGOGiftList({ gifts, store }: EGOGiftListProps) {
   const { t } = useTranslation('database')
   // Non-suspending: returns empty mappings while loading, search won't match until loaded
-  const { keywordToValue } = useSearchMappingsDeferred()
+  const mappings = useSearchMappingsDeferred()
   // Non-suspending: returns empty object while loading, name search won't match until loaded
   const giftNames = useEGOGiftListI18nDeferred()
 
   // Sort all gifts once (stable order for CSS-based filtering)
   // Default sort: tier-first (higher tier first, then by keyword)
-  const sortedGifts = useMemo(() => sortEGOGifts(gifts, 'tier-first'), [gifts])
+  const sortedGifts = sortEGOGifts(gifts, 'tier-first')
 
   // Progressive rendering: start with one batch, add a batch per frame
   const displayCount = useProgressiveCount({
     total: sortedGifts.length,
     step: PROGRESSIVE_REVEAL.CARD_BATCH,
     initial: PROGRESSIVE_REVEAL.CARD_BATCH,
-    resetKey: sortedGifts,
   })
 
-  // Create Set of visible gift IDs based on filters
-  // This is fast O(n) computation, much cheaper than React reconciliation
-  const visibleIds = useMemo(() => {
-    const ids = new Set<string>()
-
-    // Cache array conversion before loop to avoid O(N×M) allocations
-    const keywordEntries = Array.from(keywordToValue.entries())
-
-    for (const gift of sortedGifts) {
-      // Apply all filters using extracted utility functions
-      // Each filter: OR logic within, AND logic across filter types
-      if (!matchesKeywordFilter(gift.keyword, selectedKeywords)) continue
-
-      // Battle keyword filter - OR logic (gift must have ANY selected battle keyword)
-      if (selectedBattleKeywords.size > 0) {
-        const hasAnyBattleKeyword = (gift.battleKeywordList ?? []).some((keyword) =>
-          selectedBattleKeywords.has(keyword),
-        )
-        if (!hasAnyBattleKeyword) continue
-      }
-
-      if (!matchesDifficultyFilter(gift, selectedDifficulties)) continue
-      if (!matchesTierFilter(gift.tag, selectedTiers)) continue
-      if (!matchesThemePackFilter(gift.themePack, selectedThemePacks)) continue
-      if (!matchesAttributeTypeFilter(gift.attributeType, selectedAttributeTypes)) continue
-      if (!matchesFusionedFilter(gift.fusioned, selectedFusioned)) continue
-      if (!matchesExclusiveFilter(gift.themePack, selectedExclusive)) continue
-
-      // Search filter - match name OR keyword (both deferred, no suspension)
-      if (searchQuery) {
-        const lowerQuery = searchQuery.toLowerCase()
-
-        // Check name match (partial, case-insensitive)
-        const giftName = giftNames[gift.id] ?? ''
-        const nameMatch = giftName.toLowerCase().includes(lowerQuery)
-
-        // Check keyword match (partial match on natural language, then lookup PascalCase values)
-        const keywordMatch = keywordEntries.some(([naturalLang, pascalValues]) => {
-          if (naturalLang.includes(lowerQuery)) {
-            return gift.keyword && pascalValues.includes(gift.keyword)
-          }
-          return false
-        })
-
-        // Must match at least one
-        if (!nameMatch && !keywordMatch) continue
-      }
-
-      ids.add(gift.id)
-    }
-
-    return ids
-  }, [
-    sortedGifts,
-    selectedKeywords,
-    selectedBattleKeywords,
-    selectedDifficulties,
-    selectedTiers,
-    selectedThemePacks,
-    selectedAttributeTypes,
-    selectedFusioned,
-    selectedExclusive,
-    searchQuery,
-    keywordToValue,
-    giftNames,
-  ])
-
-  if (visibleIds.size === 0) {
-    return (
-      <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">{t('egoGift.emptyState')}</div>
-      </div>
-    )
-  }
+  const searchTerms = new Map(
+    sortedGifts.map((gift) => [gift.id, buildEGOGiftSearchTerms(gift, giftNames, mappings)]),
+  )
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6">
+    <div className={SECTION_STYLES.panel}>
+      <FilterEmptyState
+        store={store}
+        selectEmpty={(state) =>
+          !sortedGifts.some((gift) => matchesEGOGift(gift, state, searchTerms.get(gift.id) ?? []))
+        }
+      >
+        <div className="text-center text-muted-foreground py-8">{t('egoGift.emptyState')}</div>
+      </FilterEmptyState>
+
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.EGO_GIFT} mobileScale={0.8}>
         {sortedGifts.slice(0, displayCount).map((gift) => (
-          <ScaledCardWrapper
+          <EGOGiftCardCell
             key={gift.id}
-            mobileScale={0.8}
-            cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-            cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-            className={visibleIds.has(gift.id) ? '' : 'hidden'}
-          >
-            <EGOGiftCardLink gift={gift} />
-          </ScaledCardWrapper>
+            gift={gift}
+            giftNames={giftNames}
+            mappings={mappings}
+            store={store}
+          />
         ))}
       </ResponsiveCardGrid>
     </div>
   )
 }
+
+interface EGOGiftCardCellProps {
+  gift: EGOGiftListItem
+  giftNames: Record<string, string>
+  mappings: SearchMappings
+  store: FilterStore<EGOGiftFacetState>
+}
+
+/**
+ * One gift's slot, built inside a `map` and therefore outside the compiler's reach:
+ * without `memo`, each progressive-reveal tick re-renders every card already revealed.
+ *
+ * The cell derives its own search terms. Taking them as a prop would defeat the
+ * comparison: the list's term map is rebuilt on every render, so each array would
+ * arrive with a fresh identity.
+ */
+const EGOGiftCardCell = memo(function EGOGiftCardCell({
+  gift,
+  giftNames,
+  mappings,
+  store,
+}: EGOGiftCardCellProps) {
+  const terms = buildEGOGiftSearchTerms(gift, giftNames, mappings)
+
+  return (
+    <FilteredCardSlot
+      store={store}
+      selectVisible={(state) => matchesEGOGift(gift, state, terms)}
+      mobileScale={0.8}
+      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
+      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
+    >
+      <EGOGiftCardLink gift={gift} />
+    </FilteredCardSlot>
+  )
+})

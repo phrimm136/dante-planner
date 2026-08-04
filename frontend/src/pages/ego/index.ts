@@ -2,6 +2,7 @@
 
 export { EGOList } from './components/EGOList'
 export { EGOCard } from './components/EGOCard'
+export { EGOFilterDropdown } from './components/EGOFilterDropdown'
 export { EGOHeader } from './components/EGOHeader'
 export { EGOHeaderWithI18n } from './components/EGOHeaderI18n'
 export { SinCostPanel } from './components/SinCostPanel'
@@ -12,13 +13,9 @@ export { PassiveCardWithSuspense } from './components/PassiveI18n'
 export { useEGOListData, useEGOListSpec, useEGOListI18n } from './hooks/useEGOListData'
 export { useEGODetailData, useEGODetailSpec, useEGODetailI18n } from './hooks/useEGODetailData'
 
-export type {
-  EGOListItem,
-  Threadspin,
-  EGOSkillEntry,
-  EGOSkillDataEntry,
-  EGOPassiveI18n,
-} from './types/EGOTypes'
+export type { EGOListItem, Threadspin, EGOSkillEntry, EGOPassiveI18n } from './types/EGOTypes'
+
+export type { EGOFacetState } from './lib/egoFilter'
 
 export {
   EgoTypeSchema,

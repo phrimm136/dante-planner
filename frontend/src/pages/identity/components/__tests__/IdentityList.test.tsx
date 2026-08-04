@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Suspense } from 'react'
 import { IdentityList } from '../IdentityList'
+import { createTestFilterStore } from '@/test-utils/filterStore'
+import type { IdentityFacetState } from '../../lib/identityFilter'
 import type { IdentityListItem } from '../../types/IdentityTypes'
 
 // Mock TanStack Router Link component
@@ -103,6 +105,22 @@ const mockIdentities: IdentityListItem[] = [
   },
 ]
 
+const EMPTY_FACETS: IdentityFacetState = {
+  selectedSinners: new Set(),
+  selectedKeywords: new Set(),
+  selectedBattleKeywords: new Set(),
+  selectedAttributes: new Set(),
+  selectedAtkTypes: new Set(),
+  selectedDefTypes: new Set(),
+  selectedRaritys: new Set(),
+  selectedSeasons: new Set(),
+  selectedUnitKeywords: new Set(),
+}
+
+function makeStore(values: Partial<IdentityFacetState> = {}, searchQuery = '') {
+  return createTestFilterStore<IdentityFacetState>({ ...EMPTY_FACETS, ...values }, searchQuery)
+}
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -131,22 +149,9 @@ describe('IdentityList', () => {
 
   describe('rendering', () => {
     it('renders all identities when no filters applied', () => {
-      render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
-        />,
-        { wrapper: createWrapper() },
-      )
+      render(<IdentityList identities={mockIdentities} store={makeStore()} />, {
+        wrapper: createWrapper(),
+      })
 
       const cards = screen.getAllByRole('link')
       expect(cards).toHaveLength(3)
@@ -156,16 +161,7 @@ describe('IdentityList', () => {
       render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set(['NonExistentSinner'])}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedSinners: new Set(['NonExistentSinner']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -179,16 +175,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['AZURE'])}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAttributes: new Set(['AZURE']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -204,16 +191,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON', 'AZURE'])}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAttributes: new Set(['CRIMSON', 'AZURE']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -229,16 +207,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set(['PENETRATE'])}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAtkTypes: new Set(['PENETRATE']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -254,16 +223,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set(['SLASH', 'PENETRATE'])}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedAtkTypes: new Set(['SLASH', 'PENETRATE']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -279,16 +239,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set([3])}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedRaritys: new Set([3]) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -304,16 +255,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set([1])}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedSeasons: new Set([1]) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -329,16 +271,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set(['SevenAssociation'])}
-          searchQuery=""
+          store={makeStore({ selectedUnitKeywords: new Set(['SevenAssociation']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -354,16 +287,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set(['Burst', 'Combustion'])}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({ selectedKeywords: new Set(['Burst', 'Combustion']) })}
         />,
         { wrapper: createWrapper() },
       )
@@ -379,16 +303,10 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON'])}
-          selectedAtkTypes={new Set(['SLASH'])}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery=""
+          store={makeStore({
+            selectedAttributes: new Set(['CRIMSON']),
+            selectedAtkTypes: new Set(['SLASH']),
+          })}
         />,
         { wrapper: createWrapper() },
       )
@@ -409,22 +327,9 @@ describe('IdentityList', () => {
         unitKeywordToValue: new Map(),
       })
 
-      render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="rupture"
-        />,
-        { wrapper: createWrapper() },
-      )
+      render(<IdentityList identities={mockIdentities} store={makeStore({}, 'rupture')} />, {
+        wrapper: createWrapper(),
+      })
 
       expect(screen.getByText(/No Identities match/)).toBeInTheDocument()
     })
@@ -440,19 +345,7 @@ describe('IdentityList', () => {
       })
 
       const { container } = render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="rupture"
-        />,
+        <IdentityList identities={mockIdentities} store={makeStore({}, 'rupture')} />,
         { wrapper: createWrapper() },
       )
 
@@ -470,19 +363,7 @@ describe('IdentityList', () => {
       })
 
       const { container } = render(
-        <IdentityList
-          identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set()}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="CHARGE"
-        />,
+        <IdentityList identities={mockIdentities} store={makeStore({}, 'CHARGE')} />,
         { wrapper: createWrapper() },
       )
 
@@ -503,16 +384,7 @@ describe('IdentityList', () => {
       const { container } = render(
         <IdentityList
           identities={mockIdentities}
-          selectedSinners={new Set()}
-          selectedKeywords={new Set()}
-          selectedBattleKeywords={new Set()}
-          selectedAttributes={new Set(['CRIMSON'])}
-          selectedAtkTypes={new Set()}
-          selectedDefTypes={new Set()}
-          selectedRaritys={new Set()}
-          selectedSeasons={new Set()}
-          selectedUnitKeywords={new Set()}
-          searchQuery="rupture"
+          store={makeStore({ selectedAttributes: new Set(['CRIMSON']) }, 'rupture')}
         />,
         { wrapper: createWrapper() },
       )
