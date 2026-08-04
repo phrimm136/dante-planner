@@ -8,6 +8,10 @@ Change the values below, then run the script to update both FE and BE files.
 Usage:
     python scripts/sync-planner-config.py
     python scripts/sync-planner-config.py --dry-run
+
+Exit codes:
+    0 - files already in sync, or (without --dry-run) successfully updated
+    1 - a pattern matched other than exactly once, or --dry-run found drift
 """
 
 import re
@@ -36,6 +40,19 @@ def fmt_properties_list(values: list[int]) -> str:
     return ",".join(str(v) for v in values)
 
 
+class PatternMiss(Exception):
+    """A replacement pattern did not match exactly once in its target."""
+
+
+def apply_replacements(text: str, replacements: dict[str, str], where: str) -> str:
+    """Apply each pattern once, refusing any count other than one."""
+    for pattern, replacement in replacements.items():
+        text, count = re.subn(pattern, replacement, text)
+        if count != 1:
+            raise PatternMiss(f"{where}: pattern {pattern!r} matched {count} time(s), expected 1")
+    return text
+
+
 def sync_fe_constants(dry_run: bool = False) -> bool:
     content = FE_CONSTANTS.read_text()
 
@@ -53,13 +70,10 @@ def sync_fe_constants(dry_run: bool = False) -> bool:
         re.DOTALL,
     )
     if not config_match:
-        print("ERROR: PLANNER_CONFIG block not found in constants.ts")
-        sys.exit(1)
+        raise PatternMiss(f"{FE_CONSTANTS.name}: PLANNER_CONFIG block not found")
 
     block = config_match.group(2)
-    new_block = block
-    for pattern, replacement in replacements.items():
-        new_block = re.sub(pattern, replacement, new_block)
+    new_block = apply_replacements(block, replacements, FE_CONSTANTS.name)
 
     if new_block == block:
         print(f"FE  {FE_CONSTANTS.name}: already in sync")
@@ -86,9 +100,7 @@ def sync_be_properties(dry_run: bool = False) -> bool:
         r"(planner\.rr\.available-versions=)\S+": rf"\g<1>{fmt_properties_list(RR_AVAILABLE_VERSIONS)}",
     }
 
-    new_content = content
-    for pattern, replacement in replacements.items():
-        new_content = re.sub(pattern, replacement, new_content)
+    new_content = apply_replacements(content, replacements, BE_PROPERTIES.name)
 
     if new_content == content:
         print(f"BE  {BE_PROPERTIES.name}: already in sync")
@@ -103,20 +115,29 @@ def sync_be_properties(dry_run: bool = False) -> bool:
     return True
 
 
-def main() -> None:
+def main() -> int:
     dry_run = "--dry-run" in sys.argv
 
     if dry_run:
         print("[dry-run] No files will be modified.\n")
 
-    fe_changed = sync_fe_constants(dry_run)
-    be_changed = sync_be_properties(dry_run)
+    try:
+        fe_changed = sync_fe_constants(dry_run)
+        be_changed = sync_be_properties(dry_run)
+    except PatternMiss as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 1
 
     if not fe_changed and not be_changed:
         print("\nAll files already in sync.")
-    elif dry_run:
+        return 0
+
+    if dry_run:
         print("\nRe-run without --dry-run to apply changes.")
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
