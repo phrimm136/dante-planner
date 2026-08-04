@@ -80,9 +80,9 @@ vi.mock('../components/plannerViewer/PlannerViewer', () => ({
   ),
 }))
 
-// Mock PlannerDetailHeader
-vi.mock('../components/plannerViewer/PlannerDetailHeader', () => ({
-  PlannerDetailHeader: () => <div data-testid="planner-detail-header">Header</div>,
+// Mock PersonalPlannerHeader
+vi.mock('../components/plannerViewer/PersonalPlannerHeader', () => ({
+  PersonalPlannerHeader: () => <div data-testid="planner-detail-header">Header</div>,
 }))
 
 // Mock ErrorBoundary

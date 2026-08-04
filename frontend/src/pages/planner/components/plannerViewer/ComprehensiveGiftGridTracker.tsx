@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { decodeGiftSelection } from '@/pages/egoGift'
+import { decodeGiftSelections } from '@/pages/egoGift'
 import { sortEGOGifts } from '@/pages/egoGift'
 import { EMPTY_STATE, CARD_GRID } from '@/lib/constants'
 import { cn } from '@/lib/utils'
@@ -59,16 +59,16 @@ export function ComprehensiveGiftGridTracker({
   const mobileScale = CARD_GRID.MOBILE_SCALE.STANDARD
 
   // Use authoritative comprehensiveGiftIds when provided; fall back to aggregating from floors
-  const allComprehensiveGiftIds = useMemo(() => {
+  const allComprehensiveGiftIds = (() => {
     const allGifts = new Set<string>(comprehensiveGiftIds)
     floorSelections.forEach((selection) => {
       selection.giftIds.forEach((giftId) => allGifts.add(giftId))
     })
     return allGifts
-  }, [comprehensiveGiftIds, floorSelections])
+  })()
 
   // Get gift IDs to highlight based on hovered theme pack
-  const highlightedGiftIds = useMemo(() => {
+  const highlightedGiftIds = (() => {
     const ids = new Set<string>()
     if (hoveredThemePackId) {
       // Find which floor has this theme pack
@@ -80,21 +80,17 @@ export function ComprehensiveGiftGridTracker({
       })
     }
     return ids
-  }, [hoveredThemePackId, floorSelections])
+  })()
 
   // Decode selected IDs and convert to gift items with enhancement
-  const selectedGifts = useMemo(() => {
+  const selectedGifts = (() => {
     const highlighted: DecodedGift[] = []
     const regular: DecodedGift[] = []
     const done: DecodedGift[] = []
 
-    for (const encodedId of allComprehensiveGiftIds) {
-      const { giftId, enhancement } = decodeGiftSelection(encodedId)
-      const giftSpec = spec[giftId]
-      if (!giftSpec) continue
-
-      const giftName = i18n[giftId] || giftId
-      const giftKeyword = giftSpec.keyword ?? 'None'
+    for (const gift of decodeGiftSelections(allComprehensiveGiftIds, spec, i18n)) {
+      const { encodedId, item } = gift
+      const giftKeyword = item.keyword ?? 'None'
 
       // Apply keyword filter
       if (selectedKeywords.size > 0 && !selectedKeywords.has(giftKeyword)) {
@@ -104,7 +100,7 @@ export function ComprehensiveGiftGridTracker({
       // Apply search filter
       if (searchQuery) {
         const lowerQuery = searchQuery.toLowerCase()
-        const nameMatch = giftName.toLowerCase().includes(lowerQuery)
+        const nameMatch = item.name.toLowerCase().includes(lowerQuery)
         const keywordMatch = Array.from(keywordToValue.entries()).some(
           ([naturalLang, pascalValues]) => {
             if (naturalLang.includes(lowerQuery)) {
@@ -114,21 +110,6 @@ export function ComprehensiveGiftGridTracker({
           },
         )
         if (!nameMatch && !keywordMatch) continue
-      }
-
-      const gift: DecodedGift = {
-        item: {
-          id: giftId,
-          name: giftName,
-          tag: giftSpec.tag as EGOGiftListItem['tag'],
-          keyword: giftSpec.keyword,
-          battleKeywordList: giftSpec.battleKeywordList ?? [],
-          attributeType: giftSpec.attributeType,
-          themePack: giftSpec.themePack,
-          maxEnhancement: giftSpec.maxEnhancement,
-        },
-        enhancement,
-        encodedId,
       }
 
       // Separate into highlighted, regular, and done arrays
@@ -155,17 +136,7 @@ export function ComprehensiveGiftGridTracker({
 
     // Concatenate: highlighted first, then regular, then done
     return [...sortGroup(highlighted), ...sortGroup(regular), ...sortGroup(done)]
-  }, [
-    allComprehensiveGiftIds,
-    spec,
-    i18n,
-    highlightedGiftIds,
-    egoGiftDoneMarks,
-    selectedKeywords,
-    searchQuery,
-    keywordToValue,
-    sortMode,
-  ])
+  })()
 
   const hasAnyGifts = allComprehensiveGiftIds.size > 0
   const hasFilteredGifts = selectedGifts.length > 0
@@ -251,7 +222,26 @@ interface EgoGiftCardWithOverlayProps {
   onToggleDone?: (encodedId: string) => void
 }
 
-function EgoGiftCardWithOverlay({
+/**
+ * `decodeGiftSelections` mints a fresh `item` per render, so the default
+ * comparison never bails out. `id` and `name` are the only fields the card
+ * renders that vary — `name` carries the active language.
+ */
+const EgoGiftCardWithOverlay = memo(
+  EgoGiftCardWithOverlayImpl,
+  (prev, next) =>
+    prev.item.id === next.item.id &&
+    prev.item.name === next.item.name &&
+    prev.enhancement === next.enhancement &&
+    prev.encodedId === next.encodedId &&
+    prev.isHighlighted === next.isHighlighted &&
+    prev.isDone === next.isDone &&
+    prev.mobileScale === next.mobileScale &&
+    prev.readOnly === next.readOnly &&
+    prev.onToggleDone === next.onToggleDone,
+)
+
+function EgoGiftCardWithOverlayImpl({
   item,
   enhancement,
   encodedId,

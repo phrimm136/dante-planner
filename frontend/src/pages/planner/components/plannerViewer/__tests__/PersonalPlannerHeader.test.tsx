@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-import { PlannerDetailHeader } from '../PlannerDetailHeader'
+import { PersonalPlannerHeader } from '../PersonalPlannerHeader'
 import { NotFoundError } from '@/lib/api'
 import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 
@@ -34,6 +34,8 @@ vi.mock('@/lib/api', () => ({
   BannedError: class BannedError extends Error {},
   TimedOutError: class TimedOutError extends Error {},
   NotFoundError: class NotFoundError extends Error {},
+  ConflictError: class ConflictError extends Error {},
+  WriteTemporarilyUnavailableError: class WriteTemporarilyUnavailableError extends Error {},
 }))
 
 // ── Child dialogs ─────────────────────────────────────────────
@@ -63,8 +65,8 @@ vi.mock('../DeleteConfirmDialog', () => ({
     ) : null,
 }))
 vi.mock('../ModeratorDeleteDialog', () => ({ ModeratorDeleteDialog: () => null }))
-vi.mock('../PublishSyncOffWarningDialog', () => ({
-  PublishSyncOffWarningDialog: ({ open }: { open: boolean }) =>
+vi.mock('../../SyncOffWarningDialog', () => ({
+  SyncOffWarningDialog: ({ open }: { open: boolean }) =>
     open ? <div data-testid="publish-sync-warning" /> : null,
 }))
 
@@ -79,7 +81,7 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 const mockSavePlanner = vi.fn().mockResolvedValue({ success: true })
 const mockDeletePlanner = vi.fn().mockResolvedValue(undefined)
 vi.mock('../../../hooks/usePlannerStorage', () => ({
-  usePlannerStorage: () => ({ savePlanner: mockSavePlanner, deletePlanner: mockDeletePlanner }),
+  usePlannerStorage: () => ({ saveToLocal: mockSavePlanner, deleteFromLocal: mockDeletePlanner }),
 }))
 
 // ── Sync adapter ──────────────────────────────────────────────
@@ -131,10 +133,11 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
 }))
 
 // ── Query keys ────────────────────────────────────────────────
-vi.mock('../../../hooks/useSavedPlannerQuery', () => ({
+vi.mock('../../../lib/plannerQueryKeys', () => ({
   plannerQueryKeys: {
-    detail: (id: string) => ['planner', id] as const,
-    list: () => ['planner', 'list'] as const,
+    all: ['planners'] as const,
+    detail: (id: string) => ['planners', 'detail', id] as const,
+    list: () => ['planners', 'list'] as const,
   },
 }))
 vi.mock('../../../hooks/usePublishedPlannerQuery', () => ({
@@ -240,7 +243,7 @@ async function triggerApplyLatestMirror() {
 // Tests
 // ────────────────────────────────────────────────────────────────
 
-describe('PlannerDetailHeader – Apply Latest Mirror', () => {
+describe('PersonalPlannerHeader – Apply Latest Mirror', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSyncToServer.mockResolvedValue(syncedPlanner)
@@ -251,10 +254,8 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
     it('is visible when plan contentVersion is behind current version', () => {
       const { wrapper } = createWrapper()
       render(
-        <PlannerDetailHeader
-          variant="personal"
+        <PersonalPlannerHeader
           planner={makePlanner({ contentVersion: 6 })}
-          isOwner={true}
           isAuthenticated={true}
           syncEnabled={false}
         />,
@@ -267,10 +268,8 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
     it('is hidden when plan contentVersion equals current version', () => {
       const { wrapper } = createWrapper()
       render(
-        <PlannerDetailHeader
-          variant="personal"
+        <PersonalPlannerHeader
           planner={makePlanner({ contentVersion: CURRENT_VERSION })}
-          isOwner={true}
           isAuthenticated={true}
           syncEnabled={false}
         />,
@@ -285,10 +284,8 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
     it('saves only locally when sync is off and plan is unpublished', async () => {
       const { wrapper } = createWrapper()
       render(
-        <PlannerDetailHeader
-          variant="personal"
+        <PersonalPlannerHeader
           planner={makePlanner({ published: false })}
-          isOwner={true}
           isAuthenticated={true}
           syncEnabled={false}
         />,
@@ -313,13 +310,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
     it('syncs to server and persists server response when sync is on', async () => {
       const { wrapper } = createWrapper()
       render(
-        <PlannerDetailHeader
-          variant="personal"
-          planner={makePlanner()}
-          isOwner={true}
-          isAuthenticated={true}
-          syncEnabled={true}
-        />,
+        <PersonalPlannerHeader planner={makePlanner()} isAuthenticated={true} syncEnabled={true} />,
         { wrapper },
       )
 
@@ -339,10 +330,8 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
     it('syncs to server when plan is published even if sync is off', async () => {
       const { wrapper } = createWrapper()
       render(
-        <PlannerDetailHeader
-          variant="personal"
+        <PersonalPlannerHeader
           planner={makePlanner({ published: true })}
-          isOwner={true}
           isAuthenticated={true}
           syncEnabled={false}
         />,
@@ -364,10 +353,8 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
     it('saves only locally when not authenticated', async () => {
       const { wrapper } = createWrapper()
       render(
-        <PlannerDetailHeader
-          variant="personal"
+        <PersonalPlannerHeader
           planner={makePlanner()}
-          isOwner={true}
           isAuthenticated={false}
           syncEnabled={true}
         />,
@@ -392,7 +379,7 @@ describe('PlannerDetailHeader – Apply Latest Mirror', () => {
 // Delete with local cleanup tests
 // ────────────────────────────────────────────────────────────────
 
-describe('PlannerDetailHeader – delete with local cleanup', () => {
+describe('PersonalPlannerHeader – delete with local cleanup', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockDeletePlanner.mockResolvedValue(undefined)
@@ -403,21 +390,13 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
     fireEvent.click(await screen.findByTestId('confirm-delete'))
   }
 
-  it('calls deletePlanner locally on successful server delete', async () => {
+  it('calls deleteFromLocal locally on successful server delete', async () => {
     mockDeleteMutate.mockImplementation((_id: string, callbacks?: { onSuccess?: () => void }) => {
       callbacks?.onSuccess?.()
     })
 
     const { wrapper } = createWrapper()
-    render(
-      <PlannerDetailHeader
-        variant="personal"
-        planner={makePlanner()}
-        isOwner={true}
-        isAuthenticated={true}
-      />,
-      { wrapper },
-    )
+    render(<PersonalPlannerHeader planner={makePlanner()} isAuthenticated={true} />, { wrapper })
 
     await openAndConfirmDelete()
 
@@ -426,7 +405,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
     })
   })
 
-  it('calls deletePlanner locally and navigates when server returns 404', async () => {
+  it('calls deleteFromLocal locally and navigates when server returns 404', async () => {
     mockDeleteMutate.mockImplementation(
       (_id: string, callbacks?: { onError?: (e: Error) => void }) => {
         callbacks?.onError?.(new NotFoundError('not found'))
@@ -434,15 +413,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
     )
 
     const { wrapper } = createWrapper()
-    render(
-      <PlannerDetailHeader
-        variant="personal"
-        planner={makePlanner()}
-        isOwner={true}
-        isAuthenticated={true}
-      />,
-      { wrapper },
-    )
+    render(<PersonalPlannerHeader planner={makePlanner()} isAuthenticated={true} />, { wrapper })
 
     await openAndConfirmDelete()
 
@@ -460,15 +431,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
     )
 
     const { wrapper } = createWrapper()
-    render(
-      <PlannerDetailHeader
-        variant="personal"
-        planner={makePlanner()}
-        isOwner={true}
-        isAuthenticated={true}
-      />,
-      { wrapper },
-    )
+    render(<PersonalPlannerHeader planner={makePlanner()} isAuthenticated={true} />, { wrapper })
 
     await openAndConfirmDelete()
 
@@ -483,7 +446,7 @@ describe('PlannerDetailHeader – delete with local cleanup', () => {
 // Publish sync guard tests
 // ────────────────────────────────────────────────────────────────
 
-describe('PlannerDetailHeader – publish sync guard', () => {
+describe('PersonalPlannerHeader – publish sync guard', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockPublishMutate.mockImplementation(vi.fn())
@@ -496,10 +459,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
   it('shows sync-off warning when syncEnabled is null (not configured)', async () => {
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: false })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={null}
       />,
@@ -517,10 +478,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
   it('shows sync-off warning when syncEnabled is false', async () => {
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: false })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={false}
       />,
@@ -539,10 +498,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     mockSyncToServer.mockResolvedValue(syncedPlanner)
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: false })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
       />,
@@ -577,10 +534,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     )
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: false, syncVersion: 1 })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
       />,
@@ -605,10 +560,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     mockSyncToServer.mockReturnValue(new Promise<never>(() => {}))
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: false })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
       />,
@@ -628,10 +581,8 @@ describe('PlannerDetailHeader – publish sync guard', () => {
     mockSyncToServer.mockRejectedValue(new Error('Network error'))
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: false })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
       />,
@@ -651,7 +602,7 @@ describe('PlannerDetailHeader – publish sync guard', () => {
 // Unpublish tests — no content upload (the toggle needs none)
 // ────────────────────────────────────────────────────────────────
 
-describe('PlannerDetailHeader – unpublish', () => {
+describe('PersonalPlannerHeader – unpublish', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSyncToServer.mockResolvedValue(syncedPlanner)
@@ -665,10 +616,8 @@ describe('PlannerDetailHeader – unpublish', () => {
   it('unpublishes directly without uploading to the server (sync enabled)', async () => {
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: true })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
       />,
@@ -689,10 +638,8 @@ describe('PlannerDetailHeader – unpublish', () => {
   it('unpublishes directly with no sync-off warning (sync off)', async () => {
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: true })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={false}
       />,
@@ -719,10 +666,8 @@ describe('PlannerDetailHeader – unpublish', () => {
     )
     const { wrapper } = createWrapper()
     render(
-      <PlannerDetailHeader
-        variant="personal"
+      <PersonalPlannerHeader
         planner={makePlanner({ published: true, syncVersion: 5 })}
-        isOwner={true}
         isAuthenticated={true}
         syncEnabled={true}
       />,

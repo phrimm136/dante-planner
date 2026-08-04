@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
 import {
@@ -18,6 +18,7 @@ import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DeckTrackerPanel } from './DeckTrackerPanel'
 import { DeckBuilderPane } from '../deckBuilder/DeckBuilderPane'
+import { TrackerDeckBuilderContent } from '../deckBuilder/DeckBuilderContent'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
@@ -29,6 +30,8 @@ import { useEGOListSpec } from '@/pages/ego'
 import { DEFAULT_SKILL_EA } from '@/shared/gameData'
 import { isNoteEmpty } from '@/shared/noteEditor'
 import { cn } from '@/lib/utils'
+import { NOTE_SECTIONS } from './viewerSections'
+import type { NoteSectionId } from './viewerSections'
 import {
   encodeDeckCode,
   decodeDeckCode,
@@ -37,8 +40,10 @@ import {
 } from '../../lib/deckCode'
 import { deserializeSets } from '../../schemas/PlannerSchemas'
 import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
+import { staggerDelay } from '@/lib/stagger'
+import { STAGGER_STEP_MS } from '@/lib/constants'
 
-const SECTION_COUNT = 6
+const SECTION_COUNT = NOTE_SECTIONS.length
 
 interface TrackerModeViewerProps {
   planner: SaveablePlanner
@@ -62,13 +67,8 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
 
   const content = planner.content as MDPlannerContent
 
-  // Section note dialog states
-  const [deckBuilderNotesOpen, setDeckBuilderNotesOpen] = useState(false)
-  const [startBuffsNotesOpen, setStartBuffsNotesOpen] = useState(false)
-  const [startGiftsNotesOpen, setStartGiftsNotesOpen] = useState(false)
-  const [observationNotesOpen, setObservationNotesOpen] = useState(false)
-  const [skillReplacementNotesOpen, setSkillReplacementNotesOpen] = useState(false)
-  const [comprehensiveGiftsNotesOpen, setComprehensiveGiftsNotesOpen] = useState(false)
+  // At most one section note dialog is open at a time
+  const [openNote, setOpenNote] = useState<NoteSectionId | null>(null)
   const [deckEditPaneOpen, setDeckEditPaneOpen] = useState(false)
 
   // Load identity and EGO spec for deck code
@@ -85,18 +85,14 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
     togglePackDone,
   } = useTrackerState(content.equipment, content.deploymentOrder)
 
-  const deserialized = useMemo(
-    () =>
-      deserializeSets({
-        selectedKeywords: content.selectedKeywords,
-        selectedBuffIds: content.selectedBuffIds,
-        selectedGiftIds: content.selectedGiftIds,
-        observationGiftIds: content.observationGiftIds,
-        comprehensiveGiftIds: content.comprehensiveGiftIds,
-        floorSelections: content.floorSelections,
-      }),
-    [content],
-  )
+  const deserialized = deserializeSets({
+    selectedKeywords: content.selectedKeywords,
+    selectedBuffIds: content.selectedBuffIds,
+    selectedGiftIds: content.selectedGiftIds,
+    observationGiftIds: content.observationGiftIds,
+    comprehensiveGiftIds: content.comprehensiveGiftIds,
+    floorSelections: content.floorSelections,
+  })
 
   const handleDeckExport = async () => {
     try {
@@ -145,11 +141,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
   return (
     <div className="bg-background rounded-lg space-y-2">
       {/* Intro */}
-      {content.sectionNotes?.intro && !isNoteEmpty(content.sectionNotes.intro) && (
+      {!isNoteEmpty(content.sectionNotes?.intro) && (
         <PlannerSection title={t('pages.plannerMD.introduction')}>
           <NoteEditor
             value={content.sectionNotes.intro}
-            onChange={() => {}}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             readOnly={true}
           />
@@ -179,29 +174,30 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
             onImport={handleDeckImport}
             onExport={handleDeckExport}
             onResetToPreset={handleResetToPreset}
-            onViewNotes={() => setDeckBuilderNotesOpen(true)}
+            onViewNotes={() => setOpenNote('deckBuilder')}
           />
         </Suspense>
       </div>
 
-      {/* Deck Edit Pane - Uses override props for tracker mode */}
-      <DeckBuilderPane
-        open={deckEditPaneOpen}
-        onOpenChange={setDeckEditPaneOpen}
-        onImport={handleDeckImport}
-        onExport={handleDeckExport}
-        onResetOrder={() => setDeploymentOrder([])}
-        equipmentOverride={trackerState.equipment}
-        deploymentOrderOverride={trackerState.deploymentOrder}
-        setEquipmentOverride={setEquipment}
-        setDeploymentOrderOverride={setDeploymentOrder}
-        onIdentityChange={(sinnerCode) => {
-          setCurrentSkillCounts((prev) => ({
-            ...prev,
-            [sinnerCode]: { ...DEFAULT_SKILL_EA },
-          }))
-        }}
-      />
+      {/* Deck Edit Pane - session-only deck, not the planner editor store */}
+      <DeckBuilderPane open={deckEditPaneOpen} onOpenChange={setDeckEditPaneOpen}>
+        <TrackerDeckBuilderContent
+          isActive={deckEditPaneOpen}
+          equipment={trackerState.equipment}
+          setEquipment={setEquipment}
+          deploymentOrder={trackerState.deploymentOrder}
+          setDeploymentOrder={setDeploymentOrder}
+          onImport={handleDeckImport}
+          onExport={handleDeckExport}
+          onResetOrder={() => setDeploymentOrder([])}
+          onIdentityChange={(sinnerCode) => {
+            setCurrentSkillCounts((prev) => ({
+              ...prev,
+              [sinnerCode]: { ...DEFAULT_SKILL_EA },
+            }))
+          }}
+        />
+      </DeckBuilderPane>
 
       {/* Section 1: Start Buff - Read-only */}
       <div
@@ -219,10 +215,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         >
           <StartBuffSection
             mdVersion={planner.metadata.contentVersion}
-            selectedBuffIdsOverride={deserialized.selectedBuffIds}
-            onClick={() => {}}
+            selectedBuffIds={deserialized.selectedBuffIds}
             readOnly={true}
-            onViewNotes={() => setStartBuffsNotesOpen(true)}
+            onViewNotes={() => setOpenNote('startBuffs')}
           />
         </Suspense>
       </div>
@@ -242,11 +237,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           }
         >
           <StartGiftSummary
-            selectedKeywordOverride={content.selectedGiftKeyword}
-            selectedGiftIdsOverride={deserialized.selectedGiftIds}
-            onClick={() => {}}
+            selectedKeyword={content.selectedGiftKeyword}
+            selectedGiftIds={deserialized.selectedGiftIds}
             readOnly={true}
-            onViewNotes={() => setStartGiftsNotesOpen(true)}
+            onViewNotes={() => setOpenNote('startGifts')}
           />
         </Suspense>
       </div>
@@ -267,7 +261,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                     <Skeleton
                       key={i}
                       className="w-24 h-24 rounded-md"
-                      style={{ animationDelay: `${i * 80}ms` }}
+                      style={staggerDelay(i, STAGGER_STEP_MS.LOOSE)}
                     />
                   ))}
                 </div>
@@ -277,10 +271,9 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
         >
           <EGOGiftObservationSummary
             mdVersion={planner.metadata.contentVersion}
-            selectedGiftIdsOverride={deserialized.observationGiftIds}
-            onClick={() => {}}
+            selectedGiftIds={deserialized.observationGiftIds}
             readOnly={true}
-            onViewNotes={() => setObservationNotesOpen(true)}
+            onViewNotes={() => setOpenNote('observation')}
           />
         </Suspense>
       </div>
@@ -300,7 +293,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
                   <Skeleton
                     key={i}
                     className="h-32 rounded-lg"
-                    style={{ animationDelay: `${i * 60}ms` }}
+                    style={staggerDelay(i, STAGGER_STEP_MS.NORMAL)}
                   />
                 ))}
               </div>
@@ -308,11 +301,11 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           }
         >
           <SkillReplacementSection
-            equipmentOverride={trackerState.equipment}
-            plannedEAStateOverride={content.skillEAState}
+            equipment={trackerState.equipment}
+            plannedEAState={content.skillEAState}
             currentEAState={trackerState.currentSkillCounts}
-            setSkillEAStateOverride={setCurrentSkillCounts}
-            onViewNotes={() => setSkillReplacementNotesOpen(true)}
+            setSkillEAState={setCurrentSkillCounts}
+            onViewNotes={() => setOpenNote('skillReplacement')}
           />
         </Suspense>
       </div>
@@ -329,7 +322,7 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
           <div className="md:w-1/2 md:min-w-0">
             <PlannerSection
               title={t('pages.plannerMD.comprehensiveEgoGiftListView')}
-              onViewNotes={() => setComprehensiveGiftsNotesOpen(true)}
+              onViewNotes={() => setOpenNote('comprehensiveGifts')}
             >
               <Suspense
                 fallback={
@@ -375,11 +368,10 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       </div>
 
       {/* Outro */}
-      {content.sectionNotes?.outro && !isNoteEmpty(content.sectionNotes.outro) && (
+      {!isNoteEmpty(content.sectionNotes?.outro) && (
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
           <NoteEditor
             value={content.sectionNotes.outro}
-            onChange={() => {}}
             placeholder={t('pages.plannerMD.noteEditor.placeholder')}
             readOnly={true}
           />
@@ -387,48 +379,16 @@ export function TrackerModeViewer({ planner }: TrackerModeViewerProps) {
       )}
 
       {/* Section Note Dialogs */}
-      <SectionNoteDialog
-        open={deckBuilderNotesOpen}
-        onOpenChange={setDeckBuilderNotesOpen}
-        sectionTitle={t('pages.plannerMD.deckBuilder')}
-        noteContent={content.sectionNotes.deckBuilder}
-        readOnly={true}
-      />
-      <SectionNoteDialog
-        open={startBuffsNotesOpen}
-        onOpenChange={setStartBuffsNotesOpen}
-        sectionTitle={t('pages.plannerMD.startBuffs')}
-        noteContent={content.sectionNotes.startBuffs}
-        readOnly={true}
-      />
-      <SectionNoteDialog
-        open={startGiftsNotesOpen}
-        onOpenChange={setStartGiftsNotesOpen}
-        sectionTitle={t('pages.plannerMD.startEgoGift')}
-        noteContent={content.sectionNotes.startGifts}
-        readOnly={true}
-      />
-      <SectionNoteDialog
-        open={observationNotesOpen}
-        onOpenChange={setObservationNotesOpen}
-        sectionTitle={t('pages.plannerMD.egoGiftObservation')}
-        noteContent={content.sectionNotes.observation}
-        readOnly={true}
-      />
-      <SectionNoteDialog
-        open={skillReplacementNotesOpen}
-        onOpenChange={setSkillReplacementNotesOpen}
-        sectionTitle={t('pages.plannerMD.skillReplacement.title')}
-        noteContent={content.sectionNotes.skillReplacement}
-        readOnly={true}
-      />
-      <SectionNoteDialog
-        open={comprehensiveGiftsNotesOpen}
-        onOpenChange={setComprehensiveGiftsNotesOpen}
-        sectionTitle={t('pages.plannerMD.comprehensiveEgoGiftListView')}
-        noteContent={content.sectionNotes.comprehensiveGifts}
-        readOnly={true}
-      />
+      {NOTE_SECTIONS.map((section) => (
+        <SectionNoteDialog
+          key={section.id}
+          open={openNote === section.id}
+          onOpenChange={(next) => setOpenNote(next ? section.id : null)}
+          sectionTitle={t(section.titleKey)}
+          noteContent={content.sectionNotes[section.noteKey]}
+          readOnly={true}
+        />
+      ))}
 
       {/* Deck Import Confirmation Dialog */}
       <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>

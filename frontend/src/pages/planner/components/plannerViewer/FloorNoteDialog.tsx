@@ -44,7 +44,7 @@ export function FloorNoteDialog({
               {t('pages.plannerMD.noteEditor.noNotes', 'No notes for this theme pack')}
             </div>
           ) : (
-            <NoteEditor value={noteContent} onChange={() => {}} readOnly={true} placeholder="" />
+            <NoteEditor value={noteContent} readOnly={true} placeholder="" />
           )}
         </div>
       </DialogContent>

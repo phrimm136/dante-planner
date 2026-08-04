@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorBoundary } from '@/components/feedback/ErrorBoundary'
 import { PlannerViewer } from './components/plannerViewer/PlannerViewer'
-import { PlannerDetailHeader } from './components/plannerViewer/PlannerDetailHeader'
+import { PublishedPlannerHeader } from './components/plannerViewer/PublishedPlannerHeader'
 import { PlannerDetailFooter } from './components/plannerViewer/PlannerDetailFooter'
 import { CommentSection } from '@/shared/comment'
 import { PublishedPlannerList } from './components/plannerList/PublishedPlannerList'
@@ -29,11 +29,11 @@ export default function PlannerMDGesellschaftDetailPage() {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto p-8">
+      <div className={SECTION_STYLES.LAYOUT.page}>
         <Suspense
           fallback={
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className={SECTION_STYLES.LAYOUT.rowBetween}>
                 <Skeleton className="h-10 w-64" />
                 <Skeleton className="h-10 w-32" />
               </div>
@@ -83,9 +83,9 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   if (planner.config.type !== 'MIRROR_DUNGEON') {
     return (
       <div className="space-y-6 text-center py-12">
-        <h1 className="text-2xl font-bold">{t('pages.detail.invalidType')}</h1>
-        <p className="text-muted-foreground">{t('pages.detail.invalidTypeMessage')}</p>
-        <p className="text-sm text-muted-foreground">
+        <h1 className={SECTION_STYLES.TEXT.pageTitle}>{t('pages.detail.invalidType')}</h1>
+        <p className={SECTION_STYLES.TEXT.muted}>{t('pages.detail.invalidTypeMessage')}</p>
+        <p className={SECTION_STYLES.TEXT.caption}>
           {t('pages.detail.currentType')}: {planner.config.type}
         </p>
         <Button asChild variant="outline">
@@ -109,8 +109,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   return (
     <div className="space-y-4">
       {/* Header with author info, stats, and actions */}
-      <PlannerDetailHeader
-        variant="published"
+      <PublishedPlannerHeader
         planner={apiData}
         isOwner={isOwner}
         isAuthenticated={isAuthenticated}

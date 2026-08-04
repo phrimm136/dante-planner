@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlannerSection } from '../PlannerSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
@@ -25,17 +24,13 @@ export function FloorGalleryTracker({
 }: FloorGalleryTrackerProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  const floorIndices = useMemo(() => Array.from({ length: floorCount }, (_, i) => i), [floorCount])
+  const floorIndices = Array.from({ length: floorCount }, (_, i) => i)
 
   // Deserialize floor selections (convert giftIds from string[] to Set<string>)
-  const deserializedFloorSelections = useMemo<FloorThemeSelection[]>(
-    () =>
-      floorSelections.map((floor) => ({
-        ...floor,
-        giftIds: new Set(floor.giftIds),
-      })),
-    [floorSelections],
-  )
+  const deserializedFloorSelections: FloorThemeSelection[] = floorSelections.map((floor) => ({
+    ...floor,
+    giftIds: new Set(floor.giftIds),
+  }))
 
   return (
     <PlannerSection title={t('pages.plannerMD.floorThemes')}>
@@ -54,7 +49,6 @@ export function FloorGalleryTracker({
               {!isNoteEmpty(sectionNotes[floorNoteKey]) && (
                 <NoteEditor
                   value={sectionNotes[floorNoteKey]}
-                  onChange={() => {}}
                   placeholder={t('pages.plannerMD.noteEditor.placeholder')}
                   readOnly={true}
                 />

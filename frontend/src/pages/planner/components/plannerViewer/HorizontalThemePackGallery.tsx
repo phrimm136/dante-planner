@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { PlannerSection } from '../PlannerSection'
@@ -39,7 +38,7 @@ export function HorizontalThemePackGallery({
   const mobileScale = CARD_GRID.MOBILE_SCALE.DENSE
 
   // Collect selected theme pack IDs from all floors
-  const allThemePackIds = useMemo(() => {
+  const allThemePackIds = (() => {
     const packIds: string[] = []
     floorSelections.forEach((selection) => {
       if (selection.themePackId) {
@@ -47,16 +46,16 @@ export function HorizontalThemePackGallery({
       }
     })
     return packIds
-  }, [floorSelections])
+  })()
 
   // Get all done marks across all floors
-  const allDoneMarks = useMemo(() => {
+  const allDoneMarks = (() => {
     const marks = new Set<string>()
     Object.values(doneMarks).forEach((floorMarks) => {
       floorMarks.forEach((packId) => marks.add(packId))
     })
     return marks
-  }, [doneMarks])
+  })()
 
   // Find floor index for a given theme pack from floorSelections
   const getFloorIndexForPack = (themePackId: string): number => {

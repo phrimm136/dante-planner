@@ -77,8 +77,8 @@ export function ThemePackTrackerCard({
                   }}
                   aria-label={
                     isDone
-                      ? t('common.markAsNotDone', 'Mark as Not Done')
-                      : t('common.markAsDone', 'Mark as Done')
+                      ? t('common:markAsNotDone', 'Mark as Not Done')
+                      : t('common:markAsDone', 'Mark as Done')
                   }
                 >
                   <CheckCircle2 className="h-5 w-5" />
@@ -90,7 +90,7 @@ export function ThemePackTrackerCard({
                     e.stopPropagation()
                     setShowNotesDialog(true)
                   }}
-                  aria-label={t('common.viewNotes', 'View Notes')}
+                  aria-label={t('common:viewNotes', 'View Notes')}
                 >
                   <FileText className="h-5 w-5" />
                 </Button>

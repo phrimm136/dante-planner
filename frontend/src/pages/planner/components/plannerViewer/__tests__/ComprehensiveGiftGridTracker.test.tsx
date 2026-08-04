@@ -8,21 +8,21 @@ import type { SerializableFloorSelection } from '../../../types/PlannerTypes'
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: {
-      gift1: {
+      9001: {
         tag: ['ATTACK'],
         keyword: 'Burn',
         attributeType: 'WRATH',
         themePack: 'pack1',
         maxEnhancement: 3,
       },
-      gift2: {
+      9002: {
         tag: ['DEFENSE'],
         keyword: 'Bleed',
         attributeType: 'LUST',
         themePack: 'pack2',
         maxEnhancement: 3,
       },
-      gift3: {
+      9003: {
         tag: ['ATTACK'],
         keyword: 'Tremor',
         attributeType: 'PRIDE',
@@ -31,9 +31,9 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
       },
     },
     i18n: {
-      gift1: 'Gift One',
-      gift2: 'Gift Two',
-      gift3: 'Gift Three',
+      9001: 'Gift One',
+      9002: 'Gift Two',
+      9003: 'Gift Three',
     },
   }),
 }))
@@ -78,7 +78,7 @@ describe('ComprehensiveGiftGridTracker', () => {
   describe('Rendering', () => {
     it('renders component without crashing', () => {
       const floorSelections: SerializableFloorSelection[] = [
-        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:gift1', '0:gift2', '0:gift3'] },
+        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:9001', '0:9002', '0:9003'] },
       ]
 
       const { container } = render(
@@ -112,13 +112,13 @@ describe('ComprehensiveGiftGridTracker', () => {
     // height changes, those two skeletons must change with it.
     it('reserves the fixed scroll height that the Suspense skeleton mirrors', () => {
       const floorSelections: SerializableFloorSelection[] = [
-        { themePackId: 'pack1', difficulty: 0, giftIds: ['gift1'] },
+        { themePackId: 'pack1', difficulty: 0, giftIds: ['9001'] },
       ]
 
       const { container } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={floorSelections}
-          comprehensiveGiftIds={['gift1']}
+          comprehensiveGiftIds={['9001']}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
@@ -138,38 +138,38 @@ describe('ComprehensiveGiftGridTracker', () => {
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={floorSelections}
-          comprehensiveGiftIds={['gift1']}
+          comprehensiveGiftIds={['9001']}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
       )
 
-      expect(getByTestId('gift-card-gift1')).toBeDefined()
+      expect(getByTestId('gift-card-9001')).toBeDefined()
     })
 
     it('display gifts present in both a floor giftIds and comprehensiveGiftIds', () => {
       const floorSelections: SerializableFloorSelection[] = [
-        { themePackId: 'pack1', difficulty: 0, giftIds: ['gift2'] },
+        { themePackId: 'pack1', difficulty: 0, giftIds: ['9002'] },
       ]
 
       const { queryByTestId } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={floorSelections}
-          comprehensiveGiftIds={['gift1']}
+          comprehensiveGiftIds={['9001']}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
       )
 
-      expect(queryByTestId('gift-card-gift1')).toBeDefined()
-      expect(queryByTestId('gift-card-gift2')).toBeDefined()
+      expect(queryByTestId('gift-card-9001')).toBeDefined()
+      expect(queryByTestId('gift-card-9002')).toBeDefined()
     })
   })
 
   describe('Highlighting Logic', () => {
     it('accepts hoveredThemePackId prop', () => {
       const floorSelections: SerializableFloorSelection[] = [
-        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:gift1', '0:gift2'] },
+        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:9001', '0:9002'] },
       ]
 
       const { container } = render(
@@ -187,7 +187,7 @@ describe('ComprehensiveGiftGridTracker', () => {
 
     it('accepts doneMarks prop', () => {
       const floorSelections: SerializableFloorSelection[] = [
-        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:gift1', '0:gift2'] },
+        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:9001', '0:9002'] },
       ]
       const doneMarks: Record<number, Set<string>> = {
         0: new Set(['pack1']),
