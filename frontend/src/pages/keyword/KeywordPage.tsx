@@ -1,19 +1,19 @@
-import { useState, Suspense, useMemo } from 'react'
+import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKeywordListSpec } from '@/shared/gameText'
 import type { BuffType } from '@/shared/gameData'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
+import type { KeywordFacetState } from './lib/keywordFilter'
+import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSection } from '@/shared/filter'
 import { CompactBuffTypeFilter } from '@/shared/filter'
-import { IdentitySearchDropdown } from '@/shared/filter'
-import { EGOSearchDropdown } from '@/shared/filter'
-import { EgoGiftSearchDropdown } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
-import { useIdentityListData } from '@/pages/identity'
-import { useEGOListData } from '@/pages/ego'
-import { useEGOGiftListData } from '@/pages/egoGift'
+import { IdentityFilterDropdown } from '@/pages/identity'
+import { EGOFilterDropdown } from '@/pages/ego'
+import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { KeywordList } from './components/KeywordList'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -26,11 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton'
  */
 function KeywordCardGrid({
   spec,
-  selectedBuffTypes,
-  selectedIdentities,
-  selectedEgos,
-  selectedEgoGifts,
-  searchQuery,
+  store,
 }: {
   spec: Record<
     string,
@@ -42,37 +38,20 @@ function KeywordCardGrid({
       egoGifts: string[]
     }
   >
-  selectedBuffTypes: Set<BuffType>
-  selectedIdentities: Set<string>
-  selectedEgos: Set<string>
-  selectedEgoGifts: Set<string>
-  searchQuery: string
+  store: FilterStore<KeywordFacetState>
 }) {
-  const keywords = useMemo(
-    () =>
-      Object.entries(spec)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([id, entry]) => ({
-          id,
-          iconId: entry.iconId,
-          buffType: entry.buffType,
-          identities: entry.identities,
-          egos: entry.egos,
-          egoGifts: entry.egoGifts,
-        })),
-    [spec],
-  )
+  const keywords = Object.entries(spec)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([id, entry]) => ({
+      id,
+      iconId: entry.iconId,
+      buffType: entry.buffType,
+      identities: entry.identities,
+      egos: entry.egos,
+      egoGifts: entry.egoGifts,
+    }))
 
-  return (
-    <KeywordList
-      keywords={keywords}
-      selectedBuffTypes={selectedBuffTypes}
-      selectedIdentities={selectedIdentities}
-      selectedEgos={selectedEgos}
-      selectedEgoGifts={selectedEgoGifts}
-      searchQuery={searchQuery}
-    />
-  )
+  return <KeywordList keywords={keywords} store={store} />
 }
 
 /**
@@ -88,19 +67,16 @@ function KeywordPageShell() {
   const {
     values: filters,
     setters,
+    searchQuery,
+    setSearchQuery,
     resetAll,
+    store,
   } = useSetFilters({
     selectedBuffTypes: new Set<BuffType>(),
     selectedIdentities: new Set<string>(),
     selectedEgos: new Set<string>(),
     selectedEgoGifts: new Set<string>(),
   })
-  const [searchQuery, setSearchQuery] = useState<string>('')
-
-  const handleResetAll = () => {
-    resetAll()
-    setSearchQuery('')
-  }
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
@@ -108,7 +84,7 @@ function KeywordPageShell() {
     <>
       <FilterSection title={t('keyword.buffType')} activeCount={filters.selectedBuffTypes.size}>
         <CompactBuffTypeFilter
-          selectedBuffTypes={filters.selectedBuffTypes}
+          selected={filters.selectedBuffTypes}
           onBuffTypesChange={setters.selectedBuffTypes}
         />
       </FilterSection>
@@ -122,50 +98,41 @@ function KeywordPageShell() {
         activeCount={filters.selectedIdentities.size}
       >
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <IdentitySearchDropdown
-            selectedIdentities={filters.selectedIdentities}
+          <IdentityFilterDropdown
+            selected={filters.selectedIdentities}
             onSelectionChange={setters.selectedIdentities}
-            useListData={useIdentityListData}
+            placeholderKey="keyword.filterIdentity"
           />
         </Suspense>
       </FilterSection>
 
       <FilterSection title={t('keyword.filterEgo')} activeCount={filters.selectedEgos.size}>
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <EGOSearchDropdown
-            selectedEgos={filters.selectedEgos}
+          <EGOFilterDropdown
+            selected={filters.selectedEgos}
             onSelectionChange={setters.selectedEgos}
-            useListData={useEGOListData}
+            placeholderKey="keyword.filterEgo"
           />
         </Suspense>
       </FilterSection>
 
       <FilterSection title={t('keyword.filterEgoGift')} activeCount={filters.selectedEgoGifts.size}>
         <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <EgoGiftSearchDropdown
-            selectedEgoGifts={filters.selectedEgoGifts}
+          <EGOGiftFilterDropdown
+            selected={filters.selectedEgoGifts}
             onSelectionChange={setters.selectedEgoGifts}
-            useListData={useEGOGiftListData}
           />
         </Suspense>
       </FilterSection>
     </>
   )
 
-  const filterContent = (
-    <>
-      {primaryFilters}
-      {secondaryFilters}
-    </>
-  )
-
   return (
     <FilterPageLayout
-      filterContent={filterContent}
       primaryFilters={primaryFilters}
       secondaryFilters={secondaryFilters}
       activeFilterCount={activeFilterCount}
-      onResetAll={handleResetAll}
+      onResetAll={resetAll}
       searchBar={
         <SearchBar
           searchQuery={searchQuery}
@@ -174,14 +141,7 @@ function KeywordPageShell() {
         />
       }
     >
-      <KeywordCardGrid
-        spec={spec}
-        selectedBuffTypes={filters.selectedBuffTypes}
-        selectedIdentities={filters.selectedIdentities}
-        selectedEgos={filters.selectedEgos}
-        selectedEgoGifts={filters.selectedEgoGifts}
-        searchQuery={searchQuery}
-      />
+      <KeywordCardGrid spec={spec} store={store} />
     </FilterPageLayout>
   )
 }
@@ -193,10 +153,8 @@ function KeywordPageShell() {
  */
 export default function KeywordPage() {
   return (
-    <div className="container mx-auto p-8">
-      <Suspense fallback={<ListPageSkeleton preset="keyword" filterCount={4} cardCount={30} />}>
-        <KeywordPageShell />
-      </Suspense>
-    </div>
+    <EntityListPage skeleton={<ListPageSkeleton preset="keyword" filterCount={4} cardCount={30} />}>
+      <KeywordPageShell />
+    </EntityListPage>
   )
 }

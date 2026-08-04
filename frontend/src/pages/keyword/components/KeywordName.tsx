@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKeywordListI18nDeferred } from '@/shared/gameText'
 import { KoreanText } from '@/components/ui/KoreanText'
@@ -18,7 +17,7 @@ interface KeywordNameProps {
  * For Korean text, uses KoreanText component to handle S-Core Dream's
  * incomplete glyph coverage with Pretendard fallback.
  */
-export const KeywordName = memo(function KeywordName({ id }: KeywordNameProps) {
+export const KeywordName = function KeywordName({ id }: KeywordNameProps) {
   const { i18n } = useTranslation()
   const names = useKeywordListI18nDeferred()
   const name = names[id]?.name ?? ''
@@ -28,4 +27,4 @@ export const KeywordName = memo(function KeywordName({ id }: KeywordNameProps) {
   }
 
   return <>{name}</>
-})
+}

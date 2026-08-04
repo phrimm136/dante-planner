@@ -22,6 +22,7 @@ import { useEGOListI18n } from '@/pages/ego'
 import { useEGOGiftListI18n } from '@/pages/egoGift'
 import { getSinnerFromId } from '@/shared/gameData'
 import colorCode from '@static/data/colorCode.json'
+import { SECTION_STYLES } from '@/lib/constants'
 
 const colorMap = colorCode as Record<string, string>
 
@@ -44,7 +45,7 @@ function KeywordNameI18n({ id, buffType }: { id: string; buffType: string }) {
 function KeywordNameContent({ id, nameColor }: { id: string; nameColor: string }) {
   const i18nData = useKeywordDetailI18n(id)
   return (
-    <h1 className="text-2xl font-bold" style={{ color: nameColor }}>
+    <h1 className={SECTION_STYLES.TEXT.pageTitle} style={{ color: nameColor }}>
       {i18nData?.name ?? id}
     </h1>
   )
@@ -175,13 +176,13 @@ function KeywordDescriptionContent({ id }: { id: string }) {
 
   return (
     <div className="border rounded p-4 space-y-3">
-      <h2 className="text-lg font-semibold">{t('keyword.description')}</h2>
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('keyword.description')}</h2>
       {i18nData?.desc ? (
         <div className="text-sm leading-relaxed">
           <FormattedDescription text={i18nData.desc} />
         </div>
       ) : (
-        <div className="text-sm text-muted-foreground">-</div>
+        <div className={SECTION_STYLES.TEXT.caption}>-</div>
       )}
     </div>
   )

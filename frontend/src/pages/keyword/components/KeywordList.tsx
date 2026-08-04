@@ -1,39 +1,34 @@
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import type { BuffType } from '@/shared/gameData'
-import { CARD_GRID, PROGRESSIVE_REVEAL } from '@/lib/constants'
+import { CARD_GRID, PROGRESSIVE_REVEAL, SECTION_STYLES } from '@/lib/constants'
 import { useKeywordListI18nDeferred } from '@/shared/gameText'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
+import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
-import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
+import { FilteredCardSlot } from '@/shared/filter'
+import { FilterEmptyState } from '@/shared/filter'
+import {
+  buildKeywordSearchTerms,
+  matchesKeyword,
+  type KeywordFacetItem,
+  type KeywordFacetState,
+} from '../lib/keywordFilter'
 import { KeywordCardLink } from './KeywordCardLink'
 
-interface KeywordListItem {
+interface KeywordListItem extends KeywordFacetItem {
   id: string
   iconId: string | null
-  buffType: string
-  identities: string[]
-  egos: string[]
-  egoGifts: string[]
 }
 
 interface KeywordListProps {
   keywords: KeywordListItem[]
-  selectedBuffTypes: Set<BuffType>
-  selectedIdentities: Set<string>
-  selectedEgos: Set<string>
-  selectedEgoGifts: Set<string>
-  searchQuery: string
+  store: FilterStore<KeywordFacetState>
 }
 
 /**
- * KeywordList - Renders keyword cards with CSS-based filtering
- *
- * All cards are rendered once, visibility is toggled via CSS class.
- * This eliminates React reconciliation on filter changes.
- *
- * Pattern Source: EGOGiftList.tsx
+ * KeywordList - Renders every keyword card once and lets each one subscribe to its own
+ * visibility, so a filter toggle re-renders only the cards that changed.
  *
  * Filter Logic:
  * - All filter types use AND between each other
@@ -41,14 +36,7 @@ interface KeywordListProps {
  * - Identity/EGO/EGOGift: OR logic within each, AND across entity types
  * - Search: case-insensitive substring on localized name
  */
-export function KeywordList({
-  keywords,
-  selectedBuffTypes,
-  selectedIdentities,
-  selectedEgos,
-  selectedEgoGifts,
-  searchQuery,
-}: KeywordListProps) {
+export function KeywordList({ keywords, store }: KeywordListProps) {
   const { t } = useTranslation('database')
   const keywordNames = useKeywordListI18nDeferred()
 
@@ -57,73 +45,69 @@ export function KeywordList({
     total: keywords.length,
     step: PROGRESSIVE_REVEAL.KEYWORD_CARD_BATCH,
     initial: PROGRESSIVE_REVEAL.KEYWORD_CARD_BATCH,
-    resetKey: keywords,
   })
 
-  // Create Set of visible keyword IDs based on filters
-  const visibleIds = useMemo(() => {
-    const ids = new Set<string>()
-
-    for (const keyword of keywords) {
-      if (selectedBuffTypes.size > 0 && !selectedBuffTypes.has(keyword.buffType as BuffType)) {
-        continue
-      }
-
-      if (selectedIdentities.size > 0) {
-        if (!keyword.identities.some((id) => selectedIdentities.has(id))) continue
-      }
-
-      if (selectedEgos.size > 0) {
-        if (!keyword.egos.some((id) => selectedEgos.has(id))) continue
-      }
-
-      if (selectedEgoGifts.size > 0) {
-        if (!keyword.egoGifts.some((id) => selectedEgoGifts.has(id))) continue
-      }
-
-      if (searchQuery) {
-        const lowerQuery = searchQuery.toLowerCase()
-        const name = keywordNames[keyword.id]?.name ?? ''
-        if (!name.toLowerCase().includes(lowerQuery)) continue
-      }
-
-      ids.add(keyword.id)
-    }
-
-    return ids
-  }, [
-    keywords,
-    selectedBuffTypes,
-    selectedIdentities,
-    selectedEgos,
-    selectedEgoGifts,
-    searchQuery,
-    keywordNames,
-  ])
-
-  if (visibleIds.size === 0) {
-    return (
-      <div className="bg-muted border border-border rounded-md p-6">
-        <div className="text-center text-muted-foreground py-8">{t('keyword.emptyState')}</div>
-      </div>
-    )
-  }
+  const searchTerms = new Map(
+    keywords.map((keyword) => [keyword.id, buildKeywordSearchTerms(keyword.id, keywordNames)]),
+  )
 
   return (
-    <div className="bg-muted border border-border rounded-md p-6">
+    <div className={SECTION_STYLES.panel}>
+      <FilterEmptyState
+        store={store}
+        selectEmpty={(state) =>
+          !keywords.some((keyword) =>
+            matchesKeyword(keyword, state, searchTerms.get(keyword.id) ?? []),
+          )
+        }
+      >
+        <div className="text-center text-muted-foreground py-8">{t('keyword.emptyState')}</div>
+      </FilterEmptyState>
+
       <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.KEYWORD} mobileScale={0.8}>
         {keywords.slice(0, displayCount).map((keyword) => (
-          <ScaledCardWrapper
+          <KeywordCardCell
             key={keyword.id}
-            mobileScale={0.8}
-            cardWidth={CARD_GRID.WIDTH.KEYWORD}
-            cardHeight={CARD_GRID.HEIGHT.KEYWORD}
-            className={visibleIds.has(keyword.id) ? '' : 'hidden'}
-          >
-            <KeywordCardLink id={keyword.id} iconId={keyword.iconId} buffType={keyword.buffType} />
-          </ScaledCardWrapper>
+            keyword={keyword}
+            keywordNames={keywordNames}
+            store={store}
+          />
         ))}
       </ResponsiveCardGrid>
     </div>
   )
 }
+
+interface KeywordCardCellProps {
+  keyword: KeywordListItem
+  keywordNames: ReturnType<typeof useKeywordListI18nDeferred>
+  store: FilterStore<KeywordFacetState>
+}
+
+/**
+ * One keyword's slot, built inside a `map` and therefore outside the compiler's reach:
+ * without `memo`, each progressive-reveal tick re-renders every card already revealed.
+ *
+ * The cell derives its own search terms. Taking them as a prop would defeat the
+ * comparison: the list's term map is rebuilt on every render, so each array would
+ * arrive with a fresh identity.
+ */
+const KeywordCardCell = memo(function KeywordCardCell({
+  keyword,
+  keywordNames,
+  store,
+}: KeywordCardCellProps) {
+  const terms = buildKeywordSearchTerms(keyword.id, keywordNames)
+
+  return (
+    <FilteredCardSlot
+      store={store}
+      selectVisible={(state) => matchesKeyword(keyword, state, terms)}
+      mobileScale={0.8}
+      cardWidth={CARD_GRID.WIDTH.KEYWORD}
+      cardHeight={CARD_GRID.HEIGHT.KEYWORD}
+    >
+      <KeywordCardLink id={keyword.id} iconId={keyword.iconId} buffType={keyword.buffType} />
+    </FilteredCardSlot>
+  )
+})
