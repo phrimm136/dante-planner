@@ -8,12 +8,11 @@ import org.danteplanner.backend.shared.service.RateLimitService;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.planner.dto.BookmarkRequest;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
-import org.danteplanner.backend.moderation.dto.ReportResponse;
+import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
 import org.danteplanner.backend.planner.dto.SubscriptionResponse;
 import org.danteplanner.backend.planner.dto.VoteRequest;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
-import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +42,6 @@ public class PlannerEngagementController {
 
     private final PlannerEngagementService plannerEngagementService;
     private final PlannerSubscriptionService subscriptionService;
-    private final PlannerReportService reportService;
     private final RateLimitService rateLimitService;
     private final MeterRegistry meterRegistry;
 
@@ -140,14 +138,14 @@ public class PlannerEngagementController {
      * @return the report response
      */
     @PostMapping("/{id}/report")
-    public ResponseEntity<ReportResponse> submitReport(
+    public ResponseEntity<PlannerActionResponse> submitReport(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
         rateLimitService.check(RateLimitPolicy.REPORT, userId);
         log.info("User {} reporting planner {}", userId, id);
-        reportService.createReport(userId, id);
-        ReportResponse response = ReportResponse.builder()
+        plannerEngagementService.reportPlanner(userId, id);
+        PlannerActionResponse response = PlannerActionResponse.builder()
                 .plannerId(id)
                 .message("Report submitted")
                 .build();

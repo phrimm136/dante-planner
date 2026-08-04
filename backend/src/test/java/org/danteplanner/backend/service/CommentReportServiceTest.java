@@ -11,6 +11,8 @@ import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.user.exception.UserBannedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,6 +40,9 @@ class CommentReportServiceTest {
     @Mock
     private CommentQueryService commentQueryService;
 
+    @Mock
+    private PlannerAccessGuard accessGuard;
+
     private CommentReportService service;
 
     private static final Long COMMENT_INTERNAL_ID = 1L;
@@ -48,7 +53,7 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CommentReportService(reportRepository, commentQueryService);
+        service = new CommentReportService(reportRepository, commentQueryService, accessGuard);
     }
 
     @Nested
@@ -91,6 +96,19 @@ class CommentReportServiceTest {
             verify(reportRepository).save(captor.capture());
             assertEquals(REPORTER_ID, captor.getValue().getReporterId());
             assertEquals(REASON, captor.getValue().getReason());
+        }
+
+        @Test
+        void createReport_WhenReporterIsBanned_ThrowsAndWritesNothing() {
+            doThrow(new UserBannedException(REPORTER_ID, java.time.Instant.now()))
+                    .when(accessGuard).checkNotBanned(REPORTER_ID);
+            CommentReportRequest request = new CommentReportRequest(REASON);
+
+            assertThrows(UserBannedException.class,
+                    () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
+
+            verify(reportRepository, never()).save(any(PlannerCommentReport.class));
+            verifyNoInteractions(commentQueryService);
         }
 
         @Test

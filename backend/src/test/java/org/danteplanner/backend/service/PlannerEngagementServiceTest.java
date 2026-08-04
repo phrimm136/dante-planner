@@ -3,7 +3,6 @@ import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
@@ -14,6 +13,7 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,6 +76,9 @@ class PlannerEngagementServiceTest {
     @Mock
     private PlannerCatalogService plannerCatalogService;
 
+    @Mock
+    private PlannerReportService reportService;
+
     private PlannerEngagementService engagementService;
 
     @Value("${planner.recommended-threshold}")
@@ -88,24 +91,17 @@ class PlannerEngagementServiceTest {
         MockitoAnnotations.openMocks(this);
 
         engagementService = new PlannerEngagementService(
-                plannerRepository,
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerStatsRepository,
                 plannerCatalogService,
                 eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
+                reportService,
                 recommendedThreshold
         );
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
         // The access guard resolves the principal on every guarded path; an unstubbed
         // repository would surface as UserNotFoundException instead of the behavior under test.
         lenient().when(userService.findById(anyLong())).thenReturn(testUser);
@@ -335,8 +331,9 @@ class PlannerEngagementServiceTest {
                     .thenReturn(false);
             when(plannerVoteRepository.save(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
+            when(plannerStatsRepository.upvotesOf(plannerId)).thenReturn(5);
             when(plannerStatsRepository.findById(plannerId))
-                    .thenReturn(Optional.of(statsWithUpvotes(plannerId, 5)), Optional.of(statsWithUpvotes(plannerId, 6)));
+                    .thenReturn(Optional.of(statsWithUpvotes(plannerId, 6)));
 
             // Act
             VoteResponse response =

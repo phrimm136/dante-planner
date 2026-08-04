@@ -1,7 +1,6 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -58,14 +57,7 @@ class PlannerReportServiceTest {
         reportService = new PlannerReportService(reportRepository,
                 new PlannerAccessGuard(userService, plannerRepository));
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
 
         plannerId = UUID.randomUUID();
 

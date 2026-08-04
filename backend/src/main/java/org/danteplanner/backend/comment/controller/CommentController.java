@@ -13,14 +13,15 @@ import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CommentVoteResponse;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.CreateCommentResponse;
-import org.danteplanner.backend.comment.dto.ToggleNotificationRequest;
+import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.comment.dto.ToggleNotificationResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
-import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.moderation.dto.CommentReportRequest;
+import org.danteplanner.backend.moderation.dto.CommentReportResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -49,7 +50,6 @@ public class CommentController {
     private final CommentQueryService commentQueryService;
     private final CommentCommandService commentCommandService;
     private final CommentEngagementService commentEngagementService;
-    private final CommentReportService commentReportService;
     private final RateLimitService rateLimitService;
 
     /**
@@ -165,6 +165,8 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
 
+        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
+
         log.info("User {} deleting comment {}", userId, commentId);
         commentCommandService.deleteComment(commentId, userId);
         return ResponseEntity.noContent().build();
@@ -193,6 +195,30 @@ public class CommentController {
     }
 
     /**
+     * Submit a report for a comment.
+     *
+     * <p>Requires authentication. One report per user per comment: a repeat report is
+     * 409 Conflict. Reporting a deleted comment is 403 Forbidden.</p>
+     *
+     * @param userId    the authenticated user ID
+     * @param commentId the comment public UUID
+     * @param request   the report request with reason
+     * @return the report timestamp
+     */
+    @PostMapping("/comments/{commentId}/report")
+    public ResponseEntity<CommentReportResponse> reportComment(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable UUID commentId,
+            @Valid @RequestBody CommentReportRequest request) {
+
+        rateLimitService.check(RateLimitPolicy.REPORT, userId);
+
+        log.info("User {} reporting comment {}", userId, commentId);
+        CommentReportResponse response = commentEngagementService.reportComment(commentId, userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
      * Toggle notification setting for a comment.
      *
      * <p>Only the comment author can toggle their notification setting.
@@ -209,33 +235,10 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
+        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
+
         log.info("User {} toggling notifications for comment {}", userId, commentId);
         ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, userId, request.enabled());
         return ResponseEntity.ok(response);
     }
-
-    // Report endpoint - temporarily disabled
-    // /**
-    //  * Report a comment.
-    //  *
-    //  * <p>Creates a report for the specified comment. Users can only report each comment once.
-    //  * Cannot report deleted comments. Rate limited to prevent spam.</p>
-    //  *
-    //  * @param userId    the authenticated user ID
-    //  * @param commentId the comment public UUID
-    //  * @param request   the report request with reason
-    //  * @return the report timestamp
-    //  */
-    // @PostMapping("/comments/{commentId}/report")
-    // public ResponseEntity<CommentReportResponse> reportComment(
-    //         @AuthenticationPrincipal Long userId,
-    //         @PathVariable UUID commentId,
-    //         @Valid @RequestBody CommentReportRequest request) {
-    //
-    //     rateLimitService.check(RateLimitPolicy.COMMENT, userId);
-    //
-    //     log.info("User {} reporting comment {}", userId, commentId);
-    //     CommentReportResponse response = commentReportService.createReport(commentId, userId, request);
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    // }
 }

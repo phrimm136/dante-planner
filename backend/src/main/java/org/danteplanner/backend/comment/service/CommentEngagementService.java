@@ -12,6 +12,10 @@ import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.moderation.dto.CommentReportRequest;
+import org.danteplanner.backend.moderation.dto.CommentReportResponse;
+import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
+import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.springframework.stereotype.Service;
@@ -20,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
- * Social actions a reader takes on a comment: the immutable upvote, and the author's own
- * notification preference for the thread beneath it.
+ * Social actions a reader takes on a comment: the immutable upvote, the report, and the author's
+ * own notification preference for the thread beneath it.
  */
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class CommentEngagementService {
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final CommentQueryService commentQueryService;
     private final PlannerAccessGuard accessGuard;
+    private final CommentReportService reportService;
 
     /**
      * Cast an immutable upvote on a comment.
@@ -67,20 +72,16 @@ public class CommentEngagementService {
         PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);
         commentVoteRepository.save(newVote);
 
-        // Atomic increment
-        int updated = commentRepository.incrementUpvoteCount(internalId);
-        if (updated == 0) {
-            log.warn("Failed to increment upvote count for comment {} - comment may have been deleted", commentPublicId);
-        }
+        commentRepository.incrementUpvoteCount(internalId);
 
         log.debug("User {} cast immutable upvote on comment {}", userId, commentPublicId);
 
-        // Re-fetch to get updated count after atomic operation
-        int upvoteCount = commentRepository.findById(internalId)
-                .map(PlannerComment::getUpvoteCount)
-                .orElse(0);
+        // The increment clears the persistence context, so this reads the committed counter rather
+        // than the pre-increment copy the vote was checked against.
+        PlannerComment counted = commentRepository.findById(internalId)
+                .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
 
-        return new CommentVoteResponse(commentPublicId, upvoteCount, true);
+        return new CommentVoteResponse(commentPublicId, counted.getUpvoteCount(), true);
     }
 
     /**
@@ -109,5 +110,20 @@ public class CommentEngagementService {
         log.info("User {} toggled notifications {} for comment {}", userId, enabled ? "on" : "off", commentPublicId);
 
         return new ToggleNotificationResponse(enabled);
+    }
+
+    /**
+     * Report a comment on a user's behalf.
+     *
+     * @param commentPublicId the comment public UUID being reported
+     * @param userId          the reporting user ID
+     * @param request         the report request with reason
+     * @return the report timestamp
+     * @throws CommentNotFoundException            if comment not found
+     * @throws CommentForbiddenException           if comment is deleted
+     * @throws CommentReportAlreadyExistsException if the user has already reported this comment
+     */
+    public CommentReportResponse reportComment(UUID commentPublicId, Long userId, CommentReportRequest request) {
+        return reportService.createReport(commentPublicId, userId, request);
     }
 }

@@ -13,6 +13,8 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
+import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -25,6 +27,7 @@ import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
+import org.danteplanner.backend.support.AuthCookies;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +43,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.List;
 
@@ -94,9 +98,11 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 PlannerCommentVoteRepository commentVoteRepository,
                 CommentQueryService commentQueryService,
                 PlannerRepository plannerRepository,
-                UserService userService) {
+                UserService userService,
+                CommentReportService commentReportService) {
             return new CommentEngagementService(commentRepository, commentVoteRepository, commentQueryService,
-                    new PlannerAccessGuard(userService, plannerRepository));
+                    new PlannerAccessGuard(userService, plannerRepository),
+                    commentReportService);
         }
     }
 
@@ -114,6 +120,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
+    @Autowired
+    private PlannerCommentReportRepository commentReportRepository;
 
     @Autowired
     private JwtTokenService jwtTokenService;
@@ -138,11 +147,11 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
     }
 
     private Cookie accessTokenCookie() {
-        return new Cookie("accessToken", accessToken);
+        return AuthCookies.accessToken(accessToken);
     }
 
     private Cookie otherUserAccessTokenCookie() {
-        return new Cookie("accessToken", otherUserAccessToken);
+        return AuthCookies.accessToken(otherUserAccessToken);
     }
 
     private PlannerComment createComment(Long parentId, int expectedDepth) {
@@ -531,6 +540,63 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.commentId").value(comment.getPublicId().toString()))
                     .andExpect(jsonPath("$.upvoteCount").value(1))
                     .andExpect(jsonPath("$.hasUpvoted").value(true));
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /api/comments/{id}/report - Report Comment")
+    class ReportTests {
+
+        private static final String REPORT_BODY = "{\"reason\":\"SPAM\"}";
+
+        private MockHttpServletRequestBuilder report(PlannerComment comment) {
+            return post("/api/comments/{id}/report", comment.getPublicId()).with(withCsrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(REPORT_BODY);
+        }
+
+        @Test
+        void reportComment_WhenAuthenticated_Returns201AndStoresReport() throws Exception {
+            PlannerComment comment = createComment(null, 0);
+
+            AuthCookies.performAuthed(mockMvc, report(comment), otherUserAccessToken)
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.createdAt").exists());
+
+            assertThat(commentReportRepository.existsByReporterIdAndCommentId(otherUser.getId(), comment.getId()))
+                    .isTrue();
+        }
+
+        @Test
+        void reportComment_WhenUnauthenticated_Returns401() throws Exception {
+            PlannerComment comment = createComment(null, 0);
+
+            mockMvc.perform(report(comment))
+                    .andExpect(status().isUnauthorized());
+
+            assertThat(commentReportRepository.existsByReporterIdAndCommentId(otherUser.getId(), comment.getId()))
+                    .isFalse();
+        }
+
+        @Test
+        void reportComment_WhenAlreadyReported_Returns409() throws Exception {
+            PlannerComment comment = createComment(null, 0);
+
+            AuthCookies.performAuthed(mockMvc, report(comment), otherUserAccessToken)
+                    .andExpect(status().isCreated());
+
+            AuthCookies.performAuthed(mockMvc, report(comment), otherUserAccessToken)
+                    .andExpect(status().isConflict());
+        }
+
+        @Test
+        void reportComment_WhenCommentDeleted_Returns403() throws Exception {
+            PlannerComment comment = createComment(null, 0);
+            comment.softDelete();
+            commentRepository.save(comment);
+
+            AuthCookies.performAuthed(mockMvc, report(comment), otherUserAccessToken)
+                    .andExpect(status().isForbidden());
         }
     }
 }

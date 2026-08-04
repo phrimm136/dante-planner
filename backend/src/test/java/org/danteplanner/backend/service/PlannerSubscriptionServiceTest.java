@@ -1,7 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
-import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
@@ -10,7 +9,9 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.support.TestDataFactory;
+import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -42,6 +43,9 @@ class PlannerSubscriptionServiceTest {
     @Mock
     private PlannerRepository plannerRepository;
 
+    @Mock
+    private UserService userService;
+
     private PlannerSubscriptionService subscriptionService;
 
     private User testUser;
@@ -50,16 +54,10 @@ class PlannerSubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        subscriptionService = new PlannerSubscriptionService(subscriptionRepository, plannerRepository);
+        subscriptionService = new PlannerSubscriptionService(
+                subscriptionRepository, new PlannerAccessGuard(userService, plannerRepository));
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .provider(AuthProviderType.GOOGLE)
-                .providerId("google-123")
-                .usernameEpithet("W_CORP")
-                .usernameSuffix("test1")
-                .build();
+        testUser = TestDataFactory.unsavedUser(1L);
 
         plannerId = UUID.randomUUID();
 

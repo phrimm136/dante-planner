@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerSubscriptionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,7 @@ import java.util.UUID;
 public class PlannerSubscriptionService {
 
     private final PlannerSubscriptionRepository subscriptionRepository;
-    private final PlannerRepository plannerRepository;
+    private final PlannerAccessGuard accessGuard;
 
     /**
      * Toggle subscription state for a user on a planner.
@@ -35,10 +34,7 @@ public class PlannerSubscriptionService {
      */
     @Transactional
     public PlannerSubscription toggleSubscription(Long userId, UUID plannerId) {
-        // Verify planner exists and is published
-        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
-            throw new PlannerNotFoundException(plannerId);
-        }
+        accessGuard.requirePublished(plannerId);
 
         var existingSubscription = subscriptionRepository.findByUserIdAndPlannerId(userId, plannerId);
 

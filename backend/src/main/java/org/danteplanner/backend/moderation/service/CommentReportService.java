@@ -11,6 +11,7 @@ import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class CommentReportService {
 
     private final PlannerCommentReportRepository reportRepository;
     private final CommentQueryService commentQueryService;
+    private final PlannerAccessGuard accessGuard;
 
     /**
      * Create a report for a comment.
@@ -42,6 +44,8 @@ public class CommentReportService {
      */
     @Transactional
     public CommentReportResponse createReport(UUID commentPublicId, Long userId, CommentReportRequest request) {
+        accessGuard.checkNotBanned(userId);
+
         // Verify comment exists
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 

@@ -17,8 +17,8 @@ import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
+import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.springframework.stereotype.Service;
@@ -34,32 +34,32 @@ import java.util.UUID;
 @Slf4j
 public class PlannerEngagementService {
 
-    private final PlannerRepository plannerRepository;
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerCatalogService plannerCatalogService;
     private final ApplicationEventPublisher eventPublisher;
     private final PlannerAccessGuard accessGuard;
+    private final PlannerReportService reportService;
 
     private final int recommendedThreshold;
 
     public PlannerEngagementService(
-            PlannerRepository plannerRepository,
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerStatsRepository plannerStatsRepository,
             PlannerCatalogService plannerCatalogService,
             ApplicationEventPublisher eventPublisher,
             PlannerAccessGuard accessGuard,
+            PlannerReportService reportService,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
-        this.plannerRepository = plannerRepository;
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.plannerStatsRepository = plannerStatsRepository;
         this.plannerCatalogService = plannerCatalogService;
         this.eventPublisher = eventPublisher;
         this.accessGuard = accessGuard;
+        this.reportService = reportService;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -93,9 +93,7 @@ public class PlannerEngagementService {
                     "Vote type cannot be null - votes are immutable and cannot be removed");
         }
 
-        // Verify planner exists and is published (fail-fast)
-        Planner planner = plannerRepository.findPublishedAggregate(plannerId)
-                .orElseThrow(() -> new PlannerNotFoundException(plannerId));
+        Planner planner = accessGuard.requirePublished(plannerId);
 
         // Check if vote already exists (immutability enforcement)
         PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);
@@ -104,9 +102,7 @@ public class PlannerEngagementService {
         }
 
         // Get current upvote count BEFORE voting (for threshold detection)
-        int upvotesBefore = plannerStatsRepository.findById(plannerId)
-                .map(PlannerStats::getUpvotes)
-                .orElse(0);
+        int upvotesBefore = plannerStatsRepository.upvotesOf(plannerId);
 
         // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
@@ -169,10 +165,7 @@ public class PlannerEngagementService {
      */
     @Transactional
     public BookmarkResponse setBookmark(Long userId, UUID plannerId, boolean bookmarked) {
-        // Verify planner exists and is published (fail-fast)
-        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
-            throw new PlannerNotFoundException(plannerId);
-        }
+        accessGuard.requirePublished(plannerId);
 
         var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
         if (existingBookmark.isPresent() == bookmarked) {
@@ -210,10 +203,7 @@ public class PlannerEngagementService {
     @Deprecated
     @Transactional
     public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
-        // Verify planner exists and is published (fail-fast)
-        if (plannerRepository.findPublishedAggregate(plannerId).isEmpty()) {
-            throw new PlannerNotFoundException(plannerId);
-        }
+        accessGuard.requirePublished(plannerId);
 
         var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
 
@@ -235,6 +225,19 @@ public class PlannerEngagementService {
                     .bookmarked(true)
                     .build();
         }
+    }
+
+    /**
+     * Report a published planner on a user's behalf.
+     *
+     * @param userId    the reporting user ID
+     * @param plannerId the planner ID being reported
+     * @throws PlannerNotFoundException if planner not found or not published
+     * @throws org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException
+     *         if the user has already reported this planner
+     */
+    public void reportPlanner(Long userId, UUID plannerId) {
+        reportService.createReport(userId, plannerId);
     }
 
     /**
