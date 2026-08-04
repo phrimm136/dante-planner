@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, memo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
@@ -48,19 +48,6 @@ function EditorErrorFallback({
  * - Image upload using Tiptap's ImageUploadNode
  * - Link insertion dialog
  */
-// Custom comparison for memo - compares value.content by reference equality
-// since parent should provide stable NoteContent objects
-function areNoteEditorPropsEqual(prev: NoteEditorProps, next: NoteEditorProps): boolean {
-  return (
-    prev.value === next.value &&
-    prev.placeholder === next.placeholder &&
-    prev.readOnly === next.readOnly &&
-    prev.className === next.className &&
-    prev.maxBytes === next.maxBytes
-    // onChange intentionally excluded - should be stable from parent
-  )
-}
-
 function NoteEditorInner({
   value,
   onChange,
@@ -92,7 +79,7 @@ function NoteEditorInner({
 
     const timer = setTimeout(() => {
       if (hasLocalChangesRef.current) {
-        onChange({ content: localContent })
+        onChange?.({ content: localContent })
         hasLocalChangesRef.current = false
       }
     }, 500)
@@ -102,32 +89,29 @@ function NoteEditorInner({
 
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
-  const currentBytes = useMemo(() => {
+  const currentBytes = (() => {
     if (!localContent) return 0
     return measureDocBytes(localContent)
-  }, [localContent])
+  })()
 
   // Memoize extensions to prevent recreation on every render
-  const extensions = useMemo(
-    () => [
-      // StarterKit includes Link by default in Tiptap v3
-      // Configure Link through StarterKit to avoid duplicate extension warning
-      StarterKit.configure({
-        heading: {
-          levels: [1, 2, 3],
+  const extensions = [
+    // StarterKit includes Link by default in Tiptap v3
+    // Configure Link through StarterKit to avoid duplicate extension warning
+    StarterKit.configure({
+      heading: {
+        levels: [1, 2, 3],
+      },
+      link: {
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'note-link',
         },
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'note-link',
-          },
-        },
-      }),
-      SpoilerExtension,
-      ByteLimitExtension.configure({ limit: byteLimit }),
-    ],
-    [byteLimit],
-  )
+      },
+    }),
+    SpoilerExtension,
+    ByteLimitExtension.configure({ limit: byteLimit }),
+  ]
 
   // Initialize Tiptap editor
   const editor = useEditor({
@@ -188,6 +172,34 @@ function NoteEditorInner({
     },
   })
 
+  // Whether a pointer is currently pressed, and the wait for its release if one is
+  // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.
+  const gestureRef = useRef<{ down: boolean; pending: AbortController | null }>({
+    down: false,
+    pending: null,
+  })
+
+  useEffect(() => {
+    const gesture = gestureRef.current
+    const markDown = () => {
+      gesture.down = true
+    }
+    const markUp = () => {
+      gesture.down = false
+    }
+
+    document.addEventListener('pointerdown', markDown, true)
+    document.addEventListener('pointerup', markUp, true)
+    document.addEventListener('pointercancel', markUp, true)
+
+    return () => {
+      document.removeEventListener('pointerdown', markDown, true)
+      document.removeEventListener('pointerup', markUp, true)
+      document.removeEventListener('pointercancel', markUp, true)
+      gesture.pending?.abort()
+    }
+  }, [])
+
   // Update editable state when focus or readOnly changes
   useEffect(() => {
     if (editor) {
@@ -223,6 +235,38 @@ function NoteEditorInner({
     }
   }
 
+  /**
+   * Drop the toolbar, but never between a press and its release.
+   *
+   * The toolbar is a row in the flow, so removing it lifts everything below by its
+   * height. A press outside the editor blurs it, and the blur is delivered before
+   * the release — collapse on arrival and the control under the pointer travels
+   * out from under it, so no `click` is ever composed and nothing downstream runs.
+   */
+  const collapseToolbar = () => {
+    const gesture = gestureRef.current
+
+    if (!gesture.down) {
+      setIsFocused(false)
+      return
+    }
+
+    gesture.pending?.abort()
+    const controller = new AbortController()
+    gesture.pending = controller
+
+    const finish = () => {
+      controller.abort()
+      gesture.pending = null
+      // `click` is dispatched after `pointerup` within the same task, so yielding a
+      // task lets the press land before the row disappears.
+      setTimeout(() => setIsFocused(false), 0)
+    }
+
+    document.addEventListener('pointerup', finish, { signal: controller.signal })
+    document.addEventListener('pointercancel', finish, { signal: controller.signal })
+  }
+
   // Handle blur with relatedTarget for reliable focus tracking
   // Syncs local changes to parent when focus leaves the editor
   const handleBlur = (e: React.FocusEvent) => {
@@ -230,11 +274,11 @@ function NoteEditorInner({
 
     if (containerRef.current && !containerRef.current.contains(relatedTarget)) {
       if (!linkDialogOpen) {
-        setIsFocused(false)
+        collapseToolbar()
 
         // Sync local changes to parent on blur
         if (hasLocalChangesRef.current && localContent) {
-          onChange({ content: localContent })
+          onChange?.({ content: localContent })
           hasLocalChangesRef.current = false
         }
       }
@@ -357,6 +401,6 @@ function NoteEditorInner({
 }
 
 // Wrap with memo using custom prop comparison to prevent unnecessary re-renders
-export const NoteEditor = memo(NoteEditorInner, areNoteEditorPropsEqual)
+export const NoteEditor = NoteEditorInner
 
 export default NoteEditor

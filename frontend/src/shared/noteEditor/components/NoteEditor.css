@@ -5,6 +5,12 @@
  * Uses Tailwind's prose class as a base with custom overrides.
  */
 
+/* The toolbar mounts with focus, so this subtree changes height on every focus
+   change; anchored to it, the browser scrolls mid-gesture and mouseup misses. */
+.note-editor {
+  overflow-anchor: none;
+}
+
 /* Base editor content styles */
 .note-editor-content {
   /* Ensure proper text colors in dark mode */

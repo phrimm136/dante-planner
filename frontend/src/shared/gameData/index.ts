@@ -1,9 +1,4 @@
-export {
-  SinSchema,
-  AffinitySchema,
-  EgoTypeSchema,
-  PassiveI18nSchema,
-} from './schemas/SharedSchemas'
+export { AffinitySchema, EgoTypeSchema } from './schemas/SharedSchemas'
 
 export {
   MAX_LEVEL,
@@ -19,7 +14,6 @@ export {
   KEYWORD_ORDER,
   MD_CATEGORIES,
   RR_CATEGORIES,
-  MD_CATEGORY_STYLES,
   SYNERGY_KEYWORDS,
   PLANNER_KEYWORDS,
   KEYWORD_RENAME_MAP,
@@ -35,16 +29,13 @@ export {
   MD_CATEGORY_COLORS,
   MD_CATEGORY_TEXT_COLORS,
   FLOOR_COUNTS,
-  SELECTABLE_FLOOR_MAP,
   FLAVOR_TEXT_COLOR,
   PLANNER_TYPES,
-  DEFAULT_PLANNER_TYPE,
   MD_ACCENT_COLORS,
   SEASONS,
   ASSOCIATIONS,
   MAX_ENTITY_TIER,
   MIN_ENTITY_TIER,
-  ENTITY_TIER_LABELS,
   BUFF_TYPES,
   SANITY_CONDITION_TYPE,
   EGO_GIFT_TIERS,
@@ -70,7 +61,6 @@ export type {
   Keyword,
   MDCategory,
   RRCategory,
-  PlannerKeyword,
   EnhancementLevel,
   OffensiveSkillSlot,
   DungeonIdx,
@@ -83,7 +73,6 @@ export type {
   BuffType,
   SanityConditionType,
   EGOGiftTier,
-  EGOGiftTierTag,
   EGOGiftDifficulty,
   EGOGiftAttributeType,
   ThemePackFloor,
@@ -93,6 +82,9 @@ export { getAttributeColors, getSeasonColor } from './colorUtils'
 export type { AttributeColors } from './colorUtils'
 
 export { migrateKeywords } from './keywordNormalize'
+
+export { getResistanceInfo } from './resistance'
+export type { ResistanceCategoryKey, ResistanceInfo } from './resistance'
 
 export { SkillDescEntrySchema } from './schemas/SkillSchemas'
 export type { SkillDescEntry, Uptie, Threadspin } from './schemas/SkillSchemas'

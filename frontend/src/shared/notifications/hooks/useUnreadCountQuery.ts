@@ -10,10 +10,12 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { UnreadCountResponseSchema } from '../schemas/NotificationSchemas'
 import { notificationQueryKeys } from './useNotificationsQuery'
 
 import type { UnreadCountResponse } from '../types/NotificationTypes'
+import { STALE_TIME } from '@/lib/constants'
 
 // ============================================================================
 // Query Options
@@ -24,16 +26,9 @@ function createUnreadCountQueryOptions() {
     queryKey: notificationQueryKeys.unreadCount(),
     queryFn: async (): Promise<UnreadCountResponse> => {
       const data = await ApiClient.get('/api/notifications/unread-count')
-      const result = UnreadCountResponseSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Unread count response validation failed:', result.error)
-        throw new Error('Invalid unread count response from server')
-      }
-
-      return result.data
+      return validateData(data, UnreadCountResponseSchema, 'notifications unreadCount')
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes (refetches on SSE notification events)
+    staleTime: STALE_TIME.MEDIUM,
   })
 }
 

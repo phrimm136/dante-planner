@@ -62,7 +62,7 @@ export function NotificationItem({ notification, onNavigate, onDelete }: Notific
   const handleClick = () => {
     // Delete on click (mark as read = delete, arca.live style)
     onDelete(notification.id)
-    onNavigate(plannerId, notification.commentPublicId)
+    onNavigate(plannerId, notification.commentPublicId ?? null)
   }
 
   const handleDelete = (e: React.MouseEvent) => {

@@ -43,17 +43,17 @@ export const NotificationResponseSchema = z
     read: z.boolean(),
     /** ISO 8601 timestamp when notification was created */
     createdAt: z.string(),
-    /** ISO 8601 timestamp when notification was read (null if unread) */
-    readAt: z.string().nullable(),
+    /** ISO 8601 timestamp when notification was read (absent if unread) */
+    readAt: z.string().nullish(),
     // Rich content fields for display and navigation
     /** Planner UUID for navigation */
-    plannerId: z.string().uuid().nullable(),
+    plannerId: z.string().uuid().nullish(),
     /** Planner title for display */
-    plannerTitle: z.string().nullable(),
+    plannerTitle: z.string().nullish(),
     /** Comment content snippet for preview */
-    commentSnippet: z.string().nullable(),
+    commentSnippet: z.string().nullish(),
     /** Comment public UUID for anchor link */
-    commentPublicId: z.string().uuid().nullable(),
+    commentPublicId: z.string().uuid().nullish(),
   })
   .strict()
 
@@ -137,11 +137,7 @@ export type SseNotificationEvent = z.infer<typeof SseNotificationEventSchema>
 export const SsePublishedEventSchema = z.object({
   plannerId: z.string().uuid(),
   plannerTitle: z.string(),
-  authorKeyword: z.string(),
-  authorSuffix: z.string(),
+  /** Null once the author's account is gone */
+  authorEpithet: z.string().nullish(),
+  authorSuffix: z.string().nullish(),
 })
-
-/**
- * Inferred type for SSE published event
- */
-export type SsePublishedEvent = z.infer<typeof SsePublishedEventSchema>

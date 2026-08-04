@@ -7,7 +7,9 @@ import {
 } from '@tanstack/react-query'
 import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
+import { validateDataOrNull } from '@/lib/validation'
 import { UserSchema, type User } from '../schemas/AuthSchemas'
+import { STALE_TIME } from '@/lib/constants'
 
 /**
  * Query keys for auth-related queries
@@ -26,13 +28,8 @@ export function createAuthMeQueryOptions() {
     queryFn: async (): Promise<User | null> => {
       try {
         const data = await ApiClient.get<User | null>('/api/auth/me')
-        if (data === null) return null
-        const result = UserSchema.safeParse(data)
-        if (!result.success) {
-          console.error('User validation failed:', result.error)
-          return null
-        }
-        return result.data
+        if (data == null) return null
+        return validateDataOrNull(data, UserSchema, 'auth me')
       } catch (error) {
         // Transient backend/DB unavailability must NOT log the user out: preserve the
         // last-known identity so a maintenance blip doesn't flip an authed user to guest.
@@ -44,7 +41,7 @@ export function createAuthMeQueryOptions() {
         return null
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - auth state is relatively stable
+    staleTime: STALE_TIME.MEDIUM,
     retry: false, // Don't retry auth failures
   })
 }

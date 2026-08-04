@@ -13,4 +13,4 @@ export {
 export { useNotificationPermission } from './hooks/useNotificationPermission'
 
 export { SseNotificationEventSchema, SsePublishedEventSchema } from './schemas/NotificationSchemas'
-export type { SseNotificationEvent } from './schemas/NotificationSchemas'
+export type { SseNotificationEvent, NotificationType } from './schemas/NotificationSchemas'

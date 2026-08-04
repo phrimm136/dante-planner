@@ -10,9 +10,11 @@
 import { useSuspenseQuery, queryOptions } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { NotificationInboxResponseSchema } from '../schemas/NotificationSchemas'
 
 import type { NotificationInboxResponse } from '../types/NotificationTypes'
+import { STALE_TIME } from '@/lib/constants'
 
 // ============================================================================
 // Query Key Factory
@@ -33,16 +35,9 @@ function createNotificationsQueryOptions(page: number = 0, size: number = 20) {
     queryKey: notificationQueryKeys.inbox(page, size),
     queryFn: async (): Promise<NotificationInboxResponse> => {
       const data = await ApiClient.get(`/api/notifications/inbox?page=${page}&size=${size}`)
-      const result = NotificationInboxResponseSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Notifications response validation failed:', result.error)
-        throw new Error('Invalid notifications response from server')
-      }
-
-      return result.data
+      return validateData(data, NotificationInboxResponseSchema, 'notifications inbox')
     },
-    staleTime: 60 * 1000, // 1 minute
+    staleTime: STALE_TIME.SHORT,
   })
 }
 

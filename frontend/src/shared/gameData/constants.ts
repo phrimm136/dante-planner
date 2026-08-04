@@ -197,18 +197,6 @@ export const RR_CATEGORIES = ['RR_PLACEHOLDER'] as const
 export type RRCategory = (typeof RR_CATEGORIES)[number]
 
 /**
- * MD category badge styles for planner list display
- * Maps category to Tailwind classes for consistent badge styling
- * Colors: 5F=orange (entry), 10F=red (mid), 15F=white (endgame)
- * @deprecated Use MD_CATEGORY_COLORS with inline styles instead for exact color matching
- */
-export const MD_CATEGORY_STYLES: Record<MDCategory, string> = {
-  '5F': 'bg-orange-500 text-white',
-  '10F': 'bg-red-500 text-white',
-  '15F': 'bg-white text-black',
-} as const
-
-/**
  * Synergy keywords for planner
  */
 export const SYNERGY_KEYWORDS = [
@@ -240,11 +228,6 @@ export const PLANNER_KEYWORDS = [
   '9154',
   ...SYNERGY_KEYWORDS,
 ] as const
-
-/**
- * Planner keyword type
- */
-export type PlannerKeyword = (typeof PLANNER_KEYWORDS)[number]
 
 /**
  * Legacy keyword aliases → current ids. Mirrors the backend `RENAME_MAP`
@@ -381,12 +364,6 @@ export const FLOOR_COUNTS: Record<MDCategory, number> = {
 } as const
 
 /**
- * Selectable floors mapping from themePackList.json
- * 0 → 1F, 1 → 2F, 2 → 3F, 3 → 4F, 4 → 5-10F (represented as 5F for filtering)
- */
-export const SELECTABLE_FLOOR_MAP = [1, 2, 3, 4, 5] as const
-
-/**
  * Flavor text color for skill / status-effect lore lines.
  * Mirrors in-game `*FlavorGlow` TMP material face color used by
  * `[Text]SkillInfoFlavor` and `[Text]BuffFlavor` GameObjects.
@@ -404,11 +381,6 @@ export const PLANNER_TYPES = ['MIRROR_DUNGEON', 'REFRACTED_RAILWAY'] as const
  * Planner type derived from PLANNER_TYPES array
  */
 export type PlannerType = (typeof PLANNER_TYPES)[number]
-
-/**
- * Default planner type for new planners
- */
-export const DEFAULT_PLANNER_TYPE: PlannerType = 'MIRROR_DUNGEON'
 
 /**
  * Mirror Dungeon accent colors by content version
@@ -478,15 +450,6 @@ export const MIN_ENTITY_TIER: Record<DetailEntityType, number> = {
 }
 
 /**
- * Selector labels by entity type (for i18n keys)
- */
-export const ENTITY_TIER_LABELS: Record<DetailEntityType, string> = {
-  identity: 'uptie',
-  ego: 'threadspin',
-  egoGift: 'enhancement',
-}
-
-/**
  * Buff type categories for battle keywords
  */
 export const BUFF_TYPES = ['Positive', 'Negative', 'Neutral'] as const
@@ -535,11 +498,6 @@ export const EGO_GIFT_TIER_TAGS = [
   'TIER_5',
   'TIER_EX',
 ] as const
-
-/**
- * EGO Gift tier tag type (data format)
- */
-export type EGOGiftTierTag = (typeof EGO_GIFT_TIER_TAGS)[number]
 
 /**
  * EGO Gift difficulties for filtering

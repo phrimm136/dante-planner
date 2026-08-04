@@ -15,11 +15,6 @@ import { notificationQueryKeys } from './useNotificationsQuery'
 // Mutation Input
 // ============================================================================
 
-export interface DeleteNotificationInput {
-  /** Public UUID of the notification to delete */
-  notificationId: string
-}
-
 // ============================================================================
 // Main Hook
 // ============================================================================

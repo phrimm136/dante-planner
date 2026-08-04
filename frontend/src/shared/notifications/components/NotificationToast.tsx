@@ -12,10 +12,11 @@ import { Bell, FileText, MessageSquare, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 import type { ReactNode } from 'react'
+import type { NotificationType } from '../schemas/NotificationSchemas'
 
 interface NotificationToastData {
   /** Notification type for icon selection */
-  type: 'COMMENT_RECEIVED' | 'REPLY_RECEIVED' | 'PLANNER_RECOMMENDED' | 'PLANNER_PUBLISHED'
+  type: NotificationType
   /** Toast title */
   title: string
   /** Toast body text */
@@ -24,21 +25,12 @@ interface NotificationToastData {
   url?: string
 }
 
-/**
- * Get icon for notification type
- */
-function getNotificationIcon(type: NotificationToastData['type']): ReactNode {
-  switch (type) {
-    case 'COMMENT_RECEIVED':
-    case 'REPLY_RECEIVED':
-      return <MessageSquare className="size-5 text-primary" />
-    case 'PLANNER_RECOMMENDED':
-      return <Star className="size-5 text-yellow-500" />
-    case 'PLANNER_PUBLISHED':
-      return <FileText className="size-5 text-purple-500" />
-    default:
-      return <Bell className="size-5 text-primary" />
-  }
+const TOAST_ICON: Record<NotificationType, ReactNode> = {
+  COMMENT_RECEIVED: <MessageSquare className="size-5 text-primary" />,
+  REPLY_RECEIVED: <MessageSquare className="size-5 text-primary" />,
+  PLANNER_RECOMMENDED: <Star className="size-5 text-yellow-500" />,
+  PLANNER_PUBLISHED: <FileText className="size-5 text-purple-500" />,
+  REPORT_RECEIVED: <Bell className="size-5 text-primary" />,
 }
 
 /**
@@ -69,7 +61,7 @@ function NotificationToastContent({
         'hover:bg-accent transition-colors cursor-pointer',
       )}
     >
-      <div className="flex-shrink-0 mt-0.5">{getNotificationIcon(data.type)}</div>
+      <div className="flex-shrink-0 mt-0.5">{TOAST_ICON[data.type]}</div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{data.title}</p>
         {data.body && (
