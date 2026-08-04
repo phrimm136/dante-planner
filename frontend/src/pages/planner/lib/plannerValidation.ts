@@ -15,7 +15,7 @@ import {
   migrateKeywords,
 } from '@/shared/gameData'
 import { MAX_NOTE_BYTES } from '@/lib/constants'
-import { getBaseGiftId } from '@/pages/egoGift'
+import { hasGiftId, giftDisplayName } from '@/pages/egoGift'
 import { measureDocBytes } from '@/shared/noteEditor'
 import { getUnaffordableGiftIds } from './plannerRules'
 import { toUserFriendlyError } from './plannerValidationErrors'
@@ -88,6 +88,23 @@ const MAX_BUFF_BASE_ID = 9
 // ============================================================================
 
 /**
+ * Collect the sinner keys present in a per-sinner record, normalized to the
+ * 2-digit format. Keys that are not integers in the sinner range are ignored.
+ */
+function collectPresentSinnerKeys(source: Record<string, unknown>): Set<string> {
+  const presentKeys = new Set<string>()
+
+  for (const key of Object.keys(source)) {
+    const index = Number(key)
+    if (!Number.isInteger(index)) continue
+    if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) continue
+    presentKeys.add(String(index).padStart(2, '0'))
+  }
+
+  return presentKeys
+}
+
+/**
  * Validate equipment configuration
  * Rules:
  * - All 12 sinners must be present (keys 1-12 or 01-12)
@@ -100,19 +117,7 @@ export function validateEquipment(
 ): EquipmentValidationError[] {
   const errors: EquipmentValidationError[] = []
 
-  // Collect present sinner keys and normalize to 2-digit format
-  const presentKeys = new Set<string>()
-  for (const key of Object.keys(equipment)) {
-    try {
-      const index = parseInt(key, 10)
-      if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
-        continue
-      }
-      presentKeys.add(String(index).padStart(2, '0'))
-    } catch {
-      continue
-    }
-  }
+  const presentKeys = collectPresentSinnerKeys(equipment)
 
   // Check all 12 sinners are present
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
@@ -238,19 +243,7 @@ export function validateSkillEAState(
 ): SkillEAValidationError[] {
   const errors: SkillEAValidationError[] = []
 
-  // Collect present sinner keys
-  const presentKeys = new Set<string>()
-  for (const key of Object.keys(skillEAState)) {
-    try {
-      const index = parseInt(key, 10)
-      if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
-        continue
-      }
-      presentKeys.add(String(index).padStart(2, '0'))
-    } catch {
-      continue
-    }
-  }
+  const presentKeys = collectPresentSinnerKeys(skillEAState)
 
   // Check all 12 sinners are present
   const missingSinners = ALL_SINNER_KEYS.filter((key) => !presentKeys.has(key))
@@ -336,8 +329,7 @@ export function validateGiftIdArray(
     seen.add(giftId)
 
     if (egoGiftSpec) {
-      const baseId = getBaseGiftId(giftId)
-      if (!(baseId in egoGiftSpec)) {
+      if (!hasGiftId(giftId, egoGiftSpec)) {
         errors.push({
           code: 'GIFT_UNKNOWN_ID',
           message: `Gift ID '${giftId}' not found in ${fieldName}`,
@@ -649,8 +641,7 @@ function validateFloorGiftExistence(
     const unknownIds: string[] = []
 
     for (const giftId of floor.giftIds) {
-      const baseId = getBaseGiftId(giftId)
-      if (!(baseId in egoGiftSpec)) {
+      if (!hasGiftId(giftId, egoGiftSpec)) {
         unknownIds.push(giftId)
       }
     }
@@ -689,7 +680,7 @@ function validateFloorGiftAffordability(
     if (unaffordableIds.length === 0) return []
 
     const floorNumber = i + 1
-    const giftNames = unaffordableIds.map((id) => egoGiftI18n?.[getBaseGiftId(id)] ?? id).join(', ')
+    const giftNames = unaffordableIds.map((id) => giftDisplayName(id, egoGiftI18n ?? {})).join(', ')
 
     return [
       {

@@ -5,7 +5,7 @@
  * theme-pack affordability and floor theme-pack prerequisite gating.
  */
 
-import { getBaseGiftId } from '@/pages/egoGift'
+import { lookupByGiftId, giftDisplayName } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 
@@ -38,8 +38,7 @@ export function getUnaffordableGiftIds(
   egoGiftSpec: Record<string, EGOGiftSpec>,
 ): string[] {
   return Array.from(giftIds).filter((giftId) => {
-    const baseGiftId = getBaseGiftId(giftId)
-    const gift = egoGiftSpec[baseGiftId]
+    const gift = lookupByGiftId(giftId, egoGiftSpec)
     if (!gift) return false
     return !isGiftAffordableForThemePack(gift, themePackId)
   })
@@ -61,7 +60,7 @@ export function getUnaffordableGiftNames(
   egoGiftI18n: Record<string, string>,
 ): { ids: string[]; names: string[] } {
   const ids = getUnaffordableGiftIds(giftIds, themePackId, egoGiftSpec)
-  const names = ids.map((id) => egoGiftI18n[getBaseGiftId(id)] ?? id)
+  const names = ids.map((id) => giftDisplayName(id, egoGiftI18n))
   return { ids, names }
 }
 

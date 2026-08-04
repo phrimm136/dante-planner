@@ -216,7 +216,7 @@ describe('usePlannerVote', () => {
             voteType: 'UP',
           })
         }),
-      ).rejects.toThrow('Invalid vote response from server')
+      ).rejects.toThrow(/^\[planner vote\] Validation failed: /)
     })
   })
 

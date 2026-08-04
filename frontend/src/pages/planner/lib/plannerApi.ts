@@ -84,7 +84,7 @@ export const plannerApi = {
    * @param request - Full planner data including syncVersion
    * @param force - If true, bypasses syncVersion check (for conflict override)
    * @returns Created or updated planner with new syncVersion
-   * @throws ApiConflictError if syncVersion doesn't match (HTTP 409)
+   * @throws ConflictError if syncVersion does not match (HTTP 409)
    */
   async upsert(
     id: PlannerId | string,

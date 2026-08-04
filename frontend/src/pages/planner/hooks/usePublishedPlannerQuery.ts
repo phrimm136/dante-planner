@@ -10,10 +10,12 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
 
-import type { PublishedPlannerDetail, RRCategory } from '../types/PlannerListTypes'
+import type { PublishedPlannerDetail, MDCategory, RRCategory } from '../types/PlannerListTypes'
 import type { SaveablePlanner, MDPlannerContent, RRPlannerContent } from '../types/PlannerTypes'
+import { STALE_TIME, GC_TIME } from '@/lib/constants'
 
 /**
  * Return type for usePublishedPlannerQuery
@@ -51,14 +53,11 @@ export async function fetchPublishedPlanner(
   plannerId: string,
 ): Promise<PublishedPlannerQueryResult> {
   const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
-  const result = PublishedPlannerDetailSchema.safeParse(data)
-
-  if (!result.success) {
-    console.error('Published planner response validation failed:', result.error)
-    throw new Error('Invalid published planner response from server')
-  }
-
-  const apiData = result.data
+  const apiData = validateData(
+    data,
+    PublishedPlannerDetailSchema,
+    `planner published / ${plannerId}`,
+  )
 
   // Parse content JSON and construct SaveablePlanner
   // Server is trusted source - no frontend validation needed
@@ -84,7 +83,7 @@ export async function fetchPublishedPlanner(
     apiData.plannerType === 'MIRROR_DUNGEON'
       ? {
           metadata,
-          config: { type: 'MIRROR_DUNGEON', category: apiData.category },
+          config: { type: 'MIRROR_DUNGEON', category: apiData.category as MDCategory },
           content: contentData as MDPlannerContent,
         }
       : {
@@ -114,7 +113,7 @@ export async function fetchPublishedPlanner(
  *
  *   return (
  *     <>
- *       <PlannerDetailHeader planner={apiData} />
+ *       <PublishedPlannerHeader planner={apiData} />
  *       <PlannerViewer planner={planner} />
  *       <PlannerDetailFooter planner={apiData} />
  *     </>
@@ -126,8 +125,8 @@ export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQue
   const query = useSuspenseQuery({
     queryKey: publishedPlannerQueryKeys.detail(plannerId),
     queryFn: () => fetchPublishedPlanner(plannerId),
-    staleTime: 5 * 60 * 1000, // 5 minutes - planner content changes infrequently
-    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+    staleTime: STALE_TIME.MEDIUM,
+    gcTime: GC_TIME.MEDIUM,
   })
 
   return query.data

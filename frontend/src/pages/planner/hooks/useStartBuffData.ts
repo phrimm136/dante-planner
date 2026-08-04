@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { MDVersion } from '@/shared/gameData'
 import type { StartBuffDataList, StartBuffI18n, StartBuff } from '@/shared/gameText'
 import { BASE_BUFF_IDS } from '@/shared/gameText'
+import { STALE_TIME } from '@/lib/constants'
 
 // Query key factory for start buff data
 export const startBuffQueryKeys = {
@@ -20,7 +21,7 @@ function createDataQueryOptions(version: MDVersion) {
       const module = await import(`@static/data/MD${version}/startBuffs.json`)
       return module.default as StartBuffDataList
     },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+    staleTime: STALE_TIME.STATIC,
   })
 }
 
@@ -32,7 +33,7 @@ function createI18nQueryOptions(version: MDVersion, language: string) {
       const module = await import(`@static/i18n/${language}/MD${version}/startBuffs.json`)
       return module.default as StartBuffI18n
     },
-    staleTime: 7 * 24 * 60 * 60 * 1000, // 7 days
+    staleTime: STALE_TIME.STATIC,
   })
 }
 
@@ -73,13 +74,6 @@ export function useStartBuffData(version: MDVersion) {
  */
 export function getBuffById(buffs: StartBuff[] | undefined, id: number): StartBuff | undefined {
   return buffs?.find((b) => b.id === String(id))
-}
-
-/**
- * Gets all buffs for a specific base ID (all enhancement levels)
- */
-export function getBuffsByBaseId(buffs: StartBuff[] | undefined, baseId: number): StartBuff[] {
-  return buffs?.filter((b) => b.baseId === baseId) ?? []
 }
 
 /**

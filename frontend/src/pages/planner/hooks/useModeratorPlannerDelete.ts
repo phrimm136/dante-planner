@@ -3,7 +3,8 @@ import { ApiClient } from '@/lib/api'
 
 interface ModeratorDeleteRequest {
   plannerId: string
-  reason?: string
+  /** Recorded in the moderation audit trail; the server rejects a blank one. */
+  reason: string
 }
 
 /**
@@ -13,9 +14,7 @@ interface ModeratorDeleteRequest {
 export function useModeratorPlannerDelete() {
   return useMutation({
     mutationFn: async ({ plannerId, reason }: ModeratorDeleteRequest) => {
-      await ApiClient.post(`/api/moderation/planner/${plannerId}/takedown`, {
-        reason: reason || '',
-      })
+      await ApiClient.post(`/api/moderation/planner/${plannerId}/takedown`, { reason })
     },
   })
 }

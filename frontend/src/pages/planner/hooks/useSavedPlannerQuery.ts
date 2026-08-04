@@ -1,15 +1,8 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { usePlannerStorage } from './usePlannerStorage'
+import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import type { SaveablePlanner } from '../types/PlannerTypes'
-
-/**
- * Query key factory for planner queries
- */
-export const plannerQueryKeys = {
-  all: ['planners'] as const,
-  list: () => [...plannerQueryKeys.all, 'list'] as const,
-  detail: (id: string) => ['planner', id] as const,
-}
+import { GC_TIME } from '@/lib/constants'
 
 /**
  * Hook to load a saved planner by ID using Suspense
@@ -32,13 +25,19 @@ export const plannerQueryKeys = {
  * ```
  */
 export function useSavedPlannerQuery(plannerId: string): SaveablePlanner | null {
-  const { loadPlanner } = usePlannerStorage()
+  const { loadFromLocal } = usePlannerStorage()
 
   const query = useSuspenseQuery({
     queryKey: plannerQueryKeys.detail(plannerId),
-    queryFn: () => loadPlanner(plannerId),
+    queryFn: async () => {
+      const result = await loadFromLocal(plannerId)
+      if (!result.ok) {
+        throw new Error(`Failed to load planner ${plannerId}: ${result.error}`)
+      }
+      return result.value
+    },
     staleTime: 0, // Always refetch from IndexedDB to get latest version
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    gcTime: GC_TIME.SHORT,
   })
 
   return query.data

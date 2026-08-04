@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
 import type { OffensiveSkillSlot } from '@/shared/gameData'
 import type { SinnerEquipment } from '../types/DeckTypes'
@@ -51,6 +51,21 @@ export interface TrackerStateResult {
     initialEquipment: Record<string, SinnerEquipment>,
     initialDeployment: number[],
   ) => void
+}
+
+/**
+ * Theme pack and individual gift done marks. They are one state because
+ * marking a pack rewrites both halves in a single transition.
+ */
+interface DoneMarkState {
+  /** Theme pack done marks per floor (floorIndex 0-based -> Set<themePackID>) */
+  packs: Record<number, Set<string>>
+  /** Individual ego gift done marks (encodedId) */
+  gifts: Set<string>
+}
+
+function createInitialDoneMarks(): DoneMarkState {
+  return { packs: {}, gifts: new Set() }
 }
 
 /**
@@ -122,83 +137,78 @@ export function useTrackerState(
   const [deploymentOrder, setDeploymentOrder] = useState<number[]>(initialDeployment)
   const [currentSkillCounts, setCurrentSkillCounts] =
     useState<Record<string, Record<OffensiveSkillSlot, number>>>(createInitialSkillCounts)
-  const [doneMarks, setDoneMarks] = useState<Record<number, Set<string>>>({})
-  const [egoGiftDoneMarks, setEgoGiftDoneMarks] = useState<Set<string>>(new Set())
+  const [doneMarkState, setDoneMarkState] = useState<DoneMarkState>(createInitialDoneMarks)
 
-  const updateCurrentSkillCount = useCallback(
-    (sinnerId: string, skillSlot: OffensiveSkillSlot, count: number) => {
-      setCurrentSkillCounts((prev) => ({
-        ...prev,
-        [sinnerId]: {
-          ...prev[sinnerId],
-          [skillSlot]: count,
-        },
-      }))
-    },
-    [],
-  )
+  const updateCurrentSkillCount = (
+    sinnerId: string,
+    skillSlot: OffensiveSkillSlot,
+    count: number,
+  ) => {
+    setCurrentSkillCounts((prev) => ({
+      ...prev,
+      [sinnerId]: {
+        ...prev[sinnerId],
+        [skillSlot]: count,
+      },
+    }))
+  }
 
-  const toggleEgoGiftDoneMark = useCallback((encodedId: string) => {
-    setEgoGiftDoneMarks((prev) => {
-      const next = new Set(prev)
+  const toggleEgoGiftDoneMark = (encodedId: string) => {
+    setDoneMarkState((prev) => {
+      const gifts = new Set(prev.gifts)
 
-      if (next.has(encodedId)) {
-        next.delete(encodedId)
+      if (gifts.has(encodedId)) {
+        gifts.delete(encodedId)
       } else {
-        next.add(encodedId)
+        gifts.add(encodedId)
       }
 
-      return next
+      return { ...prev, gifts }
     })
-  }, [])
+  }
 
-  const togglePackDone = useCallback(
-    (floorIndex: number, themePackId: string, giftIds: string[]) => {
-      setDoneMarks((prev) => {
-        const floorMarks = new Set(prev[floorIndex] || [])
-        const wasDone = floorMarks.has(themePackId)
+  const togglePackDone = (floorIndex: number, themePackId: string, giftIds: string[]) => {
+    setDoneMarkState((prev) => {
+      const floorMarks = new Set(prev.packs[floorIndex] || [])
+      const wasDone = floorMarks.has(themePackId)
 
+      if (wasDone) {
+        floorMarks.delete(themePackId)
+      } else {
+        floorMarks.add(themePackId)
+      }
+
+      // Sync gift marks: marking pack → add all gifts, unmarking pack → remove all gifts
+      const gifts = new Set(prev.gifts)
+      for (const id of giftIds) {
         if (wasDone) {
-          floorMarks.delete(themePackId)
+          gifts.delete(id)
         } else {
-          floorMarks.add(themePackId)
+          gifts.add(id)
         }
+      }
 
-        // Sync gift marks: marking pack → add all gifts, unmarking pack → remove all gifts
-        setEgoGiftDoneMarks((prevGifts) => {
-          const next = new Set(prevGifts)
-          if (wasDone) {
-            giftIds.forEach((id) => next.delete(id))
-          } else {
-            giftIds.forEach((id) => next.add(id))
-          }
-          return next
-        })
+      return { packs: { ...prev.packs, [floorIndex]: floorMarks }, gifts }
+    })
+  }
 
-        return { ...prev, [floorIndex]: floorMarks }
-      })
-    },
-    [],
-  )
-
-  const resetState = useCallback(
-    (resetEquipment: Record<string, SinnerEquipment>, resetDeployment: number[]) => {
-      setEquipment(resetEquipment)
-      setDeploymentOrder(resetDeployment)
-      setCurrentSkillCounts(createInitialSkillCounts())
-      setDoneMarks({})
-      setEgoGiftDoneMarks(new Set())
-    },
-    [],
-  )
+  const resetState = (
+    resetEquipment: Record<string, SinnerEquipment>,
+    resetDeployment: number[],
+  ) => {
+    setEquipment(resetEquipment)
+    setDeploymentOrder(resetDeployment)
+    setCurrentSkillCounts(createInitialSkillCounts())
+    setDoneMarkState(createInitialDoneMarks())
+  }
 
   return {
     state: {
       equipment,
       deploymentOrder,
       currentSkillCounts,
-      doneMarks,
-      egoGiftDoneMarks,
+      doneMarks: doneMarkState.packs,
+      egoGiftDoneMarks: doneMarkState.gifts,
     },
     setEquipment,
     setDeploymentOrder,

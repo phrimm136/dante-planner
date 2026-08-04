@@ -12,6 +12,7 @@
  * - THEME_PACK: floorSelections[*].themePackId (non-null only)
  */
 
+import { getBaseGiftId } from '@/pages/egoGift'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 
@@ -71,11 +72,13 @@ export function extractEgoIds(content: MDPlannerContent): Set<string> {
 export function extractGiftIds(content: MDPlannerContent): Set<string> {
   const ids = new Set<string>()
 
-  // Helper to add IDs from either array or Set
+  // Content stores an enhanced gift as its level prefixed onto the four-digit base (19154 and
+  // 29154 both mean 9154); the filter index and the filter chips both address the base.
   const addIds = (source: Iterable<string> | undefined | null) => {
     if (!source) return
     for (const id of source) {
-      ids.add(String(id))
+      const base = getBaseGiftId(String(id))
+      if (base) ids.add(base)
     }
   }
 

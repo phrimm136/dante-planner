@@ -12,19 +12,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { requestNotificationPermission } from '@/shared/notifications'
+import { ServerPlannerResponseSchema } from '../schemas/PlannerSchemas'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 
-// ============================================================================
-// Response Type (simple toggle response)
-// ============================================================================
-
-interface PublishResponse {
-  /** ID of the planner */
-  plannerId: string
-  /** New publish state */
-  published: boolean
-}
+import type { ServerPlannerResponse } from '../types/PlannerTypes'
 
 // ============================================================================
 // Main Hook
@@ -63,12 +56,12 @@ export function usePlannerPublish() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ plannerId, published }: PublishVariables): Promise<PublishResponse> => {
-      const data = await ApiClient.put<PublishResponse>(
-        `/api/planner/md/${plannerId}/publish`,
-        { published },
-      )
-      return data
+    mutationFn: async ({
+      plannerId,
+      published,
+    }: PublishVariables): Promise<ServerPlannerResponse> => {
+      const data = await ApiClient.put(`/api/planner/md/${plannerId}/publish`, { published })
+      return validateData(data, ServerPlannerResponseSchema, 'planner publish')
     },
     onSuccess: (response) => {
       // Invalidate all planner list queries to refresh publish state

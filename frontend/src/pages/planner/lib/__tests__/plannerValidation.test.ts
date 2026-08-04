@@ -146,6 +146,12 @@ describe('validateEquipment', () => {
     const errors = validateEquipment(equipment)
     expect(errors.some((e) => e.code === 'EQUIPMENT_MISSING_ZAYIN')).toBe(true)
   })
+
+  it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
+    const equipment = makeValidEquipment()
+    equipment[key] = { identity: { id: 'i' }, egos: { ZAYIN: { id: 'z' } } } as SinnerEquipment
+    expect(validateEquipment(equipment)).toHaveLength(0)
+  })
 })
 
 // ============================================================================
@@ -394,6 +400,12 @@ describe('validateSkillEAState', () => {
     state['01'] = { 0: 4, 1: 2, 2: 1 } // 4+2+1=7
     const errors = validateSkillEAState(state)
     expect(errors.some((e) => e.code === 'SKILL_EA_INVALID_TOTAL')).toBe(true)
+  })
+
+  it.each(['abc', '', '1.5', ' 2'])('ignores the non-integer sinner key %j', (key) => {
+    const state = makeValidSkillEAState()
+    state[key] = { 0: 3, 1: 2, 2: 1 }
+    expect(validateSkillEAState(state)).toHaveLength(0)
   })
 })
 

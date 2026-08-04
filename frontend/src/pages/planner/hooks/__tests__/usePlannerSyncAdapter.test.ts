@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
+import { ConflictError } from '@/lib/api'
 import type {
   SaveablePlanner,
   ServerPlannerResponse,
@@ -296,12 +297,13 @@ describe('usePlannerSyncAdapter', () => {
 
       // Assert
       expect(mockGet).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440000')
-      expect(result).not.toBeNull()
-      expect(result?.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
-      expect(result?.metadata.syncVersion).toBe(2)
+      expect(result.ok).toBe(true)
+      if (!result.ok) throw new Error('expected a successful fetch')
+      expect(result.value.metadata.id).toBe('550e8400-e29b-41d4-a716-446655440000')
+      expect(result.value.metadata.syncVersion).toBe(2)
     })
 
-    it('returns null when planner not found', async () => {
+    it('reports a classified error when the fetch fails', async () => {
       // Arrange
       mockGet.mockRejectedValue(new Error('Not found'))
 
@@ -312,7 +314,25 @@ describe('usePlannerSyncAdapter', () => {
       const result = await adapter.fetchFromServer('non-existent')
 
       // Assert
-      expect(result).toBeNull()
+      expect(result.ok).toBe(false)
+      if (result.ok) throw new Error('expected a failed fetch')
+      expect(result.error).toEqual({ kind: 'unknown' })
+    })
+
+    it('reports the conflict kind when the server rejects with one', async () => {
+      // Arrange
+      mockGet.mockRejectedValue(new ConflictError('SYNC_CONFLICT', 'conflict', 11))
+
+      const { result: hookResult } = renderHook(() => usePlannerSyncAdapter())
+      const adapter = hookResult.current
+
+      // Act
+      const result = await adapter.fetchFromServer('550e8400-e29b-41d4-a716-446655440000')
+
+      // Assert
+      expect(result.ok).toBe(false)
+      if (result.ok) throw new Error('expected a failed fetch')
+      expect(result.error.kind).toBe('conflict')
     })
   })
 

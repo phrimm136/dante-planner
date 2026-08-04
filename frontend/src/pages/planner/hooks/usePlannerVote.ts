@@ -11,6 +11,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient, ConflictError } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
@@ -73,14 +74,7 @@ export function usePlannerVote() {
   return useMutation({
     mutationFn: async ({ plannerId, voteType }: VotePlannerInput): Promise<VoteResponse> => {
       const data = await ApiClient.post(`/api/planner/md/${plannerId}/upvote`, { voteType })
-      const result = VoteResponseSchema.safeParse(data)
-
-      if (!result.success) {
-        console.error('Vote response validation failed:', result.error)
-        throw new Error('Invalid vote response from server')
-      }
-
-      return result.data
+      return validateData(data, VoteResponseSchema, 'planner vote')
     },
     onSuccess: (response, { plannerId }) => {
       // Optimistically update cache with response data

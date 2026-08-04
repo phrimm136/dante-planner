@@ -13,6 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient, NotFoundError } from '@/lib/api'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
+import { userPlannersQueryKeys } from './useMDUserPlannersData'
 
 // ============================================================================
 // Main Hook
@@ -60,7 +61,8 @@ export function usePlannerDelete() {
       }
     },
     onSuccess: () => {
-      // Invalidate community list (server-side concern)
+      // Backend auto-unpublishes before deleting, so both lists can change
+      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
       void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
     },
     onError: (error) => {

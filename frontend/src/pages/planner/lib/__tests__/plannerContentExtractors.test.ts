@@ -187,28 +187,52 @@ describe('extractEgoIds', () => {
 describe('extractGiftIds', () => {
   it('extracts from all 4 sources', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['g1', 'g2'],
-      observationGiftIds: ['g3'],
-      comprehensiveGiftIds: ['g4'],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['g5', 'g6'] }],
+      selectedGiftIds: ['9001', '9002'],
+      observationGiftIds: ['9003'],
+      comprehensiveGiftIds: ['9004'],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['9005', '9006'] }],
     })
 
     const result = extractGiftIds(content)
 
-    expect(result).toEqual(new Set(['g1', 'g2', 'g3', 'g4', 'g5', 'g6']))
+    expect(result).toEqual(new Set(['9001', '9002', '9003', '9004', '9005', '9006']))
+  })
+
+  it('indexes an enhanced gift under its base id', () => {
+    const content = createMockMDContent({
+      selectedGiftIds: ['9154'],
+      observationGiftIds: [],
+      comprehensiveGiftIds: ['19154'],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['29154'] }],
+    })
+
+    const result = extractGiftIds(content)
+
+    expect(result).toEqual(new Set(['9154']))
+  })
+
+  it('drops ids that are not a valid gift encoding', () => {
+    const content = createMockMDContent({
+      selectedGiftIds: ['9001', 'not-a-gift', '', '999'],
+      observationGiftIds: [],
+      comprehensiveGiftIds: [],
+      floorSelections: [],
+    })
+
+    expect(extractGiftIds(content)).toEqual(new Set(['9001']))
   })
 
   it('deduplicates across sources', () => {
     const content = createMockMDContent({
-      selectedGiftIds: ['g1', 'g2'],
-      observationGiftIds: ['g2', 'g3'],
+      selectedGiftIds: ['9001', '9002'],
+      observationGiftIds: ['9002', '9003'],
       comprehensiveGiftIds: [],
-      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['g1'] }],
+      floorSelections: [{ themePackId: null, difficulty: 0, giftIds: ['9001'] }],
     })
 
     const result = extractGiftIds(content)
 
-    expect(result).toEqual(new Set(['g1', 'g2', 'g3']))
+    expect(result).toEqual(new Set(['9001', '9002', '9003']))
     expect(result.size).toBe(3)
   })
 

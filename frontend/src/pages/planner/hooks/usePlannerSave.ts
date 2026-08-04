@@ -1,40 +1,44 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/lib/i18n'
 import { useAuthQuery } from '@/shared/auth'
-import { usePlannerSaveAdapter } from './usePlannerSaveAdapter'
+import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
-import { plannerQueryKeys } from './useSavedPlannerQuery'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { serializeSets } from '../schemas/PlannerSchemas'
-import {
-  ConflictError,
-  BannedError,
-  TimedOutError,
-  WriteTemporarilyUnavailableError,
-} from '@/lib/api'
 import { queryClient } from '@/lib/queryClient'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
+import { assertNever } from '@/lib/utils'
+import { withRollback } from '@/lib/withRollback'
 import {
   validatePlannerForDraftSave,
   validatePlannerForPublish,
   validateNoteSizes,
 } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
+import {
+  classifiedSaveError,
+  classifySaveError,
+  userFriendlyValidationError,
+} from '../lib/plannerSaveErrors'
+import type { SaveError } from '../lib/plannerSaveErrors'
 import type { MDCategory, PlannerType } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import type {
   SaveablePlanner,
-  ConflictState,
   ConflictResolutionChoice,
-  PlannerConfig,
+  PlannerEditorConfig,
   PlannerContent,
+  PlannerStatus,
   MDPlannerContent,
 } from '../types/PlannerTypes'
+
+export type { SaveError } from '../lib/plannerSaveErrors'
 
 /**
  * SSR safety check
@@ -75,19 +79,6 @@ export interface PlannerState {
 }
 
 /**
- * Save error codes for i18n translation
- * Components should use these codes to display localized error messages
- */
-export type SaveErrorCode =
-  | 'conflict'
-  | 'saveFailed'
-  | 'quotaExceeded'
-  | 'banned'
-  | 'timedOut'
-  | 'syncPaused'
-  | null
-
-/**
  * Options for usePlannerSave hook
  */
 export interface UsePlannerSaveOptions {
@@ -124,6 +115,20 @@ export interface UsePlannerSaveOptions {
   syncEnabled?: boolean
 }
 
+/** Options for a single manual save. */
+export interface SaveOptions {
+  /** Drive the publication state instead of inheriting the hook's `published`. */
+  published?: boolean
+  /** Upload even when auto-sync is disabled. */
+  forceSync?: boolean
+}
+
+/** Options for one pass through the save pipeline. */
+interface PerformSaveOptions extends SaveOptions {
+  /** Bypass the server's optimistic-lock check. */
+  force?: boolean
+}
+
 /**
  * Return type for usePlannerSave hook
  */
@@ -134,18 +139,12 @@ export interface PlannerSaveResult {
   isAutoSaving: boolean
   /** Whether manual save is in progress */
   isSaving: boolean
-  /** Error code if last save failed (for i18n translation) */
-  errorCode: SaveErrorCode
-  /** I18n key for user-friendly validation errors (e.g., 'pages.plannerMD.publish.missingTitle') */
-  errorI18nKey: string | null
-  /** I18n params for user-friendly validation errors (e.g., { gifts: 'Gift Name 1, Gift Name 2' }) */
-  errorI18nParams: Record<string, string> | null
-  /** Conflict info when errorCode === 'conflict' */
-  conflictState: ConflictState | null
+  /** Why the last save failed, or null when it did not */
+  error: SaveError | null
   /** Clear the current error */
   clearError: () => void
-  /** Trigger manual save, returns true if succeeded. Pass published to drive the publication state. Pass forceSync to upload even when auto-sync is disabled. */
-  save: (options?: { published?: boolean; forceSync?: boolean }) => Promise<boolean>
+  /** Trigger manual save, returns true if succeeded. */
+  save: (options?: SaveOptions) => Promise<boolean>
   /** Resolve a conflict (overwrite local or discard and reload), returns true if succeeded */
   resolveConflict: (choice: ConflictResolutionChoice) => Promise<boolean>
   /** Current sync version (for debugging) */
@@ -162,21 +161,26 @@ export interface PlannerSaveResult {
   restrictionReason: string | undefined
 }
 
+/** Everything a `SaveablePlanner` needs that is not derived from the editor state. */
+interface SaveablePlannerInput {
+  state: PlannerState
+  plannerId: string
+  deviceId: string
+  schemaVersion: number
+  contentVersion: number
+  plannerType: PlannerType
+  /** Original creation timestamp, or null for a planner being created now. */
+  existingCreatedAt: string | null
+  existingSyncVersion: number
+  published: boolean
+  status: PlannerStatus
+}
+
 /**
  * Serialize PlannerState to SaveablePlanner format
  */
-function createSaveablePlanner(
-  state: PlannerState,
-  plannerId: string,
-  deviceId: string,
-  schemaVersion: number,
-  contentVersion: number,
-  plannerType: PlannerType,
-  existingCreatedAt: string | null,
-  existingSyncVersion: number,
-  published: boolean,
-  status: 'draft' | 'saved' = 'draft',
-): SaveablePlanner {
+function createSaveablePlanner(input: SaveablePlannerInput): SaveablePlanner {
+  const { state } = input
   const now = new Date().toISOString()
 
   // Convert Sets to arrays using serializeSets
@@ -200,23 +204,23 @@ function createSaveablePlanner(
 
   return {
     metadata: {
-      id: plannerId,
+      id: input.plannerId,
       title: state.title,
-      status,
-      schemaVersion,
-      contentVersion,
-      plannerType,
-      syncVersion: existingSyncVersion,
-      createdAt: existingCreatedAt ?? now,
+      status: input.status,
+      schemaVersion: input.schemaVersion,
+      contentVersion: input.contentVersion,
+      plannerType: input.plannerType,
+      syncVersion: input.existingSyncVersion,
+      createdAt: input.existingCreatedAt ?? now,
       lastModifiedAt: now,
-      savedAt: status === 'saved' ? now : null,
-      published,
-      deviceId,
+      savedAt: input.status === 'saved' ? now : null,
+      published: input.published,
+      deviceId: input.deviceId,
     },
     config: {
-      type: plannerType,
+      type: input.plannerType,
       category: state.category,
-    } as PlannerConfig,
+    } as PlannerEditorConfig,
     content: {
       selectedKeywords: serialized.selectedKeywords,
       selectedBuffIds: serialized.selectedBuffIds,
@@ -265,37 +269,25 @@ function stateToComparableString(state: PlannerState): string {
  * - Auto-save with 2s debounce after state changes
  * - Manual save() function with proper syncVersion tracking
  * - Conflict detection with typed ConflictError
- * - Resolution via resolveConflict('overwrite' | 'discard')
+ * - Resolution via resolveConflict('overwrite' | 'discard' | 'both')
  *
  * @example
  * ```tsx
  * function PlannerPage() {
- *   const [state, setState] = useState<PlannerState>(initialState)
- *
- *   const {
- *     plannerId,
- *     isAutoSaving,
- *     isSaving,
- *     errorCode,
- *     conflictState,
- *     save,
- *     resolveConflict,
- *   } = usePlannerSave({
- *     state,
+ *   const { isAutoSaving, isSaving, error, save, resolveConflict } = usePlannerSave({
+ *     getState: () => storeApi.getState().getPlannerState(),
+ *     subscribe: storeApi.subscribe,
  *     schemaVersion: 1,
  *     contentVersion: 6,
  *     plannerType: 'MIRROR_DUNGEON',
- *     onServerReload: (planner) => {
- *       // Update local state from server version
- *       setState(deserializePlanner(planner))
- *     },
+ *     onServerReload: (planner) => setState(deserializePlanner(planner)),
  *   })
  *
  *   return (
  *     <div>
  *       {isAutoSaving && <span>Saving...</span>}
- *       <button onClick={save} disabled={isSaving}>Save</button>
- *       {errorCode === 'conflict' && (
+ *       <button onClick={() => save()} disabled={isSaving}>Save</button>
+ *       {error?.kind === 'conflict' && (
  *         <ConflictDialog
  *           onOverwrite={() => resolveConflict('overwrite')}
  *           onDiscard={() => resolveConflict('discard')}
@@ -350,62 +342,58 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Track sync version for optimistic locking
   const syncVersionRef = useRef<number>(initialSyncVersion ?? 1)
 
-  // Another surface (publish header, conflict resolution) may advance the server
-  // version while this instance stays mounted; its cache write-through re-renders
-  // this hook with a newer initialSyncVersion. Adopt forward-only — a lagging
-  // prop must never roll back a version this instance already holds, or the next
-  // save would present a stale version and conflict (409).
-  useEffect(() => {
-    if (initialSyncVersion !== undefined && initialSyncVersion > syncVersionRef.current) {
-      syncVersionRef.current = initialSyncVersion
-    }
-  }, [initialSyncVersion])
-
-  // Error state
-  const [errorCode, setErrorCode] = useState<SaveErrorCode>(null)
-  const [errorI18nKey, setErrorI18nKey] = useState<string | null>(null)
-  const [errorI18nParams, setErrorI18nParams] = useState<Record<string, string> | null>(null)
-  const [conflictState, setConflictState] = useState<ConflictState | null>(null)
+  const [error, setError] = useState<SaveError | null>(null)
 
   // Split adapters
-  const saveAdapter = usePlannerSaveAdapter()
+  const storage = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
 
   // EGO Gift data for affordability validation
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
   /**
-   * Throws a user-friendly validation error with i18n key and params.
-   * Used in both performSave and resolveConflict to surface validation failures.
+   * Another surface (publish header, conflict resolution) may advance the server
+   * version while this instance stays mounted; its cache write-through re-renders
+   * this hook with a newer initialSyncVersion. Adoption is forward-only — a
+   * lagging prop must never roll back a version this instance already holds, or
+   * the next save would present a stale version and conflict (409).
    */
-  const throwValidationError = (friendly: { key: string; params?: Record<string, string> }) => {
-    const errorMessage = JSON.stringify({
-      key: friendly.key,
-      params: friendly.params,
-    })
-    const error = new Error(errorMessage)
-    ;(
-      error as Error & {
-        code: string
-        i18nKey: string
-        i18nParams?: Record<string, string>
-      }
-    ).code = 'userFriendlyValidation'
-    ;(
-      error as Error & {
-        code: string
-        i18nKey: string
-        i18nParams?: Record<string, string>
-      }
-    ).i18nKey = friendly.key
-    ;(
-      error as Error & {
-        code: string
-        i18nKey: string
-        i18nParams?: Record<string, string>
-      }
-    ).i18nParams = friendly.params
-    throw error
+  const adoptSyncVersion = (): number => {
+    if (initialSyncVersion !== undefined && initialSyncVersion > syncVersionRef.current) {
+      syncVersionRef.current = initialSyncVersion
+    }
+    return syncVersionRef.current
+  }
+
+  const throwIfInvalid = (saveable: SaveablePlanner, state: PlannerState, strict: boolean) => {
+    if (plannerType !== 'MIRROR_DUNGEON') return
+
+    const content = saveable.content as MDPlannerContent
+
+    const noteSizeError = validateNoteSizes(content.sectionNotes)
+    if (noteSizeError) throw userFriendlyValidationError(noteSizeError)
+
+    if (strict) {
+      // Strict: title + theme packs required, full difficulty enforced
+      const { isValid, errors } = validatePlannerForPublish(
+        state.title,
+        content,
+        state.category,
+        egoGiftSpec,
+        egoGiftI18n,
+      )
+      if (!isValid) throw userFriendlyValidationError(toUserFriendlyError(errors[0]))
+      return
+    }
+
+    // Non-strict: structural checks only, title/theme packs optional
+    const validationError = validatePlannerForDraftSave(
+      content,
+      state.category,
+      egoGiftSpec,
+      egoGiftI18n,
+    )
+    if (validationError) throw userFriendlyValidationError(validationError)
   }
 
   /**
@@ -413,202 +401,90 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * - Always saves to IndexedDB via SaveAdapter
    * - If authenticated AND syncEnabled, also syncs to server via SyncAdapter
    */
-  const performSave = useCallback(
-    async (
-      status: 'draft' | 'saved',
-      force?: boolean,
-      publishedOverride?: boolean,
-      forceSync?: boolean,
-    ): Promise<boolean> => {
-      if (!isClient) return false
+  const performSave = async (
+    status: PlannerStatus,
+    opts: PerformSaveOptions = {},
+  ): Promise<boolean> => {
+    if (!isClient) return false
 
-      // Set createdAt on first save
-      if (createdAtRef.current === null) {
-        createdAtRef.current = new Date().toISOString()
-      }
+    // Set createdAt on first save
+    if (createdAtRef.current === null) {
+      createdAtRef.current = new Date().toISOString()
+    }
 
-      // Get deviceId
-      const deviceId = await saveAdapter.getOrCreateDeviceId()
-      if (!deviceId) return false
+    // Get deviceId
+    const deviceId = await storage.getOrCreateDeviceId()
+    if (!deviceId) return false
 
-      const currentState = getState()
-      const isCurrentlyPublished = publishedOverride ?? published
+    const currentState = getState()
+    const isCurrentlyPublished = opts.published ?? published
 
-      const saveable = createSaveablePlanner(
-        currentState,
-        plannerId,
-        deviceId,
-        schemaVersion,
-        contentVersion,
-        plannerType,
-        createdAtRef.current,
-        syncVersionRef.current,
-        isCurrentlyPublished,
-        status,
-      )
-
-      // Two-tier validation for MD planners (non-strict for draft, strict for published)
-      if (plannerType === 'MIRROR_DUNGEON') {
-        const content = saveable.content as MDPlannerContent
-
-        const noteSizeError = validateNoteSizes(content.sectionNotes)
-        if (noteSizeError) throwValidationError(noteSizeError)
-
-        if (isCurrentlyPublished) {
-          // Strict: title + theme packs required, full difficulty enforced
-          const { isValid, errors } = validatePlannerForPublish(
-            currentState.title,
-            content,
-            currentState.category,
-            egoGiftSpec,
-            egoGiftI18n,
-          )
-          if (!isValid) throwValidationError(toUserFriendlyError(errors[0]))
-        } else {
-          // Non-strict: structural checks only, title/theme packs optional
-          const validationError = validatePlannerForDraftSave(
-            content,
-            currentState.category,
-            egoGiftSpec,
-            egoGiftI18n,
-          )
-          if (validationError) throwValidationError(validationError)
-        }
-      }
-
-      // If authenticated AND (syncEnabled OR forceSync), sync to server first to get new syncVersion
-      let didSync = false
-      if (isAuthenticated && (syncEnabled || forceSync)) {
-        const synced = await syncAdapter.syncToServer(saveable, force)
-        didSync = true
-
-        // Update sync version from server response
-        if (synced.metadata.syncVersion) {
-          syncVersionRef.current = synced.metadata.syncVersion
-          saveable.metadata.syncVersion = synced.metadata.syncVersion
-        }
-      }
-
-      // Save to IndexedDB (with updated syncVersion if synced)
-      const localResult = await saveAdapter.saveToLocal(saveable)
-      if (!localResult.success) {
-        const error = new Error(`Local save failed: ${localResult.errorCode}`)
-        ;(error as Error & { code: string }).code = localResult.errorCode ?? 'saveFailed'
-        throw error
-      }
-
-      // Write-through: every mounted consumer (publish header, list pages) must
-      // see the server-assigned version without relying on an SSE echo — the
-      // originating device is excluded from its own events by design.
-      if (didSync) {
-        void queryClient.invalidateQueries({
-          queryKey: plannerQueryKeys.detail(plannerId),
-        })
-        void queryClient.invalidateQueries({
-          queryKey: userPlannersQueryKeys.all,
-        })
-      }
-
-      return true
-    },
-    [
-      getState,
+    const saveable = createSaveablePlanner({
+      state: currentState,
       plannerId,
-      saveAdapter,
-      syncAdapter,
-      isAuthenticated,
-      syncEnabled,
+      deviceId,
       schemaVersion,
       contentVersion,
       plannerType,
-      published,
-      egoGiftSpec,
-      egoGiftI18n,
-    ],
-  )
+      existingCreatedAt: createdAtRef.current,
+      existingSyncVersion: adoptSyncVersion(),
+      published: isCurrentlyPublished,
+      status,
+    })
 
-  /**
-   * Handle save errors with typed detection
-   */
-  const handleSaveError = useCallback((error: unknown) => {
-    if (error instanceof ConflictError) {
-      setErrorCode('conflict')
-      setConflictState({
-        serverVersion: error.serverVersion,
-        detectedAt: new Date().toISOString(),
+    // Two-tier validation for MD planners (non-strict for draft, strict for published)
+    throwIfInvalid(saveable, currentState, isCurrentlyPublished)
+
+    // If authenticated AND (syncEnabled OR forceSync), sync to server first to get new syncVersion
+    let didSync = false
+    if (isAuthenticated && (syncEnabled || opts.forceSync)) {
+      const synced = await syncAdapter.syncToServer(saveable, opts.force)
+      didSync = true
+
+      // Update sync version from server response
+      if (synced.metadata.syncVersion) {
+        syncVersionRef.current = synced.metadata.syncVersion
+        saveable.metadata.syncVersion = synced.metadata.syncVersion
+      }
+    }
+
+    // Save to IndexedDB (with updated syncVersion if synced)
+    const localResult = await storage.saveToLocal(saveable)
+    if (!localResult.success) {
+      throw Object.assign(new Error(`Local save failed: ${localResult.errorCode}`), {
+        code: localResult.errorCode ?? 'saveFailed',
       })
-      return
     }
 
-    // Handle ban/timeout errors - these invalidate auth state
-    if (error instanceof BannedError) {
-      console.warn('User is banned')
-      // Invalidate auth query to trigger banner display
-      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
-      setErrorCode('banned')
-      return
+    // Write-through: every mounted consumer (publish header, list pages) must
+    // see the server-assigned version without relying on an SSE echo — the
+    // originating device is excluded from its own events by design.
+    if (didSync) {
+      void queryClient.invalidateQueries({
+        queryKey: plannerQueryKeys.detail(plannerId),
+      })
+      void queryClient.invalidateQueries({
+        queryKey: userPlannersQueryKeys.all,
+      })
     }
 
-    if (error instanceof TimedOutError) {
-      console.warn('User is timed out')
-      // Invalidate auth query to trigger banner display
-      void queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
-      setErrorCode('timedOut')
-      return
-    }
+    return true
+  }
 
-    if (error instanceof WriteTemporarilyUnavailableError) {
-      console.warn('Write temporarily unavailable — saved locally, sync paused')
-      setErrorCode('syncPaused')
-      return
-    }
-
-    // Check for storage error codes (from guest mode adapter)
-    if (error instanceof Error) {
-      const errorWithCode = error as Error & {
-        code?: string
-        i18nKey?: string
-        i18nParams?: Record<string, string>
-      }
-
-      if (
-        errorWithCode.code === 'quotaExceeded' ||
-        error.message.includes('QuotaExceeded') ||
-        error.message.includes('quota')
-      ) {
-        setErrorCode('quotaExceeded')
-        console.error('Save failed (quota exceeded):', error.message)
-        return
-      }
-
-      if (errorWithCode.code === 'userFriendlyValidation') {
-        // User-friendly validation error - extract key and params
-        console.error('Save failed (user validation):', error.message)
-        setErrorCode('saveFailed')
-        setErrorI18nKey(errorWithCode.i18nKey ?? null)
-        setErrorI18nParams(errorWithCode.i18nParams ?? null)
-        return
-      }
-
-      if (errorWithCode.code === 'validationFailed') {
-        // Log detailed validation error for debugging
-        console.error('Save failed (validation):', error.message)
-        setErrorCode('saveFailed')
-        return
-      }
-    }
-
-    // Generic error fallback
-    setErrorCode('saveFailed')
-    console.error('Save failed:', error)
-  }, [])
+  /** Adopt the just-saved state as both dirty-check baselines. */
+  const markSaved = () => {
+    const comparable = stateToComparableString(getState())
+    previousStateRef.current = comparable
+    lastSyncedStateRef.current = comparable
+    setLastSavedAt(new Date().toISOString())
+  }
 
   /**
-   * Debounced auto-save function
-   * Auto-saves ALWAYS go to IndexedDB only (local-first architecture)
-   * Never syncs to server - that's only for manual save
+   * Debounced auto-save.
+   * Auto-saves ALWAYS go to IndexedDB only (local-first architecture);
+   * syncing to the server is manual-save only.
    */
-  const debouncedSave = useCallback(async () => {
+  const autoSave = async () => {
     // CRITICAL: Prevent race condition with manual save
     if (isSaving) return
 
@@ -638,307 +514,278 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       }
 
       // Get deviceId
-      const deviceId = await saveAdapter.getOrCreateDeviceId()
+      const deviceId = await storage.getOrCreateDeviceId()
       if (!deviceId) return
 
-      // Create saveable planner
-      const saveable = createSaveablePlanner(
-        currentState,
+      const saveable = createSaveablePlanner({
+        state: currentState,
         plannerId,
         deviceId,
         schemaVersion,
         contentVersion,
         plannerType,
-        createdAtRef.current,
-        syncVersionRef.current,
+        existingCreatedAt: createdAtRef.current,
+        existingSyncVersion: adoptSyncVersion(),
         published,
-        'draft',
-      )
+        status: 'draft',
+      })
 
       // Save to IndexedDB only via SaveAdapter (never server for auto-save)
-      const result = await saveAdapter.saveToLocal(saveable)
+      const result = await storage.saveToLocal(saveable)
       if (!result.success) {
-        const error = new Error(`Auto-save failed: ${result.errorCode}`)
-        ;(error as Error & { code: string }).code = result.errorCode ?? 'saveFailed'
-        throw error
+        throw Object.assign(new Error(`Auto-save failed: ${result.errorCode}`), {
+          code: result.errorCode ?? 'saveFailed',
+        })
       }
 
       previousStateRef.current = currentStateString
       setLastSavedAt(new Date().toISOString())
-    } catch (error: unknown) {
-      handleSaveError(error)
+    } catch (autoSaveError: unknown) {
+      setError(classifySaveError(autoSaveError))
     } finally {
       setIsAutoSaving(false)
     }
-  }, [
-    getState,
-    isSaving,
-    saveAdapter,
-    plannerId,
-    schemaVersion,
-    contentVersion,
-    plannerType,
-    published,
-    handleSaveError,
-  ])
+  }
+
+  /** Drop a pending auto-save so it cannot land on top of a manual write. */
+  const cancelPendingAutoSave = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }
 
   /**
    * Manual save function
    * @returns true if save succeeded, false if it failed
    */
-  const save = useCallback(
-    async (options?: { published?: boolean; forceSync?: boolean }): Promise<boolean> => {
-      if (!isClient) return false
+  const save = async (saveOptions?: SaveOptions): Promise<boolean> => {
+    if (!isClient) return false
 
-      // Clear pending auto-save timer BEFORE any operations
-      // Prevents race condition where auto-save overwrites with stale syncVersion
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
+    // Prevents a race where auto-save overwrites with a stale syncVersion
+    cancelPendingAutoSave()
 
-      setIsSaving(true)
+    setIsSaving(true)
 
-      try {
-        await performSave('saved', false, options?.published, options?.forceSync)
-        const currentStateString = stateToComparableString(getState())
-        const now = new Date().toISOString()
-        previousStateRef.current = currentStateString
-        lastSyncedStateRef.current = currentStateString
-        setLastSavedAt(now)
-        return true
-      } catch (error: unknown) {
-        handleSaveError(error)
-        return false
-      } finally {
-        setIsSaving(false)
-      }
-    },
-    [getState, performSave, handleSaveError],
-  )
+    try {
+      await performSave('saved', {
+        published: saveOptions?.published,
+        forceSync: saveOptions?.forceSync,
+      })
+      markSaved()
+      return true
+    } catch (saveFailure: unknown) {
+      setError(classifySaveError(saveFailure))
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
-  /**
-   * Resolve a conflict
-   * - 'overwrite': Force-save with force=true flag
-   * - 'discard': Reload from server and update local state
-   * @returns true if resolution succeeded, false if it failed
-   */
-  const resolveConflict = useCallback(
-    async (choice: ConflictResolutionChoice): Promise<boolean> => {
-      if (!conflictState) return false
+  /** Keep Both: fork local changes to a new planner, revert the original to the server version. */
+  const forkLocalChanges = async () => {
+    const newPlannerId = generateUUID()
+    const deviceId = await storage.getOrCreateDeviceId()
 
-      setIsSaving(true)
-
-      // Clear pending auto-save timer BEFORE any state modifications
-      // Prevents race condition where timer fires with stale state before React re-renders
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-        timerRef.current = null
-      }
-
-      try {
-        if (choice === 'overwrite') {
-          // Use force=true to bypass version check, forceSync=true to sync even when auto-sync is disabled
-          await performSave('saved', true, undefined, true)
-          const currentStateString = stateToComparableString(getState())
-          previousStateRef.current = currentStateString
-          lastSyncedStateRef.current = currentStateString
-          setLastSavedAt(new Date().toISOString())
-        } else if (choice === 'both') {
-          // Keep Both: fork local changes to new planner, revert original to server
-          const newPlannerId = generateUUID()
-          const deviceId = await saveAdapter.getOrCreateDeviceId()
-
-          // 1. Create a copy with modified title containing local changes
-          const currentState = getState()
-          const baseTitle = currentState.title || t('pages.plannerMD.untitled', 'Untitled')
-          const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', {
-            title: baseTitle,
-          })
-          const copyState = { ...currentState, title: copyTitle }
-          const newPlanner = createSaveablePlanner(
-            copyState,
-            newPlannerId,
-            deviceId,
-            schemaVersion,
-            contentVersion,
-            plannerType,
-            null, // new planner, no existing createdAt
-            1, // initial syncVersion
-            false, // new copy is not published
-            'saved', // mark as saved since we're syncing immediately
-          )
-
-          // Validate copy content before saving/syncing (same content as currentState)
-          if (plannerType === 'MIRROR_DUNGEON') {
-            const content = newPlanner.content as MDPlannerContent
-            const noteSizeError = validateNoteSizes(content.sectionNotes)
-            if (noteSizeError) throwValidationError(noteSizeError)
-            if (egoGiftSpec) {
-              const validationError = validatePlannerForDraftSave(
-                content,
-                currentState.category,
-                egoGiftSpec,
-                egoGiftI18n,
-              )
-              if (validationError) throwValidationError(validationError)
-            }
-          }
-
-          // Track whether copy was saved for cleanup on failure
-          let copySavedToLocal = false
-
-          try {
-            // 2. Save new planner to local storage
-            await saveAdapter.saveToLocal(newPlanner)
-            copySavedToLocal = true
-
-            // 3. Sync the new planner to server immediately (user pressed save intentionally, force sync regardless of syncEnabled)
-            if (isAuthenticated) {
-              await syncAdapter.syncToServer(newPlanner)
-            }
-
-            // 4. Revert original planner to server version (same as discard)
-            const serverPlanner = await syncAdapter.fetchFromServer(plannerId)
-            if (serverPlanner) {
-              syncVersionRef.current = serverPlanner.metadata.syncVersion
-              await saveAdapter.saveToLocal(serverPlanner)
-
-              if (onServerReload) {
-                onServerReload(serverPlanner)
-              }
-            }
-
-            // 5. Navigate to the new planner
-            if (onKeepBothCreated) {
-              onKeepBothCreated(newPlannerId)
-            }
-          } catch (keepBothError) {
-            // Cleanup: attempt to delete the copy if it was saved
-            if (copySavedToLocal) {
-              try {
-                await saveAdapter.deleteFromLocal(newPlannerId)
-              } catch (cleanupError) {
-                console.error('Failed to cleanup copy after keepBoth error:', cleanupError)
-              }
-            }
-            throw keepBothError
-          }
-        } else {
-          // Discard: reload from server
-          const serverPlanner = await syncAdapter.fetchFromServer(plannerId)
-          if (serverPlanner) {
-            syncVersionRef.current = serverPlanner.metadata.syncVersion
-
-            // Also update local copy with server version
-            await saveAdapter.saveToLocal(serverPlanner)
-
-            if (onServerReload) {
-              onServerReload(serverPlanner)
-            }
-          }
-        }
-
-        // Clear conflict state only on success
-        setErrorCode(null)
-        setConflictState(null)
-        return true
-      } catch (error: unknown) {
-        handleSaveError(error)
-        return false
-      } finally {
-        setIsSaving(false)
-      }
-    },
-    [
-      conflictState,
-      getState,
-      performSave,
-      syncAdapter,
-      saveAdapter,
-      plannerId,
-      onServerReload,
-      onKeepBothCreated,
-      handleSaveError,
+    const currentState = getState()
+    const baseTitle = currentState.title || t('pages.plannerMD.untitled', 'Untitled')
+    const copyTitle = t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', {
+      title: baseTitle,
+    })
+    const newPlanner = createSaveablePlanner({
+      state: { ...currentState, title: copyTitle },
+      plannerId: newPlannerId,
+      deviceId,
       schemaVersion,
       contentVersion,
       plannerType,
-      t,
-      isAuthenticated,
-      egoGiftSpec,
-      egoGiftI18n,
-    ],
-  )
+      existingCreatedAt: null,
+      existingSyncVersion: 1,
+      published: false,
+      status: 'saved',
+    })
+
+    // The copy carries the same content as currentState, so the draft rules apply.
+    if (plannerType === 'MIRROR_DUNGEON') {
+      const content = newPlanner.content as MDPlannerContent
+      const noteSizeError = validateNoteSizes(content.sectionNotes)
+      if (noteSizeError) throw userFriendlyValidationError(noteSizeError)
+      if (egoGiftSpec) {
+        const validationError = validatePlannerForDraftSave(
+          content,
+          currentState.category,
+          egoGiftSpec,
+          egoGiftI18n,
+        )
+        if (validationError) throw userFriendlyValidationError(validationError)
+      }
+    }
+
+    await withRollback({
+      create: () => storage.saveToLocal(newPlanner).then(() => undefined),
+      rollback: () => storage.deleteFromLocal(newPlannerId).then(() => undefined),
+      rest: async () => {
+        // The user pressed save intentionally, so the copy syncs regardless of syncEnabled.
+        if (isAuthenticated) {
+          await syncAdapter.syncToServer(newPlanner)
+        }
+
+        await revertToServerVersion()
+
+        if (onKeepBothCreated) {
+          onKeepBothCreated(newPlannerId)
+        }
+      },
+    })
+  }
+
+  /**
+   * The server's copy of this planner.
+   *
+   * @throws the classified save error when the server copy cannot be read — a
+   *         conflict resolution that proceeds without it either overwrites the
+   *         server from a stale version or reports a discard that never happened.
+   */
+  const requireServerVersion = async (): Promise<SaveablePlanner> => {
+    const fetched = await syncAdapter.fetchFromServer(plannerId)
+    if (!fetched.ok) throw classifiedSaveError(fetched.error)
+    return fetched.value
+  }
+
+  /** Take the server's current sync version without touching local content. */
+  const adoptServerSyncVersion = async () => {
+    const serverPlanner = await requireServerVersion()
+    syncVersionRef.current = serverPlanner.metadata.syncVersion
+  }
+
+  /** Discard local changes: adopt the server version as both the local copy and editor state. */
+  const revertToServerVersion = async () => {
+    const serverPlanner = await requireServerVersion()
+
+    syncVersionRef.current = serverPlanner.metadata.syncVersion
+    const localResult = await storage.saveToLocal(serverPlanner)
+    if (!localResult.success) {
+      throw Object.assign(new Error(`Local save failed: ${localResult.errorCode}`), {
+        code: localResult.errorCode ?? 'saveFailed',
+      })
+    }
+
+    if (onServerReload) {
+      onServerReload(serverPlanner)
+    }
+  }
+
+  /**
+   * Resolve a conflict
+   * @returns true if resolution succeeded, false if it failed
+   */
+  const resolveConflict = async (choice: ConflictResolutionChoice): Promise<boolean> => {
+    if (error?.kind !== 'conflict') return false
+
+    setIsSaving(true)
+
+    // Prevents a race where the timer fires with stale state before React re-renders
+    cancelPendingAutoSave()
+
+    try {
+      switch (choice) {
+        case 'overwrite':
+          // A conflict that reported no server version leaves the local syncVersion
+          // unanchored, so read the server's back before writing over it.
+          if (error.state.serverVersion == null) {
+            await adoptServerSyncVersion()
+          }
+          // force bypasses the version check; forceSync uploads even when auto-sync is off
+          await performSave('saved', { force: true, forceSync: true })
+          markSaved()
+          break
+        case 'both':
+          await forkLocalChanges()
+          break
+        case 'discard':
+          await revertToServerVersion()
+          break
+        default:
+          assertNever(choice)
+      }
+
+      // Clear conflict state only on success
+      setError(null)
+      return true
+    } catch (resolutionError: unknown) {
+      const classified = classifySaveError(resolutionError)
+      // A resolution that failed leaves the conflict unresolved, so the conflict
+      // error stays put and the dialog with it. Only a newer conflict displaces it.
+      if (classified.kind === 'conflict') {
+        setError(classified)
+      }
+      return false
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   /**
    * Clear error state
    */
-  const clearError = useCallback(() => {
-    setErrorCode(null)
-    setErrorI18nKey(null)
-    setErrorI18nParams(null)
-    setConflictState(null)
-  }, [])
+  const clearError = () => {
+    setError(null)
+  }
 
-  // Effect for debounced auto-save - uses store subscription instead of state dependency
-  // This prevents the parent component from re-rendering on every state change
+  // The subscription must survive re-renders, so the effect reads the auto-save
+  // through a ref instead of depending on a closure that changes every render.
+  const autoSaveRef = useRef(autoSave)
+  useEffect(() => {
+    autoSaveRef.current = autoSave
+  })
+
+  // Debounced auto-save driven by store subscription rather than a state
+  // dependency, so the parent does not re-render on every state change.
   useEffect(() => {
     if (!isClient) return
 
-    // Subscribe to store changes and trigger debounced save
     const unsubscribe = subscribe(() => {
-      // Clear existing timer
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
 
-      // Set new debounce timer
       timerRef.current = setTimeout(() => {
-        void debouncedSave()
+        void autoSaveRef.current()
       }, AUTO_SAVE_DEBOUNCE_MS)
     })
 
-    // Cleanup
     return () => {
       unsubscribe()
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
     }
-  }, [subscribe, debouncedSave])
+  }, [subscribe])
 
-  // Check if there are unsynced changes (not synced to server)
-  // Return false if not yet initialized (no baseline to compare against)
-  // Note: These use getState() so they reflect current state when accessed
-  const currentState = getState()
+  // Dirty flags compare the live state against the two save baselines. An
+  // uninitialized baseline ('') means there is nothing to compare against yet.
+  const currentComparable = stateToComparableString(getState())
   const hasUnsyncedChanges =
-    lastSyncedStateRef.current !== '' &&
-    stateToComparableString(currentState) !== lastSyncedStateRef.current
-
-  // Check if there are unsaved local changes (not yet auto-saved to IndexedDB)
-  // Return false if not yet initialized (no baseline to compare against)
+    lastSyncedStateRef.current !== '' && currentComparable !== lastSyncedStateRef.current
   const hasLocalUnsavedChanges =
-    previousStateRef.current !== '' &&
-    stateToComparableString(currentState) !== previousStateRef.current
+    previousStateRef.current !== '' && currentComparable !== previousStateRef.current
 
-  // Check if user is restricted (banned or timed out) - reuse user from line 312
   const isRestricted = user?.isBanned === true || user?.isTimedOut === true
-  const restrictionReason = user?.isBanned
-    ? user.banReason || i18n.t('moderation.bannedNoReason', { ns: 'common' })
-    : user?.timeoutReason || i18n.t('moderation.timedOutNoReason', { ns: 'common' })
+  const restrictionReason = !isRestricted
+    ? undefined
+    : user?.isBanned
+      ? user.banReason || i18n.t('moderation.bannedNoReason', { ns: 'common' })
+      : user?.timeoutReason || i18n.t('moderation.timedOutNoReason', { ns: 'common' })
 
   return {
     plannerId,
     isAutoSaving,
     isSaving,
-    errorCode,
-    errorI18nKey,
-    errorI18nParams,
-    conflictState,
+    error,
     clearError,
     save,
     resolveConflict,
-    syncVersion: syncVersionRef.current,
+    syncVersion: Math.max(syncVersionRef.current, initialSyncVersion ?? 0),
     hasUnsyncedChanges,
     hasLocalUnsavedChanges,
     lastSavedAt,

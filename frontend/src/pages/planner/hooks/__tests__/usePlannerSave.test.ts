@@ -3,10 +3,10 @@
  *
  * Characterization (golden-master) tests for the unified planner save hook.
  * Pins CURRENT observable behavior (Inv 5), including the validate -> sync -> local
- * ordering at usePlannerSave.ts:391-438. These tests assert what the code DOES today;
+ * ordering inside performSave. These tests assert what the code DOES today;
  * they do NOT encode the deferred reordering track.
  *
- * Mocking policy: ONLY the two split adapters (usePlannerSaveAdapter /
+ * Mocking policy: ONLY the two split adapters (usePlannerStorage /
  * usePlannerSyncAdapter), useAuthQuery, useEGOGiftListData, and react-i18next are faked.
  * The real validators in plannerValidation run through the hook against valid/invalid
  * content fixtures — plannerValidation is deliberately NOT mocked.
@@ -20,6 +20,7 @@ import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { SaveResult } from '../usePlannerStorage'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 import { ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
+import { ok, err } from '@/lib/result'
 
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
@@ -30,8 +31,8 @@ const mockSyncToServer = vi.fn<[SaveablePlanner, boolean?], Promise<SaveablePlan
 const mockFetchFromServer = vi.fn()
 const mockDeleteFromLocal = vi.fn()
 
-vi.mock('../usePlannerSaveAdapter', () => ({
-  usePlannerSaveAdapter: () => ({
+vi.mock('../usePlannerStorage', () => ({
+  usePlannerStorage: () => ({
     getOrCreateDeviceId: mockGetOrCreateDeviceId,
     saveToLocal: (planner: SaveablePlanner) => {
       callOrder.push('local')
@@ -132,7 +133,7 @@ describe('usePlannerSave - save() golden master', () => {
     expect(callOrder).toEqual(['sync', 'local'])
     expect(mockSyncToServer).toHaveBeenCalledTimes(1)
     expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
-    expect(result.current.errorCode).toBeNull()
+    expect(result.current.error).toBeNull()
   })
 
   it('skips sync when not authenticated but still saves locally', async () => {
@@ -213,8 +214,8 @@ describe('usePlannerSave - validation-first (Inv 5)', () => {
       await result.current.save({ published: false })
     })
 
-    expect(result.current.errorCode).toBe('saveFailed')
-    expect(result.current.errorI18nKey).not.toBeNull()
+    expect(result.current.error?.kind).toBe('validation')
+    expect(result.current.error).toMatchObject({ kind: 'validation', key: expect.any(String) })
   })
 })
 
@@ -231,7 +232,10 @@ describe('usePlannerSave - draft vs published path selection', () => {
 
     expect(outcome).toBe(false)
     expect(callOrder).toEqual([])
-    expect(result.current.errorI18nKey).toBe('pages.plannerMD.publish.missingTitle')
+    expect(result.current.error).toMatchObject({
+      kind: 'validation',
+      key: 'pages.plannerMD.publish.missingTitle',
+    })
   })
 
   it('published=false exercises the non-strict path and accepts a titleless planner', async () => {
@@ -264,7 +268,7 @@ describe('usePlannerSave - error surface', () => {
     })
 
     expect(outcome).toBe(false)
-    expect(result.current.errorCode).toBe('quotaExceeded')
+    expect(result.current.error).toEqual({ kind: 'quota' })
   })
 
   it('maps WriteTemporarilyUnavailableError to a syncPaused degradation (saved locally, sync paused)', async () => {
@@ -278,7 +282,7 @@ describe('usePlannerSave - error surface', () => {
       await result.current.save({ published: false })
     })
 
-    expect(result.current.errorCode).toBe('syncPaused')
+    expect(result.current.error).toEqual({ kind: 'syncPaused' })
   })
 
   it('clearError resets error state', async () => {
@@ -289,13 +293,12 @@ describe('usePlannerSave - error surface', () => {
     await act(async () => {
       await result.current.save({ published: false })
     })
-    expect(result.current.errorCode).toBe('saveFailed')
+    expect(result.current.error?.kind).toBe('validation')
 
     act(() => {
       result.current.clearError()
     })
-    expect(result.current.errorCode).toBeNull()
-    expect(result.current.errorI18nKey).toBeNull()
+    expect(result.current.error).toBeNull()
   })
 
   it('reports restriction state for a banned user', () => {
@@ -306,6 +309,14 @@ describe('usePlannerSave - error surface', () => {
 
     expect(result.current.isRestricted).toBe(true)
     expect(result.current.restrictionReason).toBe('spam')
+  })
+
+  it('reports no restriction reason for an unrestricted user', () => {
+    authenticated()
+    const { result } = renderHook(() => usePlannerSave(baseOptions()))
+
+    expect(result.current.isRestricted).toBe(false)
+    expect(result.current.restrictionReason).toBeUndefined()
   })
 })
 
@@ -335,21 +346,25 @@ describe('usePlannerSave - dirty tracking surface', () => {
 
 describe('usePlannerSave - resolveConflict adapter ordering (golden master)', () => {
   /**
-   * conflictState is internal: it is set only inside handleSaveError when a save
-   * throws a ConflictError (usePlannerSave.ts:446-451). The single supported way to
-   * reach a non-null conflict from the public surface is a save() whose syncToServer
+   * The conflict error is set only when a save throws a ConflictError. The single
+   * supported way to reach it from the public surface is a save() whose syncToServer
    * rejects with ConflictError. That triggering save pushes 'sync' onto callOrder, so
    * each test clears callOrder before invoking resolveConflict to isolate the branch.
    */
-  async function driveIntoConflict(overrides: Partial<UsePlannerSaveOptions> = {}) {
-    mockSyncToServer.mockRejectedValueOnce(new ConflictError('conflict', 7))
+  async function driveIntoConflict(
+    overrides: Partial<UsePlannerSaveOptions> = {},
+    serverVersion: number | null = 7,
+  ) {
+    mockSyncToServer.mockRejectedValueOnce(
+      new ConflictError('SYNC_CONFLICT', 'conflict', serverVersion),
+    )
     const hook = renderHook(() => usePlannerSave(baseOptions(overrides)))
 
     await act(async () => {
       await hook.result.current.save({ published: false })
     })
 
-    expect(hook.result.current.conflictState).not.toBeNull()
+    expect(hook.result.current.error?.kind).toBe('conflict')
     callOrder.length = 0
     return hook
   }
@@ -357,9 +372,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
   beforeEach(() => {
     // Resolution branches read a server planner; default it to a truthy value with a
     // syncVersion so the if (serverPlanner) blocks execute (fetch -> local -> callbacks).
-    mockFetchFromServer.mockResolvedValue({
-      metadata: { syncVersion: 9 },
-    } as SaveablePlanner)
+    mockFetchFromServer.mockResolvedValue(ok({ metadata: { syncVersion: 9 } } as SaveablePlanner))
   })
 
   it('overwrite force-saves via performSave: sync THEN local, clears conflict', async () => {
@@ -375,8 +388,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     expect(outcome).toBe(true)
     expect(callOrder).toEqual(['sync', 'local'])
     expect(onServerReload).not.toHaveBeenCalled()
-    expect(result.current.conflictState).toBeNull()
-    expect(result.current.errorCode).toBeNull()
+    expect(result.current.error).toBeNull()
   })
 
   it('discard reloads from server: fetch THEN local, fires onServerReload, clears conflict', async () => {
@@ -392,7 +404,45 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     expect(outcome).toBe(true)
     expect(callOrder).toEqual(['fetch', 'local'])
     expect(onServerReload).toHaveBeenCalledTimes(1)
-    expect(result.current.conflictState).toBeNull()
+    expect(result.current.error).toBeNull()
+  })
+
+  it('discard reports failure and keeps the conflict when the server read fails', async () => {
+    // Silent data loss: a discard whose GET fails must never report success, or the
+    // editor keeps holding content the user believes it threw away.
+    authenticated()
+    const onServerReload = vi.fn()
+    const { result } = await driveIntoConflict({ onServerReload })
+
+    mockFetchFromServer.mockResolvedValue(err({ kind: 'unknown' }))
+
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.resolveConflict('discard')
+    })
+
+    expect(outcome).toBe(false)
+    expect(result.current.error?.kind).toBe('conflict')
+    expect(onServerReload).not.toHaveBeenCalled()
+    expect(callOrder).toEqual(['fetch'])
+  })
+
+  it('overwrite reports failure and never force-saves when the server version is unreadable', async () => {
+    // The conflict reported no server version, so performSave would push over the
+    // server from an unanchored local syncVersion if the fetch failure were ignored.
+    authenticated()
+    const { result } = await driveIntoConflict({}, null)
+
+    mockFetchFromServer.mockResolvedValue(err({ kind: 'unknown' }))
+
+    let outcome: boolean | undefined
+    await act(async () => {
+      outcome = await result.current.resolveConflict('overwrite')
+    })
+
+    expect(outcome).toBe(false)
+    expect(callOrder).toEqual(['fetch'])
+    expect(result.current.error?.kind).toBe('conflict')
   })
 
   it('both forks a copy then reverts original: local, sync, fetch, local (non-ideal but current)', async () => {
@@ -416,7 +466,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     expect(onKeepBothCreated).toHaveBeenCalledTimes(1)
     expect(onKeepBothCreated).toHaveBeenCalledWith(expect.any(String))
     expect(onServerReload).toHaveBeenCalledTimes(1)
-    expect(result.current.conflictState).toBeNull()
+    expect(result.current.error).toBeNull()
   })
 
   it('both skips the copy sync when not authenticated: local, fetch, local', async () => {
@@ -522,7 +572,7 @@ describe('usePlannerSave - cross-surface version convergence', () => {
     })
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['planner', plannerId],
+      queryKey: ['planners', 'detail', plannerId],
     })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['userPlanners'] })
     invalidateSpy.mockRestore()

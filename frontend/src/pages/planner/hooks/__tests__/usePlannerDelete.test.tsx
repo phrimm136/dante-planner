@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { usePlannerDelete } from '../usePlannerDelete'
 import { gesellschaftQueryKeys } from '../useMDGesellschaftData'
+import { userPlannersQueryKeys } from '../useMDUserPlannersData'
 
 // Mock the API client
 vi.mock('@/lib/api', async () => {
@@ -90,7 +91,7 @@ describe('usePlannerDelete', () => {
   })
 
   describe('cache invalidation', () => {
-    it('invalidates gesellschaft queries on success', async () => {
+    it('invalidates the personal and gesellschaft lists on success', async () => {
       vi.mocked(ApiClient.delete).mockResolvedValue(undefined)
       const { wrapper, queryClient } = createWrapper()
 
@@ -104,8 +105,11 @@ describe('usePlannerDelete', () => {
 
       await waitFor(() => {
         expect(invalidateSpy).toHaveBeenCalledWith({
-          queryKey: gesellschaftQueryKeys.all,
+          queryKey: userPlannersQueryKeys.all,
         })
+      })
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: gesellschaftQueryKeys.all,
       })
     })
 
