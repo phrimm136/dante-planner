@@ -14,12 +14,9 @@ import { GlobalLayout } from '@/components/layout/GlobalLayout'
 import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
 import { storage } from '@/lib/storage'
-import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
-import {
-  publishedPlannerQueryKeys,
-  fetchPublishedPlanner,
-} from '@/pages/planner/hooks/usePublishedPlannerQuery'
+import { PLANNER_STORAGE_KEYS, STALE_TIME } from '@/lib/constants'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
+import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
 // NotFoundPage is eagerly loaded as it's used as the default 404 component
 import NotFoundPage from '@/components/feedback/NotFoundPage'
@@ -30,6 +27,14 @@ import NotFoundPage from '@/components/feedback/NotFoundPage'
 
 /** Helper to create page title with site suffix */
 const pageTitle = (key: string, ns = 'common') => `${i18n.t(key, { ns })} | Dante's Planner`
+
+/**
+ * Head meta for a detail route. `fallback` covers the window before the route's
+ * loader has resolved, when `head()` still runs with no loader data.
+ */
+const detailHead = (title: string | undefined, fallback: string) => ({
+  meta: [{ title: `${title ?? fallback} | Dante's Planner` }],
+})
 
 /** Get localized untitled placeholder */
 const getUntitledPlaceholder = () => i18n.t('pages.plannerMD.untitled', { ns: 'planner' })
@@ -96,6 +101,18 @@ const mdGesellschaftSearchSchema = z.object({
 })
 
 // Root route - contains layout for all routes
+function RootLayout() {
+  return (
+    <>
+      <HeadContent />
+      <GlobalLayout>
+        <Outlet />
+      </GlobalLayout>
+      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
+    </>
+  )
+}
+
 const rootRoute = createRootRoute({
   head: () => ({
     meta: [
@@ -107,16 +124,7 @@ const rootRoute = createRootRoute({
       },
     ],
   }),
-  component: () => (
-    <>
-      <HeadContent />
-      <GlobalLayout>
-        <Outlet />
-      </GlobalLayout>
-      {/* Router dev tools - only in development */}
-      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
-    </>
-  ),
+  component: RootLayout,
 })
 
 // Home route - path: "/"
@@ -177,16 +185,17 @@ const plannerMDGesellschaftDetailRoute = createRoute({
     middlewares: [stripSearchParams(mdGesellschaftDefaults)],
   },
   loader: async ({ params }) => {
+    // Dynamic so the published-planner schemas stay out of the entry chunk.
+    const { publishedPlannerQueryKeys, fetchPublishedPlanner } =
+      await import('@/pages/planner/hooks/usePublishedPlannerQuery')
     const result = await queryClient.fetchQuery({
       queryKey: publishedPlannerQueryKeys.detail(params.id),
       queryFn: () => fetchPublishedPlanner(params.id),
-      staleTime: 5 * 60 * 1000,
+      staleTime: STALE_TIME.MEDIUM,
     })
     return { title: result.apiData.title || getUntitledPlaceholder() }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.title, getUntitledPlaceholder()),
 })
 
 // Planner MD New route - path: "/planner/md/new" (Create new MD planner)
@@ -222,9 +231,7 @@ const plannerMDDetailRoute = createRoute({
     const title = await loadPlannerTitle(params.id)
     return { title }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.title, getUntitledPlaceholder()),
 })
 
 // Planner MD Edit route - path: "/planner/md/$id/edit" (Edit planner)
@@ -277,9 +284,7 @@ const identityDetailRoute = createRoute({
     const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
     return { name }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.name ?? 'Identity'} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'Identity'),
 })
 
 // EGO route - path: "/ego" (EGO browser page)
@@ -304,9 +309,7 @@ const egoDetailRoute = createRoute({
     const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
     return { name }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.name ?? 'EGO'} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO'),
 })
 
 // EGO Gift route - path: "/ego-gift" (EGO Gift browser page)
@@ -331,9 +334,7 @@ const egoGiftDetailRoute = createRoute({
     const name = (module.default as { name?: string }).name ?? params.id
     return { name }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.name ?? 'EGO Gift'} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'EGO Gift'),
 })
 
 // Theme Pack route - path: "/theme-pack" (Theme Pack browser page)
@@ -356,9 +357,7 @@ const themePackDetailRoute = createRoute({
     const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
     return { name }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.name ?? 'Theme Pack'} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'Theme Pack'),
 })
 
 // Ab Event route - path: "/ab-event" (Abnormality Event browser page)
@@ -387,9 +386,7 @@ const abEventDetailRoute = createRoute({
       return { title: params.id }
     }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.title ?? 'Dungeon Event'} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.title, 'Dungeon Event'),
 })
 
 // Keyword route - path: "/keyword" (Keyword browser page)
@@ -413,9 +410,7 @@ const keywordDetailRoute = createRoute({
     const name = keywords[params.id]?.name ?? params.id
     return { name }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.name ?? 'Keyword'} | Dante's Planner` }],
-  }),
+  head: ({ loaderData }) => detailHead(loaderData?.name, 'Keyword'),
 })
 
 // Settings route - path: "/settings" (User settings page)
@@ -534,6 +529,7 @@ export const router = createRouter({
   routeTree,
   defaultNotFoundComponent: NotFoundPage,
   defaultErrorComponent: RouteErrorComponent,
+  defaultPendingComponent: RoutePendingFallback,
   // Preload a route's chunk + loader on link hover/touch so the ~100ms serial
   // chunk-fetch window is paid before the click, not after it. Loaders are
   // cache-idempotent (query-cache prefetch with staleTime), so a hover that
@@ -549,32 +545,37 @@ export const router = createRouter({
   parseSearch: parseSearchWith,
 })
 
+/**
+ * The title the deepest matched route published, or null when no match carries
+ * one. Matches are ordered root-first, so the search runs from the end.
+ */
+export function titleFromMatches(matches: ReadonlyArray<{ meta?: unknown }>): string | null {
+  for (let i = matches.length - 1; i >= 0; i--) {
+    const meta = matches[i].meta
+    if (!Array.isArray(meta) || meta.length === 0) continue
+
+    const titleMeta = meta.find(
+      (m): m is { title: string } =>
+        typeof m === 'object' &&
+        m !== null &&
+        'title' in m &&
+        typeof (m as { title: unknown }).title === 'string',
+    )
+    return titleMeta?.title ? titleMeta.title : null
+  }
+  return null
+}
+
 // Sync document.title when language changes.
 // TanStack Router evaluates head() only during route matching, not on i18n changes.
-// This listener re-evaluates the active route's head() and applies the new title.
 i18n.on('languageChanged', async () => {
-  // Invalidate loaders so detail pages re-fetch localized data (e.g., identity names)
+  // Invalidating re-runs the loaders so detail pages re-fetch localized data,
+  // and re-evaluates head(), which republishes each match's meta.
   await router.invalidate()
 
-  // Re-evaluate head() for the deepest matched route and set document.title
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const routesById = (router as any).routesById as Record<string, any>
-  const { matches } = router.state
-  for (let i = matches.length - 1; i >= 0; i--) {
-    const match = matches[i]
-    const headFn = routesById[match.routeId]?.options?.head
-    if (headFn) {
-      try {
-        const result = headFn({ params: match.params, loaderData: match.loaderData })
-        const titleMeta = result?.meta?.find((m: Record<string, unknown>) => 'title' in m)
-        if (titleMeta?.title) {
-          document.title = String(titleMeta.title)
-        }
-      } catch {
-        /* head evaluation failed, keep current title */
-      }
-      break
-    }
+  const title = titleFromMatches(router.state.matches)
+  if (title !== null) {
+    document.title = title
   }
 })
 
