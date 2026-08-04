@@ -76,12 +76,6 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     boolean existsActiveById(@Param("id") UUID id);
 
     /**
-     * Check if a planner exists by ID and user ID, regardless of soft-delete state.
-     * Used to detect soft-deleted planners before attempting recreation in upsert.
-     */
-    boolean existsByIdAndUserId(UUID id, Long userId);
-
-    /**
      * Classify a planner id that is not an owned active row, in one SELECT: its owner and
      * soft-delete state. Distinguishes an owner's soft-deleted planner from another user's row
      * without a second existence probe.
