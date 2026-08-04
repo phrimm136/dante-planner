@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { toast } from '@/lib/toast'
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,7 @@ export function SyncChoiceDialog({ open, onChoice }: SyncChoiceDialogProps) {
       onChoice(syncEnabled)
     } catch (error) {
       console.error('Failed to update sync settings:', error)
+      toast.error(t('settings.sync.updateError', 'Failed to update sync setting'))
     }
   }
 

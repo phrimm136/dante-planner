@@ -35,8 +35,8 @@ export const UserDeletionResponseSchema = z
     message: z.string(),
     /** ISO 8601 timestamp when account was marked as deleted */
     deletedAt: z.string(),
-    /** ISO 8601 timestamp when account will be permanently deleted */
-    permanentDeleteAt: z.string(),
+    /** ISO 8601 timestamp when account will be permanently deleted; absent when a prior deletion left none scheduled */
+    permanentDeleteAt: z.string().nullish(),
     /** Number of days in grace period before permanent deletion */
     gracePeriodDays: z.number(),
   })
@@ -48,8 +48,8 @@ export const UserDeletionResponseSchema = z
  */
 export const UserSettingsResponseSchema = z
   .object({
-    /** Whether sync is enabled (null = not chosen yet, triggers first-login dialog) */
-    syncEnabled: z.boolean().nullable(),
+    /** Whether sync is enabled (absent = not chosen yet, triggers first-login dialog) */
+    syncEnabled: z.boolean().nullish(),
     /** Notify when someone comments on your planner */
     notifyComments: z.boolean(),
     /** Notify when your planner reaches recommended status */

@@ -17,6 +17,7 @@ import { startGoogleLogin } from '@/shared/auth'
 import { formatUsername } from '@/lib/formatUsername'
 import { ChevronDown } from 'lucide-react'
 import { GoogleIcon } from '@/components/ui/GoogleIcon'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Inner component that uses Suspense hooks.
@@ -62,11 +63,11 @@ function UsernameSectionContent() {
   if (!user) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">{t('settings.username.title', 'Username')}</h2>
-        <p className="text-muted-foreground">
+        <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('settings.username.title', 'Username')}</h2>
+        <p className={SECTION_STYLES.TEXT.muted}>
           {t('settings.username.signInPrompt', 'Sign in to customize your username')}
         </p>
-        <Button onClick={startGoogleLogin} className="flex items-center gap-2">
+        <Button onClick={startGoogleLogin} className={SECTION_STYLES.LAYOUT.row}>
           <GoogleIcon className="h-4 w-4" />
           {t('header.auth.googleLogin', 'Sign in with Google')}
         </Button>
@@ -77,10 +78,10 @@ function UsernameSectionContent() {
   // Authenticated state - show dropdown and preview
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">{t('settings.username.title', 'Username')}</h2>
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>{t('settings.username.title', 'Username')}</h2>
 
       {/* Current username preview */}
-      <div className="text-sm text-muted-foreground">
+      <div className={SECTION_STYLES.TEXT.caption}>
         {t('settings.username.current')}: {formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)}
       </div>
 

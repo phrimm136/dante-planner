@@ -1,5 +1,6 @@
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from '@tanstack/react-query'
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import {
   EpithetListResponseSchema,
   UserDeletionResponseSchema,
@@ -12,6 +13,7 @@ import type {
   UserDeletionResponse,
 } from '../types/UserSettingsTypes'
 import type { User } from '@/shared/auth'
+import { STALE_TIME } from '@/lib/constants'
 
 /**
  * Query keys for user settings queries
@@ -29,14 +31,9 @@ function createEpithetsQueryOptions() {
     queryKey: userSettingsQueryKeys.epithets(),
     queryFn: async (): Promise<EpithetListResponse> => {
       const data = await ApiClient.get<EpithetListResponse>('/api/user/epithets')
-      const result = EpithetListResponseSchema.safeParse(data)
-      if (!result.success) {
-        console.error('Epithets validation failed:', result.error)
-        throw new Error('Invalid epithets data received from server')
-      }
-      return result.data
+      return validateData(data, EpithetListResponseSchema, 'user epithets')
     },
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours - epithets rarely change
+    staleTime: STALE_TIME.DAY,
   })
 }
 
@@ -92,12 +89,7 @@ export function useUpdateEpithetMutation() {
   return useMutation({
     mutationFn: async (request: UpdateUsernameEpithetRequest): Promise<User> => {
       const data = await ApiClient.put<User>('/api/user/me/username-epithet', request)
-      const result = UserSchema.safeParse(data)
-      if (!result.success) {
-        console.error('User validation failed:', result.error)
-        throw new Error('Invalid user data received from server')
-      }
-      return result.data
+      return validateData(data, UserSchema, 'user usernameEpithet')
     },
     onSuccess: (user) => {
       // Update auth cache so Header reflects the new username
@@ -133,12 +125,7 @@ export function useDeleteAccountMutation() {
   return useMutation({
     mutationFn: async (): Promise<UserDeletionResponse> => {
       const data = await ApiClient.delete<UserDeletionResponse>('/api/user/me')
-      const result = UserDeletionResponseSchema.safeParse(data)
-      if (!result.success) {
-        console.error('User deletion response validation failed:', result.error)
-        throw new Error('Invalid user deletion response received from server')
-      }
-      return result.data
+      return validateData(data, UserDeletionResponseSchema, 'user deletion')
     },
     onError: (error) => {
       console.error('Failed to delete account:', error)

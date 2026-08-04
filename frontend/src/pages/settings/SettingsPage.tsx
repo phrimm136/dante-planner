@@ -9,6 +9,7 @@ import { NotificationSection } from './components/NotificationSection'
 import { AccountDeleteSection } from './components/AccountDeleteSection'
 import { LogoutEverywhereSection } from './components/LogoutEverywhereSection'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Settings page for user preferences.
@@ -30,7 +31,7 @@ function SettingsPageContent() {
   const isAuthenticated = !!user
 
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       {/* Username customization section - auth only */}
       {isAuthenticated && (
         <section className="rounded-lg border bg-card p-6">
@@ -85,7 +86,7 @@ function SettingsPageContent() {
 
 function SettingsPageSkeleton() {
   return (
-    <div className="container mx-auto p-8">
+    <div className={SECTION_STYLES.LAYOUT.page}>
       <section className="rounded-lg border bg-card p-6">
         <Skeleton className="h-6 w-32 mb-4" />
         <Skeleton className="h-4 w-48" />

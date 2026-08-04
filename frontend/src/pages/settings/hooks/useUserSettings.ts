@@ -1,9 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
+import { validateData } from '@/lib/validation'
 import { UserSettingsResponseSchema } from '../schemas/UserSettingsSchemas'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
 import type { UserSettingsResponse, UpdateUserSettingsRequest } from '../types/UserSettingsTypes'
+import { STALE_TIME } from '@/lib/constants'
 
 /**
  * Query keys for user settings queries
@@ -26,15 +28,10 @@ export function useUserSettingsQuery() {
     queryKey: userSettingsKeys.settings(),
     queryFn: async (): Promise<UserSettingsResponse> => {
       const data = await ApiClient.get<UserSettingsResponse>('/api/user/settings')
-      const result = UserSettingsResponseSchema.safeParse(data)
-      if (!result.success) {
-        console.error('User settings validation failed:', result.error)
-        throw new Error('Invalid user settings data received from server')
-      }
-      return result.data
+      return validateData(data, UserSettingsResponseSchema, 'user settings')
     },
     enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: STALE_TIME.MEDIUM,
   })
 }
 
@@ -48,12 +45,7 @@ export function useUpdateUserSettingsMutation() {
   return useMutation({
     mutationFn: async (request: UpdateUserSettingsRequest): Promise<UserSettingsResponse> => {
       const data = await ApiClient.put<UserSettingsResponse>('/api/user/settings', request)
-      const result = UserSettingsResponseSchema.safeParse(data)
-      if (!result.success) {
-        console.error('User settings response validation failed:', result.error)
-        throw new Error('Invalid user settings response received from server')
-      }
-      return result.data
+      return validateData(data, UserSettingsResponseSchema, 'user settings update')
     },
     onSuccess: (settings) => {
       queryClient.setQueryData(userSettingsKeys.settings(), settings)

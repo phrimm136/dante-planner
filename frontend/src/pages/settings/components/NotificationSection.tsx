@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { SECTION_STYLES } from '@/lib/constants'
 
 /**
  * Inner component that uses Suspense hooks.
@@ -66,13 +67,13 @@ function NotificationSectionContent() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">
+      <h2 className={SECTION_STYLES.TEXT.sectionTitle}>
         {t('settings.notifications.title', 'Notifications')}
       </h2>
 
       {showPermissionNotice && (
         <div className="flex items-center justify-between gap-3 rounded-md border border-border bg-muted/50 px-3 py-2">
-          <p className="text-sm text-muted-foreground">
+          <p className={SECTION_STYLES.TEXT.caption}>
             {permissionState === 'denied'
               ? t(
                   'settings.notifications.permission.deniedMessage',
@@ -93,12 +94,12 @@ function NotificationSectionContent() {
 
       <div className="space-y-4">
         {/* Comments notification */}
-        <div className="flex items-center justify-between">
+        <div className={SECTION_STYLES.LAYOUT.rowBetween}>
           <div className="space-y-1">
             <Label htmlFor="notify-comments" className="text-base">
               {t('settings.notifications.comments.label', 'Comments')}
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className={SECTION_STYLES.TEXT.caption}>
               {t(
                 'settings.notifications.comments.description',
                 'Notify when someone comments on your planner',
@@ -114,12 +115,12 @@ function NotificationSectionContent() {
         </div>
 
         {/* Recommendations notification */}
-        <div className="flex items-center justify-between">
+        <div className={SECTION_STYLES.LAYOUT.rowBetween}>
           <div className="space-y-1">
             <Label htmlFor="notify-recommendations" className="text-base">
               {t('settings.notifications.recommendations.label', 'Recommendations')}
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className={SECTION_STYLES.TEXT.caption}>
               {t(
                 'settings.notifications.recommendations.description',
                 'Notify when your planner reaches recommended status',
@@ -135,12 +136,12 @@ function NotificationSectionContent() {
         </div>
 
         {/* New publications notification */}
-        <div className="flex items-center justify-between">
+        <div className={SECTION_STYLES.LAYOUT.rowBetween}>
           <div className="space-y-1">
             <Label htmlFor="notify-new-publications" className="text-base">
               {t('settings.notifications.newPublications.label', 'New Publications')}
             </Label>
-            <p className="text-sm text-muted-foreground">
+            <p className={SECTION_STYLES.TEXT.caption}>
               {t(
                 'settings.notifications.newPublications.description',
                 'Notify when someone publishes a new planner',
@@ -180,7 +181,7 @@ function NotificationSectionSkeleton() {
       <Skeleton className="h-6 w-28" />
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-center justify-between">
+          <div key={i} className={SECTION_STYLES.LAYOUT.rowBetween}>
             <div className="space-y-1">
               <Skeleton className="h-5 w-32" />
               <Skeleton className="h-4 w-64" />
