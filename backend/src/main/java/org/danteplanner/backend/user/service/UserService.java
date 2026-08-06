@@ -2,6 +2,7 @@ package org.danteplanner.backend.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserDto;
@@ -43,7 +44,7 @@ public class UserService {
      */
     private static final int MAX_USERNAME_RETRIES = 100;
 
-    /** The unique key on {@code users.username_suffix}, as the driver names it in a violation. */
+    /** The unique key on {@code users.username_suffix}, as the schema names it. */
     private static final String USERNAME_SUFFIX_CONSTRAINT = "uk_users_username_suffix";
 
     private final UserRepository userRepository;
@@ -105,7 +106,7 @@ public class UserService {
             try {
                 return userRepository.save(newUser);
             } catch (DataIntegrityViolationException e) {
-                if (!isSuffixCollision(e)) {
+                if (!isUsernameSuffixCollision(e)) {
                     throw e;
                 }
                 if (attempt % 10 == 0) {
@@ -121,12 +122,25 @@ public class UserService {
     /**
      * Whether an integrity violation is the username-suffix constraint rather than another key.
      *
-     * <p>The violated key is named only in the driver's message; the exception type is the same
-     * for every constraint on the table.</p>
+     * <p>Spring hands every constraint on the table back as the same exception type, so the key has
+     * to be read off the {@link ConstraintViolationException} Hibernate wraps the driver's failure
+     * in. A violation reaching here under any other shape names no key, and is not a collision this
+     * method claims.</p>
      */
-    private static boolean isSuffixCollision(DataIntegrityViolationException e) {
-        String message = e.getMostSpecificCause().getMessage();
-        return message != null && message.contains(USERNAME_SUFFIX_CONSTRAINT);
+    static boolean isUsernameSuffixCollision(DataIntegrityViolationException e) {
+        for (Throwable cause = e.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof ConstraintViolationException violation) {
+                return USERNAME_SUFFIX_CONSTRAINT.equalsIgnoreCase(keyName(violation.getConstraintName()));
+            }
+        }
+        return false;
+    }
+
+    /** The key alone: MySQL 8.0.19 and later qualify the key in a duplicate-entry report with its table. */
+    private static String keyName(String constraintName) {
+        return constraintName == null
+                ? null
+                : constraintName.substring(constraintName.lastIndexOf('.') + 1);
     }
 
     public UserDto toDto(User user) {

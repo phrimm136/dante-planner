@@ -5,6 +5,7 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.shared.config.EpithetConfig;
+import org.danteplanner.backend.support.IntegrityViolations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.support.TransactionCallback;
 
 import java.util.Map;
@@ -91,8 +91,7 @@ class UserServiceTest {
             when(usernameGenerator.generate())
                     .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
             when(userRepository.save(any(User.class))).thenThrow(
-                    new DataIntegrityViolationException(
-                            "Duplicate entry 'GOOGLE-google-123' for key 'uk_provider_provider_id'"));
+                    IntegrityViolations.duplicateEntry("users.uk_provider_provider_id"));
 
             User resolved = userService.findOrCreateUser("google", IDENTITY);
 
@@ -110,8 +109,7 @@ class UserServiceTest {
             when(usernameGenerator.generate())
                     .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
             when(userRepository.save(any(User.class))).thenThrow(
-                    new DataIntegrityViolationException(
-                            "Duplicate entry 'test1' for key 'uk_users_username_suffix'"));
+                    IntegrityViolations.duplicateEntry("users.uk_users_username_suffix"));
 
             assertThrows(UsernameGenerationException.class,
                     () -> userService.findOrCreateUser("google", IDENTITY));
