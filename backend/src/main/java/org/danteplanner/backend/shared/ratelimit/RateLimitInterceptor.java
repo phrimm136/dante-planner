@@ -91,8 +91,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     private boolean isExempt(HandlerMethod handlerMethod) {
-        return handlerMethod.hasMethodAnnotation(RateLimitExempt.class)
-                || handlerMethod.getBeanType().isAnnotationPresent(RateLimitExempt.class);
+        return handlerMethod.hasMethodAnnotation(RateLimitExempt.class);
     }
 
     /**

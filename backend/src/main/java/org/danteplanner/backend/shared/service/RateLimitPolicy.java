@@ -74,6 +74,16 @@ public enum RateLimitPolicy {
         return subject;
     }
 
+    /**
+     * Whether a charger must name the endpoint, because this policy spreads one bucket family
+     * across many routes rather than naming a single endpoint of its own.
+     *
+     * @return true when the endpoint comes from the caller
+     */
+    public boolean requiresCallerNamedEndpoint() {
+        return endpoint == null;
+    }
+
     BucketConfig bucket(RateLimitProperties properties) {
         return bucket.apply(properties);
     }
