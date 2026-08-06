@@ -35,7 +35,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.danteplanner.backend.planner.event.PlannerSyncEvent;
 import org.mockito.ArgumentCaptor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +74,7 @@ class PlannerCommandServiceTest {
     private UserService userService;
 
     @Mock
-    private PlannerSyncEventService sseService;
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private PlannerContentValidator contentValidator;
@@ -103,7 +105,7 @@ class PlannerCommandServiceTest {
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
-                sseService,
+                eventPublisher,
                 contentValidator,
                 contentVersionValidator,
                 plannerCatalogService,
@@ -195,9 +197,15 @@ class PlannerCommandServiceTest {
             assertEquals("Test Planner", response.title());
             assertEquals("5F", response.category());
             assertEquals(1L, response.syncVersion());
-            // The fan-out has no state form at this tier; observing the delivered event means a real
-            // PlannerSyncEventService with a subscribed emitter.
-            verify(sseService).notifyPlannerUpdate(eq(testUser.getId()), eq(deviceId), any(UUID.class), eq(SseEventType.CREATED), eq(response));
+            // The fan-out is raised here and published after commit; observing the delivered event
+            // means a real listener with a subscribed emitter.
+            ArgumentCaptor<PlannerSyncEvent> raised = ArgumentCaptor.forClass(PlannerSyncEvent.class);
+            verify(eventPublisher).publishEvent(raised.capture());
+            PlannerSyncEvent event = raised.getValue();
+            assertEquals(testUser.getId(), event.userId());
+            assertEquals(deviceId, event.excludeDeviceId());
+            assertEquals(SseEventType.CREATED, event.eventType());
+            assertEquals(response, event.payload());
         }
 
         @Test
@@ -215,7 +223,7 @@ class PlannerCommandServiceTest {
 
             assertTrue(exception.getMessage().contains(String.valueOf(maxPlannersPerUser)));
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
+            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test
@@ -237,7 +245,7 @@ class PlannerCommandServiceTest {
             assertEquals(nonExistentUserId, exception.getUserId());
             assertTrue(exception.getMessage().contains(nonExistentUserId.toString()));
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
+            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test
@@ -330,9 +338,10 @@ class PlannerCommandServiceTest {
             // Assert
             assertEquals(6L, response.syncVersion());
             assertEquals("Updated Title", response.title());
-            // The fan-out has no state form at this tier; observing the delivered event means a real
-            // PlannerSyncEventService with a subscribed emitter.
-            verify(sseService).notifyPlannerUpdate(testUser.getId(), deviceId, planner.getId(), SseEventType.UPDATED, response);
+            // The fan-out is raised here and published after commit; observing the delivered event
+            // means a real listener with a subscribed emitter.
+            verify(eventPublisher).publishEvent(new PlannerSyncEvent(
+                    testUser.getId(), deviceId, planner.getId(), SseEventType.UPDATED, response));
         }
 
         @Test
@@ -355,7 +364,7 @@ class PlannerCommandServiceTest {
 
             assertEquals(5L, exception.getActualVersion());
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
+            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test
@@ -446,7 +455,7 @@ class PlannerCommandServiceTest {
             );
 
             verify(plannerRepository, never()).save(any());
-            verify(sseService, never()).notifyPlannerUpdate(any(), any(), any(), any(), any());
+            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test

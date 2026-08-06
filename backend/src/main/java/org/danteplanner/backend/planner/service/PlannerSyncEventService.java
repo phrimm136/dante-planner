@@ -2,10 +2,13 @@ package org.danteplanner.backend.planner.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.planner.event.PlannerSyncEvent;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.UUID;
 
@@ -22,6 +25,17 @@ public class PlannerSyncEventService {
 
     private final SseService sseService;
     private final SsePublisher ssePublisher;
+
+    /**
+     * Announce a committed planner write to the owner's other devices.
+     *
+     * @param event the committed write
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onPlannerSynced(PlannerSyncEvent event) {
+        notifyPlannerUpdate(event.userId(), event.excludeDeviceId(), event.plannerId(),
+                event.eventType(), event.payload());
+    }
 
     /**
      * Notify all connected devices of a user about a planner update,
