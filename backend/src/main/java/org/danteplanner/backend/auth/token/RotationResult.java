@@ -2,6 +2,7 @@ package org.danteplanner.backend.auth.token;
 
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
+import org.danteplanner.backend.shared.failure.FailureUnion;
 
 /**
  * Outcome of a refresh-token rotation attempt.
@@ -9,8 +10,11 @@ import org.danteplanner.backend.auth.exception.SessionRevokedException;
  * <p>Sealed over the three terminal outcomes the filter/facade layer must distinguish:
  * a successful rotation that yields a new refresh token, a theft-triggered family
  * revocation, and a plain rejection (revoked family or invalid token).</p>
+ *
+ * <p>Rotation state lives in Redis under its own protocol, outside any transaction, so no rollback
+ * rides on how this outcome travels.</p>
  */
-public sealed interface RotationResult
+public sealed interface RotationResult extends FailureUnion
         permits RotationResult.Rotated, RotationResult.Revoked, RotationResult.Rejected {
 
     /**
