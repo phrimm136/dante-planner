@@ -86,17 +86,44 @@ class IdReferenceValidator {
 
         String identityId = idNode.asText();
 
-        if (!gameDataRegistry.hasIdentity(identityId)) {
-            context.reject("identity", p -> ValidationErrors.invalidIdReference(p, identityId));
+        if (!validateIdentityIsKnown(identityId, context)) {
             return;
         }
 
-        if (!sinnerIdValidator.validateMatch(sinnerKey, identityId)) {
-            context.reject("identity for sinner " + sinnerKey,
-                    p -> ValidationErrors.invalidIdReference(p, identityId));
+        if (!validateIdentityBelongsToSinner(sinnerKey, identityId, context)) {
             return;
         }
 
+        validateIdentityLevelAndUptie(sinnerKey, identity, context);
+    }
+
+    /**
+     * @return false when the identity is not in game data, so its sinner and levels say nothing
+     */
+    private boolean validateIdentityIsKnown(String identityId, ValidationContext context) {
+        if (gameDataRegistry.hasIdentity(identityId)) {
+            return true;
+        }
+
+        context.reject("identity", p -> ValidationErrors.invalidIdReference(p, identityId));
+        return false;
+    }
+
+    /**
+     * @return false when the identity belongs to another sinner, so its levels are beside the point
+     */
+    private boolean validateIdentityBelongsToSinner(String sinnerKey, String identityId,
+                                                    ValidationContext context) {
+        if (sinnerIdValidator.validateMatch(sinnerKey, identityId)) {
+            return true;
+        }
+
+        context.reject("identity for sinner " + sinnerKey,
+                p -> ValidationErrors.invalidIdReference(p, identityId));
+        return false;
+    }
+
+    private void validateIdentityLevelAndUptie(String sinnerKey, JsonNode identity, ValidationContext context) {
         String identityPath = "equipment[" + sinnerKey + "].identity";
         requireInRange(identity, identityPath, "level", GameConstants.MIN_LEVEL, GameConstants.MAX_LEVEL, context);
         requireInRange(identity, identityPath, "uptie", GameConstants.MIN_UPTIE, GameConstants.MAX_UPTIE, context);
@@ -116,31 +143,56 @@ class IdReferenceValidator {
     }
 
     private void validateEgoIds(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        eachObjectProperty(sinnerEquipment.path("egos"), (egoType, ego) -> {
-            JsonNode idNode = ego.path("id");
-            if (idNode.isMissingNode() || idNode.isNull()) {
-                return;
-            }
-            if (!idNode.isTextual()) {
-                context.reject("equipment." + sinnerKey + ".egos." + egoType + ".id",
-                        p -> ValidationErrors.invalidFieldType(p, "string", idNode));
-                return;
-            }
+        eachObjectProperty(sinnerEquipment.path("egos"),
+                (egoType, ego) -> validateEgo(sinnerKey, egoType, ego, context));
+    }
 
-            String egoId = idNode.asText();
+    private void validateEgo(String sinnerKey, String egoType, JsonNode ego, ValidationContext context) {
+        JsonNode idNode = ego.path("id");
+        if (idNode.isMissingNode() || idNode.isNull()) {
+            return;
+        }
+        if (!idNode.isTextual()) {
+            context.reject("equipment." + sinnerKey + ".egos." + egoType + ".id",
+                    p -> ValidationErrors.invalidFieldType(p, "string", idNode));
+            return;
+        }
 
-            if (!gameDataRegistry.hasEgo(egoId)) {
-                context.reject("EGO", p -> ValidationErrors.invalidIdReference(p, egoId));
-                return;
-            }
+        String egoId = idNode.asText();
 
-            if (!sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
-                context.reject("EGO for sinner " + sinnerKey, p -> ValidationErrors.invalidIdReference(p, egoId));
-                return;
-            }
+        if (!validateEgoIsKnown(egoId, context)) {
+            return;
+        }
 
-            validateThreadspin(ego, sinnerKey, egoType, egoId, context);
-        });
+        if (!validateEgoBelongsToSinner(sinnerKey, egoId, context)) {
+            return;
+        }
+
+        validateThreadspin(ego, sinnerKey, egoType, egoId, context);
+    }
+
+    /**
+     * @return false when the EGO is not in game data, so its sinner and ceiling say nothing
+     */
+    private boolean validateEgoIsKnown(String egoId, ValidationContext context) {
+        if (gameDataRegistry.hasEgo(egoId)) {
+            return true;
+        }
+
+        context.reject("EGO", p -> ValidationErrors.invalidIdReference(p, egoId));
+        return false;
+    }
+
+    /**
+     * @return false when the EGO belongs to another sinner, so its threadspin is beside the point
+     */
+    private boolean validateEgoBelongsToSinner(String sinnerKey, String egoId, ValidationContext context) {
+        if (sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
+            return true;
+        }
+
+        context.reject("EGO for sinner " + sinnerKey, p -> ValidationErrors.invalidIdReference(p, egoId));
+        return false;
     }
 
     private void validateThreadspin(JsonNode ego, String sinnerKey, String egoType, String egoId,
@@ -151,14 +203,30 @@ class IdReferenceValidator {
         }
 
         String threadspinPath = "equipment[" + sinnerKey + "].egos." + egoType + ".threadspin";
-
         int threadspin = threadspinNode.asInt();
-        if (threadspin < GameConstants.MIN_THREADSPIN || threadspin > GameConstants.MAX_THREADSPIN) {
-            context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(
-                    "threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN));
+
+        if (!validateThreadspinInRange(threadspinPath, threadspin, context)) {
             return;
         }
 
+        validateThreadspinUnderEgoCeiling(threadspinPath, threadspin, egoId, context);
+    }
+
+    /**
+     * @return false when the threadspin is outside what any EGO allows, so no per-EGO ceiling applies
+     */
+    private boolean validateThreadspinInRange(String threadspinPath, int threadspin, ValidationContext context) {
+        if (threadspin >= GameConstants.MIN_THREADSPIN && threadspin <= GameConstants.MAX_THREADSPIN) {
+            return true;
+        }
+
+        context.reject(threadspinPath, p -> ValidationErrors.valueOutOfRange(
+                "threadspin", threadspin, GameConstants.MIN_THREADSPIN, GameConstants.MAX_THREADSPIN));
+        return false;
+    }
+
+    private void validateThreadspinUnderEgoCeiling(String threadspinPath, int threadspin, String egoId,
+                                                   ValidationContext context) {
         Integer egoMax = gameDataRegistry.getEgoMaxThreadspin(egoId);
         if (egoMax == null) {
             context.reject("EGO maxThreadspin", p -> ValidationErrors.invalidIdReference(p, egoId));
@@ -198,14 +266,8 @@ class IdReferenceValidator {
                 return;
             }
 
-            if (context.policy().requiresPublishableContent()) {
-                validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(index), context);
-            }
-
-            if (themePackChosen && index > 0) {
-                validateThemePackSequence(floorPath, floorSelections.get(index - 1), index - 1, context);
-            }
-
+            validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(index), context);
+            validateThemePackSequence(floorPath, floorSelections, index, themePackChosen, context);
             validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
         });
     }
@@ -238,6 +300,10 @@ class IdReferenceValidator {
 
     private void validateDifficultyRange(String floorPath, JsonNode floor, DifficultyRule expected,
                                          ValidationContext context) {
+        if (!context.policy().requiresPublishableContent()) {
+            return;
+        }
+
         JsonNode difficultyNode = floor.path("difficulty");
         int difficulty = difficultyNode.isNumber() ? difficultyNode.asInt() : -1;
 
@@ -247,8 +313,14 @@ class IdReferenceValidator {
         }
     }
 
-    private void validateThemePackSequence(String floorPath, JsonNode previousFloor, int previousIndex,
-                                           ValidationContext context) {
+    private void validateThemePackSequence(String floorPath, JsonNode floorSelections, int index,
+                                           boolean themePackChosen, ValidationContext context) {
+        if (!themePackChosen || index == 0) {
+            return;
+        }
+
+        int previousIndex = index - 1;
+        JsonNode previousFloor = floorSelections.get(previousIndex);
         if (!previousFloor.isObject()) {
             return;
         }
@@ -267,19 +339,35 @@ class IdReferenceValidator {
         String giftsPath = floorPath + ".giftIds";
 
         eachUniqueString(arrayField(floor, "giftIds"), giftsPath, context, (giftId, index) -> {
-            if (!gameDataRegistry.hasEgoGift(giftId)) {
-                context.reject(giftsPath, p -> ValidationErrors.invalidIdReference(p, giftId));
+            if (!validateGiftIsKnown(giftsPath, giftId, context)) {
                 return;
             }
 
-            if (themePackId == null) {
-                return;
-            }
-
-            if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
-                context.reject(giftsPath + "[" + index + "]",
-                        p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
-            }
+            validateGiftIsAffordable(giftsPath, index, giftId, themePackId, context);
         });
+    }
+
+    /**
+     * @return false when the gift is not in game data, so no theme pack can price it
+     */
+    private boolean validateGiftIsKnown(String giftsPath, String giftId, ValidationContext context) {
+        if (gameDataRegistry.hasEgoGift(giftId)) {
+            return true;
+        }
+
+        context.reject(giftsPath, p -> ValidationErrors.invalidIdReference(p, giftId));
+        return false;
+    }
+
+    private void validateGiftIsAffordable(String giftsPath, int index, String giftId, String themePackId,
+                                          ValidationContext context) {
+        if (themePackId == null) {
+            return;
+        }
+
+        if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
+            context.reject(giftsPath + "[" + index + "]",
+                    p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
+        }
     }
 }

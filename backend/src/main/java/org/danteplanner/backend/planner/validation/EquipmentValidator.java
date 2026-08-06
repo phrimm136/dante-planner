@@ -58,7 +58,10 @@ class EquipmentValidator {
         }
 
         validateEgoTypes(sinnerKey, egos, context);
+        validateRequiredEgo(sinnerKey, egos, context);
+    }
 
+    private void validateRequiredEgo(String sinnerKey, JsonNode egos, ValidationContext context) {
         JsonNode zayinEgo = egos.path(REQUIRED_EGO_TYPE);
         if (!zayinEgo.isObject()) {
             context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE,

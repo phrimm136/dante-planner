@@ -39,24 +39,39 @@ class StartBuffValidator {
         Set<Integer> seenBaseIds = new HashSet<>();
 
         eachNumber(buffIds, "selectedBuffIds", context, (buffId, index) -> {
-            if (!gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
-                context.reject("selectedBuffIds",
-                        p -> ValidationErrors.invalidIdReference(p, String.valueOf(buffId)));
+            if (!validateBuffIsKnown(buffId, context)) {
                 return;
             }
 
-            int baseId = buffId % 100;
-            if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
-                context.reject("selectedBuffIds[" + index + "] base ID",
-                        p -> ValidationErrors.valueOutOfRange(p, baseId, MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
-                return;
-            }
-
-            if (!seenBaseIds.add(baseId)) {
-                context.reject("selectedBuffIds base IDs",
-                        p -> ValidationErrors.duplicateValue(p, String.valueOf(baseId)));
-            }
+            validateBuffBaseId(buffId, index, seenBaseIds, context);
         });
+    }
+
+    /**
+     * @return false when the buff is not in game data, so the base id it would carry is a guess
+     */
+    private boolean validateBuffIsKnown(int buffId, ValidationContext context) {
+        if (gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
+            return true;
+        }
+
+        context.reject("selectedBuffIds", p -> ValidationErrors.invalidIdReference(p, String.valueOf(buffId)));
+        return false;
+    }
+
+    private void validateBuffBaseId(int buffId, int index, Set<Integer> seenBaseIds, ValidationContext context) {
+        int baseId = buffId % 100;
+
+        if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
+            context.reject("selectedBuffIds[" + index + "] base ID",
+                    p -> ValidationErrors.valueOutOfRange(p, baseId, MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
+            return;
+        }
+
+        if (!seenBaseIds.add(baseId)) {
+            context.reject("selectedBuffIds base IDs",
+                    p -> ValidationErrors.duplicateValue(p, String.valueOf(baseId)));
+        }
     }
 
     void validateStartGiftIds(JsonNode root, ValidationContext context) {
@@ -64,20 +79,41 @@ class StartBuffValidator {
         JsonNode giftIds = arrayField(root, "selectedGiftIds");
 
         if (!keywordNode.isTextual()) {
-            if (!giftIds.isEmpty()) {
-                context.reject("selectedGiftIds",
-                        p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
-            }
+            validateGiftsWaitForTheirKeyword(giftIds, context);
             return;
         }
 
         String keyword = keywordNode.asText();
 
-        if (!gameDataRegistry.hasStartGiftKeyword(keyword)) {
-            context.reject("selectedGiftKeyword", p -> ValidationErrors.invalidIdReference(p, keyword));
+        if (!validateKeywordIsKnown(keyword, context)) {
             return;
         }
 
+        validateGiftsAreInKeywordPool(keyword, giftIds, context);
+    }
+
+    private void validateGiftsWaitForTheirKeyword(JsonNode giftIds, ValidationContext context) {
+        if (giftIds.isEmpty()) {
+            return;
+        }
+
+        context.reject("selectedGiftIds",
+                p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
+    }
+
+    /**
+     * @return false when the keyword is not in game data, so it names no pool to check gifts against
+     */
+    private boolean validateKeywordIsKnown(String keyword, ValidationContext context) {
+        if (gameDataRegistry.hasStartGiftKeyword(keyword)) {
+            return true;
+        }
+
+        context.reject("selectedGiftKeyword", p -> ValidationErrors.invalidIdReference(p, keyword));
+        return false;
+    }
+
+    private void validateGiftsAreInKeywordPool(String keyword, JsonNode giftIds, ValidationContext context) {
         Set<String> pool = gameDataRegistry.getStartGiftPool(keyword);
 
         eachUniqueString(giftIds, "selectedGiftIds", context, (giftId, index) -> {
