@@ -54,6 +54,7 @@ class ValidatorGoldenCorpusTest {
 
     private ObjectMapper objectMapper;
     private PlannerContentValidator contentValidator;
+    private ContentVersionValidator versionValidator;
     private IdReferenceValidator idReferenceValidator;
 
     @BeforeEach
@@ -70,6 +71,8 @@ class ValidatorGoldenCorpusTest {
                 new SkillStateValidator(),
                 idReferenceValidator,
                 new StartBuffValidator(registry));
+        versionValidator = new ContentVersionValidator(
+                ValidatorGoldenCorpus.MD_CURRENT_VERSION, ValidatorGoldenCorpus.RR_AVAILABLE_VERSIONS);
     }
 
     /**
@@ -103,6 +106,17 @@ class ValidatorGoldenCorpusTest {
                 .isEqualTo(snapshot().get(name));
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("versionEntryNames")
+    void contentVersion_WhenCorpusEntryReplayed_MatchesSnapshot(String name) {
+        ValidatorGoldenCorpus.VersionEntry entry = VERSION_ENTRIES.get(name);
+
+        assertThat(outcomeOf(() -> versionValidator.validateVersionForCreate(
+                entry.plannerType(), entry.contentVersion())))
+                .as(REGENERATION_HINT, name)
+                .isEqualTo(snapshot().get(name));
+    }
+
     @Test
     @DisplayName("the snapshot holds exactly the corpus, no more and no less")
     void snapshot_WhenComparedToTheCorpus_CoversEveryEntryExactlyOnce() {
@@ -125,6 +139,11 @@ class ValidatorGoldenCorpusTest {
             appendSection(file, entry.name(), outcomeOf(() -> contentValidator.validate(
                     entry.content(), entry.category(), entry.policy())));
         }
+        for (ValidatorGoldenCorpus.VersionEntry entry : ValidatorGoldenCorpus.versionEntries()) {
+            appendSection(file, entry.name(), outcomeOf(() -> versionValidator.validateVersionForCreate(
+                    entry.plannerType(), entry.contentVersion())));
+        }
+
         Files.createDirectories(SNAPSHOT_SOURCE.getParent());
         Files.writeString(SNAPSHOT_SOURCE, file.toString(), StandardCharsets.UTF_8);
     }
@@ -135,6 +154,9 @@ class ValidatorGoldenCorpusTest {
 
     private static final Map<String, ValidatorGoldenCorpus.ContentEntry> CONTENT_ENTRIES = byName(
             ValidatorGoldenCorpus.contentEntries(), ValidatorGoldenCorpus.ContentEntry::name);
+    private static final Map<String, ValidatorGoldenCorpus.VersionEntry> VERSION_ENTRIES = byName(
+            ValidatorGoldenCorpus.versionEntries(), ValidatorGoldenCorpus.VersionEntry::name);
+
     private static <T> Map<String, T> byName(List<T> entries, Function<T, String> name) {
         Map<String, T> byName = new LinkedHashMap<>();
         for (T entry : entries) {
@@ -149,8 +171,14 @@ class ValidatorGoldenCorpusTest {
         return CONTENT_ENTRIES.keySet().stream();
     }
 
+    private static Stream<String> versionEntryNames() {
+        return VERSION_ENTRIES.keySet().stream();
+    }
+
     private static List<String> corpusNames() {
-        return new ArrayList<>(CONTENT_ENTRIES.keySet());
+        List<String> names = new ArrayList<>(CONTENT_ENTRIES.keySet());
+        names.addAll(VERSION_ENTRIES.keySet());
+        return names;
     }
 
     /**

@@ -441,3 +441,21 @@ accepted
 ### baseline-accepted-on-publish
 accepted
 
+### content-version-absent
+code: CONTENT_VERSION_REQUIRED
+message: Content version is required
+
+### content-version-rejected-for-md
+code: INVALID_CONTENT_VERSION
+message: Invalid content version for Mirror Dungeon
+
+### content-version-rejected-for-rr
+code: INVALID_CONTENT_VERSION
+message: Invalid content version for Refracted Railway
+
+### content-version-accepted-for-md
+accepted
+
+### content-version-accepted-for-rr
+accepted
+

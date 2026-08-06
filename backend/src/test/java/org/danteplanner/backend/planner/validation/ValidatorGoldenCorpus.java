@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.danteplanner.backend.planner.entity.PlannerType;
+
 /**
  * The bad-input corpus whose validator output is frozen by {@link ValidatorGoldenCorpusTest}.
  *
@@ -38,8 +40,21 @@ final class ValidatorGoldenCorpus {
     record ContentEntry(String name, String category, ValidationPolicy policy, String content) {
     }
 
+    /**
+     * One content-version claim, as a new planner declares it.
+     *
+     * @param name           the entry's identity in the snapshot file
+     * @param plannerType    the type whose accepted versions apply
+     * @param contentVersion the version declared, or null for an absent one
+     */
+    record VersionEntry(String name, PlannerType plannerType, Integer contentVersion) {
+    }
+
     static final int MAX_CONTENT_SIZE_BYTES = 51200;
     static final int MAX_NOTE_SIZE_BYTES = 1024;
+
+    static final int MD_CURRENT_VERSION = 7;
+    static final String RR_AVAILABLE_VERSIONS = "1,5";
 
     static final Set<String> IDENTITY_IDS = sinnerScopedIds("1", "01");
     static final Set<String> EGO_IDS = union(sinnerScopedIds("2", "01"), Set.of("20502"));
@@ -374,6 +389,15 @@ final class ValidatorGoldenCorpus {
         entries.add(publish("baseline-accepted-on-publish", valid()));
 
         return List.copyOf(entries);
+    }
+
+    static List<VersionEntry> versionEntries() {
+        return List.of(
+                new VersionEntry("content-version-absent", PlannerType.MIRROR_DUNGEON, null),
+                new VersionEntry("content-version-rejected-for-md", PlannerType.MIRROR_DUNGEON, 99),
+                new VersionEntry("content-version-rejected-for-rr", PlannerType.REFRACTED_RAILWAY, 99),
+                new VersionEntry("content-version-accepted-for-md", PlannerType.MIRROR_DUNGEON, MD_CURRENT_VERSION),
+                new VersionEntry("content-version-accepted-for-rr", PlannerType.REFRACTED_RAILWAY, 5));
     }
 
     private static ContentEntry draft(String name, Doc doc) {
