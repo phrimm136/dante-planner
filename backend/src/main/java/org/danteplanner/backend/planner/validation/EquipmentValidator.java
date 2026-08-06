@@ -35,23 +35,23 @@ class EquipmentValidator {
     }
 
     private void validateSinnerHasIdentity(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        JsonNode identity = sinnerEquipment.get("identity");
-        if (identity == null || !identity.isObject()) {
+        JsonNode identity = sinnerEquipment.path("identity");
+        if (!identity.isObject()) {
             context.reject("equipment[" + sinnerKey + "].identity",
                     p -> ValidationErrors.invalidFieldType(p, "object"));
             return;
         }
 
-        JsonNode idNode = identity.get("id");
-        if (idNode == null || !idNode.isTextual() || idNode.asText().isBlank()) {
+        JsonNode idNode = identity.path("id");
+        if (!idNode.isTextual() || idNode.asText().isBlank()) {
             context.reject("equipment[" + sinnerKey + "].identity.id",
                     p -> ValidationErrors.invalidFieldType(p, "non-empty string"));
         }
     }
 
     private void validateSinnerHasZayinEgo(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        JsonNode egos = sinnerEquipment.get("egos");
-        if (egos == null || !egos.isObject()) {
+        JsonNode egos = sinnerEquipment.path("egos");
+        if (!egos.isObject()) {
             context.reject("equipment[" + sinnerKey + "].egos",
                     p -> ValidationErrors.invalidFieldType(p, "object"));
             return;
@@ -59,15 +59,15 @@ class EquipmentValidator {
 
         validateEgoTypes(sinnerKey, egos, context);
 
-        JsonNode zayinEgo = egos.get(REQUIRED_EGO_TYPE);
-        if (zayinEgo == null || !zayinEgo.isObject()) {
+        JsonNode zayinEgo = egos.path(REQUIRED_EGO_TYPE);
+        if (!zayinEgo.isObject()) {
             context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE,
                     p -> ValidationErrors.missingRequiredField(Set.of(p)));
             return;
         }
 
-        JsonNode idNode = zayinEgo.get("id");
-        if (idNode == null || !idNode.isTextual() || idNode.asText().isBlank()) {
+        JsonNode idNode = zayinEgo.path("id");
+        if (!idNode.isTextual() || idNode.asText().isBlank()) {
             context.reject("equipment[" + sinnerKey + "].egos." + REQUIRED_EGO_TYPE + ".id",
                     p -> ValidationErrors.invalidFieldType(p, "non-empty string"));
         }

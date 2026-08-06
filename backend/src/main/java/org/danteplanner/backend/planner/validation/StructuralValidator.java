@@ -123,8 +123,8 @@ class StructuralValidator {
     }
 
     void validateNoteSize(JsonNode root) {
-        JsonNode sectionNotes = root.get("sectionNotes");
-        if (sectionNotes == null || !sectionNotes.isObject()) {
+        JsonNode sectionNotes = root.path("sectionNotes");
+        if (!sectionNotes.isObject()) {
             return;
         }
 
