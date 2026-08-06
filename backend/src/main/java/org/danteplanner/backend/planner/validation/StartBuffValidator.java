@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
+
 /**
  * Validates start-buff and start-gift selections against game data.
  *
@@ -24,10 +28,7 @@ class StartBuffValidator {
     private final GameDataRegistry gameDataRegistry;
 
     void validateStartBuffIds(JsonNode root, ValidationContext context) {
-        JsonNode buffIds = root.get("selectedBuffIds");
-        if (buffIds == null || !buffIds.isArray()) {
-            return;
-        }
+        JsonNode buffIds = arrayField(root, "selectedBuffIds");
 
         if (buffIds.size() > MAX_START_BUFFS) {
             context.reject("selectedBuffIds count",
@@ -37,43 +38,33 @@ class StartBuffValidator {
 
         Set<Integer> seenBaseIds = new HashSet<>();
 
-        for (int i = 0; i < buffIds.size(); i++) {
-            JsonNode node = buffIds.get(i);
-            if (!node.isNumber()) {
-                context.reject("selectedBuffIds[" + i + "]",
-                        p -> ValidationErrors.invalidFieldType(p, "number", node));
-                continue;
-            }
-
-            int buffId = node.asInt();
-
+        eachNumber(buffIds, "selectedBuffIds", context, (buffId, index) -> {
             if (!gameDataRegistry.hasStartBuff(String.valueOf(buffId))) {
                 context.reject("selectedBuffIds",
                         p -> ValidationErrors.invalidIdReference(p, String.valueOf(buffId)));
-                continue;
+                return;
             }
 
             int baseId = buffId % 100;
             if (baseId < MIN_BUFF_BASE_ID || baseId > MAX_BUFF_BASE_ID) {
-                context.reject("selectedBuffIds[" + i + "] base ID",
+                context.reject("selectedBuffIds[" + index + "] base ID",
                         p -> ValidationErrors.valueOutOfRange(p, baseId, MIN_BUFF_BASE_ID, MAX_BUFF_BASE_ID));
-                continue;
+                return;
             }
 
             if (!seenBaseIds.add(baseId)) {
                 context.reject("selectedBuffIds base IDs",
                         p -> ValidationErrors.duplicateValue(p, String.valueOf(baseId)));
             }
-        }
+        });
     }
 
     void validateStartGiftIds(JsonNode root, ValidationContext context) {
-        JsonNode keywordNode = root.get("selectedGiftKeyword");
-        JsonNode giftIdsNode = root.get("selectedGiftIds");
-        JsonNode giftIds = (giftIdsNode != null && giftIdsNode.isArray()) ? giftIdsNode : null;
+        JsonNode keywordNode = root.path("selectedGiftKeyword");
+        JsonNode giftIds = arrayField(root, "selectedGiftIds");
 
-        if (keywordNode == null || !keywordNode.isTextual()) {
-            if (giftIds != null && !giftIds.isEmpty()) {
+        if (!keywordNode.isTextual()) {
+            if (!giftIds.isEmpty()) {
                 context.reject("selectedGiftIds",
                         p -> ValidationErrors.invalidSequence(p + " requires selectedGiftKeyword"));
             }
@@ -88,31 +79,12 @@ class StartBuffValidator {
         }
 
         Set<String> pool = gameDataRegistry.getStartGiftPool(keyword);
-        if (giftIds == null) {
-            return;
-        }
 
-        Set<String> seenGiftIds = new HashSet<>();
-
-        for (int i = 0; i < giftIds.size(); i++) {
-            JsonNode node = giftIds.get(i);
-            if (!node.isTextual()) {
-                context.reject("selectedGiftIds[" + i + "]",
-                        p -> ValidationErrors.invalidFieldType(p, "string", node));
-                continue;
-            }
-
-            String giftId = node.asText();
-
-            if (!seenGiftIds.add(giftId)) {
-                context.reject("selectedGiftIds", p -> ValidationErrors.duplicateValue(p, giftId));
-                continue;
-            }
-
+        eachUniqueString(giftIds, "selectedGiftIds", context, (giftId, index) -> {
             if (!pool.contains(giftId)) {
                 context.reject("selectedGiftIds (not in keyword '" + keyword + "' pool)",
                         p -> ValidationErrors.invalidIdReference(p, giftId));
             }
-        }
+        });
     }
 }
