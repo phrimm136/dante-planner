@@ -15,6 +15,7 @@ import java.util.function.IntFunction;
 
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObject;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObjectProperty;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 
 /**
@@ -70,28 +71,16 @@ class IdReferenceValidator {
     private final SinnerIdValidator sinnerIdValidator;
 
     void validateEquipmentIds(JsonNode root, ValidationContext context) {
-        JsonNode equipment = root.get("equipment");
-        if (equipment == null || !equipment.isObject()) {
-            return;
-        }
-
-        for (Map.Entry<String, JsonNode> entry : equipment.properties()) {
-            String sinnerKey = entry.getKey();
-            JsonNode sinnerEquipment = entry.getValue();
-
+        eachObjectProperty(root.path("equipment"), (sinnerKey, sinnerEquipment) -> {
             validateIdentityId(sinnerKey, sinnerEquipment, context);
             validateEgoIds(sinnerKey, sinnerEquipment, context);
-        }
+        });
     }
 
     private void validateIdentityId(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        JsonNode identity = sinnerEquipment.get("identity");
-        if (identity == null || !identity.isObject()) {
-            return;
-        }
-
-        JsonNode idNode = identity.get("id");
-        if (idNode == null || !idNode.isTextual()) {
+        JsonNode identity = sinnerEquipment.path("identity");
+        JsonNode idNode = identity.path("id");
+        if (!idNode.isTextual()) {
             return;
         }
 
@@ -115,8 +104,8 @@ class IdReferenceValidator {
 
     private void requireInRange(JsonNode owner, String ownerPath, String field, int min, int max,
                                 ValidationContext context) {
-        JsonNode node = owner.get(field);
-        if (node == null || !node.isNumber()) {
+        JsonNode node = owner.path(field);
+        if (!node.isNumber()) {
             return;
         }
 
@@ -127,48 +116,37 @@ class IdReferenceValidator {
     }
 
     private void validateEgoIds(String sinnerKey, JsonNode sinnerEquipment, ValidationContext context) {
-        JsonNode egos = sinnerEquipment.get("egos");
-        if (egos == null || !egos.isObject()) {
-            return;
-        }
-
-        for (Map.Entry<String, JsonNode> egoEntry : egos.properties()) {
-            String egoType = egoEntry.getKey();
-            JsonNode ego = egoEntry.getValue();
-            if (ego == null || !ego.isObject()) {
-                continue;
-            }
-
-            JsonNode idNode = ego.get("id");
-            if (idNode == null || idNode.isNull()) {
-                continue;
+        eachObjectProperty(sinnerEquipment.path("egos"), (egoType, ego) -> {
+            JsonNode idNode = ego.path("id");
+            if (idNode.isMissingNode() || idNode.isNull()) {
+                return;
             }
             if (!idNode.isTextual()) {
                 context.reject("equipment." + sinnerKey + ".egos." + egoType + ".id",
                         p -> ValidationErrors.invalidFieldType(p, "string", idNode));
-                continue;
+                return;
             }
 
             String egoId = idNode.asText();
 
             if (!gameDataRegistry.hasEgo(egoId)) {
                 context.reject("EGO", p -> ValidationErrors.invalidIdReference(p, egoId));
-                continue;
+                return;
             }
 
             if (!sinnerIdValidator.validateMatch(sinnerKey, egoId)) {
                 context.reject("EGO for sinner " + sinnerKey, p -> ValidationErrors.invalidIdReference(p, egoId));
-                continue;
+                return;
             }
 
             validateThreadspin(ego, sinnerKey, egoType, egoId, context);
-        }
+        });
     }
 
     private void validateThreadspin(JsonNode ego, String sinnerKey, String egoType, String egoId,
                                     ValidationContext context) {
-        JsonNode threadspinNode = ego.get("threadspin");
-        if (threadspinNode == null || !threadspinNode.isNumber()) {
+        JsonNode threadspinNode = ego.path("threadspin");
+        if (!threadspinNode.isNumber()) {
             return;
         }
 
