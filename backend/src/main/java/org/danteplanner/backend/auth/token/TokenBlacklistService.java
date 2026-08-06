@@ -218,10 +218,6 @@ public class TokenBlacklistService {
      * @return true if the token is blacklisted and outside any grace period
      */
     public boolean isBlacklisted(String token) {
-        if (token == null) {
-            return false;
-        }
-
         try {
             String value = authLocalStringRedisTemplate.opsForValue().get(blacklistKey(token));
             if (value == null) {
@@ -263,9 +259,6 @@ public class TokenBlacklistService {
      * @return true if the token was issued before invalidation
      */
     public boolean isUserTokenInvalidated(Long userId, long issuedAt) {
-        if (userId == null) {
-            return false;
-        }
         try {
             String value = authLocalStringRedisTemplate.opsForValue().get(userInvalidationKey(userId));
             if (value == null) {

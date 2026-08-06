@@ -148,16 +148,6 @@ class TokenBlacklistServiceIT {
             assertThat(result).isFalse();
             assertThat(blacklistService.size()).isEqualTo(0); // Entry should be removed
         }
-
-        @Test
-        @DisplayName("Should return false for null token")
-        void isBlacklisted_WhenNullToken_ReturnsFalse() {
-            // Act
-            boolean result = blacklistService.isBlacklisted(null);
-
-            // Assert
-            assertThat(result).isFalse();
-        }
     }
 
     @Nested
