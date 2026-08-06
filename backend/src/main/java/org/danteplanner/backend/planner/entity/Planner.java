@@ -208,12 +208,16 @@ public class Planner implements Persistable<UUID> {
     /**
      * Take this planner down as a moderator. Unpublishing is part of the takedown.
      *
-     * @return whether the takedown changed this planner
+     * <p>A takedown that newly stamps the planner reports {@link PublicationChange#WITHDRAWN} even
+     * when the planner was already unpublished: the stamp pins it unpublishable, which is a
+     * departure from public view the caller still has to persist and project.</p>
+     *
+     * @return what the takedown turned out to be
      */
-    public boolean takeDown() {
+    public PublicationChange takeDown() {
         boolean moderated = moderation.takeDown();
-        boolean withdrawn = publication.unpublish().changed();
-        return moderated || withdrawn;
+        PublicationChange withdrawal = publication.unpublish();
+        return moderated ? PublicationChange.WITHDRAWN : withdrawal;
     }
 
     /**
@@ -253,7 +257,7 @@ public class Planner implements Persistable<UUID> {
         if (moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
         }
-        return publication.setPublished(true);
+        return publication.publish();
     }
 
     /**

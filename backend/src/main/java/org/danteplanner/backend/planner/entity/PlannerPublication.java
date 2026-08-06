@@ -54,24 +54,19 @@ public class PlannerPublication {
     private Boolean ownerNotificationsEnabled = true;
 
     /**
-     * Drive the published state to {@code target}, stamping firstPublishedAt on the first
-     * transition into published.
+     * Enter public view, stamping firstPublishedAt on the first entry.
      *
-     * <p>Idempotent by construction rather than by the caller checking first: applying the state
-     * a planner already holds changes nothing, so a retry or a failover cannot flip it back.</p>
+     * <p>Idempotent by construction rather than by the caller checking first: publishing a planner
+     * already published changes nothing, so a retry or a failover cannot flip it back.</p>
      *
-     * @param target the desired published state
      * @return what the transition turned out to be
      */
-    PublicationChange setPublished(boolean target) {
-        if (published == target) {
+    PublicationChange publish() {
+        if (published) {
             return PublicationChange.NONE;
         }
-        this.published = target;
+        this.published = true;
 
-        if (!target) {
-            return PublicationChange.WITHDRAWN;
-        }
         if (firstPublishedAt == null) {
             this.firstPublishedAt = Instant.now();
             return PublicationChange.FIRST_PUBLISH;
@@ -79,7 +74,18 @@ public class PlannerPublication {
         return PublicationChange.REPUBLISH;
     }
 
+    /**
+     * Leave public view, keeping the first-publish stamp that anchors the catalog's recency sort.
+     *
+     * <p>Idempotent by construction, for the same reason {@link #publish()} is.</p>
+     *
+     * @return what the transition turned out to be
+     */
     PublicationChange unpublish() {
-        return setPublished(false);
+        if (!published) {
+            return PublicationChange.NONE;
+        }
+        this.published = false;
+        return PublicationChange.WITHDRAWN;
     }
 }

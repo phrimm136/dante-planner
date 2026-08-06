@@ -68,9 +68,9 @@ public class PlannerPublishingService {
          * Apply the transition.
          *
          * @param planner the loaded aggregate
-         * @return whether the transition changed it
+         * @return what the transition turned out to be
          */
-        boolean apply(Planner planner);
+        PublicationChange apply(Planner planner);
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -197,7 +197,7 @@ public class PlannerPublishingService {
     public Planner withdrawFromPublicView(UUID plannerId, Withdrawal withdrawal) {
         Planner planner = accessGuard.requireExisting(plannerId);
 
-        if (!withdrawal.apply(planner)) {
+        if (!withdrawal.apply(planner).changed()) {
             return planner;
         }
 

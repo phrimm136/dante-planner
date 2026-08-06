@@ -67,8 +67,7 @@ public class PlannerModerationService {
      */
     @Transactional
     public Planner unpublishPlanner(Long actorId, UUID plannerId) {
-        Planner saved = plannerPublishingService.withdrawFromPublicView(
-                plannerId, planner -> planner.unpublish().changed());
+        Planner saved = plannerPublishingService.withdrawFromPublicView(plannerId, Planner::unpublish);
 
         auditService.record(actorId, plannerId.toString(),
                 ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER, null, null);
