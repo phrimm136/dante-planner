@@ -1,21 +1,17 @@
-import { Suspense } from 'react'
-import { useTranslation } from 'react-i18next'
 import { ThemePackFilterDropdown } from '@/pages/themePack'
 import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
-import { FilterSection } from '@/shared/filter'
+import { FilterSectionList, filterSection } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { AbEventList, useAbEventListSpec } from '@/pages/abEvent'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Shell component - loads spec, manages filter states.
  */
 function AbEventPageShell() {
-  const { t } = useTranslation(['database', 'common'])
   const spec = useAbEventListSpec()
 
   // Filter states
@@ -31,38 +27,34 @@ function AbEventPageShell() {
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
-  const primaryFilters = (
-    <FilterSection
-      title={t('filters.egoGift', 'EGO Gift')}
-      activeCount={filters.selectedEgoGifts.size}
-    >
-      <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-        <EGOGiftFilterDropdown
-          selected={filters.selectedEgoGifts}
-          onSelectionChange={setters.selectedEgoGifts}
-        />
-      </Suspense>
-    </FilterSection>
-  )
+  const PRIMARY_FILTERS = [
+    filterSection({
+      key: 'selectedEgoGifts',
+      titleKey: 'filters.egoGift',
+      titleFallback: 'EGO Gift',
+      suspense: true,
+      Component: EGOGiftFilterDropdown,
+      selected: filters.selectedEgoGifts,
+      onSelectionChange: setters.selectedEgoGifts,
+    }),
+  ]
 
-  const secondaryFilters = (
-    <FilterSection
-      title={t('filters.themePack', 'Theme Pack')}
-      activeCount={filters.selectedThemePacks.size}
-    >
-      <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-        <ThemePackFilterDropdown
-          selected={filters.selectedThemePacks}
-          onThemePacksChange={setters.selectedThemePacks}
-        />
-      </Suspense>
-    </FilterSection>
-  )
+  const SECONDARY_FILTERS = [
+    filterSection({
+      key: 'selectedThemePacks',
+      titleKey: 'filters.themePack',
+      titleFallback: 'Theme Pack',
+      suspense: true,
+      Component: ThemePackFilterDropdown,
+      selected: filters.selectedThemePacks,
+      onSelectionChange: setters.selectedThemePacks,
+    }),
+  ]
 
   return (
     <FilterPageLayout
-      primaryFilters={primaryFilters}
-      secondaryFilters={secondaryFilters}
+      primaryFilters={<FilterSectionList sections={PRIMARY_FILTERS} />}
+      secondaryFilters={<FilterSectionList sections={SECONDARY_FILTERS} />}
       activeFilterCount={activeFilterCount}
       onResetAll={resetAll}
     >

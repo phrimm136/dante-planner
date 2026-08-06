@@ -2,10 +2,12 @@ import { plannerApi } from '../lib/plannerApi'
 import { PLANNER_SCHEMA_VERSION } from '@/lib/constants'
 import { ok, err } from '@/lib/result'
 import { classifySaveError } from '../lib/plannerSaveErrors'
+import { toSaveablePlanner } from '../schemas/PlannerSchemas'
 import type { Result } from '@/lib/result'
 import type { SaveError } from '../lib/plannerSaveErrors'
 import type {
   SaveablePlanner,
+  PlannerEditorConfig,
   PlannerSummary,
   ServerPlannerResponse,
   ServerPlannerSummary,
@@ -38,8 +40,8 @@ function serverResponseToSaveable(response: ServerPlannerResponse): SaveablePlan
     throw new Error('Failed to parse planner content from server')
   }
 
-  return {
-    metadata: {
+  return toSaveablePlanner(
+    {
       id: response.id,
       title: response.title,
       status: response.status,
@@ -53,12 +55,12 @@ function serverResponseToSaveable(response: ServerPlannerResponse): SaveablePlan
       deviceId: response.deviceId ?? '',
       published: response.published,
     },
-    config: {
+    {
       type: response.plannerType,
       category: response.category,
-    },
+    } as PlannerEditorConfig,
     content,
-  } as SaveablePlanner
+  )
 }
 
 /**

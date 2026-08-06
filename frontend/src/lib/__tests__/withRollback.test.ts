@@ -1,67 +1,69 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import { ok, err } from '../result'
 import { withRollback } from '../withRollback'
-
-beforeEach(() => {
-  vi.restoreAllMocks()
-  vi.spyOn(console, 'error').mockImplementation(() => {})
-})
 
 describe('withRollback', () => {
   it('runs create then rest and never rolls back on success', async () => {
     const order: string[] = []
 
-    await withRollback({
+    const outcome = await withRollback<string>({
       create: async () => {
         order.push('create')
+        return ok(undefined)
       },
       rest: async () => {
         order.push('rest')
+        return ok(undefined)
       },
       rollback: async () => {
         order.push('rollback')
+        return ok(undefined)
       },
     })
 
+    expect(outcome).toEqual({ kind: 'completed' })
     expect(order).toEqual(['create', 'rest'])
   })
 
-  it('rolls back and rethrows when a later step fails', async () => {
-    const rollback = vi.fn().mockResolvedValue(undefined)
-    const failure = new Error('rest failed')
+  it('rolls back and reports the failure when a later step fails', async () => {
+    const rollback = vi.fn().mockResolvedValue(ok(undefined))
 
-    await expect(
-      withRollback({
-        create: async () => {},
-        rest: () => Promise.reject(failure),
-        rollback,
-      }),
-    ).rejects.toBe(failure)
+    const outcome = await withRollback<string>({
+      create: async () => ok(undefined),
+      rest: async () => err('rest failed'),
+      rollback,
+    })
 
+    expect(outcome).toEqual({ kind: 'undone', error: 'rest failed' })
     expect(rollback).toHaveBeenCalledTimes(1)
   })
 
   it('does not roll back when create itself fails', async () => {
-    const rollback = vi.fn().mockResolvedValue(undefined)
-    const rest = vi.fn().mockResolvedValue(undefined)
-    const failure = new Error('create failed')
+    const rollback = vi.fn().mockResolvedValue(ok(undefined))
+    const rest = vi.fn().mockResolvedValue(ok(undefined))
 
-    await expect(
-      withRollback({ create: () => Promise.reject(failure), rest, rollback }),
-    ).rejects.toBe(failure)
+    const outcome = await withRollback<string>({
+      create: async () => err('create failed'),
+      rest,
+      rollback,
+    })
 
+    expect(outcome).toEqual({ kind: 'undone', error: 'create failed' })
     expect(rollback).not.toHaveBeenCalled()
     expect(rest).not.toHaveBeenCalled()
   })
 
-  it('surfaces the original error even when the rollback also fails', async () => {
-    const failure = new Error('rest failed')
+  it('reports both causes when the rollback also fails', async () => {
+    const outcome = await withRollback<string>({
+      create: async () => ok(undefined),
+      rest: async () => err('rest failed'),
+      rollback: async () => err('rollback failed'),
+    })
 
-    await expect(
-      withRollback({
-        create: async () => {},
-        rest: () => Promise.reject(failure),
-        rollback: () => Promise.reject(new Error('rollback failed')),
-      }),
-    ).rejects.toBe(failure)
+    expect(outcome).toEqual({
+      kind: 'undoFailed',
+      error: 'rest failed',
+      rollbackError: 'rollback failed',
+    })
   })
 })

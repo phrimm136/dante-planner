@@ -55,7 +55,7 @@ const h = vi.hoisted(() => {
     userRef: { current: null as unknown },
     settingsRef: { current: null as unknown },
     createEventsConnection: vi.fn(() => new MockEventSource('/api/planner/events')),
-    deleteFromLocal: vi.fn(() => Promise.resolve()),
+    deleteFromLocal: vi.fn(() => Promise.resolve({ ok: true as const, value: undefined })),
     showBrowserNotification: vi.fn(),
     showNotificationToast: vi.fn(),
     isTabHidden: vi.fn(() => false),

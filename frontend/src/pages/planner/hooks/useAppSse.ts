@@ -132,8 +132,10 @@ export function useAppSse(): void {
   const applyPlannerDeleted = (_envelope: SseEnvelope, deletedId: string | undefined) => {
     if (!deletedId) return
 
-    void storage.deleteFromLocal(deletedId).catch((e) => {
-      console.error('Failed to purge local planner after SSE delete:', e)
+    void storage.deleteFromLocal(deletedId).then((purge) => {
+      if (!purge.ok) {
+        console.error('Failed to purge local planner after SSE delete:', purge.error.kind)
+      }
     })
     queryClient.setQueryData(plannerQueryKeys.list(), (prev) =>
       Array.isArray(prev) ? prev.filter((p) => p?.id !== deletedId) : prev,

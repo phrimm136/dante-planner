@@ -38,6 +38,15 @@ interface CommentEditorProps {
   isSubmitting?: boolean
 }
 
+function CommentEditorErrorFallback() {
+  const { t } = useTranslation(['planner', 'common'])
+  return (
+    <div className="p-3 text-sm text-muted-foreground">
+      {t('common:error.editorFailed', 'Editor failed to load')}
+    </div>
+  )
+}
+
 export function CommentEditor({
   placeholder,
   disabled = false,
@@ -138,13 +147,7 @@ export function CommentEditor({
       onClick={handleFocus}
       onBlur={handleBlur}
     >
-      <ErrorBoundary
-        fallbackRender={() => (
-          <div className="p-3 text-sm text-muted-foreground">
-            {t('common:error.editorFailed', 'Editor failed to load')}
-          </div>
-        )}
-      >
+      <ErrorBoundary FallbackComponent={CommentEditorErrorFallback}>
         <EditorContext.Provider value={{ editor }}>
           <div className="relative">
             <EditorContent editor={editor} />

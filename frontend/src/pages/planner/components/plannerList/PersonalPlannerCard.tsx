@@ -5,6 +5,7 @@ import { Clock } from 'lucide-react'
 import { formatCompactDate } from '@/lib/formatDate'
 import { getKeywordIconPath } from '@/shared/assets'
 import { PLANNER_LIST, SECTION_STYLES } from '@/lib/constants'
+import { MdCategoryLabel } from '../MdCategoryLabel'
 import { PlannerStatusIcon } from './PlannerStatusIcon'
 import { categoryBadgeStyle, deriveSaveStatus } from '../../lib/plannerBadges'
 
@@ -61,7 +62,7 @@ export function PersonalPlannerCard({
               className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
               style={categoryBadgeStyle(planner.category)}
             >
-              {t(`pages.plannerList.mdCategory.${planner.category}`)}
+              <MdCategoryLabel category={planner.category} />
             </span>
 
             {/* Keywords (icons inline with floor badge) */}

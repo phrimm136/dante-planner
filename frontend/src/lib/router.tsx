@@ -190,7 +190,7 @@ const plannerMDGesellschaftDetailRoute = createRoute({
       await import('@/pages/planner/hooks/usePublishedPlannerQuery')
     const result = await queryClient.fetchQuery({
       queryKey: publishedPlannerQueryKeys.detail(params.id),
-      queryFn: () => fetchPublishedPlanner(params.id),
+      queryFn: ({ signal }) => fetchPublishedPlanner(params.id, signal),
       staleTime: STALE_TIME.MEDIUM,
     })
     return { title: result.apiData.title || getUntitledPlaceholder() }

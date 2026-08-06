@@ -15,8 +15,6 @@ import {
   TimedOutError,
   WriteTemporarilyUnavailableError,
 } from '@/lib/api'
-import { queryClient } from '@/lib/queryClient'
-import { authQueryKeys } from '@/shared/auth'
 
 import type { ConflictState } from '../types/PlannerTypes'
 
@@ -45,51 +43,12 @@ const MODERATION_TOAST_KEY: Record<RestrictionKind, string> = {
 const QUOTA_TOAST_KEY = 'pages.plannerMD.save.quotaExceeded'
 const QUOTA_TOAST_FALLBACK = 'Storage quota exceeded'
 
-/** Error `code` carried by the ad-hoc errors thrown inside the save pipeline. */
-export const USER_FRIENDLY_VALIDATION_CODE = 'userFriendlyValidation'
-const VALIDATION_FAILED_CODE = 'validationFailed'
-const QUOTA_EXCEEDED_CODE = 'quotaExceeded'
-const CLASSIFIED_CODE = 'classifiedSaveError'
-
-interface CodedError extends Error {
-  code?: string
-  i18nKey?: string
-  i18nParams?: Record<string, string>
-  saveError?: SaveError
-}
-
-/**
- * Build the error the save pipeline throws to abort on a user-facing validation
- * failure, carrying the i18n key/params through the shared `catch`.
- */
-export function userFriendlyValidationError(friendly: {
+/** Carry a validator's i18n key and params into the save error vocabulary. */
+export function validationSaveError(friendly: {
   key: string
   params?: Record<string, string>
-}): CodedError {
-  return Object.assign(new Error(friendly.key), {
-    code: USER_FRIENDLY_VALIDATION_CODE,
-    i18nKey: friendly.key,
-    i18nParams: friendly.params,
-  })
-}
-
-/**
- * Build the error a save step throws once it already knows which {@link SaveError}
- * the failure is, so the shared `catch` reports that rather than re-deriving
- * `unknown` from a wrapper.
- */
-export function classifiedSaveError(saveError: SaveError): CodedError {
-  return Object.assign(new Error(saveError.kind), {
-    code: CLASSIFIED_CODE,
-    saveError,
-  })
-}
-
-/** The `SaveError` an error carries verbatim, or null when it carries none. */
-function carriedSaveError(error: unknown): SaveError | null {
-  if (!(error instanceof Error)) return null
-  const coded = error as CodedError
-  return coded.code === CLASSIFIED_CODE ? (coded.saveError ?? null) : null
+}): SaveError {
+  return { kind: 'validation', key: friendly.key, params: friendly.params }
 }
 
 /** The account restriction an error reports, or null when it reports none. */
@@ -102,12 +61,10 @@ export function restrictionOf(error: unknown): RestrictionKind | null {
 /**
  * Map a thrown value onto the save error vocabulary.
  *
- * A restriction invalidates the cached account so the app-wide banner appears.
+ * Pure: every reaction a failure deserves — cache invalidation, logging, toasts —
+ * belongs to the caller that knows which surface is failing.
  */
 export function classifySaveError(error: unknown): SaveError {
-  const carried = carriedSaveError(error)
-  if (carried) return carried
-
   if (error instanceof ConflictError) {
     return {
       kind: 'conflict',
@@ -116,41 +73,15 @@ export function classifySaveError(error: unknown): SaveError {
   }
 
   const restriction = restrictionOf(error)
-  if (restriction) {
-    console.warn(`Save blocked: user is ${restriction}`)
-    void queryClient.invalidateQueries({ queryKey: authQueryKeys.me })
-    return { kind: 'moderation', reason: restriction }
+  if (restriction) return { kind: 'moderation', reason: restriction }
+
+  if (error instanceof WriteTemporarilyUnavailableError) return { kind: 'syncPaused' }
+
+  // IndexedDB reports an exhausted quota as the request's DOMException.
+  if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+    return { kind: 'quota' }
   }
 
-  if (error instanceof WriteTemporarilyUnavailableError) {
-    console.warn('Write temporarily unavailable — saved locally, sync paused')
-    return { kind: 'syncPaused' }
-  }
-
-  if (error instanceof Error) {
-    const coded = error as CodedError
-
-    if (
-      coded.code === QUOTA_EXCEEDED_CODE ||
-      error.message.includes('QuotaExceeded') ||
-      error.message.includes('quota')
-    ) {
-      console.error('Save failed (quota exceeded):', error.message)
-      return { kind: 'quota' }
-    }
-
-    if (coded.code === USER_FRIENDLY_VALIDATION_CODE && coded.i18nKey) {
-      console.error('Save failed (user validation):', error.message)
-      return { kind: 'validation', key: coded.i18nKey, params: coded.i18nParams }
-    }
-
-    if (coded.code === VALIDATION_FAILED_CODE) {
-      console.error('Save failed (validation):', error.message)
-      return { kind: 'unknown' }
-    }
-  }
-
-  console.error('Save failed:', error)
   return { kind: 'unknown' }
 }
 

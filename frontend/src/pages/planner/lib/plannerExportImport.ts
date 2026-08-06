@@ -1,13 +1,20 @@
 /**
  * Planner Export/Import Support
  *
- * The abort protocol for the import pipeline, the device-id resolution used when
+ * The decode stages of the import pipeline, the device-id resolution used when
  * rewriting imported planners, and the outcome tables mapping an end state to its
  * user-facing toast (severity + i18n key + interpolation params).
  */
 
+import { ungzip } from 'pako'
+
+import { ok, err } from '@/lib/result'
 import { isValidUUID } from '@/lib/utils'
 import { generateUUID } from '@/lib/uuid'
+import { ExportEnvelopeSchema } from '../schemas/PlannerSchemas'
+
+import type { Result } from '@/lib/result'
+import type { z } from 'zod'
 
 /** Toast method used to surface an outcome. */
 export type ToastSeverity = 'info' | 'success' | 'warning' | 'error'
@@ -45,10 +52,17 @@ export async function getValidDeviceId(source: () => Promise<string>): Promise<s
 }
 
 /* -------------------------------------------------------------------------- */
-/* Pipeline aborts                                                             */
+/* Import stages                                                               */
 /* -------------------------------------------------------------------------- */
 
-const IMPORT_ABORT_TOASTS = {
+/** Why an import stage rejected the file. */
+export type ImportError =
+  | { kind: 'invalidFileFormat' }
+  | { kind: 'decompressFailed' }
+  | { kind: 'parseFailed' }
+  | { kind: 'noPlannersInFile' }
+
+const IMPORT_ERROR_TOASTS = {
   invalidFileFormat: {
     severity: 'error',
     key: 'exportImport.invalidFileFormat',
@@ -69,45 +83,54 @@ const IMPORT_ABORT_TOASTS = {
     key: 'exportImport.noPlannersInFile',
     fallback: 'No planners in file',
   },
-} as const satisfies Record<string, ToastDescriptor>
+} as const satisfies Record<ImportError['kind'], ToastDescriptor>
 
-export type ImportAbortReason = keyof typeof IMPORT_ABORT_TOASTS
-
-/** Signals that an import stage failed; carries the reason its toast is keyed by. */
-export class ImportAbortError extends Error {
-  readonly reason: ImportAbortReason
-
-  constructor(reason: ImportAbortReason) {
-    super(reason)
-    this.name = 'ImportAbortError'
-    this.reason = reason
-  }
+export function importErrorToast(error: ImportError): ToastDescriptor {
+  return IMPORT_ERROR_TOASTS[error.kind]
 }
 
-export function importAbortToast(reason: ImportAbortReason): ToastDescriptor {
-  return IMPORT_ABORT_TOASTS[reason]
+/** Gzip magic bytes: 0x1f 0x8b */
+const GZIP_MAGIC_BYTES = [0x1f, 0x8b]
+
+/** An envelope that passed structural validation; content stays loosely typed. */
+export type ImportEnvelope = z.infer<typeof ExportEnvelopeSchema>
+
+/** Accept a file only when it opens with a gzip header. */
+export function readGzipBytes(data: Uint8Array): Result<Uint8Array, ImportError> {
+  const isGzip =
+    data.length >= 2 && data[0] === GZIP_MAGIC_BYTES[0] && data[1] === GZIP_MAGIC_BYTES[1]
+  return isGzip ? ok(data) : err<ImportError>({ kind: 'invalidFileFormat' })
 }
 
-/** Returned by a stage to reject its input; distinct from any parsed JSON value. */
-export const ABORT = Symbol('import-abort')
-
-/**
- * Run one import stage. A thrown error or an {@link ABORT} result aborts the pipeline
- * with `reason`; anything else is passed through to the next stage.
- *
- * @throws ImportAbortError
- */
-export function step<T>(stage: () => T | typeof ABORT, reason: ImportAbortReason): T {
-  let value: T | typeof ABORT
+/** Inflate the export file into its JSON text. */
+export function decompressImport(data: Uint8Array): Result<string, ImportError> {
   try {
-    value = stage()
+    return ok(ungzip(data, { toText: true }))
   } catch {
-    throw new ImportAbortError(reason)
+    return err<ImportError>({ kind: 'decompressFailed' })
   }
-  if (value === ABORT) {
-    throw new ImportAbortError(reason)
+}
+
+/** Parse the inflated text; the shape is checked by {@link readImportEnvelope}. */
+export function parseImportJson(text: string): Result<unknown, ImportError> {
+  try {
+    return ok(JSON.parse(text) as unknown)
+  } catch {
+    return err<ImportError>({ kind: 'parseFailed' })
   }
-  return value as T
+}
+
+/** Validate the envelope structure and reject one carrying no planners. */
+export function readImportEnvelope(parsed: unknown): Result<ImportEnvelope, ImportError> {
+  const validation = ExportEnvelopeSchema.safeParse(parsed)
+  if (!validation.success) {
+    console.error('Validation failed:', validation.error)
+    return err<ImportError>({ kind: 'invalidFileFormat' })
+  }
+  if (validation.data.planners.length === 0) {
+    return err<ImportError>({ kind: 'noPlannersInFile' })
+  }
+  return ok(validation.data)
 }
 
 /* -------------------------------------------------------------------------- */

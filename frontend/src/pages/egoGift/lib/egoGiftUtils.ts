@@ -21,24 +21,6 @@ export function calculateEnhancementCost(tier: string, level: number): number | 
 }
 
 /**
- * Extract tier string from gift tag array
- * @param tags - Array of tags (e.g., ['TIER_2', 'SOME_OTHER_TAG'])
- * @returns Tier string ('1', '2', '3', '4', '5', 'EX')
- * @throws Error if no TIER_ tag found
- */
-export function extractEGOGiftTier(tags: string[]): string {
-  const exTier = tags.find((t) => t === 'TIER_EX')
-  if (exTier) return 'EX'
-
-  const tierTag = tags.find((t) => t.startsWith('TIER_'))
-  if (!tierTag) {
-    throw new Error(`No TIER_ tag found in tags: ${tags.join(', ')}`)
-  }
-
-  return tierTag.replace('TIER_', '')
-}
-
-/**
  * Whether a recipe is the two-pool "mixed" shape rather than the standard
  * material-list shape.
  *

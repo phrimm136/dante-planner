@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { getKeywordIconPath } from '@/shared/assets'
+import { MdCategoryLabel } from '../MdCategoryLabel'
 import { categoryBadgeStyle } from '../../lib/plannerBadges'
 
 import type { ReactNode } from 'react'
@@ -57,7 +58,7 @@ export function PlannerHeaderChrome({
             className="px-2 py-0.5 text-sm font-medium rounded shrink-0"
             style={categoryBadgeStyle(category)}
           >
-            {t(`pages.plannerList.mdCategory.${category}`)}
+            <MdCategoryLabel category={category} />
           </span>
           {keywords.length > 0 && (
             <div className="flex items-center gap-1.5 overflow-x-auto">

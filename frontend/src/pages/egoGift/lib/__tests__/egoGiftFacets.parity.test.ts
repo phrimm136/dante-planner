@@ -9,12 +9,8 @@ import { describe, it, expect } from 'vitest'
 import { applyFacets } from '@/shared/filter'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
-import {
-  EGO_GIFT_FACETS,
-  extractTier,
-  deriveDifficulty,
-  type EGOGiftFacetState,
-} from '../egoGiftFilter'
+import { EGO_GIFT_FACETS, deriveDifficulty, type EGOGiftFacetState } from '../egoGiftFilter'
+import { parseTier, toRomanTier } from '../egoGiftTier'
 import type { EGOGiftListItem } from '../../types/EGOGiftTypes'
 
 function legacyKeyword(giftKeyword: string | null, selectedKeywords: ReadonlySet<string>): boolean {
@@ -33,7 +29,7 @@ function legacyDifficulty(
 
 function legacyTier(tag: readonly string[], selectedTiers: ReadonlySet<EGOGiftTier>): boolean {
   if (selectedTiers.size === 0) return true
-  const tier = extractTier(tag)
+  const tier = toRomanTier(parseTier(tag))
   return tier !== undefined && selectedTiers.has(tier)
 }
 

@@ -3,9 +3,12 @@ import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
 import { generateUUID } from '@/lib/uuid'
 import { ok, err } from '@/lib/result'
 import { migrateKeywords } from '@/shared/gameData'
-import { SaveablePlannerSchema } from '../schemas/PlannerSchemas'
+import { SaveablePlannerSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
+import { classifySaveError } from '../lib/plannerSaveErrors'
+import { isMDPlanner } from '../types/PlannerTypes'
 import type { Result } from '@/lib/result'
-import type { SaveablePlanner, PlannerSummary, MDPlannerContent } from '../types/PlannerTypes'
+import type { SaveError } from '../lib/plannerSaveErrors'
+import type { SaveablePlanner, PlannerSummary } from '../types/PlannerTypes'
 
 /**
  * SSR safety check
@@ -43,6 +46,24 @@ function parseStorageKey(
 }
 
 /**
+ * A planner whose keyword ids are the current ones.
+ *
+ * Rebuilt rather than assigned into: the input is parse output shared with the
+ * caller, so migrating in place would rewrite a value someone else still holds.
+ */
+function withMigratedKeywords(planner: SaveablePlanner): SaveablePlanner {
+  if (!isMDPlanner(planner)) return planner
+
+  return {
+    ...planner,
+    content: {
+      ...planner.content,
+      selectedKeywords: migrateKeywords(planner.content.selectedKeywords),
+    },
+  }
+}
+
+/**
  * Options for storage operations with error handling
  */
 export interface StorageOperationOptions {
@@ -63,16 +84,6 @@ export type StorageErrorCode =
   | 'notInBrowser'
 
 /**
- * Result of a save operation
- */
-export interface SaveResult {
-  /** Whether the save succeeded */
-  success: boolean
-  /** Error code if save failed (for i18n translation) */
-  errorCode?: StorageErrorCode
-}
-
-/**
  * Result of a load operation.
  *
  * A successful load of a key that holds nothing carries `null`; a load that
@@ -87,18 +98,21 @@ export type LoadResult = Result<SaveablePlanner | null, StorageErrorCode>
 export interface PlannerStorageOperations {
   /** Get device ID from storage or create new UUID */
   getOrCreateDeviceId: () => Promise<string>
-  /** Save planner to IndexedDB with proper key based on status. Returns success/failure result. */
-  saveToLocal: (planner: SaveablePlanner, options?: StorageOperationOptions) => Promise<SaveResult>
+  /** Save planner to IndexedDB with proper key based on status, reporting why it failed */
+  saveToLocal: (
+    planner: SaveablePlanner,
+    options?: StorageOperationOptions,
+  ) => Promise<Result<void, SaveError>>
   /** Load and validate a planner; absent reads succeed with null, broken ones report a code */
   loadFromLocal: (id: string, options?: StorageOperationOptions) => Promise<LoadResult>
   /** List all planners as summaries, sorted by lastModifiedAt (newest first) */
   listLocal: () => Promise<PlannerSummary[]>
   /** List all planners with full content, sorted by lastModifiedAt (newest first) */
   listLocalFull: () => Promise<SaveablePlanner[]>
-  /** Delete a planner by ID */
-  deleteFromLocal: (id: string) => Promise<void>
+  /** Delete a planner by ID, reporting why the delete failed */
+  deleteFromLocal: (id: string) => Promise<Result<void, SaveError>>
   /** Clear corrupted planner data by ID */
-  clearCorruptedLocal: (id: string) => Promise<void>
+  clearCorruptedLocal: (id: string) => Promise<Result<void, SaveError>>
 }
 
 // Promise cache for getOrCreateDeviceId to prevent race conditions
@@ -166,14 +180,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
      * Save planner to IndexedDB
      * Uses unified key: planner:md:{deviceId}:{plannerId}
      * Validates planner data with Zod before saving
-     * @returns SaveResult with success/failure status and error code
+     * @returns the save error the caller reports to the user, or nothing on success
      */
     const saveToLocal = async (
       planner: SaveablePlanner,
       options?: StorageOperationOptions,
-    ): Promise<SaveResult> => {
+    ): Promise<Result<void, SaveError>> => {
       if (!isClient) {
-        return { success: false, errorCode: 'notInBrowser' }
+        return err({ kind: 'unknown' })
       }
 
       // Validate planner data before saving
@@ -188,7 +202,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
           )
         })
         options?.onError?.('validationFailed')
-        return { success: false, errorCode: 'validationFailed' }
+        return err({ kind: 'unknown' })
       }
 
       try {
@@ -196,18 +210,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
         const key = storageKeys.md(deviceId, planner.metadata.id)
 
         await storage.setItem(key, JSON.stringify(validation.data))
-        return { success: true }
+        return ok(undefined)
       } catch (error) {
-        const isQuotaError =
-          error instanceof DOMException &&
-          (error.name === 'QuotaExceededError' || error.code === 22)
-
-        const errorCode: StorageErrorCode = isQuotaError ? 'quotaExceeded' : 'saveFailed'
+        const saveError = classifySaveError(error)
 
         console.error('Failed to save planner:', error)
-        options?.onError?.(errorCode)
+        options?.onError?.(saveError.kind === 'quota' ? 'quotaExceeded' : 'saveFailed')
 
-        return { success: false, errorCode }
+        return err(saveError)
       }
     }
 
@@ -250,17 +260,13 @@ export function usePlannerStorage(): PlannerStorageOperations {
         return err('validationFailed')
       }
 
-      // Type assertion needed because:
-      // 1. Zod schema uses z.record(z.string(), z.unknown()) for content flexibility
-      // 2. TypeScript expects specific PlannerContent type
-      // Zod validation ensures the structure is correct at runtime
-      const planner = result.data as unknown as SaveablePlanner
+      const planner = toSaveablePlanner(
+        result.data.metadata,
+        result.data.config,
+        result.data.content,
+      )
       // Migrate renamed keyword ids so the detail/view page renders current icons.
-      if (planner.config.type === 'MIRROR_DUNGEON') {
-        const mdContent = planner.content as MDPlannerContent
-        mdContent.selectedKeywords = migrateKeywords(mdContent.selectedKeywords)
-      }
-      return ok(planner)
+      return ok(withMigratedKeywords(planner))
     }
 
     /**
@@ -302,14 +308,16 @@ export function usePlannerStorage(): PlannerStorageOperations {
                 const validation = SaveablePlannerSchema.safeParse(data)
 
                 if (validation.success) {
-                  // Type assertion needed because Zod schema uses flexible content type
-                  const planner = validation.data as unknown as SaveablePlanner
+                  const planner = toSaveablePlanner(
+                    validation.data.metadata,
+                    validation.data.config,
+                    validation.data.content,
+                  )
 
                   // Extract keywords for MD planners only (RR has no keywords)
-                  const selectedKeywords =
-                    planner.config.type === 'MIRROR_DUNGEON'
-                      ? migrateKeywords((planner.content as MDPlannerContent).selectedKeywords)
-                      : undefined
+                  const selectedKeywords = isMDPlanner(planner)
+                    ? migrateKeywords(planner.content.selectedKeywords)
+                    : undefined
 
                   results.push({
                     id: planner.metadata.id,
@@ -381,14 +389,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
                 const validation = SaveablePlannerSchema.safeParse(data)
 
                 if (validation.success) {
-                  const planner = validation.data as unknown as SaveablePlanner
+                  const planner = toSaveablePlanner(
+                    validation.data.metadata,
+                    validation.data.config,
+                    validation.data.content,
+                  )
                   // Migrate renamed keyword ids so downstream sync-validation and
                   // keyword filtering see current ids (content is unvalidated here).
-                  if (planner.config.type === 'MIRROR_DUNGEON') {
-                    const mdContent = planner.content as MDPlannerContent
-                    mdContent.selectedKeywords = migrateKeywords(mdContent.selectedKeywords)
-                  }
-                  results.push(planner)
+                  results.push(withMigratedKeywords(planner))
                 }
               } catch {
                 // Skip invalid entries
@@ -414,20 +422,27 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
     /**
      * Delete a planner by ID
+     * @returns the delete error the caller reports to the user, or nothing on success
      */
-    const deleteFromLocal = async (id: string): Promise<void> => {
-      if (!isClient) return
+    const deleteFromLocal = async (id: string): Promise<Result<void, SaveError>> => {
+      if (!isClient) return err({ kind: 'unknown' })
 
-      const deviceId = await getOrCreateDeviceId()
-      await storage.removeItem(storageKeys.md(deviceId, id))
+      try {
+        const deviceId = await getOrCreateDeviceId()
+        await storage.removeItem(storageKeys.md(deviceId, id))
+        return ok(undefined)
+      } catch (error) {
+        console.error('Failed to delete planner:', error)
+        return err(classifySaveError(error))
+      }
     }
 
     /**
      * Clear corrupted planner data by ID
      * Used when validation fails on load to clean up invalid data
      */
-    async function clearCorruptedLocal(id: string): Promise<void> {
-      await deleteFromLocal(id)
+    async function clearCorruptedLocal(id: string): Promise<Result<void, SaveError>> {
+      return deleteFromLocal(id)
     }
 
     return {

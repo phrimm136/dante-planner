@@ -12,14 +12,13 @@ import { useTranslation } from 'react-i18next'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { ThemePackCard } from '@/pages/themePack'
-import { EGOGiftCard } from '@/pages/egoGift'
-import { EGOGiftName } from '@/pages/egoGift'
+import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useThemePackDetailData } from '@/pages/themePack'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { isMixedRecipe } from '@/pages/egoGift'
 import { AbEventCard, useAbEventListData } from '@/pages/abEvent'
+import { findFusionGifts } from './lib/themePackFusion'
 import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
   DUNGEON_IDX,
@@ -33,6 +32,16 @@ import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
 import { SECTION_STYLES } from '@/lib/constants'
 
+const GIFT_ROW = 'flex flex-wrap gap-3'
+
+/** Difficulties in display order; the label also keys DIFFICULTY_COLORS. */
+const DUNGEON_DIFFICULTIES: { idx: DungeonIdx; label: DifficultyLabel }[] = [
+  { idx: DUNGEON_IDX.NORMAL, label: DIFFICULTY_LABELS.NORMAL },
+  { idx: DUNGEON_IDX.HARD, label: DIFFICULTY_LABELS.HARD },
+  { idx: DUNGEON_IDX.PARALLEL, label: DIFFICULTY_LABELS.INFINITY_MIRROR },
+  { idx: DUNGEON_IDX.EXTREME, label: DIFFICULTY_LABELS.EXTREME_MIRROR },
+]
+
 // =============================================================================
 // Left Column Components
 // =============================================================================
@@ -42,17 +51,11 @@ import { SECTION_STYLES } from '@/lib/constants'
  */
 function DifficultyBadges({ conditions }: { conditions: ThemePackDetail['exceptionConditions'] }) {
   const dungeonIdxSet = new Set(conditions.map((c) => c.dungeonIdx))
-
-  const DUNGEON_DISPLAY: { idx: DungeonIdx; label: DifficultyLabel }[] = [
-    { idx: DUNGEON_IDX.NORMAL, label: DIFFICULTY_LABELS.NORMAL },
-    { idx: DUNGEON_IDX.HARD, label: DIFFICULTY_LABELS.HARD },
-    { idx: DUNGEON_IDX.PARALLEL, label: DIFFICULTY_LABELS.INFINITY_MIRROR },
-    { idx: DUNGEON_IDX.EXTREME, label: DIFFICULTY_LABELS.EXTREME_MIRROR },
-  ]
+  const shownDifficulties = DUNGEON_DIFFICULTIES.filter((d) => dungeonIdxSet.has(d.idx))
 
   return (
     <div className={SECTION_STYLES.LAYOUT.wrap}>
-      {DUNGEON_DISPLAY.filter((d) => dungeonIdxSet.has(d.idx)).map((d) => (
+      {shownDifficulties.map((d) => (
         <span
           key={d.idx}
           className="px-2 py-0.5 text-xs font-semibold rounded"
@@ -77,14 +80,7 @@ export function FloorDisplay({
 }: {
   conditions: ThemePackDetail['exceptionConditions']
 }) {
-  const FLOOR_DIFFICULTIES: { idx: DungeonIdx; label: DifficultyLabel }[] = [
-    { idx: DUNGEON_IDX.NORMAL, label: DIFFICULTY_LABELS.NORMAL },
-    { idx: DUNGEON_IDX.HARD, label: DIFFICULTY_LABELS.HARD },
-    { idx: DUNGEON_IDX.PARALLEL, label: DIFFICULTY_LABELS.INFINITY_MIRROR },
-    { idx: DUNGEON_IDX.EXTREME, label: DIFFICULTY_LABELS.EXTREME_MIRROR },
-  ]
-
-  const floorGroups = FLOOR_DIFFICULTIES.map((d) => {
+  const floorGroups = DUNGEON_DIFFICULTIES.map((d) => {
     const conds = conditions.filter((c) => c.dungeonIdx === d.idx)
     if (conds.length === 0) return { ...d, floors: [] as string[] }
 
@@ -189,57 +185,15 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
 
   if (giftIds.length === 0) return null
 
-  // Find fusioned gifts: gifts whose recipe materials are all in this pool
-  const poolSet = new Set(giftIds.map(String))
-  const fusionedIds: string[] = []
-  for (const [id, giftSpec] of Object.entries(spec)) {
-    if (poolSet.has(id)) continue
-    const recipe = giftSpec.recipe
-    if (!recipe) continue
-    if (isMixedRecipe(recipe)) {
-      const allIds = [...(recipe.a?.ids ?? []), ...(recipe.b?.ids ?? [])]
-      if (allIds.length > 0 && allIds.every((mid) => poolSet.has(String(mid)))) {
-        fusionedIds.push(id)
-      }
-    } else if ('materials' in recipe) {
-      for (const matSet of recipe.materials ?? []) {
-        if (matSet.length > 0 && matSet.every((mid) => poolSet.has(String(mid)))) {
-          fusionedIds.push(id)
-          break
-        }
-      }
-    }
-  }
-
-  const shownGifts = [...giftIds.map(String), ...fusionedIds].flatMap((id) => {
-    const giftSpec = spec[id]
-    return giftSpec ? [{ id, giftSpec }] : []
-  })
+  const poolIds = giftIds.map(String)
 
   return (
-    <div className="flex flex-wrap gap-3">
-      {shownGifts.map(({ id, giftSpec }) => (
-        <Link key={id} to="/ego-gift/$id" params={{ id }}>
-          <div className="flex flex-col items-center gap-1">
-            <EGOGiftCard
-              gift={{
-                id,
-                tag: giftSpec.tag,
-                keyword: giftSpec.keyword,
-                battleKeywordList: giftSpec.battleKeywordList ?? [],
-                attributeType: giftSpec.attributeType,
-                themePack: giftSpec.themePack,
-                maxEnhancement: giftSpec.maxEnhancement,
-              }}
-              enableHoverHighlight
-            />
-            <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-              <EGOGiftName id={id} />
-            </span>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <EGOGiftGrid
+      ids={[...poolIds, ...findFusionGifts(spec, poolIds)]}
+      spec={spec}
+      showName
+      className={GIFT_ROW}
+    />
   )
 }
 
@@ -249,36 +203,7 @@ function SpecificEgoGifts({ giftIds }: { giftIds: number[] }) {
 function FixedRewardEgoGifts({ giftIds }: { giftIds: number[] }) {
   const { spec } = useEGOGiftListData()
 
-  return (
-    <div className="flex flex-wrap gap-3">
-      {giftIds.map((giftId) => {
-        const id = String(giftId)
-        const giftSpec = spec[id]
-        if (!giftSpec) return null
-        return (
-          <Link key={id} to="/ego-gift/$id" params={{ id }}>
-            <div className="flex flex-col items-center gap-1">
-              <EGOGiftCard
-                gift={{
-                  id,
-                  tag: giftSpec.tag,
-                  keyword: giftSpec.keyword,
-                  battleKeywordList: giftSpec.battleKeywordList ?? [],
-                  attributeType: giftSpec.attributeType,
-                  themePack: giftSpec.themePack,
-                  maxEnhancement: giftSpec.maxEnhancement,
-                }}
-                enableHoverHighlight
-              />
-              <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-                <EGOGiftName id={id} />
-              </span>
-            </div>
-          </Link>
-        )
-      })}
-    </div>
-  )
+  return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} showName className={GIFT_ROW} />
 }
 
 /**
@@ -329,31 +254,7 @@ function ExclusiveEventsSection({ eventPool, packId }: { eventPool: number[]; pa
 function AllEgoGifts({ giftIds }: { giftIds: number[] }) {
   const { spec } = useEGOGiftListData()
 
-  return (
-    <div className={SECTION_STYLES.LAYOUT.wrap}>
-      {giftIds.map((giftId) => {
-        const id = String(giftId)
-        const giftSpec = spec[id]
-        if (!giftSpec) return null
-        return (
-          <Link key={id} to="/ego-gift/$id" params={{ id }}>
-            <EGOGiftCard
-              gift={{
-                id,
-                tag: giftSpec.tag,
-                keyword: giftSpec.keyword,
-                battleKeywordList: giftSpec.battleKeywordList ?? [],
-                attributeType: giftSpec.attributeType,
-                themePack: giftSpec.themePack,
-                maxEnhancement: giftSpec.maxEnhancement,
-              }}
-              enableHoverHighlight
-            />
-          </Link>
-        )
-      })}
-    </div>
-  )
+  return <EGOGiftGrid ids={giftIds.map(String)} spec={spec} />
 }
 
 /**

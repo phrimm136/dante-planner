@@ -12,8 +12,7 @@ import {
 import { deserializeSets } from './schemas/PlannerSchemas'
 import { PlannerEditEditor } from './components/planner/PlannerEditEditor'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
-import type { MDCategory } from '@/shared/gameData'
-import type { MDPlannerContent } from './types/PlannerTypes'
+import { isMDPlanner } from './types/PlannerTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { PlannerEditorState } from './stores/usePlannerEditorStore'
 import { SECTION_STYLES } from '@/lib/constants'
@@ -57,7 +56,7 @@ function PlannerEditContent({ id }: { id: string }) {
     return <PlannerNotFound listPath="/planner/md" />
   }
 
-  if (planner.config.type !== 'MIRROR_DUNGEON') {
+  if (!isMDPlanner(planner)) {
     return (
       <div className="container mx-auto py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">
@@ -80,12 +79,12 @@ function PlannerEditContent({ id }: { id: string }) {
   }
 
   // Build initial state from planner data for the store
-  const content = planner.content as MDPlannerContent
+  const { content } = planner
   const deserialized = deserializeSets(content)
 
   const initialState: Partial<PlannerEditorState> = {
     title: planner.metadata.title,
-    category: planner.config.category as MDCategory,
+    category: planner.config.category,
     isPublished: planner.metadata.published ?? false,
     equipment: content.equipment,
     floorSelections: deserialized.floorSelections as FloorThemeSelection[],

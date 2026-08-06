@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useIdentityListSpec, IdentityList } from '@/pages/identity'
 import type { IdentityListItem, IdentitySpecListSchema, IdentityFacetState } from '@/pages/identity'
@@ -9,7 +8,7 @@ import { useSetFilters } from '@/components/hooks/useSetFilters'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
-import { FilterSection } from '@/shared/filter'
+import { FilterSectionList, filterSection } from '@/shared/filter'
 import { CompactSinnerFilter } from '@/shared/filter'
 import { CompactKeywordFilter } from '@/shared/filter'
 import { CompactSkillAttributeFilter } from '@/shared/filter'
@@ -21,7 +20,7 @@ import { UnitKeywordDropdown } from '@/shared/filter'
 import { BattleKeywordDropdown } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { Skeleton } from '@/components/ui/skeleton'
+import { buildFacetCounts } from './lib/identityFacetCounts'
 
 /**
  * Card grid section - no longer suspends at grid level.
@@ -60,19 +59,7 @@ function IdentityPageShell() {
   const { t } = useTranslation(['database', 'common'])
   const spec = useIdentityListSpec()
 
-  // Compute counts for dropdown display
-  const { seasonCounts, unitKeywordCounts } = (() => {
-    const sc: Record<string, number> = {}
-    const ukc: Record<string, number> = {}
-    for (const entry of Object.values(spec)) {
-      const key = String(entry.season)
-      sc[key] = (sc[key] ?? 0) + 1
-      for (const kw of entry.unitKeywordList) {
-        ukc[kw] = (ukc[kw] ?? 0) + 1
-      }
-    }
-    return { seasonCounts: sc, unitKeywordCounts: ukc }
-  })()
+  const { seasonCounts, unitKeywordCounts } = buildFacetCounts(spec)
 
   // Filter states
   const {
@@ -98,127 +85,104 @@ function IdentityPageShell() {
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
   // Primary filters (always visible on mobile): Sinner and Keyword
-  const primaryFilters = (
-    <>
-      <FilterSection
-        title={t('filters.sinner', 'Sinner')}
-        defaultExpanded={true}
-        activeCount={filters.selectedSinners.size}
-      >
-        <CompactSinnerFilter
-          selected={filters.selectedSinners}
-          onSelectionChange={setters.selectedSinners}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.keyword', 'Keyword')}
-        defaultExpanded={true}
-        activeCount={filters.selectedKeywords.size}
-      >
-        <CompactKeywordFilter
-          selected={filters.selectedKeywords}
-          onSelectionChange={setters.selectedKeywords}
-        />
-      </FilterSection>
-    </>
-  )
+  const PRIMARY_FILTERS = [
+    filterSection({
+      key: 'selectedSinners',
+      titleKey: 'filters.sinner',
+      titleFallback: 'Sinner',
+      defaultExpanded: true,
+      Component: CompactSinnerFilter,
+      selected: filters.selectedSinners,
+      onSelectionChange: setters.selectedSinners,
+    }),
+    filterSection({
+      key: 'selectedKeywords',
+      titleKey: 'filters.keyword',
+      titleFallback: 'Keyword',
+      defaultExpanded: true,
+      Component: CompactKeywordFilter,
+      selected: filters.selectedKeywords,
+      onSelectionChange: setters.selectedKeywords,
+    }),
+  ]
 
   // Secondary filters (shown when mobile expanded): Skill Attribute, Attack Type, Rarity, Season, Unit Keywords
-  const secondaryFilters = (
-    <>
-      <FilterSection
-        title={t('filters.skillAttribute', 'Skill Attribute')}
-        defaultExpanded={false}
-        activeCount={filters.selectedAttributes.size}
-      >
-        <CompactSkillAttributeFilter
-          selected={filters.selectedAttributes}
-          onSelectionChange={setters.selectedAttributes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.attackType', 'Attack Type')}
-        defaultExpanded={false}
-        activeCount={filters.selectedAtkTypes.size}
-      >
-        <CompactAttackTypeFilter
-          selected={filters.selectedAtkTypes}
-          onSelectionChange={setters.selectedAtkTypes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.defenseType', 'Defense Type')}
-        defaultExpanded={false}
-        activeCount={filters.selectedDefTypes.size}
-      >
-        <CompactDefenseTypeFilter
-          selected={filters.selectedDefTypes}
-          onSelectionChange={setters.selectedDefTypes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.rank', 'Rarity')}
-        defaultExpanded={false}
-        activeCount={filters.selectedRaritys.size}
-      >
-        <CompactRarityFilter
-          selected={filters.selectedRaritys}
-          onSelectionChange={setters.selectedRaritys}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.season', 'Season')}
-        defaultExpanded={false}
-        activeCount={filters.selectedSeasons.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <SeasonDropdown
-            selected={filters.selectedSeasons}
-            onSelectionChange={setters.selectedSeasons}
-            counts={seasonCounts}
-          />
-        </Suspense>
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.unitKeywords', 'Unit Keywords')}
-        defaultExpanded={false}
-        activeCount={filters.selectedUnitKeywords.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <UnitKeywordDropdown
-            selected={filters.selectedUnitKeywords}
-            onSelectionChange={setters.selectedUnitKeywords}
-            counts={unitKeywordCounts}
-          />
-        </Suspense>
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.additionalKeyword', 'Additional Keywords')}
-        defaultExpanded={false}
-        activeCount={filters.selectedBattleKeywords.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <BattleKeywordDropdown
-            entityType="identity"
-            selected={filters.selectedBattleKeywords}
-            onSelectionChange={setters.selectedBattleKeywords}
-          />
-        </Suspense>
-      </FilterSection>
-    </>
-  )
+  const SECONDARY_FILTERS = [
+    filterSection({
+      key: 'selectedAttributes',
+      titleKey: 'filters.skillAttribute',
+      titleFallback: 'Skill Attribute',
+      defaultExpanded: false,
+      Component: CompactSkillAttributeFilter,
+      selected: filters.selectedAttributes,
+      onSelectionChange: setters.selectedAttributes,
+    }),
+    filterSection({
+      key: 'selectedAtkTypes',
+      titleKey: 'filters.attackType',
+      titleFallback: 'Attack Type',
+      defaultExpanded: false,
+      Component: CompactAttackTypeFilter,
+      selected: filters.selectedAtkTypes,
+      onSelectionChange: setters.selectedAtkTypes,
+    }),
+    filterSection({
+      key: 'selectedDefTypes',
+      titleKey: 'filters.defenseType',
+      titleFallback: 'Defense Type',
+      defaultExpanded: false,
+      Component: CompactDefenseTypeFilter,
+      selected: filters.selectedDefTypes,
+      onSelectionChange: setters.selectedDefTypes,
+    }),
+    filterSection({
+      key: 'selectedRaritys',
+      titleKey: 'filters.rank',
+      titleFallback: 'Rarity',
+      defaultExpanded: false,
+      Component: CompactRarityFilter,
+      selected: filters.selectedRaritys,
+      onSelectionChange: setters.selectedRaritys,
+    }),
+    filterSection({
+      key: 'selectedSeasons',
+      titleKey: 'filters.season',
+      titleFallback: 'Season',
+      defaultExpanded: false,
+      suspense: true,
+      Component: SeasonDropdown,
+      selected: filters.selectedSeasons,
+      onSelectionChange: setters.selectedSeasons,
+      props: { counts: seasonCounts },
+    }),
+    filterSection({
+      key: 'selectedUnitKeywords',
+      titleKey: 'filters.unitKeywords',
+      titleFallback: 'Unit Keywords',
+      defaultExpanded: false,
+      suspense: true,
+      Component: UnitKeywordDropdown,
+      selected: filters.selectedUnitKeywords,
+      onSelectionChange: setters.selectedUnitKeywords,
+      props: { counts: unitKeywordCounts },
+    }),
+    filterSection({
+      key: 'selectedBattleKeywords',
+      titleKey: 'filters.additionalKeyword',
+      titleFallback: 'Additional Keywords',
+      defaultExpanded: false,
+      suspense: true,
+      Component: BattleKeywordDropdown,
+      selected: filters.selectedBattleKeywords,
+      onSelectionChange: setters.selectedBattleKeywords,
+      props: { entityType: 'identity' as const },
+    }),
+  ]
 
   return (
     <FilterPageLayout
-      primaryFilters={primaryFilters}
-      secondaryFilters={secondaryFilters}
+      primaryFilters={<FilterSectionList sections={PRIMARY_FILTERS} />}
+      secondaryFilters={<FilterSectionList sections={SECONDARY_FILTERS} />}
       activeFilterCount={activeFilterCount}
       onResetAll={resetAll}
       searchBar={

@@ -5,5 +5,6 @@ export {
   ClearTimeoutDialog,
   CommentDeleteDialog,
 } from './components/BanDialog'
+export type { ModerationDialogProps } from './components/BanDialog'
 export { ModerationReasonDialog } from './components/ModerationReasonDialog'
 export { BanStatusBanner } from './components/BanStatusBanner'

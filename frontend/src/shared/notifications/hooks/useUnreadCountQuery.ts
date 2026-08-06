@@ -24,8 +24,8 @@ import { STALE_TIME } from '@/lib/constants'
 function createUnreadCountQueryOptions() {
   return queryOptions({
     queryKey: notificationQueryKeys.unreadCount(),
-    queryFn: async (): Promise<UnreadCountResponse> => {
-      const data = await ApiClient.get('/api/notifications/unread-count')
+    queryFn: async ({ signal }): Promise<UnreadCountResponse> => {
+      const data = await ApiClient.get('/api/notifications/unread-count', { signal })
       return validateData(data, UnreadCountResponseSchema, 'notifications unreadCount')
     },
     staleTime: STALE_TIME.MEDIUM,

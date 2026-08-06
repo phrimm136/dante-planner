@@ -6,32 +6,11 @@
  */
 
 import type { Facet, SearchMappings } from '@/shared/filter'
-import { applyFacets } from '@/shared/filter'
+import { applyFacets, collectKeywordTerms, matchesSearch } from '@/shared/filter'
 import type { FilterState } from '@/components/hooks/useSetFilters'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
-import { EGO_GIFT_TIERS, EGO_GIFT_TIER_TAGS } from '@/shared/gameData'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
-
-/** Map tier tag (TIER_1) to display tier (I) */
-const TIER_TAG_TO_DISPLAY: Record<string, EGOGiftTier> = Object.fromEntries(
-  EGO_GIFT_TIER_TAGS.map((tag, index) => [tag, EGO_GIFT_TIERS[index]]),
-)
-
-/**
- * Extract display tier from gift tag array
- * Returns the first matching tier or undefined
- *
- * @example
- * extractTier(['TIER_3', 'GIFT']) // Returns 'III'
- * extractTier(['GIFT']) // Returns undefined
- */
-export function extractTier(tag: readonly string[]): EGOGiftTier | undefined {
-  for (const t of tag) {
-    const tier = TIER_TAG_TO_DISPLAY[t]
-    if (tier) return tier
-  }
-  return undefined
-}
+import { parseTier, toRomanTier } from './egoGiftTier'
 
 /**
  * Derive difficulty from hardOnly/extremeOnly flags
@@ -74,7 +53,7 @@ export const EGO_GIFT_FACETS: readonly Facet<EGOGiftListItem, EGOGiftFacetState>
   },
   { sel: (s) => s.selectedBattleKeywords, get: (g) => g.battleKeywordList ?? [], mode: 'any' },
   { sel: (s) => s.selectedDifficulties, get: (g) => deriveDifficulty(g), mode: 'any' },
-  { sel: (s) => s.selectedTiers, get: (g) => extractTier(g.tag), mode: 'any' },
+  { sel: (s) => s.selectedTiers, get: (g) => toRomanTier(parseTier(g.tag)), mode: 'any' },
   { sel: (s) => s.selectedThemePacks, get: (g) => (g.themePack ?? []).map(String), mode: 'any' },
   { sel: (s) => s.selectedAttributeTypes, get: (g) => g.attributeType, mode: 'any' },
   { sel: (s) => s.selectedFusioned, get: (g) => (g.fusioned === true ? 'Y' : 'N'), mode: 'any' },
@@ -101,12 +80,11 @@ export function buildEGOGiftSearchTerms(
   giftNames: Record<string, string>,
   mappings: SearchMappings,
 ): string[] {
+  const { keyword } = gift
   const terms = [(giftNames[gift.id] ?? '').toLowerCase()]
 
-  for (const [naturalLang, pascalValues] of mappings.keywordToValue) {
-    if (gift.keyword && pascalValues.includes(gift.keyword)) {
-      terms.push(naturalLang)
-    }
+  if (keyword) {
+    terms.push(...collectKeywordTerms(mappings.keywordToValue, (value) => value === keyword))
   }
 
   return terms
@@ -119,8 +97,6 @@ export function matchesEGOGift(
   searchTerms: readonly string[],
 ): boolean {
   if (!applyFacets(gift, state.values, EGO_GIFT_FACETS)) return false
-  if (!state.searchQuery) return true
 
-  const lowerQuery = state.searchQuery.toLowerCase()
-  return searchTerms.some((term) => term.includes(lowerQuery))
+  return matchesSearch(state.searchQuery, searchTerms)
 }

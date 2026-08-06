@@ -6,7 +6,7 @@
  */
 
 import type { Facet, SearchMappings } from '@/shared/filter'
-import { applyFacets } from '@/shared/filter'
+import { applyFacets, collectKeywordTerms, matchesSearch } from '@/shared/filter'
 import type { FilterState } from '@/components/hooks/useSetFilters'
 import type { AtkType, EgoType, Season, SkillAttributeType } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
@@ -43,15 +43,12 @@ export function buildEGOSearchTerms(
   egoNames: Record<string, string>,
   mappings: SearchMappings,
 ): string[] {
-  const terms = [(egoNames[ego.id] ?? '').toLowerCase()]
-
-  for (const [naturalLang, bracketedValues] of mappings.keywordToValue) {
-    if (bracketedValues.some((value) => ego.skillKeywordList.includes(value))) {
-      terms.push(naturalLang)
-    }
-  }
-
-  return terms
+  return [
+    (egoNames[ego.id] ?? '').toLowerCase(),
+    ...collectKeywordTerms(mappings.keywordToValue, (value) =>
+      ego.skillKeywordList.includes(value),
+    ),
+  ]
 }
 
 /** Whether one EGO survives the current facets and search query. */
@@ -61,8 +58,6 @@ export function matchesEGO(
   searchTerms: readonly string[],
 ): boolean {
   if (!applyFacets(ego, state.values, EGO_FACETS)) return false
-  if (!state.searchQuery) return true
 
-  const lowerQuery = state.searchQuery.toLowerCase()
-  return searchTerms.some((term) => term.includes(lowerQuery))
+  return matchesSearch(state.searchQuery, searchTerms)
 }

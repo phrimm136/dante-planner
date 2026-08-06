@@ -6,7 +6,7 @@
  */
 
 import type { Facet, SearchMappings } from '@/shared/filter'
-import { applyFacets } from '@/shared/filter'
+import { applyFacets, collectKeywordTerms, matchesSearch } from '@/shared/filter'
 import type { FilterState } from '@/components/hooks/useSetFilters'
 import type { AtkType, DefType, Season, SkillAttributeType } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
@@ -47,21 +47,15 @@ export function buildIdentitySearchTerms(
   identityNames: Record<string, string>,
   mappings: SearchMappings,
 ): string[] {
-  const terms = [(identityNames[identity.id] ?? '').toLowerCase()]
-
-  for (const [naturalLang, bracketedValues] of mappings.keywordToValue) {
-    if (bracketedValues.some((value) => identity.skillKeywordList.includes(value))) {
-      terms.push(naturalLang)
-    }
-  }
-
-  for (const [naturalLang, internalCodes] of mappings.unitKeywordToValue) {
-    if (internalCodes.some((code) => identity.unitKeywordList.includes(code))) {
-      terms.push(naturalLang)
-    }
-  }
-
-  return terms
+  return [
+    (identityNames[identity.id] ?? '').toLowerCase(),
+    ...collectKeywordTerms(mappings.keywordToValue, (value) =>
+      identity.skillKeywordList.includes(value),
+    ),
+    ...collectKeywordTerms(mappings.unitKeywordToValue, (code) =>
+      identity.unitKeywordList.includes(code),
+    ),
+  ]
 }
 
 /** Whether one identity survives the current facets and search query. */
@@ -71,8 +65,6 @@ export function matchesIdentity(
   searchTerms: readonly string[],
 ): boolean {
   if (!applyFacets(identity, state.values, IDENTITY_FACETS)) return false
-  if (!state.searchQuery) return true
 
-  const lowerQuery = state.searchQuery.toLowerCase()
-  return searchTerms.some((term) => term.includes(lowerQuery))
+  return matchesSearch(state.searchQuery, searchTerms)
 }

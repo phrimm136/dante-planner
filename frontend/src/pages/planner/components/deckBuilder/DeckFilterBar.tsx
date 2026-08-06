@@ -12,7 +12,8 @@ import { useIsBreakpoint } from '@/components/hooks/use-is-breakpoint'
 
 import { useDeckFilterState, useSetDeckFilterState } from '../../stores/usePlannerEditorStore'
 
-import type { EntityMode } from '../../types/DeckTypes'
+import type { ComponentType } from 'react'
+import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
 import type { EgoType } from '@/shared/gameData'
 
 import { SearchBar } from '@/shared/filter'
@@ -31,6 +32,208 @@ import { BattleKeywordDropdown } from '@/shared/filter'
 import { EntityToggle } from './EntityToggle'
 
 const FILTER_BOX = 'rounded-md border border-border/60 p-1'
+
+/** Writes one field of the filter state, leaving the rest alone. */
+type SetFilterField = <K extends keyof DeckFilterState>(
+  key: K,
+) => (value: DeckFilterState[K]) => void
+
+/** The filter-state fields a filter chip owns: all of them hold a selection set. */
+type FilterSetKey = {
+  [K in keyof DeckFilterState]: DeckFilterState[K] extends Set<unknown> ? K : never
+}[keyof DeckFilterState]
+
+interface FilterControlProps {
+  state: DeckFilterState
+  setField: SetFilterField
+  /** Applied to dropdown controls, which size themselves per layout. */
+  className?: string
+}
+
+function SinnerControl({ state, setField }: FilterControlProps) {
+  return (
+    <CompactSinnerFilter
+      selected={state.selectedSinners}
+      onSelectionChange={setField('selectedSinners')}
+    />
+  )
+}
+
+function KeywordControl({ state, setField }: FilterControlProps) {
+  return (
+    <CompactKeywordFilter
+      selected={state.selectedKeywords}
+      onSelectionChange={setField('selectedKeywords')}
+    />
+  )
+}
+
+function SkillAttributeControl({ state, setField }: FilterControlProps) {
+  return (
+    <CompactSkillAttributeFilter
+      selected={state.selectedAttributes}
+      onSelectionChange={setField('selectedAttributes')}
+    />
+  )
+}
+
+function AttackTypeControl({ state, setField }: FilterControlProps) {
+  return (
+    <CompactAttackTypeFilter
+      selected={state.selectedAtkTypes}
+      onSelectionChange={setField('selectedAtkTypes')}
+    />
+  )
+}
+
+function DefenseTypeControl({ state, setField }: FilterControlProps) {
+  return (
+    <CompactDefenseTypeFilter
+      selected={state.selectedDefTypes}
+      onSelectionChange={setField('selectedDefTypes')}
+    />
+  )
+}
+
+function EGOTypeControl({ state, setField }: FilterControlProps) {
+  const setEgoTypes = setField('selectedEgoTypes')
+
+  return (
+    <CompactEGOTypeFilter
+      selected={state.selectedEgoTypes as Set<string>}
+      onSelectionChange={(types) => {
+        setEgoTypes(types as Set<EgoType>)
+      }}
+    />
+  )
+}
+
+function RarityControl({ state, setField }: FilterControlProps) {
+  return (
+    <CompactRarityFilter
+      selected={state.selectedRaritys}
+      onSelectionChange={setField('selectedRaritys')}
+    />
+  )
+}
+
+function SeasonControl({ state, setField, className }: FilterControlProps) {
+  return (
+    <SeasonDropdown
+      selected={state.selectedSeasons}
+      onSelectionChange={setField('selectedSeasons')}
+      className={className}
+    />
+  )
+}
+
+function UnitKeywordControl({ state, setField, className }: FilterControlProps) {
+  return (
+    <UnitKeywordDropdown
+      selected={state.selectedUnitKeywords}
+      onSelectionChange={setField('selectedUnitKeywords')}
+      className={className}
+    />
+  )
+}
+
+function BattleKeywordControl({ state, setField, className }: FilterControlProps) {
+  return (
+    <BattleKeywordDropdown
+      entityType={state.entityMode === 'identity' ? 'identity' : 'ego'}
+      selected={state.selectedBattleKeywords}
+      onSelectionChange={setField('selectedBattleKeywords')}
+      className={className}
+    />
+  )
+}
+
+interface DeckFilter {
+  /** Selection set this filter reads its active count from. */
+  key: FilterSetKey
+  labelKey: string
+  label: string
+  Control: ComponentType<FilterControlProps>
+  /** Rendered in this entity mode only; both modes when absent. */
+  mode?: EntityMode
+  /** Mobile: sits above the chevron, expanded on first paint. */
+  primary?: boolean
+  /** Suspends on i18n data and takes a width per layout. */
+  dropdown?: boolean
+}
+
+/** Render order, shared by both layouts. */
+const FILTERS: readonly DeckFilter[] = [
+  {
+    key: 'selectedSinners',
+    labelKey: 'filters.sinner',
+    label: 'Sinner',
+    Control: SinnerControl,
+    primary: true,
+  },
+  {
+    key: 'selectedKeywords',
+    labelKey: 'filters.keyword',
+    label: 'Keyword',
+    Control: KeywordControl,
+    primary: true,
+  },
+  {
+    key: 'selectedAttributes',
+    labelKey: 'filters.skillAttribute',
+    label: 'Skill Attribute',
+    Control: SkillAttributeControl,
+  },
+  {
+    key: 'selectedAtkTypes',
+    labelKey: 'filters.attackType',
+    label: 'Attack Type',
+    Control: AttackTypeControl,
+  },
+  {
+    key: 'selectedDefTypes',
+    labelKey: 'filters.defenseType',
+    label: 'Defense Type',
+    Control: DefenseTypeControl,
+    mode: 'identity',
+  },
+  {
+    key: 'selectedEgoTypes',
+    labelKey: 'filters.egoType',
+    label: 'EGO Type',
+    Control: EGOTypeControl,
+    mode: 'ego',
+  },
+  {
+    key: 'selectedRaritys',
+    labelKey: 'filters.rank',
+    label: 'Rarity',
+    Control: RarityControl,
+    mode: 'identity',
+  },
+  {
+    key: 'selectedSeasons',
+    labelKey: 'filters.season',
+    label: 'Season',
+    Control: SeasonControl,
+    dropdown: true,
+  },
+  {
+    key: 'selectedUnitKeywords',
+    labelKey: 'filters.unitKeywords',
+    label: 'Unit Keywords',
+    Control: UnitKeywordControl,
+    mode: 'identity',
+    dropdown: true,
+  },
+  {
+    key: 'selectedBattleKeywords',
+    labelKey: 'filters.additionalKeyword',
+    label: 'Additional Keywords',
+    Control: BattleKeywordControl,
+    dropdown: true,
+  },
+]
 
 /**
  * Single-row filter bar for the deck builder.
@@ -72,55 +275,14 @@ export function DeckFilterBar() {
   const canReset = hasActiveFilters || hasSearch
 
   const isIdentityMode = filterState.entityMode === 'identity'
-  const battleKeywordEntityType = isIdentityMode ? 'identity' : 'ego'
 
-  const handleModeChange = (mode: EntityMode) => {
-    setFilterState((prev) => ({ ...prev, entityMode: mode }))
+  const setField: SetFilterField = (key) => (value) => {
+    setFilterState((prev) => ({ ...prev, [key]: value }))
   }
 
-  const handleSinnersChange = (sinners: Set<string>) => {
-    setFilterState((prev) => ({ ...prev, selectedSinners: sinners }))
-  }
-
-  const handleKeywordsChange = (keywords: Set<string>) => {
-    setFilterState((prev) => ({ ...prev, selectedKeywords: keywords }))
-  }
-
-  const handleAttributesChange = (attributes: typeof filterState.selectedAttributes) => {
-    setFilterState((prev) => ({ ...prev, selectedAttributes: attributes }))
-  }
-
-  const handleAtkTypesChange = (types: typeof filterState.selectedAtkTypes) => {
-    setFilterState((prev) => ({ ...prev, selectedAtkTypes: types }))
-  }
-
-  const handleDefTypesChange = (types: typeof filterState.selectedDefTypes) => {
-    setFilterState((prev) => ({ ...prev, selectedDefTypes: types }))
-  }
-
-  const handleRaritysChange = (ranks: Set<number>) => {
-    setFilterState((prev) => ({ ...prev, selectedRaritys: ranks }))
-  }
-
-  const handleEgoTypesChange = (types: Set<string>) => {
-    setFilterState((prev) => ({ ...prev, selectedEgoTypes: types as Set<EgoType> }))
-  }
-
-  const handleSeasonsChange = (seasons: typeof filterState.selectedSeasons) => {
-    setFilterState((prev) => ({ ...prev, selectedSeasons: seasons }))
-  }
-
-  const handleUnitKeywordsChange = (unitKeywords: Set<string>) => {
-    setFilterState((prev) => ({ ...prev, selectedUnitKeywords: unitKeywords }))
-  }
-
-  const handleBattleKeywordsChange = (battleKeywords: Set<string>) => {
-    setFilterState((prev) => ({ ...prev, selectedBattleKeywords: battleKeywords }))
-  }
-
-  const handleSearchChange = (query: string) => {
-    setFilterState((prev) => ({ ...prev, searchQuery: query }))
-  }
+  const applicableFilters = FILTERS.filter(
+    (filter) => filter.mode === undefined || filter.mode === filterState.entityMode,
+  )
 
   const handleResetAll = () => {
     setFilterState((prev) => ({
@@ -157,99 +319,37 @@ export function DeckFilterBar() {
     </Button>
   )
 
+  const searchPlaceholder = isIdentityMode
+    ? t('planner:deckBuilder.identitySearchPlaceholder')
+    : t('planner:deckBuilder.egoSearchPlaceholder')
+
   const searchBar = (
     <SearchBar
       searchQuery={filterState.searchQuery}
-      onSearchChange={handleSearchChange}
-      placeholder={
-        isIdentityMode
-          ? t('planner:deckBuilder.identitySearchPlaceholder')
-          : t('planner:deckBuilder.egoSearchPlaceholder')
-      }
+      onSearchChange={setField('searchQuery')}
+      placeholder={searchPlaceholder}
     />
   )
 
   if (isDesktop) {
     return (
       <div className={cn('flex flex-wrap items-center gap-2', 'rounded-lg border bg-card p-2')}>
-        <EntityToggle mode={filterState.entityMode} onModeChange={handleModeChange} />
-        <div className={FILTER_BOX}>
-          <CompactSinnerFilter
-            selected={filterState.selectedSinners}
-            onSelectionChange={handleSinnersChange}
-          />
-        </div>
-        <div className={FILTER_BOX}>
-          <CompactKeywordFilter
-            selected={filterState.selectedKeywords}
-            onSelectionChange={handleKeywordsChange}
-          />
-        </div>
-        <div className={FILTER_BOX}>
-          <CompactSkillAttributeFilter
-            selected={filterState.selectedAttributes}
-            onSelectionChange={handleAttributesChange}
-          />
-        </div>
-        <div className={FILTER_BOX}>
-          <CompactAttackTypeFilter
-            selected={filterState.selectedAtkTypes}
-            onSelectionChange={handleAtkTypesChange}
-          />
-        </div>
-        <div className={FILTER_BOX}>
-          {isIdentityMode ? (
-            <CompactDefenseTypeFilter
-              selected={filterState.selectedDefTypes}
-              onSelectionChange={handleDefTypesChange}
-            />
+        <EntityToggle mode={filterState.entityMode} onModeChange={setField('entityMode')} />
+        {applicableFilters.map((filter) =>
+          filter.dropdown ? (
+            <Suspense key={filter.key} fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
+              <filter.Control state={filterState} setField={setField} className="w-48" />
+            </Suspense>
           ) : (
-            <CompactEGOTypeFilter
-              selected={filterState.selectedEgoTypes as Set<string>}
-              onSelectionChange={handleEgoTypesChange}
-            />
-          )}
-        </div>
-        {isIdentityMode && (
-          <div className={FILTER_BOX}>
-            <CompactRarityFilter
-              selected={filterState.selectedRaritys}
-              onSelectionChange={handleRaritysChange}
-            />
-          </div>
+            <div key={filter.key} className={FILTER_BOX}>
+              <filter.Control state={filterState} setField={setField} />
+            </div>
+          ),
         )}
-        <Suspense fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
-          <SeasonDropdown
-            selected={filterState.selectedSeasons}
-            onSelectionChange={handleSeasonsChange}
-            className="w-48"
-          />
-        </Suspense>
-        {isIdentityMode && (
-          <Suspense fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
-            <UnitKeywordDropdown
-              selected={filterState.selectedUnitKeywords}
-              onSelectionChange={handleUnitKeywordsChange}
-              className="w-48"
-            />
-          </Suspense>
-        )}
-        <Suspense fallback={<Skeleton className="h-10 w-48 rounded-md" />}>
-          <BattleKeywordDropdown
-            entityType={battleKeywordEntityType}
-            selected={filterState.selectedBattleKeywords}
-            onSelectionChange={handleBattleKeywordsChange}
-            className="w-48"
-          />
-        </Suspense>
         <SearchBar
           searchQuery={filterState.searchQuery}
-          onSearchChange={handleSearchChange}
-          placeholder={
-            isIdentityMode
-              ? t('planner:deckBuilder.identitySearchPlaceholder')
-              : t('planner:deckBuilder.egoSearchPlaceholder')
-          }
+          onSearchChange={setField('searchQuery')}
+          placeholder={searchPlaceholder}
           className="h-10 p-1 w-56"
         />
         {resetAllButton}
@@ -262,135 +362,27 @@ export function DeckFilterBar() {
       <div className="rounded-lg border bg-card p-3">
         <div className="space-y-1">
           <div className="px-1 py-1.5">
-            <EntityToggle mode={filterState.entityMode} onModeChange={handleModeChange} />
+            <EntityToggle mode={filterState.entityMode} onModeChange={setField('entityMode')} />
           </div>
 
-          <FilterSection
-            title={t('filters.sinner', 'Sinner')}
-            defaultExpanded={true}
-            activeCount={filterState.selectedSinners.size}
-          >
-            <CompactSinnerFilter
-              selected={filterState.selectedSinners}
-              onSelectionChange={handleSinnersChange}
-            />
-          </FilterSection>
-
-          <FilterSection
-            title={t('filters.keyword', 'Keyword')}
-            defaultExpanded={true}
-            activeCount={filterState.selectedKeywords.size}
-          >
-            <CompactKeywordFilter
-              selected={filterState.selectedKeywords}
-              onSelectionChange={handleKeywordsChange}
-            />
-          </FilterSection>
-
-          {isExpanded && (
-            <>
+          {applicableFilters
+            .filter((filter) => filter.primary === true || isExpanded)
+            .map((filter) => (
               <FilterSection
-                title={t('filters.skillAttribute', 'Skill Attribute')}
-                defaultExpanded={false}
-                activeCount={filterState.selectedAttributes.size}
+                key={filter.key}
+                title={t(filter.labelKey, filter.label)}
+                defaultExpanded={filter.primary === true}
+                activeCount={filterState[filter.key].size}
               >
-                <CompactSkillAttributeFilter
-                  selected={filterState.selectedAttributes}
-                  onSelectionChange={handleAttributesChange}
-                />
-              </FilterSection>
-
-              <FilterSection
-                title={t('filters.attackType', 'Attack Type')}
-                defaultExpanded={false}
-                activeCount={filterState.selectedAtkTypes.size}
-              >
-                <CompactAttackTypeFilter
-                  selected={filterState.selectedAtkTypes}
-                  onSelectionChange={handleAtkTypesChange}
-                />
-              </FilterSection>
-
-              {isIdentityMode ? (
-                <FilterSection
-                  title={t('filters.defenseType', 'Defense Type')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedDefTypes.size}
-                >
-                  <CompactDefenseTypeFilter
-                    selected={filterState.selectedDefTypes}
-                    onSelectionChange={handleDefTypesChange}
-                  />
-                </FilterSection>
-              ) : (
-                <FilterSection
-                  title={t('filters.egoType', 'EGO Type')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedEgoTypes.size}
-                >
-                  <CompactEGOTypeFilter
-                    selected={filterState.selectedEgoTypes as Set<string>}
-                    onSelectionChange={handleEgoTypesChange}
-                  />
-                </FilterSection>
-              )}
-
-              {isIdentityMode && (
-                <FilterSection
-                  title={t('filters.rank', 'Rarity')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedRaritys.size}
-                >
-                  <CompactRarityFilter
-                    selected={filterState.selectedRaritys}
-                    onSelectionChange={handleRaritysChange}
-                  />
-                </FilterSection>
-              )}
-
-              <FilterSection
-                title={t('filters.season', 'Season')}
-                defaultExpanded={false}
-                activeCount={filterState.selectedSeasons.size}
-              >
-                <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-                  <SeasonDropdown
-                    selected={filterState.selectedSeasons}
-                    onSelectionChange={handleSeasonsChange}
-                  />
-                </Suspense>
-              </FilterSection>
-
-              {isIdentityMode && (
-                <FilterSection
-                  title={t('filters.unitKeywords', 'Unit Keywords')}
-                  defaultExpanded={false}
-                  activeCount={filterState.selectedUnitKeywords.size}
-                >
+                {filter.dropdown ? (
                   <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-                    <UnitKeywordDropdown
-                      selected={filterState.selectedUnitKeywords}
-                      onSelectionChange={handleUnitKeywordsChange}
-                    />
+                    <filter.Control state={filterState} setField={setField} />
                   </Suspense>
-                </FilterSection>
-              )}
-
-              <FilterSection
-                title={t('filters.additionalKeyword', 'Additional Keywords')}
-                defaultExpanded={false}
-                activeCount={filterState.selectedBattleKeywords.size}
-              >
-                <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-                  <BattleKeywordDropdown
-                    entityType={battleKeywordEntityType}
-                    selected={filterState.selectedBattleKeywords}
-                    onSelectionChange={handleBattleKeywordsChange}
-                  />
-                </Suspense>
+                ) : (
+                  <filter.Control state={filterState} setField={setField} />
+                )}
               </FilterSection>
-            </>
-          )}
+            ))}
 
           <div>{searchBar}</div>
 

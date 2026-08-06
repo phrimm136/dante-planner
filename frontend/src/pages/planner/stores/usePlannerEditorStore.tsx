@@ -3,127 +3,30 @@ import { createStore, useStore } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
 import {
-  SINNERS,
-  MAX_LEVEL,
-  DEFAULT_SKILL_EA,
-  DUNGEON_IDX,
-  migrateKeywords,
-} from '@/shared/gameData'
-import { createEmptyNoteContent } from '@/shared/noteEditor'
-import egoSpecList from '@static/data/egoSpecList.json'
+  createDefaultDeckFilterState,
+  createDefaultEquipment,
+  createDefaultFloorSelections,
+  createDefaultSectionNotes,
+  createDefaultSkillEAState,
+  hydrateEditorState,
+  projectEditorState,
+} from '../lib/editorStateCodec'
 
 import type { ReactNode } from 'react'
 import type { StoreApi } from 'zustand'
-import type { MDCategory, DungeonIdx } from '@/shared/gameData'
-import type {
-  SinnerEquipment,
-  SkillEAState,
-  DeckFilterState,
-  ThreadspinTier,
-} from '../types/DeckTypes'
+import type { MDCategory } from '@/shared/gameData'
+import type { SinnerEquipment, SkillEAState, DeckFilterState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
 import type { NoteContent } from '@/shared/noteEditor'
 import type { MDPlannerContent } from '../types/PlannerTypes'
 import type { PlannerState } from '../hooks/usePlannerSave'
 
-const DEFAULT_ZAYIN_MAX_THREADSPIN: Record<string, ThreadspinTier> = (() => {
-  const lookup = egoSpecList as Record<string, { maxThreadspin: 4 | 5 }>
-  const out: Record<string, ThreadspinTier> = {}
-  SINNERS.forEach((_, index) => {
-    const id = `2${String(index + 1).padStart(2, '0')}01`
-    out[id] = lookup[id]?.maxThreadspin ?? 4
-  })
-  return out
-})()
-
-// ============================================================================
-// Default State Factories
-// ============================================================================
-
-/**
- * Creates default equipment for all 12 sinners
- * Each sinner gets their base identity (uptie 4, max level) and ZAYIN EGO
- */
-export function createDefaultEquipment(): Record<string, SinnerEquipment> {
-  const equipment: Record<string, SinnerEquipment> = {}
-  SINNERS.forEach((_, index) => {
-    const sinnerCode = String(index + 1)
-    const sinnerIdPart = sinnerCode.padStart(2, '0')
-    const defaultIdentityId = `1${sinnerIdPart}01`
-    const defaultEgoId = `2${sinnerIdPart}01`
-    equipment[sinnerCode] = {
-      identity: { id: defaultIdentityId, uptie: 4, level: MAX_LEVEL },
-      egos: {
-        ZAYIN: { id: defaultEgoId, threadspin: DEFAULT_ZAYIN_MAX_THREADSPIN[defaultEgoId] ?? 4 },
-      },
-    }
-  })
-  return equipment
-}
-
-/**
- * Creates default skill EA state for all 12 sinners
- * Each sinner gets default EA values: S1=3, S2=2, S3=1
- */
-export function createDefaultSkillEAState(): Record<string, SkillEAState> {
-  const state: Record<string, SkillEAState> = {}
-  SINNERS.forEach((_, index) => {
-    state[String(index + 1)] = { ...DEFAULT_SKILL_EA }
-  })
-  return state
-}
-
-/**
- * Creates default floor selections for 15 floors
- * All floors start with no theme pack selected and normal difficulty
- */
-export function createDefaultFloorSelections(): FloorThemeSelection[] {
-  return Array.from({ length: 15 }, () => ({
-    themePackId: null,
-    difficulty: DUNGEON_IDX.NORMAL as DungeonIdx,
-    giftIds: new Set<string>(),
-  }))
-}
-
-/**
- * Creates default section notes for all planner sections
- * Includes 6 fixed sections + 15 floor sections
- */
-export function createDefaultSectionNotes(): Record<string, NoteContent> {
-  const notes: Record<string, NoteContent> = {
-    intro: createEmptyNoteContent(),
-    deckBuilder: createEmptyNoteContent(),
-    startBuffs: createEmptyNoteContent(),
-    startGifts: createEmptyNoteContent(),
-    observation: createEmptyNoteContent(),
-    skillReplacement: createEmptyNoteContent(),
-    comprehensiveGifts: createEmptyNoteContent(),
-    outro: createEmptyNoteContent(),
-  }
-  for (let i = 0; i < 15; i++) {
-    notes[`floor-${i}`] = createEmptyNoteContent()
-  }
-  return notes
-}
-
-/**
- * Creates default deck filter state
- */
-export function createDefaultDeckFilterState(): DeckFilterState {
-  return {
-    entityMode: 'identity',
-    selectedSinners: new Set(),
-    selectedKeywords: new Set(),
-    selectedAttributes: new Set(),
-    selectedAtkTypes: new Set(),
-    selectedDefTypes: new Set(),
-    selectedRaritys: new Set(),
-    selectedEgoTypes: new Set(),
-    selectedSeasons: new Set(),
-    selectedUnitKeywords: new Set(),
-    selectedBattleKeywords: new Set(),
-    searchQuery: '',
-  }
+export {
+  createDefaultDeckFilterState,
+  createDefaultEquipment,
+  createDefaultFloorSelections,
+  createDefaultSectionNotes,
+  createDefaultSkillEAState,
 }
 
 // ============================================================================
@@ -383,83 +286,12 @@ export const createPlannerEditorStore = (initialState?: Partial<PlannerEditorSta
 
         // Batch operations
         initializeFromPlanner: (content, metadata) =>
-          set(
-            {
-              // Metadata
-              title: metadata.title,
-              category: metadata.category,
-              isPublished: metadata.isPublished,
-
-              // Hot state - with defensive array validation
-              equipment: content.equipment ?? createDefaultEquipment(),
-              floorSelections: Array.isArray(content.floorSelections)
-                ? content.floorSelections.map((floor) => ({
-                    themePackId: floor?.themePackId ?? null,
-                    difficulty: floor?.difficulty ?? (DUNGEON_IDX.NORMAL as DungeonIdx),
-                    giftIds: new Set(Array.isArray(floor?.giftIds) ? floor.giftIds : []),
-                  }))
-                : createDefaultFloorSelections(),
-              comprehensiveGiftIds: new Set(
-                Array.isArray(content.comprehensiveGiftIds) ? content.comprehensiveGiftIds : [],
-              ),
-              deploymentOrder: Array.isArray(content.deploymentOrder)
-                ? content.deploymentOrder
-                : [],
-
-              // Warm state - migrate renamed keyword ids (handles non-array input)
-              selectedKeywords: new Set(migrateKeywords(content.selectedKeywords)),
-              selectedBuffIds: new Set(
-                Array.isArray(content.selectedBuffIds) ? content.selectedBuffIds : [],
-              ),
-              selectedGiftIds: new Set(
-                Array.isArray(content.selectedGiftIds) ? content.selectedGiftIds : [],
-              ),
-              observationGiftIds: new Set(
-                Array.isArray(content.observationGiftIds) ? content.observationGiftIds : [],
-              ),
-              selectedGiftKeyword: content.selectedGiftKeyword ?? null,
-              skillEAState: content.skillEAState ?? createDefaultSkillEAState(),
-              deckFilterState: createDefaultDeckFilterState(),
-
-              // Cold state - section notes need conversion
-              // Merge with defaults to backfill missing keys (e.g., intro/outro for v1 plans)
-              sectionNotes: {
-                ...createDefaultSectionNotes(),
-                ...(content.sectionNotes
-                  ? Object.fromEntries(
-                      Object.entries(content.sectionNotes).map(([key, note]) => [
-                        key,
-                        { content: note?.content ?? '' },
-                      ]),
-                    )
-                  : {}),
-              },
-            },
-            false,
-            'initializeFromPlanner',
-          ),
+          set(hydrateEditorState(content, metadata), false, 'initializeFromPlanner'),
 
         reset: () => set(createInitialState(), false, 'reset'),
 
         // Derived state - compose PlannerState without subscription
-        getPlannerState: () => {
-          const s = get()
-          return {
-            title: s.title,
-            category: s.category,
-            selectedKeywords: s.selectedKeywords,
-            selectedBuffIds: s.selectedBuffIds,
-            selectedGiftKeyword: s.selectedGiftKeyword,
-            selectedGiftIds: s.selectedGiftIds,
-            observationGiftIds: s.observationGiftIds,
-            comprehensiveGiftIds: s.comprehensiveGiftIds,
-            equipment: s.equipment,
-            deploymentOrder: s.deploymentOrder,
-            skillEAState: s.skillEAState,
-            floorSelections: s.floorSelections,
-            sectionNotes: s.sectionNotes,
-          }
-        },
+        getPlannerState: () => projectEditorState(get()),
       }),
       { name: 'PlannerEditorStore', enabled: import.meta.env.DEV },
     ),

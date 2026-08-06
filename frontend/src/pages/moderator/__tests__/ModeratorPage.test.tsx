@@ -60,7 +60,7 @@ interface ReasonDialogProps {
 interface TimeoutDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: (durationMinutes: number, reason: string) => void
+  onConfirm: (reason: string, durationMinutes: number) => void
 }
 
 function dialogBody(testId: string, confirm: () => void, close: () => void) {
@@ -88,7 +88,7 @@ function timeoutDialogStub(testId: string) {
     open
       ? dialogBody(
           testId,
-          () => onConfirm(10, 'reason'),
+          () => onConfirm('reason', 10),
           () => onOpenChange(false),
         )
       : null
@@ -148,6 +148,19 @@ describe('ModeratorPage user row dialogs', () => {
 
     expect(mocks.banMutate).toHaveBeenCalled()
     expect(openDialogs()).toEqual([])
+  })
+
+  it('sends the duration the timeout dialog collected', async () => {
+    const user = userEvent.setup()
+    render(<ModeratorPage />)
+
+    await user.click(screen.getByText('dashboard.timeout'))
+    await user.click(screen.getByText('confirm-timeout-dialog'))
+
+    expect(mocks.timeoutMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ usernameSuffix: '1234', reason: 'reason', durationMinutes: 10 }),
+      expect.anything(),
+    )
   })
 
   it('closes the timeout dialog when the dialog requests close', async () => {

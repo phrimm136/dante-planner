@@ -4,7 +4,7 @@ import { AlertTriangle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { useAuthQuery } from '@/shared/auth'
-import { linkifyText } from '@/components/ui/LinkifyText'
+import { LinkifyText } from '@/components/ui/LinkifyText'
 
 /**
  * Global banner displaying account suspension status (ban or timeout).
@@ -33,7 +33,9 @@ export function BanStatusBanner() {
         <AlertTriangle className="h-5 w-5 flex-shrink-0" />
         <div className="text-sm">
           <p className="font-medium">{message}</p>
-          <p className="text-red-100 mt-1">{linkifyText(t('moderation.contactSupport'))}</p>
+          <p className="text-red-100 mt-1">
+            <LinkifyText text={t('moderation.contactSupport')} />
+          </p>
         </div>
       </div>
       <Button

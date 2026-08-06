@@ -147,16 +147,46 @@ export interface RRPlannerContent {
 export type PlannerContent = MDPlannerContent | RRPlannerContent
 
 /**
- * Complete saveable planner structure
- * Combines metadata, config (with category), and content for IndexedDB storage
+ * Mirror Dungeon planner: config and content are pinned to the MD half
  */
-export interface SaveablePlanner {
+export interface MDSaveablePlanner {
   /** Planner metadata (id, status, timestamps, etc.) */
   metadata: PlannerMetadata
-  /** Planner config (type discriminator and category) */
-  config: PlannerEditorConfig
-  /** Planner content (all user-editable state) */
-  content: PlannerContent
+  /** MD config (type discriminator and MD category) */
+  config: MDConfig
+  /** MD content (all user-editable state) */
+  content: MDPlannerContent
+}
+
+/**
+ * Refracted Railway planner: config and content are pinned to the RR half
+ */
+export interface RRSaveablePlanner {
+  /** Planner metadata (id, status, timestamps, etc.) */
+  metadata: PlannerMetadata
+  /** RR config (type discriminator and RR category) */
+  config: RRConfig
+  /** RR content (all user-editable state) */
+  content: RRPlannerContent
+}
+
+/**
+ * Complete saveable planner structure
+ *
+ * Discriminated at the root, so `content` follows `config`. Select a branch
+ * with `isMDPlanner` rather than testing `config.type` inline.
+ */
+export type SaveablePlanner = MDSaveablePlanner | RRSaveablePlanner
+
+/**
+ * Narrow a planner to its Mirror Dungeon branch.
+ *
+ * A bare `planner.config.type === 'MIRROR_DUNGEON'` narrows `planner.config`
+ * and stops there — the discriminant sits one level below the union root, so
+ * the sibling `content` stays widened. This predicate carries it across.
+ */
+export function isMDPlanner(planner: SaveablePlanner): planner is MDSaveablePlanner {
+  return planner.config.type === 'MIRROR_DUNGEON'
 }
 
 /**

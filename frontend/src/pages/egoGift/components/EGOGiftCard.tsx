@@ -4,7 +4,7 @@ import {
   getEGOGiftOnHoverPath,
   getEGOGiftSelectHighlightPath,
 } from '@/shared/assets'
-import { extractTier } from '../lib/egoGiftSort'
+import { parseTier } from '../lib/egoGiftTier'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { EGOGiftCardBackground } from './EGOGiftCardBackground'
 import { EGOGiftTierIndicator } from './EGOGiftTierIndicator'
@@ -57,7 +57,7 @@ export const EGOGiftCard = function EGOGiftCard({
 }: EGOGiftCardProps) {
   const { id } = gift
 
-  const tier = extractTier(gift.tag) ?? ''
+  const tier = parseTier(gift.tag) ?? ''
 
   return (
     <div

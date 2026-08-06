@@ -1,0 +1,121 @@
+id: queryfn-consumes-signal
+snapshots:
+  ? |
+    const o = {
+      queryFn: async (): Promise<User | null> => {
+        return await ApiClient.get('/api/auth/me')
+      },
+    }
+  : labels:
+    - source: |-
+        queryFn: async (): Promise<User | null> => {
+            return await ApiClient.get('/api/auth/me')
+          }
+      style: primary
+      start: 14
+      end: 109
+    - source: queryFn
+      style: secondary
+      start: 14
+      end: 21
+    - source: ()
+      style: secondary
+      start: 29
+      end: 31
+    - source: |-
+        async (): Promise<User | null> => {
+            return await ApiClient.get('/api/auth/me')
+          }
+      style: secondary
+      start: 23
+      end: 109
+  'const o = { queryFn: () => fetchThing(id) }':
+    labels:
+    - source: 'queryFn: () => fetchThing(id)'
+      style: primary
+      start: 12
+      end: 41
+    - source: queryFn
+      style: secondary
+      start: 12
+      end: 19
+    - source: ()
+      style: secondary
+      start: 21
+      end: 23
+    - source: () => fetchThing(id)
+      style: secondary
+      start: 21
+      end: 41
+  'const o = { queryFn: (): number => 1 }':
+    labels:
+    - source: 'queryFn: (): number => 1'
+      style: primary
+      start: 12
+      end: 36
+    - source: queryFn
+      style: secondary
+      start: 12
+      end: 19
+    - source: ()
+      style: secondary
+      start: 21
+      end: 23
+    - source: '(): number => 1'
+      style: secondary
+      start: 21
+      end: 36
+  'const o = { queryFn: async () => await fetchThing(id) }':
+    labels:
+    - source: 'queryFn: async () => await fetchThing(id)'
+      style: primary
+      start: 12
+      end: 53
+    - source: queryFn
+      style: secondary
+      start: 12
+      end: 19
+    - source: ()
+      style: secondary
+      start: 27
+      end: 29
+    - source: async () => await fetchThing(id)
+      style: secondary
+      start: 21
+      end: 53
+  'const o = { queryFn: async function () { return fetchThing(id) } }':
+    labels:
+    - source: 'queryFn: async function () { return fetchThing(id) }'
+      style: primary
+      start: 12
+      end: 64
+    - source: queryFn
+      style: secondary
+      start: 12
+      end: 19
+    - source: ()
+      style: secondary
+      start: 36
+      end: 38
+    - source: async function () { return fetchThing(id) }
+      style: secondary
+      start: 21
+      end: 64
+  'const o = { queryFn: function () { return fetchThing(id) } }':
+    labels:
+    - source: 'queryFn: function () { return fetchThing(id) }'
+      style: primary
+      start: 12
+      end: 58
+    - source: queryFn
+      style: secondary
+      start: 12
+      end: 19
+    - source: ()
+      style: secondary
+      start: 30
+      end: 32
+    - source: function () { return fetchThing(id) }
+      style: secondary
+      start: 21
+      end: 58

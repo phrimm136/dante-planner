@@ -1,6 +1,14 @@
 import { EGO_TYPES, type EgoType } from '@/shared/gameData'
 
 /**
+ * Spec-record entries in ascending id order, for the lists whose items are the spec's
+ * own `[id, entry]` pairs rather than a derived item array.
+ */
+export function entriesSortedById<TEntry>(spec: Record<string, TEntry>): [string, TEntry][] {
+  return Object.entries(spec).sort(([a], [b]) => a.localeCompare(b))
+}
+
+/**
  * Sort Identity entities by release date
  * Sort order: updateDate DESC -> rank DESC -> id DESC
  */

@@ -23,7 +23,7 @@
     "reacthooks/use-memo": "error",
     "reacthooks/rule-suppression": "error",
     "reacthooks/set-state-in-effect": "warn",
-    "reacthooks/static-components": "warn",
+    "reacthooks/static-components": "error",
     "reacthooks/refs": "warn",
     "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }],
     "react-you-might-not-need-an-effect/no-derived-state": "warn",
@@ -60,6 +60,22 @@
     "react/display-name": "error",
     "react/jsx-props-no-spread-multi": "error",
     "react/self-closing-comp": "error",
+    "react/no-unstable-nested-components": ["error", { "allowAsProps": false }],
+    "typescript/only-throw-error": ["error", { "allowRethrowing": true }],
+    "typescript/no-floating-promises": "error",
+    "typescript/use-unknown-in-catch-callback-variable": "error",
+    "preserve-caught-error": "error",
+    "typescript/switch-exhaustiveness-check": [
+      "error",
+      { "allowDefaultCaseForExhaustiveSwitch": true, "considerDefaultExhaustiveForUnions": true }
+    ],
+    "typescript/no-unsafe-enum-comparison": "error",
+    "no-param-reassign": ["error", { "props": false }],
+    "prefer-const": "error",
+    "typescript/require-array-sort-compare": ["error", { "ignoreStringArrays": true }],
+    "oxc/no-accumulating-spread": "error",
+    "typescript/no-misused-promises": "warn",
+    "import/no-cycle": "warn",
     "no-restricted-imports": [
       "error",
       {
@@ -118,6 +134,26 @@
       "files": ["src/lib/router.tsx"],
       "rules": {
         "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["src/pages/*/lib/**/*.ts", "src/shared/*/lib/**/*.ts", "src/lib/**/*.ts"],
+      "rules": {
+        "no-console": ["warn", { "allow": [] }],
+        "unicorn/no-immediate-mutation": "error",
+        "oxc/no-map-spread": "warn",
+        "no-restricted-properties": [
+          "warn",
+          {
+            "object": "queryClient",
+            "message": "lib is the functional core: cache IO belongs in the shell"
+          },
+          {
+            "object": "message",
+            "property": "includes",
+            "message": "model the failure as a discriminated union instead of sniffing strings"
+          }
+        ]
       }
     },
     {

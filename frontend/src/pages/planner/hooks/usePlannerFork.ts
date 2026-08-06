@@ -20,9 +20,10 @@ import { ApiClient } from '@/lib/api'
 import { generateUUID } from '@/lib/uuid'
 import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
+import { toSaveablePlanner } from '../schemas/PlannerSchemas'
 
 import type { PublishedPlannerDetail } from '../types/PlannerListTypes'
-import type { SaveablePlanner, PlannerEditorConfig } from '../types/PlannerTypes'
+import type { PlannerEditorConfig } from '../types/PlannerTypes'
 
 // ============================================================================
 // Types
@@ -111,8 +112,8 @@ export function usePlannerFork() {
 
       // 4. Create new SaveablePlanner with correct metadata structure
       const now = new Date().toISOString()
-      const newPlanner: SaveablePlanner = {
-        metadata: {
+      const newPlanner = toSaveablePlanner(
+        {
           id: newPlannerId,
           title: copyTitle,
           status: 'saved', // Mark as saved (immediately persisted to local)
@@ -126,12 +127,12 @@ export function usePlannerFork() {
           deviceId,
           published: false, // New copy is not published
         },
-        config: {
+        {
           type: plannerData.plannerType,
           category: plannerData.category,
         } as PlannerEditorConfig,
-        content: contentData, // Parsed content object
-      }
+        contentData, // Parsed content object
+      )
 
       // 5. Save to local storage
       await storage.saveToLocal(newPlanner)

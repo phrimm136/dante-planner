@@ -12,8 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { DetailPageLayout } from '@/components/layout/DetailPageLayout'
 import { DetailPageSkeleton } from '@/components/feedback/DetailPageSkeleton'
 import { ColoredText } from '@/shared/gameText'
-import { EGOGiftCard } from '@/pages/egoGift'
-import { EGOGiftName } from '@/pages/egoGift'
+import { EGOGiftGrid } from '@/pages/egoGift'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useEGOGiftListSpec, useEGOGiftListI18n } from '@/pages/egoGift'
 import { useThemePackI18n } from '@/pages/themePack'
@@ -26,7 +25,6 @@ import {
   createEffectTextResolver,
 } from '@/pages/abEvent'
 import type { CoinTossI18nContext, AbEventChoice } from '@/pages/abEvent'
-import { SECTION_STYLES } from '@/lib/constants'
 
 // =============================================================================
 // Left Column Components
@@ -61,33 +59,7 @@ function RelatedEgoGifts({ giftIds, label }: { giftIds: string[]; label: string 
       <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
         {label}
       </div>
-      <div className={SECTION_STYLES.LAYOUT.wrap}>
-        {giftIds.map((id) => {
-          const giftSpec = spec[id]
-          if (!giftSpec) return null
-          return (
-            <Link key={id} to="/ego-gift/$id" params={{ id }}>
-              <div className="flex flex-col items-center gap-1">
-                <EGOGiftCard
-                  gift={{
-                    id,
-                    tag: giftSpec.tag,
-                    keyword: giftSpec.keyword,
-                    battleKeywordList: giftSpec.battleKeywordList ?? [],
-                    attributeType: giftSpec.attributeType,
-                    themePack: giftSpec.themePack,
-                    maxEnhancement: giftSpec.maxEnhancement,
-                  }}
-                  enableHoverHighlight
-                />
-                <span className="text-xs text-center text-foreground line-clamp-2 w-24 leading-tight font-medium">
-                  <EGOGiftName id={id} />
-                </span>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
+      <EGOGiftGrid ids={giftIds} spec={spec} showName />
     </div>
   )
 }

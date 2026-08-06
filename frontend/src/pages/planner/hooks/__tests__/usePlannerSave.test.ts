@@ -17,16 +17,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryClient } from '@/lib/queryClient'
 import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
-import type { SaveResult } from '../usePlannerStorage'
+import type { SaveError } from '../../lib/plannerSaveErrors'
+import type { Result } from '@/lib/result'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
-import { ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
+import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
 import { ok, err } from '@/lib/result'
 
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.
 const callOrder: string[] = []
 
 const mockGetOrCreateDeviceId = vi.fn<[], Promise<string>>()
-const mockSaveToLocal = vi.fn<[SaveablePlanner], Promise<SaveResult>>()
+const mockSaveToLocal = vi.fn<[SaveablePlanner], Promise<Result<void, SaveError>>>()
 const mockSyncToServer = vi.fn<[SaveablePlanner, boolean?], Promise<SaveablePlanner>>()
 const mockFetchFromServer = vi.fn()
 const mockDeleteFromLocal = vi.fn()
@@ -63,6 +64,7 @@ vi.mock('../usePlannerSyncAdapter', () => ({
 const mockUseAuthQuery = vi.fn()
 vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: () => mockUseAuthQuery(),
+  authQueryKeys: { me: ['auth', 'me'] as const },
 }))
 
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
@@ -113,7 +115,8 @@ beforeEach(() => {
   vi.clearAllMocks()
   callOrder.length = 0
   mockGetOrCreateDeviceId.mockResolvedValue('device-123')
-  mockSaveToLocal.mockResolvedValue({ success: true })
+  mockSaveToLocal.mockResolvedValue(ok(undefined))
+  mockDeleteFromLocal.mockResolvedValue(ok(undefined))
   mockSyncToServer.mockResolvedValue({
     metadata: { syncVersion: 5 },
   } as SaveablePlanner)
@@ -254,12 +257,9 @@ describe('usePlannerSave - draft vs published path selection', () => {
 })
 
 describe('usePlannerSave - error surface', () => {
-  it('maps a quotaExceeded local-save failure to the quotaExceeded error code', async () => {
+  it('surfaces the quota failure the storage layer reported', async () => {
     authenticated()
-    mockSaveToLocal.mockResolvedValue({
-      success: false,
-      errorCode: 'quotaExceeded',
-    })
+    mockSaveToLocal.mockResolvedValue(err({ kind: 'quota' }))
     const { result } = renderHook(() => usePlannerSave(baseOptions()))
 
     let outcome: boolean | undefined
@@ -269,6 +269,23 @@ describe('usePlannerSave - error surface', () => {
 
     expect(outcome).toBe(false)
     expect(result.current.error).toEqual({ kind: 'quota' })
+  })
+
+  it('invalidates the cached account when a restriction blocks the save', async () => {
+    // The app-wide restriction banner reads that cache entry, so a save the server
+    // refused on moderation grounds has to refresh it.
+    authenticated()
+    mockSyncToServer.mockRejectedValue(new BannedError('banned'))
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => usePlannerSave(baseOptions()))
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+
+    expect(result.current.error).toEqual({ kind: 'moderation', reason: 'banned' })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['auth', 'me'] })
+    invalidateSpy.mockRestore()
   })
 
   it('maps WriteTemporarilyUnavailableError to a syncPaused degradation (saved locally, sync paused)', async () => {

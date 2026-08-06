@@ -4,7 +4,7 @@ import { SearchableMultiSelect } from './SearchableMultiSelect'
 
 interface ThemePackDropdownProps {
   selected: Set<string>
-  onThemePacksChange: (themePacks: Set<string>) => void
+  onSelectionChange: (themePacks: Set<string>) => void
   /** Structural shape only — the dropdown reads each pack's gift-pool length for the count. */
   packs: Record<string, { specificEgoGiftPool?: unknown[] }>
   names: Record<string, { name?: string } | undefined>
@@ -21,7 +21,7 @@ interface ThemePackDropdownProps {
  */
 export function ThemePackDropdown({
   selected,
-  onThemePacksChange,
+  onSelectionChange,
   packs,
   names,
 }: ThemePackDropdownProps) {
@@ -37,7 +37,7 @@ export function ThemePackDropdown({
     <SearchableMultiSelect
       options={options}
       selectedValues={selected}
-      onSelectionChange={onThemePacksChange}
+      onSelectionChange={onSelectionChange}
       placeholder={t('filters.themePack', 'Theme Pack')}
       searchPlaceholder={t('filters.searchThemePack', 'Search theme packs...')}
     />

@@ -159,7 +159,7 @@ describe('ApiClient', () => {
 
       await expect(ApiClient.put('/api/planner/123', { version: 3 })).rejects.toThrow(ConflictError)
 
-      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e) => e)
+      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e: unknown) => e)
 
       expect(error).toBeInstanceOf(ConflictError)
       expect((error as ConflictError).serverVersion).toBe(5)
@@ -172,7 +172,7 @@ describe('ApiClient', () => {
         json: vi.fn().mockRejectedValue(new Error('Parse error')),
       })
 
-      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e) => e)
+      const error = await ApiClient.put('/api/planner/123', { version: 3 }).catch((e: unknown) => e)
 
       expect(error).toBeInstanceOf(ConflictError)
       expect((error as ConflictError).serverVersion).toBeNull()
@@ -189,7 +189,7 @@ describe('ApiClient', () => {
         }),
       })
 
-      const error = await ApiClient.put('/api/planner/123', {}).catch((e) => e)
+      const error = await ApiClient.put('/api/planner/123', {}).catch((e: unknown) => e)
 
       expect(error).toBeInstanceOf(ConflictError)
       expect((error as ConflictError).serverVersion).toBeNull()
@@ -208,7 +208,7 @@ describe('ApiClient', () => {
         }),
       })
 
-      const error = await ApiClient.post('/api/planner/md', {}).catch((e) => e)
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
 
       expect(error).toBeInstanceOf(ValidationError)
       expect((error as ValidationError).code).toBe('VALIDATION_ERROR')
@@ -225,7 +225,7 @@ describe('ApiClient', () => {
         }),
       })
 
-      const error = await ApiClient.post('/api/planner/md', {}).catch((e) => e)
+      const error = await ApiClient.post('/api/planner/md', {}).catch((e: unknown) => e)
 
       expect(error).toBeInstanceOf(RateLimitError)
       expect((error as RateLimitError).code).toBe('RATE_LIMIT_EXCEEDED')

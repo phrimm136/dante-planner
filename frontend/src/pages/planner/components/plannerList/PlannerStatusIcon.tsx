@@ -1,6 +1,7 @@
 import { Circle, CheckCircle, CloudUpload, Globe, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+import type { LucideIcon } from 'lucide-react'
 import type { SaveStatus } from '../../lib/plannerBadges'
 
 interface PlannerStatusIconProps {
@@ -8,53 +9,55 @@ interface PlannerStatusIconProps {
   className?: string
 }
 
+interface StatusIconSpec {
+  Icon: LucideIcon
+  className: string
+  label: string
+}
+
+/**
+ * Icon, colour and accessible name per save status. Total over `SaveStatus`, so
+ * a new status cannot ship without one.
+ */
+const STATUS_ICONS: Record<SaveStatus, StatusIconSpec> = {
+  draft: {
+    Icon: Circle,
+    className: 'text-yellow-600 dark:text-yellow-400',
+    label: 'Draft',
+  },
+  saved: {
+    Icon: Circle,
+    className: 'fill-current text-muted-foreground',
+    label: 'Saved',
+  },
+  unsynced: {
+    Icon: CloudUpload,
+    className: 'text-blue-600 dark:text-blue-400',
+    label: 'Unsynced',
+  },
+  synced: {
+    Icon: CheckCircle,
+    className: 'text-primary',
+    label: 'Synced',
+  },
+  published: {
+    Icon: Globe,
+    className: 'text-primary',
+    label: 'Published',
+  },
+  unpublishedChanges: {
+    Icon: AlertCircle,
+    className: 'text-orange-600 dark:text-orange-400',
+    label: 'Unpublished changes',
+  },
+}
+
 /**
  * Symbol indicator for planner status (used in cards).
  * Displays minimal icon without text for compact representation.
- *
- * States:
- * - draft: Empty circle (○) - Never manually saved
- * - saved: Filled circle (●) - Saved locally, sync disabled
- * - unsynced: Cloud upload icon - Has unsaved changes (sync enabled)
- * - synced: Check circle - Synced to server
- * - published: Globe - Published to community
- * - unpublishedChanges: Alert - Published but has local changes
  */
 export function PlannerStatusIcon({ status, className }: PlannerStatusIconProps) {
-  const iconClass = cn('size-4', className)
+  const { Icon, className: statusClass, label } = STATUS_ICONS[status]
 
-  switch (status) {
-    case 'draft':
-      return (
-        <Circle
-          className={cn(iconClass, 'text-yellow-600 dark:text-yellow-400')}
-          aria-label="Draft"
-        />
-      )
-    case 'saved':
-      return (
-        <Circle
-          className={cn(iconClass, 'fill-current text-muted-foreground')}
-          aria-label="Saved"
-        />
-      )
-    case 'unsynced':
-      return (
-        <CloudUpload
-          className={cn(iconClass, 'text-blue-600 dark:text-blue-400')}
-          aria-label="Unsynced"
-        />
-      )
-    case 'synced':
-      return <CheckCircle className={cn(iconClass, 'text-primary')} aria-label="Synced" />
-    case 'published':
-      return <Globe className={cn(iconClass, 'text-primary')} aria-label="Published" />
-    case 'unpublishedChanges':
-      return (
-        <AlertCircle
-          className={cn(iconClass, 'text-orange-600 dark:text-orange-400')}
-          aria-label="Unpublished changes"
-        />
-      )
-  }
+  return <Icon className={cn('size-4', className, statusClass)} aria-label={label} />
 }

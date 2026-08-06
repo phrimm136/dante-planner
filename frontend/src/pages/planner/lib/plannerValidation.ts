@@ -844,29 +844,27 @@ export function validatePlannerForDraftSave(
   egoGiftSpec?: Record<string, EGOGiftSpec>,
   egoGiftI18n?: Record<string, string>,
 ): { key: string; params?: Record<string, string> } | null {
-  const errors: PlannerValidationError[] = []
+  const errors: PlannerValidationError[] = [
+    // 1. Equipment validation
+    ...validateEquipment(content.equipment),
 
-  // 1. Equipment validation
-  errors.push(...validateEquipment(content.equipment))
+    // 2. Deployment order validation
+    ...validateDeploymentOrder(content.deploymentOrder),
 
-  // 2. Deployment order validation
-  errors.push(...validateDeploymentOrder(content.deploymentOrder))
+    // 3. Skill EA state validation
+    ...validateSkillEAState(content.skillEAState),
 
-  // 3. Skill EA state validation
-  errors.push(...validateSkillEAState(content.skillEAState))
-
-  // 4. Gift IDs validation (all three arrays)
-  errors.push(...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec))
-  errors.push(...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec))
-  errors.push(
+    // 4. Gift IDs validation (all three arrays)
+    ...validateGiftIdArray(content.selectedGiftIds, 'selectedGiftIds', egoGiftSpec),
+    ...validateGiftIdArray(content.observationGiftIds, 'observationGiftIds', egoGiftSpec),
     ...validateGiftIdArray(content.comprehensiveGiftIds, 'comprehensiveGiftIds', egoGiftSpec),
-  )
 
-  // 5. Start buffs validation
-  errors.push(...validateStartBuffIds(content.selectedBuffIds))
+    // 5. Start buffs validation
+    ...validateStartBuffIds(content.selectedBuffIds),
 
-  // 6. Start gifts validation
-  errors.push(...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds))
+    // 6. Start gifts validation
+    ...validateStartGiftSelection(content.selectedGiftKeyword, content.selectedGiftIds),
+  ]
 
   // 7. Floor selections validation (non-strict: theme packs optional)
   const floorCount = FLOOR_COUNTS[category]

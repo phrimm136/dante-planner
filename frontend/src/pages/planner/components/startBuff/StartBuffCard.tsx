@@ -103,6 +103,86 @@ const CARD_VARIANTS: Record<number, StartBuffCardVariant> = {
   },
 }
 
+type EnhancementStateKey = keyof StartBuffCardVariant['enhancementStates']
+
+/** State an enhancement button is in, keyed by the level it toggles. */
+const SELECTED_ENHANCEMENT_STATES: Record<1 | 2, EnhancementStateKey> = {
+  1: 'plus1',
+  2: 'plus2',
+}
+
+/** Icon height per enhancement-button state. */
+const ENHANCEMENT_ICON_HEIGHTS: Record<EnhancementStateKey, string> = {
+  unselected: 'h-4',
+  plus1: 'h-[16.9px]',
+  plus2: 'h-[20.8px]',
+}
+
+function EnhancementButton({
+  lvl,
+  enhancement,
+  variant,
+  version,
+  onEnhancementClick,
+}: {
+  lvl: 1 | 2
+  enhancement: EnhancementLevel
+  variant: StartBuffCardVariant
+  version: number
+  onEnhancementClick: (level: 1 | 2) => void
+}) {
+  const isButtonSelected = enhancement === lvl
+  const iconPath = isButtonSelected
+    ? getStartBuffEnhancementIconPath(lvl)
+    : getStartBuffEnhancementIconPath(0)
+  const iconCount = lvl === 2 && !isButtonSelected ? 2 : 1
+  const stateKey = isButtonSelected ? SELECTED_ENHANCEMENT_STATES[lvl] : 'unselected'
+  const border = variant.enhancementStates[stateKey]
+  const overlay = variant.enhancementOverlay
+  return (
+    <div className={variant.enhancementSlot}>
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          onEnhancementClick(lvl)
+        }}
+        className="absolute inset-0 overflow-visible"
+        style={{
+          borderStyle: 'solid',
+          borderWidth: `${border.width}px`,
+          borderImageSource: `url('${getStartBuffEnhancementBgPath(border.bgLevel, version)}')`,
+          borderImageSlice: `${border.slice} fill`,
+          borderImageOutset: `${border.outset}px`,
+          borderImageRepeat: 'stretch',
+        }}
+      />
+      {overlay && isButtonSelected && (
+        <div
+          className={overlay.className}
+          style={{
+            borderStyle: 'solid',
+            borderWidth: `${overlay.width}px`,
+            borderImageSource: `url('${getStartBuffEnhancementOverlayPath(version)}')`,
+            borderImageSlice: `${overlay.slice} fill`,
+            borderImageOutset: `${overlay.outset}px`,
+            borderImageRepeat: 'stretch',
+          }}
+        />
+      )}
+      <div className="absolute inset-0 flex items-center justify-center gap-0.5 pointer-events-none">
+        {Array.from({ length: iconCount }).map((_, i) => (
+          <img
+            key={i}
+            src={iconPath}
+            alt=""
+            className={`w-auto shrink-0 ${ENHANCEMENT_ICON_HEIGHTS[stateKey]}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const FALLBACK_MD_VERSION = 6
 
 /** Duration of the card press-down animation */
@@ -194,59 +274,6 @@ export function StartBuffCard({
     }
   }
 
-  function EnhancementButton({ lvl }: { lvl: 1 | 2 }) {
-    const isButtonSelected = enhancement === lvl
-    const iconPath = isButtonSelected
-      ? getStartBuffEnhancementIconPath(lvl)
-      : getStartBuffEnhancementIconPath(0)
-    const iconCount = lvl === 2 && !isButtonSelected ? 2 : 1
-    const stateKey = isButtonSelected ? (lvl === 1 ? 'plus1' : 'plus2') : 'unselected'
-    const border = variant.enhancementStates[stateKey]
-    const overlay = variant.enhancementOverlay
-    return (
-      <div className={variant.enhancementSlot}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            handleEnhancementClick(lvl)
-          }}
-          className="absolute inset-0 overflow-visible"
-          style={{
-            borderStyle: 'solid',
-            borderWidth: `${border.width}px`,
-            borderImageSource: `url('${getStartBuffEnhancementBgPath(border.bgLevel, version)}')`,
-            borderImageSlice: `${border.slice} fill`,
-            borderImageOutset: `${border.outset}px`,
-            borderImageRepeat: 'stretch',
-          }}
-        />
-        {overlay && isButtonSelected && (
-          <div
-            className={overlay.className}
-            style={{
-              borderStyle: 'solid',
-              borderWidth: `${overlay.width}px`,
-              borderImageSource: `url('${getStartBuffEnhancementOverlayPath(version)}')`,
-              borderImageSlice: `${overlay.slice} fill`,
-              borderImageOutset: `${overlay.outset}px`,
-              borderImageRepeat: 'stretch',
-            }}
-          />
-        )}
-        <div className="absolute inset-0 flex items-center justify-center gap-0.5 pointer-events-none">
-          {Array.from({ length: iconCount }).map((_, i) => (
-            <img
-              key={i}
-              src={iconPath}
-              alt=""
-              className={`w-auto shrink-0 ${isButtonSelected ? (lvl === 2 ? 'h-[20.8px]' : 'h-[16.9px]') : 'h-4'}`}
-            />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div
       className={`relative cursor-pointer ${variant.root ? `${variant.root} ` : ''}transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'} `}
@@ -315,8 +342,20 @@ export function StartBuffCard({
 
         {/* Enhancement buttons - bottom */}
         <div className={variant.enhancementRow}>
-          <EnhancementButton lvl={1} />
-          <EnhancementButton lvl={2} />
+          <EnhancementButton
+            lvl={1}
+            enhancement={enhancement}
+            variant={variant}
+            version={version}
+            onEnhancementClick={handleEnhancementClick}
+          />
+          <EnhancementButton
+            lvl={2}
+            enhancement={enhancement}
+            variant={variant}
+            version={version}
+            onEnhancementClick={handleEnhancementClick}
+          />
         </div>
       </div>
       {/* Highlight overlay */}

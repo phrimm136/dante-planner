@@ -10,6 +10,7 @@
     "typecheck": "tsc -b",
     "lint": "oxlint --type-aware --tsconfig tsconfig.app.json src",
     "check:compiler-bailouts": "tsx scripts/compiler-bailouts.ts",
+    "check:fp": "ast-grep scan",
     "fmt": "oxfmt src",
     "fmt:check": "oxfmt --check src",
     "preview": "vite preview",

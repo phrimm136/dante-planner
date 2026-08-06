@@ -2,6 +2,7 @@
 
 export { EGOGiftCard } from './components/EGOGiftCard'
 export { EGOGiftCardLink } from './components/EGOGiftCardLink'
+export { EGOGiftGrid } from './components/EGOGiftGrid'
 export { EGOGiftList } from './components/EGOGiftList'
 export { EGOGiftName } from './components/EGOGiftName'
 export { EGOGiftMetadata } from './components/EGOGiftMetadata'
@@ -38,7 +39,10 @@ export {
 } from './hooks/useEGOGiftObservationData'
 
 export { sortEGOGifts } from './lib/egoGiftSort'
-export { calculateEnhancementCost, extractEGOGiftTier, isMixedRecipe } from './lib/egoGiftUtils'
+export { calculateEnhancementCost, isMixedRecipe } from './lib/egoGiftUtils'
+export { parseTier, toRomanTier } from './lib/egoGiftTier'
+export type { EGOGiftTierValue } from './lib/egoGiftTier'
+export { toEGOGiftCardProps } from './lib/egoGiftCardProps'
 export { deriveDifficulty } from './lib/egoGiftFilter'
 export type { EGOGiftFacetState } from './lib/egoGiftFilter'
 

@@ -15,6 +15,7 @@ import { PlannerListFilterPills } from './components/plannerList/PlannerListFilt
 import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlansErrorFallback'
 import { usePublishedPlannerQuery } from './hooks/usePublishedPlannerQuery'
+import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
@@ -80,7 +81,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
     user.usernameSuffix === apiData.authorUsernameSuffix
 
   // Validate planner type - viewer only supports Mirror Dungeon planners
-  if (planner.config.type !== 'MIRROR_DUNGEON') {
+  if (!isMDPlanner(planner)) {
     return (
       <div className="space-y-6 text-center py-12">
         <h1 className={SECTION_STYLES.TEXT.pageTitle}>{t('pages.detail.invalidType')}</h1>

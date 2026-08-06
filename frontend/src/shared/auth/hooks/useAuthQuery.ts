@@ -25,9 +25,9 @@ export const authQueryKeys = {
 export function createAuthMeQueryOptions() {
   return queryOptions({
     queryKey: authQueryKeys.me,
-    queryFn: async (): Promise<User | null> => {
+    queryFn: async ({ signal }): Promise<User | null> => {
       try {
-        const data = await ApiClient.get<User | null>('/api/auth/me')
+        const data = await ApiClient.get<User | null>('/api/auth/me', { signal })
         if (data == null) return null
         return validateDataOrNull(data, UserSchema, 'auth me')
       } catch (error) {

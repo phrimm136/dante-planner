@@ -4,10 +4,17 @@ import {
   ServiceUpdatingError,
   BackendUnavailableError,
   AuthTemporarilyUnavailableError,
+  RetryableUnavailableError,
 } from './api'
 import { toast } from './toast'
 import i18n from './i18n'
-import { STALE_TIME, GC_TIME } from '@/lib/constants'
+import {
+  STALE_TIME,
+  GC_TIME,
+  MAX_RETRYABLE_ATTEMPTS,
+  RETRY_BASE_MS,
+  RETRY_MAX_MS,
+} from '@/lib/constants'
 
 export function handleBackendDownError(error: Error): void {
   if (error instanceof ServiceUpdatingError) {
@@ -40,11 +47,15 @@ export const queryClient = new QueryClient({
       staleTime: STALE_TIME.SHORT,
       gcTime: GC_TIME.SHORT,
       retry: (failureCount, error) => {
+        if (error instanceof RetryableUnavailableError) {
+          return failureCount < MAX_RETRYABLE_ATTEMPTS
+        }
         if (error instanceof ServiceUpdatingError || error instanceof BackendUnavailableError) {
           return false
         }
         return failureCount < 1
       },
+      retryDelay: (attempt) => Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS),
       refetchOnWindowFocus: false, // Don't refetch when window regains focus
     },
   },

@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useThemePackListData } from '@/pages/themePack'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
@@ -6,14 +5,13 @@ import { calculateActiveFilterCount } from '@/shared/filter'
 import { useSetFilters } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
-import { FilterSection } from '@/shared/filter'
+import { FilterSectionList, filterSection } from '@/shared/filter'
 import { CompactDungeonDifficultyFilter } from '@/shared/filter'
 import { CompactFloorFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { EGOGiftFilterDropdown } from '@/pages/egoGift'
 import { ThemePackList } from '@/pages/themePack'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Shell component - loads spec + i18n, manages filter states.
@@ -39,45 +37,41 @@ function ThemePackPageShell() {
 
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
-  const primaryFilters = (
-    <FilterSection
-      title={t('filters.difficulty', 'Difficulty')}
-      activeCount={filters.selectedDifficulties.size}
-    >
-      <CompactDungeonDifficultyFilter
-        selected={filters.selectedDifficulties}
-        onSelectionChange={setters.selectedDifficulties}
-      />
-    </FilterSection>
-  )
+  const PRIMARY_FILTERS = [
+    filterSection({
+      key: 'selectedDifficulties',
+      titleKey: 'filters.difficulty',
+      titleFallback: 'Difficulty',
+      Component: CompactDungeonDifficultyFilter,
+      selected: filters.selectedDifficulties,
+      onSelectionChange: setters.selectedDifficulties,
+    }),
+  ]
 
-  const secondaryFilters = (
-    <>
-      <FilterSection title={t('filters.floor', 'Floor')} activeCount={filters.selectedFloors.size}>
-        <CompactFloorFilter
-          selected={filters.selectedFloors}
-          onSelectionChange={setters.selectedFloors}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.egoGift', 'EGO Gift')}
-        activeCount={filters.selectedEgoGifts.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <EGOGiftFilterDropdown
-            selected={filters.selectedEgoGifts}
-            onSelectionChange={setters.selectedEgoGifts}
-          />
-        </Suspense>
-      </FilterSection>
-    </>
-  )
+  const SECONDARY_FILTERS = [
+    filterSection({
+      key: 'selectedFloors',
+      titleKey: 'filters.floor',
+      titleFallback: 'Floor',
+      Component: CompactFloorFilter,
+      selected: filters.selectedFloors,
+      onSelectionChange: setters.selectedFloors,
+    }),
+    filterSection({
+      key: 'selectedEgoGifts',
+      titleKey: 'filters.egoGift',
+      titleFallback: 'EGO Gift',
+      suspense: true,
+      Component: EGOGiftFilterDropdown,
+      selected: filters.selectedEgoGifts,
+      onSelectionChange: setters.selectedEgoGifts,
+    }),
+  ]
 
   return (
     <FilterPageLayout
-      primaryFilters={primaryFilters}
-      secondaryFilters={secondaryFilters}
+      primaryFilters={<FilterSectionList sections={PRIMARY_FILTERS} />}
+      secondaryFilters={<FilterSectionList sections={SECONDARY_FILTERS} />}
       activeFilterCount={activeFilterCount}
       onResetAll={resetAll}
       searchBar={

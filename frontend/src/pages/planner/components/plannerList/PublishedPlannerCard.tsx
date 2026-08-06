@@ -10,7 +10,9 @@ import {
   PLANNER_STATUS_BADGE_STYLES,
   RECOMMENDED_THRESHOLD,
   SECTION_STYLES,
+  STAR_ICON_CLASS,
 } from '@/lib/constants'
+import { MdCategoryLabel } from '../MdCategoryLabel'
 import { categoryBadgeStyle } from '../../lib/plannerBadges'
 
 import type { PublicPlanner } from '../../types/PlannerListTypes'
@@ -101,7 +103,7 @@ export function PublishedPlannerCard({
             className="px-2 py-0.5 text-xs font-medium rounded shrink-0 whitespace-nowrap"
             style={categoryBadgeStyle(category)}
           >
-            {t(`pages.plannerList.mdCategory.${category}`)}
+            <MdCategoryLabel category={category} />
           </span>
 
           {/* Keywords (icons inline with floor badge) */}
@@ -132,9 +134,7 @@ export function PublishedPlannerCard({
               {statusBadgeLabels[statusBadge]}
             </span>
           )}
-          {upvotes >= RECOMMENDED_THRESHOLD && (
-            <Star className="size-4 fill-yellow-400 text-yellow-400" />
-          )}
+          {upvotes >= RECOMMENDED_THRESHOLD && <Star className={cn('size-4', STAR_ICON_CLASS)} />}
           {showBookmark && isBookmarked && (
             <Bookmark className="size-4 fill-primary text-primary" />
           )}

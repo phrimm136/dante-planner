@@ -6,7 +6,7 @@
  */
 
 import type { Facet } from '@/shared/filter'
-import { applyFacets } from '@/shared/filter'
+import { applyFacets, matchesSearch } from '@/shared/filter'
 import type { FilterState } from '@/components/hooks/useSetFilters'
 import type { BuffType } from '@/shared/gameData'
 import type { BattleKeywordI18nEntry } from '@/shared/gameText'
@@ -51,8 +51,6 @@ export function matchesKeyword(
   searchTerms: readonly string[],
 ): boolean {
   if (!applyFacets(keyword, state.values, KEYWORD_FACETS)) return false
-  if (!state.searchQuery) return true
 
-  const lowerQuery = state.searchQuery.toLowerCase()
-  return searchTerms.some((term) => term.includes(lowerQuery))
+  return matchesSearch(state.searchQuery, searchTerms)
 }

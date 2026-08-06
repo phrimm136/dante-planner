@@ -11,35 +11,23 @@ import { cn } from '@/lib/utils'
 import { COMMENT_MAX_VISUAL_DEPTH_MOBILE, COMMENT_MAX_VISUAL_DEPTH_DESKTOP } from '@/lib/constants'
 import { CommentCard } from './CommentCard'
 
-import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
+import type { CommentNode } from '../types/CommentTypes'
+import type { CommentActions, CommentViewer } from '../lib/commentViewer'
 
 interface CommentThreadProps {
   node: CommentNode
+  /** Whether the planner carrying the thread is published. */
   isPublished: boolean
-  isAuthenticated: boolean
-  isModerator: boolean
-  onReply: (parentId: string, content: string) => void
-  onEdit: (commentId: string, content: string) => void
-  onDelete: (commentId: string) => void
-  onModeratorDelete: (commentId: string) => void
-  onUpvote: (commentId: string) => void
-  onToggleNotifications: (commentId: string, enabled: boolean) => void
-  onReport: (commentId: string, reason: CommentReportReason) => void
+  viewer: CommentViewer
+  actions: CommentActions
   depth?: number
 }
 
 export function CommentThread({
   node,
   isPublished,
-  isAuthenticated,
-  isModerator,
-  onReply,
-  onEdit,
-  onDelete,
-  onModeratorDelete,
-  onUpvote,
-  onToggleNotifications,
-  onReport,
+  viewer,
+  actions,
   depth = 0,
 }: CommentThreadProps) {
   // Responsive hierarchy collapse:
@@ -48,15 +36,6 @@ export function CommentThread({
   const withinMobileMax = depth > 0 && depth <= COMMENT_MAX_VISUAL_DEPTH_MOBILE
   const beyondMobileWithinDesktop =
     depth > COMMENT_MAX_VISUAL_DEPTH_MOBILE && depth <= COMMENT_MAX_VISUAL_DEPTH_DESKTOP
-
-  // Wrap handlers that need additional logic
-  const handleToggleNotifications = (commentId: string) => {
-    onToggleNotifications(commentId, !node.authorNotificationsEnabled)
-  }
-
-  const handleReport = (commentId: string) => {
-    onReport(commentId, 'OTHER')
-  }
 
   return (
     <div
@@ -67,19 +46,7 @@ export function CommentThread({
         beyondMobileWithinDesktop && 'lg:ml-3 lg:border-l-2 lg:border-border lg:pl-3',
       )}
     >
-      <CommentCard
-        comment={node}
-        isPublished={isPublished}
-        isAuthenticated={isAuthenticated}
-        isModerator={isModerator}
-        onReply={onReply}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onModeratorDelete={onModeratorDelete}
-        onUpvote={onUpvote}
-        onToggleNotifications={handleToggleNotifications}
-        onReport={handleReport}
-      />
+      <CommentCard comment={node} isPublished={isPublished} viewer={viewer} actions={actions} />
 
       {/* Render replies recursively */}
       {node.replies.map((reply) => (
@@ -87,15 +54,8 @@ export function CommentThread({
           key={reply.id}
           node={reply}
           isPublished={isPublished}
-          isAuthenticated={isAuthenticated}
-          isModerator={isModerator}
-          onReply={onReply}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onModeratorDelete={onModeratorDelete}
-          onUpvote={onUpvote}
-          onToggleNotifications={onToggleNotifications}
-          onReport={onReport}
+          viewer={viewer}
+          actions={actions}
           depth={depth + 1}
         />
       ))}

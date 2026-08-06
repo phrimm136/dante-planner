@@ -3,15 +3,23 @@ import { useTranslation } from 'react-i18next'
 
 import { ModerationReasonDialog } from './ModerationReasonDialog'
 
-interface BanDialogProps {
+/** The shape every per-user moderation dialog accepts, so callers can table them. */
+export interface ModerationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   username: string
-  onConfirm: (reason: string) => void
+  /** `durationMinutes` is supplied only by the dialogs that collect a duration. */
+  onConfirm: (reason: string, durationMinutes?: number) => void
   isPending: boolean
 }
 
-export function BanDialog({ open, onOpenChange, username, onConfirm, isPending }: BanDialogProps) {
+export function BanDialog({
+  open,
+  onOpenChange,
+  username,
+  onConfirm,
+  isPending,
+}: ModerationDialogProps) {
   const { t } = useTranslation(['moderation'])
 
   return (
@@ -32,14 +40,6 @@ export function BanDialog({ open, onOpenChange, username, onConfirm, isPending }
   )
 }
 
-interface TimeoutDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  username: string
-  onConfirm: (durationMinutes: number, reason: string) => void
-  isPending: boolean
-}
-
 const TIMEOUT_PRESETS = [
   { value: 30, label: '30 minutes' },
   { value: 60, label: '1 hour' },
@@ -58,7 +58,7 @@ export function TimeoutDialog({
   username,
   onConfirm,
   isPending,
-}: TimeoutDialogProps) {
+}: ModerationDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
   const [duration, setDuration] = useState<number>(DEFAULT_TIMEOUT_MINUTES)
 
@@ -74,7 +74,7 @@ export function TimeoutDialog({
       cancelLabel={t('common:cancel')}
       confirmLabel={t('dialogs.timeout.confirm')}
       destructive
-      onConfirm={(reason) => onConfirm(duration, reason)}
+      onConfirm={(reason) => onConfirm(reason, duration)}
       isPending={isPending}
     >
       <div className="space-y-2">
@@ -100,21 +100,13 @@ export function TimeoutDialog({
   )
 }
 
-interface UnbanDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  username: string
-  onConfirm: (reason: string) => void
-  isPending: boolean
-}
-
 export function UnbanDialog({
   open,
   onOpenChange,
   username,
   onConfirm,
   isPending,
-}: UnbanDialogProps) {
+}: ModerationDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
 
   return (
@@ -134,21 +126,13 @@ export function UnbanDialog({
   )
 }
 
-interface ClearTimeoutDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  username: string
-  onConfirm: (reason: string) => void
-  isPending: boolean
-}
-
 export function ClearTimeoutDialog({
   open,
   onOpenChange,
   username,
   onConfirm,
   isPending,
-}: ClearTimeoutDialogProps) {
+}: ModerationDialogProps) {
   const { t } = useTranslation(['moderation', 'common'])
 
   return (

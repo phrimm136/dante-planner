@@ -327,8 +327,8 @@ export class ApiClient {
     return response.json()
   }
 
-  static async get<T>(endpoint: string): Promise<T> {
-    return this.fetch<T>(endpoint, { method: 'GET' })
+  static async get<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    return this.fetch<T>(endpoint, { ...options, method: 'GET' })
   }
 
   static async post<T>(endpoint: string, data?: unknown): Promise<T> {

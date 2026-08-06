@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { createStaticDataQueryOptions } from '@/lib/queryOptions'
 import { AnnouncementSpecListSchema, AnnouncementI18nSchema } from '../schemas/AnnouncementSchemas'
-import { formatAnnouncementDate } from '@/lib/formatDate'
+import { mergeAnnouncements } from '../lib/mergeAnnouncements'
 import type { Announcement } from '../types/AnnouncementTypes'
 
 // Query key factory for announcement data
@@ -55,39 +55,18 @@ export function useAnnouncementData(): Announcement[] {
   const { data: specList } = useSuspenseQuery(createSpecQueryOptions())
   const { data: i18nData } = useSuspenseQuery(createI18nQueryOptions(i18n.language))
 
-  const today = new Date()
-  const announcements: Announcement[] = []
+  const { announcements, missingIds } = mergeAnnouncements(
+    specList,
+    i18nData,
+    i18n.language,
+    new Date(),
+  )
 
-  for (const spec of specList) {
-    // Filter expired entries — timezone edge at day boundary is accepted
-    if (spec.expiresAt && new Date(spec.expiresAt) < today) {
-      continue
-    }
-
-    // Skip entries missing from i18n file; log but do not crash
-    const i18nEntry = i18nData[spec.id]
-    if (!i18nEntry) {
-      console.error(
-        `[useAnnouncementData] Missing i18n entry for id "${spec.id}" in language "${i18n.language}"`,
-      )
-      continue
-    }
-
-    announcements.push({
-      id: spec.id,
-      date: spec.date,
-      formattedDate: formatAnnouncementDate(spec.date, i18n.language),
-      title: i18nEntry.title,
-      body: i18nEntry.body,
-      permanent: spec.permanent ?? false,
-    })
+  for (const id of missingIds) {
+    console.error(
+      `[useAnnouncementData] Missing i18n entry for id "${id}" in language "${i18n.language}"`,
+    )
   }
 
-  // Partition: regular (newest-first), then permanent (newest-first)
-  const regular = announcements.filter((a) => !a.permanent)
-  const permanent = announcements.filter((a) => a.permanent)
-  regular.sort((a, b) => b.date.localeCompare(a.date))
-  permanent.sort((a, b) => b.date.localeCompare(a.date))
-
-  return [...regular, ...permanent]
+  return announcements
 }

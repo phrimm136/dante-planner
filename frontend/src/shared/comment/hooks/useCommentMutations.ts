@@ -11,6 +11,7 @@ import { toast } from '@/lib/toast'
 import { ApiClient, ConflictError } from '@/lib/api'
 import { requestNotificationPermission } from '@/shared/notifications'
 import { useApiMutation } from '@/components/hooks/useApiMutation'
+import { updateCommentInTree } from '../lib/commentTree'
 import { commentsQueryKeys } from './useCommentsQuery'
 
 import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
@@ -176,30 +177,6 @@ interface ToggleNotificationsInput {
   commentId: string // UUID
   enabled: boolean
   plannerId: string
-}
-
-// ============================================================================
-// Cache Update Helpers
-// ============================================================================
-
-/**
- * Recursively updates a single comment in the tree.
- * Returns a new tree with the updated node (immutable update).
- */
-function updateCommentInTree(
-  nodes: CommentNode[],
-  targetId: string,
-  updater: (node: CommentNode) => CommentNode,
-): CommentNode[] {
-  return nodes.map((node) => {
-    if (node.id === targetId) {
-      return updater(node)
-    }
-    if (node.replies.length > 0) {
-      return { ...node, replies: updateCommentInTree(node.replies, targetId, updater) }
-    }
-    return node
-  })
 }
 
 export function useToggleCommentNotifications() {

@@ -5,7 +5,7 @@ import { getKeywordIconPath } from '@/shared/assets'
 import { KEYWORD_ORDER } from '@/shared/gameData'
 
 interface CompactEGOGiftKeywordFilterProps {
-  selectedKeywords: Set<string>
+  selected: Set<string>
   onSelectionChange: (keywords: Set<string>) => void
 }
 
@@ -21,7 +21,7 @@ interface CompactEGOGiftKeywordFilterProps {
  * - "None" is rendered as a text button via children prop
  */
 export function CompactEGOGiftKeywordFilter({
-  selectedKeywords,
+  selected,
   onSelectionChange,
 }: CompactEGOGiftKeywordFilterProps) {
   const { t } = useTranslation()
@@ -30,7 +30,7 @@ export function CompactEGOGiftKeywordFilter({
   const iconKeywords = KEYWORD_ORDER.filter((k) => k !== 'None')
 
   const handleNoneClick = () => {
-    const newKeywords = new Set(selectedKeywords)
+    const newKeywords = new Set(selected)
     if (newKeywords.has('None')) {
       newKeywords.delete('None')
     } else {
@@ -39,12 +39,12 @@ export function CompactEGOGiftKeywordFilter({
     onSelectionChange(newKeywords)
   }
 
-  const isNoneSelected = selectedKeywords.has('None')
+  const isNoneSelected = selected.has('None')
 
   return (
     <CompactIconFilter
       options={iconKeywords}
-      selectedOptions={selectedKeywords}
+      selectedOptions={selected}
       onSelectionChange={onSelectionChange}
       getIconPath={getKeywordIconPath}
     >

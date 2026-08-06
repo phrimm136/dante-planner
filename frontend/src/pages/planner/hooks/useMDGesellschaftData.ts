@@ -83,7 +83,7 @@ function createGesellschaftQueryOptions(mode: MDGesellschaftMode, params: Gesell
     queryKey: isBest
       ? gesellschaftQueryKeys.recommended(params)
       : gesellschaftQueryKeys.published(params),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const searchParams = new URLSearchParams()
       searchParams.append('page', String(params.page))
       searchParams.append('size', String(params.size))
@@ -96,7 +96,7 @@ function createGesellschaftQueryOptions(mode: MDGesellschaftMode, params: Gesell
       if (params.themePack) searchParams.append('themePack', params.themePack)
 
       const path = isBest ? '/api/planner/md/recommended' : '/api/planner/md/published'
-      const data = await ApiClient.get(`${path}?${searchParams.toString()}`)
+      const data = await ApiClient.get(`${path}?${searchParams.toString()}`, { signal })
       return validateData(
         data,
         PaginatedPlannersSchema,

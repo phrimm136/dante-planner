@@ -3,7 +3,7 @@ import { useThemePackListData } from '../hooks/useThemePackListData'
 
 interface ThemePackFilterDropdownProps {
   selected: Set<string>
-  onThemePacksChange: (themePacks: Set<string>) => void
+  onSelectionChange: (themePacks: Set<string>) => void
 }
 
 /**
@@ -12,14 +12,14 @@ interface ThemePackFilterDropdownProps {
  */
 export function ThemePackFilterDropdown({
   selected,
-  onThemePacksChange,
+  onSelectionChange,
 }: ThemePackFilterDropdownProps) {
   const { spec, i18n } = useThemePackListData()
 
   return (
     <ThemePackDropdown
       selected={selected}
-      onThemePacksChange={onThemePacksChange}
+      onSelectionChange={onSelectionChange}
       packs={spec}
       names={i18n}
     />

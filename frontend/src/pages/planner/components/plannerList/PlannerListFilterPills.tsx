@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 
 import { MD_CATEGORIES } from '@/shared/gameData'
 
+import { MdCategoryLabel } from '../MdCategoryLabel'
+
 import type { MDCategory } from '@/shared/gameData'
 
 interface PlannerListFilterPillsProps {
@@ -52,7 +54,7 @@ export function PlannerListFilterPills({
           className="selectable px-3 py-1.5 text-sm font-medium rounded-full bg-card"
           data-selected={selectedCategory === category}
         >
-          {t(`pages.plannerList.mdCategory.${category}`)}
+          <MdCategoryLabel category={category} />
         </button>
       ))}
     </div>

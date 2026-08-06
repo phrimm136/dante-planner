@@ -14,8 +14,19 @@
  * - Parsed: { baseName: "OnWinDuelAsParryingCountMultiplyAndPlusPercent", args: [10, 20] }
  */
 
+import { err, ok } from '@/lib/result'
+
+import type { Result } from '@/lib/result'
 import type { SanityConditionI18n } from '@/shared/gameText'
 import type { SanityConditionType } from '@/shared/gameData'
+
+/** Base name a condition parsed to, for which the i18n table holds no entry. */
+export interface MissingSanityConditionI18n {
+  baseName: string
+}
+
+/** A formatted description, or the base name whose translation is missing. */
+export type SanityConditionResult = Result<string, MissingSanityConditionI18n>
 
 /**
  * Result of parsing a sanity condition function name
@@ -76,12 +87,11 @@ export function substituteArgs(template: string, args: number[]): string {
  * Formats a sanity condition into a human-readable description.
  *
  * This is the main entry point for formatting sanity conditions.
- * Uses forgiving strategy: returns raw name if parsing/lookup fails.
  *
  * @param encodedName - Raw function name like "OnKillEnemyAsLevelRatioMultiply10"
  * @param i18n - Sanity condition i18n lookup object
  * @param type - Whether this is an increment ('inc') or decrement ('dec') condition
- * @returns Formatted description or raw name on failure
+ * @returns The formatted description, or the unresolved base name
  *
  * @example
  * const i18n = {
@@ -91,41 +101,36 @@ export function substituteArgs(template: string, args: number[]): string {
  *   }
  * }
  * formatSanityCondition("OnKillEnemyAsLevelRatioMultiply10", i18n, "inc")
- * // => "Increase by 10 after defeating..."
+ * // => { ok: true, value: "Increase by 10 after defeating..." }
  */
 export function formatSanityCondition(
   encodedName: string,
   i18n: SanityConditionI18n,
   type: SanityConditionType,
-): string {
-  // Parse the encoded name
+): SanityConditionResult {
   const { baseName, args } = parseSanityCondition(encodedName)
 
-  // Look up the translation - use Object.hasOwn for runtime safety
+  // Object.hasOwn for runtime safety against prototype keys
   if (!Object.hasOwn(i18n, baseName)) {
-    // Fallback: return raw name for debugging visibility
-    console.warn(`[SanityCondition] Missing i18n for: ${baseName} (raw: ${encodedName})`)
-    return encodedName
+    return err({ baseName })
   }
 
-  const template = i18n[baseName][type]
-
   // Substitute arguments - keep tags for FormattedSanityText to parse
-  return substituteArgs(template, args)
+  return ok(substituteArgs(i18n[baseName][type], args))
 }
 
 /**
- * Formats multiple sanity conditions into an array of descriptions.
+ * Formats multiple sanity conditions.
  *
  * @param encodedNames - Array of raw function names
  * @param i18n - Sanity condition i18n lookup object
  * @param type - Whether these are increment ('inc') or decrement ('dec') conditions
- * @returns Array of formatted descriptions
+ * @returns One result per input, in order
  */
 export function formatSanityConditions(
   encodedNames: string[],
   i18n: SanityConditionI18n,
   type: SanityConditionType,
-): string[] {
+): SanityConditionResult[] {
   return encodedNames.map((name) => formatSanityCondition(name, i18n, type))
 }

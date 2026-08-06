@@ -39,9 +39,14 @@ import type {
   SerializableFloorSelection,
   SerializableNoteContent,
   MDPlannerContent,
+  RRPlannerContent,
+  MDSaveablePlanner,
+  RRSaveablePlanner,
+  SaveablePlanner,
   PlannerExportItem,
   ExportEnvelope,
 } from './PlannerTypes'
+import type { isMDPlanner } from './PlannerTypes'
 
 // ============================================================================
 // Type-level assertion helpers
@@ -72,6 +77,25 @@ type ExportItemAsRecord = Omit<PlannerExportItem, 'content'> & {
 // ============================================================================
 // Assertions (exported so noUnusedLocals does not flag them)
 // ============================================================================
+
+/**
+ * Reaching an MD-only content field without selecting a branch must not compile.
+ * The `@ts-expect-error` IS the assertion: if `content` ever widens back to a
+ * castable sibling of `config`, this line stops erroring and the build fails.
+ */
+// @ts-expect-error content is MDPlannerContent | RRPlannerContent until a branch is chosen
+export type UnguardedMDContentField = SaveablePlanner['content']['selectedKeywords']
+
+export type PlannerRootDiscriminationGuard = [
+  // config.type selects the branch, and content comes along with it.
+  Expect<Equal<Extract<SaveablePlanner, { config: MDConfig }>, MDSaveablePlanner>>,
+  Expect<Equal<MDSaveablePlanner['content'], MDPlannerContent>>,
+  Expect<Equal<Extract<SaveablePlanner, { config: RRConfig }>, RRSaveablePlanner>>,
+  Expect<Equal<RRSaveablePlanner['content'], RRPlannerContent>>,
+
+  // The predicate is what carries the discriminant across; pin what it narrows to.
+  Expect<Equal<typeof isMDPlanner, (planner: SaveablePlanner) => planner is MDSaveablePlanner>>,
+]
 
 export type PlannerSchemaDriftGuard = [
   // --- Leaves: schema and hand-written type must agree exactly ---

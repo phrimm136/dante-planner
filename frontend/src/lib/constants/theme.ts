@@ -36,6 +36,33 @@ export const PASSIVE_INDICATOR_COLORS = {
 export const DISCORD_BLURPLE = '#5865F2'
 
 /**
+ * Tailwind classes for a warning callout: the panel, its heading and its list body.
+ */
+export const WARNING_CALLOUT_STYLES = {
+  panel:
+    'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3',
+  heading: 'text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2',
+  list: 'text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside',
+} as const
+
+/**
+ * Tailwind text colours that carry the severity of a moderation state or action.
+ */
+export const STATUS_TEXT_COLORS = {
+  /** Irreversible or destructive */
+  DANGER: 'text-red-500',
+  /** Reversible restriction */
+  WARNING: 'text-orange-500',
+  /** Access restored */
+  SUCCESS: 'text-green-500',
+  /** Role change */
+  INFO: 'text-blue-500',
+} as const
+
+/** Filled star marking a planner above the recommendation threshold. */
+export const STAR_ICON_CLASS = 'fill-yellow-400 text-yellow-400'
+
+/**
  * Inline accent colours shared by cards, indicators and event branches.
  */
 export const ACCENT_COLORS = {

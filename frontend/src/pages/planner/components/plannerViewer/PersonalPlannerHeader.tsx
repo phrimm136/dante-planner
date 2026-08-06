@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { ChevronsRight, Edit, Trash2, Upload } from 'lucide-react'
 
 import { toast } from '@/lib/toast'
+import { assertNever } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { I18N_LOCALE_MAP } from '@/lib/constants'
@@ -21,12 +22,25 @@ import { usePlannerSyncAdapter } from '../../hooks/usePlannerSyncAdapter'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
+import { decidePublishAction } from '../../lib/plannerPublishPolicy'
 import { toastForError } from '../../lib/plannerSaveErrors'
 import { validatePlannerForPublish } from '../../lib/plannerValidation'
 import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 
-import type { MDCategory } from '@/shared/gameData'
-import type { SaveablePlanner, MDPlannerContent } from '../../types/PlannerTypes'
+import { isMDPlanner } from '../../types/PlannerTypes'
+import type { SaveablePlanner } from '../../types/PlannerTypes'
+
+/** Publish-button label, by mutation state and by which direction the toggle goes. */
+const PUBLISH_LABEL_KEYS = {
+  idle: {
+    publish: 'pages.plannerMD.publish.button',
+    unpublish: 'pages.plannerMD.publish.unpublish',
+  },
+  pending: {
+    publish: 'pages.plannerMD.publish.publishing',
+    unpublish: 'pages.plannerMD.publish.unpublishing',
+  },
+} as const
 
 interface PersonalPlannerHeaderProps {
   /** The user's own copy of the planner */
@@ -106,8 +120,8 @@ export function PersonalPlannerHeader({
           // a local-save failure instead of swallowing it (the personal view reads
           // from IndexedDB, so a failed save leaves it stale until the next save).
           const saveResult = await saveToLocal(updatedPlanner)
-          if (!saveResult.success) {
-            console.error('Local planner save failed after publish toggle:', saveResult.errorCode)
+          if (!saveResult.ok) {
+            console.error('Local planner save failed after publish toggle:', saveResult.error.kind)
           }
 
           void queryClient.invalidateQueries({
@@ -150,41 +164,45 @@ export function PersonalPlannerHeader({
     }
   }
 
+  const publishValidationErrors = () =>
+    isMDPlanner(planner)
+      ? validatePlannerForPublish(
+          planner.metadata.title,
+          planner.content,
+          planner.config.category,
+          egoGiftSpec,
+          egoGiftI18n,
+        ).errors
+      : []
+
   const handlePublishToggle = () => {
     if (!plannerId) return
 
-    // Unpublishing — just flip the flag. No content upload: the row already
-    // exists on the server, and the publish toggle never bumps syncVersion, so
-    // there is no version to drift.
-    if (planner.metadata.published) {
-      callPublishMutation(true, planner)
-      return
-    }
+    const isPublished = planner.metadata.published
+    const action = decidePublishAction({
+      isPublished,
+      validationErrors: isPublished ? [] : publishValidationErrors(),
+      syncEnabled,
+    })
 
-    // Only validate when publishing
-    if (planner.config.type === 'MIRROR_DUNGEON') {
-      const { isValid, errors } = validatePlannerForPublish(
-        planner.metadata.title,
-        planner.content as MDPlannerContent,
-        planner.config.category as MDCategory,
-        egoGiftSpec,
-        egoGiftI18n,
-      )
-      if (!isValid) {
-        const friendly = toUserFriendlyError(errors[0])
+    switch (action.kind) {
+      case 'unpublish':
+        callPublishMutation(true, planner)
+        return
+      case 'invalid': {
+        const friendly = toUserFriendlyError(action.error)
         toast.error(t(friendly.key, friendly.params))
         return
       }
+      case 'warnSyncDisabled':
+        setShowPublishWarning(true)
+        return
+      case 'uploadThenPublish':
+        void handlePublishWithUpload()
+        return
+      default:
+        assertNever(action)
     }
-
-    // Sync disabled — show warning dialog (handlePublishWithUpload called on confirm)
-    if (syncEnabled !== true) {
-      setShowPublishWarning(true)
-      return
-    }
-
-    // Sync enabled — upload then publish
-    void handlePublishWithUpload()
   }
 
   const status = deriveSaveStatus(planner.metadata, isAuthenticated, syncEnabled)
@@ -240,15 +258,11 @@ export function PersonalPlannerHeader({
             >
               <Upload className="size-4" />
               <span className="hidden lg:inline">
-                {publishMutation.isPending
-                  ? t(
-                      planner.metadata.published
-                        ? 'pages.plannerMD.publish.unpublishing'
-                        : 'pages.plannerMD.publish.publishing',
-                    )
-                  : planner.metadata.published
-                    ? t('pages.plannerMD.publish.unpublish')
-                    : t('pages.plannerMD.publish.button')}
+                {t(
+                  PUBLISH_LABEL_KEYS[publishMutation.isPending ? 'pending' : 'idle'][
+                    planner.metadata.published ? 'unpublish' : 'publish'
+                  ],
+                )}
               </span>
             </Button>
           )}

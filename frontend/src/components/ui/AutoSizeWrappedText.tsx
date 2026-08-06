@@ -112,13 +112,12 @@ export function AutoSizeWrappedText({
 
     const measureWithRetry = () => {
       cancelPending()
-      let framesLeft = AUTOSIZE_MEASURE_RETRY_FRAMES
-      const attempt = () => {
+      const attempt = (framesLeft: number) => {
         if (cancelled || measure()) return
-        if (framesLeft-- <= 0) return
-        rafRef.current = requestAnimationFrame(attempt)
+        if (framesLeft <= 0) return
+        rafRef.current = requestAnimationFrame(() => attempt(framesLeft - 1))
       }
-      attempt()
+      attempt(AUTOSIZE_MEASURE_RETRY_FRAMES)
     }
 
     measureWithRetry()

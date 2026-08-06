@@ -1,61 +1,43 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
-import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
-import { SseEnvelopeSchema } from '@/shared/sse'
+import { COMMENT_SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
+import {
+  SseEnvelopeSchema,
+  useSseEngine,
+  type SseConnectionState,
+  type SseReconnectPolicy,
+} from '@/shared/sse'
 
+import { containsComment, insertComment } from '../lib/commentTree'
 import { commentsQueryKeys } from './useCommentsQuery'
 
 import type { CommentNode } from '../types/CommentTypes'
 
-/**
- * SSE reconnection configuration for planner comments
- */
-const SSE_CONFIG = {
-  /** Base delay for reconnection in ms */
-  BASE_DELAY: 1000,
-  /** Maximum delay for reconnection in ms */
-  MAX_DELAY: 8000,
-  /** Maximum reconnection attempts before giving up */
-  MAX_ATTEMPTS: 10,
-} as const
-
-/** Whether `id` names a comment anywhere in the loaded tree. */
-function containsComment(nodes: CommentNode[], id: string): boolean {
-  return nodes.some((n) => n?.id === id || containsComment(n?.replies ?? [], id))
+const COMMENT_SSE_POLICY: SseReconnectPolicy = {
+  initialDelayMs: COMMENT_SSE_CONNECTION.INITIAL_DELAY,
+  baseDelayMs: COMMENT_SSE_CONNECTION.BASE_DELAY,
+  maxDelayMs: COMMENT_SSE_CONNECTION.MAX_DELAY,
+  maxJitterMs: COMMENT_SSE_CONNECTION.MAX_JITTER,
+  maxAttempts: COMMENT_SSE_CONNECTION.MAX_ATTEMPTS,
+  idleResetMs: COMMENT_SSE_CONNECTION.IDLE_RESET_TIMEOUT,
+  proactiveReconnectMs: COMMENT_SSE_CONNECTION.PROACTIVE_RECONNECT_INTERVAL,
+  stableAfterMs: COMMENT_SSE_CONNECTION.STABLE_CONNECTION_THRESHOLD,
 }
 
-/**
- * Place `added` under the parent it names, or at the top level when it names none.
- *
- * Returns null when the named parent is not in the loaded tree — the counter still
- * moves, but no comment is grafted where it does not belong.
- */
-function insertComment(nodes: CommentNode[], added: CommentNode): CommentNode[] | null {
-  if (!added.parentCommentId) {
-    return [...nodes, { ...added, replies: added.replies ?? [] }]
-  }
-
-  let grafted = false
-  const graft = (list: CommentNode[]): CommentNode[] =>
-    list.map((node) => {
-      if (node?.id === added.parentCommentId) {
-        grafted = true
-        return { ...node, replies: [...(node.replies ?? []), { ...added, replies: [] }] }
-      }
-      return { ...node, replies: graft(node?.replies ?? []) }
-    })
-
-  const next = graft(nodes)
-  return grafted ? next : null
+/** The count belongs to one planner, so a different planner reads zero. */
+interface PlannerCommentCount {
+  plannerId: string
+  count: number
 }
 
 /**
  * Hook that subscribes to real-time comment notifications for a specific planner.
  *
- * When a new comment is posted on the planner by another user, the count increments.
- * The author's own browser is excluded (handled server-side via device ID).
+ * When a new comment is posted on the planner by another user, the count increments
+ * and the comment is grafted into the loaded tree. The author's own browser is
+ * excluded (handled server-side via device ID).
  *
  * Works for both authenticated users and guests.
  *
@@ -86,100 +68,68 @@ function insertComment(nodes: CommentNode[], added: CommentNode): CommentNode[] 
  */
 export function usePlannerCommentsSse(plannerId: string) {
   const queryClient = useQueryClient()
-  const [newCommentsCount, setNewCommentsCount] = useState(0)
-  const eventSourceRef = useRef<EventSource | null>(null)
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const reconnectAttemptsRef = useRef(0)
+  const [counted, setCounted] = useState<PlannerCommentCount>({ plannerId, count: 0 })
 
-  const resetCount = () => {
-    setNewCommentsCount(0)
+  // This stream is one planner's, not the app's, so it keeps its own attempt
+  // counter: sharing the store's would let a flapping comment stream spend the
+  // app stream's attempt budget and stretch its backoff.
+  const attemptsRef = useRef(0)
+  const connectionState: SseConnectionState = {
+    getAttempts: () => attemptsRef.current,
+    incrementAttempts: () => {
+      attemptsRef.current += 1
+    },
+    resetAttempts: () => {
+      attemptsRef.current = 0
+    },
+    setConnected: () => {},
   }
 
-  useEffect(() => {
-    // Skip if no plannerId
-    if (!plannerId) return
+  const resetCount = () => {
+    setCounted({ plannerId, count: 0 })
+  }
 
-    const connect = () => {
-      // Guard: max attempts reached
-      if (reconnectAttemptsRef.current >= SSE_CONFIG.MAX_ATTEMPTS) {
-        console.warn('Planner comment SSE: Max reconnection attempts reached')
-        return
-      }
+  const createConnection = () =>
+    ApiClient.createEventSource(`/api/planner/${plannerId}/comments/events`)
 
-      // Create EventSource with credentials (sends deviceId cookie)
-      const es = ApiClient.createEventSource(`/api/planner/${plannerId}/comments/events`)
-
-      eventSourceRef.current = es
-
-      es.addEventListener(SSE_EVENTS.CONNECTED, () => {
-        // Reset reconnect attempts on successful connection
-        reconnectAttemptsRef.current = 0
-      })
-
-      es.addEventListener(SSE_EVENTS.COMMENT_ADDED, (event) => {
-        let payload: unknown = null
-        try {
-          payload = SseEnvelopeSchema.parse(JSON.parse(event.data as string)).payload
-        } catch (error) {
-          console.warn('Planner comment SSE: failed to parse comment:added event', error)
-          return
-        }
-
-        if (!payload || typeof payload !== 'object') return
-        const added = payload as CommentNode
-        if (typeof added.id !== 'string') return
-
-        const listKey = commentsQueryKeys.list(plannerId)
-        const cached = queryClient.getQueryData<CommentNode[]>(listKey)
-        const comments = Array.isArray(cached) ? cached : []
-        if (containsComment(comments, added.id)) return
-
-        const next = insertComment(comments, added)
-        if (next) {
-          queryClient.setQueryData(listKey, next)
-        }
-        setNewCommentsCount((c) => c + 1)
-      })
-
-      es.onerror = () => {
-        es.close()
-        eventSourceRef.current = null
-
-        // Calculate exponential backoff delay
-        const delay =
-          Math.min(
-            SSE_CONFIG.BASE_DELAY * Math.pow(2, reconnectAttemptsRef.current),
-            SSE_CONFIG.MAX_DELAY,
-          ) +
-          Math.random() * SSE_CONNECTION.MAX_JITTER
-
-        reconnectAttemptsRef.current += 1
-
-        // Schedule reconnect
-        reconnectTimeoutRef.current = setTimeout(connect, delay)
-      }
+  const handleCommentAdded = (event: MessageEvent) => {
+    let payload: unknown = null
+    try {
+      payload = SseEnvelopeSchema.parse(JSON.parse(event.data as string)).payload
+    } catch (error) {
+      console.warn('Planner comment SSE: failed to parse comment:added event', error)
+      return
     }
 
-    // Initial connection
-    connect()
+    if (!payload || typeof payload !== 'object') return
+    const added = payload as CommentNode
+    if (typeof added.id !== 'string') return
 
-    // Cleanup on unmount or plannerId change
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close()
-        eventSourceRef.current = null
-      }
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current)
-        reconnectTimeoutRef.current = null
-      }
-      reconnectAttemptsRef.current = 0
-      setNewCommentsCount(0)
+    const listKey = commentsQueryKeys.list(plannerId)
+    const cached = queryClient.getQueryData<CommentNode[]>(listKey)
+    const comments = Array.isArray(cached) ? cached : []
+    if (containsComment(comments, added.id)) return
+
+    const next = insertComment(comments, added)
+    if (next) {
+      queryClient.setQueryData(listKey, next)
     }
-  }, [plannerId, queryClient])
+    setCounted((prev) =>
+      prev.plannerId === plannerId ? { plannerId, count: prev.count + 1 } : { plannerId, count: 1 },
+    )
+  }
+
+  useSseEngine({
+    shouldConnect: !!plannerId,
+    streamKey: plannerId,
+    createConnection,
+    handlers: { [SSE_EVENTS.COMMENT_ADDED]: handleCommentAdded },
+    policy: COMMENT_SSE_POLICY,
+    state: connectionState,
+  })
 
   return {
-    newCommentsCount,
+    newCommentsCount: counted.plannerId === plannerId ? counted.count : 0,
     resetCount,
   }
 }

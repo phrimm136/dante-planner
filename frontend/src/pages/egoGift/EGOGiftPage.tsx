@@ -1,4 +1,3 @@
-import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useEGOGiftListSpec } from '@/pages/egoGift'
 import type { EGOGiftListItem, EGOGiftSpecListSchema, EGOGiftFacetState } from '@/pages/egoGift'
@@ -10,7 +9,7 @@ import { useSetFilters } from '@/components/hooks/useSetFilters'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
-import { FilterSection } from '@/shared/filter'
+import { FilterSectionList, filterSection } from '@/shared/filter'
 import { CompactEGOGiftKeywordFilter } from '@/pages/egoGift'
 import { CompactDifficultyFilter } from '@/pages/egoGift'
 import { CompactTierFilter } from '@/pages/egoGift'
@@ -21,7 +20,24 @@ import { CompactIconFilter } from '@/shared/filter'
 import { SearchBar } from '@/shared/filter'
 import { EGOGiftList } from '@/pages/egoGift'
 import { ListPageSkeleton } from '@/components/feedback/ListPageSkeleton'
-import { Skeleton } from '@/components/ui/skeleton'
+
+/** The Yes/No icon filter both boolean gift facets render. */
+function BooleanFilter({
+  selected,
+  onSelectionChange,
+}: {
+  selected: Set<string>
+  onSelectionChange: (options: Set<string>) => void
+}) {
+  return (
+    <CompactIconFilter
+      options={BOOLEAN_FILTER_OPTIONS}
+      selectedOptions={selected}
+      onSelectionChange={onSelectionChange}
+      getLabel={(v) => v}
+    />
+  )
+}
 
 /**
  * Card grid section - no longer suspends at grid level.
@@ -83,105 +99,84 @@ function EGOGiftPageShell() {
   const activeFilterCount = calculateActiveFilterCount(...Object.values(filters))
 
   // Primary filters (always visible on mobile): Keyword and Difficulty
-  const primaryFilters = (
-    <>
-      <FilterSection
-        title={t('filters.keyword', 'Keyword')}
-        activeCount={filters.selectedKeywords.size}
-      >
-        <CompactEGOGiftKeywordFilter
-          selectedKeywords={filters.selectedKeywords}
-          onSelectionChange={setters.selectedKeywords}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.difficulty', 'Difficulty')}
-        activeCount={filters.selectedDifficulties.size}
-      >
-        <CompactDifficultyFilter
-          selectedDifficulties={filters.selectedDifficulties}
-          onSelectionChange={setters.selectedDifficulties}
-        />
-      </FilterSection>
-    </>
-  )
+  const PRIMARY_FILTERS = [
+    filterSection({
+      key: 'selectedKeywords',
+      titleKey: 'filters.keyword',
+      titleFallback: 'Keyword',
+      Component: CompactEGOGiftKeywordFilter,
+      selected: filters.selectedKeywords,
+      onSelectionChange: setters.selectedKeywords,
+    }),
+    filterSection({
+      key: 'selectedDifficulties',
+      titleKey: 'filters.difficulty',
+      titleFallback: 'Difficulty',
+      Component: CompactDifficultyFilter,
+      selected: filters.selectedDifficulties,
+      onSelectionChange: setters.selectedDifficulties,
+    }),
+  ]
 
   // Secondary filters (shown when mobile expanded): Tier, Theme Pack, Attribute Type
-  const secondaryFilters = (
-    <>
-      <FilterSection title={t('filters.tier', 'Tier')} activeCount={filters.selectedTiers.size}>
-        <CompactTierFilter
-          selectedTiers={filters.selectedTiers}
-          onSelectionChange={setters.selectedTiers}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.attributeType', 'Attribute')}
-        activeCount={filters.selectedAttributeTypes.size}
-      >
-        <CompactAttributeTypeFilter
-          selected={filters.selectedAttributeTypes}
-          onAttributeTypesChange={setters.selectedAttributeTypes}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.fusioned', 'Fusioned')}
-        activeCount={filters.selectedFusioned.size}
-      >
-        <CompactIconFilter
-          options={BOOLEAN_FILTER_OPTIONS}
-          selectedOptions={filters.selectedFusioned}
-          onSelectionChange={setters.selectedFusioned}
-          getLabel={(v) => v}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.themePackExclusive', 'Theme Pack Exclusive')}
-        activeCount={filters.selectedExclusive.size}
-      >
-        <CompactIconFilter
-          options={BOOLEAN_FILTER_OPTIONS}
-          selectedOptions={filters.selectedExclusive}
-          onSelectionChange={setters.selectedExclusive}
-          getLabel={(v) => v}
-        />
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.themePack', 'Theme Pack')}
-        activeCount={filters.selectedThemePacks.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <ThemePackFilterDropdown
-            selected={filters.selectedThemePacks}
-            onThemePacksChange={setters.selectedThemePacks}
-          />
-        </Suspense>
-      </FilterSection>
-
-      <FilterSection
-        title={t('filters.additionalKeyword', 'Additional Keywords')}
-        activeCount={filters.selectedBattleKeywords.size}
-      >
-        <Suspense fallback={<Skeleton className="h-10 w-full rounded-md" />}>
-          <BattleKeywordDropdown
-            entityType="egoGift"
-            selected={filters.selectedBattleKeywords}
-            onSelectionChange={setters.selectedBattleKeywords}
-          />
-        </Suspense>
-      </FilterSection>
-    </>
-  )
+  const SECONDARY_FILTERS = [
+    filterSection({
+      key: 'selectedTiers',
+      titleKey: 'filters.tier',
+      titleFallback: 'Tier',
+      Component: CompactTierFilter,
+      selected: filters.selectedTiers,
+      onSelectionChange: setters.selectedTiers,
+    }),
+    filterSection({
+      key: 'selectedAttributeTypes',
+      titleKey: 'filters.attributeType',
+      titleFallback: 'Attribute',
+      Component: CompactAttributeTypeFilter,
+      selected: filters.selectedAttributeTypes,
+      onSelectionChange: setters.selectedAttributeTypes,
+    }),
+    filterSection({
+      key: 'selectedFusioned',
+      titleKey: 'filters.fusioned',
+      titleFallback: 'Fusioned',
+      Component: BooleanFilter,
+      selected: filters.selectedFusioned,
+      onSelectionChange: setters.selectedFusioned,
+    }),
+    filterSection({
+      key: 'selectedExclusive',
+      titleKey: 'filters.themePackExclusive',
+      titleFallback: 'Theme Pack Exclusive',
+      Component: BooleanFilter,
+      selected: filters.selectedExclusive,
+      onSelectionChange: setters.selectedExclusive,
+    }),
+    filterSection({
+      key: 'selectedThemePacks',
+      titleKey: 'filters.themePack',
+      titleFallback: 'Theme Pack',
+      suspense: true,
+      Component: ThemePackFilterDropdown,
+      selected: filters.selectedThemePacks,
+      onSelectionChange: setters.selectedThemePacks,
+    }),
+    filterSection({
+      key: 'selectedBattleKeywords',
+      titleKey: 'filters.additionalKeyword',
+      titleFallback: 'Additional Keywords',
+      suspense: true,
+      Component: BattleKeywordDropdown,
+      selected: filters.selectedBattleKeywords,
+      onSelectionChange: setters.selectedBattleKeywords,
+      props: { entityType: 'egoGift' as const },
+    }),
+  ]
 
   return (
     <FilterPageLayout
-      primaryFilters={primaryFilters}
-      secondaryFilters={secondaryFilters}
+      primaryFilters={<FilterSectionList sections={PRIMARY_FILTERS} />}
+      secondaryFilters={<FilterSectionList sections={SECONDARY_FILTERS} />}
       activeFilterCount={activeFilterCount}
       onResetAll={resetAll}
       searchBar={

@@ -2,7 +2,7 @@ import { useState, startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { SaveablePlanner } from '../../types/PlannerTypes'
+import type { MDSaveablePlanner } from '../../types/PlannerTypes'
 
 import { GuideModeViewer } from './GuideModeViewer'
 import { TrackerModeViewer } from './TrackerModeViewer'
@@ -10,7 +10,7 @@ import { TrackerModeViewer } from './TrackerModeViewer'
 type ViewerMode = 'guide' | 'tracker'
 
 interface PlannerViewerProps {
-  planner: SaveablePlanner
+  planner: MDSaveablePlanner
 }
 
 /**

@@ -22,34 +22,22 @@ import { CommentActionButtons } from './CommentActionButtons'
 import { CommentEditor } from './CommentEditor'
 
 import type { CommentNode } from '../types/CommentTypes'
+import type { CommentActions, CommentViewer } from '../lib/commentViewer'
 
 interface CommentCardProps {
   comment: CommentNode
+  /** Whether the planner carrying the comment is published. */
   isPublished: boolean
-  isAuthenticated: boolean
-  isModerator: boolean
-  onReply: (commentId: string, content: string) => void
-  onEdit: (commentId: string, content: string) => void
-  onDelete: (commentId: string) => void
-  onModeratorDelete: (commentId: string) => void
-  onUpvote: (commentId: string) => void
-  onToggleNotifications: (commentId: string) => void
-  onReport: (commentId: string) => void
+  viewer: CommentViewer
+  actions: CommentActions
   isUpvoting?: boolean
 }
 
 export const CommentCard = function CommentCard({
   comment,
   isPublished,
-  isAuthenticated,
-  isModerator,
-  onReply,
-  onEdit,
-  onDelete,
-  onModeratorDelete,
-  onUpvote,
-  onToggleNotifications,
-  onReport,
+  viewer,
+  actions,
   isUpvoting = false,
 }: CommentCardProps) {
   const { t, i18n } = useTranslation(['planner', 'common'])
@@ -71,36 +59,14 @@ export const CommentCard = function CommentCard({
   const handleReplyClick = () => setShowReplyEditor(true)
   const handleEditClick = () => setShowEditEditor(true)
 
-  // Delete triggers parent's confirmation dialog
-  const handleDeleteClick = () => {
-    onDelete(comment.id)
-  }
-
-  // Moderator delete triggers parent's confirmation dialog
-  const handleModeratorDeleteClick = () => {
-    onModeratorDelete(comment.id)
-  }
-
   const handleReplySubmit = (content: string) => {
-    onReply(comment.id, content)
+    actions.onReply(comment.id, content)
     setShowReplyEditor(false)
   }
 
   const handleEditSubmit = (content: string) => {
-    onEdit(comment.id, content)
+    actions.onEdit(comment.id, content)
     setShowEditEditor(false)
-  }
-
-  const handleUpvote = () => {
-    onUpvote(comment.id)
-  }
-
-  const handleToggleNotifications = () => {
-    onToggleNotifications(comment.id)
-  }
-
-  const handleReport = () => {
-    onReport(comment.id)
   }
 
   // Show deleted placeholder for deleted comments
@@ -121,15 +87,10 @@ export const CommentCard = function CommentCard({
         <CommentActionButtons
           comment={comment}
           isPublished={isPublished}
-          isAuthenticated={isAuthenticated}
-          isModerator={isModerator}
-          onReply={handleReplyClick}
-          onEdit={handleEditClick}
-          onDelete={handleDeleteClick}
-          onModeratorDelete={handleModeratorDeleteClick}
-          onUpvote={handleUpvote}
-          onToggleNotifications={handleToggleNotifications}
-          onReport={handleReport}
+          viewer={viewer}
+          actions={actions}
+          onStartReply={handleReplyClick}
+          onStartEdit={handleEditClick}
           isUpvoting={isUpvoting}
         />
       </div>

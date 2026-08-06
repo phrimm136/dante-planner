@@ -11,7 +11,7 @@ const DIFFICULTY_LABELS: Record<EGOGiftDifficulty, string> = {
 }
 
 interface CompactDifficultyFilterProps {
-  selectedDifficulties: Set<EGOGiftDifficulty>
+  selected: Set<EGOGiftDifficulty>
   onSelectionChange: (difficulties: Set<EGOGiftDifficulty>) => void
 }
 
@@ -24,13 +24,13 @@ interface CompactDifficultyFilterProps {
  * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
  */
 export function CompactDifficultyFilter({
-  selectedDifficulties,
+  selected,
   onSelectionChange,
 }: CompactDifficultyFilterProps) {
   return (
     <CompactIconFilter
       options={EGO_GIFT_DIFFICULTIES}
-      selectedOptions={selectedDifficulties as Set<string>}
+      selectedOptions={selected as Set<string>}
       onSelectionChange={(options) => {
         onSelectionChange(options as Set<EGOGiftDifficulty>)
       }}

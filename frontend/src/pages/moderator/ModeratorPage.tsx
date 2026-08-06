@@ -16,27 +16,108 @@ import { formatUsername } from '@/lib/formatUsername'
 import { formatRelativeTime } from '@/lib/formatDate'
 import { toast } from '@/lib/toast'
 
+import type { ModerationDialogProps } from '@/shared/moderation'
 import type { UserForMod, ModerationAction, ModerationDialogKind } from './types/ModeratorTypes'
-import { SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES, STATUS_TEXT_COLORS } from '@/lib/constants'
 
 const ROLE_TEXT_STYLES: Record<UserForMod['role'], string> = {
-  ADMIN: 'text-red-500 font-semibold',
-  MODERATOR: 'text-blue-500 font-semibold',
+  ADMIN: `${STATUS_TEXT_COLORS.DANGER} font-semibold`,
+  MODERATOR: `${STATUS_TEXT_COLORS.INFO} font-semibold`,
   NORMAL: '',
 }
 
 const ACTION_TEXT_STYLES: Record<ModerationAction['actionType'], string> = {
-  BAN: 'text-red-500',
-  UNBAN: 'text-green-500',
-  TIMEOUT: 'text-orange-500',
-  CLEAR_TIMEOUT: 'text-green-500',
-  PROMOTE: 'text-blue-500',
-  DEMOTE: 'text-orange-500',
-  DELETE_PLANNER: 'text-red-500',
-  DELETE_COMMENT: 'text-red-500',
-  UNPUBLISH_PLANNER: 'text-orange-500',
-  HIDE_FROM_RECOMMENDED: 'text-orange-500',
-  UNHIDE_FROM_RECOMMENDED: 'text-green-500',
+  BAN: STATUS_TEXT_COLORS.DANGER,
+  UNBAN: STATUS_TEXT_COLORS.SUCCESS,
+  TIMEOUT: STATUS_TEXT_COLORS.WARNING,
+  CLEAR_TIMEOUT: STATUS_TEXT_COLORS.SUCCESS,
+  PROMOTE: STATUS_TEXT_COLORS.INFO,
+  DEMOTE: STATUS_TEXT_COLORS.WARNING,
+  DELETE_PLANNER: STATUS_TEXT_COLORS.DANGER,
+  DELETE_COMMENT: STATUS_TEXT_COLORS.DANGER,
+  UNPUBLISH_PLANNER: STATUS_TEXT_COLORS.WARNING,
+  HIDE_FROM_RECOMMENDED: STATUS_TEXT_COLORS.WARNING,
+  UNHIDE_FROM_RECOMMENDED: STATUS_TEXT_COLORS.SUCCESS,
+}
+
+const TABLE_HEADER_CLASS = 'px-4 py-3 text-left text-sm font-semibold'
+
+const USER_TABLE_HEADER_KEYS = [
+  'dashboard.username',
+  'dashboard.role',
+  'dashboard.status',
+  'dashboard.actions',
+]
+
+const HISTORY_TABLE_HEADER_KEYS = [
+  'dashboard.time',
+  'dashboard.action',
+  'dashboard.targetType',
+  'dashboard.moderator',
+  'dashboard.reason',
+  'dashboard.duration',
+]
+
+function TableHeaderRow({ labelKeys }: { labelKeys: readonly string[] }) {
+  const { t } = useTranslation(['moderation'])
+
+  return (
+    <tr>
+      {labelKeys.map((key) => (
+        <th key={key} className={TABLE_HEADER_CLASS}>
+          {t(key)}
+        </th>
+      ))}
+    </tr>
+  )
+}
+
+/** What one user-row dialog renders and which toasts its mutation resolves to. */
+interface ModerationDialogSpec {
+  Dialog: (props: ModerationDialogProps) => React.ReactNode
+  successKey: string
+  failKey: string
+}
+
+const MODERATION_DIALOGS: Record<ModerationDialogKind, ModerationDialogSpec> = {
+  ban: {
+    Dialog: BanDialog,
+    successKey: 'dashboard.userBanned',
+    failKey: 'dashboard.banFailed',
+  },
+  unban: {
+    Dialog: UnbanDialog,
+    successKey: 'dashboard.userUnbanned',
+    failKey: 'dashboard.unbanFailed',
+  },
+  timeout: {
+    Dialog: TimeoutDialog,
+    successKey: 'dashboard.userTimedOut',
+    failKey: 'dashboard.timeoutFailed',
+  },
+  clearTimeout: {
+    Dialog: ClearTimeoutDialog,
+    successKey: 'dashboard.timeoutRemoved',
+    failKey: 'dashboard.untimeoutFailed',
+  },
+}
+
+const MODERATION_DIALOG_KINDS = Object.keys(MODERATION_DIALOGS) as ModerationDialogKind[]
+
+/** Widest variable shape across the four mutations; a duration is ignored where unused. */
+interface ModerationVariables {
+  usernameSuffix: string
+  reason: string
+  durationMinutes: number
+}
+
+/** The slice of a mutation result the dialog table needs. */
+interface ModerationMutation {
+  mutate: (
+    variables: ModerationVariables,
+    options: { onSuccess: () => void; onError: () => void },
+  ) => void
+  isPending: boolean
 }
 
 /**
@@ -46,67 +127,32 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
   const { t, i18n } = useTranslation(['moderation', 'common'])
   const [openDialog, setOpenDialog] = useState<ModerationDialogKind | null>(null)
 
-  const banMutation = useBanUser()
-  const unbanMutation = useUnbanUser()
-  const timeoutMutation = useTimeoutUser()
-  const untimeoutMutation = useUntimeoutUser()
+  const mutations: Record<ModerationDialogKind, ModerationMutation> = {
+    ban: useBanUser(),
+    unban: useUnbanUser(),
+    timeout: useTimeoutUser(),
+    clearTimeout: useUntimeoutUser(),
+  }
 
   const isSelf = user.usernameSuffix === currentUserSuffix
   const canBan = user.role !== 'ADMIN' && !isSelf
   const canTimeout = (user.role === 'NORMAL' || user.role === 'MODERATOR') && !isSelf
   const username = formatUsername(user.usernameEpithet, user.usernameSuffix, i18n.language)
 
-  const handleBanConfirm = (reason: string) => {
-    banMutation.mutate(
-      { usernameSuffix: user.usernameSuffix, reason },
-      {
-        onSuccess: () => {
-          toast.success(t('dashboard.userBanned'))
-          setOpenDialog(null)
+  const confirmModeration =
+    (kind: ModerationDialogKind) => (reason: string, durationMinutes?: number) => {
+      const { successKey, failKey } = MODERATION_DIALOGS[kind]
+      mutations[kind].mutate(
+        { usernameSuffix: user.usernameSuffix, reason, durationMinutes: durationMinutes ?? 0 },
+        {
+          onSuccess: () => {
+            toast.success(t(successKey))
+            setOpenDialog(null)
+          },
+          onError: () => toast.error(t(failKey)),
         },
-        onError: () => toast.error(t('dashboard.banFailed')),
-      },
-    )
-  }
-
-  const handleUnbanConfirm = (reason: string) => {
-    unbanMutation.mutate(
-      { usernameSuffix: user.usernameSuffix, reason },
-      {
-        onSuccess: () => {
-          toast.success(t('dashboard.userUnbanned'))
-          setOpenDialog(null)
-        },
-        onError: () => toast.error(t('dashboard.unbanFailed')),
-      },
-    )
-  }
-
-  const handleTimeoutConfirm = (durationMinutes: number, reason: string) => {
-    timeoutMutation.mutate(
-      { usernameSuffix: user.usernameSuffix, durationMinutes, reason },
-      {
-        onSuccess: () => {
-          toast.success(t('dashboard.userTimedOut'))
-          setOpenDialog(null)
-        },
-        onError: () => toast.error(t('dashboard.timeoutFailed')),
-      },
-    )
-  }
-
-  const handleUntimeoutConfirm = (reason: string) => {
-    untimeoutMutation.mutate(
-      { usernameSuffix: user.usernameSuffix, reason },
-      {
-        onSuccess: () => {
-          toast.success(t('dashboard.timeoutRemoved'))
-          setOpenDialog(null)
-        },
-        onError: () => toast.error(t('dashboard.untimeoutFailed')),
-      },
-    )
-  }
+      )
+    }
 
   return (
     <tr className="border-b">
@@ -117,8 +163,8 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
         <span className={ROLE_TEXT_STYLES[user.role]}>{user.role}</span>
       </td>
       <td className="px-4 py-3 text-sm">
-        {user.isBanned && <span className="text-red-500">Banned</span>}
-        {user.isTimedOut && <span className="text-orange-500">Timed Out</span>}
+        {user.isBanned && <span className={STATUS_TEXT_COLORS.DANGER}>Banned</span>}
+        {user.isTimedOut && <span className={STATUS_TEXT_COLORS.WARNING}>Timed Out</span>}
         {!user.isBanned && !user.isTimedOut && <span className={SECTION_STYLES.TEXT.muted}>-</span>}
       </td>
       <td className="px-4 py-3">
@@ -128,7 +174,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
               variant="outline"
               size="sm"
               onClick={() => setOpenDialog('unban')}
-              disabled={unbanMutation.isPending || isSelf}
+              disabled={mutations.unban.isPending || isSelf}
             >
               <UserCheck className="size-4 mr-1" />
               {t('dashboard.unban')}
@@ -138,7 +184,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
               variant="destructive"
               size="sm"
               onClick={() => setOpenDialog('ban')}
-              disabled={!canBan || banMutation.isPending}
+              disabled={!canBan || mutations.ban.isPending}
             >
               <Ban className="size-4 mr-1" />
               {t('dashboard.ban')}
@@ -150,7 +196,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
               variant="outline"
               size="sm"
               onClick={() => setOpenDialog('clearTimeout')}
-              disabled={untimeoutMutation.isPending || isSelf}
+              disabled={mutations.clearTimeout.isPending || isSelf}
             >
               <UserCheck className="size-4 mr-1" />
               {t('dashboard.untimeout')}
@@ -160,7 +206,7 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
               variant="outline"
               size="sm"
               onClick={() => setOpenDialog('timeout')}
-              disabled={!canTimeout || timeoutMutation.isPending}
+              disabled={!canTimeout || mutations.timeout.isPending}
             >
               <Clock className="size-4 mr-1" />
               {t('dashboard.timeout')}
@@ -170,37 +216,19 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
       </td>
 
       {/* Dialogs */}
-      <BanDialog
-        open={openDialog === 'ban'}
-        onOpenChange={(next) => setOpenDialog(next ? 'ban' : null)}
-        username={username}
-        onConfirm={handleBanConfirm}
-        isPending={banMutation.isPending}
-      />
-
-      <UnbanDialog
-        open={openDialog === 'unban'}
-        onOpenChange={(next) => setOpenDialog(next ? 'unban' : null)}
-        username={username}
-        onConfirm={handleUnbanConfirm}
-        isPending={unbanMutation.isPending}
-      />
-
-      <TimeoutDialog
-        open={openDialog === 'timeout'}
-        onOpenChange={(next) => setOpenDialog(next ? 'timeout' : null)}
-        username={username}
-        onConfirm={handleTimeoutConfirm}
-        isPending={timeoutMutation.isPending}
-      />
-
-      <ClearTimeoutDialog
-        open={openDialog === 'clearTimeout'}
-        onOpenChange={(next) => setOpenDialog(next ? 'clearTimeout' : null)}
-        username={username}
-        onConfirm={handleUntimeoutConfirm}
-        isPending={untimeoutMutation.isPending}
-      />
+      {MODERATION_DIALOG_KINDS.map((kind) => {
+        const { Dialog } = MODERATION_DIALOGS[kind]
+        return (
+          <Dialog
+            key={kind}
+            open={openDialog === kind}
+            onOpenChange={(next) => setOpenDialog(next ? kind : null)}
+            username={username}
+            onConfirm={confirmModeration(kind)}
+            isPending={mutations[kind].isPending}
+          />
+        )
+      })}
     </tr>
   )
 }
@@ -268,18 +296,7 @@ export default function ModeratorPage() {
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-muted">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.username')}
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.role')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.status')}
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.actions')}
-                </th>
-              </tr>
+              <TableHeaderRow labelKeys={USER_TABLE_HEADER_KEYS} />
             </thead>
             <tbody>
               {users.map((user) => (
@@ -300,24 +317,7 @@ export default function ModeratorPage() {
         <div className="border rounded-lg overflow-hidden">
           <table className="w-full">
             <thead className="bg-muted">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold">{t('dashboard.time')}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.action')}
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.targetType')}
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.moderator')}
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.reason')}
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">
-                  {t('dashboard.duration')}
-                </th>
-              </tr>
+              <TableHeaderRow labelKeys={HISTORY_TABLE_HEADER_KEYS} />
             </thead>
             <tbody>
               {history.map((action, idx) => (

@@ -51,8 +51,9 @@ export const publishedPlannerQueryKeys = {
  */
 export async function fetchPublishedPlanner(
   plannerId: string,
+  signal?: AbortSignal,
 ): Promise<PublishedPlannerQueryResult> {
-  const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`)
+  const data = await ApiClient.get(`/api/planner/md/published/${plannerId}`, { signal })
   const apiData = validateData(
     data,
     PublishedPlannerDetailSchema,
@@ -124,7 +125,7 @@ export async function fetchPublishedPlanner(
 export function usePublishedPlannerQuery(plannerId: string): PublishedPlannerQueryResult {
   const query = useSuspenseQuery({
     queryKey: publishedPlannerQueryKeys.detail(plannerId),
-    queryFn: () => fetchPublishedPlanner(plannerId),
+    queryFn: ({ signal }) => fetchPublishedPlanner(plannerId, signal),
     staleTime: STALE_TIME.MEDIUM,
     gcTime: GC_TIME.MEDIUM,
   })

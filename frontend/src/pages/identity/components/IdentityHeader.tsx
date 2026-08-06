@@ -11,6 +11,7 @@ import {
   getButtonSwapImagePath,
   getButtonExpandImagePath,
 } from '@/shared/assets'
+import { FallbackImage } from '@/components/ui/FallbackImage'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
@@ -104,18 +105,14 @@ export function IdentityHeader({ identityId, name, rank, uptie }: IdentityHeader
 
       {/* Character Image with overlay buttons */}
       <div className="relative bg-muted rounded-lg overflow-hidden">
-        <img
+        <FallbackImage
           src={currentImagePath}
+          fallbackSrc={getIdentityDetailImagePath(identityId, 'normal')}
+          onFallback={() => {
+            setImageVariant('normal')
+          }}
           alt={name}
           className="w-full h-auto object-contain"
-          onError={(e) => {
-            // Fallback to normal variant if gacksung fails
-            if (imageVariant === 'gacksung') {
-              const img = e.target as HTMLImageElement
-              img.src = getIdentityDetailImagePath(identityId, 'normal')
-              setImageVariant('normal')
-            }
-          }}
         />
 
         {/* Stacked buttons */}

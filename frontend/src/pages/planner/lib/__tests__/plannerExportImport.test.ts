@@ -1,21 +1,64 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { gzip } from 'pako'
 import {
-  ABORT,
   IMPORT_OUTCOME_TOASTS,
-  ImportAbortError,
   RESOLVE_OUTCOME_TOASTS,
   classifyImportOutcome,
   classifyResolveOutcome,
+  decompressImport,
   getValidDeviceId,
-  importAbortToast,
-  step,
+  importErrorToast,
+  parseImportJson,
+  readGzipBytes,
+  readImportEnvelope,
 } from '../plannerExportImport'
 
-import type { ImportAbortReason } from '../plannerExportImport'
+import type { ImportError } from '../plannerExportImport'
+import type { Result } from '@/lib/result'
 
 const VALID_UUID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301'
 const OTHER_UUID = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d'
 const FALLBACK_UUID = '11111111-2222-4333-8444-555555555555'
+
+const TIMESTAMP = '2026-01-01T00:00:00.000Z'
+
+const EXPORT_ITEM = {
+  id: VALID_UUID,
+  metadata: {
+    id: VALID_UUID,
+    title: 'Imported plan',
+    status: 'saved',
+    schemaVersion: 2,
+    contentVersion: 6,
+    plannerType: 'MIRROR_DUNGEON',
+    syncVersion: 1,
+    createdAt: TIMESTAMP,
+    lastModifiedAt: TIMESTAMP,
+    savedAt: TIMESTAMP,
+    deviceId: '',
+  },
+  config: { type: 'MIRROR_DUNGEON', category: '5F' },
+  content: {},
+}
+
+function envelope(planners: unknown[]) {
+  return {
+    exportVersion: 1,
+    exportedAt: TIMESTAMP,
+    sourceDeviceId: '',
+    planners,
+  }
+}
+
+function gzipped(payload: unknown): Uint8Array {
+  return gzip(JSON.stringify(payload))
+}
+
+function expectErr<T>(result: Result<T, ImportError>): ImportError {
+  expect(result.ok).toBe(false)
+  if (result.ok) throw new Error('expected a failed stage')
+  return result.error
+}
 
 describe('getValidDeviceId', () => {
   beforeEach(() => {
@@ -61,61 +104,150 @@ describe('getValidDeviceId', () => {
   })
 })
 
-function captureAbort(
-  stage: () => unknown,
-  reason: ImportAbortReason,
-): ImportAbortError & { reason: ImportAbortReason } {
-  try {
-    step(stage, reason)
-  } catch (error) {
-    return error as ImportAbortError
-  }
-  throw new Error(`step(${reason}) was expected to abort`)
-}
+describe('readGzipBytes', () => {
+  it('passes bytes opening with the gzip header through', () => {
+    const bytes = gzipped(envelope([]))
 
-describe('step', () => {
-  it('passes a stage result through', () => {
-    expect(step(() => 42, 'parseFailed')).toBe(42)
+    expect(readGzipBytes(bytes)).toEqual({ ok: true, value: bytes })
   })
 
-  it('passes falsy and null-ish results through — only ABORT rejects', () => {
-    expect(step<unknown>(() => null, 'parseFailed')).toBeNull()
-    expect(step<unknown>(() => 0, 'parseFailed')).toBe(0)
-    expect(step<unknown>(() => '', 'parseFailed')).toBe('')
+  it('rejects bytes that do not open with the gzip header', () => {
+    expect(expectErr(readGzipBytes(new Uint8Array([0x50, 0x4b, 0x03, 0x04])))).toEqual({
+      kind: 'invalidFileFormat',
+    })
   })
 
-  it('aborts with the stage reason when the stage returns ABORT', () => {
-    const error = captureAbort(() => ABORT, 'noPlannersInFile')
-
-    expect(error).toBeInstanceOf(ImportAbortError)
-    expect(error.reason).toBe('noPlannersInFile')
-  })
-
-  it('aborts with the stage reason when the stage throws', () => {
-    const error = captureAbort(() => {
-      throw new Error('boom')
-    }, 'decompressFailed')
-
-    expect(error).toBeInstanceOf(ImportAbortError)
-    expect(error.reason).toBe('decompressFailed')
+  it('rejects a file too short to carry the header', () => {
+    expect(expectErr(readGzipBytes(new Uint8Array([0x1f])))).toEqual({ kind: 'invalidFileFormat' })
   })
 })
 
-describe('importAbortToast', () => {
-  it('maps each abort reason to its i18n key and severity', () => {
-    expect(importAbortToast('invalidFileFormat')).toMatchObject({
+describe('decompressImport', () => {
+  it('inflates gzipped bytes back to their text', () => {
+    const result = decompressImport(gzipped(envelope([])))
+
+    expect(result).toEqual({ ok: true, value: JSON.stringify(envelope([])) })
+  })
+
+  it('rejects bytes that cannot be inflated', () => {
+    expect(expectErr(decompressImport(new Uint8Array([0x1f, 0x8b, 0x08, 0x00])))).toEqual({
+      kind: 'decompressFailed',
+    })
+  })
+})
+
+describe('parseImportJson', () => {
+  it('parses the inflated text', () => {
+    expect(parseImportJson('{"a":1}')).toEqual({ ok: true, value: { a: 1 } })
+  })
+
+  it('passes falsy parsed values through — only unparseable text fails', () => {
+    expect(parseImportJson('null')).toEqual({ ok: true, value: null })
+    expect(parseImportJson('0')).toEqual({ ok: true, value: 0 })
+    expect(parseImportJson('""')).toEqual({ ok: true, value: '' })
+  })
+
+  it('rejects text that is not JSON', () => {
+    expect(expectErr(parseImportJson('{ not json'))).toEqual({ kind: 'parseFailed' })
+  })
+})
+
+describe('readImportEnvelope', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('returns the validated envelope', () => {
+    const result = readImportEnvelope(envelope([EXPORT_ITEM]))
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.value.planners).toHaveLength(1)
+    expect(result.value.planners[0].metadata.title).toBe('Imported plan')
+  })
+
+  it('rejects a payload that does not match the envelope shape', () => {
+    expect(expectErr(readImportEnvelope({ planners: 'nope' }))).toEqual({
+      kind: 'invalidFileFormat',
+    })
+  })
+
+  it('rejects an envelope carrying an unparseable planner', () => {
+    expect(expectErr(readImportEnvelope(envelope([{ id: VALID_UUID }])))).toEqual({
+      kind: 'invalidFileFormat',
+    })
+  })
+
+  it('rejects an envelope carrying no planners', () => {
+    expect(expectErr(readImportEnvelope(envelope([])))).toEqual({ kind: 'noPlannersInFile' })
+  })
+})
+
+describe('import stage failures', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const cases: {
+    name: string
+    stage: () => Result<unknown, ImportError>
+    kind: ImportError['kind']
+  }[] = [
+    {
+      name: 'a file that is not gzip',
+      stage: () => readGzipBytes(new Uint8Array([0x00, 0x00])),
+      kind: 'invalidFileFormat',
+    },
+    {
+      name: 'an envelope of the wrong shape',
+      stage: () => readImportEnvelope({}),
+      kind: 'invalidFileFormat',
+    },
+    {
+      name: 'gzip bytes that will not inflate',
+      stage: () => decompressImport(new Uint8Array([0x1f, 0x8b, 0x08, 0x00, 0x00])),
+      kind: 'decompressFailed',
+    },
+    {
+      name: 'inflated text that is not JSON',
+      stage: () => parseImportJson('<html>'),
+      kind: 'parseFailed',
+    },
+    {
+      name: 'an envelope with an empty planner list',
+      stage: () => readImportEnvelope(envelope([])),
+      kind: 'noPlannersInFile',
+    },
+  ]
+
+  it.each(cases)('rejects $name with $kind', ({ stage, kind }) => {
+    expect(expectErr(stage())).toEqual({ kind })
+  })
+})
+
+describe('importErrorToast', () => {
+  it('maps each import error to its i18n key and severity', () => {
+    expect(importErrorToast({ kind: 'invalidFileFormat' })).toMatchObject({
       severity: 'error',
       key: 'exportImport.invalidFileFormat',
     })
-    expect(importAbortToast('decompressFailed')).toMatchObject({
+    expect(importErrorToast({ kind: 'decompressFailed' })).toMatchObject({
       severity: 'error',
       key: 'exportImport.decompressFailed',
     })
-    expect(importAbortToast('parseFailed')).toMatchObject({
+    expect(importErrorToast({ kind: 'parseFailed' })).toMatchObject({
       severity: 'error',
       key: 'exportImport.parseFailed',
     })
-    expect(importAbortToast('noPlannersInFile')).toMatchObject({
+    expect(importErrorToast({ kind: 'noPlannersInFile' })).toMatchObject({
       severity: 'info',
       key: 'exportImport.noPlannersInFile',
     })

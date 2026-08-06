@@ -33,8 +33,8 @@ export const moderatorQueryKeys = {
 function createModeratorUsersQueryOptions() {
   return queryOptions({
     queryKey: moderatorQueryKeys.users(),
-    queryFn: async (): Promise<UserForMod[]> => {
-      const data = await ApiClient.get('/api/moderation/users')
+    queryFn: async ({ signal }): Promise<UserForMod[]> => {
+      const data = await ApiClient.get('/api/moderation/users', { signal })
       return validateData(data, UserForModSchema.array(), 'moderation users')
     },
     staleTime: STALE_TIME.FREQUENT,
@@ -44,8 +44,8 @@ function createModeratorUsersQueryOptions() {
 function createModerationHistoryQueryOptions() {
   return queryOptions({
     queryKey: moderatorQueryKeys.actions(),
-    queryFn: async (): Promise<ModerationAction[]> => {
-      const data = await ApiClient.get('/api/moderation/actions')
+    queryFn: async ({ signal }): Promise<ModerationAction[]> => {
+      const data = await ApiClient.get('/api/moderation/actions', { signal })
       return validateData(data, ModerationActionSchema.array(), 'moderation actions')
     },
     staleTime: STALE_TIME.LIVE,

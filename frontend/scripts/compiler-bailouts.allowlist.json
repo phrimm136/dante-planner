@@ -1,11 +1,7 @@
 [
   "src/components/tiptap-node/image-upload-node/image-upload-node.tsx",
   "src/components/tiptap-ui-primitive/tooltip/tooltip.tsx",
-  "src/components/ui/AutoSizeText.tsx",
-  "src/components/ui/AutoSizeWrappedText.tsx",
   "src/pages/planner/components/PlannerExportImportSection.tsx",
   "src/pages/planner/hooks/useMDUserPlannersData.ts",
-  "src/pages/planner/hooks/usePlannerHeaderActions.ts",
-  "src/pages/planner/hooks/usePlannerSave.ts",
-  "src/shared/sse/hooks/useSseEngine.ts"
+  "src/pages/planner/hooks/usePlannerSave.ts"
 ]

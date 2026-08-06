@@ -6,7 +6,7 @@ import type { EGOGiftAttributeType } from '@/shared/gameData'
 
 interface CompactAttributeTypeFilterProps {
   selected: Set<EGOGiftAttributeType>
-  onAttributeTypesChange: (types: Set<EGOGiftAttributeType>) => void
+  onSelectionChange: (types: Set<EGOGiftAttributeType>) => void
 }
 
 /**
@@ -18,14 +18,14 @@ interface CompactAttributeTypeFilterProps {
  */
 export function CompactAttributeTypeFilter({
   selected,
-  onAttributeTypesChange,
+  onSelectionChange,
 }: CompactAttributeTypeFilterProps) {
   return (
     <CompactIconFilter
       options={EGO_GIFT_ATTRIBUTE_TYPES}
       selectedOptions={selected as Set<string>}
       onSelectionChange={(types) => {
-        onAttributeTypesChange(types as Set<EGOGiftAttributeType>)
+        onSelectionChange(types as Set<EGOGiftAttributeType>)
       }}
       getIconPath={getAffinityIconPath}
     />

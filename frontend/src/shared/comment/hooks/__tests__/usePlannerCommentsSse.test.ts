@@ -43,7 +43,8 @@ vi.mock('@/lib/api', () => ({
   },
 }))
 
-vi.mock('@/shared/sse', () => ({
+vi.mock('@/shared/sse', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/shared/sse')>()),
   SseEnvelopeSchema: {
     parse: (x: unknown) => x,
     safeParse: (x: unknown) => ({ success: true, data: x }),

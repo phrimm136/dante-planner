@@ -15,15 +15,6 @@ import { toast } from '@/lib/toast'
 // shadcn/ui components
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -38,28 +29,23 @@ import {
   DUNGEON_IDX,
   DEFAULT_SKILL_EA,
 } from '@/shared/gameData'
-import { STAGGER_STEP_MS, SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES } from '@/lib/constants'
 import { getKeywordIconPath } from '@/shared/assets'
 import { assertNever, calculateByteLength } from '@/lib/utils'
-import { encodeDeckCode, decodeDeckCode, validateDeckCode } from '../../lib/deckCode'
 import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
+import { MdCategoryLabel } from '../MdCategoryLabel'
 import { saveErrorMessage } from '../../lib/plannerSaveErrors'
 
 // Project types & schemas
 import type { MDCategory } from '@/shared/gameData'
-import type {
-  SaveablePlanner,
-  MDPlannerContent,
-  ConflictResolutionChoice,
-} from '../../types/PlannerTypes'
-import type { DecodedDeck } from '../../lib/deckCode'
+import { isMDPlanner } from '../../types/PlannerTypes'
+import type { SaveablePlanner, ConflictResolutionChoice } from '../../types/PlannerTypes'
 
 // Store
 import { usePlannerEditorStore, usePlannerEditorStoreApi } from '../../stores/usePlannerEditorStore'
 
 // Project hooks
-import { useIdentityListSpec } from '@/pages/identity'
-import { useEGOListSpec } from '@/pages/ego'
+import { useDeckClipboard } from '../../hooks/useDeckClipboard'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import type { SaveOptions } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
@@ -80,12 +66,20 @@ import { ComprehensiveGiftSelectorPane } from '../egoGift/ComprehensiveGiftSelec
 import { StoreBoundSkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
 import { PlannerSection } from '../PlannerSection'
+import { RevealSection } from '../RevealSection'
+import type { RevealSectionSpec } from '../RevealSection'
+import {
+  DeckGridSkeleton,
+  GiftGridSkeleton,
+  SectionBlockSkeleton,
+  SkillGridSkeleton,
+} from '../plannerSkeletons'
+import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
 import { StoreBoundSectionNote } from './StoreBoundSectionNote'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
 import { KeywordSelector } from './KeywordSelector'
 import { LastSavedLabel } from './LastSavedLabel'
-import { staggerDelay } from '@/lib/stagger'
 
 const MAX_TITLE_BYTES = 256
 const SAVE_FAILED_TOAST_KEY = 'pages.plannerMD.save.failed'
@@ -169,48 +163,26 @@ export function PlannerEditorShell({
   const [isObservationPaneOpen, setIsObservationPaneOpen] = useState(false)
   const [isComprehensivePaneOpen, setIsComprehensivePaneOpen] = useState(false)
   const [isDeckPaneOpen, setIsDeckPaneOpen] = useState(false)
-  const [importDialogOpen, setImportDialogOpen] = useState(false)
-  const [pendingImport, setPendingImport] = useState<DecodedDeck | null>(null)
   const [showSaveWarning, setShowSaveWarning] = useState(false)
 
   // ============================================================================
   // Derived State
   // ============================================================================
   const floorCount = FLOOR_COUNTS[category]
-  const totalSections = 6 + floorCount
-
-  // Progressive section rendering
-  useEffect(() => {
-    if (visibleSections < totalSections) {
-      const rafId = requestAnimationFrame(() => {
-        setVisibleSections(visibleSections + 1)
-      })
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [visibleSections, totalSections, setVisibleSections])
-
-  // Reduce visible sections when category changes to fewer floors
-  useEffect(() => {
-    const newTotalSections = 6 + FLOOR_COUNTS[category]
-    if (visibleSections > newTotalSections) {
-      setVisibleSections(newTotalSections)
-    }
-  }, [category, visibleSections, setVisibleSections])
 
   // ============================================================================
   // SSE Reload Handler - Uses store batch action
   // ============================================================================
   const handleServerReload = (reloadedPlanner: SaveablePlanner) => {
-    if (reloadedPlanner.config.type !== 'MIRROR_DUNGEON') {
+    if (!isMDPlanner(reloadedPlanner)) {
       console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
       toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
       return
     }
 
-    const content = reloadedPlanner.content as MDPlannerContent
-    initializeFromPlannerAction(content, {
+    initializeFromPlannerAction(reloadedPlanner.content, {
       title: reloadedPlanner.metadata.title,
-      category: reloadedPlanner.config.category as MDCategory,
+      category: reloadedPlanner.config.category,
       isPublished: reloadedPlanner.metadata.published ?? false,
     })
   }
@@ -292,8 +264,12 @@ export function PlannerEditorShell({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [hasLocalUnsavedChanges])
 
-  const identitySpec = useIdentityListSpec()
-  const egoSpec = useEGOListSpec()
+  const {
+    handleImport: handleDeckImport,
+    handleExport: handleDeckExport,
+    pendingImport,
+    clearPending,
+  } = useDeckClipboard({ readDeck: () => storeApi.getState() })
 
   const titleByteLength = calculateByteLength(title)
   const isTitleValid = titleByteLength <= MAX_TITLE_BYTES
@@ -320,49 +296,14 @@ export function PlannerEditorShell({
     setDeploymentOrder([])
   }
 
-  const handleDeckExport = async () => {
-    try {
-      const { equipment, deploymentOrder } = storeApi.getState()
-      const code = encodeDeckCode(equipment, deploymentOrder)
-      await navigator.clipboard.writeText(code)
-      toast.success(t('deckBuilder.exportSuccess'))
-    } catch {
-      toast.error(t('deckBuilder.exportError'))
-    }
-  }
-
-  const handleDeckImport = async () => {
-    try {
-      const clipboardText = await navigator.clipboard.readText()
-      const validation = validateDeckCode(clipboardText)
-
-      if (!validation.isValid) {
-        toast.error(t('deckBuilder.importError'))
-        return
-      }
-
-      const decoded = decodeDeckCode(clipboardText, identitySpec, egoSpec)
-      setPendingImport(decoded)
-      setImportDialogOpen(true)
-    } catch {
-      toast.error(t('deckBuilder.importError'))
-    }
-  }
-
   const handleImportConfirm = () => {
     if (!pendingImport) return
 
     setEquipment(pendingImport.equipment)
     setDeploymentOrder(pendingImport.deploymentOrder)
 
-    setImportDialogOpen(false)
-    setPendingImport(null)
+    clearPending()
     toast.success(t('deckBuilder.importSuccess'))
-  }
-
-  const handleImportCancel = () => {
-    setImportDialogOpen(false)
-    setPendingImport(null)
   }
 
   // Drop the stale editor caches, then land on whichever viewer owns this plan.
@@ -432,6 +373,232 @@ export function PlannerEditorShell({
     }
   }
 
+  // ============================================================================
+  // Sections, in reveal order
+  // ============================================================================
+  const regularSections: RevealSectionSpec[] = [
+    {
+      id: 'deckBuilder',
+      node: (
+        <>
+          <Suspense fallback={<DeckGridSkeleton />}>
+            <StoreBoundDeckBuilderSummary
+              onToggleDeploy={handleToggleDeploy}
+              onImport={handleDeckImport}
+              onExport={handleDeckExport}
+              onResetOrder={handleResetDeployment}
+              onEditDeck={() => {
+                startTransition(() => setIsDeckPaneOpen(true))
+              }}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
+              <StoreBoundDeckBuilderContent
+                isActive={isDeckPaneOpen}
+                onImport={handleDeckImport}
+                onExport={handleDeckExport}
+                onResetOrder={handleResetDeployment}
+                onIdentityChange={(sinnerCode) => {
+                  updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
+                }}
+              />
+            </DeckBuilderPane>
+          </Suspense>
+          <StoreBoundSectionNote
+            sectionKey="deckBuilder"
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+          />
+        </>
+      ),
+    },
+
+    {
+      id: 'startBuffs',
+      node: (
+        <Suspense fallback={<SectionBlockSkeleton />}>
+          <StoreBoundStartBuffSection
+            mdVersion={mdVersion}
+            onClick={() => {
+              setIsStartBuffPaneOpen(true)
+            }}
+          />
+          <StartBuffEditPane
+            open={isStartBuffPaneOpen}
+            onOpenChange={setIsStartBuffPaneOpen}
+            mdVersion={mdVersion}
+          />
+          <StoreBoundSectionNote
+            sectionKey="startBuffs"
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+          />
+        </Suspense>
+      ),
+    },
+
+    {
+      id: 'startGifts',
+      node: (
+        <Suspense fallback={<SectionBlockSkeleton />}>
+          <StoreBoundStartGiftSummary
+            onClick={() => {
+              setIsStartGiftPaneOpen(true)
+            }}
+          />
+          <StartGiftEditPane
+            open={isStartGiftPaneOpen}
+            onOpenChange={setIsStartGiftPaneOpen}
+            mdVersion={mdVersion}
+          />
+          <StoreBoundSectionNote
+            sectionKey="startGifts"
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+          />
+        </Suspense>
+      ),
+    },
+
+    {
+      id: 'observation',
+      node: (
+        <>
+          <Suspense
+            fallback={
+              <GiftGridSkeleton title={t('pages.plannerMD.egoGiftObservation')} showCount />
+            }
+          >
+            <StoreBoundEGOGiftObservationSummary
+              mdVersion={mdVersion}
+              onClick={() => {
+                setIsObservationPaneOpen(true)
+              }}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <EGOGiftObservationEditPane
+              open={isObservationPaneOpen}
+              onOpenChange={setIsObservationPaneOpen}
+              mdVersion={mdVersion}
+            />
+          </Suspense>
+          <StoreBoundSectionNote
+            sectionKey="observation"
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+          />
+        </>
+      ),
+    },
+
+    {
+      id: 'skillReplacement',
+      node: (
+        <>
+          <Suspense
+            fallback={<SkillGridSkeleton title={t('pages.plannerMD.skillReplacement.title')} />}
+          >
+            <StoreBoundSkillReplacementSection />
+          </Suspense>
+          <StoreBoundSectionNote
+            sectionKey="skillReplacement"
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+          />
+        </>
+      ),
+    },
+
+    {
+      id: 'comprehensiveGifts',
+      node: (
+        <>
+          <Suspense
+            fallback={
+              <div className={SECTION_STYLES.panel}>
+                <div className="text-center text-gray-500 py-8">
+                  {t('pages.plannerMD.loading.EGOGiftData')}
+                </div>
+              </div>
+            }
+          >
+            <StoreBoundComprehensiveGiftSummary onClick={() => setIsComprehensivePaneOpen(true)} />
+          </Suspense>
+          <Suspense fallback={null}>
+            <ComprehensiveGiftSelectorPane
+              open={isComprehensivePaneOpen}
+              onOpenChange={setIsComprehensivePaneOpen}
+            />
+          </Suspense>
+          <StoreBoundSectionNote
+            sectionKey="comprehensiveGifts"
+            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+          />
+        </>
+      ),
+    },
+  ]
+
+  const regularSectionCount = regularSections.length
+
+  /** Slot of the first floor block; the floors take the slots after the regular sections. */
+  const floorSlotStart = regularSectionCount + 1
+
+  const sections: RevealSectionSpec[] = [
+    ...regularSections,
+    {
+      // Unlike the others this entry spans one reveal slot per floor of the category
+      id: 'floorThemes',
+      node: (
+        <PlannerSection title={t('pages.plannerMD.floorThemes')}>
+          <Suspense
+            fallback={
+              <div className="text-center text-gray-500 py-8">
+                {t('pages.plannerMD.loading.themePackData')}
+              </div>
+            }
+          >
+            <div className="space-y-4">
+              {floorIndices.map((floorIndex) => {
+                const sectionIndex = floorSlotStart + floorIndex
+                if (visibleSections < sectionIndex) return null
+
+                const floorNumber = floorIndex + 1
+                const floorNoteKey = `floor-${floorIndex}`
+                return (
+                  <div key={floorIndex} className="space-y-2">
+                    <FloorThemeGiftSection floorNumber={floorNumber} floorIndex={floorIndex} />
+                    <StoreBoundSectionNote
+                      sectionKey={floorNoteKey}
+                      placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          </Suspense>
+        </PlannerSection>
+      ),
+    },
+  ]
+
+  const totalSections = regularSectionCount + floorCount
+
+  // Progressive section rendering
+  useEffect(() => {
+    if (visibleSections < totalSections) {
+      const rafId = requestAnimationFrame(() => {
+        setVisibleSections(visibleSections + 1)
+      })
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [visibleSections, totalSections, setVisibleSections])
+
+  // Reduce visible sections when category changes to fewer floors
+  useEffect(() => {
+    const newTotalSections = regularSectionCount + FLOOR_COUNTS[category]
+    if (visibleSections > newTotalSections) {
+      setVisibleSections(newTotalSections)
+    }
+  }, [category, visibleSections, setVisibleSections, regularSectionCount])
+
   return (
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ConflictResolutionDialog
@@ -473,7 +640,7 @@ export function PlannerEditorShell({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="w-auto min-w-24 h-10 justify-between">
-                  {t(`pages.plannerList.mdCategory.${category}`)}
+                  <MdCategoryLabel category={category} />
                   <ChevronDown className="ml-2 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -485,7 +652,7 @@ export function PlannerEditorShell({
                       handleCategoryChange(cat)
                     }}
                   >
-                    {t(`pages.plannerList.mdCategory.${cat}`)}
+                    <MdCategoryLabel category={cat} />
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -543,275 +710,17 @@ export function PlannerEditorShell({
           />
         </PlannerSection>
 
-        {visibleSections >= 1 && (
-          <>
-            <Suspense
-              fallback={
-                <div className="space-y-2">
-                  <div className="border-2 border-border rounded-lg p-4">
-                    <div className={SECTION_STYLES.LAYOUT.wrap}>
-                      {Array.from({ length: 12 }).map((_, i) => (
-                        <Skeleton
-                          key={i}
-                          className="w-16 h-20 rounded-md"
-                          style={staggerDelay(i)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              }
-            >
-              <StoreBoundDeckBuilderSummary
-                onToggleDeploy={handleToggleDeploy}
-                onImport={handleDeckImport}
-                onExport={handleDeckExport}
-                onResetOrder={handleResetDeployment}
-                onEditDeck={() => {
-                  startTransition(() => setIsDeckPaneOpen(true))
-                }}
-              />
-            </Suspense>
-            <Suspense fallback={null}>
-              <DeckBuilderPane open={isDeckPaneOpen} onOpenChange={setIsDeckPaneOpen}>
-                <StoreBoundDeckBuilderContent
-                  isActive={isDeckPaneOpen}
-                  onImport={handleDeckImport}
-                  onExport={handleDeckExport}
-                  onResetOrder={handleResetDeployment}
-                  onIdentityChange={(sinnerCode) => {
-                    updateSinnerSkillEA(sinnerCode, { ...DEFAULT_SKILL_EA })
-                  }}
-                />
-              </DeckBuilderPane>
-            </Suspense>
-          </>
-        )}
+        <DeckImportConfirmDialog
+          pendingImport={pendingImport}
+          onConfirm={handleImportConfirm}
+          onCancel={clearPending}
+        />
 
-        <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t('deckBuilder.importConfirmTitle')}</DialogTitle>
-              <DialogDescription>{t('deckBuilder.importConfirmDescription')}</DialogDescription>
-            </DialogHeader>
-
-            {pendingImport && pendingImport.warnings.length > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
-                <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
-                  {t('deckBuilder.importWarnings')}
-                </p>
-                <ul className="text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside">
-                  {pendingImport.warnings.map((warning, index) => (
-                    <li key={index}>{warning}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <DialogFooter>
-              <Button variant="outline" onClick={handleImportCancel}>
-                {t('deckBuilder.cancel')}
-              </Button>
-              <Button onClick={handleImportConfirm}>{t('deckBuilder.apply')}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {visibleSections >= 1 && (
-          <StoreBoundSectionNote
-            sectionKey="deckBuilder"
-            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-          />
-        )}
-
-        {visibleSections >= 2 && (
-          <Suspense
-            fallback={
-              <div className="space-y-2">
-                <Skeleton className="h-32 w-full rounded-lg" />
-              </div>
-            }
-          >
-            <StoreBoundStartBuffSection
-              mdVersion={mdVersion}
-              onClick={() => {
-                setIsStartBuffPaneOpen(true)
-              }}
-            />
-            <StartBuffEditPane
-              open={isStartBuffPaneOpen}
-              onOpenChange={setIsStartBuffPaneOpen}
-              mdVersion={mdVersion}
-            />
-            <StoreBoundSectionNote
-              sectionKey="startBuffs"
-              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            />
-          </Suspense>
-        )}
-
-        {visibleSections >= 3 && (
-          <Suspense
-            fallback={
-              <div className="space-y-2">
-                <Skeleton className="h-32 w-full rounded-lg" />
-              </div>
-            }
-          >
-            <StoreBoundStartGiftSummary
-              onClick={() => {
-                setIsStartGiftPaneOpen(true)
-              }}
-            />
-            <StartGiftEditPane
-              open={isStartGiftPaneOpen}
-              onOpenChange={setIsStartGiftPaneOpen}
-              mdVersion={mdVersion}
-            />
-            <StoreBoundSectionNote
-              sectionKey="startGifts"
-              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            />
-          </Suspense>
-        )}
-
-        {visibleSections >= 4 && (
-          <>
-            <Suspense
-              fallback={
-                <PlannerSection title={t('pages.plannerMD.egoGiftObservation')}>
-                  <div className="space-y-4">
-                    <div className="flex justify-end">
-                      <div className={SECTION_STYLES.LAYOUT.rowTight}>
-                        <Skeleton className="w-8 h-8 rounded-md" />
-                        <Skeleton className="w-12 h-6" />
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2 p-2 min-h-28">
-                      {Array.from({ length: 6 }).map((_, i) => (
-                        <Skeleton
-                          key={i}
-                          className="w-24 h-24 rounded-md"
-                          style={staggerDelay(i, STAGGER_STEP_MS.LOOSE)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </PlannerSection>
-              }
-            >
-              <StoreBoundEGOGiftObservationSummary
-                mdVersion={mdVersion}
-                onClick={() => {
-                  setIsObservationPaneOpen(true)
-                }}
-              />
-            </Suspense>
-            <Suspense fallback={null}>
-              <EGOGiftObservationEditPane
-                open={isObservationPaneOpen}
-                onOpenChange={setIsObservationPaneOpen}
-                mdVersion={mdVersion}
-              />
-            </Suspense>
-            <StoreBoundSectionNote
-              sectionKey="observation"
-              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            />
-          </>
-        )}
-
-        {visibleSections >= 5 && (
-          <>
-            <Suspense
-              fallback={
-                <PlannerSection title={t('pages.plannerMD.skillReplacement.title')}>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex flex-col items-center gap-1 p-2 rounded-lg border-2 border-border bg-card"
-                        style={staggerDelay(i, STAGGER_STEP_MS.NORMAL)}
-                      >
-                        <Skeleton className="w-24 h-24 rounded-md" />
-                        <div className="flex gap-1">
-                          <Skeleton className="w-7 h-7 rounded-sm" />
-                          <Skeleton className="w-7 h-7 rounded-sm" />
-                          <Skeleton className="w-7 h-7 rounded-sm" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </PlannerSection>
-              }
-            >
-              <StoreBoundSkillReplacementSection />
-            </Suspense>
-            <StoreBoundSectionNote
-              sectionKey="skillReplacement"
-              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            />
-          </>
-        )}
-
-        {visibleSections >= 6 && (
-          <>
-            <Suspense
-              fallback={
-                <div className={SECTION_STYLES.panel}>
-                  <div className="text-center text-gray-500 py-8">
-                    {t('pages.plannerMD.loading.EGOGiftData')}
-                  </div>
-                </div>
-              }
-            >
-              <StoreBoundComprehensiveGiftSummary
-                onClick={() => setIsComprehensivePaneOpen(true)}
-              />
-            </Suspense>
-            <Suspense fallback={null}>
-              <ComprehensiveGiftSelectorPane
-                open={isComprehensivePaneOpen}
-                onOpenChange={setIsComprehensivePaneOpen}
-              />
-            </Suspense>
-            <StoreBoundSectionNote
-              sectionKey="comprehensiveGifts"
-              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-            />
-          </>
-        )}
-
-        {visibleSections >= 7 && (
-          <PlannerSection title={t('pages.plannerMD.floorThemes')}>
-            <Suspense
-              fallback={
-                <div className="text-center text-gray-500 py-8">
-                  {t('pages.plannerMD.loading.themePackData')}
-                </div>
-              }
-            >
-              <div className="space-y-4">
-                {floorIndices.map((floorIndex) => {
-                  const sectionIndex = 7 + floorIndex
-                  if (visibleSections < sectionIndex) return null
-
-                  const floorNumber = floorIndex + 1
-                  const floorNoteKey = `floor-${floorIndex}`
-                  return (
-                    <div key={floorIndex} className="space-y-2">
-                      <FloorThemeGiftSection floorNumber={floorNumber} floorIndex={floorIndex} />
-                      <StoreBoundSectionNote
-                        sectionKey={floorNoteKey}
-                        placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-                      />
-                    </div>
-                  )
-                })}
-              </div>
-            </Suspense>
-          </PlannerSection>
-        )}
+        {sections.map((section, index) => (
+          <RevealSection key={section.id} visible={visibleSections >= index + 1}>
+            {section.node}
+          </RevealSection>
+        ))}
 
         <PlannerSection title={t('pages.plannerMD.closingNotes')}>
           <StoreBoundSectionNote

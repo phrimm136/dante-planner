@@ -5,7 +5,7 @@ import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { Announcement } from '../types/AnnouncementTypes'
-import { linkifyText } from '@/components/ui/LinkifyText'
+import { LinkifyText } from '@/components/ui/LinkifyText'
 import { SECTION_STYLES } from '@/lib/constants'
 
 // ============================================================================
@@ -44,7 +44,9 @@ function AnnouncementDialogContent({
         </Button>
         <h3 className="text-base font-semibold">{selected.title}</h3>
         <p className={SECTION_STYLES.TEXT.caption}>{selected.formattedDate}</p>
-        <p className="whitespace-pre-wrap text-sm mt-2">{linkifyText(selected.body)}</p>
+        <p className="whitespace-pre-wrap text-sm mt-2">
+          <LinkifyText text={selected.body} />
+        </p>
       </div>
     )
   }

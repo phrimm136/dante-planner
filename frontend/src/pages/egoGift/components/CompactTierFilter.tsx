@@ -4,7 +4,7 @@ import { EGO_GIFT_TIERS } from '@/shared/gameData'
 import type { EGOGiftTier } from '@/shared/gameData'
 
 interface CompactTierFilterProps {
-  selectedTiers: Set<EGOGiftTier>
+  selected: Set<EGOGiftTier>
   onSelectionChange: (tiers: Set<EGOGiftTier>) => void
 }
 
@@ -16,11 +16,11 @@ interface CompactTierFilterProps {
  *
  * Pattern: Wraps CompactIconFilter in text mode (no getIconPath)
  */
-export function CompactTierFilter({ selectedTiers, onSelectionChange }: CompactTierFilterProps) {
+export function CompactTierFilter({ selected, onSelectionChange }: CompactTierFilterProps) {
   return (
     <CompactIconFilter
       options={EGO_GIFT_TIERS}
-      selectedOptions={selectedTiers as Set<string>}
+      selectedOptions={selected as Set<string>}
       onSelectionChange={(options) => {
         onSelectionChange(options as Set<EGOGiftTier>)
       }}

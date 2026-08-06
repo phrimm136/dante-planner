@@ -77,7 +77,11 @@ describe('useAuthQuery error handling', () => {
 
   describe('queryFn behavior', () => {
     const callQueryFn = () =>
-      (createAuthMeQueryOptions().queryFn as unknown as () => Promise<unknown>)()
+      (
+        createAuthMeQueryOptions().queryFn as unknown as (ctx: {
+          signal: AbortSignal
+        }) => Promise<unknown>
+      )({ signal: new AbortController().signal })
 
     it('returns null for unauthenticated user (null response)', async () => {
       vi.mocked(ApiClient.get).mockResolvedValue(null)
@@ -109,7 +113,11 @@ describe('useAuthQuery transient-failure session preservation (Fix 2b)', () => {
   })
 
   const callQueryFn = () =>
-    (createAuthMeQueryOptions().queryFn as unknown as () => Promise<unknown>)()
+    (
+      createAuthMeQueryOptions().queryFn as unknown as (ctx: {
+        signal: AbortSignal
+      }) => Promise<unknown>
+    )({ signal: new AbortController().signal })
 
   it('preserves the cached user when /auth/me hits a transient BackendUnavailableError', async () => {
     queryClient.setQueryData(authQueryKeys.me, mockUserResponse)

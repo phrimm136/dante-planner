@@ -91,7 +91,7 @@ export function usePlannerHeaderActions({
     setIsApplyingLatestMirror(true)
     setShowApplyLatestMirrorDialog(false)
 
-    try {
+    const applyUpdate = async () => {
       const updatedPlanner: SaveablePlanner = {
         ...plannerToUpdate,
         metadata: {
@@ -114,12 +114,16 @@ export function usePlannerHeaderActions({
       void queryClient.invalidateQueries({ queryKey: publishedPlannerQueryKeys.detail(plannerId) })
 
       toast.success(t('pages.plannerMD.applyLatestMirror.success'))
-    } catch (error) {
-      console.error('Failed to apply latest mirror:', error)
-      toastForError(error, 'pages.plannerMD.applyLatestMirror.failed')
-    } finally {
-      setIsApplyingLatestMirror(false)
     }
+
+    await applyUpdate()
+      .catch((error: unknown) => {
+        console.error('Failed to apply latest mirror:', error)
+        toastForError(error, 'pages.plannerMD.applyLatestMirror.failed')
+      })
+      .finally(() => {
+        setIsApplyingLatestMirror(false)
+      })
   }
 
   return {

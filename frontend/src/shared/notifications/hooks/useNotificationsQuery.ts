@@ -33,8 +33,10 @@ export const notificationQueryKeys = {
 function createNotificationsQueryOptions(page: number = 0, size: number = 20) {
   return queryOptions({
     queryKey: notificationQueryKeys.inbox(page, size),
-    queryFn: async (): Promise<NotificationInboxResponse> => {
-      const data = await ApiClient.get(`/api/notifications/inbox?page=${page}&size=${size}`)
+    queryFn: async ({ signal }): Promise<NotificationInboxResponse> => {
+      const data = await ApiClient.get(`/api/notifications/inbox?page=${page}&size=${size}`, {
+        signal,
+      })
       return validateData(data, NotificationInboxResponseSchema, 'notifications inbox')
     },
     staleTime: STALE_TIME.SHORT,

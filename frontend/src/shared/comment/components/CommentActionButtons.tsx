@@ -4,8 +4,8 @@
  * Action buttons row for comments (arca.live style).
  * Shows different buttons based on:
  * - isPublished: All buttons hidden if planner is unpublished
- * - isAuthor: Edit, delete, notification toggle only for comment author
- * - isAuthenticated: Reply, vote require login (checked via isAuthor field presence)
+ * - comment.isAuthor: Edit, delete, notification toggle only for comment author
+ * - viewer: Reply requires an account, the moderator delete requires the role
  *
  * Responsive:
  * - Wide screens (sm+): Inline buttons
@@ -25,21 +25,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+import { canModerate, canReply } from '../lib/commentViewer'
+
 import type { CommentNode } from '../types/CommentTypes'
+import type { CommentActions, CommentViewer } from '../lib/commentViewer'
 
 interface CommentActionButtonsProps {
   comment: CommentNode
+  /** Whether the planner carrying the comment is published. */
   isPublished: boolean
-  isAuthenticated: boolean
-  isModerator: boolean
-  onReply: () => void
-  onEdit: () => void
-  onDelete: () => void
-  onModeratorDelete: () => void
-  onUpvote: () => void
-  onToggleNotifications: () => void
-  /** Report callback - temporarily disabled, kept for API stability */
-  onReport?: () => void
+  viewer: CommentViewer
+  actions: CommentActions
+  /** Opens the card's inline reply editor. */
+  onStartReply: () => void
+  /** Opens the card's inline edit editor. */
+  onStartEdit: () => void
   isUpvoting?: boolean
 }
 
@@ -57,28 +57,24 @@ interface CommentAction {
 export function CommentActionButtons({
   comment,
   isPublished,
-  isAuthenticated,
-  isModerator,
-  onReply,
-  onEdit,
-  onDelete,
-  onModeratorDelete,
-  onUpvote,
-  onToggleNotifications,
+  viewer,
+  actions,
+  onStartReply,
+  onStartEdit,
   isUpvoting = false,
 }: CommentActionButtonsProps) {
   const { t } = useTranslation()
   // Don't show any actions if planner is unpublished
   if (!isPublished) return null
 
-  const hasMenuItems = isAuthenticated || comment.isAuthor || isModerator
+  const hasMenuItems = canReply(viewer) || comment.isAuthor
 
-  const actions: CommentAction[] = []
+  const rendered: CommentAction[] = []
 
-  if (isAuthenticated) {
-    actions.push({
+  if (canReply(viewer)) {
+    rendered.push({
       key: 'reply',
-      onSelect: onReply,
+      onSelect: onStartReply,
       inlineIcon: <Reply className="size-3.5" />,
       menuIcon: <Reply className="size-4 mr-2" />,
       menuLabel: 'Reply',
@@ -86,17 +82,17 @@ export function CommentActionButtons({
   }
 
   if (comment.isAuthor) {
-    actions.push(
+    rendered.push(
       {
         key: 'edit',
-        onSelect: onEdit,
+        onSelect: onStartEdit,
         inlineIcon: <Edit className="size-3.5" />,
         menuIcon: <Edit className="size-4 mr-2" />,
         menuLabel: 'Edit',
       },
       {
         key: 'delete',
-        onSelect: onDelete,
+        onSelect: () => actions.onDelete(comment.id),
         inlineIcon: <Trash2 className="size-3.5" />,
         menuIcon: <Trash2 className="size-4 mr-2" />,
         menuLabel: 'Delete',
@@ -104,7 +100,8 @@ export function CommentActionButtons({
       },
       {
         key: 'notifications',
-        onSelect: onToggleNotifications,
+        onSelect: () =>
+          actions.onToggleNotifications(comment.id, !comment.authorNotificationsEnabled),
         inlineIcon: comment.authorNotificationsEnabled ? (
           <Bell className="size-3.5 fill-current text-primary" />
         ) : (
@@ -122,10 +119,10 @@ export function CommentActionButtons({
     )
   }
 
-  if (isModerator && !comment.isAuthor) {
-    actions.push({
+  if (canModerate(viewer, comment)) {
+    rendered.push({
       key: 'moderatorDelete',
-      onSelect: onModeratorDelete,
+      onSelect: () => actions.onModeratorDelete(comment.id),
       inlineIcon: <Trash2 className="size-3.5" />,
       inlineClassName: 'text-orange-500 hover:text-orange-600',
       menuIcon: <Trash2 className="size-4 mr-2" />,
@@ -141,7 +138,7 @@ export function CommentActionButtons({
         variant="ghost"
         size="sm"
         className={cn('h-7 px-2 gap-1', comment.hasUpvoted && 'text-primary')}
-        onClick={onUpvote}
+        onClick={() => actions.onUpvote(comment.id)}
         disabled={comment.hasUpvoted || isUpvoting}
       >
         <ThumbsUp className="size-3.5" />
@@ -150,7 +147,7 @@ export function CommentActionButtons({
 
       {/* Desktop: Inline buttons (hidden on mobile) */}
       <div className="hidden sm:flex items-center gap-1">
-        {actions.map((action) => (
+        {rendered.map((action) => (
           <Button
             key={action.key}
             variant="ghost"
@@ -172,7 +169,7 @@ export function CommentActionButtons({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {actions.map((action) => (
+            {rendered.map((action) => (
               <DropdownMenuItem
                 key={action.key}
                 onClick={action.onSelect}

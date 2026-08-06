@@ -26,8 +26,8 @@ export function useUserSettingsQuery() {
 
   return useQuery({
     queryKey: userSettingsKeys.settings(),
-    queryFn: async (): Promise<UserSettingsResponse> => {
-      const data = await ApiClient.get<UserSettingsResponse>('/api/user/settings')
+    queryFn: async ({ signal }): Promise<UserSettingsResponse> => {
+      const data = await ApiClient.get<UserSettingsResponse>('/api/user/settings', { signal })
       return validateData(data, UserSettingsResponseSchema, 'user settings')
     },
     enabled: isAuthenticated,

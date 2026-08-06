@@ -29,8 +29,8 @@ export const userSettingsQueryKeys = {
 function createEpithetsQueryOptions() {
   return queryOptions({
     queryKey: userSettingsQueryKeys.epithets(),
-    queryFn: async (): Promise<EpithetListResponse> => {
-      const data = await ApiClient.get<EpithetListResponse>('/api/user/epithets')
+    queryFn: async ({ signal }): Promise<EpithetListResponse> => {
+      const data = await ApiClient.get<EpithetListResponse>('/api/user/epithets', { signal })
       return validateData(data, EpithetListResponseSchema, 'user epithets')
     },
     staleTime: STALE_TIME.DAY,

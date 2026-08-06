@@ -78,8 +78,8 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
 }))
 
 // ── Storage ───────────────────────────────────────────────────
-const mockSavePlanner = vi.fn().mockResolvedValue({ success: true })
-const mockDeletePlanner = vi.fn().mockResolvedValue(undefined)
+const mockSavePlanner = vi.fn().mockResolvedValue({ ok: true, value: undefined })
+const mockDeletePlanner = vi.fn().mockResolvedValue({ ok: true, value: undefined })
 vi.mock('../../../hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({ saveToLocal: mockSavePlanner, deleteFromLocal: mockDeletePlanner }),
 }))
@@ -247,7 +247,7 @@ describe('PersonalPlannerHeader – Apply Latest Mirror', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSyncToServer.mockResolvedValue(syncedPlanner)
-    mockSavePlanner.mockResolvedValue({ success: true })
+    mockSavePlanner.mockResolvedValue({ ok: true, value: undefined })
   })
 
   describe('button visibility', () => {
@@ -382,7 +382,7 @@ describe('PersonalPlannerHeader – Apply Latest Mirror', () => {
 describe('PersonalPlannerHeader – delete with local cleanup', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mockDeletePlanner.mockResolvedValue(undefined)
+    mockDeletePlanner.mockResolvedValue({ ok: true, value: undefined })
   })
 
   async function openAndConfirmDelete() {

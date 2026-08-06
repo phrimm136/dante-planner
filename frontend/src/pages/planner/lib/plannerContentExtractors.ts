@@ -13,6 +13,7 @@
  */
 
 import { getBaseGiftId } from '@/pages/egoGift'
+import { isMDPlanner } from '../types/PlannerTypes'
 import type { MDPlannerContent, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 
@@ -153,7 +154,7 @@ export function matchesPlannerFilters(
   }
 
   // Content filters only apply to MD planners
-  if (plan.config.type !== 'MIRROR_DUNGEON') {
+  if (!isMDPlanner(plan)) {
     // For non-MD planners, content filters automatically fail if any are active
     const hasContentFilters =
       filters.keywords.length > 0 ||
@@ -164,7 +165,7 @@ export function matchesPlannerFilters(
     return !hasContentFilters
   }
 
-  const content = plan.content as MDPlannerContent
+  const { content } = plan
 
   // Keyword filter: ALL selected keywords must be present
   if (filters.keywords.length > 0) {

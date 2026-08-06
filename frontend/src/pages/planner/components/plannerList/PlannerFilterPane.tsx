@@ -54,6 +54,15 @@ import { SECTION_STYLES } from '@/lib/constants'
 const FILTER_CATEGORIES = ['keywords', 'identity', 'ego', 'gift', 'themePack'] as const
 type FilterCategory = (typeof FILTER_CATEGORIES)[number]
 
+/** The filter field each category selects into. */
+const CATEGORY_TO_FILTER_KEY = {
+  keywords: 'keywords',
+  identity: 'identityIds',
+  ego: 'egoIds',
+  gift: 'giftIds',
+  themePack: 'themePackIds',
+} as const satisfies Record<FilterCategory, keyof PlannerSearchFilters>
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -140,71 +149,29 @@ export function PlannerFilterPane({ filters, onFiltersChange }: PlannerFilterPan
   }
 
   // Check if an item is selected
-  const isSelected = (category: FilterCategory, id: string): boolean => {
-    switch (category) {
-      case 'keywords':
-        return filters.keywords.includes(id)
-      case 'identity':
-        return filters.identityIds.includes(id)
-      case 'ego':
-        return filters.egoIds.includes(id)
-      case 'gift':
-        return filters.giftIds.includes(id)
-      case 'themePack':
-        return filters.themePackIds.includes(id)
-    }
-  }
+  const isSelected = (category: FilterCategory, id: string): boolean =>
+    filters[CATEGORY_TO_FILTER_KEY[category]].includes(id)
 
   // Toggle selection of an item
   const toggleItem = (category: FilterCategory, id: string) => {
-    const toggle = (arr: string[]) =>
-      arr.includes(id) ? arr.filter((v) => v !== id) : [...arr, id]
+    const key = CATEGORY_TO_FILTER_KEY[category]
+    const current = filters[key]
+    const next = current.includes(id) ? current.filter((v) => v !== id) : [...current, id]
 
-    switch (category) {
-      case 'keywords':
-        onFiltersChange({ keywords: toggle(filters.keywords) })
-        break
-      case 'identity':
-        onFiltersChange({ identityIds: toggle(filters.identityIds) })
-        break
-      case 'ego':
-        onFiltersChange({ egoIds: toggle(filters.egoIds) })
-        break
-      case 'gift':
-        onFiltersChange({ giftIds: toggle(filters.giftIds) })
-        break
-      case 'themePack':
-        onFiltersChange({ themePackIds: toggle(filters.themePackIds) })
-        break
-    }
+    onFiltersChange({ [key]: next })
   }
 
   // Build selected chips — uses allItems for label lookup, falls back to raw ID
   const selectedChips = (() => {
     const itemMap = new Map(allItems.map((item) => [`${item.category}-${item.id}`, item]))
-    const chips: FilterItem[] = []
 
-    for (const kw of filters.keywords) {
-      const found = itemMap.get(`keywords-${kw}`)
-      chips.push({ id: kw, label: found?.label ?? kw, category: 'keywords' })
-    }
-    for (const id of filters.identityIds) {
-      const found = itemMap.get(`identity-${id}`)
-      chips.push({ id, label: found?.label ?? id, category: 'identity' })
-    }
-    for (const id of filters.egoIds) {
-      const found = itemMap.get(`ego-${id}`)
-      chips.push({ id, label: found?.label ?? id, category: 'ego' })
-    }
-    for (const id of filters.giftIds) {
-      const found = itemMap.get(`gift-${id}`)
-      chips.push({ id, label: found?.label ?? id, category: 'gift' })
-    }
-    for (const id of filters.themePackIds) {
-      const found = itemMap.get(`themePack-${id}`)
-      chips.push({ id, label: found?.label ?? id, category: 'themePack' })
-    }
-    return chips
+    return FILTER_CATEGORIES.flatMap((category) =>
+      filters[CATEGORY_TO_FILTER_KEY[category]].map((id) => ({
+        id,
+        label: itemMap.get(`${category}-${id}`)?.label ?? id,
+        category,
+      })),
+    )
   })()
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)

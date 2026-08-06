@@ -7,7 +7,7 @@
 
 import type { z } from 'zod'
 import type { Facet } from '@/shared/filter'
-import { applyFacets } from '@/shared/filter'
+import { applyFacets, matchesSearch } from '@/shared/filter'
 import type { FilterState } from '@/components/hooks/useSetFilters'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
@@ -56,8 +56,6 @@ export function matchesThemePack(
   searchTerms: readonly string[],
 ): boolean {
   if (!applyFacets(entry, state.values, THEME_PACK_FACETS)) return false
-  if (!state.searchQuery) return true
 
-  const lowerQuery = state.searchQuery.toLowerCase()
-  return searchTerms.some((term) => term.includes(lowerQuery))
+  return matchesSearch(state.searchQuery, searchTerms)
 }

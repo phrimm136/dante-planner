@@ -7,7 +7,19 @@
 
 import { useSanityConditionI18n } from '@/shared/gameText'
 import { formatSanityCondition, formatSanityConditions } from './formatSanityCondition'
+import type { SanityConditionResult } from './formatSanityCondition'
 import type { SanityConditionType } from '@/shared/gameData'
+
+/**
+ * Display text for one formatted condition: the translation, or the raw name
+ * once the miss has been reported.
+ */
+function resolve(result: SanityConditionResult, encodedName: string): string {
+  if (result.ok) return result.value
+
+  console.warn(`[SanityCondition] Missing i18n for: ${result.error.baseName} (raw: ${encodedName})`)
+  return encodedName
+}
 
 /**
  * Hook that provides a formatter function for sanity conditions.
@@ -43,7 +55,7 @@ export function useSanityConditionFormatter() {
      * @returns Formatted description or raw name on failure
      */
     format: (encodedName: string, type: SanityConditionType): string => {
-      return formatSanityCondition(encodedName, i18n, type)
+      return resolve(formatSanityCondition(encodedName, i18n, type), encodedName)
     },
 
     /**
@@ -53,7 +65,9 @@ export function useSanityConditionFormatter() {
      * @returns Array of formatted descriptions
      */
     formatAll: (encodedNames: string[], type: SanityConditionType): string[] => {
-      return formatSanityConditions(encodedNames, i18n, type)
+      return formatSanityConditions(encodedNames, i18n, type).map((result, index) =>
+        resolve(result, encodedNames[index]),
+      )
     },
 
     /** Raw i18n data for advanced usage */

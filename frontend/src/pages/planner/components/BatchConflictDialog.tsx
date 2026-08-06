@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { cva } from 'class-variance-authority'
 import {
   Dialog,
   DialogContent,
@@ -54,22 +55,72 @@ export interface BatchConflictDialogProps {
   error?: { key: string; params?: Record<string, string> } | null
 }
 
+/** The choices in the order both the per-item row and the apply-to-all row show them. */
+const CHOICE_ORDER: ConflictResolutionChoice[] = ['overwrite', 'discard', 'both']
+
 /**
  * Resolution choice button styling
  * - overwrite (Keep Local): destructive/red
  * - discard (Use Server): muted/neutral
  * - both (Save as Copy): same as discard for visual consistency
  */
-const CHOICE_STYLES: Record<ConflictResolutionChoice, string> = {
-  overwrite: 'bg-destructive/10 text-destructive border-destructive/30',
-  discard: 'bg-muted text-muted-foreground border-border',
-  both: 'bg-muted text-muted-foreground border-border',
-}
+const choiceButtonVariants = cva(
+  'rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
+  {
+    variants: {
+      choice: { overwrite: '', discard: '', both: '' },
+      selected: { true: '', false: '' },
+      size: { sm: 'px-2 py-1 text-xs', md: 'px-3 py-1.5 text-sm' },
+    },
+    compoundVariants: [
+      {
+        choice: 'overwrite',
+        selected: false,
+        class: 'bg-destructive/10 text-destructive border-destructive/30',
+      },
+      {
+        choice: 'overwrite',
+        selected: true,
+        class: 'bg-destructive text-destructive-foreground border-destructive',
+      },
+      { choice: 'discard', selected: false, class: 'bg-muted text-muted-foreground border-border' },
+      {
+        choice: 'discard',
+        selected: true,
+        class: 'bg-primary text-primary-foreground border-primary',
+      },
+      { choice: 'both', selected: false, class: 'bg-muted text-muted-foreground border-border' },
+      { choice: 'both', selected: true, class: 'bg-primary text-primary-foreground border-primary' },
+    ],
+    defaultVariants: { selected: false, size: 'sm' },
+  }
+)
 
-const CHOICE_SELECTED_STYLES: Record<ConflictResolutionChoice, string> = {
-  overwrite: 'bg-destructive text-destructive-foreground border-destructive',
-  discard: 'bg-primary text-primary-foreground border-primary',
-  both: 'bg-primary text-primary-foreground border-primary',
+function ChoiceButton({
+  choice,
+  label,
+  selected = false,
+  size,
+  disabled,
+  onClick,
+}: {
+  choice: ConflictResolutionChoice
+  label: string
+  selected?: boolean
+  size?: 'sm' | 'md'
+  disabled: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(choiceButtonVariants({ choice, selected, size }))}
+    >
+      {label}
+    </button>
+  )
 }
 
 /**
@@ -144,30 +195,6 @@ export function BatchConflictDialog({
     both: t('pages.plannerMD.conflict.keepBoth', 'Keep Both'),
   }
 
-  // Choice button component
-  const ChoiceButton = ({
-    choice,
-    selected,
-    onClick,
-  }: {
-    choice: ConflictResolutionChoice
-    selected: boolean
-    onClick: () => void
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={isResolving}
-      className={cn(
-        'px-2 py-1 text-xs rounded border transition-colors',
-        selected ? CHOICE_SELECTED_STYLES[choice] : CHOICE_STYLES[choice],
-        isResolving && 'opacity-50 cursor-not-allowed'
-      )}
-    >
-      {choiceLabels[choice]}
-    </button>
-  )
-
   return (
     <Dialog open={open}>
       <DialogContent
@@ -195,42 +222,16 @@ export function BatchConflictDialog({
             {t('pages.plannerMD.batchConflict.applyToAll', 'Apply to all')}
           </span>
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => applyToAll('overwrite')}
-              disabled={isResolving}
-              className={cn(
-                'px-3 py-1.5 text-sm rounded border transition-colors',
-                CHOICE_STYLES.overwrite,
-                isResolving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {choiceLabels.overwrite}
-            </button>
-            <button
-              type="button"
-              onClick={() => applyToAll('discard')}
-              disabled={isResolving}
-              className={cn(
-                'px-3 py-1.5 text-sm rounded border transition-colors',
-                CHOICE_STYLES.discard,
-                isResolving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {choiceLabels.discard}
-            </button>
-            <button
-              type="button"
-              onClick={() => applyToAll('both')}
-              disabled={isResolving}
-              className={cn(
-                'px-3 py-1.5 text-sm rounded border transition-colors',
-                CHOICE_STYLES.both,
-                isResolving && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              {choiceLabels.both}
-            </button>
+            {CHOICE_ORDER.map((choice) => (
+              <ChoiceButton
+                key={choice}
+                choice={choice}
+                label={choiceLabels[choice]}
+                size="md"
+                disabled={isResolving}
+                onClick={() => applyToAll(choice)}
+              />
+            ))}
           </div>
         </div>
 
@@ -268,21 +269,16 @@ export function BatchConflictDialog({
                 )}
                 {/* Buttons */}
                 <div className="flex gap-1">
-                  <ChoiceButton
-                    choice="overwrite"
-                    selected={currentChoice === 'overwrite'}
-                    onClick={() => setResolution(conflict.id, 'overwrite')}
-                  />
-                  <ChoiceButton
-                    choice="discard"
-                    selected={currentChoice === 'discard'}
-                    onClick={() => setResolution(conflict.id, 'discard')}
-                  />
-                  <ChoiceButton
-                    choice="both"
-                    selected={currentChoice === 'both'}
-                    onClick={() => setResolution(conflict.id, 'both')}
-                  />
+                  {CHOICE_ORDER.map((choice) => (
+                    <ChoiceButton
+                      key={choice}
+                      choice={choice}
+                      label={choiceLabels[choice]}
+                      selected={currentChoice === choice}
+                      disabled={isResolving}
+                      onClick={() => setResolution(conflict.id, choice)}
+                    />
+                  ))}
                 </div>
               </div>
             )

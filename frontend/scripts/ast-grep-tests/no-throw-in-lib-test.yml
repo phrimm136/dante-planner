@@ -1,0 +1,18 @@
+id: no-throw-in-lib
+valid:
+  - const parsed = schema.safeParse(raw)
+  - |
+    function load(raw: string) {
+      const parsed = schema.safeParse(raw)
+      if (!parsed.success) return { ok: false, error: parsed.error } as const
+      return { ok: true, value: parsed.data } as const
+    }
+invalid:
+  - throw new Error('boom')
+  - |
+    function load(raw: string) {
+      const parsed = schema.safeParse(raw)
+      if (!parsed.success) throw new Error('invalid payload')
+      return parsed.data
+    }
+  - throw err

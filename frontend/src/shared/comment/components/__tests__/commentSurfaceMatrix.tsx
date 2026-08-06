@@ -6,7 +6,10 @@
 
 import type { ReactNode } from 'react'
 
+import { toCommentViewer } from '../../lib/commentViewer'
+
 import type { CommentNode } from '../../types/CommentTypes'
+import type { CommentActions, CommentViewer } from '../../lib/commentViewer'
 
 export function makeComment(overrides: Partial<CommentNode> = {}): CommentNode {
   return {
@@ -30,15 +33,10 @@ export function makeComment(overrides: Partial<CommentNode> = {}): CommentNode {
 export interface ActionSurfaceProps {
   comment: CommentNode
   isPublished: boolean
-  isAuthenticated: boolean
-  isModerator: boolean
-  onReply: () => void
-  onEdit: () => void
-  onDelete: () => void
-  onModeratorDelete: () => void
-  onUpvote: () => void
-  onToggleNotifications: () => void
-  onReport?: () => void
+  viewer: CommentViewer
+  actions: CommentActions
+  onStartReply: () => void
+  onStartEdit: () => void
   isUpvoting?: boolean
 }
 
@@ -49,13 +47,20 @@ export interface ActionCase {
 
 const noop = () => {}
 
-const HANDLERS = {
+export const NOOP_ACTIONS: CommentActions = {
   onReply: noop,
   onEdit: noop,
   onDelete: noop,
   onModeratorDelete: noop,
   onUpvote: noop,
   onToggleNotifications: noop,
+  onReport: noop,
+}
+
+const HANDLERS = {
+  actions: NOOP_ACTIONS,
+  onStartReply: noop,
+  onStartEdit: noop,
 }
 
 interface ActionFlags {
@@ -116,8 +121,7 @@ export function actionCase(overrides: Partial<ActionFlags>): ActionCase {
         ...(reply ? { replies: reply } : {}),
       }),
       isPublished: flags.isPublished,
-      isAuthenticated: flags.isAuthenticated,
-      isModerator: flags.isModerator,
+      viewer: toCommentViewer(flags.isAuthenticated, flags.isModerator),
       isUpvoting: flags.isUpvoting,
       ...HANDLERS,
     },
@@ -143,14 +147,19 @@ const VISIBILITY_DIMENSIONS: (keyof ActionFlags)[] = [
   'authorNotificationsEnabled',
 ]
 
+/** A moderator is a signed-in user, so the viewer union cannot express the pair. */
+function isReachableViewer(flags: Partial<ActionFlags>): boolean {
+  return !(flags.isModerator === true && flags.isAuthenticated !== true)
+}
+
 /** Every action-visibility combination reachable from CommentCard. */
 export const ACTION_CASES: ActionCase[] = [
-  ...cartesian(VISIBILITY_DIMENSIONS).map(actionCase),
+  ...cartesian(VISIBILITY_DIMENSIONS).filter(isReachableViewer).map(actionCase),
   actionCase({ hasUpvoted: true }),
   actionCase({ isAuthenticated: true, isAuthor: true, isUpvoting: true }),
   actionCase({ isAuthenticated: true, hasUpvoted: true, isUpvoting: true }),
   actionCase({ isAuthenticated: true, isAuthor: true, isReply: true }),
-  actionCase({ isModerator: true, isReply: true }),
+  actionCase({ isAuthenticated: true, isModerator: true, isReply: true }),
 ]
 
 /** Deleted comments, which CommentCard answers with a placeholder instead. */
@@ -158,7 +167,9 @@ export const DELETED_ACTION_CASES: ActionCase[] = cartesian([
   'isAuthenticated',
   'isAuthor',
   'isModerator',
-]).map((flags) => actionCase({ ...flags, isDeleted: true }))
+])
+  .filter(isReachableViewer)
+  .map((flags) => actionCase({ ...flags, isDeleted: true }))
 
 interface StubItemProps {
   children?: ReactNode

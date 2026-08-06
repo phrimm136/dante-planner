@@ -13,7 +13,8 @@ import type {
   SerializableFloorSelection,
   SaveablePlanner,
   MDPlannerContent,
-  RRPlannerContent,
+  PlannerMetadata,
+  PlannerEditorConfig,
 } from '../types/PlannerTypes'
 import { EgoTypeSchema } from '@/shared/gameData'
 
@@ -384,6 +385,31 @@ export const SaveablePlannerSchema = DraftPlannerSchema
 // ============================================================================
 
 /**
+ * Bind a loose content record to the config half that selects it.
+ *
+ * The reader schemas gate `content` as `z.record(z.string(), z.unknown())` so a
+ * strict gate can never mass-discard older saves on load. This is the single
+ * seam where such a record is paired with an already-narrowed `config`, and
+ * therefore the only place that asserts the MD content shape without having
+ * validated it field by field.
+ *
+ * @param metadata - Validated planner metadata
+ * @param config - Narrowed planner config (carries the type discriminator)
+ * @param content - Content record accepted by the loose gate
+ * @returns The planner as the branch its config selects
+ */
+export function toSaveablePlanner(
+  metadata: PlannerMetadata,
+  config: PlannerEditorConfig,
+  content: Record<string, unknown>,
+): SaveablePlanner {
+  if (config.type === 'MIRROR_DUNGEON') {
+    return { metadata, config, content: content as unknown as MDPlannerContent }
+  }
+  return { metadata, config, content }
+}
+
+/**
  * Validate a SaveablePlanner with two-step validation:
  * 1. Validate base structure (metadata + config)
  * 2. Validate content based on config.type discriminator
@@ -421,22 +447,23 @@ export function validateSaveablePlanner(
     .parse(data)
 
   // Step 2: Validate content based on config.type
-  let content: MDPlannerContent | RRPlannerContent
-
   if (base.config.type === 'MIRROR_DUNGEON') {
     const contentSchema = mode === 'save' ? MDPlannerContentSaveSchema : MDPlannerContentDraftSchema
-    content = contentSchema.parse(base.content) as MDPlannerContent
-  } else {
-    // REFRACTED_RAILWAY
-    const contentSchema = mode === 'save' ? RRPlannerContentSaveSchema : RRPlannerContentDraftSchema
-    content = contentSchema.parse(base.content) as RRPlannerContent
+    return {
+      metadata: base.metadata,
+      config: base.config,
+      // JSONContentSchema validates note bodies structurally as `unknown`, so the
+      // parse output is wider than MDPlannerContent on `sectionNotes`.
+      content: contentSchema.parse(base.content) as MDPlannerContent,
+    }
   }
 
+  const contentSchema = mode === 'save' ? RRPlannerContentSaveSchema : RRPlannerContentDraftSchema
   return {
     metadata: base.metadata,
     config: base.config,
-    content,
-  } as SaveablePlanner
+    content: contentSchema.parse(base.content),
+  }
 }
 
 // ============================================================================

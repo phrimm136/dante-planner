@@ -14,7 +14,12 @@ import { userEvent } from '@testing-library/user-event'
 
 import { CommentActionButtons } from '../CommentActionButtons'
 import { CommentCard } from '../CommentCard'
-import { ACTION_CASES, DELETED_ACTION_CASES, makeComment } from './commentSurfaceMatrix'
+import {
+  ACTION_CASES,
+  DELETED_ACTION_CASES,
+  NOOP_ACTIONS,
+  makeComment,
+} from './commentSurfaceMatrix'
 
 vi.mock('react-i18next', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-i18next')>()
@@ -42,8 +47,8 @@ describe('CommentActionButtons DOM', () => {
 describe('CommentActionButtons wiring', () => {
   function renderWithSpies(overrides: Partial<Parameters<typeof CommentActionButtons>[0]>) {
     const spies = {
-      onReply: vi.fn(),
-      onEdit: vi.fn(),
+      onStartReply: vi.fn(),
+      onStartEdit: vi.fn(),
       onDelete: vi.fn(),
       onModeratorDelete: vi.fn(),
       onUpvote: vi.fn(),
@@ -53,9 +58,10 @@ describe('CommentActionButtons wiring', () => {
       <CommentActionButtons
         comment={makeComment()}
         isPublished
-        isAuthenticated={false}
-        isModerator={false}
-        {...spies}
+        viewer={{ kind: 'anon' }}
+        actions={{ ...NOOP_ACTIONS, ...spies }}
+        onStartReply={spies.onStartReply}
+        onStartEdit={spies.onStartEdit}
         {...overrides}
       />,
     )
@@ -66,12 +72,17 @@ describe('CommentActionButtons wiring', () => {
     }
   }
 
-  const AUTHOR_ACTIONS = ['onReply', 'onEdit', 'onDelete', 'onToggleNotifications'] as const
+  const AUTHOR_ACTIONS = [
+    'onStartReply',
+    'onStartEdit',
+    'onDelete',
+    'onToggleNotifications',
+  ] as const
 
   it('fires the author actions in order on both surfaces', async () => {
     const user = userEvent.setup()
     const { spies, inline, menu } = renderWithSpies({
-      isAuthenticated: true,
+      viewer: { kind: 'user' },
       comment: makeComment({ isAuthor: true }),
     })
 
@@ -85,15 +96,28 @@ describe('CommentActionButtons wiring', () => {
     }
   })
 
+  it('addresses the comment-scoped actions by id, and toggles notifications to their opposite', async () => {
+    const user = userEvent.setup()
+    const comment = makeComment({ isAuthor: true, authorNotificationsEnabled: true })
+    const { spies, inline } = renderWithSpies({ viewer: { kind: 'user' }, comment })
+
+    await user.click(inline[2])
+    expect(spies.onDelete).toHaveBeenCalledWith(comment.id)
+
+    await user.click(inline[3])
+    expect(spies.onToggleNotifications).toHaveBeenCalledWith(comment.id, false)
+  })
+
   it('fires the moderator delete on both surfaces', async () => {
     const user = userEvent.setup()
-    const { spies, inline, menu } = renderWithSpies({ isModerator: true })
+    const { spies, inline, menu } = renderWithSpies({ viewer: { kind: 'moderator' } })
 
-    expect(inline).toHaveLength(1)
-    expect(menu).toHaveLength(1)
+    // Reply first, then the moderator delete: a moderator is a signed-in user.
+    expect(inline).toHaveLength(2)
+    expect(menu).toHaveLength(2)
 
-    await user.click(inline[0])
-    await user.click(menu[0])
+    await user.click(inline[1])
+    await user.click(menu[1])
     expect(spies.onModeratorDelete).toHaveBeenCalledTimes(2)
     expect(spies.onDelete).not.toHaveBeenCalled()
   })
@@ -108,14 +132,10 @@ describe('CommentActionButtons wiring', () => {
       <CommentActionButtons
         comment={makeComment({ hasUpvoted: true })}
         isPublished
-        isAuthenticated={false}
-        isModerator={false}
-        onReply={() => {}}
-        onEdit={() => {}}
-        onDelete={() => {}}
-        onModeratorDelete={() => {}}
-        onUpvote={() => {}}
-        onToggleNotifications={() => {}}
+        viewer={{ kind: 'anon' }}
+        actions={NOOP_ACTIONS}
+        onStartReply={() => {}}
+        onStartEdit={() => {}}
       />,
     )
     expect(screen.getAllByRole('button').at(-1)).toBeDisabled()
@@ -125,15 +145,8 @@ describe('CommentActionButtons wiring', () => {
 describe('deleted comments never reach CommentActionButtons', () => {
   const cardProps = {
     isPublished: true,
-    isAuthenticated: true,
-    isModerator: true,
-    onReply: () => {},
-    onEdit: () => {},
-    onDelete: () => {},
-    onModeratorDelete: () => {},
-    onUpvote: () => {},
-    onToggleNotifications: () => {},
-    onReport: () => {},
+    viewer: { kind: 'moderator' } as const,
+    actions: NOOP_ACTIONS,
   }
 
   for (const testCase of DELETED_ACTION_CASES) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
 import StarterKit from '@tiptap/starter-kit'
@@ -20,13 +20,8 @@ import './NoteEditor.css'
 /**
  * EditorErrorFallback - Simple inline fallback when editor crashes
  */
-function EditorErrorFallback({
-  resetErrorBoundary,
-  t,
-}: {
-  resetErrorBoundary: () => void
-  t: (key: string) => string
-}) {
+function EditorErrorFallback({ resetErrorBoundary }: FallbackProps) {
+  const { t } = useTranslation(['planner', 'common'])
   return (
     <div className="p-3 text-center text-sm text-muted-foreground bg-muted/50 rounded min-h-[100px] flex flex-col items-center justify-center gap-2">
       <span>{t('pages.plannerMD.noteEditor.errorFallback.loadFailed')}</span>
@@ -355,9 +350,7 @@ function NoteEditorInner({
 
         {/* Editor content with error boundary */}
         <ErrorBoundary
-          fallbackRender={({ resetErrorBoundary }) => (
-            <EditorErrorFallback resetErrorBoundary={resetErrorBoundary} t={t} />
-          )}
+          FallbackComponent={EditorErrorFallback}
           onError={(error) => {
             console.error('NoteEditor error:', error)
           }}

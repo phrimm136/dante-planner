@@ -294,6 +294,11 @@ export const DEFAULT_SKILL_EA: Record<OffensiveSkillSlot, number> = {
 } as const
 
 /**
+ * EA count from which a deck's affinity or keyword tally reads as a surplus
+ */
+export const EA_SURPLUS_THRESHOLD = 5
+
+/**
  * Dungeon difficulty indices from themePackList.json
  * Maps to internal game data (0=normal, 1=hard, 2=parallel, 3=extreme)
  */

@@ -36,8 +36,8 @@ export const commentsQueryKeys = {
 export function useCommentsQuery(plannerId: string): CommentNode[] {
   const query = useSuspenseQuery({
     queryKey: commentsQueryKeys.list(plannerId),
-    queryFn: async (): Promise<CommentNode[]> => {
-      const data = await ApiClient.get(`/api/planner/${plannerId}/comments`)
+    queryFn: async ({ signal }): Promise<CommentNode[]> => {
+      const data = await ApiClient.get(`/api/planner/${plannerId}/comments`, { signal })
       return validateData(data, CommentTreeSchema, `comments / ${plannerId}`)
     },
     staleTime: STALE_TIME.FREQUENT,

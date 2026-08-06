@@ -12,9 +12,9 @@ vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: () => mockUseAuthQuery(),
 }))
 
-// Mock linkifyText to pass through (test focuses on banner behavior, not link rendering)
+// Mock LinkifyText to pass through (test focuses on banner behavior, not link rendering)
 vi.mock('@/components/ui/LinkifyText', () => ({
-  linkifyText: (text: string) => text,
+  LinkifyText: ({ text }: { text: string }) => text,
 }))
 
 // Mock react-i18next

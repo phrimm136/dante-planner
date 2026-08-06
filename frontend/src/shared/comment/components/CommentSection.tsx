@@ -24,6 +24,8 @@ import {
   useToggleCommentNotifications,
 } from '../hooks/useCommentMutations'
 import { useModeratorCommentDelete } from '../hooks/useModeratorCommentDelete'
+import { countComments } from '../lib/commentTree'
+import { toCommentViewer } from '../lib/commentViewer'
 import { CommentComposer } from './CommentComposer'
 import { CommentThread } from './CommentThread'
 import { NewCommentsBar } from './NewCommentsBar'
@@ -39,18 +41,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-import type { CommentNode, CommentReportReason } from '../types/CommentTypes'
+import type { CommentReportReason } from '../types/CommentTypes'
+import type { CommentActions } from '../lib/commentViewer'
 import { SECTION_STYLES } from '@/lib/constants'
 
 interface CommentSectionProps {
   plannerId: string
   isPublished: boolean
   isAuthenticated: boolean
-}
-
-/** Count all comments in tree recursively */
-function countComments(nodes: CommentNode[]): number {
-  return nodes.reduce((acc, node) => acc + 1 + countComments(node.replies), 0)
 }
 
 function CommentSectionSkeleton() {
@@ -73,9 +71,9 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
   const { t } = useTranslation(['planner', 'common'])
   const queryClient = useQueryClient()
 
-  // Check if current user is moderator
+  // Who is reading the thread: a guest, a signed-in user, or a moderator
   const { data: currentUser } = useAuthQuery()
-  const isModerator = isStaff(currentUser?.role)
+  const viewer = toCommentViewer(isAuthenticated, isStaff(currentUser?.role))
 
   // Real-time new comment notifications via SSE
   const { newCommentsCount, resetCount } = usePlannerCommentsSse(plannerId)
@@ -174,6 +172,16 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
     }
   }
 
+  const actions: CommentActions = {
+    onReply: handleReply,
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onModeratorDelete: handleModeratorDelete,
+    onUpvote: handleUpvote,
+    onToggleNotifications: handleToggleNotifications,
+    onReport: handleReport,
+  }
+
   const handleRefresh = () => {
     resetCount()
     void queryClient.invalidateQueries({ queryKey: commentsQueryKeys.list(plannerId) })
@@ -202,15 +210,8 @@ function CommentSectionContent({ plannerId, isPublished, isAuthenticated }: Comm
               key={node.id}
               node={node}
               isPublished={isPublished}
-              isAuthenticated={isAuthenticated}
-              isModerator={isModerator}
-              onReply={handleReply}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onModeratorDelete={handleModeratorDelete}
-              onUpvote={handleUpvote}
-              onToggleNotifications={handleToggleNotifications}
-              onReport={handleReport}
+              viewer={viewer}
+              actions={actions}
             />
           ))}
         </div>

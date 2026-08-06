@@ -1,7 +1,7 @@
 import { Suspense, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
-import { gzip, ungzip } from 'pako'
+import { gzip } from 'pako'
 import DOMPurify from 'dompurify'
 
 import { Button } from '@/components/ui/button'
@@ -18,34 +18,40 @@ import { downloadBlob } from '@/lib/downloadBlob'
 import { generateUUID } from '@/lib/uuid'
 import { assertNever } from '@/lib/utils'
 import { GZIP_OS_BYTE_OFFSET, GZIP_OS_TOPS20 } from '../lib/deckCode'
-import { ExportEnvelopeSchema } from '../schemas/PlannerSchemas'
+import { toSaveablePlanner } from '../schemas/PlannerSchemas'
 import {
-  ABORT,
   IMPORT_OUTCOME_TOASTS,
-  ImportAbortError,
   RESOLVE_OUTCOME_TOASTS,
   classifyImportOutcome,
   classifyResolveOutcome,
+  decompressImport,
   getValidDeviceId,
-  importAbortToast,
-  step,
+  importErrorToast,
+  parseImportJson,
+  readGzipBytes,
+  readImportEnvelope,
 } from '../lib/plannerExportImport'
+import { planConflictResolution } from '../lib/conflictChoice'
 
 import type { ConflictItem, ConflictResolution } from './BatchConflictDialog'
 import type { ExportEnvelope, PlannerExportItem, SaveablePlanner } from '../types/PlannerTypes'
-import type { ToastDescriptor } from '../lib/plannerExportImport'
+import type { ImportError, ToastDescriptor } from '../lib/plannerExportImport'
 
 const MIME_TYPE = 'application/gzip'
 
-/** Gzip magic bytes: 0x1f 0x8b */
-const GZIP_MAGIC_BYTES = [0x1f, 0x8b]
+/** Stable empty list so a closed dialog keeps a single conflicts identity. */
+const NO_CONFLICTS: ConflictItem[] = []
 
 /**
- * Validate gzip magic bytes at start of file
+ * What the section is doing. `awaitingChoice` and `resolving` hold the progress
+ * the import reached, which stays on screen while the dialog is up.
  */
-function isValidGzip(data: Uint8Array): boolean {
-  return data.length >= 2 && data[0] === GZIP_MAGIC_BYTES[0] && data[1] === GZIP_MAGIC_BYTES[1]
-}
+type SectionState =
+  | { k: 'idle' }
+  | { k: 'exporting'; pct: number }
+  | { k: 'importing'; pct: number }
+  | { k: 'awaitingChoice'; pct: number; conflicts: ConflictItem[] }
+  | { k: 'resolving'; pct: number; conflicts: ConflictItem[] }
 
 /**
  * Sanitize planner title to prevent XSS
@@ -62,28 +68,24 @@ function PlannerExportImportSectionContent() {
   const { t } = useTranslation(['common', 'planner'])
   const { listLocal, loadFromLocal, saveToLocal, getOrCreateDeviceId } = usePlannerStorage()
 
-  // State for export/import operations
-  const [isExporting, setIsExporting] = useState(false)
-  const [isImporting, setIsImporting] = useState(false)
-  const [progress, setProgress] = useState(0)
-
-  // State for conflict resolution
-  const [conflicts, setConflicts] = useState<ConflictItem[]>([])
-  const [isResolving, setIsResolving] = useState(false)
+  const [state, setState] = useState<SectionState>({ k: 'idle' })
 
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const isProcessing = state.k !== 'idle'
+  const progress = state.k === 'idle' ? 0 : state.pct
+  const conflicts =
+    state.k === 'awaitingChoice' || state.k === 'resolving' ? state.conflicts : NO_CONFLICTS
 
   const showToast = (descriptor: ToastDescriptor, params?: Record<string, number>) => {
     toast[descriptor.severity](t(descriptor.key, descriptor.fallback, params))
   }
 
   /**
-   * Reset import state (for error recovery)
+   * Release the file input so the same file can be picked again
    */
-  const resetImportState = () => {
-    setIsImporting(false)
-    setProgress(0)
+  const clearFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -93,8 +95,7 @@ function PlannerExportImportSectionContent() {
    * Export all planners to a compressed .danteplanner file
    */
   const handleExport = async () => {
-    setIsExporting(true)
-    setProgress(0)
+    setState({ k: 'exporting', pct: 0 })
 
     try {
       // Get all planner summaries
@@ -102,7 +103,6 @@ function PlannerExportImportSectionContent() {
 
       if (summaries.length === 0) {
         toast.info(t('exportImport.noPlannersToExport', 'No planners to export'))
-        setIsExporting(false)
         return
       }
 
@@ -129,12 +129,14 @@ function PlannerExportImportSectionContent() {
             })
           }
         }
-        setProgress(Math.round(((i + batch.length) / summaries.length) * 50))
+        setState({
+          k: 'exporting',
+          pct: Math.round(((i + batch.length) / summaries.length) * 50),
+        })
       }
 
       if (planners.length === 0) {
         toast.error(t('exportImport.exportFailed', 'Export failed'))
-        setIsExporting(false)
         return
       }
 
@@ -147,7 +149,7 @@ function PlannerExportImportSectionContent() {
         planners,
       }
 
-      setProgress(60)
+      setState({ k: 'exporting', pct: 60 })
 
       // pako 3 ignores a `header` option on the one-shot gzip(), so the OS byte is
       // written directly into the emitted header instead.
@@ -155,14 +157,14 @@ function PlannerExportImportSectionContent() {
       const compressed = gzip(jsonString)
       compressed[GZIP_OS_BYTE_OFFSET] = GZIP_OS_TOPS20
 
-      setProgress(80)
+      setState({ k: 'exporting', pct: 80 })
 
       downloadBlob(
         `plans-${new Date().toISOString().split('T')[0]}${EXPORT_FILE_EXTENSION}`,
         new Blob([compressed], { type: MIME_TYPE }),
       )
 
-      setProgress(100)
+      setState({ k: 'exporting', pct: 100 })
       toast.success(
         t('exportImport.exportSuccess', 'Exported {{count}} planners', { count: planners.length }),
       )
@@ -170,8 +172,7 @@ function PlannerExportImportSectionContent() {
       console.error('Export failed:', error)
       toast.error(t('exportImport.exportFailed', 'Export failed'))
     } finally {
-      setIsExporting(false)
-      setProgress(0)
+      setState({ k: 'idle' })
     }
   }
 
@@ -183,9 +184,7 @@ function PlannerExportImportSectionContent() {
     if (!file) return
 
     // Reset file input for re-selection
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
+    clearFileInput()
 
     // Validate file extension
     if (!file.name.endsWith(EXPORT_FILE_EXTENSION)) {
@@ -199,40 +198,51 @@ function PlannerExportImportSectionContent() {
       return
     }
 
-    setIsImporting(true)
-    setProgress(0)
+    const failImport = (error: ImportError) => {
+      showToast(importErrorToast(error))
+      clearFileInput()
+      setState({ k: 'idle' })
+    }
+
+    setState({ k: 'importing', pct: 0 })
 
     try {
       // Read file as ArrayBuffer
       const arrayBuffer = await file.arrayBuffer()
-      const compressed = new Uint8Array(arrayBuffer)
 
-      setProgress(10)
+      setState({ k: 'importing', pct: 10 })
 
-      step(() => (isValidGzip(compressed) ? compressed : ABORT), 'invalidFileFormat')
+      const compressed = readGzipBytes(new Uint8Array(arrayBuffer))
+      if (!compressed.ok) {
+        failImport(compressed.error)
+        return
+      }
 
-      setProgress(20)
+      setState({ k: 'importing', pct: 20 })
 
-      const jsonString = step(() => ungzip(compressed, { toText: true }), 'decompressFailed')
+      const jsonString = decompressImport(compressed.value)
+      if (!jsonString.ok) {
+        failImport(jsonString.error)
+        return
+      }
 
-      setProgress(40)
+      setState({ k: 'importing', pct: 40 })
 
-      const parsed = step<unknown>(() => JSON.parse(jsonString), 'parseFailed')
+      const parsed = parseImportJson(jsonString.value)
+      if (!parsed.ok) {
+        failImport(parsed.error)
+        return
+      }
 
-      setProgress(50)
+      setState({ k: 'importing', pct: 50 })
 
-      const envelope = step(() => {
-        const validation = ExportEnvelopeSchema.safeParse(parsed)
-        if (!validation.success) {
-          console.error('Validation failed:', validation.error)
-          return ABORT
-        }
-        return validation.data
-      }, 'invalidFileFormat')
+      const envelope = readImportEnvelope(parsed.value)
+      if (!envelope.ok) {
+        failImport(envelope.error)
+        return
+      }
 
-      step(() => (envelope.planners.length > 0 ? envelope : ABORT), 'noPlannersInFile')
-
-      setProgress(60)
+      setState({ k: 'importing', pct: 60 })
 
       const currentDeviceId = await getValidDeviceId(getOrCreateDeviceId)
 
@@ -244,20 +254,20 @@ function PlannerExportImportSectionContent() {
       const nonConflicting: SaveablePlanner[] = []
       let skipped = 0
 
-      for (const item of envelope.planners) {
+      for (const item of envelope.value.planners) {
         // Sanitize imported title to prevent XSS
         const sanitizedTitle = sanitizeTitle(item.metadata.title)
 
         // Reconstruct planner with current device ID and sanitized title
-        const planner: SaveablePlanner = {
-          metadata: {
+        const planner = toSaveablePlanner(
+          {
             ...item.metadata,
             title: sanitizedTitle,
             deviceId: currentDeviceId,
           },
-          config: item.config,
-          content: item.content,
-        }
+          item.config,
+          item.content,
+        )
 
         if (existingIds.has(item.id)) {
           // Load existing planner for conflict comparison
@@ -277,13 +287,13 @@ function PlannerExportImportSectionContent() {
         }
       }
 
-      setProgress(80)
+      setState({ k: 'importing', pct: 80 })
 
       // Save non-conflicting planners immediately
       let imported = 0
       for (const planner of nonConflicting) {
-        const result = await saveToLocal(planner)
-        if (result.success) {
+        const saved = await saveToLocal(planner)
+        if (saved.ok) {
           imported++
         } else {
           skipped++
@@ -293,13 +303,16 @@ function PlannerExportImportSectionContent() {
       // Calculate actual progress based on success ratio
       const processed = imported + skipped + conflictItems.length
       const successRatio = processed > 0 ? (imported / processed) * 100 : 0
-      setProgress(80 + Math.round(successRatio * 0.2)) // 80-100% based on success
+      const pct = 80 + Math.round(successRatio * 0.2) // 80-100% based on success
 
       const counts = { imported, skipped, conflicts: conflictItems.length }
 
-      // Keep isImporting true while the dialog is open; progress stays put
+      // Keep the section busy while the dialog is open; progress stays put
       if (counts.conflicts > 0) {
-        setConflicts(conflictItems)
+        setState({ k: 'awaitingChoice', pct, conflicts: conflictItems })
+      } else {
+        clearFileInput()
+        setState({ k: 'idle' })
       }
 
       const outcome = classifyImportOutcome(counts)
@@ -307,19 +320,11 @@ function PlannerExportImportSectionContent() {
         const descriptor = IMPORT_OUTCOME_TOASTS[outcome]
         showToast(descriptor, descriptor.params(counts))
       }
-
-      if (counts.conflicts === 0) {
-        resetImportState()
-      }
     } catch (error) {
-      if (error instanceof ImportAbortError) {
-        showToast(importAbortToast(error.reason))
-        resetImportState()
-        return
-      }
       console.error('Import failed:', error)
       toast.error(t('exportImport.importFailed', 'Import failed'))
-      resetImportState()
+      clearFileInput()
+      setState({ k: 'idle' })
     }
   }
 
@@ -327,9 +332,15 @@ function PlannerExportImportSectionContent() {
    * Handle conflict resolution from BatchConflictDialog
    */
   const handleConflictResolve = async (resolutions: ConflictResolution[]) => {
-    setIsResolving(true)
+    setState({ k: 'resolving', pct: progress, conflicts })
 
-    const currentDeviceId = await getValidDeviceId(getOrCreateDeviceId)
+    const resolutionContext = {
+      deviceId: await getValidDeviceId(getOrCreateDeviceId),
+      now: new Date().toISOString(),
+      newId: generateUUID,
+      copyTitle: (title: string) =>
+        t('planner:pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
+    }
 
     let saved = 0
     let errors = 0
@@ -339,48 +350,53 @@ function PlannerExportImportSectionContent() {
       if (!conflict) continue
 
       try {
-        switch (resolution.choice) {
-          case 'overwrite':
-            // Keep local — the local planner already exists, nothing to write
-            break
-          case 'discard': {
-            // Use imported - save the imported planner
-            const result = await saveToLocal(conflict.serverPlanner)
-            if (result.success) {
-              saved++
-            } else {
-              errors++
-            }
-            break
-          }
-          case 'both': {
-            // Keep both - save imported with new ID and "(Copy)" suffix via i18n
-            const baseTitle =
+        const plan = planConflictResolution(
+          resolution.choice,
+          {
+            forkSide: 'incoming',
+            forkTitle:
               conflict.serverPlanner.metadata.title ||
-              t('planner:pages.plannerMD.untitled', 'Untitled')
-            const copyTitle = t('planner:pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', {
-              title: baseTitle,
-            })
-            const copyPlanner: SaveablePlanner = {
-              metadata: {
-                ...conflict.serverPlanner.metadata,
-                id: generateUUID(),
-                title: sanitizeTitle(copyTitle),
-                deviceId: currentDeviceId,
-              },
-              config: conflict.serverPlanner.config,
-              content: conflict.serverPlanner.content,
+              t('planner:pages.plannerMD.untitled', 'Untitled'),
+          },
+          resolutionContext,
+        )
+
+        for (const effect of plan) {
+          switch (effect.kind) {
+            case 'keepLocal':
+              // Keep local — the local planner already exists, nothing to write
+              break
+            case 'adoptIncoming': {
+              // Use imported - save the imported planner
+              const adopted = await saveToLocal(conflict.serverPlanner)
+              if (adopted.ok) {
+                saved++
+              } else {
+                errors++
+              }
+              break
             }
-            const result = await saveToLocal(copyPlanner)
-            if (result.success) {
-              saved++
-            } else {
-              errors++
+            case 'forkCopy': {
+              const copyPlanner: SaveablePlanner = {
+                ...conflict.serverPlanner,
+                metadata: {
+                  ...conflict.serverPlanner.metadata,
+                  id: effect.metadata.id,
+                  title: sanitizeTitle(effect.metadata.title),
+                  deviceId: effect.metadata.deviceId,
+                },
+              }
+              const copied = await saveToLocal(copyPlanner)
+              if (copied.ok) {
+                saved++
+              } else {
+                errors++
+              }
+              break
             }
-            break
+            default:
+              assertNever(effect)
           }
-          default:
-            assertNever(resolution.choice)
         }
       } catch (error) {
         console.error('Conflict resolution error:', error)
@@ -388,16 +404,13 @@ function PlannerExportImportSectionContent() {
       }
     }
 
-    setIsResolving(false)
-    setConflicts([])
-    resetImportState()
+    clearFileInput()
+    setState({ k: 'idle' })
 
     const counts = { saved, errors }
     const descriptor = RESOLVE_OUTCOME_TOASTS[classifyResolveOutcome(counts)]
     showToast(descriptor, descriptor.params(counts))
   }
-
-  const isProcessing = isExporting || isImporting
 
   return (
     <div className="space-y-4">
@@ -425,7 +438,7 @@ function PlannerExportImportSectionContent() {
       {/* Action buttons */}
       <div className="flex gap-3">
         <Button variant="outline" onClick={handleExport} disabled={isProcessing}>
-          {isExporting
+          {state.k === 'exporting'
             ? t('exportImport.exporting', 'Exporting...')
             : t('exportImport.export', 'Export')}
         </Button>
@@ -435,7 +448,7 @@ function PlannerExportImportSectionContent() {
           onClick={() => fileInputRef.current?.click()}
           disabled={isProcessing}
         >
-          {isImporting
+          {isProcessing && state.k !== 'exporting'
             ? t('exportImport.importing', 'Importing...')
             : t('exportImport.import', 'Import')}
         </Button>
@@ -455,7 +468,7 @@ function PlannerExportImportSectionContent() {
         open={conflicts.length >= 1}
         conflicts={conflicts}
         onResolve={handleConflictResolve}
-        isResolving={isResolving}
+        isResolving={state.k === 'resolving'}
       />
     </div>
   )
