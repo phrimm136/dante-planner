@@ -1,6 +1,7 @@
 package org.danteplanner.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.danteplanner.backend.integration.SharedMySqlContainerSupport;
 import org.junit.jupiter.api.Tag;
 import static org.hamcrest.Matchers.hasItem;
@@ -1150,29 +1151,41 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("stale-client-publishes-through-the-delegate: the legacy route answers what the intent route answers")
         void staleClientPublishesThroughTheDelegate_WhenLegacyRouteCalled_AnswersIdentically() throws Exception {
-            Planner planner = createTestPlanner(testUser);
+            // Two planners in the same starting state, so both routes drive the same transition.
+            // Publishing one planner twice compares a first publish against a republish.
+            Planner throughIntent = createTestPlanner(testUser);
+            Planner throughDelegate = createTestPlanner(testUser);
 
-            String viaIntent = mockMvc.perform(
-                            post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            String intentBody = mockMvc.perform(
+                            post("/api/planner/md/{id}/publish", throughIntent.getId()).with(withCsrf())
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
 
-            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .cookie(accessTokenCookie()))
-                    .andExpect(status().isOk());
-
-            String viaDelegate = mockMvc.perform(
-                            put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+            String delegateBody = mockMvc.perform(
+                            put("/api/planner/md/{id}/publish", throughDelegate.getId()).with(withCsrf())
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content("{\"published\":true}")
                                     .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andReturn().getResponse().getContentAsString();
 
-            assertEquals(viaIntent, viaDelegate);
+            ObjectNode fromIntent = (ObjectNode) objectMapper.readTree(intentBody);
+            ObjectNode fromDelegate = (ObjectNode) objectMapper.readTree(delegateBody);
+
+            // Distinct rows differ in identity and timestamps whichever route wrote them. Every
+            // remaining field is one the publish decided, so those have to agree exactly.
+            List<String> perRowFields = List.of("id", "createdAt", "lastModifiedAt", "savedAt");
+            for (String field : perRowFields) {
+                assertTrue(fromIntent.has(field), field + " missing from the intent response");
+                assertTrue(fromDelegate.has(field), field + " missing from the delegate response");
+            }
+            fromIntent.remove(perRowFields);
+            fromDelegate.remove(perRowFields);
+
+            assertTrue(fromIntent.get("published").asBoolean());
+            assertEquals(fromIntent, fromDelegate);
         }
     }
 
