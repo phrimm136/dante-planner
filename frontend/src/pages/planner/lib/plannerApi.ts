@@ -117,15 +117,26 @@ export const plannerApi = {
   },
 
   /**
-   * Drive a planner to an explicit publication state.
+   * Publish a planner.
    * Idempotent: a repeated request leaves the planner where it already is.
    *
    * @param id - Planner UUID
-   * @param published - the state the planner should end in
-   * @returns Updated planner in the requested state
+   * @returns The published planner
    */
-  async setPublished(id: PlannerId | string, published: boolean): Promise<ServerPlannerResponse> {
-    const data = await ApiClient.put(`${PLANNERS_BASE}/${id}/publish`, { published })
+  async publish(id: PlannerId | string): Promise<ServerPlannerResponse> {
+    const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/publish`)
+    return ServerPlannerResponseSchema.parse(data)
+  },
+
+  /**
+   * Withdraw a planner from public view.
+   * Idempotent: a repeated request leaves the planner where it already is.
+   *
+   * @param id - Planner UUID
+   * @returns The withdrawn planner
+   */
+  async unpublish(id: PlannerId | string): Promise<ServerPlannerResponse> {
+    const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/unpublish`)
     return ServerPlannerResponseSchema.parse(data)
   },
 

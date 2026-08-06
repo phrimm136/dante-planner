@@ -2,7 +2,7 @@
  * Planner Publish Mutation Hook
  *
  * Handles publishing/unpublishing a planner.
- * Toggle endpoint - calling again unpublishes.
+ * The requested state selects the intent endpoint; neither one flips the planner.
  * Only the planner owner can publish/unpublish.
  * Invalidates planner list cache on success.
  *
@@ -60,7 +60,8 @@ export function usePlannerPublish() {
       plannerId,
       published,
     }: PublishVariables): Promise<ServerPlannerResponse> => {
-      const data = await ApiClient.put(`/api/planner/md/${plannerId}/publish`, { published })
+      const intent = published ? 'publish' : 'unpublish'
+      const data = await ApiClient.post(`/api/planner/md/${plannerId}/${intent}`)
       return validateData(data, ServerPlannerResponseSchema, 'planner publish')
     },
     onSuccess: (response) => {

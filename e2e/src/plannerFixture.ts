@@ -45,9 +45,8 @@ export async function seedPlanner(
 }
 
 export async function publish(fixture: PlannerFixture, published = true): Promise<void> {
-  const response = await fixture.api.put(`/api/planner/md/${fixture.plannerId}/publish`, {
-    data: { published },
-  })
+  const intent = published ? 'publish' : 'unpublish'
+  const response = await fixture.api.post(`/api/planner/md/${fixture.plannerId}/${intent}`)
   expect(response.status(), await response.text()).toBe(200)
 }
 
