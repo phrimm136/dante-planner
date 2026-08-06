@@ -1,6 +1,7 @@
 package org.danteplanner.backend.notification.repository;
 
 import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,6 +23,21 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * Find notification by public UUID.
      */
     Optional<Notification> findByPublicId(UUID publicId);
+
+    /**
+     * Whether the recipient already carries a notification for this content.
+     *
+     * <p>The three columns are those of {@code uk_notification_dedup} and no others: the key does
+     * not include {@code deleted_at}, so a soft-deleted row still occupies it and must still count
+     * as carried.</p>
+     *
+     * @param userId           the recipient
+     * @param contentId        the content the notification is about
+     * @param notificationType the notification kind
+     * @return true when a row already occupies the deduplication key
+     */
+    boolean existsByUserIdAndContentIdAndNotificationType(
+            Long userId, String contentId, NotificationType notificationType);
 
     /**
      * Find notifications for a user's inbox (non-deleted, ordered by creation time).

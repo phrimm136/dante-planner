@@ -9,7 +9,6 @@ import org.danteplanner.backend.notification.event.NotificationRaisedEvent;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -144,29 +143,62 @@ public class NotificationDispatchService {
     }
 
     /**
-     * Persist a notification and push it to its recipient, suppressing duplicates.
-     *
-     * <p>The UNIQUE constraint on (userId, contentId, type) makes concurrent duplicate
-     * notifications throw {@link DataIntegrityViolationException}; that case is expected and
-     * swallowed rather than propagated.</p>
+     * Raise a notification and report what became of it.
      *
      * @param notification the notification to raise
      * @param sseEventType the SSE event carrying it to the recipient
+     * @return the outcome, {@code Duplicate} when the recipient already carried this notification
      */
-    private void dispatch(Notification notification, SseEventType sseEventType) {
-        try {
-            Notification saved = notificationRepository.save(notification);
-            log.info("Created {} notification for user {} on content {}",
-                    notification.getNotificationType(), notification.getUserId(), notification.getContentId());
-
-            eventPublisher.publishEvent(new NotificationRaisedEvent(
-                    notification.getUserId(),
-                    sseEventType,
-                    saved.getPublicId().toString(),
-                    NotificationEventPayload.fromEntity(saved)));
-        } catch (DataIntegrityViolationException e) {
-            log.debug("Duplicate {} notification prevented for user {} on content {}",
-                    notification.getNotificationType(), notification.getUserId(), notification.getContentId());
+    NotificationOutcome dispatch(Notification notification, SseEventType sseEventType) {
+        NotificationOutcome outcome = deliver(notification, sseEventType);
+        switch (outcome) {
+            case NotificationOutcome.Delivered delivered -> log.info(
+                    "Created {} notification {} for user {} on content {}",
+                    notification.getNotificationType(), delivered.publicId(),
+                    notification.getUserId(), notification.getContentId());
+            case NotificationOutcome.Duplicate duplicate -> log.debug(
+                    "Suppressed duplicate {} notification for user {} on content {}",
+                    duplicate.notificationType(), duplicate.userId(), duplicate.contentId());
         }
+        return outcome;
+    }
+
+    /**
+     * Writes the notification unless the recipient already carries one for the same content, and
+     * hands the push of a written one to the after-commit listener.
+     *
+     * <p>The duplicate is decided before the write rather than read off a fired constraint. The
+     * comment and reply entry points join their caller's transaction, where a violation would mark
+     * that transaction rollback-only and reach the caller as an
+     * {@code UnexpectedRollbackException} — suppressing nothing and failing the operation that
+     * occasioned the notification.</p>
+     *
+     * <p>{@code uk_notification_dedup} stays the invariant. This check-then-act closes the
+     * reachable duplicate — the recommendation threshold crossed twice, dispatched from an
+     * after-commit listener in its own transaction — and the key still rejects two dispatches that
+     * race past the same check.</p>
+     *
+     * @param notification the notification to raise
+     * @param sseEventType the SSE event carrying it to the recipient
+     * @return the outcome of the attempt
+     */
+    private NotificationOutcome deliver(Notification notification, SseEventType sseEventType) {
+        if (notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                notification.getUserId(),
+                notification.getContentId(),
+                notification.getNotificationType())) {
+            return new NotificationOutcome.Duplicate(
+                    notification.getUserId(),
+                    notification.getContentId(),
+                    notification.getNotificationType());
+        }
+
+        Notification saved = notificationRepository.save(notification);
+        eventPublisher.publishEvent(new NotificationRaisedEvent(
+                notification.getUserId(),
+                sseEventType,
+                saved.getPublicId().toString(),
+                NotificationEventPayload.fromEntity(saved)));
+        return new NotificationOutcome.Delivered(saved.getPublicId());
     }
 }

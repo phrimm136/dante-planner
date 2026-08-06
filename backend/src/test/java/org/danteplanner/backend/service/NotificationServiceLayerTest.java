@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -119,16 +118,18 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should handle duplicate notification via UNIQUE constraint gracefully")
-        void notifyPlannerRecommended_WhenDuplicate_CatchesException() {
+        @DisplayName("Should write nothing when the owner was already notified")
+        void notifyPlannerRecommended_WhenAlreadyNotified_WritesNothing() {
             // Arrange
-            when(notificationRepository.save(any(Notification.class)))
-                    .thenThrow(new DataIntegrityViolationException("Duplicate key violation"));
+            when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                    testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED))
+                    .thenReturn(true);
 
-            // Act & Assert - should not throw, logs debug message
-            assertDoesNotThrow(() ->
-                    dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId)
-            );
+            // Act
+            dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
+
+            // Assert - the duplicate is decided before the write, so no violation is ever fired
+            verify(notificationRepository, never()).save(any());
         }
 
         @Test
@@ -167,11 +168,12 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should not push via SSE when save hits duplicate constraint")
-        void notifyPlannerRecommended_WhenDuplicate_DoesNotPush() {
+        @DisplayName("Should not push via SSE when the owner was already notified")
+        void notifyPlannerRecommended_WhenAlreadyNotified_DoesNotPush() {
             // Arrange
-            when(notificationRepository.save(any(Notification.class)))
-                    .thenThrow(new DataIntegrityViolationException("Duplicate key violation"));
+            when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                    testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED))
+                    .thenReturn(true);
 
             // Act
             dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
@@ -238,23 +240,28 @@ class NotificationServiceLayerTest {
         }
 
         @Test
-        @DisplayName("Should handle duplicate notification via UNIQUE constraint")
-        void notifyCommentReceived_WhenDuplicate_CatchesException() {
+        @DisplayName("Should write nothing when the owner was already notified")
+        void notifyCommentReceived_WhenAlreadyNotified_WritesNothing() {
             // Arrange
             Long plannerOwnerId = 100L;
             Long commenterId = 200L;
             Long commentId = 999L;
             UUID commentPublicId = UUID.randomUUID();
 
-            when(notificationRepository.save(any(Notification.class)))
-                    .thenThrow(new DataIntegrityViolationException("Duplicate key"));
+            // A comment keys on its own fresh primary key, so production never reaches this;
+            // asserted because the entry point joins its caller's transaction, where a fired
+            // constraint would poison the caller rather than suppress anything.
+            when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                    plannerOwnerId, commentId.toString(), NotificationType.COMMENT_RECEIVED))
+                    .thenReturn(true);
 
-            // Act & Assert - should not throw
-            assertDoesNotThrow(() ->
-                    dispatchService.notifyCommentReceived(
-                            commentId, commentPublicId, testPlannerId, "Test Planner",
-                            "Test content", plannerOwnerId, commenterId)
-            );
+            // Act
+            dispatchService.notifyCommentReceived(
+                    commentId, commentPublicId, testPlannerId, "Test Planner",
+                    "Test content", plannerOwnerId, commenterId);
+
+            // Assert
+            verify(notificationRepository, never()).save(any());
         }
     }
 
