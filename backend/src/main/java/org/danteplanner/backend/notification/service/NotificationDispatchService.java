@@ -173,10 +173,17 @@ public class NotificationDispatchService {
      * {@code UnexpectedRollbackException} — suppressing nothing and failing the operation that
      * occasioned the notification.</p>
      *
-     * <p>{@code uk_notification_dedup} stays the invariant. This check-then-act closes the
-     * reachable duplicate — the recommendation threshold crossed twice, dispatched from an
-     * after-commit listener in its own transaction — and the key still rejects two dispatches that
-     * race past the same check.</p>
+     * <p>Three layers guard the same invariant, outermost first: the recommendation path is
+     * arbitrated upstream by the atomic conditional update behind {@code trySetRecommendedNotified},
+     * gated on a null flag and never reset, so exactly one caller reaches dispatch at all; this
+     * pre-check; and {@code uk_notification_dedup} as the final backstop for two dispatches racing
+     * past the check. Comment and reply key on a fresh primary key and cannot collide, so no known
+     * production path reaches this pre-check as its first line of defense.</p>
+     *
+     * <p>Accepted consequence: were a duplicate to reach the key anyway, the violation escapes this
+     * method and surfaces after the commit as an UNEXPECTED_CONFLICT 409 reported to Sentry rather
+     * than as a suppressed duplicate — accepted because the upstream gate makes that doubly
+     * unreachable.</p>
      *
      * @param notification the notification to raise
      * @param sseEventType the SSE event carrying it to the recipient
