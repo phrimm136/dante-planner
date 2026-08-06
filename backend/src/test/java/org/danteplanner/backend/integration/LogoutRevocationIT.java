@@ -1,6 +1,7 @@
 package org.danteplanner.backend.integration;
 
 import java.net.SocketAddress;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +160,40 @@ class LogoutRevocationIT {
                 .isGreaterThan(0);
         assertThat(roundTrips)
                 .as("all three revocations land in a single atomic Redis round trip")
+                .isEqualTo(1L);
+    }
+
+    /**
+     * The revocation script indexes its per-token TTLs off the token count and reads the family
+     * keys off the tail of KEYS, so a shape carrying fewer tokens than the maximum exercises
+     * different ARGV offsets than the all-present shape above.
+     */
+    @Test
+    void logout_WhenOnlyAccessTokenPresent_BlacklistsExactlyItAndRevokesNoFamily() {
+        long userId = 4243L;
+        String accessToken = jwtTokenService.generateAccessToken(userId, UserRole.NORMAL);
+
+        AUTH_COMMAND_COUNT.set(0L);
+        authService.logout(accessToken, null);
+        long roundTrips = AUTH_COMMAND_COUNT.get();
+
+        Set<String> blacklistKeys = authStringRedisTemplate.keys("bl:*");
+        assertThat(blacklistKeys)
+                .as("exactly the access token is blacklisted")
+                .hasSize(1);
+        assertThat(authStringRedisTemplate.keys("rt:fam:*"))
+                .as("no refresh family is revoked")
+                .isEmpty();
+
+        String blacklistKey = blacklistKeys.iterator().next();
+        assertThat(authStringRedisTemplate.opsForValue().get(blacklistKey))
+                .as("the entry is written with immediate effect, not the rotation grace mode")
+                .startsWith("1:");
+        assertThat(authStringRedisTemplate.getExpire(blacklistKey))
+                .as("the token's own remaining lifetime lands as the entry's TTL")
+                .isGreaterThan(0);
+        assertThat(roundTrips)
+                .as("the revocation lands in a single atomic Redis round trip")
                 .isEqualTo(1L);
     }
 
