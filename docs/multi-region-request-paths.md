@@ -204,24 +204,29 @@ re-checks queues in its own pool instead of exhausting the pool writes need.
 
 ## 6. Write path: publish, end to end
 
-`PUT /api/planner/md/{id}/publish` → `PlannerPublishingController.setPublished`
+`POST /api/planner/md/{id}/publish` → `PlannerPublishingController.publishPlanner`
+`POST /api/planner/md/{id}/unpublish` → `PlannerPublishingController.unpublishPlanner`
+
+`PUT /api/planner/md/{id}/publish` → `PlannerPublishingController.setPublished` is a deprecated
+delegate, kept for one release so tabs holding the previous bundle keep working. It resolves the
+body's `published` flag to one of the two handlers above and is charged against the same
+`CRUD:publish` bucket, so a client crossing over between them draws from one allowance.
 
 ```
-1. rateLimitConfig.checkCrudLimit(userId, "publish")     rate-limit Redis (LOCAL, never cross-region)
-2. body names published?
-   ├─ yes + content → PlannerPublishingService.setPublishedWithContent
-   ├─ yes, no content → setPublished
-   └─ no  → legacy toggle path, increments meter planner.legacy_toggle{operation=publish}
-3. setPublishedWithContent
-   └─ plannerCommandService.upsertAggregate(...)         ONE aggregate load, reused below
-                                                          → PRIMARY (write tx), cross-region
-   └─ applyPublishedState(userId, planner, published)
-        ├─ already in requested state → return, NO write   ← idempotent; mints no cookie
-        └─ togglePublish(userId, planner)                   ← the actual state change
-             ├─ plannerRepository.save
-             ├─ plannerCatalogService.onBecameVisible
-             ├─ subscriptionService.createSubscription
-             └─ first publish? publishEvent(PlannerPublishedEvent)
+1. RateLimitInterceptor charges CRUD:publish              rate-limit Redis (LOCAL, never cross-region)
+2. body carries a document?
+   ├─ yes → PlannerPublishingService.publish(userId, id, content)
+   │         └─ plannerCommandService.upsertAggregate(...) ONE aggregate load, reused below
+   │                                                        → PRIMARY (write tx), cross-region
+   └─ no  → PlannerPublishingService.publish(userId, id)
+             └─ accessGuard.requireExisting(id)            → PRIMARY (write tx), cross-region
+3. applyPublish(userId, planner)
+     ├─ title and content validated                        ← before any mutation; a refusal writes nothing
+     ├─ planner.publish() reports NONE → return, NO write   ← idempotent; mints no cookie
+     ├─ plannerRepository.save
+     ├─ plannerCatalogService.onBecameVisible
+     ├─ subscriptionService.createSubscription
+     └─ first publish? publishEvent(PlannerPublishedEvent)
 4. transaction commits  → GtidCapturingDataSource intercepts commit() → capture (§4a)
 5. AFTER_COMMIT: PlannerPublishingService.onPlannerPublished
      ├─ ssePublisher.publishBroadcast(...)                Redis, cross-region (§7)
@@ -229,11 +234,17 @@ re-checks queues in its own pool instead of exhausting the pool writes need.
 6. GtidCookieFilter mints ryw_gtid covering every commit in steps 3–5
 ```
 
-Two design points that are load-bearing:
+Unpublish runs the same shape through `applyUnpublish`, charged against `CRUD:unpublish`: no
+validation, and `plannerCatalogService.onBecameInvisible` in place of the visibility and
+subscription calls. It publishes no event, so step 5 does not run.
 
-- **The aggregate is loaded once.** `upsertAggregate` returns the persisted entity so
-  `applyPublishedState` and `togglePublish(Planner)` reuse it. Reading it back by id would be three
-  cross-region round trips for one publish.
+Three design points that are load-bearing:
+
+- **The aggregate is loaded once.** `upsertAggregate` returns the persisted entity so `applyPublish`
+  reuses it. Reading it back by id would be three cross-region round trips for one publish.
+- **Publishability is decided before the aggregate moves.** A planner that fails validation is
+  refused without a write, so a rejected publish mints no `ryw_gtid` cookie. The rollback is not
+  what keeps the stored state intact.
 - **The fan-out runs after commit, not inside.** An `INSERT ... SELECT` nested inside the publish
   transaction takes locks on rows that transaction already holds and self-deadlocks. Running it
   from the `AFTER_COMMIT` listener also means notifications never persist for a publish that rolled
@@ -347,7 +358,7 @@ expected states, not defects.
 | Base path | Controller | Region-relevant behavior |
 |---|---|---|
 | `/api/planner/md` | `PlannerCommandController` (`PUT /{id}` upsert) | write → primary; mints `ryw_gtid` |
-| | `PlannerPublishingController` (`PUT /{id}/publish`) | §6; publishes SSE + notifications after commit |
+| | `PlannerPublishingController` (`POST /{id}/publish`, `POST /{id}/unpublish`; `PUT /{id}/publish` a deprecated one-release delegate) | §6; publish publishes SSE + notifications after commit |
 | | `PlannerEngagementController` (`POST /{id}/bookmark`, vote, subscribe) | writes → primary; bookmark is state-targeted and idempotent |
 | | `PlannerQueryController`, `PublishedPlannerController` | reads → replica; by-id reads go through `ByIdReadGuard` (§5) |
 | | `PlannerSseController` (`GET /events`) | subscribes to local Redis fan-out |
