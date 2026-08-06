@@ -22,6 +22,8 @@ import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/moderation")
 @RequiredArgsConstructor
 @Slf4j
+@RateLimited(RateLimitPolicy.MODERATION)
 public class ModerationController {
 
     private final UserModerationService userModerationService;
@@ -180,6 +183,7 @@ public class ModerationController {
      *
      * @return list of users
      */
+    @RateLimitExempt
     @GetMapping("/users")
     public ResponseEntity<List<ModeratedUserDto>> getAllUsers() {
         List<ModeratedUserDto> responses = moderationQueryService.getAllUsers().stream()
@@ -196,6 +200,7 @@ public class ModerationController {
      *
      * @return list of timed-out users
      */
+    @RateLimitExempt
     @GetMapping("/users/timed-out")
     public ResponseEntity<List<TimeoutResponse>> getTimedOutUsers() {
         List<User> timedOutUsers = moderationQueryService.getTimedOutUsers();
@@ -212,6 +217,7 @@ public class ModerationController {
      *
      * @return list of moderation actions
      */
+    @RateLimitExempt
     @GetMapping("/actions")
     public ResponseEntity<List<ModerationActionDto>> getModerationActions() {
         List<ModerationActionDto> actions = moderationQueryService.getModerationActionsWithActors();

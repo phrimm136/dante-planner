@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,7 @@ public class PlannerQueryController {
      * @param pageable pagination parameters (page, size, sort)
      * @return page of planner summaries
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "list")
     @GetMapping
     public ResponseEntity<Page<PlannerSummaryResponse>> getPlanners(
             @AuthenticationPrincipal Long userId,
@@ -60,6 +62,7 @@ public class PlannerQueryController {
      * @param id     the planner ID
      * @return the planner details
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "get")
     @GetMapping("/{id}")
     public ResponseEntity<PlannerResponse> getPlanner(
             @AuthenticationPrincipal Long userId,

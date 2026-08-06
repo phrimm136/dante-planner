@@ -21,6 +21,8 @@ import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -71,6 +73,7 @@ public class AuthController {
      * @param response HTTP response the {@code oauth_tx} cookie is set on
      * @return 302 redirect to Google's authorization endpoint
      */
+    @RateLimitExempt
     @GetMapping("/google/start")
     public ResponseEntity<Void> googleStart(
             @RequestParam(required = false) String returnTo,
@@ -110,6 +113,7 @@ public class AuthController {
      * @param deviceId    device identifier for rate limiting
      * @return 302 redirect to the SPA root on success, or to the SPA error route on rejection
      */
+    @RateLimited(RateLimitPolicy.AUTH)
     @GetMapping("/google/callback")
     public ResponseEntity<Void> googleCallback(
             @RequestParam(required = false) String code,
@@ -165,6 +169,7 @@ public class AuthController {
         }
     }
 
+    @RateLimited(RateLimitPolicy.AUTH)
     @PostMapping("/apple/callback")
     public ResponseEntity<UserDto> appleCallback(
             HttpServletRequest httpRequest,
@@ -182,6 +187,7 @@ public class AuthController {
         return ResponseEntity.badRequest().build();
     }
 
+    @RateLimitExempt
     @GetMapping("/me")
     public ResponseEntity<UserDto> getCurrentUser() {
         // Trust SecurityContext set by JwtAuthenticationFilter
@@ -204,6 +210,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.currentUser(userId));
     }
 
+    @RateLimitExempt
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
@@ -219,6 +226,7 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @RateLimitExempt
     @PostMapping("/logout-all")
     public ResponseEntity<Void> logoutAll(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

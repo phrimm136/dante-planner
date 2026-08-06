@@ -6,6 +6,7 @@ import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.sse.SseService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,6 +41,7 @@ public class SseController {
      * @param deviceId the device identifier (from HTTP-only cookie)
      * @return the SSE emitter
      */
+    @RateLimited(RateLimitPolicy.SSE)
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(
             @AuthenticationPrincipal Long userId,

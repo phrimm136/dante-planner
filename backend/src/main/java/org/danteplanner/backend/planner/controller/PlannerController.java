@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerConfigResponse;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,7 @@ public class PlannerController {
      *
      * @return the planner configuration
      */
+    @RateLimitExempt
     @GetMapping("/config")
     public ResponseEntity<PlannerConfigResponse> getConfig() {
         return ResponseEntity.ok(PlannerConfigResponse.builder()

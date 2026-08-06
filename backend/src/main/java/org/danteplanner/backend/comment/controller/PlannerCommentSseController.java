@@ -9,6 +9,7 @@ import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,6 +59,7 @@ public class PlannerCommentSseController {
      * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
      *         if no published planner carries the id
      */
+    @RateLimited(RateLimitPolicy.PLANNER_COMMENT_SSE)
     @GetMapping(value = "/{plannerId}/comments/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribeToComments(
             @PathVariable UUID plannerId,

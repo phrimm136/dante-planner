@@ -22,6 +22,8 @@ import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
+@RateLimited(RateLimitPolicy.COMMENT)
 public class CommentController {
 
     private final CommentQueryService commentQueryService;
@@ -63,6 +66,7 @@ public class CommentController {
      * @param plannerId the planner ID
      * @return list of comments with vote status
      */
+    @RateLimitExempt
     @GetMapping("/planner/{plannerId}/comments")
     public ResponseEntity<List<CommentTreeNode>> getComments(
             @AuthenticationPrincipal Long userId,
@@ -205,6 +209,7 @@ public class CommentController {
      * @param request   the report request with reason
      * @return the report timestamp
      */
+    @RateLimited(RateLimitPolicy.REPORT)
     @PostMapping("/comments/{commentId}/report")
     public ResponseEntity<CommentReportResponse> reportComment(
             @AuthenticationPrincipal Long userId,

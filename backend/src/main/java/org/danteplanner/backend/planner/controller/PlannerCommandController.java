@@ -12,6 +12,7 @@ import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,6 +54,7 @@ public class PlannerCommandController {
      * @param request  the planner data (full data for create, partial updates supported)
      * @return the created (201) or updated (200) planner
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "upsert")
     @PutMapping("/{id}")
     public ResponseEntity<PlannerResponse> upsertPlanner(
             @AuthenticationPrincipal Long userId,
@@ -77,6 +79,7 @@ public class PlannerCommandController {
      * @param id       the planner ID
      * @return no content
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "delete")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanner(
             @AuthenticationPrincipal Long userId,
@@ -98,6 +101,7 @@ public class PlannerCommandController {
      * @param request the import request containing planners
      * @return the import result
      */
+    @RateLimited(RateLimitPolicy.IMPORT)
     @PostMapping("/import")
     public ResponseEntity<ImportPlannersResponse> importPlanners(
             @AuthenticationPrincipal Long userId,

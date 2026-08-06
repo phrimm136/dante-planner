@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.HidePlannerRequest;
 import org.danteplanner.backend.moderation.dto.ModerationResponse;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class AdminModerationController {
      * @param request     the hide request containing reason
      * @return moderation response with updated status
      */
+    @RateLimitExempt
     @PostMapping("/{id}/hide-from-recommended")
     public ResponseEntity<ModerationResponse> hideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,
@@ -59,6 +61,7 @@ public class AdminModerationController {
      * @param plannerId   the planner ID to unhide
      * @return moderation response with updated status
      */
+    @RateLimitExempt
     @PostMapping("/{id}/unhide-from-recommended")
     public ResponseEntity<ModerationResponse> unhideFromRecommended(
             @AuthenticationPrincipal Long moderatorId,

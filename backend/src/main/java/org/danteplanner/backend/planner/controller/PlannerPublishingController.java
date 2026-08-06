@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -51,6 +52,7 @@ public class PlannerPublishingController {
      * @param request the desired publication state, optionally carrying content to upsert
      * @return the updated planner response
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "publish")
     @PutMapping("/{id}/publish")
     public ResponseEntity<PlannerResponse> setPublished(
             @AuthenticationPrincipal Long userId,
@@ -75,6 +77,7 @@ public class PlannerPublishingController {
      * @param request the toggle request with enabled flag
      * @return the updated notification state
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-toggle")
     @PatchMapping("/{id}/notifications")
     public ResponseEntity<ToggleOwnerNotificationsResponse> toggleOwnerNotifications(
             @AuthenticationPrincipal Long userId,

@@ -8,6 +8,7 @@ import org.danteplanner.backend.admin.dto.UserRoleResponse;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.admin.service.AdminService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,7 @@ public class AdminController {
      * @param request  the role change request
      * @return the updated user role information
      */
+    @RateLimitExempt
     @PutMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> changeRole(
             @AuthenticationPrincipal Long actorId,
@@ -67,6 +69,7 @@ public class AdminController {
      * @param targetId the user ID
      * @return the user's role information
      */
+    @RateLimitExempt
     @GetMapping("/user/{targetId}/role")
     public ResponseEntity<UserRoleResponse> getUserRole(@PathVariable Long targetId) {
         UserRole role = adminService.getUserRole(targetId);

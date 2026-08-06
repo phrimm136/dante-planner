@@ -14,6 +14,7 @@ import org.danteplanner.backend.planner.dto.VoteRequest;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -56,6 +57,7 @@ public class PlannerEngagementController {
      * @param request the vote request containing vote type (UP or DOWN, cannot be null)
      * @return the updated vote counts and user's current vote
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "vote")
     @PostMapping("/{id}/upvote")
     public ResponseEntity<VoteResponse> castUpvote(
             @AuthenticationPrincipal Long userId,
@@ -83,6 +85,7 @@ public class PlannerEngagementController {
      * @param request the desired bookmark state
      * @return the updated bookmark state
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "bookmark")
     @PostMapping("/{id}/bookmark")
     public ResponseEntity<BookmarkResponse> setBookmark(
             @AuthenticationPrincipal Long userId,
@@ -112,6 +115,7 @@ public class PlannerEngagementController {
      * @param id     the planner ID
      * @return the subscription response with current state
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "subscribe")
     @PostMapping("/{id}/subscribe")
     public ResponseEntity<SubscriptionResponse> toggleSubscription(
             @AuthenticationPrincipal Long userId,
@@ -137,6 +141,7 @@ public class PlannerEngagementController {
      * @param id     the planner ID
      * @return the report response
      */
+    @RateLimited(RateLimitPolicy.REPORT)
     @PostMapping("/{id}/report")
     public ResponseEntity<PlannerActionResponse> submitReport(
             @AuthenticationPrincipal Long userId,

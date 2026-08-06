@@ -21,6 +21,8 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -78,6 +80,7 @@ public class UserController {
      *
      * @return list of all 27 epithet keywords
      */
+    @RateLimitExempt
     @GetMapping("/epithets")
     public ResponseEntity<EpithetListResponse> getEpithets() {
         return ResponseEntity.ok(new EpithetListResponse(
@@ -95,6 +98,7 @@ public class UserController {
      * @param request the update request containing the new epithet
      * @return the updated user DTO
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-epithet-update")
     @PutMapping("/me/username-epithet")
     public ResponseEntity<UserDto> updateUsernameEpithet(
             @AuthenticationPrincipal Long userId,
@@ -119,6 +123,7 @@ public class UserController {
      * @param response HTTP response to clear cookies
      * @return Response with deletion details and scheduled permanent delete date
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-delete")
     @DeleteMapping("/me")
     public ResponseEntity<UserDeletionResponse> deleteMyAccount(
             @AuthenticationPrincipal Long userId,
@@ -151,6 +156,7 @@ public class UserController {
      * @param userId the authenticated user's ID
      * @return the user settings
      */
+    @RateLimitExempt
     @GetMapping("/settings")
     public ResponseEntity<UserSettingsResponse> getSettings(@AuthenticationPrincipal Long userId) {
         UserSettingsResponse settings = userSettingsService.getSettings(userId);
@@ -166,6 +172,7 @@ public class UserController {
      * @param request the update request with optional fields
      * @return the updated user settings
      */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-settings-update")
     @PutMapping("/settings")
     public ResponseEntity<UserSettingsResponse> updateSettings(
             @AuthenticationPrincipal Long userId,
