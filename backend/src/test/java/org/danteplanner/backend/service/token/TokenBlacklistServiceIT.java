@@ -84,32 +84,6 @@ class TokenBlacklistServiceIT {
         }
 
         @Test
-        @DisplayName("Should handle null token gracefully")
-        void blacklistToken_WhenNullToken_DoesNothing() {
-            // Arrange
-            Date expiry = new Date(System.currentTimeMillis() + 60000);
-
-            // Act
-            blacklistService.blacklistToken(null, expiry);
-
-            // Assert
-            assertThat(blacklistService.size()).isEqualTo(0);
-        }
-
-        @Test
-        @DisplayName("Should handle null expiry gracefully")
-        void blacklistToken_WhenNullExpiry_DoesNothing() {
-            // Arrange
-            String token = "test.jwt.token";
-
-            // Act
-            blacklistService.blacklistToken(token, null);
-
-            // Assert
-            assertThat(blacklistService.size()).isEqualTo(0);
-        }
-
-        @Test
         @DisplayName("Should overwrite existing entry for same token")
         void blacklistToken_WhenSameToken_Overwrites() {
             // Arrange

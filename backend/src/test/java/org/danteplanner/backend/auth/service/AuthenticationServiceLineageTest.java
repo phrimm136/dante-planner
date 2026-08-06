@@ -7,6 +7,7 @@ import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.service.UserAccountLifecycleService;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
+import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -19,9 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -99,8 +99,10 @@ class AuthenticationServiceLineageTest {
 
         // The logout revocation lands in Redis and has no response-visible form;
         // asserting it as state needs the containerized tier with a live TokenBlacklistService.
-        verify(tokenBlacklistService).revokeLogoutSession(
-                eq(accessToken), eq(accessExpiry), eq(refreshToken), eq(refresh.expiration()), eq("fam-logout"));
+        verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                new LogoutRevocation.TokenRevocation(accessToken, accessExpiry),
+                new LogoutRevocation.TokenRevocation(refreshToken, refresh.expiration()),
+                new LogoutRevocation.FamilyRevocation("fam-logout")));
     }
 
     @Test
@@ -118,7 +120,7 @@ class AuthenticationServiceLineageTest {
 
         // The access-token blacklist entry lands in Redis and has no response-visible form;
         // asserting it as state needs the containerized tier with a live TokenBlacklistService.
-        verify(tokenBlacklistService).revokeLogoutSession(
-                eq(accessToken), eq(accessExpiry), isNull(), isNull(), isNull());
+        verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                new LogoutRevocation.TokenRevocation(accessToken, accessExpiry)));
     }
 }

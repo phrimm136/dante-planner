@@ -12,6 +12,7 @@ import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
+import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -25,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -244,8 +246,9 @@ class AuthenticationServiceTest {
             authenticationService.logout(accessToken, refreshToken);
 
             // Assert
-            verify(tokenBlacklistService).revokeLogoutSession(
-                    eq(accessToken), eq(accessExpiry), eq(refreshToken), eq(refreshExpiry), isNull());
+            verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry),
+                    new LogoutRevocation.TokenRevocation(refreshToken, refreshExpiry)));
         }
 
         @Test
@@ -264,12 +267,12 @@ class AuthenticationServiceTest {
             authenticationService.logout(null, refreshToken);
 
             // Assert - only refresh token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(
-                    isNull(), isNull(), eq(refreshToken), eq(refreshExpiry), isNull());
+            verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                    new LogoutRevocation.TokenRevocation(refreshToken, refreshExpiry)));
         }
 
         @Test
-        @DisplayName("Should handle null refresh token")
+        @DisplayName("logout-with-only-an-access-token-revokes-exactly-it: no refresh cookie, no family revocation")
         void logout_WhenNullRefreshToken_BlacklistsOnlyAccess() {
             // Arrange
             String accessToken = "access-token";
@@ -284,8 +287,8 @@ class AuthenticationServiceTest {
             authenticationService.logout(accessToken, null);
 
             // Assert - only access token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(
-                    eq(accessToken), eq(accessExpiry), isNull(), isNull(), isNull());
+            verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                    new LogoutRevocation.TokenRevocation(accessToken, accessExpiry)));
         }
 
         @Test
@@ -294,7 +297,8 @@ class AuthenticationServiceTest {
             // Act
             authenticationService.logout(null, null);
 
-            // Assert - no blacklist operations
+            // Assert - nothing present to revoke
+            verify(tokenBlacklistService).revokeLogoutSession(List.of());
             verify(tokenBlacklistService, never()).blacklistToken(any(), any());
             verify(tokenValidator, never()).validateToken(any());
         }
@@ -318,8 +322,8 @@ class AuthenticationServiceTest {
             authenticationService.logout(invalidAccessToken, validRefreshToken);
 
             // Assert - only refresh token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(
-                    isNull(), isNull(), eq(validRefreshToken), eq(refreshExpiry), isNull());
+            verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                    new LogoutRevocation.TokenRevocation(validRefreshToken, refreshExpiry)));
         }
 
         @Test
@@ -341,8 +345,8 @@ class AuthenticationServiceTest {
             authenticationService.logout(validAccessToken, invalidRefreshToken);
 
             // Assert - only access token blacklisted
-            verify(tokenBlacklistService).revokeLogoutSession(
-                    eq(validAccessToken), eq(accessExpiry), isNull(), isNull(), isNull());
+            verify(tokenBlacklistService).revokeLogoutSession(List.of(
+                    new LogoutRevocation.TokenRevocation(validAccessToken, accessExpiry)));
         }
     }
 

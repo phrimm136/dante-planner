@@ -13,6 +13,7 @@ import org.danteplanner.backend.auth.oauth.OAuthProvider;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthTokens;
 import org.danteplanner.backend.auth.oauth.OAuthUserInfo;
+import org.danteplanner.backend.auth.token.LogoutRevocation;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
@@ -20,7 +21,8 @@ import org.danteplanner.backend.auth.token.TokenGenerator;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -143,40 +145,37 @@ public class AuthenticationService {
     public void logout(String accessToken, String refreshToken) {
         log.info("Processing logout");
 
-        String validAccessToken = null;
-        Date accessExpiry = null;
+        List<LogoutRevocation> revocations = new ArrayList<>();
+
         if (accessToken != null) {
             try {
-                accessExpiry = tokenValidator.validateAccessToken(accessToken).expiration();
-                validAccessToken = accessToken;
+                revocations.add(new LogoutRevocation.TokenRevocation(
+                        accessToken, tokenValidator.validateAccessToken(accessToken).expiration()));
             } catch (InvalidTokenException e) {
                 log.debug("Access token already invalid, skipping blacklist");
             }
         }
 
-        String validRefreshToken = null;
-        Date refreshExpiry = null;
-        String familyId = null;
         if (refreshToken != null) {
             try {
                 TokenClaims refreshClaims = tokenValidator.validateRefreshToken(refreshToken);
-                refreshExpiry = refreshClaims.expiration();
-                validRefreshToken = refreshToken;
+                revocations.add(new LogoutRevocation.TokenRevocation(
+                        refreshToken, refreshClaims.expiration()));
                 if (lineageRotationFlag.isEnabled()) {
                     // A legacy token carries no family, but admission synthesizes one
                     // deterministically, so the same value is revocable here.
-                    familyId = refreshClaims.familyId() != null
+                    String familyId = refreshClaims.familyId() != null
                             ? refreshClaims.familyId()
                             : RefreshRotationService.legacyFamilyId(
                                     refreshClaims.userId(), refreshClaims.issuedAt().getTime());
+                    revocations.add(new LogoutRevocation.FamilyRevocation(familyId));
                 }
             } catch (InvalidTokenException e) {
                 log.debug("Refresh token already invalid, skipping blacklist");
             }
         }
 
-        tokenBlacklistService.revokeLogoutSession(
-                validAccessToken, accessExpiry, validRefreshToken, refreshExpiry, familyId);
+        tokenBlacklistService.revokeLogoutSession(revocations);
 
         log.info("Logout completed");
     }

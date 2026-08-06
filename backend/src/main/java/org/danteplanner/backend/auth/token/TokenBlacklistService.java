@@ -4,7 +4,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -61,17 +63,22 @@ public class TokenBlacklistService {
 
     private static final String BLACKLIST_CHECK_SKIPPED_COUNTER = "blacklist_check_skipped_total";
 
-    private static final String LOGOUT_NOOP_KEY = "bl:__logout_noop__";
-
+    /**
+     * KEYS are the blacklist keys of the tokens being revoked, followed by the keys of the
+     * families being revoked; ARGV is the blacklist entry value, the token count that splits
+     * KEYS, one TTL per token, the family revocation stamp, and the family TTL.
+     */
     private static final String LOGOUT_REVOKE_SCRIPT =
-            "if tonumber(ARGV[2]) > 0 then redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2]) end\n"
-            + "if tonumber(ARGV[3]) > 0 then redis.call('SET', KEYS[2], ARGV[1], 'PX', ARGV[3]) end\n"
-            + "if ARGV[4] ~= '' then\n"
-            + "  redis.call('HSET', KEYS[3], '"
-            + RefreshRotationService.REVOKED_FIELD + "', ARGV[4])\n"
+            "local tokens = tonumber(ARGV[2])\n"
+            + "for i = 1, tokens do\n"
+            + "  redis.call('SET', KEYS[i], ARGV[1], 'PX', ARGV[2 + i])\n"
+            + "end\n"
+            + "for i = tokens + 1, #KEYS do\n"
+            + "  redis.call('HSET', KEYS[i], '"
+            + RefreshRotationService.REVOKED_FIELD + "', ARGV[tokens + 3])\n"
             // Logging out before the session ever rotated creates this hash here, and only the
             // rotation script's sliding PEXPIRE would otherwise ever give it one.
-            + "  redis.call('PEXPIRE', KEYS[3], ARGV[5])\n"
+            + "  redis.call('PEXPIRE', KEYS[i], ARGV[tokens + 4])\n"
             + "end\n"
             + "return 'OK'";
 
@@ -115,50 +122,57 @@ public class TokenBlacklistService {
     }
 
     /**
-     * Blacklists the access and refresh tokens and revokes the refresh family in one atomic
-     * Redis round trip. A token with no remaining lifetime and an absent family are skipped
-     * inside the script; when nothing needs writing, no Redis command is issued.
+     * Withdraws every credential the logout presents, in one atomic Redis round trip.
      *
-     * @param accessToken   the access token to blacklist, or null to skip
-     * @param accessExpiry  the access token's expiration, or null to skip
-     * @param refreshToken  the refresh token to blacklist, or null to skip
-     * @param refreshExpiry the refresh token's expiration, or null to skip
-     * @param familyId      the refresh family to revoke, or null to skip
+     * <p>Each revocation names a credential the session actually carried, so a credential the
+     * session did not carry is absent from {@code revocations} rather than passed as a null.
+     * A token whose lifetime has already lapsed asks for no blacklist entry; when that leaves
+     * nothing to write, no Redis command is issued.</p>
+     *
+     * @param revocations the credentials to withdraw
      */
-    public void revokeLogoutSession(String accessToken, Date accessExpiry,
-            String refreshToken, Date refreshExpiry, String familyId) {
+    public void revokeLogoutSession(Collection<LogoutRevocation> revocations) {
         long now = System.currentTimeMillis();
-        long accessTtl = remainingMillis(accessToken, accessExpiry, now);
-        long refreshTtl = remainingMillis(refreshToken, refreshExpiry, now);
-        boolean revokeFamily = familyId != null;
-        if (accessTtl == 0 && refreshTtl == 0 && !revokeFamily) {
+
+        List<String> tokenKeys = new ArrayList<>();
+        List<String> tokenTtls = new ArrayList<>();
+        List<String> familyKeys = new ArrayList<>();
+        for (LogoutRevocation revocation : revocations) {
+            switch (revocation) {
+                case LogoutRevocation.TokenRevocation token -> {
+                    long remaining = remainingMillis(token.expiry(), now);
+                    if (remaining > 0) {
+                        tokenKeys.add(blacklistKey(token.token()));
+                        tokenTtls.add(Long.toString(remaining));
+                    }
+                }
+                case LogoutRevocation.FamilyRevocation family ->
+                        familyKeys.add(RefreshRotationService.familyKey(family.familyId()));
+            }
+        }
+
+        if (tokenKeys.isEmpty() && familyKeys.isEmpty()) {
             return;
         }
 
-        String value = encode(BlacklistMode.IMMEDIATE, now);
-        String accessKey = accessTtl > 0 ? blacklistKey(accessToken) : LOGOUT_NOOP_KEY;
-        String refreshKey = refreshTtl > 0 ? blacklistKey(refreshToken) : LOGOUT_NOOP_KEY;
-        String familyKey = revokeFamily
-                ? RefreshRotationService.familyKey(familyId)
-                : LOGOUT_NOOP_KEY;
+        List<String> keys = new ArrayList<>(tokenKeys);
+        keys.addAll(familyKeys);
 
-        stringRedisTemplate.execute(logoutRevokeScript,
-                List.of(accessKey, refreshKey, familyKey),
-                value,
-                Long.toString(accessTtl),
-                Long.toString(refreshTtl),
-                revokeFamily ? Long.toString(now) : "",
-                Long.toString(refreshTokenExpiry));
+        List<Object> args = new ArrayList<>();
+        args.add(encode(BlacklistMode.IMMEDIATE, now));
+        args.add(Long.toString(tokenKeys.size()));
+        args.addAll(tokenTtls);
+        args.add(Long.toString(now));
+        args.add(Long.toString(refreshTokenExpiry));
+
+        stringRedisTemplate.execute(logoutRevokeScript, keys, args.toArray());
     }
 
     /**
-     * The lifetime a token has left, floored at zero so an expired or absent token asks for no
-     * blacklist entry at all.
+     * The lifetime a token has left, floored at zero so an expired token asks for no blacklist
+     * entry at all.
      */
-    private long remainingMillis(String token, Date expiry, long now) {
-        if (token == null || expiry == null) {
-            return 0;
-        }
+    private long remainingMillis(Date expiry, long now) {
         return Math.max(expiry.getTime() - now, 0);
     }
 
@@ -187,7 +201,7 @@ public class TokenBlacklistService {
 
     private void addToBlacklist(String token, Date expiry, BlacklistMode mode) {
         long now = System.currentTimeMillis();
-        long remaining = remainingMillis(token, expiry, now);
+        long remaining = remainingMillis(expiry, now);
         if (remaining == 0) {
             return;
         }
