@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.function.IntFunction;
 
 import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachObject;
 import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 
 /**
@@ -207,37 +208,28 @@ class IdReferenceValidator {
     }
 
     void validateFloorSelectionIds(JsonNode root, String category, ValidationContext context) {
-        JsonNode floorSelections = root.get("floorSelections");
-        if (floorSelections == null || !floorSelections.isArray()) {
-            return;
-        }
-
+        JsonNode floorSelections = arrayField(root, "floorSelections");
         FloorRules rules = FLOOR_RULES.get(MDCategory.fromValue(category));
 
-        for (int i = 0; i < floorSelections.size() && i < rules.floorCount(); i++) {
-            JsonNode floor = floorSelections.get(i);
-            if (!floor.isObject()) {
-                continue;
-            }
-
-            String floorPath = "floorSelections[" + i + "]";
-            JsonNode themePackNode = floor.get("themePackId");
-            boolean themePackChosen = themePackNode != null && themePackNode.isTextual();
+        eachObject(floorSelections, rules.floorCount(), (floor, index) -> {
+            String floorPath = "floorSelections[" + index + "]";
+            JsonNode themePackNode = floor.path("themePackId");
+            boolean themePackChosen = themePackNode.isTextual();
 
             if (!validateThemePackPresence(floorPath, themePackNode, themePackChosen, context)) {
-                continue;
+                return;
             }
 
             if (context.policy().requiresPublishableContent()) {
-                validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(i), context);
+                validateDifficultyRange(floorPath, floor, rules.difficultyAt().apply(index), context);
             }
 
-            if (themePackChosen && i > 0) {
-                validateThemePackSequence(floorPath, floorSelections.get(i - 1), i - 1, context);
+            if (themePackChosen && index > 0) {
+                validateThemePackSequence(floorPath, floorSelections.get(index - 1), index - 1, context);
             }
 
             validateFloorGiftIds(floorPath, floor, themePackChosen ? themePackNode.asText() : null, context);
-        }
+        });
     }
 
     /**
@@ -268,8 +260,8 @@ class IdReferenceValidator {
 
     private void validateDifficultyRange(String floorPath, JsonNode floor, DifficultyRule expected,
                                          ValidationContext context) {
-        JsonNode difficultyNode = floor.get("difficulty");
-        int difficulty = (difficultyNode != null && difficultyNode.isNumber()) ? difficultyNode.asInt() : -1;
+        JsonNode difficultyNode = floor.path("difficulty");
+        int difficulty = difficultyNode.isNumber() ? difficultyNode.asInt() : -1;
 
         if (difficulty < expected.min() || difficulty > expected.max()) {
             context.reject(floorPath + ".difficulty",
@@ -283,8 +275,8 @@ class IdReferenceValidator {
             return;
         }
 
-        JsonNode previousThemePackNode = previousFloor.get("themePackId");
-        boolean previousChosen = previousThemePackNode != null && previousThemePackNode.isTextual()
+        JsonNode previousThemePackNode = previousFloor.path("themePackId");
+        boolean previousChosen = previousThemePackNode.isTextual()
                 && !previousThemePackNode.asText().isEmpty();
         if (!previousChosen) {
             context.reject(floorPath, p -> ValidationErrors.invalidSequence(
