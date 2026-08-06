@@ -3,6 +3,8 @@ package org.danteplanner.backend.integration;
 import java.util.UUID;
 
 import org.danteplanner.backend.config.TestConfig;
+import org.danteplanner.backend.notification.entity.Notification;
+import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -71,6 +73,55 @@ class NotificationFanoutIT extends SharedMySqlContainerSupport {
 
         assertThat(rePublished).as("uk_notification_dedup absorbs the re-publish").isZero();
         assertThat(unread(enabledA)).isEqualTo(1);
+    }
+
+    /**
+     * The dispatch pre-check answers for exactly the rows {@code uk_notification_dedup} rejects.
+     *
+     * <p>A pre-check narrower than the key would let a dispatch through to fire the violation it
+     * exists to avoid, which under joined propagation reaches the caller as an
+     * {@code UnexpectedRollbackException}. The soft-deleted case is the one that can drift: the key
+     * does not include {@code deleted_at}, so a soft-deleted row still occupies it.</p>
+     */
+    @Test
+    @Transactional
+    @DisplayName("the duplicate pre-check answers for the same rows the dedup key rejects")
+    void dedupPreCheck_WhenARowOccupiesTheKey_MatchesTheConstraintIncludingSoftDeleted() {
+        Long recipient = enabledUser("precheck").getId();
+        UUID plannerId = UUID.randomUUID();
+        String contentId = plannerId.toString();
+
+        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                recipient, contentId, NotificationType.PLANNER_RECOMMENDED))
+                .as("nothing occupies the key yet")
+                .isFalse();
+
+        Notification raised = notificationRepository.save(new Notification(
+                recipient, contentId, NotificationType.PLANNER_RECOMMENDED,
+                plannerId, "Recommended Build", null, null));
+
+        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                recipient, contentId, NotificationType.PLANNER_RECOMMENDED))
+                .as("the row now occupies the key")
+                .isTrue();
+
+        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                recipient, contentId, NotificationType.COMMENT_RECEIVED))
+                .as("a different type is a different key")
+                .isFalse();
+
+        raised.softDelete();
+        notificationRepository.saveAndFlush(raised);
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT deleted_at FROM notifications WHERE id = ?", java.sql.Timestamp.class, raised.getId()))
+                .as("the row reached the database soft-deleted, so the assertion below is not vacuous")
+                .isNotNull();
+
+        assertThat(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
+                recipient, contentId, NotificationType.PLANNER_RECOMMENDED))
+                .as("a soft-deleted row still occupies the key, so it still counts as carried")
+                .isTrue();
     }
 
     private long unread(Long userId) {
