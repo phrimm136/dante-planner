@@ -11,6 +11,7 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.moderation.service.ModerationPolicy;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.planner.entity.Planner;
@@ -114,10 +115,11 @@ class ModerationAuditMatrixTest {
     @BeforeEach
     void setUp() {
         auditService = new ModerationAuditService(moderationActionRepository);
-        userModerationService = new UserModerationService(userService, auditService, ssePublisher);
+        ModerationPolicy moderationPolicy = new ModerationPolicy();
+        userModerationService = new UserModerationService(userService, auditService, ssePublisher, moderationPolicy);
         plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
         commentModerationService = new CommentModerationService(commentCommandService, commentQueryService, auditService);
-        adminService = new AdminService(userService, eventPublisher, auditService);
+        adminService = new AdminService(userService, eventPublisher, auditService, moderationPolicy);
 
         User actor = user(ACTOR, UserRole.ADMIN);
         User target = user(TARGET, UserRole.MODERATOR);

@@ -6,6 +6,7 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.moderation.service.ModerationPolicy;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
@@ -55,7 +56,8 @@ class UserModerationServiceTest {
     @BeforeEach
     void setUp() {
         moderationService = new UserModerationService(userService,
-                new ModerationAuditService(moderationActionRepository), ssePublisher);
+                new ModerationAuditService(moderationActionRepository), ssePublisher,
+                new ModerationPolicy());
 
         adminUser = User.builder()
                 .id(1L)

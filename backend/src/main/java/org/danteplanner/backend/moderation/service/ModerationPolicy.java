@@ -5,6 +5,8 @@ import org.danteplanner.backend.moderation.exception.ModerationForbiddenExceptio
 import org.danteplanner.backend.user.entity.RestrictionState;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.util.Map;
@@ -15,7 +17,8 @@ import java.util.Map;
  * <p>Every account-level moderation decision resolves through the same restriction and rank
  * checks, so an authority hole cannot open in one mutation while its siblings stay closed.</p>
  */
-public final class ModerationPolicy {
+@Service
+public class ModerationPolicy {
 
     /**
      * What one account restriction demands.
@@ -45,7 +48,15 @@ public final class ModerationPolicy {
             UserRole.MODERATOR, "moderators",
             UserRole.ADMIN, "administrators");
 
-    private ModerationPolicy() {
+    private final Clock clock;
+
+    @Autowired
+    public ModerationPolicy() {
+        this(Clock.systemUTC());
+    }
+
+    ModerationPolicy(Clock clock) {
+        this.clock = clock;
     }
 
     /**
@@ -59,7 +70,7 @@ public final class ModerationPolicy {
      *                                      not strictly outrank the target
      * @throws IllegalArgumentException     if the action is not an account restriction
      */
-    public static void requireCanRestrict(User actor, User target, ModerationAction.ActionType action) {
+    public void requireCanRestrict(User actor, User target, ModerationAction.ActionType action) {
         Authority authority = AUTHORITIES.get(action);
         if (authority == null) {
             throw new IllegalArgumentException("Not an account restriction: " + action);
@@ -67,7 +78,7 @@ public final class ModerationPolicy {
 
         // A restriction withdraws the authority, and nothing else does: banning a rogue moderator
         // invalidates no token, and the endpoint is gated on the role claim the token still carries.
-        RestrictionState actorRestriction = actor.restrictionState(Clock.systemUTC());
+        RestrictionState actorRestriction = actor.restrictionState(clock);
         if (actorRestriction != RestrictionState.ACTIVE) {
             throw new ModerationForbiddenException("A %s account cannot %s"
                     .formatted(RESTRICTION_ADJECTIVE.get(actorRestriction), authority.power()));
@@ -93,7 +104,7 @@ public final class ModerationPolicy {
      * @throws ModerationForbiddenException if the new role outranks the actor, or the target holds a
      *                                      rank the actor may not modify
      */
-    public static void requireCanChangeRole(User actor, User target, UserRole newRole) {
+    public void requireCanChangeRole(User actor, User target, UserRole newRole) {
         if (newRole.outranks(actor.getRole())) {
             throw new ModerationForbiddenException("Cannot grant role higher than your own");
         }

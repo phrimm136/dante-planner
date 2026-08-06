@@ -28,6 +28,7 @@ public class AdminService {
     private final UserService userService;
     private final ApplicationEventPublisher eventPublisher;
     private final ModerationAuditService auditService;
+    private final ModerationPolicy moderationPolicy;
 
     /**
      * Change a user's role with safeguards.
@@ -47,7 +48,7 @@ public class AdminService {
 
         UserRole targetCurrentRole = target.getRole();
 
-        ModerationPolicy.requireCanChangeRole(actor, target, newRole);
+        moderationPolicy.requireCanChangeRole(actor, target, newRole);
 
         if (targetCurrentRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
             long adminCount = userService.countByRole(UserRole.ADMIN);

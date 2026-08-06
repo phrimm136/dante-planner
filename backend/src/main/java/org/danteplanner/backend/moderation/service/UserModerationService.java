@@ -31,6 +31,7 @@ public class UserModerationService {
     private final UserService userService;
     private final ModerationAuditService auditService;
     private final SsePublisher ssePublisher;
+    private final ModerationPolicy moderationPolicy;
 
     /**
      * Timeout a user for a specified duration.
@@ -157,7 +158,7 @@ public class UserModerationService {
             String reason, Integer durationMinutes, Consumer<User> mutation) {
         User actor = requireActive(actorId);
         User target = requireActive(targetId);
-        ModerationPolicy.requireCanRestrict(actor, target, action);
+        moderationPolicy.requireCanRestrict(actor, target, action);
 
         mutation.accept(target);
         User saved = userService.save(target);

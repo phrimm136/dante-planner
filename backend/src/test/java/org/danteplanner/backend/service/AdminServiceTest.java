@@ -24,6 +24,7 @@ import static org.mockito.Mockito.*;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
+import org.danteplanner.backend.moderation.service.ModerationPolicy;
 
 /**
  * Unit tests for AdminService.
@@ -51,7 +52,7 @@ class AdminServiceTest {
     @BeforeEach
     void setUp() {
         adminService = new AdminService(userService, eventPublisher,
-                new ModerationAuditService(moderationActionRepository));
+                new ModerationAuditService(moderationActionRepository), new ModerationPolicy());
 
         adminUser = User.builder()
                 .id(1L)
