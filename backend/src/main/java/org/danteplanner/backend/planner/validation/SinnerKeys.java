@@ -31,6 +31,9 @@ final class SinnerKeys {
      * and entries on the way. The body sees a zero-padded key and an object value; it does not run
      * at all unless all 12 sinners are present.
      *
+     * <p>A container that is not an object at all is passed over in silence, its type having been
+     * reported already by whoever owns that field's type.
+     *
      * @param container the sinner-keyed object
      * @param field     the container's field name, as errors and logs address it
      * @param context   collects the failures
@@ -38,6 +41,10 @@ final class SinnerKeys {
      */
     static void forEachSinnerEntry(JsonNode container, String field, ValidationContext context,
                                    BiConsumer<String, JsonNode> body) {
+        if (!container.isObject()) {
+            return;
+        }
+
         Map<String, JsonNode> bySinnerKey = new HashMap<>();
 
         for (Map.Entry<String, JsonNode> entry : container.properties()) {

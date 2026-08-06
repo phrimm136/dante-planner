@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import java.util.Iterator;
 import java.util.Set;
 
+import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachNumber;
 import static org.danteplanner.backend.planner.validation.SinnerKeys.forEachSinnerEntry;
 
 /**
@@ -26,12 +28,7 @@ class EquipmentValidator {
     );
 
     void validateEquipmentSinnerIndices(JsonNode root, ValidationContext context) {
-        JsonNode equipment = root.get("equipment");
-        if (equipment == null || !equipment.isObject()) {
-            return;
-        }
-
-        forEachSinnerEntry(equipment, "equipment", context, (sinnerKey, sinnerEquipment) -> {
+        forEachSinnerEntry(root.path("equipment"), "equipment", context, (sinnerKey, sinnerEquipment) -> {
             validateSinnerHasIdentity(sinnerKey, sinnerEquipment, context);
             validateSinnerHasZayinEgo(sinnerKey, sinnerEquipment, context);
         });
@@ -90,24 +87,11 @@ class EquipmentValidator {
     }
 
     void validateDeploymentOrder(JsonNode root, ValidationContext context) {
-        JsonNode order = root.get("deploymentOrder");
-        if (order == null || !order.isArray()) {
-            return;
-        }
-
-        for (int i = 0; i < order.size(); i++) {
-            JsonNode node = order.get(i);
-            if (!node.isNumber()) {
-                context.reject("deploymentOrder[" + i + "]",
-                        p -> ValidationErrors.invalidFieldType(p, "number", node));
-                continue;
+        eachNumber(arrayField(root, "deploymentOrder"), "deploymentOrder", context, (sinnerIndex, position) -> {
+            if (sinnerIndex < MIN_DEPLOYMENT_SINNER || sinnerIndex > MAX_DEPLOYMENT_SINNER) {
+                context.reject("deploymentOrder[" + position + "]", p -> ValidationErrors.valueOutOfRange(
+                        p, sinnerIndex, MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
             }
-
-            int index = node.asInt();
-            if (index < MIN_DEPLOYMENT_SINNER || index > MAX_DEPLOYMENT_SINNER) {
-                context.reject("deploymentOrder[" + i + "]", p -> ValidationErrors.valueOutOfRange(
-                        p, index, MIN_DEPLOYMENT_SINNER, MAX_DEPLOYMENT_SINNER));
-            }
-        }
+        });
     }
 }
