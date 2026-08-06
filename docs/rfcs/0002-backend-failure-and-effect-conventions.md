@@ -168,7 +168,7 @@ one release.
 ```gherkin
 Scenario: Mixed-type gift array accumulates both errors
   Given planner content whose selectedGiftIds is ["gift_a", 42, "gift_a"]
-  When content validation runs
+  When gift-id reference validation runs over the field
   Then exactly two errors are produced, in order: INVALID_FIELD_TYPE with message
        "Field 'selectedGiftIds[1]' must be string, got number 42", then DUPLICATE_VALUE
        with message "Duplicate value 'gift_a' in selectedGiftIds"
