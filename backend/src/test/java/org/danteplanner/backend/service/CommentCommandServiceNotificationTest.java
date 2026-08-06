@@ -9,7 +9,8 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.comment.event.CommentCreatedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
@@ -68,7 +69,7 @@ class CommentCommandServiceNotificationTest {
 
 
     @Mock
-    private SsePublisher ssePublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     private CommentCommandService service;
 
@@ -91,7 +92,7 @@ class CommentCommandServiceNotificationTest {
                         new PlannerAccessGuard(userService, plannerRepository)),
                 userService,
                 notificationDispatchService,
-                ssePublisher,
+                eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository));
 
@@ -405,11 +406,14 @@ class CommentCommandServiceNotificationTest {
         }
 
         private CommentTreeNode broadcastPayload() {
-            ArgumentCaptor<Object> payload = ArgumentCaptor.forClass(Object.class);
-            verify(ssePublisher).publishCommentEvent(
-                    eq(PLANNER_ID), eq(SseEventType.COMMENT_ADDED), any(), eq(COMMENTER_ID),
-                    payload.capture());
-            return (CommentTreeNode) payload.getValue();
+            ArgumentCaptor<CommentCreatedEvent> raised =
+                    ArgumentCaptor.forClass(CommentCreatedEvent.class);
+            verify(eventPublisher).publishEvent(raised.capture());
+
+            CommentCreatedEvent event = raised.getValue();
+            assertThat(event.plannerId()).isEqualTo(PLANNER_ID);
+            assertThat(event.authorUserId()).isEqualTo(COMMENTER_ID);
+            return event.payload();
         }
     }
 }

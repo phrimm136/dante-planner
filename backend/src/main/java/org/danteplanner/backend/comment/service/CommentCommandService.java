@@ -8,6 +8,7 @@ import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.comment.entity.PlannerComment;
+import org.danteplanner.backend.comment.event.CommentCreatedEvent;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
@@ -16,10 +17,9 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.shared.entity.SseEventType;
-import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.service.UserService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +39,7 @@ public class CommentCommandService {
     private final CommentQueryService commentQueryService;
     private final UserService userService;
     private final NotificationDispatchService notificationDispatchService;
-    private final SsePublisher ssePublisher;
+    private final ApplicationEventPublisher eventPublisher;
     private final PlannerAccessGuard accessGuard;
     private final PlannerStatsService plannerStatsService;
 
@@ -279,8 +279,10 @@ public class CommentCommandService {
     }
 
     /**
-     * Fan out a newly created comment to other nodes via Redis pub/sub,
-     * carrying the full comment payload for real-time SSE delivery.
+     * Raise the fan-out of a newly created comment, for delivery once the comment commits.
+     *
+     * <p>The payload is rendered here rather than in the listener: the listener runs after commit
+     * with no session, and the author lookup it needs would have none to load from.</p>
      *
      * @param plannerId      the planner the comment belongs to
      * @param saved          the persisted comment to broadcast
@@ -292,7 +294,7 @@ public class CommentCommandService {
         User author = userService.findOptionalById(authorUserId).orElse(null);
         CommentTreeNode payload =
                 CommentTreeNode.fromEntity(saved, parentPublicId, author, null, false, List.of());
-        ssePublisher.publishCommentEvent(plannerId, SseEventType.COMMENT_ADDED,
-                saved.getPublicId().toString(), authorUserId, payload);
+        eventPublisher.publishEvent(
+                new CommentCreatedEvent(plannerId, saved.getPublicId(), authorUserId, payload));
     }
 }

@@ -10,7 +10,7 @@ import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.springframework.context.ApplicationEventPublisher;
 
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
@@ -80,10 +80,10 @@ class CommentServiceLayerTest {
     private NotificationDispatchService notificationDispatchService;
 
 
-    // Comment fan-out publishes to Redis and returns; delivery to a subscriber has no in-process
-    // path, so no create test here can assert it.
+    // Comment fan-out is raised as an event and published after commit, so no create test here
+    // can assert delivery.
     @Mock
-    private SsePublisher ssePublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     @Mock
     private CommentReportService commentReportService;
@@ -104,7 +104,7 @@ class CommentServiceLayerTest {
                 commentRepository, commentVoteRepository, userService,
                 new PlannerAccessGuard(userService, plannerRepository));
         commandService = new CommentCommandService(
-                commentRepository, queryService, userService, notificationDispatchService, ssePublisher,
+                commentRepository, queryService, userService, notificationDispatchService, eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository));
         engagementService = new CommentEngagementService(

@@ -24,7 +24,7 @@ import org.danteplanner.backend.comment.service.CommentQueryService;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
 import org.danteplanner.backend.support.AuthCookies;
@@ -83,10 +83,10 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 PlannerRepository plannerRepository,
                 UserService userService,
                 NotificationDispatchService notificationDispatchService,
-                SsePublisher ssePublisher,
+                ApplicationEventPublisher eventPublisher,
                 PlannerStatsRepository plannerStatsRepository) {
             return new CommentCommandService(commentRepository, commentQueryService, userService,
-                    notificationDispatchService, ssePublisher,
+                    notificationDispatchService, eventPublisher,
                     new PlannerAccessGuard(userService, plannerRepository),
                     new PlannerStatsService(plannerStatsRepository));
         }

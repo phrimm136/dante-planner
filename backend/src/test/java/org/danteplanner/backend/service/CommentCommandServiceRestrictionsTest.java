@@ -10,7 +10,7 @@ import org.danteplanner.backend.notification.service.NotificationDispatchService
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.exception.UserBannedException;
@@ -48,7 +48,7 @@ class CommentCommandServiceRestrictionsTest {
     @Mock PlannerStatsRepository plannerStatsRepository;
     @Mock UserService userService;
     @Mock NotificationDispatchService notificationDispatchService;
-    @Mock SsePublisher ssePublisher;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     private CommentCommandService commentService() {
         return new CommentCommandService(
@@ -57,7 +57,7 @@ class CommentCommandServiceRestrictionsTest {
                         new PlannerAccessGuard(userService, plannerRepository)),
                 userService,
                 notificationDispatchService,
-                ssePublisher,
+                eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
                 new PlannerStatsService(plannerStatsRepository));
     }
