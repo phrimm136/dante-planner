@@ -70,10 +70,10 @@ public record LegacyPublishRequest(
     }
 
     /**
-     * The content-carrying half of this request as the intent routes' body.
+     * The content-carrying half of this request as an upsert payload.
      */
-    public PublishRequest toPublishRequest() {
-        return new PublishRequest(
+    public UpsertPlannerRequest toUpsertRequest() {
+        return new UpsertPlannerRequest(
                 id, category, title, status, content, contentVersion, plannerType,
                 syncVersion, selectedKeywords);
     }

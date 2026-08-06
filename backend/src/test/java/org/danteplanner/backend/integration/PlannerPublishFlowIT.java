@@ -5,7 +5,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
-import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -212,7 +211,7 @@ class PlannerPublishFlowIT {
     void publishIntentSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
         UUID plannerId = UUID.randomUUID();
         String content = TestDataFactory.planner(owner).build().getContentJson();
-        PublishRequest publishRequest = new PublishRequest(
+        UpsertPlannerRequest publishRequest = new UpsertPlannerRequest(
                 plannerId.toString(), "5F", "Intent One-Shot", PlannerStatus.SAVED,
                 content, 7, PlannerType.MIRROR_DUNGEON, null, null);
 
