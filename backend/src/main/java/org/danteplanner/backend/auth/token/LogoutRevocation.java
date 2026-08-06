@@ -3,6 +3,8 @@ package org.danteplanner.backend.auth.token;
 import java.util.Date;
 import java.util.Objects;
 
+import org.springframework.lang.NonNull;
+
 /**
  * A credential a logout withdraws.
  *
@@ -20,7 +22,7 @@ public sealed interface LogoutRevocation
      * @param token  the token being withdrawn
      * @param expiry the token's expiration, which bounds the blacklist entry's TTL
      */
-    record TokenRevocation(String token, Date expiry) implements LogoutRevocation {
+    record TokenRevocation(@NonNull String token, @NonNull Date expiry) implements LogoutRevocation {
 
         /**
          * @throws NullPointerException if {@code token} or {@code expiry} is null
@@ -36,7 +38,7 @@ public sealed interface LogoutRevocation
      *
      * @param familyId the family identifier
      */
-    record FamilyRevocation(String familyId) implements LogoutRevocation {
+    record FamilyRevocation(@NonNull String familyId) implements LogoutRevocation {
 
         /**
          * @throws NullPointerException if {@code familyId} is null
