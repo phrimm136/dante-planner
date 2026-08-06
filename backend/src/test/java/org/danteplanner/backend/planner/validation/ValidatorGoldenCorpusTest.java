@@ -7,13 +7,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,15 +39,20 @@ import static org.assertj.core.api.Assertions.tuple;
  * complete, ordered output — top-level code, combined message, and every sub-error in the order
  * it accumulated — against a checked-in snapshot.
  *
- * <p>Game data is answered from fixed sets rather than the static JSON tree, so the snapshot
- * moves only when a validator does. Regenerate it deliberately with
- * {@code GOLDEN_CORPUS_REWRITE=true} and read the resulting diff: every changed line is a
- * changed contract.
+ * <p>Game data comes from the real {@link GameDataRegistry} over a small fixed dataset, so an
+ * entry freezes the registry's own id and affordability rules rather than a copy of them, and the
+ * snapshot moves only when a validator does.
+ *
+ * <p>To regenerate: run with {@code GOLDEN_CORPUS_REWRITE=true}, which writes
+ * {@code golden-corpus.actual.txt} beside the snapshot; compare the two, justify every changed
+ * line, and promote it by copying it over {@code golden-corpus.txt} by hand. Nothing writes the
+ * canonical file automatically — a gate that repairs itself gates nothing.
  */
 class ValidatorGoldenCorpusTest {
 
     private static final String SNAPSHOT_RESOURCE = "/validation/golden-corpus.txt";
-    private static final Path SNAPSHOT_SOURCE = Path.of("src/test/resources/validation/golden-corpus.txt");
+    private static final Path REWRITE_TARGET =
+            Path.of("src/test/resources/validation/golden-corpus.actual.txt");
 
     private static final String SECTION_MARKER = "### ";
     private static final String ACCEPTED = "accepted";
@@ -60,7 +65,7 @@ class ValidatorGoldenCorpusTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        GameDataRegistry registry = new FixedGameDataRegistry();
+        GameDataRegistry registry = fixedRegistry(objectMapper);
         idReferenceValidator = new IdReferenceValidator(registry, new SinnerIdValidator());
         contentValidator = new PlannerContentValidator(
                 new StructuralValidator(objectMapper,
@@ -102,7 +107,7 @@ class ValidatorGoldenCorpusTest {
 
         assertThat(outcomeOf(() -> contentValidator.validate(
                 entry.content(), entry.category(), entry.policy())))
-                .as(REGENERATION_HINT, name)
+                .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
     }
 
@@ -113,7 +118,7 @@ class ValidatorGoldenCorpusTest {
 
         assertThat(outcomeOf(() -> versionValidator.validateVersionForCreate(
                 entry.plannerType(), entry.contentVersion())))
-                .as(REGENERATION_HINT, name)
+                .as(OUTPUT_CHANGED, name)
                 .isEqualTo(snapshot().get(name));
     }
 
@@ -122,14 +127,14 @@ class ValidatorGoldenCorpusTest {
     void snapshot_WhenComparedToTheCorpus_CoversEveryEntryExactlyOnce() {
         assertThat(snapshot().keySet())
                 .as("a section with no entry is a frozen message nothing produces any more, and an "
-                        + "entry with no section is an unfrozen one; regenerate with "
-                        + "GOLDEN_CORPUS_REWRITE=true and read the diff")
+                        + "entry with no section is an unfrozen one")
                 .containsExactlyElementsOf(corpusNames());
     }
 
     /**
-     * Writes the snapshot from the current output of the chain. Disabled unless asked for: a gate
-     * that repairs itself on every run gates nothing.
+     * Writes the current output beside the snapshot as {@code golden-corpus.actual.txt}, never
+     * over the snapshot itself: promotion stays a deliberate manual copy, so no run can quietly
+     * bless a changed message.
      */
     @Test
     @EnabledIfEnvironmentVariable(named = "GOLDEN_CORPUS_REWRITE", matches = "true")
@@ -144,13 +149,13 @@ class ValidatorGoldenCorpusTest {
                     entry.plannerType(), entry.contentVersion())));
         }
 
-        Files.createDirectories(SNAPSHOT_SOURCE.getParent());
-        Files.writeString(SNAPSHOT_SOURCE, file.toString(), StandardCharsets.UTF_8);
+        Files.createDirectories(REWRITE_TARGET.getParent());
+        Files.writeString(REWRITE_TARGET, file.toString(), StandardCharsets.UTF_8);
     }
 
-    private static final String REGENERATION_HINT =
-            "corpus entry '%s' no longer produces the frozen output; if the change is intended, "
-                    + "regenerate with GOLDEN_CORPUS_REWRITE=true and justify every changed line";
+    private static final String OUTPUT_CHANGED =
+            "frozen validator output changed for entry '%s' — a validator message or its ordering "
+                    + "moved";
 
     private static final Map<String, ValidatorGoldenCorpus.ContentEntry> CONTENT_ENTRIES = byName(
             ValidatorGoldenCorpus.contentEntries(), ValidatorGoldenCorpus.ContentEntry::name);
@@ -192,21 +197,92 @@ class ValidatorGoldenCorpusTest {
         } catch (PlannerValidationException ex) {
             StringBuilder block = new StringBuilder()
                     .append("code: ").append(ex.getErrorCode()).append("\n")
-                    .append("message: ").append(escape(ex.getMessage()));
+                    .append("message: ").append(render(ex.getMessage()));
             int index = 1;
             for (ValidationError sub : ex.getSubErrors()) {
                 block.append("\nsub ").append(index++).append(": ")
-                        .append(sub.code()).append(" | ").append(escape(sub.message()));
+                        .append(sub.code()).append(" | ").append(render(sub.message()));
             }
             return block.toString();
         }
     }
 
-    /** Jackson's parse messages carry newlines, which would otherwise split one section into many. */
-    private static String escape(String message) {
+    private static String render(String message) {
         if (message == null) {
             return "null";
         }
+        return escape(normalizeSetOrder(elideParserDetail(message)));
+    }
+
+    private static final List<String> SET_RENDERED_PREFIXES =
+            List.of("Missing required fields: ", "Unknown fields: ");
+
+    /**
+     * Sorts the elements of the two messages that render a {@link java.util.Set} directly.
+     *
+     * <p>The sets feeding them are built from {@code Set.of} constants, whose iteration order the
+     * JVM salts per run, and the receiving {@code HashSet} resolves same-bucket ties by insertion
+     * order — so {@code selectedKeywords}/{@code equipment} and sinner {@code 01}/{@code 12} can
+     * each render in either order between runs. Sorting keeps that salt out of the snapshot, so
+     * the gate answers about validator behaviour and a corpus author need not know which keys
+     * collide.
+     *
+     * <p>Bracket depth is tracked rather than matched by regex: an element may carry brackets of
+     * its own, as {@code equipment[05].egos.ZAYIN} does.
+     */
+    private static String normalizeSetOrder(String message) {
+        String normalized = message;
+        for (String prefix : SET_RENDERED_PREFIXES) {
+            int found = normalized.indexOf(prefix);
+            while (found >= 0) {
+                int open = found + prefix.length();
+                int close = closingBracket(normalized, open);
+                if (close < 0) {
+                    break;
+                }
+                String sorted = Arrays.stream(normalized.substring(open + 1, close).split(", ", -1))
+                        .sorted()
+                        .collect(Collectors.joining(", "));
+                normalized = normalized.substring(0, open + 1) + sorted + normalized.substring(close);
+                found = normalized.indexOf(prefix, open + sorted.length());
+            }
+        }
+        return normalized;
+    }
+
+    private static int closingBracket(String text, int open) {
+        if (open >= text.length() || text.charAt(open) != '[') {
+            return -1;
+        }
+        int depth = 0;
+        for (int at = open; at < text.length(); at++) {
+            char character = text.charAt(at);
+            if (character == '[') {
+                depth++;
+            } else if (character == ']' && --depth == 0) {
+                return at;
+            }
+        }
+        return -1;
+    }
+
+    private static final String PARSER_DETAIL = "Malformed JSON: <parser detail elided>";
+
+    /**
+     * Everything after the {@code Malformed JSON: } prefix on a parse failure is Jackson's prose,
+     * down to its source-location clause, so freezing it would redden this gate on a parser
+     * upgrade that moved no validator. The prefix and the code are the validator's contribution
+     * and stay frozen; the details this validator writes itself carry no source clause and are
+     * kept verbatim.
+     */
+    private static String elideParserDetail(String message) {
+        return message.startsWith("Malformed JSON: ") && message.contains("[Source:")
+                ? PARSER_DETAIL
+                : message;
+    }
+
+    /** Parse messages carry newlines, which would otherwise split one section into many. */
+    private static String escape(String message) {
         return message.replace("\\", "\\\\")
                 .replace("\r", "\\r")
                 .replace("\n", "\\n");
@@ -252,8 +328,8 @@ class ValidatorGoldenCorpusTest {
     private static String readSnapshot() {
         try (InputStream in = ValidatorGoldenCorpusTest.class.getResourceAsStream(SNAPSHOT_RESOURCE)) {
             if (in == null) {
-                throw new IllegalStateException(SNAPSHOT_RESOURCE
-                        + " is absent; generate it with GOLDEN_CORPUS_REWRITE=true");
+                throw new IllegalStateException(
+                        SNAPSHOT_RESOURCE + " is absent; see this class's Javadoc to generate it");
             }
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -261,72 +337,50 @@ class ValidatorGoldenCorpusTest {
         }
     }
 
+    private static GameDataRegistry fixedRegistry(ObjectMapper objectMapper) {
+        GameDataRegistry registry =
+                new GameDataRegistry(new FixedGameDataLoader(objectMapper), "fixture");
+        registry.refresh();
+        return registry;
+    }
+
     /**
-     * Game data as a fixed set of answers. Every query the validators make is answered here, so
-     * the loader the superclass would read the static JSON tree with is never reached.
+     * The file-reading half of game data, answered from the corpus's fixed dataset. Substituting
+     * at this seam and no higher leaves the id, enhancement-prefix and theme-pack rules to the
+     * real registry, so an entry freezes what production answers rather than a second
+     * implementation of it.
      */
-    private static final class FixedGameDataRegistry extends GameDataRegistry {
+    private static final class FixedGameDataLoader extends GameDataLoader {
 
-        private FixedGameDataRegistry() {
-            super(null, "");
+        private FixedGameDataLoader(ObjectMapper objectMapper) {
+            super(objectMapper);
         }
 
         @Override
-        public boolean hasIdentity(String id) {
-            return ValidatorGoldenCorpus.IDENTITY_IDS.contains(id);
+        public Set<String> loadKeysFromFile(Path filePath) {
+            return switch (filePath.getFileName().toString()) {
+                case "identitySpecList.json" -> ValidatorGoldenCorpus.IDENTITY_IDS;
+                case "egoSpecList.json" -> ValidatorGoldenCorpus.EGO_IDS;
+                case "egoGiftSpecList.json" -> ValidatorGoldenCorpus.EGO_GIFT_IDS;
+                case "themePackList.json" -> ValidatorGoldenCorpus.THEME_PACK_IDS;
+                case "startBuffs.json" -> ValidatorGoldenCorpus.START_BUFF_IDS;
+                default -> throw new IllegalStateException("no fixture for " + filePath);
+            };
         }
 
         @Override
-        public boolean hasEgo(String id) {
-            return ValidatorGoldenCorpus.EGO_IDS.contains(id);
+        public Map<String, Set<String>> loadStartGiftPools(Path filePath) {
+            return ValidatorGoldenCorpus.START_GIFT_POOLS;
         }
 
         @Override
-        public Integer getEgoMaxThreadspin(String id) {
-            return ValidatorGoldenCorpus.EGO_MAX_THREADSPIN.get(id);
+        public Map<String, List<String>> loadEgoGiftThemePackMap(Path filePath) {
+            return ValidatorGoldenCorpus.EGO_GIFT_THEME_PACKS;
         }
 
         @Override
-        public boolean hasEgoGift(String id) {
-            return ValidatorGoldenCorpus.EGO_GIFT_IDS.contains(stripEnhancement(id));
-        }
-
-        @Override
-        public boolean hasThemePack(String id) {
-            return ValidatorGoldenCorpus.THEME_PACK_IDS.contains(id);
-        }
-
-        @Override
-        public boolean hasStartBuff(String id) {
-            return ValidatorGoldenCorpus.START_BUFF_IDS.contains(id);
-        }
-
-        @Override
-        public Set<String> getStartGiftPool(String keyword) {
-            return ValidatorGoldenCorpus.START_GIFT_POOLS.get(keyword);
-        }
-
-        @Override
-        public boolean hasStartGiftKeyword(String keyword) {
-            return ValidatorGoldenCorpus.START_GIFT_POOLS.containsKey(keyword);
-        }
-
-        @Override
-        public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
-            String baseId = stripEnhancement(giftId);
-            return ValidatorGoldenCorpus.EGO_GIFT_IDS.contains(baseId)
-                    && !ValidatorGoldenCorpus.UNAFFORDABLE_GIFT_IDS.contains(baseId);
-        }
-
-        /** Mirrors the registry's enhancement-prefix rule, which the corpus exercises directly. */
-        private static final Pattern GIFT_ENHANCEMENT = Pattern.compile("^[12]?(9\\d{3})$");
-
-        private static String stripEnhancement(String id) {
-            if (id == null) {
-                return null;
-            }
-            Matcher matcher = GIFT_ENHANCEMENT.matcher(id);
-            return matcher.matches() ? matcher.group(1) : id;
+        public Map<String, Integer> loadEgoMaxThreadspin(Path filePath) {
+            return ValidatorGoldenCorpus.EGO_MAX_THREADSPIN;
         }
     }
 }

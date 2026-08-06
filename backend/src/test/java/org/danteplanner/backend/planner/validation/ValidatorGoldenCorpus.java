@@ -18,11 +18,9 @@ import org.danteplanner.backend.planner.entity.PlannerType;
  * decides the order Jackson reports object members in, and therefore the order errors accumulate
  * in — is fixed by the corpus rather than by a search-and-replace landing where it lands.
  *
- * <p>Two message shapes render a {@link Set}, and a set of two colliding hashes iterates in
- * whichever order they were inserted. {@code REQUIRED_KEYS} and {@code ALL_SINNER_KEYS} are
- * {@code Set.of}, whose iteration order is salted per JVM run, so no entry here omits both
- * {@code selectedKeywords} and {@code equipment}, and none omits both sinner {@code 01} and
- * sinner {@code 12}: those are the pairs that share a bucket.
+ * <p>An entry needs no discipline about which fields it omits together: the snapshot renderer
+ * sorts the two messages that render a set, so the JVM's per-run iteration salt cannot reach the
+ * frozen text.
  */
 final class ValidatorGoldenCorpus {
 
@@ -73,8 +71,26 @@ final class ValidatorGoldenCorpus {
             "Combustion", Set.of("9001", "9002", "gift_a"),
             "Slash", Set.of("9003"));
 
-    /** {@code 9004} is affordable nowhere, which is what reaches the affordability rejection. */
-    static final Set<String> UNAFFORDABLE_GIFT_IDS = Set.of("9004");
+    /**
+     * Theme-pack availability per gift, in the shape the loader hands the registry: an empty list
+     * means universal. {@code 9004} lists a pack no corpus floor selects, so the affordability
+     * rejection is reached through the registry's own rule rather than around it.
+     */
+    static final Map<String, List<String>> EGO_GIFT_THEME_PACKS = Map.of(
+            "9001", List.of(),
+            "9002", List.of(),
+            "9003", List.of(),
+            "9004", List.of("1002"),
+            "gift_a", List.of(),
+            "gift_b", List.of());
+
+    /**
+     * A document over the byte ceiling, spelled out rather than derived from {@link #valid()}: the
+     * rejection message quotes the byte count, so a baseline that gained a field would otherwise
+     * silently rewrite this entry's frozen message.
+     */
+    static final String OVERSIZED_DOCUMENT = "{\"selectedKeywords\":[\"" + "x".repeat(52000)
+            + "\"],\"equipment\":{},\"deploymentOrder\":[],\"floorSelections\":[],\"sectionNotes\":{}}";
 
     private static Set<String> sinnerScopedIds(String prefix, String suffix) {
         Set<String> ids = new HashSet<>();
@@ -219,7 +235,7 @@ final class ValidatorGoldenCorpus {
         entries.add(new ContentEntry("content-null", "5F", ValidationPolicy.DRAFT, null));
         entries.add(new ContentEntry("content-blank", "5F", ValidationPolicy.DRAFT, "   "));
         entries.add(new ContentEntry("content-size-exceeded", "5F", ValidationPolicy.DRAFT,
-                valid().with("selectedKeywords", "[\"" + "x".repeat(52000) + "\"]").json()));
+                OVERSIZED_DOCUMENT));
         entries.add(new ContentEntry("json-malformed", "5F", ValidationPolicy.DRAFT, "not json"));
         entries.add(new ContentEntry("json-truncated", "5F", ValidationPolicy.DRAFT, "{\"selectedKeywords\":["));
         entries.add(new ContentEntry("root-is-array", "5F", ValidationPolicy.DRAFT, "[]"));
@@ -231,6 +247,10 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("missing-required-single", valid().without("sectionNotes")));
         entries.add(draft("missing-required-multiple", valid()
                 .without("deploymentOrder").without("floorSelections").without("sectionNotes")));
+        entries.add(draft("missing-required-hash-colliding-pair",
+                valid().without("selectedKeywords").without("equipment")));
+        entries.add(draft("equipment-sinners-missing-hash-colliding-pair",
+                valid().with("equipment", equipmentWith(Map.of("01", "", "12", "")))));
 
         entries.add(draft("field-type-selected-keywords", valid().with("selectedKeywords", "\"none\"")));
         entries.add(draft("field-type-deployment-order", valid().with("deploymentOrder", "\"none\"")));
@@ -384,6 +404,38 @@ final class ValidatorGoldenCorpus {
         entries.add(draft("start-gift-duplicate",
                 valid().with("selectedGiftIds", "[\"9001\",\"9001\"]")));
         entries.add(draft("start-gift-not-string", valid().with("selectedGiftIds", "[9001]")));
+
+        // Each entry below pins a guard that skips an element without rejecting it. What is frozen
+        // is the ABSENCE of an error, so a traversal helper that starts reporting one of these
+        // silences fails here rather than reaching a client as a new rejection.
+        entries.add(draft("silence-floor-element-not-object", valid().with("floorSelections", "[5]")));
+        entries.add(draft("silence-floor-gift-ids-not-array", valid().with("floorSelections",
+                "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":5}]")));
+        entries.add(draft("silence-floor-theme-pack-absent-as-draft", valid().with("floorSelections",
+                "[{\"difficulty\":0,\"giftIds\":[\"9004\"]}]")));
+        entries.add(draft("silence-floor-previous-element-not-object", valid().with("floorSelections",
+                "[5,{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]}]")));
+        entries.add(draft("silence-identity-not-object", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":5,"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("silence-identity-id-not-textual", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":10501,\"level\":45,\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("silence-identity-level-not-number", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":\"45\",\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("silence-identity-uptie-not-number", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":\"4\"},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));
+        entries.add(draft("silence-egos-not-object", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                        + "\"egos\":5}")))));
+        entries.add(draft("silence-ego-value-not-object", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":5}}")))));
+        entries.add(draft("silence-threadspin-not-number", valid().with("equipment", equipmentWith(
+                Map.of("05", "\"05\":{\"identity\":{\"id\":\"10501\",\"level\":45,\"uptie\":4},"
+                        + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":\"4\"}}}")))));
 
         entries.add(draft("baseline-accepted", valid()));
         entries.add(publish("baseline-accepted-on-publish", valid()));

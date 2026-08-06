@@ -20,15 +20,15 @@ message: Content is empty or null
 
 ### content-size-exceeded
 code: SIZE_EXCEEDED
-message: Content size 53861 exceeds limit 51200
+message: Content size 52100 exceeds limit 51200
 
 ### json-malformed
 code: MALFORMED_JSON
-message: Malformed JSON: Unrecognized token 'not': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]
+message: Malformed JSON: <parser detail elided>
 
 ### json-truncated
 code: MALFORMED_JSON
-message: Malformed JSON: Unexpected end-of-input: expected close marker for Array (start marker at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 21])\n at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 22]
+message: Malformed JSON: <parser detail elided>
 
 ### root-is-array
 code: MALFORMED_JSON
@@ -44,7 +44,7 @@ message: Unknown fields: [theme]
 
 ### unknown-fields-multiple
 code: UNKNOWN_FIELD
-message: Unknown fields: [theme, revision]
+message: Unknown fields: [revision, theme]
 
 ### missing-required-single
 code: MISSING_REQUIRED_FIELD
@@ -52,7 +52,16 @@ message: Missing required fields: [sectionNotes]
 
 ### missing-required-multiple
 code: MISSING_REQUIRED_FIELD
-message: Missing required fields: [floorSelections, sectionNotes, deploymentOrder]
+message: Missing required fields: [deploymentOrder, floorSelections, sectionNotes]
+
+### missing-required-hash-colliding-pair
+code: MISSING_REQUIRED_FIELD
+message: Missing required fields: [equipment, selectedKeywords]
+
+### equipment-sinners-missing-hash-colliding-pair
+code: VALIDATION_ERROR
+message: [MISSING_REQUIRED_FIELD] Missing required fields: [01, 12]
+sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [01, 12]
 
 ### field-type-selected-keywords
 code: VALIDATION_ERROR
@@ -434,6 +443,47 @@ code: VALIDATION_ERROR
 message: [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' must be string, got number 9001; [INVALID_FIELD_TYPE] Field 'selectedGiftIds[0]' must be string, got number 9001
 sub 1: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got number 9001
 sub 2: INVALID_FIELD_TYPE | Field 'selectedGiftIds[0]' must be string, got number 9001
+
+### silence-floor-element-not-object
+accepted
+
+### silence-floor-gift-ids-not-array
+accepted
+
+### silence-floor-theme-pack-absent-as-draft
+accepted
+
+### silence-floor-previous-element-not-object
+accepted
+
+### silence-identity-not-object
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity' has wrong type, expected object
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity' has wrong type, expected object
+
+### silence-identity-id-not-textual
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity.id' has wrong type, expected non-empty string
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].identity.id' has wrong type, expected non-empty string
+
+### silence-identity-level-not-number
+accepted
+
+### silence-identity-uptie-not-number
+accepted
+
+### silence-egos-not-object
+code: VALIDATION_ERROR
+message: [INVALID_FIELD_TYPE] Field 'equipment[05].egos' has wrong type, expected object
+sub 1: INVALID_FIELD_TYPE | Field 'equipment[05].egos' has wrong type, expected object
+
+### silence-ego-value-not-object
+code: VALIDATION_ERROR
+message: [MISSING_REQUIRED_FIELD] Missing required fields: [equipment[05].egos.ZAYIN]
+sub 1: MISSING_REQUIRED_FIELD | Missing required fields: [equipment[05].egos.ZAYIN]
+
+### silence-threadspin-not-number
+accepted
 
 ### baseline-accepted
 accepted
