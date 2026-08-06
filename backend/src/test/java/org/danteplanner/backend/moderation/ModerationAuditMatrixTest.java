@@ -20,7 +20,7 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.user.service.UserService;
@@ -71,9 +71,8 @@ class ModerationAuditMatrixTest {
     @Mock CommentQueryService commentQueryService;
     @Mock ModerationActionRepository moderationActionRepository;
     ModerationAuditService auditService;
-    @Mock SsePublisher ssePublisher;
     @Mock TokenBlacklistService tokenBlacklistService;
-    @Mock org.springframework.context.ApplicationEventPublisher eventPublisher;
+    @Mock ApplicationEventPublisher eventPublisher;
 
     private UserModerationService userModerationService;
     private PlannerModerationService plannerModerationService;
@@ -116,7 +115,7 @@ class ModerationAuditMatrixTest {
     void setUp() {
         auditService = new ModerationAuditService(moderationActionRepository);
         ModerationPolicy moderationPolicy = new ModerationPolicy();
-        userModerationService = new UserModerationService(userService, auditService, ssePublisher, moderationPolicy);
+        userModerationService = new UserModerationService(userService, auditService, eventPublisher, moderationPolicy);
         plannerModerationService = new PlannerModerationService(plannerPublishingService, auditService);
         commentModerationService = new CommentModerationService(commentCommandService, commentQueryService, auditService);
         adminService = new AdminService(userService, eventPublisher, auditService, moderationPolicy);

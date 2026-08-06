@@ -8,7 +8,8 @@ import org.danteplanner.backend.moderation.repository.ModerationActionRepository
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.moderation.service.ModerationPolicy;
 import org.danteplanner.backend.moderation.service.UserModerationService;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -45,7 +46,7 @@ class UserModerationServiceTest {
     private ModerationActionRepository moderationActionRepository;
 
     @Mock
-    private SsePublisher ssePublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     private UserModerationService moderationService;
 
@@ -56,7 +57,7 @@ class UserModerationServiceTest {
     @BeforeEach
     void setUp() {
         moderationService = new UserModerationService(userService,
-                new ModerationAuditService(moderationActionRepository), ssePublisher,
+                new ModerationAuditService(moderationActionRepository), eventPublisher,
                 new ModerationPolicy());
 
         adminUser = User.builder()
@@ -420,7 +421,8 @@ class UserModerationServiceTest {
             assertEquals(adminUser.getId(), action.getActorId());
             assertEquals("Test ban reason", action.getReason());
 
-            verify(ssePublisher).publishAccountSuspended(eq(normalUser.getId()), eq("Test ban reason"), eq(SuspensionType.BAN), isNull());
+            verify(eventPublisher).publishEvent(new AccountSuspendedEvent(
+                    normalUser.getId(), "Test ban reason", SuspensionType.BAN, null));
         }
 
         @Test
@@ -466,7 +468,7 @@ class UserModerationServiceTest {
             );
             assertTrue(exception.getMessage().contains("Cannot ban a user of equal or higher rank"));
             verify(userService, never()).save(any());
-            verify(ssePublisher, never()).publishAccountSuspended(any(), any(), any(), any());
+            verify(eventPublisher, never()).publishEvent(any(AccountSuspendedEvent.class));
         }
 
         @Test

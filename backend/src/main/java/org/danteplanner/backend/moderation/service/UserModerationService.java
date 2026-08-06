@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
+import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
-import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SuspensionType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.user.service.UserService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class UserModerationService {
 
     private final UserService userService;
     private final ModerationAuditService auditService;
-    private final SsePublisher ssePublisher;
+    private final ApplicationEventPublisher eventPublisher;
     private final ModerationPolicy moderationPolicy;
 
     /**
@@ -52,8 +53,8 @@ public class UserModerationService {
         User saved = restrict(actorId, targetId, ModerationAction.ActionType.TIMEOUT, reason, durationMinutes,
                 target -> target.setTimeoutUntil(timeoutUntil(durationMinutes)));
 
-        ssePublisher.publishAccountSuspended(
-                targetId, reason, SuspensionType.TIMED_OUT, durationMinutes);
+        eventPublisher.publishEvent(new AccountSuspendedEvent(
+                targetId, reason, SuspensionType.TIMED_OUT, durationMinutes));
 
         log.info("User {} timed out until {} by moderator {}", targetId, saved.getTimeoutUntil(), actorId);
         return saved;
@@ -98,7 +99,8 @@ public class UserModerationService {
                     target.setBannedBy(actorId);
                 });
 
-        ssePublisher.publishAccountSuspended(targetId, reason, SuspensionType.BAN, null);
+        eventPublisher.publishEvent(
+                new AccountSuspendedEvent(targetId, reason, SuspensionType.BAN, null));
 
         log.info("User {} banned by admin {} with reason: {}", targetId, actorId, reason);
         return saved;
