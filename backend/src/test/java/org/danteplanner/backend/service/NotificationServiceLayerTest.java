@@ -1,7 +1,8 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.notification.dto.NotificationEventPayload;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.notification.event.NotificationRaisedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 
 import org.danteplanner.backend.notification.service.NotificationRetentionService;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
@@ -49,7 +50,7 @@ class NotificationServiceLayerTest {
     private NotificationRepository notificationRepository;
 
     @Mock
-    private SsePublisher ssePublisher;
+    private ApplicationEventPublisher eventPublisher;
 
     private NotificationInboxService inboxService;
     private NotificationDispatchService dispatchService;
@@ -61,7 +62,7 @@ class NotificationServiceLayerTest {
     @BeforeEach
     void setUp() {
         inboxService = new NotificationInboxService(notificationRepository);
-        dispatchService = new NotificationDispatchService(notificationRepository, ssePublisher);
+        dispatchService = new NotificationDispatchService(notificationRepository, eventPublisher);
         retentionService = new NotificationRetentionService(notificationRepository);
     }
 
@@ -148,15 +149,16 @@ class NotificationServiceLayerTest {
             dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            ArgumentCaptor<String> entityIdCaptor = ArgumentCaptor.forClass(String.class);
-            ArgumentCaptor<Object> payloadCaptor = ArgumentCaptor.forClass(Object.class);
-            verify(ssePublisher).publishUserEvent(
-                    eq(testUserId), any(), eq(SseEventType.NOTIFY_RECOMMENDED),
-                    entityIdCaptor.capture(), payloadCaptor.capture());
+            ArgumentCaptor<NotificationRaisedEvent> raised =
+                    ArgumentCaptor.forClass(NotificationRaisedEvent.class);
+            verify(eventPublisher).publishEvent(raised.capture());
 
-            assertEquals(persistedPublicId[0].toString(), entityIdCaptor.getValue());
+            NotificationRaisedEvent event = raised.getValue();
+            assertEquals(testUserId, event.userId());
+            assertEquals(SseEventType.NOTIFY_RECOMMENDED, event.eventType());
+            assertEquals(persistedPublicId[0].toString(), event.entityId());
 
-            NotificationEventPayload payload = (NotificationEventPayload) payloadCaptor.getValue();
+            NotificationEventPayload payload = event.payload();
             assertEquals(persistedPublicId[0].toString(), payload.id());
             assertEquals(NotificationType.PLANNER_RECOMMENDED.name(), payload.type());
             assertEquals(testPlannerId.toString(), payload.contentId());
@@ -175,7 +177,7 @@ class NotificationServiceLayerTest {
             dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert
-            verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any(), any());
+            verify(eventPublisher, never()).publishEvent(any(NotificationRaisedEvent.class));
         }
     }
 

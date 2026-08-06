@@ -3,7 +3,9 @@ package org.danteplanner.backend.notification.listener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
+import org.danteplanner.backend.notification.event.NotificationRaisedEvent;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
+import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -24,6 +26,21 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class NotificationEventListener {
 
     private final NotificationDispatchService notificationDispatchService;
+    private final SsePublisher ssePublisher;
+
+    /**
+     * Push a committed notification to its recipient.
+     *
+     * <p>A push lost to a crash in this window is recovered by the recipient's next fetch, which
+     * reads the row the commit already durably wrote.</p>
+     *
+     * @param event the committed notification
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void handleNotificationRaised(NotificationRaisedEvent event) {
+        ssePublisher.publishUserEvent(event.userId(), null, event.eventType(),
+                event.entityId(), event.payload());
+    }
 
     /**
      * Handle planner recommended event by sending notification to the planner owner.

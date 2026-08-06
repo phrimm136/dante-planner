@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.notification.dto.NotificationEventPayload;
 import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
+import org.danteplanner.backend.notification.event.NotificationRaisedEvent;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -17,11 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 /**
- * Raises notifications on behalf of the features that cause them, and pushes each to its recipient
- * over SSE.
+ * Raises notifications on behalf of the features that cause them, and hands each push to the
+ * after-commit listener that delivers it.
  *
- * <p>Every entry point runs REQUIRES_NEW: a notification that cannot be raised must not roll back
- * the comment, vote, or publication that occasioned it.</p>
+ * <p>Propagation differs by caller, and the difference is the point. The comment and reply entry
+ * points join the transaction that occasioned them, so a rolled-back comment leaves no notification
+ * claiming it exists. The recommended and published entry points run REQUIRES_NEW because their
+ * callers are after-commit listeners, where no transaction is live and a joining write would never
+ * commit.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -29,7 +33,7 @@ import java.util.UUID;
 public class NotificationDispatchService {
 
     private final NotificationRepository notificationRepository;
-    private final SsePublisher ssePublisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Notify a planner owner that their planner crossed the recommendation threshold.
@@ -63,7 +67,7 @@ public class NotificationDispatchService {
      * @param plannerOwnerId  the planner owner to notify
      * @param commenterId     the user who posted the comment
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void notifyCommentReceived(
             Long commentId,
             UUID commentPublicId,
@@ -99,7 +103,7 @@ public class NotificationDispatchService {
      * @param parentAuthorId  the parent comment author to notify
      * @param replierId       the user who posted the reply
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void notifyReplyReceived(
             Long replyId,
             UUID replyPublicId,
@@ -155,16 +159,14 @@ public class NotificationDispatchService {
             log.info("Created {} notification for user {} on content {}",
                     notification.getNotificationType(), notification.getUserId(), notification.getContentId());
 
-            pushNotification(notification.getUserId(), sseEventType, saved);
+            eventPublisher.publishEvent(new NotificationRaisedEvent(
+                    notification.getUserId(),
+                    sseEventType,
+                    saved.getPublicId().toString(),
+                    NotificationEventPayload.fromEntity(saved)));
         } catch (DataIntegrityViolationException e) {
             log.debug("Duplicate {} notification prevented for user {} on content {}",
                     notification.getNotificationType(), notification.getUserId(), notification.getContentId());
         }
-    }
-
-    private void pushNotification(Long userId, SseEventType eventType, Notification notification) {
-        ssePublisher.publishUserEvent(userId, null, eventType,
-                notification.getPublicId().toString(),
-                NotificationEventPayload.fromEntity(notification));
     }
 }
