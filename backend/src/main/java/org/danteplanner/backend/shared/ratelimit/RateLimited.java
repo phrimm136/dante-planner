@@ -29,4 +29,10 @@ public @interface RateLimited {
      * buckets by a caller-named endpoint. Empty where the policy names its own endpoint.
      */
     String endpoint() default "";
+
+    /**
+     * How a refusal reaches this handler's caller. Endpoints a browser navigates to directly need
+     * a redirect, because the caller is rendering the response as a page.
+     */
+    RateLimitDenial denial() default RateLimitDenial.RESPOND;
 }

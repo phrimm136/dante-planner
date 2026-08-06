@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
+import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,7 +44,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>The coverage rule makes an undeclared handler unreachable in a build that ran its tests. This
  * covers the deploy where it did not: the interceptor refuses rather than waving the request
  * through, because a silently unguarded endpoint is the failure the whole seam exists to end.</p>
+ *
+ * <p>Runs exclusively: the assertions read a Logback appender attached to a logger the whole JVM
+ * shares, so a concurrent class logging through the interceptor would land in this appender.</p>
  */
+@Isolated
 class BackstopDeniesWhenTheGateWasSkippedTest {
 
     private final BareHandlerFixture bareFixture = new BareHandlerFixture();
@@ -59,6 +65,7 @@ class BackstopDeniesWhenTheGateWasSkippedTest {
                 rateLimitService,
                 mock(SecurityProperties.class),
                 new DeviceIdResolver(new CookieUtils(false, "", "Lax")),
+                new FrontendProperties("https://planner.example"),
                 new ObjectMapper());
 
         mockMvc = MockMvcBuilders.standaloneSetup(bareFixture, new DeclaredHandlerFixture())

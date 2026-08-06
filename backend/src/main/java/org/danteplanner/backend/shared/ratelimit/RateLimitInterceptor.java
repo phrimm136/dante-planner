@@ -2,6 +2,7 @@ package org.danteplanner.backend.shared.ratelimit;
 
 import java.io.IOException;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -16,7 +17,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceIdResolver;
+import org.danteplanner.backend.shared.config.FrontendProperties;
+import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.SecurityProperties;
+import org.danteplanner.backend.shared.exception.RateLimitExceededException;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
@@ -43,6 +47,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final RateLimitService rateLimitService;
     private final SecurityProperties securityProperties;
     private final DeviceIdResolver deviceIdResolver;
+    private final FrontendProperties frontendProperties;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -61,8 +66,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
         RateLimited declaration = declarationOn(handlerMethod);
         if (declaration != null) {
-            charge(declaration, request, response);
-            return true;
+            return charge(declaration, request, response);
         }
         if (isExempt(handlerMethod)) {
             return true;
@@ -91,7 +95,26 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 || handlerMethod.getBeanType().isAnnotationPresent(RateLimitExempt.class);
     }
 
-    private void charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
+    /**
+     * @return true when the request may proceed, false when the refusal was already rendered
+     * @throws RateLimitExceededException if the declaration asks for the refusal to be responded to
+     */
+    private boolean charge(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            chargeBucket(declaration, request, response);
+            return true;
+        } catch (RateLimitExceededException refused) {
+            if (declaration.denial() != RateLimitDenial.REDIRECT_LOGIN) {
+                throw refused;
+            }
+            log.warn("Rate limit exceeded on a browser-navigation endpoint: {}", refused.getMessage());
+            response.setStatus(HttpStatus.FOUND.value());
+            response.setHeader(HttpHeaders.LOCATION, frontendProperties.getUrl() + LoginRedirect.RATE_LIMITED);
+            return false;
+        }
+    }
+
+    private void chargeBucket(RateLimited declaration, HttpServletRequest request, HttpServletResponse response) {
         RateLimitPolicy policy = declaration.value();
 
         if (policy.subject() == RateLimitPolicy.Subject.CLIENT) {

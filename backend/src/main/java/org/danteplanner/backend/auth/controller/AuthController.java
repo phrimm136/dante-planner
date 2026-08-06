@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.FrontendProperties;
+import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
@@ -17,6 +18,7 @@ import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.TokenValidator;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
+import org.danteplanner.backend.shared.ratelimit.RateLimitDenial;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.HttpStatus;
@@ -44,8 +46,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
-
-    private static final String LOGIN_ERROR_PATH = "/?login=error";
 
     private final AuthenticationService authService;
     private final TokenValidator tokenValidator;
@@ -105,7 +105,7 @@ public class AuthController {
      * @param response    HTTP response for setting/clearing cookies
      * @return 302 redirect to the SPA root on success, or to the SPA error route on rejection
      */
-    @RateLimited(RateLimitPolicy.AUTH)
+    @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
     @GetMapping("/google/callback")
     public ResponseEntity<Void> googleCallback(
             @RequestParam(required = false) String code,
@@ -123,13 +123,13 @@ public class AuthController {
         // SPA error route, never a JSON error body from GlobalExceptionHandler.
         try {
             if (error != null || code == null || code.isBlank() || state == null) {
-                return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
+                return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
             }
 
             Optional<OAuthTransaction> transaction = oAuthStateService.open(oauthTx);
             if (transaction.isEmpty() || !statesMatch(transaction.get().state(), state)) {
                 log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
-                return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
+                return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
             }
 
             AuthResult result = authService.authenticateWithOAuth(
@@ -148,7 +148,7 @@ public class AuthController {
             // indistinguishable from a user declining consent, so the cause is reported here.
             io.sentry.Sentry.captureException(e);
             log.warn("OAuth callback failed: {}", e.getMessage());
-            return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
+            return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
         }
     }
 
