@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.planner.dto.BookmarkRequest;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;

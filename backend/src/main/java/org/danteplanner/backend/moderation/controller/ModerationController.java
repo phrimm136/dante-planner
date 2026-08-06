@@ -21,7 +21,6 @@ import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.ResponseEntity;
