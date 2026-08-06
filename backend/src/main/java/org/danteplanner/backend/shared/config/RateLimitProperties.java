@@ -26,6 +26,7 @@ public class RateLimitProperties {
     private BucketConfig comment;
     private BucketConfig report;
     private BucketConfig moderation;
+    private BucketConfig publicRead;
 
     /**
      * One bucket's shape: it holds {@code capacity} tokens and regains {@code refillTokens} of

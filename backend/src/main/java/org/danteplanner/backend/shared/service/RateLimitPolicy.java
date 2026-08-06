@@ -37,7 +37,10 @@ public enum RateLimitPolicy {
     AUTH(RateLimitProperties::getAuth, "auth", "", Subject.CLIENT),
 
     /** Guests may subscribe, so the subject is a client identifier ({@code ip:} / {@code device:}). */
-    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT);
+    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT),
+
+    /** Unauthenticated reads of published content, so the subject is a client identifier. */
+    PUBLIC_READ(RateLimitProperties::getPublicRead, "public-read", "", Subject.CLIENT);
 
     /** What a policy's buckets are keyed by, and therefore what a charger must resolve first. */
     public enum Subject {

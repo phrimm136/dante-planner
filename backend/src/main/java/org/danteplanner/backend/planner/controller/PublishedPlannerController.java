@@ -12,7 +12,8 @@ import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
-import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +63,7 @@ public class PublishedPlannerController {
      * @param userId   optional authenticated user ID (null for anonymous)
      * @return page of public planner summaries with optional user context
      */
-    @RateLimitExempt
+    @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published")
     public ResponseEntity<Page<PublicPlannerResponse>> getPublishedPlanners(
             @RequestParam(defaultValue = "0") int page,
@@ -94,7 +95,7 @@ public class PublishedPlannerController {
      * @param userId   optional authenticated user ID (null for anonymous)
      * @return page of recommended public planner summaries with optional user context
      */
-    @RateLimitExempt
+    @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/recommended")
     public ResponseEntity<Page<PublicPlannerResponse>> getRecommendedPlanners(
             @RequestParam(defaultValue = "0") int page,
@@ -125,7 +126,7 @@ public class PublishedPlannerController {
      * @param userId  optional authenticated user ID (null for anonymous)
      * @return the public planner response with user context and updated view count
      */
-    @RateLimitExempt
+    @RateLimited(RateLimitPolicy.PUBLIC_READ)
     @GetMapping("/published/{id}")
     public ResponseEntity<PublishedPlannerDetailResponse> getPublishedPlanner(
             HttpServletRequest request,

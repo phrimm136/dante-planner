@@ -6,7 +6,8 @@ import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.service.NotificationInboxService;
-import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
+import org.danteplanner.backend.shared.ratelimit.RateLimited;
+import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class NotificationController {
      * @param size   the page size (default 20, max 100)
      * @return notification inbox with pagination metadata
      */
-    @RateLimitExempt
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-inbox")
     @GetMapping("/inbox")
     public ResponseEntity<NotificationInboxResponse> getInbox(
             @AuthenticationPrincipal Long userId,
@@ -59,7 +60,7 @@ public class NotificationController {
      * @param userId the authenticated user ID
      * @return unread notification count
      */
-    @RateLimitExempt
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-unread-count")
     @GetMapping("/unread-count")
     public ResponseEntity<UnreadCountResponse> getUnreadCount(
             @AuthenticationPrincipal Long userId) {
@@ -76,7 +77,7 @@ public class NotificationController {
      * @param publicId the notification public ID
      * @return the updated notification
      */
-    @RateLimitExempt
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-read")
     @PostMapping("/{id}/mark-read")
     public ResponseEntity<NotificationResponse> markAsRead(
             @AuthenticationPrincipal Long userId,
@@ -93,7 +94,7 @@ public class NotificationController {
      * @param userId the authenticated user ID
      * @return count of notifications marked as read
      */
-    @RateLimitExempt
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-all-read")
     @PostMapping("/mark-all-read")
     public ResponseEntity<Integer> markAllAsRead(
             @AuthenticationPrincipal Long userId) {
@@ -113,7 +114,7 @@ public class NotificationController {
      * @param publicId the notification public ID
      * @return 204 No Content on success
      */
-    @RateLimitExempt
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(
             @AuthenticationPrincipal Long userId,
@@ -130,7 +131,7 @@ public class NotificationController {
      * @param userId the authenticated user ID
      * @return count of notifications deleted
      */
-    @RateLimitExempt
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete-all")
     @DeleteMapping("/all")
     public ResponseEntity<Integer> deleteAllNotifications(
             @AuthenticationPrincipal Long userId) {

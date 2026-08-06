@@ -56,6 +56,7 @@ class RateLimitKeyFormatTest {
     private static final long COMMENT_CAPACITY = 15;
     private static final long REPORT_CAPACITY = 16;
     private static final long MODERATION_CAPACITY = 17;
+    private static final long PUBLIC_READ_CAPACITY = 18;
 
     private static final Long USER_ID = 7L;
 
@@ -91,7 +92,10 @@ class RateLimitKeyFormatTest {
                     "device:3f2504e0-4f89-41d3-9a0c-0305e82c3301:planner-comment-sse",
                     SSE_CAPACITY, null, "planner-comment-sse",
                     service -> service.check(
-                            RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)));
+                            RateLimitPolicy.PLANNER_COMMENT_SSE, "device:" + DEVICE_ID)),
+            new FrozenKey(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9:public-read",
+                    PUBLIC_READ_CAPACITY, null, "public-read",
+                    service -> service.check(RateLimitPolicy.PUBLIC_READ, "ip:203.0.113.9")));
 
     @TestFactory
     Stream<DynamicTest> policy_WhenCharged_ConsumesFrozenBucketKey() {
@@ -137,6 +141,7 @@ class RateLimitKeyFormatTest {
         properties.setComment(bucket(COMMENT_CAPACITY));
         properties.setReport(bucket(REPORT_CAPACITY));
         properties.setModeration(bucket(MODERATION_CAPACITY));
+        properties.setPublicRead(bucket(PUBLIC_READ_CAPACITY));
         return properties;
     }
 
