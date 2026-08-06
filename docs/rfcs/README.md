@@ -8,6 +8,7 @@ in `../README.md`.
 | # | Title | Status | Tracking |
 |---|---|---|---|
 | [0001](0001-aws-account-topology.md) | AWS account topology | Accepted | none |
+| [0002](0002-backend-failure-and-effect-conventions.md) | Backend failure, effect, and enforcement conventions | Accepted | none |
 
 ## Lifecycle
 
