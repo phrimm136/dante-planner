@@ -72,7 +72,7 @@ class PlannerPublishEventIT extends SharedMySqlContainerSupport {
     @Test
     @Transactional
     void publish_WhenRolledBack_EmitsNoSseEvent() {
-        plannerPublishingService.setPublished(owner.getId(), plannerId, true);
+        plannerPublishingService.publish(owner.getId(), plannerId);
 
         // The surrounding @Transactional rolls back, so a commit-only emission never fires.
         verify(sseService, never()).broadcastToAll(any(), any(), any());

@@ -9,15 +9,13 @@ import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
 
 /**
- * Request DTO for the publish endpoint.
+ * Request DTO for the superseded state-setting publish route.
  *
  * <p>Names the desired publication state and optionally carries the document to upsert before
- * reaching it, so one request can create a client-side draft and publish it. A request that omits
- * {@code published} is the legacy toggle shape kept for tabs running a previously cached bundle;
- * the content fields are otherwise validated as a group, since a state-only request carries none
- * of them.</p>
+ * reaching it. Kept only for tabs running a bundle published before the intent routes existed; the
+ * content fields are validated as a group, since a state-only request carries none of them.</p>
  *
- * @param published        the desired publication state; absent means the legacy toggle
+ * @param published        the desired publication state
  * @param id               client-generated UUID; the server uses this ID instead of generating one
  * @param category         planner category
  * @param title            planner title
@@ -27,8 +25,11 @@ import org.danteplanner.backend.planner.entity.PlannerType;
  * @param plannerType      type of planner (MIRROR_DUNGEON, REFRACTED_RAILWAY)
  * @param syncVersion      sync version for optimistic locking
  * @param selectedKeywords selected keywords for list-view display (MD planners only)
+ * @deprecated superseded by the publish and unpublish intent routes, which carry the intent in the
+ *     path instead of the body.
  */
-public record PublishRequest(
+@Deprecated(forRemoval = true)
+public record LegacyPublishRequest(
     @NotNull(message = "published is required")
     Boolean published,
     String id,
@@ -41,7 +42,7 @@ public record PublishRequest(
     Long syncVersion,
     Set<String> selectedKeywords
 ) {
-    public PublishRequest {
+    public LegacyPublishRequest {
         selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
     }
 

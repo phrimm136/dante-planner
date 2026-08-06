@@ -1092,7 +1092,92 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
     }
 
     @Nested
-    @DisplayName("PUT /api/planner/md/{id}/publish - Toggle Publish")
+    @DisplayName("POST /api/planner/md/{id}/publish and /unpublish - Publication Intents")
+    class PublicationIntentTests {
+
+        @Test
+        @DisplayName("publish-validates-before-mutating: a blank title is refused and the stored state is unchanged")
+        void publishValidatesBeforeMutating_WhenTitleBlank_Returns400AndStoresNothing() throws Exception {
+            Planner planner = TestDataFactory.planner(testUser)
+                    .title("   ")
+                    .status(PlannerStatus.DRAFT)
+                    .content(TestDataFactory.VALID_CONTENT)
+                    .save(plannerRepository);
+
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+            Planner stored = plannerRepository.findById(planner.getId()).orElseThrow();
+            assertFalse(stored.getPublished());
+            assertNull(stored.getFirstPublishedAt(), "a refused publish leaves no first-publish stamp");
+        }
+
+        @Test
+        @DisplayName("the publish intent publishes and the unpublish intent withdraws")
+        void publicationIntents_WhenOwnerCallsEach_MovePlannerBothWays() throws Exception {
+            Planner planner = createTestPlanner(testUser);
+
+            mockMvc.perform(post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.published").value(true));
+            assertTrue(plannerRepository.findById(planner.getId()).orElseThrow().getPublished());
+
+            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.published").value(false));
+            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().getPublished());
+        }
+
+        @Test
+        @DisplayName("the unpublish intent refuses a non-owner")
+        void unpublishIntent_WhenNonOwner_Returns403() throws Exception {
+            Planner planner = createPublishedPlanner(testUser, "Someone Else's", "5F", 0);
+
+            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(AuthCookies.accessToken(otherUserAccessToken)))
+                    .andExpect(status().isForbidden())
+                    .andExpect(jsonPath("$.code").value("PLANNER_FORBIDDEN"));
+        }
+
+        @Test
+        @DisplayName("stale-client-publishes-through-the-delegate: the legacy route answers what the intent route answers")
+        void staleClientPublishesThroughTheDelegate_WhenLegacyRouteCalled_AnswersIdentically() throws Exception {
+            Planner planner = createTestPlanner(testUser);
+
+            String viaIntent = mockMvc.perform(
+                            post("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk());
+
+            String viaDelegate = mockMvc.perform(
+                            put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content("{\"published\":true}")
+                                    .cookie(accessTokenCookie()))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            assertEquals(viaIntent, viaDelegate);
+        }
+    }
+
+    @Nested
+    @DisplayName("PUT /api/planner/md/{id}/publish - Legacy Publish Delegate")
     class SetPublishedTests {
 
         @Test

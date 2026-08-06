@@ -32,7 +32,7 @@ import java.util.function.Consumer;
 
 /**
  * Service for the publish lifecycle of a planner.
- * Handles toggling publish status and owner notification settings.
+ * Handles the publish and unpublish intents and owner notification settings.
  */
 @Service
 @RequiredArgsConstructor
@@ -81,101 +81,150 @@ public class PlannerPublishingService {
     }
 
     /**
-     * Drive a planner to an explicit published state.
+     * Publish a planner the owner has already stored.
      *
-     * <p>Idempotent: a request naming the state the planner is already in leaves it untouched, so a
-     * retried or failed-over mutation never flips it back.</p>
+     * <p>Idempotent: publishing an already-published planner leaves it untouched, so a retried or
+     * failed-over mutation never flips it back.</p>
      *
      * @param userId    the user ID (must be owner)
      * @param plannerId the planner ID
-     * @param published the desired published state
-     * @return the planner response in the requested state
+     * @return the published planner response
+     * @throws PlannerNotFoundException   if planner not found
+     * @throws PlannerForbiddenException  if user is not the owner, or the planner was taken down
+     * @throws PlannerValidationException if the planner is not publishable
+     */
+    @Transactional
+    public PlannerResponse publish(Long userId, UUID plannerId) {
+        // Before the lookup, not inside applyPublish: a restricted actor must learn nothing about
+        // which planners exist, and the entry points load through different paths.
+        accessGuard.checkNotRestricted(userId);
+
+        return applyPublish(userId, accessGuard.requireExisting(plannerId));
+    }
+
+    /**
+     * Upsert the carried document and publish it in one request, so a client-side draft costs one
+     * round trip.
+     *
+     * @param userId    the user ID (must be owner)
+     * @param plannerId the planner ID
+     * @param content   the document to store before publishing
+     * @return the published planner response
+     */
+    @Transactional
+    public PlannerResponse publish(Long userId, UUID plannerId, UpsertPlannerRequest content) {
+        accessGuard.checkNotRestricted(userId);
+
+        return applyPublish(userId, upserted(userId, plannerId, content));
+    }
+
+    /**
+     * Withdraw a planner from public view on its owner's authority.
+     *
+     * <p>Idempotent, for the same reason {@link #publish(Long, UUID)} is.</p>
+     *
+     * @param userId    the user ID (must be owner)
+     * @param plannerId the planner ID
+     * @return the withdrawn planner response
      * @throws PlannerNotFoundException  if planner not found
      * @throws PlannerForbiddenException if user is not the owner
      */
     @Transactional
-    public PlannerResponse setPublished(Long userId, UUID plannerId, boolean published) {
-        // Before the lookup, not inside applyPublishedState: a restricted actor must learn nothing
-        // about which planners exist, and the two entry points load through different paths.
+    public PlannerResponse unpublish(Long userId, UUID plannerId) {
         accessGuard.checkNotRestricted(userId);
 
-        Planner planner = accessGuard.requireExisting(plannerId);
-        return applyPublishedState(userId, planner, published);
+        return applyUnpublish(userId, accessGuard.requireExisting(plannerId));
     }
 
     /**
-     * Upsert the carried document and drive the planner to an explicit published state in one
-     * request, idempotently.
+     * Upsert the carried document and withdraw the planner from public view in one request.
      *
      * @param userId    the user ID (must be owner)
      * @param plannerId the planner ID
-     * @param req       the content-carrying upsert payload
-     * @param published the desired published state
-     * @return the planner response in the requested state
+     * @param content   the document to store before withdrawing
+     * @return the withdrawn planner response
      */
     @Transactional
-    public PlannerResponse setPublishedWithContent(
-            Long userId, UUID plannerId, UpsertPlannerRequest req, boolean published) {
+    public PlannerResponse unpublish(Long userId, UUID plannerId, UpsertPlannerRequest content) {
         accessGuard.checkNotRestricted(userId);
 
-        Planner planner = plannerCommandService
-                .upsertAggregate(userId, null, plannerId, req, false)
+        return applyUnpublish(userId, upserted(userId, plannerId, content));
+    }
+
+    private Planner upserted(Long userId, UUID plannerId, UpsertPlannerRequest content) {
+        return plannerCommandService
+                .upsertAggregate(userId, null, plannerId, content, false)
                 .planner();
-        return applyPublishedState(userId, planner, published);
     }
 
     /**
-     * Move an already-loaded aggregate to the requested publication state, leaving it untouched when
-     * it is already there.
+     * Publish an already-loaded aggregate.
      *
-     * <p>Every path into a publication change crosses this method, so the ownership check lives
-     * here rather than at each entry point. The restriction check cannot: it has to precede the
-     * lookup so a restricted actor learns nothing about which planners exist.</p>
+     * <p>Both entry points cross this method, so the ownership check lives here rather than at each
+     * of them. The restriction check cannot: it has to precede the lookup so a restricted actor
+     * learns nothing about which planners exist.</p>
      *
-     * <p>The aggregate owns the idempotency decision and reports it; the projections and the
-     * first-publish fan-out below read that one report.</p>
+     * <p>Publishability is decided before the aggregate moves, so a refusal leaves the planner in
+     * the state the caller found it in rather than relying on the rollback to put it back.</p>
      */
-    private PlannerResponse applyPublishedState(Long userId, Planner planner, boolean published) {
+    private PlannerResponse applyPublish(Long userId, Planner planner) {
         UUID plannerId = planner.getId();
+        requireOwner(userId, planner);
 
-        if (!planner.isOwnedBy(userId)) {
-            throw new PlannerForbiddenException(plannerId);
+        if (planner.getTitle() == null || planner.getTitle().isBlank()) {
+            throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
         }
+        contentValidator.validate(planner.getContentJson(), planner.getCategory(), ValidationPolicy.PUBLISH);
 
-        PublicationChange change = published ? planner.publish() : planner.unpublish();
+        PublicationChange change = planner.publish();
         if (!change.changed()) {
-            return PlannerResponse.fromEntity(planner, plannerStatsRepository.upvotesOf(plannerId));
-        }
-
-        if (published) {
-            if (planner.getTitle() == null || planner.getTitle().isBlank()) {
-                throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
-            }
-            contentValidator.validate(planner.getContentJson(), planner.getCategory(), ValidationPolicy.PUBLISH);
+            return describe(planner);
         }
 
         Planner saved = plannerRepository.save(planner);
+        plannerCatalogService.onBecameVisible(saved);
+        subscriptionService.createSubscription(userId, plannerId);
 
-        if (published) {
-            plannerCatalogService.onBecameVisible(saved);
-            subscriptionService.createSubscription(userId, plannerId);
-
-            // The DB fan-out and the SSE broadcast both run from the AFTER_COMMIT listener, so
-            // neither persists nor fires when the publish rolls back.
-            if (change == PublicationChange.FIRST_PUBLISH) {
-                eventPublisher.publishEvent(new PlannerPublishedEvent(
-                        userId, plannerId, saved.getTitle(),
-                        PlannerPublishedPayload.fromEntity(saved)));
-                log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
-            }
-        } else {
-            plannerCatalogService.onBecameInvisible(plannerId);
+        // The DB fan-out and the SSE broadcast both run from the AFTER_COMMIT listener, so neither
+        // persists nor fires when the publish rolls back.
+        if (change == PublicationChange.FIRST_PUBLISH) {
+            eventPublisher.publishEvent(new PlannerPublishedEvent(
+                    userId, plannerId, saved.getTitle(),
+                    PlannerPublishedPayload.fromEntity(saved)));
+            log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
         }
 
-        log.info("Set publish status for planner {} to {} by user {}",
-                plannerId, saved.getPublished(), userId);
+        log.info("Published planner {} by user {}", plannerId, userId);
+        return describe(saved);
+    }
 
-        return PlannerResponse.fromEntity(saved, plannerStatsRepository.upvotesOf(plannerId));
+    /**
+     * Withdraw an already-loaded aggregate from public view, on the same terms as
+     * {@link #applyPublish(Long, Planner)}.
+     */
+    private PlannerResponse applyUnpublish(Long userId, Planner planner) {
+        UUID plannerId = planner.getId();
+        requireOwner(userId, planner);
+
+        if (!planner.unpublish().changed()) {
+            return describe(planner);
+        }
+
+        Planner saved = plannerRepository.save(planner);
+        plannerCatalogService.onBecameInvisible(plannerId);
+
+        log.info("Unpublished planner {} by user {}", plannerId, userId);
+        return describe(saved);
+    }
+
+    private void requireOwner(Long userId, Planner planner) {
+        if (!planner.isOwnedBy(userId)) {
+            throw new PlannerForbiddenException(planner.getId());
+        }
+    }
+
+    private PlannerResponse describe(Planner planner) {
+        return PlannerResponse.fromEntity(planner, plannerStatsRepository.upvotesOf(planner.getId()));
     }
 
     /**

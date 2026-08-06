@@ -17,6 +17,8 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
+import org.danteplanner.backend.planner.exception.PlannerValidationException;
+import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.user.service.UserService;
@@ -37,6 +39,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -117,7 +121,7 @@ class PlannerPublishingServiceTest {
     }
 
     @Nested
-    @DisplayName("setPublished Tests")
+    @DisplayName("publish intent Tests")
     class SetPublishedTests {
 
         @Test
@@ -128,8 +132,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            PlannerResponse first = publishingService.setPublished(testUser.getId(), planner.getId(), true);
-            PlannerResponse second = publishingService.setPublished(testUser.getId(), planner.getId(), true);
+            PlannerResponse first = publishingService.publish(testUser.getId(), planner.getId());
+            PlannerResponse second = publishingService.publish(testUser.getId(), planner.getId());
 
             assertTrue(first.published());
             assertTrue(second.published(), "a repeated publish must not flip the planner back");
@@ -142,7 +146,7 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), false);
+            PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             assertFalse(result.published());
             verify(plannerRepository, never()).save(any(Planner.class));
@@ -222,8 +226,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(planner))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            PlannerResponse result = publishingService.setPublishedWithContent(
-                    testUser.getId(), planner.getId(), request, true);
+            PlannerResponse result = publishingService.publish(
+                    testUser.getId(), planner.getId(), request);
 
             assertTrue(result.published());
             verify(plannerRepository, never()).findAggregateForOwner(any(), any());
@@ -237,7 +241,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should publish when owner")
-        void setPublished_WhenOwner_Publishes() {
+        void publish_WhenOwner_Publishes() {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
 
@@ -248,7 +252,7 @@ class PlannerPublishingServiceTest {
             when(plannerStatsRepository.upvotesOf(planner.getId())).thenReturn(12);
 
             // Act
-            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), true);
+            PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
 
             // Assert
             assertTrue(result.published());
@@ -259,7 +263,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should unpublish a published planner")
-        void setPublished_WhenPublished_Unpublishes() {
+        void unpublish_WhenPublished_Unpublishes() {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
 
@@ -267,7 +271,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), false);
+            PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             // Assert
             assertFalse(result.published());
@@ -275,7 +279,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerForbiddenException when not owner")
-        void setPublished_WhenNotOwner_ThrowsException() {
+        void publish_WhenNotOwner_ThrowsException() {
             // Arrange
             User otherUser = User.builder()
                     .id(999L)
@@ -293,7 +297,7 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             PlannerForbiddenException exception = assertThrows(
                     PlannerForbiddenException.class,
-                    () -> publishingService.setPublished(testUser.getId(), planner.getId(), true)
+                    () -> publishingService.publish(testUser.getId(), planner.getId())
             );
 
             assertEquals(planner.getId(), exception.getPlannerId());
@@ -302,7 +306,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not found")
-        void setPublished_WhenNotFound_ThrowsException() {
+        void publish_WhenNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
             when(plannerRepository.findAggregate(nonExistentId)).thenReturn(Optional.empty());
@@ -310,13 +314,13 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> publishingService.setPublished(testUser.getId(), nonExistentId, true)
+                    () -> publishingService.publish(testUser.getId(), nonExistentId)
             );
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner is deleted")
-        void setPublished_WhenDeleted_ThrowsException() {
+        void publish_WhenDeleted_ThrowsException() {
             // Arrange
             Planner planner = createTestPlanner();
             planner.softDelete();
@@ -327,13 +331,13 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> publishingService.setPublished(testUser.getId(), planner.getId(), true)
+                    () -> publishingService.publish(testUser.getId(), planner.getId())
             );
         }
 
         @Test
         @DisplayName("Should auto-subscribe owner when publishing")
-        void setPublished_WhenPublishing_AutoSubscribesOwner() {
+        void publish_WhenPublishing_AutoSubscribesOwner() {
             // Arrange
             Planner planner = testPlannerBuilder().published(false).build();
 
@@ -341,7 +345,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), true);
+            PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
 
             // Assert
             assertTrue(result.published());
@@ -352,7 +356,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Should not auto-subscribe when unpublishing")
-        void setPublished_WhenUnpublishing_DoesNotAutoSubscribe() {
+        void unpublish_WhenUnpublishing_DoesNotAutoSubscribe() {
             // Arrange
             Planner planner = testPlannerBuilder().published(true).build();
 
@@ -360,7 +364,7 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
-            PlannerResponse result = publishingService.setPublished(testUser.getId(), planner.getId(), false);
+            PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             // Assert
             assertFalse(result.published());
@@ -374,7 +378,7 @@ class PlannerPublishingServiceTest {
 
         @Test
         @DisplayName("Banned user cannot change publication state")
-        void setPublished_WhenBannedUser_ThrowsUserBannedException() {
+        void publish_WhenBannedUser_ThrowsUserBannedException() {
             // Arrange
             testUser.setBannedAt(java.time.Instant.now());
             testUser.setBannedBy(1L);
@@ -386,7 +390,7 @@ class PlannerPublishingServiceTest {
             // Act & Assert
             assertThrows(
                     UserBannedException.class,
-                    () -> publishingService.setPublished(testUser.getId(), plannerId, true)
+                    () -> publishingService.publish(testUser.getId(), plannerId)
             );
             verify(plannerRepository, never()).save(any());
         }
@@ -439,6 +443,46 @@ class PlannerPublishingServiceTest {
                     () -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true)
             );
             verify(plannerRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("publish-validates-before-mutating")
+    class PublishValidatesBeforeMutatingTests {
+
+        @Test
+        @DisplayName("a blank title refuses the publish before the aggregate moves")
+        void publishValidatesBeforeMutating_WhenTitleBlank_LeavesAggregateUnpublished() {
+            Planner planner = testPlannerBuilder().title("   ").published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+
+            PlannerValidationException thrown = assertThrows(
+                    PlannerValidationException.class,
+                    () -> publishingService.publish(testUser.getId(), planner.getId()));
+
+            assertEquals("MISSING_TITLE", thrown.getErrorCode());
+            assertFalse(planner.getPublished());
+            assertNull(planner.getFirstPublishedAt());
+            verify(plannerRepository, never()).save(any(Planner.class));
+        }
+
+        @Test
+        @DisplayName("refused content leaves the aggregate where it was")
+        void publishValidatesBeforeMutating_WhenContentRefused_LeavesAggregateUnpublished() {
+            Planner planner = testPlannerBuilder().published(false).build();
+            when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
+            doThrow(new PlannerValidationException("EMPTY_CONTENT", "Content is required"))
+                    .when(contentValidator)
+                    .validate(any(), any(), eq(ValidationPolicy.PUBLISH));
+
+            assertThrows(
+                    PlannerValidationException.class,
+                    () -> publishingService.publish(testUser.getId(), planner.getId()));
+
+            assertFalse(planner.getPublished());
+            assertNull(planner.getFirstPublishedAt());
+            verify(plannerRepository, never()).save(any(Planner.class));
+            verify(plannerCatalogService, never()).onBecameVisible(any());
         }
     }
 }

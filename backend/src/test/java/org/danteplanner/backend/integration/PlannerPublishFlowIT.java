@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.planner.dto.PublishRequest;
+import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -175,7 +175,7 @@ class PlannerPublishFlowIT {
         UUID plannerId = UUID.randomUUID();
         String content = TestDataFactory.planner(owner).build().getContentJson();
         // Creating strictly requires the CURRENT game content version
-        PublishRequest publishRequest = new PublishRequest(
+        LegacyPublishRequest publishRequest = new LegacyPublishRequest(
                 true, plannerId.toString(), "5F", "One-Shot Publish", PlannerStatus.SAVED,
                 content, 7, PlannerType.MIRROR_DUNGEON, null, null);
 
