@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.annotation.PostConstruct;
@@ -226,11 +227,10 @@ public class TokenBlacklistService {
      * Used when demoting users to immediately revoke their access.
      *
      * @param userId the user whose tokens should be invalidated
+     * @throws NullPointerException if {@code userId} is null
      */
     public void invalidateUserTokens(Long userId) {
-        if (userId == null) {
-            return;
-        }
+        Objects.requireNonNull(userId, "userId");
         // Floored to the second because a JWT's iat carries no sub-second component: an
         // unfloored stamp would reject a token minted later in the same second as the
         // invalidation, which is exactly the token a user logging straight back in receives.
@@ -267,11 +267,11 @@ public class TokenBlacklistService {
      * Clears user invalidation entry (for testing or when user re-authenticates).
      *
      * @param userId the user whose invalidation should be cleared
+     * @throws NullPointerException if {@code userId} is null
      */
     public void clearUserInvalidation(Long userId) {
-        if (userId != null) {
-            stringRedisTemplate.delete(userInvalidationKey(userId));
-        }
+        Objects.requireNonNull(userId, "userId");
+        stringRedisTemplate.delete(userInvalidationKey(userId));
     }
 
     /**
