@@ -4,7 +4,6 @@ import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.controller.UserController;
 
 import jakarta.servlet.http.Cookie;
-import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
 import org.danteplanner.backend.user.dto.UserDeletionResponse;
@@ -60,9 +59,6 @@ class UserControllerTest {
     private SsePublisher ssePublisher;
 
     @Mock
-    private RateLimitService rateLimitService;
-
-    @Mock
     private UserSessionService userSessionService;
 
     /**
@@ -88,7 +84,7 @@ class UserControllerTest {
 
     private UserController controllerWithGracePeriod(int gracePeriodDays) {
         return new UserController(lifecycleService, userService, userSettingsService, ssePublisher,
-                epithetConfig, rateLimitService, userSessionService, cookieUtils, gracePeriodDays);
+                epithetConfig, userSessionService, cookieUtils, gracePeriodDays);
     }
 
     @Nested

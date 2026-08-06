@@ -1,13 +1,10 @@
 package org.danteplanner.backend.comment.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.shared.service.RateLimitService;
-import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.MediaType;
@@ -37,8 +34,6 @@ import java.util.UUID;
 public class PlannerCommentSseController {
 
     private final PlannerCommentSseService plannerCommentSseService;
-    private final RateLimitService rateLimitService;
-    private final SecurityProperties securityProperties;
 
     /**
      * Subscribe to comment notifications for a specific planner.
@@ -54,7 +49,6 @@ public class PlannerCommentSseController {
      * @param plannerId   the planner ID to subscribe to
      * @param deviceId    the device identifier (from HTTP-only cookie)
      * @param userId      the authenticated account, or null for a guest
-     * @param httpRequest the HTTP request the rate-limit identity is resolved from
      * @return the SSE emitter
      * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
      *         if no published planner carries the id
@@ -64,12 +58,8 @@ public class PlannerCommentSseController {
     public SseEmitter subscribeToComments(
             @PathVariable UUID plannerId,
             @DeviceId UUID deviceId,
-            @AuthenticationPrincipal Long userId,
-            HttpServletRequest httpRequest) {
+            @AuthenticationPrincipal Long userId) {
 
-        String identifier = ClientIpResolver.resolveClientIdentifier(
-                httpRequest, securityProperties, deviceId);
-        rateLimitService.check(RateLimitPolicy.PLANNER_COMMENT_SSE, identifier);
         log.debug("Comment SSE subscription for planner {} device {}", plannerId, deviceId);
         return plannerCommentSseService.subscribe(plannerId, deviceId, userId);
     }

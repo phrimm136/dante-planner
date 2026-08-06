@@ -53,7 +53,6 @@ public class CommentController {
     private final CommentQueryService commentQueryService;
     private final CommentCommandService commentCommandService;
     private final CommentEngagementService commentEngagementService;
-    private final RateLimitService rateLimitService;
 
     /**
      * Get all comments for a planner.
@@ -96,8 +95,6 @@ public class CommentController {
             @PathVariable UUID plannerId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
-
         log.info("User {} creating comment on planner {}", userId, plannerId);
         CreateCommentResponse response = commentCommandService.createComment(plannerId, userId, deviceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -123,8 +120,6 @@ public class CommentController {
             @PathVariable UUID parentCommentId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
-
         log.info("User {} creating reply to comment {}", userId, parentCommentId);
         CreateCommentResponse response = commentCommandService.createReply(parentCommentId, userId, deviceId, request.content());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -147,8 +142,6 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody UpdateCommentRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
-
         log.info("User {} editing comment {}", userId, commentId);
         UpdateCommentResponse response = commentCommandService.updateComment(commentId, userId, request);
         return ResponseEntity.ok(response);
@@ -168,8 +161,6 @@ public class CommentController {
     public ResponseEntity<Void> deleteComment(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
-
-        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} deleting comment {}", userId, commentId);
         commentCommandService.deleteComment(commentId, userId);
@@ -191,8 +182,6 @@ public class CommentController {
     public ResponseEntity<CommentVoteResponse> toggleUpvote(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
-
-        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         CommentVoteResponse response = commentEngagementService.toggleUpvote(commentId, userId);
         return ResponseEntity.ok(response);
@@ -216,8 +205,6 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody CommentReportRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.REPORT, userId);
-
         log.info("User {} reporting comment {}", userId, commentId);
         CommentReportResponse response = commentEngagementService.reportComment(commentId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -239,8 +226,6 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId,
             @Valid @RequestBody ToggleNotificationRequest request) {
-
-        rateLimitService.check(RateLimitPolicy.COMMENT, userId);
 
         log.info("User {} toggling notifications for comment {}", userId, commentId);
         ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, userId, request.enabled());

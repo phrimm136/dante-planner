@@ -40,7 +40,6 @@ import java.util.UUID;
 public class PlannerCommandController {
 
     private final PlannerCommandService plannerCommandService;
-    private final RateLimitService rateLimitService;
 
     /**
      * Upsert a planner (create if not exists, update if exists).
@@ -63,7 +62,6 @@ public class PlannerCommandController {
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "upsert");
         log.info("Upserting planner {} for user {}, force={}", id, userId, force);
         UpsertResult result = plannerCommandService.upsertPlanner(userId, deviceId, id, request, force);
 
@@ -86,7 +84,6 @@ public class PlannerCommandController {
             @DeviceId UUID deviceId,
             @PathVariable UUID id) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "delete");
         log.info("Deleting planner {} for user {}", id, userId);
         plannerCommandService.deletePlanner(userId, deviceId, id);
         return ResponseEntity.noContent().build();
@@ -107,7 +104,6 @@ public class PlannerCommandController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ImportPlannersRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.IMPORT, userId);
         log.info("Importing {} planners for user {}", request.planners().size(), userId);
         ImportPlannersResponse response = plannerCommandService.importPlanners(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

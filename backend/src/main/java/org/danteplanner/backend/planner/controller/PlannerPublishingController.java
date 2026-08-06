@@ -35,7 +35,6 @@ import java.util.UUID;
 public class PlannerPublishingController {
 
     private final PlannerPublishingService plannerPublishingService;
-    private final RateLimitService rateLimitService;
 
     /**
      * Set the published status of a planner.
@@ -59,8 +58,6 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @RequestBody @Valid PublishRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "publish");
-
         log.info("Setting planner {} published={} by user {}", id, request.published(), userId);
         return ResponseEntity.ok(request.carriesContent()
                 ? plannerPublishingService.setPublishedWithContent(
@@ -83,8 +80,6 @@ public class PlannerPublishingController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
             @Valid @RequestBody ToggleNotificationRequest request) {
-
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "notifications-toggle");
 
         log.info("User {} toggling owner notifications for planner {}", userId, id);
         ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(userId, id, request.enabled());

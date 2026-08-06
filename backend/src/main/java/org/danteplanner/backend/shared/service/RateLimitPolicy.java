@@ -21,35 +21,57 @@ import org.danteplanner.backend.shared.config.RateLimitProperties.BucketConfig;
 public enum RateLimitPolicy {
 
     /** Ordinary write/read traffic; the endpoint is named per call, one bucket per route. */
-    CRUD(RateLimitProperties::getCrud, null, ""),
+    CRUD(RateLimitProperties::getCrud, null, "", Subject.USER),
 
-    IMPORT(RateLimitProperties::getImportConfig, "import", ""),
+    IMPORT(RateLimitProperties::getImportConfig, "import", "", Subject.USER),
 
-    SSE(RateLimitProperties::getSse, "sse", ""),
+    SSE(RateLimitProperties::getSse, "sse", "", Subject.USER),
 
-    COMMENT(RateLimitProperties::getComment, "comment", ""),
+    COMMENT(RateLimitProperties::getComment, "comment", "", Subject.USER),
 
-    REPORT(RateLimitProperties::getReport, "report", ""),
+    REPORT(RateLimitProperties::getReport, "report", "", Subject.USER),
 
-    MODERATION(RateLimitProperties::getModeration, "moderation", ""),
+    MODERATION(RateLimitProperties::getModeration, "moderation", "", Subject.USER),
 
     /** Reachable before a user exists, so the subject is a client identifier ({@code ip:} / {@code device:}). */
-    AUTH(RateLimitProperties::getAuth, "auth", ""),
+    AUTH(RateLimitProperties::getAuth, "auth", "", Subject.CLIENT),
 
     /** Guests may subscribe, so the subject is a client identifier ({@code ip:} / {@code device:}). */
-    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "");
+    PLANNER_COMMENT_SSE(RateLimitProperties::getSse, "planner-comment-sse", "", Subject.CLIENT);
+
+    /** What a policy's buckets are keyed by, and therefore what a charger must resolve first. */
+    public enum Subject {
+
+        /** The authenticated account; the policy's endpoints are all behind authentication. */
+        USER,
+
+        /** A pre-authentication client identifier ({@code ip:} / {@code device:}). */
+        CLIENT
+    }
 
     private final Function<RateLimitProperties, BucketConfig> bucket;
     private final String endpoint;
     private final String subjectPrefix;
+    private final Subject subject;
 
     RateLimitPolicy(
             Function<RateLimitProperties, BucketConfig> bucket,
             String endpoint,
-            String subjectPrefix) {
+            String subjectPrefix,
+            Subject subject) {
         this.bucket = bucket;
         this.endpoint = endpoint;
         this.subjectPrefix = subjectPrefix;
+        this.subject = subject;
+    }
+
+    /**
+     * What identifies the caller this policy charges.
+     *
+     * @return the subject kind
+     */
+    public Subject subject() {
+        return subject;
     }
 
     BucketConfig bucket(RateLimitProperties properties) {

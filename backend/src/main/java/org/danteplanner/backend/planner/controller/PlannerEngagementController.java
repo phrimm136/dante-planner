@@ -43,7 +43,6 @@ public class PlannerEngagementController {
 
     private final PlannerEngagementService plannerEngagementService;
     private final PlannerSubscriptionService subscriptionService;
-    private final RateLimitService rateLimitService;
     private final MeterRegistry meterRegistry;
 
     /**
@@ -64,7 +63,6 @@ public class PlannerEngagementController {
             @PathVariable UUID id,
             @Valid @RequestBody VoteRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "vote");
         log.info("User {} casting immutable upvote on planner {}", userId, id);
         VoteResponse response = plannerEngagementService.castVote(userId, id, request.voteType());
         return ResponseEntity.ok(response);
@@ -91,8 +89,6 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
             @Valid @RequestBody(required = false) BookmarkRequest request) {
-
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "bookmark");
 
         if (request != null && request.namesState()) {
             log.info("User {} setting bookmark={} on planner {}", userId, request.bookmarked(), id);
@@ -121,7 +117,6 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "subscribe");
         log.info("User {} toggling subscription on planner {}", userId, id);
         var subscription = subscriptionService.toggleSubscription(userId, id);
         SubscriptionResponse response = SubscriptionResponse.builder()
@@ -147,7 +142,6 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        rateLimitService.check(RateLimitPolicy.REPORT, userId);
         log.info("User {} reporting planner {}", userId, id);
         plannerEngagementService.reportPlanner(userId, id);
         PlannerActionResponse response = PlannerActionResponse.builder()

@@ -29,7 +29,6 @@ import java.util.UUID;
 public class PlannerSseController {
 
     private final SseService sseService;
-    private final RateLimitService rateLimitService;
 
     /**
      * Subscribe to Server-Sent Events for planner updates.
@@ -47,7 +46,6 @@ public class PlannerSseController {
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId) {
 
-        rateLimitService.check(RateLimitPolicy.SSE, userId);
         log.info("SSE subscription for user {} device {}", userId, deviceId);
         return sseService.subscribe(userId, deviceId);
     }

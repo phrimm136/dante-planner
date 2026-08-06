@@ -4,13 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.config.DeviceId;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
-import org.danteplanner.backend.shared.config.SecurityProperties;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
@@ -18,7 +15,6 @@ import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
 import org.danteplanner.backend.auth.oauth.OAuthStateService;
 import org.danteplanner.backend.auth.oauth.OAuthStateService.OAuthTransaction;
 import org.danteplanner.backend.auth.token.TokenValidator;
-import org.danteplanner.backend.shared.util.ClientIpResolver;
 import org.danteplanner.backend.shared.util.CookieConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
@@ -38,7 +34,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * REST controller for authentication endpoints.
@@ -54,11 +49,9 @@ public class AuthController {
 
     private final AuthenticationService authService;
     private final TokenValidator tokenValidator;
-    private final RateLimitService rateLimitService;
     private final OAuthProperties oAuthProperties;
     private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;
-    private final SecurityProperties securityProperties;
     private final OAuthStateService oAuthStateService;
     private final OAuthProviderRegistry providerRegistry;
     private final FrontendProperties frontendProperties;
@@ -108,9 +101,8 @@ public class AuthController {
      * @param code        authorization code from Google (absent on user denial)
      * @param state       state echoed back by Google
      * @param error       error code if the user denied consent or Google failed
-     * @param httpRequest HTTP request for rate-limit identity and reading {@code oauth_tx}
+     * @param httpRequest HTTP request for reading {@code oauth_tx}
      * @param response    HTTP response for setting/clearing cookies
-     * @param deviceId    device identifier for rate limiting
      * @return 302 redirect to the SPA root on success, or to the SPA error route on rejection
      */
     @RateLimited(RateLimitPolicy.AUTH)
@@ -120,25 +112,16 @@ public class AuthController {
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error,
             HttpServletRequest httpRequest,
-            HttpServletResponse response,
-            @DeviceId UUID deviceId) {
+            HttpServletResponse response) {
 
         // Read and clear the transient oauth_tx up front so it is cleared on EVERY exit path
-        // (success, rejection, rate-limit, or exchange failure).
+        // (success, rejection, or exchange failure).
         String oauthTx = cookieUtils.getCookieValue(httpRequest, CookieConstants.OAUTH_TX);
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         // This is a top-level browser-redirect endpoint: any failure must land the user back on the
-        // SPA error route, never a JSON error body from GlobalExceptionHandler. The rate-limit check
-        // and the token exchange both run inside the guard.
+        // SPA error route, never a JSON error body from GlobalExceptionHandler.
         try {
-            String identifier = ClientIpResolver.resolveClientIdentifier(
-                    httpRequest,
-                    securityProperties,
-                    deviceId
-            );
-            rateLimitService.check(RateLimitPolicy.AUTH, identifier);
-
             if (error != null || code == null || code.isBlank() || state == null) {
                 return redirect(frontendProperties.getUrl() + LOGIN_ERROR_PATH);
             }
@@ -171,18 +154,7 @@ public class AuthController {
 
     @RateLimited(RateLimitPolicy.AUTH)
     @PostMapping("/apple/callback")
-    public ResponseEntity<UserDto> appleCallback(
-            HttpServletRequest httpRequest,
-            @DeviceId UUID deviceId) {
-
-        // Apply rate limiting by client identifier (IP or device ID)
-        String identifier = ClientIpResolver.resolveClientIdentifier(
-                httpRequest,
-                securityProperties,
-                deviceId
-        );
-        rateLimitService.check(RateLimitPolicy.AUTH, identifier);
-
+    public ResponseEntity<UserDto> appleCallback() {
         // Apple OAuth not yet implemented
         return ResponseEntity.badRequest().build();
     }

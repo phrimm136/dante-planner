@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserDto;
 import org.danteplanner.backend.user.dto.EpithetListResponse;
@@ -48,7 +47,6 @@ public class UserController {
     private final UserSettingsService userSettingsService;
     private final SsePublisher ssePublisher;
     private final EpithetConfig epithetConfig;
-    private final RateLimitService rateLimitService;
     private final UserSessionService userSessionService;
     private final CookieUtils cookieUtils;
     private final int gracePeriodDays;
@@ -59,7 +57,6 @@ public class UserController {
             UserSettingsService userSettingsService,
             SsePublisher ssePublisher,
             EpithetConfig epithetConfig,
-            RateLimitService rateLimitService,
             UserSessionService userSessionService,
             CookieUtils cookieUtils,
             @Value("${app.user.deletion.grace-period-days:30}") int gracePeriodDays) {
@@ -68,7 +65,6 @@ public class UserController {
         this.userSettingsService = userSettingsService;
         this.ssePublisher = ssePublisher;
         this.epithetConfig = epithetConfig;
-        this.rateLimitService = rateLimitService;
         this.userSessionService = userSessionService;
         this.cookieUtils = cookieUtils;
         this.gracePeriodDays = gracePeriodDays;
@@ -103,7 +99,6 @@ public class UserController {
     public ResponseEntity<UserDto> updateUsernameEpithet(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUsernameEpithetRequest request) {
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-epithet-update");
         log.info("User {} updating username epithet to {}", userId, request.epithet());
 
         User updatedUser = userService.updateUsernameEpithet(userId, request.epithet());
@@ -129,7 +124,6 @@ public class UserController {
             @AuthenticationPrincipal Long userId,
             HttpServletRequest request,
             HttpServletResponse response) {
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-delete");
         log.info("User {} requested account deletion", userId);
 
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
@@ -177,7 +171,6 @@ public class UserController {
     public ResponseEntity<UserSettingsResponse> updateSettings(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUserSettingsRequest request) {
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "user-settings-update");
         log.debug("User {} updating settings", userId);
 
         UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);

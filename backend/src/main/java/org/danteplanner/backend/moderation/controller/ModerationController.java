@@ -51,7 +51,6 @@ public class ModerationController {
     private final PlannerModerationService plannerModerationService;
     private final CommentModerationService commentModerationService;
     private final ModerationQueryService moderationQueryService;
-    private final RateLimitService rateLimitService;
 
     /**
      * Timeout a user for a specified duration.
@@ -69,8 +68,6 @@ public class ModerationController {
             @AuthenticationPrincipal Long actorId,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody TimeoutRequest request) {
-
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} timing out user with suffix {} for {} minutes with reason: {}",
                 actorId, usernameSuffix, request.durationMinutes(), request.reason());
@@ -95,8 +92,6 @@ public class ModerationController {
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
-
         log.info("Moderator {} removing timeout from user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
         User user = userModerationService.removeTimeoutBySuffix(actorId, usernameSuffix, request.reason());
@@ -117,8 +112,6 @@ public class ModerationController {
     public ResponseEntity<UnpublishPlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long actorId,
             @PathVariable UUID plannerId) {
-
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} unpublishing planner {}", actorId, plannerId);
 
@@ -144,8 +137,6 @@ public class ModerationController {
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
-
         log.info("Admin {} banning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
         User user = userModerationService.banUserBySuffix(actorId, usernameSuffix, request.reason());
@@ -167,8 +158,6 @@ public class ModerationController {
             @AuthenticationPrincipal Long actorId,
             @PathVariable String usernameSuffix,
             @Valid @RequestBody BanRequest request) {
-
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Admin {} unbanning user with suffix {} with reason: {}", actorId, usernameSuffix, request.reason());
 
@@ -241,8 +230,6 @@ public class ModerationController {
             @PathVariable UUID plannerId,
             @Valid @RequestBody BanRequest request) {
 
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
-
         log.info("Moderator {} taking down planner {} with reason: {}", actorId, plannerId, request.reason());
 
         plannerModerationService.deletePlanner(actorId, plannerId, request.reason());
@@ -266,8 +253,6 @@ public class ModerationController {
             @AuthenticationPrincipal Long actorId,
             @PathVariable UUID commentPublicId,
             @Valid @RequestBody BanRequest request) {
-
-        rateLimitService.check(RateLimitPolicy.MODERATION, actorId);
 
         log.info("Moderator {} deleting comment {} with reason: {}", actorId, commentPublicId, request.reason());
         commentModerationService.deleteCommentByPublicId(actorId, commentPublicId, request.reason());

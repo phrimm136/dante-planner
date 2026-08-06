@@ -33,7 +33,6 @@ import java.util.UUID;
 public class PlannerQueryController {
 
     private final PlannerQueryService plannerQueryService;
-    private final RateLimitService rateLimitService;
     private final ByIdReadGuard byIdReadGuard;
 
     /**
@@ -49,7 +48,6 @@ public class PlannerQueryController {
             @AuthenticationPrincipal Long userId,
             Pageable pageable) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "list");
         log.debug("Fetching planners for user {} with pagination: {}", userId, pageable);
         Page<PlannerSummaryResponse> planners = plannerQueryService.getPlanners(userId, pageable);
         return ResponseEntity.ok(planners);
@@ -68,7 +66,6 @@ public class PlannerQueryController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        rateLimitService.check(RateLimitPolicy.CRUD, userId, "get");
         log.debug("Fetching planner {} for user {}", id, userId);
         PlannerResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
                 () -> plannerQueryService.getPlanner(userId, id));
