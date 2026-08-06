@@ -241,21 +241,19 @@ public class Planner implements Persistable<UUID> {
     }
 
     /**
-     * Drive the published state to {@code target}, stamping firstPublishedAt on the first
-     * transition into published.
+     * Publish this planner, stamping firstPublishedAt on the first transition into published.
      *
-     * <p>Idempotent: applying the state the planner already holds changes nothing, so a retry or a
-     * failover cannot flip it back. A moderator takedown blocks publishing but not unpublishing.</p>
+     * <p>Idempotent: publishing a planner already published changes nothing, so a retry or a
+     * failover cannot flip it back.</p>
      *
-     * @param target the desired published state
      * @return what the transition turned out to be
-     * @throws PlannerForbiddenException if publishing a planner taken down by a moderator
+     * @throws PlannerForbiddenException if the planner was taken down by a moderator
      */
-    public PublicationChange setPublished(boolean target) {
-        if (target && moderation.isTakenDown()) {
+    public PublicationChange publish() {
+        if (moderation.isTakenDown()) {
             throw new PlannerForbiddenException(id);
         }
-        return publication.setPublished(target);
+        return publication.setPublished(true);
     }
 
     /**
@@ -266,11 +264,14 @@ public class Planner implements Persistable<UUID> {
     }
 
     /**
-     * Unpublish this planner. No moderation side effects.
+     * Withdraw this planner from public view. No moderation side effects, and a takedown does not
+     * block it.
      *
-     * @return whether the planner was published before this call
+     * <p>Idempotent: withdrawing a planner already withdrawn changes nothing.</p>
+     *
+     * @return what the transition turned out to be
      */
-    public boolean unpublish() {
-        return publication.unpublish().changed();
+    public PublicationChange unpublish() {
+        return publication.unpublish();
     }
 }

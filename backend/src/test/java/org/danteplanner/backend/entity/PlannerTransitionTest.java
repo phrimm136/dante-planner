@@ -3,6 +3,7 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
+import org.danteplanner.backend.planner.entity.PublicationChange;
 
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.junit.jupiter.api.Test;
@@ -41,51 +42,51 @@ class PlannerTransitionTest {
     }
 
     @Test
-    void setPublished_WhenTakenDown_Throws() {
+    void publish_WhenTakenDown_Throws() {
         UUID plannerId = UUID.randomUUID();
         Planner planner = planner(plannerId,
                 PlannerContent.builder().build(),
                 PlannerPublication.builder().published(false).build(),
                 PlannerModeration.builder().takenDownAt(Instant.now()).build());
 
-        assertThatThrownBy(() -> planner.setPublished(true))
+        assertThatThrownBy(planner::publish)
                 .isInstanceOf(PlannerForbiddenException.class)
                 .extracting(ex -> ((PlannerForbiddenException) ex).getPlannerId())
                 .isEqualTo(plannerId);
     }
 
     @Test
-    void setPublished_WhenFirstPublish_StampsFirstPublishedAtOnce() {
+    void publish_WhenFirstPublish_StampsFirstPublishedAtOnce() {
         Planner planner = planner(UUID.randomUUID(),
                 PlannerContent.builder().build(),
                 PlannerPublication.builder().published(false).build(),
                 PlannerModeration.builder().build());
 
-        planner.setPublished(true);
+        planner.publish();
         Instant firstStamp = planner.getFirstPublishedAt();
 
         assertThat(planner.getPublished()).isTrue();
         assertThat(firstStamp).isNotNull();
 
-        planner.setPublished(false);
+        planner.unpublish();
         assertThat(planner.getPublished()).isFalse();
 
-        planner.setPublished(true);
+        planner.publish();
         assertThat(planner.getPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt()).isEqualTo(firstStamp);
     }
 
     @Test
-    void setPublished_WhenAlreadyInThatState_ChangesNothing() {
+    void publish_WhenAlreadyPublished_ChangesNothing() {
         Planner planner = planner(UUID.randomUUID(),
                 PlannerContent.builder().build(),
                 PlannerPublication.builder().published(false).build(),
                 PlannerModeration.builder().build());
 
-        planner.setPublished(true);
+        planner.publish();
         Instant firstStamp = planner.getFirstPublishedAt();
 
-        planner.setPublished(true);
+        assertThat(planner.publish()).isEqualTo(PublicationChange.NONE);
 
         assertThat(planner.getPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt())

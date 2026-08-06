@@ -159,7 +159,8 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
 
-            Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::unpublish);
+            Planner result = publishingService.withdrawFromPublicView(
+                    planner.getId(), aggregate -> aggregate.unpublish().changed());
 
             assertSame(planner, result);
             verify(plannerRepository, never()).save(any(Planner.class));
@@ -174,7 +175,8 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.save(any(Planner.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::unpublish);
+            Planner result = publishingService.withdrawFromPublicView(
+                    planner.getId(), aggregate -> aggregate.unpublish().changed());
 
             assertFalse(result.getPublished());
             verify(plannerRepository).save(planner);

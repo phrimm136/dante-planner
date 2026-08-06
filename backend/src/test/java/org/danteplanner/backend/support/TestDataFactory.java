@@ -259,7 +259,9 @@ public class TestDataFactory {
                             .build(),
                     PlannerPublication.builder().build(),
                     PlannerModeration.builder().build());
-            planner.setPublished(published);
+            if (published) {
+                planner.publish();
+            }
             if (firstPublishedAt != null) {
                 planner.getPublication().setFirstPublishedAt(firstPublishedAt);
             }

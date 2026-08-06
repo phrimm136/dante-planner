@@ -142,7 +142,7 @@ public class PlannerPublishingService {
             throw new PlannerForbiddenException(plannerId);
         }
 
-        PublicationChange change = planner.setPublished(published);
+        PublicationChange change = published ? planner.publish() : planner.unpublish();
         if (!change.changed()) {
             return PlannerResponse.fromEntity(planner, plannerStatsRepository.upvotesOf(plannerId));
         }
