@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.danteplanner.backend.comment.service.PlannerCommentSseService;
+import org.danteplanner.backend.planner.event.PlannerSyncEvent;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.danteplanner.backend.shared.sse.SseRedisSubscriber;
@@ -22,6 +23,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,6 +66,24 @@ class PlannerSyncEventServiceTest {
                 publishedJson.getBytes(StandardCharsets.UTF_8)), null);
 
         verify(sseService).sendToUser(eq(1L), eq(originatingDeviceId), eq("updated"), any());
+    }
+
+    /**
+     * The forwarding half of the moved planner-sync announcement. The command side proves the
+     * event is raised; a listener that stops receiving fails none of those assertions.
+     */
+    @Test
+    void onPlannerSynced_WhenEventDelivered_ForwardsEveryFieldToThePublisher() {
+        SsePublisher publisher = mock(SsePublisher.class);
+        PlannerSyncEventService service = new PlannerSyncEventService(sseService, publisher);
+        UUID originatingDeviceId = UUID.randomUUID();
+        UUID plannerId = UUID.randomUUID();
+
+        service.onPlannerSynced(new PlannerSyncEvent(
+                7L, originatingDeviceId, plannerId, SseEventType.DELETED, null));
+
+        verify(publisher).publishUserEvent(
+                7L, originatingDeviceId, SseEventType.DELETED, plannerId.toString(), null);
     }
 
     @Test

@@ -7,6 +7,7 @@ import org.danteplanner.backend.notification.entity.Notification;
 import org.danteplanner.backend.notification.entity.NotificationType;
 import org.danteplanner.backend.notification.repository.NotificationRepository;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
@@ -21,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -36,23 +38,30 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 /**
- * Which side of the commit a comment's announcements land on.
+ * Which side of the commit each announcement lands on, and that it lands at all.
  *
  * <p>A comment write touches two stores that share no transaction: the notification row goes to
  * MySQL, the SSE announcement to Redis. The row is committed with the comment that caused it, and
  * the announcement follows that commit — so a rollback costs both, and a lost announcement costs
  * neither.</p>
+ *
+ * <p>Half of these assert that a delivery happens rather than that one does not. A negative
+ * assertion passes just as well when the listener has quietly stopped receiving anything, and an
+ * {@code @TransactionalEventListener} whose binding breaks drops its event in silence rather than
+ * failing.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles("it")
 @Tag("containerized")
-@Import({TestConfig.class, CommentEffectPlacementIT.SilentPublisherConfig.class})
-class CommentEffectPlacementIT extends SharedMySqlContainerSupport {
+@Import({TestConfig.class, EffectPlacementIT.SilentPublisherConfig.class})
+class EffectPlacementIT extends SharedMySqlContainerSupport {
 
     /**
      * Stands in for every subscriber. Nothing this receives reaches anyone, which is what lets a
@@ -84,6 +93,9 @@ class CommentEffectPlacementIT extends SharedMySqlContainerSupport {
 
     @Autowired
     private PlatformTransactionManager transactionManager;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     private User owner;
     private User commenter;
@@ -137,6 +149,38 @@ class CommentEffectPlacementIT extends SharedMySqlContainerSupport {
         assertThat(notificationRepository.findByPublicId(UUID.fromString(announced.getValue())))
                 .as("an announcement names committed data or it invented it")
                 .isPresent();
+    }
+
+    @Test
+    @DisplayName("A committed comment reaches the fan-out")
+    void commentFanOut_WhenTheTransactionCommits_ReachesThePublisher() {
+        commentCommandService.createComment(planner.getId(), commenter.getId(), UUID.randomUUID(),
+                new CreateCommentRequest("A comment the planner's readers should hear about", null));
+
+        verify(ssePublisher, timeout(5000)).publishCommentEvent(
+                eq(planner.getId()), eq(SseEventType.COMMENT_ADDED), any(),
+                eq(commenter.getId()), any());
+    }
+
+    /**
+     * The recommended push is raised inside a REQUIRES_NEW transaction that an after-commit
+     * listener started, and is then itself delivered after that inner commit. Nothing about that
+     * nesting is checked by the compiler, and a listener that stops being bound drops its event
+     * without failing, so the delivery is asserted directly.
+     */
+    @Test
+    @DisplayName("A recommendation raised from an after-commit listener still reaches the publisher")
+    void recommendedPush_WhenRaisedInsideAnAfterCommitListener_ReachesThePublisher() {
+        new TransactionTemplate(transactionManager).executeWithoutResult(status ->
+                eventPublisher.publishEvent(new PlannerRecommendedEvent(
+                        this, planner.getId(), planner.getTitle(), owner.getId(), 4, 5)));
+
+        verify(ssePublisher, timeout(5000)).publishUserEvent(
+                eq(owner.getId()), isNull(), eq(SseEventType.NOTIFY_RECOMMENDED), any(), any());
+
+        assertThat(notificationsFor(owner))
+                .as("the push rides a row that its REQUIRES_NEW transaction had to commit first")
+                .hasSize(1);
     }
 
     private List<Notification> notificationsFor(User recipient) {
