@@ -17,6 +17,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.redis.core.RedisCallback;
@@ -64,9 +65,16 @@ public class TokenBlacklistService {
     private static final String BLACKLIST_CHECK_SKIPPED_COUNTER = "blacklist_check_skipped_total";
 
     /**
-     * KEYS are the blacklist keys of the tokens being revoked, followed by the keys of the
-     * families being revoked; ARGV is the blacklist entry value, the token count that splits
-     * KEYS, one TTL per token, the family revocation stamp, and the family TTL.
+     * Argument protocol, where {@code n} is the token count in {@code ARGV[2]}:
+     * <ul>
+     *   <li>{@code KEYS[1..n]} — the blacklist keys of the tokens being revoked</li>
+     *   <li>{@code KEYS[n+1..#KEYS]} — the keys of the families being revoked</li>
+     *   <li>{@code ARGV[1]} — the blacklist entry value</li>
+     *   <li>{@code ARGV[2]} — {@code n}, the count that splits KEYS</li>
+     *   <li>{@code ARGV[3..n+2]} — one TTL per token, in {@code KEYS[1..n]} order</li>
+     *   <li>{@code ARGV[n+3]} — the family revocation stamp</li>
+     *   <li>{@code ARGV[n+4]} — the family TTL</li>
+     * </ul>
      */
     private static final String LOGOUT_REVOKE_SCRIPT =
             "local tokens = tonumber(ARGV[2])\n"
@@ -131,7 +139,7 @@ public class TokenBlacklistService {
      *
      * @param revocations the credentials to withdraw
      */
-    public void revokeLogoutSession(Collection<LogoutRevocation> revocations) {
+    public void revokeLogoutSession(@NonNull Collection<LogoutRevocation> revocations) {
         long now = System.currentTimeMillis();
 
         List<String> tokenKeys = new ArrayList<>();
@@ -239,7 +247,7 @@ public class TokenBlacklistService {
      * @param userId the user whose tokens should be invalidated
      * @throws NullPointerException if {@code userId} is null
      */
-    public void invalidateUserTokens(Long userId) {
+    public void invalidateUserTokens(@NonNull Long userId) {
         Objects.requireNonNull(userId, "userId");
         // Floored to the second because a JWT's iat carries no sub-second component: an
         // unfloored stamp would reject a token minted later in the same second as the
@@ -276,7 +284,7 @@ public class TokenBlacklistService {
      * @param userId the user whose invalidation should be cleared
      * @throws NullPointerException if {@code userId} is null
      */
-    public void clearUserInvalidation(Long userId) {
+    public void clearUserInvalidation(@NonNull Long userId) {
         Objects.requireNonNull(userId, "userId");
         stringRedisTemplate.delete(userInvalidationKey(userId));
     }
