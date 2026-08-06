@@ -415,6 +415,16 @@ final class ValidatorGoldenCorpus {
                 "[{\"difficulty\":0,\"giftIds\":[\"9004\"]}]")));
         entries.add(draft("silence-floor-previous-element-not-object", valid().with("floorSelections",
                 "[5,{\"themePackId\":\"1002\",\"difficulty\":0,\"giftIds\":[]}]")));
+        // A sixth floor under a five-floor category: traversal stops at the category's count, so
+        // the defective floor past it is never looked at. Its gift is unaffordable, the deepest
+        // check a floor reaches, so widening or dropping that bound surfaces here.
+        entries.add(draft("silence-floor-beyond-category-count", valid().with("floorSelections",
+                "[{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[]},"
+                        + "{\"themePackId\":\"1001\",\"difficulty\":0,\"giftIds\":[\"9004\"]}]")));
         entries.add(draft("silence-identity-not-object", valid().with("equipment", equipmentWith(
                 Map.of("05", "\"05\":{\"identity\":5,"
                         + "\"egos\":{\"ZAYIN\":{\"id\":\"20501\",\"threadspin\":4}}}")))));

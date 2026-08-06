@@ -456,6 +456,9 @@ accepted
 ### silence-floor-previous-element-not-object
 accepted
 
+### silence-floor-beyond-category-count
+accepted
+
 ### silence-identity-not-object
 code: VALIDATION_ERROR
 message: [INVALID_FIELD_TYPE] Field 'equipment[05].identity' has wrong type, expected object
