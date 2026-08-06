@@ -5,6 +5,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
+import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStats;
@@ -40,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Publish flow over the projections: an owner's title edit on a published
  * planner is visible in the list and detail from the same request on, and
  * publishing is one content-carrying request that upserts and sets published
- * atomically. Unpublish stays a bodyless toggle.
+ * atomically. Unpublish carries no body.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -203,5 +205,47 @@ class PlannerPublishFlowIT {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.published").value(false));
         assertThat(catalogRepository.existsById(plannerId)).isFalse();
+    }
+
+    @Test
+    @DisplayName("publish-intent-single-request: the intent route's body creates the draft server-side and publishes it")
+    void publishIntentSingleRequest_WhenContentCarried_CreatesAndPublishesAtomically() throws Exception {
+        UUID plannerId = UUID.randomUUID();
+        String content = TestDataFactory.planner(owner).build().getContentJson();
+        PublishRequest publishRequest = new PublishRequest(
+                plannerId.toString(), "5F", "Intent One-Shot", PlannerStatus.SAVED,
+                content, 7, PlannerType.MIRROR_DUNGEON, null, null);
+
+        mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId)
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(publishRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.published").value(true))
+                .andExpect(jsonPath("$.title").value("Intent One-Shot"));
+
+        assertThat(plannerRepository.existsById(plannerId))
+                .as("the single request created the planner").isTrue();
+        assertThat(catalogRepository.existsById(plannerId))
+                .as("the single request published it (catalog row present)").isTrue();
+        assertThat(entityFilterRows(plannerId))
+                .as("the single request built the filter index").isPositive();
+    }
+
+    @Test
+    @DisplayName("publish-intent-rejects-partial-content: an incomplete body is refused before anything is stored")
+    void publishIntentSingleRequest_WhenContentIncomplete_Returns400AndStoresNothing() throws Exception {
+        UUID plannerId = UUID.randomUUID();
+
+        mockMvc.perform(post("/api/planner/md/{id}/publish", plannerId)
+                        .cookie(AuthCookies.accessToken(token))
+                        .with(withCsrf())
+                        .contentType(APPLICATION_JSON)
+                        .content("{\"id\":\"" + plannerId + "\",\"title\":\"No Category\"}"))
+                .andExpect(status().isBadRequest());
+
+        assertThat(plannerRepository.existsById(plannerId))
+                .as("a refused body creates nothing").isFalse();
     }
 }

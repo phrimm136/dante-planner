@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.service.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
-import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.dto.PublishRequest;
 import org.danteplanner.backend.shared.dto.ToggleNotificationRequest;
 import org.danteplanner.backend.planner.dto.ToggleOwnerNotificationsResponse;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
@@ -48,7 +48,7 @@ public class PlannerPublishingController {
      *
      * @param userId  the authenticated user ID (must be owner)
      * @param id      the planner ID
-     * @param content the document to store before publishing, absent to publish the stored one
+     * @param request the document to store before publishing, absent to publish the stored one
      * @return the published planner response
      */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "publish")
@@ -56,12 +56,12 @@ public class PlannerPublishingController {
     public ResponseEntity<PlannerResponse> publishPlanner(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
-            @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
+            @RequestBody(required = false) @Valid PublishRequest request) {
 
         log.info("Publishing planner {} by user {}", id, userId);
-        return ResponseEntity.ok(content == null
+        return ResponseEntity.ok(request == null
                 ? plannerPublishingService.publish(userId, id)
-                : plannerPublishingService.publish(userId, id, content));
+                : plannerPublishingService.publish(userId, id, request.toUpsertRequest()));
     }
 
     /**
@@ -72,7 +72,7 @@ public class PlannerPublishingController {
      *
      * @param userId  the authenticated user ID (must be owner)
      * @param id      the planner ID
-     * @param content the document to store before withdrawing, absent to withdraw the stored one
+     * @param request the document to store before withdrawing, absent to withdraw the stored one
      * @return the withdrawn planner response
      */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "unpublish")
@@ -80,12 +80,12 @@ public class PlannerPublishingController {
     public ResponseEntity<PlannerResponse> unpublishPlanner(
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id,
-            @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
+            @RequestBody(required = false) @Valid PublishRequest request) {
 
         log.info("Unpublishing planner {} by user {}", id, userId);
-        return ResponseEntity.ok(content == null
+        return ResponseEntity.ok(request == null
                 ? plannerPublishingService.unpublish(userId, id)
-                : plannerPublishingService.unpublish(userId, id, content));
+                : plannerPublishingService.unpublish(userId, id, request.toUpsertRequest()));
     }
 
     /**
@@ -109,7 +109,7 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @RequestBody @Valid LegacyPublishRequest request) {
 
-        UpsertPlannerRequest content = request.carriesContent() ? request.toUpsertRequest() : null;
+        PublishRequest content = request.carriesContent() ? request.toPublishRequest() : null;
         return request.published()
                 ? publishPlanner(userId, id, content)
                 : unpublishPlanner(userId, id, content);
