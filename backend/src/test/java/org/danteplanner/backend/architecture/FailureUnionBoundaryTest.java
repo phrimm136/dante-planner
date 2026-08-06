@@ -23,10 +23,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * may produce and consume one through helpers, and a facade owning no transaction may return one,
  * but no {@code @Transactional} method declares one as its return type.</p>
  *
- * <p>The rule body is shared with a fixture that violates it on purpose. A rule only ever asserted
- * against a passing codebase demonstrates that the codebase passes, not that the rule rejects
- * anything, and the two cases fail for opposite reasons: a broken rule that matches nothing leaves
- * the first test green and the second red.</p>
+ * <p>The rule body is shared with fixtures that violate it on purpose, one annotated on the method
+ * and one on the class. A rule only ever asserted against a passing codebase demonstrates that the
+ * codebase passes, not that the rule rejects anything, and the two cases fail for opposite reasons:
+ * a broken rule that matches nothing leaves the first test green and the second red.</p>
+ *
+ * <p>Known bound: the rule reads the declared raw return type, so a union wrapped in an
+ * {@code Optional} or a collection passes unremarked. That is the convention as worded — the union
+ * itself is what may not be declared across the proxy.</p>
  */
 class FailureUnionBoundaryTest {
 
@@ -54,11 +58,15 @@ class FailureUnionBoundaryTest {
     }
 
     @Test
-    @DisplayName("the rule names the offending method when one exists")
+    @DisplayName("the rule names the offending method when one exists, annotated either way")
     void offendingMethod_WhenTheRuleRunsOverTheFixture_IsNamed() {
         assertThat(offendersIn(FIXTURE_CLASSES))
-                .as("the rule above passes vacuously unless this one shows it rejecting a violation")
-                .containsExactly(FIXTURE_PACKAGE + ".TransactionalUnionReturner.settle");
+                .as("the rule above passes vacuously unless this one shows it rejecting a violation, "
+                        + "and no class in main sources is annotated at class level to exercise that "
+                        + "half of the condition")
+                .containsExactly(
+                        FIXTURE_PACKAGE + ".ClassTransactionalUnionReturner.settle",
+                        FIXTURE_PACKAGE + ".TransactionalUnionReturner.settle");
     }
 
     /**
