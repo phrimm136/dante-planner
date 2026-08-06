@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.IntFunction;
+
+import static org.danteplanner.backend.planner.validation.JsonTraversal.arrayField;
+import static org.danteplanner.backend.planner.validation.JsonTraversal.eachUniqueString;
 
 /**
  * Validates that equipment, EGO, gift and floor-selection IDs exist in game
@@ -197,32 +199,11 @@ class IdReferenceValidator {
     }
 
     private void validateGiftIdArray(JsonNode root, String fieldName, ValidationContext context) {
-        JsonNode array = root.get(fieldName);
-        if (array == null || !array.isArray()) {
-            return;
-        }
-
-        Set<String> seenGiftIds = new HashSet<>();
-
-        for (int i = 0; i < array.size(); i++) {
-            JsonNode node = array.get(i);
-
-            if (!node.isTextual()) {
-                context.reject(fieldName + "[" + i + "]", p -> ValidationErrors.invalidFieldType(p, "string", node));
-                continue;
-            }
-
-            String giftId = node.asText();
-
-            if (!seenGiftIds.add(giftId)) {
-                context.reject(fieldName, p -> ValidationErrors.duplicateValue(p, giftId));
-                continue;
-            }
-
+        eachUniqueString(arrayField(root, fieldName), fieldName, context, (giftId, index) -> {
             if (!gameDataRegistry.hasEgoGift(giftId)) {
                 context.reject(fieldName, p -> ValidationErrors.invalidIdReference(p, giftId));
             }
-        }
+        });
     }
 
     void validateFloorSelectionIds(JsonNode root, String category, ValidationContext context) {
@@ -313,42 +294,22 @@ class IdReferenceValidator {
 
     private void validateFloorGiftIds(String floorPath, JsonNode floor, String themePackId,
                                       ValidationContext context) {
-        JsonNode giftIds = floor.get("giftIds");
-        if (giftIds == null || !giftIds.isArray()) {
-            return;
-        }
+        String giftsPath = floorPath + ".giftIds";
 
-        Set<String> seenFloorGiftIds = new HashSet<>();
-
-        for (int j = 0; j < giftIds.size(); j++) {
-            JsonNode giftNode = giftIds.get(j);
-
-            if (!giftNode.isTextual()) {
-                context.reject(floorPath + ".giftIds[" + j + "]",
-                        p -> ValidationErrors.invalidFieldType(p, "string", giftNode));
-                continue;
-            }
-
-            String giftId = giftNode.asText();
-
-            if (!seenFloorGiftIds.add(giftId)) {
-                context.reject(floorPath + ".giftIds", p -> ValidationErrors.duplicateValue(p, giftId));
-                continue;
-            }
-
+        eachUniqueString(arrayField(floor, "giftIds"), giftsPath, context, (giftId, index) -> {
             if (!gameDataRegistry.hasEgoGift(giftId)) {
-                context.reject(floorPath + ".giftIds", p -> ValidationErrors.invalidIdReference(p, giftId));
-                continue;
+                context.reject(giftsPath, p -> ValidationErrors.invalidIdReference(p, giftId));
+                return;
             }
 
             if (themePackId == null) {
-                continue;
+                return;
             }
 
             if (!gameDataRegistry.isGiftAffordableForThemePack(giftId, themePackId)) {
-                context.reject(floorPath + ".giftIds[" + j + "]",
+                context.reject(giftsPath + "[" + index + "]",
                         p -> ValidationErrors.giftNotAffordable(giftId, themePackId));
             }
-        }
+        });
     }
 }
