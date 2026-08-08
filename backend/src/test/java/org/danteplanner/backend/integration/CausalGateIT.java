@@ -377,7 +377,7 @@ class CausalGateIT extends CausalHarnessSupport {
         primaryJdbc.update(
                 "INSERT INTO user_settings (user_id, sync_enabled, notify_comments, "
                         + "notify_recommendations, notify_new_publications) "
-                        + "VALUES (?, NULL, TRUE, TRUE, TRUE)",
+                        + "VALUES (?, FALSE, TRUE, TRUE, TRUE)",
                 userId);
     }
 

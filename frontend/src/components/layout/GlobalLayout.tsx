@@ -37,7 +37,7 @@ export function GlobalLayout({ children }: GlobalLayoutProps) {
 
   // Check on mount if user needs to configure sync preference
   useEffect(() => {
-    if (user && settings && settings.syncEnabled == null) {
+    if (user && settings && !settings.syncChoiceMade) {
       openSyncChoiceDialog()
     }
   }, [user, settings, openSyncChoiceDialog])

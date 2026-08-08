@@ -25,7 +25,7 @@ export interface SyncChoiceDialogProps {
  * First-login sync choice dialog (GDPR compliant)
  *
  * Non-dismissible dialog that forces users to explicitly choose their sync preference.
- * Shown when syncEnabled === null (first login).
+ * Shown when the sync prompt has not been answered (first login).
  *
  * Features:
  * - No X button, no click-outside close, no Escape key dismissal
@@ -35,7 +35,7 @@ export interface SyncChoiceDialogProps {
  * @example
  * ```tsx
  * <SyncChoiceDialog
- *   open={settings?.syncEnabled === null}
+ *   open={settings ? !settings.syncChoiceMade : false}
  *   onChoice={(enabled) => {
  *     if (enabled) triggerPendingSync()
  *   }}

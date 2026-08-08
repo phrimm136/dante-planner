@@ -203,7 +203,7 @@ class UserControllerTest {
         void sseSettingsInvalidationCrossPod_WhenSettingsUpdated_PublishesInvalidationForUser() {
             // Arrange
             UpdateUserSettingsRequest updateRequest = new UpdateUserSettingsRequest(true, null, null, null);
-            UserSettingsResponse persisted = new UserSettingsResponse(true, true, true, false);
+            UserSettingsResponse persisted = new UserSettingsResponse(true, true, true, true, false);
             when(userSettingsService.updateSettings(TEST_USER_ID, updateRequest)).thenReturn(persisted);
 
             // Act

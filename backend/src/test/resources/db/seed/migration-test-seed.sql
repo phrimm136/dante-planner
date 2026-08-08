@@ -15,7 +15,8 @@
 --   - ENUM/JSON values must match the schema after all MERGED migrations
 --   - Every keyword and ENUM value should appear in at least one row
 --
--- Schema version: V052 (planner aggregate + projections; planners table gone)
+-- Schema version: V056 (planner aggregate + projections; planners table gone;
+--                       user_settings sync choice split into two non-null flags)
 --
 -- Coverage:
 --   - selected_keywords: all 35 keywords across 4 planners (JSON arrays)
@@ -42,11 +43,11 @@ VALUES
 -- user_settings
 -- ============================================================================
 
-INSERT IGNORE INTO user_settings (user_id, sync_enabled, notify_comments, notify_recommendations, notify_new_publications)
+INSERT IGNORE INTO user_settings (user_id, sync_enabled, sync_choice_made, notify_comments, notify_recommendations, notify_new_publications)
 VALUES
-    (1, TRUE, TRUE, TRUE, FALSE),
-    (2, TRUE, TRUE, TRUE, TRUE),
-    (3, NULL, TRUE, TRUE, FALSE);
+    (1, TRUE, TRUE, TRUE, TRUE, FALSE),
+    (2, TRUE, TRUE, TRUE, TRUE, TRUE),
+    (3, FALSE, FALSE, TRUE, TRUE, FALSE);
 
 -- ============================================================================
 -- planner (write-once core)

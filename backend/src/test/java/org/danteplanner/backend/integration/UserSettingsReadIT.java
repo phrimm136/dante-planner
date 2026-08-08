@@ -13,20 +13,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.danteplanner.backend.support.AuthCookies.performAuthed;
+import static org.danteplanner.backend.support.CsrfMockMvcSupport.withCsrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Settings read seam: a GET on a missing settings row returns defaults with a 200 and writes
- * nothing (a defensive read, not a lazy insert), and a stored NULL sync_enabled is preserved
- * as JSON null rather than coerced to a boolean.
+ * nothing (a defensive read, not a lazy insert), and a row whose sync choice has not been made
+ * reports sync off alongside the unanswered prompt.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -66,7 +69,8 @@ class UserSettingsReadIT extends SharedMySqlContainerSupport {
 
         performAuthed(mockMvc, get("/api/user/settings"), token)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.syncEnabled").doesNotExist())
+                .andExpect(jsonPath("$.syncEnabled").value(false))
+                .andExpect(jsonPath("$.syncChoiceMade").value(false))
                 .andExpect(jsonPath("$.notifyComments").value(true))
                 .andExpect(jsonPath("$.notifyRecommendations").value(true))
                 .andExpect(jsonPath("$.notifyNewPublications").value(false));
@@ -77,14 +81,32 @@ class UserSettingsReadIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    void settingsGet_WhenSyncNull_OmitsTheField() throws Exception {
+    void settingsGet_WhenChoiceNotMade_ReportsSyncOffAndPromptPending() throws Exception {
         jdbcTemplate.update(
-                "INSERT INTO user_settings (user_id, sync_enabled, notify_comments, "
-                        + "notify_recommendations, notify_new_publications) VALUES (?, NULL, true, true, false)",
+                "INSERT INTO user_settings (user_id, sync_enabled, sync_choice_made, notify_comments, "
+                        + "notify_recommendations, notify_new_publications) "
+                        + "VALUES (?, false, false, true, true, false)",
                 user.getId());
 
         performAuthed(mockMvc, get("/api/user/settings"), token)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.syncEnabled").doesNotExist());
+                .andExpect(jsonPath("$.syncEnabled").value(false))
+                .andExpect(jsonPath("$.syncChoiceMade").value(false));
+    }
+
+    @Test
+    void settingsPut_WhenSyncChosen_MarksTheChoiceMade() throws Exception {
+        jdbcTemplate.update(
+                "INSERT INTO user_settings (user_id, sync_enabled, sync_choice_made, notify_comments, "
+                        + "notify_recommendations, notify_new_publications) "
+                        + "VALUES (?, false, false, true, true, false)",
+                user.getId());
+
+        performAuthed(mockMvc, put("/api/user/settings").with(withCsrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"syncEnabled\":true}"), token)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.syncEnabled").value(true))
+                .andExpect(jsonPath("$.syncChoiceMade").value(true));
     }
 }

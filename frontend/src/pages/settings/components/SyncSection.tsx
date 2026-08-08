@@ -29,7 +29,6 @@ function SyncSectionContent() {
     return <SyncSectionSkeleton />
   }
 
-  // Handle toggle - null means first-login (will redirect to dialog in Phase 6)
   const handleSyncToggle = (checked: boolean) => {
     updateSettings.mutate(
       { syncEnabled: checked },
@@ -47,9 +46,7 @@ function SyncSectionContent() {
     )
   }
 
-  // syncEnabled = null means not chosen yet (first-login case)
-  // For now, treat as OFF until Phase 6 implements the dialog
-  const syncEnabled = settings.syncEnabled ?? false
+  const syncEnabled = settings.syncEnabled
 
   return (
     <div className="space-y-4">

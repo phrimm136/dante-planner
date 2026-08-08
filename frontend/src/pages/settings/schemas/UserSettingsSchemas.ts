@@ -48,8 +48,10 @@ export const UserDeletionResponseSchema = z
  */
 export const UserSettingsResponseSchema = z
   .object({
-    /** Whether sync is enabled (absent = not chosen yet, triggers first-login dialog) */
-    syncEnabled: z.boolean().nullish(),
+    /** Whether sync is enabled */
+    syncEnabled: z.boolean(),
+    /** Whether the user has answered the sync prompt; false triggers the first-login dialog */
+    syncChoiceMade: z.boolean(),
     /** Notify when someone comments on your planner */
     notifyComments: z.boolean(),
     /** Notify when your planner reaches recommended status */

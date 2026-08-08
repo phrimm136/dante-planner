@@ -24,13 +24,13 @@ type FirstLoginStore = FirstLoginState & FirstLoginActions
  * Zustand store for first-login dialog state
  *
  * Controls visibility of the SyncChoiceDialog at the app level.
- * Triggered by auth callback when syncEnabled === null.
+ * Triggered when the user has not answered the sync prompt.
  *
  * @example
  * ```tsx
  * // In auth callback
  * const openSyncChoiceDialog = useFirstLoginStore((s) => s.openSyncChoiceDialog)
- * if (settings.syncEnabled === null) {
+ * if (!settings.syncChoiceMade) {
  *   openSyncChoiceDialog()
  * }
  *
