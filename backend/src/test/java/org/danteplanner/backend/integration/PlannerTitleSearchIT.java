@@ -123,12 +123,12 @@ class PlannerTitleSearchIT {
     void titleSearchNgram_WhenSubstringQueried_MatchesLatinAndCjk() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "eed"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("Bleed Team"));
 
         mockMvc.perform(get("/api/planner/md/published").param("q", "출혈"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("출혈 덱 공략"));
     }
 
@@ -145,7 +145,7 @@ class PlannerTitleSearchIT {
     void titleSearchNgram_WhenSingleChar_MatchesNothing() throws Exception {
         mockMvc.perform(get("/api/planner/md/published").param("q", "e"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(0));
+                .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
     @Test
@@ -168,7 +168,7 @@ class PlannerTitleSearchIT {
         // "Kit Collection" has no 'sinking' in its title — only the keyword
         mockMvc.perform(get("/api/planner/md/published").param("q", "Sinking"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("Kit Collection"));
     }
 }

@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.sse;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ class EventPayloadShapeTest {
     private static final UUID NOTIFICATION_PUBLIC_ID = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
 
     /** The application's own mapper: the shape asserted here is the one clients receive. */
-    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper();
+    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper(List.of());
 
     @Test
     void accountSuspended_WhenTimeout_CarriesSuspensionTypeReasonAndDuration() {

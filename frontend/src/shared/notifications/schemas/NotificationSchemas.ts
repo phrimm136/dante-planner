@@ -77,6 +77,17 @@ export const NotificationInboxResponseSchema = z
   .strict()
 
 /**
+ * Bulk notification operation response schema
+ * Matches backend NotificationBulkResultResponse DTO
+ */
+export const NotificationBulkResultResponseSchema = z
+  .object({
+    /** Number of notifications the operation changed */
+    affected: z.number().int().nonnegative(),
+  })
+  .strict()
+
+/**
  * Unread notification count response schema
  * Matches backend UnreadCountResponse DTO
  */
@@ -97,6 +108,8 @@ export type NotificationType = z.infer<typeof NotificationTypeSchema>
 export type NotificationResponse = z.infer<typeof NotificationResponseSchema>
 /** Notification inbox response with pagination - matches backend NotificationInboxResponse DTO */
 export type NotificationInboxResponse = z.infer<typeof NotificationInboxResponseSchema>
+/** Bulk notification operation result - matches backend NotificationBulkResultResponse DTO */
+export type NotificationBulkResultResponse = z.infer<typeof NotificationBulkResultResponseSchema>
 /** Unread notification count response - matches backend UnreadCountResponse DTO */
 export type UnreadCountResponse = z.infer<typeof UnreadCountResponseSchema>
 

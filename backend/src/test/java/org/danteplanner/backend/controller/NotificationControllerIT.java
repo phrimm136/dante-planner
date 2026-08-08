@@ -395,7 +395,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").value(3));
+                    .andExpect(jsonPath("$.affected").value(3));
 
             long unreadCount = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(testUser.getId());
             assertThat(unreadCount).isZero();
@@ -410,7 +410,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").value(2));
+                    .andExpect(jsonPath("$.affected").value(2));
         }
 
         @Test
@@ -426,7 +426,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").value(1));
+                    .andExpect(jsonPath("$.affected").value(1));
 
             Notification unchanged = notificationRepository.findById(read.getId()).orElseThrow();
             // Compared at millisecond precision: with no test transaction the entity is
@@ -444,7 +444,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").value(1));
+                    .andExpect(jsonPath("$.affected").value(1));
 
             long otherUserUnreadCount = notificationRepository.countByUserIdAndReadFalseAndDeletedAtIsNull(otherUser.getId());
             assertThat(otherUserUnreadCount).isEqualTo(1);
@@ -456,7 +456,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
             mockMvc.perform(post("/api/notifications/mark-all-read").with(withCsrf())
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$").value(0));
+                    .andExpect(jsonPath("$.affected").value(0));
         }
 
         @Test

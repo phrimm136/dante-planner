@@ -1,5 +1,6 @@
 package org.danteplanner.backend.moderation;
 
+import java.util.List;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -7,7 +8,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
-import org.danteplanner.backend.moderation.dto.ModeratedUserDto;
+import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
 import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
 import org.danteplanner.backend.moderation.dto.UnpublishPlannerResponse;
 import org.danteplanner.backend.shared.config.JacksonConfig;
@@ -26,7 +27,7 @@ class ModerationResponseShapeTest {
     private static final Instant TIMEOUT_UNTIL = Instant.parse("2026-03-05T06:07:08Z");
 
     /** The application's own mapper: the shape asserted here is the one clients receive. */
-    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper();
+    private final ObjectMapper objectMapper = new JacksonConfig().objectMapper(List.of());
 
     @Test
     void unpublishPlanner_WhenModeratorUnpublishes_CarriesPlannerIdPublishedAndMessage() {
@@ -94,9 +95,9 @@ class ModerationResponseShapeTest {
         assertThat(json).containsEntry("isTimedOut", false);
     }
 
-    private static ModeratedUserDto roster(String epithet, String suffix, String role,
+    private static ModeratedUserResponse roster(String epithet, String suffix, String role,
             boolean banned, Instant bannedAt, boolean timedOut, Instant timeoutUntil) {
-        return new ModeratedUserDto(epithet, suffix, role, banned, bannedAt, timedOut, timeoutUntil);
+        return new ModeratedUserResponse(epithet, suffix, role, banned, bannedAt, timedOut, timeoutUntil);
     }
 
     private Map<String, Object> serialize(Object response) {

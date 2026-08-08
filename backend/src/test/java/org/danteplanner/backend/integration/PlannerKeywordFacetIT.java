@@ -152,17 +152,17 @@ class PlannerKeywordFacetIT {
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "10101"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("With Entities"));
 
         mockMvc.perform(get("/api/planner/md/published").param("themePack", "1001"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("With Entities"));
 
         mockMvc.perform(get("/api/planner/md/published").param("identity", "99999"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(0));
+                .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
     @Test
@@ -173,12 +173,12 @@ class PlannerKeywordFacetIT {
 
         mockMvc.perform(get("/api/planner/md/published").param("keyword", "Sinking"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("Sinking Build"));
 
         mockMvc.perform(get("/api/planner/md/published").param("keyword", "DawnTeam"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(0));
+                .andExpect(jsonPath("$.page.totalElements").value(0));
     }
 
     @Test
@@ -209,7 +209,7 @@ class PlannerKeywordFacetIT {
         // And the facet finds it under the current id
         mockMvc.perform(get("/api/planner/md/published").param("keyword", "9828"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].title").value("Legacy Keywords"));
     }
 

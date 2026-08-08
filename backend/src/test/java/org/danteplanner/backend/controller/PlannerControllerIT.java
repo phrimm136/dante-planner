@@ -455,7 +455,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .param("size", "20"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.totalElements").value(2));
+                    .andExpect(jsonPath("$.page.totalElements").value(2));
         }
 
         @Test
@@ -498,8 +498,8 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .param("size", "2"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content", hasSize(2)))
-                    .andExpect(jsonPath("$.totalElements").value(5))
-                    .andExpect(jsonPath("$.totalPages").value(3));
+                    .andExpect(jsonPath("$.page.totalElements").value(5))
+                    .andExpect(jsonPath("$.page.totalPages").value(3));
         }
     }
 

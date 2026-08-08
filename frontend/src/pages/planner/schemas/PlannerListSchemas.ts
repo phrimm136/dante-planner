@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { migrateKeywords } from '@/shared/gameData'
+import { pagedModelSchema } from '@/lib/validation'
 import { PlannerCategorySchema, PlannerTypeSchema, PlannerStatusSchema } from './PlannerSchemas'
 
 /**
@@ -57,23 +58,9 @@ export const PublicPlannerSchema = z.object({
 
 /**
  * Paginated planners response schema
- * Follows Spring Data Page structure
- * Uses passthrough() to allow Spring's extra fields (empty, first, last, etc.)
+ * Follows the Spring Data PagedModel envelope: content plus nested page metadata
  */
-export const PaginatedPlannersSchema = z
-  .object({
-    /** Array of planners for current page */
-    content: z.array(PublicPlannerSchema),
-    /** Total number of planners matching the query */
-    totalElements: z.number().int().min(0),
-    /** Total number of pages */
-    totalPages: z.number().int().min(0),
-    /** Current page number (0-indexed) */
-    number: z.number().int().min(0),
-    /** Page size */
-    size: z.number().int().positive(),
-  })
-  .passthrough()
+export const PaginatedPlannersSchema = pagedModelSchema(PublicPlannerSchema)
 
 // ============================================================================
 // Action Response Schemas

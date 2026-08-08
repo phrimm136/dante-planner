@@ -2,15 +2,22 @@ package org.danteplanner.backend.notification.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.danteplanner.backend.notification.dto.NotificationBulkResultResponse;
 import org.danteplanner.backend.notification.dto.NotificationInboxResponse;
 import org.danteplanner.backend.notification.dto.NotificationResponse;
 import org.danteplanner.backend.notification.dto.UnreadCountResponse;
 import org.danteplanner.backend.notification.service.NotificationInboxService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -96,12 +103,12 @@ public class NotificationController {
      */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-mark-all-read")
     @PostMapping("/mark-all-read")
-    public ResponseEntity<Integer> markAllAsRead(
+    public ResponseEntity<NotificationBulkResultResponse> markAllAsRead(
             @AuthenticationPrincipal Long userId) {
 
         log.info("User {} marking all notifications as read", userId);
         int count = notificationInboxService.markAllAsRead(userId);
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(new NotificationBulkResultResponse(count));
     }
 
     /**
@@ -133,11 +140,11 @@ public class NotificationController {
      */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "notifications-delete-all")
     @DeleteMapping("/all")
-    public ResponseEntity<Integer> deleteAllNotifications(
+    public ResponseEntity<NotificationBulkResultResponse> deleteAllNotifications(
             @AuthenticationPrincipal Long userId) {
 
         log.info("User {} deleting all notifications", userId);
         int count = notificationInboxService.deleteAllNotifications(userId);
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(new NotificationBulkResultResponse(count));
     }
 }

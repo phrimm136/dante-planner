@@ -1,4 +1,37 @@
-import type { z } from 'zod'
+import { z } from 'zod'
+
+/**
+ * Page metadata of a Spring Data `PagedModel` envelope.
+ */
+export const PageMetadataSchema = z
+  .object({
+    /** Requested page size */
+    size: z.number().int().nonnegative(),
+    /** Current page number (0-indexed) */
+    number: z.number().int().nonnegative(),
+    /** Total number of items matching the query */
+    totalElements: z.number().int().nonnegative(),
+    /** Total number of pages */
+    totalPages: z.number().int().nonnegative(),
+  })
+  .strict()
+
+/**
+ * Builds the schema of a Spring Data `PagedModel` envelope around an item schema.
+ *
+ * @param itemSchema - Schema describing one element of `content`
+ * @returns Schema matching `{ content: [...], page: { size, number, totalElements, totalPages } }`
+ */
+export function pagedModelSchema<T extends z.ZodType>(itemSchema: T) {
+  return z
+    .object({
+      /** Items of the current page */
+      content: z.array(itemSchema),
+      /** Pagination metadata */
+      page: PageMetadataSchema,
+    })
+    .strict()
+}
 
 /**
  * Validates unknown data against a Zod schema, throwing on failure.

@@ -115,11 +115,11 @@ export function PublishedPlannerList({
         ))}
       </ResponsiveCardGrid>
 
-      {data.totalPages > 1 && (
+      {data.page.totalPages > 1 && (
         <div className="mt-6">
           <PlannerListPagination
             currentPage={page}
-            totalPages={data.totalPages}
+            totalPages={data.page.totalPages}
             onPageChange={onPageChange}
           />
         </div>

@@ -3,6 +3,8 @@ package org.danteplanner.backend.shared.config;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.planner.entity.MDCategory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
+import org.springframework.data.web.config.EnableSpringDataWebSupport.PageSerializationMode;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.core.convert.converter.Converter;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
@@ -17,6 +19,7 @@ import java.util.List;
  */
 @Configuration
 @RequiredArgsConstructor
+@EnableSpringDataWebSupport(pageSerializationMode = PageSerializationMode.VIA_DTO)
 public class WebConfig implements WebMvcConfigurer {
 
     private final DeviceIdArgumentResolver deviceIdArgumentResolver;

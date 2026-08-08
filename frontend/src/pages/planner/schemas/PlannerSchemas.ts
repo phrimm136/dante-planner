@@ -9,6 +9,7 @@ import {
 } from '@/shared/gameData'
 import type { DungeonIdx } from '@/shared/gameData'
 import { JSONContentSchema } from '@/shared/noteEditor'
+import { pagedModelSchema } from '@/lib/validation'
 import type {
   SerializableFloorSelection,
   SaveablePlanner,
@@ -627,10 +628,10 @@ export const ServerPlannerSummarySchema = z
   .strict()
 
 /**
- * Array schema for server planner summaries
+ * Paginated schema for server planner summaries
  * Used for validating list endpoint responses
  */
-export const ServerPlannerSummaryArraySchema = z.array(ServerPlannerSummarySchema)
+export const ServerPlannerSummaryPageSchema = pagedModelSchema(ServerPlannerSummarySchema)
 
 /**
  * Response schema for bulk import operation

@@ -8,7 +8,7 @@
 import { ApiClient } from '@/lib/api'
 import {
   ServerPlannerResponseSchema,
-  ServerPlannerSummaryArraySchema,
+  ServerPlannerSummaryPageSchema,
   ImportPlannersResponseSchema,
 } from '../schemas/PlannerSchemas'
 import type {
@@ -32,15 +32,14 @@ export const plannerApi = {
    *
    * @param page - Page number (0-indexed)
    * @param size - Number of items per page
-   * @returns Paginated response with content and metadata
+   * @returns Paginated response with content and whether this is the final page
    */
   async list(page = 0, size = 100): Promise<{ content: ServerPlannerSummary[]; last: boolean }> {
-    const data = await ApiClient.get<{ content: unknown[]; last: boolean }>(
-      `${PLANNERS_BASE}?page=${page}&size=${size}`,
-    )
+    const data = await ApiClient.get(`${PLANNERS_BASE}?page=${page}&size=${size}`)
+    const parsed = ServerPlannerSummaryPageSchema.parse(data)
     return {
-      content: ServerPlannerSummaryArraySchema.parse(data.content),
-      last: data.last,
+      content: parsed.content,
+      last: parsed.page.number >= parsed.page.totalPages - 1,
     }
   },
 
