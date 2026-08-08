@@ -322,8 +322,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean abandonSession(
             HttpServletRequest request, HttpServletResponse response, String errorCode) {
         request.setAttribute(CustomAuthenticationEntryPoint.AUTH_ERROR_ATTRIBUTE, errorCode);
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
         return false;
     }
 

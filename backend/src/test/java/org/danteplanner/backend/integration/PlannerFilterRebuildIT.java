@@ -9,7 +9,7 @@ import org.danteplanner.backend.planner.entity.PlannerKeywordFilter;
 import org.danteplanner.backend.planner.repository.PlannerEntityFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerKeywordFilterRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
-import org.danteplanner.backend.planner.service.PlannerContentEntityExtractor;
+import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;

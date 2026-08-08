@@ -76,7 +76,7 @@ class CommentReportServiceTest {
             when(commentQueryService.requireByPublicId(COMMENT_PUBLIC_ID)).thenReturn(comment);
             when(reportRepository.existsByReporterIdAndCommentId(REPORTER_ID, COMMENT_INTERNAL_ID))
                     .thenReturn(false);
-            when(reportRepository.save(any(PlannerCommentReport.class)))
+            when(reportRepository.insert(any(PlannerCommentReport.class)))
                     .thenAnswer(inv -> {
                         PlannerCommentReport r = inv.getArgument(0);
                         r.setCreatedAt(java.time.Instant.now());
@@ -93,7 +93,7 @@ class CommentReportServiceTest {
 
             ArgumentCaptor<PlannerCommentReport> captor =
                     ArgumentCaptor.forClass(PlannerCommentReport.class);
-            verify(reportRepository).save(captor.capture());
+            verify(reportRepository).insert(captor.capture());
             assertEquals(REPORTER_ID, captor.getValue().getReporterId());
             assertEquals(REASON, captor.getValue().getReason());
         }
@@ -107,7 +107,7 @@ class CommentReportServiceTest {
             assertThrows(UserBannedException.class,
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
-            verify(reportRepository, never()).save(any(PlannerCommentReport.class));
+            verify(reportRepository, never()).insert(any(PlannerCommentReport.class));
             verifyNoInteractions(commentQueryService);
         }
 
@@ -124,7 +124,7 @@ class CommentReportServiceTest {
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
@@ -144,7 +144,7 @@ class CommentReportServiceTest {
 
             assertEquals(COMMENT_INTERNAL_ID, exception.getCommentId());
             assertEquals(REPORTER_ID, exception.getUserId());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
@@ -160,7 +160,7 @@ class CommentReportServiceTest {
                     () -> service.createReport(COMMENT_PUBLIC_ID, REPORTER_ID, request));
 
             verify(reportRepository, never()).existsByReporterIdAndCommentId(any(), any());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test

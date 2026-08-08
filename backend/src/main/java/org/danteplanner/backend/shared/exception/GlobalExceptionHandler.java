@@ -18,7 +18,7 @@ import org.danteplanner.backend.user.exception.UsernameGenerationException;
 import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
-import org.danteplanner.backend.shared.util.CookieConstants;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.CannotAcquireLockException;
@@ -96,8 +96,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleSessionRevoked(SessionRevokedException ex, HttpServletResponse response) {
         Sentry.captureException(ex);
         log.warn("Session revoked: {}", ex.getMessage());
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(new ErrorResponse("UNAUTHORIZED", "Authentication required"));
     }

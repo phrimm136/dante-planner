@@ -27,6 +27,8 @@ public abstract class AbstractSseService<K> {
 
     protected static final long SSE_TIMEOUT_MS = 3600_000L;
 
+    protected static final long CLEANUP_INTERVAL_MS = 60_000L;
+
     protected final ConcurrentHashMap<K, CopyOnWriteArrayList<EmitterEntry>> emitters = new ConcurrentHashMap<>();
 
     /**

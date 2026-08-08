@@ -130,7 +130,7 @@ class AutoRefreshFailureContractTest {
 
     private TokenClaims refreshClaims() {
         return new TokenClaims(
-                USER_ID, "user@example.com", TokenClaims.TYPE_REFRESH, null,
+                USER_ID, TokenClaims.TYPE_REFRESH, null,
                 new Date(), new Date(System.currentTimeMillis() + 604_800_000L),
                 "jti-1", "fam-1", null);
     }

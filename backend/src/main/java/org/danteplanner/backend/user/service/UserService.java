@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.shared.config.EpithetConfig;
-import org.danteplanner.backend.user.dto.UserDto;
+import org.danteplanner.backend.user.dto.UserResponse;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
@@ -99,12 +99,12 @@ public class UserService {
                     .email(userInfo.get("email"))
                     .provider(provider)
                     .providerId(userInfo.get("id"))
-                    .usernameEpithet(username.keyword())
+                    .usernameEpithet(username.epithet())
                     .usernameSuffix(username.suffix())
                     .build();
 
             try {
-                return userRepository.save(newUser);
+                return userRepository.insert(newUser);
             } catch (DataIntegrityViolationException e) {
                 if (!isUsernameSuffixCollision(e)) {
                     throw e;
@@ -143,8 +143,8 @@ public class UserService {
                 : constraintName.substring(constraintName.lastIndexOf('.') + 1);
     }
 
-    public UserDto toDto(User user) {
-        UserDto.UserDtoBuilder builder = UserDto.builder()
+    public UserResponse toResponse(User user) {
+        UserResponse.UserResponseBuilder builder = UserResponse.builder()
                 .email(user.getEmail())
                 .usernameEpithet(user.getUsernameEpithet())
                 .usernameSuffix(user.getUsernameSuffix())
@@ -259,17 +259,6 @@ public class UserService {
     }
 
     /**
-     * Persist a moderator's or administrator's change to an account.
-     *
-     * @param user the account carrying the change
-     * @return the persisted account
-     */
-    @Transactional
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-
-    /**
      * Update a user's username epithet.
      * Validates the epithet against the allowed epithets before updating.
      *
@@ -289,6 +278,9 @@ public class UserService {
             .orElseThrow(() -> new UserNotFoundException(userId));
 
         user.setUsernameEpithet(epithet);
-        return userRepository.save(user);
+
+        log.info("User {} updated username epithet to {}", userId, epithet);
+
+        return user;
     }
 }

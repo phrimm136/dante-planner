@@ -100,7 +100,6 @@ class AdminServiceTest {
                     .thenReturn(adminUser);
             when(userService.lockActiveById(normalUser.getId()))
                     .thenReturn(normalUser);
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.MODERATOR);
@@ -118,7 +117,6 @@ class AdminServiceTest {
                     .thenReturn(adminUser);
             when(userService.lockActiveById(moderatorUser.getId()))
                     .thenReturn(moderatorUser);
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), moderatorUser.getId(), UserRole.NORMAL);
@@ -145,7 +143,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), normalUser.getId(), UserRole.ADMIN)
             );
             assertTrue(exception.getMessage().contains("higher than your own"));
-            verify(userService, never()).save(any());
+            assertEquals(UserRole.NORMAL, normalUser.getRole());
         }
 
         @Test
@@ -175,7 +173,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), otherModerator.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userService, never()).save(any());
+            assertEquals(UserRole.MODERATOR, otherModerator.getRole());
         }
 
         @Test
@@ -193,7 +191,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(moderatorUser.getId(), adminUser.getId(), UserRole.NORMAL)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userService, never()).save(any());
+            assertEquals(UserRole.ADMIN, adminUser.getRole());
         }
 
         @Test
@@ -210,7 +208,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("last administrator"));
-            verify(userService, never()).save(any());
+            assertEquals(UserRole.ADMIN, adminUser.getRole());
         }
 
         @Test
@@ -240,7 +238,7 @@ class AdminServiceTest {
                     () -> adminService.changeRole(adminUser.getId(), otherAdmin.getId(), UserRole.MODERATOR)
             );
             assertTrue(exception.getMessage().contains("equal or higher rank"));
-            verify(userService, never()).save(any());
+            assertEquals(UserRole.ADMIN, otherAdmin.getRole());
             verify(eventPublisher, never()).publishEvent(any(UserDemotedEvent.class));
         }
 
@@ -283,7 +281,6 @@ class AdminServiceTest {
             when(userService.lockActiveById(adminUser.getId()))
                     .thenReturn(adminUser);
             when(userService.countByRole(UserRole.ADMIN)).thenReturn(2L);
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = adminService.changeRole(adminUser.getId(), adminUser.getId(), UserRole.MODERATOR);
@@ -303,7 +300,6 @@ class AdminServiceTest {
                     .thenReturn(adminUser);
             when(userService.lockActiveById(normalUser.getId()))
                     .thenReturn(normalUser);
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             adminService.changeRole(adminUser.getId(), normalUser.getId(), UserRole.ADMIN);

@@ -190,7 +190,7 @@ class RandomUsernameGeneratorTest {
 
             RandomUsernameGenerator.UsernameComponents result = generator.generate();
 
-            assertThat(result.keyword()).isEqualTo("W_CORP");
+            assertThat(result.epithet()).isEqualTo("W_CORP");
             assertThat(result.suffix()).hasSize(5);
             assertThat(result.suffix()).matches(SAFE_SUFFIX_PATTERN);
         }

@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 
 /**
  * Declarations that compile and read plausibly but name the wrong endpoint shape for their policy.

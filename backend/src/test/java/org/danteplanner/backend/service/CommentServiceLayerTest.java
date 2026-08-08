@@ -20,7 +20,6 @@ import org.danteplanner.backend.comment.dto.CreateCommentResponse;
 import org.danteplanner.backend.comment.dto.UpdateCommentResponse;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
 import org.danteplanner.backend.comment.dto.UpdateCommentRequest;
-import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -160,7 +159,7 @@ class CommentServiceLayerTest {
             when(userService.findById(testUser.getId())).thenReturn(testUser);
             when(plannerRepository.findPublishedAggregate(plannerId))
                     .thenReturn(Optional.of(publishedPlanner));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = i.getArgument(0);
                         c.setId(100L);
@@ -204,7 +203,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L))
                     .thenReturn(Optional.of(parentComment));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = i.getArgument(0);
                         c.setId(101L);
@@ -281,7 +280,7 @@ class CommentServiceLayerTest {
                     .thenReturn(Optional.of(depth5Parent));
             when(commentRepository.findById(50L))
                     .thenReturn(Optional.of(depth5Parent));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(i -> {
                         PlannerComment c = i.getArgument(0);
                         c.setId(102L);
@@ -321,7 +320,6 @@ class CommentServiceLayerTest {
 
             UpdateCommentRequest request = new UpdateCommentRequest("Updated content");
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
-            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             UpdateCommentResponse response = commandService.updateComment(commentPublicId, testUser.getId(), request);
@@ -383,7 +381,6 @@ class CommentServiceLayerTest {
             comment.setCreatedAt(Instant.now());
 
             when(commentRepository.findByPublicId(commentPublicId)).thenReturn(Optional.of(comment));
-            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             commandService.deleteComment(commentPublicId, testUser.getId());
@@ -407,7 +404,7 @@ class CommentServiceLayerTest {
             // Act & Assert
             assertThrows(CommentForbiddenException.class,
                     () -> commandService.deleteComment(commentPublicId, otherUser.getId()));
-            verify(commentRepository, never()).save(any());
+            assertFalse(comment.isDeleted());
         }
 
         @Test
@@ -425,8 +422,8 @@ class CommentServiceLayerTest {
             // Act
             commandService.deleteComment(commentPublicId, testUser.getId());
 
-            // Assert - no exception, no save
-            verify(commentRepository, never()).save(any());
+            // Assert - the counter must not drop a second time for an already-withdrawn comment
+            verify(plannerStatsRepository, never()).decrementCommentCount(any());
         }
     }
 
@@ -531,7 +528,7 @@ class CommentServiceLayerTest {
                     () -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
             );
             assertEquals(testUser.getId(), exception.getUserId());
-            verify(commentRepository, never()).save(any());
+            verify(commentRepository, never()).insert(any());
         }
 
         @Test
@@ -552,7 +549,7 @@ class CommentServiceLayerTest {
                     () -> commandService.createComment(plannerId, testUser.getId(), UUID.randomUUID(), request)
             );
             assertEquals(testUser.getId(), exception.getUserId());
-            verify(commentRepository, never()).save(any());
+            verify(commentRepository, never()).insert(any());
         }
 
         @Test
@@ -571,7 +568,7 @@ class CommentServiceLayerTest {
                     CommentNotFoundException.class,
                     () -> engagementService.toggleUpvote(commentId, testUser.getId())
             );
-            verify(commentVoteRepository, never()).save(any());
+            verify(commentVoteRepository, never()).insert(any());
         }
 
         @Test
@@ -590,7 +587,7 @@ class CommentServiceLayerTest {
                     UserBannedException.class,
                     () -> engagementService.toggleUpvote(commentId, testUser.getId())
             );
-            verify(commentVoteRepository, never()).save(any());
+            verify(commentVoteRepository, never()).insert(any());
         }
 
         @Test

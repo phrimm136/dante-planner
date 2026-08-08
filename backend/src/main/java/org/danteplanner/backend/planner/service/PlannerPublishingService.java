@@ -153,7 +153,7 @@ public class PlannerPublishingService {
 
     private Planner upserted(Long userId, UUID plannerId, UpsertPlannerRequest content) {
         return plannerCommandService
-                .upsertAggregate(userId, null, plannerId, content, false)
+                .upsertAggregate(userId, plannerId, content, false)
                 .planner();
     }
 
@@ -181,21 +181,20 @@ public class PlannerPublishingService {
             return describe(planner);
         }
 
-        Planner saved = plannerRepository.save(planner);
-        plannerCatalogService.onBecameVisible(saved);
+        plannerCatalogService.onBecameVisible(planner);
         subscriptionService.createSubscription(userId, plannerId);
 
         // The DB fan-out and the SSE broadcast both run from the AFTER_COMMIT listener, so neither
         // persists nor fires when the publish rolls back.
         if (change == PublicationChange.FIRST_PUBLISH) {
             eventPublisher.publishEvent(new PlannerPublishedEvent(
-                    userId, plannerId, saved.getTitle(),
-                    PlannerPublishedPayload.fromEntity(saved)));
+                    userId, plannerId, planner.getTitle(),
+                    PlannerPublishedPayload.fromEntity(planner)));
             log.info("Broadcast first-publish notification for planner {} by user {}", plannerId, userId);
         }
 
         log.info("Published planner {} by user {}", plannerId, userId);
-        return describe(saved);
+        return describe(planner);
     }
 
     /**
@@ -210,11 +209,10 @@ public class PlannerPublishingService {
             return describe(planner);
         }
 
-        Planner saved = plannerRepository.save(planner);
         plannerCatalogService.onBecameInvisible(plannerId);
 
         log.info("Unpublished planner {} by user {}", plannerId, userId);
-        return describe(saved);
+        return describe(planner);
     }
 
     private void requireOwner(Long userId, Planner planner) {
@@ -250,9 +248,8 @@ public class PlannerPublishingService {
             return planner;
         }
 
-        Planner saved = plannerRepository.save(planner);
         plannerCatalogService.onBecameInvisible(plannerId);
-        return saved;
+        return planner;
     }
 
     /**
@@ -269,9 +266,8 @@ public class PlannerPublishingService {
         Planner planner = accessGuard.requireExisting(plannerId);
 
         change.accept(planner);
-        Planner saved = plannerRepository.save(planner);
         plannerCatalogService.refreshRecommended(plannerId);
-        return saved;
+        return planner;
     }
 
     /**
@@ -317,7 +313,6 @@ public class PlannerPublishingService {
         }
 
         planner.setOwnerNotificationsEnabled(enabled);
-        plannerRepository.save(planner);
 
         log.info("User {} toggled owner notifications for planner {} to {}", userId, plannerId, enabled);
         return new ToggleOwnerNotificationsResponse(enabled);

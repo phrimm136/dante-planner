@@ -14,10 +14,10 @@ import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.OAuthProperties;
 import org.danteplanner.backend.shared.config.SecurityProperties;
-import org.danteplanner.backend.shared.exception.RateLimitExceededException;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitInterceptor;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 import org.danteplanner.backend.shared.util.CookieUtils;
 
 import org.junit.jupiter.api.BeforeEach;

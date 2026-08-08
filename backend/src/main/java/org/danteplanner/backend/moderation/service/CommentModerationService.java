@@ -45,7 +45,7 @@ public class CommentModerationService {
         commentCommandService.softDelete(comment);
 
         auditService.record(actorId, comment.getPublicId().toString(),
-                ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, null, null);
+                ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, null);
 
         log.info("Moderator {} deleted comment {}", actorId, commentId);
     }
@@ -66,7 +66,7 @@ public class CommentModerationService {
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
         auditService.record(actorId, comment.getPublicId().toString(),
-                ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, reason, null);
+                ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, reason);
 
         if (comment.isDeleted()) {
             log.info("Moderator {} attempted delete of already-deleted comment {} (idempotent)", actorId, commentPublicId);

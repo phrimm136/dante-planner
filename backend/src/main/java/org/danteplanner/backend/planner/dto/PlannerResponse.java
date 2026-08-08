@@ -22,16 +22,16 @@ public record PlannerResponse(
     String category,
     PlannerStatus status,
     String content,
-    Integer schemaVersion,
-    Integer contentVersion,
+    int schemaVersion,
+    int contentVersion,
     PlannerType plannerType,
-    Long syncVersion,
+    long syncVersion,
     String deviceId,
     Instant createdAt,
     Instant lastModifiedAt,
     Instant savedAt,
-    Boolean published,
-    Integer upvotes
+    boolean published,
+    int upvotes
 ) {
 
     /**

@@ -231,10 +231,10 @@ class AuthenticationServiceTest {
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
 
             TokenClaims accessClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
+                    123L, TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
             TokenClaims refreshClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
+                    123L, TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
             when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
@@ -256,7 +256,7 @@ class AuthenticationServiceTest {
             String refreshToken = "refresh-token";
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
             TokenClaims refreshClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
+                    123L, TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
             when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(refreshClaims);
@@ -276,7 +276,7 @@ class AuthenticationServiceTest {
             String accessToken = "access-token";
             Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
             TokenClaims accessClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
+                    123L, TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
             when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);
@@ -309,7 +309,7 @@ class AuthenticationServiceTest {
             String validRefreshToken = "valid-refresh";
             Date refreshExpiry = new Date(System.currentTimeMillis() + 86400000);
             TokenClaims refreshClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
+                    123L, TokenClaims.TYPE_REFRESH, null, new Date(), refreshExpiry
             );
 
             when(tokenValidator.validateAccessToken(invalidAccessToken))
@@ -332,7 +332,7 @@ class AuthenticationServiceTest {
             String invalidRefreshToken = "invalid-refresh";
             Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
             TokenClaims accessClaims = new TokenClaims(
-                    123L, "test@example.com", TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
+                    123L, TokenClaims.TYPE_ACCESS, UserRole.NORMAL, new Date(), accessExpiry
             );
 
             when(tokenValidator.validateAccessToken(validAccessToken)).thenReturn(accessClaims);

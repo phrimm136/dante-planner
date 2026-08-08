@@ -1,10 +1,7 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
-import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
@@ -20,7 +17,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,7 +45,6 @@ class PlannerReportServiceTest {
     private PlannerReportService reportService;
 
     private User testUser;
-    private Planner publishedPlanner;
     private UUID plannerId;
 
     @BeforeEach
@@ -61,16 +56,6 @@ class PlannerReportServiceTest {
 
         plannerId = UUID.randomUUID();
 
-        publishedPlanner = TestDataFactory.planner(testUser)
-                .id(plannerId)
-                .title("Published Planner")
-                .category("5F")
-                .status(PlannerStatus.DRAFT)
-                .content("{\"data\": \"test\"}")
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .published(true)
-                .build();
         // The access guard resolves the principal on every guarded path; an unstubbed
         // repository would surface as UserNotFoundException instead of the behavior under test.
         lenient().when(userService.findById(anyLong())).thenReturn(testUser);
@@ -85,11 +70,10 @@ class PlannerReportServiceTest {
         @DisplayName("Should create report when not previously reported")
         void createReport_WhenNotReported_CreatesReport() {
             // Arrange
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(false);
-            when(reportRepository.save(any(PlannerReport.class)))
+            when(reportRepository.insert(any(PlannerReport.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
@@ -101,7 +85,7 @@ class PlannerReportServiceTest {
             assertEquals(plannerId, result.getPlannerId());
 
             ArgumentCaptor<PlannerReport> captor = ArgumentCaptor.forClass(PlannerReport.class);
-            verify(reportRepository).save(captor.capture());
+            verify(reportRepository).insert(captor.capture());
             assertEquals(testUser.getId(), captor.getValue().getUserId());
             assertEquals(plannerId, captor.getValue().getPlannerId());
         }
@@ -110,8 +94,7 @@ class PlannerReportServiceTest {
         @DisplayName("Should throw ReportAlreadyExistsException when already reported")
         void createReport_WhenAlreadyReported_ThrowsException() {
             // Arrange
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(reportRepository.existsByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(true);
 
@@ -123,7 +106,7 @@ class PlannerReportServiceTest {
 
             assertEquals(plannerId, exception.getPlannerId());
             assertEquals(testUser.getId(), exception.getUserId());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
@@ -131,8 +114,7 @@ class PlannerReportServiceTest {
         void createReport_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findPublishedAggregate(nonExistentId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -141,15 +123,14 @@ class PlannerReportServiceTest {
             );
 
             verify(reportRepository, never()).existsByUserIdAndPlannerId(any(), any());
-            verify(reportRepository, never()).save(any());
+            verify(reportRepository, never()).insert(any());
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not published")
         void createReport_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -163,8 +144,7 @@ class PlannerReportServiceTest {
         void createReport_WhenPlannerMissing_ValidatesPlannerFirst() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findPublishedAggregate(nonExistentId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -173,7 +153,7 @@ class PlannerReportServiceTest {
             );
 
             // Verify order: planner lookup first, then never reaches report check
-            verify(plannerRepository).findPublishedAggregate(nonExistentId);
+            verify(plannerRepository).existsPublishedById(nonExistentId);
             verify(reportRepository, never()).existsByUserIdAndPlannerId(any(), any());
         }
     }

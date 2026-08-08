@@ -2,8 +2,7 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.LegacyPublishRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
@@ -32,7 +31,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PlannerPublishingController {
 
     private final PlannerPublishingService plannerPublishingService;
@@ -58,7 +56,6 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
 
-        log.info("Publishing planner {} by user {}", id, userId);
         return ResponseEntity.ok(content == null
                 ? plannerPublishingService.publish(userId, id)
                 : plannerPublishingService.publish(userId, id, content));
@@ -82,7 +79,6 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @RequestBody(required = false) @Valid UpsertPlannerRequest content) {
 
-        log.info("Unpublishing planner {} by user {}", id, userId);
         return ResponseEntity.ok(content == null
                 ? plannerPublishingService.unpublish(userId, id)
                 : plannerPublishingService.unpublish(userId, id, content));
@@ -131,7 +127,6 @@ public class PlannerPublishingController {
             @PathVariable UUID id,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        log.info("User {} toggling owner notifications for planner {}", userId, id);
         ToggleOwnerNotificationsResponse response = plannerPublishingService.toggleOwnerNotifications(userId, id, request.enabled());
         return ResponseEntity.ok(response);
     }

@@ -60,12 +60,11 @@ public class AdminService {
         // Apply role change
         UserRole oldRole = target.getRole();
         target.setRole(newRole);
-        User saved = userService.save(target);
 
         boolean demotion = oldRole.outranks(newRole);
         auditService.record(actorId, target.getPublicId().toString(),
                 demotion ? ModerationAction.ActionType.DEMOTE : ModerationAction.ActionType.PROMOTE,
-                ModerationAction.TargetType.USER, oldRole + " -> " + newRole, null);
+                ModerationAction.TargetType.USER, oldRole + " -> " + newRole);
 
         // Credentials issued under the old role are withdrawn after this commits
         if (demotion) {
@@ -76,7 +75,7 @@ public class AdminService {
                     targetId, oldRole, newRole, actorId);
         }
 
-        return saved;
+        return target;
     }
 
     /**

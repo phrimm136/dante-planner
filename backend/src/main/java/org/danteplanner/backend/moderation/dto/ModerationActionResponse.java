@@ -10,12 +10,12 @@ import org.danteplanner.backend.moderation.entity.ModerationAction;
  * Includes actor username (no internal IDs exposed).
  */
 @Builder
-public record ModerationActionDto(
+public record ModerationActionResponse(
     String actionType,
     String targetType,
     String targetUuid,
     String reason,
-    Integer durationMinutes,
+    int durationMinutes,
     Instant createdAt,
     String actorUsernameEpithet,
     String actorUsernameSuffix
@@ -29,8 +29,8 @@ public record ModerationActionDto(
      * @param actorSuffix the actor's username suffix
      * @return the DTO
      */
-    public static ModerationActionDto fromEntity(ModerationAction action, String actorEpithet, String actorSuffix) {
-        return ModerationActionDto.builder()
+    public static ModerationActionResponse fromEntity(ModerationAction action, String actorEpithet, String actorSuffix) {
+        return ModerationActionResponse.builder()
                 .actionType(action.getActionType().name())
                 .targetType(action.getTargetType().name())
                 .targetUuid(action.getTargetUuid() != null ? action.getTargetUuid() : "")

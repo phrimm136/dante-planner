@@ -54,7 +54,6 @@ public class CommentEngagementService {
         accessGuard.checkNotBanned(userId);
 
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
-
         Long internalId = comment.getId();
 
         // Cannot vote on deleted comments - they should only preserve thread structure
@@ -70,18 +69,19 @@ public class CommentEngagementService {
 
         // Create new immutable vote
         PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);
-        commentVoteRepository.save(newVote);
 
+        commentVoteRepository.insert(newVote);
         commentRepository.incrementUpvoteCount(internalId);
-
-        log.debug("User {} cast immutable upvote on comment {}", userId, commentPublicId);
 
         // The increment clears the persistence context, so this reads the committed counter rather
         // than the pre-increment copy the vote was checked against.
         PlannerComment counted = commentRepository.findById(internalId)
                 .orElseThrow(() -> new CommentNotFoundException(commentPublicId));
+        CommentVoteResponse response = new CommentVoteResponse(commentPublicId, counted.getUpvoteCount(), true);
 
-        return new CommentVoteResponse(commentPublicId, counted.getUpvoteCount(), true);
+        log.debug("User {} cast immutable upvote on comment {}", userId, commentPublicId);
+
+        return response;
     }
 
     /**
@@ -105,11 +105,12 @@ public class CommentEngagementService {
         }
 
         comment.setAuthorNotificationsEnabled(enabled);
-        commentRepository.save(comment);
+
+        ToggleNotificationResponse response = new ToggleNotificationResponse(enabled);
 
         log.info("User {} toggled notifications {} for comment {}", userId, enabled ? "on" : "off", commentPublicId);
 
-        return new ToggleNotificationResponse(enabled);
+        return response;
     }
 
     /**

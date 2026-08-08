@@ -74,7 +74,7 @@ class AuthenticationServiceLineageTest {
 
     private TokenClaims refreshClaims(String jti, String familyId, String parentJti) {
         return new TokenClaims(
-                testUser.getId(), testUser.getEmail(), TokenClaims.TYPE_REFRESH, null,
+                testUser.getId(), TokenClaims.TYPE_REFRESH, null,
                 new Date(), new Date(System.currentTimeMillis() + 604800000L),
                 jti, familyId, parentJti);
     }
@@ -88,7 +88,7 @@ class AuthenticationServiceLineageTest {
         String refreshToken = "refresh.jwt";
         Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
         TokenClaims accessClaims = new TokenClaims(
-                testUser.getId(), testUser.getEmail(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
+                testUser.getId(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
                 new Date(), accessExpiry);
         TokenClaims refresh = refreshClaims("jti-1", "fam-logout", null);
 
@@ -111,7 +111,7 @@ class AuthenticationServiceLineageTest {
         String accessToken = "access.jwt";
         Date accessExpiry = new Date(System.currentTimeMillis() + 60000);
         TokenClaims accessClaims = new TokenClaims(
-                testUser.getId(), testUser.getEmail(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
+                testUser.getId(), TokenClaims.TYPE_ACCESS, UserRole.NORMAL,
                 new Date(), accessExpiry);
 
         when(tokenValidator.validateAccessToken(accessToken)).thenReturn(accessClaims);

@@ -135,7 +135,6 @@ class JwtAuthenticationFilterTest {
     private TokenClaims createValidClaims(Long userId) {
         return new TokenClaims(
                 userId,
-                "test@example.com",
                 TokenClaims.TYPE_ACCESS,
                 UserRole.NORMAL,
                 new Date(),
@@ -146,7 +145,6 @@ class JwtAuthenticationFilterTest {
     private TokenClaims createRefreshClaims(Long userId) {
         return new TokenClaims(
                 userId,
-                "test@example.com",
                 TokenClaims.TYPE_REFRESH,
                 UserRole.NORMAL,
                 new Date(),

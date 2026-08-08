@@ -37,6 +37,7 @@ public class PlannerEngagementService {
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
     private final PlannerStatsRepository plannerStatsRepository;
+    private final PlannerStatsService plannerStatsService;
     private final PlannerCatalogService plannerCatalogService;
     private final ApplicationEventPublisher eventPublisher;
     private final PlannerAccessGuard accessGuard;
@@ -48,6 +49,7 @@ public class PlannerEngagementService {
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
             PlannerStatsRepository plannerStatsRepository,
+            PlannerStatsService plannerStatsService,
             PlannerCatalogService plannerCatalogService,
             ApplicationEventPublisher eventPublisher,
             PlannerAccessGuard accessGuard,
@@ -56,6 +58,7 @@ public class PlannerEngagementService {
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
         this.plannerStatsRepository = plannerStatsRepository;
+        this.plannerStatsService = plannerStatsService;
         this.plannerCatalogService = plannerCatalogService;
         this.eventPublisher = eventPublisher;
         this.accessGuard = accessGuard;
@@ -101,20 +104,19 @@ public class PlannerEngagementService {
             throw new VoteAlreadyExistsException(plannerId, userId);
         }
 
-        // Get current upvote count BEFORE voting (for threshold detection)
-        int upvotesBefore = plannerStatsRepository.upvotesOf(plannerId);
-
         // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
-        plannerVoteRepository.save(newVote);
+        plannerVoteRepository.insert(newVote);
 
         // Atomic increment for upvote
-        plannerStatsRepository.incrementUpvotes(plannerId);
+        plannerStatsService.incrementUpvotes(plannerId);
 
-        // Re-fetch stats to get updated counts after atomic increment
+        // The increment upserts the counter row, so it exists here; an absent row can only mean a
+        // concurrent purge, and this vote is then the only one the counter would have carried.
         int upvotesAfter = plannerStatsRepository.findById(plannerId)
                 .map(PlannerStats::getUpvotes)
-                .orElse(upvotesBefore + 1);
+                .orElse(1);
+        int upvotesBefore = upvotesAfter - 1;
 
         // Check threshold crossing for notification (9→10 net votes)
         if (upvotesBefore < recommendedThreshold && upvotesAfter >= recommendedThreshold) {
@@ -165,7 +167,7 @@ public class PlannerEngagementService {
      */
     @Transactional
     public BookmarkResponse setBookmark(Long userId, UUID plannerId, boolean bookmarked) {
-        accessGuard.requirePublished(plannerId);
+        accessGuard.checkPublished(plannerId);
 
         var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
         if (existingBookmark.isPresent() == bookmarked) {
@@ -176,7 +178,7 @@ public class PlannerEngagementService {
         }
 
         if (bookmarked) {
-            plannerBookmarkRepository.save(new PlannerBookmark(userId, plannerId));
+            plannerBookmarkRepository.insert(new PlannerBookmark(userId, plannerId));
             log.debug("User {} bookmarked planner {}", userId, plannerId);
         } else {
             plannerBookmarkRepository.delete(existingBookmark.get());
@@ -203,7 +205,7 @@ public class PlannerEngagementService {
     @Deprecated
     @Transactional
     public BookmarkResponse toggleBookmark(Long userId, UUID plannerId) {
-        accessGuard.requirePublished(plannerId);
+        accessGuard.checkPublished(plannerId);
 
         var existingBookmark = plannerBookmarkRepository.findByUserIdAndPlannerId(userId, plannerId);
 
@@ -218,7 +220,7 @@ public class PlannerEngagementService {
         } else {
             // Add bookmark
             PlannerBookmark bookmark = new PlannerBookmark(userId, plannerId);
-            plannerBookmarkRepository.save(bookmark);
+            plannerBookmarkRepository.insert(bookmark);
             log.debug("User {} bookmarked planner {}", userId, plannerId);
             return BookmarkResponse.builder()
                     .plannerId(plannerId)

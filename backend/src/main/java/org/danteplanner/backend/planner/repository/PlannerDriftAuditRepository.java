@@ -1,0 +1,195 @@
+package org.danteplanner.backend.planner.repository;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+/**
+ * The audit reads behind planner drift reconciliation: each query returns the rows of one audited
+ * dimension — counters, catalog membership, the filter indexes, the derived recommended flag —
+ * and leaves the comparison and the reporting to its caller.
+ *
+ * <p>Moderation is joined outer throughout: a planner with no moderation row is nothing-hidden and
+ * not-taken-down, the same reading the catalog write side and {@link RecommendedSql} take. An inner
+ * join would drop exactly those planners from every audit, which is the state most in need of
+ * one.</p>
+ */
+@Repository
+public class PlannerDriftAuditRepository {
+
+    private final JdbcTemplate jdbc;
+    private final NamedParameterJdbcTemplate namedJdbc;
+
+    // Build over the @Primary (routing) datasource rather than an autoconfigured JdbcTemplate,
+    // which backs off when multiple datasources are present. The audit reads under the caller's
+    // read-only transaction, so the routing datasource sends it to the replica. Mirrors
+    // PlannerViewRepositoryImpl.
+    public PlannerDriftAuditRepository(DataSource dataSource) {
+        this.jdbc = new JdbcTemplate(dataSource);
+        this.namedJdbc = new NamedParameterJdbcTemplate(this.jdbc);
+    }
+
+    /**
+     * One counter row whose stored value disagrees with a recount of its authoritative child rows.
+     */
+    public record CounterDriftRow(UUID plannerId, long counter, long recounted) {
+    }
+
+    /**
+     * One catalog row's stored recommended flag beside the flag derived from current state.
+     */
+    public record RecommendedDriftRow(UUID plannerId, boolean flag, boolean derived) {
+    }
+
+    /**
+     * One visible planner's stored content document and keyword column, as written.
+     */
+    public record ContentDocumentRow(UUID plannerId, String content, String selectedKeywords) {
+    }
+
+    /**
+     * One indexed entity reference.
+     */
+    public record EntityFilterRow(UUID plannerId, String entityType, int entityId) {
+    }
+
+    /**
+     * One indexed keyword.
+     */
+    public record KeywordFilterRow(UUID plannerId, String keyword) {
+    }
+
+    /**
+     * Stat rows whose upvote counter disagrees with the vote rows.
+     *
+     * @return one row per disagreeing planner
+     */
+    public List<CounterDriftRow> driftedUpvoteCounters() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.upvotes, COUNT(v.planner_id) AS votes
+                FROM planner_stats s
+                LEFT JOIN planner_votes v ON v.planner_id = s.planner_id
+                GROUP BY s.planner_id, s.upvotes
+                HAVING s.upvotes <> votes
+                """,
+                (rs, rowNum) -> new CounterDriftRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getInt("upvotes"), rs.getLong("votes")));
+    }
+
+    /**
+     * Stat rows whose comment counter disagrees with the live comment rows.
+     *
+     * @return one row per disagreeing planner
+     */
+    public List<CounterDriftRow> driftedCommentCounters() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count,
+                       COUNT(c.planner_id) AS live_comments
+                FROM planner_stats s
+                LEFT JOIN planner_comments c ON c.planner_id = s.planner_id AND c.deleted_at IS NULL
+                GROUP BY s.planner_id, s.comment_count
+                HAVING s.comment_count <> live_comments
+                """,
+                (rs, rowNum) -> new CounterDriftRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getInt("comment_count"), rs.getLong("live_comments")));
+    }
+
+    /**
+     * Planners that are visible on every state the catalog consults, yet carry no catalog row.
+     *
+     * @return the planner ids
+     */
+    public List<UUID> visiblePlannersWithoutCatalogRow() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(p.id) AS planner_id
+                FROM planner p
+                JOIN planner_content c ON c.planner_id = p.id
+                JOIN planner_publication pub ON pub.planner_id = p.id
+                LEFT JOIN planner_moderation m ON m.planner_id = p.id
+                LEFT JOIN planner_catalog cat ON cat.planner_id = p.id
+                WHERE pub.published = TRUE AND c.deleted_at IS NULL
+                  AND m.taken_down_at IS NULL AND cat.planner_id IS NULL
+                """,
+                (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
+    }
+
+    /**
+     * Catalog rows whose planner is no longer visible.
+     *
+     * @return the planner ids
+     */
+    public List<UUID> catalogRowsWithoutVisiblePlanner() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(cat.planner_id) AS planner_id
+                FROM planner_catalog cat
+                LEFT JOIN planner_content c ON c.planner_id = cat.planner_id
+                LEFT JOIN planner_publication pub ON pub.planner_id = cat.planner_id
+                LEFT JOIN planner_moderation m ON m.planner_id = cat.planner_id
+                WHERE pub.planner_id IS NULL OR pub.published = FALSE
+                   OR c.deleted_at IS NOT NULL OR m.taken_down_at IS NOT NULL
+                """,
+                (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
+    }
+
+    /**
+     * The stored content and keyword columns of every visible planner, for a rebuild of the filter
+     * indexes.
+     *
+     * @return one row per visible planner
+     */
+    public List<ContentDocumentRow> visibleContentDocuments() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(c.planner_id) AS planner_id, c.content, c.selected_keywords
+                FROM planner_content c
+                JOIN planner_publication pub ON pub.planner_id = c.planner_id
+                LEFT JOIN planner_moderation m ON m.planner_id = c.planner_id
+                WHERE pub.published = TRUE AND c.deleted_at IS NULL AND m.taken_down_at IS NULL
+                """,
+                (rs, rowNum) -> new ContentDocumentRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getString("content"), rs.getString("selected_keywords")));
+    }
+
+    /**
+     * Every row of the entity filter index.
+     *
+     * @return one row per indexed entity reference
+     */
+    public List<EntityFilterRow> entityFilterEntries() {
+        return jdbc.query("""
+                SELECT BIN_TO_UUID(planner_id) AS planner_id, entity_type, entity_id
+                FROM planner_entity_filter
+                """,
+                (rs, rowNum) -> new EntityFilterRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getString("entity_type"), rs.getInt("entity_id")));
+    }
+
+    /**
+     * Every row of the keyword filter index.
+     *
+     * @return one row per indexed keyword
+     */
+    public List<KeywordFilterRow> keywordFilterEntries() {
+        return jdbc.query(
+                "SELECT BIN_TO_UUID(planner_id) AS planner_id, keyword FROM planner_keyword_filter",
+                (rs, rowNum) -> new KeywordFilterRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getString("keyword")));
+    }
+
+    /**
+     * Catalog rows whose stored recommended flag disagrees with the derived one.
+     *
+     * @param threshold upvotes at which a planner counts as recommended
+     * @return one row per disagreeing catalog row
+     */
+    public List<RecommendedDriftRow> driftedRecommendedFlags(int threshold) {
+        return namedJdbc.query(RecommendedSql.DRIFTED_ROWS, Map.of("threshold", threshold),
+                (rs, rowNum) -> new RecommendedDriftRow(UUID.fromString(rs.getString("planner_id")),
+                        rs.getBoolean("recommended"), rs.getBoolean("derived")));
+    }
+}

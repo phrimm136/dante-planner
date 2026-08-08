@@ -1,9 +1,8 @@
 package org.danteplanner.backend.shared.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.sse.SseService;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.MediaType;
@@ -24,7 +23,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/sse")
-@Slf4j
 public class SseController {
 
     private final SseService sseService;
@@ -45,7 +43,6 @@ public class SseController {
             @AuthenticationPrincipal Long userId,
             @DeviceId UUID deviceId) {
 
-        log.info("SSE subscription for user {} device {}", userId, deviceId);
         return sseService.subscribe(userId, deviceId);
     }
 }

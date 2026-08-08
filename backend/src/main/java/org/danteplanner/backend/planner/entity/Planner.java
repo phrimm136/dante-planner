@@ -1,6 +1,20 @@
 package org.danteplanner.backend.planner.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -168,7 +182,7 @@ public class Planner implements Persistable<UUID> {
         return publication.getFirstPublishedAt();
     }
 
-    public Boolean getOwnerNotificationsEnabled() {
+    public boolean getOwnerNotificationsEnabled() {
         return publication.getOwnerNotificationsEnabled();
     }
 
@@ -176,7 +190,7 @@ public class Planner implements Persistable<UUID> {
         return moderation.getTakenDownAt();
     }
 
-    public Boolean getHiddenFromRecommended() {
+    public boolean getHiddenFromRecommended() {
         return moderation.getHiddenFromRecommended();
     }
 

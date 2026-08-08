@@ -91,7 +91,7 @@ class NotificationServiceLayerTest {
         @DisplayName("Should create PLANNER_RECOMMENDED notification successfully")
         void notifyPlannerRecommended_WhenValid_CreatesNotification() {
             // Arrange - set publicId and createdAt on saved notification (simulating @PrePersist)
-            when(notificationRepository.save(any(Notification.class)))
+            when(notificationRepository.insert(any(Notification.class)))
                     .thenAnswer(invocation -> {
                         Notification n = invocation.getArgument(0);
                         n.setPublicId(UUID.randomUUID());
@@ -106,7 +106,7 @@ class NotificationServiceLayerTest {
             // The persisted row is observable only in a containerized test; the captured entity is
             // the nearest stand-in for what reaches the notifications table.
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-            verify(notificationRepository).save(captor.capture());
+            verify(notificationRepository).insert(captor.capture());
 
             Notification saved = captor.getValue();
             assertEquals(testUserId, saved.getUserId());
@@ -129,7 +129,7 @@ class NotificationServiceLayerTest {
             dispatchService.notifyPlannerRecommended(testPlannerId, "Test Planner Title", testUserId);
 
             // Assert - the duplicate is decided before the write, so no violation is ever fired
-            verify(notificationRepository, never()).save(any());
+            verify(notificationRepository, never()).insert(any());
         }
 
         @Test
@@ -137,7 +137,7 @@ class NotificationServiceLayerTest {
         void notifyPlannerRecommended_WhenSuccess_PushesViaSse() {
             // Arrange
             UUID[] persistedPublicId = new UUID[1];
-            when(notificationRepository.save(any(Notification.class)))
+            when(notificationRepository.insert(any(Notification.class)))
                     .thenAnswer(invocation -> {
                         Notification n = invocation.getArgument(0);
                         n.setPublicId(UUID.randomUUID());
@@ -197,7 +197,7 @@ class NotificationServiceLayerTest {
             UUID commentPublicId = UUID.randomUUID();
 
             // Set publicId and createdAt on saved notification (simulating @PrePersist)
-            when(notificationRepository.save(any(Notification.class)))
+            when(notificationRepository.insert(any(Notification.class)))
                     .thenAnswer(invocation -> {
                         Notification n = invocation.getArgument(0);
                         n.setPublicId(UUID.randomUUID());
@@ -214,7 +214,7 @@ class NotificationServiceLayerTest {
             // The persisted row is observable only in a containerized test; the captured entity is
             // the nearest stand-in for what reaches the notifications table.
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-            verify(notificationRepository).save(captor.capture());
+            verify(notificationRepository).insert(captor.capture());
 
             Notification saved = captor.getValue();
             assertEquals(plannerOwnerId, saved.getUserId());
@@ -236,7 +236,7 @@ class NotificationServiceLayerTest {
                     "Test content", userId, userId);
 
             // Assert
-            verify(notificationRepository, never()).save(any());
+            verify(notificationRepository, never()).insert(any());
         }
 
         @Test
@@ -261,7 +261,7 @@ class NotificationServiceLayerTest {
                     "Test content", plannerOwnerId, commenterId);
 
             // Assert
-            verify(notificationRepository, never()).save(any());
+            verify(notificationRepository, never()).insert(any());
         }
     }
 
@@ -279,7 +279,7 @@ class NotificationServiceLayerTest {
             Long replierId = 200L;
 
             // Set publicId and createdAt on saved notification (simulating @PrePersist)
-            when(notificationRepository.save(any(Notification.class)))
+            when(notificationRepository.insert(any(Notification.class)))
                     .thenAnswer(invocation -> {
                         Notification n = invocation.getArgument(0);
                         n.setPublicId(UUID.randomUUID());
@@ -296,7 +296,7 @@ class NotificationServiceLayerTest {
             // The persisted row is observable only in a containerized test; the captured entity is
             // the nearest stand-in for what reaches the notifications table.
             ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-            verify(notificationRepository).save(captor.capture());
+            verify(notificationRepository).insert(captor.capture());
 
             Notification saved = captor.getValue();
             assertEquals(parentAuthorId, saved.getUserId());
@@ -318,7 +318,7 @@ class NotificationServiceLayerTest {
                     "Reply content", userId, userId);
 
             // Assert
-            verify(notificationRepository, never()).save(any());
+            verify(notificationRepository, never()).insert(any());
         }
     }
 
@@ -414,8 +414,6 @@ class NotificationServiceLayerTest {
 
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
-            when(notificationRepository.save(any(Notification.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             NotificationResponse response = inboxService.markAsRead(publicId, testUserId);
@@ -504,8 +502,6 @@ class NotificationServiceLayerTest {
 
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
-            when(notificationRepository.save(any(Notification.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             inboxService.deleteNotification(publicId, testUserId);

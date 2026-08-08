@@ -112,8 +112,9 @@ public class PlannerAccessGuard {
     }
 
     /**
-     * Require a planner to be publicly visible, whoever is asking. An unpublished, taken-down, or
-     * soft-deleted planner is indistinguishable from a missing one to a non-owner.
+     * Require a planner to be publicly visible, whoever is asking, and return it loaded. An
+     * unpublished, taken-down, or soft-deleted planner is indistinguishable from a missing one to a
+     * non-owner. Callers that discard the return value belong on {@link #checkPublished(UUID)}.
      *
      * @param id the planner ID
      * @return the published planner
@@ -122,5 +123,19 @@ public class PlannerAccessGuard {
     public Planner requirePublished(UUID id) {
         return plannerRepository.findPublishedAggregate(id)
                 .orElseThrow(() -> new PlannerNotFoundException(id));
+    }
+
+    /**
+     * Assert that a planner is publicly visible, whoever is asking. The void pure-authorization
+     * form of {@link #requirePublished(UUID)}: it settles the same visibility question with an
+     * existence query, leaving the aggregate unhydrated.
+     *
+     * @param plannerId the planner ID
+     * @throws PlannerNotFoundException if no published planner carries the id
+     */
+    public void checkPublished(UUID plannerId) {
+        if (!plannerRepository.existsPublishedById(plannerId)) {
+            throw new PlannerNotFoundException(plannerId);
+        }
     }
 }

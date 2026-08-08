@@ -5,9 +5,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CommentVoteResponse;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
@@ -45,7 +44,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@Slf4j
 @RateLimited(RateLimitPolicy.COMMENT)
 public class CommentController {
 
@@ -77,8 +75,9 @@ public class CommentController {
     /**
      * Create a new comment on a planner.
      *
-     * <p>Supports both top-level comments and threaded replies.
-     * Max depth is 5; replies at max depth become siblings.
+     * <p>Supports both top-level comments and threaded replies. Nesting stops at
+     * {@link org.danteplanner.backend.shared.util.CommentConstants#MAX_DEPTH}, where a reply
+     * becomes a sibling instead of a child.
      * Rate limited to prevent spam.</p>
      *
      * @param userId    the authenticated user ID
@@ -94,7 +93,6 @@ public class CommentController {
             @PathVariable UUID plannerId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        log.info("User {} creating comment on planner {}", userId, plannerId);
         CreateCommentResponse response = commentCommandService.createComment(plannerId, userId, deviceId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -102,8 +100,9 @@ public class CommentController {
     /**
      * Create a reply to an existing comment.
      *
-     * <p>Creates a threaded reply under the specified parent comment.
-     * Max depth is 5; replies at max depth become siblings.
+     * <p>Creates a threaded reply under the specified parent comment. Nesting stops at
+     * {@link org.danteplanner.backend.shared.util.CommentConstants#MAX_DEPTH}, where a reply
+     * becomes a sibling instead of a child.
      * Rate limited to prevent spam.</p>
      *
      * @param userId          the authenticated user ID
@@ -119,7 +118,6 @@ public class CommentController {
             @PathVariable UUID parentCommentId,
             @Valid @RequestBody CreateCommentRequest request) {
 
-        log.info("User {} creating reply to comment {}", userId, parentCommentId);
         CreateCommentResponse response = commentCommandService.createReply(parentCommentId, userId, deviceId, request.content());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -141,7 +139,6 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody UpdateCommentRequest request) {
 
-        log.info("User {} editing comment {}", userId, commentId);
         UpdateCommentResponse response = commentCommandService.updateComment(commentId, userId, request);
         return ResponseEntity.ok(response);
     }
@@ -161,7 +158,6 @@ public class CommentController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID commentId) {
 
-        log.info("User {} deleting comment {}", userId, commentId);
         commentCommandService.deleteComment(commentId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -204,7 +200,6 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody CommentReportRequest request) {
 
-        log.info("User {} reporting comment {}", userId, commentId);
         CommentReportResponse response = commentEngagementService.reportComment(commentId, userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -226,7 +221,6 @@ public class CommentController {
             @PathVariable UUID commentId,
             @Valid @RequestBody ToggleNotificationRequest request) {
 
-        log.info("User {} toggling notifications for comment {}", userId, commentId);
         ToggleNotificationResponse response = commentEngagementService.toggleNotification(commentId, userId, request.enabled());
         return ResponseEntity.ok(response);
     }

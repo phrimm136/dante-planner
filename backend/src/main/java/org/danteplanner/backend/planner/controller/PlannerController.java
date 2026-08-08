@@ -1,9 +1,8 @@
 package org.danteplanner.backend.planner.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.dto.PlannerConfigResponse;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +20,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PlannerController {
 
     private final int schemaVersion;

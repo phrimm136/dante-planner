@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.exception;
+package org.danteplanner.backend.shared.ratelimit;
 
 import lombok.Getter;
 

@@ -20,9 +20,6 @@ import org.danteplanner.backend.shared.config.DeviceIdResolver;
 import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.SecurityProperties;
-import org.danteplanner.backend.shared.exception.RateLimitExceededException;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
 import org.danteplanner.backend.shared.util.ClientIpResolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

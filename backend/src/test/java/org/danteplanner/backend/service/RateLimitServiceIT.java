@@ -1,10 +1,10 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.config.RateLimitProperties;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties;
 import org.danteplanner.backend.shared.config.RedisConnectionConfig;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.shared.service.RateLimitService;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitService;
 
-import org.danteplanner.backend.shared.exception.RateLimitExceededException;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;

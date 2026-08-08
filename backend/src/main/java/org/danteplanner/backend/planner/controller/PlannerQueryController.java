@@ -1,8 +1,7 @@
 package org.danteplanner.backend.planner.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
@@ -28,7 +27,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PlannerQueryController {
 
     private final PlannerQueryService plannerQueryService;
@@ -47,7 +45,6 @@ public class PlannerQueryController {
             @AuthenticationPrincipal Long userId,
             Pageable pageable) {
 
-        log.debug("Fetching planners for user {} with pagination: {}", userId, pageable);
         Page<PlannerSummaryResponse> planners = plannerQueryService.getPlanners(userId, pageable);
         return ResponseEntity.ok(planners);
     }
@@ -65,7 +62,6 @@ public class PlannerQueryController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        log.debug("Fetching planner {} for user {}", id, userId);
         PlannerResponse response = byIdReadGuard.read(ByIdReadGuard.PLANNER_ENTITY_TYPE, id,
                 () -> plannerQueryService.getPlanner(userId, id));
         return ResponseEntity.ok(response);

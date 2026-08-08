@@ -2,9 +2,8 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.DeviceId;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
@@ -35,7 +34,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PlannerCommandController {
 
     private final PlannerCommandService plannerCommandService;
@@ -61,7 +59,6 @@ public class PlannerCommandController {
             @Valid @RequestBody UpsertPlannerRequest request,
             @RequestParam(required = false, defaultValue = "false") boolean force) {
 
-        log.info("Upserting planner {} for user {}, force={}", id, userId, force);
         UpsertResult result = plannerCommandService.upsertPlanner(userId, deviceId, id, request, force);
 
         HttpStatus status = result.isCreated() ? HttpStatus.CREATED : HttpStatus.OK;
@@ -83,7 +80,6 @@ public class PlannerCommandController {
             @DeviceId UUID deviceId,
             @PathVariable UUID id) {
 
-        log.info("Deleting planner {} for user {}", id, userId);
         plannerCommandService.deletePlanner(userId, deviceId, id);
         return ResponseEntity.noContent().build();
     }
@@ -103,7 +99,6 @@ public class PlannerCommandController {
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody ImportPlannersRequest request) {
 
-        log.info("Importing {} planners for user {}", request.planners().size(), userId);
         ImportPlannersResponse response = plannerCommandService.importPlanners(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

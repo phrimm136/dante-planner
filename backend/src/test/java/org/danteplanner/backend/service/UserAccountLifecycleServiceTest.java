@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -85,12 +84,7 @@ class UserAccountLifecycleServiceTest {
         @DisplayName("Should set deletedAt and scheduledDate on first deletion")
         void deleteAccount_WhenFirstDeletion_SetsDeletedAtAndScheduledDate() {
             // Arrange
-            List<User> persisted = new ArrayList<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-                persisted.add(invocation.getArgument(0));
-                return invocation.getArgument(0);
-            });
 
             // Act
             Instant scheduledDate = lifecycleService.deleteAccount(testUser.getId());
@@ -106,13 +100,6 @@ class UserAccountLifecycleServiceTest {
             Instant expectedScheduleMax = Instant.now().plus(Duration.ofDays(GRACE_PERIOD_DAYS + 1));
             assertTrue(scheduledDate.isAfter(expectedScheduleMin));
             assertTrue(scheduledDate.isBefore(expectedScheduleMax));
-
-            assertEquals(1, persisted.size());
-            User persistedUser = persisted.get(0);
-            assertEquals(testUser.getId(), persistedUser.getId());
-            assertTrue(persistedUser.isDeleted());
-            assertNotNull(persistedUser.getDeletedAt());
-            assertEquals(scheduledDate, persistedUser.getPermanentDeleteScheduledAt());
 
             // Auth is token-only, so deletion must push token invalidation itself.
             // The outcome form — a request carrying the old token is rejected — is only
@@ -134,7 +121,6 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertEquals(existingScheduledAt, scheduledDate);
-            verify(userRepository, never()).save(any()); // No save on idempotent call
             verify(tokenBlacklistService, never()).invalidateUserTokens(any()); // No re-invalidation
         }
 
@@ -152,7 +138,6 @@ class UserAccountLifecycleServiceTest {
             );
 
             assertEquals(nonExistentId, exception.getUserId());
-            verify(userRepository, never()).save(any());
         }
     }
 
@@ -167,12 +152,7 @@ class UserAccountLifecycleServiceTest {
             testUser.softDelete(Instant.now().plus(Duration.ofDays(30)));
             assertTrue(testUser.isDeleted());
 
-            List<User> persisted = new ArrayList<>();
             when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-                persisted.add(invocation.getArgument(0));
-                return invocation.getArgument(0);
-            });
 
             // Act
             lifecycleService.reactivateAccount(testUser.getId());
@@ -181,13 +161,6 @@ class UserAccountLifecycleServiceTest {
             assertFalse(testUser.isDeleted());
             assertNull(testUser.getDeletedAt());
             assertNull(testUser.getPermanentDeleteScheduledAt());
-
-            assertEquals(1, persisted.size());
-            User persistedUser = persisted.get(0);
-            assertEquals(testUser.getId(), persistedUser.getId());
-            assertFalse(persistedUser.isDeleted());
-            assertNull(persistedUser.getDeletedAt());
-            assertNull(persistedUser.getPermanentDeleteScheduledAt());
         }
 
         @Test
@@ -204,7 +177,6 @@ class UserAccountLifecycleServiceTest {
             );
 
             assertEquals(nonExistentId, exception.getUserId());
-            verify(userRepository, never()).save(any());
         }
 
         @Test
@@ -220,7 +192,6 @@ class UserAccountLifecycleServiceTest {
 
             // Assert
             assertFalse(testUser.isDeleted());
-            verify(userRepository, never()).save(any()); // Idempotent: no save for already-active user
         }
     }
 

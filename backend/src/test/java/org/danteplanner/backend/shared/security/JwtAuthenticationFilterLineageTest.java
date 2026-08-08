@@ -104,7 +104,7 @@ class JwtAuthenticationFilterLineageTest {
 
     private TokenClaims refreshClaims(Long userId, String jti, String familyId) {
         return new TokenClaims(
-                userId, "user@example.com", TokenClaims.TYPE_REFRESH, null,
+                userId, TokenClaims.TYPE_REFRESH, null,
                 new Date(), new Date(System.currentTimeMillis() + 604800000L),
                 jti, familyId, null);
     }

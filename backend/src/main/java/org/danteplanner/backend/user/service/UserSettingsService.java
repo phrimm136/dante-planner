@@ -73,10 +73,9 @@ public class UserSettingsService {
             settings.setNotifyNewPublications(request.notifyNewPublications());
         }
 
-        UserSettings saved = userSettingsRepository.save(settings);
         log.debug("Updated settings for user {}", userId);
 
-        return UserSettingsResponse.fromEntity(saved);
+        return UserSettingsResponse.fromEntity(settings);
     }
 
     /**
@@ -105,6 +104,6 @@ public class UserSettingsService {
                 .build();
 
         log.info("Created default settings for user {}", userId);
-        return userSettingsRepository.save(settings);
+        return userSettingsRepository.insert(settings);
     }
 }

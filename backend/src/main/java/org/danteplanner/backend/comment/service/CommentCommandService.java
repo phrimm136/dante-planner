@@ -17,13 +17,13 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.shared.util.CommentConstants;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.service.UserService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -82,26 +82,25 @@ public class CommentCommandService {
             }
 
             // Calculate depth with max enforcement (flatten at max depth)
-            depth = Math.min(parent.getDepth() + 1, PlannerComment.MAX_DEPTH);
+            depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
 
             // If at max depth, replies become siblings instead of children
-            if (parent.getDepth() >= PlannerComment.MAX_DEPTH) {
+            if (parent.getDepth() >= CommentConstants.MAX_DEPTH) {
                 effectiveParentId = parent.getParentCommentId();
             }
         }
 
         // Create and save comment
         PlannerComment comment = new PlannerComment(plannerId, userId, request.content(), effectiveParentId, depth);
-        PlannerComment saved = commentRepository.save(comment);
-        plannerStatsService.commentAdded(plannerId);
-        log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
+        PlannerComment saved = commentRepository.insert(comment);
+        plannerStatsService.incrementCommentCount(plannerId);
 
         // Send notifications (respecting user notification settings)
         UUID parentPublicId = null;
         if (effectiveParentId == null) {
             // Top-level comment - notify planner owner (if not self-comment and owner has notifications enabled)
             Long plannerOwnerId = planner.getUser().getId();
-            if (!userId.equals(plannerOwnerId) && Boolean.TRUE.equals(planner.getOwnerNotificationsEnabled())) {
+            if (!userId.equals(plannerOwnerId) && planner.getOwnerNotificationsEnabled()) {
                 notificationDispatchService.notifyCommentReceived(
                         saved.getId(),
                         saved.getPublicId(),
@@ -133,6 +132,7 @@ public class CommentCommandService {
         }
 
         publishCommentCreated(plannerId, saved, parentPublicId, userId);
+        log.info("User {} created comment {} on planner {}", userId, saved.getId(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
@@ -165,19 +165,18 @@ public class CommentCommandService {
         }
 
         // Calculate depth with max enforcement (flatten at max depth)
-        int depth = Math.min(parent.getDepth() + 1, PlannerComment.MAX_DEPTH);
+        int depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
 
         // If at max depth, replies become siblings instead of children
         Long effectiveParentId = parent.getId();
-        if (parent.getDepth() >= PlannerComment.MAX_DEPTH) {
+        if (parent.getDepth() >= CommentConstants.MAX_DEPTH) {
             effectiveParentId = parent.getParentCommentId();
         }
 
         // Create and save reply
         PlannerComment reply = new PlannerComment(plannerId, userId, content, effectiveParentId, depth);
-        PlannerComment saved = commentRepository.save(reply);
-        plannerStatsService.commentAdded(plannerId);
-        log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.getId(), plannerId);
+        PlannerComment saved = commentRepository.insert(reply);
+        plannerStatsService.incrementCommentCount(plannerId);
 
         // Send notification to parent author (if not self-reply and author has notifications enabled)
         PlannerComment notifyParent = commentRepository.findById(effectiveParentId).orElseThrow();
@@ -196,6 +195,7 @@ public class CommentCommandService {
         }
 
         publishCommentCreated(plannerId, saved, notifyParent.getPublicId(), userId);
+        log.info("User {} created reply {} to comment {} on planner {}", userId, saved.getId(), parent.getId(), plannerId);
 
         return new CreateCommentResponse(saved.getPublicId(), saved.getCreatedAt());
     }
@@ -228,10 +228,9 @@ public class CommentCommandService {
         }
 
         comment.edit(request.content());
-        PlannerComment saved = commentRepository.save(comment);
         log.info("User {} edited comment {}", userId, commentPublicId);
 
-        return new UpdateCommentResponse(saved.getEditedAt());
+        return new UpdateCommentResponse(comment.getEditedAt());
     }
 
     /**
@@ -245,9 +244,10 @@ public class CommentCommandService {
      */
     @Transactional
     public void softDelete(PlannerComment comment) {
+        // The withdrawal must precede the counter: decrementing detaches the comment, and a
+        // mutation made after it would never reach the row.
         comment.softDelete();
-        commentRepository.save(comment);
-        plannerStatsService.commentRemoved(comment.getPlannerId());
+        plannerStatsService.decrementCommentCount(comment.getPlannerId());
     }
 
     /**
@@ -292,8 +292,7 @@ public class CommentCommandService {
     private void publishCommentCreated(UUID plannerId, PlannerComment saved, UUID parentPublicId,
             Long authorUserId) {
         User author = userService.findOptionalById(authorUserId).orElse(null);
-        CommentTreeNode payload =
-                CommentTreeNode.fromEntity(saved, parentPublicId, author, null, false, List.of());
+        CommentTreeNode payload = CommentTreeNode.forBroadcast(saved, parentPublicId, author);
         eventPublisher.publishEvent(
                 new CommentCreatedEvent(plannerId, saved.getPublicId(), authorUserId, payload));
     }

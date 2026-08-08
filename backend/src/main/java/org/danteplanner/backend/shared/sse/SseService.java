@@ -38,7 +38,6 @@ import org.danteplanner.backend.shared.entity.SseEventType;
 public class SseService extends AbstractSseService<Long> {
 
     private static final long HEARTBEAT_INTERVAL_MS = 10_000L;
-    private static final long CLEANUP_INTERVAL_MS = 60_000L;
 
     private static final Duration SETTINGS_CACHE_TTL = Duration.ofMinutes(5);
     private static final long SETTINGS_CACHE_MAX_ENTRIES = 10_000;

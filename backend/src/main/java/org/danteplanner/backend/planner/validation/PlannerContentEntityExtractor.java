@@ -1,4 +1,4 @@
-package org.danteplanner.backend.planner.service;
+package org.danteplanner.backend.planner.validation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

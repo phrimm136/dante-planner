@@ -83,7 +83,6 @@ class JwtTokenServiceTest {
             assertNotNull(token);
             TokenClaims claims = tokenService.validateToken(token);
             assertEquals(userId, claims.userId());
-            assertNull(claims.email());
             assertEquals(TokenClaims.TYPE_ACCESS, claims.type());
             assertEquals(UserRole.NORMAL, claims.role());
             assertTrue(claims.isAccessToken());
@@ -154,7 +153,6 @@ class JwtTokenServiceTest {
             assertNotNull(token);
             TokenClaims claims = tokenService.validateToken(token);
             assertEquals(userId, claims.userId());
-            assertNull(claims.email());
             assertEquals(TokenClaims.TYPE_REFRESH, claims.type());
             assertTrue(claims.isRefreshToken());
             assertFalse(claims.isAccessToken());
@@ -238,7 +236,6 @@ class JwtTokenServiceTest {
             // Assert
             assertNotNull(claims);
             assertEquals(userId, claims.userId());
-            assertNull(claims.email());
             assertNotNull(claims.issuedAt());
             assertNotNull(claims.expiration());
         }

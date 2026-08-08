@@ -1,10 +1,7 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 
-import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerSubscription;
-import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -49,7 +46,6 @@ class PlannerSubscriptionServiceTest {
     private PlannerSubscriptionService subscriptionService;
 
     private User testUser;
-    private Planner publishedPlanner;
     private UUID plannerId;
 
     @BeforeEach
@@ -60,17 +56,6 @@ class PlannerSubscriptionServiceTest {
         testUser = TestDataFactory.unsavedUser(1L);
 
         plannerId = UUID.randomUUID();
-
-        publishedPlanner = TestDataFactory.planner(testUser)
-                .id(plannerId)
-                .title("Published Planner")
-                .category("5F")
-                .status(PlannerStatus.DRAFT)
-                .content("{\"data\": \"test\"}")
-                .contentVersion(6)
-                .plannerType(PlannerType.MIRROR_DUNGEON)
-                .published(true)
-                .build();
     }
 
     @Nested
@@ -81,11 +66,10 @@ class PlannerSubscriptionServiceTest {
         @DisplayName("Should create new subscription when not subscribed")
         void toggleSubscription_WhenNotSubscribed_CreatesNewSubscription() {
             // Arrange
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.empty());
-            when(subscriptionRepository.save(any(PlannerSubscription.class)))
+            when(subscriptionRepository.insert(any(PlannerSubscription.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
@@ -98,7 +82,7 @@ class PlannerSubscriptionServiceTest {
             assertEquals(plannerId, result.getPlannerId());
 
             ArgumentCaptor<PlannerSubscription> captor = ArgumentCaptor.forClass(PlannerSubscription.class);
-            verify(subscriptionRepository).save(captor.capture());
+            verify(subscriptionRepository).insert(captor.capture());
             assertTrue(captor.getValue().isEnabled());
         }
 
@@ -109,12 +93,9 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription existingSubscription = new PlannerSubscription(testUser.getId(), plannerId);
             // existingSubscription is enabled by default
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(existingSubscription));
-            when(subscriptionRepository.save(any(PlannerSubscription.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
@@ -122,7 +103,7 @@ class PlannerSubscriptionServiceTest {
             // Assert
             assertNotNull(result);
             assertFalse(result.isEnabled()); // Was enabled, now disabled
-            verify(subscriptionRepository).save(existingSubscription);
+            assertSame(existingSubscription, result);
         }
 
         @Test
@@ -132,12 +113,9 @@ class PlannerSubscriptionServiceTest {
             PlannerSubscription disabledSubscription = new PlannerSubscription(testUser.getId(), plannerId);
             disabledSubscription.toggle(); // Now disabled
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(publishedPlanner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(subscriptionRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(disabledSubscription));
-            when(subscriptionRepository.save(any(PlannerSubscription.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             PlannerSubscription result = subscriptionService.toggleSubscription(testUser.getId(), plannerId);
@@ -152,8 +130,7 @@ class PlannerSubscriptionServiceTest {
         void toggleSubscription_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findPublishedAggregate(nonExistentId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -162,15 +139,14 @@ class PlannerSubscriptionServiceTest {
             );
 
             verify(subscriptionRepository, never()).findByUserIdAndPlannerId(any(), any());
-            verify(subscriptionRepository, never()).save(any());
+            verify(subscriptionRepository, never()).insert(any());
         }
 
         @Test
         @DisplayName("Should throw PlannerNotFoundException when planner not published")
         void toggleSubscription_WhenPlannerNotPublished_ThrowsException() {
             // Arrange
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -248,7 +224,7 @@ class PlannerSubscriptionServiceTest {
 
             // Assert
             ArgumentCaptor<PlannerSubscription> captor = ArgumentCaptor.forClass(PlannerSubscription.class);
-            verify(subscriptionRepository).save(captor.capture());
+            verify(subscriptionRepository).insert(captor.capture());
 
             PlannerSubscription saved = captor.getValue();
             assertEquals(testUser.getId(), saved.getUserId());
@@ -267,7 +243,7 @@ class PlannerSubscriptionServiceTest {
             subscriptionService.createSubscription(testUser.getId(), plannerId);
 
             // Assert
-            verify(subscriptionRepository, never()).save(any());
+            verify(subscriptionRepository, never()).insert(any());
         }
     }
 

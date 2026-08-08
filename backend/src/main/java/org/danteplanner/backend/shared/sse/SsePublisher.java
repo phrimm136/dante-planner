@@ -28,6 +28,18 @@ public class SsePublisher {
     private final ObjectMapper objectMapper;
 
     /**
+     * Publish a user-targeted event to every one of the user's devices.
+     *
+     * @param userId   the target user ID
+     * @param type     the event type
+     * @param entityId the affected entity id
+     * @param payload  the event payload (patched into the recipient's cache)
+     */
+    public void publishUserEvent(Long userId, SseEventType type, String entityId, Object payload) {
+        publishUserEvent(userId, null, type, entityId, payload);
+    }
+
+    /**
      * Publish a user-targeted event carrying its full payload to the primary Redis.
      *
      * @param userId          the target user ID

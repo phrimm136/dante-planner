@@ -25,4 +25,17 @@ public record PlannerSyncEvent(
         UUID plannerId,
         SseEventType eventType,
         PlannerResponse payload) {
+
+    /**
+     * Announces a deleted planner, which carries no row to patch into a cache.
+     *
+     * @param userId          the owner whose devices receive the event
+     * @param excludeDeviceId the device that originated the deletion, or null when the change came
+     *                        from no device
+     * @param plannerId       the planner that was deleted
+     * @return the event
+     */
+    public static PlannerSyncEvent deleted(Long userId, UUID excludeDeviceId, UUID plannerId) {
+        return new PlannerSyncEvent(userId, excludeDeviceId, plannerId, SseEventType.DELETED, null);
+    }
 }

@@ -43,14 +43,12 @@ public class NotificationDispatchService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void notifyPlannerRecommended(UUID plannerId, String plannerTitle, Long plannerOwnerId) {
-        dispatch(new Notification(
+        dispatch(Notification.plannerScoped(
                 plannerOwnerId,
                 plannerId.toString(),
                 NotificationType.PLANNER_RECOMMENDED,
                 plannerId,
-                plannerTitle,
-                null,
-                null
+                plannerTitle
         ), SseEventType.NOTIFY_RECOMMENDED);
     }
 
@@ -200,7 +198,7 @@ public class NotificationDispatchService {
                     notification.getNotificationType());
         }
 
-        Notification saved = notificationRepository.save(notification);
+        Notification saved = notificationRepository.insert(notification);
         eventPublisher.publishEvent(new NotificationRaisedEvent(
                 notification.getUserId(),
                 sseEventType,

@@ -94,16 +94,9 @@ class UserModerationServiceTest {
                 .build();
     }
 
-    /** The user entity handed to the repository, whose field state is what a commit would write. */
-    private User persistedUser() {
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userService).save(captor.capture());
-        return captor.getValue();
-    }
-
     private ModerationAction persistedAction() {
         ArgumentCaptor<ModerationAction> captor = ArgumentCaptor.forClass(ModerationAction.class);
-        verify(moderationActionRepository).save(captor.capture());
+        verify(moderationActionRepository).insert(captor.capture());
         return captor.getValue();
     }
 
@@ -119,7 +112,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(moderatorUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 60, "Test timeout");
@@ -127,9 +119,9 @@ class UserModerationServiceTest {
             // Assert
             assertNotNull(result.getTimeoutUntil());
 
-            User persisted = persistedUser();
-            assertEquals(normalUser.getId(), persisted.getId());
-            assertEquals(result.getTimeoutUntil(), persisted.getTimeoutUntil());
+            // The loaded entity carries the change dirty checking would write at commit.
+            assertSame(normalUser, result);
+            assertEquals(result.getTimeoutUntil(), normalUser.getTimeoutUntil());
         }
 
         @Test
@@ -140,7 +132,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.timeoutUser(adminUser.getId(), normalUser.getId(), 60, "Test timeout");
@@ -157,7 +148,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.timeoutUser(adminUser.getId(), moderatorUser.getId(), 60, "Test timeout");
@@ -191,7 +181,7 @@ class UserModerationServiceTest {
                     () -> moderationService.timeoutUser(adminUser.getId(), targetAdmin.getId(), 60, "Test")
             );
             assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
-            verify(userService, never()).save(any());
+            assertNull(targetAdmin.getTimeoutUntil());
         }
 
         @Test
@@ -219,7 +209,7 @@ class UserModerationServiceTest {
                     () -> moderationService.timeoutUser(moderatorUser.getId(), otherModerator.getId(), 60, "Test")
             );
             assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
-            verify(userService, never()).save(any());
+            assertNull(otherModerator.getTimeoutUntil());
         }
 
         @Test
@@ -237,7 +227,7 @@ class UserModerationServiceTest {
                     () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 0, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
-            verify(userService, never()).save(any());
+            assertNull(normalUser.getTimeoutUntil());
         }
 
         @Test
@@ -255,7 +245,7 @@ class UserModerationServiceTest {
                     () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), -30, "Test")
             );
             assertTrue(exception.getMessage().contains("must be positive"));
-            verify(userService, never()).save(any());
+            assertNull(normalUser.getTimeoutUntil());
         }
 
         @Test
@@ -305,7 +295,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(moderatorUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.removeTimeout(moderatorUser.getId(), normalUser.getId(), "Test clear timeout");
@@ -313,9 +302,8 @@ class UserModerationServiceTest {
             // Assert
             assertNull(result.getTimeoutUntil());
 
-            User persisted = persistedUser();
-            assertEquals(normalUser.getId(), persisted.getId());
-            assertNull(persisted.getTimeoutUntil());
+            assertSame(normalUser, result);
+            assertNull(normalUser.getTimeoutUntil());
         }
 
         @Test
@@ -359,7 +347,6 @@ class UserModerationServiceTest {
             assertTrue(exception.getMessage()
                     .contains("Cannot clear the timeout of a user of equal or higher rank"));
             assertNotNull(otherModerator.getTimeoutUntil());
-            verify(userService, never()).save(any());
         }
 
         @Test
@@ -384,7 +371,7 @@ class UserModerationServiceTest {
                     () -> moderationService.removeTimeout(normalUser.getId(), target.getId(), "Test")
             );
             assertTrue(exception.getMessage().contains("Only moderators can clear timeouts"));
-            verify(userService, never()).save(any());
+            assertNotNull(target.getTimeoutUntil());
         }
     }
 
@@ -400,7 +387,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.banUser(adminUser.getId(), normalUser.getId(), "Test ban reason");
@@ -410,10 +396,9 @@ class UserModerationServiceTest {
             assertNotNull(result.getBannedAt());
             assertEquals(adminUser.getId(), result.getBannedBy());
 
-            User persisted = persistedUser();
-            assertEquals(normalUser.getId(), persisted.getId());
-            assertTrue(persisted.isBanned());
-            assertEquals(adminUser.getId(), persisted.getBannedBy());
+            assertSame(normalUser, result);
+            assertTrue(normalUser.isBanned());
+            assertEquals(adminUser.getId(), normalUser.getBannedBy());
 
             ModerationAction action = persistedAction();
             assertEquals(ModerationAction.ActionType.BAN, action.getActionType());
@@ -433,7 +418,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(moderatorUser.getId()))
                     .thenReturn(Optional.of(moderatorUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.banUser(adminUser.getId(), moderatorUser.getId(), null);
@@ -467,7 +451,7 @@ class UserModerationServiceTest {
                     () -> moderationService.banUser(adminUser.getId(), targetAdmin.getId(), "Reason")
             );
             assertTrue(exception.getMessage().contains("Cannot ban a user of equal or higher rank"));
-            verify(userService, never()).save(any());
+            assertFalse(targetAdmin.isBanned());
             verify(eventPublisher, never()).publishEvent(any(AccountSuspendedEvent.class));
         }
 
@@ -486,7 +470,7 @@ class UserModerationServiceTest {
                     () -> moderationService.banUser(moderatorUser.getId(), normalUser.getId(), "Reason")
             );
             assertTrue(exception.getMessage().contains("Only administrators can ban"));
-            verify(userService, never()).save(any());
+            assertFalse(normalUser.isBanned());
         }
     }
 
@@ -505,7 +489,6 @@ class UserModerationServiceTest {
                     .thenReturn(Optional.of(adminUser));
             when(userService.findActiveById(normalUser.getId()))
                     .thenReturn(Optional.of(normalUser));
-            when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
 
             // Act
             User result = moderationService.unbanUser(adminUser.getId(), normalUser.getId(), "Test unban");
@@ -515,10 +498,9 @@ class UserModerationServiceTest {
             assertNull(result.getBannedAt());
             assertNull(result.getBannedBy());
 
-            User persisted = persistedUser();
-            assertEquals(normalUser.getId(), persisted.getId());
-            assertFalse(persisted.isBanned());
-            assertNull(persisted.getBannedBy());
+            assertSame(normalUser, result);
+            assertFalse(normalUser.isBanned());
+            assertNull(normalUser.getBannedBy());
 
             ModerationAction action = persistedAction();
             assertEquals(ModerationAction.ActionType.UNBAN, action.getActionType());
@@ -541,7 +523,6 @@ class UserModerationServiceTest {
                     () -> moderationService.unbanUser(moderatorUser.getId(), normalUser.getId(), "Test")
             );
             assertTrue(exception.getMessage().contains("Only administrators can unban"));
-            verify(userService, never()).save(any());
         }
 
         @Test
@@ -567,7 +548,6 @@ class UserModerationServiceTest {
             );
             assertTrue(exception.getMessage().contains("Cannot unban a user of equal or higher rank"));
             assertTrue(targetAdmin.isBanned());
-            verify(userService, never()).save(any());
         }
     }
 }

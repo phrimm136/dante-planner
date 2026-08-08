@@ -29,6 +29,8 @@ Package-by-feature: feature roots (`admin`, `auth`, `comment`, `moderation`, `no
 - Collections `FetchType.LAZY`; prevent N+1 with `@EntityGraph` or `JOIN FETCH`; explicit `countQuery` on paginated `@Query`.
 - List endpoints take `Pageable` (default size 20, max 100) — never an unbounded `List<Entity>`.
 - Check-then-act races: `@Lock(LockModeType.PESSIMISTIC_WRITE)` repository method. Counters: atomic `@Modifying @Query("... SET x = x + 1")`, not read-modify-write.
+- Method names carry the cardinality: a plural noun returns a collection, `…ById`/`…Of` returns at most one row, a verb prefix (`try…`, `insert…`, `refresh…`, `increment…`) mutates and returns the affected count.
+- Projection interfaces live in the repository package with a `*Row` suffix; repositories never return `*Response` types — a `*Row` is mapped by a static `from(row)` on the DTO.
 
 ## Security
 

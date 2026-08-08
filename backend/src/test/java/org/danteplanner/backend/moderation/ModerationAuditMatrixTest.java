@@ -124,10 +124,8 @@ class ModerationAuditMatrixTest {
         User target = user(TARGET, UserRole.MODERATOR);
         when(userService.findActiveById(ACTOR)).thenReturn(Optional.of(actor));
         when(userService.findActiveById(TARGET)).thenReturn(Optional.of(target));
-        when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userService.lockActiveById(ACTOR)).thenReturn(actor);
         when(userService.lockActiveById(TARGET)).thenReturn(target);
-        when(userService.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
         when(userService.countByRole(any())).thenReturn(5L);
 
         Planner planner = plannerAggregate(actor);
@@ -152,7 +150,7 @@ class ModerationAuditMatrixTest {
                     entry.getValue().run();
 
                     ArgumentCaptor<ModerationAction> captor = ArgumentCaptor.forClass(ModerationAction.class);
-                    verify(moderationActionRepository, atLeastOnce()).save(captor.capture());
+                    verify(moderationActionRepository, atLeastOnce()).insert(captor.capture());
                     assertTrue(captor.getAllValues().stream()
                                     .anyMatch(a -> a.getActionType() == entry.getKey()),
                             entry.getKey() + " left no audit record of its own type");

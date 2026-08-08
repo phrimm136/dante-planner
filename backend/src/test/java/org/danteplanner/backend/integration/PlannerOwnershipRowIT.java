@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.entity.Planner;
-import org.danteplanner.backend.planner.repository.PlannerClassification;
+import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Verifies the {@link PlannerClassification} projection maps against the real schema: the classifying
+ * Verifies the {@link PlannerOwnershipRow} projection maps against the real schema: the ownership
  * SELECT resolves a planner's owner and soft-delete state through the aliased getters, so the upsert
  * create branch can distinguish owner-soft-deleted from other-user-active in one query.
  */
@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("it")
 @Tag("containerized")
 @Import(TestConfig.class)
-class PlannerClassificationIT extends SharedMySqlContainerSupport {
+class PlannerOwnershipRowIT extends SharedMySqlContainerSupport {
 
 
     @Autowired
@@ -38,16 +38,16 @@ class PlannerClassificationIT extends SharedMySqlContainerSupport {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("classifying SELECT resolves an active planner's owner and null soft-delete state")
+    @DisplayName("ownership SELECT resolves an active planner's owner and null soft-delete state")
     void createExistenceTwoSelects_WhenActivePlanner_ProjectsOwnerAndNullDeletedAt() {
-        User owner = TestDataFactory.createTestUser(userRepository, "classify-" + System.nanoTime() + "@example.com");
+        User owner = TestDataFactory.createTestUser(userRepository, "ownership-" + System.nanoTime() + "@example.com");
         Planner planner = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
 
-        Optional<PlannerClassification> classification =
-                plannerRepository.findClassificationById(planner.getId());
+        Optional<PlannerOwnershipRow> ownership =
+                plannerRepository.findOwnershipById(planner.getId());
 
-        assertThat(classification).isPresent();
-        assertThat(classification.get().getUserId()).isEqualTo(owner.getId());
-        assertThat(classification.get().getDeletedAt()).isNull();
+        assertThat(ownership).isPresent();
+        assertThat(ownership.get().getUserId()).isEqualTo(owner.getId());
+        assertThat(ownership.get().getDeletedAt()).isNull();
     }
 }

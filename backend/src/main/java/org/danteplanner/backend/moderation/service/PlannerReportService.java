@@ -38,8 +38,7 @@ public class PlannerReportService {
     public PlannerReport createReport(Long userId, UUID plannerId) {
         accessGuard.checkNotBanned(userId);
 
-        // Verify planner exists and is published
-        accessGuard.requirePublished(plannerId);
+        accessGuard.checkPublished(plannerId);
 
         // Check if already reported (one report per user per planner)
         if (reportRepository.existsByUserIdAndPlannerId(userId, plannerId)) {
@@ -47,7 +46,7 @@ public class PlannerReportService {
         }
 
         PlannerReport report = new PlannerReport(userId, plannerId);
-        PlannerReport saved = reportRepository.save(report);
+        PlannerReport saved = reportRepository.insert(report);
         log.info("User {} reported planner {}", userId, plannerId);
         return saved;
     }

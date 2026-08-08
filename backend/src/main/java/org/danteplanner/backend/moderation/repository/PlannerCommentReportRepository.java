@@ -1,15 +1,15 @@
 package org.danteplanner.backend.moderation.repository;
 
-import org.springframework.data.repository.query.Param;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.Modifying;
-import java.util.UUID;
-import java.util.Collection;
 import org.danteplanner.backend.moderation.entity.PlannerCommentReport;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository for comment report operations.
@@ -46,4 +46,18 @@ public interface PlannerCommentReportRepository extends JpaRepository<PlannerCom
     @Query("DELETE FROM PlannerCommentReport r WHERE r.commentId IN "
             + "(SELECT c.id FROM PlannerComment c WHERE c.plannerId IN :plannerIds)")
     void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
+
+    /**
+     * Persists a report that does not exist yet.
+     *
+     * @param report the report to insert, carrying no id
+     * @return the persisted report, carrying its generated id
+     * @throws IllegalArgumentException if the report already carries an id
+     */
+    default PlannerCommentReport insert(PlannerCommentReport report) {
+        if (report.getId() != null) {
+            throw new IllegalArgumentException("insert() takes new rows only");
+        }
+        return save(report);
+    }
 }

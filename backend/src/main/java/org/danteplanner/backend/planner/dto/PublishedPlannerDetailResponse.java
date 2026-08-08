@@ -32,10 +32,10 @@ public record PublishedPlannerDetailResponse(
     Boolean hasUpvoted,
     Boolean isBookmarked,
     String content,
-    Integer schemaVersion,
-    Integer contentVersion,
+    int schemaVersion,
+    int contentVersion,
     PlannerStatus status,
-    Long syncVersion,
+    long syncVersion,
     Boolean isSubscribed,
     Boolean hasReported,
     long commentCount,
@@ -43,6 +43,29 @@ public record PublishedPlannerDetailResponse(
 ) {
     public PublishedPlannerDetailResponse {
         selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
+    }
+
+    /**
+     * Create a PublishedPlannerDetailResponse for a viewer with no account.
+     *
+     * <p>Upvoted, bookmarked, subscribed, and reported are not applicable for an anonymous viewer:
+     * there is no account for any of them to be true or false of.</p>
+     *
+     * @param planner the planner aggregate root
+     * @param commentCount total non-deleted comment count for this planner
+     * @param ownerNotificationsEnabled whether owner has notifications enabled (false for non-owners)
+     * @param viewCount the planner's view count (from planner_stats)
+     * @param upvotes the planner's upvote count (from planner_stats)
+     * @return the published planner detail response DTO
+     */
+    public static PublishedPlannerDetailResponse forAnonymous(
+            Planner planner,
+            long commentCount,
+            boolean ownerNotificationsEnabled,
+            int viewCount,
+            int upvotes) {
+        return fromEntity(planner, null, null, null, null,
+                commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 
     /**

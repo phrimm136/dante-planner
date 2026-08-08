@@ -59,4 +59,17 @@ public interface PlannerBookmarkRepository extends JpaRepository<PlannerBookmark
      * @return list of bookmarks for the given planners
      */
     List<PlannerBookmark> findByUserIdAndPlannerIdIn(Long userId, List<UUID> plannerIds);
+
+    /**
+     * Persists a bookmark that does not exist yet.
+     *
+     * <p>The key is the (user, planner) pair the caller supplies, so no id-null guard can tell a
+     * new row from an existing one: passing a row that already exists overwrites it.</p>
+     *
+     * @param bookmark the bookmark to insert
+     * @return the persisted bookmark
+     */
+    default PlannerBookmark insert(PlannerBookmark bookmark) {
+        return save(bookmark);
+    }
 }

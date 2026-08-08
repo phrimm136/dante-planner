@@ -32,7 +32,7 @@ public final class RecommendedSql {
     public static final String REFRESH_RECOMMENDED =
             "UPDATE planner_catalog c" + LEFT_JOINS
                     + " SET c.recommended = " + PREDICATE
-                    + " WHERE c.planner_id = :id";
+                    + " WHERE c.planner_id = :plannerId";
 
     /**
      * Re-list an owner's planners that are still visible on their own terms, deriving the flag for
@@ -71,11 +71,11 @@ public final class RecommendedSql {
      * an aggregate it already holds.
      *
      * @param upvotes                the planner's current upvote count
-     * @param hiddenFromRecommended  the moderation flag, null when the planner has no moderation row
+     * @param hiddenFromRecommended  the moderation flag
      * @param threshold              upvotes at which a planner counts as recommended
      * @return whether the planner is recommendable
      */
-    public static boolean isRecommended(int upvotes, Boolean hiddenFromRecommended, int threshold) {
-        return upvotes >= threshold && !Boolean.TRUE.equals(hiddenFromRecommended);
+    public static boolean isRecommended(int upvotes, boolean hiddenFromRecommended, int threshold) {
+        return upvotes >= threshold && !hiddenFromRecommended;
     }
 }

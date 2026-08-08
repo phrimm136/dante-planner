@@ -3,7 +3,13 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.danteplanner.backend.planner.dto.*;
+import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
+import org.danteplanner.backend.planner.dto.ImportPlannersResponse;
+import org.danteplanner.backend.planner.dto.PlannerResponse;
+import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
+import org.danteplanner.backend.planner.dto.UpdatePlannerRequest;
+import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
+import org.danteplanner.backend.planner.dto.UpsertResult;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
@@ -19,7 +25,7 @@ import org.danteplanner.backend.planner.exception.PlannerConflictException;
 import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.planner.repository.PlannerClassification;
+import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
@@ -108,23 +114,23 @@ public class PlannerCommandService {
      * @throws PlannerValidationException if the category is invalid for the planner type,
      *                                    or the content fails validation
      */
-    private void applyUpsertFields(Planner planner, UpsertPlannerRequest req, UUID deviceId) {
+    private void applyUpsertFields(Planner planner, UpsertPlannerRequest request, UUID deviceId) {
         PlannerContent contentRow = planner.getContent();
-        applyTitleAndStatus(contentRow, req.title(), req.status());
+        applyTitleAndStatus(contentRow, request.title(), request.status());
 
-        boolean categoryChanged = req.category() != null && !req.category().equals(contentRow.getCategory());
+        boolean categoryChanged = request.category() != null && !request.category().equals(contentRow.getCategory());
         if (categoryChanged) {
-            applyCategory(planner, req.category());
+            applyCategory(planner, request.category());
         }
 
-        if (req.content() != null) {
-            applyContent(planner, req.content());
+        if (request.content() != null) {
+            applyContent(planner, request.content());
         } else if (categoryChanged) {
             contentValidator.validate(contentRow.getContent(), contentRow.getCategory(),
                     ValidationPolicy.forPublicationState(planner.getPublished()));
         }
 
-        applyKeywordsAndDeviceId(contentRow, req.selectedKeywords(), deviceId);
+        applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
     }
 
     /**
@@ -135,18 +141,18 @@ public class PlannerCommandService {
      * @throws PlannerValidationException if the category is invalid for the planner type,
      *                                    or the content fails validation
      */
-    private void applyUpdateFields(Planner planner, UpdatePlannerRequest req, UUID deviceId) {
+    private void applyUpdateFields(Planner planner, UpdatePlannerRequest request, UUID deviceId) {
         PlannerContent contentRow = planner.getContent();
-        applyTitleAndStatus(contentRow, req.title(), req.status());
+        applyTitleAndStatus(contentRow, request.title(), request.status());
 
-        if (req.category() != null) {
-            applyCategory(planner, req.category());
+        if (request.category() != null) {
+            applyCategory(planner, request.category());
         }
-        if (req.content() != null) {
-            applyContent(planner, req.content());
+        if (request.content() != null) {
+            applyContent(planner, request.content());
         }
 
-        applyKeywordsAndDeviceId(contentRow, req.selectedKeywords(), deviceId);
+        applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
     }
 
     private void applyTitleAndStatus(PlannerContent contentRow, String title, PlannerStatus status) {
@@ -185,26 +191,30 @@ public class PlannerCommandService {
         }
     }
 
+    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request) {
+        return buildAggregate(id, user, request, null);
+    }
+
     /**
      * Build a fresh aggregate (core + content + publication + moderation) from
      * request fields.
      */
-    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest req, UUID deviceId) {
+    private Planner buildAggregate(UUID id, User user, UpsertPlannerRequest request, UUID deviceId) {
         Planner planner = Planner.builder()
                 .id(id)
                 .user(user)
-                .plannerType(req.plannerType())
+                .plannerType(request.plannerType())
                 .build();
         planner.attach(
                 PlannerContent.builder()
-                        .title(req.title() != null ? req.title() : "Untitled")
-                        .status(req.status() != null ? req.status() : PlannerStatus.DRAFT)
-                        .category(req.category())
-                        .selectedKeywords(req.selectedKeywords() != null
-                                ? PlannerKeywords.fromClient(req.selectedKeywords()).asSet()
+                        .title(request.title() != null ? request.title() : "Untitled")
+                        .status(request.status() != null ? request.status() : PlannerStatus.DRAFT)
+                        .category(request.category())
+                        .selectedKeywords(request.selectedKeywords() != null
+                                ? PlannerKeywords.fromClient(request.selectedKeywords()).asSet()
                                 : null)
-                        .content(req.content())
-                        .gameContentVersion(req.contentVersion())
+                        .content(request.content())
+                        .gameContentVersion(request.contentVersion())
                         .deviceId(deviceId)
                         .build(),
                 PlannerPublication.builder().build(),
@@ -222,15 +232,15 @@ public class PlannerCommandService {
      *
      * @param userId   the user ID
      * @param deviceId the device ID making the request (for SSE notification exclusion)
-     * @param req      the create planner request
+     * @param request      the create planner request
      * @return the created planner response
      * @throws PlannerLimitExceededException if user has reached max planners
      * @throws PlannerValidationException    if content exceeds size limit or category is invalid
      * @throws org.springframework.dao.DataIntegrityViolationException if UUID collision (handled by GlobalExceptionHandler)
      */
     @Transactional
-    PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest req) {
-        return createAggregate(userId, deviceId, req).response();
+    PlannerResponse createPlanner(Long userId, UUID deviceId, UpsertPlannerRequest request) {
+        return createAggregate(userId, deviceId, request).response();
     }
 
     /**
@@ -238,12 +248,12 @@ public class PlannerCommandService {
      *
      * @param userId   the user ID
      * @param deviceId the device ID making the request (for SSE notification exclusion)
-     * @param req      the create planner request
+     * @param request      the create planner request
      * @return the persisted aggregate and its response
      * @throws PlannerLimitExceededException if user has reached max planners
      * @throws PlannerValidationException    if content exceeds size limit or category is invalid
      */
-    UpsertedPlanner createAggregate(Long userId, UUID deviceId, UpsertPlannerRequest req) {
+    UpsertedPlanner createAggregate(Long userId, UUID deviceId, UpsertPlannerRequest request) {
         // Check if user has restrictions (timeout or ban) and get user entity
         User user = accessGuard.getUser(userId);
 
@@ -254,20 +264,21 @@ public class PlannerCommandService {
         }
 
         // Validate content version (strict: must use current version for new planners)
-        contentVersionValidator.validateVersionForCreate(req.plannerType(), req.contentVersion());
+        contentVersionValidator.validateVersionForCreate(request.plannerType(), request.contentVersion());
 
         // Validate category for planner type
-        if (!req.plannerType().isValidCategory(req.category())) {
+        if (!request.plannerType().isValidCategory(request.category())) {
             throw new PlannerValidationException(
                     ErrorCode.INVALID_CATEGORY.getCode(),
-                    "Invalid category '" + req.category() + "' for planner type " + req.plannerType());
+                    "Invalid category '" + request.category() + "' for planner type " + request.plannerType());
         }
 
         // Validate content with category context
-        contentValidator.validate(req.content(), req.category());
+        contentValidator.validate(request.content(), request.category());
 
-        Planner saved = plannerRepository.save(buildAggregate(UUID.fromString(req.id()), user, req, deviceId));
-        statsRepository.save(PlannerStats.builder().plannerId(saved.getId()).build());
+        Planner saved = plannerRepository.insert(
+                buildAggregate(UUID.fromString(request.id()), user, request, deviceId));
+        statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
         log.info("Created planner {} for user {}", saved.getId(), userId);
 
         PlannerResponse response = PlannerResponse.fromEntity(saved, 0);
@@ -293,17 +304,33 @@ public class PlannerCommandService {
      * @param userId   the user ID
      * @param deviceId the device ID making the request (for SSE notification exclusion)
      * @param id       the planner ID (from URL path)
-     * @param req      the planner data
+     * @param request      the planner data
      * @param force    if true, skip syncVersion conflict check
      * @return upsert result with response and created flag for HTTP status determination
      * @throws PlannerConflictException if syncVersion doesn't match and force is false
      */
     @Transactional
-    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
-        UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, req, force);
+    public UpsertResult upsertPlanner(Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
+        UpsertedPlanner upserted = upsertAggregate(userId, deviceId, id, request, force);
         return upserted.created()
                 ? UpsertResult.created(upserted.response())
                 : UpsertResult.updated(upserted.response());
+    }
+
+    /**
+     * Upsert a planner on behalf of a caller that originated from no device, so every one of the
+     * owner's devices hears about the write.
+     *
+     * @param userId  the user ID
+     * @param id      the planner ID
+     * @param request the planner data
+     * @param force   if true, skip syncVersion conflict check
+     * @return the persisted aggregate, its response, and whether the planner was created
+     * @throws PlannerConflictException if syncVersion doesn't match and force is false
+     */
+    @Transactional
+    public UpsertedPlanner upsertAggregate(Long userId, UUID id, UpsertPlannerRequest request, boolean force) {
+        return upsertAggregate(userId, null, id, request, force);
     }
 
     /**
@@ -313,14 +340,14 @@ public class PlannerCommandService {
      * @param userId   the user ID
      * @param deviceId the device ID making the request (for SSE notification exclusion)
      * @param id       the planner ID (from URL path)
-     * @param req      the planner data
+     * @param request      the planner data
      * @param force    if true, skip syncVersion conflict check
      * @return the persisted aggregate, its response, and whether the planner was created
      * @throws PlannerConflictException if syncVersion doesn't match and force is false
      */
     @Transactional
     public UpsertedPlanner upsertAggregate(
-            Long userId, UUID deviceId, UUID id, UpsertPlannerRequest req, boolean force) {
+            Long userId, UUID deviceId, UUID id, UpsertPlannerRequest request, boolean force) {
         var existingPlanner = plannerRepository.findAggregateForOwner(id, userId);
 
         if (existingPlanner.isPresent()) {
@@ -329,37 +356,36 @@ public class PlannerCommandService {
 
             // Check if user has any restrictions
             // Check optimistic locking unless force override is requested
-            if (!force && req.syncVersion() != null && !planner.getSyncVersion().equals(req.syncVersion())) {
-                throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
+            if (!force && request.syncVersion() != null && !planner.getSyncVersion().equals(request.syncVersion())) {
+                throw new PlannerConflictException(request.syncVersion(), planner.getSyncVersion());
             }
 
-            applyUpsertFields(planner, req, deviceId);
+            applyUpsertFields(planner, request, deviceId);
 
-            if (req.contentVersion() != null) {
-                planner.getContent().setGameContentVersion(req.contentVersion());
+            if (request.contentVersion() != null) {
+                planner.getContent().setGameContentVersion(request.contentVersion());
             }
 
             planner.getContent().setContentSchemaVersion(currentSchemaVersion);
             planner.recordSave();
 
-            Planner saved = plannerRepository.save(planner);
-            log.info("Updated planner {} via upsert, new syncVersion: {}", id, saved.getSyncVersion());
+            log.info("Updated planner {} via upsert, new syncVersion: {}", id, planner.getSyncVersion());
 
-            if (saved.getPublished()) {
-                plannerCatalogService.onVisibleEditCommitted(saved);
+            if (planner.getPublished()) {
+                plannerCatalogService.onVisibleEditCommitted(planner);
             }
 
-            PlannerResponse response = PlannerResponse.fromEntity(saved, statsRepository.upvotesOf(id));
+            PlannerResponse response = PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
             eventPublisher.publishEvent(
                     new PlannerSyncEvent(userId, deviceId, id, SseEventType.UPDATED, response));
-            return new UpsertedPlanner(saved, response, false);
+            return new UpsertedPlanner(planner, response, false);
         }
 
-        // One classifying SELECT covers both non-owned-active cases. Another user's soft-deleted
+        // One ownership SELECT covers both non-owned-active cases. Another user's soft-deleted
         // row matches neither branch and falls through to create, surfacing as a PK collision on save.
-        var classification = plannerRepository.findClassificationById(id);
-        if (classification.isPresent()) {
-            PlannerClassification existing = classification.get();
+        var ownership = plannerRepository.findOwnershipById(id);
+        if (ownership.isPresent()) {
+            PlannerOwnershipRow existing = ownership.get();
             if (existing.getUserId().equals(userId)) {
                 log.warn("Planner {} is soft-deleted for user {} - cannot recreate", id, userId);
                 throw new PlannerNotFoundException(id);
@@ -374,18 +400,18 @@ public class PlannerCommandService {
         log.info("Planner {} not found, creating for user {}", id, userId);
 
         // Override the ID in request with path variable ID
-        UpsertPlannerRequest createReq = new UpsertPlannerRequest(
+        UpsertPlannerRequest createRequest = new UpsertPlannerRequest(
                 id.toString(),
-                req.category(),
-                req.title(),
-                req.status(),
-                req.content(),
-                req.contentVersion(),
-                req.plannerType(),
+                request.category(),
+                request.title(),
+                request.status(),
+                request.content(),
+                request.contentVersion(),
+                request.plannerType(),
                 null,
-                req.selectedKeywords());
+                request.selectedKeywords());
 
-        return createAggregate(userId, deviceId, createReq);
+        return createAggregate(userId, deviceId, createRequest);
     }
 
     /**
@@ -394,7 +420,7 @@ public class PlannerCommandService {
      * @param userId   the user ID
      * @param deviceId the device ID making the request (for SSE notification exclusion)
      * @param id       the planner ID
-     * @param req      the update request
+     * @param request      the update request
      * @param force    if true, skip syncVersion conflict check
      * @return the updated planner response
      * @throws PlannerNotFoundException if planner not found
@@ -402,27 +428,26 @@ public class PlannerCommandService {
      * @throws PlannerValidationException if content exceeds size limit
      */
     @Transactional
-    public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest req, boolean force) {
+    public PlannerResponse updatePlanner(Long userId, UUID deviceId, UUID id, UpdatePlannerRequest request, boolean force) {
         // Check if user has any restrictions
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
         // Check optimistic locking unless force override is requested
-        if (!force && !planner.getSyncVersion().equals(req.syncVersion())) {
-            throw new PlannerConflictException(req.syncVersion(), planner.getSyncVersion());
+        if (!force && !planner.getSyncVersion().equals(request.syncVersion())) {
+            throw new PlannerConflictException(request.syncVersion(), planner.getSyncVersion());
         }
 
-        applyUpdateFields(planner, req, deviceId);
+        applyUpdateFields(planner, request, deviceId);
 
         planner.recordSave();
 
-        Planner saved = plannerRepository.save(planner);
-        log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, saved.getSyncVersion());
+        log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, planner.getSyncVersion());
 
-        if (saved.getPublished()) {
-            plannerCatalogService.onVisibleEditCommitted(saved);
+        if (planner.getPublished()) {
+            plannerCatalogService.onVisibleEditCommitted(planner);
         }
 
-        PlannerResponse response = PlannerResponse.fromEntity(saved, statsRepository.upvotesOf(id));
+        PlannerResponse response = PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
 
         // Notify other devices via SSE
         eventPublisher.publishEvent(
@@ -451,7 +476,6 @@ public class PlannerCommandService {
         }
 
         planner.softDelete();
-        plannerRepository.save(planner);
         plannerCatalogService.onBecameInvisible(id);
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
@@ -467,24 +491,24 @@ public class PlannerCommandService {
 
         // Notify other devices via SSE
         eventPublisher.publishEvent(
-                new PlannerSyncEvent(userId, deviceId, id, SseEventType.DELETED, null));
+                PlannerSyncEvent.deleted(userId, deviceId, id));
     }
 
     /**
      * Import multiple planners for a user.
      *
      * @param userId the user ID
-     * @param req the import request
+     * @param request the import request
      * @return the import result
      * @throws PlannerLimitExceededException if import would exceed user's limit
      */
     @Transactional
-    public ImportPlannersResponse importPlanners(Long userId, ImportPlannersRequest req) {
+    public ImportPlannersResponse importPlanners(Long userId, ImportPlannersRequest request) {
         // Check restrictions and get user entity (needed for limit check)
         User user = accessGuard.getUser(userId);
 
         long currentCount = plannerRepository.countActiveByUserId(userId);
-        int requestedCount = req.planners().size();
+        int requestedCount = request.planners().size();
 
         if (currentCount + requestedCount > maxPlannersPerUser) {
             throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
@@ -492,22 +516,22 @@ public class PlannerCommandService {
 
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
 
-        for (UpsertPlannerRequest plannerReq : req.planners()) {
+        for (UpsertPlannerRequest plannerRequest : request.planners()) {
             // Validate content version (strict: must use current version for new planners)
-            contentVersionValidator.validateVersionForCreate(plannerReq.plannerType(), plannerReq.contentVersion());
+            contentVersionValidator.validateVersionForCreate(plannerRequest.plannerType(), plannerRequest.contentVersion());
 
             // Validate category for planner type
-            if (!plannerReq.plannerType().isValidCategory(plannerReq.category())) {
+            if (!plannerRequest.plannerType().isValidCategory(plannerRequest.category())) {
                 throw new PlannerValidationException(
                         ErrorCode.INVALID_CATEGORY.getCode(),
-                        "Invalid category '" + plannerReq.category() + "' for planner type " + plannerReq.plannerType());
+                        "Invalid category '" + plannerRequest.category() + "' for planner type " + plannerRequest.plannerType());
             }
 
-            contentValidator.validate(plannerReq.content(), plannerReq.category());
+            contentValidator.validate(plannerRequest.content(), plannerRequest.category());
 
-            Planner saved = plannerRepository.save(
-                    buildAggregate(UUID.randomUUID(), user, plannerReq, null));
-            statsRepository.save(PlannerStats.builder().plannerId(saved.getId()).build());
+            Planner saved = plannerRepository.insert(
+                    buildAggregate(UUID.randomUUID(), user, plannerRequest));
+            statsRepository.insert(PlannerStats.builder().plannerId(saved.getId()).build());
             importedPlanners.add(PlannerSummaryResponse.fromEntity(saved));
         }
 

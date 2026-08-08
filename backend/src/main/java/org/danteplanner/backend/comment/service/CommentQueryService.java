@@ -21,7 +21,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -135,15 +135,15 @@ public class CommentQueryService {
         // Step 3: Recursively build tree nodes with pruning
         return topLevel.stream()
                 .map(c -> buildNode(c, null, childrenMap, userMap, upvotedIds, currentUserId))
-                .filter(Objects::nonNull)  // Prune deleted without children
+                .flatMap(Optional::stream)
                 .toList();
     }
 
     /**
      * Recursively build a comment node.
-     * Returns null if deleted AND has no children (pruned).
+     * Empty if deleted AND has no children (pruned).
      */
-    private CommentTreeNode buildNode(
+    private Optional<CommentTreeNode> buildNode(
             PlannerComment comment,
             UUID parentPublicId,
             Map<Long, List<PlannerComment>> childrenMap,
@@ -156,19 +156,18 @@ public class CommentQueryService {
         List<CommentTreeNode> childNodes = children.stream()
                 .sorted(Comparator.comparing(PlannerComment::getCreatedAt))
                 .map(c -> buildNode(c, comment.getPublicId(), childrenMap, userMap, upvotedIds, currentUserId))
-                .filter(Objects::nonNull)
+                .flatMap(Optional::stream)
                 .toList();
 
-        // Prune: if deleted AND no children, return null
         if (comment.isDeleted() && childNodes.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
 
         // Build node
         User author = userMap.get(comment.getUserId());
         boolean hasUpvoted = upvotedIds.contains(comment.getId());
 
-        return CommentTreeNode.fromEntity(
-                comment, parentPublicId, author, currentUserId, hasUpvoted, childNodes);
+        return Optional.of(CommentTreeNode.fromEntity(
+                comment, parentPublicId, author, currentUserId, hasUpvoted, childNodes));
     }
 }

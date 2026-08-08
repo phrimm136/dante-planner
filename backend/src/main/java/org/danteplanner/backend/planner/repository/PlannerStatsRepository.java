@@ -28,21 +28,21 @@ public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
-            + "VALUES (:id, :delta, 0, 0) "
+            + "VALUES (:plannerId, :delta, 0, 0) "
             + "ON DUPLICATE KEY UPDATE view_count = view_count + :delta", nativeQuery = true)
-    void incrementViewCountBy(@Param("id") UUID plannerId, @Param("delta") int delta);
+    void incrementViewCountBy(@Param("plannerId") UUID plannerId, @Param("delta") int delta);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
-            + "VALUES (:id, 0, 1, 0) "
+            + "VALUES (:plannerId, 0, 1, 0) "
             + "ON DUPLICATE KEY UPDATE upvotes = upvotes + 1", nativeQuery = true)
-    void incrementUpvotes(@Param("id") UUID plannerId);
+    void incrementUpvotes(@Param("plannerId") UUID plannerId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "INSERT INTO planner_stats (planner_id, view_count, upvotes, comment_count) "
-            + "VALUES (:id, 0, 0, 1) "
+            + "VALUES (:plannerId, 0, 0, 1) "
             + "ON DUPLICATE KEY UPDATE comment_count = comment_count + 1", nativeQuery = true)
-    void incrementCommentCount(@Param("id") UUID plannerId);
+    void incrementCommentCount(@Param("plannerId") UUID plannerId);
 
     /**
      * Decrement the comment counter on a non-deleted-to-deleted transition,
@@ -50,8 +50,8 @@ public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "UPDATE planner_stats SET comment_count = comment_count - 1 "
-            + "WHERE planner_id = :id AND comment_count > 0", nativeQuery = true)
-    void decrementCommentCount(@Param("id") UUID plannerId);
+            + "WHERE planner_id = :plannerId AND comment_count > 0", nativeQuery = true)
+    void decrementCommentCount(@Param("plannerId") UUID plannerId);
 
     /**
      * Atomically set the recommended notification stamp if it hasn't been set yet.
@@ -62,10 +62,10 @@ public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID
      */
     @Modifying
     @Query(value = "UPDATE planner_stats SET recommended_notified_at = CURRENT_TIMESTAMP(6) "
-            + "WHERE planner_id = :id "
+            + "WHERE planner_id = :plannerId "
             + "AND upvotes >= :threshold "
             + "AND recommended_notified_at IS NULL", nativeQuery = true)
-    int trySetRecommendedNotified(@Param("id") UUID plannerId, @Param("threshold") int threshold);
+    int trySetRecommendedNotified(@Param("plannerId") UUID plannerId, @Param("threshold") int threshold);
 
     /**
      * Hard-delete sweep by planner ids (user account deletion).
@@ -73,4 +73,17 @@ public interface PlannerStatsRepository extends JpaRepository<PlannerStats, UUID
     @Modifying
     @Query("DELETE FROM PlannerStats s WHERE s.plannerId IN :plannerIds")
     void deleteAllByPlannerIds(@Param("plannerIds") Collection<UUID> plannerIds);
+
+    /**
+     * Persists a counter row that does not exist yet.
+     *
+     * <p>The key is the planner's id, so no id-null guard can tell a new row from an existing one:
+     * passing a row that already exists overwrites it, resetting every counter.</p>
+     *
+     * @param stats the counter row to insert
+     * @return the persisted counter row
+     */
+    default PlannerStats insert(PlannerStats stats) {
+        return save(stats);
+    }
 }

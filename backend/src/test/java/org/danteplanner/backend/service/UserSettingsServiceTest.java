@@ -92,7 +92,7 @@ class UserSettingsServiceTest {
             assertTrue(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertFalse(result.notifyNewPublications());
-            verify(userSettingsRepository, never()).save(any());
+            verify(userSettingsRepository, never()).insert(any());
         }
 
         @Test
@@ -124,8 +124,6 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     false,  // syncEnabled
@@ -149,8 +147,6 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     null,   // syncEnabled - should not change
@@ -175,8 +171,6 @@ class UserSettingsServiceTest {
             // Arrange
             when(userSettingsRepository.findByUserId(testUser.getId()))
                     .thenReturn(Optional.of(existingSettings));
-            when(userSettingsRepository.save(any(UserSettings.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
                     null, null, null, null
@@ -210,7 +204,7 @@ class UserSettingsServiceTest {
             // Assert
             assertSame(existingSettings, result);
             verify(userRepository, never()).findById(any());
-            verify(userSettingsRepository, never()).save(any());
+            verify(userSettingsRepository, never()).insert(any());
         }
 
         @Test
@@ -221,7 +215,7 @@ class UserSettingsServiceTest {
                     .thenReturn(Optional.empty());
             when(userRepository.findById(testUser.getId()))
                     .thenReturn(Optional.of(testUser));
-            when(userSettingsRepository.save(any(UserSettings.class)))
+            when(userSettingsRepository.insert(any(UserSettings.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
@@ -230,7 +224,7 @@ class UserSettingsServiceTest {
             // Assert
             assertNotNull(result);
             assertEquals(testUser, result.getUser());
-            verify(userSettingsRepository).save(any(UserSettings.class));
+            verify(userSettingsRepository).insert(any(UserSettings.class));
         }
     }
 }

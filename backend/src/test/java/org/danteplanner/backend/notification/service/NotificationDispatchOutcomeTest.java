@@ -66,7 +66,7 @@ class NotificationDispatchOutcomeTest {
 
         assertThat(outcome).isEqualTo(new NotificationOutcome.Duplicate(
                 RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED));
-        verify(notificationRepository, never()).save(any());
+        verify(notificationRepository, never()).insert(any());
         verifyNoInteractions(eventPublisher);
     }
 
@@ -77,7 +77,7 @@ class NotificationDispatchOutcomeTest {
         when(notificationRepository.existsByUserIdAndContentIdAndNotificationType(
                 RECIPIENT_ID, PLANNER_ID.toString(), NotificationType.PLANNER_RECOMMENDED))
                 .thenReturn(false);
-        when(notificationRepository.save(notification)).thenReturn(persisted(notification));
+        when(notificationRepository.insert(notification)).thenReturn(persisted(notification));
 
         NotificationOutcome outcome =
                 dispatchService.dispatch(notification, SseEventType.NOTIFY_RECOMMENDED);

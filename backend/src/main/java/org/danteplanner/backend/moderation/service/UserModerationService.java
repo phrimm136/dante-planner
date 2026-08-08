@@ -72,7 +72,7 @@ public class UserModerationService {
      */
     @Transactional
     public User removeTimeout(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, ModerationAction.ActionType.CLEAR_TIMEOUT, reason, null,
+        User saved = restrict(actorId, targetId, ModerationAction.ActionType.CLEAR_TIMEOUT, reason,
                 target -> target.setTimeoutUntil(null));
 
         log.info("Timeout removed from user {} by moderator {} with reason: {}", targetId, actorId, reason);
@@ -93,7 +93,7 @@ public class UserModerationService {
      */
     @Transactional
     public User banUser(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, ModerationAction.ActionType.BAN, reason, null,
+        User saved = restrict(actorId, targetId, ModerationAction.ActionType.BAN, reason,
                 target -> {
                     target.setBannedAt(Instant.now());
                     target.setBannedBy(actorId);
@@ -118,7 +118,7 @@ public class UserModerationService {
      */
     @Transactional
     public User unbanUser(Long actorId, Long targetId, String reason) {
-        User saved = restrict(actorId, targetId, ModerationAction.ActionType.UNBAN, reason, null,
+        User saved = restrict(actorId, targetId, ModerationAction.ActionType.UNBAN, reason,
                 target -> {
                     target.setBannedAt(null);
                     target.setBannedBy(null);
@@ -152,6 +152,11 @@ public class UserModerationService {
         return unbanUser(actorId, targetIdBySuffix(usernameSuffix), reason);
     }
 
+    private User restrict(Long actorId, Long targetId, ModerationAction.ActionType action,
+            String reason, Consumer<User> mutation) {
+        return restrict(actorId, targetId, action, reason, null, mutation);
+    }
+
     /**
      * Apply one account restriction: authorize the actor against the target, mutate the target, and
      * leave the audit record the action owes.
@@ -163,12 +168,11 @@ public class UserModerationService {
         moderationPolicy.requireCanRestrict(actor, target, action);
 
         mutation.accept(target);
-        User saved = userService.save(target);
 
         auditService.record(actorId, target.getPublicId().toString(), action,
                 ModerationAction.TargetType.USER, reason, durationMinutes);
 
-        return saved;
+        return target;
     }
 
     private Instant timeoutUntil(int durationMinutes) {

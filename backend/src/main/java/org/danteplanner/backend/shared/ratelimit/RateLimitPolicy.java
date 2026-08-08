@@ -1,9 +1,8 @@
-package org.danteplanner.backend.shared.service;
+package org.danteplanner.backend.shared.ratelimit;
 
 import java.util.function.Function;
 
-import org.danteplanner.backend.shared.config.RateLimitProperties;
-import org.danteplanner.backend.shared.config.RateLimitProperties.BucketConfig;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 
 /**
  * The complete set of rate-limited policies — the single answer to "what is rate limited".

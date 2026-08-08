@@ -12,7 +12,7 @@ import org.danteplanner.backend.user.entity.User;
  *
  * @param role NORMAL, MODERATOR, or ADMIN
  */
-public record ModeratedUserDto(
+public record ModeratedUserResponse(
     String usernameEpithet,
     String usernameSuffix,
     String role,
@@ -28,8 +28,8 @@ public record ModeratedUserDto(
      * @param user the account
      * @return the roster row
      */
-    public static ModeratedUserDto fromUser(User user) {
-        return new ModeratedUserDto(
+    public static ModeratedUserResponse fromUser(User user) {
+        return new ModeratedUserResponse(
                 user.getUsernameEpithet(),
                 user.getUsernameSuffix(),
                 user.getRole().name(),

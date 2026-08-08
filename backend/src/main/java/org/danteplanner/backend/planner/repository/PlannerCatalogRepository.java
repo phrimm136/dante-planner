@@ -13,8 +13,8 @@ import java.util.UUID;
 
 /**
  * Repository for the visible-only browse projection. Row presence IS visibility,
- * so no query here filters on published/deleted/taken-down — membership is
- * maintained by the write side. Browsing, search, and facet composition all go
+ * so no read query filters on published/deleted/taken-down — the write-side
+ * membership statements are the only ones that consult those states. Browsing, search, and facet composition all go
  * through the Specification executor, sorted by recency so the read rides
  * {@code idx_catalog_recent} / {@code idx_catalog_recommended}.
  */
@@ -27,7 +27,7 @@ public interface PlannerCatalogRepository
      */
     @Modifying
     @Query(value = RecommendedSql.REFRESH_RECOMMENDED, nativeQuery = true)
-    int refreshRecommended(@Param("id") UUID plannerId, @Param("threshold") int threshold);
+    int refreshRecommended(@Param("plannerId") UUID plannerId, @Param("threshold") int threshold);
 
     /**
      * Hard-delete sweep by planner ids (user account deletion).
@@ -58,4 +58,17 @@ public interface PlannerCatalogRepository
     @Modifying
     @Query(value = RecommendedSql.RESTORE_ALL_OWNED_BY, nativeQuery = true)
     int restoreAllOwnedBy(@Param("userId") Long userId, @Param("threshold") int threshold);
+
+    /**
+     * Persists a listing that does not exist yet.
+     *
+     * <p>The key is the planner's id, so no id-null guard can tell a new row from an existing one:
+     * passing a row that already exists overwrites it.</p>
+     *
+     * @param row the listing to insert
+     * @return the persisted listing
+     */
+    default PlannerCatalog insert(PlannerCatalog row) {
+        return save(row);
+    }
 }

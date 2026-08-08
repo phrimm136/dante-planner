@@ -1,7 +1,7 @@
 package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
-import org.danteplanner.backend.moderation.dto.ModerationActionDto;
+import org.danteplanner.backend.moderation.dto.ModerationActionResponse;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.repository.ModerationActionRepository;
 import org.danteplanner.backend.user.entity.User;
@@ -58,7 +58,7 @@ public class ModerationQueryService {
      * @return list of moderation action DTOs with actor information
      */
     @Transactional(readOnly = true)
-    public List<ModerationActionDto> getModerationActionsWithActors() {
+    public List<ModerationActionResponse> getModerationActionsWithActors() {
         List<ModerationAction> actions = getModerationActions();
 
         List<Long> actorIds = actions.stream()
@@ -74,7 +74,7 @@ public class ModerationQueryService {
                     User actor = actorMap.get(action.getActorId());
                     String epithet = actor != null ? actor.getUsernameEpithet() : "Unknown";
                     String suffix = actor != null ? actor.getUsernameSuffix() : "";
-                    return ModerationActionDto.fromEntity(action, epithet, suffix);
+                    return ModerationActionResponse.fromEntity(action, epithet, suffix);
                 })
                 .toList();
     }

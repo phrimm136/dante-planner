@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.moderation.dto.BanRequest;
 import org.danteplanner.backend.moderation.dto.BanStatusResponse;
-import org.danteplanner.backend.moderation.dto.ModeratedUserDto;
-import org.danteplanner.backend.moderation.dto.ModerationActionDto;
+import org.danteplanner.backend.moderation.dto.ModeratedUserResponse;
+import org.danteplanner.backend.moderation.dto.ModerationActionResponse;
 import org.danteplanner.backend.moderation.dto.PlannerActionResponse;
 import org.danteplanner.backend.moderation.dto.TimeoutRequest;
 import org.danteplanner.backend.moderation.dto.TimeoutResponse;
@@ -20,7 +20,7 @@ import org.danteplanner.backend.moderation.service.CommentModerationService;
 import org.danteplanner.backend.moderation.service.ModerationQueryService;
 import org.danteplanner.backend.moderation.service.PlannerModerationService;
 import org.danteplanner.backend.moderation.service.UserModerationService;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
 import org.springframework.http.ResponseEntity;
@@ -173,9 +173,9 @@ public class ModerationController {
      */
     @RateLimitExempt
     @GetMapping("/users")
-    public ResponseEntity<List<ModeratedUserDto>> getAllUsers() {
-        List<ModeratedUserDto> responses = moderationQueryService.getAllUsers().stream()
-                .map(ModeratedUserDto::fromUser)
+    public ResponseEntity<List<ModeratedUserResponse>> getAllUsers() {
+        List<ModeratedUserResponse> responses = moderationQueryService.getAllUsers().stream()
+                .map(ModeratedUserResponse::fromUser)
                 .toList();
         return ResponseEntity.ok(responses);
     }
@@ -193,7 +193,7 @@ public class ModerationController {
     public ResponseEntity<List<TimeoutResponse>> getTimedOutUsers() {
         List<User> timedOutUsers = moderationQueryService.getTimedOutUsers();
         List<TimeoutResponse> responses = timedOutUsers.stream()
-                .map(user -> TimeoutResponse.fromUser(user, null))
+                .map(TimeoutResponse::fromUser)
                 .toList();
         return ResponseEntity.ok(responses);
     }
@@ -207,8 +207,8 @@ public class ModerationController {
      */
     @RateLimitExempt
     @GetMapping("/actions")
-    public ResponseEntity<List<ModerationActionDto>> getModerationActions() {
-        List<ModerationActionDto> actions = moderationQueryService.getModerationActionsWithActors();
+    public ResponseEntity<List<ModerationActionResponse>> getModerationActions() {
+        List<ModerationActionResponse> actions = moderationQueryService.getModerationActionsWithActors();
         return ResponseEntity.ok(actions);
     }
 

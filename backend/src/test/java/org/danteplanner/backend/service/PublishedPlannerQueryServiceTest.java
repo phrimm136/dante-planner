@@ -1,5 +1,6 @@
 package org.danteplanner.backend.service;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
@@ -94,6 +95,9 @@ class PublishedPlannerQueryServiceTest {
     private PlannerReportService reportService;
 
     @Mock
+    private PlannerStatsService plannerStatsService;
+
+    @Mock
     private PlannerCatalogService plannerCatalogService;
 
     @Mock
@@ -122,6 +126,7 @@ class PublishedPlannerQueryServiceTest {
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerStatsRepository,
+                plannerStatsService,
                 plannerCatalogService,
                 eventPublisher,
                 accessGuard,

@@ -104,16 +104,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByTimeoutUntilAfterAndDeletedAtIsNull(Instant now);
 
     /**
-     * Get all active user IDs except the specified one.
-     * Used for broadcast notifications (e.g., new planner published).
-     *
-     * @param excludeUserId the user ID to exclude (typically the author)
-     * @return list of user IDs
-     */
-    @Query("SELECT u.id FROM User u WHERE u.deletedAt IS NULL AND u.id <> :excludeUserId")
-    List<Long> findAllActiveUserIdsExcept(@Param("excludeUserId") Long excludeUserId);
-
-    /**
      * Find an active (non-deleted) user by username suffix.
      * Username suffixes are unique identifiers safe for moderation operations.
      * Used by moderation endpoints to identify users without exposing internal IDs.
@@ -122,4 +112,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return the active user if found
      */
     Optional<User> findByUsernameSuffixAndDeletedAtIsNull(String usernameSuffix);
+
+    /**
+     * Persists an account that does not exist yet.
+     *
+     * @param user the account to insert, carrying no id
+     * @return the persisted account, carrying its generated id
+     * @throws IllegalArgumentException if the account already carries an id
+     */
+    default User insert(User user) {
+        if (user.getId() != null) {
+            throw new IllegalArgumentException("insert() takes new rows only");
+        }
+        return save(user);
+    }
 }

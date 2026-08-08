@@ -66,7 +66,6 @@ public class NotificationInboxService {
         Notification notification = requireOwned(publicId, userId);
 
         notification.markAsRead();
-        notificationRepository.save(notification);
 
         return NotificationResponse.fromEntity(notification);
     }
@@ -87,7 +86,6 @@ public class NotificationInboxService {
         Notification notification = requireOwned(publicId, userId);
 
         notification.softDelete();
-        notificationRepository.save(notification);
     }
 
     /**

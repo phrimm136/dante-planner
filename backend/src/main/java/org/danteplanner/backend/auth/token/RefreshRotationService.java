@@ -250,17 +250,17 @@ public class RefreshRotationService {
                 yield new RotationResult.Rotated(storedJwt, storedClaims);
             }
             case THEFT -> {
-                clearAuthCookies(response);
+                cookieUtils.clearAuthCookies(response);
                 incrementOutcome(OUTCOME_THEFT_REVOKED);
                 yield new RotationResult.Revoked(familyId);
             }
             case REVOKED -> {
-                clearAuthCookies(response);
+                cookieUtils.clearAuthCookies(response);
                 incrementOutcome(OUTCOME_REJECTED_REVOKED_FAMILY);
                 yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
             }
             case INVALIDATED -> {
-                clearAuthCookies(response);
+                cookieUtils.clearAuthCookies(response);
                 incrementOutcome(OUTCOME_REJECTED_USER_INVALIDATED);
                 yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
             }
@@ -335,17 +335,6 @@ public class RefreshRotationService {
     }
 
     /**
-     * Clears both auth cookies (access and refresh) by setting their max age to 0, used
-     * when a rotation attempt is rejected or triggers a theft-driven family revocation.
-     *
-     * @param response the response to attach the cleared cookies to
-     */
-    private void clearAuthCookies(HttpServletResponse response) {
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-    }
-
-    /**
      * Rebuilds claims for a legacy refresh token with deterministically synthesized
      * {@code jti} and {@code family_id}, derived from {@code (userId, issuedAtMs)} so
      * repeated presentations of the same legacy token resolve to the same lineage.
@@ -360,7 +349,7 @@ public class RefreshRotationService {
                 String.format(LEGACY_JTI_SYNTHESIS_FORMAT, legacy.userId(), issuedAtMs)
                         .getBytes(StandardCharsets.UTF_8)).toString();
         return new TokenClaims(
-                legacy.userId(), legacy.email(), legacy.type(), legacy.role(),
+                legacy.userId(), legacy.type(), legacy.role(),
                 legacy.issuedAt(), legacy.expiration(),
                 synthesizedJti, synthesizedFamilyId, legacy.parentJti());
     }

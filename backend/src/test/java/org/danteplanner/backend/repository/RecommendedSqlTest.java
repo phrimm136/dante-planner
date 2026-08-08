@@ -19,11 +19,6 @@ class RecommendedSqlTest {
     }
 
     @Test
-    void isRecommended_WhenModerationRowMissing_IsRecommendable() {
-        assertThat(RecommendedSql.isRecommended(THRESHOLD, null, THRESHOLD)).isTrue();
-    }
-
-    @Test
     void isRecommended_WhenHidden_IsNotRecommendable() {
         assertThat(RecommendedSql.isRecommended(THRESHOLD, true, THRESHOLD)).isFalse();
     }

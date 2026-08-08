@@ -1,4 +1,4 @@
-package org.danteplanner.backend.shared.service;
+package org.danteplanner.backend.shared.ratelimit;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -6,9 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import org.danteplanner.backend.shared.config.RateLimitProperties;
-import org.danteplanner.backend.shared.config.RateLimitProperties.BucketConfig;
-import org.danteplanner.backend.shared.exception.RateLimitExceededException;
+import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.BucketConfiguration;

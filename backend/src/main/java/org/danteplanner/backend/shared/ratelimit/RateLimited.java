@@ -5,8 +5,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
-
 /**
  * Declares the rate-limit policy a request handler is charged against.
  *

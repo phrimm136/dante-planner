@@ -53,4 +53,18 @@ public interface ModerationActionRepository extends JpaRepository<ModerationActi
     @Modifying
     @Query("UPDATE ModerationAction a SET a.actorId = :sentinelId WHERE a.actorId = :userId")
     int reassignActorToSentinel(@Param("userId") Long userId, @Param("sentinelId") Long sentinelId);
+
+    /**
+     * Persists an audit record that does not exist yet.
+     *
+     * @param action the record to insert, carrying no id
+     * @return the persisted record, carrying its generated id
+     * @throws IllegalArgumentException if the record already carries an id
+     */
+    default ModerationAction insert(ModerationAction action) {
+        if (action.getId() != null) {
+            throw new IllegalArgumentException("insert() takes new rows only");
+        }
+        return save(action);
+    }
 }

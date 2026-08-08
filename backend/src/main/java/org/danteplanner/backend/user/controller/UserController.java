@@ -3,10 +3,9 @@ package org.danteplanner.backend.user.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import org.danteplanner.backend.shared.config.EpithetConfig;
-import org.danteplanner.backend.user.dto.UserDto;
+import org.danteplanner.backend.user.dto.UserResponse;
 import org.danteplanner.backend.user.dto.EpithetListResponse;
 import org.danteplanner.backend.user.dto.UpdateUsernameEpithetRequest;
 import org.danteplanner.backend.user.dto.UpdateUserSettingsRequest;
@@ -39,7 +38,6 @@ import java.time.Instant;
  */
 @RestController
 @RequestMapping("/api/user")
-@Slf4j
 public class UserController {
 
     private final UserAccountLifecycleService lifecycleService;
@@ -79,11 +77,7 @@ public class UserController {
     @RateLimitExempt
     @GetMapping("/epithets")
     public ResponseEntity<EpithetListResponse> getEpithets() {
-        return ResponseEntity.ok(new EpithetListResponse(
-            epithetConfig.getEpithetsWithInfo().stream()
-                .map(dto -> dto.keyword())
-                .toList()
-        ));
+        return ResponseEntity.ok(new EpithetListResponse(epithetConfig.getEpithets()));
     }
 
     /**
@@ -96,14 +90,12 @@ public class UserController {
      */
     @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "user-epithet-update")
     @PutMapping("/me/username-epithet")
-    public ResponseEntity<UserDto> updateUsernameEpithet(
+    public ResponseEntity<UserResponse> updateUsernameEpithet(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUsernameEpithetRequest request) {
-        log.info("User {} updating username epithet to {}", userId, request.epithet());
-
         User updatedUser = userService.updateUsernameEpithet(userId, request.epithet());
 
-        return ResponseEntity.ok(userService.toDto(updatedUser));
+        return ResponseEntity.ok(userService.toResponse(updatedUser));
     }
 
     /**
@@ -124,16 +116,13 @@ public class UserController {
             @AuthenticationPrincipal Long userId,
             HttpServletRequest request,
             HttpServletResponse response) {
-        log.info("User {} requested account deletion", userId);
-
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
 
         // Blacklist tokens and clear cookies (same as logout)
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
         userSessionService.logout(accessToken, refreshToken);
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.ok(new UserDeletionResponse(
             "Account scheduled for deletion",
@@ -171,8 +160,6 @@ public class UserController {
     public ResponseEntity<UserSettingsResponse> updateSettings(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody UpdateUserSettingsRequest request) {
-        log.debug("User {} updating settings", userId);
-
         UserSettingsResponse settings = userSettingsService.updateSettings(userId, request);
         ssePublisher.publishSettingsInvalidation(userId);
         return ResponseEntity.ok(settings);

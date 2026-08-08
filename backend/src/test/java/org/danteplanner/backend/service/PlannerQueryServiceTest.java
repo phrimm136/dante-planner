@@ -11,6 +11,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -79,6 +81,46 @@ class PlannerQueryServiceTest {
         return testPlannerBuilder().build();
     }
 
+    private static PlannerSummaryRow summaryRow(Planner planner) {
+        return new PlannerSummaryRow() {
+
+            @Override
+            public UUID getId() {
+                return planner.getId();
+            }
+
+            @Override
+            public String getTitle() {
+                return planner.getTitle();
+            }
+
+            @Override
+            public String getCategory() {
+                return planner.getCategory();
+            }
+
+            @Override
+            public PlannerType getPlannerType() {
+                return planner.getPlannerType();
+            }
+
+            @Override
+            public PlannerStatus getStatus() {
+                return planner.getStatus();
+            }
+
+            @Override
+            public Long getSyncVersion() {
+                return planner.getSyncVersion();
+            }
+
+            @Override
+            public Instant getLastModifiedAt() {
+                return planner.getLastModifiedAt();
+            }
+        };
+    }
+
     @Nested
     @DisplayName("getPlanners Tests")
     class GetPlannersTests {
@@ -88,13 +130,12 @@ class PlannerQueryServiceTest {
         void getPlanners_WhenCalled_ReturnsPaginatedResults() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            List<PlannerSummaryResponse> summaries = List.of(
-                    PlannerSummaryResponse.fromEntity(createTestPlanner()),
-                    PlannerSummaryResponse.fromEntity(createTestPlanner()));
-            Page<PlannerSummaryResponse> summaryPage = new PageImpl<>(summaries, pageable, 2);
+            Planner planner = createTestPlanner();
+            List<PlannerSummaryRow> rows = List.of(summaryRow(planner), summaryRow(createTestPlanner()));
+            Page<PlannerSummaryRow> rowPage = new PageImpl<>(rows, pageable, 2);
 
             when(plannerRepository.findOwnerSummaries(testUser.getId(), pageable))
-                    .thenReturn(summaryPage);
+                    .thenReturn(rowPage);
 
             // Act
             Page<PlannerSummaryResponse> result = queryService.getPlanners(testUser.getId(), pageable);
@@ -102,6 +143,8 @@ class PlannerQueryServiceTest {
             // Assert
             assertEquals(2, result.getTotalElements());
             assertEquals(2, result.getContent().size());
+            assertEquals(planner.getTitle(), result.getContent().get(0).title());
+            assertEquals(planner.getSyncVersion(), result.getContent().get(0).syncVersion());
         }
 
         @Test
@@ -109,7 +152,7 @@ class PlannerQueryServiceTest {
         void getPlanners_WhenNoPlanners_ReturnsEmptyPage() {
             // Arrange
             Pageable pageable = PageRequest.of(0, 10);
-            Page<PlannerSummaryResponse> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+            Page<PlannerSummaryRow> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 
             when(plannerRepository.findOwnerSummaries(testUser.getId(), pageable))
                     .thenReturn(emptyPage);

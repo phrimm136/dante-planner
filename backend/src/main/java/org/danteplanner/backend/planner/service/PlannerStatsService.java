@@ -22,17 +22,17 @@ public class PlannerStatsService {
     private final PlannerStatsRepository plannerStatsRepository;
 
     /**
-     * Record that a comment joined the planner's thread.
+     * Increments the planner's comment counter.
      *
      * @param plannerId the planner the comment belongs to
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void commentAdded(UUID plannerId) {
+    public void incrementCommentCount(UUID plannerId) {
         plannerStatsRepository.incrementCommentCount(plannerId);
     }
 
     /**
-     * Record that a comment left the planner's thread.
+     * Decrements the planner's comment counter.
      *
      * <p>Not idempotent: a caller that may be re-entered has to establish that the comment was
      * still visible, or the counter drops twice.</p>
@@ -40,7 +40,17 @@ public class PlannerStatsService {
      * @param plannerId the planner the comment belonged to
      */
     @Transactional(propagation = Propagation.MANDATORY)
-    public void commentRemoved(UUID plannerId) {
+    public void decrementCommentCount(UUID plannerId) {
         plannerStatsRepository.decrementCommentCount(plannerId);
+    }
+
+    /**
+     * Increments the planner's upvote counter.
+     *
+     * @param plannerId the planner the vote belongs to
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void incrementUpvotes(UUID plannerId) {
+        plannerStatsRepository.incrementUpvotes(plannerId);
     }
 }

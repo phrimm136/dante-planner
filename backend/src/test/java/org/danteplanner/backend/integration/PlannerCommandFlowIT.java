@@ -19,7 +19,7 @@ import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
-import org.danteplanner.backend.planner.service.PlannerContentEntityExtractor;
+import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor;
 import org.danteplanner.backend.planner.service.PlannerFilterService;
 import org.danteplanner.backend.shared.entity.ContentEntityType;
 import org.danteplanner.backend.support.TestDataFactory;

@@ -111,4 +111,18 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             @Param("authorId") Long authorId,
             @Param("plannerId") String plannerId,
             @Param("plannerTitle") String plannerTitle);
+
+    /**
+     * Persists a notification that does not exist yet.
+     *
+     * @param notification the notification to insert, carrying no id
+     * @return the persisted notification, carrying its generated id
+     * @throws IllegalArgumentException if the notification already carries an id
+     */
+    default Notification insert(Notification notification) {
+        if (notification.getId() != null) {
+            throw new IllegalArgumentException("insert() takes new rows only");
+        }
+        return save(notification);
+    }
 }

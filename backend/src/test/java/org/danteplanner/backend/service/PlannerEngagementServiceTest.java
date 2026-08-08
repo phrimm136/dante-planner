@@ -40,6 +40,7 @@ import org.danteplanner.backend.user.service.UserService;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.anyLong;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.entity.PlannerVote;
@@ -74,6 +75,9 @@ class PlannerEngagementServiceTest {
     private PlannerStatsRepository plannerStatsRepository;
 
     @Mock
+    private PlannerStatsService plannerStatsService;
+
+    @Mock
     private PlannerCatalogService plannerCatalogService;
 
     @Mock
@@ -94,6 +98,7 @@ class PlannerEngagementServiceTest {
                 plannerVoteRepository,
                 plannerBookmarkRepository,
                 plannerStatsRepository,
+                plannerStatsService,
                 plannerCatalogService,
                 eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
@@ -133,8 +138,7 @@ class PlannerEngagementServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(new PlannerBookmark(testUser.getId(), plannerId)));
 
@@ -150,15 +154,14 @@ class PlannerEngagementServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.empty());
 
             BookmarkResponse response = engagementService.setBookmark(testUser.getId(), plannerId, false);
 
             assertFalse(response.bookmarked());
-            verify(plannerBookmarkRepository, never()).save(any(PlannerBookmark.class));
+            verify(plannerBookmarkRepository, never()).insert(any(PlannerBookmark.class));
         }
     }
 
@@ -178,11 +181,10 @@ class PlannerEngagementServiceTest {
             Planner planner = createPublishedPlanner();
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.empty());
-            when(plannerBookmarkRepository.save(any(PlannerBookmark.class)))
+            when(plannerBookmarkRepository.insert(any(PlannerBookmark.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
@@ -193,7 +195,7 @@ class PlannerEngagementServiceTest {
             assertEquals(plannerId, response.plannerId());
             ArgumentCaptor<PlannerBookmark> bookmarkCaptor =
                     ArgumentCaptor.forClass(PlannerBookmark.class);
-            verify(plannerBookmarkRepository).save(bookmarkCaptor.capture());
+            verify(plannerBookmarkRepository).insert(bookmarkCaptor.capture());
             assertEquals(testUser.getId(), bookmarkCaptor.getValue().getUserId());
             assertEquals(plannerId, bookmarkCaptor.getValue().getPlannerId());
             verify(plannerBookmarkRepository, never()).delete(any());
@@ -207,8 +209,7 @@ class PlannerEngagementServiceTest {
             UUID plannerId = planner.getId();
             PlannerBookmark existingBookmark = new PlannerBookmark(testUser.getId(), plannerId);
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.of(planner));
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(true);
             when(plannerBookmarkRepository.findByUserIdAndPlannerId(testUser.getId(), plannerId))
                     .thenReturn(Optional.of(existingBookmark));
 
@@ -219,7 +220,7 @@ class PlannerEngagementServiceTest {
             assertFalse(response.bookmarked());
             assertEquals(plannerId, response.plannerId());
             verify(plannerBookmarkRepository).delete(existingBookmark);
-            verify(plannerBookmarkRepository, never()).save(any());
+            verify(plannerBookmarkRepository, never()).insert(any());
         }
 
         @Test
@@ -227,8 +228,7 @@ class PlannerEngagementServiceTest {
         void toggleBookmark_WhenPlannerNotFound_ThrowsException() {
             // Arrange
             UUID nonExistentId = UUID.randomUUID();
-            when(plannerRepository.findPublishedAggregate(nonExistentId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(nonExistentId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -246,8 +246,7 @@ class PlannerEngagementServiceTest {
             Planner planner = createTestPlanner(); // Not published
             UUID plannerId = planner.getId();
 
-            when(plannerRepository.findPublishedAggregate(plannerId))
-                    .thenReturn(Optional.empty());
+            when(plannerRepository.existsPublishedById(plannerId)).thenReturn(false);
 
             // Act & Assert
             assertThrows(
@@ -294,8 +293,8 @@ class PlannerEngagementServiceTest {
 
             assertEquals(plannerId, exception.getPlannerId());
             assertEquals(testUser.getId(), exception.getUserId());
-            verify(plannerVoteRepository, never()).save(any());
-            verify(plannerStatsRepository, never()).incrementUpvotes(any());
+            verify(plannerVoteRepository, never()).insert(any());
+            verify(plannerStatsService, never()).incrementUpvotes(any());
         }
 
         @Test
@@ -313,7 +312,7 @@ class PlannerEngagementServiceTest {
 
             assertTrue(exception.getMessage().contains("Vote type cannot be null"));
             verify(plannerVoteRepository, never()).existsById(any());
-            verify(plannerVoteRepository, never()).save(any());
+            verify(plannerVoteRepository, never()).insert(any());
         }
 
         @Test
@@ -329,9 +328,8 @@ class PlannerEngagementServiceTest {
                     .thenReturn(Optional.of(planner));
             when(plannerVoteRepository.existsById(voteId))
                     .thenReturn(false);
-            when(plannerVoteRepository.save(any(PlannerVote.class)))
+            when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerStatsRepository.upvotesOf(plannerId)).thenReturn(5);
             when(plannerStatsRepository.findById(plannerId))
                     .thenReturn(Optional.of(statsWithUpvotes(plannerId, 6)));
 
@@ -344,12 +342,12 @@ class PlannerEngagementServiceTest {
             assertTrue(response.hasUpvoted());
             ArgumentCaptor<PlannerVote> voteCaptor =
                     ArgumentCaptor.forClass(PlannerVote.class);
-            verify(plannerVoteRepository).save(voteCaptor.capture());
+            verify(plannerVoteRepository).insert(voteCaptor.capture());
             assertEquals(testUser.getId(), voteCaptor.getValue().getUserId());
             assertEquals(plannerId, voteCaptor.getValue().getPlannerId());
             assertEquals(VoteType.UP,
                     voteCaptor.getValue().getVoteType());
-            verify(plannerStatsRepository).incrementUpvotes(plannerId);
+            verify(plannerStatsService).incrementUpvotes(plannerId);
         }
     }
 

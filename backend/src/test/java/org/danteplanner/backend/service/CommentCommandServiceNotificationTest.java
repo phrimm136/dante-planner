@@ -17,7 +17,6 @@ import org.danteplanner.backend.notification.service.NotificationDispatchService
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.comment.dto.CommentTreeNode;
 import org.danteplanner.backend.comment.dto.CreateCommentRequest;
-import org.danteplanner.backend.shared.entity.*;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -153,7 +152,7 @@ class CommentCommandServiceNotificationTest {
 .thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(1L);
@@ -183,7 +182,7 @@ class CommentCommandServiceNotificationTest {
 .thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(1L);
@@ -211,7 +210,7 @@ class CommentCommandServiceNotificationTest {
 .thenReturn(owner);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID))
                     .thenReturn(Optional.of(planner));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(1L);
@@ -257,7 +256,7 @@ class CommentCommandServiceNotificationTest {
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(101L);
@@ -289,7 +288,7 @@ class CommentCommandServiceNotificationTest {
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(101L);
@@ -320,7 +319,7 @@ class CommentCommandServiceNotificationTest {
                     .thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parentComment));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parentComment));
-            when(commentRepository.save(any(PlannerComment.class)))
+            when(commentRepository.insert(any(PlannerComment.class)))
                     .thenAnswer(inv -> {
                         PlannerComment c = inv.getArgument(0);
                         c.setId(101L);
@@ -348,7 +347,7 @@ class CommentCommandServiceNotificationTest {
         void createComment_WhenTopLevel_BroadcastsPayloadNamingNoParent() {
             when(userService.findById(COMMENTER_ID)).thenReturn(commenter);
             when(plannerRepository.findPublishedAggregate(PLANNER_ID)).thenReturn(Optional.of(planner));
-            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(savedComment(1L));
+            when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(1L));
 
             service.createComment(PLANNER_ID, COMMENTER_ID, UUID.randomUUID(),
                     new CreateCommentRequest("Top level", null));
@@ -368,7 +367,7 @@ class CommentCommandServiceNotificationTest {
             when(plannerRepository.findPublishedAggregate(PLANNER_ID)).thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parent));
-            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(savedComment(101L));
+            when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(101L));
 
             service.createComment(PLANNER_ID, COMMENTER_ID, UUID.randomUUID(),
                     new CreateCommentRequest("Reply", PARENT_PUBLIC_ID));
@@ -388,7 +387,7 @@ class CommentCommandServiceNotificationTest {
             when(plannerRepository.findPublishedAggregate(PLANNER_ID)).thenReturn(Optional.of(planner));
             when(commentRepository.findByPublicId(PARENT_PUBLIC_ID)).thenReturn(Optional.of(parent));
             when(commentRepository.findById(50L)).thenReturn(Optional.of(parent));
-            when(commentRepository.save(any(PlannerComment.class))).thenAnswer(savedComment(101L));
+            when(commentRepository.insert(any(PlannerComment.class))).thenAnswer(savedComment(101L));
 
             service.createReply(PARENT_PUBLIC_ID, COMMENTER_ID, UUID.randomUUID(), "Reply");
 

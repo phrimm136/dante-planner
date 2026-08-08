@@ -2,7 +2,7 @@ package org.danteplanner.backend.exception;
 import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.danteplanner.backend.shared.exception.RateLimitExceededException;
+import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

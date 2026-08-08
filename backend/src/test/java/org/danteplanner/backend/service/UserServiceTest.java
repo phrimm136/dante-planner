@@ -90,14 +90,14 @@ class UserServiceTest {
                     .thenReturn(Optional.of(testUser));
             when(usernameGenerator.generate())
                     .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
-            when(userRepository.save(any(User.class))).thenThrow(
+            when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_provider_provider_id"));
 
             User resolved = userService.findOrCreateUser("google", IDENTITY);
 
             assertEquals(testUser.getId(), resolved.getId());
             // A constraint no new suffix can satisfy must not be retried against new suffixes.
-            verify(userRepository, times(1)).save(any(User.class));
+            verify(userRepository, times(1)).insert(any(User.class));
         }
 
         @Test
@@ -108,7 +108,7 @@ class UserServiceTest {
                     .thenReturn(Optional.empty());
             when(usernameGenerator.generate())
                     .thenReturn(new RandomUsernameGenerator.UsernameComponents("W_CORP", "test1"));
-            when(userRepository.save(any(User.class))).thenThrow(
+            when(userRepository.insert(any(User.class))).thenThrow(
                     IntegrityViolations.duplicateEntry("users.uk_users_username_suffix"));
 
             assertThrows(UsernameGenerationException.class,

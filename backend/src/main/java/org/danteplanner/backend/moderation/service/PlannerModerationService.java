@@ -50,7 +50,7 @@ public class PlannerModerationService {
         Planner saved = plannerPublishingService.withdrawFromPublicView(plannerId, Planner::takeDown);
 
         auditService.record(actorId, plannerId.toString(),
-                ModerationAction.ActionType.DELETE_PLANNER, ModerationAction.TargetType.PLANNER, reason, null);
+                ModerationAction.ActionType.DELETE_PLANNER, ModerationAction.TargetType.PLANNER, reason);
 
         log.info("Planner {} taken down by moderator {} with reason: {}", plannerId, actorId, reason);
         return saved;
@@ -70,7 +70,7 @@ public class PlannerModerationService {
         Planner saved = plannerPublishingService.withdrawFromPublicView(plannerId, Planner::unpublish);
 
         auditService.record(actorId, plannerId.toString(),
-                ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER, null, null);
+                ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER, null);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;
@@ -93,7 +93,7 @@ public class PlannerModerationService {
 
         auditService.record(moderatorId, plannerId.toString(),
                 ModerationAction.ActionType.HIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER,
-                request.reason(), null);
+                request.reason());
 
         log.info("Planner {} hidden from recommended by moderator {} with reason: {}",
                 plannerId, moderatorId, request.reason());
@@ -115,7 +115,7 @@ public class PlannerModerationService {
                 Planner::unhideFromRecommended);
 
         auditService.record(moderatorId, plannerId.toString(),
-                ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER, null, null);
+                ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER, null);
 
         log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
 

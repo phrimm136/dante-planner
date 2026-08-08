@@ -8,8 +8,8 @@ import org.danteplanner.backend.shared.config.FrontendProperties;
 import org.danteplanner.backend.shared.config.LoginRedirect;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.shared.config.OAuthProperties;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
-import org.danteplanner.backend.user.dto.UserDto;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.user.dto.UserResponse;
 import org.danteplanner.backend.auth.service.AuthenticationService;
 import org.danteplanner.backend.auth.service.AuthenticationService.AuthResult;
 import org.danteplanner.backend.auth.oauth.OAuthProviderRegistry;
@@ -98,11 +98,11 @@ public class AuthController {
      * {@code csrf} cookie is ensured by {@link org.danteplanner.backend.shared.security.CsrfDoubleSubmitFilter}
      * on this GET response.
      *
-     * @param code        authorization code from Google (absent on user denial)
-     * @param state       state echoed back by Google
-     * @param error       error code if the user denied consent or Google failed
-     * @param httpRequest HTTP request for reading {@code oauth_tx}
-     * @param response    HTTP response for setting/clearing cookies
+     * @param code     authorization code from Google (absent on user denial)
+     * @param state    state echoed back by Google
+     * @param error    error code if the user denied consent or Google failed
+     * @param request  HTTP request for reading {@code oauth_tx}
+     * @param response HTTP response for setting/clearing cookies
      * @return 302 redirect to the SPA root on success, or to the SPA error route on rejection
      */
     @RateLimited(value = RateLimitPolicy.AUTH, denial = RateLimitDenial.REDIRECT_LOGIN)
@@ -111,12 +111,12 @@ public class AuthController {
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error,
-            HttpServletRequest httpRequest,
+            HttpServletRequest request,
             HttpServletResponse response) {
 
         // Read and clear the transient oauth_tx up front so it is cleared on EVERY exit path
         // (success, rejection, or exchange failure).
-        String oauthTx = cookieUtils.getCookieValue(httpRequest, CookieConstants.OAUTH_TX);
+        String oauthTx = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX);
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         // This is a top-level browser-redirect endpoint: any failure must land the user back on the
@@ -154,14 +154,14 @@ public class AuthController {
 
     @RateLimited(RateLimitPolicy.AUTH)
     @PostMapping("/apple/callback")
-    public ResponseEntity<UserDto> appleCallback() {
+    public ResponseEntity<UserResponse> appleCallback() {
         // Apple OAuth not yet implemented
         return ResponseEntity.badRequest().build();
     }
 
     @RateLimitExempt
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser() {
+    public ResponseEntity<UserResponse> getCurrentUser() {
         // Trust SecurityContext set by JwtAuthenticationFilter
         // Filter handles token validation, expiry, and auto-refresh
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -188,12 +188,9 @@ public class AuthController {
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
 
-        // Blacklist tokens
         authService.logout(accessToken, refreshToken);
 
-        // Clear cookies
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
     }
@@ -207,8 +204,7 @@ public class AuthController {
         String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         authService.logoutAll(userId, accessToken);
 
-        cookieUtils.clearCookie(response, CookieConstants.ACCESS_TOKEN);
-        cookieUtils.clearCookie(response, CookieConstants.REFRESH_TOKEN);
+        cookieUtils.clearAuthCookies(response);
 
         return ResponseEntity.noContent().build();
     }

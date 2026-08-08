@@ -1,6 +1,5 @@
 package org.danteplanner.backend.shared.config;
 
-import org.danteplanner.backend.user.dto.EpithetDto;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -94,15 +93,4 @@ public class EpithetConfig implements EpithetProvider {
         return EPITHETS.containsKey(keyword);
     }
 
-    /**
-     * Get all epithets for UI selection.
-     * Frontend maps keywords to display names via i18n.
-     *
-     * @return list of EpithetDto containing keywords
-     */
-    public List<EpithetDto> getEpithetsWithInfo() {
-        return EPITHETS.keySet().stream()
-            .map(EpithetDto::new)
-            .toList();
-    }
 }

@@ -34,20 +34,19 @@ public class PlannerSubscriptionService {
      */
     @Transactional
     public PlannerSubscription toggleSubscription(Long userId, UUID plannerId) {
-        accessGuard.requirePublished(plannerId);
+        accessGuard.checkPublished(plannerId);
 
         var existingSubscription = subscriptionRepository.findByUserIdAndPlannerId(userId, plannerId);
 
         if (existingSubscription.isPresent()) {
             PlannerSubscription subscription = existingSubscription.get();
             subscription.toggle();
-            PlannerSubscription saved = subscriptionRepository.save(subscription);
             log.debug("User {} toggled subscription for planner {} to enabled={}",
-                    userId, plannerId, saved.isEnabled());
-            return saved;
+                    userId, plannerId, subscription.isEnabled());
+            return subscription;
         } else {
             PlannerSubscription subscription = new PlannerSubscription(userId, plannerId);
-            PlannerSubscription saved = subscriptionRepository.save(subscription);
+            PlannerSubscription saved = subscriptionRepository.insert(subscription);
             log.debug("User {} created subscription for planner {}", userId, plannerId);
             return saved;
         }
@@ -83,7 +82,7 @@ public class PlannerSubscriptionService {
         }
 
         PlannerSubscription subscription = new PlannerSubscription(userId, plannerId);
-        subscriptionRepository.save(subscription);
+        subscriptionRepository.insert(subscription);
         log.debug("Auto-created subscription for user {} on planner {}", userId, plannerId);
     }
 

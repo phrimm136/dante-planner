@@ -36,7 +36,7 @@ public class PlannerQueryService {
      */
     @Transactional(readOnly = true)
     public Page<PlannerSummaryResponse> getPlanners(Long userId, Pageable pageable) {
-        return plannerRepository.findOwnerSummaries(userId, pageable);
+        return plannerRepository.findOwnerSummaries(userId, pageable).map(PlannerSummaryResponse::from);
     }
 
     /**

@@ -62,7 +62,7 @@ public class CommentReportService {
         }
 
         PlannerCommentReport report = new PlannerCommentReport(internalId, userId, request.reason());
-        PlannerCommentReport saved = reportRepository.save(report);
+        PlannerCommentReport saved = reportRepository.insert(report);
         log.info("User {} reported comment {} with reason: {}", userId, commentPublicId, request.reason());
 
         return new CommentReportResponse(saved.getCreatedAt());

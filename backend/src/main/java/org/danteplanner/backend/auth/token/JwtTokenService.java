@@ -159,7 +159,6 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
         return new TokenClaims(
                 userId,
-                null,
                 type,
                 role,
                 claims.getIssuedAt(),

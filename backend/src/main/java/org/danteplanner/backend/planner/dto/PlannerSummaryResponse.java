@@ -5,6 +5,7 @@ import lombok.Builder;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -19,7 +20,7 @@ public record PlannerSummaryResponse(
     String category,
     PlannerType plannerType,
     PlannerStatus status,
-    Long syncVersion,
+    long syncVersion,
     Instant lastModifiedAt
 ) {
 
@@ -38,6 +39,24 @@ public record PlannerSummaryResponse(
                 .status(planner.getStatus())
                 .syncVersion(planner.getSyncVersion())
                 .lastModifiedAt(planner.getLastModifiedAt())
+                .build();
+    }
+
+    /**
+     * Create a PlannerSummaryResponse from an owner-list projection row.
+     *
+     * @param row the projection row
+     * @return the summary response DTO
+     */
+    public static PlannerSummaryResponse from(PlannerSummaryRow row) {
+        return PlannerSummaryResponse.builder()
+                .id(row.getId())
+                .title(row.getTitle())
+                .category(row.getCategory())
+                .plannerType(row.getPlannerType())
+                .status(row.getStatus())
+                .syncVersion(row.getSyncVersion())
+                .lastModifiedAt(row.getLastModifiedAt())
                 .build();
     }
 }

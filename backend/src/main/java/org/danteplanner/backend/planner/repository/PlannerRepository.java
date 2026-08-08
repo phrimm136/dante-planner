@@ -2,7 +2,6 @@ package org.danteplanner.backend.planner.repository;
 
 
 import org.danteplanner.backend.planner.dto.PlannerCoreInfo;
-import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +17,7 @@ import java.util.UUID;
 
 /**
  * Repository for the planner write aggregate. Single-row paths load the full
- * aggregate (core + satellites + user) with fetch joins; the owner list is a DTO
+ * aggregate (core + satellites + user) with fetch joins; the owner list is a row
  * projection over {@code planner ⨝ planner_content} and deliberately filesorts on
  * {@code last_modified_at} (INV6 forbids an index on the content row, and per-user
  * cardinality is small). Public browse/search reads live on the catalog projection.
@@ -34,14 +33,15 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
      * Owner list: summary cards for all non-deleted planners of a user, most
      * recently modified first.
      */
-    @Query(value = "SELECT new org.danteplanner.backend.planner.dto.PlannerSummaryResponse("
-            + "p.id, c.title, c.category, p.plannerType, c.status, c.syncVersion, c.lastModifiedAt) "
+    @Query(value = "SELECT p.id AS id, c.title AS title, c.category AS category, "
+            + "p.plannerType AS plannerType, c.status AS status, c.syncVersion AS syncVersion, "
+            + "c.lastModifiedAt AS lastModifiedAt "
             + "FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
             + "WHERE p.user.id = :userId AND c.deletedAt IS NULL "
             + "ORDER BY c.lastModifiedAt DESC",
             countQuery = "SELECT COUNT(p) FROM Planner p JOIN PlannerContent c ON c.plannerId = p.id "
             + "WHERE p.user.id = :userId AND c.deletedAt IS NULL")
-    Page<PlannerSummaryResponse> findOwnerSummaries(@Param("userId") Long userId, Pageable pageable);
+    Page<PlannerSummaryRow> findOwnerSummaries(@Param("userId") Long userId, Pageable pageable);
 
     /**
      * Load the full aggregate for an owner-scoped, non-deleted planner.
@@ -76,13 +76,21 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     boolean existsActiveById(@Param("id") UUID id);
 
     /**
-     * Classify a planner id that is not an owned active row, in one SELECT: its owner and
-     * soft-delete state. Distinguishes an owner's soft-deleted planner from another user's row
-     * without a second existence probe.
+     * Check if a published, non-deleted planner exists by ID. Mirrors the visibility
+     * predicate of {@link #findPublishedAggregate(UUID)} without loading the aggregate,
+     * for callers that only need the authorization outcome.
+     */
+    @Query("SELECT COUNT(p) > 0 FROM Planner p JOIN p.content c JOIN p.publication pub "
+            + "WHERE p.id = :id AND pub.published = TRUE AND c.deletedAt IS NULL")
+    boolean existsPublishedById(@Param("id") UUID id);
+
+    /**
+     * Read a planner id's owner and soft-delete state in one SELECT. Distinguishes an owner's
+     * soft-deleted planner from another user's row without a second existence probe.
      */
     @Query("SELECT p.user.id AS userId, c.deletedAt AS deletedAt "
             + "FROM Planner p JOIN p.content c WHERE p.id = :id")
-    Optional<PlannerClassification> findClassificationById(@Param("id") UUID id);
+    Optional<PlannerOwnershipRow> findOwnershipById(@Param("id") UUID id);
 
     /**
      * Core + author fields for a batch of planners (public list card assembly).
@@ -106,4 +114,17 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
             countQuery = "SELECT COUNT(p) FROM Planner p JOIN p.content c "
             + "WHERE p.moderation.hiddenFromRecommended = TRUE AND c.deletedAt IS NULL")
     Page<Planner> findHiddenFromRecommended(Pageable pageable);
+
+    /**
+     * Persists an aggregate that does not exist yet, satellites included.
+     *
+     * <p>The id is the client's, so no id-null guard can tell a new aggregate from an existing
+     * one: passing one that already exists overwrites it.</p>
+     *
+     * @param planner the aggregate to insert
+     * @return the persisted aggregate
+     */
+    default Planner insert(Planner planner) {
+        return save(planner);
+    }
 }

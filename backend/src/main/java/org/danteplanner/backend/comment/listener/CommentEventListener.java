@@ -1,7 +1,6 @@
 package org.danteplanner.backend.comment.listener;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.comment.event.CommentCreatedEvent;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
@@ -14,7 +13,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class CommentEventListener {
 
     private final SsePublisher ssePublisher;

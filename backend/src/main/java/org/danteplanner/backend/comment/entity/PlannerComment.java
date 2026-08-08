@@ -1,9 +1,17 @@
 package org.danteplanner.backend.comment.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.danteplanner.backend.shared.util.CommentConstants;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -21,9 +29,6 @@ import java.util.UUID;
            @Index(name = "idx_comment_parent", columnList = "parent_comment_id")
        })
 public class PlannerComment {
-
-    /** Capped at the TINYINT column ceiling; frontend handles visual flattening */
-    public static final int MAX_DEPTH = 127;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -96,7 +101,7 @@ public class PlannerComment {
      */
     public void softDelete() {
         this.deletedAt = Instant.now();
-        this.content = "";
+        this.content = CommentConstants.DELETED_CONTENT;
     }
 
     /**

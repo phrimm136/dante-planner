@@ -129,15 +129,13 @@ class PlannerPublishingServiceTest {
         void publishIdempotentStateTargeted_WhenSentTwice_StaysPublished() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             PlannerResponse first = publishingService.publish(testUser.getId(), planner.getId());
             PlannerResponse second = publishingService.publish(testUser.getId(), planner.getId());
 
             assertTrue(first.published());
             assertTrue(second.published(), "a repeated publish must not flip the planner back");
-            verify(plannerRepository, times(1)).save(any(Planner.class));
+            verify(plannerCatalogService, times(1)).onBecameVisible(any());
         }
 
         @Test
@@ -149,7 +147,7 @@ class PlannerPublishingServiceTest {
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
 
             assertFalse(result.published());
-            verify(plannerRepository, never()).save(any(Planner.class));
+            verify(plannerCatalogService, never()).onBecameInvisible(any());
         }
     }
 
@@ -167,7 +165,6 @@ class PlannerPublishingServiceTest {
                     planner.getId(), Planner::unpublish);
 
             assertSame(planner, result);
-            verify(plannerRepository, never()).save(any(Planner.class));
             verify(plannerCatalogService, never()).onBecameInvisible(any());
         }
 
@@ -176,14 +173,12 @@ class PlannerPublishingServiceTest {
         void withdrawFromPublicView_WhenPublished_PersistsAndDropsCatalogRow() {
             Planner planner = testPlannerBuilder().published(true).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             Planner result = publishingService.withdrawFromPublicView(
                     planner.getId(), Planner::unpublish);
 
+            assertSame(planner, result);
             assertFalse(result.getPublished());
-            verify(plannerRepository).save(planner);
             verify(plannerCatalogService).onBecameInvisible(planner.getId());
         }
 
@@ -192,13 +187,11 @@ class PlannerPublishingServiceTest {
         void withdrawFromPublicView_WhenTakedownOfUnpublished_StillPersists() {
             Planner planner = testPlannerBuilder().published(false).build();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             Planner result = publishingService.withdrawFromPublicView(planner.getId(), Planner::takeDown);
 
+            assertSame(planner, result);
             assertTrue(result.isTakenDown());
-            verify(plannerRepository).save(planner);
         }
     }
 
@@ -215,7 +208,7 @@ class PlannerPublishingServiceTest {
                     PlannerType.MIRROR_DUNGEON, null, null);
 
             when(plannerCommandService.upsertAggregate(
-                    testUser.getId(), null, planner.getId(), request, false))
+                    testUser.getId(), planner.getId(), request, false))
                     .thenReturn(new PlannerCommandService.UpsertedPlanner(
                             planner, PlannerResponse.fromEntity(planner, 0), false));
             // Decoys: a reload by either route would succeed and stay silent, so the prohibitions
@@ -223,8 +216,6 @@ class PlannerPublishingServiceTest {
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(planner))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             PlannerResponse result = publishingService.publish(
                     testUser.getId(), planner.getId(), request);
@@ -246,7 +237,6 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(planner)).thenAnswer(invocation -> invocation.getArgument(0));
             // An upvote count no other source could supply, so the response can only carry it by
             // having read this planner's own stats row.
             when(plannerStatsRepository.upvotesOf(planner.getId())).thenReturn(12);
@@ -268,7 +258,6 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
@@ -301,7 +290,7 @@ class PlannerPublishingServiceTest {
             );
 
             assertEquals(planner.getId(), exception.getPlannerId());
-            verify(plannerRepository, never()).save(any());
+            assertFalse(planner.getPublished());
         }
 
         @Test
@@ -342,7 +331,6 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(false).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             PlannerResponse result = publishingService.publish(testUser.getId(), planner.getId());
@@ -361,7 +349,6 @@ class PlannerPublishingServiceTest {
             Planner planner = testPlannerBuilder().published(true).build();
 
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             PlannerResponse result = publishingService.unpublish(testUser.getId(), planner.getId());
@@ -392,7 +379,7 @@ class PlannerPublishingServiceTest {
                     UserBannedException.class,
                     () -> publishingService.publish(testUser.getId(), plannerId)
             );
-            verify(plannerRepository, never()).save(any());
+            verify(plannerCatalogService, never()).onBecameVisible(any());
         }
     }
 
@@ -406,7 +393,6 @@ class PlannerPublishingServiceTest {
             // Arrange
             Planner planner = createTestPlanner();
             when(plannerRepository.findAggregate(planner.getId())).thenReturn(Optional.of(planner));
-            when(plannerRepository.save(any(Planner.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
             // Act
             ToggleOwnerNotificationsResponse response =
@@ -415,9 +401,6 @@ class PlannerPublishingServiceTest {
             // Assert
             assertFalse(response.ownerNotificationsEnabled());
             assertFalse(planner.getOwnerNotificationsEnabled());
-            // The flip is visible on the aggregate; its persistence is not. Asserting the stored
-            // row needs a containerized test against a real repository.
-            verify(plannerRepository).save(planner);
         }
 
         @Test
@@ -442,7 +425,7 @@ class PlannerPublishingServiceTest {
                     PlannerForbiddenException.class,
                     () -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true)
             );
-            verify(plannerRepository, never()).save(any());
+            assertTrue(planner.getOwnerNotificationsEnabled());
         }
     }
 
@@ -463,7 +446,6 @@ class PlannerPublishingServiceTest {
             assertEquals("MISSING_TITLE", thrown.getErrorCode());
             assertFalse(planner.getPublished());
             assertNull(planner.getFirstPublishedAt());
-            verify(plannerRepository, never()).save(any(Planner.class));
         }
 
         @Test
@@ -481,7 +463,6 @@ class PlannerPublishingServiceTest {
 
             assertFalse(planner.getPublished());
             assertNull(planner.getFirstPublishedAt());
-            verify(plannerRepository, never()).save(any(Planner.class));
             verify(plannerCatalogService, never()).onBecameVisible(any());
         }
     }

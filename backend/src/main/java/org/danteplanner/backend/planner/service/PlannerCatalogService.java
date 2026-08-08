@@ -130,7 +130,7 @@ public class PlannerCatalogService {
                 statsRepository.upvotesOf(planner.getId()),
                 planner.getHiddenFromRecommended(),
                 recommendedThreshold);
-        catalogRepository.save(PlannerCatalog.builder()
+        catalogRepository.insert(PlannerCatalog.builder()
                 .plannerId(planner.getId())
                 .plannerType(planner.getPlannerType())
                 .category(planner.getCategory())
@@ -152,7 +152,6 @@ public class PlannerCatalogService {
             row.setTitle(planner.getTitle());
             row.setCategory(planner.getCategory());
             row.setSelectedKeywords(planner.getSelectedKeywords());
-            catalogRepository.save(row);
         });
     }
 

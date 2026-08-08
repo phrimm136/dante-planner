@@ -8,7 +8,6 @@ import java.util.Date;
  * Immutable value object containing parsed JWT token claims.
  *
  * @param userId user identifier from token subject
- * @param email always null; email is no longer carried in tokens
  * @param type token type ("access" or "refresh")
  * @param role user role (nullable for backward compat with old tokens, null = NORMAL)
  * @param issuedAt when the token was issued
@@ -19,7 +18,6 @@ import java.util.Date;
  */
 public record TokenClaims(
         Long userId,
-        String email,
         String type,
         UserRole role,
         Date issuedAt,
@@ -50,8 +48,8 @@ public record TokenClaims(
      * Convenience constructor for tokens without rotation-lineage claims
      * (access tokens, legacy refresh tokens).
      */
-    public TokenClaims(Long userId, String email, String type, UserRole role, Date issuedAt, Date expiration) {
-        this(userId, email, type, role, issuedAt, expiration, null, null, null);
+    public TokenClaims(Long userId, String type, UserRole role, Date issuedAt, Date expiration) {
+        this(userId, type, role, issuedAt, expiration, null, null, null);
     }
 
     /**
@@ -82,7 +80,7 @@ public record TokenClaims(
      * Checks if the token has expired.
      */
     public boolean isExpired() {
-        return expiration != null && expiration.before(new Date());
+        return expiration.before(new Date());
     }
 
     /**

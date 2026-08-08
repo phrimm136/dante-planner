@@ -278,14 +278,11 @@ public class PublishedPlannerQueryService {
         // - For owner: actual setting (defaults to true)
         // - For non-owner/anonymous: false (they can't toggle it anyway)
         boolean isOwner = userId != null && planner.isOwnedBy(userId);
-        Boolean ownerNotificationsEnabled = isOwner
-                ? Boolean.TRUE.equals(planner.getOwnerNotificationsEnabled())
-                : false;
+        boolean ownerNotificationsEnabled = isOwner && planner.getOwnerNotificationsEnabled();
 
         if (userId == null) {
-            return PublishedPlannerDetailResponse.fromEntity(
-                    planner, null, null, null, null, commentCount, ownerNotificationsEnabled,
-                    viewCount, upvotes);
+            return PublishedPlannerDetailResponse.forAnonymous(
+                    planner, commentCount, ownerNotificationsEnabled, viewCount, upvotes);
         }
 
         Boolean hasUpvoted = hasUpvoted(plannerId, userId);

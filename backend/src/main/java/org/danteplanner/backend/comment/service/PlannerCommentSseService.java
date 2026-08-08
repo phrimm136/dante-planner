@@ -36,7 +36,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PlannerCommentSseService extends AbstractSseService<UUID> {
 
     private static final long HEARTBEAT_INTERVAL_MS = 15_000L; // 15 seconds
-    private static final long CLEANUP_INTERVAL_MS = 60_000L; // 1 minute
+    private static final long HEARTBEAT_INITIAL_DELAY_MS = 5_000L;
+    private static final long CLEANUP_INITIAL_DELAY_MS = 30_000L;
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500; // Prevent DoS
 
     private final ObjectMapper objectMapper;
@@ -53,7 +54,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      *         if no published planner carries the id
      */
     public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) {
-        plannerAccessGuard.requirePublished(plannerId);
+        plannerAccessGuard.checkPublished(plannerId);
         SseEmitter emitter = register(plannerId, deviceId, userId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
         return emitter;
@@ -144,7 +145,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      * Send heartbeat to all connected emitters.
      * Uses different fixedRate to avoid collision with SseService heartbeats.
      */
-    @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS, initialDelay = 5000)
+    @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS, initialDelay = HEARTBEAT_INITIAL_DELAY_MS)
     public void sendHeartbeats() {
         heartbeatConnections();
     }
@@ -152,7 +153,7 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     /**
      * Cleanup zombie connections by probing all emitters.
      */
-    @Scheduled(fixedRate = CLEANUP_INTERVAL_MS, initialDelay = 30000)
+    @Scheduled(fixedRate = CLEANUP_INTERVAL_MS, initialDelay = CLEANUP_INITIAL_DELAY_MS)
     public void cleanupZombieConnections() {
         int removed = cleanupConnections();
         if (removed > 0) {

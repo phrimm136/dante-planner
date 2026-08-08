@@ -2,8 +2,7 @@ package org.danteplanner.backend.planner.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.danteplanner.backend.planner.dto.BookmarkRequest;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
@@ -34,7 +33,6 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/planner/md")
-@Slf4j
 public class PlannerEngagementController {
 
     /** Counts calls still using the pre-state-targeted toggle shape, tagged by operation. */
@@ -62,7 +60,6 @@ public class PlannerEngagementController {
             @PathVariable UUID id,
             @Valid @RequestBody VoteRequest request) {
 
-        log.info("User {} casting immutable upvote on planner {}", userId, id);
         VoteResponse response = plannerEngagementService.castVote(userId, id, request.voteType());
         return ResponseEntity.ok(response);
     }
@@ -90,13 +87,11 @@ public class PlannerEngagementController {
             @Valid @RequestBody(required = false) BookmarkRequest request) {
 
         if (request != null && request.namesState()) {
-            log.info("User {} setting bookmark={} on planner {}", userId, request.bookmarked(), id);
             return ResponseEntity.ok(
                     plannerEngagementService.setBookmark(userId, id, request.bookmarked()));
         }
 
         meterRegistry.counter(LEGACY_TOGGLE_COUNTER, "operation", "bookmark").increment();
-        log.info("User {} toggling bookmark on planner {}", userId, id);
         return ResponseEntity.ok(plannerEngagementService.toggleBookmark(userId, id));
     }
 
@@ -116,7 +111,6 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        log.info("User {} toggling subscription on planner {}", userId, id);
         var subscription = subscriptionService.toggleSubscription(userId, id);
         SubscriptionResponse response = SubscriptionResponse.builder()
                 .plannerId(id)
@@ -141,7 +135,6 @@ public class PlannerEngagementController {
             @AuthenticationPrincipal Long userId,
             @PathVariable UUID id) {
 
-        log.info("User {} reporting planner {}", userId, id);
         plannerEngagementService.reportPlanner(userId, id);
         PlannerActionResponse response = PlannerActionResponse.builder()
                 .plannerId(id)

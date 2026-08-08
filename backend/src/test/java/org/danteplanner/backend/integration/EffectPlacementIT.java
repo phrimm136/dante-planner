@@ -39,7 +39,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -125,6 +124,7 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
                         + "must take it too")
                 .isEmpty();
 
+        verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any());
         verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any(), any());
         verify(ssePublisher, never()).publishCommentEvent(any(), any(), any(), any(), any());
     }
@@ -144,7 +144,7 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
 
         ArgumentCaptor<String> announced = ArgumentCaptor.forClass(String.class);
         verify(ssePublisher, timeout(5000)).publishUserEvent(
-                any(), any(), any(SseEventType.class), announced.capture(), any());
+                any(), any(SseEventType.class), announced.capture(), any());
 
         assertThat(notificationRepository.findByPublicId(UUID.fromString(announced.getValue())))
                 .as("an announcement names committed data or it invented it")
@@ -176,7 +176,7 @@ class EffectPlacementIT extends SharedMySqlContainerSupport {
                         this, planner.getId(), planner.getTitle(), owner.getId(), 4, 5)));
 
         verify(ssePublisher, timeout(5000)).publishUserEvent(
-                eq(owner.getId()), isNull(), eq(SseEventType.NOTIFY_RECOMMENDED), any(), any());
+                eq(owner.getId()), eq(SseEventType.NOTIFY_RECOMMENDED), any(), any());
 
         assertThat(notificationsFor(owner))
                 .as("the push rides a row that its REQUIRES_NEW transaction had to commit first")

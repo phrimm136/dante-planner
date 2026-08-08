@@ -90,7 +90,6 @@ public class UserAccountLifecycleService {
 
         Instant scheduledDeleteAt = Instant.now().plus(Duration.ofDays(gracePeriodDays));
         user.softDelete(scheduledDeleteAt);
-        userRepository.save(user);
 
         // Withdrawn from the public listing, not unpublished: reactivation within the grace
         // period restores the same set without the owner republishing.
@@ -100,6 +99,7 @@ public class UserAccountLifecycleService {
         // Auth is token-only: the JWT filter does no per-request DB lookup, so deletion
         // must push the revocation signal here.
         tokenBlacklistService.invalidateUserTokens(userId);
+        log.info("User {} requested account deletion", userId);
 
         return scheduledDeleteAt;
     }
@@ -121,7 +121,6 @@ public class UserAccountLifecycleService {
         }
 
         user.reactivate();
-        userRepository.save(user);
         plannerCatalogService.restoreAllOwnedBy(userId);
     }
 

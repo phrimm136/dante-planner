@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.danteplanner.backend.shared.ratelimit.RateLimitExempt;
 import org.danteplanner.backend.shared.ratelimit.RateLimited;
-import org.danteplanner.backend.shared.service.RateLimitPolicy;
+import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
 
 /**
  * Handlers covered by a class-level declaration, one of them overriding it with an exemption.

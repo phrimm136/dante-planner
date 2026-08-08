@@ -83,7 +83,7 @@ public class CookieUtils {
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
         cookie.setAttribute("SameSite", sameSite);
-        if (cookieDomain != null && !cookieDomain.isEmpty()) {
+        if (!cookieDomain.isEmpty()) {
             cookie.setDomain(cookieDomain);
         }
         return cookie;
@@ -99,6 +99,16 @@ public class CookieUtils {
         // A browser drops the stored cookie only when the expiring one matches it on
         // domain/path/secure, so the attributes must come from the same builder that set it.
         response.addCookie(buildCookie(name, null, 0, true));
+    }
+
+    /**
+     * Clears both authentication cookies (access and refresh).
+     *
+     * @param response HTTP response to add the expiring cookies to
+     */
+    public void clearAuthCookies(HttpServletResponse response) {
+        clearCookie(response, CookieConstants.ACCESS_TOKEN);
+        clearCookie(response, CookieConstants.REFRESH_TOKEN);
     }
 
     /**

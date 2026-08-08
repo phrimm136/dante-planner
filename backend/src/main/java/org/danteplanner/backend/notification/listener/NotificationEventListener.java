@@ -38,7 +38,7 @@ public class NotificationEventListener {
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleNotificationRaised(NotificationRaisedEvent event) {
-        ssePublisher.publishUserEvent(event.userId(), null, event.eventType(),
+        ssePublisher.publishUserEvent(event.userId(), event.eventType(),
                 event.entityId(), event.payload());
     }
 

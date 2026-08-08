@@ -58,7 +58,6 @@ class RefreshRotationServiceIT {
     private static final long REFRESH_TOKEN_EXPIRY = 604800000L; // 7 days
     private static final long RETRY_REUSE_WINDOW_MS = 30000L;
     private static final Long USER_ID = TestDataFactory.nextUserId();
-    private static final String EMAIL = "rotation@example.com";
 
     private static StringRedisTemplate sharedTemplate;
 
@@ -521,7 +520,7 @@ class RefreshRotationServiceIT {
 
         private TokenClaims legacyClaims(Date issuedAt) {
             return new TokenClaims(
-                    USER_ID, EMAIL, TokenClaims.TYPE_REFRESH, UserRole.NORMAL,
+                    USER_ID, TokenClaims.TYPE_REFRESH, UserRole.NORMAL,
                     issuedAt, new Date(issuedAt.getTime() + REFRESH_TOKEN_EXPIRY));
         }
 

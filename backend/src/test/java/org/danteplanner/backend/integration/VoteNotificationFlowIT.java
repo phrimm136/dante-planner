@@ -23,8 +23,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 import org.danteplanner.backend.config.TestConfig;
-import org.danteplanner.backend.shared.entity.*;
-import org.danteplanner.backend.repository.*;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +37,11 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 

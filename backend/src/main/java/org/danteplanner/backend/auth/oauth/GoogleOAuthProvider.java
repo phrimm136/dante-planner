@@ -168,8 +168,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
             throw new OAuthException(
                 PROVIDER_NAME,
                 "id_token",
-                "Missing required field: " + claim,
-                null
+                "Missing required field: " + claim
             );
         }
         return value;
@@ -179,26 +178,20 @@ public class GoogleOAuthProvider implements OAuthProvider {
         try {
             JsonNode json = objectMapper.readTree(responseBody);
 
-            JsonNode accessTokenNode = json.get("access_token");
-            if (accessTokenNode == null || accessTokenNode.isNull()) {
+            JsonNode accessTokenNode = json.path("access_token");
+            if (accessTokenNode.isMissingNode() || accessTokenNode.isNull()) {
                 throw new OAuthException(
                     PROVIDER_NAME,
                     "token_parse",
-                    "Missing required field: access_token",
-                    null
+                    "Missing required field: access_token"
                 );
             }
 
             String accessToken = accessTokenNode.asText();
-            String refreshToken = json.has("refresh_token")
-                ? json.get("refresh_token").asText()
-                : null;
-            String idToken = json.has("id_token")
-                ? json.get("id_token").asText()
-                : null;
-            Long expiresIn = json.has("expires_in")
-                ? json.get("expires_in").asLong()
-                : null;
+            String refreshToken = json.path("refresh_token").asText(null);
+            String idToken = json.path("id_token").asText(null);
+            JsonNode expiresInNode = json.path("expires_in");
+            Long expiresIn = expiresInNode.isNumber() ? expiresInNode.asLong() : null;
 
             return new OAuthTokens(
                 accessToken,
@@ -220,23 +213,21 @@ public class GoogleOAuthProvider implements OAuthProvider {
         try {
             JsonNode json = objectMapper.readTree(responseBody);
 
-            JsonNode idNode = json.get("id");
-            JsonNode emailNode = json.get("email");
+            JsonNode idNode = json.path("id");
+            JsonNode emailNode = json.path("email");
 
-            if (idNode == null || idNode.isNull()) {
+            if (idNode.isMissingNode() || idNode.isNull()) {
                 throw new OAuthException(
                     PROVIDER_NAME,
                     "userinfo_parse",
-                    "Missing required field: id",
-                    null
+                    "Missing required field: id"
                 );
             }
-            if (emailNode == null || emailNode.isNull()) {
+            if (emailNode.isMissingNode() || emailNode.isNull()) {
                 throw new OAuthException(
                     PROVIDER_NAME,
                     "userinfo_parse",
-                    "Missing required field: email",
-                    null
+                    "Missing required field: email"
                 );
             }
 
