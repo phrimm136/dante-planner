@@ -36,6 +36,17 @@ occupying attention, and are pulled only by a deliberate defrag or design sessio
   `?login=error` nor `?login=rate_limited` (zero hits for `login=` in `frontend/src`);
   closing it needs `validateSearch` on the `/` route, a toast in `GlobalLayout`, and
   `login.*` copy in all 5 locales.
+- `CommentEngagementService.toggleUpvote` inserts a `PlannerCommentVote` and then runs
+  `incrementUpvoteCount`, which is `@Modifying(clearAutomatically = true)` without
+  `flushAutomatically`; whether auto-flush covers the pending vote insert depends on
+  query-space overlap between `planner_comments` and `planner_comment_votes`, which do
+  not overlap. No IT asserts that a second comment upvote returns 409, so the vote
+  row's durability on that path is untested. Add the duplicate-upvote IT (and consider
+  `flushAutomatically = true` on the increment).
+- `CsrfDoubleSubmitFilterTest.mutation_WhenTokenTampered_Rejected` is a ~1-in-64 flake:
+  it tampers by prepending `"x" + token.substring(1)`, so a token that already starts
+  with `x` yields an untampered "tampered" token and the filter correctly admits it.
+  Fix by flipping a character instead of overwriting with a constant.
 - The big-bang deployment window needs a runbook once the comment converter lands.
   Sequence: block traffic → full DB backup via `scripts/ops/access/` → deploy with
   traffic still blocked (Flyway runs the planner decomposition against prod data for
