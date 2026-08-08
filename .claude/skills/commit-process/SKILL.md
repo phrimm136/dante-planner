@@ -18,13 +18,13 @@ Run all checks. A commit that breaks the build wastes everyone's time — catch 
 | FE build | `yarn --cwd frontend build` |
 | BE test | `./gradlew -p backend test` |
 | BE build | `./gradlew -p backend build` |
-| Mock deploy | `docker compose -f backend/docker-compose.local.yml up --build -d` |
+| Mock deploy | `docker compose up --build -d` (repo root; auto-merges the gitignored `docker-compose.override.yml`, which supplies the local mysql/backend/nginx/redis stack) |
 
 Output redirection is enforced by the `check-output-redirect.sh` hook — it will block any test/build command that doesn't redirect to `/tmp/` with a date suffix. Follow the hook's required pattern.
 
 **Mock deployment** spins up MySQL + Spring Boot via Docker Compose to validate Flyway migrations and context loading against a real database. After the backend health check passes (`curl -f http://localhost:8080/actuator/health`), tear down:
 ```
-docker compose -f backend/docker-compose.local.yml down -v
+docker compose down -v
 ```
 
 If any check fails, diagnose and fix before proceeding. Do not skip checks — a "quick fix" that skips validation is how production breaks.
