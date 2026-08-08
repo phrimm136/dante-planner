@@ -32,6 +32,15 @@ occupying attention, and are pulled only by a deliberate defrag or design sessio
 - Toggle endpoints flip state instead of converging on it; make them idempotent the way
   planner publish is (repeat calls are no-ops, not inversions).
 - A full review pass on `shared/` and `user/` is outstanding.
+- FE `selectedKeywords` schemas still allow `.nullish()` although the two response DTOs
+  now always emit an array; tighten to a plain `z.array(z.string())` and drop the
+  now-dead `?? []` fallbacks in the two consumers.
+- Obsolete FE snapshot in `pages/identity/__tests__/IdentityDetailPage.parity.test.tsx`
+  ("renders uptie 1 with skill1 selected 2") — regenerate on the next pass through
+  that area.
+- Stale "a fresh account's syncEnabled is null" comments in `e2e/src/plannerFixture.ts`
+  and `e2e/tests/mutation-gestures.spec.ts` — behaviorally fine post-V056, textually
+  outdated.
 - The `?login=` gap covers both variants, not just `rate_limited`: the FE reads neither
   `?login=error` nor `?login=rate_limited` (zero hits for `login=` in `frontend/src`);
   closing it needs `validateSearch` on the `/` route, a toast in `GlobalLayout`, and
