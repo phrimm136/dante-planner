@@ -1,9 +1,12 @@
 package org.danteplanner.backend.util;
 import org.danteplanner.backend.shared.util.CookieUtils;
 
+import java.util.Optional;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -131,15 +134,15 @@ class CookieUtilsTest {
             when(request.getCookies()).thenReturn(cookies);
 
             // Act
-            String result = cookieUtils.getCookieValue(request, expectedName);
+            Optional<String> result = cookieUtils.getCookieValue(request, expectedName);
 
             // Assert
-            assertEquals(expectedValue, result);
+            assertEquals(Optional.of(expectedValue), result);
         }
 
         @Test
-        @DisplayName("Should return null for missing cookie")
-        void getCookieValue_WhenCookieMissing_ReturnsNull() {
+        @DisplayName("Should return empty for missing cookie")
+        void getCookieValue_WhenCookieMissing_ReturnsEmpty() {
             // Arrange
             Cookie[] cookies = {
                     new Cookie("otherCookie", "otherValue"),
@@ -148,50 +151,50 @@ class CookieUtilsTest {
             when(request.getCookies()).thenReturn(cookies);
 
             // Act
-            String result = cookieUtils.getCookieValue(request, "nonExistentCookie");
+            Optional<String> result = cookieUtils.getCookieValue(request, "nonExistentCookie");
 
             // Assert
-            assertNull(result);
+            assertTrue(result.isEmpty());
         }
 
         @Test
-        @DisplayName("Should return null when no cookies present")
-        void getCookieValue_WhenNoCookies_ReturnsNull() {
+        @DisplayName("Should return empty when no cookies present")
+        void getCookieValue_WhenNoCookies_ReturnsEmpty() {
             // Arrange
             when(request.getCookies()).thenReturn(null);
 
             // Act
-            String result = cookieUtils.getCookieValue(request, "anyCookie");
+            Optional<String> result = cookieUtils.getCookieValue(request, "anyCookie");
 
             // Assert
-            assertNull(result);
+            assertTrue(result.isEmpty());
         }
 
         @Test
-        @DisplayName("Should return null for empty cookies array")
-        void getCookieValue_WhenEmptyCookiesArray_ReturnsNull() {
+        @DisplayName("Should return empty for empty cookies array")
+        void getCookieValue_WhenEmptyCookiesArray_ReturnsEmpty() {
             // Arrange
             when(request.getCookies()).thenReturn(new Cookie[0]);
 
             // Act
-            String result = cookieUtils.getCookieValue(request, "anyCookie");
+            Optional<String> result = cookieUtils.getCookieValue(request, "anyCookie");
 
             // Assert
-            assertNull(result);
+            assertTrue(result.isEmpty());
         }
 
         @Test
         @DisplayName("Should handle case-sensitive cookie names")
-        void getCookieValue_WhenDifferentCase_ReturnsNull() {
+        void getCookieValue_WhenDifferentCase_ReturnsEmpty() {
             // Arrange
             Cookie[] cookies = {new Cookie("AccessToken", "value")};
             when(request.getCookies()).thenReturn(cookies);
 
             // Act
-            String result = cookieUtils.getCookieValue(request, "accessToken");
+            Optional<String> result = cookieUtils.getCookieValue(request, "accessToken");
 
             // Assert - different case should not match
-            assertNull(result);
+            assertTrue(result.isEmpty());
         }
     }
 
@@ -214,7 +217,7 @@ class CookieUtilsTest {
 
             Cookie cookie = cookieCaptor.getValue();
             assertEquals(name, cookie.getName());
-            assertNull(cookie.getValue());
+            assertEquals("", cookie.getValue());
             assertEquals(0, cookie.getMaxAge());
         }
 
@@ -233,6 +236,22 @@ class CookieUtilsTest {
             assertTrue(cookie.getSecure(), "Cleared cookie should be Secure");
             assertEquals("/", cookie.getPath());
             assertEquals("Lax", cookie.getAttribute("SameSite"));
+        }
+
+        @Test
+        @DisplayName("Should emit a Set-Cookie the browser reads as a deletion")
+        void clearCookie_WhenCalled_EmitsDeletingSetCookieHeader() {
+            // A cleared cookie only takes effect through its rendered header, and the Cookie
+            // object alone cannot show that: the container decides what an empty value emits.
+            cookieUtils.clearCookie(response, "accessToken");
+
+            ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+            verify(response).addCookie(cookieCaptor.capture());
+
+            assertEquals(
+                    "accessToken=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:10 GMT; Path=/;"
+                            + " Secure; HttpOnly; SameSite=Lax",
+                    new Rfc6265CookieProcessor().generateHeader(cookieCaptor.getValue(), null));
         }
 
         @Test

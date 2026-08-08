@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -80,8 +81,8 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        String cookieToken = cookieUtils.getCookieValue(request, CookieConstants.CSRF);
-        boolean serverIssued = csrfTokenService.isValid(cookieToken);
+        Optional<String> cookieToken = cookieUtils.getCookieValue(request, CookieConstants.CSRF);
+        boolean serverIssued = cookieToken.map(csrfTokenService::isValid).orElse(false);
 
         // Ensure-cookie: guarantee the browser holds a token before it can mutate.
         // Runs before enforcement, so a guest's first mutation receives a Set-Cookie
@@ -95,7 +96,8 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
 
         if (requiresEnforcement(request)) {
             String headerToken = request.getHeader(CSRF_HEADER);
-            if (!serverIssued || !tokensMatch(cookieToken, headerToken)) {
+            boolean echoed = cookieToken.map(cookie -> tokensMatch(cookie, headerToken)).orElse(false);
+            if (!serverIssued || !echoed) {
                 reject(response);
                 return;
             }
@@ -109,8 +111,7 @@ public class CsrfDoubleSubmitFilter extends OncePerRequestFilter {
     }
 
     private boolean tokensMatch(String cookieToken, String headerToken) {
-        if (cookieToken == null || cookieToken.isEmpty()
-                || headerToken == null || headerToken.isEmpty()) {
+        if (cookieToken.isEmpty() || headerToken == null || headerToken.isEmpty()) {
             return false;
         }
         return MessageDigest.isEqual(

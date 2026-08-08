@@ -1,5 +1,7 @@
 package org.danteplanner.backend.shared.util;
 
+import java.util.Optional;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -98,7 +100,7 @@ public class CookieUtils {
     public void clearCookie(HttpServletResponse response, String name) {
         // A browser drops the stored cookie only when the expiring one matches it on
         // domain/path/secure, so the attributes must come from the same builder that set it.
-        response.addCookie(buildCookie(name, null, 0, true));
+        response.addCookie(buildCookie(name, "", 0, true));
     }
 
     /**
@@ -116,17 +118,17 @@ public class CookieUtils {
      *
      * @param request HTTP request containing cookies
      * @param name cookie name to find
-     * @return cookie value, or null if not found
+     * @return the cookie value, empty if the request carries no cookie of that name
      */
-    public String getCookieValue(HttpServletRequest request, String name) {
+    public Optional<String> getCookieValue(HttpServletRequest request, String name) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
-                    return cookie.getValue();
+                    return Optional.ofNullable(cookie.getValue());
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

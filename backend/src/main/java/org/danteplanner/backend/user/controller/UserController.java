@@ -119,8 +119,10 @@ public class UserController {
         Instant permanentDeleteAt = lifecycleService.deleteAccount(userId);
 
         // Blacklist tokens and clear cookies (same as logout)
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .orElse(null);
+        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
+                .orElse(null);
         userSessionService.logout(accessToken, refreshToken);
         cookieUtils.clearAuthCookies(response);
 

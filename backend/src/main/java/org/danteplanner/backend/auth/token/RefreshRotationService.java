@@ -2,13 +2,10 @@ package org.danteplanner.backend.auth.token;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.config.JwtProperties;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.shared.redis.RedisKeyScanner;
-import org.danteplanner.backend.shared.util.CookieConstants;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -151,7 +148,6 @@ public class RefreshRotationService {
     private final StringRedisTemplate authRedisTemplate;
     private final TokenValidator tokenValidator;
     private final TokenGenerator tokenGenerator;
-    private final CookieUtils cookieUtils;
     private final JwtProperties jwtProperties;
     private final MeterRegistry meterRegistry;
     private final boolean legacyAdmitEnabled;
@@ -163,7 +159,6 @@ public class RefreshRotationService {
             StringRedisTemplate authRedisTemplate,
             TokenValidator tokenValidator,
             TokenGenerator tokenGenerator,
-            CookieUtils cookieUtils,
             JwtProperties jwtProperties,
             MeterRegistry meterRegistry,
             @Value("${jwt.rotation.legacy-admit-enabled:true}") boolean legacyAdmitEnabled,
@@ -171,7 +166,6 @@ public class RefreshRotationService {
         this.authRedisTemplate = authRedisTemplate;
         this.tokenValidator = tokenValidator;
         this.tokenGenerator = tokenGenerator;
-        this.cookieUtils = cookieUtils;
         this.jwtProperties = jwtProperties;
         this.meterRegistry = meterRegistry;
         this.legacyAdmitEnabled = legacyAdmitEnabled;
@@ -185,14 +179,13 @@ public class RefreshRotationService {
     /**
      * Rotates a refresh token through the lineage state machine.
      *
-     * <p>On a successful rotation a fresh successor is minted and written as a
-     * {@code Set-Cookie} on {@code response}.</p>
+     * <p>On a successful rotation a fresh successor is minted and carried back on the
+     * {@link RotationResult.Rotated} outcome; no cookie is written here.</p>
      *
      * @param refreshToken the presented refresh JWT
-     * @param response     the response to attach cookies to
      * @return the rotation outcome
      */
-    public RotationResult rotate(String refreshToken, HttpServletResponse response) {
+    public RotationResult rotate(String refreshToken) {
         TokenClaims claims;
         try {
             claims = tokenValidator.validateRefreshToken(refreshToken);
@@ -244,29 +237,22 @@ public class RefreshRotationService {
                 // on one cookie; the JWT this call optimistically signed is discarded.
                 String storedJwt = result.substring(REUSED_RESULT_PREFIX.length());
                 TokenClaims storedClaims = tokenValidator.validateRefreshToken(storedJwt);
-                cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, storedJwt,
-                        jwtProperties.getRefreshTokenExpirySeconds());
                 incrementOutcome(OUTCOME_RETRY_REUSED);
                 yield new RotationResult.Rotated(storedJwt, storedClaims);
             }
             case THEFT -> {
-                cookieUtils.clearAuthCookies(response);
                 incrementOutcome(OUTCOME_THEFT_REVOKED);
                 yield new RotationResult.Revoked(familyId);
             }
             case REVOKED -> {
-                cookieUtils.clearAuthCookies(response);
                 incrementOutcome(OUTCOME_REJECTED_REVOKED_FAMILY);
                 yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
             }
             case INVALIDATED -> {
-                cookieUtils.clearAuthCookies(response);
                 incrementOutcome(OUTCOME_REJECTED_USER_INVALIDATED);
                 yield new RotationResult.Rejected(RotationResult.Rejected.Reason.REVOKED_FAMILY);
             }
             case ROTATED, SUPERSEDED -> {
-                cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, successorJwt,
-                        jwtProperties.getRefreshTokenExpirySeconds());
                 incrementOutcome(legacy ? OUTCOME_LEGACY_ADMITTED
                         : outcome == Outcome.SUPERSEDED ? OUTCOME_RETRY_SUPERSEDED : OUTCOME_ROTATED);
                 yield new RotationResult.Rotated(successorJwt, successorClaims);
@@ -288,13 +274,10 @@ public class RefreshRotationService {
      * Recovers the leading {@link RotationState} from a family-hash field value of shape
      * {@code "<STATE>|<succ>|<exp>"}, taking the segment before the first separator.
      *
-     * @param fieldValue the raw hash field value, or null
-     * @return the leading state, or null if {@code fieldValue} is null
+     * @param fieldValue the raw hash field value
+     * @return the leading state
      */
     private static RotationState parseLeadingState(String fieldValue) {
-        if (fieldValue == null) {
-            return null;
-        }
         int sep = fieldValue.indexOf(FIELD_SEPARATOR);
         return RotationState.of(sep >= 0 ? fieldValue.substring(0, sep) : fieldValue);
     }

@@ -212,7 +212,7 @@ class OAuthProviderRegistryTest {
         @DisplayName("Returned provider should be usable for OAuth operations")
         void getProvider_WhenCalled_ReturnedProviderIsUsable() {
             // Arrange
-            OAuthTokens expectedTokens = new OAuthTokens("access", "refresh", null, 3600L);
+            OAuthTokens expectedTokens = new OAuthTokens("access", "refresh", null);
             OAuthUserInfo expectedUserInfo = new OAuthUserInfo("123", "test@example.com");
 
             when(googleProvider.exchangeCodeForTokens("code", "redirect", "verifier"))

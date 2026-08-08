@@ -116,7 +116,7 @@ public class AuthController {
 
         // Read and clear the transient oauth_tx up front so it is cleared on EVERY exit path
         // (success, rejection, or exchange failure).
-        String oauthTx = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX);
+        Optional<String> oauthTx = cookieUtils.getCookieValue(request, CookieConstants.OAUTH_TX);
         cookieUtils.clearCookie(response, CookieConstants.OAUTH_TX);
 
         // This is a top-level browser-redirect endpoint: any failure must land the user back on the
@@ -126,7 +126,7 @@ public class AuthController {
                 return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
             }
 
-            Optional<OAuthTransaction> transaction = oAuthStateService.open(oauthTx);
+            Optional<OAuthTransaction> transaction = oauthTx.flatMap(oAuthStateService::open);
             if (transaction.isEmpty() || !statesMatch(transaction.get().state(), state)) {
                 log.warn("OAuth callback rejected: oauth_tx absent/expired/tampered or state mismatch");
                 return redirect(frontendProperties.getUrl() + LoginRedirect.ERROR);
@@ -185,8 +185,10 @@ public class AuthController {
     @RateLimitExempt
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .orElse(null);
+        String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)
+                .orElse(null);
 
         authService.logout(accessToken, refreshToken);
 
@@ -201,7 +203,8 @@ public class AuthController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Long userId = (Long) auth.getPrincipal();
 
-        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        String accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)
+                .orElse(null);
         authService.logoutAll(userId, accessToken);
 
         cookieUtils.clearAuthCookies(response);

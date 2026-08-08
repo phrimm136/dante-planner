@@ -100,7 +100,7 @@ class AuthenticationServiceTest {
             String redirectUri = "http://localhost/callback";
             String codeVerifier = "verifier";
 
-            OAuthTokens oauthTokens = new OAuthTokens("oauth-access", "oauth-refresh", null, 3600L);
+            OAuthTokens oauthTokens = new OAuthTokens("oauth-access", "oauth-refresh", null);
             OAuthUserInfo userInfo = new OAuthUserInfo("google-123", "test@example.com");
 
             when(providerRegistry.getProvider(providerName)).thenReturn(oauthProvider);
@@ -150,7 +150,7 @@ class AuthenticationServiceTest {
         @DisplayName("Should create new user when not found")
         void authenticateWithOAuth_WhenUserNotFound_CreatesNewUser() {
             // Arrange
-            OAuthTokens oauthTokens = new OAuthTokens("access", null, null, null);
+            OAuthTokens oauthTokens = new OAuthTokens("access", null, null);
             OAuthUserInfo userInfo = new OAuthUserInfo("provider-id-123", "user@email.com");
 
             when(providerRegistry.getProvider(anyString())).thenReturn(oauthProvider);
@@ -190,7 +190,7 @@ class AuthenticationServiceTest {
                     .build();
             deletedUser.softDelete(java.time.Instant.now().plusSeconds(86400 * 30));
 
-            OAuthTokens oauthTokens = new OAuthTokens("access", null, null, null);
+            OAuthTokens oauthTokens = new OAuthTokens("access", null, null);
             OAuthUserInfo userInfo = new OAuthUserInfo("deleted-123", "deleted@example.com");
 
             when(providerRegistry.getProvider("google")).thenReturn(oauthProvider);

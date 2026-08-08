@@ -190,14 +190,11 @@ public class GoogleOAuthProvider implements OAuthProvider {
             String accessToken = accessTokenNode.asText();
             String refreshToken = json.path("refresh_token").asText(null);
             String idToken = json.path("id_token").asText(null);
-            JsonNode expiresInNode = json.path("expires_in");
-            Long expiresIn = expiresInNode.isNumber() ? expiresInNode.asLong() : null;
 
             return new OAuthTokens(
                 accessToken,
                 refreshToken,
-                idToken,
-                expiresIn
+                idToken
             );
         } catch (JsonProcessingException e) {
             throw new OAuthException(

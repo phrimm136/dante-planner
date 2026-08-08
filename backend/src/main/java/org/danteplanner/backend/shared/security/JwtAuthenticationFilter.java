@@ -12,6 +12,7 @@ import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.RefreshRotationService;
+import org.danteplanner.backend.auth.token.RotationResult;
 import org.danteplanner.backend.auth.token.TokenBlacklistService;
 import org.danteplanner.backend.auth.token.TokenClaims;
 import org.danteplanner.backend.auth.token.TokenGenerator;
@@ -117,15 +118,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private boolean establishAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        String token = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        Optional<String> accessToken = cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
 
-        if (token == null) {
+        if (accessToken.isEmpty()) {
             // Cookie expiry (MaxAge) and token expiry (JWT) desync: the access cookie can be gone
             // while a refresh cookie still carries a live session.
             return refreshOrReportOutage(request, response) != RefreshOutcome.OUTAGE_REPORTED;
         }
 
-        return switch (accessTokenAuthenticator.verify(token, request)) {
+        return switch (accessTokenAuthenticator.verify(accessToken.orElseThrow(), request)) {
             case AUTHENTICATED -> true;
             case EXPIRED -> refreshExpiredSession(request, response);
             case SENTINEL_BLOCKED, REVOKED, REJECTED -> {
@@ -200,13 +201,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response
     ) {
         try {
-            String refreshToken = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
+            Optional<String> presented = cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
 
-            if (refreshToken == null) {
+            if (presented.isEmpty()) {
                 log.debug("No refresh token available for auto-refresh");
                 return false;
             }
 
+            String refreshToken = presented.orElseThrow();
             TokenClaims claims = tokenValidator.validateRefreshToken(refreshToken);
 
             if (!claims.isRefreshToken()) {
@@ -263,8 +265,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * Replace the presented refresh cookie with its successor.
      *
      * <p>With lineage rotation on, {@link RefreshRotationService} owns both the successor and the
-     * theft detection, and sets the cookie itself. With it off, the presented token is blacklisted
-     * for the rotation grace period and a successor is minted here.</p>
+     * theft detection, and this method writes the successor it hands back. With it off, the
+     * presented token is blacklisted for the rotation grace period and a successor is minted
+     * here.</p>
+     *
+     * <p>Every outcome that is not a rotation withdraws the auth cookies, so a client is never
+     * left re-presenting credentials this filter has already refused.</p>
      *
      * @param refreshToken the presented refresh JWT
      * @param claims       its verified claims
@@ -282,7 +288,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) {
         if (lineageRotationFlag.isEnabled()) {
             try {
-                refreshRotationService.rotate(refreshToken, response).orThrow();
+                RotationResult.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
+                cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(),
+                        jwtProperties.getRefreshTokenExpirySeconds());
                 return true;
             } catch (SessionRevokedException e) {
                 return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);

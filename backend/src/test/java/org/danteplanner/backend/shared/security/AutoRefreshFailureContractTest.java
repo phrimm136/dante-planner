@@ -107,7 +107,7 @@ class AutoRefreshFailureContractTest {
         when(tokenValidator.validateRefreshToken(DEAD_REFRESH_TOKEN)).thenReturn(refreshClaims());
         if (lineageEnabled) {
             when(userService.findActiveById(USER_ID)).thenReturn(Optional.of(activeUser()));
-            when(refreshRotationService.rotate(DEAD_REFRESH_TOKEN, response))
+            when(refreshRotationService.rotate(DEAD_REFRESH_TOKEN))
                     .thenReturn(new RotationResult.Revoked("fam-revoked"));
         } else {
             when(tokenBlacklistService.isBlacklisted(DEAD_REFRESH_TOKEN)).thenReturn(true);

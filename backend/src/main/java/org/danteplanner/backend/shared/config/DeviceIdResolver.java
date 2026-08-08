@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.config;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -39,26 +40,27 @@ public class DeviceIdResolver {
             return memoised;
         }
 
-        UUID deviceId = readDeviceId(request);
-        if (deviceId == null) {
-            deviceId = UUID.randomUUID();
+        UUID deviceId = readDeviceId(request).orElseGet(() -> {
+            UUID minted = UUID.randomUUID();
             cookieUtils.setCookie(
-                    response, CookieConstants.DEVICE_ID, deviceId.toString(), DEVICE_ID_MAX_AGE_SECONDS);
-        }
+                    response, CookieConstants.DEVICE_ID, minted.toString(), DEVICE_ID_MAX_AGE_SECONDS);
+            return minted;
+        });
 
         request.setAttribute(REQUEST_ATTRIBUTE, deviceId);
         return deviceId;
     }
 
-    private UUID readDeviceId(HttpServletRequest request) {
-        String value = cookieUtils.getCookieValue(request, CookieConstants.DEVICE_ID);
-        if (value == null) {
-            return null;
-        }
+    private Optional<UUID> readDeviceId(HttpServletRequest request) {
+        return cookieUtils.getCookieValue(request, CookieConstants.DEVICE_ID)
+                .flatMap(DeviceIdResolver::parseUuid);
+    }
+
+    private static Optional<UUID> parseUuid(String value) {
         try {
-            return UUID.fromString(value);
+            return Optional.of(UUID.fromString(value));
         } catch (IllegalArgumentException e) {
-            return null;
+            return Optional.empty();
         }
     }
 }

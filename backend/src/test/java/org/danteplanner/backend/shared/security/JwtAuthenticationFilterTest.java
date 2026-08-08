@@ -173,7 +173,7 @@ class JwtAuthenticationFilterTest {
             String token = "valid.jwt.token";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
             lenient().when(tokenValidator.validateAccessToken(token)).thenReturn(createValidClaims(userId));
 
@@ -199,7 +199,7 @@ class JwtAuthenticationFilterTest {
             String token = "valid.jwt.token";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
             lenient().when(tokenValidator.validateAccessToken(token)).thenReturn(createValidClaims(userId));
             // deleteAccount()/demotion called invalidateUserTokens → this returns true
@@ -224,7 +224,7 @@ class JwtAuthenticationFilterTest {
             String token = "sentinel.jwt.token";
             Long sentinelId = 0L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             when(tokenBlacklistService.isBlacklisted(token)).thenReturn(false);
             lenient().when(tokenValidator.validateAccessToken(token)).thenReturn(createValidClaims(sentinelId));
 
@@ -243,7 +243,7 @@ class JwtAuthenticationFilterTest {
         @Test
         @DisplayName("Should continue without authentication when no token present")
         void doFilterInternal_WhenNoToken_ContinuesWithoutAuth() throws Exception {
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.empty());
 
             filter.doFilterInternal(request, response, filterChain);
 
@@ -265,8 +265,8 @@ class JwtAuthenticationFilterTest {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(expiredToken));
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
             lenient().when(tokenValidator.validateAccessToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
@@ -289,8 +289,8 @@ class JwtAuthenticationFilterTest {
             // Access cookie absent (expiry/MaxAge desync) but a refresh cookie is present —
             // this routes through the token==null branch, a different catch site than the
             // expired-token path below.
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.empty());
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             when(userService.findActiveById(userId))
                     .thenThrow(new DataAccessResourceFailureException("DB unreachable"));
@@ -309,8 +309,8 @@ class JwtAuthenticationFilterTest {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(expiredToken));
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
             lenient().when(tokenValidator.validateAccessToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
@@ -333,8 +333,8 @@ class JwtAuthenticationFilterTest {
             Long userId = 123L;
             User user = activeUser(userId);
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.empty());
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
             when(tokenBlacklistService.isBlacklisted(refreshToken)).thenReturn(false);
             when(tokenBlacklistService.isUserTokenInvalidated(eq(userId), anyLong())).thenReturn(false);
@@ -358,8 +358,8 @@ class JwtAuthenticationFilterTest {
             String refreshToken = "refresh.jwt.token";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(expiredToken));
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshToken));
             lenient().when(tokenValidator.validateAccessToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
             lenient().when(tokenValidator.validateRefreshToken(refreshToken)).thenReturn(createRefreshClaims(userId));
@@ -383,8 +383,8 @@ class JwtAuthenticationFilterTest {
         void doFilterInternal_WhenExpiredToken_AttemptsAutoRefresh() throws Exception {
             String expiredToken = "expired.jwt.token";
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(expiredToken);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(null);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(expiredToken));
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.empty());
             lenient().when(tokenValidator.validateAccessToken(expiredToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.EXPIRED));
 
@@ -399,7 +399,7 @@ class JwtAuthenticationFilterTest {
         void doFilterInternal_WhenMalformedToken_ClearsContext() throws Exception {
             String token = "malformed.jwt.token";
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             lenient().when(tokenValidator.validateAccessToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.MALFORMED));
 
@@ -416,7 +416,7 @@ class JwtAuthenticationFilterTest {
         void doFilterInternal_WhenInvalidSignature_ClearsContext() throws Exception {
             String token = "tampered.jwt.token";
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             lenient().when(tokenValidator.validateAccessToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_SIGNATURE));
 
@@ -433,7 +433,7 @@ class JwtAuthenticationFilterTest {
         void doFilterInternal_WhenRevokedToken_ClearsContext() throws Exception {
             String token = "revoked.jwt.token";
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             lenient().when(tokenValidator.validateAccessToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.REVOKED));
 
@@ -454,7 +454,7 @@ class JwtAuthenticationFilterTest {
             String token = "refresh.typed.in.access.cookie";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             lenient().when(tokenValidator.validateAccessToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
 
@@ -471,7 +471,7 @@ class JwtAuthenticationFilterTest {
             String token = "refresh.typed.in.access.cookie";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(token);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.of(token));
             lenient().when(tokenValidator.validateAccessToken(token))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
 
@@ -493,8 +493,8 @@ class JwtAuthenticationFilterTest {
             String refreshCookieToken = "access.typed.in.refresh.cookie";
             Long userId = 123L;
 
-            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(null);
-            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(refreshCookieToken);
+            when(cookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN)).thenReturn(Optional.empty());
+            when(cookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN)).thenReturn(Optional.of(refreshCookieToken));
             lenient().when(tokenValidator.validateRefreshToken(refreshCookieToken))
                     .thenThrow(new InvalidTokenException(InvalidTokenException.Reason.INVALID_TYPE));
 

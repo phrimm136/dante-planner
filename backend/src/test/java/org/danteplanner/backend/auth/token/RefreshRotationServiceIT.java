@@ -3,14 +3,10 @@ package org.danteplanner.backend.auth.token;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.integration.SharedRedisContainerSupport;
-import jakarta.servlet.http.Cookie;
 import org.danteplanner.backend.shared.config.JwtProperties;
-import org.danteplanner.backend.shared.util.CookieConstants;
-import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +59,6 @@ class RefreshRotationServiceIT {
 
     private JwtTokenService tokenService;
     private JwtProperties jwtProperties;
-    private CookieUtils cookieUtils;
     private SimpleMeterRegistry meterRegistry;
     private RefreshRotationService rotationService;
 
@@ -97,7 +92,6 @@ class RefreshRotationServiceIT {
         jwtProperties.setRefreshTokenExpiry(REFRESH_TOKEN_EXPIRY);
 
         tokenService = new JwtTokenService(jwtProperties);
-        cookieUtils = new CookieUtils(true, "", "Lax");
         meterRegistry = new SimpleMeterRegistry();
 
         rotationService = serviceWithReuseWindow(RETRY_REUSE_WINDOW_MS);
@@ -106,16 +100,12 @@ class RefreshRotationServiceIT {
 
     private RefreshRotationService serviceWithReuseWindow(long reuseWindowMs) {
         return new RefreshRotationService(
-                sharedTemplate, tokenService, tokenService, cookieUtils, jwtProperties, meterRegistry,
+                sharedTemplate, tokenService, tokenService, jwtProperties, meterRegistry,
                 true, reuseWindowMs);
     }
 
     private String freshLoginToken() {
         return tokenService.generateRefreshToken(USER_ID, UUID.randomUUID().toString(), null);
-    }
-
-    private MockHttpServletResponse newResponse() {
-        return new MockHttpServletResponse();
     }
 
     private double outcomeCount(String outcome) {
@@ -136,7 +126,7 @@ class RefreshRotationServiceIT {
             String r1Jti = tokenService.validateToken(r1).jti();
             String familyId = tokenService.validateToken(r1).familyId();
 
-            RotationResult result = rotationService.rotate(r1, newResponse());
+            RotationResult result = rotationService.rotate(r1);
 
             assertInstanceOf(RotationResult.Rotated.class, result);
             RotationResult.Rotated rotated = (RotationResult.Rotated) result;
@@ -154,11 +144,11 @@ class RefreshRotationServiceIT {
             String r1 = freshLoginToken();
             String r1Jti = tokenService.validateToken(r1).jti();
 
-            RotationResult.Rotated first = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+            RotationResult.Rotated first = (RotationResult.Rotated) rotationService.rotate(r1);
             String r2 = first.newRefreshJwt();
             String r2Jti = first.claims().jti();
 
-            RotationResult.Rotated second = (RotationResult.Rotated) rotationService.rotate(r2, newResponse());
+            RotationResult.Rotated second = (RotationResult.Rotated) rotationService.rotate(r2);
 
             assertEquals(RotationState.RETIRED, rotationService.stateOf(r1Jti));
             assertEquals(RotationState.PENDING, rotationService.stateOf(r2Jti));
@@ -167,17 +157,16 @@ class RefreshRotationServiceIT {
         }
 
         @Test
-        @DisplayName("Rotation sets a refresh cookie carrying the new token")
-        void rotate_WhenRotated_SetsRefreshCookie() {
+        @DisplayName("Rotation hands back the successor JWT its own claims describe")
+        void rotate_WhenRotated_CarriesSuccessorJwt() {
             String r1 = freshLoginToken();
-            MockHttpServletResponse response = newResponse();
 
-            RotationResult.Rotated rotated = (RotationResult.Rotated) rotationService.rotate(r1, response);
+            RotationResult.Rotated rotated = (RotationResult.Rotated) rotationService.rotate(r1);
 
-            Cookie refreshCookie = response.getCookie(CookieConstants.REFRESH_TOKEN);
-            assertNotNull(refreshCookie);
-            assertEquals(rotated.newRefreshJwt(), refreshCookie.getValue());
-            assertTrue(refreshCookie.getMaxAge() > 0);
+            // The caller writes this value as the refresh cookie, so it has to be the token the
+            // reported claims belong to.
+            assertEquals(rotated.claims().jti(),
+                    tokenService.validateToken(rotated.newRefreshJwt()).jti());
         }
     }
 
@@ -190,15 +179,12 @@ class RefreshRotationServiceIT {
         void rotate_WhenParentRepresentedWithinWindow_ReusesSuccessor() {
             String r1 = freshLoginToken();
 
-            RotationResult.Rotated firstAttempt = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+            RotationResult.Rotated firstAttempt = (RotationResult.Rotated) rotationService.rotate(r1);
 
-            MockHttpServletResponse retryResponse = newResponse();
-            RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1, retryResponse);
+            RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1);
 
             assertEquals(firstAttempt.claims().jti(), retry.claims().jti());
             assertEquals(firstAttempt.newRefreshJwt(), retry.newRefreshJwt());
-            assertEquals(retry.newRefreshJwt(),
-                    retryResponse.getCookie(CookieConstants.REFRESH_TOKEN).getValue());
             assertEquals(RotationState.UNUSED_LATEST, rotationService.stateOf(retry.claims().jti()));
             assertEquals(RotationState.PENDING, rotationService.stateOf(tokenService.validateToken(r1).jti()));
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_ROTATED));
@@ -211,10 +197,10 @@ class RefreshRotationServiceIT {
             RefreshRotationService noReuse = serviceWithReuseWindow(0L);
             String r1 = freshLoginToken();
 
-            RotationResult.Rotated firstAttempt = (RotationResult.Rotated) noReuse.rotate(r1, newResponse());
+            RotationResult.Rotated firstAttempt = (RotationResult.Rotated) noReuse.rotate(r1);
             String r2First = firstAttempt.claims().jti();
 
-            RotationResult.Rotated retry = (RotationResult.Rotated) noReuse.rotate(r1, newResponse());
+            RotationResult.Rotated retry = (RotationResult.Rotated) noReuse.rotate(r1);
             String r2Retry = retry.claims().jti();
 
             assertNotEquals(r2First, r2Retry);
@@ -229,10 +215,10 @@ class RefreshRotationServiceIT {
         @DisplayName("Fresh successor from retry rotates normally")
         void rotate_WhenRetrySuccessor_RotatesNormally() {
             String r1 = freshLoginToken();
-            rotationService.rotate(r1, newResponse());
-            RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+            rotationService.rotate(r1);
+            RotationResult.Rotated retry = (RotationResult.Rotated) rotationService.rotate(r1);
 
-            RotationResult result = rotationService.rotate(retry.newRefreshJwt(), newResponse());
+            RotationResult result = rotationService.rotate(retry.newRefreshJwt());
 
             assertInstanceOf(RotationResult.Rotated.class, result);
         }
@@ -248,18 +234,14 @@ class RefreshRotationServiceIT {
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
 
-            RotationResult.Rotated first = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
-            rotationService.rotate(first.newRefreshJwt(), newResponse()); // R1 -> RETIRED
+            RotationResult.Rotated first = (RotationResult.Rotated) rotationService.rotate(r1);
+            rotationService.rotate(first.newRefreshJwt()); // R1 -> RETIRED
 
-            MockHttpServletResponse response = newResponse();
-            RotationResult result = rotationService.rotate(r1, response);
+            RotationResult result = rotationService.rotate(r1);
 
             assertInstanceOf(RotationResult.Revoked.class, result);
             assertEquals(familyId, ((RotationResult.Revoked) result).familyId());
             assertTrue(rotationService.isFamilyRevoked(familyId));
-            assertNotNull(response.getCookie(CookieConstants.REFRESH_TOKEN));
-            assertEquals(0, response.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
-            assertEquals(0, response.getCookie(CookieConstants.ACCESS_TOKEN).getMaxAge());
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_THEFT_REVOKED));
         }
 
@@ -275,7 +257,7 @@ class RefreshRotationServiceIT {
 
             assertEquals(RotationState.RETIRED, rotationService.stateOf(claims.jti()));
 
-            RotationResult result = rotationService.rotate(r1, newResponse());
+            RotationResult result = rotationService.rotate(r1);
 
             assertInstanceOf(RotationResult.Revoked.class, result);
             assertTrue(rotationService.isFamilyRevoked(claims.familyId()));
@@ -289,11 +271,11 @@ class RefreshRotationServiceIT {
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
 
-            RotationResult.Rotated attempt1 = (RotationResult.Rotated) noReuse.rotate(r1, newResponse());
+            RotationResult.Rotated attempt1 = (RotationResult.Rotated) noReuse.rotate(r1);
             String r2Superseded = attempt1.newRefreshJwt();
-            noReuse.rotate(r1, newResponse()); // outside the window: supersedes r2Superseded
+            noReuse.rotate(r1); // outside the window: supersedes r2Superseded
 
-            RotationResult result = noReuse.rotate(r2Superseded, newResponse());
+            RotationResult result = noReuse.rotate(r2Superseded);
 
             assertInstanceOf(RotationResult.Revoked.class, result);
             assertTrue(noReuse.isFamilyRevoked(familyId));
@@ -310,25 +292,23 @@ class RefreshRotationServiceIT {
         void rotate_WhenRevokedFamily_RejectsAllTokens() {
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
-            RotationResult.Rotated rotated = (RotationResult.Rotated) rotationService.rotate(r1, newResponse());
+            RotationResult.Rotated rotated = (RotationResult.Rotated) rotationService.rotate(r1);
             String r2 = rotated.newRefreshJwt();
 
             rotationService.revokeFamily(familyId);
 
-            MockHttpServletResponse response = newResponse();
-            RotationResult result = rotationService.rotate(r2, response);
+            RotationResult result = rotationService.rotate(r2);
 
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.REVOKED_FAMILY,
                     ((RotationResult.Rejected) result).reason());
-            assertEquals(0, response.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
             assertEquals(1.0, outcomeCount(RefreshRotationService.OUTCOME_REJECTED_REVOKED_FAMILY));
         }
 
         @Test
         @DisplayName("Invalid token is rejected as INVALID")
         void rotate_WhenInvalidToken_Rejected() {
-            RotationResult result = rotationService.rotate("not.a.jwt", newResponse());
+            RotationResult result = rotationService.rotate("not.a.jwt");
 
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.INVALID,
@@ -341,7 +321,7 @@ class RefreshRotationServiceIT {
         void rotate_WhenAccessToken_RejectedEvenWithLegacyAdmit() {
             String accessToken = tokenService.generateAccessToken(USER_ID, UserRole.NORMAL);
 
-            RotationResult result = rotationService.rotate(accessToken, newResponse());
+            RotationResult result = rotationService.rotate(accessToken);
 
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.INVALID,
@@ -355,11 +335,11 @@ class RefreshRotationServiceIT {
         void rotate_WhenAccessTokenClaims_RejectedAndFamilyUntouched() {
             JwtTokenService generatorSpy = spy(tokenService);
             RefreshRotationService svc = new RefreshRotationService(
-                    sharedTemplate, tokenService, generatorSpy, cookieUtils, jwtProperties, meterRegistry,
+                    sharedTemplate, tokenService, generatorSpy, jwtProperties, meterRegistry,
                     true, RETRY_REUSE_WINDOW_MS);
             String accessToken = tokenService.generateAccessToken(USER_ID, UserRole.NORMAL);
 
-            RotationResult result = svc.rotate(accessToken, newResponse());
+            RotationResult result = svc.rotate(accessToken);
 
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.INVALID,
@@ -388,11 +368,11 @@ class RefreshRotationServiceIT {
             sharedTemplate.opsForValue().set(
                     UINV_KEY, String.valueOf(System.currentTimeMillis() + 60_000));
 
-            MockHttpServletResponse response = newResponse();
-            RotationResult result = rotationService.rotate(token, response);
+            RotationResult result = rotationService.rotate(token);
 
             assertInstanceOf(RotationResult.Rejected.class, result);
-            assertEquals(0, response.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
+            assertEquals(RotationResult.Rejected.Reason.REVOKED_FAMILY,
+                    ((RotationResult.Rejected) result).reason());
             assertEquals(1.0,
                     outcomeCount(RefreshRotationService.OUTCOME_REJECTED_USER_INVALIDATED));
         }
@@ -404,7 +384,7 @@ class RefreshRotationServiceIT {
                     UINV_KEY, String.valueOf(System.currentTimeMillis() - 60_000));
             String token = freshLoginToken();
 
-            RotationResult result = rotationService.rotate(token, newResponse());
+            RotationResult result = rotationService.rotate(token);
 
             assertInstanceOf(RotationResult.Rotated.class, result);
         }
@@ -414,11 +394,11 @@ class RefreshRotationServiceIT {
         void rotate_WhenFamilyHealthyButUserInvalidated_Rejected() {
             String token = freshLoginToken();
             RotationResult.Rotated first =
-                    (RotationResult.Rotated) rotationService.rotate(token, newResponse());
+                    (RotationResult.Rotated) rotationService.rotate(token);
             sharedTemplate.opsForValue().set(
                     UINV_KEY, String.valueOf(System.currentTimeMillis() + 60_000));
 
-            RotationResult result = rotationService.rotate(first.newRefreshJwt(), newResponse());
+            RotationResult result = rotationService.rotate(first.newRefreshJwt());
 
             assertInstanceOf(RotationResult.Rejected.class, result);
         }
@@ -445,7 +425,7 @@ class RefreshRotationServiceIT {
                 pool.submit(() -> {
                     try {
                         barrier.await();
-                        RotationResult result = rotationService.rotate(r1, newResponse());
+                        RotationResult result = rotationService.rotate(r1);
                         synchronized (results) {
                             results.add((RotationResult.Rotated) result);
                         }
@@ -490,25 +470,23 @@ class RefreshRotationServiceIT {
             StringRedisTemplate templateB = buildTemplate(SharedRedisContainerSupport.host(), SharedRedisContainerSupport.port());
 
             RefreshRotationService instanceA = new RefreshRotationService(
-                    templateA, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(),
+                    templateA, tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
                     true, RETRY_REUSE_WINDOW_MS);
             RefreshRotationService instanceB = new RefreshRotationService(
-                    templateB, tokenService, tokenService, cookieUtils, jwtProperties, new SimpleMeterRegistry(),
+                    templateB, tokenService, tokenService, jwtProperties, new SimpleMeterRegistry(),
                     true, RETRY_REUSE_WINDOW_MS);
 
             String r1 = freshLoginToken();
             String familyId = tokenService.validateToken(r1).familyId();
 
-            RotationResult.Rotated first = (RotationResult.Rotated) instanceA.rotate(r1, newResponse());
-            instanceA.rotate(first.newRefreshJwt(), newResponse()); // r1 -> RETIRED on A
+            RotationResult.Rotated first = (RotationResult.Rotated) instanceA.rotate(r1);
+            instanceA.rotate(first.newRefreshJwt()); // r1 -> RETIRED on A
 
-            MockHttpServletResponse responseB = newResponse();
-            RotationResult replay = instanceB.rotate(r1, responseB);
+            RotationResult replay = instanceB.rotate(r1);
 
             assertInstanceOf(RotationResult.Revoked.class, replay);
+            assertEquals(familyId, ((RotationResult.Revoked) replay).familyId());
             assertTrue(instanceB.isFamilyRevoked(familyId));
-            assertNotNull(responseB.getCookie(CookieConstants.REFRESH_TOKEN));
-            assertEquals(0, responseB.getCookie(CookieConstants.REFRESH_TOKEN).getMaxAge());
         }
     }
 
@@ -526,7 +504,7 @@ class RefreshRotationServiceIT {
 
         private RefreshRotationService serviceWith(TokenValidator validator, boolean legacyAdmit) {
             return new RefreshRotationService(
-                    sharedTemplate, validator, tokenService, cookieUtils, jwtProperties, meterRegistry,
+                    sharedTemplate, validator, tokenService, jwtProperties, meterRegistry,
                     legacyAdmit, RETRY_REUSE_WINDOW_MS);
         }
 
@@ -538,7 +516,7 @@ class RefreshRotationServiceIT {
             doReturn(legacyClaims(new Date())).when(validator).validateRefreshToken(LEGACY_TOKEN);
             RefreshRotationService svc = serviceWith(validator, true);
 
-            RotationResult result = svc.rotate(LEGACY_TOKEN, newResponse());
+            RotationResult result = svc.rotate(LEGACY_TOKEN);
 
             assertInstanceOf(RotationResult.Rotated.class, result);
             RotationResult.Rotated rotated = (RotationResult.Rotated) result;
@@ -556,7 +534,7 @@ class RefreshRotationServiceIT {
             doReturn(legacyClaims(new Date())).when(validator).validateRefreshToken(LEGACY_TOKEN);
             RefreshRotationService svc = serviceWith(validator, false);
 
-            RotationResult result = svc.rotate(LEGACY_TOKEN, newResponse());
+            RotationResult result = svc.rotate(LEGACY_TOKEN);
 
             assertInstanceOf(RotationResult.Rejected.class, result);
             assertEquals(RotationResult.Rejected.Reason.INVALID,
@@ -574,8 +552,8 @@ class RefreshRotationServiceIT {
             doReturn(legacyClaims(issuedAt)).when(validator).validateRefreshToken(LEGACY_TOKEN);
             RefreshRotationService svc = serviceWith(validator, true);
 
-            RotationResult.Rotated first = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN, newResponse());
-            RotationResult.Rotated second = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN, newResponse());
+            RotationResult.Rotated first = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN);
+            RotationResult.Rotated second = (RotationResult.Rotated) svc.rotate(LEGACY_TOKEN);
 
             assertEquals(first.claims().familyId(), second.claims().familyId());
             assertEquals(first.claims().jti(), second.claims().jti());

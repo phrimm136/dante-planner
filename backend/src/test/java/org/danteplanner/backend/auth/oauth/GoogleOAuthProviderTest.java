@@ -48,7 +48,7 @@ class GoogleOAuthProviderTest {
     }
 
     private static OAuthTokens tokensWithIdToken() {
-        return new OAuthTokens("access-token", null, "id-token", 3600L);
+        return new OAuthTokens("access-token", null, "id-token");
     }
 
     @Test
