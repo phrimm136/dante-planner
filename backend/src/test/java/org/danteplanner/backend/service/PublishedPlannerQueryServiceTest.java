@@ -4,6 +4,8 @@ import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.danteplanner.backend.planner.service.PublishedPlannerQueryService;
+import org.danteplanner.backend.planner.validation.CatalogReadValidator;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.dto.CatalogQuery;
@@ -125,12 +127,12 @@ class PublishedPlannerQueryServiceTest {
         engagementService = new PlannerEngagementService(
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                plannerStatsRepository,
                 plannerStatsService,
                 plannerCatalogService,
                 eventPublisher,
                 accessGuard,
                 reportService,
+                new VoteUniquenessValidator(),
                 recommendedThreshold
         );
 
@@ -144,7 +146,8 @@ class PublishedPlannerQueryServiceTest {
                 engagementService,
                 plannerViewRecorder,
                 plannerStatsRepository,
-                accessGuard
+                accessGuard,
+                new CatalogReadValidator()
         );
 
         testUser = TestDataFactory.unsavedUser(1L);
@@ -453,8 +456,8 @@ class PublishedPlannerQueryServiceTest {
             assertEquals(plannerId, result.id());
             assertEquals(10, result.viewCount());
             assertNotNull(result.content());
-            assertNull(result.hasUpvoted());
-            assertNull(result.isBookmarked());
+            assertFalse(result.hasUpvoted());
+            assertFalse(result.isBookmarked());
         }
 
         @Test
@@ -524,8 +527,8 @@ class PublishedPlannerQueryServiceTest {
             assertEquals(42, card.viewCount());
             assertEquals(7, card.upvotes());
             assertEquals(3L, card.commentCount());
-            assertNull(card.hasUpvoted());
-            assertNull(card.isBookmarked());
+            assertFalse(card.hasUpvoted());
+            assertFalse(card.isBookmarked());
         }
     }
 
@@ -552,8 +555,8 @@ class PublishedPlannerQueryServiceTest {
             PublicPlannerResponse card = result.getContent().get(0);
             assertEquals(row.getPlannerId(), card.id());
             assertEquals("Test Planner", card.title());
-            assertNull(card.hasUpvoted());
-            assertNull(card.isBookmarked());
+            assertFalse(card.hasUpvoted());
+            assertFalse(card.isBookmarked());
         }
 
         @Test

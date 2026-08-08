@@ -63,10 +63,10 @@ describe('CommentNodeSchema', () => {
     expect(result.success).toBe(true)
   })
 
-  it('should validate comment without authorNotificationsEnabled', () => {
-    const { authorNotificationsEnabled: _omitted, ...nonAuthorView } = validCommentNode
-    const result = CommentNodeSchema.safeParse(nonAuthorView)
-    expect(result.success).toBe(true)
+  it('should reject comment without authorNotificationsEnabled', () => {
+    const { authorNotificationsEnabled: _omitted, ...missingField } = validCommentNode
+    const result = CommentNodeSchema.safeParse(missingField)
+    expect(result.success).toBe(false)
   })
 
   it('should validate comment with nested replies', () => {

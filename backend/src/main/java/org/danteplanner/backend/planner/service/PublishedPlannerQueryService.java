@@ -22,6 +22,7 @@ import org.danteplanner.backend.planner.repository.PlannerCatalogRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.validation.CatalogReadValidator;
 import org.danteplanner.backend.shared.util.ViewerHashUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,7 +55,7 @@ public class PublishedPlannerQueryService {
      * assembly reads one shape. Neither instance is ever persisted.
      */
     private static final PlannerStats NO_STATS = PlannerStats.builder().build();
-    private static final PlannerCoreInfo NO_CORE = new PlannerCoreInfo(null, null, null, null);
+    private static final PlannerCoreInfo NO_CORE = PlannerCoreInfo.absent();
 
     private final PlannerRepository plannerRepository;
     private final PlannerCatalogRepository catalogRepository;
@@ -66,6 +67,7 @@ public class PublishedPlannerQueryService {
     private final PlannerViewRecorder plannerViewRecorder;
     private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerAccessGuard accessGuard;
+    private final CatalogReadValidator catalogReadValidator;
 
     public PublishedPlannerQueryService(
             PlannerRepository plannerRepository,
@@ -77,7 +79,8 @@ public class PublishedPlannerQueryService {
             PlannerEngagementService engagementService,
             PlannerViewRecorder plannerViewRecorder,
             PlannerStatsRepository plannerStatsRepository,
-            PlannerAccessGuard accessGuard) {
+            PlannerAccessGuard accessGuard,
+            CatalogReadValidator catalogReadValidator) {
         this.plannerRepository = plannerRepository;
         this.catalogRepository = catalogRepository;
         this.plannerVoteRepository = plannerVoteRepository;
@@ -88,6 +91,7 @@ public class PublishedPlannerQueryService {
         this.plannerViewRecorder = plannerViewRecorder;
         this.plannerStatsRepository = plannerStatsRepository;
         this.accessGuard = accessGuard;
+        this.catalogReadValidator = catalogReadValidator;
     }
 
     /**
@@ -98,9 +102,7 @@ public class PublishedPlannerQueryService {
      */
     @Transactional
     public void incrementViewCount(UUID plannerId) {
-        if (!plannerRepository.existsActiveById(plannerId)) {
-            throw new PlannerNotFoundException(plannerId);
-        }
+        catalogReadValidator.requireActivePlanner(plannerRepository.existsActiveById(plannerId), plannerId);
         plannerStatsRepository.incrementViewCountBy(plannerId, 1);
         log.debug("Incremented view count for planner {}", plannerId);
     }
@@ -137,24 +139,13 @@ public class PublishedPlannerQueryService {
         }
         for (Map.Entry<ContentEntityType, List<String>> filter : catalogQuery.entityFilters().entrySet()) {
             for (String id : filter.getValue()) {
-                spec = spec.and(CatalogSpecifications.containsEntity(filter.getKey(), parseEntityId(id)));
+                spec = spec.and(CatalogSpecifications.containsEntity(
+                        filter.getKey(), catalogReadValidator.requireNumericEntityId(id)));
             }
         }
 
         Page<PlannerCatalog> rows = catalogRepository.findAll(spec, recencySorted(pageable));
         return mapCatalogWithUserContext(rows, userId);
-    }
-
-    /**
-     * Entity ids are integers by contract. A sentinel would AND a never-satisfiable predicate onto
-     * the whole specification, so one malformed element would silently empty an otherwise valid page.
-     */
-    private static Integer parseEntityId(String raw) {
-        try {
-            return Integer.parseInt(raw);
-        } catch (NumberFormatException e) {
-            throw new PlannerValidationException("INVALID_FILTER_ID", "Filter id must be numeric: " + raw);
-        }
     }
 
     /**
@@ -210,22 +201,10 @@ public class PublishedPlannerQueryService {
             UUID id = row.getPlannerId();
             PlannerCoreInfo core = coreInfoMap.getOrDefault(id, NO_CORE);
             PlannerStats stats = statsMap.getOrDefault(id, NO_STATS);
-            return PublicPlannerResponse.builder()
-                    .id(id)
-                    .title(row.getTitle())
-                    .category(row.getCategory())
-                    .plannerType(row.getPlannerType())
-                    .selectedKeywords(row.getSelectedKeywords())
-                    .authorUsernameEpithet(core.authorUsernameEpithet())
-                    .authorUsernameSuffix(core.authorUsernameSuffix())
-                    .upvotes(stats.getUpvotes())
-                    .createdAt(core.createdAt())
-                    .viewCount(stats.getViewCount())
-                    .firstPublishedAt(row.getFirstPublishedAt())
-                    .hasUpvoted(anonymous ? null : upvotedIds.contains(id))
-                    .isBookmarked(anonymous ? null : bookmarkedIds.contains(id))
-                    .commentCount((long) stats.getCommentCount())
-                    .build();
+            return anonymous
+                    ? PublicPlannerResponse.forAnonymous(row, core, stats)
+                    : PublicPlannerResponse.fromCatalog(row, core, stats,
+                            upvotedIds.contains(id), bookmarkedIds.contains(id));
         });
     }
 
@@ -278,17 +257,17 @@ public class PublishedPlannerQueryService {
         // - For owner: actual setting (defaults to true)
         // - For non-owner/anonymous: false (they can't toggle it anyway)
         boolean isOwner = userId != null && planner.isOwnedBy(userId);
-        boolean ownerNotificationsEnabled = isOwner && planner.getOwnerNotificationsEnabled();
+        boolean ownerNotificationsEnabled = isOwner && planner.isOwnerNotificationsEnabled();
 
         if (userId == null) {
             return PublishedPlannerDetailResponse.forAnonymous(
                     planner, commentCount, ownerNotificationsEnabled, viewCount, upvotes);
         }
 
-        Boolean hasUpvoted = hasUpvoted(plannerId, userId);
-        Boolean isBookmarked = engagementService.isBookmarked(userId, plannerId);
-        Boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
-        Boolean hasReported = reportService.hasReported(userId, plannerId);
+        final boolean hasUpvoted = hasUpvoted(plannerId, userId);
+        final boolean isBookmarked = engagementService.isBookmarked(userId, plannerId);
+        final boolean isSubscribed = subscriptionService.isSubscribed(userId, plannerId);
+        final boolean hasReported = reportService.hasReported(userId, plannerId);
 
         return PublishedPlannerDetailResponse.fromEntity(
                 planner, hasUpvoted, isBookmarked, isSubscribed, hasReported,

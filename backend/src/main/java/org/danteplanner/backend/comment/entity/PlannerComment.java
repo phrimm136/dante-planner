@@ -66,7 +66,7 @@ public class PlannerComment {
     private Instant deletedAt;
 
     @Column(name = "author_notifications_enabled", nullable = false)
-    private Boolean authorNotificationsEnabled = true;
+    private boolean authorNotificationsEnabled = true;
 
     public PlannerComment() {
     }
@@ -202,11 +202,11 @@ public class PlannerComment {
         this.deletedAt = deletedAt;
     }
 
-    public Boolean getAuthorNotificationsEnabled() {
+    public boolean isAuthorNotificationsEnabled() {
         return authorNotificationsEnabled;
     }
 
-    public void setAuthorNotificationsEnabled(Boolean authorNotificationsEnabled) {
+    public void setAuthorNotificationsEnabled(boolean authorNotificationsEnabled) {
         this.authorNotificationsEnabled = authorNotificationsEnabled;
     }
 }

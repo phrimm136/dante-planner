@@ -48,10 +48,10 @@ export const PublicPlannerSchema = z.object({
   createdAt: z.string(),
   /** ISO 8601 timestamp when planner was first published */
   firstPublishedAt: z.string(),
-  /** Whether current user has upvoted (absent if not authenticated) */
-  hasUpvoted: z.boolean().nullish(),
-  /** Whether current user has bookmarked (absent if not authenticated) */
-  isBookmarked: z.boolean().nullish(),
+  /** Whether current user has upvoted; false when not authenticated */
+  hasUpvoted: z.boolean(),
+  /** Whether current user has bookmarked; false when not authenticated */
+  isBookmarked: z.boolean(),
   /** Total non-deleted comment count */
   commentCount: z.number().int().min(0),
 })
@@ -122,10 +122,10 @@ export const PublishedPlannerDetailSchema = PublicPlannerSchema.extend({
   status: PlannerStatusSchema,
   /** Server sync version for optimistic locking */
   syncVersion: z.number().int().positive(),
-  /** Subscription status for authenticated users (absent if not authenticated) */
-  isSubscribed: z.boolean().nullish(),
-  /** Report status for authenticated users (absent if not authenticated) */
-  hasReported: z.boolean().nullish(),
+  /** Subscription status; false when not authenticated */
+  isSubscribed: z.boolean(),
+  /** Report status; false when not authenticated */
+  hasReported: z.boolean(),
   /** Whether owner has notifications enabled (false for non-owners) */
   ownerNotificationsEnabled: z.boolean(),
   /** Total comment count for this planner */

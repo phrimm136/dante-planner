@@ -29,8 +29,13 @@ import static org.danteplanner.backend.support.AuthCookies.performAuthed;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
+import org.danteplanner.backend.planner.entity.PlannerBookmark;
 import org.danteplanner.backend.planner.entity.PlannerStats;
+import org.danteplanner.backend.planner.entity.PlannerVote;
+import org.danteplanner.backend.planner.entity.VoteType;
+import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 
 /**
@@ -67,6 +72,12 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
     @Autowired
     private PlannerCatalogService catalogService;
 
+    @Autowired
+    private PlannerVoteRepository voteRepository;
+
+    @Autowired
+    private PlannerBookmarkRepository bookmarkRepository;
+
     private User owner;
     private String token;
     private Planner published;
@@ -83,6 +94,37 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
         List<String> names = new ArrayList<>();
         node.fieldNames().forEachRemaining(names::add);
         return names;
+    }
+
+    /**
+     * The list page carries every published planner in the shared database, so the card under
+     * assertion is selected by id rather than by position.
+     */
+    private JsonNode cardFor(String json, UUID plannerId) throws Exception {
+        JsonNode card = null;
+        for (JsonNode candidate : objectMapper.readTree(json).get("content")) {
+            if (plannerId.toString().equals(candidate.get("id").asText())) {
+                card = candidate;
+            }
+        }
+        assertThat(card).as("the published list carries planner %s", plannerId).isNotNull();
+        return card;
+    }
+
+    /**
+     * Reads a viewer-context flag, failing unless it is present and serialized as a JSON boolean
+     * rather than omitted or null.
+     */
+    private boolean flag(JsonNode node, String field) {
+        JsonNode value = node.get(field);
+        assertThat(value).as("%s is present on the wire", field).isNotNull();
+        assertThat(value.isBoolean()).as("%s is a JSON boolean", field).isTrue();
+        return value.booleanValue();
+    }
+
+    private void engageAsOwner() {
+        voteRepository.insert(new PlannerVote(owner.getId(), published.getId(), VoteType.UP));
+        bookmarkRepository.save(new PlannerBookmark(owner.getId(), published.getId()));
     }
 
     @Test
@@ -136,25 +178,39 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        JsonNode card = objectMapper.readTree(json).get("content").get(0);
+        JsonNode card = cardFor(json, published.getId());
         assertThat(fieldNames(card)).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "selectedKeywords",
                 "authorUsernameEpithet", "authorUsernameSuffix", "upvotes",
-                "createdAt", "viewCount", "firstPublishedAt", "commentCount");
+                "createdAt", "viewCount", "firstPublishedAt", "commentCount",
+                "hasUpvoted", "isBookmarked");
+        assertThat(flag(card, "hasUpvoted"))
+                .as("an anonymous viewer has no account to have upvoted with")
+                .isFalse();
+        assertThat(flag(card, "isBookmarked"))
+                .as("an anonymous viewer has no account to have bookmarked with")
+                .isFalse();
     }
 
     @Test
-    @DisplayName("list-card-fields: an authenticated list card adds the viewer's vote and bookmark state")
+    @DisplayName("list-card-fields: an authenticated list card carries the viewer's own vote and bookmark state")
     void listCardFields_WhenListedAsViewer_CarriesUserContext() throws Exception {
         statsRepository.save(PlannerStats.builder().plannerId(published.getId()).build());
         catalogService.add(published);
+        engageAsOwner();
 
         String json = performAuthed(mockMvc, get("/api/planner/md/published"), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        JsonNode card = objectMapper.readTree(json).get("content").get(0);
+        JsonNode card = cardFor(json, published.getId());
         assertThat(fieldNames(card)).contains("hasUpvoted", "isBookmarked");
+        assertThat(flag(card, "hasUpvoted"))
+                .as("the viewer's vote row is reflected on the card")
+                .isTrue();
+        assertThat(flag(card, "isBookmarked"))
+                .as("the viewer's bookmark row is reflected on the card")
+                .isTrue();
     }
 
     @Test
@@ -178,22 +234,45 @@ class PlannerResponseContractIT extends SharedMySqlContainerSupport {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        assertThat(fieldNames(objectMapper.readTree(json))).containsExactlyInAnyOrder(
+        JsonNode detail = objectMapper.readTree(json);
+        assertThat(fieldNames(detail)).containsExactlyInAnyOrder(
                 "id", "title", "category", "plannerType", "selectedKeywords",
                 "authorUsernameEpithet", "authorUsernameSuffix", "upvotes", "viewCount",
                 "createdAt", "firstPublishedAt", "lastModifiedAt",
                 "content", "schemaVersion", "contentVersion", "status", "syncVersion",
-                "commentCount", "ownerNotificationsEnabled");
+                "commentCount", "ownerNotificationsEnabled",
+                "hasUpvoted", "isBookmarked", "isSubscribed", "hasReported");
+        assertThat(flag(detail, "hasUpvoted")).isFalse();
+        assertThat(flag(detail, "isBookmarked")).isFalse();
+        assertThat(flag(detail, "isSubscribed")).isFalse();
+        assertThat(flag(detail, "hasReported"))
+                .as("an anonymous viewer has no account for any viewer-context flag to be true of")
+                .isFalse();
     }
 
     @Test
     void responseContractStable_WhenPublishedDetailAsViewer_CarriesUserContext() throws Exception {
+        engageAsOwner();
+
         String json = performAuthed(
                 mockMvc, get("/api/planner/md/published/{id}", published.getId()), token)
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        assertThat(fieldNames(objectMapper.readTree(json)))
+        JsonNode detail = objectMapper.readTree(json);
+        assertThat(fieldNames(detail))
                 .contains("hasUpvoted", "isBookmarked", "isSubscribed", "hasReported");
+        assertThat(flag(detail, "hasUpvoted"))
+                .as("the viewer's vote row is reflected on the detail")
+                .isTrue();
+        assertThat(flag(detail, "isBookmarked"))
+                .as("the viewer's bookmark row is reflected on the detail")
+                .isTrue();
+        assertThat(flag(detail, "isSubscribed"))
+                .as("the viewer holds no subscription row")
+                .isFalse();
+        assertThat(flag(detail, "hasReported"))
+                .as("the viewer holds no report row")
+                .isFalse();
     }
 }

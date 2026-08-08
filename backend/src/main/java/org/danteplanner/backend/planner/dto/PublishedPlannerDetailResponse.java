@@ -29,27 +29,27 @@ public record PublishedPlannerDetailResponse(
     Instant createdAt,
     Instant firstPublishedAt,
     Instant lastModifiedAt,
-    Boolean hasUpvoted,
-    Boolean isBookmarked,
+    boolean hasUpvoted,
+    boolean isBookmarked,
     String content,
     int schemaVersion,
     int contentVersion,
     PlannerStatus status,
     long syncVersion,
-    Boolean isSubscribed,
-    Boolean hasReported,
+    boolean isSubscribed,
+    boolean hasReported,
     long commentCount,
     boolean ownerNotificationsEnabled
 ) {
     public PublishedPlannerDetailResponse {
-        selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
+        selectedKeywords = selectedKeywords == null ? Set.of() : Set.copyOf(selectedKeywords);
     }
 
     /**
      * Create a PublishedPlannerDetailResponse for a viewer with no account.
      *
-     * <p>Upvoted, bookmarked, subscribed, and reported are not applicable for an anonymous viewer:
-     * there is no account for any of them to be true or false of.</p>
+     * <p>An anonymous viewer has no account to have upvoted, bookmarked, subscribed, or
+     * reported with, so all four are false.</p>
      *
      * @param planner the planner aggregate root
      * @param commentCount total non-deleted comment count for this planner
@@ -64,7 +64,7 @@ public record PublishedPlannerDetailResponse(
             boolean ownerNotificationsEnabled,
             int viewCount,
             int upvotes) {
-        return fromEntity(planner, null, null, null, null,
+        return fromEntity(planner, false, false, false, false,
                 commentCount, ownerNotificationsEnabled, viewCount, upvotes);
     }
 
@@ -73,10 +73,10 @@ public record PublishedPlannerDetailResponse(
      * context and stats-sourced counters.
      *
      * @param planner the planner aggregate root
-     * @param hasUpvoted whether the current user has upvoted (null if not authenticated)
-     * @param isBookmarked whether the current user has bookmarked (null if not authenticated)
-     * @param isSubscribed whether the current user is subscribed (null if not authenticated)
-     * @param hasReported whether the current user has reported (null if not authenticated)
+     * @param hasUpvoted whether the current user has upvoted
+     * @param isBookmarked whether the current user has bookmarked
+     * @param isSubscribed whether the current user is subscribed
+     * @param hasReported whether the current user has reported
      * @param commentCount total non-deleted comment count for this planner
      * @param ownerNotificationsEnabled whether owner has notifications enabled (false for non-owners)
      * @param viewCount the planner's view count (from planner_stats)
@@ -85,10 +85,10 @@ public record PublishedPlannerDetailResponse(
      */
     public static PublishedPlannerDetailResponse fromEntity(
             Planner planner,
-            Boolean hasUpvoted,
-            Boolean isBookmarked,
-            Boolean isSubscribed,
-            Boolean hasReported,
+            boolean hasUpvoted,
+            boolean isBookmarked,
+            boolean isSubscribed,
+            boolean hasReported,
             long commentCount,
             boolean ownerNotificationsEnabled,
             int viewCount,

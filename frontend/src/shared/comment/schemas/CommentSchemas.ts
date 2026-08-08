@@ -35,8 +35,8 @@ const CommentNodeBaseSchema = z.object({
   upvoteCount: z.number().int().min(0),
   /** Whether current user has upvoted */
   hasUpvoted: z.boolean(),
-  /** Whether author has notifications enabled for replies; sent only to the author */
-  authorNotificationsEnabled: z.boolean().optional(),
+  /** Whether author has notifications enabled for replies; false for every other viewer */
+  authorNotificationsEnabled: z.boolean(),
 })
 
 // Recursive schema with replies

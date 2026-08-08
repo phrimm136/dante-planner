@@ -14,7 +14,7 @@ import java.util.UUID;
  * Tree is built server-side with isAuthor computed.
  *
  * <p>{@code updatedAt} is null unless the comment was edited, and
- * {@code authorNotificationsEnabled} is null for every viewer except the comment's author.</p>
+ * {@code authorNotificationsEnabled} is false for every viewer except the comment's author.</p>
  */
 public record CommentTreeNode(
     UUID id,
@@ -28,7 +28,7 @@ public record CommentTreeNode(
     boolean isDeleted,
     int upvoteCount,
     boolean hasUpvoted,
-    Boolean authorNotificationsEnabled,
+    boolean authorNotificationsEnabled,
     List<CommentTreeNode> replies
 ) {
 
@@ -103,7 +103,7 @@ public record CommentTreeNode(
                 comment.isDeleted(),
                 comment.getUpvoteCount(),
                 hasUpvoted,
-                isAuthor ? comment.getAuthorNotificationsEnabled() : null,
+                isAuthor && comment.isAuthorNotificationsEnabled(),
                 replies
         );
     }
