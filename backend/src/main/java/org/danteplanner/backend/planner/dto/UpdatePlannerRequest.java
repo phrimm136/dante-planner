@@ -3,6 +3,9 @@ package org.danteplanner.backend.planner.dto;
 import jakarta.validation.constraints.NotNull;
 
 import org.danteplanner.backend.planner.entity.PlannerStatus;
+import org.danteplanner.backend.shared.sanitize.NotUserContent;
+import org.danteplanner.backend.shared.sanitize.Sanitized;
+import org.danteplanner.backend.shared.sanitize.SanitizerKind;
 
 import java.util.Set;
 
@@ -18,9 +21,12 @@ import java.util.Set;
  * @param selectedKeywords updated selected keywords; null leaves the keywords unchanged
  */
 public record UpdatePlannerRequest(
+    @Sanitized(SanitizerKind.PLAIN)
     String title,
     PlannerStatus status,
+    @NotUserContent
     String category,
+    @Sanitized(SanitizerKind.PLANNER_CONTENT)
     String content,
     @NotNull(message = "Sync version is required for optimistic locking")
     Long syncVersion,

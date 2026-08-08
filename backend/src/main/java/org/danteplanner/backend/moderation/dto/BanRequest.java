@@ -3,6 +3,10 @@ package org.danteplanner.backend.moderation.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import org.danteplanner.backend.moderation.util.ModerationConstants;
+import org.danteplanner.backend.shared.sanitize.Sanitized;
+import org.danteplanner.backend.shared.sanitize.SanitizerKind;
+
 /**
  * Request DTO for banning a user.
  *
@@ -10,6 +14,8 @@ import jakarta.validation.constraints.Size;
  */
 public record BanRequest(
     @NotBlank(message = "Reason is required for audit trail")
-    @Size(max = 500, message = "Reason cannot exceed 500 characters")
+    @Size(max = ModerationConstants.ACTION_REASON_MAX_LENGTH,
+          message = "Reason cannot exceed 500 characters")
+    @Sanitized(SanitizerKind.PLAIN)
     String reason
 ) {}

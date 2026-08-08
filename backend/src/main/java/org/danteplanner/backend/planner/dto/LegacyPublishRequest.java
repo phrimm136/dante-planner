@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.sanitize.NotUserContent;
+import org.danteplanner.backend.shared.sanitize.Sanitized;
+import org.danteplanner.backend.shared.sanitize.SanitizerKind;
 
 /**
  * Request DTO for the superseded state-setting publish route.
@@ -32,10 +35,14 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 public record LegacyPublishRequest(
     @NotNull(message = "published is required")
     Boolean published,
+    @NotUserContent
     String id,
+    @NotUserContent
     String category,
+    @Sanitized(SanitizerKind.PLAIN)
     String title,
     PlannerStatus status,
+    @Sanitized(SanitizerKind.PLANNER_CONTENT)
     String content,
     Integer contentVersion,
     PlannerType plannerType,
