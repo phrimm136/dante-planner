@@ -105,7 +105,7 @@ export const CommentCard = function CommentCard({
         />
       ) : (
         <>
-          {comment.isUpdated && (
+          {comment.updatedAt != null && (
             <span className="text-muted-foreground text-xs">
               ({t('pages.plannerMD.comments.modified', 'edited')})
             </span>

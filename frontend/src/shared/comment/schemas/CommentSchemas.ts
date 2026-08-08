@@ -29,16 +29,14 @@ const CommentNodeBaseSchema = z.object({
   createdAt: z.string(),
   /** Edit timestamp (absent if never edited) */
   updatedAt: z.string().nullish(),
-  /** Whether this comment was edited (shows edit indicator) */
-  isUpdated: z.boolean(),
   /** Whether this comment has been deleted */
   isDeleted: z.boolean(),
   /** Number of upvotes */
   upvoteCount: z.number().int().min(0),
   /** Whether current user has upvoted */
   hasUpvoted: z.boolean(),
-  /** Whether author has notifications enabled for replies */
-  authorNotificationsEnabled: z.boolean(),
+  /** Whether author has notifications enabled for replies; sent only to the author */
+  authorNotificationsEnabled: z.boolean().optional(),
 })
 
 // Recursive schema with replies

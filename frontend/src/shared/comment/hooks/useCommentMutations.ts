@@ -69,7 +69,6 @@ export function useEditComment() {
         return updateCommentInTree(oldTree, commentId, (node) => ({
           ...node,
           content,
-          isUpdated: true,
           updatedAt: new Date().toISOString(),
         }))
       })

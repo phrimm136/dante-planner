@@ -17,7 +17,6 @@ function node(id: string, replies: CommentNode[] = [], overrides: Partial<Commen
     isAuthor: false,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: null,
-    isUpdated: false,
     isDeleted: false,
     upvoteCount: 0,
     hasUpvoted: false,
