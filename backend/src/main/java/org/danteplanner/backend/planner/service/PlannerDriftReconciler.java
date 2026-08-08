@@ -8,17 +8,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.entity.PlannerKeywords;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.ContentDocumentRow;
-import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.CounterDriftRow;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.EntityFilterRow;
 import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.KeywordFilterRow;
-import org.danteplanner.backend.planner.repository.PlannerDriftAuditRepository.RecommendedDriftRow;
 import org.danteplanner.backend.planner.validation.PlannerContentEntityExtractor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +23,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Scheduled drift reconciler over the planner projections and counters: detects
@@ -67,13 +66,21 @@ public class PlannerDriftReconciler {
     public record DriftRecord(UUID plannerId, String kind, String expected, String actual) {
     }
 
+    /**
+     * The filter index state a rebuild of the stored documents implies, beside the planners whose
+     * document could not be read and whose expected state is therefore unknown.
+     */
+    private record ExpectedIndexes(Map<UUID, Set<String>> entities, Map<UUID, Set<String>> keywords,
+            Set<UUID> unreadable) {
+    }
+
     @Scheduled(cron = "${planner.reconciler.cron:0 0 4 * * *}")
     public void runScheduled() {
         reconcile();
     }
 
     /**
-     * Run all drift checks and emit a record per finding.
+     * Run every audit and emit a record per finding.
      *
      * <p>The read-only boundary spans the whole pass: every audit read routes to the replica, and
      * one transaction gives them a single snapshot to disagree against.</p>
@@ -82,12 +89,14 @@ public class PlannerDriftReconciler {
      */
     @Transactional(readOnly = true)
     public List<DriftRecord> reconcile() {
-        List<DriftRecord> records = new ArrayList<>();
-        checkUpvotes(records);
-        checkCommentCounts(records);
-        checkCatalogMembership(records);
-        checkFilters(records);
-        checkRecommended(records);
+        List<DriftRecord> records = Stream.of(
+                        auditUpvotes(),
+                        auditCommentCounts(),
+                        auditCatalogMembership(),
+                        auditFilters(),
+                        auditRecommended())
+                .flatMap(List::stream)
+                .toList();
         records.forEach(this::emit);
         log.info("Planner drift reconciliation finished: {} drifted finding(s)", records.size());
         return records;
@@ -99,34 +108,51 @@ public class PlannerDriftReconciler {
         meterRegistry.counter(METRIC_NAME, "kind", record.kind()).increment();
     }
 
-    private void checkUpvotes(List<DriftRecord> records) {
-        for (CounterDriftRow row : auditRepository.driftedUpvoteCounters()) {
-            records.add(new DriftRecord(row.plannerId(), "upvotes",
-                    String.valueOf(row.recounted()), String.valueOf(row.counter())));
-        }
+    private List<DriftRecord> auditUpvotes() {
+        return auditRepository.driftedUpvoteCounters().stream()
+                .map(row -> new DriftRecord(row.plannerId(), "upvotes",
+                        String.valueOf(row.recounted()), String.valueOf(row.counter())))
+                .toList();
     }
 
-    private void checkCommentCounts(List<DriftRecord> records) {
-        for (CounterDriftRow row : auditRepository.driftedCommentCounters()) {
-            records.add(new DriftRecord(row.plannerId(), "comment_count",
-                    String.valueOf(row.recounted()), String.valueOf(row.counter())));
-        }
+    private List<DriftRecord> auditCommentCounts() {
+        return auditRepository.driftedCommentCounters().stream()
+                .map(row -> new DriftRecord(row.plannerId(), "comment_count",
+                        String.valueOf(row.recounted()), String.valueOf(row.counter())))
+                .toList();
     }
 
-    private void checkCatalogMembership(List<DriftRecord> records) {
-        for (UUID plannerId : auditRepository.visiblePlannersWithoutCatalogRow()) {
-            records.add(new DriftRecord(plannerId, "catalog_membership", "row present", "row missing"));
-        }
-        for (UUID plannerId : auditRepository.catalogRowsWithoutVisiblePlanner()) {
-            records.add(new DriftRecord(plannerId, "catalog_membership", "row absent", "row present"));
-        }
+    private List<DriftRecord> auditCatalogMembership() {
+        return Stream.concat(
+                        auditRepository.visiblePlannersWithoutCatalogRow().stream()
+                                .map(plannerId -> new DriftRecord(plannerId, "catalog_membership",
+                                        "row present", "row missing")),
+                        auditRepository.catalogRowsWithoutVisiblePlanner().stream()
+                                .map(plannerId -> new DriftRecord(plannerId, "catalog_membership",
+                                        "row absent", "row present")))
+                .toList();
     }
 
-    private void checkFilters(List<DriftRecord> records) {
-        // Expected index state: the same extraction the runtime maintenance runs,
-        // over every visible planner's stored content and keywords
-        Map<UUID, Set<String>> expectedEntities = new HashMap<>();
-        Map<UUID, Set<String>> expectedKeywords = new HashMap<>();
+    private List<DriftRecord> auditFilters() {
+        ExpectedIndexes expected = rebuildExpectedIndexes();
+        return Stream.of(
+                        compareIndex("entity_filter", expected.entities(), actualEntityIndex(),
+                                expected.unreadable()),
+                        compareIndex("keyword_filter", expected.keywords(), actualKeywordIndex(),
+                                expected.unreadable()))
+                .flatMap(List::stream)
+                .toList();
+    }
+
+    /**
+     * Rebuild the index state every visible planner's stored content and keywords imply, by the same
+     * extraction the runtime maintenance runs.
+     *
+     * @return the rebuilt sets per planner, plus the planners that could not be rebuilt
+     */
+    private ExpectedIndexes rebuildExpectedIndexes() {
+        Map<UUID, Set<String>> entitiesByPlanner = new HashMap<>();
+        Map<UUID, Set<String>> keywordsByPlanner = new HashMap<>();
         Set<UUID> unreadable = new HashSet<>();
         for (ContentDocumentRow row : auditRepository.visibleContentDocuments()) {
             UUID plannerId = row.plannerId();
@@ -139,43 +165,10 @@ public class PlannerDriftReconciler {
                 unreadable.add(plannerId);
                 continue;
             }
-            expectedEntities.put(plannerId, entities);
-            expectedKeywords.put(plannerId, keywords);
+            entitiesByPlanner.put(plannerId, entities);
+            keywordsByPlanner.put(plannerId, keywords);
         }
-
-        Map<UUID, Set<String>> actualEntities = new HashMap<>();
-        for (EntityFilterRow row : auditRepository.entityFilterEntries()) {
-            actualEntities.computeIfAbsent(row.plannerId(), k -> new HashSet<>())
-                    .add(row.entityType() + ":" + row.entityId());
-        }
-        Map<UUID, Set<String>> actualKeywords = new HashMap<>();
-        for (KeywordFilterRow row : auditRepository.keywordFilterEntries()) {
-            actualKeywords.computeIfAbsent(row.plannerId(), k -> new HashSet<>())
-                    .add(row.keyword());
-        }
-
-        compareIndex(records, "entity_filter", expectedEntities, actualEntities, unreadable);
-        compareIndex(records, "keyword_filter", expectedKeywords, actualKeywords, unreadable);
-    }
-
-    /**
-     * Compare one index against its rebuild.
-     *
-     * <p>A planner whose stored document could not be rebuilt is left out entirely: its expected
-     * set is unknown, and treating unknown as empty reports every indexed row it has as drift.</p>
-     */
-    private void compareIndex(List<DriftRecord> records, String kind,
-            Map<UUID, Set<String>> expected, Map<UUID, Set<String>> actual, Set<UUID> unreadable) {
-        Set<UUID> plannerIds = new HashSet<>(expected.keySet());
-        plannerIds.addAll(actual.keySet());
-        plannerIds.removeAll(unreadable);
-        for (UUID plannerId : plannerIds) {
-            Set<String> want = expected.getOrDefault(plannerId, Set.of());
-            Set<String> have = actual.getOrDefault(plannerId, Set.of());
-            if (!want.equals(have)) {
-                records.add(new DriftRecord(plannerId, kind, String.valueOf(want), String.valueOf(have)));
-            }
-        }
+        return new ExpectedIndexes(entitiesByPlanner, keywordsByPlanner, unreadable);
     }
 
     /**
@@ -214,10 +207,68 @@ public class PlannerDriftReconciler {
         }
     }
 
-    private void checkRecommended(List<DriftRecord> records) {
-        for (RecommendedDriftRow row : auditRepository.driftedRecommendedFlags(recommendedThreshold)) {
-            records.add(new DriftRecord(row.plannerId(), "recommended",
-                    String.valueOf(row.derived()), String.valueOf(row.flag())));
-        }
+    /**
+     * @return the indexed entity references each planner currently carries
+     */
+    private Map<UUID, Set<String>> actualEntityIndex() {
+        return auditRepository.entityFilterEntries().stream()
+                .collect(Collectors.groupingBy(EntityFilterRow::plannerId,
+                        Collectors.mapping(row -> row.entityType() + ":" + row.entityId(),
+                                Collectors.toSet())));
+    }
+
+    /**
+     * @return the indexed keywords each planner currently carries
+     */
+    private Map<UUID, Set<String>> actualKeywordIndex() {
+        return auditRepository.keywordFilterEntries().stream()
+                .collect(Collectors.groupingBy(KeywordFilterRow::plannerId,
+                        Collectors.mapping(KeywordFilterRow::keyword, Collectors.toSet())));
+    }
+
+    /**
+     * Compare one index against its rebuild.
+     *
+     * @return one record per planner whose indexed rows disagree with the rebuild
+     */
+    private List<DriftRecord> compareIndex(String kind, Map<UUID, Set<String>> expected,
+            Map<UUID, Set<String>> actual, Set<UUID> unreadable) {
+        return comparablePlannerIds(expected, actual, unreadable).stream()
+                .map(plannerId -> indexDrift(kind, plannerId,
+                        expected.getOrDefault(plannerId, Set.of()),
+                        actual.getOrDefault(plannerId, Set.of())))
+                .flatMap(Optional::stream)
+                .toList();
+    }
+
+    /**
+     * <p>A planner whose stored document could not be rebuilt is left out entirely: its expected
+     * set is unknown, and treating unknown as empty reports every indexed row it has as drift.</p>
+     *
+     * @return the planners whose two sides can be held against each other
+     */
+    private Set<UUID> comparablePlannerIds(Map<UUID, Set<String>> expected,
+            Map<UUID, Set<String>> actual, Set<UUID> unreadable) {
+        Set<UUID> plannerIds = new HashSet<>(expected.keySet());
+        plannerIds.addAll(actual.keySet());
+        plannerIds.removeAll(unreadable);
+        return plannerIds;
+    }
+
+    /**
+     * @return the record for one planner's index, or empty when the two sides agree
+     */
+    private Optional<DriftRecord> indexDrift(String kind, UUID plannerId, Set<String> want,
+            Set<String> have) {
+        return want.equals(have)
+                ? Optional.empty()
+                : Optional.of(new DriftRecord(plannerId, kind, String.valueOf(want), String.valueOf(have)));
+    }
+
+    private List<DriftRecord> auditRecommended() {
+        return auditRepository.driftedRecommendedFlags(recommendedThreshold).stream()
+                .map(row -> new DriftRecord(row.plannerId(), "recommended",
+                        String.valueOf(row.derived()), String.valueOf(row.recommended())))
+                .toList();
     }
 }

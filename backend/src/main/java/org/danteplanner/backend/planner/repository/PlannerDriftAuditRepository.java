@@ -19,6 +19,15 @@ import org.springframework.stereotype.Repository;
  * not-taken-down, the same reading the catalog write side and {@link RecommendedSql} take. An inner
  * join would drop exactly those planners from every audit, which is the state most in need of
  * one.</p>
+ *
+ * <p>Naming convention within this class. A query method is named for the row set it returns and the
+ * predicate that selects it, never for the audit that consumes it: {@code drifted*} for rows whose
+ * stored value disagrees with a recomputation, {@code visible*} for rows passing the visibility
+ * predicate the catalog is built on, {@code *Entries} for a whole index read unfiltered, and an
+ * {@code xWithoutY} phrase for a set difference between two of those. Each {@code *Row} component
+ * name mirrors its SQL column alias exactly, so the SELECT list and the mapper read as one list and
+ * an alias rename is a component rename — which is why the two counter queries alias their columns
+ * to the shared record's shape rather than to the columns they read.</p>
  */
 @Repository
 public class PlannerDriftAuditRepository {
@@ -44,7 +53,7 @@ public class PlannerDriftAuditRepository {
     /**
      * One catalog row's stored recommended flag beside the flag derived from current state.
      */
-    public record RecommendedDriftRow(UUID plannerId, boolean flag, boolean derived) {
+    public record RecommendedDriftRow(UUID plannerId, boolean recommended, boolean derived) {
     }
 
     /**
@@ -72,14 +81,15 @@ public class PlannerDriftAuditRepository {
      */
     public List<CounterDriftRow> driftedUpvoteCounters() {
         return jdbc.query("""
-                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.upvotes, COUNT(v.planner_id) AS votes
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.upvotes AS counter,
+                       COUNT(v.planner_id) AS recounted
                 FROM planner_stats s
                 LEFT JOIN planner_votes v ON v.planner_id = s.planner_id
                 GROUP BY s.planner_id, s.upvotes
-                HAVING s.upvotes <> votes
+                HAVING s.upvotes <> recounted
                 """,
                 (rs, rowNum) -> new CounterDriftRow(UUID.fromString(rs.getString("planner_id")),
-                        rs.getInt("upvotes"), rs.getLong("votes")));
+                        rs.getLong("counter"), rs.getLong("recounted")));
     }
 
     /**
@@ -89,15 +99,15 @@ public class PlannerDriftAuditRepository {
      */
     public List<CounterDriftRow> driftedCommentCounters() {
         return jdbc.query("""
-                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count,
-                       COUNT(c.planner_id) AS live_comments
+                SELECT BIN_TO_UUID(s.planner_id) AS planner_id, s.comment_count AS counter,
+                       COUNT(c.planner_id) AS recounted
                 FROM planner_stats s
                 LEFT JOIN planner_comments c ON c.planner_id = s.planner_id AND c.deleted_at IS NULL
                 GROUP BY s.planner_id, s.comment_count
-                HAVING s.comment_count <> live_comments
+                HAVING s.comment_count <> recounted
                 """,
                 (rs, rowNum) -> new CounterDriftRow(UUID.fromString(rs.getString("planner_id")),
-                        rs.getInt("comment_count"), rs.getLong("live_comments")));
+                        rs.getLong("counter"), rs.getLong("recounted")));
     }
 
     /**
