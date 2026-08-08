@@ -126,11 +126,11 @@ class PlannerModerationServiceTest {
             Planner result = moderationService.unpublishPlanner(moderatorUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result.getPublished());
+            assertFalse(result.isPublished());
 
             Planner persisted = persistedPlanner();
             assertEquals(plannerId, persisted.getId());
-            assertFalse(persisted.getPublished());
+            assertFalse(persisted.isPublished());
         }
 
         @Test
@@ -153,7 +153,7 @@ class PlannerModerationServiceTest {
             Planner result = moderationService.unpublishPlanner(adminUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result.getPublished());
+            assertFalse(result.isPublished());
         }
 
         @Test
@@ -176,7 +176,7 @@ class PlannerModerationServiceTest {
             Planner result = moderationService.unpublishPlanner(moderatorUser.getId(), plannerId);
 
             // Assert
-            assertFalse(result.getPublished());
+            assertFalse(result.isPublished());
         }
 
         @Test

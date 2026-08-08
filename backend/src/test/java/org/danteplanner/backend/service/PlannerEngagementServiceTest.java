@@ -1,5 +1,4 @@
 package org.danteplanner.backend.service;
-import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.planner.service.PlannerEngagementService;
 import org.mockito.ArgumentCaptor;
 
@@ -41,8 +40,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.ArgumentMatchers.anyLong;
 import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
-import org.danteplanner.backend.planner.entity.PlannerStats;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
@@ -72,9 +70,6 @@ class PlannerEngagementServiceTest {
     private ApplicationEventPublisher eventPublisher;
 
     @Mock
-    private PlannerStatsRepository plannerStatsRepository;
-
-    @Mock
     private PlannerStatsService plannerStatsService;
 
     @Mock
@@ -97,12 +92,12 @@ class PlannerEngagementServiceTest {
         engagementService = new PlannerEngagementService(
                 plannerVoteRepository,
                 plannerBookmarkRepository,
-                plannerStatsRepository,
                 plannerStatsService,
                 plannerCatalogService,
                 eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
                 reportService,
+                new VoteUniquenessValidator(),
                 recommendedThreshold
         );
 
@@ -264,13 +259,6 @@ class PlannerEngagementServiceTest {
             return testPlannerBuilder().published(true).build();
         }
 
-        private PlannerStats statsWithUpvotes(UUID plannerId, int upvotes) {
-            return PlannerStats.builder()
-                    .plannerId(plannerId)
-                    .upvotes(upvotes)
-                    .build();
-        }
-
         @Test
         @DisplayName("Should throw VoteAlreadyExistsException when user attempts duplicate vote")
         void castVote_WhenDuplicateVote_ThrowsException() {
@@ -298,24 +286,6 @@ class PlannerEngagementServiceTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidRequestException when voteType is null")
-        void castVote_WhenNullVoteType_ThrowsException() {
-            // Arrange
-            Planner planner = createPublishedPlanner();
-            UUID plannerId = planner.getId();
-
-            // Act & Assert
-            InvalidRequestException exception = assertThrows(
-                    InvalidRequestException.class,
-                    () -> engagementService.castVote(testUser.getId(), plannerId, null)
-            );
-
-            assertTrue(exception.getMessage().contains("Vote type cannot be null"));
-            verify(plannerVoteRepository, never()).existsById(any());
-            verify(plannerVoteRepository, never()).insert(any());
-        }
-
-        @Test
         @DisplayName("Should allow first vote and create new vote record")
         void castVote_WhenFirstVote_CreatesVote() {
             // Arrange
@@ -330,8 +300,7 @@ class PlannerEngagementServiceTest {
                     .thenReturn(false);
             when(plannerVoteRepository.insert(any(PlannerVote.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(plannerStatsRepository.findById(plannerId))
-                    .thenReturn(Optional.of(statsWithUpvotes(plannerId, 6)));
+            when(plannerStatsService.upvotesOf(plannerId)).thenReturn(6);
 
             // Act
             VoteResponse response =

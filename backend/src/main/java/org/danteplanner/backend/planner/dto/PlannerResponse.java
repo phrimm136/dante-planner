@@ -56,7 +56,7 @@ public record PlannerResponse(
                 .createdAt(planner.getCreatedAt())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .savedAt(planner.getLastModifiedAt())
-                .published(planner.getPublished())
+                .published(planner.isPublished())
                 .upvotes(upvotes)
                 .build();
     }

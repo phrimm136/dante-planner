@@ -5,13 +5,11 @@ package org.danteplanner.backend.planner.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.planner.dto.BookmarkResponse;
 import org.danteplanner.backend.planner.dto.VoteResponse;
 import org.danteplanner.backend.planner.event.PlannerRecommendedEvent;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerBookmark;
-import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerVote;
 import org.danteplanner.backend.planner.entity.PlannerVoteId;
 import org.danteplanner.backend.planner.entity.VoteType;
@@ -19,8 +17,8 @@ import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.moderation.service.PlannerReportService;
 import org.danteplanner.backend.planner.repository.PlannerBookmarkRepository;
-import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,33 +34,33 @@ public class PlannerEngagementService {
 
     private final PlannerVoteRepository plannerVoteRepository;
     private final PlannerBookmarkRepository plannerBookmarkRepository;
-    private final PlannerStatsRepository plannerStatsRepository;
     private final PlannerStatsService plannerStatsService;
     private final PlannerCatalogService plannerCatalogService;
     private final ApplicationEventPublisher eventPublisher;
     private final PlannerAccessGuard accessGuard;
     private final PlannerReportService reportService;
+    private final VoteUniquenessValidator voteUniquenessValidator;
 
     private final int recommendedThreshold;
 
     public PlannerEngagementService(
             PlannerVoteRepository plannerVoteRepository,
             PlannerBookmarkRepository plannerBookmarkRepository,
-            PlannerStatsRepository plannerStatsRepository,
             PlannerStatsService plannerStatsService,
             PlannerCatalogService plannerCatalogService,
             ApplicationEventPublisher eventPublisher,
             PlannerAccessGuard accessGuard,
             PlannerReportService reportService,
+            VoteUniquenessValidator voteUniquenessValidator,
             @Value("${planner.recommended-threshold}") int recommendedThreshold) {
         this.plannerVoteRepository = plannerVoteRepository;
         this.plannerBookmarkRepository = plannerBookmarkRepository;
-        this.plannerStatsRepository = plannerStatsRepository;
         this.plannerStatsService = plannerStatsService;
         this.plannerCatalogService = plannerCatalogService;
         this.eventPublisher = eventPublisher;
         this.accessGuard = accessGuard;
         this.reportService = reportService;
+        this.voteUniquenessValidator = voteUniquenessValidator;
         this.recommendedThreshold = recommendedThreshold;
     }
 
@@ -84,25 +82,16 @@ public class PlannerEngagementService {
      * @return the updated vote response with counts
      * @throws PlannerNotFoundException if planner not found or not published
      * @throws VoteAlreadyExistsException if user has already voted (409 Conflict)
-     * @throws InvalidRequestException if voteType is null
      */
     @Transactional
     public VoteResponse castVote(Long userId, UUID plannerId, VoteType voteType) {
         accessGuard.checkNotBanned(userId);
 
-        // Validate input (fail-fast)
-        if (voteType == null) {
-            throw new InvalidRequestException("INVALID_VOTE_TYPE",
-                    "Vote type cannot be null - votes are immutable and cannot be removed");
-        }
-
         Planner planner = accessGuard.requirePublished(plannerId);
 
-        // Check if vote already exists (immutability enforcement)
         PlannerVoteId voteId = new PlannerVoteId(userId, plannerId);
-        if (plannerVoteRepository.existsById(voteId)) {
-            throw new VoteAlreadyExistsException(plannerId, userId);
-        }
+        voteUniquenessValidator.requireFirstVote(
+                plannerVoteRepository.existsById(voteId), plannerId, userId);
 
         // Create new immutable vote
         PlannerVote newVote = new PlannerVote(userId, plannerId, voteType);
@@ -111,11 +100,7 @@ public class PlannerEngagementService {
         // Atomic increment for upvote
         plannerStatsService.incrementUpvotes(plannerId);
 
-        // The increment upserts the counter row, so it exists here; an absent row can only mean a
-        // concurrent purge, and this vote is then the only one the counter would have carried.
-        int upvotesAfter = plannerStatsRepository.findById(plannerId)
-                .map(PlannerStats::getUpvotes)
-                .orElse(1);
+        int upvotesAfter = plannerStatsService.upvotesOf(plannerId);
         int upvotesBefore = upvotesAfter - 1;
 
         // Check threshold crossing for notification (9→10 net votes)
@@ -123,7 +108,7 @@ public class PlannerEngagementService {
             // Keep the catalog's derived flag in step with the crossing
             plannerCatalogService.refreshRecommended(plannerId);
             // Try to atomically set notification flag (prevents race condition duplicates)
-            int rowsUpdated = plannerStatsRepository.trySetRecommendedNotified(plannerId, recommendedThreshold);
+            int rowsUpdated = plannerStatsService.trySetRecommendedNotified(plannerId, recommendedThreshold);
             if (rowsUpdated > 0) {
                 // First thread to cross threshold wins - publish event (handled AFTER_COMMIT)
                 eventPublisher.publishEvent(new PlannerRecommendedEvent(

@@ -110,7 +110,7 @@ class PlannerQueryServiceTest {
             }
 
             @Override
-            public Long getSyncVersion() {
+            public long getSyncVersion() {
                 return planner.getSyncVersion();
             }
 

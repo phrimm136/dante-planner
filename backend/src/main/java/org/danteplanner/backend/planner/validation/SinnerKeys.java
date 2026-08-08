@@ -49,13 +49,14 @@ final class SinnerKeys {
 
         for (Map.Entry<String, JsonNode> entry : container.properties()) {
             String key = entry.getKey();
-            Integer parsed = parseIndex(key);
-            if (parsed == null) {
+            int index;
+            try {
+                index = Integer.parseInt(key);
+            } catch (NumberFormatException e) {
                 context.reject(field + " key '" + key + "'", p -> ValidationErrors.invalidFieldType(p, "integer"));
                 continue;
             }
 
-            int index = parsed;
             if (index < MIN_EQUIPMENT_SINNER || index > MAX_EQUIPMENT_SINNER) {
                 context.reject(field + " key", p -> ValidationErrors.valueOutOfRange(
                         p, index, MIN_EQUIPMENT_SINNER, MAX_EQUIPMENT_SINNER));
@@ -80,14 +81,6 @@ final class SinnerKeys {
                 continue;
             }
             body.accept(sinnerKey, value);
-        }
-    }
-
-    private static Integer parseIndex(String key) {
-        try {
-            return Integer.valueOf(key);
-        } catch (NumberFormatException e) {
-            return null;
         }
     }
 }

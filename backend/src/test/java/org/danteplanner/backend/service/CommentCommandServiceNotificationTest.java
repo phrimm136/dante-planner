@@ -8,6 +8,9 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.comment.validation.CommentAccessValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.comment.event.CommentCreatedEvent;
 import org.springframework.context.ApplicationEventPublisher;
@@ -88,12 +91,15 @@ class CommentCommandServiceNotificationTest {
         service = new CommentCommandService(
                 commentRepository,
                 new CommentQueryService(commentRepository, commentVoteRepository, userService,
-                        new PlannerAccessGuard(userService, plannerRepository)),
+                        new PlannerAccessGuard(userService, plannerRepository),
+                        new CommentAccessValidator()),
                 userService,
                 notificationDispatchService,
                 eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
-                new PlannerStatsService(plannerStatsRepository));
+                new PlannerStatsService(plannerStatsRepository),
+                new CommentAccessValidator(), new CommentAuthorshipValidator(),
+                new CommentStateValidator());
 
         owner = User.builder()
                 .id(OWNER_ID)

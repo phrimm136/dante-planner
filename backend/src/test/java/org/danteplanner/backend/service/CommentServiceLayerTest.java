@@ -8,6 +8,10 @@ import org.danteplanner.backend.comment.entity.PlannerComment;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.comment.validation.CommentAccessValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -101,15 +105,19 @@ class CommentServiceLayerTest {
     void setUp() {
         queryService = new CommentQueryService(
                 commentRepository, commentVoteRepository, userService,
-                new PlannerAccessGuard(userService, plannerRepository));
+                new PlannerAccessGuard(userService, plannerRepository),
+                new CommentAccessValidator());
         commandService = new CommentCommandService(
                 commentRepository, queryService, userService, notificationDispatchService, eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
-                new PlannerStatsService(plannerStatsRepository));
+                new PlannerStatsService(plannerStatsRepository),
+                new CommentAccessValidator(), new CommentAuthorshipValidator(),
+                new CommentStateValidator());
         engagementService = new CommentEngagementService(
                 commentRepository, commentVoteRepository, queryService,
                 new PlannerAccessGuard(userService, plannerRepository),
-                commentReportService);
+                commentReportService, new CommentAuthorshipValidator(),
+                new CommentStateValidator(), new VoteUniquenessValidator());
 
         testUser = User.builder()
                 .id(1L)

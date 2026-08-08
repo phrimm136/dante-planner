@@ -5,6 +5,9 @@ import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.comment.validation.CommentAccessValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
@@ -54,12 +57,15 @@ class CommentCommandServiceRestrictionsTest {
         return new CommentCommandService(
                 commentRepository,
                 new CommentQueryService(commentRepository, commentVoteRepository, userService,
-                        new PlannerAccessGuard(userService, plannerRepository)),
+                        new PlannerAccessGuard(userService, plannerRepository),
+                        new CommentAccessValidator()),
                 userService,
                 notificationDispatchService,
                 eventPublisher,
                 new PlannerAccessGuard(userService, plannerRepository),
-                new PlannerStatsService(plannerStatsRepository));
+                new PlannerStatsService(plannerStatsRepository),
+                new CommentAccessValidator(), new CommentAuthorshipValidator(),
+                new CommentStateValidator());
     }
 
     private User restrictedUser() {

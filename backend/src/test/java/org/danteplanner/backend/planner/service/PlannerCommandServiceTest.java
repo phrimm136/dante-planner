@@ -9,6 +9,10 @@ import org.danteplanner.backend.planner.dto.ImportPlannersRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.entity.Planner;
+import org.danteplanner.backend.planner.validation.PlannerCategoryValidator;
+import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
+import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.validation.SyncVersionValidator;
 import org.danteplanner.backend.planner.entity.PlannerContent;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
@@ -110,6 +114,10 @@ class PlannerCommandServiceTest {
                 contentVersionValidator,
                 plannerCatalogService,
                 accessGuard,
+                new PlannerCategoryValidator(),
+                new PlannerLimitValidator(),
+                new PlannerOwnershipValidator(),
+                new SyncVersionValidator(),
                 maxPlannersPerUser,
                 currentSchemaVersion
         );
@@ -397,7 +405,7 @@ class PlannerCommandServiceTest {
             // A request without a category must validate against the planner's own. Only that exact
             // triple is rejected, so any other combination leaves the stub unmatched and succeeds.
             when(contentValidator.validate(request.content(), planner.getCategory(),
-                    ValidationPolicy.forPublicationState(planner.getPublished())))
+                    ValidationPolicy.forPublicationState(planner.isPublished())))
                     .thenThrow(new PlannerValidationException("INVALID_CONTENT", "Rejected content"));
 
             // Act & Assert
@@ -461,7 +469,7 @@ class PlannerCommandServiceTest {
         void deletePlanner_WhenPublishedPlanner_UnpublishesFirst() {
             // Arrange
             Planner planner = testPlanner(1L, true);
-            assertTrue(planner.getPublished());
+            assertTrue(planner.isPublished());
 
             when(plannerRepository.findAggregateForOwner(planner.getId(), testUser.getId()))
                     .thenReturn(Optional.of(planner));
@@ -470,7 +478,7 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
 
             // Assert
-            assertFalse(planner.getPublished()); // Auto-unpublished
+            assertFalse(planner.isPublished()); // Auto-unpublished
             assertNotNull(planner.getContent().getDeletedAt()); // Then soft deleted
         }
 
@@ -487,7 +495,7 @@ class PlannerCommandServiceTest {
             commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
 
             // Assert
-            assertFalse(planner.getPublished()); // Still unpublished
+            assertFalse(planner.isPublished()); // Still unpublished
             assertNotNull(planner.getContent().getDeletedAt());
         }
     }

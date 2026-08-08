@@ -1,6 +1,7 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.PlannerReportService;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -50,7 +51,8 @@ class PlannerReportServiceTest {
     @BeforeEach
     void setUp() {
         reportService = new PlannerReportService(reportRepository,
-                new PlannerAccessGuard(userService, plannerRepository));
+                new PlannerAccessGuard(userService, plannerRepository),
+                new ReportUniquenessValidator());
 
         testUser = TestDataFactory.unsavedUser(1L);
 

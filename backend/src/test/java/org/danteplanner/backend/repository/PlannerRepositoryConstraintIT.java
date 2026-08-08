@@ -472,7 +472,7 @@ class PlannerRepositoryConstraintIT extends SharedMySqlContainerSupport {
             entityManager.flush();
 
             Planner saved = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertThat(saved.getPublished()).isFalse();
+            assertThat(saved.isPublished()).isFalse();
         }
 
         @Test

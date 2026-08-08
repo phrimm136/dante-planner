@@ -1112,7 +1112,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
 
             Planner stored = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertFalse(stored.getPublished());
+            assertFalse(stored.isPublished());
             assertNull(stored.getFirstPublishedAt(), "a refused publish leaves no first-publish stamp");
         }
 
@@ -1126,14 +1126,14 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(true));
-            assertTrue(plannerRepository.findById(planner.getId()).orElseThrow().getPublished());
+            assertTrue(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
 
             mockMvc.perform(post("/api/planner/md/{id}/unpublish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .cookie(accessTokenCookie()))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.published").value(false));
-            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().getPublished());
+            assertFalse(plannerRepository.findById(planner.getId()).orElseThrow().isPublished());
         }
 
         @Test
@@ -1198,7 +1198,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void setPublished_WhenOwner_Returns200() throws Exception {
             // Arrange - Create planner for test user
             Planner planner = createTestPlanner(testUser);
-            assertFalse(planner.getPublished());
+            assertFalse(planner.isPublished());
 
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1210,7 +1210,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
 
             // Verify in database
             Planner updated = plannerRepository.findById(planner.getId()).orElseThrow();
-            assertTrue(updated.getPublished());
+            assertTrue(updated.isPublished());
         }
 
         @Test
@@ -1254,7 +1254,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void setPublished_WhenPublished_Unpublishes() throws Exception {
             // Arrange - Create already published planner
             Planner planner = createPublishedPlanner(testUser, "Published Planner", "5F", 5);
-            assertTrue(planner.getPublished());
+            assertTrue(planner.isPublished());
 
             mockMvc.perform(put("/api/planner/md/{id}/publish", planner.getId()).with(withCsrf())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -1341,7 +1341,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void castVote_WhenUnpublishedPlanner_Returns404() throws Exception {
             // Arrange - Create unpublished planner
             Planner planner = createTestPlanner(otherUser);
-            assertFalse(planner.getPublished());
+            assertFalse(planner.isPublished());
 
             VoteRequest request = new VoteRequest(VoteType.UP);
 
@@ -1423,7 +1423,7 @@ class PlannerControllerIT extends SharedMySqlContainerSupport {
         void toggleBookmark_WhenUnpublishedPlanner_Returns404() throws Exception {
             // Arrange - Create unpublished planner
             Planner planner = createTestPlanner(otherUser);
-            assertFalse(planner.getPublished());
+            assertFalse(planner.isPublished());
 
             // Act & Assert
             mockMvc.perform(post("/api/planner/md/{id}/bookmark", planner.getId()).with(withCsrf())

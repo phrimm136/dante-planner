@@ -1,6 +1,8 @@
 package org.danteplanner.backend.service;
 
 import org.danteplanner.backend.moderation.service.CommentReportService;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.mockito.ArgumentCaptor;
 import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
@@ -53,7 +55,8 @@ class CommentReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CommentReportService(reportRepository, commentQueryService, accessGuard);
+        service = new CommentReportService(reportRepository, commentQueryService, accessGuard,
+                new CommentStateValidator(), new ReportUniquenessValidator());
     }
 
     @Nested

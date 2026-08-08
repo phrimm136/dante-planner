@@ -29,7 +29,7 @@ public record ModerationResponse(
         return new ModerationResponse(
                 planner.getId(),
                 planner.getTitle(),
-                planner.getHiddenFromRecommended(),
+                planner.isHiddenFromRecommended(),
                 planner.getModeration().getHiddenByModeratorId(),
                 planner.getModeration().getHiddenReason(),
                 planner.getModeration().getHiddenAt(),

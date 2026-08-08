@@ -50,6 +50,7 @@ class UserSettingsServiceTest {
         existingSettings = UserSettings.builder()
                 .user(testUser)
                 .syncEnabled(true)
+                .syncChoiceMade(true)
                 .notifyComments(true)
                 .notifyRecommendations(false)
                 .notifyNewPublications(false)
@@ -72,6 +73,7 @@ class UserSettingsServiceTest {
 
             // Assert
             assertTrue(result.syncEnabled());
+            assertTrue(result.syncChoiceMade());
             assertTrue(result.notifyComments());
             assertFalse(result.notifyRecommendations());
             verify(userRepository, never()).findById(any());
@@ -88,7 +90,8 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.getSettings(testUser.getId());
 
             // Assert
-            assertNull(result.syncEnabled());
+            assertFalse(result.syncEnabled());
+            assertFalse(result.syncChoiceMade());
             assertTrue(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertFalse(result.notifyNewPublications());
@@ -107,7 +110,8 @@ class UserSettingsServiceTest {
             UserSettingsResponse result = userSettingsService.getSettings(nonExistentId);
 
             // Assert
-            assertNull(result.syncEnabled());
+            assertFalse(result.syncEnabled());
+            assertFalse(result.syncChoiceMade());
             assertTrue(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertFalse(result.notifyNewPublications());
@@ -137,8 +141,48 @@ class UserSettingsServiceTest {
 
             // Assert
             assertFalse(result.syncEnabled());
+            assertTrue(result.syncChoiceMade());
             assertTrue(result.notifyComments());      // unchanged from existing
             assertFalse(result.notifyRecommendations()); // unchanged from existing
+        }
+
+        @Test
+        @DisplayName("Should mark the sync choice made when an unchosen user answers the prompt")
+        void updateSettings_WhenChoiceNotYetMade_MarksChoiceMade() {
+            UserSettings unchosen = UserSettings.builder()
+                    .user(testUser)
+                    .build();
+            when(userSettingsRepository.findByUserId(testUser.getId()))
+                    .thenReturn(Optional.of(unchosen));
+
+            UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
+                    true, null, null, null
+            );
+
+            UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
+
+            assertTrue(result.syncEnabled());
+            assertTrue(result.syncChoiceMade());
+        }
+
+        @Test
+        @DisplayName("Should leave the sync choice untouched when sync is not provided")
+        void updateSettings_WhenSyncAbsent_LeavesChoiceUnmade() {
+            UserSettings unchosen = UserSettings.builder()
+                    .user(testUser)
+                    .build();
+            when(userSettingsRepository.findByUserId(testUser.getId()))
+                    .thenReturn(Optional.of(unchosen));
+
+            UpdateUserSettingsRequest request = new UpdateUserSettingsRequest(
+                    null, false, null, null
+            );
+
+            UserSettingsResponse result = userSettingsService.updateSettings(testUser.getId(), request);
+
+            assertFalse(result.syncEnabled());
+            assertFalse(result.syncChoiceMade());
+            assertFalse(result.notifyComments());
         }
 
         @Test
@@ -160,6 +204,7 @@ class UserSettingsServiceTest {
 
             // Assert
             assertTrue(result.syncEnabled());         // unchanged from existing
+            assertTrue(result.syncChoiceMade());      // unchanged from existing
             assertFalse(result.notifyComments());
             assertTrue(result.notifyRecommendations());
             assertTrue(result.notifyNewPublications());

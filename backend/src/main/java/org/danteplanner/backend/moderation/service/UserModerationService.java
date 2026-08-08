@@ -2,7 +2,6 @@ package org.danteplanner.backend.moderation.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.event.AccountSuspendedEvent;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
@@ -45,7 +44,6 @@ public class UserModerationService {
      * @param reason          reason for timeout (for audit trail)
      * @return the updated user
      * @throws UserNotFoundException if the actor or the target is not an active user
-     * @throws InvalidRequestException if the duration is not positive
      * @throws ModerationForbiddenException if the actor may not restrict this target
      */
     @Transactional
@@ -99,8 +97,7 @@ public class UserModerationService {
                     target.setBannedBy(actorId);
                 });
 
-        eventPublisher.publishEvent(
-                new AccountSuspendedEvent(targetId, reason, SuspensionType.BAN, null));
+        eventPublisher.publishEvent(AccountSuspendedEvent.ban(targetId, reason));
 
         log.info("User {} banned by admin {} with reason: {}", targetId, actorId, reason);
         return saved;
@@ -176,10 +173,6 @@ public class UserModerationService {
     }
 
     private Instant timeoutUntil(int durationMinutes) {
-        if (durationMinutes <= 0) {
-            throw new InvalidRequestException(
-                    "INVALID_TIMEOUT_DURATION", "Timeout duration must be positive");
-        }
         return Instant.now().plus(durationMinutes, ChronoUnit.MINUTES);
     }
 

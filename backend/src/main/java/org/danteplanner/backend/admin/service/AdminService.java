@@ -50,11 +50,8 @@ public class AdminService {
 
         moderationPolicy.requireCanChangeRole(actor, target, newRole);
 
-        if (targetCurrentRole == UserRole.ADMIN && newRole != UserRole.ADMIN) {
-            long adminCount = userService.countByRole(UserRole.ADMIN);
-            if (adminCount <= 1) {
-                throw new ModerationForbiddenException("Cannot demote the last administrator");
-            }
+        if (moderationPolicy.demotesAnAdministrator(targetCurrentRole, newRole)) {
+            moderationPolicy.requireAnotherAdministratorRemains(userService.countByRole(UserRole.ADMIN));
         }
 
         // Apply role change

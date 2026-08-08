@@ -32,7 +32,7 @@ public record NotificationResponse(
             notification.getPublicId(),
             notification.getContentId(),
             notification.getNotificationType(),
-            notification.getRead(),
+            notification.isRead(),
             notification.getCreatedAt(),
             notification.getReadAt(),
             notification.getPlannerId(),

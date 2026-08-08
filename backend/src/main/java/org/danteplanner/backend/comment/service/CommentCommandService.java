@@ -12,6 +12,9 @@ import org.danteplanner.backend.comment.event.CommentCreatedEvent;
 import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
+import org.danteplanner.backend.comment.validation.CommentAccessValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
@@ -42,6 +45,9 @@ public class CommentCommandService {
     private final ApplicationEventPublisher eventPublisher;
     private final PlannerAccessGuard accessGuard;
     private final PlannerStatsService plannerStatsService;
+    private final CommentAccessValidator accessValidator;
+    private final CommentAuthorshipValidator authorshipValidator;
+    private final CommentStateValidator stateValidator;
 
     /**
      * Create a new comment on a planner.
@@ -70,16 +76,8 @@ public class CommentCommandService {
             PlannerComment parent = commentQueryService.requireByPublicId(parentPublicId);
             effectiveParentId = parent.getId();
 
-            // Verify parent belongs to same planner
-            if (!parent.getPlannerId().equals(plannerId)) {
-                throw new CommentForbiddenException("Parent comment belongs to a different planner");
-            }
-
-            // Cannot reply to deleted TOP-LEVEL comments
-            // But CAN reply to children of deleted comments (preserves thread continuity)
-            if (parent.isDeleted() && parent.getDepth() == 0) {
-                throw new CommentForbiddenException(effectiveParentId, "Cannot reply to deleted top-level comment");
-            }
+            accessValidator.requireParentInPlanner(parent, plannerId);
+            stateValidator.requireReplyable(parent);
 
             // Calculate depth with max enforcement (flatten at max depth)
             depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
@@ -100,7 +98,7 @@ public class CommentCommandService {
         if (effectiveParentId == null) {
             // Top-level comment - notify planner owner (if not self-comment and owner has notifications enabled)
             Long plannerOwnerId = planner.getUser().getId();
-            if (!userId.equals(plannerOwnerId) && planner.getOwnerNotificationsEnabled()) {
+            if (!userId.equals(plannerOwnerId) && planner.isOwnerNotificationsEnabled()) {
                 notificationDispatchService.notifyCommentReceived(
                         saved.getId(),
                         saved.getPublicId(),
@@ -117,7 +115,7 @@ public class CommentCommandService {
             PlannerComment parentComment = commentRepository.findById(effectiveParentId).orElseThrow();
             parentPublicId = parentComment.getPublicId();
             Long parentAuthorId = parentComment.getUserId();
-            if (!userId.equals(parentAuthorId) && Boolean.TRUE.equals(parentComment.getAuthorNotificationsEnabled())) {
+            if (!userId.equals(parentAuthorId) && parentComment.isAuthorNotificationsEnabled()) {
                 notificationDispatchService.notifyReplyReceived(
                         saved.getId(),
                         saved.getPublicId(),
@@ -159,10 +157,7 @@ public class CommentCommandService {
 
         Planner planner = accessGuard.requirePublished(plannerId);
 
-        // Cannot reply to deleted TOP-LEVEL comments
-        if (parent.isDeleted() && parent.getDepth() == 0) {
-            throw new CommentForbiddenException(parent.getId(), "Cannot reply to deleted top-level comment");
-        }
+        stateValidator.requireReplyable(parent);
 
         // Calculate depth with max enforcement (flatten at max depth)
         int depth = Math.min(parent.getDepth() + 1, CommentConstants.MAX_DEPTH);
@@ -181,7 +176,7 @@ public class CommentCommandService {
         // Send notification to parent author (if not self-reply and author has notifications enabled)
         PlannerComment notifyParent = commentRepository.findById(effectiveParentId).orElseThrow();
         Long parentAuthorId = notifyParent.getUserId();
-        if (!userId.equals(parentAuthorId) && Boolean.TRUE.equals(notifyParent.getAuthorNotificationsEnabled())) {
+        if (!userId.equals(parentAuthorId) && notifyParent.isAuthorNotificationsEnabled()) {
             notificationDispatchService.notifyReplyReceived(
                     saved.getId(),
                     saved.getPublicId(),
@@ -217,15 +212,8 @@ public class CommentCommandService {
 
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
-        // Cannot edit deleted comments
-        if (comment.isDeleted()) {
-            throw new CommentForbiddenException(comment.getId(), "Cannot edit a deleted comment");
-        }
-
-        // Only author can edit
-        if (!comment.getUserId().equals(userId)) {
-            throw new CommentForbiddenException(comment.getId(), "Only the author can edit this comment");
-        }
+        stateValidator.requireEditable(comment);
+        authorshipValidator.requireAuthorToEdit(comment, userId);
 
         comment.edit(request.content());
         log.info("User {} edited comment {}", userId, commentPublicId);
@@ -269,10 +257,7 @@ public class CommentCommandService {
             return;
         }
 
-        // Only author can delete
-        if (!comment.getUserId().equals(userId)) {
-            throw new CommentForbiddenException(comment.getId(), "Only the author can delete this comment");
-        }
+        authorshipValidator.requireAuthorToDelete(comment, userId);
 
         softDelete(comment);
         log.info("User {} deleted comment {}", userId, commentPublicId);

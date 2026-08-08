@@ -10,7 +10,9 @@ import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerCommentReportRepository;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,8 @@ public class CommentReportService {
     private final PlannerCommentReportRepository reportRepository;
     private final CommentQueryService commentQueryService;
     private final PlannerAccessGuard accessGuard;
+    private final CommentStateValidator commentStateValidator;
+    private final ReportUniquenessValidator reportUniquenessValidator;
 
     /**
      * Create a report for a comment.
@@ -51,15 +55,9 @@ public class CommentReportService {
 
         Long internalId = comment.getId();
 
-        // Cannot report deleted comments
-        if (comment.isDeleted()) {
-            throw new CommentForbiddenException(internalId, "Cannot report a deleted comment");
-        }
-
-        // Check if already reported (one report per user per comment)
-        if (reportRepository.existsByReporterIdAndCommentId(userId, internalId)) {
-            throw new CommentReportAlreadyExistsException(internalId, userId);
-        }
+        commentStateValidator.requireReportable(comment);
+        reportUniquenessValidator.requireFirstCommentReport(
+                reportRepository.existsByReporterIdAndCommentId(userId, internalId), internalId, userId);
 
         PlannerCommentReport report = new PlannerCommentReport(internalId, userId, request.reason());
         PlannerCommentReport saved = reportRepository.insert(report);

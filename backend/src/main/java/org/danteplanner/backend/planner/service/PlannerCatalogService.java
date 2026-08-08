@@ -128,7 +128,7 @@ public class PlannerCatalogService {
     public void add(Planner planner) {
         boolean recommended = RecommendedSql.isRecommended(
                 statsRepository.upvotesOf(planner.getId()),
-                planner.getHiddenFromRecommended(),
+                planner.isHiddenFromRecommended(),
                 recommendedThreshold);
         catalogRepository.insert(PlannerCatalog.builder()
                 .plannerId(planner.getId())

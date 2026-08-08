@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import org.danteplanner.backend.shared.ratelimit.RateLimitProperties.BucketConfig;
 
@@ -77,9 +78,7 @@ public class RateLimitService {
 
     private static String requireOwnEndpoint(RateLimitPolicy policy) {
         String endpoint = policy.endpoint();
-        if (endpoint == null) {
-            throw new IllegalArgumentException(policy + " keys its buckets by a caller-named endpoint");
-        }
+        Assert.notNull(endpoint, () -> policy + " keys its buckets by a caller-named endpoint");
         return endpoint;
     }
 

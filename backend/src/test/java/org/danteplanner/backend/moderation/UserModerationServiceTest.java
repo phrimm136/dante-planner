@@ -1,6 +1,5 @@
 package org.danteplanner.backend.moderation;
 
-import org.danteplanner.backend.shared.exception.InvalidRequestException;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.moderation.entity.ModerationAction;
 import org.danteplanner.backend.moderation.exception.ModerationForbiddenException;
@@ -210,42 +209,6 @@ class UserModerationServiceTest {
             );
             assertTrue(exception.getMessage().contains("Cannot timeout a user of equal or higher rank"));
             assertNull(otherModerator.getTimeoutUntil());
-        }
-
-        @Test
-        @DisplayName("Duration must be positive - zero fails")
-        void timeoutUser_WhenZeroDuration_ThrowsException() {
-            // Arrange
-            when(userService.findActiveById(moderatorUser.getId()))
-                    .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(normalUser.getId()))
-                    .thenReturn(Optional.of(normalUser));
-
-            // Act & Assert
-            InvalidRequestException exception = assertThrows(
-                    InvalidRequestException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), 0, "Test")
-            );
-            assertTrue(exception.getMessage().contains("must be positive"));
-            assertNull(normalUser.getTimeoutUntil());
-        }
-
-        @Test
-        @DisplayName("Duration must be positive - negative fails")
-        void timeoutUser_WhenNegativeDuration_ThrowsException() {
-            // Arrange
-            when(userService.findActiveById(moderatorUser.getId()))
-                    .thenReturn(Optional.of(moderatorUser));
-            when(userService.findActiveById(normalUser.getId()))
-                    .thenReturn(Optional.of(normalUser));
-
-            // Act & Assert
-            InvalidRequestException exception = assertThrows(
-                    InvalidRequestException.class,
-                    () -> moderationService.timeoutUser(moderatorUser.getId(), normalUser.getId(), -30, "Test")
-            );
-            assertTrue(exception.getMessage().contains("must be positive"));
-            assertNull(normalUser.getTimeoutUntil());
         }
 
         @Test

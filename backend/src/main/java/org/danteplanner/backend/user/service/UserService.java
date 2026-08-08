@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.danteplanner.backend.shared.exception.InvalidRequestException;
-import org.danteplanner.backend.shared.config.EpithetConfig;
 import org.danteplanner.backend.user.dto.UserResponse;
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.user.entity.User;
@@ -14,6 +13,7 @@ import org.danteplanner.backend.user.exception.UserNotFoundException;
 import org.danteplanner.backend.moderation.service.ModerationAuditService;
 import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.user.service.RandomUsernameGenerator.UsernameComponents;
+import org.danteplanner.backend.user.validation.EpithetValidator;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -49,7 +49,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RandomUsernameGenerator usernameGenerator;
-    private final EpithetConfig epithetConfig;
+    private final EpithetValidator epithetValidator;
     private final ModerationAuditService moderationAuditService;
     private final UserSettingsService userSettingsService;
     private final TransactionTemplate transactionTemplate;
@@ -270,9 +270,7 @@ public class UserService {
      */
     @Transactional
     public User updateUsernameEpithet(Long userId, String epithet) {
-        if (!epithetConfig.isValidEpithet(epithet)) {
-            throw new InvalidRequestException("INVALID_EPITHET", "Invalid epithet: " + epithet);
-        }
+        epithetValidator.requireValidEpithet(epithet);
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException(userId));

@@ -53,4 +53,27 @@ public class PlannerStatsService {
     public void incrementUpvotes(UUID plannerId) {
         plannerStatsRepository.incrementUpvotes(plannerId);
     }
+
+    /**
+     * The planner's current upvote count, zero while it has no counter row.
+     *
+     * @param plannerId the planner ID
+     * @return the current upvote count
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public int upvotesOf(UUID plannerId) {
+        return plannerStatsRepository.upvotesOf(plannerId);
+    }
+
+    /**
+     * Atomically claims the recommended-notification stamp once the threshold is met.
+     *
+     * @param plannerId the planner crossing the threshold
+     * @param threshold upvotes at which a planner counts as recommended
+     * @return 1 if this caller won the claim, 0 if already claimed or threshold unmet
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public int trySetRecommendedNotified(UUID plannerId, int threshold) {
+        return plannerStatsRepository.trySetRecommendedNotified(plannerId, threshold);
+    }
 }

@@ -40,7 +40,7 @@ class PlannerEntityTest {
 
         planner.takeDown();
 
-        assertThat(planner.getPublished()).isFalse();
+        assertThat(planner.isPublished()).isFalse();
         assertThat(planner.getTakenDownAt()).isNotNull();
     }
 
@@ -49,7 +49,7 @@ class PlannerEntityTest {
         Planner planner = publishedPlanner();
         planner.takeDown();
 
-        assertThat(planner.getPublished()).isFalse();
+        assertThat(planner.isPublished()).isFalse();
         assertThat(planner.isTakenDown()).isTrue();
 
         assertThatThrownBy(planner::publish)

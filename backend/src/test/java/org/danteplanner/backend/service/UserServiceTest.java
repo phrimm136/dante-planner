@@ -5,6 +5,7 @@ import org.danteplanner.backend.user.service.UserSettingsService;
 
 import org.danteplanner.backend.auth.entity.AuthProviderType;
 import org.danteplanner.backend.shared.config.EpithetConfig;
+import org.danteplanner.backend.user.validation.EpithetValidator;
 import org.danteplanner.backend.support.IntegrityViolations;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
@@ -62,7 +63,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, usernameGenerator, epithetConfig,
+        userService = new UserService(userRepository, usernameGenerator, new EpithetValidator(epithetConfig),
                 moderationAuditService, userSettingsService, transactionTemplate);
 
         testUser = TestDataFactory.unsavedUser(123L);

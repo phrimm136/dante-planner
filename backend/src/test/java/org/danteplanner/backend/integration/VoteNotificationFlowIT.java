@@ -161,7 +161,7 @@ class VoteNotificationFlowIT {
         assertEquals(plannerOwner.getId(), notification.getUserId());
         assertEquals(testPlanner.getId().toString(), notification.getContentId());
         assertEquals(NotificationType.PLANNER_RECOMMENDED, notification.getNotificationType());
-        assertFalse(notification.getRead());
+        assertFalse(notification.isRead());
         assertNotNull(notification.getCreatedAt());
 
         // Verify stats flag set

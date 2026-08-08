@@ -12,12 +12,15 @@ import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.moderation.dto.CommentReportRequest;
 import org.danteplanner.backend.moderation.dto.CommentReportResponse;
 import org.danteplanner.backend.moderation.exception.CommentReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.service.CommentReportService;
 import org.danteplanner.backend.planner.exception.VoteAlreadyExistsException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,9 @@ public class CommentEngagementService {
     private final CommentQueryService commentQueryService;
     private final PlannerAccessGuard accessGuard;
     private final CommentReportService reportService;
+    private final CommentAuthorshipValidator authorshipValidator;
+    private final CommentStateValidator stateValidator;
+    private final VoteUniquenessValidator voteUniquenessValidator;
 
     /**
      * Cast an immutable upvote on a comment.
@@ -56,16 +62,11 @@ public class CommentEngagementService {
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
         Long internalId = comment.getId();
 
-        // Cannot vote on deleted comments - they should only preserve thread structure
-        if (comment.isDeleted()) {
-            throw new CommentForbiddenException(internalId, "Cannot vote on a deleted comment");
-        }
+        stateValidator.requireVotable(comment);
 
-        // Check if vote already exists (immutability enforcement)
         PlannerCommentVoteId voteId = new PlannerCommentVoteId(internalId, userId);
-        if (commentVoteRepository.existsById(voteId)) {
-            throw new VoteAlreadyExistsException(comment.getPlannerId(), userId);
-        }
+        voteUniquenessValidator.requireFirstVote(
+                commentVoteRepository.existsById(voteId), comment.getPlannerId(), userId);
 
         // Create new immutable vote
         PlannerCommentVote newVote = new PlannerCommentVote(internalId, userId, CommentVoteType.UP);
@@ -99,10 +100,7 @@ public class CommentEngagementService {
     public ToggleNotificationResponse toggleNotification(UUID commentPublicId, Long userId, boolean enabled) {
         PlannerComment comment = commentQueryService.requireByPublicId(commentPublicId);
 
-        // Only author can toggle their notification setting
-        if (!comment.getUserId().equals(userId)) {
-            throw new CommentForbiddenException(comment.getId(), "Only the author can toggle notification settings");
-        }
+        authorshipValidator.requireAuthorToToggleNotifications(comment, userId);
 
         comment.setAuthorNotificationsEnabled(enabled);
 

@@ -18,6 +18,8 @@ import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.validation.PlannerPublishValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -48,6 +50,8 @@ public class PlannerPublishingService {
     private final SsePublisher ssePublisher;
     private final NotificationDispatchService notificationDispatchService;
     private final PlannerAccessGuard accessGuard;
+    private final PlannerOwnershipValidator ownershipValidator;
+    private final PlannerPublishValidator publishValidator;
     private final ApplicationEventPublisher eventPublisher;
 
     /**
@@ -169,11 +173,9 @@ public class PlannerPublishingService {
      */
     private PlannerResponse applyPublish(Long userId, Planner planner) {
         UUID plannerId = planner.getId();
-        requireOwner(userId, planner);
+        ownershipValidator.requireOwner(planner, userId);
 
-        if (planner.getTitle() == null || planner.getTitle().isBlank()) {
-            throw new PlannerValidationException("MISSING_TITLE", "Title is required for publishing");
-        }
+        publishValidator.requireTitle(planner.getTitle());
         contentValidator.validate(planner.getContentJson(), planner.getCategory(), ValidationPolicy.PUBLISH);
 
         PublicationChange change = planner.publish();
@@ -203,7 +205,7 @@ public class PlannerPublishingService {
      */
     private PlannerResponse applyUnpublish(Long userId, Planner planner) {
         UUID plannerId = planner.getId();
-        requireOwner(userId, planner);
+        ownershipValidator.requireOwner(planner, userId);
 
         if (!planner.unpublish().changed()) {
             return describe(planner);
@@ -213,12 +215,6 @@ public class PlannerPublishingService {
 
         log.info("Unpublished planner {} by user {}", plannerId, userId);
         return describe(planner);
-    }
-
-    private void requireOwner(Long userId, Planner planner) {
-        if (!planner.isOwnedBy(userId)) {
-            throw new PlannerForbiddenException(planner.getId());
-        }
     }
 
     private PlannerResponse describe(Planner planner) {
@@ -308,9 +304,7 @@ public class PlannerPublishingService {
     public ToggleOwnerNotificationsResponse toggleOwnerNotifications(Long userId, UUID plannerId, boolean enabled) {
         Planner planner = accessGuard.requireExisting(plannerId);
 
-        if (!planner.isOwnedBy(userId)) {
-            throw new PlannerForbiddenException(plannerId);
-        }
+        ownershipValidator.requireOwner(planner, userId);
 
         planner.setOwnerNotificationsEnabled(enabled);
 

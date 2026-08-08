@@ -116,7 +116,7 @@ public class ModerationController {
 
         Planner planner = plannerModerationService.unpublishPlanner(actorId, plannerId);
         return ResponseEntity.ok(new UnpublishPlannerResponse(
-                planner.getId(), planner.getPublished(), "Planner unpublished successfully"));
+                planner.getId(), planner.isPublished(), "Planner unpublished successfully"));
     }
 
     /**

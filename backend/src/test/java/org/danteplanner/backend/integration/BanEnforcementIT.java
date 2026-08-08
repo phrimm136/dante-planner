@@ -141,7 +141,7 @@ class BanEnforcementIT extends SharedMySqlContainerSupport {
 
         // Verify planner was not published
         Planner updated = plannerRepository.findById(plannerId).orElseThrow();
-        assertFalse(updated.getPublished());
+        assertFalse(updated.isPublished());
     }
 
     @Test

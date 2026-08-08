@@ -2,6 +2,7 @@ package org.danteplanner.backend.planner.validation;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -18,43 +19,35 @@ public class SinnerIdValidator {
     private static final Pattern EGO_PATTERN = Pattern.compile("^2(0[1-9]|1[0-2])\\d{2,}$");
 
     /**
-     * Extract sinner index from an entity ID.
-     *
-     * @param id Entity ID (identity: "10101" or EGO: "20101")
-     * @return Sinner index as 2-digit string (e.g., "01"), or null if invalid
-     */
-    public String extractSinnerIndex(String id) {
-        if (id == null || id.length() < 4) {
-            return null;
-        }
-
-        if (IDENTITY_PATTERN.matcher(id).matches() || EGO_PATTERN.matcher(id).matches()) {
-            return id.substring(1, 3);
-        }
-
-        return null;
-    }
-
-    /**
      * Validate that equipment key matches the sinner encoded in entity ID.
      *
-     * <p>Equipment keys are 2-digit 1-indexed ("01"-"12"), matching ID sinner indices.
+     * <p>Equipment keys are 2-digit 1-indexed ("01"-"12"), matching ID sinner indices. An ID that
+     * encodes no sinner at all fails the same way one encoding the wrong sinner does, so the
+     * caller records one element error against the path either way.
      *
      * @param equipmentKey Equipment key (e.g., "01", "02", "12")
      * @param entityId     Identity or EGO ID (e.g., "10101", "20101")
      * @return true if sinner indices match
      */
     public boolean validateMatch(String equipmentKey, String entityId) {
-        String sinnerFromId = extractSinnerIndex(entityId);
-        if (sinnerFromId == null) {
-            return false;
-        }
-
-        // Equipment key should be 2-digit format matching ID's sinner index
         String normalizedKey = equipmentKey.length() == 1
                 ? "0" + equipmentKey
                 : equipmentKey;
 
-        return normalizedKey.equals(sinnerFromId);
+        return extractSinnerIndex(entityId)
+                .filter(normalizedKey::equals)
+                .isPresent();
+    }
+
+    private Optional<String> extractSinnerIndex(String id) {
+        if (id == null || id.length() < 4) {
+            return Optional.empty();
+        }
+
+        if (IDENTITY_PATTERN.matcher(id).matches() || EGO_PATTERN.matcher(id).matches()) {
+            return Optional.of(id.substring(1, 3));
+        }
+
+        return Optional.empty();
     }
 }

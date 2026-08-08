@@ -5,6 +5,8 @@ import org.danteplanner.backend.planner.service.PlannerCatalogService;
 import org.danteplanner.backend.planner.service.PlannerSubscriptionService;
 import org.danteplanner.backend.planner.service.PlannerCommandService;
 import org.danteplanner.backend.planner.service.PlannerPublishingService;
+import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.validation.PlannerPublishValidator;
 
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 
@@ -104,6 +106,8 @@ class PlannerPublishingServiceTest {
                 ssePublisher,
                 notificationDispatchService,
                 accessGuard,
+                new PlannerOwnershipValidator(),
+                new PlannerPublishValidator(),
                 eventPublisher
         );
 
@@ -178,7 +182,7 @@ class PlannerPublishingServiceTest {
                     planner.getId(), Planner::unpublish);
 
             assertSame(planner, result);
-            assertFalse(result.getPublished());
+            assertFalse(result.isPublished());
             verify(plannerCatalogService).onBecameInvisible(planner.getId());
         }
 
@@ -290,7 +294,7 @@ class PlannerPublishingServiceTest {
             );
 
             assertEquals(planner.getId(), exception.getPlannerId());
-            assertFalse(planner.getPublished());
+            assertFalse(planner.isPublished());
         }
 
         @Test
@@ -400,7 +404,7 @@ class PlannerPublishingServiceTest {
 
             // Assert
             assertFalse(response.ownerNotificationsEnabled());
-            assertFalse(planner.getOwnerNotificationsEnabled());
+            assertFalse(planner.isOwnerNotificationsEnabled());
         }
 
         @Test
@@ -425,7 +429,7 @@ class PlannerPublishingServiceTest {
                     PlannerForbiddenException.class,
                     () -> publishingService.toggleOwnerNotifications(testUser.getId(), planner.getId(), true)
             );
-            assertTrue(planner.getOwnerNotificationsEnabled());
+            assertTrue(planner.isOwnerNotificationsEnabled());
         }
     }
 
@@ -444,7 +448,7 @@ class PlannerPublishingServiceTest {
                     () -> publishingService.publish(testUser.getId(), planner.getId()));
 
             assertEquals("MISSING_TITLE", thrown.getErrorCode());
-            assertFalse(planner.getPublished());
+            assertFalse(planner.isPublished());
             assertNull(planner.getFirstPublishedAt());
         }
 
@@ -461,7 +465,7 @@ class PlannerPublishingServiceTest {
                     PlannerValidationException.class,
                     () -> publishingService.publish(testUser.getId(), planner.getId()));
 
-            assertFalse(planner.getPublished());
+            assertFalse(planner.isPublished());
             assertNull(planner.getFirstPublishedAt());
             verify(plannerCatalogService, never()).onBecameVisible(any());
         }

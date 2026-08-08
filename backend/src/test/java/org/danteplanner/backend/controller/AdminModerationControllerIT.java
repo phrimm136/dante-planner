@@ -116,7 +116,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isTrue();
+            assertThat(updated.isHiddenFromRecommended()).isTrue();
         }
 
         @Test
@@ -232,7 +232,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isTrue();
+            assertThat(updated.isHiddenFromRecommended()).isTrue();
         }
 
         @Test
@@ -313,7 +313,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isTrue();
+            assertThat(updated.isHiddenFromRecommended()).isTrue();
             assertThat(updated.getModeration().getHiddenAt()).isNotNull();
             assertThat(updated.getModeration().getHiddenByModeratorId()).isEqualTo(adminUser.getId());
             assertThat(updated.getModeration().getHiddenReason()).isEqualTo(reason);
@@ -371,7 +371,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isFalse();
+            assertThat(updated.isHiddenFromRecommended()).isFalse();
         }
 
         @Test
@@ -415,7 +415,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isFalse();
+            assertThat(updated.isHiddenFromRecommended()).isFalse();
         }
 
         @Test
@@ -483,7 +483,7 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isFalse();
+            assertThat(updated.isHiddenFromRecommended()).isFalse();
             assertThat(updated.getModeration().getHiddenAt()).isNull();
             assertThat(updated.getModeration().getHiddenByModeratorId()).isNull();
             assertThat(updated.getModeration().getHiddenReason()).isNull();
@@ -492,14 +492,14 @@ class AdminModerationControllerIT extends SharedMySqlContainerSupport {
         @Test
         @DisplayName("Should be idempotent when unhiding already unhidden planner")
         void unhideFromRecommended_WhenAlreadyUnhidden_IsIdempotent() throws Exception {
-            assertThat(testPlanner.getHiddenFromRecommended()).isFalse();
+            assertThat(testPlanner.isHiddenFromRecommended()).isFalse();
 
             mockMvc.perform(post("/api/moderation/planner/{id}/unhide-from-recommended", testPlanner.getId()).with(withCsrf())
                             .cookie(adminCookie()))
                     .andExpect(status().isOk());
 
             Planner updated = plannerRepository.findById(testPlanner.getId()).orElseThrow();
-            assertThat(updated.getHiddenFromRecommended()).isFalse();
+            assertThat(updated.isHiddenFromRecommended()).isFalse();
         }
 
         @Test

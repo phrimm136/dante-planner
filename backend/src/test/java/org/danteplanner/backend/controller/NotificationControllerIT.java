@@ -310,7 +310,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
         @DisplayName("Should mark unread notification as read and return 200")
         void markRead_WhenUnreadNotification_Returns200() throws Exception {
             Notification notification = createNotification(testUser, NotificationType.COMMENT_RECEIVED);
-            assertThat(notification.getRead()).isFalse();
+            assertThat(notification.isRead()).isFalse();
 
             mockMvc.perform(post("/api/notifications/{id}/mark-read", notification.getPublicId()).with(withCsrf())
                             .cookie(accessTokenCookie()))
@@ -331,7 +331,7 @@ class NotificationControllerIT extends SharedMySqlContainerSupport {
 
             Notification updated = notificationRepository.findById(notification.getId()).orElseThrow();
             assertThat(updated.getReadAt()).isNotNull();
-            assertThat(updated.getRead()).isTrue();
+            assertThat(updated.isRead()).isTrue();
         }
 
         @Test

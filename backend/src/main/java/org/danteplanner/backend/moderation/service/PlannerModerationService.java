@@ -70,7 +70,7 @@ public class PlannerModerationService {
         Planner saved = plannerPublishingService.withdrawFromPublicView(plannerId, Planner::unpublish);
 
         auditService.record(actorId, plannerId.toString(),
-                ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER, null);
+                ModerationAction.ActionType.UNPUBLISH_PLANNER, ModerationAction.TargetType.PLANNER);
 
         log.info("Planner {} unpublished by moderator {}", plannerId, actorId);
         return saved;
@@ -115,7 +115,7 @@ public class PlannerModerationService {
                 Planner::unhideFromRecommended);
 
         auditService.record(moderatorId, plannerId.toString(),
-                ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER, null);
+                ModerationAction.ActionType.UNHIDE_FROM_RECOMMENDED, ModerationAction.TargetType.PLANNER);
 
         log.info("Planner {} unhidden from recommended by moderator {}", plannerId, moderatorId);
 

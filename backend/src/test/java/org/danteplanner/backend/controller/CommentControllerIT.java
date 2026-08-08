@@ -21,9 +21,13 @@ import org.danteplanner.backend.user.repository.UserRepository;
 import org.danteplanner.backend.comment.service.CommentCommandService;
 import org.danteplanner.backend.comment.service.CommentEngagementService;
 import org.danteplanner.backend.comment.service.CommentQueryService;
+import org.danteplanner.backend.comment.validation.CommentAccessValidator;
+import org.danteplanner.backend.comment.validation.CommentAuthorshipValidator;
+import org.danteplanner.backend.comment.validation.CommentStateValidator;
 import org.danteplanner.backend.notification.service.NotificationDispatchService;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
 import org.danteplanner.backend.planner.service.PlannerStatsService;
+import org.danteplanner.backend.planner.validation.VoteUniquenessValidator;
 import org.springframework.context.ApplicationEventPublisher;
 import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.auth.token.JwtTokenService;
@@ -72,7 +76,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 PlannerRepository plannerRepository,
                 UserService userService) {
             return new CommentQueryService(commentRepository, commentVoteRepository, userService,
-                    new PlannerAccessGuard(userService, plannerRepository));
+                    new PlannerAccessGuard(userService, plannerRepository),
+                    new CommentAccessValidator());
         }
 
         @Bean
@@ -88,7 +93,9 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
             return new CommentCommandService(commentRepository, commentQueryService, userService,
                     notificationDispatchService, eventPublisher,
                     new PlannerAccessGuard(userService, plannerRepository),
-                    new PlannerStatsService(plannerStatsRepository));
+                    new PlannerStatsService(plannerStatsRepository),
+                    new CommentAccessValidator(), new CommentAuthorshipValidator(),
+                    new CommentStateValidator());
         }
 
         @Bean
@@ -102,7 +109,8 @@ class CommentControllerIT extends SharedMySqlContainerSupport {
                 CommentReportService commentReportService) {
             return new CommentEngagementService(commentRepository, commentVoteRepository, commentQueryService,
                     new PlannerAccessGuard(userService, plannerRepository),
-                    commentReportService);
+                    commentReportService, new CommentAuthorshipValidator(),
+                    new CommentStateValidator(), new VoteUniquenessValidator());
         }
     }
 

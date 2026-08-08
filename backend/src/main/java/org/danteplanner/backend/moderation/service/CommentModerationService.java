@@ -45,7 +45,7 @@ public class CommentModerationService {
         commentCommandService.softDelete(comment);
 
         auditService.record(actorId, comment.getPublicId().toString(),
-                ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT, null);
+                ModerationAction.ActionType.DELETE_COMMENT, ModerationAction.TargetType.COMMENT);
 
         log.info("Moderator {} deleted comment {}", actorId, commentId);
     }

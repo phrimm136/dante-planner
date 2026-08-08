@@ -7,6 +7,7 @@ import org.danteplanner.backend.comment.exception.CommentForbiddenException;
 import org.danteplanner.backend.comment.exception.CommentNotFoundException;
 import org.danteplanner.backend.comment.repository.PlannerCommentRepository;
 import org.danteplanner.backend.comment.repository.PlannerCommentVoteRepository;
+import org.danteplanner.backend.comment.validation.CommentAccessValidator;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
@@ -39,6 +40,7 @@ public class CommentQueryService {
     private final PlannerCommentVoteRepository commentVoteRepository;
     private final UserService userService;
     private final PlannerAccessGuard accessGuard;
+    private final CommentAccessValidator accessValidator;
 
     /**
      * Get comments for a planner as a hierarchical tree.
@@ -54,10 +56,7 @@ public class CommentQueryService {
     public List<CommentTreeNode> getCommentTree(UUID plannerId, Long currentUserId) {
         Planner planner = accessGuard.requireExisting(plannerId);
 
-        // Check access: published planners are public, unpublished only for owner
-        if (!planner.getPublished() && (currentUserId == null || !planner.isOwnedBy(currentUserId))) {
-            throw new CommentForbiddenException("Cannot view comments on unpublished planner");
-        }
+        accessValidator.requireThreadVisible(planner, currentUserId);
 
         List<PlannerComment> comments = commentRepository.findByPlannerId(plannerId);
         if (comments.isEmpty()) {

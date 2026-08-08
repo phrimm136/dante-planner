@@ -129,6 +129,16 @@ class ModerationControllerIT extends SharedMySqlContainerSupport {
         }
 
         @Test
+        void timeoutUser_WhenDurationZero_Returns400ValidationError() throws Exception {
+            mockMvc.perform(post("/api/moderation/user/{suffix}/timeout", regularUser.getUsernameSuffix()).with(withCsrf())
+                            .cookie(moderatorCookie())
+                            .contentType(APPLICATION_JSON)
+                            .content("{\"durationMinutes\":0,\"reason\":\"Repeated harassment reports\"}"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+        }
+
+        @Test
         void timeoutUser_WhenNormalUser_Returns403() throws Exception {
             mockMvc.perform(post("/api/moderation/user/{suffix}/timeout", regularUser.getUsernameSuffix()).with(withCsrf())
                             .cookie(regularUserCookie())

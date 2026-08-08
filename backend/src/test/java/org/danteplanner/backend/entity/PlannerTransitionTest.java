@@ -38,7 +38,7 @@ class PlannerTransitionTest {
         planner.takeDown();
 
         assertThat(planner.getTakenDownAt()).isNotNull();
-        assertThat(planner.getPublished()).isFalse();
+        assertThat(planner.isPublished()).isFalse();
     }
 
     @Test
@@ -65,14 +65,14 @@ class PlannerTransitionTest {
         planner.publish();
         Instant firstStamp = planner.getFirstPublishedAt();
 
-        assertThat(planner.getPublished()).isTrue();
+        assertThat(planner.isPublished()).isTrue();
         assertThat(firstStamp).isNotNull();
 
         planner.unpublish();
-        assertThat(planner.getPublished()).isFalse();
+        assertThat(planner.isPublished()).isFalse();
 
         planner.publish();
-        assertThat(planner.getPublished()).isTrue();
+        assertThat(planner.isPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt()).isEqualTo(firstStamp);
     }
 
@@ -88,7 +88,7 @@ class PlannerTransitionTest {
 
         assertThat(planner.publish()).isEqualTo(PublicationChange.NONE);
 
-        assertThat(planner.getPublished()).isTrue();
+        assertThat(planner.isPublished()).isTrue();
         assertThat(planner.getFirstPublishedAt())
                 .as("re-applying the state a planner already holds is a no-op, stamp included")
                 .isEqualTo(firstStamp);
@@ -103,7 +103,7 @@ class PlannerTransitionTest {
 
         planner.hideFromRecommended(42L, "spam");
 
-        assertThat(planner.getHiddenFromRecommended()).isTrue();
+        assertThat(planner.isHiddenFromRecommended()).isTrue();
         assertThat(planner.getModeration().getHiddenByModeratorId()).isEqualTo(42L);
         assertThat(planner.getModeration().getHiddenReason()).isEqualTo("spam");
         assertThat(planner.getModeration().getHiddenAt()).isNotNull();
@@ -123,7 +123,7 @@ class PlannerTransitionTest {
 
         planner.unhideFromRecommended();
 
-        assertThat(planner.getHiddenFromRecommended()).isFalse();
+        assertThat(planner.isHiddenFromRecommended()).isFalse();
         assertThat(planner.getModeration().getHiddenByModeratorId()).isNull();
         assertThat(planner.getModeration().getHiddenReason()).isNull();
         assertThat(planner.getModeration().getHiddenAt()).isNull();
@@ -151,7 +151,7 @@ class PlannerTransitionTest {
 
         planner.unpublish();
 
-        assertThat(planner.getPublished()).isFalse();
+        assertThat(planner.isPublished()).isFalse();
         assertThat(planner.getTakenDownAt()).isEqualTo(takenDownAt);
     }
 }

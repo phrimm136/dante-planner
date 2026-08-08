@@ -22,15 +22,16 @@ import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
-import org.danteplanner.backend.planner.exception.PlannerForbiddenException;
 import org.danteplanner.backend.planner.exception.PlannerLimitExceededException;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
-import org.danteplanner.backend.planner.repository.PlannerOwnershipRow;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
-import org.danteplanner.backend.planner.validation.ErrorCode;
+import org.danteplanner.backend.planner.validation.PlannerCategoryValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
+import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
+import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
+import org.danteplanner.backend.planner.validation.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
@@ -61,6 +62,10 @@ public class PlannerCommandService {
     private final ContentVersionValidator contentVersionValidator;
     private final PlannerCatalogService plannerCatalogService;
     private final PlannerAccessGuard accessGuard;
+    private final PlannerCategoryValidator categoryValidator;
+    private final PlannerLimitValidator limitValidator;
+    private final PlannerOwnershipValidator ownershipValidator;
+    private final SyncVersionValidator syncVersionValidator;
     private final Optional<ContentTombstoneStore> tombstoneStore;
 
     private final int maxPlannersPerUser;
@@ -74,10 +79,15 @@ public class PlannerCommandService {
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
+            PlannerCategoryValidator categoryValidator,
+            PlannerLimitValidator limitValidator,
+            PlannerOwnershipValidator ownershipValidator,
+            SyncVersionValidator syncVersionValidator,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
         this(plannerRepository, statsRepository, eventPublisher, contentValidator, contentVersionValidator,
-                plannerCatalogService, accessGuard, Optional.empty(),
+                plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
+                syncVersionValidator, Optional.empty(),
                 maxPlannersPerUser, currentSchemaVersion);
     }
 
@@ -90,6 +100,10 @@ public class PlannerCommandService {
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
             PlannerAccessGuard accessGuard,
+            PlannerCategoryValidator categoryValidator,
+            PlannerLimitValidator limitValidator,
+            PlannerOwnershipValidator ownershipValidator,
+            SyncVersionValidator syncVersionValidator,
             Optional<ContentTombstoneStore> tombstoneStore,
             @Value("${planner.max-per-user}") int maxPlannersPerUser,
             @Value("${planner.schema-version}") int currentSchemaVersion) {
@@ -100,6 +114,10 @@ public class PlannerCommandService {
         this.contentVersionValidator = contentVersionValidator;
         this.plannerCatalogService = plannerCatalogService;
         this.accessGuard = accessGuard;
+        this.categoryValidator = categoryValidator;
+        this.limitValidator = limitValidator;
+        this.ownershipValidator = ownershipValidator;
+        this.syncVersionValidator = syncVersionValidator;
         this.tombstoneStore = tombstoneStore;
         this.maxPlannersPerUser = maxPlannersPerUser;
         this.currentSchemaVersion = currentSchemaVersion;
@@ -127,7 +145,7 @@ public class PlannerCommandService {
             applyContent(planner, request.content());
         } else if (categoryChanged) {
             contentValidator.validate(contentRow.getContent(), contentRow.getCategory(),
-                    ValidationPolicy.forPublicationState(planner.getPublished()));
+                    ValidationPolicy.forPublicationState(planner.isPublished()));
         }
 
         applyKeywordsAndDeviceId(contentRow, request.selectedKeywords(), deviceId);
@@ -165,18 +183,14 @@ public class PlannerCommandService {
     }
 
     private void applyCategory(Planner planner, String category) {
-        if (!planner.getPlannerType().isValidCategory(category)) {
-            throw new PlannerValidationException(
-                    ErrorCode.INVALID_CATEGORY.getCode(),
-                    "Invalid category '" + category + "' for planner type " + planner.getPlannerType());
-        }
+        categoryValidator.requireCategoryForType(planner.getPlannerType(), category);
         planner.getContent().setCategory(category);
     }
 
     private void applyContent(Planner planner, String content) {
         PlannerContent contentRow = planner.getContent();
         contentValidator.validate(content, contentRow.getCategory(),
-                ValidationPolicy.forPublicationState(planner.getPublished()));
+                ValidationPolicy.forPublicationState(planner.isPublished()));
         contentRow.setContent(content);
     }
 
@@ -257,21 +271,12 @@ public class PlannerCommandService {
         // Check if user has restrictions (timeout or ban) and get user entity
         User user = accessGuard.getUser(userId);
 
-        // Check planner count limit
-        long currentCount = plannerRepository.countActiveByUserId(userId);
-        if (currentCount >= maxPlannersPerUser) {
-            throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
-        }
+        limitValidator.requireRoomFor(plannerRepository.countActiveByUserId(userId), 1, maxPlannersPerUser);
 
         // Validate content version (strict: must use current version for new planners)
         contentVersionValidator.validateVersionForCreate(request.plannerType(), request.contentVersion());
 
-        // Validate category for planner type
-        if (!request.plannerType().isValidCategory(request.category())) {
-            throw new PlannerValidationException(
-                    ErrorCode.INVALID_CATEGORY.getCode(),
-                    "Invalid category '" + request.category() + "' for planner type " + request.plannerType());
-        }
+        categoryValidator.requireCategoryForType(request.plannerType(), request.category());
 
         // Validate content with category context
         contentValidator.validate(request.content(), request.category());
@@ -354,11 +359,7 @@ public class PlannerCommandService {
             log.info("Planner {} exists for user {}, updating (force={})", id, userId, force);
             Planner planner = existingPlanner.get();
 
-            // Check if user has any restrictions
-            // Check optimistic locking unless force override is requested
-            if (!force && request.syncVersion() != null && !planner.getSyncVersion().equals(request.syncVersion())) {
-                throw new PlannerConflictException(request.syncVersion(), planner.getSyncVersion());
-            }
+            syncVersionValidator.requireSyncVersionMatch(force, request.syncVersion(), planner.getSyncVersion());
 
             applyUpsertFields(planner, request, deviceId);
 
@@ -371,7 +372,7 @@ public class PlannerCommandService {
 
             log.info("Updated planner {} via upsert, new syncVersion: {}", id, planner.getSyncVersion());
 
-            if (planner.getPublished()) {
+            if (planner.isPublished()) {
                 plannerCatalogService.onVisibleEditCommitted(planner);
             }
 
@@ -383,35 +384,13 @@ public class PlannerCommandService {
 
         // One ownership SELECT covers both non-owned-active cases. Another user's soft-deleted
         // row matches neither branch and falls through to create, surfacing as a PK collision on save.
-        var ownership = plannerRepository.findOwnershipById(id);
-        if (ownership.isPresent()) {
-            PlannerOwnershipRow existing = ownership.get();
-            if (existing.getUserId().equals(userId)) {
-                log.warn("Planner {} is soft-deleted for user {} - cannot recreate", id, userId);
-                throw new PlannerNotFoundException(id);
-            }
-            if (existing.getDeletedAt() == null) {
-                log.warn("Planner {} exists but belongs to another user (ID collision)", id);
-                throw new PlannerForbiddenException(id);
-            }
-        }
+        plannerRepository.findOwnershipById(id)
+                .ifPresent(existing -> ownershipValidator.requireIdAvailable(id, userId, existing));
 
         // Planner doesn't exist at all - create new
         log.info("Planner {} not found, creating for user {}", id, userId);
 
-        // Override the ID in request with path variable ID
-        UpsertPlannerRequest createRequest = new UpsertPlannerRequest(
-                id.toString(),
-                request.category(),
-                request.title(),
-                request.status(),
-                request.content(),
-                request.contentVersion(),
-                request.plannerType(),
-                null,
-                request.selectedKeywords());
-
-        return createAggregate(userId, deviceId, createRequest);
+        return createAggregate(userId, deviceId, request.withId(id.toString()));
     }
 
     /**
@@ -432,10 +411,7 @@ public class PlannerCommandService {
         // Check if user has any restrictions
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
-        // Check optimistic locking unless force override is requested
-        if (!force && !planner.getSyncVersion().equals(request.syncVersion())) {
-            throw new PlannerConflictException(request.syncVersion(), planner.getSyncVersion());
-        }
+        syncVersionValidator.requireSyncVersionMatch(force, request.syncVersion(), planner.getSyncVersion());
 
         applyUpdateFields(planner, request, deviceId);
 
@@ -443,7 +419,7 @@ public class PlannerCommandService {
 
         log.info("Updated planner {} for user {}, new syncVersion: {}", id, userId, planner.getSyncVersion());
 
-        if (planner.getPublished()) {
+        if (planner.isPublished()) {
             plannerCatalogService.onVisibleEditCommitted(planner);
         }
 
@@ -470,7 +446,7 @@ public class PlannerCommandService {
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 
         // Auto-unpublish if published (subscriptions cascade at DB level)
-        if (planner.getPublished()) {
+        if (planner.isPublished()) {
             planner.unpublish();
             log.info("Auto-unpublished planner {} before deletion", id);
         }
@@ -507,12 +483,10 @@ public class PlannerCommandService {
         // Check restrictions and get user entity (needed for limit check)
         User user = accessGuard.getUser(userId);
 
-        long currentCount = plannerRepository.countActiveByUserId(userId);
         int requestedCount = request.planners().size();
 
-        if (currentCount + requestedCount > maxPlannersPerUser) {
-            throw new PlannerLimitExceededException(currentCount, maxPlannersPerUser);
-        }
+        limitValidator.requireRoomFor(
+                plannerRepository.countActiveByUserId(userId), requestedCount, maxPlannersPerUser);
 
         List<PlannerSummaryResponse> importedPlanners = new ArrayList<>();
 
@@ -520,12 +494,7 @@ public class PlannerCommandService {
             // Validate content version (strict: must use current version for new planners)
             contentVersionValidator.validateVersionForCreate(plannerRequest.plannerType(), plannerRequest.contentVersion());
 
-            // Validate category for planner type
-            if (!plannerRequest.plannerType().isValidCategory(plannerRequest.category())) {
-                throw new PlannerValidationException(
-                        ErrorCode.INVALID_CATEGORY.getCode(),
-                        "Invalid category '" + plannerRequest.category() + "' for planner type " + plannerRequest.plannerType());
-            }
+            categoryValidator.requireCategoryForType(plannerRequest.plannerType(), plannerRequest.category());
 
             contentValidator.validate(plannerRequest.content(), plannerRequest.category());
 

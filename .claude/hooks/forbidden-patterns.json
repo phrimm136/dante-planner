@@ -97,6 +97,15 @@
         "regex": "(identical to the (previous|old|former)|\\bwas missing\\b|\\brenamed from\\b|\\bmoved from\\b|\\bused to be\\b|no longer (does|exists|has|supports|uses|contains))",
         "message": "Durable records carry no change history - state what the code does now; git owns the diff",
         "severity": "error"
+      },
+      {
+        "regex": "Boolean\\.TRUE\\.equals\\(",
+        "exclude": [
+          "ContentTombstoneStore.java",
+          "RefreshRotationService.java"
+        ],
+        "message": "Boolean.TRUE.equals() re-checks a value a primitive boolean already proves - make the getter primitive (excluded: the two Redis hasKey call sites, whose Boolean is genuinely nullable)",
+        "severity": "warning"
       }
     ],
     "extensions": [

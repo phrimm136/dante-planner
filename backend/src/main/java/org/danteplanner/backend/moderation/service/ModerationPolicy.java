@@ -7,6 +7,7 @@ import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.entity.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.time.Clock;
 import java.util.Map;
@@ -72,9 +73,7 @@ public class ModerationPolicy {
      */
     public void requireCanRestrict(User actor, User target, ModerationAction.ActionType action) {
         Authority authority = AUTHORITIES.get(action);
-        if (authority == null) {
-            throw new IllegalArgumentException("Not an account restriction: " + action);
-        }
+        Assert.notNull(authority, () -> "Not an account restriction: " + action);
 
         // A restriction withdraws the authority, and nothing else does: banning a rogue moderator
         // invalidates no token, and the endpoint is gated on the role claim the token still carries.
@@ -92,6 +91,32 @@ public class ModerationPolicy {
         if (!actor.getRole().outranks(target.getRole())) {
             throw new ModerationForbiddenException(
                     "Cannot %s a user of equal or higher rank".formatted(authority.verb()));
+        }
+    }
+
+    /**
+     * Whether a role change takes administrator rank away from the target.
+     *
+     * @param currentRole the role the target holds now
+     * @param newRole     the role being assigned
+     * @return true when an administrator is losing that rank
+     */
+    public boolean demotesAnAdministrator(UserRole currentRole, UserRole newRole) {
+        return currentRole == UserRole.ADMIN && newRole != UserRole.ADMIN;
+    }
+
+    /**
+     * Require an administrator to remain after the demotion.
+     *
+     * <p>An instance with no administrator can never grant the rank back, so the last one may not
+     * step down.</p>
+     *
+     * @param administratorCount administrators holding the rank before the demotion
+     * @throws ModerationForbiddenException if the demotion would leave none
+     */
+    public void requireAnotherAdministratorRemains(long administratorCount) {
+        if (administratorCount <= 1) {
+            throw new ModerationForbiddenException("Cannot demote the last administrator");
         }
     }
 

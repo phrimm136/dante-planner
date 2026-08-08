@@ -6,6 +6,7 @@ import org.danteplanner.backend.moderation.entity.PlannerReport;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.moderation.exception.ReportAlreadyExistsException;
 import org.danteplanner.backend.moderation.repository.PlannerReportRepository;
+import org.danteplanner.backend.moderation.validation.ReportUniquenessValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class PlannerReportService {
 
     private final PlannerReportRepository reportRepository;
     private final PlannerAccessGuard accessGuard;
+    private final ReportUniquenessValidator reportUniquenessValidator;
 
     /**
      * Create a report for a planner.
@@ -40,10 +42,8 @@ public class PlannerReportService {
 
         accessGuard.checkPublished(plannerId);
 
-        // Check if already reported (one report per user per planner)
-        if (reportRepository.existsByUserIdAndPlannerId(userId, plannerId)) {
-            throw new ReportAlreadyExistsException(plannerId, userId);
-        }
+        reportUniquenessValidator.requireFirstPlannerReport(
+                reportRepository.existsByUserIdAndPlannerId(userId, plannerId), plannerId, userId);
 
         PlannerReport report = new PlannerReport(userId, plannerId);
         PlannerReport saved = reportRepository.insert(report);
