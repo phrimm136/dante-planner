@@ -197,7 +197,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         Planner planner = draft();
         publishingService.publish(owner.getId(), planner.getId());
         assertThat(catalogRepository.findById(planner.getId())
-                .map(PlannerCatalog::getRecommended).orElseThrow()).isFalse();
+                .map(PlannerCatalog::isRecommended).orElseThrow()).isFalse();
 
         // votes up to one below the threshold: still not recommended
         for (int i = 0; i < recommendedThreshold - 1; i++) {
@@ -205,25 +205,25 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
             engagementService.castVote(voter.getId(), planner.getId(), VoteType.UP);
         }
         assertThat(catalogRepository.findById(planner.getId())
-                .map(PlannerCatalog::getRecommended).orElseThrow())
+                .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("below threshold stays unrecommended").isFalse();
 
         // the crossing vote flips the derived flag
         User crosser = TestDataFactory.createTestUser(userRepository, "crosser@example.com");
         engagementService.castVote(crosser.getId(), planner.getId(), VoteType.UP);
         assertThat(catalogRepository.findById(planner.getId())
-                .map(PlannerCatalog::getRecommended).orElseThrow())
+                .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("threshold crossing sets recommended").isTrue();
 
         // moderation hide clears it; unhide recomputes it from stats
         plannerModerationService.hideFromRecommended(planner.getId(), admin.getId(), new HidePlannerRequest("off-list"));
         assertThat(catalogRepository.findById(planner.getId())
-                .map(PlannerCatalog::getRecommended).orElseThrow())
+                .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("hidden planner is not recommended").isFalse();
 
         plannerModerationService.unhideFromRecommended(planner.getId(), admin.getId());
         assertThat(catalogRepository.findById(planner.getId())
-                .map(PlannerCatalog::getRecommended).orElseThrow())
+                .map(PlannerCatalog::isRecommended).orElseThrow())
                 .as("unhide restores the stats-derived flag").isTrue();
     }
 

@@ -16,6 +16,7 @@ import org.danteplanner.backend.user.entity.UserRole;
 import org.danteplanner.backend.auth.exception.InvalidTokenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -77,12 +78,8 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
     @Override
     public String generateAccessToken(Long userId, UserRole role) {
-        if (userId == null) {
-            throw new IllegalArgumentException("userId must not be null");
-        }
-        if (role == null) {
-            throw new IllegalArgumentException("role must not be null");
-        }
+        Assert.notNull(userId, "userId must not be null");
+        Assert.notNull(role, "role must not be null");
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenClaims.TYPE_ACCESS);
@@ -98,12 +95,8 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
 
     @Override
     public String generateRefreshToken(Long userId, String familyId, String parentJti) {
-        if (userId == null) {
-            throw new IllegalArgumentException("userId must not be null");
-        }
-        if (familyId == null) {
-            throw new IllegalArgumentException("familyId must not be null");
-        }
+        Assert.notNull(userId, "userId must not be null");
+        Assert.notNull(familyId, "familyId must not be null");
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_TYPE, TokenClaims.TYPE_REFRESH);
@@ -138,7 +131,7 @@ public class JwtTokenService implements TokenGenerator, TokenValidator {
         if (subject == null) {
             throw new InvalidTokenException(InvalidTokenException.Reason.MISSING_CLAIMS);
         }
-        Long userId;
+        final long userId;
         try {
             userId = Long.parseLong(subject);
         } catch (NumberFormatException e) {

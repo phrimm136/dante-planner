@@ -30,24 +30,12 @@ public class PlannerEntityFilterId implements Serializable {
         return entityType;
     }
 
-    public void setEntityType(ContentEntityType entityType) {
-        this.entityType = entityType;
-    }
-
     public Integer getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(Integer entityId) {
-        this.entityId = entityId;
-    }
-
     public UUID getPlannerId() {
         return plannerId;
-    }
-
-    public void setPlannerId(UUID plannerId) {
-        this.plannerId = plannerId;
     }
 
     @Override

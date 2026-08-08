@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Optional;
@@ -96,9 +97,7 @@ public interface PlannerCommentRepository extends JpaRepository<PlannerComment, 
      * @throws IllegalArgumentException if the comment already carries an id
      */
     default PlannerComment insert(PlannerComment comment) {
-        if (comment.getId() != null) {
-            throw new IllegalArgumentException("insert() takes new rows only");
-        }
+        Assert.isNull(comment.getId(), "insert() takes new rows only");
         return save(comment);
     }
 }

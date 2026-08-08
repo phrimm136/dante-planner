@@ -27,16 +27,8 @@ public class PlannerBookmarkId implements Serializable {
         return userId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     public UUID getPlannerId() {
         return plannerId;
-    }
-
-    public void setPlannerId(UUID plannerId) {
-        this.plannerId = plannerId;
     }
 
     @Override

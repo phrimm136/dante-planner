@@ -26,16 +26,8 @@ public class PlannerKeywordFilterId implements Serializable {
         return keyword;
     }
 
-    public void setKeyword(String keyword) {
-        this.keyword = keyword;
-    }
-
     public UUID getPlannerId() {
         return plannerId;
-    }
-
-    public void setPlannerId(UUID plannerId) {
-        this.plannerId = plannerId;
     }
 
     @Override

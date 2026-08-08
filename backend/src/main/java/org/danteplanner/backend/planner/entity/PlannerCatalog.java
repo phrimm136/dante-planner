@@ -61,7 +61,6 @@ public class PlannerCatalog {
     private Instant firstPublishedAt;
 
     @Column(nullable = false)
-    @Setter
     @Builder.Default
-    private Boolean recommended = false;
+    private boolean recommended = false;
 }

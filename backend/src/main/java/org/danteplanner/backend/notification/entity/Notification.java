@@ -54,7 +54,7 @@ public class Notification {
     private NotificationType notificationType;
 
     @Column(name = "`read`", nullable = false)
-    private Boolean read = false;
+    private boolean read = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

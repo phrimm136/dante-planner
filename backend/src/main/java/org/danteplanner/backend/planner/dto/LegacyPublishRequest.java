@@ -49,6 +49,7 @@ public record LegacyPublishRequest(
     Long syncVersion,
     Set<String> selectedKeywords
 ) {
+    /** A null {@code selectedKeywords} is preserved: it means "leave unchanged", which an empty set does not. */
     public LegacyPublishRequest {
         selectedKeywords = selectedKeywords == null ? null : Set.copyOf(selectedKeywords);
     }

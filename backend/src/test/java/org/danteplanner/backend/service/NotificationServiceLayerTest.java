@@ -114,7 +114,7 @@ class NotificationServiceLayerTest {
             assertEquals(NotificationType.PLANNER_RECOMMENDED, saved.getNotificationType());
             assertEquals(testPlannerId, saved.getPlannerId());
             assertEquals("Test Planner Title", saved.getPlannerTitle());
-            assertFalse(saved.getRead());
+            assertFalse(saved.isRead());
         }
 
         @Test
@@ -410,7 +410,7 @@ class NotificationServiceLayerTest {
             UUID publicId = UUID.randomUUID();
             Notification notification = new Notification(testUserId, testPlannerId.toString(), NotificationType.PLANNER_RECOMMENDED);
             notification.setPublicId(publicId);
-            assertFalse(notification.getRead());
+            assertFalse(notification.isRead());
 
             when(notificationRepository.findByPublicId(publicId))
                     .thenReturn(Optional.of(notification));
@@ -419,7 +419,7 @@ class NotificationServiceLayerTest {
             NotificationResponse response = inboxService.markAsRead(publicId, testUserId);
 
             // Assert
-            assertTrue(notification.getRead());
+            assertTrue(notification.isRead());
             assertNotNull(notification.getReadAt());
             assertTrue(response.read());
         }

@@ -30,24 +30,12 @@ public class PlannerViewId implements Serializable {
         return plannerId;
     }
 
-    public void setPlannerId(UUID plannerId) {
-        this.plannerId = plannerId;
-    }
-
     public String getViewerHash() {
         return viewerHash;
     }
 
-    public void setViewerHash(String viewerHash) {
-        this.viewerHash = viewerHash;
-    }
-
     public LocalDate getViewDate() {
         return viewDate;
-    }
-
-    public void setViewDate(LocalDate viewDate) {
-        this.viewDate = viewDate;
     }
 
     @Override

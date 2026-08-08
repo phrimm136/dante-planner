@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.util.Assert;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -120,9 +121,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
      * @throws IllegalArgumentException if the notification already carries an id
      */
     default Notification insert(Notification notification) {
-        if (notification.getId() != null) {
-            throw new IllegalArgumentException("insert() takes new rows only");
-        }
+        Assert.isNull(notification.getId(), "insert() takes new rows only");
         return save(notification);
     }
 }

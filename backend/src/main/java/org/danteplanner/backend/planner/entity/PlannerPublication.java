@@ -51,7 +51,7 @@ public class PlannerPublication {
     @Column(name = "owner_notifications_enabled", nullable = false)
     @Setter(AccessLevel.PACKAGE)
     @Builder.Default
-    private Boolean ownerNotificationsEnabled = true;
+    private boolean ownerNotificationsEnabled = true;
 
     /**
      * Enter public view, stamping firstPublishedAt on the first entry.

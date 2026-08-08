@@ -12,6 +12,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import org.springframework.data.domain.Persistable;
+import org.springframework.util.Assert;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -95,10 +96,8 @@ public class PlannerVote implements Persistable<PlannerVoteId> {
     protected void markNotNew() {
         this.isNew = false;
         // Validate entity integrity after loading from database
-        if (this.voteType == null) {
-            throw new IllegalStateException(
-                "Vote loaded with null voteType - data corruption detected for vote: " + getId());
-        }
+        Assert.notNull(this.voteType,
+                () -> "Vote loaded with null voteType - data corruption detected for vote: " + getId());
     }
 
     // Getters only - votes are immutable

@@ -80,11 +80,11 @@ public class PlannerContent {
     @Column(name = "content_schema_version", nullable = false)
     @Setter
     @Builder.Default
-    private Integer contentSchemaVersion = 2;
+    private int contentSchemaVersion = 2;
 
     @Column(name = "game_content_version", nullable = false)
     @Setter
-    private Integer gameContentVersion;
+    private int gameContentVersion;
 
     @Column(name = "sync_version", nullable = false)
     @Builder.Default

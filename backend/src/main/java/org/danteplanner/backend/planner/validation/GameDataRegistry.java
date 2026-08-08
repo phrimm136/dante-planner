@@ -160,7 +160,6 @@ public class GameDataRegistry {
     }
 
     private String stripGiftEnhancement(String id) {
-        if (id == null) return null;
         Matcher matcher = GIFT_ENHANCEMENT_PATTERN.matcher(id);
         return matcher.matches() ? matcher.group(1) : id;
     }

@@ -120,7 +120,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             return;
         }
 
-        Long userId = authenticatedUserId();
+        long userId = authenticatedUserId();
         if (declaration.endpoint().isEmpty()) {
             rateLimitService.check(policy, userId);
         } else {
@@ -132,7 +132,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
      * @throws IllegalStateException if the handler is reachable without authentication, which would
      *                               otherwise charge every anonymous caller to one shared bucket
      */
-    private Long authenticatedUserId() {
+    private long authenticatedUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof Long userId)) {
             throw new IllegalStateException(

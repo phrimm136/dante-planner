@@ -22,7 +22,7 @@ public interface PlannerSummaryRow {
 
     PlannerStatus getStatus();
 
-    Long getSyncVersion();
+    long getSyncVersion();
 
     Instant getLastModifiedAt();
 }

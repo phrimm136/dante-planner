@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.Assert;
 
 import java.time.Instant;
 import java.util.List;
@@ -121,9 +122,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @throws IllegalArgumentException if the account already carries an id
      */
     default User insert(User user) {
-        if (user.getId() != null) {
-            throw new IllegalArgumentException("insert() takes new rows only");
-        }
+        Assert.isNull(user.getId(), "insert() takes new rows only");
         return save(user);
     }
 }

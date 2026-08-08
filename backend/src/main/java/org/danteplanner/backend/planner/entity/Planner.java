@@ -142,15 +142,15 @@ public class Planner implements Persistable<UUID> {
         return content.getLoadedContent();
     }
 
-    public Integer getSchemaVersion() {
+    public int getSchemaVersion() {
         return content.getContentSchemaVersion();
     }
 
-    public Integer getContentVersion() {
+    public int getContentVersion() {
         return content.getGameContentVersion();
     }
 
-    public Long getSyncVersion() {
+    public long getSyncVersion() {
         return content.getSyncVersion();
     }
 
@@ -174,7 +174,7 @@ public class Planner implements Persistable<UUID> {
         return content.getLoadedSelectedKeywords();
     }
 
-    public boolean getPublished() {
+    public boolean isPublished() {
         return publication.isPublished();
     }
 
@@ -182,16 +182,16 @@ public class Planner implements Persistable<UUID> {
         return publication.getFirstPublishedAt();
     }
 
-    public boolean getOwnerNotificationsEnabled() {
-        return publication.getOwnerNotificationsEnabled();
+    public boolean isOwnerNotificationsEnabled() {
+        return publication.isOwnerNotificationsEnabled();
     }
 
     public Instant getTakenDownAt() {
         return moderation.getTakenDownAt();
     }
 
-    public boolean getHiddenFromRecommended() {
-        return moderation.getHiddenFromRecommended();
+    public boolean isHiddenFromRecommended() {
+        return moderation.isHiddenFromRecommended();
     }
 
     public boolean isDeleted() {

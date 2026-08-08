@@ -1,5 +1,7 @@
 package org.danteplanner.backend.auth.token;
 
+import org.springframework.util.Assert;
+
 import org.danteplanner.backend.user.entity.UserRole;
 
 import java.util.Date;
@@ -27,21 +29,11 @@ public record TokenClaims(
         String parentJti
 ) {
     public TokenClaims {
-        if (userId == null) {
-            throw new IllegalArgumentException("userId must not be null");
-        }
-        if (type == null || type.isBlank()) {
-            throw new IllegalArgumentException("type must not be null or blank");
-        }
-        if (issuedAt == null) {
-            throw new IllegalArgumentException("issuedAt must not be null");
-        }
-        if (expiration == null) {
-            throw new IllegalArgumentException("expiration must not be null");
-        }
-        if (expiration.before(issuedAt)) {
-            throw new IllegalArgumentException("expiration must be after issuedAt");
-        }
+        Assert.notNull(userId, "userId must not be null");
+        Assert.hasText(type, "type must not be null or blank");
+        Assert.notNull(issuedAt, "issuedAt must not be null");
+        Assert.notNull(expiration, "expiration must not be null");
+        Assert.isTrue(!expiration.before(issuedAt), "expiration must be after issuedAt");
     }
 
     /**

@@ -59,14 +59,14 @@ public class JwtProperties {
      * Default: 900000 (15 minutes)
      */
     @Min(value = 1, message = "Access token expiry must be positive")
-    private Long accessTokenExpiry = 900000L;
+    private long accessTokenExpiry = 900000L;
 
     /**
      * Refresh token expiry time in milliseconds.
      * Default: 604800000 (7 days)
      */
     @Min(value = 1, message = "Refresh token expiry must be positive")
-    private Long refreshTokenExpiry = 604800000L;
+    private long refreshTokenExpiry = 604800000L;
 
     /**
      * Returns access token expiry in seconds (for cookie max-age).

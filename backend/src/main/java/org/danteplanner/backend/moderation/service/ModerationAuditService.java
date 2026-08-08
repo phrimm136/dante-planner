@@ -23,6 +23,19 @@ public class ModerationAuditService {
     private final ModerationActionRepository moderationActionRepository;
 
     /**
+     * Record one moderator action that carries neither a reason nor a duration.
+     *
+     * @param actorId    the moderator or admin performing the action
+     * @param targetUuid the public id of the affected user, planner, or comment
+     * @param actionType what was done
+     * @param targetType what kind of entity it was done to
+     */
+    public void record(Long actorId, String targetUuid, ModerationAction.ActionType actionType,
+            ModerationAction.TargetType targetType) {
+        record(actorId, targetUuid, actionType, targetType, null, null);
+    }
+
+    /**
      * Record one moderator action that carries no duration.
      *
      * @param actorId    the moderator or admin performing the action

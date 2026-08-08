@@ -47,7 +47,7 @@ public class PlannerModeration {
 
     @Column(name = "hidden_from_recommended", nullable = false)
     @Builder.Default
-    private Boolean hiddenFromRecommended = false;
+    private boolean hiddenFromRecommended = false;
 
     @Column(name = "hidden_by_moderator_id")
     private Long hiddenByModeratorId;

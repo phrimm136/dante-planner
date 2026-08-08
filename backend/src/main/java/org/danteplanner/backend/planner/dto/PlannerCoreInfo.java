@@ -13,4 +13,13 @@ public record PlannerCoreInfo(
     String authorUsernameEpithet,
     String authorUsernameSuffix
 ) {
+
+    /**
+     * The empty projection, standing in for a planner whose core row the batch load did not return.
+     *
+     * @return a projection with every field absent
+     */
+    public static PlannerCoreInfo absent() {
+        return new PlannerCoreInfo(null, null, null, null);
+    }
 }

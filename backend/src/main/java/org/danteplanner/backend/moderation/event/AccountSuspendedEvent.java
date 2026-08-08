@@ -15,4 +15,15 @@ public record AccountSuspendedEvent(
         String reason,
         SuspensionType suspensionType,
         Integer durationMinutes) {
+
+    /**
+     * A ban reaching the banned user's open sessions. A ban is permanent, so it carries no duration.
+     *
+     * @param userId the banned user
+     * @param reason the moderator's stated reason, shown to the user
+     * @return the event
+     */
+    public static AccountSuspendedEvent ban(Long userId, String reason) {
+        return new AccountSuspendedEvent(userId, reason, SuspensionType.BAN, null);
+    }
 }
