@@ -10,8 +10,7 @@ Five kinds of document, five jobs. Putting something in the wrong one is how it 
 | *(root)* | How does the system work today | Edited in place; carries no history of its own |
 | `legacy/` | What a retired process produced | Frozen; nothing here is maintained |
 
-Execution tracking lives in GitHub issues, not here. Facts worth surfacing unprompted live in the
-meme store as one-line pointers.
+Execution tracking lives in GitHub issues, not here.
 
 ## Choosing between them
 
@@ -33,11 +32,9 @@ from an agreed design rather than being where the design happens.
 
 | File | Covers |
 |---|---|
-| `architecture-map.md` | Module and service topology |
 | `multi-region-request-paths.md` | How a request traverses the two regions |
 | `prd.md` | Product requirements |
 | `spec.md` | The data-driven feature template |
-| `tech-brief.md` | Stack and technology choices |
 | `testing-principles.md` | The testing charter — tiers, what each owns, and the standing rules |
 | `testing-evidence.md` | What has actually been verified, and how |
 | `external-access.md` | Reaching production from a workstation |
