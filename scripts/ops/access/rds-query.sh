@@ -15,6 +15,7 @@ LOCAL_PORT=${RDS_TUNNEL_PORT:-3306}
 OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/constants.sh
 source "$OPS_DIR/../lib/constants.sh"
+require_aws_session
 
 secret() {
   aws secretsmanager get-secret-value --region us-west-2 \

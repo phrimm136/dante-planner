@@ -7,6 +7,11 @@ set -euo pipefail
 MODE=${1:?usage: rds-tunnel.sh start|stop|status [oregon|seoul]}
 SITE=${2:-oregon}
 LOCAL_PORT=${RDS_TUNNEL_PORT:-3306}
+OPS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/constants.sh
+source "$OPS_DIR/../lib/constants.sh"
+# stop/status only touch the local PID file — no session needed there.
+if [ "$MODE" = start ]; then require_aws_session; fi
 
 case "$SITE" in
   oregon) REGION="us-west-2";      DB_ID="danteplanner-mysql" ;;

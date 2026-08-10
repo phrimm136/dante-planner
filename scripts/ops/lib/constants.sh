@@ -14,3 +14,16 @@ SECRET_RDS_MASTER_PASSWORD="danteplanner/rds/master-password"
 SECRET_RDS_READONLY_USERNAME="danteplanner/rds/readonly-username"
 SECRET_RDS_READONLY_PASSWORD="danteplanner/rds/readonly-password"
 SECRET_STAGING_E2E_ENDPOINTS="danteplanner/staging/e2e-endpoints"
+
+# Ops aws calls authenticate through this SSO profile, never static access keys.
+export AWS_PROFILE="${AWS_PROFILE:-danteplanner}"
+
+require_aws_session() {
+  aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 && return 0
+  {
+    echo "No live AWS session for profile '$AWS_PROFILE'."
+    echo "Run: aws sso login --profile $AWS_PROFILE"
+    echo "First time on this machine: aws configure sso --profile $AWS_PROFILE"
+  } >&2
+  return 1
+}
