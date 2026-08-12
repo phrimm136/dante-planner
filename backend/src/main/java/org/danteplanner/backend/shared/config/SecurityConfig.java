@@ -32,6 +32,32 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     /**
+     * Prevents Spring Boot from auto-registering CsrfDoubleSubmitFilter in the servlet container.
+     * Without this, the filter runs twice: once at the servlet level, ahead of the Spring Security
+     * chain and outside its ordering, and once inside it.
+     */
+    @Bean
+    public FilterRegistrationBean<CsrfDoubleSubmitFilter> csrfFilterRegistration(
+            CsrfDoubleSubmitFilter filter) {
+        FilterRegistrationBean<CsrfDoubleSubmitFilter> bean = new FilterRegistrationBean<>(filter);
+        bean.setEnabled(false);
+        return bean;
+    }
+
+    /**
+     * Prevents Spring Boot from auto-registering JwtAuthenticationFilter in the servlet container.
+     * Without this, the filter runs twice: once at the servlet level, where it authenticates ahead
+     * of the CSRF check that is meant to precede it, and once inside the Spring Security chain.
+     */
+    @Bean
+    public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilterRegistration(
+            JwtAuthenticationFilter filter) {
+        FilterRegistrationBean<JwtAuthenticationFilter> bean = new FilterRegistrationBean<>(filter);
+        bean.setEnabled(false);
+        return bean;
+    }
+
+    /**
      * Prevents Spring Boot from auto-registering MdcLoggingFilter in the servlet container.
      * Without this, the filter runs twice: once at the servlet level (before JwtAuthenticationFilter,
      * so SecurityContext is empty and userId = "guest") and once inside the Spring Security chain.

@@ -1,10 +1,13 @@
 package org.danteplanner.backend.architecture;
 
+import java.util.Set;
+import java.util.TreeSet;
+
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaParameter;
-import com.tngtech.archunit.core.domain.JavaParameterizedType;
-import com.tngtech.archunit.core.domain.JavaType;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -18,6 +21,7 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Executable form of the prose conventions in {@code backend/CLAUDE.md}.
@@ -120,42 +124,56 @@ class ConventionBaselineTest {
                     .as("@Valid beside every @RequestBody");
 
     /**
-     * A mapped entity returned from a controller serializes whatever its mapping happens to expose,
-     * so a new column becomes a response field nobody chose. Identified by {@code @Entity} rather
-     * than by package: {@code shared.entity} holds enums that are legitimate response values.
-     * Checked on the type arguments too, because the raw return type is always
-     * {@code ResponseEntity}.
+     * The controllers that dereference a mapped entity a service handed back — state read from the
+     * mapping in a local rather than through a DTO, which is why no signature carries it.
+     */
+    private static final Set<String> ENTITY_TOUCHING_CONTROLLERS = Set.of(
+            "org.danteplanner.backend.moderation.controller.ModerationController",
+            "org.danteplanner.backend.planner.controller.PlannerEngagementController");
+
+    /**
+     * Identified by {@code @Entity} rather than by package: {@code shared.entity} holds enums that
+     * are legitimate response values.
      */
     @ArchTest
-    static final ArchRule controllers_return_dtos =
-            methods()
-                    .that().areDeclaredInClassesThat().resideInAPackage("..controller..")
-                    .should(new ArchCondition<JavaMethod>("return a DTO rather than a mapped entity") {
-                        @Override
-                        public void check(JavaMethod method, ConditionEvents events) {
-                            returnedTypes(method).stream()
-                                    .filter(type -> type.isAnnotatedWith(ENTITY))
-                                    .forEach(type -> events.add(SimpleConditionEvent.violated(method,
-                                            method.getFullName() + " returns " + type.getName()
-                                                    + "; map it to a DTO at the boundary")));
-                        }
-                    })
-                    .as("controllers return DTOs, never mapped entities");
+    static final ArchRule controllers_exchange_dtos =
+            noClasses()
+                    .that().resideInAPackage("..controller..").and(notFrozen())
+                    .should().dependOnClassesThat().areAnnotatedWith(ENTITY)
+                    .as("controllers exchange DTOs, never mapped entities");
+
+    @ArchTest
+    static void frozenEntityControllers_WhenScanned_AreStillLive(JavaClasses classes) {
+        Set<String> stale = new TreeSet<>(ENTITY_TOUCHING_CONTROLLERS);
+        classes.stream()
+                .filter(ConventionBaselineTest::touchesMappedEntity)
+                .forEach(javaClass -> stale.remove(topLevel(javaClass)));
+
+        assertThat(stale)
+                .as("these no longer touch a mapped entity, so the entry now excuses a leak nobody "
+                        + "has; delete it and let the rule cover the controller again")
+                .isEmpty();
+    }
+
+    private static DescribedPredicate<JavaClass> notFrozen() {
+        return DescribedPredicate.describe(
+                "are not frozen against mapped entities",
+                javaClass -> !ENTITY_TOUCHING_CONTROLLERS.contains(topLevel(javaClass)));
+    }
+
+    private static boolean touchesMappedEntity(JavaClass javaClass) {
+        return javaClass.getDirectDependenciesFromSelf().stream()
+                .anyMatch(dependency -> dependency.getTargetClass().isAnnotatedWith(ENTITY));
+    }
+
+    private static String topLevel(JavaClass javaClass) {
+        String fullName = javaClass.getFullName();
+        int nested = fullName.indexOf('$');
+        return nested < 0 ? fullName : fullName.substring(0, nested);
+    }
 
     private static boolean isAnnotated(JavaParameter parameter, String annotation) {
         return parameter.getAnnotations().stream()
                 .anyMatch(a -> a.getRawType().getName().equals(annotation));
-    }
-
-    /** The declared return type plus, when it is parameterized, its type arguments. */
-    private static java.util.List<JavaClass> returnedTypes(JavaMethod method) {
-        JavaType returned = method.getReturnType();
-        java.util.List<JavaClass> types = new java.util.ArrayList<>();
-        types.add(returned.toErasure());
-        if (returned instanceof JavaParameterizedType parameterized) {
-            parameterized.getActualTypeArguments()
-                    .forEach(argument -> types.add(argument.toErasure()));
-        }
-        return types;
     }
 }
