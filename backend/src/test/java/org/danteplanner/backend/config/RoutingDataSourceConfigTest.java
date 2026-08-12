@@ -58,6 +58,16 @@ class RoutingDataSourceConfigTest {
 
             assertThat(hikari.getMaximumPoolSize()).isEqualTo(PoolLedger.SEOUL_REPLICA_POOL);
         }
+
+        @Test
+        void buildHikariConfig_WhenBuilt_NamesEachPoolFromTheLedger() {
+            assertThat(config.buildPrimaryHikariConfig().getPoolName())
+                    .isEqualTo(PoolLedger.PRIMARY_POOL_NAME);
+            assertThat(config.buildReplicaHikariConfig().getPoolName())
+                    .isEqualTo(PoolLedger.REPLICA_POOL_NAME);
+            assertThat(config.buildBulkheadHikariConfig().getPoolName())
+                    .isEqualTo(PoolLedger.BULKHEAD_POOL_NAME);
+        }
     }
 
     @Nested

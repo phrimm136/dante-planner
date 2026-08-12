@@ -315,7 +315,7 @@ class TestIsolationConventionTest {
      * low is what prevents it. The budget sits at the current count, so any addition is a
      * deliberate decision rather than a silent slide toward the bound.
      */
-    private static final int CONTEXT_BUDGET = 29;
+    private static final int CONTEXT_BUDGET = 30;
 
     @Test
     @DisplayName("the suite stays within its application-context budget")

@@ -71,6 +71,16 @@ public class GtidCapturingDataSource extends AbstractDataSource {
         return wrap(delegate.getConnection(username, password));
     }
 
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return iface.isInstance(this) ? iface.cast(this) : delegate.unwrap(iface);
+    }
+
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this) || delegate.isWrapperFor(iface);
+    }
+
     private Connection wrap(Connection target) {
         return (Connection) Proxy.newProxyInstance(
                 Connection.class.getClassLoader(),

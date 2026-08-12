@@ -3,6 +3,7 @@ package org.danteplanner.backend.readpath;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.danteplanner.backend.shared.config.ReadOnlyRoutingDataSource;
 import org.danteplanner.backend.shared.config.RoutingKey;
+import org.danteplanner.backend.shared.config.UndeclaredPrimaryAccessGuard;
 import org.danteplanner.backend.shared.exception.EntityNotFoundException;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
 import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
@@ -43,6 +44,10 @@ class PrimaryReCheckTest {
     private static final String ENTITY_TYPE = "planner";
     private static final String PROMOTED_COUNTER = "replica_miss_promoted_total";
 
+    /** Never armed: these probes read the routing decision, they do not acquire a connection. */
+    private static final UndeclaredPrimaryAccessGuard PROBE_GUARD =
+            new UndeclaredPrimaryAccessGuard(new SimpleMeterRegistry(), false);
+
     @Mock ContentTombstoneStore tombstoneStore;
 
     private SimpleMeterRegistry meterRegistry;
@@ -63,7 +68,7 @@ class PrimaryReCheckTest {
 
     /** What the current thread would route to, as the routing datasource itself decides it. */
     private static Object currentRoutingKey() {
-        return new ReadOnlyRoutingDataSource().determineCurrentLookupKey();
+        return new ReadOnlyRoutingDataSource(PROBE_GUARD).determineCurrentLookupKey();
     }
 
     private double promoted() {
@@ -178,7 +183,7 @@ class PrimaryReCheckTest {
      * falls back to PRIMARY, which is indistinguishable from a leaked PRIMARY pin.
      */
     private static Object currentRoutingKeyOverride() {
-        ReadOnlyRoutingDataSource probe = new ReadOnlyRoutingDataSource();
+        ReadOnlyRoutingDataSource probe = new ReadOnlyRoutingDataSource(PROBE_GUARD);
         Object key = probe.determineCurrentLookupKey();
         return key == RoutingKey.PRIMARY ? null : key;
     }

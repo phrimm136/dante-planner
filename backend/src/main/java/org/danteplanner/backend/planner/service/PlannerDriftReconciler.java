@@ -74,11 +74,6 @@ public class PlannerDriftReconciler {
             Set<UUID> unreadable) {
     }
 
-    @Scheduled(cron = "${planner.reconciler.cron:0 0 4 * * *}")
-    public void runScheduled() {
-        reconcile();
-    }
-
     /**
      * Run every audit and emit a record per finding.
      *
@@ -87,6 +82,7 @@ public class PlannerDriftReconciler {
      *
      * @return the drift records found in this pass
      */
+    @Scheduled(cron = "${planner.reconciler.cron:0 0 4 * * *}")
     @Transactional(readOnly = true)
     public List<DriftRecord> reconcile() {
         List<DriftRecord> records = Stream.of(

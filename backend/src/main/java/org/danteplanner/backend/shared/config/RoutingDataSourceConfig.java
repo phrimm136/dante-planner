@@ -5,7 +5,10 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,6 +33,10 @@ import org.danteplanner.backend.shared.readpath.PrimaryReCheck;
  * <p>Each HikariCP pool is sized from the shared {@link PoolLedger} constants — the same ledger
  * the INV9 config assertion reads — so production and the assertion never drift. The primary pool
  * is sized per region (Seoul 10 / Oregon 15); the Seoul-local replica pool is 15.</p>
+ *
+ * <p>The pools are beans rather than locals so Boot's pool-metrics post-processor can reach them:
+ * it binds {@code hikaricp_*} meters onto {@code DataSource} beans only, tagged with the pool
+ * name.</p>
  */
 @Configuration
 @ConditionalOnProperty(name = "datasource.routing.enabled", havingValue = "true")
@@ -65,6 +72,7 @@ public class RoutingDataSourceConfig {
 
     public HikariConfig buildPrimaryHikariConfig() {
         HikariConfig config = new HikariConfig();
+        config.setPoolName(PoolLedger.PRIMARY_POOL_NAME);
         applyEndpoint(config, primaryProperties.getUrl(),
                 primaryProperties.getUsername(), primaryProperties.getPassword());
         config.setMaximumPoolSize(
@@ -77,6 +85,7 @@ public class RoutingDataSourceConfig {
 
     public HikariConfig buildReplicaHikariConfig() {
         HikariConfig config = new HikariConfig();
+        config.setPoolName(PoolLedger.REPLICA_POOL_NAME);
         applyEndpoint(config, replicaProperties.getUrl(),
                 replicaProperties.getUsername(), replicaProperties.getPassword());
         config.setMaximumPoolSize(PoolLedger.SEOUL_REPLICA_POOL);
@@ -86,6 +95,7 @@ public class RoutingDataSourceConfig {
 
     public HikariConfig buildBulkheadHikariConfig() {
         HikariConfig config = new HikariConfig();
+        config.setPoolName(PoolLedger.BULKHEAD_POOL_NAME);
         boolean ownEndpoint = StringUtils.hasText(bulkheadProperties.getUrl());
         applyEndpoint(config,
                 ownEndpoint ? bulkheadProperties.getUrl() : primaryProperties.getUrl(),
@@ -103,24 +113,50 @@ public class RoutingDataSourceConfig {
     }
 
     @Bean
+    public HikariDataSource primaryPool() {
+        return new HikariDataSource(buildPrimaryHikariConfig());
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "datasource.replica.enabled", havingValue = "true")
+    public HikariDataSource replicaPool() {
+        return new HikariDataSource(buildReplicaHikariConfig());
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "datasource.replica.enabled", havingValue = "true")
+    public HikariDataSource bulkheadPool() {
+        return new HikariDataSource(buildBulkheadHikariConfig());
+    }
+
+    @Bean
+    public UndeclaredPrimaryAccessGuard undeclaredPrimaryAccessGuard(
+            MeterRegistry meterRegistry,
+            @Value("${datasource.routing.undeclared-primary-fail-fast}") boolean failFast) {
+        return new UndeclaredPrimaryAccessGuard(meterRegistry, failFast);
+    }
+
+    @Bean
     @Primary
-    public DataSource dataSource(GtidWriteCapture gtidWriteCapture) {
+    public DataSource dataSource(
+            GtidWriteCapture gtidWriteCapture,
+            UndeclaredPrimaryAccessGuard undeclaredGuard,
+            @Qualifier("primaryPool") HikariDataSource primaryPool,
+            @Qualifier("replicaPool") ObjectProvider<HikariDataSource> replicaPool,
+            @Qualifier("bulkheadPool") ObjectProvider<HikariDataSource> bulkheadPool) {
         // Wrapped BELOW the routing and lazy proxies: the committed GTID lives as session state on
         // the physical connection, and this is the only layer where "the connection that committed"
         // is held rather than looked up. The replica pool takes no writes, so it stays bare.
-        DataSource primary =
-                new GtidCapturingDataSource(new HikariDataSource(buildPrimaryHikariConfig()), gtidWriteCapture);
+        DataSource primary = new GtidCapturingDataSource(primaryPool, gtidWriteCapture);
         Map<Object, Object> targets = new HashMap<>();
         targets.put(RoutingKey.PRIMARY, primary);
         if (replicaProperties.isEnabled()) {
-            HikariDataSource replica = new HikariDataSource(buildReplicaHikariConfig());
-            targets.put(RoutingKey.REPLICA, replica);
-            HikariDataSource bulkhead = new HikariDataSource(buildBulkheadHikariConfig());
-            targets.put(RoutingKey.BULKHEAD, bulkhead);
+            targets.put(RoutingKey.REPLICA, replicaPool.getObject());
+            targets.put(RoutingKey.BULKHEAD, bulkheadPool.getObject());
         } else {
             targets.put(RoutingKey.REPLICA, primary);
         }
-        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource();
+        ReadOnlyRoutingDataSource routing = new ReadOnlyRoutingDataSource(undeclaredGuard);
         routing.setTargetDataSources(targets);
         routing.setDefaultTargetDataSource(primary);
         routing.afterPropertiesSet();

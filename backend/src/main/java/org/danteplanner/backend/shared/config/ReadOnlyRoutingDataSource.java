@@ -14,10 +14,20 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * re-check reaches the primary through the isolated bulkhead pool. The override is a static
  * {@link ThreadLocal} — like {@link TransactionSynchronizationManager} itself — because the routing
  * datasource is otherwise unreachable beneath the lazy-connection proxy.</p>
+ *
+ * <p>Every acquisition that lands on {@link RoutingKey#PRIMARY} without an override passes through
+ * {@link UndeclaredPrimaryAccessGuard}, which observes it and may reject it but never redirects
+ * it.</p>
  */
 public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
 
     private static final ThreadLocal<RoutingKey> OVERRIDE = new ThreadLocal<>();
+
+    private final UndeclaredPrimaryAccessGuard undeclaredGuard;
+
+    public ReadOnlyRoutingDataSource(UndeclaredPrimaryAccessGuard undeclaredGuard) {
+        this.undeclaredGuard = undeclaredGuard;
+    }
 
     public static void pinTo(RoutingKey key) {
         OVERRIDE.set(key);
@@ -33,8 +43,10 @@ public class ReadOnlyRoutingDataSource extends AbstractRoutingDataSource {
         if (override != null) {
             return override;
         }
-        return TransactionSynchronizationManager.isCurrentTransactionReadOnly()
-                ? RoutingKey.REPLICA
-                : RoutingKey.PRIMARY;
+        if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
+            return RoutingKey.REPLICA;
+        }
+        undeclaredGuard.checkDeclared();
+        return RoutingKey.PRIMARY;
     }
 }

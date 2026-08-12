@@ -45,6 +45,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.test.context.ActiveProfiles;
@@ -429,7 +430,14 @@ class DegradationIT {
         }
     }
 
+    /**
+     * Descends to the pools themselves. Probing the injected datasource instead would route rather
+     * than reach a pool: the routing key is resolved from the transaction, and there is none here.
+     */
     private static List<DataSource> resolvedTargets(DataSource dataSource) {
+        if (dataSource instanceof LazyConnectionDataSourceProxy lazy) {
+            return resolvedTargets(lazy.getTargetDataSource());
+        }
         if (dataSource instanceof AbstractRoutingDataSource routing) {
             Map<Object, DataSource> resolved = routing.getResolvedDataSources();
             return List.copyOf(resolved.values());
