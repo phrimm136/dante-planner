@@ -16,6 +16,8 @@ import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Buffers view records per pod and drains them on flush. A view is one row per
@@ -51,9 +53,11 @@ public class PlannerViewRecorder {
         Map<UUID, Integer> newViewsByPlanner =
                 plannerViewRepository.insertIgnoreReturningNewCounts(drained, Instant.now());
         newViewsByPlanner.forEach(plannerStatsRepository::incrementViewCountBy);
-        // Drained last: a lock wait or deadlock here throws before the removal, so the batch stays
-        // buffered for the next tick. Removing first loses every view in it, the insert being
-        // rolled back with it.
-        buffer.removeAll(drained);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                buffer.removeAll(drained);
+            }
+        });
     }
 }
