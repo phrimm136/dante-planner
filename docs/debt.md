@@ -65,3 +65,27 @@ occupying attention, and are pulled only by a deliberate defrag or design sessio
   the FE extension set) → smoke-check converted-comment render and new-comment
   round-trip → reopen. Rehearse the entire window first on a prod dump restored
   locally: Flyway train plus converter against real data.
+- `DegradationIT` F2 (rate-limit Redis cut → 503) is order-dependent: it passes when the
+  class runs alone and fails in full-class order, on clean HEAD as well as after the
+  2026-08-10 fix batch, so something an earlier test leaves behind (container state or
+  bucket state) breaks it. Route through /diagnose before touching the assertion.
+- `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
+  routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
+  `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
+  covered since the lazy-proxy descent fix; the primary needs an unwrap step.
+- `user.entity` is a de facto shared domain model: `User`, `UserRole` and `RestrictionState`
+  are read by 25 classes across every feature, including `shared.security` and
+  `auth.token`. The entity half of the user-internals boundary rule is therefore a freeze
+  against new edges, not a boundary anything is close to satisfying — closing it means
+  deciding what the account types look like outside the `user` feature (a shared value type,
+  a projection, or an id plus a lookup), which is design-lane work, not a mechanical move.
+- The backend patterns still declared in `.claude/hooks/forbidden-patterns.json` predate
+  ADR 070 and should be audited for migration to checkstyle: field injection
+  (`@Autowired private`), entity-typed `ResponseEntity` returns from controllers, `.get()`
+  on `Optional`, `@Transactional` on private methods, string concatenation inside `@Query`,
+  empty catch blocks, `@RequestBody` without `@Valid`, change-history phrasing in durable
+  records, `Boolean.TRUE.equals(...)`, plus the file-specific pairs (`@Transactional` in a
+  Controller, `@Query` in a Service). Each needs either a checkstyle equivalent — a
+  `RegexpSinglelineJava` id with id-scoped suppressions, or an ArchUnit rule where the check
+  is structural — or a stated reason it is Claude-only working process and belongs in the
+  hook.
