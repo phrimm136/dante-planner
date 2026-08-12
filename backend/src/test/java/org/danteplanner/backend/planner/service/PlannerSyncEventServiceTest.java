@@ -12,6 +12,7 @@ import org.danteplanner.backend.shared.sse.SseRedisSubscriber;
 import org.danteplanner.backend.shared.sse.SseService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -50,7 +51,7 @@ class PlannerSyncEventServiceTest {
      */
     @Test
     void notifyPlannerUpdate_WhenFannedOutThroughRedis_ExcludesOriginatingDevice() {
-        SsePublisher publisher = new SsePublisher(stringRedisTemplate, objectMapper);
+        SsePublisher publisher = new SsePublisher(stringRedisTemplate, objectMapper, new SimpleMeterRegistry());
         PlannerSyncEventService service = new PlannerSyncEventService(sseService, publisher);
         SseRedisSubscriber subscriber = new SseRedisSubscriber(sseService, plannerCommentSseService, objectMapper);
         UUID originatingDeviceId = UUID.randomUUID();
@@ -88,7 +89,7 @@ class PlannerSyncEventServiceTest {
 
     @Test
     void notifyPlannerUpdate_WhenPayloadGiven_PublishedEnvelopeCarriesSyncVersion() {
-        SsePublisher publisher = new SsePublisher(stringRedisTemplate, objectMapper);
+        SsePublisher publisher = new SsePublisher(stringRedisTemplate, objectMapper, new SimpleMeterRegistry());
         PlannerSyncEventService service = new PlannerSyncEventService(sseService, publisher);
         UUID plannerId = UUID.randomUUID();
 

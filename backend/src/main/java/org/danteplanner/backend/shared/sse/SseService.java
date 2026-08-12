@@ -76,8 +76,9 @@ public class SseService extends AbstractSseService<Long> {
      * @param userId   the user ID
      * @param deviceId the device identifier (UUID)
      * @return the SSE emitter for the connection
+     * @throws IOException if the initial connected event cannot be written
      */
-    public SseEmitter subscribe(Long userId, UUID deviceId) {
+    public SseEmitter subscribe(Long userId, UUID deviceId) throws IOException {
         SseEmitter emitter = register(userId, deviceId);
         log.info("SSE subscribed: user={}, device={}", userId, deviceId);
         return emitter;
@@ -244,11 +245,6 @@ public class SseService extends AbstractSseService<Long> {
     @Override
     protected void afterKeyRemoved(Long userId) {
         settingsCache.invalidate(userId);
-    }
-
-    @Override
-    protected void onConnectedSendFailure(Long userId, UUID deviceId) {
-        log.warn("Failed to send connected event to user {} device {}", userId, deviceId);
     }
 
     @Override

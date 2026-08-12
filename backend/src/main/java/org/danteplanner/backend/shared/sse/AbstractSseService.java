@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * de-duplication, dead-emitter removal, heartbeat probing, and zombie cleanup —
  * over a registry keyed by {@code K} (user ID or planner ID). Subclasses supply
  * routing, event dispatch, registry-specific behavior (settings cache, capacity
- * eviction), and all logging; log level, message, and logger name stay
+ * limits), and all logging; log level, message, and logger name stay
  * per-service via the protected hooks.</p>
  *
  * <p>Not a Spring bean. Concrete subclasses carry {@code @Service} and the
@@ -44,8 +44,9 @@ public abstract class AbstractSseService<K> {
      * @param key      the registry key
      * @param deviceId the device identifier
      * @return the registered emitter
+     * @throws IOException if the initial connected event cannot be written
      */
-    protected SseEmitter register(K key, UUID deviceId) {
+    protected SseEmitter register(K key, UUID deviceId) throws IOException {
         return register(key, deviceId, null);
     }
 
@@ -57,8 +58,9 @@ public abstract class AbstractSseService<K> {
      * @param deviceId the device identifier
      * @param userId   the authenticated account, or null for a guest
      * @return the registered emitter
+     * @throws IOException if the initial connected event cannot be written
      */
-    protected SseEmitter register(K key, UUID deviceId, Long userId) {
+    protected SseEmitter register(K key, UUID deviceId, Long userId) throws IOException {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
 
         var connections = emitters.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>());
@@ -71,11 +73,7 @@ public abstract class AbstractSseService<K> {
         emitter.onTimeout(() -> removeConnection(key, deviceId));
         emitter.onError(e -> removeConnection(key, deviceId));
 
-        try {
-            emitter.send(SseEmitter.event().name("connected").data("{}"));
-        } catch (IOException e) {
-            onConnectedSendFailure(key, deviceId);
-        }
+        emitter.send(SseEmitter.event().name("connected").data("{}"));
 
         return emitter;
     }
@@ -149,8 +147,6 @@ public abstract class AbstractSseService<K> {
 
     protected void afterKeyRemoved(K key) {
     }
-
-    protected abstract void onConnectedSendFailure(K key, UUID deviceId);
 
     protected abstract void onUnsubscribed(K key, UUID deviceId);
 

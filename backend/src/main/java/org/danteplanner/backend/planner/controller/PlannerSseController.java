@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -36,12 +37,13 @@ public class PlannerSseController {
      * @param userId   the authenticated user ID
      * @param deviceId the device identifier (from HTTP-only cookie)
      * @return the SSE emitter
+     * @throws IOException if the initial connected event cannot be written
      */
     @RateLimited(RateLimitPolicy.SSE)
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribeToEvents(
             @AuthenticationPrincipal Long userId,
-            @DeviceId UUID deviceId) {
+            @DeviceId UUID deviceId) throws IOException {
 
         return sseService.subscribe(userId, deviceId);
     }

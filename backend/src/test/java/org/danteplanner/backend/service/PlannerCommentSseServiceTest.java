@@ -4,17 +4,20 @@ import org.danteplanner.backend.comment.service.PlannerCommentSseService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,7 +57,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("registers a subscriber for the planner")
-        void subscribe_WhenNewDevice_RegistersSubscriber() {
+        void subscribe_WhenNewDevice_RegistersSubscriber() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
@@ -62,7 +65,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("replaces the prior emitter when the same device reconnects")
-        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() {
+        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
             UUID deviceId = UUID.randomUUID();
 
             service.subscribe(plannerId, deviceId, null);
@@ -72,13 +75,47 @@ class PlannerCommentSseServiceTest {
         }
 
         @Test
-        @DisplayName("caps the subscriber count by evicting the oldest at capacity")
-        void subscribe_WhenAtCapacity_CapsCount() {
-            for (int i = 0; i < MAX_CONNECTIONS_PER_PLANNER + 1; i++) {
+        @DisplayName("rejects the arriving subscriber at capacity")
+        void subscribe_WhenAtCapacity_RejectsTheNewcomer() throws IOException {
+            fillToCapacity();
+
+            assertThatThrownBy(() -> service.subscribe(plannerId, UUID.randomUUID(), null))
+                    .isInstanceOf(SseCapacityExceededException.class);
+        }
+
+        @Test
+        @DisplayName("keeps every connected subscriber when one is rejected at capacity")
+        void subscribe_WhenAtCapacity_KeepsTheConnectedSubscribers() throws IOException {
+            fillToCapacity();
+
+            assertThatThrownBy(() -> service.subscribe(plannerId, UUID.randomUUID(), null))
+                    .isInstanceOf(SseCapacityExceededException.class);
+
+            assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
+            // A closed emitter throws on the next send and is dropped, so a count that survives a
+            // heartbeat round is what proves no connected subscriber's stream was completed.
+            service.sendHeartbeats();
+            assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
+        }
+
+        @Test
+        @DisplayName("admits a connected device's own reconnect at capacity")
+        void subscribe_WhenSameDeviceReconnectsAtCapacity_IsAdmitted() throws IOException {
+            UUID deviceId = UUID.randomUUID();
+            service.subscribe(plannerId, deviceId, null);
+            for (int i = 0; i < MAX_CONNECTIONS_PER_PLANNER - 1; i++) {
                 service.subscribe(plannerId, UUID.randomUUID(), null);
             }
 
+            assertThatCode(() -> service.subscribe(plannerId, deviceId, null))
+                    .doesNotThrowAnyException();
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
+        }
+
+        private void fillToCapacity() throws IOException {
+            for (int i = 0; i < MAX_CONNECTIONS_PER_PLANNER; i++) {
+                service.subscribe(plannerId, UUID.randomUUID(), null);
+            }
         }
     }
 
@@ -88,7 +125,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void broadcast_WhenEmitterDead_RemovesConnection() {
+        void broadcast_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = service.subscribe(plannerId, deviceId, null);
             emitter.complete();
@@ -128,7 +165,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendHeartbeats_WhenEmitterDead_RemovesConnection() {
+        void sendHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = service.subscribe(plannerId, UUID.randomUUID(), null);
             emitter.complete();
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
@@ -140,7 +177,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("keeps a live connection")
-        void sendHeartbeats_WhenEmitterLive_KeepsConnection() {
+        void sendHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
             service.sendHeartbeats();
@@ -155,7 +192,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the probe fails")
-        void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() {
+        void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = service.subscribe(plannerId, UUID.randomUUID(), null);
             emitter.complete();
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
@@ -167,7 +204,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("keeps a live connection")
-        void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() {
+        void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
             service.cleanupZombieConnections();
@@ -182,7 +219,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("is idempotent when called twice for the same device")
-        void removeConnection_WhenCalledTwice_DoesNotThrow() {
+        void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
             UUID deviceId = UUID.randomUUID();
             service.subscribe(plannerId, deviceId, null);
 
@@ -201,7 +238,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("skips every connection of the excluded account and keeps the rest")
-        void broadcast_WhenExcludingAuthor_SkipsTheirConnectionsOnly() {
+        void broadcast_WhenExcludingAuthor_SkipsTheirConnectionsOnly() throws IOException {
             Long author = 7L;
             SseEmitter authorTab = service.subscribe(plannerId, UUID.randomUUID(), author);
             SseEmitter authorOtherTab = service.subscribe(plannerId, UUID.randomUUID(), author);
@@ -226,7 +263,7 @@ class PlannerCommentSseServiceTest {
 
         @Test
         @DisplayName("sums subscribers across all planners")
-        void getTotalConnectionCount_WhenMultiplePlanners_SumsAll() {
+        void getTotalConnectionCount_WhenMultiplePlanners_SumsAll() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
             service.subscribe(UUID.randomUUID(), UUID.randomUUID(), null);
 

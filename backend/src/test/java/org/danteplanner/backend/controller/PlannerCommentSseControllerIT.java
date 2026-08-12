@@ -93,8 +93,8 @@ class PlannerCommentSseControllerIT extends SharedMySqlContainerSupport {
 
     /**
      * A cookie-less caller is issued a freshly minted device id per request, so a bucket keyed by
-     * that id is a new bucket every time — an unauthenticated client could hold this planner's
-     * connection registry and evict its real subscribers. The bucket must follow the caller.
+     * that id is a new bucket every time — an unauthenticated client could fill this planner's
+     * connection registry and lock its real subscribers out. The bucket must follow the caller.
      */
     @Test
     @DisplayName("charges one bucket across cookie-less requests from the same client address")

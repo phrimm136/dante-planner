@@ -19,6 +19,7 @@ import org.danteplanner.backend.auth.exception.OAuthException;
 import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
+import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.CannotAcquireLockException;
@@ -174,6 +175,20 @@ public class GlobalExceptionHandler {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse("RATE_LIMIT_EXCEEDED", ex.getMessage())));
+    }
+
+    /**
+     * A full planner SSE registry is an expected user error (no Sentry). The response is written
+     * directly because the subscription endpoint declares {@code produces=text/event-stream}, for
+     * which no converter can serialize the JSON body.
+     */
+    @ExceptionHandler(SseCapacityExceededException.class)
+    public void handleSseCapacityExceeded(SseCapacityExceededException ex, HttpServletResponse response) throws IOException {
+        log.warn("SSE capacity exceeded: {}", ex.getMessage());
+        response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(
+            new ErrorResponse("SSE_CAPACITY_EXCEEDED", "Too many active connections for this planner")));
     }
 
     @ExceptionHandler(PlannerConflictException.class)
@@ -396,17 +411,28 @@ public class GlobalExceptionHandler {
      *   <li>Explicit connection close from client</li>
      * </ul>
      * </p>
+     *
+     * <p>Any other IOException is a server failure and answers 500 — unless the response is
+     * already committed, where a null return marks the request handled because no status or body
+     * can still be written.</p>
      */
     @ExceptionHandler(IOException.class)
-    public void handleIOException(IOException ex) {
+    public ResponseEntity<ErrorResponse> handleIOException(IOException ex, HttpServletResponse response) {
         if (ex instanceof ClientAbortException || carriesDisconnectStrerror(ex)) {
             log.debug("SSE client disconnected ({}): {}", ex.getClass().getName(), ex.getMessage());
-            return;
+            return null;
         }
 
         // Other IOExceptions are unexpected and should be sent to Sentry
         Sentry.captureException(ex);
         log.error("Unexpected IOException", ex);
+
+        if (response.isCommitted()) {
+            return null;
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred"));
     }
 
     /**

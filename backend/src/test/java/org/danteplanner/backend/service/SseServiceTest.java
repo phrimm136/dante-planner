@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("registers a connection for the user")
-        void subscribe_WhenNewDevice_RegistersConnection() {
+        void subscribe_WhenNewDevice_RegistersConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
@@ -79,7 +80,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("replaces the prior emitter when the same device reconnects")
-        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() {
+        void subscribe_WhenSameDeviceReconnects_DoesNotDuplicate() throws IOException {
             UUID deviceId = UUID.randomUUID();
 
             sseService.subscribe(USER_ID, deviceId);
@@ -90,7 +91,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("tracks each distinct device separately")
-        void subscribe_WhenMultipleDevices_CountsAll() {
+        void subscribe_WhenMultipleDevices_CountsAll() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
@@ -104,7 +105,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendToUser_WhenEmitterDead_RemovesConnection() {
+        void sendToUser_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = sseService.subscribe(USER_ID, deviceId);
             emitter.complete();
@@ -150,7 +151,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void broadcastToAll_WhenEmitterDead_RemovesConnection() {
+        void broadcastToAll_WhenEmitterDead_RemovesConnection() throws IOException {
             UUID deviceId = UUID.randomUUID();
             SseEmitter emitter = sseService.subscribe(USER_ID, deviceId);
             emitter.complete();
@@ -181,7 +182,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendHeartbeats_WhenEmitterDead_RemovesConnection() {
+        void sendHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
@@ -193,7 +194,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("keeps a live connection")
-        void sendHeartbeats_WhenEmitterLive_KeepsConnection() {
+        void sendHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
             sseService.sendHeartbeats();
@@ -208,7 +209,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("removes the connection when the probe fails")
-        void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() {
+        void cleanupZombieConnections_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
@@ -220,7 +221,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("keeps a live connection")
-        void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() {
+        void cleanupZombieConnections_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
             sseService.cleanupZombieConnections();
@@ -235,7 +236,7 @@ class SseServiceTest {
 
         @Test
         @DisplayName("is idempotent when called twice for the same device")
-        void removeConnection_WhenCalledTwice_DoesNotThrow() {
+        void removeConnection_WhenCalledTwice_DoesNotThrow() throws IOException {
             UUID deviceId = UUID.randomUUID();
             sseService.subscribe(USER_ID, deviceId);
 

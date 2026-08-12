@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -41,7 +42,7 @@ public class PlannerCommentSseController {
      * <p>No authentication required - guests can subscribe. The bucket is keyed by the resolved
      * client identifier rather than the device id: an absent device cookie is minted fresh per
      * request, so a caller that discards cookies would otherwise get an unlimited supply of
-     * buckets and could evict a planner's real subscribers from the connection registry.</p>
+     * buckets and could fill a planner's connection registry, locking its real subscribers out.</p>
      *
      * @param plannerId   the planner ID to subscribe to
      * @param deviceId    the device identifier (from HTTP-only cookie)
@@ -49,13 +50,16 @@ public class PlannerCommentSseController {
      * @return the SSE emitter
      * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
      *         if no published planner carries the id
+     * @throws org.danteplanner.backend.shared.sse.SseCapacityExceededException
+     *         if the planner already holds its maximum connections
+     * @throws IOException if the initial connected event cannot be written
      */
     @RateLimited(RateLimitPolicy.PLANNER_COMMENT_SSE)
     @GetMapping(value = "/{plannerId}/comments/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribeToComments(
             @PathVariable UUID plannerId,
             @DeviceId UUID deviceId,
-            @AuthenticationPrincipal Long userId) {
+            @AuthenticationPrincipal Long userId) throws IOException {
 
         return plannerCommentSseService.subscribe(plannerId, deviceId, userId);
     }

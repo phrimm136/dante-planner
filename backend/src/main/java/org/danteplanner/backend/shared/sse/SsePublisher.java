@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.entity.SseEventType;
@@ -24,8 +25,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class SsePublisher {
 
+    private static final String DROPPED_COUNTER = "sse.publish.dropped";
+
     private final StringRedisTemplate stringRedisTemplate;
     private final ObjectMapper objectMapper;
+    private final MeterRegistry meterRegistry;
 
     /**
      * Publish a user-targeted event to every one of the user's devices.
@@ -135,6 +139,7 @@ public class SsePublisher {
         try {
             stringRedisTemplate.convertAndSend(channel.topic(), json);
         } catch (DataAccessException e) {
+            meterRegistry.counter(DROPPED_COUNTER, "channel", channel.name()).increment();
             log.warn("SSE publish skipped, Redis unreachable (transient): channel {} type {}: {}",
                     channel, envelope.type(), e.getMessage());
         }

@@ -2,6 +2,7 @@ package org.danteplanner.backend.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.sentry.Sentry;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.ClientAbortException;
 import org.danteplanner.backend.shared.exception.GlobalExceptionHandler;
 import org.danteplanner.backend.shared.util.CookieUtils;
@@ -53,6 +54,7 @@ class GlobalExceptionHandlerSseDisconnectTest {
     }
 
     private static void handle(IOException ex) {
-        new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper()).handleIOException(ex);
+        new GlobalExceptionHandler(mock(CookieUtils.class), new ObjectMapper())
+                .handleIOException(ex, mock(HttpServletResponse.class));
     }
 }

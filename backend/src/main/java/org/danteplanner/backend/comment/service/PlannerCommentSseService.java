@@ -1,6 +1,7 @@
 package org.danteplanner.backend.comment.service;
 
 import org.danteplanner.backend.shared.sse.AbstractSseService;
+import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -52,8 +53,10 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
      * @return the SSE emitter for the connection
      * @throws org.danteplanner.backend.planner.exception.PlannerNotFoundException
      *         if no published planner carries the id
+     * @throws SseCapacityExceededException if the planner already holds its maximum connections
+     * @throws IOException if the initial connected event cannot be written
      */
-    public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) {
+    public SseEmitter subscribe(UUID plannerId, UUID deviceId, Long userId) throws IOException {
         plannerAccessGuard.checkPublished(plannerId);
         SseEmitter emitter = register(plannerId, deviceId, userId);
         log.debug("Comment SSE subscribed: planner={}, device={}", plannerId, deviceId);
@@ -163,23 +166,11 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
 
     @Override
     protected void beforeRegister(UUID plannerId, CopyOnWriteArrayList<EmitterEntry> connections) {
-        // FIFO eviction if at max capacity (DoS prevention)
-        while (connections.size() >= MAX_CONNECTIONS_PER_PLANNER && !connections.isEmpty()) {
-            EmitterEntry oldest = connections.remove(0);
-            try {
-                oldest.emitter().complete();
-            } catch (IllegalStateException e) {
-                log.debug("Evicted comment SSE emitter for planner {} was already closed: {}",
-                        plannerId, e.getMessage());
-            }
-            log.warn("Comment SSE: Evicted oldest connection for planner {} (max {} reached)",
+        if (connections.size() >= MAX_CONNECTIONS_PER_PLANNER) {
+            log.warn("Comment SSE: rejected a subscriber for planner {} (max {} reached)",
                     plannerId, MAX_CONNECTIONS_PER_PLANNER);
+            throw new SseCapacityExceededException(plannerId, MAX_CONNECTIONS_PER_PLANNER);
         }
-    }
-
-    @Override
-    protected void onConnectedSendFailure(UUID plannerId, UUID deviceId) {
-        log.warn("Failed to send connected event for planner {} device {}", plannerId, deviceId);
     }
 
     @Override
