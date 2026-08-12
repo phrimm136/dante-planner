@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
@@ -24,6 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
 import io.github.bucket4j.distributed.proxy.AsyncProxyManager;
+import io.github.bucket4j.distributed.proxy.ClientSideConfig;
 import io.github.bucket4j.distributed.proxy.ProxyManager;
 import io.github.bucket4j.distributed.proxy.RemoteBucketBuilder;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
@@ -70,21 +70,6 @@ import lombok.Setter;
 @Setter
 public class RedisConnectionConfig {
 
-    /** Bound on a cross-region auth Redis command, well below Lettuce's minute-long default. */
-    private static final long AUTH_COMMAND_TIMEOUT_MS = 3_000L;
-
-    /**
-     * Every role needs the same bound, not just the cross-region one: a caller that degrades
-     * gracefully only degrades as fast as its slowest command, and Lettuce's default lets an
-     * unreachable local Redis hold a request thread for a minute — long enough to exhaust the
-     * pool from a dependency the ladder promises to survive.
-     */
-    private static LettuceClientConfiguration boundedClientConfiguration() {
-        return LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofMillis(AUTH_COMMAND_TIMEOUT_MS))
-                .build();
-    }
-
     @Valid
     private Endpoint auth = new Endpoint();
 
@@ -100,24 +85,22 @@ public class RedisConnectionConfig {
     @Bean
     @Primary
     public LettuceConnectionFactory authRedisConnectionFactory() {
-        // The auth endpoint is reached cross-region, so a command must give up well before
-        // Lettuce's minute-long default and let the caller degrade instead of holding its thread.
-        return new LettuceConnectionFactory(standaloneConfiguration(auth), boundedClientConfiguration());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(auth));
     }
 
     @Bean
     public LettuceConnectionFactory rateLimitRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(rateLimit), boundedClientConfiguration());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(rateLimit));
     }
 
     @Bean
     public LettuceConnectionFactory sseLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(sseLocal), boundedClientConfiguration());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(sseLocal));
     }
 
     @Bean
     public LettuceConnectionFactory authLocalRedisConnectionFactory() {
-        return new LettuceConnectionFactory(standaloneConfiguration(authLocal), boundedClientConfiguration());
+        return BoundedRedisConnections.connectionFactory(standaloneConfiguration(authLocal));
     }
 
     /**
@@ -167,7 +150,7 @@ public class RedisConnectionConfig {
      * @return a byte[]-keyed proxy manager backed by the given Redis endpoint
      */
     public static ProxyManager<byte[]> buildRateLimitProxyManager(String host, int port, Duration bucketTtl) {
-        RedisClient client = RedisClient.create("redis://" + host + ":" + port);
+        RedisClient client = BoundedRedisConnections.redisClient(host, port);
         StatefulRedisConnection<byte[], byte[]> connection;
         try {
             connection = client.connect(ByteArrayCodec.INSTANCE);
@@ -176,6 +159,8 @@ public class RedisConnectionConfig {
             throw e;
         }
         return LettuceBasedProxyManager.builderFor(connection)
+                .withClientSideConfig(ClientSideConfig.getDefault()
+                        .withRequestTimeout(BoundedRedisConnections.COMMAND_TIMEOUT))
                 .withExpirationStrategy(ExpirationAfterWriteStrategy.fixedTimeToLive(bucketTtl))
                 .build();
     }

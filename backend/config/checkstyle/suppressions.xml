@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<!--
+  The raw-Redis-construction ban guards a production stall, so it is scoped to
+  main sources: the containerized ITs build factories straight against a
+  testcontainer endpoint, where a minute-long command bound cannot hold a
+  request thread.
+-->
+<suppressions>
+    <suppress id="rawRedisConstruction" files="BoundedRedisConnections\.java"/>
+    <suppress id="rawRedisConstruction" files="[\\/]src[\\/]test[\\/]"/>
+</suppressions>
