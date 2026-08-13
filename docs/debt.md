@@ -3,6 +3,9 @@
 Append-only dump for found work. Not a queue: entries are captured so they stop
 occupying attention, and are pulled only by a deliberate defrag or design session.
 
+The `static/` submodule keeps its own `static/docs/debt.md` for the data and
+asset pipeline.
+
 - `.githooks/commit-msg` lacks the commit type/scope grammar; the local
   `core.hooksPath = .githooks` bypasses the global hook, so duplicate or source
   `~/.config/git/hooks/commit-msg` here.
@@ -65,10 +68,12 @@ occupying attention, and are pulled only by a deliberate defrag or design sessio
   the FE extension set) → smoke-check converted-comment render and new-comment
   round-trip → reopen. Rehearse the entire window first on a prod dump restored
   locally: Flyway train plus converter against real data.
-- `DegradationIT` F2 (rate-limit Redis cut → 503) is order-dependent: it passes when the
-  class runs alone and fails in full-class order, on clean HEAD as well as after the
-  2026-08-10 fix batch, so something an earlier test leaves behind (container state or
-  bucket state) breaks it. Route through /diagnose before touching the assertion.
+- RESOLVED 2026-08-12 — `DegradationIT` F2 (rate-limit Redis cut → 503) order-dependence
+  was not leaked sibling state: bucket4j's `withRequestTimeout` and Lettuce's command
+  timeout shared the same 3s constant, so every rate-limit stall raced two equal timers
+  and the exception type depended on the winner (`RedisException` → typed 503,
+  `io.github.bucket4j.TimeoutException` → catch-all 500); sibling tests merely biased
+  the race. Fixed by mapping bucket4j's `TimeoutException` in the same handler.
 - `DegradationIT.evictPooledPrimaryConnections` still cannot evict the primary pool: the
   routing target for PRIMARY is the `GtidCapturingDataSource` wrapper, not a
   `HikariDataSource`, so the helper's instanceof walk skips it. Replica and bulkhead are
@@ -89,3 +94,27 @@ occupying attention, and are pulled only by a deliberate defrag or design sessio
   `RegexpSinglelineJava` id with id-scoped suppressions, or an ArchUnit rule where the check
   is structural — or a stated reason it is Claude-only working process and belongs in the
   hook.
+- No CI lane asserts query shape: statement-count and EXPLAIN access-path checks against
+  seeded, ANALYZE'd data exist only as measurement-form prose in the portfolio catalog. A
+  regression in pagination depth cost or FULLTEXT access path ships silently today.
+- The full vitest suite (~7600 tests) now trips the per-worker heap cap on most runs
+  (`ERR_WORKER_OUT_OF_MEMORY`, one worker, cumulative heap — no single hot file; the run
+  is green under `--logHeapUsage`, whose forced per-file GC masks it). Needs a worker
+  memory/pool tuning pass in `vitest.config`, not a test fix.
+- RESOLVED 2026-08-13 — e2e oauth-journey vs the id_token verifier: the stub minted an
+  `alg:none` id_token the post-853e1211 `GoogleIdTokenVerifier` rejects at decode, and
+  nothing pointed `GOOGLE_OAUTH_JWKS_URI` at the stub. Fixed by signing the stub's
+  id_token RS256 with the e2e test RSA key, serving a `/jwks` route, and wiring
+  `GOOGLE_OAUTH_JWKS_URI`/`GOOGLE_OAUTH_ISSUER` in both stub-facing compose files.
+- RESOLVED 2026-08-13 — the publish/unpublish gesture specs failed on two stacked
+  defects. Real bug: `useAppSse.applyPlannerUpsert` wrote the server's flat SSE planner
+  payload into `plannerQueryKeys.detail(id)`, whose consumers expect a nested
+  SaveablePlanner — any save's SSE echo shape-corrupted the open detail page and the
+  next render crashed into the error boundary (`isMDPlanner` reading `.config` of a flat
+  row). Fixed by invalidate-never-patch, per the ruled sync-stream direction. Masked
+  underneath: the specs expected the pre-intent-endpoint contract (`PUT /{id}/publish`
+  with a body) while the API is body-less `POST /{id}/publish|unpublish`; specs updated.
+- `local-multiregion-up.sh` step 5 verifies replication with a fixed `sleep 4`, which is
+  too short under load (transient "did not start" failures on a busy box) — replace with
+  a bounded poll of `Replica_SQL_Running`. Step 2's flyway grep was fixed 2026-08-13 to
+  match "is up to date" on re-runs; the sleep remains.

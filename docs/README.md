@@ -51,7 +51,6 @@ principle without a corresponding entry is an untested claim rather than a settl
 | `runbooks/rds-migration.md` | Managed-database migration and the decommission gate |
 | `runbooks/schema-decomposition-migration.md` | The stop-the-world schema window |
 | `runbooks/oregon-cutover.md` | Primary-region cutover |
-| `runbooks/observability-handoff.md` | Remaining metrics and alerting work |
 
 ## Legacy
 
