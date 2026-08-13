@@ -25,6 +25,8 @@ services:
       GOOGLE_OAUTH_AUTHORIZE_URL: http://localhost:3000/auth
       GOOGLE_OAUTH_TOKEN_URL: http://oauth-stub:3000/token
       GOOGLE_OAUTH_USER_INFO_URL: http://oauth-stub:3000/userinfo
+      GOOGLE_OAUTH_JWKS_URI: http://oauth-stub:3000/jwks
+      GOOGLE_OAUTH_ISSUER: https://idp-staging.dante-planner.com
       # Single-region stand-in for Seoul: the gate filter registers on this flag alone, and the
       # "replica" is the same server, which is enough to exercise capture and cookie minting.
       #
@@ -48,9 +50,11 @@ services:
     command: ["node", "/app/server.js"]
     volumes:
       - ./e2e/stub:/app:ro
+      - ./backend/src/test/resources/test-keys:/keys:ro
     environment:
       CLIENT_ID: staging-stub
       CLIENT_SECRET: ${STUB_CLIENT_SECRET}
+      ID_TOKEN_KEY_FILE: /keys/private_key.pem
     ports:
       - "3000:3000"
     networks:

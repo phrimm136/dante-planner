@@ -1,8 +1,12 @@
 const http = require('http');
 const crypto = require('crypto');
+const fs = require('fs');
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const ISSUER = 'https://idp-staging.dante-planner.com';
+const PRIVATE_KEY = crypto.createPrivateKey(fs.readFileSync(process.env.ID_TOKEN_KEY_FILE, 'utf8'));
+const PUBLIC_JWK = crypto.createPublicKey(PRIVATE_KEY).export({ format: 'jwk' });
+const KID = 'e2e-stub';
 const codes = new Map();
 const tokens = new Map();
 const b64u = (s) => Buffer.from(s).toString('base64url');
@@ -55,11 +59,12 @@ http.createServer((req, res) => {
       const accessToken = b64u(crypto.randomBytes(24));
       tokens.set(accessToken, { sub, email: rec.email });
       const now = Math.floor(Date.now() / 1000);
-      const idToken = [
-        b64u(JSON.stringify({ alg: 'none', typ: 'JWT' })),
+      const signingInput = [
+        b64u(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: KID })),
         b64u(JSON.stringify({ iss: ISSUER, aud: CLIENT_ID, sub, email: rec.email, iat: now, exp: now + 3600 })),
-        'unsigned',
       ].join('.');
+      const signature = crypto.sign('RSA-SHA256', Buffer.from(signingInput), PRIVATE_KEY).toString('base64url');
+      const idToken = `${signingInput}.${signature}`;
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         access_token: accessToken,
@@ -69,6 +74,11 @@ http.createServer((req, res) => {
       }));
     });
     return;
+  }
+
+  if (u.pathname === '/jwks' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ keys: [{ ...PUBLIC_JWK, kid: KID, alg: 'RS256', use: 'sig' }] }));
   }
 
   if (u.pathname === '/userinfo' && req.method === 'GET') {

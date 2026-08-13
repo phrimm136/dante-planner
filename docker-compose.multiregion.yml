@@ -142,6 +142,8 @@ services:
       GOOGLE_OAUTH_AUTHORIZE_URL: http://localhost:3000/auth
       GOOGLE_OAUTH_TOKEN_URL: http://oauth-stub:3000/token
       GOOGLE_OAUTH_USER_INFO_URL: http://oauth-stub:3000/userinfo
+      GOOGLE_OAUTH_JWKS_URI: http://oauth-stub:3000/jwks
+      GOOGLE_OAUTH_ISSUER: https://idp-staging.dante-planner.com
     ports:
       - "8081:8080"
     networks:

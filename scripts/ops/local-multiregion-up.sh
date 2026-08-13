@@ -56,7 +56,7 @@ docker run --rm --network container:"$PRIMARY_CT" \
   flyway/flyway:11.7.2 \
   -url="jdbc:mysql://127.0.0.1:3306/$db?allowPublicKeyRetrieval=true&useSSL=false" \
   -user=root -password="$root_pw" -locations=filesystem:/flyway/sql \
-  -validateOnMigrate=false migrate 2>&1 | grep -E "Successfully applied|already up to date|ERROR" | tail -2
+  -validateOnMigrate=false migrate 2>&1 | grep -E "Successfully applied|up to date|ERROR" | tail -2
 primary "$db" -N -e "SELECT CONCAT('primary at V', MAX(CAST(version AS UNSIGNED))) FROM flyway_schema_history;" 2>/dev/null
 
 say "3. creating the replication user on the primary"

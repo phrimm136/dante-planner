@@ -84,11 +84,11 @@ test('publishing a planner sends the publish flag and reports it', async ({
 
     const request = await producesRequest(
       page,
-      { method: 'PUT', url: `/api/planner/md/${fixture.plannerId}/publish` },
+      { method: 'POST', url: `/api/planner/md/${fixture.plannerId}/publish` },
       () => page.getByRole('button', { name: 'Publish', exact: true }).click(),
     )
 
-    expect(JSON.parse(request.postData() ?? '{}')).toEqual({ published: true })
+    expect(request.postData()).toBeFalsy()
     await expect(page.getByText('Plan published successfully')).toBeVisible()
   } finally {
     await dropPlanner(fixture)
@@ -114,11 +114,11 @@ test('unpublishing a planner clears the publish flag and reports it', async ({
 
     const request = await producesRequest(
       page,
-      { method: 'PUT', url: `/api/planner/md/${fixture.plannerId}/publish` },
+      { method: 'POST', url: `/api/planner/md/${fixture.plannerId}/unpublish` },
       () => page.getByRole('button', { name: 'Unpublish', exact: true }).click(),
     )
 
-    expect(JSON.parse(request.postData() ?? '{}')).toEqual({ published: false })
+    expect(request.postData()).toBeFalsy()
     await expect(page.getByText('Plan unpublished successfully')).toBeVisible()
   } finally {
     await dropPlanner(fixture)
