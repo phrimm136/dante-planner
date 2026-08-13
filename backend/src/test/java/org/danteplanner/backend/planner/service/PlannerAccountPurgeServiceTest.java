@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,7 @@ class PlannerAccountPurgeServiceTest {
     @Mock private PlannerCatalogRepository plannerCatalogRepository;
     @Mock private PlannerEntityFilterRepository plannerEntityFilterRepository;
     @Mock private PlannerKeywordFilterRepository plannerKeywordFilterRepository;
+    @Mock private PlannerViewRepository plannerViewRepository;
     @Mock private PlannerVoteRepository plannerVoteRepository;
 
     @InjectMocks private PlannerAccountPurgeService purgeService;
@@ -57,9 +59,10 @@ class PlannerAccountPurgeServiceTest {
 
         // None of these carry an FK to the planner core, so none is removed by the cascade; every
         // one left behind here outlives the planner it describes.
-        var inOrder = inOrder(plannerEntityFilterRepository, plannerKeywordFilterRepository,
-                plannerCatalogRepository, plannerStatsRepository, plannerModerationRepository,
-                plannerPublicationRepository, plannerContentRepository);
+        var inOrder = inOrder(plannerViewRepository, plannerEntityFilterRepository,
+                plannerKeywordFilterRepository, plannerCatalogRepository, plannerStatsRepository,
+                plannerModerationRepository, plannerPublicationRepository, plannerContentRepository);
+        inOrder.verify(plannerViewRepository).deleteViewsByPlannerIds(plannerIds);
         inOrder.verify(plannerEntityFilterRepository).deleteAllByPlannerIds(plannerIds);
         inOrder.verify(plannerKeywordFilterRepository).deleteAllByPlannerIds(plannerIds);
         inOrder.verify(plannerCatalogRepository).deleteAllByPlannerIds(plannerIds);

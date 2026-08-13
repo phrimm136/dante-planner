@@ -10,6 +10,7 @@ import org.danteplanner.backend.planner.repository.PlannerModerationRepository;
 import org.danteplanner.backend.planner.repository.PlannerPublicationRepository;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerViewRepository;
 import org.danteplanner.backend.planner.repository.PlannerVoteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,6 +42,7 @@ public class PlannerAccountPurgeService {
     private final PlannerCatalogRepository plannerCatalogRepository;
     private final PlannerEntityFilterRepository plannerEntityFilterRepository;
     private final PlannerKeywordFilterRepository plannerKeywordFilterRepository;
+    private final PlannerViewRepository plannerViewRepository;
     private final PlannerVoteRepository plannerVoteRepository;
 
     /**
@@ -80,6 +82,7 @@ public class PlannerAccountPurgeService {
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void deleteProjectionsFor(List<UUID> plannerIds) {
+        plannerViewRepository.deleteViewsByPlannerIds(plannerIds);
         plannerEntityFilterRepository.deleteAllByPlannerIds(plannerIds);
         plannerKeywordFilterRepository.deleteAllByPlannerIds(plannerIds);
         plannerCatalogRepository.deleteAllByPlannerIds(plannerIds);

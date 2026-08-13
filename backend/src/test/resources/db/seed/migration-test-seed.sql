@@ -15,8 +15,9 @@
 --   - ENUM/JSON values must match the schema after all MERGED migrations
 --   - Every keyword and ENUM value should appear in at least one row
 --
--- Schema version: V056 (planner aggregate + projections; planners table gone;
---                       user_settings sync choice split into two non-null flags)
+-- Schema version: V057 (planner aggregate + projections; planners table gone;
+--                       user_settings sync choice split into two non-null flags;
+--                       planner_views no longer foreign-keys the planner core)
 --
 -- Coverage:
 --   - selected_keywords: all 35 keywords across 4 planners (JSON arrays)
@@ -28,6 +29,8 @@
 --     including a base/enhanced pair of one gift on the same planner
 --   - content: JSON with equipment, gifts, floorSelections structure
 --   - planner_catalog: visible rows only; one recommended (upvotes >= 10)
+--   - planner_views: several view_date values, and a row whose planner_id
+--     matches no planner row — legal since V057 dropped fk_view_planner
 
 -- ============================================================================
 -- users (sentinel id=0 already exists from V009)
@@ -240,10 +243,18 @@ VALUES
 -- planner_views
 -- ============================================================================
 
+-- Spread over view_date, the key any future range partitioning of this table
+-- splits on. The last row names a planner that does not exist: the FK is gone
+-- as of V057, and the app-side purge sweep is what keeps such rows from
+-- accumulating in production.
+
 INSERT IGNORE INTO planner_views (planner_id, viewer_hash, view_date, created_at)
 VALUES
     (UNHEX('AAAA0001000000000000000000000001'), SHA2('viewer-001', 256), CURDATE(), NOW()),
-    (UNHEX('AAAA0002000000000000000000000002'), SHA2('viewer-002', 256), CURDATE(), NOW());
+    (UNHEX('AAAA0001000000000000000000000001'), SHA2('viewer-003', 256), CURDATE() - INTERVAL 45 DAY, NOW()),
+    (UNHEX('AAAA0002000000000000000000000002'), SHA2('viewer-002', 256), CURDATE(), NOW()),
+    (UNHEX('AAAA0002000000000000000000000002'), SHA2('viewer-002', 256), CURDATE() - INTERVAL 1 DAY, NOW()),
+    (UNHEX('AAAA0009000000000000000000000009'), SHA2('viewer-004', 256), CURDATE() - INTERVAL 400 DAY, NOW());
 
 -- ============================================================================
 -- planner_comments
