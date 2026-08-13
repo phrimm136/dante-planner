@@ -22,6 +22,42 @@ public class GameDataRegistry {
 
     private static final Pattern GIFT_ENHANCEMENT_PATTERN = Pattern.compile("^[12]?(9\\d{3})$");
 
+    /**
+     * One load of the game data, as a single immutable value.
+     *
+     * @param identityIds         known identity IDs
+     * @param egoIds              known EGO IDs
+     * @param egoGiftIds          known EGO Gift base IDs
+     * @param themePackIds        known theme pack IDs
+     * @param startBuffIds        known start buff IDs
+     * @param startGiftPools      gift IDs by start gift keyword
+     * @param egoGiftThemePackMap theme pack IDs by EGO Gift base ID, empty list meaning universal
+     * @param egoMaxThreadspin    max threadspin by EGO ID
+     */
+    private record Snapshot(
+            Set<String> identityIds,
+            Set<String> egoIds,
+            Set<String> egoGiftIds,
+            Set<String> themePackIds,
+            Set<String> startBuffIds,
+            Map<String, Set<String>> startGiftPools,
+            Map<String, List<String>> egoGiftThemePackMap,
+            Map<String, Integer> egoMaxThreadspin) {
+
+        private static final Snapshot EMPTY = new Snapshot(
+                Set.of(), Set.of(), Set.of(), Set.of(), Set.of(), Map.of(), Map.of(), Map.of());
+
+        private boolean isPopulated() {
+            return !identityIds.isEmpty()
+                    && !egoIds.isEmpty()
+                    && !egoGiftIds.isEmpty()
+                    && !themePackIds.isEmpty()
+                    && !startBuffIds.isEmpty()
+                    && !startGiftPools.isEmpty()
+                    && !egoGiftThemePackMap.isEmpty();
+        }
+    }
+
     private final GameDataLoader loader;
     private final String dataPath;
 
@@ -32,14 +68,7 @@ public class GameDataRegistry {
         this.dataPath = dataPath;
     }
 
-    private Set<String> identityIds = Set.of();
-    private Set<String> egoIds = Set.of();
-    private Set<String> egoGiftIds = Set.of();
-    private Set<String> themePackIds = Set.of();
-    private Set<String> startBuffIds = Set.of();
-    private Map<String, Set<String>> startGiftPools = Map.of();
-    private Map<String, List<String>> egoGiftThemePackMap = Map.of();
-    private Map<String, Integer> egoMaxThreadspin = Map.of();
+    private volatile Snapshot snapshot = Snapshot.EMPTY;
 
     @PostConstruct
     public void init() {
@@ -53,29 +82,37 @@ public class GameDataRegistry {
 
     /**
      * Reload all game data from static JSON files.
+     *
+     * <p>The load is assembled in full and published in one write, so a concurrent validation
+     * reads either the whole previous load or the whole new one, never a mix of the two.</p>
      */
     public void refresh() {
         log.info("Loading game data from: {}", dataPath);
 
-        identityIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "identitySpecList.json")));
-        egoIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "egoSpecList.json")));
-        egoGiftIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "egoGiftSpecList.json")));
-        themePackIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "themePackList.json")));
-        startBuffIds = Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "MD6", "startBuffs.json")));
-        startGiftPools = Map.copyOf(loader.loadStartGiftPools(Path.of(dataPath, "MD6", "startEgoGiftPools.json")));
-        egoGiftThemePackMap = Map.copyOf(loader.loadEgoGiftThemePackMap(Path.of(dataPath, "egoGiftSpecList.json")));
-        egoMaxThreadspin = Map.copyOf(loader.loadEgoMaxThreadspin(Path.of(dataPath, "egoSpecList.json")));
+        Snapshot loaded = new Snapshot(
+                Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "identitySpecList.json"))),
+                Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "egoSpecList.json"))),
+                Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "egoGiftSpecList.json"))),
+                Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "themePackList.json"))),
+                Set.copyOf(loader.loadKeysFromFile(Path.of(dataPath, "MD6", "startBuffs.json"))),
+                Map.copyOf(loader.loadStartGiftPools(Path.of(dataPath, "MD6", "startEgoGiftPools.json"))),
+                Map.copyOf(loader.loadEgoGiftThemePackMap(Path.of(dataPath, "egoGiftSpecList.json"))),
+                Map.copyOf(loader.loadEgoMaxThreadspin(Path.of(dataPath, "egoSpecList.json"))));
+
+        snapshot = loaded;
 
         log.info("Game data loaded - identities: {}, egos: {}, gifts: {}, themePacks: {}, startBuffs: {}, giftPools: {}, giftThemePacks: {}, egoMaxThreadspin: {}",
-                identityIds.size(), egoIds.size(), egoGiftIds.size(), themePackIds.size(), startBuffIds.size(), startGiftPools.size(), egoGiftThemePackMap.size(), egoMaxThreadspin.size());
+                loaded.identityIds().size(), loaded.egoIds().size(), loaded.egoGiftIds().size(),
+                loaded.themePackIds().size(), loaded.startBuffIds().size(), loaded.startGiftPools().size(),
+                loaded.egoGiftThemePackMap().size(), loaded.egoMaxThreadspin().size());
     }
 
     public boolean hasIdentity(String id) {
-        return identityIds.contains(id);
+        return snapshot.identityIds().contains(id);
     }
 
     public boolean hasEgo(String id) {
-        return egoIds.contains(id);
+        return snapshot.egoIds().contains(id);
     }
 
     /**
@@ -83,7 +120,7 @@ public class GameDataRegistry {
      * is unknown to the registry.
      */
     public Integer getEgoMaxThreadspin(String id) {
-        return egoMaxThreadspin.get(id);
+        return snapshot.egoMaxThreadspin().get(id);
     }
 
     /**
@@ -91,11 +128,11 @@ public class GameDataRegistry {
      */
     public boolean hasEgoGift(String id) {
         String baseId = stripGiftEnhancement(id);
-        return egoGiftIds.contains(baseId);
+        return snapshot.egoGiftIds().contains(baseId);
     }
 
     public boolean hasThemePack(String id) {
-        return themePackIds.contains(id);
+        return snapshot.themePackIds().contains(id);
     }
 
     /**
@@ -105,7 +142,7 @@ public class GameDataRegistry {
      * @return true if ID exists in game data
      */
     public boolean hasStartBuff(String id) {
-        return startBuffIds.contains(id);
+        return snapshot.startBuffIds().contains(id);
     }
 
     /**
@@ -115,14 +152,14 @@ public class GameDataRegistry {
      * @return Set of valid gift IDs for this keyword, null if keyword doesn't exist
      */
     public Set<String> getStartGiftPool(String keyword) {
-        return startGiftPools.get(keyword);
+        return snapshot.startGiftPools().get(keyword);
     }
 
     /**
      * Check if a keyword exists in start gift pools.
      */
     public boolean hasStartGiftKeyword(String keyword) {
-        return startGiftPools.containsKey(keyword);
+        return snapshot.startGiftPools().containsKey(keyword);
     }
 
     /**
@@ -138,7 +175,7 @@ public class GameDataRegistry {
      */
     public boolean isGiftAffordableForThemePack(String giftId, String themePackId) {
         String baseId = stripGiftEnhancement(giftId);
-        List<String> themePacks = egoGiftThemePackMap.get(baseId);
+        List<String> themePacks = snapshot.egoGiftThemePackMap().get(baseId);
 
         // If gift not found in map, assume not affordable (fail-safe)
         if (themePacks == null) {
@@ -150,13 +187,7 @@ public class GameDataRegistry {
     }
 
     public boolean isPopulated() {
-        return !identityIds.isEmpty()
-                && !egoIds.isEmpty()
-                && !egoGiftIds.isEmpty()
-                && !themePackIds.isEmpty()
-                && !startBuffIds.isEmpty()
-                && !startGiftPools.isEmpty()
-                && !egoGiftThemePackMap.isEmpty();
+        return snapshot.isPopulated();
     }
 
     private String stripGiftEnhancement(String id) {
