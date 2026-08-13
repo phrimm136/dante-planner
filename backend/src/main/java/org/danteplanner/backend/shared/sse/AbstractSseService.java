@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.sse;
 
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -31,6 +32,12 @@ public abstract class AbstractSseService<K> {
 
     protected final ConcurrentHashMap<K, CopyOnWriteArrayList<EmitterEntry>> emitters = new ConcurrentHashMap<>();
 
+    private final TaskExecutor heartbeatWorker;
+
+    protected AbstractSseService(TaskExecutor heartbeatWorker) {
+        this.heartbeatWorker = heartbeatWorker;
+    }
+
     /**
      * A live connection. {@code deviceId} de-duplicates a client's own reconnects and is
      * client-supplied; {@code userId} comes from the authenticated principal and is null
@@ -54,6 +61,11 @@ public abstract class AbstractSseService<K> {
      * Register an emitter for a key/device, replacing any prior emitter for the
      * same device and wiring the lifecycle callbacks plus the initial connected event.
      *
+     * <p>The whole registry mutation runs inside {@code compute} so it cannot interleave with the
+     * unregistration that drops an emptied key: an emitter added to a list already unmapped would
+     * be reachable from nothing and would linger until its one-hour timeout. {@code afterRegister}
+     * stays outside, since a subclass may load state from the database there.</p>
+     *
      * @param key      the registry key
      * @param deviceId the device identifier
      * @param userId   the authenticated account, or null for a guest
@@ -63,10 +75,13 @@ public abstract class AbstractSseService<K> {
     protected SseEmitter register(K key, UUID deviceId, Long userId) throws IOException {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
 
-        var connections = emitters.computeIfAbsent(key, k -> new CopyOnWriteArrayList<>());
-        connections.removeIf(e -> e.deviceId().equals(deviceId));
-        beforeRegister(key, connections);
-        connections.add(new EmitterEntry(deviceId, userId, emitter));
+        emitters.compute(key, (k, existing) -> {
+            var connections = existing != null ? existing : new CopyOnWriteArrayList<EmitterEntry>();
+            connections.removeIf(e -> e.deviceId().equals(deviceId));
+            beforeRegister(key, connections);
+            connections.add(new EmitterEntry(deviceId, userId, emitter));
+            return connections;
+        });
         afterRegister(key);
 
         emitter.onCompletion(() -> removeConnection(key, deviceId));
@@ -86,13 +101,20 @@ public abstract class AbstractSseService<K> {
      * @param deviceId the device identifier
      */
     public void removeConnection(K key, UUID deviceId) {
-        var connections = emitters.get(key);
-        if (connections != null) {
+        boolean[] keyRemoved = {false};
+        emitters.compute(key, (k, connections) -> {
+            if (connections == null) {
+                return null;
+            }
             connections.removeIf(e -> e.deviceId().equals(deviceId));
             if (connections.isEmpty()) {
-                emitters.remove(key);
-                afterKeyRemoved(key);
+                keyRemoved[0] = true;
+                return null;
             }
+            return connections;
+        });
+        if (keyRemoved[0]) {
+            afterKeyRemoved(key);
         }
         onUnsubscribed(key, deviceId);
     }
@@ -103,19 +125,28 @@ public abstract class AbstractSseService<K> {
     }
 
     /**
-     * Send a heartbeat comment to every connection, removing any that reject it.
+     * Hand every connection's heartbeat to the worker pool and return.
+     *
+     * <p>The send itself blocks for as long as the peer's receive window stays full, so it runs on
+     * a worker rather than on the caller's thread: the sweep is driven by the scheduler shared with
+     * every other {@code @Scheduled} task in the pod, which one unresponsive client would otherwise
+     * hold for the whole sweep.</p>
      */
-    protected void heartbeatConnections() {
+    protected void sweepHeartbeatConnections() {
         emitters.forEach((key, connections) -> {
             for (EmitterEntry entry : connections) {
-                try {
-                    entry.emitter().send(SseEmitter.event().comment("heartbeat"));
-                } catch (IOException | IllegalStateException e) {
-                    onHeartbeatFailure(key, entry.deviceId());
-                    removeConnection(key, entry.deviceId());
-                }
+                heartbeatWorker.execute(() -> sendHeartbeat(key, entry));
             }
         });
+    }
+
+    private void sendHeartbeat(K key, EmitterEntry entry) {
+        try {
+            entry.emitter().send(SseEmitter.event().comment("heartbeat"));
+        } catch (IOException | IllegalStateException e) {
+            onHeartbeatFailure(key, entry.deviceId());
+            removeConnection(key, entry.deviceId());
+        }
     }
 
     /**

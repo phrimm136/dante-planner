@@ -2,10 +2,11 @@ package org.danteplanner.backend.shared.sse;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.user.entity.UserSettings;
 import org.danteplanner.backend.user.service.UserSettingsService;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -33,17 +34,25 @@ import org.danteplanner.backend.shared.entity.SseEventType;
  * </p>
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class SseService extends AbstractSseService<Long> {
 
-    private static final long HEARTBEAT_INTERVAL_MS = 10_000L;
+    private static final long HEARTBEAT_INTERVAL_MS = SseConstants.USER_STREAM_HEARTBEAT_INTERVAL_MS;
 
     private static final Duration SETTINGS_CACHE_TTL = Duration.ofMinutes(5);
     private static final long SETTINGS_CACHE_MAX_ENTRIES = 10_000;
 
     private final ObjectMapper objectMapper;
     private final UserSettingsService userSettingsService;
+
+    public SseService(
+            ObjectMapper objectMapper,
+            UserSettingsService userSettingsService,
+            @Qualifier(SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER) TaskExecutor heartbeatWorker) {
+        super(heartbeatWorker);
+        this.objectMapper = objectMapper;
+        this.userSettingsService = userSettingsService;
+    }
 
     /**
      * Per-node cache of the settings that gate event delivery. Entries expire on their own so a node
@@ -219,11 +228,11 @@ public class SseService extends AbstractSseService<Long> {
     }
 
     /**
-     * Send heartbeat to all connected emitters.
+     * Submit a heartbeat for every connected emitter to the heartbeat worker pool.
      */
     @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS)
-    public void sendHeartbeats() {
-        heartbeatConnections();
+    public void sweepSseHeartbeats() {
+        sweepHeartbeatConnections();
     }
 
     /**

@@ -2,11 +2,14 @@ package org.danteplanner.backend.comment.service;
 
 import org.danteplanner.backend.shared.sse.AbstractSseService;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
+import org.danteplanner.backend.shared.sse.SseConstants;
+import org.danteplanner.backend.shared.sse.SseHeartbeatWorkerConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.planner.service.PlannerAccessGuard;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -32,17 +35,25 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * </p>
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PlannerCommentSseService extends AbstractSseService<UUID> {
 
-    private static final long HEARTBEAT_INTERVAL_MS = 15_000L; // 15 seconds
+    private static final long HEARTBEAT_INTERVAL_MS = SseConstants.COMMENT_STREAM_HEARTBEAT_INTERVAL_MS;
     private static final long HEARTBEAT_INITIAL_DELAY_MS = 5_000L;
     private static final long CLEANUP_INITIAL_DELAY_MS = 30_000L;
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500; // Prevent DoS
 
     private final ObjectMapper objectMapper;
     private final PlannerAccessGuard plannerAccessGuard;
+
+    public PlannerCommentSseService(
+            ObjectMapper objectMapper,
+            PlannerAccessGuard plannerAccessGuard,
+            @Qualifier(SseHeartbeatWorkerConfig.SSE_HEARTBEAT_WORKER) TaskExecutor heartbeatWorker) {
+        super(heartbeatWorker);
+        this.objectMapper = objectMapper;
+        this.plannerAccessGuard = plannerAccessGuard;
+    }
 
     /**
      * Subscribe a device to receive comment notifications for a planner.
@@ -145,12 +156,12 @@ public class PlannerCommentSseService extends AbstractSseService<UUID> {
     }
 
     /**
-     * Send heartbeat to all connected emitters.
+     * Submit a heartbeat for every connected emitter to the heartbeat worker pool.
      * Uses different fixedRate to avoid collision with SseService heartbeats.
      */
     @Scheduled(fixedRate = HEARTBEAT_INTERVAL_MS, initialDelay = HEARTBEAT_INITIAL_DELAY_MS)
-    public void sendHeartbeats() {
-        heartbeatConnections();
+    public void sweepSseHeartbeats() {
+        sweepHeartbeatConnections();
     }
 
     /**

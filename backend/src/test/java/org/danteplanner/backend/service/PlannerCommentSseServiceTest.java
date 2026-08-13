@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -38,6 +39,9 @@ class PlannerCommentSseServiceTest {
     /** Mirrors {@code PlannerCommentSseService.MAX_CONNECTIONS_PER_PLANNER}. */
     private static final int MAX_CONNECTIONS_PER_PLANNER = 500;
 
+    /** Runs each submitted heartbeat on the calling thread, so a sweep's effects hold on return. */
+    private static final TaskExecutor SAME_THREAD = Runnable::run;
+
     private ObjectMapper objectMapper;
     private PlannerAccessGuard plannerAccessGuard;
     private PlannerCommentSseService service;
@@ -47,7 +51,7 @@ class PlannerCommentSseServiceTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         plannerAccessGuard = mock(PlannerAccessGuard.class);
-        service = new PlannerCommentSseService(objectMapper, plannerAccessGuard);
+        service = new PlannerCommentSseService(objectMapper, plannerAccessGuard, SAME_THREAD);
         plannerId = UUID.randomUUID();
     }
 
@@ -94,7 +98,7 @@ class PlannerCommentSseServiceTest {
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
             // A closed emitter throws on the next send and is dropped, so a count that survives a
             // heartbeat round is what proves no connected subscriber's stream was completed.
-            service.sendHeartbeats();
+            service.sweepSseHeartbeats();
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(MAX_CONNECTIONS_PER_PLANNER);
         }
 
@@ -150,7 +154,7 @@ class PlannerCommentSseServiceTest {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
             PlannerCommentSseService failingService =
-                    new PlannerCommentSseService(failingMapper, plannerAccessGuard);
+                    new PlannerCommentSseService(failingMapper, plannerAccessGuard, SAME_THREAD);
             failingService.subscribe(plannerId, UUID.randomUUID(), null);
 
             assertThatCode(() -> failingService.broadcast(plannerId, "comment:added", Map.of("id", UUID.randomUUID().toString()), null))
@@ -160,27 +164,27 @@ class PlannerCommentSseServiceTest {
     }
 
     @Nested
-    @DisplayName("sendHeartbeats")
+    @DisplayName("sweepSseHeartbeats")
     class SendHeartbeats {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
+        void sweepSseHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = service.subscribe(plannerId, UUID.randomUUID(), null);
             emitter.complete();
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
 
-            service.sendHeartbeats();
+            service.sweepSseHeartbeats();
 
             assertThat(service.getSubscriberCount(plannerId)).isZero();
         }
 
         @Test
         @DisplayName("keeps a live connection")
-        void sendHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
+        void sweepSseHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             service.subscribe(plannerId, UUID.randomUUID(), null);
 
-            service.sendHeartbeats();
+            service.sweepSseHeartbeats();
 
             assertThat(service.getSubscriberCount(plannerId)).isEqualTo(1);
         }

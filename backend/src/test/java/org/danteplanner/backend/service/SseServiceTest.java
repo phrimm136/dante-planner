@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -43,6 +44,9 @@ class SseServiceTest {
 
     private static final Long USER_ID = 1L;
 
+    /** Runs each submitted heartbeat on the calling thread, so a sweep's effects hold on return. */
+    private static final TaskExecutor SAME_THREAD = Runnable::run;
+
     @Mock
     private UserSettingsService userSettingsService;
 
@@ -52,7 +56,7 @@ class SseServiceTest {
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
-        sseService = new SseService(objectMapper, userSettingsService);
+        sseService = new SseService(objectMapper, userSettingsService, SAME_THREAD);
         lenient().when(userSettingsService.getOrCreateEntity(anyLong())).thenReturn(allEnabledSettings());
     }
 
@@ -121,7 +125,7 @@ class SseServiceTest {
         void sendToUser_WhenSerializationFails_DoesNotThrowNorRemove() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, userSettingsService);
+            SseService service = new SseService(failingMapper, userSettingsService, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.sendToUser(USER_ID, "notify:comment", Map.of("k", "v")))
@@ -133,7 +137,7 @@ class SseServiceTest {
         @DisplayName("does not deliver an event type this node does not recognize")
         void sendToUser_WhenEventTypeUnrecognized_DoesNotDeliver() throws Exception {
             ObjectMapper watchedMapper = mock(ObjectMapper.class);
-            SseService service = new SseService(watchedMapper, userSettingsService);
+            SseService service = new SseService(watchedMapper, userSettingsService, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             service.sendToUser(USER_ID, "notify:something-this-node-cannot-name", Map.of("k", "v"));
@@ -167,7 +171,7 @@ class SseServiceTest {
         void broadcastToAll_WhenSerializationFails_DoesNotThrow() throws Exception {
             ObjectMapper failingMapper = mock(ObjectMapper.class);
             when(failingMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("boom") {});
-            SseService service = new SseService(failingMapper, userSettingsService);
+            SseService service = new SseService(failingMapper, userSettingsService, SAME_THREAD);
             service.subscribe(USER_ID, UUID.randomUUID());
 
             assertThatCode(() -> service.broadcastToAll(null, "notify:published", Map.of("k", "v")))
@@ -177,27 +181,27 @@ class SseServiceTest {
     }
 
     @Nested
-    @DisplayName("sendHeartbeats")
+    @DisplayName("sweepSseHeartbeats")
     class SendHeartbeats {
 
         @Test
         @DisplayName("removes the connection when the emitter is dead")
-        void sendHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
+        void sweepSseHeartbeats_WhenEmitterDead_RemovesConnection() throws IOException {
             SseEmitter emitter = sseService.subscribe(USER_ID, UUID.randomUUID());
             emitter.complete();
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
 
-            sseService.sendHeartbeats();
+            sseService.sweepSseHeartbeats();
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isZero();
         }
 
         @Test
         @DisplayName("keeps a live connection")
-        void sendHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
+        void sweepSseHeartbeats_WhenEmitterLive_KeepsConnection() throws IOException {
             sseService.subscribe(USER_ID, UUID.randomUUID());
 
-            sseService.sendHeartbeats();
+            sseService.sweepSseHeartbeats();
 
             assertThat(sseService.getActiveConnectionCount(USER_ID)).isEqualTo(1);
         }
