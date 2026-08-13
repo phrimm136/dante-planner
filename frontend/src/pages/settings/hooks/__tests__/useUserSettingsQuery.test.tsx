@@ -7,9 +7,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import React from 'react'
-import { userSettingsQueryKeys, useUpdateEpithetMutation } from '../useUserSettingsQuery'
+import React, { Suspense } from 'react'
+import {
+  userSettingsQueryKeys,
+  useUpdateEpithetMutation,
+  useEpithetsQuery,
+} from '../useUserSettingsQuery'
 import { authQueryKeys } from '@/shared/auth'
+import { STALE_TIME } from '@/lib/constants'
 
 // Mock the API client
 vi.mock('@/lib/api', () => ({
@@ -54,6 +59,61 @@ describe('userSettingsQueryKeys', () => {
   it('creates consistent key for epithets', () => {
     const key = userSettingsQueryKeys.epithets()
     expect(key).toEqual(['user', 'epithets'])
+  })
+})
+
+describe('useEpithetsQuery — staleness window', () => {
+  const EPITHETS = { epithets: ['W_CORP', 'NAIVE'] }
+
+  function createSuspenseWrapper() {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    return {
+      queryClient,
+      wrapper: function Wrapper({ children }: { children: React.ReactNode }) {
+        return (
+          <QueryClientProvider client={queryClient}>
+            <Suspense fallback={null}>{children}</Suspense>
+          </QueryClientProvider>
+        )
+      },
+    }
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.mocked(ApiClient.get).mockResolvedValue(EPITHETS)
+  })
+
+  it('re-mounting on a fresh cache reads the cache instead of refetching', async () => {
+    const { wrapper } = createSuspenseWrapper()
+
+    const first = renderHook(() => useEpithetsQuery(), { wrapper })
+    await waitFor(() => expect(first.result.current?.epithets).toEqual(EPITHETS.epithets))
+    first.unmount()
+
+    const second = renderHook(() => useEpithetsQuery(), { wrapper })
+    await waitFor(() => expect(second.result.current?.epithets).toEqual(EPITHETS.epithets))
+
+    expect(ApiClient.get).toHaveBeenCalledTimes(1)
+  })
+
+  it('re-mounting past the staleness window refetches', async () => {
+    const { queryClient, wrapper } = createSuspenseWrapper()
+
+    const first = renderHook(() => useEpithetsQuery(), { wrapper })
+    await waitFor(() => expect(first.result.current?.epithets).toEqual(EPITHETS.epithets))
+    first.unmount()
+
+    // Backdate the cached entry past the window rather than moving the clock,
+    // which react-query reads through Date.now on both sides of the comparison.
+    const cached = queryClient.getQueryCache().find({ queryKey: userSettingsQueryKeys.epithets() })
+    cached?.setState({ dataUpdatedAt: Date.now() - STALE_TIME.LONG - 1 })
+
+    const second = renderHook(() => useEpithetsQuery(), { wrapper })
+    await waitFor(() => expect(ApiClient.get).toHaveBeenCalledTimes(2))
+    second.unmount()
   })
 })
 

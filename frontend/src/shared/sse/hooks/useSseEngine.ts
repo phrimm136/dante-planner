@@ -2,19 +2,19 @@ import { useEffect, useRef } from 'react'
 
 import { SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
 import { useSseStore } from '../stores/useSseStore'
+import { runSseStream, type SseFrame } from '../lib/sseStream'
 
 /**
  * Generic SSE connection engine — domain-free.
  *
- * Owns the connection lifecycle only: open, per-event listener wiring, error
- * backoff (exponential, capped, with idle reset), proactive pre-expiry
- * reconnect, timer cleanup, and connection-status updates. It knows
- * nothing about planners, settings, or notifications — the caller injects
- * WHEN to connect (`shouldConnect`), HOW to open a stream (`createConnection`),
- * WHAT to do per event (`handlers`), and WITH WHAT TIMINGS (`policy`). This
- * keeps `shared/sse` free of any `@/pages/*` import (sink rule); the
- * planner/settings orchestration lives in the composition-root hook that calls
- * this engine.
+ * Owns the connection lifecycle only: open, per-event dispatch, error backoff
+ * (exponential, capped, with idle reset), rate-limit cooldown, proactive
+ * pre-expiry reconnect, timer cleanup, and connection-status updates. It knows
+ * nothing about planners, settings, or notifications — the caller injects WHEN
+ * to connect (`shouldConnect`), WHICH stream to read (`url`), WHAT to do per
+ * event (`handlers`), and WITH WHAT TIMINGS (`policy`). This keeps `shared/sse`
+ * free of any `@/pages/*` import (sink rule); the planner/settings
+ * orchestration lives in the composition-root hook that calls this engine.
  */
 
 /** Every timing the reconnect loop reads, in milliseconds. */
@@ -70,13 +70,15 @@ export interface SseEngineConfig {
   /**
    * Identity of the stream to open (e.g. the planner a per-planner stream
    * follows). A change closes the live connection and opens a fresh one, so a
-   * caller whose `createConnection` reads changing state must supply it.
+   * caller whose `url` reads changing state must supply it.
    */
   streamKey?: string
-  /** Opens a fresh EventSource (e.g. `plannerApi.createEventsConnection`). */
-  createConnection: () => EventSource
-  /** Map of SSE event name → handler. Attached on every (re)connect. */
+  /** API path of the stream, resolved against the API base URL. */
+  url: string
+  /** Map of SSE event name → handler. Resolved per dispatched event. */
   handlers: Record<string, (event: MessageEvent) => void>
+  /** Runs on every open, the first one and every reconnect alike. */
+  onConnected?: () => void
   /** Reconnect timings; defaults to the app-wide stream's policy. */
   policy?: SseReconnectPolicy
   /** Connection state binding; defaults to the shared SSE store. */
@@ -90,21 +92,23 @@ export interface SseEngineConfig {
  * - Connects when `shouldConnect` is true.
  * - Disconnects when it flips false.
  * - Auto-reconnects with exponential backoff on error.
+ * - Waits out the server's `Retry-After` on a 429 without spending an attempt.
  */
 export function useSseEngine({
   shouldConnect,
   streamKey = '',
-  createConnection,
+  url,
   handlers,
+  onConnected,
   policy = DEFAULT_SSE_POLICY,
   state,
 }: SseEngineConfig): void {
   // The effect owns the whole lifecycle, so only `shouldConnect` may retrigger
   // it. Everything else reaches the running connection through this ref, which
-  // the listeners read at dispatch time rather than capturing at attach time.
-  const configRef = useRef({ createConnection, handlers, policy, state })
+  // the callbacks read at dispatch time rather than capturing at open time.
+  const configRef = useRef({ url, handlers, onConnected, policy, state })
   useEffect(() => {
-    configRef.current = { createConnection, handlers, policy, state }
+    configRef.current = { url, handlers, onConnected, policy, state }
   })
 
   const setConnected = useSseStore((s) => s.setConnected)
@@ -122,13 +126,16 @@ export function useSseEngine({
       setConnected,
     }
 
-    let eventSource: EventSource | null = null
+    let controller: AbortController | null = null
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null
     let proactiveReconnect: ReturnType<typeof setTimeout> | null = null
     let idleResetTimeout: ReturnType<typeof setTimeout> | null = null
-    // 0 until onopen fires. onerror reads this to tell a never-opened or
-    // short-lived connection (keep backing off) from a healthy one (reset).
+    // 0 until the stream opens. The close path reads this to tell a
+    // never-opened or short-lived connection (keep backing off) from a healthy
+    // one (reset).
     let connectionStartTime = 0
+    let lastEventId: string | null = null
+    let serverRetryMs: number | null = null
 
     function clearAllTimers() {
       if (reconnectTimeout) {
@@ -146,29 +153,144 @@ export function useSseEngine({
     }
 
     function disconnect() {
-      if (eventSource) {
-        eventSource.close()
-        eventSource = null
+      if (controller) {
+        controller.abort()
+        controller = null
       }
       clearAllTimers()
       connectionState.setConnected(false)
     }
 
+    function dispatchFrame(frame: SseFrame) {
+      if (frame.id !== null) lastEventId = frame.id
+      if (frame.retryMs !== null) serverRetryMs = frame.retryMs
+
+      if (frame.type === SSE_EVENTS.CONNECTED) {
+        connectionState.setConnected(true)
+      }
+      if (frame.data === null) return
+
+      configRef.current.handlers[frame.type]?.(
+        new MessageEvent(frame.type, { data: frame.data, lastEventId: frame.id ?? '' }),
+      )
+    }
+
+    function handleOpen() {
+      connectionStartTime = Date.now()
+      connectionState.setConnected(true)
+
+      if (idleResetTimeout) {
+        clearTimeout(idleResetTimeout)
+        idleResetTimeout = null
+      }
+
+      // Reconnect before the token expires; the backend refreshes it on the
+      // new connection.
+      if (proactiveReconnect) {
+        clearTimeout(proactiveReconnect)
+        proactiveReconnect = null
+      }
+      if (timings.proactiveReconnectMs !== null) {
+        proactiveReconnect = setTimeout(() => {
+          if (controller) {
+            controller.abort()
+            controller = null
+          }
+          connectionState.setConnected(false)
+
+          reconnectTimeout = setTimeout(() => {
+            connectionState.resetAttempts()
+            openStream()
+          }, timings.initialDelayMs)
+        }, timings.proactiveReconnectMs)
+      }
+
+      configRef.current.onConnected?.()
+    }
+
+    function handleClosed() {
+      connectionState.setConnected(false)
+
+      // Credit the connection as healthy only if it stayed open past the
+      // stability floor; a never-opened or short-lived drop keeps the attempt
+      // counter climbing so backoff actually slows a flapping client.
+      if (connectionStartTime > 0 && Date.now() - connectionStartTime >= timings.stableAfterMs) {
+        connectionState.resetAttempts()
+      }
+
+      if (proactiveReconnect) {
+        clearTimeout(proactiveReconnect)
+        proactiveReconnect = null
+      }
+
+      if (connectionState.getAttempts() >= timings.maxAttempts) {
+        console.warn('SSE: Max reconnection attempts reached, waiting for idle reset')
+        return
+      }
+
+      scheduleReconnect()
+    }
+
+    /**
+     * A refusal is the server's own pacing, not a failed attempt, so the
+     * counter stands and the cooldown never undercuts the slowest backoff tier.
+     */
+    function handleRateLimited(retryAfterMs: number | null) {
+      connectionState.setConnected(false)
+
+      if (proactiveReconnect) {
+        clearTimeout(proactiveReconnect)
+        proactiveReconnect = null
+      }
+      if (idleResetTimeout) {
+        clearTimeout(idleResetTimeout)
+        idleResetTimeout = null
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout)
+      }
+
+      const delay =
+        Math.max(retryAfterMs ?? 0, timings.maxDelayMs) + Math.random() * timings.maxJitterMs
+      reconnectTimeout = setTimeout(openStream, delay)
+    }
+
     /** The one place a stream is opened. No-ops while one is already live. */
     function openStream() {
-      if (eventSource) return
-      const es = configRef.current.createConnection()
-      eventSource = es
-      attachListeners(es)
+      if (controller) return
+      const active = new AbortController()
+      controller = active
+      connectionStartTime = 0
+
+      void runSseStream(configRef.current.url, lastEventId, active.signal, {
+        onOpen: () => {
+          if (controller === active) handleOpen()
+        },
+        onFrame: (frame) => {
+          if (controller === active) dispatchFrame(frame)
+        },
+        onRateLimited: (retryAfterMs) => {
+          if (controller !== active) return
+          controller = null
+          handleRateLimited(retryAfterMs)
+        },
+        onClosed: () => {
+          if (controller !== active) return
+          controller = null
+          handleClosed()
+        },
+      })
     }
 
     function scheduleReconnect() {
       const attemptsBeforeIncrement = connectionState.getAttempts()
       connectionState.incrementAttempts()
 
-      const delay =
-        Math.min(timings.baseDelayMs * Math.pow(2, attemptsBeforeIncrement), timings.maxDelayMs) +
-        Math.random() * timings.maxJitterMs
+      const backoff = Math.min(
+        timings.baseDelayMs * Math.pow(2, attemptsBeforeIncrement),
+        timings.maxDelayMs,
+      )
+      const delay = Math.max(backoff, serverRetryMs ?? 0) + Math.random() * timings.maxJitterMs
 
       if (idleResetTimeout) {
         clearTimeout(idleResetTimeout)
@@ -183,81 +305,9 @@ export function useSseEngine({
       reconnectTimeout = setTimeout(openStream, delay)
     }
 
-    function attachListeners(es: EventSource) {
-      connectionStartTime = 0
-
-      es.onopen = () => {
-        connectionStartTime = Date.now()
-        connectionState.setConnected(true)
-
-        if (idleResetTimeout) {
-          clearTimeout(idleResetTimeout)
-          idleResetTimeout = null
-        }
-
-        // Reconnect before the token expires; the backend refreshes it on the
-        // new connection.
-        if (proactiveReconnect) {
-          clearTimeout(proactiveReconnect)
-          proactiveReconnect = null
-        }
-        if (timings.proactiveReconnectMs !== null) {
-          proactiveReconnect = setTimeout(() => {
-            if (eventSource) {
-              eventSource.close()
-              eventSource = null
-            }
-            connectionState.setConnected(false)
-
-            reconnectTimeout = setTimeout(() => {
-              connectionState.resetAttempts()
-              openStream()
-            }, timings.initialDelayMs)
-          }, timings.proactiveReconnectMs)
-        }
-      }
-
-      es.addEventListener(SSE_EVENTS.CONNECTED, () => {
-        connectionState.setConnected(true)
-      })
-
-      // Domain event listeners injected by the caller. The listener resolves the
-      // handler per event, so a live stream never dispatches into a stale one.
-      Object.keys(configRef.current.handlers).forEach((type) => {
-        es.addEventListener(type, (event) => {
-          configRef.current.handlers[type]?.(event as MessageEvent)
-        })
-      })
-
-      es.onerror = () => {
-        es.close()
-        eventSource = null
-        connectionState.setConnected(false)
-
-        // Credit the connection as healthy only if it stayed open past the
-        // stability floor; a never-opened or short-lived drop keeps the attempt
-        // counter climbing so backoff actually slows a flapping client.
-        if (connectionStartTime > 0 && Date.now() - connectionStartTime >= timings.stableAfterMs) {
-          connectionState.resetAttempts()
-        }
-
-        if (proactiveReconnect) {
-          clearTimeout(proactiveReconnect)
-          proactiveReconnect = null
-        }
-
-        if (connectionState.getAttempts() >= timings.maxAttempts) {
-          console.warn('SSE: Max reconnection attempts reached, waiting for idle reset')
-          return
-        }
-
-        scheduleReconnect()
-      }
-    }
-
     /** Opens unless the attempt budget is already spent. */
     function startInitialConnection() {
-      if (eventSource) return
+      if (controller) return
       if (connectionState.getAttempts() >= timings.maxAttempts) {
         console.warn('SSE: Max reconnection attempts reached, giving up')
         return

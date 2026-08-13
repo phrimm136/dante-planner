@@ -355,14 +355,4 @@ export class ApiClient {
       body: data ? JSON.stringify(data) : undefined,
     })
   }
-
-  /**
-   * Create an EventSource for Server-Sent Events
-   * Used for real-time planner sync notifications
-   */
-  static createEventSource(endpoint: string): EventSource {
-    return new EventSource(`${API_BASE_URL}${endpoint}`, {
-      withCredentials: true,
-    })
-  }
 }

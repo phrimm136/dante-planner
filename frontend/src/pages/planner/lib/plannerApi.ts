@@ -138,23 +138,4 @@ export const plannerApi = {
     const data = await ApiClient.post(`${PLANNERS_BASE}/${id}/unpublish`)
     return ServerPlannerResponseSchema.parse(data)
   },
-
-  /**
-   * Create an EventSource for real-time planner updates
-   * Used for multi-device sync notifications
-   *
-   * @returns EventSource connected to unified SSE endpoint
-   *
-   * @example
-   * const eventSource = plannerApi.createEventsConnection()
-   * eventSource.onmessage = (event) => {
-   *   const data = PlannerSseEventSchema.parse(JSON.parse(event.data))
-   *   // Handle update...
-   * }
-   * eventSource.onerror = () => eventSource.close()
-   */
-  createEventsConnection(): EventSource {
-    // Using unified SSE endpoint for all event types
-    return ApiClient.createEventSource('/api/sse/subscribe')
-  },
 }

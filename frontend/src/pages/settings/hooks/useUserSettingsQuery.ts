@@ -33,7 +33,7 @@ function createEpithetsQueryOptions() {
       const data = await ApiClient.get<EpithetListResponse>('/api/user/epithets', { signal })
       return validateData(data, EpithetListResponseSchema, 'user epithets')
     },
-    staleTime: STALE_TIME.DAY,
+    staleTime: STALE_TIME.LONG,
   })
 }
 

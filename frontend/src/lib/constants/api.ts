@@ -21,6 +21,8 @@ export const STALE_TIME = {
   SHORT: 60 * 1000,
   /** Auth identity, settings, published planner content */
   MEDIUM: 5 * 60 * 1000,
+  /** Reference data whose changes reach the client through no other signal */
+  LONG: 10 * 60 * 1000,
   /** Reference data that changes at most daily (epithet catalogue) */
   DAY: 24 * 60 * 60 * 1000,
   /** Bundled static JSON */
@@ -98,6 +100,22 @@ export const COMMENT_SSE_CONNECTION = {
   PROACTIVE_RECONNECT_INTERVAL: null,
   /** Minimum time (30s) a connection must stay open to count as healthy */
   STABLE_CONNECTION_THRESHOLD: 30 * 1000,
+} as const
+
+/**
+ * Wire-level settings of the SSE transport.
+ */
+export const SSE_TRANSPORT = {
+  /** `Accept` value the stream endpoints answer with an event stream for */
+  ACCEPT: 'text/event-stream',
+  /** Request header replaying the last received event id after a drop */
+  LAST_EVENT_ID_HEADER: 'Last-Event-ID',
+  /** Response header carrying the rate-limit cooldown in seconds */
+  RETRY_AFTER_HEADER: 'Retry-After',
+  /** Status answered with a cooldown instead of a stream */
+  RATE_LIMITED_STATUS: 429,
+  /** Milliseconds per second of `Retry-After` */
+  RETRY_AFTER_UNIT_MS: 1000,
 } as const
 
 /**

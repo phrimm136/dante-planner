@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 import i18n from '@/lib/i18n'
@@ -19,14 +20,15 @@ import {
   notificationQueryKeys,
 } from '@/shared/notifications'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
-import { plannerApi } from '../lib/plannerApi'
+import { useUserSettingsQuery, userSettingsKeys } from '@/pages/settings'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
-import { SsePlannerPayloadSchema } from '../schemas/PlannerSchemas'
 import { usePlannerStorage } from './usePlannerStorage'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 
 import type { SseNotificationEvent, NotificationType } from '@/shared/notifications'
+
+/** The single stream carrying every app-level event type. */
+const APP_SSE_PATH = '/api/sse/subscribe'
 
 /**
  * Title i18n key per notification type. A type absent from the table raises no
@@ -70,16 +72,6 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
   } else {
     showNotificationToast({ type: data.type, title, body, url })
   }
-}
-
-/**
- * Replace the entry matching `item.id` in a planner list cache, or append it
- * when absent. Non-mutating; tolerates a non-array/undefined `list`.
- */
-function upsertById(list: unknown, item: { id?: string } | undefined) {
-  const arr = Array.isArray(list) ? list : []
-  const i = arr.findIndex((p) => p?.id === item?.id)
-  return i >= 0 ? arr.map((p, idx) => (idx === i ? item : p)) : [...arr, item]
 }
 
 /**
@@ -142,21 +134,13 @@ export function useAppSse(): void {
     )
   }
 
-  const applyPlannerUpsert = (envelope: SseEnvelope, plannerId: string | undefined) => {
+  const applyPlannerUpsert = (_envelope: SseEnvelope, plannerId: string | undefined) => {
     if (!plannerId) return
 
-    const parsed = SsePlannerPayloadSchema.safeParse(envelope.payload)
-    if (parsed.success) {
-      queryClient.setQueryData(plannerQueryKeys.detail(plannerId), parsed.data)
-      queryClient.setQueryData(plannerQueryKeys.list(), (prev) => upsertById(prev, parsed.data))
-    } else {
-      // Contract violation: the payload must be a planner row. Never write
-      // an unparsed payload into a cache — mark the row-level caches stale
-      // and let consumers refetch.
-      console.error('SSE planner payload failed schema parse; falling back to invalidation')
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
-      void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
-    }
+    // The event payload is the server's flat row; the detail cache holds a nested
+    // SaveablePlanner. The shapes must never cross — invalidate, never patch.
+    void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
+    void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
     // userPlanners reads IndexedDB, so this refetch cannot race replica
     // replication; without it, mounted pages keep a pre-save syncVersion
     // and later present it to the server (409).
@@ -278,7 +262,14 @@ export function useAppSse(): void {
     }
   }
 
-  const createConnection = () => plannerApi.createEventsConnection()
+  /** Settings are re-read after a gap in the stream, not on the first open. */
+  const hasConnectedRef = useRef(false)
+  const handleConnected = () => {
+    if (hasConnectedRef.current) {
+      void queryClient.invalidateQueries({ queryKey: userSettingsKeys.settings() })
+    }
+    hasConnectedRef.current = true
+  }
 
   const handlers = {
     [SSE_EVENTS.CREATED]: handlePlannerUpdate,
@@ -290,5 +281,5 @@ export function useAppSse(): void {
     [SSE_EVENTS.ACCOUNT_SUSPENDED]: handleAccountSuspended,
   }
 
-  useSseEngine({ shouldConnect, createConnection, handlers })
+  useSseEngine({ shouldConnect, url: APP_SSE_PATH, handlers, onConnected: handleConnected })
 }

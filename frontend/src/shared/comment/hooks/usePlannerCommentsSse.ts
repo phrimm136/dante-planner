@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient } from '@/lib/api'
 import { COMMENT_SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
 import {
   SseEnvelopeSchema,
@@ -89,9 +88,6 @@ export function usePlannerCommentsSse(plannerId: string) {
     setCounted({ plannerId, count: 0 })
   }
 
-  const createConnection = () =>
-    ApiClient.createEventSource(`/api/planner/${plannerId}/comments/events`)
-
   const handleCommentAdded = (event: MessageEvent) => {
     let payload: unknown = null
     try {
@@ -122,7 +118,7 @@ export function usePlannerCommentsSse(plannerId: string) {
   useSseEngine({
     shouldConnect: !!plannerId,
     streamKey: plannerId,
-    createConnection,
+    url: `/api/planner/${plannerId}/comments/events`,
     handlers: { [SSE_EVENTS.COMMENT_ADDED]: handleCommentAdded },
     policy: COMMENT_SSE_POLICY,
     state: connectionState,
