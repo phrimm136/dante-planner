@@ -110,6 +110,12 @@ public class RoutingDataSourceConfig {
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
+        config.setConnectionInitSql(TimeoutHierarchy.LOCK_WAIT_INIT_SQL);
+        // Connector/J lets the driver properties win over the same key in the URL query string.
+        config.addDataSourceProperty(
+                TimeoutHierarchy.SOCKET_TIMEOUT_PROPERTY,
+                String.valueOf(TimeoutHierarchy.JDBC_SOCKET_TIMEOUT_MS));
+        StatementCache.DRIVER_PROPERTIES.forEach(config::addDataSourceProperty);
     }
 
     @Bean

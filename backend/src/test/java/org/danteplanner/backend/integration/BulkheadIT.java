@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.test.context.ActiveProfiles;
@@ -138,10 +139,17 @@ class BulkheadIT extends CausalHarnessSupport {
                     singleReCheckMs, writeElapsedMs, stillInFlight, floodDrainMs, distinct(floodOutcomes));
 
             assertThat(floodOutcomes)
-                    .as("every junk-UUID re-check must be a genuine slow miss on the wan-slowed bulkhead, "
-                            + "not a fast connection error masquerading as a fast flood")
+                    .as("every junk-UUID re-check must be a genuine slow miss through the wan-slowed "
+                            + "bulkhead or a fail-fast acquire shed — never any other error kind")
                     .hasSize(FLOOD_SIZE)
-                    .containsOnly(PlannerNotFoundException.class.getSimpleName());
+                    .allSatisfy(outcome -> assertThat(outcome).isIn(
+                            PlannerNotFoundException.class.getSimpleName(),
+                            DataAccessResourceFailureException.class.getSimpleName()));
+
+            assertThat(floodOutcomes)
+                    .as("at least one flood task must reach the replica through the bulkhead — an "
+                            + "all-shed flood would leave the saturation claim untested")
+                    .contains(PlannerNotFoundException.class.getSimpleName());
 
             assertThat(floodDrainMs)
                     .as("a %d-task flood through the %d-connection bulkhead must queue and take longer "

@@ -160,7 +160,7 @@ public class RedisConnectionConfig {
         }
         return LettuceBasedProxyManager.builderFor(connection)
                 .withClientSideConfig(ClientSideConfig.getDefault()
-                        .withRequestTimeout(BoundedRedisConnections.COMMAND_TIMEOUT))
+                        .withRequestTimeout(Duration.ofMillis(TimeoutHierarchy.RATE_LIMIT_FUTURE_TIMEOUT_MS)))
                 .withExpirationStrategy(ExpirationAfterWriteStrategy.fixedTimeToLive(bucketTtl))
                 .build();
     }

@@ -22,5 +22,5 @@ public class BulkheadDataSourceProperties {
     private String username;
     private String password;
 
-    private long connectionTimeout = 30_000L;
+    private long connectionTimeout = TimeoutHierarchy.BULKHEAD_ACQUIRE_TIMEOUT_MS;
 }

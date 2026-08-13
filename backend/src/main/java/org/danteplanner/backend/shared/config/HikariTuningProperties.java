@@ -16,5 +16,5 @@ import lombok.Setter;
 @Setter
 public class HikariTuningProperties {
 
-    private long connectionTimeout = 30_000L;
+    private long connectionTimeout = TimeoutHierarchy.POOL_ACQUIRE_TIMEOUT_MS;
 }

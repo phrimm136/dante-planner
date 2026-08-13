@@ -20,6 +20,7 @@ import org.danteplanner.backend.auth.exception.SessionRevokedException;
 import org.danteplanner.backend.auth.exception.TokenRevokedException;
 import org.danteplanner.backend.shared.ratelimit.RateLimitExceededException;
 import org.danteplanner.backend.shared.sse.SseCapacityExceededException;
+import org.danteplanner.backend.shared.sse.SseConstants;
 import org.danteplanner.backend.shared.util.CookieUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.dao.CannotAcquireLockException;
@@ -27,6 +28,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -187,6 +189,7 @@ public class GlobalExceptionHandler {
         log.warn("SSE capacity exceeded: {}", ex.getMessage());
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setHeader(HttpHeaders.RETRY_AFTER, String.valueOf(SseConstants.CAPACITY_RETRY_AFTER_SECONDS));
         response.getWriter().write(objectMapper.writeValueAsString(
             new ErrorResponse("SSE_CAPACITY_EXCEEDED", "Too many active connections for this planner")));
     }
@@ -377,8 +380,9 @@ public class GlobalExceptionHandler {
      * {@code LettuceBasedProxyManager} is handed a raw {@code RedisClient.connect(...)}), so a rate-limit
      * Redis outage does NOT surface as Spring Data's {@code RedisConnectionFailureException}. It rethrows
      * the raw {@code RedisException} (RedisConnectionException / RedisCommandTimeoutException /
-     * RedisSystemException) unwrapped. Mapping the common supertype covers every cut variant. Transient and
-     * self-healing — the client reconnects when Redis returns.</p>
+     * RedisSystemException) unwrapped — or bucket4j's own {@code TimeoutException} when its request
+     * timeout fires before Lettuce's equal command timeout. Mapping both covers every cut variant.
+     * Transient and self-healing — the client reconnects when Redis returns.</p>
      *
      * <p>Returning 503 (not letting it fall to the catch-all 500) honours the edge contract: nginx has
      * {@code proxy_intercept_errors on}, so it rewrites any backend 5xx to {@code BACKEND_UNAVAILABLE}.
@@ -387,8 +391,8 @@ public class GlobalExceptionHandler {
      * The {@code RATE_LIMIT_TEMPORARILY_UNAVAILABLE} code is internal-only; external clients see
      * BACKEND_UNAVAILABLE.</p>
      */
-    @ExceptionHandler(RedisException.class)
-    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(RedisException ex) {
+    @ExceptionHandler({RedisException.class, io.github.bucket4j.TimeoutException.class})
+    public ResponseEntity<ErrorResponse> handleRateLimitRedisUnavailable(RuntimeException ex) {
         log.warn("Rate-limit Redis unavailable (transient): {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .header("Retry-After", "10")
