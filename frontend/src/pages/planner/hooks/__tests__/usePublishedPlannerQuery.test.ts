@@ -32,7 +32,7 @@ describe('fetchPublishedPlanner', () => {
   })
 
   it('still throws every other failure to the boundary', async () => {
-    apiMocks.get.mockRejectedValue(new ForbiddenError('nope'))
+    apiMocks.get.mockRejectedValue(new ForbiddenError('PLANNER_FORBIDDEN', 'nope'))
 
     await expect(fetchPublishedPlanner('planner-1')).rejects.toBeInstanceOf(ForbiddenError)
   })

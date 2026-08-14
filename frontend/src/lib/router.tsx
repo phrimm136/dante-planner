@@ -186,13 +186,14 @@ const plannerMDGesellschaftDetailRoute = createRoute({
   },
   loader: async ({ params }) => {
     // Dynamic so the published-planner schemas stay out of the entry chunk.
-    const { publishedPlannerQueryKeys, fetchPublishedPlanner } =
+    const { publishedPlannerQueryKeys, fetchPublishedPlanner, isPlannerRemoved } =
       await import('@/pages/planner/hooks/usePublishedPlannerQuery')
     const result = await queryClient.fetchQuery({
       queryKey: publishedPlannerQueryKeys.detail(params.id),
       queryFn: ({ signal }) => fetchPublishedPlanner(params.id, signal),
       staleTime: STALE_TIME.MEDIUM,
     })
+    if (isPlannerRemoved(result)) return { title: getUntitledPlaceholder() }
     return { title: result.apiData.title || getUntitledPlaceholder() }
   },
   head: ({ loaderData }) => detailHead(loaderData?.title, getUntitledPlaceholder()),
