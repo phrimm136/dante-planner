@@ -8,7 +8,7 @@ import StarterKit from '@tiptap/starter-kit'
 import { cn } from '@/lib/utils'
 import { measureDocBytes, largestPrefixWithinLimit } from '../lib/noteUtils'
 import { sanitizeUrl } from '../lib/tiptap-utils'
-import { MAX_NOTE_BYTES } from '@/lib/constants'
+import { AUTO_SAVE_DEBOUNCE_MS, MAX_NOTE_BYTES } from '@/lib/constants'
 import type { NoteEditorProps } from '../types/NoteEditorTypes'
 import { SpoilerExtension } from './extensions/SpoilerExtension'
 import { ByteLimitExtension, BYTE_LIMIT_BYPASS } from './extensions/ByteLimitExtension'
@@ -68,19 +68,34 @@ function NoteEditorInner({
   const [localContent, setLocalContent] = useState(value.content)
   const hasLocalChangesRef = useRef(false)
 
-  // Debounced sync to parent - fires 500ms after typing stops
+  // What the armed debounce would have delivered, callable outside its timer.
+  const pendingRef = useRef<(() => void) | null>(null)
+
+  // Debounced sync to parent - fires AUTO_SAVE_DEBOUNCE_MS after typing stops
   useEffect(() => {
+    pendingRef.current = null
     if (!hasLocalChangesRef.current || !localContent) return
 
-    const timer = setTimeout(() => {
+    const flush = () => {
       if (hasLocalChangesRef.current) {
         onChange?.({ content: localContent })
         hasLocalChangesRef.current = false
       }
-    }, 500)
+    }
+    pendingRef.current = flush
+
+    const timer = setTimeout(() => {
+      pendingRef.current = null
+      flush()
+    }, AUTO_SAVE_DEBOUNCE_MS)
 
     return () => clearTimeout(timer)
   }, [localContent, onChange])
+
+  // The debounce effect re-runs on every keystroke and clears its timer each time,
+  // so unmount would otherwise drop the last edit. Flush it from an unmount-only
+  // effect, which runs after that cleanup.
+  useEffect(() => () => pendingRef.current?.(), [])
 
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
@@ -169,9 +184,14 @@ function NoteEditorInner({
 
   // Whether a pointer is currently pressed, and the wait for its release if one is
   // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.
-  const gestureRef = useRef<{ down: boolean; pending: AbortController | null }>({
+  const gestureRef = useRef<{
+    down: boolean
+    pending: AbortController | null
+    release: ReturnType<typeof setTimeout> | null
+  }>({
     down: false,
     pending: null,
+    release: null,
   })
 
   useEffect(() => {
@@ -192,6 +212,10 @@ function NoteEditorInner({
       document.removeEventListener('pointerup', markUp, true)
       document.removeEventListener('pointercancel', markUp, true)
       gesture.pending?.abort()
+      if (gesture.release) {
+        clearTimeout(gesture.release)
+        gesture.release = null
+      }
     }
   }, [])
 
@@ -255,7 +279,10 @@ function NoteEditorInner({
       gesture.pending = null
       // `click` is dispatched after `pointerup` within the same task, so yielding a
       // task lets the press land before the row disappears.
-      setTimeout(() => setIsFocused(false), 0)
+      gesture.release = setTimeout(() => {
+        gesture.release = null
+        setIsFocused(false)
+      }, 0)
     }
 
     document.addEventListener('pointerup', finish, { signal: controller.signal })

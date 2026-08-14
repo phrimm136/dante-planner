@@ -598,3 +598,96 @@ describe('NoteEditor - paste byte limit', () => {
   // deterministically at the Editor level in ByteLimitExtension.test.ts —
   // exercising the exact call shape without jsdom/React/debounce flakiness.
 })
+
+describe('NoteEditor - debounce flush on unmount', () => {
+  const emptyValue: NoteContent = {
+    content: { type: 'doc', content: [{ type: 'paragraph' }] },
+  }
+
+  // jsdom has no layout: ProseMirror's post-dispatch scrollToSelection calls
+  // Range.getClientRects(), which returns empty and throws. Shim a zero rect.
+  const zeroRect = {
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    width: 0,
+    height: 0,
+    x: 0,
+    y: 0,
+    toJSON: () => ({}),
+  } as DOMRect
+  let origBounding: typeof Range.prototype.getBoundingClientRect
+  let origClientRects: typeof Range.prototype.getClientRects
+
+  beforeAll(() => {
+    origBounding = Range.prototype.getBoundingClientRect
+    origClientRects = Range.prototype.getClientRects
+    Range.prototype.getBoundingClientRect = () => zeroRect
+    Range.prototype.getClientRects = () =>
+      ({
+        length: 1,
+        item: () => zeroRect,
+        0: zeroRect,
+        [Symbol.iterator]: () => [zeroRect][Symbol.iterator](),
+      }) as unknown as DOMRectList
+  })
+
+  afterAll(() => {
+    Range.prototype.getBoundingClientRect = origBounding
+    Range.prototype.getClientRects = origClientRects
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  function typeText(text: string) {
+    const contentEl = document.querySelector('.note-editor-content')
+    expect(contentEl).toBeTruthy()
+    const clipboardData = {
+      getData: (type: string) => (type === 'text/plain' ? text : ''),
+      types: ['text/plain'],
+      files: [],
+    }
+    fireEvent.paste(contentEl as Element, { clipboardData })
+  }
+
+  it('calls onChange exactly once with the typed content when unmounted before the interval elapses', async () => {
+    const onChange = vi.fn()
+    const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.click(container)
+
+    typeText('unflushed keystrokes')
+
+    // No await between the edit and the unmount, so the debounce cannot have
+    // elapsed: whatever onChange sees came from the teardown flush.
+    expect(onChange).not.toHaveBeenCalled()
+
+    unmount()
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    const flushed = onChange.mock.calls[0][0] as NoteContent
+    expect(JSON.stringify(flushed.content)).toContain('unflushed keystrokes')
+  })
+
+  it('calls onChange once in total when the debounce already fired before unmount', async () => {
+    const onChange = vi.fn()
+    const { unmount } = render(<NoteEditor value={emptyValue} onChange={onChange} />)
+
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.click(container)
+
+    typeText('settled content')
+
+    await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1), { timeout: 2000 })
+
+    unmount()
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+})
