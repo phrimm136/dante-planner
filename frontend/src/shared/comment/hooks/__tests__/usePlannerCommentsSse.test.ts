@@ -21,8 +21,8 @@ vi.mock('@/shared/sse', async (importOriginal) => ({
   },
 }))
 
-const toastMocks = vi.hoisted(() => ({ error: vi.fn() }))
-vi.mock('@/lib/toast', () => ({ toast: toastMocks }))
+const presenterMocks = vi.hoisted(() => ({ showErrorMessage: vi.fn() }))
+vi.mock('@/lib/errorPresentation', () => presenterMocks)
 vi.mock('@/lib/i18n', () => ({ default: { t: (key: string) => key } }))
 
 import { usePlannerCommentsSse } from '../usePlannerCommentsSse'
@@ -218,7 +218,7 @@ describe('usePlannerCommentsSse — planner removed elsewhere', () => {
     renderHook(() => usePlannerCommentsSse('planner-1'), { wrapper })
     await settle()
 
-    expect(toastMocks.error).toHaveBeenCalledTimes(1)
-    expect(toastMocks.error).toHaveBeenCalledWith('sync.removedOnAnotherDevice')
+    expect(presenterMocks.showErrorMessage).toHaveBeenCalledTimes(1)
+    expect(presenterMocks.showErrorMessage).toHaveBeenCalledWith('planner:sync.removedOnAnotherDevice')
   })
 })

@@ -165,7 +165,7 @@ function PlannerExportImportSectionContent() {
       // Construct export envelope
       const deviceId = await getOrCreateDeviceId()
       if (!deviceId.ok) {
-        toast.error(t('exportImport.exportFailed', 'Export failed'))
+        showErrorMessage('common:exportImport.exportFailed')
         setState({ k: 'idle' })
         return
       }
@@ -276,7 +276,7 @@ function PlannerExportImportSectionContent() {
 
       const currentDeviceId = await getValidDeviceId(getOrCreateDeviceId)
       if (!currentDeviceId.ok) {
-        toast.error(t('exportImport.importFailed', 'Import failed'))
+        showErrorMessage('common:exportImport.importFailed')
         clearFileInput()
         setState({ k: 'idle' })
         return
@@ -372,7 +372,7 @@ function PlannerExportImportSectionContent() {
 
     const deviceId = await getValidDeviceId(getOrCreateDeviceId)
     if (!deviceId.ok) {
-      toast.error(t('exportImport.importFailed', 'Import failed'))
+      showErrorMessage('common:exportImport.importFailed')
       setState({ k: 'idle' })
       return
     }

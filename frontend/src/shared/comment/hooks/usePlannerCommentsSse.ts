@@ -2,8 +2,7 @@ import { useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { COMMENT_SSE_CONNECTION, SSE_EVENTS } from '@/lib/constants'
-import i18n from '@/lib/i18n'
-import { toast } from '@/lib/toast'
+import { showErrorMessage } from '@/lib/errorPresentation'
 import {
   SseEnvelopeSchema,
   useSseEngine,
@@ -123,7 +122,7 @@ export function usePlannerCommentsSse(plannerId: string) {
    * brings it back.
    */
   const handleStreamGone = () => {
-    toast.error(i18n.t('sync.removedOnAnotherDevice', { ns: 'planner' }))
+    showErrorMessage('planner:sync.removedOnAnotherDevice')
   }
 
   useSseEngine({
