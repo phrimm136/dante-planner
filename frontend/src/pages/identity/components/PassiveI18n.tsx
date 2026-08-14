@@ -10,9 +10,8 @@ import {
   getIdentityPassiveCountIconPath,
   getLockIconPath,
 } from '@/shared/assets'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn, getDisplayFontForNumeric, getDisplayFontForLanguage } from '@/lib/utils'
-import { SECTION_STYLES } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface PassiveCondition {
   type: string

@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next'
 
 import { ColoredText } from '@/shared/gameText'
 import { CantSelectCondition } from './CantSelectCondition'
-import { AFFINITY_COLORS, formatAdderInfo } from '../lib/abEventTextResolver'
+import { formatAdderInfo } from '../lib/abEventTextResolver'
 import type { CoinTossI18nContext } from '../lib/abEventTextResolver'
 import type { AbEventChoice, AbEventSelectionEvent, AbEventI18n } from '../schemas/AbEventSchemas'
 import { cn } from '@/lib/utils'
-import { ACCENT_COLORS, SECTION_STYLES } from '@/lib/constants'
+import { ACCENT_COLORS, AFFINITY_COLORS, SECTION_STYLES } from '@/lib/constants'
 
 type OptionI18n = NonNullable<AbEventI18n['options']>[number]
 type SelectionTextI18n = NonNullable<AbEventI18n['selectionTexts']>[string]

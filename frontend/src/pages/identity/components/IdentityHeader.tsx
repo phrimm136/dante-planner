@@ -13,10 +13,10 @@ import {
 } from '@/shared/assets'
 import { FallbackImage } from '@/components/ui/FallbackImage'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
+import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
-import { SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
 
 type ImageVariant = 'normal' | 'gacksung'
 

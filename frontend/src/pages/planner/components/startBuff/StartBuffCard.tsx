@@ -9,7 +9,7 @@ import {
   getStartBuffEnhancementOverlayPath,
   getStartBuffEnhancementIconPath,
 } from '@/shared/assets'
-import { MD_ACCENT_COLORS } from '@/shared/gameData'
+import { MD_ACCENT_COLORS } from '@/lib/constants'
 import { getDisplayFontForLanguage, getDisplayFontForNumeric } from '@/lib/utils'
 import type { StartBuff, StartBuffI18n, BattleKeywords, EnhancementLevel } from '@/shared/gameText'
 import { getEnhancementSuffix, createBuffId } from '@/shared/gameText'

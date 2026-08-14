@@ -1,6 +1,5 @@
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import type { EGOPassiveI18n } from '../types/EGOTypes'
-import { SECTION_STYLES } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface EGOPassiveDisplayProps {
   passives: EGOPassiveI18n[]

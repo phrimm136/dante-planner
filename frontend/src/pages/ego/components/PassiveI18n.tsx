@@ -3,9 +3,8 @@ import { useEGODetailI18n } from '../hooks/useEGODetailData'
 import { FormattedDescription } from '@/shared/gameText'
 import { StyledSkillName, StyledNameSkeleton } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { cn } from '@/lib/utils'
-import { SECTION_STYLES } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface PassiveCardWithSuspenseProps {
   /** EGO ID for i18n lookup */

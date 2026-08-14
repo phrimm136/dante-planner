@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/lib/constants'
 import { categoryBadgeStyle, deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../plannerBadges'
 
 import type { SaveStatus, SaveStatusSource } from '../plannerBadges'

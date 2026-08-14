@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import {
-  resolveCondition,
-  createEffectTextResolver,
-  formatAdderInfo,
-  AFFINITY_COLORS,
-} from '../abEventTextResolver'
+import { resolveCondition, createEffectTextResolver, formatAdderInfo } from '../abEventTextResolver'
+import { AFFINITY_COLORS } from '@/lib/constants'
 import type { AbEventShared } from '../../schemas/AbEventSchemas'
 
 // =============================================================================

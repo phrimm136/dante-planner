@@ -10,11 +10,10 @@
 import { useState } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { getBattleKeywordIconPath } from '@/shared/assets'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
 import { applyStrikethrough } from '../lib/unityRichText'
 import { cn } from '@/lib/utils'
 import type { ResolvedKeyword } from '../types/KeywordTypes'
-import { SECTION_STYLES } from '@/lib/constants'
+import { FLAVOR_TEXT_COLOR, SECTION_STYLES } from '@/lib/constants'
 
 interface FormattedKeywordProps {
   /** Resolved keyword data from useKeywordFormatter */

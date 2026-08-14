@@ -5,18 +5,9 @@
  * Resolves effect templates, conditions, and targets from _shared.json data.
  */
 
-import type { AbEventShared } from '../schemas/AbEventSchemas'
+import { AFFINITY_COLORS } from '@/lib/constants'
 
-/** Sin affinity colors from game ChoiceEventEffect color tags */
-export const AFFINITY_COLORS: Record<string, string> = {
-  CRIMSON: '#a0392b',
-  SCARLET: '#bb521f',
-  AMBER: '#e48801',
-  SHAMROCK: '#61822b',
-  AZURE: '#306471',
-  INDIGO: '#185188',
-  VIOLET: '#7d4e94',
-}
+import type { AbEventShared } from '../schemas/AbEventSchemas'
 
 /** Default cream text color used in game effect templates */
 const CREAM = '#ebcaa2'

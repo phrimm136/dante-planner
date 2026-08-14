@@ -11,8 +11,8 @@ vi.mock('@/shared/assets', () => ({
 }))
 
 // Mock constants
-vi.mock('@/shared/gameData', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/shared/gameData')>()),
+vi.mock('@/lib/constants', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/constants')>()),
   MD_ACCENT_COLORS: { 6: '#00ffcc', 7: '#b00000' },
 }))
 

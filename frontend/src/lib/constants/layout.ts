@@ -15,67 +15,6 @@ export const FILTER_SIDEBAR_WIDTH = 280
 export const AUTOSIZE_MEASURE_RETRY_FRAMES = 60
 
 /**
- * Section Styling Tokens
- * Consistent styling for complex pages like PlannerMDNewPage
- * Import: import { SECTION_STYLES } from '@/lib/constants'
- */
-export const SECTION_STYLES = {
-  /** Typography classes for section hierarchy */
-  TEXT: {
-    /** Page-level h1 */
-    pageTitle: 'text-2xl font-bold',
-    /** Major section titles - use for all h2 section headers */
-    header: 'text-xl font-semibold',
-    /** Subsection titles - use for nested headers */
-    subHeader: 'text-lg font-medium',
-    /** Subsection titles that carry the same weight as a section header */
-    sectionTitle: 'text-lg font-semibold',
-    /** Form field labels */
-    label: 'text-sm font-medium',
-    /** Helper text, counts, hints */
-    caption: 'text-sm text-muted-foreground',
-    /** Dense helper text (badges, footnotes) */
-    captionSmall: 'text-xs text-muted-foreground',
-    /** De-emphasised body text at the inherited size */
-    muted: 'text-muted-foreground',
-  },
-
-  /** Spacing classes for consistent layout */
-  SPACING: {
-    /** Between major page sections */
-    section: 'space-y-6',
-    /** Between elements inside a section */
-    content: 'space-y-4',
-    /** Between form elements (label + input) */
-    elements: 'space-y-2',
-    /** Standard grid/flex gap */
-    gap: 'gap-4',
-  },
-
-  /** Flex arrangements repeated across pages */
-  LAYOUT: {
-    /** Centred page shell */
-    page: 'container mx-auto p-8',
-    /** Inline row of related controls */
-    row: 'flex items-center gap-2',
-    /** Inline row with minimal separation (icon + label) */
-    rowTight: 'flex items-center gap-1',
-    /** Header row with leading content and trailing actions */
-    rowBetween: 'flex items-center justify-between',
-    /** Wrapping row of chips/badges */
-    wrap: 'flex flex-wrap gap-2',
-    /** Stacked block */
-    column: 'flex flex-col gap-4',
-  },
-
-  /** Section container background with border */
-  container: 'bg-card border border-border rounded-md p-6',
-
-  /** Recessed container for read-only or secondary content */
-  panel: 'bg-muted border border-border rounded-md p-6',
-} as const
-
-/**
  * Empty State Styling Tokens
  * Consistent styling for clickable empty state placeholders in planner sections
  * Import: import { EMPTY_STATE } from '@/lib/constants'
@@ -195,15 +134,6 @@ export const EGO_CARD_INFO_ROW = {
   NAME_SLOT: EGO_INFO_NAME_SLOT,
   /** Full row track */
   WIDTH: EGO_INFO_ICON_SLOT * 2 + EGO_INFO_NAME_SLOT,
-} as const
-
-/**
- * Difficulty badge styles for EGO Gift metadata display
- * Used in EGOGiftMetadata component for Hard/Extreme badges
- */
-export const DIFFICULTY_BADGE_STYLES = {
-  HARD: 'bg-orange-500/20 text-orange-500',
-  EXTREME: 'bg-red-500/20 text-red-500',
 } as const
 
 /**

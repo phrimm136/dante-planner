@@ -10,7 +10,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PassiveCard } from '../PassiveI18n'
-import { FLAVOR_TEXT_COLOR } from '@/shared/gameData'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 
 // FormattedDescription pulls a keyword pipeline that needs query providers.
 vi.mock('@/shared/gameText/components/FormattedDescription', () => ({

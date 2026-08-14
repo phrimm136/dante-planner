@@ -22,7 +22,6 @@ import { findFusionGifts } from './lib/themePackFusion'
 import { getFeaturedBossImagePath } from '@/shared/assets'
 import {
   DUNGEON_IDX,
-  DIFFICULTY_COLORS,
   DIFFICULTY_LABELS,
   DUNGEON_FIXED_FLOOR_RANGE,
   THEME_PACK_FLOOR_LABELS,
@@ -30,7 +29,7 @@ import {
 import type { DungeonIdx, ThemePackFloor, DifficultyLabel } from '@/shared/gameData'
 import type { ThemePackDetail } from '@/pages/themePack'
 import { Link } from '@tanstack/react-router'
-import { SECTION_STYLES } from '@/lib/constants'
+import { DIFFICULTY_COLORS, SECTION_STYLES } from '@/lib/constants'
 
 const GIFT_ROW = 'flex flex-wrap gap-3'
 

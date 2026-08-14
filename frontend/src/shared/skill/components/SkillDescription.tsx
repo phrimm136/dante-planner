@@ -1,7 +1,8 @@
 import { getCoinDescIconPath } from '@/shared/assets'
-import { FLAVOR_TEXT_COLOR, type SkillDescEntry } from '@/shared/gameData'
+import { type SkillDescEntry } from '@/shared/gameData'
 import { FormattedDescription } from '@/shared/gameText'
 import { Skeleton } from '@/components/ui/skeleton'
+import { FLAVOR_TEXT_COLOR } from '@/lib/constants'
 
 interface SkillDescriptionProps {
   descData: SkillDescEntry

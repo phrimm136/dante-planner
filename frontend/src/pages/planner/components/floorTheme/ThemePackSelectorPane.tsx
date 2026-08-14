@@ -4,14 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
-import {
-  DUNGEON_IDX,
-  DIFFICULTY_COLORS,
-  DIFFICULTY_LABELS,
-  type DungeonIdx,
-  type MDCategory,
-} from '@/shared/gameData'
-import { CARD_GRID } from '@/lib/constants'
+import { DUNGEON_IDX, DIFFICULTY_LABELS, type DungeonIdx, type MDCategory } from '@/shared/gameData'
+import { CARD_GRID, DIFFICULTY_COLORS } from '@/lib/constants'
 import { ThemePackViewer } from './ThemePackViewer'
 import type { ThemePackListType, ThemePackEntry } from '@/pages/themePack'
 

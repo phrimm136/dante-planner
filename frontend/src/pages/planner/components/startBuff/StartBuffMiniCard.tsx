@@ -3,7 +3,7 @@ import {
   getStartBuffMiniPath,
   getStartBuffMiniHighlightPath,
 } from '@/shared/assets'
-import { MD_ACCENT_COLORS } from '@/shared/gameData'
+import { MD_ACCENT_COLORS } from '@/lib/constants'
 import {
   getEnhancementFromBuffId,
   getBaseIdFromBuffId,

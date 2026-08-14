@@ -1,7 +1,6 @@
-import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/shared/gameData'
+import { MD_CATEGORY_COLORS, MD_CATEGORY_TEXT_COLORS } from '@/lib/constants'
 
 import type { CSSProperties } from 'react'
-import type { MDCategory } from '@/shared/gameData'
 import type { PlannerStatus } from '../types/PlannerTypes'
 
 /**
@@ -67,11 +66,7 @@ export function deriveSaveStatus(
  */
 export function categoryBadgeStyle(category: string): CSSProperties {
   return {
-    backgroundColor:
-      category in MD_CATEGORY_COLORS ? MD_CATEGORY_COLORS[category as MDCategory] : undefined,
-    color:
-      category in MD_CATEGORY_TEXT_COLORS
-        ? MD_CATEGORY_TEXT_COLORS[category as MDCategory]
-        : undefined,
+    backgroundColor: MD_CATEGORY_COLORS[category],
+    color: MD_CATEGORY_TEXT_COLORS[category],
   }
 }

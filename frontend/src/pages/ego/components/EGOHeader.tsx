@@ -10,11 +10,11 @@ import {
   getButtonExpandImagePath,
 } from '@/shared/assets'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SINNER_COLORS, type Sinner } from '@/shared/gameData'
+import { type Sinner } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { getDisplayFontForLanguage } from '@/lib/utils'
 import type { EgoType } from '@/shared/gameData'
-import { SECTION_STYLES } from '@/lib/constants'
+import { SECTION_STYLES, SINNER_COLORS } from '@/lib/constants'
 
 interface EGOHeaderProps {
   egoId: string

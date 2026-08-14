@@ -5,8 +5,9 @@ import {
   getAttackTypeFramePath,
   getAttackTypeFrameBGPath,
 } from '@/shared/assets'
-import { SKILL_FRAME_GLOW_COLORS, type SkillAttributeType } from '@/shared/gameData'
+import { type SkillAttributeType } from '@/shared/gameData'
 import { getDisplayFontForNumeric } from '@/lib/utils'
+import { SKILL_FRAME_GLOW_COLORS } from '@/lib/constants'
 
 interface SkillImageCompositeProps {
   skillImagePath: string
