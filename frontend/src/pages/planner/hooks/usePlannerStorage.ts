@@ -19,7 +19,7 @@ const isClient = typeof window !== 'undefined'
  * Storage key builders for planner data
  * Key format: planner:{type}:{deviceId}:{plannerId}
  */
-const storageKeys = {
+export const storageKeys = {
   /** Mirror Dungeon planner key: planner:md:{deviceId}:{plannerId} */
   md: (deviceId: string, plannerId: string) =>
     `${PLANNER_STORAGE_KEYS.PLANNER}:${PLANNER_STORAGE_KEYS.MD}:${deviceId}:${plannerId}`,

@@ -13,8 +13,7 @@ import { zodValidator } from '@tanstack/zod-adapter'
 import { GlobalLayout } from '@/components/layout/GlobalLayout'
 import i18n from '@/lib/i18n'
 import { queryClient } from '@/lib/queryClient'
-import { storage } from '@/lib/storage'
-import { PLANNER_STORAGE_KEYS } from '@/lib/constants'
+import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner'
 import { RouteErrorComponent } from '@/components/feedback/RouteErrorComponent'
 import { RoutePendingFallback } from '@/components/feedback/RoutePendingFallback'
 
@@ -35,26 +34,6 @@ const pageTitle = (key: string, ns = 'common') => `${i18n.t(key, { ns })} | Dant
 const detailHead = (title: string | undefined, fallback: string) => ({
   meta: [{ title: `${title ?? fallback} | Dante's Planner` }],
 })
-
-/** Get localized untitled placeholder */
-const getUntitledPlaceholder = () => i18n.t('pages.plannerMD.untitled', { ns: 'planner' })
-
-/** Load planner title from IndexedDB for route head */
-async function loadPlannerTitle(plannerId: string): Promise<string> {
-  try {
-    const deviceId = await storage.getItem(PLANNER_STORAGE_KEYS.DEVICE_ID)
-    if (!deviceId) return getUntitledPlaceholder()
-
-    const key = `${PLANNER_STORAGE_KEYS.PLANNER}:${PLANNER_STORAGE_KEYS.MD}:${deviceId}:${plannerId}`
-    const rawData = await storage.getItem(key)
-    if (!rawData) return getUntitledPlaceholder()
-
-    const parsed = JSON.parse(rawData)
-    return parsed?.metadata?.title || getUntitledPlaceholder()
-  } catch {
-    return getUntitledPlaceholder()
-  }
-}
 
 // ============================================================================
 // Search Param Schemas
@@ -197,10 +176,10 @@ const plannerMDGesellschaftDetailRoute = createRoute({
       queryFn: ({ signal }) => fetchPublishedPlanner(params.id, signal),
       staleTime: (query) => publishedPlannerStaleTime(query.state.data),
     })
-    if (isPlannerRemoved(result)) return { title: getUntitledPlaceholder() }
-    return { title: result.apiData.title || getUntitledPlaceholder() }
+    if (isPlannerRemoved(result)) return { title: untitledPlannerTitle() }
+    return { title: result.apiData.title || untitledPlannerTitle() }
   },
-  head: ({ loaderData }) => detailHead(loaderData?.title, getUntitledPlaceholder()),
+  head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
 // Planner MD New route - path: "/planner/md/new" (Create new MD planner)
@@ -236,7 +215,7 @@ const plannerMDDetailRoute = createRoute({
     const title = await loadPlannerTitle(params.id)
     return { title }
   },
-  head: ({ loaderData }) => detailHead(loaderData?.title, getUntitledPlaceholder()),
+  head: ({ loaderData }) => detailHead(loaderData?.title, untitledPlannerTitle()),
 })
 
 // Planner MD Edit route - path: "/planner/md/$id/edit" (Edit planner)
@@ -251,7 +230,7 @@ const plannerMDEditRoute = createRoute({
   head: ({ loaderData }) => ({
     meta: [
       {
-        title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? getUntitledPlaceholder()} | Dante's Planner`,
+        title: `${i18n.t('pages.edit.title', { ns: 'planner' })} - ${loaderData?.title ?? untitledPlannerTitle()} | Dante's Planner`,
       },
     ],
   }),
