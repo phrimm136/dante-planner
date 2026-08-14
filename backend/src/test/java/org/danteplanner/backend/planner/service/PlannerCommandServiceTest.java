@@ -33,15 +33,12 @@ import org.danteplanner.backend.user.service.UserService;
 import org.danteplanner.backend.planner.validation.ContentVersionValidator;
 import org.danteplanner.backend.planner.validation.PlannerContentValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
-import org.danteplanner.backend.shared.entity.SseEventType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.danteplanner.backend.planner.event.PlannerSyncEvent;
 import org.mockito.ArgumentCaptor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,9 +75,6 @@ class PlannerCommandServiceTest {
     private UserService userService;
 
     @Mock
-    private ApplicationEventPublisher eventPublisher;
-
-    @Mock
     private PlannerContentValidator contentValidator;
 
     @Mock
@@ -109,7 +103,6 @@ class PlannerCommandServiceTest {
         commandService = new PlannerCommandService(
                 plannerRepository,
                 statsRepository,
-                eventPublisher,
                 contentValidator,
                 contentVersionValidator,
                 plannerCatalogService,
@@ -205,15 +198,6 @@ class PlannerCommandServiceTest {
             assertEquals("Test Planner", response.title());
             assertEquals("5F", response.category());
             assertEquals(1L, response.syncVersion());
-            // The fan-out is raised here and published after commit; observing the delivered event
-            // means a real listener with a subscribed emitter.
-            ArgumentCaptor<PlannerSyncEvent> raised = ArgumentCaptor.forClass(PlannerSyncEvent.class);
-            verify(eventPublisher).publishEvent(raised.capture());
-            PlannerSyncEvent event = raised.getValue();
-            assertEquals(testUser.getId(), event.userId());
-            assertEquals(deviceId, event.excludeDeviceId());
-            assertEquals(SseEventType.CREATED, event.eventType());
-            assertEquals(response, event.payload());
         }
 
         @Test
@@ -231,7 +215,6 @@ class PlannerCommandServiceTest {
 
             assertTrue(exception.getMessage().contains(String.valueOf(maxPlannersPerUser)));
             verify(plannerRepository, never()).insert(any());
-            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test
@@ -253,7 +236,6 @@ class PlannerCommandServiceTest {
             assertEquals(nonExistentUserId, exception.getUserId());
             assertTrue(exception.getMessage().contains(nonExistentUserId.toString()));
             verify(plannerRepository, never()).insert(any());
-            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test
@@ -345,10 +327,6 @@ class PlannerCommandServiceTest {
             // Assert
             assertEquals(6L, response.syncVersion());
             assertEquals("Updated Title", response.title());
-            // The fan-out is raised here and published after commit; observing the delivered event
-            // means a real listener with a subscribed emitter.
-            verify(eventPublisher).publishEvent(new PlannerSyncEvent(
-                    testUser.getId(), deviceId, planner.getId(), SseEventType.UPDATED, response));
         }
 
         @Test
@@ -371,7 +349,6 @@ class PlannerCommandServiceTest {
 
             assertEquals(5L, exception.getActualVersion());
             assertEquals(5L, planner.getSyncVersion());
-            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test
@@ -461,7 +438,6 @@ class PlannerCommandServiceTest {
             );
 
             verify(plannerRepository, never()).insert(any());
-            verify(eventPublisher, never()).publishEvent(any(PlannerSyncEvent.class));
         }
 
         @Test

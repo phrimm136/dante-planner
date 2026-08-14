@@ -17,8 +17,6 @@ import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStats;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
-import org.danteplanner.backend.planner.event.PlannerSyncEvent;
-import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.planner.exception.PlannerValidationException;
 import org.danteplanner.backend.planner.exception.PlannerConflictException;
@@ -35,7 +33,6 @@ import org.danteplanner.backend.planner.validation.SyncVersionValidator;
 import org.danteplanner.backend.planner.validation.ValidationPolicy;
 import org.danteplanner.backend.shared.readpath.ByIdReadGuard;
 import org.danteplanner.backend.shared.readpath.ContentTombstoneStore;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -57,7 +54,6 @@ public class PlannerCommandService {
 
     private final PlannerRepository plannerRepository;
     private final PlannerStatsRepository statsRepository;
-    private final ApplicationEventPublisher eventPublisher;
     private final PlannerContentValidator contentValidator;
     private final ContentVersionValidator contentVersionValidator;
     private final PlannerCatalogService plannerCatalogService;
@@ -74,7 +70,6 @@ public class PlannerCommandService {
     public PlannerCommandService(
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
-            ApplicationEventPublisher eventPublisher,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
@@ -85,7 +80,7 @@ public class PlannerCommandService {
             SyncVersionValidator syncVersionValidator,
             int maxPlannersPerUser,
             int currentSchemaVersion) {
-        this(plannerRepository, statsRepository, eventPublisher, contentValidator, contentVersionValidator,
+        this(plannerRepository, statsRepository, contentValidator, contentVersionValidator,
                 plannerCatalogService, accessGuard, categoryValidator, limitValidator, ownershipValidator,
                 syncVersionValidator, Optional.empty(),
                 maxPlannersPerUser, currentSchemaVersion);
@@ -95,7 +90,6 @@ public class PlannerCommandService {
     public PlannerCommandService(
             PlannerRepository plannerRepository,
             PlannerStatsRepository statsRepository,
-            ApplicationEventPublisher eventPublisher,
             PlannerContentValidator contentValidator,
             ContentVersionValidator contentVersionValidator,
             PlannerCatalogService plannerCatalogService,
@@ -109,7 +103,6 @@ public class PlannerCommandService {
             @Value("${planner.schema-version}") int currentSchemaVersion) {
         this.plannerRepository = plannerRepository;
         this.statsRepository = statsRepository;
-        this.eventPublisher = eventPublisher;
         this.contentValidator = contentValidator;
         this.contentVersionValidator = contentVersionValidator;
         this.plannerCatalogService = plannerCatalogService;
@@ -288,9 +281,6 @@ public class PlannerCommandService {
 
         PlannerResponse response = PlannerResponse.fromEntity(saved, 0);
 
-        eventPublisher.publishEvent(
-                new PlannerSyncEvent(userId, deviceId, saved.getId(), SseEventType.CREATED, response));
-
         return new UpsertedPlanner(saved, response, true);
     }
 
@@ -377,8 +367,6 @@ public class PlannerCommandService {
             }
 
             PlannerResponse response = PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
-            eventPublisher.publishEvent(
-                    new PlannerSyncEvent(userId, deviceId, id, SseEventType.UPDATED, response));
             return new UpsertedPlanner(planner, response, false);
         }
 
@@ -423,13 +411,7 @@ public class PlannerCommandService {
             plannerCatalogService.onVisibleEditCommitted(planner);
         }
 
-        PlannerResponse response = PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
-
-        // Notify other devices via SSE
-        eventPublisher.publishEvent(
-                new PlannerSyncEvent(userId, deviceId, id, SseEventType.UPDATED, response));
-
-        return response;
+        return PlannerResponse.fromEntity(planner, statsRepository.upvotesOf(id));
     }
 
     /**
@@ -464,10 +446,6 @@ public class PlannerCommandService {
             tombstoneStore.ifPresent(store -> store.writeTombstone(ByIdReadGuard.PLANNER_ENTITY_TYPE, id));
         }
         log.info("Soft deleted planner {} for user {}", id, userId);
-
-        // Notify other devices via SSE
-        eventPublisher.publishEvent(
-                PlannerSyncEvent.deleted(userId, deviceId, id));
     }
 
     /**
