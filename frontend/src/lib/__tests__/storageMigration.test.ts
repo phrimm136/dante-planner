@@ -1,14 +1,20 @@
 /**
- * The v1 to v2 key migration, driven over a stub object store.
+ * The v1 to v2 key migration, at two levels.
  *
- * What matters is which rows survive and in what order they are written and
+ * The first suite drives `migrateToFlatKeys` over a stub object store, where
+ * what matters is which rows survive and in what order they are written and
  * dropped: a source may only go once its copy reads back, and two devices
  * holding one planner id must collapse to the row modified last.
+ *
+ * The second runs the whole upgrade through a real IndexedDB implementation,
+ * which is the only place the `versionchange` transaction, the version gate,
+ * and the store's own durability actually exist.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 
-import { migrateToFlatKeys } from '../storage'
+import { migrateToFlatKeys, STORAGE_STORE_NAME } from '../storage'
 
 interface StubRequest<T> {
   onsuccess: ((event: unknown) => void) | null
@@ -189,5 +195,153 @@ describe('migrateToFlatKeys', () => {
     await flush()
 
     expect(rows.get('planner:p1')).toBe(dated)
+  })
+})
+
+const DB_NAME = 'danteplanner'
+
+/** Open the database directly, outside the module under test. */
+function openRaw(
+  factory: IDBFactory,
+  version?: number,
+  upgrade?: (db: IDBDatabase) => void,
+): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = version === undefined ? factory.open(DB_NAME) : factory.open(DB_NAME, version)
+    request.onupgradeneeded = () => upgrade?.(request.result)
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+/** Create the database at v1 holding `rows`, then close the seeding connection. */
+async function seedV1(factory: IDBFactory, rows: Record<string, string>): Promise<void> {
+  const db = await openRaw(factory, 1, (created) => created.createObjectStore(STORAGE_STORE_NAME))
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(STORAGE_STORE_NAME)
+    for (const [key, value] of Object.entries(rows)) store.put(value, key)
+    transaction.oncomplete = () => resolve()
+    transaction.onerror = () => reject(transaction.error)
+  })
+  db.close()
+}
+
+/** Every row the database currently holds, read on its own connection. */
+async function readAll(factory: IDBFactory): Promise<Map<string, string>> {
+  const db = await openRaw(factory)
+  const rows = new Map<string, string>()
+  await new Promise<void>((resolve, reject) => {
+    const request = db
+      .transaction(STORAGE_STORE_NAME, 'readonly')
+      .objectStore(STORAGE_STORE_NAME)
+      .openCursor()
+    request.onsuccess = () => {
+      const cursor = request.result
+      if (!cursor) return resolve()
+      const key: IDBValidKey = cursor.key
+      const value: unknown = cursor.value
+      if (typeof key === 'string' && typeof value === 'string') rows.set(key, value)
+      cursor.continue()
+    }
+    request.onerror = () => reject(request.error)
+  })
+  db.close()
+  return rows
+}
+
+/** The database version currently on disk, read on its own connection. */
+async function currentVersion(factory: IDBFactory): Promise<number> {
+  const db = await openRaw(factory)
+  const { version } = db
+  db.close()
+  return version
+}
+
+/** Import the module fresh so it opens a new connection of its own. */
+async function openThroughStorage(): Promise<void> {
+  vi.resetModules()
+  const { storage } = await import('../storage')
+  // Any read forces the shared connection open, which runs the upgrade.
+  await storage.getItem('deviceId')
+}
+
+describe('the v1 to v2 upgrade over a real IndexedDB', () => {
+  let factory: IDBFactory
+
+  beforeEach(() => {
+    factory = new IDBFactory()
+    vi.stubGlobal('indexedDB', factory)
+    vi.stubGlobal('IDBKeyRange', IDBKeyRange)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+
+  it('collapses two devices onto one planner key and leaves the deviceId singleton alone', async () => {
+    const older = plannerRow('p1', '2026-01-01T00:00:00.000Z')
+    const newer = plannerRow('p1', '2026-06-01T00:00:00.000Z')
+    await seedV1(factory, {
+      deviceId: 'a-device-uuid',
+      'planner:md:devA:p1': older,
+      'planner:md:devB:p1': newer,
+    })
+
+    await openThroughStorage()
+
+    const rows = await readAll(factory)
+    expect(rows.get('planner:p1')).toBe(newer)
+    expect(rows.get('deviceId')).toBe('a-device-uuid')
+    expect(rows.has('planner:md:devA:p1')).toBe(false)
+    expect(rows.has('planner:md:devB:p1')).toBe(false)
+    expect(await currentVersion(factory)).toBe(2)
+  })
+
+  it('migrates every planner id the database held', async () => {
+    await seedV1(factory, {
+      'planner:md:devA:p1': plannerRow('p1', '2026-01-01T00:00:00.000Z'),
+      'planner:md:devA:p2': plannerRow('p2', '2026-02-01T00:00:00.000Z'),
+    })
+
+    await openThroughStorage()
+
+    const rows = await readAll(factory)
+    expect([...rows.keys()].sort()).toEqual(['planner:p1', 'planner:p2'])
+  })
+
+  it('is a no-op on a second open at v2', async () => {
+    await seedV1(factory, {
+      deviceId: 'a-device-uuid',
+      'planner:md:devA:p1': plannerRow('p1', '2026-01-01T00:00:00.000Z'),
+    })
+
+    await openThroughStorage()
+    const afterUpgrade = await readAll(factory)
+
+    await openThroughStorage()
+    const afterSecondOpen = await readAll(factory)
+
+    expect(afterSecondOpen).toEqual(afterUpgrade)
+    expect(await currentVersion(factory)).toBe(2)
+  })
+
+  it('creates an empty store when no database existed, with nothing to migrate', async () => {
+    await openThroughStorage()
+
+    expect(await readAll(factory)).toEqual(new Map())
+    expect(await currentVersion(factory)).toBe(2)
+  })
+
+  it('serves a migrated row back through the reader under its new key', async () => {
+    const row = plannerRow('p1', '2026-01-01T00:00:00.000Z')
+    await seedV1(factory, { 'planner:md:devA:p1': row })
+
+    vi.resetModules()
+    const { storage } = await import('../storage')
+
+    await expect(storage.getItem('planner:p1')).resolves.toEqual({ ok: true, value: row })
+    await expect(storage.getItem('planner:md:devA:p1')).resolves.toEqual({ ok: true, value: null })
   })
 })
