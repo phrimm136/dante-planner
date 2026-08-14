@@ -10,3 +10,7 @@ invalid:
   - import { toast } from '@/lib/toast'
   - import { toast as notify } from '@/lib/toast'
   - export { toast } from 'sonner'
+  # Evasion shapes the earlier identifier-keyed rule walked past.
+  - import * as ns from 'sonner'
+  - const { toast } = await import('sonner')
+  - export * from 'sonner'

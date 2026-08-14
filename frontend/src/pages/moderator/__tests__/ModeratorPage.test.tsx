@@ -22,10 +22,6 @@ vi.mock('react-i18next', async (importOriginal) => {
   }
 })
 
-vi.mock('@/lib/toast', () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
-}))
-
 vi.mock('@/shared/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/shared/auth')>()),
   useAuthQuery: () => ({ data: { role: 'ADMIN', usernameSuffix: '9999' } }),

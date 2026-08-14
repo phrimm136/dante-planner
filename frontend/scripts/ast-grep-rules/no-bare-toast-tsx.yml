@@ -6,7 +6,6 @@ files:
   - src/**/*.tsx
 ignores:
   - src/lib/errorPresentation.ts
-  - src/lib/toast.ts
 rule:
   any:
     - pattern: toast.error($$$ARGS)

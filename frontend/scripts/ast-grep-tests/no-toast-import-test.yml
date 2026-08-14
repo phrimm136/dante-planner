@@ -5,6 +5,7 @@ valid:
   - import { showWarning } from '@/lib/errorPresentation'
   - import { formatDate } from '@/lib/formatDate'
   - export { showError } from '@/lib/errorPresentation'
+  - const mod = await import('@/lib/errorPresentation')
 invalid:
   - import { toast } from 'sonner'
   - import { toast } from '@/lib/toast'
@@ -12,3 +13,7 @@ invalid:
   - import { toast, Toaster } from 'sonner'
   - export { toast } from '@/lib/toast'
   - import { type ExternalToast, toast } from 'sonner'
+  # Evasion shapes the earlier identifier-keyed rule walked past.
+  - import * as ns from 'sonner'
+  - const { toast } = await import('sonner')
+  - export * from 'sonner'
