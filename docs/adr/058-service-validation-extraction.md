@@ -20,6 +20,15 @@
   Validation runs before the restriction checks, inverting the response-ordering
   contract for restricted actors.
 
+- @validation @services (taste) — The extracted validators keep per-operation verbs; no uniform
+  validate-context contract, collection injection, or holder bundling. Verb selection per call
+  site is the business rule itself, response-code ordering is part of the wire contract, and one
+  validator receives caller-computed state, so a uniform pipeline re-encodes selection as
+  dispatch behind worse names. REJECTED: list injection behind one contract — erases the verbs.
+  REJECTED: a bundled holder object — reduces the argument count without changing coupling.
+  REJECTED: per-command handler split — the coordinator's dependencies are one aggregate's write
+  lifecycle, honestly counted.
+
 ## Takeaway
 
 - takeaway: extraction driven by duplication count keeps the inline form as the

@@ -559,86 +559,9 @@ Scenario: The dead command surface is gone (dead-surface-removal)
 
 ## Decisions
 
-- @bookmark — Remove the feature entirely, table included, because the write path never had a
-  production caller and the read side has only ever rendered false. Overturns RFC 0003 item 16.
-  REJECTED: keeping the read-side projection — it renders a constant.
-- @bookmark @deploy — Big-bang single release. REJECTED: FE-first two-step ordering — accepted
-  consequence instead: browsers holding the old bundle fail list parsing until reload.
-- @notification — Named static factories per type: `forComment`, `forReply`, `forReport`, and
-  `forRecommendation`, the last specializing `plannerScoped` and dropping its type parameter.
-  REJECTED: JPA inheritance — the hottest write path bypasses entity construction entirely and
-  the read side never dispatches on type.
-- @notification @report — `REPORT_RECEIVED` is wired, not deleted: recipients are admin/moderator
-  users, producers are the planner and comment report services, dedup key is (user_id, content_id,
-  notification_type) so repeat reports collapse. REJECTED: deleting the enum value — the type was
-  intended, not accidental.
-- @auth @rotation — The legacy non-lineage path is removed now, because the rollout completed and
-  the seven-day refresh TTL bounds any surviving legacy token to zero. REJECTED: continued
-  admission of legacy-format tokens.
-- @auth @refresh — Refresh orchestration extracts into a `SessionRefresher` collaborator, keeping
-  the repo's session vocabulary (a refresh-token family is the session). REJECTED: a second
-  servlet filter — the refresh path shares the authentication verdict, response cookies, abandon
-  protocol, and outage short-circuit with the filter. REJECTED: token-first naming — the session
-  vocabulary is already established by the surrounding types.
-- @auth @token — `TokenBlacklistService` and `RefreshRotationService` consolidate into one
-  `TokenLifecycleService` (user-ruled, overturning this same debate's earlier two-service
-  position). Accepted consequence: one class carries both failure postures, scoped per method
-  group. REJECTED: two services with one-way key-schema coupling. REJECTED: the name
-  `TokenRevocationService` — rotation mints tokens, which is not revocation.
-- @auth @logout — Logout drops the refresh-token hash revocation once legacy admission is gone;
-  family revocation covers it and is stronger under outage, because the hash check fails open
-  while the family check fails closed. REJECTED: keeping both — a fail-open backup behind a
-  fail-closed primary adds storage, not guarantee.
-- @auth @rotation @naming — The persisted rotation states rename to `LIVE` (was `UNUSED_LATEST`)
-  and `IN_GRACE` (was `PENDING`), and the legacy `USED` spelling is dropped after conversion to
-  `RETIRED`; the theft arm's spellings (`RETIRED`, `SUPERSEDED`) are untouched. REJECTED: keeping
-  the old spellings — the state machine is the security argument, and its names misstated it.
-- @auth @rotation @migration — Pre-rename values are batch-converted by an idempotent boot-time
-  converter running before readiness, valid only because the deployment is big-bang (no old
-  writer survives into the new keyspace); the converter is deleted in the first release after it
-  has run in production. REJECTED: a synonym window inside the script — its removal step edits
-  the security-critical Lua a third time, where the converter's removal deletes an inert class.
-- @auth @logout (taste) — The logout script keeps its array-based segmented-KEYS form although
-  the population shrinks to at most one token and one family, because revocations are built
-  conditionally and the legal shapes are {0,1} tokens x {0,1} families. REJECTED: fixed
-  positional keys — they need sentinel keys or four call variants, moving shape-handling from
-  one Lua loop into the caller.
-- @config — `jwt.rotation.*` binds once, nested under the existing `jwt` properties class,
-  absorbing the standalone rotation flag bean. REJECTED: three parallel binding mechanisms for
-  one prefix.
-- @convention @archunit — The arity problem gets a form ratchet, not a number: `@Value`
-  constructor parameters are banned outside `@ConfigurationProperties` classes, flipping to
-  blocking at a zero baseline. The banned form:
+Recorded in `docs/adr/` at decision time (076-081, plus an addition to 058) rather than held
+here for wrap-up harvest; this section keeps no second copy.
 
-  ```java
-  SomeService(..., @Value("${planner.recommended-threshold}") int recommendedThreshold)
-  ``` REJECTED: a numeric arity cap — a frozen over-cap class growing
-  worse adds no new violation, so freezing is blind exactly where it matters. REJECTED: Sonar
-  S107 — a second toolchain gate for a rule the existing architecture suite can express.
-- @validators — No unified validate-context contract; the verb-shaped validators stand as named,
-  order-explicit preconditions, and the command service honestly lands at eleven constructor
-  arguments. REJECTED: a uniform `validate(context)` pipeline — it erases per-operation verb
-  selection and re-encodes it as dispatch; the signatures it would have to erase:
-
-  ```java
-  public void requireEditable(PlannerComment comment)
-  public void requireAuthorToEdit(PlannerComment comment, Long userId)
-  public void requireFirstVote(boolean alreadyVoted, UUID plannerId, Long userId)  // caller supplies the lookup
-  ```
-
-  REJECTED: a bundled holder object — count cosmetics.
-  REJECTED: per-command handler split — same verdict as the publishing service's accept.
-- @planner @moderation — Restriction gates on the planner's public state, not the endpoint's
-  classification: upsert of a published planner rejects restricted users before sync-version
-  validation (403 beats 409), rejecting the write in its entirety, and
-  the frontend's blanket sync disable narrows to published planners. REJECTED: blocking all sync
-  for restricted users — withdraws the private work the guard's contract preserves. REJECTED:
-  status quo — the only public mutation without a server-side check, enforced solely in the
-  bypassable layer.
-- @query @publishing — `PublishedPlannerQueryService` is not split and `notificationTargetOf`
-  stays; `PlannerPublishingService`, `PlannerAccountPurgeService`, and
-  `UserAccountLifecycleService` are accepted as-is. REJECTED: list/detail split — two read
-  aggregators sharing three infrastructure deps buy little for a new seam.
 - Spike: production `planner_bookmarks` row count — inconclusive (no live AWS session);
   superseded by the user's ruling that the feature was never active and the table holds zero
   rows.
