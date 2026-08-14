@@ -4,6 +4,7 @@ import org.danteplanner.backend.auth.entity.AuthProviderType;
 import java.util.concurrent.atomic.AtomicLong;
 import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -247,7 +248,7 @@ public class TestDataFactory {
                     .plannerType(plannerType)
                     .build();
             planner.attach(
-                    PlannerContent.builder()
+                    PlannerContentLifecycle.asPersisted(PlannerContent.builder()
                             .title(title)
                             .category(category)
                             .status(status != null ? status
@@ -256,7 +257,7 @@ public class TestDataFactory {
                             .contentSchemaVersion(schemaVersion)
                             .gameContentVersion(contentVersion)
                             .selectedKeywords(selectedKeywords)
-                            .build(),
+                            .build()),
                     PlannerPublication.builder().build(),
                     PlannerModeration.builder().build());
             if (published) {

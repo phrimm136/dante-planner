@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The digest tracks the document, not the save. A save that leaves the content string byte-identical
- * moves the sync version and nothing else; only a moved document re-derives the digest.
+ * The digest identifies the document a save carried. Every save carrying one re-derives it, so the
+ * value follows the string the client sent rather than the form storage returns; a save carrying no
+ * document leaves it alone.
  */
 class PlannerContentDigestTest {
 
@@ -15,7 +16,7 @@ class PlannerContentDigestTest {
 
     /**
      * Drives the JPA callbacks the persistence provider would: the persist that computes the first
-     * digest, then the load that captures the searchable values {@code recordSave} compares against.
+     * digest, then the load that leaves the row carrying no assignment of its own.
      */
     private PlannerContent storedContent(String content) {
         PlannerContent contentRow = PlannerContent.builder()
@@ -63,6 +64,32 @@ class PlannerContentDigestTest {
 
         assertThat(contentRow.contentDigestHex()).isEqualTo(atCreate);
         assertThat(contentRow.getContent()).isEqualTo(DOCUMENT);
+    }
+
+    @Test
+    void digest_WhenResavedWithTheSameDocument_KeepsTheSameValue() {
+        PlannerContent contentRow = storedContent(DOCUMENT);
+        String atCreate = contentRow.contentDigestHex();
+
+        contentRow.setContent(DOCUMENT);
+        contentRow.recordSave();
+
+        assertThat(contentRow.contentDigestHex()).isEqualTo(atCreate);
+    }
+
+    @Test
+    void digest_WhenAStoredDocumentIsResavedVerbatim_HashesTheAssignedString() {
+        PlannerContent contentRow = storedContent(DOCUMENT);
+        String storedForm = "{\"selectedGiftIds\": [\"9001\"]}";
+
+        contentRow.setContent(storedForm);
+        contentRow.recordSave();
+
+        assertThat(contentRow.contentDigestHex())
+                .as("the digest follows what the client sent, not what it once identified")
+                .isNotEqualTo(storedContent(DOCUMENT).contentDigestHex());
+        assertThat(contentRow.contentDigestHex())
+                .isEqualTo(storedContent(storedForm).contentDigestHex());
     }
 
     @Test

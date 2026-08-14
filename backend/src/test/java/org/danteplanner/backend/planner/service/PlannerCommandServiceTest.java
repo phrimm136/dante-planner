@@ -14,6 +14,7 @@ import org.danteplanner.backend.planner.validation.PlannerLimitValidator;
 import org.danteplanner.backend.planner.validation.PlannerOwnershipValidator;
 import org.danteplanner.backend.planner.validation.SyncVersionValidator;
 import org.danteplanner.backend.planner.entity.PlannerContent;
+import org.danteplanner.backend.planner.entity.PlannerContentLifecycle;
 import org.danteplanner.backend.planner.entity.PlannerModeration;
 import org.danteplanner.backend.planner.entity.PlannerPublication;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
@@ -153,7 +154,7 @@ class PlannerCommandServiceTest {
                 .createdAt(Instant.now())
                 .build();
         planner.attach(
-                PlannerContent.builder()
+                PlannerContentLifecycle.asPersisted(PlannerContent.builder()
                         .title("Test Planner")
                         .category("5F")
                         .status(PlannerStatus.DRAFT)
@@ -162,7 +163,7 @@ class PlannerCommandServiceTest {
                         .gameContentVersion(6)
                         .syncVersion(syncVersion)
                         .lastModifiedAt(Instant.now())
-                        .build(),
+                        .build()),
                 PlannerPublication.builder().published(published).build(),
                 PlannerModeration.builder().build());
         return planner;
@@ -187,7 +188,7 @@ class PlannerCommandServiceTest {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
                 planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
+                return PlannerContentLifecycle.asPersisted(planner);
             });
 
             // Act
@@ -252,7 +253,7 @@ class PlannerCommandServiceTest {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
                 planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
+                return PlannerContentLifecycle.asPersisted(planner);
             });
 
             // Act
@@ -500,7 +501,7 @@ class PlannerCommandServiceTest {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
                 planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
+                return PlannerContentLifecycle.asPersisted(planner);
             });
 
             // Act
@@ -580,7 +581,7 @@ class PlannerCommandServiceTest {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
                 planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
+                return PlannerContentLifecycle.asPersisted(planner);
             });
 
             // Act
@@ -608,7 +609,7 @@ class PlannerCommandServiceTest {
                 Planner planner = invocation.getArgument(0);
                 planner.setCreatedAt(Instant.now());
                 planner.getContent().setLastModifiedAt(Instant.now());
-                return planner;
+                return PlannerContentLifecycle.asPersisted(planner);
             });
 
             // Act & Assert - should not throw
@@ -696,7 +697,8 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
             when(plannerRepository.insert(any(Planner.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
+                            (Planner) invocation.getArgument(0)));
 
             UpsertPlannerRequest request = new UpsertPlannerRequest(
                     null, "5F", "Test Planner", null, "{}", 1, PlannerType.MIRROR_DUNGEON, null, null);
@@ -782,7 +784,8 @@ class PlannerCommandServiceTest {
             when(plannerRepository.countActiveByUserId(testUser.getId()))
                     .thenReturn(0L);
             when(plannerRepository.insert(any(Planner.class)))
-                    .thenAnswer(invocation -> invocation.getArgument(0));
+                    .thenAnswer(invocation -> PlannerContentLifecycle.asPersisted(
+                            (Planner) invocation.getArgument(0)));
 
             UpsertResult result = commandService.upsertPlanner(
                     testUser.getId(), deviceId, plannerId, request, false);

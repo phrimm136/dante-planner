@@ -29,7 +29,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,13 +78,14 @@ public class PlannerContent {
     private Set<String> selectedKeywords;
 
     @Column(columnDefinition = "JSON", nullable = false)
-    @Setter
     private String content;
 
     /**
-     * SHA-256 over the content document as the write path received it. MySQL re-serializes a JSON
-     * column, so this is the only surviving identity of the author's bytes: recomputing it from
-     * {@link #content} after a round trip yields a different value for an unchanged document.
+     * SHA-256 over the content document as the write path received it, which is the output of the
+     * request DTO's {@code @Sanitized(PLANNER_CONTENT)} bind-time normalization rather than the raw
+     * request body. MySQL re-serializes a JSON column, so this is the only surviving identity of
+     * that string: recomputing it from {@link #content} after a round trip yields a different value
+     * for an unchanged document.
      */
     @Column(name = "content_digest", columnDefinition = "BINARY(32)", nullable = false)
     private byte[] contentDigest;
@@ -130,10 +130,27 @@ public class PlannerContent {
     @Transient
     private Set<String> loadedSelectedKeywords;
 
+    /**
+     * Whether a request document has been assigned since the digest was last derived. Comparing
+     * {@link #content} against {@link #loadedContent} cannot answer this: a client that pulls a
+     * document and saves it back unchanged sends the stored form, which is MySQL's
+     * re-serialization, so an equal comparison would keep a digest over a string no client holds.
+     */
+    @Transient
+    private boolean contentAssigned;
+
     @PostLoad
     protected void onLoad() {
         loadedContent = content;
         loadedSelectedKeywords = selectedKeywords;
+    }
+
+    /**
+     * Assign the content document a request carried, in the form the sanitizer produced.
+     */
+    public void setContent(String content) {
+        this.content = content;
+        this.contentAssigned = true;
     }
 
     @PrePersist
@@ -142,6 +159,7 @@ public class PlannerContent {
             lastModifiedAt = Instant.now();
         }
         contentDigest = digestOf(content);
+        contentAssigned = false;
     }
 
     private static byte[] digestOf(String content) {
@@ -153,7 +171,7 @@ public class PlannerContent {
     }
 
     public String contentDigestHex() {
-        return contentDigest == null ? null : HexFormat.of().formatHex(contentDigest);
+        return HexFormat.of().formatHex(contentDigest);
     }
 
     @PreUpdate
@@ -175,12 +193,14 @@ public class PlannerContent {
 
     /**
      * Record a save: bump the sync version handed back to clients, and re-derive the content
-     * digest when this transaction actually moved the document.
+     * digest from the document this save carried. A save carrying no document leaves the digest
+     * over the string it already identifies.
      */
     public void recordSave() {
         this.syncVersion = this.syncVersion + 1;
-        if (!Objects.equals(content, loadedContent)) {
+        if (contentAssigned) {
             this.contentDigest = digestOf(content);
+            this.contentAssigned = false;
         }
     }
 }

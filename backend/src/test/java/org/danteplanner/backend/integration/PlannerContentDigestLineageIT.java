@@ -7,6 +7,7 @@ import org.danteplanner.backend.config.TestConfig;
 import org.danteplanner.backend.planner.dto.UpsertPlannerRequest;
 import org.danteplanner.backend.planner.entity.PlannerStatus;
 import org.danteplanner.backend.planner.entity.PlannerType;
+import org.danteplanner.backend.shared.util.PlannerContentSanitizer;
 import org.danteplanner.backend.support.TestDataFactory;
 import org.danteplanner.backend.user.entity.User;
 import org.danteplanner.backend.user.repository.UserRepository;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -35,11 +37,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * The digest is the identity of the bytes the author wrote, carried forward untouched.
+ * The digest identifies the document the write path received — the output of the request DTO's
+ * {@code @Sanitized(PLANNER_CONTENT)} normalization, not the raw request body — and is carried
+ * forward untouched.
  *
  * <p>MySQL re-serializes a JSON column, so the {@code content} a reader gets back is not the string
  * the writer sent. A consumer that hashes what it received and expects the digest to match is
- * therefore wrong, and these tests are that claim in executable form.</p>
+ * therefore wrong, and these tests are that claim in executable form. The last case covers the
+ * inverse: a client resaving exactly what it pulled gets a digest over that string, because every
+ * save carrying a document re-derives it.</p>
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -79,7 +85,7 @@ class PlannerContentDigestLineageIT extends SharedMySqlContainerSupport {
         }
     }
 
-    private void save(String content) throws Exception {
+    private ResultActions upsert(String content, Long syncVersion) throws Exception {
         UpsertPlannerRequest request = new UpsertPlannerRequest(
                 plannerId.toString(),
                 "5F",
@@ -88,13 +94,23 @@ class PlannerContentDigestLineageIT extends SharedMySqlContainerSupport {
                 content,
                 7,
                 PlannerType.MIRROR_DUNGEON,
-                null,
+                syncVersion,
                 null);
 
-        performAuthed(mockMvc, put("/api/planner/md/{id}", plannerId).with(withCsrf())
+        return performAuthed(mockMvc, put("/api/planner/md/{id}", plannerId).with(withCsrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)), token)
-                .andExpect(status().isCreated());
+                        .content(objectMapper.writeValueAsString(request)), token);
+    }
+
+    private void save(String content) throws Exception {
+        upsert(content, null).andExpect(status().isCreated());
+    }
+
+    private JsonNode resave(String content, long syncVersion) throws Exception {
+        String json = upsert(content, syncVersion)
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(json);
     }
 
     private JsonNode readBack() throws Exception {
@@ -125,5 +141,43 @@ class PlannerContentDigestLineageIT extends SharedMySqlContainerSupport {
         assertThat(response.get("contentDigest").asText())
                 .as("a consumer that re-hashes what it received gets a different value")
                 .isNotEqualTo(sha256Hex(returnedContent));
+    }
+
+    @Test
+    void contentDigest_WhenTheRequestCarriesSlackWhitespace_HashesTheSanitizerOutput() throws Exception {
+        String spaced = objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(objectMapper.readTree(TestDataFactory.VALID_CONTENT));
+        String normalized = PlannerContentSanitizer.sanitize(spaced);
+
+        assertThat(normalized)
+                .as("the fixture only tests anything while bind-time normalization changes the string")
+                .isNotEqualTo(spaced);
+
+        save(spaced);
+        String digest = readBack().get("contentDigest").asText();
+
+        assertThat(digest)
+                .as("the digest identifies the document the write path received, after sanitization")
+                .isEqualTo(sha256Hex(normalized));
+        assertThat(digest)
+                .as("the raw request body is not what the digest identifies")
+                .isNotEqualTo(sha256Hex(spaced));
+    }
+
+    @Test
+    void contentDigest_WhenAPulledDocumentIsResavedVerbatim_HashesTheResentString() throws Exception {
+        save(TestDataFactory.VALID_CONTENT);
+
+        JsonNode pulled = readBack();
+        String pulledContent = pulled.get("content").asText();
+
+        JsonNode resaved = resave(pulledContent, pulled.get("syncVersion").asLong());
+
+        assertThat(resaved.get("contentDigest").asText())
+                .as("a client that resaves what it pulled must get back a digest over that string, "
+                        + "or it can never confirm the server holds what it holds")
+                .isEqualTo(sha256Hex(PlannerContentSanitizer.sanitize(pulledContent)));
+        assertThat(resaved.get("contentDigest").asText())
+                .isNotEqualTo(pulled.get("contentDigest").asText());
     }
 }
