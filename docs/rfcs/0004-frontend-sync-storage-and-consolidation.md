@@ -608,9 +608,12 @@ export const SseEventTypeSchema = z.enum(
 handlers: Partial<Record<SseEventType, (event: MessageEvent) => void>>
 ```
 
-A cross-device delete makes the next open 404. `SseStreamCallbacks` gains a status-carrying close so
-the engine can stop retrying and say so, instead of backing off forever against a stream that will
-never exist:
+`SseStreamCallbacks` gains a status-carrying close. What a 404 means depends on the stream: the
+account stream (`/api/sse/subscribe`) names no resource, so its 404s are transient infrastructure
+(a routing miss, a deploy window) and keep the normal backoff. The per-planner comment stream can
+genuinely lose its resource — a cross-device delete or unpublish makes its open 404 permanent — so
+terminal-on-404 is an opt-in engine option (`stopOnNotFound`) that only per-resource consumers set,
+paired with a report callback so the stop is said, not silent:
 
 ```ts
 // shared/sse/lib/sseStream.ts
@@ -635,29 +638,50 @@ export interface SseStreamCallbacks {
 3. `shared/sse/lib/sseStream.ts` — delete `buildHeaders` (`:91-97`) and the `lastEventId` parameter
    of `runSseStream` (`:137-142`); widen `onClosed` to carry the status (`:164-167`).
 4. `shared/sse/hooks/useSseEngine.ts` — delete the `lastEventId` local (`:137`, `:165`, `:265`);
-   type `handlers` as `Partial<Record<SseEventType, …>>` (`:79`); stop reconnecting on a 404 open
-   and report it once.
+   type `handlers` as `Partial<Record<SseEventType, …>>` (`:79`); add the opt-in `stopOnNotFound`
+   with its one-shot report callback. The account stream does not set it — its 404s keep the
+   backoff path.
 5. `lib/constants/api.ts` — delete `SSE_TRANSPORT.LAST_EVENT_ID_HEADER` (`:112`); export
    `SseEventType`.
 6. `shared/sse/schemas/SseEnvelopeSchemas.ts:7-17` — derive the enum from `SSE_EVENTS`; reconcile
-   the two vocabularies as one (`settings:invalidated` and `connected` both belong).
+   the two vocabularies as one (`settings:invalidated` and `connected` both belong;
+   `created`/`updated`/`deleted` are retired from `SSE_EVENTS` — the backend no longer has them,
+   and a vocabulary value the wire cannot carry is drift by construction).
 7. `lib/queryClient.ts:59` — `refetchOnWindowFocus: true`; the local-storage-backed planner queries
-   (`useSavedPlannerQuery`, `useMDUserPlannersData`) set it back to `false` at their own query
-   options, since a focus event tells them nothing.
-8. `pages/planner/hooks/useAppSse.ts` — on a 404 open, show a graceful message keyed under
-   `planner` explaining the planner was removed on another device.
+   (`useSavedPlannerQuery`, `useMDUserPlannersData`, both `list` and `listFull`) set it back to
+   `false` at their own query options, since a focus event tells them nothing.
+8. `shared/comment/hooks/usePlannerCommentsSse.ts` — sets `stopOnNotFound` and reports through the
+   graceful message keyed under `planner` explaining the planner was removed on another device.
+9. `hooks/usePublishedPlannerQuery.ts` — a 404 on the detail open renders the same removal message
+   instead of throwing to the route error boundary (074 is silent here; 073 @sse @freshness decides
+   it: "a delete performed on another device surfaces as a 404 when the stale entry is opened,
+   which the client answers with a message rather than an error boundary").
+10. `shared/auth/hooks/useAuthQuery.ts` — a bare network failure (an unwrapped fetch `TypeError`)
+    preserves the cached identity exactly as `BackendUnavailableError` does. The focus-refetch flip
+    makes transient network blips a routine refetch condition, and answering one with `null` logs
+    the user out of the UI and silently disables save sync.
 
 ### Test plan
 
 - `shared/sse/hooks/__tests__/useSseEngine.test.ts` — delete the Last-Event-ID replay pin
-  (`:238-250`); add: a 404 open produces exactly one closed report and no reconnect attempt.
+  (`:238-250`); add: with `stopOnNotFound`, a 404 open produces exactly one report and no reconnect
+  attempt; without it, a 404 keeps the backoff path; a dispatched frame whose type is outside the
+  vocabulary reaches no handler (the rejection branch itself, not an unhandled known type).
 - `pages/planner/hooks/__tests__/useAppSse.test.tsx` — delete the applier cases (`:267`, `:289`,
-  `:302`, `:309`, `:329`, `:347`, `:409`); keep gating (`:188-245`), unparseable (`:389`), unknown
-  type (`:399`) and unmount cleanup (`:448-470`).
-- `shared/sse/schemas/__tests__/SseEnvelopeSchemas.test.ts` — the parity test now asserts the enum
-  equals `Object.values(SSE_EVENTS)` sorted, and separately that this matches the backend list.
+  `:302`, `:309`, `:329`, `:347`, `:409`); keep gating (`:188-245`) and unmount cleanup
+  (`:448-470`); the unparseable and unknown-type cases must exercise a live path — a handled event
+  type with an unparseable payload through `handleNotification`'s catch, and a frame rejected by
+  the vocabulary gate — not a type nothing handles either way.
+- `shared/sse/schemas/__tests__/SseEnvelopeSchemas.test.ts` — the transcribed backend list matches
+  `SseEventType.java`'s six `@JsonValue`s in declaration order, plus `connected` (emitted as a
+  literal by `AbstractSseService`); the enum-equals-`SSE_EVENTS` assertion is dropped as a
+  tautology against its own derivation source.
 - A published-planner detail query refetches on window focus; a saved (local) planner query does
-  not.
+  not — asserted against a query client carrying the global `refetchOnWindowFocus: true`, so the
+  test proves the override, and covering `listFull` as well as `list`.
+- A published-planner detail open answering 404 renders the removal message and does not reach the
+  route error boundary.
+- `useAuthQuery` answering a fetch `TypeError` keeps the cached identity.
 
 ---
 
@@ -1102,8 +1126,10 @@ rewrites under its own authorization. Behavior-preserving: no assertion may weak
 - [ ] A bare `toast.error`/`toast.success` outside the two sanctioned modules fails the build, and
       the rule is proven to run (not silently unknown).
 - [ ] No SSE handler mutates a planner cache; no Last-Event-ID is sent; the FE event enum is
-      derived from `SSE_EVENTS`; server-backed planner queries refetch on focus and local ones do
-      not; a 404 open reports once and stops retrying.
+      derived from `SSE_EVENTS` and carries no value the wire cannot; server-backed planner
+      queries refetch on focus and local ones do not; a per-resource stream's 404 reports once and
+      stops, the account stream's keeps backoff; a deleted planner's detail open answers with the
+      removal message, not the error boundary.
 - [ ] One debounce constant; both the editor and the autosave flush on teardown; the unload warning
       is armed from the store subscription.
 - [ ] `tsc -b` type-checks tests and `test-utils`; fixtures parse through production schemas; both
