@@ -42,14 +42,42 @@ desync class from silent to loud.
 - `TokenBlacklistService` and `RefreshRotationService` are coupled bidirectionally: the logout Lua
   in the blacklist writes rotation's `REVOKED_FIELD` into `rt:fam:*` hashes, and rotation's Lua
   reads the blacklist's `uinv:` keys. Blacklist reads fail open on a replica template; rotation
-  fails closed on the primary.
+  fails closed on the primary. The coupling at proposal time, verbatim:
+
+  ```java
+  // TokenBlacklistService — the logout Lua writes rotation's namespace:
+  + "  redis.call('HSET', KEYS[i], '" + RefreshRotationService.REVOKED_FIELD + "', ARGV[tokens + 3])\n"
+  ...
+  case LogoutRevocation.FamilyRevocation family ->
+          familyKeys.add(RefreshRotationService.familyKey(family.familyId()));
+
+  // RefreshRotationService — its rotate Lua reads the blacklist's namespace:
+  private String userInvalidationKey(Long userId) {
+      return TokenBlacklistService.USER_INVALIDATION_KEY_PREFIX + userId;
+  }
+  ```
 - `Notification` carries a 3-arg constructor with no production caller and a 7-arg constructor
   with adjacent same-typed parameters; `NotificationType.REPORT_RECEIVED` has no producer, no
   `DomainEventType` counterpart, and no effect arm; `PLANNER_PUBLISHED` rows are written by a
-  native fanout insert that bypasses entity construction.
+  native fanout insert that bypasses entity construction. The telescoping surface at proposal
+  time:
+
+  ```java
+  public Notification(Long userId, String contentId, NotificationType notificationType)  // no production caller
+  public Notification(Long userId, String contentId, NotificationType notificationType,
+                      UUID plannerId, String plannerTitle, String commentSnippet, UUID commentPublicId)
+  public static Notification plannerScoped(Long userId, String contentId, NotificationType type,
+                                           UUID plannerId, String plannerTitle)
+  ```
 - `PlannerCommandService.upsertAggregate` propagates edits of a published planner to the public
   catalog via `PlannerCatalogService.onVisibleEditCommitted` with no restriction check, while
-  every other public-contribution write calls `PlannerAccessGuard`. The frontend disables the sync
+  every other public-contribution write calls `PlannerAccessGuard`:
+
+  ```java
+  if (planner.isPublished()) {
+      plannerCatalogService.onVisibleEditCommitted(planner);  // public side effect on a path that never consults the guard
+  }
+  ``` The frontend disables the sync
   button for restricted users, so enforcement exists only client-side. `createPlanner`,
   `updatePlanner`, and `PublishedPlannerQueryService.incrementViewCount` have no production
   callers.
@@ -253,13 +281,25 @@ Scenario: The dead command surface is gone (dead-surface-removal)
   one prefix.
 - @convention @archunit — The arity problem gets a form ratchet, not a number: `@Value`
   constructor parameters are banned outside `@ConfigurationProperties` classes, flipping to
-  blocking at a zero baseline. REJECTED: a numeric arity cap — a frozen over-cap class growing
+  blocking at a zero baseline. The banned form:
+
+  ```java
+  SomeService(..., @Value("${planner.recommended-threshold}") int recommendedThreshold)
+  ``` REJECTED: a numeric arity cap — a frozen over-cap class growing
   worse adds no new violation, so freezing is blind exactly where it matters. REJECTED: Sonar
   S107 — a second toolchain gate for a rule the existing architecture suite can express.
 - @validators — No unified validate-context contract; the verb-shaped validators stand as named,
   order-explicit preconditions, and the command service honestly lands at eleven constructor
   arguments. REJECTED: a uniform `validate(context)` pipeline — it erases per-operation verb
-  selection and re-encodes it as dispatch. REJECTED: a bundled holder object — count cosmetics.
+  selection and re-encodes it as dispatch; the signatures it would have to erase:
+
+  ```java
+  public void requireEditable(PlannerComment comment)
+  public void requireAuthorToEdit(PlannerComment comment, Long userId)
+  public void requireFirstVote(boolean alreadyVoted, UUID plannerId, Long userId)  // caller supplies the lookup
+  ```
+
+  REJECTED: a bundled holder object — count cosmetics.
   REJECTED: per-command handler split — same verdict as the publishing service's accept.
 - @planner @moderation — Restriction gates on the planner's public state, not the endpoint's
   classification: upsert of a published planner rejects restricted users before sync-version
