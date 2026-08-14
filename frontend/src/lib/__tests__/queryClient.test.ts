@@ -30,7 +30,13 @@ vi.mock('../i18n', () => ({
 }))
 
 import { toast } from '../toast'
-import { handleBackendDownError } from '../queryClient'
+import { handleBackendDownError, queryClient } from '../queryClient'
+
+describe('window-focus refetching', () => {
+  it('refetches on focus by default, which is what keeps server-backed data fresh', () => {
+    expect(queryClient.getDefaultOptions().queries?.refetchOnWindowFocus).toBe(true)
+  })
+})
 
 describe('QueryCache onError', () => {
   let queryCache: QueryCache

@@ -348,3 +348,30 @@ describe('userPlannersQueryKeys', () => {
     expect(key[2]).toHaveProperty('isAuthenticated', true)
   })
 })
+
+describe('useMDUserPlannersData window-focus policy', () => {
+  it('opts its local-storage query out of the global focus refetch', async () => {
+    syncMocks.isAuthenticated = true
+    syncMocks.syncEnabled = true
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>
+        <React.Suspense fallback={null}>{children}</React.Suspense>
+      </QueryClientProvider>
+    )
+
+    const { result } = renderHook((props: { page: number }) => useMDUserPlannersData(props), {
+      wrapper,
+      initialProps: { page: 0 },
+    })
+    await waitFor(() => expect(result.current).not.toBeNull())
+
+    // IndexedDB is the source of truth here, so a focus event carries no news
+    // about it; only server-backed planner queries take the global default.
+    const localList = queryClient.getQueryCache().find({
+      queryKey: userPlannersQueryKeys.list(true),
+    })
+
+    expect(localList?.observers[0]?.options.refetchOnWindowFocus).toBe(false)
+  })
+})

@@ -181,6 +181,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
       queryKey: userPlannersQueryKeys.list(isAuthenticated),
       queryFn: () => storage.listLocal(),
       staleTime: STALE_TIME.FREQUENT,
+      // The source is local storage, so regaining focus says nothing about it.
+      refetchOnWindowFocus: false,
     }),
   )
 
@@ -191,6 +193,8 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     queryFn: () => storage.listLocalFull(),
     staleTime: STALE_TIME.FREQUENT,
     enabled: hasContentFilters,
+    // The source is local storage, so regaining focus says nothing about it.
+    refetchOnWindowFocus: false,
   })
 
   // Background sync: Pull missing planners from server

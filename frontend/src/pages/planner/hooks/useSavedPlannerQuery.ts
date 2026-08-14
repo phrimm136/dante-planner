@@ -38,6 +38,8 @@ export function useSavedPlannerQuery(plannerId: string): SaveablePlanner | null 
     },
     staleTime: 0, // Always refetch from IndexedDB to get latest version
     gcTime: GC_TIME.SHORT,
+    // The source is local storage, so regaining focus says nothing about it.
+    refetchOnWindowFocus: false,
   })
 
   return query.data

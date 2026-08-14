@@ -56,7 +56,7 @@ export const queryClient = new QueryClient({
         return failureCount < 1
       },
       retryDelay: (attempt) => Math.min(RETRY_BASE_MS * 2 ** attempt, RETRY_MAX_MS),
-      refetchOnWindowFocus: false, // Don't refetch when window regains focus
+      refetchOnWindowFocus: true,
     },
   },
 })
