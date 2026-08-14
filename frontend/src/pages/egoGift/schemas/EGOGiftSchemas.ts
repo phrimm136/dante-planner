@@ -79,22 +79,6 @@ export const EGOGiftI18nSchema = z
   })
   .strict()
 
-// EGOGiftListItem schema - merged data for list view
-export const EGOGiftListItemSchema = z
-  .object({
-    id: z.string(),
-    name: z.string(),
-    tag: tagArraySchema,
-    keyword: z.string().nullable(),
-    attributeType: z.string(),
-    themePack: z.array(z.string()),
-    maxEnhancement: z.union([z.literal(0), z.literal(1), z.literal(2)]),
-    hardOnly: z.boolean().optional(),
-    extremeOnly: z.boolean().optional(),
-    fusioned: z.boolean().optional(),
-  })
-  .strict()
-
 // Record types for spec and name lists
 export const EGOGiftSpecListSchema = z.record(z.string(), EGOGiftSpecSchema)
 export const EGOGiftNameListSchema = z.record(z.string(), z.string())

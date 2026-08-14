@@ -60,7 +60,6 @@ export {
   EGOGiftSpecSchema,
   EGOGiftDataSchema,
   EGOGiftI18nSchema,
-  EGOGiftListItemSchema,
   EGOGiftSpecListSchema,
   EGOGiftNameListSchema,
 } from './schemas/EGOGiftSchemas'

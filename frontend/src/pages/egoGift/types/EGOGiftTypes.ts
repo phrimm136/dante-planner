@@ -21,8 +21,7 @@ export type EGOGiftI18n = z.infer<typeof EGOGiftI18nSchema>
  * EGO Gift list item for list/grid views.
  *
  * Assembled in list components from already-validated spec + name list — not a
- * direct boundary shape, so it stays a plain TS type (carries battleKeywordList
- * and an optional name, unlike EGOGiftListItemSchema). Components should prefer
+ * direct boundary shape, so it stays a plain TS type. Components should prefer
  * EGOGiftName for granular Suspense boundaries.
  */
 export interface EGOGiftListItem {
