@@ -9,7 +9,8 @@
 
 import { useSuspenseQuery } from '@tanstack/react-query'
 
-import { ApiClient, NotFoundError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
 import { validateData } from '@/lib/validation'
 import { PublishedPlannerDetailSchema } from '../schemas/PlannerListSchemas'
 

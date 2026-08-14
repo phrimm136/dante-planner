@@ -10,7 +10,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient, ConflictError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
 import { showErrorMessage } from '@/lib/errorPresentation'
 import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'

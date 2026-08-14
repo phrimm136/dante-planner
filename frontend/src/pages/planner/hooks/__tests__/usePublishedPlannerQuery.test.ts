@@ -8,7 +8,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-import { NotFoundError, ForbiddenError } from '@/lib/api'
+import { NotFoundError, ForbiddenError } from '@/lib/apiErrors'
 
 const apiMocks = vi.hoisted(() => ({ get: vi.fn() }))
 

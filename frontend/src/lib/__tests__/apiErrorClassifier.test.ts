@@ -1,19 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import {
-  AuthTemporarilyUnavailableError,
-  BackendUnavailableError,
-  BannedError,
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-  RateLimitError,
-  RetryableUnavailableError,
-  ServiceUpdatingError,
-  TimedOutError,
-  ValidationError,
-  WriteTemporarilyUnavailableError,
-} from '@/lib/api'
+import { AuthTemporarilyUnavailableError, BackendUnavailableError, BannedError, ConflictError, ForbiddenError, NotFoundError, RateLimitError, RetryableUnavailableError, ServiceUpdatingError, TimedOutError, ValidationError, WriteTemporarilyUnavailableError } from '@/lib/apiErrors'
 
 import { classifyAppError, validationAppError } from '../apiErrorClassifier'
 import type { AppError } from '../apiErrorClassifier'

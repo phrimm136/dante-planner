@@ -23,7 +23,7 @@ import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../usePlannerSyncAdapter'
-import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
+import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/apiErrors'
 import { ok, err } from '@/lib/result'
 
 // Shared call-order recorder: every adapter call pushes its label so order is assertable.

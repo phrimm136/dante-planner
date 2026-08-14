@@ -5,7 +5,8 @@
  * Most mutations use cache invalidation. Notification toggle uses direct cache update (no refetch).
  */
 
-import { ApiClient, ConflictError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
 import { showErrorMessage } from '@/lib/errorPresentation'
 import { requestNotificationPermission } from '@/shared/notifications'
 import { useApiMutation } from '@/components/hooks/useApiMutation'

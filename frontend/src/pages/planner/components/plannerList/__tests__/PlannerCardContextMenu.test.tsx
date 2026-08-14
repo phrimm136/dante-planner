@@ -9,7 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { PublicPlanner, VoteResponse } from '../../../types/PlannerListTypes'
-import { ConflictError } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
 import { buildMutationResult } from '@/test-utils'
 
 vi.mock('@tanstack/react-router', () => ({

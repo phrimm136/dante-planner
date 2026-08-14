@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { NotFoundError } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
 import { showSuccess } from '@/lib/errorPresentation'
 import { showSyncFailure } from '../lib/syncFailure'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { toast as sonnerToast } from 'sonner'
 
-import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/api'
+import { BannedError, ConflictError, WriteTemporarilyUnavailableError } from '@/lib/apiErrors'
 
 import { showSyncFailure } from '../syncFailure'
 

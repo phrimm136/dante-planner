@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { toast as sonnerToast } from 'sonner'
 
-import {
-  BannedError,
-  ConflictError,
-  RetryableUnavailableError,
-  ServiceUpdatingError,
-  WriteTemporarilyUnavailableError,
-} from '@/lib/api'
+import { BannedError, ConflictError, RetryableUnavailableError, ServiceUpdatingError, WriteTemporarilyUnavailableError } from '@/lib/apiErrors'
 
 import {
   presentError,

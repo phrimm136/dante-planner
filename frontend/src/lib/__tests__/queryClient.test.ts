@@ -12,7 +12,7 @@ import {
   AuthTemporarilyUnavailableError,
   ValidationError,
   WriteTemporarilyUnavailableError,
-} from '../api'
+} from '../apiErrors'
 
 vi.mock('@/lib/i18n', () => ({
   default: { t: (key: string) => key },

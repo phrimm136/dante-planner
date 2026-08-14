@@ -18,7 +18,7 @@ import {
   TimedOutError,
   ValidationError,
   WriteTemporarilyUnavailableError,
-} from './api'
+} from './apiErrors'
 
 type Tagged<K extends string, P = unknown> = { kind: K } & P
 

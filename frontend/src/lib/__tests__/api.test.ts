@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ApiClient } from '../api'
 import {
-  ApiClient,
   ConflictError,
   RateLimitError,
   RetryableUnavailableError,
@@ -15,7 +15,7 @@ import {
   WriteTemporarilyUnavailableError,
   AuthTemporarilyUnavailableError,
   BackendUnavailableError,
-} from '../api'
+} from '../apiErrors'
 
 // Mock the env module
 vi.mock('../env', () => ({

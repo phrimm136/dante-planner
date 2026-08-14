@@ -24,7 +24,8 @@ vi.mock('@/lib/api', async (importActual) => {
   }
 })
 
-import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { BackendUnavailableError, ServiceUpdatingError } from '@/lib/apiErrors'
 
 /**
  * Mock user response matching UserSchema

@@ -11,7 +11,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { ApiClient, NotFoundError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
 

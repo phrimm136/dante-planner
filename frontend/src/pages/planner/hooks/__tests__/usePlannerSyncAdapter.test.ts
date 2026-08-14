@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { ConflictError } from '@/lib/api'
+import { ConflictError } from '@/lib/apiErrors'
 import type {
   SaveablePlanner,
   ServerPlannerResponse,

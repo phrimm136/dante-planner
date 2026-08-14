@@ -25,7 +25,8 @@ vi.mock('@/lib/api', async () => {
 })
 
 // Import after mocking
-import { ApiClient, NotFoundError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
 
 /**
  * Create a wrapper component with QueryClientProvider

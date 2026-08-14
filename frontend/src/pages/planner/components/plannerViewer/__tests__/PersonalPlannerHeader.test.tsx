@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { PersonalPlannerHeader } from '../PersonalPlannerHeader'
-import { NotFoundError } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
 import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 import type { AcknowledgedPlanner } from '../../../hooks/usePlannerSyncAdapter'
 

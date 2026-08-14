@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from '@tanstack/react-router'
 import { PlannerNotFound } from './PlannerNotFound'
 import { Button } from '@/components/ui/button'
-import { NotFoundError } from '@/lib/api'
+import { NotFoundError } from '@/lib/apiErrors'
 import NotFoundPage from './NotFoundPage'
 
 /**

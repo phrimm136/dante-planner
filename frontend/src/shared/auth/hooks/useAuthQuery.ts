@@ -5,7 +5,8 @@ import {
   useQueryClient,
   queryOptions,
 } from '@tanstack/react-query'
-import { ApiClient, BackendUnavailableError, ServiceUpdatingError } from '@/lib/api'
+import { ApiClient } from '@/lib/api'
+import { BackendUnavailableError, ServiceUpdatingError } from '@/lib/apiErrors'
 import { queryClient } from '@/lib/queryClient'
 import { validateDataOrNull } from '@/lib/validation'
 import { UserSchema, type User } from '../schemas/AuthSchemas'
