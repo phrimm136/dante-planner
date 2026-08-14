@@ -212,8 +212,26 @@ separate transaction that also marks the row dispatched. Two triggers reach that
 after-commit hop for latency, and a scheduled relay for recovery. Both are idempotent through the
 `dispatched_at` check under a row lock.
 
+**Pushes follow the dispatch commit, not the arm.** An arm does not publish; it enqueues its pushes,
+and the dispatcher fires the queue from a `TransactionSynchronization.afterCommit` registered on the
+dispatch transaction. A push sent inside that transaction announces a row a rollback then discards,
+and the frontend patches its cache straight from the envelope — so a failed dispatch commit left
+recipients holding a notification no query could confirm, and the relay's re-run then delivered it a
+second time. What remains after the change is a lost push, recovered by the client's ordinary
+refetch on mount, focus, or staleness, against the row the commit made durable.
+
 Payloads are ids only. Everything an effect needs is re-read at dispatch time, so a stale payload
-cannot announce a value the database no longer holds.
+cannot announce a value the database no longer holds. The re-read carries the raise site's own
+predicate rather than mere existence: an arm skips a planner that is no longer published, and a
+comment since withdrawn, because announcing either would be announcing a state that has passed.
+
+**Poison policy.** `attempts` is incremented in a `REQUIRES_NEW` transaction, so an arm that throws
+still leaves the count raised. An increment written in the dispatch transaction is rolled back by
+the very failure it exists to record, which leaves a permanently failing row retried forever with
+`attempts` frozen at zero. The relay skips rows at or past `OutboxConstants.DISPATCH_ATTEMPT_CAP`,
+and the attempt that reaches the cap logs at ERROR and reports to Sentry exactly once. Capped rows
+stay in the table: they are the record of what was never derived, and deleting them destroys the
+only evidence that it was owed.
 
 Notification rows are derived by `INSERT IGNORE` against `uk_notification_dedup`, for every arm and
 not only the published fan-out. The constraint, not a preceding existence check, is what makes a
@@ -267,13 +285,18 @@ public interface DomainEventRepository extends JpaRepository<DomainEvent, Long> 
 
     @Query(value = """
             SELECT id FROM domain_events
-            WHERE dispatched_at IS NULL AND created_at < :cutoff
+            WHERE dispatched_at IS NULL AND created_at < :cutoff AND attempts < :cap
             ORDER BY created_at
             LIMIT :limit
             """, nativeQuery = true)
-    List<Long> undispatchedIdsOlderThan(@Param("cutoff") Instant cutoff, @Param("limit") int limit);
+    List<Long> undispatchedIdsOlderThan(@Param("cutoff") Instant cutoff, @Param("cap") int cap,
+            @Param("limit") int limit);
 }
 ```
+
+The scan runs under a read-write `@Transactional` on the service layer rather than untransacted:
+without one it inherits `SimpleJpaRepository`'s `readOnly = true`, which is the replica-routing
+signal, and a recovery scan against a lagging replica is exactly the wrong reader.
 
 Dispatcher and the arm seam:
 
@@ -284,26 +307,35 @@ public class DomainEventDispatcher {
 
     private final DomainEventRepository events;
     private final DomainEffectRegistry effectRegistry;
+    private final DomainEventAttemptRecorder attemptRecorder;
+    private final SsePublisher ssePublisher;
 
     @Transactional
     public void dispatchDomainEvent(long eventId) {
+        attemptRecorder.recordAttempt(eventId);
         events.findForDispatch(eventId)
                 .filter(event -> !event.isDispatched())
                 .ifPresent(event -> {
-                    event.recordAttempt();
-                    effectRegistry.applyEffectFor(event);
+                    EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
+                    effectRegistry.applyEffectFor(event, pushes);
                     event.markDispatched();
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new EffectPushSynchronization(pushes));
                 });
     }
 }
 ```
+
+The attempt is recorded before the row lock is taken, not after: the outer transaction holds an
+exclusive lock on the same row for the rest of the dispatch, and a `REQUIRES_NEW` write attempted
+behind that lock waits on a transaction that is itself waiting on it.
 
 ```java
 public interface DomainEffect {
 
     DomainEventType type();
 
-    void applyEffect(DomainEvent event);
+    void applyEffect(DomainEvent event, EffectPushQueue pushes);
 }
 
 @Component
@@ -316,11 +348,11 @@ public class DomainEffectRegistry {
                 .collect(Collectors.toUnmodifiableMap(DomainEffect::type, Function.identity()));
     }
 
-    public void applyEffectFor(DomainEvent event) {
+    public void applyEffectFor(DomainEvent event, EffectPushQueue pushes) {
         Optional.ofNullable(effectsByType.get(event.getEventType()))
                 .orElseThrow(() -> new IllegalStateException(
                         "no effect arm for " + event.getEventType()))
-                .applyEffect(event);
+                .applyEffect(event, pushes);
     }
 }
 ```
@@ -355,18 +387,21 @@ NotificationOutcome raise(Notification notification, SseEventType sseEventType) 
 }
 ```
 
-The arms, by type:
+The arms, by type. Every push named below is enqueued on the `EffectPushQueue`, not sent — the
+dispatch commit is what releases them:
 
-- `PLANNER_PUBLISHED` (`planner/effect/`) — `notificationDispatchService.notifyPlannerPublished(...)`
-  fan-out `INSERT IGNORE`, then `ssePublisher.publishBroadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
-  PlannerPublishedPayload.fromEntity(planner))`.
-- `PLANNER_RECOMMENDED` (`planner/effect/`) — one `notifyPlannerRecommended` row, then a
-  `NOTIFY_RECOMMENDED` push on `Delivered`. The event row committed with the vote transaction that
-  CAS'd `recommended_notified_at`, so the latch and the obligation to notify are atomic; the push no
-  longer depends on a listener firing.
-- `COMMENT_RECEIVED` / `REPLY_RECEIVED` (`comment/effect/`) — recipient eligibility is decided here
-  (not self, notifications enabled), then the notification row and its `NOTIFY_COMMENT` push, then
-  the `COMMENT_ADDED` comment-stream push, which happens for every created comment including a
+- `PLANNER_PUBLISHED` (`planner/effect/`) — re-reads through `findPublishedAggregate` and skips a
+  planner since withdrawn, then `notificationDispatchService.notifyPlannerPublished(...)` fan-out
+  `INSERT IGNORE`, then a `NOTIFY_PUBLISHED` broadcast carrying
+  `PlannerPublishedPayload.fromEntity(planner)`.
+- `PLANNER_RECOMMENDED` (`planner/effect/`) — the same published re-read, one
+  `notifyPlannerRecommended` row, then a `NOTIFY_RECOMMENDED` push on `Delivered`. The event row
+  committed with the vote transaction that CAS'd `recommended_notified_at`, so the latch and the
+  obligation to notify are atomic; the push no longer depends on a listener firing.
+- `COMMENT_RECEIVED` / `REPLY_RECEIVED` (`comment/effect/`) — a comment withdrawn before dispatch is
+  skipped, its content being a placeholder by then. Recipient eligibility is decided here (not self,
+  notifications enabled), then the notification row and its `NOTIFY_COMMENT` push, then the
+  `COMMENT_ADDED` comment-stream push, which happens for every surviving comment including a
   self-comment.
 
 Raise seam, joining the caller's transaction:
@@ -414,10 +449,10 @@ Relay:
 
 ```java
 @Scheduled(fixedDelayString = "${outbox.relay.fixed-delay-ms:60000}")
-@SchedulerLock(name = "dispatchDomainEvents", lockAtMostFor = "PT5M", lockAtLeastFor = "PT30S")
+@SchedulerLock(name = "dispatchDomainEvents", lockAtMostFor = "PT30M", lockAtLeastFor = "PT30S")
 public void dispatchPendingEvents() {
     Instant cutoff = Instant.now().minus(graceDuration);
-    events.undispatchedIdsOlderThan(cutoff, batchSize).forEach(this::relayOne);
+    dispatcher.pendingEventIds(cutoff, batchSize).forEach(this::relayOne);
 }
 
 private void relayOne(long eventId) {
@@ -429,6 +464,14 @@ private void relayOne(long eventId) {
     }
 }
 ```
+
+The lease is `PT30M` rather than `PT5M`: a batch of `outbox.relay.batch-size` rows dispatched while
+Redis is degraded spends the command timeout on each push, which puts a full batch well past five
+minutes, and a lease that expires mid-batch hands the same batch to a second pod.
+
+Rows the relay stops picking up are the ones at the attempt cap. They are not deleted and not
+retried; the ERROR raised as the cap was crossed is what says so, and the rows themselves are what
+an operator reads afterwards.
 
 Redis publish hardening in `shared/sse/`. `@Retryable` cannot sit on `SsePublisher.publish(...)` —
 it is private and self-invoked, so no proxy sees the call. The retry lands on a one-method
@@ -467,10 +510,12 @@ private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable
 1. `db/migration/V059__create_domain_events.sql` and the migration smoke seed — new table.
 2. `shared/outbox/entity/DomainEvent.java`, `DomainEventType.java`; `shared/outbox/repository/
    DomainEventRepository.java`; `shared/outbox/service/{DomainEventDispatcher,DomainEffectRegistry,
-   DomainEffect,DomainEventRecorder,DomainEventRecorded}.java`; `shared/outbox/scheduler/
-   DomainEventRelay.java` — new.
+   DomainEffect,DomainEventRecorder,DomainEventRecorded,DomainEventAttemptRecorder,EffectPushQueue,
+   EffectPushSynchronization}.java`; `shared/outbox/scheduler/DomainEventRelay.java` — new.
+   `DomainEventDispatcher` also owns `pendingEventIds`, the read-write scan the relay drives.
 3. `shared/outbox/config/OutboxAsyncConfig.java` — new: `@EnableAsync`, `@EnableRetry`, and a bounded
    `ThreadPoolTaskExecutor` bean `outboxDispatchExecutor` with `setWaitForTasksToCompleteOnShutdown(true)`.
+   `shared/outbox/config/OutboxConstants.java` — new: `DISPATCH_ATTEMPT_CAP`.
 4. `backend/build.gradle.kts` — add `org.springframework.retry:spring-retry` and
    `spring-boot-starter-aop` (the Sentry SDK is already present at line 82).
 5. `backend/src/main/resources/application.properties` — `outbox.relay.fixed-delay-ms`,
@@ -504,13 +549,22 @@ private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable
     `comment/listener/CommentEventListener.java`, `notification/event/NotificationRaisedEvent.java`,
     `planner/event/PlannerRecommendedEvent.java`, `comment/event/CommentCreatedEvent.java`.
 14. `shared/sse/SseChannelSender.java` — new; `shared/sse/SsePublisher.java` — delegate the send
-    (line 140) and add the unserializable arm (line 134-137).
+    (line 140) and add the unserializable arm (line 134-137). The retry covers
+    `RedisConnectionFailureException` and `QueryTimeoutException`: a Lettuce failover surfaces as a
+    command timeout, which the connection-acquisition failure does not cover.
 15. `architecture/ConventionBaselineTest.java` — `no_async_annotation` (line 53-57) and
     `no_async_enablement_or_thread_pools` (line 59-64) are narrowed by exception list per ADR 067, not
     deleted: the rules stay at full width with `DomainEventEagerDispatch.onDomainEventRecorded` and
     `OutboxAsyncConfig` frozen by name, paired with a staleness test.
-16. `backend/CLAUDE.md` — the Async bullet is restated: the async model is `@Scheduled` +
-    `@TransactionalEventListener(AFTER_COMMIT)` + Redis pub/sub + the outbox dispatch executor.
+16. `backend/src/main/java/org/danteplanner/backend/CLAUDE.md` — the "Deliberately NO `@Async`"
+    bullet is restated to the new model with the frozen exception, and the AFTER_COMMIT sentence is
+    corrected: the eager hop carries no `REQUIRES_NEW`, because the dispatcher it calls opens a
+    transaction of its own.
+17. `architecture/EffectPlacementTest.java` — the observer-publish rule's prose and failure message
+    describe the outbox model rather than instructing a return to inline listeners, and the rule is
+    made non-vacuous. The raise-caller rule admits `..effect..` and `DomainEventDispatcher` only.
+18. `notification/repository/NotificationRepository.java` — delete `insert(Notification)`, orphaned
+    when `deliver` became `raise`.
 
 ### Test plan
 
@@ -523,13 +577,20 @@ private static final String UNSERIALIZABLE_COUNTER = "sse.publish.unserializable
 - `EffectPlacementTest` extended: after-commit listeners reach only `DomainEventDispatcher`;
   `NotificationRepository` write methods are reached only from `..notification..`, and
   `NotificationDispatchService`'s raise methods only from `..effect..` and the dispatcher; every
-  `DomainEffect` implementation resides in a `..effect..` package.
+  `DomainEffect` implementation resides in a `..effect..` package; and no `..effect..` class depends
+  on `SsePublisher` at all, which is what makes the transactional-reachability rule true of the
+  outbox rather than merely unreached by it.
 - `DomainEffectCoverageIT` — injects `List<DomainEffect>` and asserts the declared `type()` set equals
   `DomainEventType.values()`. No freeze list: the tree passes it, so ADR 067's exception mechanism
   applies only if an arm is ever deliberately deferred.
 - Dispatcher IT: dispatching the same event id twice writes one notification row and pushes once.
-- `SsePublisherTest` — a `RedisConnectionFailureException` on the first two sends still publishes; a
-  serialization failure increments `sse.publish.unserializable` and does not throw.
+- Dispatcher IT: an arm that throws leaves `attempts` raised, and a second dispatch raises it again —
+  the increment survives the rollback of the dispatch that recorded it.
+- Relay IT: a row already at `DISPATCH_ATTEMPT_CAP` is absent from the scan, and the attempt that
+  reached the cap raised its alarm once.
+- `SsePublisherTest` — a `RedisConnectionFailureException` on the first two sends still publishes, a
+  `QueryTimeoutException` is retried on the same terms, the exhausted case moves the drop counter
+  once, and a serialization failure increments `sse.publish.unserializable` and does not throw.
 - `CommentCommandServiceNotificationTest`, `PlannerEngagementServiceTest`,
   `PlannerPublishingServiceTest`, `NotificationServiceLayerTest`, `NotificationDispatchOutcomeTest`,
   `VoteNotificationFlowIT`, `NotificationFanoutIT` — retargeted from the deleted in-process events to
