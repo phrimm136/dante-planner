@@ -148,27 +148,46 @@ public class PlannerDriftReconciler {
     }
 
     /**
-     * Compare the catalog's keyword copy against the content row's.
+     * Compare the catalog's keyword copy against the content row's, as the runtime serves each.
      *
-     * <p>Both sides go through the same normalization the runtime reads them with, because the
-     * stored array is order-bearing and its ordering carries no meaning; a row whose column could
-     * not be read is left out, as its expected state is unknown rather than empty.</p>
+     * <p>Drift confined to invalid or legacy members is invisible here by construction:
+     * {@link PlannerKeywords#fromStorage} drops unknown ids and remaps renamed ones, so the audit
+     * compares the valid subsets and a difference the runtime itself normalizes away is not
+     * reported. That is the intended reading — the question is whether the two columns serve the
+     * same keywords, not whether they hold the same bytes.</p>
      *
      * @return one record per planner whose two keyword sets disagree
      */
     private List<DriftRecord> auditCatalogKeywords() {
         return auditRepository.catalogKeywordPairs().stream()
                 .map(row -> {
-                    Optional<Set<String>> want = parseKeywords(row.contentKeywords());
-                    Optional<Set<String>> have = parseKeywords(row.catalogKeywords());
-                    if (want.isEmpty() || have.isEmpty() || want.get().equals(have.get())) {
-                        return Optional.<DriftRecord>empty();
-                    }
-                    return Optional.of(new DriftRecord(row.plannerId(), "catalog_keywords",
-                            String.valueOf(want.get()), String.valueOf(have.get())));
+                    Set<String> want = keywordsAsServed(row.plannerId(), "content", row.contentKeywords());
+                    Set<String> have = keywordsAsServed(row.plannerId(), "catalog", row.catalogKeywords());
+                    return want.equals(have)
+                            ? Optional.<DriftRecord>empty()
+                            : Optional.of(new DriftRecord(row.plannerId(), "catalog_keywords",
+                                    String.valueOf(want), String.valueOf(have)));
                 })
                 .flatMap(Optional::stream)
                 .toList();
+    }
+
+    /**
+     * Read one keyword column the way a reader of this planner gets it.
+     *
+     * <p>{@code KeywordSetConverter} is total: a column it cannot parse is served as the empty set,
+     * and that is what the page shows. The observation therefore takes a corrupt column at face
+     * value where {@link #parseKeywords} abstains, and the split is deliberate — a column served as
+     * no keywords while the other side has some is a divergence a user can see, whereas rebuilding
+     * an index from it would delete rows nothing has shown to be wrong.</p>
+     *
+     * @param plannerId   the planner whose column is being read
+     * @param side        which of the two columns, for the log line
+     * @param keywordsJson the stored array
+     * @return the keywords that column denotes to a reader
+     */
+    private Set<String> keywordsAsServed(UUID plannerId, String side, String keywordsJson) {
+        return parseKeywords(plannerId, side, keywordsJson).orElseGet(Set::of);
     }
 
     private List<DriftRecord> auditFilters() {
@@ -195,7 +214,7 @@ public class PlannerDriftReconciler {
         for (ContentDocumentRow row : auditRepository.visibleContentDocuments()) {
             UUID plannerId = row.plannerId();
             Set<String> entities = extractEntityKeys(row.content()).orElse(null);
-            Set<String> keywords = parseKeywords(row.selectedKeywords()).orElse(null);
+            Set<String> keywords = parseKeywords(plannerId, "content", row.selectedKeywords()).orElse(null);
 
             if (entities == null || keywords == null) {
                 log.warn("Planner {} skipped this reconciliation cycle: stored content or "
@@ -230,9 +249,12 @@ public class PlannerDriftReconciler {
     }
 
     /**
+     * @param plannerId    the planner whose column is being read
+     * @param side         which of the stored columns, for the log line
+     * @param keywordsJson the stored array
      * @return the keywords the stored column carries, or empty when it cannot be read
      */
-    private Optional<Set<String>> parseKeywords(String keywordsJson) {
+    private Optional<Set<String>> parseKeywords(UUID plannerId, String side, String keywordsJson) {
         if (keywordsJson == null || keywordsJson.isBlank()) {
             return Optional.of(Set.of());
         }
@@ -240,7 +262,8 @@ public class PlannerDriftReconciler {
             return Optional.of(
                     PlannerKeywords.fromStorage(objectMapper.readValue(keywordsJson, STRING_LIST)).asSet());
         } catch (JsonProcessingException | IllegalArgumentException e) {
-            log.warn("Unreadable planner keywords during reconciliation: {}", e.getMessage());
+            log.warn("Unreadable {} keywords for planner {} during reconciliation: {}",
+                    side, plannerId, e.getMessage());
             return Optional.empty();
         }
     }

@@ -194,10 +194,13 @@ public class PlannerDriftAuditRepository {
     /**
      * Both stored keyword arrays of every catalogued planner, raw.
      *
-     * <p>Deliberately unfiltered where the scalar copies are compared in SQL: the stored array is
-     * order-bearing and the converter sorts on write, so a SQL comparison reports drift on a row
-     * whose keyword set is identical. Normalization is the caller's, through the path the runtime
-     * reads these columns with.</p>
+     * <p>Returned uncompared where the scalar copies are compared in SQL. Not because the JPA
+     * converter's output would disagree — it sorts ascending and nulls an empty set on both
+     * columns, so a byte comparison holds for every row it wrote — but because these two columns
+     * are also written from outside JPA, by backfill migrations and by manual repair, and because
+     * {@code PlannerKeywords} remaps renamed ids on read: an array carrying a legacy alias and one
+     * carrying its current id denote the same keywords and differ as strings. Normalization is the
+     * caller's, through the path the runtime reads these columns with.</p>
      *
      * @return one row per catalogued planner
      */

@@ -237,7 +237,7 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
-    @DisplayName("reconciler-skips-unreadable: a planner whose stored keywords cannot be rebuilt is left out, not reported as drift")
+    @DisplayName("reconciler-skips-unreadable: a planner whose stored keywords cannot be rebuilt is left out of the index audits, and its catalog copy is compared as the empty set the runtime serves")
     void reconcilerSkipsUnreadable_WhenContentCannotBeParsed_ReportsNoFilterDrift() {
         Planner unreadable = publishClean("Unreadable Content");
         assertThat(entityFilterRows(unreadable.getId()))
@@ -253,6 +253,14 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
         assertThat(kindsFor(records, unreadable.getId()))
                 .as("an unrebuildable document is unknown, not empty: its indexed rows are not drift")
                 .doesNotContain("entity_filter", "keyword_filter");
+        assertThat(recordsFor(records, unreadable.getId(), "catalog_keywords"))
+                .as("the runtime serves the corrupt column as no keywords, so the catalog's copy "
+                        + "is a divergence a reader can see")
+                .singleElement()
+                .satisfies(record -> {
+                    assertThat(record.expected()).isEqualTo("[]");
+                    assertThat(record.actual()).isEqualTo("[Sinking]");
+                });
         assertThat(entityFilterRows(unreadable.getId()))
                 .as("nothing is repaired away either").isPositive();
     }
