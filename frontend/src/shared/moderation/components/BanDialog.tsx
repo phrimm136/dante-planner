@@ -2,15 +2,13 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { ModerationReasonDialog } from './ModerationReasonDialog'
+import type { ActionDialogControl } from '@/components/feedback/ConfirmActionDialog'
 
 /** The shape every per-user moderation dialog accepts, so callers can table them. */
-export interface ModerationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+export interface ModerationDialogProps extends ActionDialogControl {
   username: string
   /** `durationMinutes` is supplied only by the dialogs that collect a duration. */
   onConfirm: (reason: string, durationMinutes?: number) => void
-  isPending: boolean
 }
 
 export function BanDialog({
@@ -152,11 +150,8 @@ export function ClearTimeoutDialog({
   )
 }
 
-interface CommentDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+interface CommentDeleteDialogProps extends ActionDialogControl {
   onConfirm: (reason: string) => void
-  isPending: boolean
 }
 
 export function CommentDeleteDialog({

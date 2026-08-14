@@ -1,13 +1,11 @@
 import { useTranslation } from 'react-i18next'
 
 import { ModerationReasonDialog } from '@/shared/moderation'
+import type { ActionDialogControl } from '@/components/feedback/ConfirmActionDialog'
 
-interface ModeratorDeleteDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+interface ModeratorDeleteDialogProps extends ActionDialogControl {
   plannerTitle: string
   onConfirm: (reason: string) => void
-  isPending: boolean
 }
 
 /**

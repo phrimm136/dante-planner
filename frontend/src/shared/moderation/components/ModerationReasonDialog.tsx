@@ -1,25 +1,20 @@
 import { useState, type ReactNode } from 'react'
 
-import { ConfirmActionDialog } from '@/components/feedback/ConfirmActionDialog'
+import {
+  ConfirmActionDialog,
+  type ActionDialogBaseProps,
+} from '@/components/feedback/ConfirmActionDialog'
 
 /** Server-side cap on a moderation reason */
 const REASON_MAX_LENGTH = 500
 
-interface ModerationReasonDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: ReactNode
-  description: ReactNode
+interface ModerationReasonDialogProps extends ActionDialogBaseProps {
   /** Label above the reason textarea */
   reasonLabel: ReactNode
   reasonPlaceholder: string
   /** DOM id of the textarea, tying it to its label */
   reasonInputId: string
-  cancelLabel: ReactNode
-  confirmLabel: ReactNode
-  destructive?: boolean
   onConfirm: (reason: string) => void
-  isPending: boolean
   /** Extra controls rendered above the reason field */
   children?: ReactNode
 }

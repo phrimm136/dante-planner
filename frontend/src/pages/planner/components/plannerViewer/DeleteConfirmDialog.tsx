@@ -1,20 +1,17 @@
 import { useTranslation } from 'react-i18next'
 
-import { ConfirmActionDialog } from '@/components/feedback/ConfirmActionDialog'
+import {
+  ConfirmActionDialog,
+  type ActionDialogControl,
+} from '@/components/feedback/ConfirmActionDialog'
 
-interface DeleteConfirmDialogProps {
-  /** Whether the dialog is open */
-  open: boolean
-  /** Callback when open state changes */
-  onOpenChange: (open: boolean) => void
+interface DeleteConfirmDialogProps extends ActionDialogControl {
   /** ID of the planner to delete */
   plannerId: string
   /** Title of the planner to delete (for display) */
   plannerTitle: string
   /** Callback when user confirms deletion */
   onConfirm: () => void
-  /** Whether deletion is in progress */
-  isPending: boolean
 }
 
 /**

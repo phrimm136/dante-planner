@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle } from 'lucide-react'
 
-import { ConfirmActionDialog } from '@/components/feedback/ConfirmActionDialog'
+import {
+  ConfirmActionDialog,
+  type ActionDialogControl,
+} from '@/components/feedback/ConfirmActionDialog'
 
 export type SyncOffAction = 'save' | 'publish'
 
@@ -23,13 +26,10 @@ const SYNC_OFF_KEYS: Record<
   },
 }
 
-interface SyncOffWarningDialogProps {
+interface SyncOffWarningDialogProps extends ActionDialogControl {
   /** Which mutation the user is about to run with sync disabled */
   action: SyncOffAction
-  open: boolean
-  onOpenChange: (open: boolean) => void
   onConfirm: () => void
-  isPending?: boolean
 }
 
 /**

@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
 
-import { ConfirmActionDialog } from '@/components/feedback/ConfirmActionDialog'
+import {
+  ConfirmActionDialog,
+  type ActionDialogControl,
+} from '@/components/feedback/ConfirmActionDialog'
 
-interface VoteWarningModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+interface VoteWarningModalProps extends ActionDialogControl {
   onConfirm: () => void
   voteDirection: 'UP' | 'DOWN'
   plannerId: string

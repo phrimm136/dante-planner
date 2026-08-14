@@ -1,16 +1,13 @@
 import { useTranslation } from 'react-i18next'
 
-import { ConfirmActionDialog } from '@/components/feedback/ConfirmActionDialog'
+import {
+  ConfirmActionDialog,
+  type ActionDialogControl,
+} from '@/components/feedback/ConfirmActionDialog'
 
-interface ApplyLatestMirrorDialogProps {
-  /** Whether the dialog is open */
-  open: boolean
-  /** Callback when open state changes */
-  onOpenChange: (open: boolean) => void
+interface ApplyLatestMirrorDialogProps extends ActionDialogControl {
   /** Callback when user confirms */
   onConfirm: () => void
-  /** Whether the apply operation is in progress */
-  isPending: boolean
 }
 
 /**

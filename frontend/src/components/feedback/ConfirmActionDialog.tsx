@@ -11,21 +11,28 @@ import {
 import { Button } from '@/components/ui/button'
 import { SECTION_STYLES } from '@/lib/constants'
 
-interface ConfirmActionDialogProps {
+/** The confirm-flow surface every action dialog presents, whatever it confirms. */
+export interface ActionDialogBaseProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   title: ReactNode
   description: ReactNode
   confirmLabel: ReactNode
   cancelLabel: ReactNode
-  /** Confirm-button label while `isPending` is true; falls back to `confirmLabel` */
-  pendingLabel?: ReactNode
   /** Renders the confirm button in the destructive variant */
   destructive?: boolean
+  isPending?: boolean
+}
+
+/** The subset a wrapper dialog forwards without restating it. */
+export type ActionDialogControl = Pick<ActionDialogBaseProps, 'open' | 'onOpenChange' | 'isPending'>
+
+interface ConfirmActionDialogProps extends ActionDialogBaseProps {
+  /** Confirm-button label while `isPending` is true; falls back to `confirmLabel` */
+  pendingLabel?: ReactNode
   onConfirm: () => void
   /** Cancel-button handler; defaults to closing the dialog */
   onCancel?: () => void
-  isPending?: boolean
   /** Disables the confirm button without disabling cancel */
   confirmDisabled?: boolean
   /** Rendered beside the title inside a flex row */
