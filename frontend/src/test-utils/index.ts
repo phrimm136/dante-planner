@@ -3,6 +3,12 @@
  * Import from this file to get render with providers and test utilities
  */
 export { createTestFilterStore } from './filterStore'
+export {
+  buildEgoGiftListItem,
+  buildFloorSelection,
+  buildPlannerSummary,
+  buildSaveablePlanner,
+} from './fixtures'
 export { createTestQueryClient } from './queryClient'
 export { createTestRouter } from './router'
 export { renderWithProviders } from './renderWithProviders'
