@@ -1,6 +1,8 @@
 package org.danteplanner.backend.shared.outbox.service;
 
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.outbox.config.OutboxConstants;
 import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.sse.SsePublisher;
@@ -25,6 +27,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DomainEventDispatcher {
 
     private final DomainEventRepository events;
@@ -39,19 +42,45 @@ public class DomainEventDispatcher {
      */
     @Transactional
     public void dispatchDomainEvent(long eventId) {
-        // Before the row lock, not after: the lock this transaction is about to take is the one the
-        // recorder's own transaction would then be waiting for.
-        attemptRecorder.recordAttempt(eventId);
+        // First statement, and both reasons are invisible here. The lock this transaction is about
+        // to take on the row is the one the recorder's own transaction would then wait for, so the
+        // order is what keeps the two off a deadlock. And the connection is lazy: nothing is drawn
+        // from the pool until findForDispatch runs, so the recorder never opens a second connection
+        // behind one this transaction is already holding — which four dispatch threads against a
+        // ten-connection pool would otherwise do.
+        int attempts = attemptRecorder.recordAttempt(eventId);
 
-        events.findForDispatch(eventId)
-                .filter(event -> !event.isDispatched())
-                .ifPresent(event -> {
-                    EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
-                    effectRegistry.applyEffectFor(event, pushes);
-                    event.markDispatched();
-                    TransactionSynchronizationManager.registerSynchronization(
-                            new EffectPushSynchronization(pushes));
-                });
+        try {
+            events.findForDispatch(eventId)
+                    .filter(event -> !event.isDispatched())
+                    .ifPresent(event -> {
+                        EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
+                        effectRegistry.applyEffectFor(event, pushes);
+                        event.markDispatched();
+                        TransactionSynchronizationManager.registerSynchronization(
+                                new EffectPushSynchronization(pushes));
+                    });
+        } catch (RuntimeException e) {
+            alarmIfSpent(eventId, attempts, e);
+            throw e;
+        }
+    }
+
+    /**
+     * Raise the poison alarm if this failure was the attempt that spent the row's last try.
+     *
+     * <p>On the failure path, not on the increment: an attempt that goes on to succeed has derived
+     * its effect, and paging someone to say it never was would be false twice over. Equality rather
+     * than a threshold is what makes it fire once — past the cap the relay stops offering the row,
+     * so no later pass can repeat it.</p>
+     */
+    private void alarmIfSpent(long eventId, int attempts, RuntimeException cause) {
+        if (attempts != OutboxConstants.DISPATCH_ATTEMPT_CAP) {
+            return;
+        }
+        log.error("Domain event {} spent its last dispatch attempt and will not be relayed again; "
+                + "its effect was never derived", eventId, cause);
+        Sentry.captureException(cause);
     }
 
     /**

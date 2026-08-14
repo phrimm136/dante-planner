@@ -89,13 +89,6 @@ public class DomainEvent {
     }
 
     /**
-     * Count one dispatch attempt, whether or not it goes on to succeed.
-     */
-    public void recordAttempt() {
-        this.attempts = this.attempts + 1;
-    }
-
-    /**
      * Close the row so no later dispatch derives its effect a second time.
      */
     public void markDispatched() {

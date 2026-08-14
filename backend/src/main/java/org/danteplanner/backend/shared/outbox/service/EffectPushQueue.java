@@ -1,5 +1,6 @@
 package org.danteplanner.backend.shared.outbox.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 
@@ -18,6 +19,7 @@ import java.util.UUID;
  *
  * <p>Not a bean: a queue is one dispatch's worth of state, and a shared one would mix two.</p>
  */
+@Slf4j
 public final class EffectPushQueue {
 
     private final SsePublisher ssePublisher;
@@ -66,10 +68,18 @@ public final class EffectPushQueue {
 
     /**
      * Send everything enqueued. Called once the dispatch is durable, and never before.
+     *
+     * <p>Each push is isolated. {@code SsePublisher} swallows the two failures it expects, and
+     * anything else escaping here would both cost the pushes still queued behind it and surface out
+     * of an after-commit callback as a dispatch failure — for a dispatch that committed.</p>
      */
     public void flush() {
         for (EffectPush push : pushes) {
-            push.sendVia(ssePublisher);
+            try {
+                push.sendVia(ssePublisher);
+            } catch (RuntimeException e) {
+                log.error("Announcing a committed effect failed; the row it names stands", e);
+            }
         }
     }
 

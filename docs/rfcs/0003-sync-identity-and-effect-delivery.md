@@ -229,9 +229,16 @@ comment since withdrawn, because announcing either would be announcing a state t
 still leaves the count raised. An increment written in the dispatch transaction is rolled back by
 the very failure it exists to record, which leaves a permanently failing row retried forever with
 `attempts` frozen at zero. The relay skips rows at or past `OutboxConstants.DISPATCH_ATTEMPT_CAP`,
-and the attempt that reaches the cap logs at ERROR and reports to Sentry exactly once. Capped rows
-stay in the table: they are the record of what was never derived, and deleting them destroys the
-only evidence that it was owed.
+and the attempt that fails after reaching the cap logs at ERROR and reports to Sentry exactly once.
+Capped rows stay in the table: they are the record of what was never derived, and deleting them
+destroys the only evidence that it was owed.
+
+The cost of keeping them is paid by the scan. `attempts` is not part of
+`idx_domain_events_undispatched`, so a capped row remains at the front of the `ORDER BY created_at`
+ordering and is re-read and discarded on every tick, at a cost proportional to how many such rows
+exist. That is accepted rather than indexed away: the count is expected to be zero or near it, and a
+growing scan cost is itself a signal. Retention is a manual operations action — inspect, then
+archive or delete — with no automated sweep and no index change.
 
 Notification rows are derived by `INSERT IGNORE` against `uk_notification_dedup`, for every arm and
 not only the published fan-out. The constraint, not a preceding existence check, is what makes a
