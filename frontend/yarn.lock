@@ -39,6 +39,56 @@
   resolved "https://registry.yarnpkg.com/@asamuzakjp/nwsapi/-/nwsapi-2.3.9.tgz#ad5549322dfe9d153d4b4dd6f7ff2ae234b06e24"
   integrity sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==
 
+"@ast-grep/cli-darwin-arm64@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-darwin-arm64/-/cli-darwin-arm64-0.44.1.tgz#98f012aa74d23a2598d3edd406667b8ac414aa99"
+  integrity sha512-wOzb+IqFy4Pdhvs+PeaHdQJ1VemsI1SgoOGJf+x0J0KBSJ+s/hUg2n1fVJwfsrw/XDIbz9m7PGKTGCLxsgYa1g==
+
+"@ast-grep/cli-darwin-x64@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-darwin-x64/-/cli-darwin-x64-0.44.1.tgz#c23c01aa0e55ba003f7bb892681e017ddd933f52"
+  integrity sha512-X3OzzsnO9Q3ISQ4qO3jasWk8EZhJA03xfmJHhuS9rGJZZCbNEuqjicrwrDMKK8EgEGJ7MG4oL0BE5qUcn3twLw==
+
+"@ast-grep/cli-linux-arm64-gnu@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-linux-arm64-gnu/-/cli-linux-arm64-gnu-0.44.1.tgz#bb466dc5260662882e247973c99d86f87c229934"
+  integrity sha512-2F1YBRd9tQnfrGX+4BlkfXWLb2jqNgTmjp0ETLNRLMmSDinR905QsZn2A55qcAZxhQDU982mEzzgT4NduPXIGg==
+
+"@ast-grep/cli-linux-x64-gnu@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-linux-x64-gnu/-/cli-linux-x64-gnu-0.44.1.tgz#8b5a8d6fc3cddca1a01a938d89f1aa11e27de17f"
+  integrity sha512-d5UNoDLT2i6xV4GGqcPnrAR6CB3H078+v3BiqjKxZdZMHFnDe46+i+DxfH1IK6yvJqViqv2F611+wiAAn/s7qw==
+
+"@ast-grep/cli-win32-arm64-msvc@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-win32-arm64-msvc/-/cli-win32-arm64-msvc-0.44.1.tgz#92ff2a689d038913baff7b4d962bf339c1c23240"
+  integrity sha512-r6K49Z14BLOeJdBSmaoK+TdgtPRqJfJ562F0n0KvRi0qH3o8is8N2dXtEMYKynYm/tdOd65i69Mc1WKSuIeWyA==
+
+"@ast-grep/cli-win32-ia32-msvc@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-win32-ia32-msvc/-/cli-win32-ia32-msvc-0.44.1.tgz#ed6d13d6d436160726d681efeec551a56594e2a4"
+  integrity sha512-AusXTP5SfUQEL/EkF0fhHoA4H30M7hsVgvsVEZ7PeZrxB69trzUcqKnHC8pBDYTmgIsJsr9dtXjTPDcBauaPiA==
+
+"@ast-grep/cli-win32-x64-msvc@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli-win32-x64-msvc/-/cli-win32-x64-msvc-0.44.1.tgz#58a9c775add07944d99368c5af07ae0dd23198c9"
+  integrity sha512-gDMHT17Edmp/tXTDdMSQHd9vJki2Y2WSXq9ycrvjziHwpmnsnc6xlCQ7SEOGA1987vepSpkOkqBCPliP2TVW0w==
+
+"@ast-grep/cli@0.44.1":
+  version "0.44.1"
+  resolved "https://registry.yarnpkg.com/@ast-grep/cli/-/cli-0.44.1.tgz#e84d8aa47992cd9c2b053c9b11e428c265ef14cc"
+  integrity sha512-wSjtu0/9xSYzzo/EW31w5pf1qB33tejYKmKXb2nBAlZ5PpYtOqwFmk9H1nywhjzO913beugsKAZYxrwciqW9AQ==
+  dependencies:
+    detect-libc "2.1.2"
+  optionalDependencies:
+    "@ast-grep/cli-darwin-arm64" "0.44.1"
+    "@ast-grep/cli-darwin-x64" "0.44.1"
+    "@ast-grep/cli-linux-arm64-gnu" "0.44.1"
+    "@ast-grep/cli-linux-x64-gnu" "0.44.1"
+    "@ast-grep/cli-win32-arm64-msvc" "0.44.1"
+    "@ast-grep/cli-win32-ia32-msvc" "0.44.1"
+    "@ast-grep/cli-win32-x64-msvc" "0.44.1"
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.28.6", "@babel/code-frame@^7.29.0":
   version "7.29.0"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.29.0.tgz#7cd7a59f15b3cc0dcd803038f7792712a7d0b15c"
@@ -3728,7 +3778,7 @@ dequal@^2.0.3:
   resolved "https://registry.yarnpkg.com/dequal/-/dequal-2.0.3.tgz#2644214f1997d39ed0ee0ece72335490a7ac67be"
   integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
 
-detect-libc@^2.0.3:
+detect-libc@2.1.2, detect-libc@^2.0.3:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.1.2.tgz#689c5dcdc1900ef5583a4cb9f6d7b473742074ad"
   integrity sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==
@@ -3888,7 +3938,7 @@ es-object-atoms@^1.0.0, es-object-atoms@^1.1.1:
   dependencies:
     es-errors "^1.3.0"
 
-esbuild@^0.28.1, esbuild@~0.27.0:
+esbuild@^0.28.1, esbuild@~0.27.0, esbuild@~0.28.0:
   version "0.28.1"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.28.1.tgz#ef45b4634c9c9d97a296aea4114a5f9840f95578"
   integrity sha512-HrJrvZv5ayxBzPfwphOoNzkzOIIlifzk0KJrGK2c8R4+LKpMtpYLQeUdjnwjWv/LZlkH2laZk+4w78pi99D4Vw==
@@ -6701,6 +6751,15 @@ tsx@^4.19.2:
   dependencies:
     esbuild "~0.27.0"
     get-tsconfig "^4.7.5"
+  optionalDependencies:
+    fsevents "~2.3.3"
+
+tsx@^4.21.0:
+  version "4.23.12"
+  resolved "https://registry.yarnpkg.com/tsx/-/tsx-4.23.12.tgz#3a4919591cd9b9e00011b75e596c8ab8db23c09c"
+  integrity sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==
+  dependencies:
+    esbuild "~0.28.0"
   optionalDependencies:
     fsevents "~2.3.3"
 
