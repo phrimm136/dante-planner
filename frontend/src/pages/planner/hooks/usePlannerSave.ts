@@ -808,7 +808,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     try {
       const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId.ok) throw new Error('Failed to get device ID')
+      if (!deviceId.ok) throw new Error('Failed to get device ID', { cause: deviceId.error })
       const plan = planConflictResolution(
         choice,
         {

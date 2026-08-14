@@ -99,7 +99,7 @@ export function usePlannerFork() {
       const deviceId = await storage.getOrCreateDeviceId()
 
       if (!deviceId.ok) {
-        throw new Error('Failed to get device ID')
+        throw new Error('Failed to get device ID', { cause: deviceId.error })
       }
 
       // 2. Apply i18n copySuffix to title

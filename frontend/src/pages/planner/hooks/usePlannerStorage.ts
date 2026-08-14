@@ -118,7 +118,7 @@ let deviceIdPromise: Promise<Result<string, StorageReadError>> | null = null
  * Hook that provides planner storage operations using IndexedDB
  *
  * All operations are SSR-safe and use Zod validation for loaded data.
- * Keys follow the format: {prefix}:{deviceId}:{plannerId}
+ * Keys follow the format: {prefix}:{plannerId}
  *
  * @example
  * ```tsx
@@ -164,7 +164,10 @@ export function usePlannerStorage(): PlannerStorageOperations {
           }
 
           const newId = generateUUID()
-          await storage.setItem(storageKeys.deviceId(), newId)
+          const written = await storage.setItem(storageKeys.deviceId(), newId)
+          // An id that did not persist would be minted again on the next read,
+          // scattering rows across a new identity every time.
+          if (!written.ok) return written
           return ok(newId)
         } finally {
           // Clear promise cache after resolution to allow re-fetch if storage is cleared externally
@@ -177,7 +180,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
     /**
      * Save planner to IndexedDB
-     * Uses unified key: planner:md:{deviceId}:{plannerId}
+     * Uses unified key: planner:{plannerId}
      * Validates planner data with Zod before saving
      * @returns the save error the caller reports to the user, or nothing on success
      */
@@ -207,7 +210,14 @@ export function usePlannerStorage(): PlannerStorageOperations {
       try {
         const key = storageKeys.planner(planner.metadata.id)
 
-        await storage.setItem(key, JSON.stringify(validation.data))
+        const written = await storage.setItem(key, JSON.stringify(validation.data))
+        if (!written.ok) {
+          const saveError = classifySaveError(
+            written.error.kind === 'ioError' ? written.error.cause : written.error,
+          )
+          options?.onError?.(saveError.kind === 'quota' ? 'quotaExceeded' : 'saveFailed')
+          return err(saveError)
+        }
         return ok(undefined)
       } catch (error) {
         const saveError = classifySaveError(error)
@@ -419,7 +429,15 @@ export function usePlannerStorage(): PlannerStorageOperations {
       if (!isClient) return err({ kind: 'unknown' })
 
       try {
-        await storage.removeItem(storageKeys.planner(id))
+        const removed = await storage.removeItem(storageKeys.planner(id))
+        if (!removed.ok) {
+          console.error('Failed to delete planner:', removed.error)
+          return err(
+            classifySaveError(
+              removed.error.kind === 'ioError' ? removed.error.cause : removed.error,
+            ),
+          )
+        }
         return ok(undefined)
       } catch (error) {
         console.error('Failed to delete planner:', error)

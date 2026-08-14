@@ -399,7 +399,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     try {
       const deviceId = await storage.getOrCreateDeviceId()
       if (!deviceId.ok) {
-        throw new Error('Failed to get device ID')
+        throw new Error('Failed to get device ID', { cause: deviceId.error })
       }
       const resolutionContext = {
         deviceId: deviceId.value,

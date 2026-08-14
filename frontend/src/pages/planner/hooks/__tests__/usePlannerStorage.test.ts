@@ -86,7 +86,7 @@ describe('getOrCreateDeviceId', () => {
 
   it('mints and persists an id when the store answers that it holds none', async () => {
     mockGetItem.mockResolvedValue(ok(null))
-    mockSetItem.mockResolvedValue(undefined)
+    mockSetItem.mockResolvedValue(ok(undefined))
 
     const outcome = await storageHook().getOrCreateDeviceId()
 
@@ -103,6 +103,24 @@ describe('getOrCreateDeviceId', () => {
 
     expect(outcome).toEqual({ ok: true, value: 'an-existing-device-id' })
     expect(mockSetItem).not.toHaveBeenCalled()
+  })
+})
+
+describe('saveToLocal', () => {
+  it('reports the failure when the underlying write could not be performed', async () => {
+    mockSetItem.mockResolvedValue(err({ kind: 'ioError', cause: new Error('quota exceeded') }))
+
+    const outcome = await storageHook().saveToLocal(buildSaveablePlanner())
+
+    expect(outcome.ok).toBe(false)
+  })
+
+  it('reports success only when the underlying write committed', async () => {
+    mockSetItem.mockResolvedValue(ok(undefined))
+
+    const outcome = await storageHook().saveToLocal(buildSaveablePlanner())
+
+    expect(outcome.ok).toBe(true)
   })
 })
 
