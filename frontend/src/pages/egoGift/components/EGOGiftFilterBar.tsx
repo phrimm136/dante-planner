@@ -36,8 +36,9 @@ export function EGOGiftFilterBar({
     <div className={cn('space-y-2 lg:space-y-0 lg:flex lg:items-center lg:gap-4', className)}>
       <div className="shrink-0">
         <EGOGiftKeywordFilter
-          selectedKeywords={selectedKeywords}
+          selected={selectedKeywords}
           onSelectionChange={onKeywordsChange}
+          layout="bar"
         />
       </div>
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 lg:flex-1 lg:min-w-0">

@@ -10,7 +10,7 @@ import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { EntityListPage } from '@/shared/filter'
 import { FilterPageLayout } from '@/shared/filter'
 import { FilterSectionList, filterSection } from '@/shared/filter'
-import { CompactEGOGiftKeywordFilter } from '@/pages/egoGift'
+import { EGOGiftKeywordFilter } from '@/pages/egoGift'
 import { CompactDifficultyFilter } from '@/pages/egoGift'
 import { CompactTierFilter } from '@/pages/egoGift'
 import { ThemePackFilterDropdown } from '@/pages/themePack'
@@ -104,7 +104,7 @@ function EGOGiftPageShell() {
       key: 'selectedKeywords',
       titleKey: 'filters.keyword',
       titleFallback: 'Keyword',
-      Component: CompactEGOGiftKeywordFilter,
+      Component: EGOGiftKeywordFilter,
       selected: filters.selectedKeywords,
       onSelectionChange: setters.selectedKeywords,
     }),
