@@ -11,7 +11,7 @@ in `../README.md`.
 | [0002](0002-backend-failure-and-effect-conventions.md) | Backend failure, effect, and enforcement conventions | Accepted | [243](https://github.com/phrimm136/dante-planner/issues/243) |
 | [0003](0003-sync-identity-and-effect-delivery.md) | Sync identity and effect delivery | Accepted | none |
 | [0004](0004-frontend-sync-storage-and-consolidation.md) | Frontend sync storage and consolidation | Accepted | none |
-| [0005](0005-server-noop-conflict-arbitration.md) | Server-side no-op conflict arbitration and digest retirement | Draft | none |
+| [0005](0005-server-noop-conflict-arbitration.md) | Server-side no-op conflict arbitration and digest retirement | Accepted | none |
 | [0006](0006-constructor-arity-audit-outcomes.md) | Constructor-arity audit outcomes | Draft | none |
 
 ## Lifecycle
