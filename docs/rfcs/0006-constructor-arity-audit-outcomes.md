@@ -233,7 +233,29 @@ public class TokenLifecycleService {
     // fail-closed lineage writes (primary template, Lua)
     public RotationResult rotate(String refreshJwt) { ... }
     public void revokeLogoutSession(Collection<LogoutRevocation> revocations) { ... }
+
+    // fail-closed revocation writes (primary template, plain commands)
+    public void blacklistToken(String token, Date expiry) { ... }
     public void invalidateUserTokens(Long userId) { ... }
+}
+```
+
+`logoutAll` re-points to the consolidated service with its semantics unchanged — the user-wide
+watermark plus one immediate blacklist of the presented access token; families are deliberately
+left untouched because the watermark outranks them:
+
+```java
+public void logoutAll(Long userId, String accessToken) {
+    tokenLifecycleService.invalidateUserTokens(userId);
+
+    if (accessToken != null) {
+        try {
+            TokenClaims accessClaims = tokenValidator.validateAccessToken(accessToken);
+            tokenLifecycleService.blacklistToken(accessToken, accessClaims.expiration());
+        } catch (InvalidTokenException e) {
+            log.debug("Access token already invalid, skipping blacklist");
+        }
+    }
 }
 ```
 
