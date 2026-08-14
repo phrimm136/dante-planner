@@ -21,17 +21,23 @@ declare module '@tanstack/react-query' {
   }
 }
 
-export const queryClient = new QueryClient({
-  queryCache: new QueryCache({
+export function createQueryCache(): QueryCache {
+  return new QueryCache({
     onError: (error) => {
       console.error('Query failed:', error)
       // Queries stay narrow: a thrown query error already reaches the route
       // error component, so toasting anything else would double-report it.
       showUnavailable(error)
     },
-  }),
-  mutationCache: new MutationCache({
+  })
+}
+
+export function createMutationCache(): MutationCache {
+  return new MutationCache({
     onError: (error, _variables, _onMutateResult, mutation) => {
+      // Logging precedes the opt-out: a mutation that renders its own failure
+      // surface still belongs in the console.
+      console.error('Mutation failed:', error)
       if (mutation.meta?.suppressErrorToast === true) return
       showError(error)
     },
@@ -39,7 +45,12 @@ export const queryClient = new QueryClient({
       const message = mutation.meta?.successMessage
       if (message !== undefined) showSuccess(message, mutation.meta?.successParams)
     },
-  }),
+  })
+}
+
+export const queryClient = new QueryClient({
+  queryCache: createQueryCache(),
+  mutationCache: createMutationCache(),
   defaultOptions: {
     queries: {
       staleTime: STALE_TIME.SHORT,

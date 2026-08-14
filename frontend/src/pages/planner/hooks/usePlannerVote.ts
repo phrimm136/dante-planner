@@ -96,7 +96,7 @@ export function usePlannerVote() {
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
-        showErrorMessage('planner:pages.plannerList.contextMenu.alreadyVoted')
+        showErrorMessage('planner:toast.alreadyVoted')
       }
     },
   })
