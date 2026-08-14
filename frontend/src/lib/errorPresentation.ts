@@ -36,15 +36,20 @@ const RESTRICTION_KEY: Record<RestrictionKind, string> = {
   timedOut: 'common:moderation.timedOut',
 }
 
-/** `write` is null: the sync-paused banner already stands for it. */
-const UNAVAILABLE_KEY: Record<UnavailableScope, string | null> = {
+const UNAVAILABLE_KEY: Record<UnavailableScope, string> = {
   service: 'common:errors.serviceUpdating',
   backend: 'common:errors.backendUnavailable',
   auth: 'common:errors.authUnavailable',
-  write: null,
+  write: 'common:errors.writeUnavailable.message',
 }
 
-/** How an error is shown, or null when a dedicated surface owns it. */
+/**
+ * How an error is shown, or null when a mounted surface owns it.
+ *
+ * A null is a delegation, never a disposal: only `conflict` returns one, and
+ * only because the resolution dialog renders it. A caller that can carry a
+ * conflict without that dialog mounted has to present it itself.
+ */
 export function presentError(error: AppError): ErrorPresentation | null {
   switch (error.kind) {
     case 'conflict':
@@ -53,10 +58,8 @@ export function presentError(error: AppError): ErrorPresentation | null {
       return { key: error.key, params: error.params, severity: 'error', supportHint: false }
     case 'restricted':
       return { key: RESTRICTION_KEY[error.reason], severity: 'error', supportHint: false }
-    case 'unavailable': {
-      const key = UNAVAILABLE_KEY[error.scope]
-      return key === null ? null : { key, severity: 'warning', supportHint: false }
-    }
+    case 'unavailable':
+      return { key: UNAVAILABLE_KEY[error.scope], severity: 'warning', supportHint: false }
     case 'rateLimit':
       return { key: RATE_LIMIT_KEY, severity: 'warning', supportHint: false }
     case 'retryable':

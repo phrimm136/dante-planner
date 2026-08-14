@@ -50,8 +50,33 @@ describe('presentError', () => {
     expect(presentError({ kind: 'conflict', code: 'SYNC_CONFLICT', serverVersion: 4 })).toBeNull()
   })
 
-  it('stays silent for an unavailable write, which the sync banner owns', () => {
-    expect(presentError({ kind: 'unavailable', scope: 'write' })).toBeNull()
+  it('speaks for an unavailable write, which no surface owns', () => {
+    expect(presentError({ kind: 'unavailable', scope: 'write' })).toEqual({
+      key: 'common:errors.writeUnavailable.message',
+      severity: 'warning',
+      supportHint: false,
+    })
+  })
+
+  it('returns null for the conflict alone', () => {
+    const silent = (
+      [
+        { kind: 'validation', key: 'k' },
+        { kind: 'restricted', reason: 'banned' },
+        { kind: 'rateLimit' },
+        { kind: 'forbidden', code: 'X' },
+        { kind: 'notFound' },
+        { kind: 'unavailable', scope: 'service' },
+        { kind: 'unavailable', scope: 'backend' },
+        { kind: 'unavailable', scope: 'auth' },
+        { kind: 'unavailable', scope: 'write' },
+        { kind: 'retryable' },
+        { kind: 'quota' },
+        { kind: 'unknown' },
+      ] satisfies AppError[]
+    ).filter((error) => presentError(error) === null)
+
+    expect(silent).toEqual([])
   })
 
   const presented: { name: string; error: AppError; expected: ErrorPresentation }[] = [
@@ -166,12 +191,20 @@ describe('showError', () => {
     expect(sonnerToast.error).not.toHaveBeenCalled()
   })
 
-  it('says nothing for the errors a dedicated surface owns', () => {
+  it('says nothing for the conflict the resolution dialog owns', () => {
     showError(new ConflictError('SYNC_CONFLICT', 'conflict', 4))
-    showError(new WriteTemporarilyUnavailableError('paused'))
 
     expect(sonnerToast.error).not.toHaveBeenCalled()
     expect(sonnerToast.warning).not.toHaveBeenCalled()
+  })
+
+  it('reports a paused write rather than swallowing the failed save', () => {
+    showError(new WriteTemporarilyUnavailableError('paused'))
+
+    expect(sonnerToast.warning).toHaveBeenCalledWith(
+      'common:errors.writeUnavailable.message',
+      undefined,
+    )
   })
 })
 
@@ -191,10 +224,13 @@ describe('showUnavailable', () => {
     expect(sonnerToast.warning).not.toHaveBeenCalled()
   })
 
-  it('says nothing for the unavailable write the sync banner owns', () => {
+  it('reports the unavailable write like the rest of its family', () => {
     showUnavailable(new WriteTemporarilyUnavailableError('paused'))
 
-    expect(sonnerToast.warning).not.toHaveBeenCalled()
+    expect(sonnerToast.warning).toHaveBeenCalledWith(
+      'common:errors.writeUnavailable.message',
+      undefined,
+    )
   })
 })
 

@@ -245,13 +245,13 @@ export function PlannerEditorShell({
     [saveError],
   )
 
-  // Show error toasts. Errors with their own surface (conflict dialog) or with
-  // none by design (sync paused) yield no message and stay set.
+  // Show error toasts. Only the conflict has its own surface, so only it yields
+  // no message and stays set to keep the dialog open.
   useEffect(() => {
     if (!saveError) return
 
-    // A conflict keeps the dialog open and a paused sync has its own banner, so
-    // both stay set; anything the presenter speaks for is reported and cleared.
+    // The conflict stays set so the dialog keeps rendering it; anything the
+    // presenter speaks for is reported and cleared.
     if (presentError(saveError) === null) return
 
     showAppError(saveError)

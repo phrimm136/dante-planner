@@ -129,7 +129,7 @@ describe('MutationCache onError', () => {
     expect(toastCount()).toBe(1)
   })
 
-  it('leaves the errors a dedicated surface owns to that surface', () => {
+  it('reports a paused write, which no banner owns', () => {
     mutationOnError?.(
       new WriteTemporarilyUnavailableError('paused'),
       {} as never,
@@ -138,7 +138,8 @@ describe('MutationCache onError', () => {
       {} as never,
     )
 
-    expect(toastCount()).toBe(0)
+    expect(toast.warning).toHaveBeenCalledWith('common:errors.writeUnavailable.message', undefined)
+    expect(toastCount()).toBe(1)
   })
 })
 
