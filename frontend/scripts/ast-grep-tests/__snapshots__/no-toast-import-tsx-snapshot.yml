@@ -1,0 +1,42 @@
+id: no-toast-import-tsx
+snapshots:
+  export { toast } from 'sonner':
+    labels:
+    - source: export { toast } from 'sonner'
+      style: primary
+      start: 0
+      end: 30
+    - source: '''sonner'''
+      style: secondary
+      start: 22
+      end: 30
+  import { toast as notify } from '@/lib/toast':
+    labels:
+    - source: import { toast as notify } from '@/lib/toast'
+      style: primary
+      start: 0
+      end: 45
+    - source: '''@/lib/toast'''
+      style: secondary
+      start: 32
+      end: 45
+  import { toast } from '@/lib/toast':
+    labels:
+    - source: import { toast } from '@/lib/toast'
+      style: primary
+      start: 0
+      end: 35
+    - source: '''@/lib/toast'''
+      style: secondary
+      start: 22
+      end: 35
+  import { toast } from 'sonner':
+    labels:
+    - source: import { toast } from 'sonner'
+      style: primary
+      start: 0
+      end: 30
+    - source: '''sonner'''
+      style: secondary
+      start: 22
+      end: 30

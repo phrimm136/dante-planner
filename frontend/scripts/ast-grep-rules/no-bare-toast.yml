@@ -1,7 +1,7 @@
 id: no-bare-toast
 language: TypeScript
 severity: error
-message: A bare toast.error/toast.success bypasses error classification and the opt-in support hint; call showError, showAppError, showErrorMessage or showSuccess from lib/errorPresentation.
+message: A bare toast.error/toast.success/toast.warning bypasses error classification and the opt-in support hint; call showError, showAppError, showErrorMessage, showSuccess or showWarning from lib/errorPresentation.
 files:
   - src/**/*.ts
 ignores:
@@ -11,3 +11,4 @@ rule:
   any:
     - pattern: toast.error($$$ARGS)
     - pattern: toast.success($$$ARGS)
+    - pattern: toast.warning($$$ARGS)

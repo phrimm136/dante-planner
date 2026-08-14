@@ -1,0 +1,62 @@
+id: no-toast-import
+snapshots:
+  export { toast } from '@/lib/toast':
+    labels:
+    - source: export { toast } from '@/lib/toast'
+      style: primary
+      start: 0
+      end: 35
+    - source: '''@/lib/toast'''
+      style: secondary
+      start: 22
+      end: 35
+  import { toast as notify } from 'sonner':
+    labels:
+    - source: import { toast as notify } from 'sonner'
+      style: primary
+      start: 0
+      end: 40
+    - source: '''sonner'''
+      style: secondary
+      start: 32
+      end: 40
+  import { toast } from '@/lib/toast':
+    labels:
+    - source: import { toast } from '@/lib/toast'
+      style: primary
+      start: 0
+      end: 35
+    - source: '''@/lib/toast'''
+      style: secondary
+      start: 22
+      end: 35
+  import { toast } from 'sonner':
+    labels:
+    - source: import { toast } from 'sonner'
+      style: primary
+      start: 0
+      end: 30
+    - source: '''sonner'''
+      style: secondary
+      start: 22
+      end: 30
+  import { toast, Toaster } from 'sonner':
+    labels:
+    - source: import { toast, Toaster } from 'sonner'
+      style: primary
+      start: 0
+      end: 39
+    - source: '''sonner'''
+      style: secondary
+      start: 31
+      end: 39
+  import { type ExternalToast, toast } from 'sonner':
+    labels:
+    - source: import { type ExternalToast, toast } from 'sonner'
+      style: primary
+      start: 0
+      end: 50
+    - source: '''sonner'''
+      style: secondary
+      start: 42
+      end: 50

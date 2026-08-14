@@ -21,3 +21,9 @@ snapshots:
       style: primary
       start: 0
       end: 65
+  toast.warning(t('pages.plannerMD.publish.requiresHardMode')):
+    labels:
+    - source: toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+      style: primary
+      start: 0
+      end: 60

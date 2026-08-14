@@ -1,0 +1,14 @@
+id: no-toast-import
+valid:
+  - import { showError, showSuccess } from '@/lib/errorPresentation'
+  - import { Toaster } from 'sonner'
+  - import { showWarning } from '@/lib/errorPresentation'
+  - import { formatDate } from '@/lib/formatDate'
+  - export { showError } from '@/lib/errorPresentation'
+invalid:
+  - import { toast } from 'sonner'
+  - import { toast } from '@/lib/toast'
+  - import { toast as notify } from 'sonner'
+  - import { toast, Toaster } from 'sonner'
+  - export { toast } from '@/lib/toast'
+  - import { type ExternalToast, toast } from 'sonner'

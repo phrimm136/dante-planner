@@ -1,0 +1,26 @@
+id: no-toast-import
+language: TypeScript
+severity: error
+message: Only lib/errorPresentation.ts may hold the toast handle; a call-shape ban alone is evaded by aliasing, destructuring, computed access or a re-export. Call showError, showAppError, showErrorMessage, showSuccess, showWarning or showInfo instead.
+files:
+  - src/**/*.ts
+ignores:
+  # The two sanctioned modules, plus NotificationToast, which renders bespoke
+  # toast.custom notifications rather than error/success semantics.
+  - src/lib/errorPresentation.ts
+  - src/lib/toast.ts
+  - src/shared/notifications/components/NotificationToast.tsx
+  # A test asserting on the sink needs the handle it asserts against.
+  - src/**/__tests__/**
+  - src/**/*.test.ts
+  - src/**/*.test.tsx
+  - src/test-utils/**
+rule:
+  any:
+    - kind: import_statement
+    - kind: export_statement
+  regex: \btoast\b
+  has:
+    kind: string
+    regex: ^['"](sonner|@/lib/toast)['"]$
+    stopBy: end

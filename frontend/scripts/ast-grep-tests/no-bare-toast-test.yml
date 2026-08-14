@@ -4,15 +4,16 @@ valid:
   - showAppError(saveResult.error)
   - showErrorMessage('planner:deckBuilder.importError')
   - showSuccess('common:settings.sync.enabledSuccess')
-  - toast.info(t('exportImport.noPlannersToExport'))
-  - toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+  - showWarning('planner:pages.plannerMD.publish.requiresHardMode')
+  - showInfo('common:exportImport.noPlannersToExport')
   - toast.dismiss('toast-id')
-  - "toast[descriptor.severity](t(descriptor.key))"
+  - "toast.custom((id) => renderNotification(id), { duration: 5000 })"
   - expect(toast.error).toHaveBeenCalledOnce()
 invalid:
   - toast.error('Something went wrong')
   - toast.success(t('settings.username.saveSuccess'))
   - "toast.error(t(failKey), { duration: 5000 })"
+  - toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
   - |
     try {
       await save()

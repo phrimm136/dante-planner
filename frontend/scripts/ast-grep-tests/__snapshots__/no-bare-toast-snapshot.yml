@@ -18,6 +18,12 @@ snapshots:
       style: primary
       start: 0
       end: 49
+  toast.warning(t('pages.plannerMD.publish.requiresHardMode')):
+    labels:
+    - source: toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+      style: primary
+      start: 0
+      end: 60
   ? |
     try {
       await save()
