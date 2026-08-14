@@ -193,14 +193,22 @@ export default defineConfig({
     // Coverage configuration
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.test.{ts,tsx}',
         'src/**/*.spec.{ts,tsx}',
         'src/main.tsx',
         'src/**/*.d.ts',
+        'src/test-utils/**',
       ],
+      // Ratchet: set just under the measured rates so a drop fails the build.
+      thresholds: {
+        lines: 55,
+        functions: 54,
+        branches: 37,
+        statements: 47,
+      },
     },
 
     // Better mock management
@@ -241,6 +249,7 @@ export default defineConfig({
           name: 'plugin',
           include: ['vite-plugin-hash-static.test.ts'],
           pool: 'forks',
+          environment: 'node',
         },
       },
     ],
