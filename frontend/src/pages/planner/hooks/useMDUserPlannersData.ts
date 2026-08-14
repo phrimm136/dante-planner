@@ -27,15 +27,18 @@ import { useUserSettingsQuery } from '@/pages/settings'
 import { useEGOGiftListData } from '@/pages/egoGift'
 import { validatePlannerForDraftSave, validatePlannerForPublish } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
-import { planConflictResolution } from '../lib/conflictChoice'
+import { planConflictResolution, interpretConflictPlan } from '../lib/conflictChoice'
 import { categorizeSync } from '../lib/syncPlan'
-import { assertNever } from '@/lib/utils'
+import { classifyAppError, validationAppError } from '@/lib/apiErrorClassifier'
+import { ok, err } from '@/lib/result'
 import { generateUUID } from '@/lib/uuid'
 import { PLANNER_LIST, STALE_TIME } from '@/lib/constants'
 
 import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 
 import { isMDPlanner } from '../types/PlannerTypes'
+import type { AppError } from '@/lib/apiErrorClassifier'
+import type { ConflictOps, ConflictOutcome } from '../lib/conflictChoice'
 import type { PlannerSummary, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '../components/BatchConflictDialog'
@@ -69,6 +72,11 @@ export const userPlannersQueryKeys = {
 // Hook Options Interface
 // ============================================================================
 
+/** Planner validators name their keys inside the planner namespace. */
+function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
+  return validationAppError({ key: `planner:${friendly.key}`, params: friendly.params })
+}
+
 export interface UseMDUserPlannersDataOptions {
   /** MD category filter (optional) */
   category?: MDCategory
@@ -95,12 +103,10 @@ export interface MDUserPlannersResult {
   isSyncing: boolean
   /** Pending conflicts that need user resolution (local draft vs server newer) */
   pendingConflicts: ConflictItem[]
-  /** Resolve batch conflicts - call after user chooses resolutions */
-  resolveConflicts: (resolutions: ConflictResolution[]) => Promise<void>
+  /** Resolve batch conflicts - call after user chooses resolutions, one outcome per attempt */
+  resolveConflicts: (resolutions: ConflictResolution[]) => Promise<ConflictOutcome[]>
   /** Whether conflict resolution is in progress */
   isResolvingConflicts: boolean
-  /** Validation or sync error from last conflict resolution attempt */
-  conflictResolutionError: { key: string; params?: Record<string, string> } | null
 }
 
 // ============================================================================
@@ -167,10 +173,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   // Conflict resolution state
   const [pendingConflicts, setPendingConflicts] = useState<ConflictItem[]>([])
   const [isResolvingConflicts, setIsResolvingConflicts] = useState(false)
-  const [conflictResolutionError, setConflictResolutionError] = useState<{
-    key: string
-    params?: Record<string, string>
-  } | null>(null)
 
   // EGO Gift spec for affordability validation in conflict resolution
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
@@ -353,17 +355,15 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   })()
 
   /**
-   * Validate a local planner's content before syncing to server.
-   * Mirrors performSave: strict when published, non-strict otherwise.
-   * Throws a typed error if invalid, to be caught by resolveConflicts outer catch.
+   * Why a local planner may not be synced, or null when it may be.
+   * Mirrors performSave: strict when published, structural checks otherwise.
    */
-  const validateBeforeSync = (planner: SaveablePlanner) => {
-    if (!isMDPlanner(planner) || !egoGiftSpec) return
+  const validateBeforeSync = (planner: SaveablePlanner): AppError | null => {
+    if (!isMDPlanner(planner) || !egoGiftSpec) return null
+
     const { content } = planner
     const { category } = planner.config
     const { title, published } = planner.metadata
-
-    let friendlyError: { key: string; params?: Record<string, string> } | null = null
 
     if (published) {
       const { isValid, errors } = validatePlannerForPublish(
@@ -373,115 +373,88 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         egoGiftSpec,
         egoGiftI18n,
       )
-      if (!isValid) friendlyError = toUserFriendlyError(errors[0])
-    } else {
-      friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
+      return isValid ? null : plannerValidationError(toUserFriendlyError(errors[0]))
     }
 
-    if (friendlyError) {
-      throw Object.assign(new Error('validationFailed'), {
-        code: 'validationFailed',
-        friendlyError,
-      })
-    }
+    const friendlyError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
+    return friendlyError ? plannerValidationError(friendlyError) : null
   }
 
+  /** The effects one conflict's resolution runs against storage and the server. */
+  const conflictOps = (conflict: ConflictItem): ConflictOps => ({
+    local: () => conflict.localPlanner,
+    incoming: async () => ok(conflict.serverPlanner),
+    validate: validateBeforeSync,
+    saveLocal: storage.saveToLocal,
+    deleteLocal: storage.deleteFromLocal,
+    sync: async (planner, force) => {
+      try {
+        return ok(acknowledgedCopy(await syncAdapter.syncToServer(planner, force)))
+      } catch (failure: unknown) {
+        return err(classifyAppError(failure))
+      }
+    },
+    sanitizeTitle: (title) => title.trim() || t('pages.plannerMD.untitled', 'Untitled'),
+  })
+
   /**
-   * Resolve batch conflicts based on user choices
-   * Pattern: mirrors usePlannerSave.resolveConflict() but for multiple items
+   * Resolve batch conflicts based on user choices.
+   *
+   * Stops at the first failure: the resolutions after it are the user's to
+   * re-submit once they know what went wrong, and only what resolved leaves the
+   * pending list.
    */
-  const resolveConflicts = async (resolutions: ConflictResolution[]) => {
-    if (resolutions.length === 0) return
+  const resolveConflicts = async (
+    resolutions: ConflictResolution[],
+  ): Promise<ConflictOutcome[]> => {
+    const [first] = resolutions
+    if (!first) return []
 
     setIsResolvingConflicts(true)
-    setConflictResolutionError(null)
 
-    try {
-      const deviceId = await storage.getOrCreateDeviceId()
-      if (!deviceId.ok) {
-        throw new Error('Failed to get device ID', { cause: deviceId.error })
-      }
-      const resolutionContext = {
-        deviceId: deviceId.value,
-        now: new Date().toISOString(),
-        newId: generateUUID,
-        copyTitle: (title: string) =>
-          t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
-      }
-
-      for (const resolution of resolutions) {
-        const conflict = pendingConflicts.find((c) => c.id === resolution.id)
-        if (!conflict) continue
-
-        const plan = planConflictResolution(
-          resolution.choice,
-          { forkSide: 'local', forkTitle: conflict.localPlanner.metadata.title },
-          resolutionContext,
-        )
-
-        for (const effect of plan) {
-          switch (effect.kind) {
-            case 'keepLocal': {
-              // Validate before syncing local draft to server
-              validateBeforeSync(conflict.localPlanner)
-              // The local draft wins the conflict by being force-pushed; what the
-              // server then holds is what gets stored, under the version it acked.
-              const synced = await syncAdapter.syncToServer(conflict.localPlanner, true)
-              const stored = acknowledgedCopy(synced)
-              // The server echoes the status it was sent, so the resolution marks
-              // the row saved itself. Left a draft it would stay badged unsaved and
-              // turn the next server-version bump into another conflict prompt.
-              await storage.saveToLocal({
-                ...stored,
-                metadata: {
-                  ...stored.metadata,
-                  status: 'saved',
-                  savedAt: new Date().toISOString(),
-                },
-              })
-              break
-            }
-            case 'adoptIncoming':
-              // Use server version, discard local draft
-              await storage.saveToLocal(conflict.serverPlanner)
-              break
-            case 'forkCopy': {
-              const copy: SaveablePlanner = {
-                ...conflict.localPlanner,
-                metadata: { ...conflict.localPlanner.metadata, ...effect.metadata },
-              }
-              // Validate copy before syncing (same content as localPlanner)
-              validateBeforeSync(copy)
-              await storage.saveToLocal(copy)
-              await syncAdapter.syncToServer(copy)
-              break
-            }
-            default:
-              assertNever(effect)
-          }
-        }
-      }
-
-      // Only clear conflicts after ALL resolutions succeed
-      setPendingConflicts([])
-      const updatedLocal = await storage.listLocal()
-      queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
-      void queryClient.invalidateQueries({
-        queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
-      })
-    } catch (error) {
-      const e = error as {
-        code?: string
-        friendlyError?: { key: string; params?: Record<string, string> }
-      }
-      if (e.code === 'validationFailed' && e.friendlyError) {
-        setConflictResolutionError(e.friendlyError)
-      } else {
-        console.error('Conflict resolution failed:', error)
-      }
+    // The copy is stamped with this device, and the id lives in the same store
+    // the copy would be written to.
+    const deviceId = await storage.getOrCreateDeviceId()
+    if (!deviceId.ok) {
+      setIsResolvingConflicts(false)
+      return [{ id: first.id, result: err({ step: 'saveLocal', error: { kind: 'unknown' } }) }]
     }
 
+    const outcomes: ConflictOutcome[] = []
+    const resolved = new Set<string>()
+
+    for (const resolution of resolutions) {
+      const conflict = pendingConflicts.find((c) => c.id === resolution.id)
+      if (!conflict) continue
+
+      const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
+      const plan = planConflictResolution(
+        resolution.choice,
+        { forkSide: 'local', forkTitle: conflict.localPlanner.metadata.title },
+        {
+          ...ctx,
+          copyTitle: (title: string) =>
+            t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
+        },
+      )
+
+      const result = await interpretConflictPlan(plan, conflictOps(conflict), ctx)
+      outcomes.push({ id: conflict.id, result })
+      if (!result.ok) break
+
+      resolved.add(conflict.id)
+    }
+
+    setPendingConflicts((pending) => pending.filter((conflict) => !resolved.has(conflict.id)))
+
+    const updatedLocal = await storage.listLocal()
+    queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
+    void queryClient.invalidateQueries({
+      queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
+    })
+
     setIsResolvingConflicts(false)
+    return outcomes
   }
 
   return {
@@ -492,7 +465,6 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     pendingConflicts,
     resolveConflicts,
     isResolvingConflicts,
-    conflictResolutionError,
   }
 }
 

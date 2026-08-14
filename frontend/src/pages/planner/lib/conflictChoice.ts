@@ -85,6 +85,12 @@ export interface ConflictFailure {
   error: AppError
 }
 
+/** How one submitted resolution ended, for the surface that listed the conflicts. */
+export interface ConflictOutcome {
+  id: string
+  result: Result<void, ConflictFailure>
+}
+
 /** The effectful operations a resolution needs, injected so the interpreter stays testable. */
 export interface ConflictOps {
   /** The side that ends up under the conflicting id when local wins. */

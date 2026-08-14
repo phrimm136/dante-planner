@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 import { useMDUserPlannersData } from '../../hooks/useMDUserPlannersData'
 import { useUserSettingsQuery } from '@/pages/settings'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
@@ -9,6 +11,8 @@ import { PlannerEmptyState } from './PlannerEmptyState'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 import { BatchConflictDialog } from '../BatchConflictDialog'
 
+import type { ConflictResolution } from '../BatchConflictDialog'
+import type { ConflictOutcome } from '../../lib/conflictChoice'
 import type { MDCategory } from '@/shared/gameData'
 import type { PlannerSummary } from '../../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../../types/PlannerSearchTypes'
@@ -53,13 +57,15 @@ export function PersonalPlannerList({
     pendingConflicts,
     resolveConflicts,
     isResolvingConflicts,
-    conflictResolutionError,
   } = useMDUserPlannersData({
     category,
     page,
     search: search || undefined,
     contentFilters,
   })
+
+  // What the last submission did to each item, shown against its own row.
+  const [outcomes, setOutcomes] = useState<ConflictOutcome[]>([])
   // TODO: Add UI indicator when isSyncing is true
   void isSyncing
 
@@ -90,41 +96,49 @@ export function PersonalPlannerList({
   // Calculate pagination
   const totalPages = calculatePlannerPages(totalCount)
 
-  // Handle empty state
-  if (planners.length === 0) {
-    return <PlannerEmptyState view="my-plans" isFiltered={hasActiveFilters} />
+  const submitResolutions = async (resolutions: ConflictResolution[]) => {
+    setOutcomes(await resolveConflicts(resolutions))
   }
 
   return (
     <>
-      {/* Batch conflict dialog for sync conflicts (local draft vs server newer) */}
+      {/* Batch conflict dialog for sync conflicts (local draft vs server newer).
+          A sibling of both branches: filtered to nothing, the list would
+          otherwise return before the conflicts were ever rendered. */}
       <BatchConflictDialog
+        key={pendingConflicts.map((conflict) => conflict.id).join(',')}
         open={pendingConflicts.length > 0}
         conflicts={pendingConflicts}
-        onResolve={resolveConflicts}
+        onResolve={(resolutions) => void submitResolutions(resolutions)}
         isResolving={isResolvingConflicts}
-        error={conflictResolutionError}
+        outcomes={outcomes}
       />
 
-      <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
-        {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
-          <PersonalPlannerCard
-            key={planner.id}
-            planner={planner}
-            isAuthenticated={isAuthenticated}
-            syncEnabled={syncEnabled}
-          />
-        ))}
-      </ResponsiveCardGrid>
+      {planners.length === 0 ? (
+        <PlannerEmptyState view="my-plans" isFiltered={hasActiveFilters} />
+      ) : (
+        <>
+          <ResponsiveCardGrid cardWidth={CARD_GRID.WIDTH.PLANNER}>
+            {planners.slice(0, displayCount).map((planner: PlannerSummary) => (
+              <PersonalPlannerCard
+                key={planner.id}
+                planner={planner}
+                isAuthenticated={isAuthenticated}
+                syncEnabled={syncEnabled}
+              />
+            ))}
+          </ResponsiveCardGrid>
 
-      {totalPages > 1 && (
-        <div className="mt-6">
-          <PlannerListPagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-          />
-        </div>
+          {totalPages > 1 && (
+            <div className="mt-6">
+              <PlannerListPagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={onPageChange}
+              />
+            </div>
+          )}
+        </>
       )}
     </>
   )

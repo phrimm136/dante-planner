@@ -12,6 +12,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
+import { presentError } from '@/lib/errorPresentation'
+import type { ConflictFailure, ConflictOutcome } from '../lib/conflictChoice'
 import type { ConflictResolutionChoice, SaveablePlanner } from '../types/PlannerTypes'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -51,8 +53,8 @@ export interface BatchConflictDialogProps {
   onResolve: (resolutions: ConflictResolution[]) => void
   /** Whether resolution is in progress */
   isResolving?: boolean
-  /** Validation error from last resolution attempt (i18n key + optional params) */
-  error?: { key: string; params?: Record<string, string> } | null
+  /** One entry per attempted item, in submission order. */
+  outcomes?: ConflictOutcome[]
 }
 
 /** The choices in the order both the per-item row and the apply-to-all row show them. */
@@ -147,9 +149,29 @@ export function BatchConflictDialog({
   conflicts,
   onResolve,
   isResolving = false,
-  error = null,
+  outcomes = [],
 }: BatchConflictDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
+
+  // Closing is per batch: the consumer keys this dialog by the conflicts it
+  // carries, so a new batch mounts a fresh, undismissed one.
+  const [dismissed, setDismissed] = useState(false)
+
+  /** Why the attempt on this row failed, or null when it did not fail. */
+  const failureOf = (id: string): ConflictFailure | null => {
+    const outcome = outcomes.find((entry) => entry.id === id)
+    if (!outcome || outcome.result.ok) return null
+    return outcome.result.error
+  }
+
+  const failureMessage = (failure: ConflictFailure): string => {
+    const presentation = presentError(failure.error)
+    if (!presentation) {
+      // A conflict has no message of its own; this dialog is what reports it.
+      return t('pages.plannerMD.batchConflict.itemFailed', 'This planner could not be resolved.')
+    }
+    return t(presentation.key, presentation.params)
+  }
 
   // Track resolution choice for each conflict
   const [resolutions, setResolutions] = useState<Record<string, ConflictResolutionChoice>>(() => {
@@ -183,11 +205,6 @@ export function BatchConflictDialog({
     onResolve(result)
   }
 
-  // Prevent dismissal via ESC key or clicking outside
-  const preventDismissal = (e: Event) => {
-    e.preventDefault()
-  }
-
   // Resolution choice labels
   const choiceLabels: Record<ConflictResolutionChoice, string> = {
     overwrite: t('pages.plannerMD.conflict.overwrite', 'Keep Local'),
@@ -196,13 +213,13 @@ export function BatchConflictDialog({
   }
 
   return (
-    <Dialog open={open}>
-      <DialogContent
-        showCloseButton={false}
-        onEscapeKeyDown={preventDismissal}
-        onInteractOutside={preventDismissal}
-        className="max-w-2xl"
-      >
+    <Dialog
+      open={open && !dismissed}
+      onOpenChange={(next) => {
+        if (!next) setDismissed(true)
+      }}
+    >
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
             {t('pages.plannerMD.batchConflict.title', 'Conflicts Detected')}
@@ -239,6 +256,7 @@ export function BatchConflictDialog({
         <div className="max-h-64 overflow-y-auto space-y-3 py-2">
           {conflicts.map((conflict) => {
             const currentChoice = resolutions[conflict.id] ?? 'overwrite'
+            const failure = failureOf(conflict.id)
             return (
               <div
                 key={conflict.id}
@@ -267,6 +285,12 @@ export function BatchConflictDialog({
                     {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
                   </p>
                 )}
+                {/* Why the attempt on this row failed */}
+                {failure && (
+                  <p className="text-sm text-destructive" data-testid={`outcome-${conflict.id}`}>
+                    {failureMessage(failure)}
+                  </p>
+                )}
                 {/* Buttons */}
                 <div className="flex gap-1">
                   {CHOICE_ORDER.map((choice) => (
@@ -286,11 +310,6 @@ export function BatchConflictDialog({
         </div>
 
         <DialogFooter className="flex-col items-stretch gap-2 sm:flex-col">
-          {error && (
-            <p className="text-sm text-destructive">
-              {t(error.key, { ns: 'planner', ...error.params })}
-            </p>
-          )}
           <Button onClick={handleResolveAll} disabled={isResolving}>
             {t('pages.plannerMD.batchConflict.resolveAll', 'Resolve All')}
           </Button>

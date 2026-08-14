@@ -41,7 +41,7 @@ vi.mock('../usePlannerStorage', () => ({
     loadFromLocal: syncMocks.loadFromLocal,
     listLocal: syncMocks.listLocal,
     listLocalFull: vi.fn(async () => []),
-    deleteFromLocal: vi.fn(async () => undefined),
+    deleteFromLocal: vi.fn(async () => ({ ok: true })),
     clearCorruptedLocal: vi.fn(async () => undefined),
   }),
 }))
@@ -79,6 +79,7 @@ vi.mock('@/pages/egoGift', () => ({
 }))
 
 import { userPlannersQueryKeys, useMDUserPlannersData } from '../useMDUserPlannersData'
+import type { ConflictOutcome } from '../../lib/conflictChoice'
 
 describe('useMDUserPlannersData background sync', () => {
   function createWrapper() {
@@ -377,5 +378,131 @@ describe('useMDUserPlannersData window-focus policy', () => {
 
     expect(focusOptionFor(userPlannersQueryKeys.list(true))).toBe(false)
     expect(focusOptionFor(userPlannersQueryKeys.listFull(true))).toBe(false)
+  })
+})
+
+describe('useMDUserPlannersData batch conflict resolution', () => {
+  function createWrapper() {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    return function Wrapper({ children }: { children: React.ReactNode }) {
+      return (
+        <QueryClientProvider client={queryClient}>
+          <React.Suspense fallback={null}>{children}</React.Suspense>
+        </QueryClientProvider>
+      )
+    }
+  }
+
+  beforeEach(() => {
+    syncMocks.isAuthenticated = true
+    syncMocks.syncEnabled = true
+    syncMocks.saveToLocal.mockClear()
+    syncMocks.syncToServer.mockClear()
+  })
+
+  /** Three drafts the server has moved past, which categorizeSync sends to conflict. */
+  function conflictRows() {
+    return ['planner-0', 'planner-1', 'planner-2'].map((id) => ({
+      id,
+      title: id,
+      plannerType: 'MIRROR_DUNGEON',
+      category: '5F',
+      status: 'draft',
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+      savedAt: null,
+      syncVersion: 1,
+    }))
+  }
+
+  async function pendingThreeConflicts() {
+    const rows = conflictRows()
+    syncMocks.listFromServer.mockResolvedValue(
+      rows.map((row) => ({ ...row, status: 'saved', syncVersion: 5 })),
+    )
+    syncMocks.listLocal.mockResolvedValue(rows)
+    syncMocks.loadFromLocal.mockImplementation(async (id: string) => ({
+      ok: true,
+      value: {
+        metadata: { ...rows.find((row) => row.id === id)!, syncVersion: 1 },
+        config: { type: 'MIRROR_DUNGEON', category: '5F' },
+        content: {},
+      },
+    }))
+    syncMocks.fetchFromServer.mockImplementation(async (id: string) => ({
+      ok: true,
+      value: {
+        planner: {
+          metadata: { ...rows.find((row) => row.id === id)!, syncVersion: 5 },
+          config: { type: 'MIRROR_DUNGEON', category: '5F' },
+          content: {},
+        },
+        ack: { syncVersion: 5 },
+      },
+    }))
+
+    const { result } = renderHook((props: { page: number }) => useMDUserPlannersData(props), {
+      wrapper: createWrapper(),
+      initialProps: { page: 0 },
+    })
+    await waitFor(() => expect(result.current).not.toBeNull())
+    await waitFor(() => expect(result.current.pendingConflicts).toHaveLength(3))
+    return result
+  }
+
+  it('stops at the first failure and keeps every id it did not resolve', async () => {
+    const result = await pendingThreeConflicts()
+    // The second upload is rejected; the third resolution must never be attempted.
+    syncMocks.syncToServer.mockImplementation(async (planner: unknown) => {
+      const id = (planner as SaveablePlanner).metadata.id
+      if (id === 'planner-1') throw new Error('server rejected the write')
+      return { planner, ack: { syncVersion: 6 } }
+    })
+
+    let outcomes: ConflictOutcome[] = []
+    await act(async () => {
+      outcomes = await result.current.resolveConflicts([
+        { id: 'planner-0', choice: 'overwrite' },
+        { id: 'planner-1', choice: 'overwrite' },
+        { id: 'planner-2', choice: 'overwrite' },
+      ])
+    })
+
+    expect(outcomes.map((outcome) => outcome.id)).toEqual(['planner-0', 'planner-1'])
+    expect(outcomes[0]!.result.ok).toBe(true)
+    expect(outcomes[1]!.result).toEqual({
+      ok: false,
+      error: { step: 'sync', error: { kind: 'unknown' } },
+    })
+
+    const attempted = syncMocks.syncToServer.mock.calls.map(
+      (call) => (call[0] as SaveablePlanner).metadata.id,
+    )
+    expect(attempted).toEqual(['planner-0', 'planner-1'])
+
+    // Only what resolved leaves the list; the rest stay for a second attempt.
+    expect(result.current.pendingConflicts.map((conflict) => conflict.id)).toEqual([
+      'planner-1',
+      'planner-2',
+    ])
+  })
+
+  it('clears the whole list when every resolution lands', async () => {
+    const result = await pendingThreeConflicts()
+    syncMocks.syncToServer.mockImplementation(async (planner: unknown) => ({
+      planner,
+      ack: { syncVersion: 6 },
+    }))
+
+    let outcomes: ConflictOutcome[] = []
+    await act(async () => {
+      outcomes = await result.current.resolveConflicts([
+        { id: 'planner-0', choice: 'overwrite' },
+        { id: 'planner-1', choice: 'discard' },
+        { id: 'planner-2', choice: 'overwrite' },
+      ])
+    })
+
+    expect(outcomes.every((outcome) => outcome.result.ok)).toBe(true)
+    expect(result.current.pendingConflicts).toEqual([])
   })
 })
