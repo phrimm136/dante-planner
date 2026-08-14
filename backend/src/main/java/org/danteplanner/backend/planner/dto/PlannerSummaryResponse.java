@@ -8,6 +8,7 @@ import org.danteplanner.backend.planner.entity.PlannerType;
 import org.danteplanner.backend.planner.repository.PlannerSummaryRow;
 
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.UUID;
 
 /**
@@ -21,6 +22,7 @@ public record PlannerSummaryResponse(
     PlannerType plannerType,
     PlannerStatus status,
     long syncVersion,
+    String contentDigest,
     Instant lastModifiedAt
 ) {
 
@@ -38,6 +40,7 @@ public record PlannerSummaryResponse(
                 .plannerType(planner.getPlannerType())
                 .status(planner.getStatus())
                 .syncVersion(planner.getSyncVersion())
+                .contentDigest(planner.getContentDigestHex())
                 .lastModifiedAt(planner.getLastModifiedAt())
                 .build();
     }
@@ -56,6 +59,7 @@ public record PlannerSummaryResponse(
                 .plannerType(row.getPlannerType())
                 .status(row.getStatus())
                 .syncVersion(row.getSyncVersion())
+                .contentDigest(HexFormat.of().formatHex(row.getContentDigest()))
                 .lastModifiedAt(row.getLastModifiedAt())
                 .build();
     }

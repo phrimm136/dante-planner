@@ -153,7 +153,7 @@ public class PlannerContent {
     }
 
     public String contentDigestHex() {
-        return HexFormat.of().formatHex(contentDigest);
+        return contentDigest == null ? null : HexFormat.of().formatHex(contentDigest);
     }
 
     @PreUpdate

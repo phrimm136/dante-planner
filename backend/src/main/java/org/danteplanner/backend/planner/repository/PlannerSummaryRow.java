@@ -24,5 +24,7 @@ public interface PlannerSummaryRow {
 
     long getSyncVersion();
 
+    byte[] getContentDigest();
+
     Instant getLastModifiedAt();
 }
