@@ -3,7 +3,7 @@ import { render } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ComprehensiveGiftGridTracker } from '../ComprehensiveGiftGridTracker'
 import { encodeGiftSelection } from '@/pages/egoGift'
-import { buildFloorSelection } from '@/test-utils'
+import { buildEgoGiftSpecList, buildFloorSelection } from '@/test-utils'
 
 // The card is the seam the grid renders through, so the mock surfaces the three
 // values the grid computes: which gift, at which enhancement, and highlighted or not.
@@ -27,25 +27,26 @@ vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
   ),
 }))
 
+// The factory may not import: `@/test-utils` reaches the `@/pages/egoGift` barrel, which
+// re-exports this very module, so an awaiting factory waits on its own pending promise.
+vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
+  useEGOGiftListData: () => GIFT_CATALOG,
+}))
+
 // The spec entries pass through the boundary schema the catalog validates with, so a
 // mock that drifts from the real spec shape fails here instead of rendering nothing.
-vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', async () => {
-  const { buildEgoGiftSpecList } = await import('@/test-utils/fixtures')
-  return {
-    useEGOGiftListData: () => ({
-      spec: buildEgoGiftSpecList({
-        9001: { tag: ['TIER_3'], keyword: 'Burn', attributeType: 'WRATH', themePack: ['1001'] },
-        9002: { tag: ['TIER_2'], keyword: 'Bleed', attributeType: 'LUST', themePack: ['1002'] },
-        9003: { tag: ['TIER_1'], keyword: 'Tremor', attributeType: 'PRIDE', themePack: ['1001'] },
-      }),
-      i18n: {
-        9001: 'Gift One',
-        9002: 'Gift Two',
-        9003: 'Gift Three',
-      },
-    }),
-  }
-})
+const GIFT_CATALOG = {
+  spec: buildEgoGiftSpecList({
+    9001: { tag: ['TIER_3'], keyword: 'Burn', attributeType: 'WRATH', themePack: ['1001'] },
+    9002: { tag: ['TIER_2'], keyword: 'Bleed', attributeType: 'LUST', themePack: ['1002'] },
+    9003: { tag: ['TIER_1'], keyword: 'Tremor', attributeType: 'PRIDE', themePack: ['1001'] },
+  }),
+  i18n: {
+    9001: 'Gift One',
+    9002: 'Gift Two',
+    9003: 'Gift Three',
+  },
+}
 
 vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   useSearchMappingsDeferred: () => ({
