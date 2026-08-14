@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ChevronsRight, Edit, Trash2, Upload } from 'lucide-react'
 
-import { toast } from '@/lib/toast'
 import { assertNever } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +22,7 @@ import { useEGOGiftListData } from '@/pages/egoGift'
 import { plannerQueryKeys } from '../../lib/plannerQueryKeys'
 import { deriveSaveStatus, SAVE_STATUS_BADGE_VARIANT } from '../../lib/plannerBadges'
 import { decidePublishAction } from '../../lib/plannerPublishPolicy'
-import { toastForError } from '../../lib/plannerSaveErrors'
+import { showAppError, showError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
 import { validatePlannerForPublish } from '../../lib/plannerValidation'
 import { toUserFriendlyError } from '../../lib/plannerValidationErrors'
 
@@ -120,25 +119,27 @@ export function PersonalPlannerHeader({
           // a local-save failure instead of swallowing it (the personal view reads
           // from IndexedDB, so a failed save leaves it stale until the next save).
           const saveResult = await saveToLocal(updatedPlanner)
-          if (!saveResult.ok) {
-            console.error('Local planner save failed after publish toggle:', saveResult.error.kind)
-          }
 
           void queryClient.invalidateQueries({
             queryKey: plannerQueryKeys.detail(plannerId),
           })
 
-          toast.success(
-            t(
-              wasPublished
-                ? 'pages.plannerMD.publish.unpublishSuccess'
-                : 'pages.plannerMD.publish.success',
-            ),
-          )
           setIsUploadingForPublish(false)
+
+          // The personal view reads the local mirror, so a failed save leaves it
+          // stale; reporting the toggle as done would be a lie about what is shown.
+          if (!saveResult.ok) {
+            showAppError(saveResult.error)
+            return
+          }
+
+          showSuccess(
+            wasPublished
+              ? 'planner:pages.plannerMD.publish.unpublishSuccess'
+              : 'planner:pages.plannerMD.publish.success',
+          )
         },
-        onError: (error) => {
-          toastForError(error, 'pages.plannerMD.publish.failed')
+        onError: () => {
           setIsUploadingForPublish(false)
         },
       },
@@ -159,7 +160,7 @@ export function PersonalPlannerHeader({
       callPublishMutation(false, acknowledgedCopy(synced))
     } catch (error) {
       console.error('Failed to upload plan for publishing:', error)
-      toast.error(t('pages.plannerMD.publish.uploadFailed'))
+      showError(error)
       setIsUploadingForPublish(false)
     }
   }
@@ -191,7 +192,7 @@ export function PersonalPlannerHeader({
         return
       case 'invalid': {
         const friendly = toUserFriendlyError(action.error)
-        toast.error(t(friendly.key, friendly.params))
+        showErrorMessage(`planner:${friendly.key}`, friendly.params)
         return
       }
       case 'warnSyncDisabled':

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import { toast } from '@/lib/toast'
 import { NotFoundError } from '@/lib/api'
-import { toastForError } from '../lib/plannerSaveErrors'
+import { showError } from '@/lib/errorPresentation'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
@@ -121,7 +121,7 @@ export function usePlannerHeaderActions({
     await applyUpdate()
       .catch((error: unknown) => {
         console.error('Failed to apply latest mirror:', error)
-        toastForError(error, 'pages.plannerMD.applyLatestMirror.failed')
+        showError(error)
       })
       .finally(() => {
         setIsApplyingLatestMirror(false)

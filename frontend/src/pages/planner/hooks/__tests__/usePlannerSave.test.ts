@@ -17,7 +17,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryClient } from '@/lib/queryClient'
 import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
-import type { SaveError } from '../../lib/plannerSaveErrors'
+import type { AppError } from '@/lib/apiErrorClassifier'
 import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
@@ -29,7 +29,7 @@ import { ok, err } from '@/lib/result'
 const callOrder: string[] = []
 
 const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
-const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, SaveError>>>()
+const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, AppError>>>()
 const mockSyncToServer =
   vi.fn<(planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>>()
 const mockFetchFromServer = vi.fn()
@@ -252,7 +252,7 @@ describe('usePlannerSave - draft vs published path selection', () => {
     expect(callOrder).toEqual([])
     expect(result.current.error).toMatchObject({
       kind: 'validation',
-      key: 'pages.plannerMD.publish.missingTitle',
+      key: 'planner:pages.plannerMD.publish.missingTitle',
     })
   })
 
@@ -298,12 +298,12 @@ describe('usePlannerSave - error surface', () => {
       await result.current.save({ published: false })
     })
 
-    expect(result.current.error).toEqual({ kind: 'moderation', reason: 'banned' })
+    expect(result.current.error).toEqual({ kind: 'restricted', reason: 'banned' })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['auth', 'me'] })
     invalidateSpy.mockRestore()
   })
 
-  it('maps WriteTemporarilyUnavailableError to a syncPaused degradation (saved locally, sync paused)', async () => {
+  it('maps WriteTemporarilyUnavailableError to an unavailable write (saved locally, sync paused)', async () => {
     authenticated()
     mockSyncToServer.mockRejectedValue(
       new WriteTemporarilyUnavailableError('Database temporarily unavailable, please retry'),
@@ -314,7 +314,7 @@ describe('usePlannerSave - error surface', () => {
       await result.current.save({ published: false })
     })
 
-    expect(result.current.error).toEqual({ kind: 'syncPaused' })
+    expect(result.current.error).toEqual({ kind: 'unavailable', scope: 'write' })
   })
 
   it('clearError resets error state', async () => {

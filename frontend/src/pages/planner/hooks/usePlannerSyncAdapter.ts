@@ -1,10 +1,10 @@
 import { plannerApi } from '../lib/plannerApi'
 import { PLANNER_SCHEMA_VERSION } from '@/lib/constants'
 import { ok, err } from '@/lib/result'
-import { classifySaveError } from '../lib/plannerSaveErrors'
+import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { toSaveablePlanner } from '../schemas/PlannerSchemas'
 import type { Result } from '@/lib/result'
-import type { SaveError } from '../lib/plannerSaveErrors'
+import type { AppError } from '@/lib/apiErrorClassifier'
 import type {
   SaveablePlanner,
   PlannerEditorConfig,
@@ -32,7 +32,7 @@ export interface PlannerSyncAdapterOperations {
   /** Sync planner to server (PUT). Uses force param for conflict override */
   syncToServer: (planner: SaveablePlanner, force?: boolean) => Promise<AcknowledgedPlanner>
   /** Fetch planner from server by ID (GET), reporting why the fetch failed */
-  fetchFromServer: (id: string) => Promise<Result<AcknowledgedPlanner, SaveError>>
+  fetchFromServer: (id: string) => Promise<Result<AcknowledgedPlanner, AppError>>
   /** Delete planner from server by ID (DELETE) */
   deleteFromServer: (id: string) => Promise<void>
   /** List user's server planners */
@@ -166,13 +166,13 @@ export function usePlannerSyncAdapter(): PlannerSyncAdapterOperations {
       return { planner: serverResponseToSaveable(response), ack: ackOf(response) }
     },
 
-    fetchFromServer: async (id: string): Promise<Result<AcknowledgedPlanner, SaveError>> => {
+    fetchFromServer: async (id: string): Promise<Result<AcknowledgedPlanner, AppError>> => {
       try {
         const response = await plannerApi.get(id)
         return ok({ planner: serverResponseToSaveable(response), ack: ackOf(response) })
       } catch (error) {
         console.error(`fetchFromServer failed for ${id}:`, error)
-        return err(classifySaveError(error))
+        return err(classifyAppError(error))
       }
     },
 

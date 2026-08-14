@@ -1,6 +1,7 @@
 import { Suspense, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/lib/toast'
+import { showError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
 import { gzip } from 'pako'
 import DOMPurify from 'dompurify'
 
@@ -136,7 +137,7 @@ function PlannerExportImportSectionContent() {
       }
 
       if (planners.length === 0) {
-        toast.error(t('exportImport.exportFailed', 'Export failed'))
+        showErrorMessage('common:exportImport.exportFailed')
         return
       }
 
@@ -164,18 +165,21 @@ function PlannerExportImportSectionContent() {
 
       setState({ k: 'exporting', pct: 80 })
 
+      if (compressed.length === 0) {
+        showErrorMessage('common:exportImport.exportFailed')
+        return
+      }
+
       downloadBlob(
         `plans-${new Date().toISOString().split('T')[0]}${EXPORT_FILE_EXTENSION}`,
         new Blob([compressed], { type: MIME_TYPE }),
       )
 
       setState({ k: 'exporting', pct: 100 })
-      toast.success(
-        t('exportImport.exportSuccess', 'Exported {{count}} planners', { count: planners.length }),
-      )
+      showSuccess('common:exportImport.exportSuccess', { count: planners.length })
     } catch (error) {
       console.error('Export failed:', error)
-      toast.error(t('exportImport.exportFailed', 'Export failed'))
+      showError(error)
     } finally {
       setState({ k: 'idle' })
     }
@@ -193,13 +197,13 @@ function PlannerExportImportSectionContent() {
 
     // Validate file extension
     if (!file.name.endsWith(EXPORT_FILE_EXTENSION)) {
-      toast.error(t('exportImport.invalidFileFormat', 'Invalid file format'))
+      showErrorMessage('common:exportImport.invalidFileFormat')
       return
     }
 
     // Validate file size to prevent memory exhaustion
     if (file.size > EXPORT_MAX_FILE_SIZE) {
-      toast.error(t('exportImport.fileTooLarge', 'File too large (max 10MB)'))
+      showErrorMessage('common:exportImport.fileTooLarge')
       return
     }
 
@@ -333,7 +337,7 @@ function PlannerExportImportSectionContent() {
       }
     } catch (error) {
       console.error('Import failed:', error)
-      toast.error(t('exportImport.importFailed', 'Import failed'))
+      showError(error)
       clearFileInput()
       setState({ k: 'idle' })
     }

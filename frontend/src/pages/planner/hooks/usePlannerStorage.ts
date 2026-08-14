@@ -4,11 +4,11 @@ import { generateUUID } from '@/lib/uuid'
 import { ok, err } from '@/lib/result'
 import { migrateKeywords } from '@/shared/gameData'
 import { SaveablePlannerSchema, toSaveablePlanner } from '../schemas/PlannerSchemas'
-import { classifySaveError } from '../lib/plannerSaveErrors'
+import { classifyAppError } from '@/lib/apiErrorClassifier'
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { Result } from '@/lib/result'
 import type { StorageReadError } from '@/lib/storage'
-import type { SaveError } from '../lib/plannerSaveErrors'
+import type { AppError } from '@/lib/apiErrorClassifier'
 import type { SaveablePlanner, PlannerSummary } from '../types/PlannerTypes'
 
 /**
@@ -98,7 +98,7 @@ export interface PlannerStorageOperations {
   saveToLocal: (
     planner: SaveablePlanner,
     options?: StorageOperationOptions,
-  ) => Promise<Result<void, SaveError>>
+  ) => Promise<Result<void, AppError>>
   /** Load and validate a planner; absent reads succeed with null, broken ones report a code */
   loadFromLocal: (id: string, options?: StorageOperationOptions) => Promise<LoadResult>
   /** List all planners as summaries, sorted by lastModifiedAt (newest first) */
@@ -106,9 +106,9 @@ export interface PlannerStorageOperations {
   /** List all planners with full content, sorted by lastModifiedAt (newest first) */
   listLocalFull: () => Promise<SaveablePlanner[]>
   /** Delete a planner by ID, reporting why the delete failed */
-  deleteFromLocal: (id: string) => Promise<Result<void, SaveError>>
+  deleteFromLocal: (id: string) => Promise<Result<void, AppError>>
   /** Clear corrupted planner data by ID */
-  clearCorruptedLocal: (id: string) => Promise<Result<void, SaveError>>
+  clearCorruptedLocal: (id: string) => Promise<Result<void, AppError>>
 }
 
 // Promise cache for getOrCreateDeviceId to prevent race conditions
@@ -187,7 +187,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
     const saveToLocal = async (
       planner: SaveablePlanner,
       options?: StorageOperationOptions,
-    ): Promise<Result<void, SaveError>> => {
+    ): Promise<Result<void, AppError>> => {
       if (!isClient) {
         return err({ kind: 'unknown' })
       }
@@ -212,7 +212,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
 
         const written = await storage.setItem(key, JSON.stringify(validation.data))
         if (!written.ok) {
-          const saveError = classifySaveError(
+          const saveError = classifyAppError(
             written.error.kind === 'ioError' ? written.error.cause : written.error,
           )
           options?.onError?.(saveError.kind === 'quota' ? 'quotaExceeded' : 'saveFailed')
@@ -220,7 +220,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
         }
         return ok(undefined)
       } catch (error) {
-        const saveError = classifySaveError(error)
+        const saveError = classifyAppError(error)
 
         console.error('Failed to save planner:', error)
         options?.onError?.(saveError.kind === 'quota' ? 'quotaExceeded' : 'saveFailed')
@@ -425,7 +425,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
      * Delete a planner by ID
      * @returns the delete error the caller reports to the user, or nothing on success
      */
-    const deleteFromLocal = async (id: string): Promise<Result<void, SaveError>> => {
+    const deleteFromLocal = async (id: string): Promise<Result<void, AppError>> => {
       if (!isClient) return err({ kind: 'unknown' })
 
       try {
@@ -433,7 +433,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
         if (!removed.ok) {
           console.error('Failed to delete planner:', removed.error)
           return err(
-            classifySaveError(
+            classifyAppError(
               removed.error.kind === 'ioError' ? removed.error.cause : removed.error,
             ),
           )
@@ -441,7 +441,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
         return ok(undefined)
       } catch (error) {
         console.error('Failed to delete planner:', error)
-        return err(classifySaveError(error))
+        return err(classifyAppError(error))
       }
     }
 
@@ -449,7 +449,7 @@ export function usePlannerStorage(): PlannerStorageOperations {
      * Clear corrupted planner data by ID
      * Used when validation fails on load to clean up invalid data
      */
-    async function clearCorruptedLocal(id: string): Promise<Result<void, SaveError>> {
+    async function clearCorruptedLocal(id: string): Promise<Result<void, AppError>> {
       return deleteFromLocal(id)
     }
 

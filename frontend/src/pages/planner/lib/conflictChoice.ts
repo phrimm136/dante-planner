@@ -7,9 +7,9 @@ import type { ConflictResolutionChoice, PlannerStatus } from '../types/PlannerTy
  * without one.
  */
 export const CONFLICT_TOAST_KEY: Record<ConflictResolutionChoice, string> = {
-  overwrite: 'pages.plannerMD.conflict.overwriteSuccess',
-  discard: 'pages.plannerMD.conflict.discardSuccess',
-  both: 'pages.plannerMD.conflict.keepBothSuccess',
+  overwrite: 'planner:pages.plannerMD.conflict.overwriteSuccess',
+  discard: 'planner:pages.plannerMD.conflict.discardSuccess',
+  both: 'planner:pages.plannerMD.conflict.keepBothSuccess',
 }
 
 /** Sync version a freshly forked copy starts from. */

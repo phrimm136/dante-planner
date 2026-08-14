@@ -87,10 +87,15 @@ function emit(presentation: ErrorPresentation): void {
   toast.error(message, options)
 }
 
-export function showError(error: unknown): void {
-  const presentation = presentError(classifyAppError(error))
+/** Report a failure that is already classified. */
+export function showAppError(error: AppError): void {
+  const presentation = presentError(error)
   if (presentation === null) return
   emit(presentation)
+}
+
+export function showError(error: unknown): void {
+  showAppError(classifyAppError(error))
 }
 
 /** Only the unavailable family, for the query cache's deliberately narrow toasting. */
@@ -105,9 +110,7 @@ export function showUnavailable(error: unknown): void {
 
 /** Report a failure under a message the caller chose, not one the classifier picked. */
 export function showErrorMessage(key: string, params?: Record<string, string>): void {
-  const presentation = presentError(validationAppError({ key, params }))
-  if (presentation === null) return
-  emit(presentation)
+  showAppError(validationAppError({ key, params }))
 }
 
 export function showSuccess(key: string, params?: Record<string, unknown>): void {

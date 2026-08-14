@@ -1,5 +1,5 @@
 // React core
-import { useState, useEffect, Suspense, startTransition, useRef } from 'react'
+import { useState, useEffect, useMemo, Suspense, startTransition, useRef } from 'react'
 
 // TanStack
 import { useNavigate } from '@tanstack/react-router'
@@ -34,7 +34,7 @@ import { getKeywordIconPath } from '@/shared/assets'
 import { assertNever, calculateByteLength } from '@/lib/utils'
 import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
 import { MdCategoryLabel } from '../MdCategoryLabel'
-import { saveErrorMessage } from '../../lib/plannerSaveErrors'
+import { presentError, showAppError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
 
 // Project types & schemas
 import type { MDCategory } from '@/shared/gameData'
@@ -82,7 +82,6 @@ import { KeywordSelector } from './KeywordSelector'
 import { LastSavedLabel } from './LastSavedLabel'
 
 const MAX_TITLE_BYTES = 256
-const SAVE_FAILED_TOAST_KEY = 'pages.plannerMD.save.failed'
 
 /**
  * The parts of an editing session the shell cannot derive for itself: which
@@ -176,7 +175,7 @@ export function PlannerEditorShell({
   const handleServerReload = (reloadedPlanner: SaveablePlanner) => {
     if (!isMDPlanner(reloadedPlanner)) {
       console.error('Attempted to load non-MD planner in MD editor:', reloadedPlanner.config.type)
-      toast.error(t('pages.plannerMD.errors.invalidType', 'Cannot load: Invalid planner type'))
+      showErrorMessage('planner:pages.plannerMD.errors.invalidType')
       return
     }
 
@@ -236,15 +235,26 @@ export function PlannerEditorShell({
     syncEnabled,
   })
 
+  // The classified error carries no timestamp, so the dialog's "detected at"
+  // is minted once per conflict rather than on every render.
+  const conflictState = useMemo(
+    () =>
+      saveError?.kind === 'conflict'
+        ? { serverVersion: saveError.serverVersion, detectedAt: new Date().toISOString() }
+        : null,
+    [saveError],
+  )
+
   // Show error toasts. Errors with their own surface (conflict dialog) or with
   // none by design (sync paused) yield no message and stay set.
   useEffect(() => {
     if (!saveError) return
 
-    const message = saveErrorMessage(saveError, SAVE_FAILED_TOAST_KEY)
-    if (!message) return
+    // A conflict keeps the dialog open and a paused sync has its own banner, so
+    // both stay set; anything the presenter speaks for is reported and cleared.
+    if (presentError(saveError) === null) return
 
-    toast.error(message)
+    showAppError(saveError)
     clearError()
   }, [saveError, clearError])
 
@@ -303,7 +313,7 @@ export function PlannerEditorShell({
     setDeploymentOrder(pendingImport.deploymentOrder)
 
     clearPending()
-    toast.success(t('deckBuilder.importSuccess'))
+    showSuccess('planner:deckBuilder.importSuccess')
   }
 
   // Drop the stale editor caches, then land on whichever viewer owns this plan.
@@ -327,7 +337,7 @@ export function PlannerEditorShell({
       return
     }
 
-    toast.success(t('pages.plannerMD.save.success'))
+    showSuccess('planner:pages.plannerMD.save.success')
     navigateToViewer()
   }
 
@@ -354,11 +364,10 @@ export function PlannerEditorShell({
     if (!success) {
       // Reset intentional navigation flag if resolution failed
       isIntentionalNavigationRef.current = false
-      toast.error(t(SAVE_FAILED_TOAST_KEY))
       return
     }
 
-    toast.success(t(CONFLICT_TOAST_KEY[choice]))
+    showSuccess(CONFLICT_TOAST_KEY[choice])
 
     switch (choice) {
       case 'overwrite':
@@ -603,7 +612,7 @@ export function PlannerEditorShell({
     <div className={SECTION_STYLES.LAYOUT.page}>
       <ConflictResolutionDialog
         open={saveError?.kind === 'conflict'}
-        conflictState={saveError?.kind === 'conflict' ? saveError.state : null}
+        conflictState={conflictState}
         onChoice={handleConflictResolution}
         isResolving={isSaving}
       />

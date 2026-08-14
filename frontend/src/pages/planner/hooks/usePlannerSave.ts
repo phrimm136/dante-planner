@@ -20,13 +20,13 @@ import {
   validateNoteSizes,
 } from '../lib/plannerValidation'
 import { toUserFriendlyError } from '../lib/plannerValidationErrors'
-import { classifySaveError, validationSaveError } from '../lib/plannerSaveErrors'
+import { classifyAppError, validationAppError } from '@/lib/apiErrorClassifier'
 import { planConflictResolution } from '../lib/conflictChoice'
 import { ok, err } from '@/lib/result'
 import type { Result } from '@/lib/result'
 import type { ConflictEffect, ConflictForkMetadata } from '../lib/conflictChoice'
 import type { AcknowledgedPlanner } from './usePlannerSyncAdapter'
-import type { SaveError } from '../lib/plannerSaveErrors'
+import type { AppError } from '@/lib/apiErrorClassifier'
 import type { MDCategory, RRCategory, PlannerType } from '@/shared/gameData'
 import type { SinnerEquipment, SkillEAState } from '../types/DeckTypes'
 import type { FloorThemeSelection } from '@/pages/themePack'
@@ -39,7 +39,10 @@ import type {
   ServerAck,
 } from '../types/PlannerTypes'
 
-export type { SaveError } from '../lib/plannerSaveErrors'
+/** Planner validators name their keys inside the planner namespace. */
+function plannerValidationError(friendly: { key: string; params?: Record<string, string> }) {
+  return validationAppError({ key: `planner:${friendly.key}`, params: friendly.params })
+}
 
 /**
  * SSR safety check
@@ -151,7 +154,7 @@ export interface PlannerSaveResult {
   /** Whether manual save is in progress */
   isSaving: boolean
   /** Why the last save failed, or null when it did not */
-  error: SaveError | null
+  error: AppError | null
   /** Clear the current error */
   clearError: () => void
   /** Trigger manual save, returns true if succeeded. */
@@ -359,7 +362,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Track sync version for optimistic locking
   const syncVersionRef = useRef<number>(initialSyncVersion ?? INITIAL_SYNC_VERSION)
 
-  const [error, setError] = useState<SaveError | null>(null)
+  const [error, setError] = useState<AppError | null>(null)
 
   // Split adapters
   const storage = usePlannerStorage()
@@ -400,13 +403,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     saveable: SaveablePlanner,
     state: PlannerState,
     publishedNow: boolean,
-  ): SaveError | null => {
+  ): AppError | null => {
     if (!isMDPlanner(saveable)) return null
 
     const { content } = saveable
 
     const noteSizeError = validateNoteSizes(content.sectionNotes)
-    if (noteSizeError) return validationSaveError(noteSizeError)
+    if (noteSizeError) return plannerValidationError(noteSizeError)
 
     if (publishedNow) {
       const { isValid, errors } = validatePlannerForPublish(
@@ -416,7 +419,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         egoGiftSpec,
         egoGiftI18n,
       )
-      return isValid ? null : validationSaveError(toUserFriendlyError(errors[0]))
+      return isValid ? null : plannerValidationError(toUserFriendlyError(errors[0]))
     }
 
     const validationError = validatePlannerForDraftSave(
@@ -425,31 +428,31 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       egoGiftSpec,
       egoGiftI18n,
     )
-    return validationError ? validationSaveError(validationError) : null
+    return validationError ? plannerValidationError(validationError) : null
   }
 
   /** Upload the planner, reporting a rejected write instead of throwing it. */
   const syncToServer = async (
     planner: SaveablePlanner,
     mode: SaveMode,
-  ): Promise<Result<AcknowledgedPlanner, SaveError>> => {
+  ): Promise<Result<AcknowledgedPlanner, AppError>> => {
     try {
       return ok(await syncAdapter.syncToServer(planner, mode === 'forcePush'))
     } catch (syncFailure: unknown) {
-      return err(classifySaveError(syncFailure))
+      return err(classifyAppError(syncFailure))
     }
   }
 
   /** The cache reactions a failed save owns now that classification is pure. */
-  const reactToFailure = (failure: SaveError) => {
+  const reactToFailure = (failure: AppError) => {
     // A restriction invalidates the cached account so the app-wide banner appears.
-    if (failure.kind === 'moderation') {
+    if (failure.kind === 'restricted') {
       void queryClient.invalidateQueries({ queryKey: authQueryKeys.me })
     }
   }
 
   /** React to a failed save and surface it to the editor. */
-  const reportFailure = (failure: SaveError) => {
+  const reportFailure = (failure: AppError) => {
     reactToFailure(failure)
     setError(failure)
   }
@@ -462,7 +465,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const performSave = async (
     status: PlannerStatus,
     opts: PerformSaveOptions,
-  ): Promise<Result<void, SaveError>> => {
+  ): Promise<Result<void, AppError>> => {
     if (!isClient) return err({ kind: 'unknown' })
 
     // Set createdAt on first save
@@ -592,7 +595,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       previousStateRef.current = currentStateString
       setLastSavedAt(new Date().toISOString())
     } catch (autoSaveError: unknown) {
-      reportFailure(classifySaveError(autoSaveError))
+      reportFailure(classifyAppError(autoSaveError))
     } finally {
       setIsAutoSaving(false)
     }
@@ -631,7 +634,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       markSaved()
       return true
     } catch (saveFailure: unknown) {
-      reportFailure(classifySaveError(saveFailure))
+      reportFailure(classifyAppError(saveFailure))
       return false
     } finally {
       setIsSaving(false)
@@ -641,8 +644,8 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   /** Keep Both: fork local changes to a new planner, then run the rest of the plan. */
   const forkLocalChanges = async (
     metadata: ConflictForkMetadata,
-    rest: () => Promise<Result<void, SaveError>>,
-  ): Promise<Result<void, SaveError>> => {
+    rest: () => Promise<Result<void, AppError>>,
+  ): Promise<Result<void, AppError>> => {
     const currentState = getState()
     const newPlanner = createSaveablePlanner({
       state: { ...currentState, title: metadata.title },
@@ -661,7 +664,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (isMDPlanner(newPlanner)) {
       const { content } = newPlanner
       const noteSizeError = validateNoteSizes(content.sectionNotes)
-      if (noteSizeError) return err(validationSaveError(noteSizeError))
+      if (noteSizeError) return err(plannerValidationError(noteSizeError))
       if (egoGiftSpec) {
         const validationError = validatePlannerForDraftSave(
           content,
@@ -669,11 +672,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
           egoGiftSpec,
           egoGiftI18n,
         )
-        if (validationError) return err(validationSaveError(validationError))
+        if (validationError) return err(plannerValidationError(validationError))
       }
     }
 
-    const outcome = await withRollback<SaveError>({
+    const outcome = await withRollback<AppError>({
       create: () => storage.saveToLocal(newPlanner),
       rollback: () => storage.deleteFromLocal(metadata.id),
       rest: async () => {
@@ -715,7 +718,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * forward: adopting a lower one would present a version the local copy has
    * already passed, and the force push that follows would overwrite from behind.
    */
-  const adoptServerSyncVersion = async (): Promise<Result<void, SaveError>> => {
+  const adoptServerSyncVersion = async (): Promise<Result<void, AppError>> => {
     const fetched = await syncAdapter.fetchFromServer(plannerId)
     if (!fetched.ok) return err(fetched.error)
 
@@ -724,7 +727,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   }
 
   /** Discard local changes: adopt the server version as both the local copy and editor state. */
-  const revertToServerVersion = async (): Promise<Result<void, SaveError>> => {
+  const revertToServerVersion = async (): Promise<Result<void, AppError>> => {
     // A resolution that proceeds without the server copy either overwrites the
     // server from a stale version or reports a discard that never happened.
     const fetched = await syncAdapter.fetchFromServer(plannerId)
@@ -748,7 +751,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const runEffects = async (
     effects: ConflictEffect[],
     serverVersion: number | null,
-  ): Promise<Result<void, SaveError>> => {
+  ): Promise<Result<void, AppError>> => {
     const [effect, ...remaining] = effects
     if (!effect) return ok(undefined)
 
@@ -785,7 +788,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * The conflict is still unresolved, so the conflict error stays put and the
    * dialog with it. Only a newer conflict displaces it.
    */
-  const failResolution = (failure: SaveError): boolean => {
+  const failResolution = (failure: AppError): boolean => {
     reactToFailure(failure)
     if (failure.kind === 'conflict') {
       setError(failure)
@@ -799,7 +802,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    */
   const resolveConflict = async (choice: ConflictResolutionChoice): Promise<boolean> => {
     if (error?.kind !== 'conflict') return false
-    const { serverVersion } = error.state
+    const { serverVersion } = error
 
     setIsSaving(true)
 
@@ -831,7 +834,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       setError(null)
       return true
     } catch (resolutionError: unknown) {
-      return failResolution(classifySaveError(resolutionError))
+      return failResolution(classifyAppError(resolutionError))
     } finally {
       setIsSaving(false)
     }
