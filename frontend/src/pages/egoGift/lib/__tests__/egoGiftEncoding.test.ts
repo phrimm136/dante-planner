@@ -272,11 +272,13 @@ describe('ENCODED_SELECTION_PATTERN vs GiftIdSchema', () => {
     return ids
   }
 
-  const accepted = candidateIds().filter((id) => GiftIdSchema.safeParse(id).success)
+  const candidates = candidateIds()
+  const accepted = candidates.filter((id) => GiftIdSchema.safeParse(id).success)
 
   it('spans a superset of what the schema accepts', () => {
-    expect(candidateIds()).toHaveLength(110000)
-    expect(accepted.length).toBeGreaterThan(0)
+    expect(candidates).toHaveLength(110000)
+    // 9000-9999, plus the same bodies behind each of the two permitted prefixes.
+    expect(accepted).toHaveLength(3000)
   })
 
   it('accepts every string GiftIdSchema accepts', () => {
