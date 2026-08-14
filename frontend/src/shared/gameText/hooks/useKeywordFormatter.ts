@@ -7,7 +7,7 @@
  */
 
 import { useBattleKeywords } from './useBattleKeywords'
-import { useSkillTagI18n } from '@/shared/skill'
+import { useSkillTagI18n } from './useSkillTagI18n'
 import { useColorCodes } from './useColorCodes'
 import { formatDescription, parseKeywords, resolveKeyword } from '../lib/keywordFormatter'
 import type {
