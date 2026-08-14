@@ -5,9 +5,8 @@
  * card slots subscribe through.
  */
 
-import type { Facet, SearchMappings } from '@/shared/filter'
-import { applyFacets, collectKeywordTerms, matchesSearch } from '@/shared/filter'
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
+import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { AtkType, DefType, Season, SkillAttributeType } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import type { IdentityListItem } from '../types/IdentityTypes'
@@ -59,12 +58,5 @@ export function buildIdentitySearchTerms(
 }
 
 /** Whether one identity survives the current facets and search query. */
-export function matchesIdentity(
-  identity: IdentityListItem,
-  state: FilterState<IdentityFacetState>,
-  searchTerms: readonly string[],
-): boolean {
-  if (!applyFacets(identity, state.values, IDENTITY_FACETS)) return false
-
-  return matchesSearch(state.searchQuery, searchTerms)
-}
+export const matchesIdentity: EntityMatcher<IdentityListItem, IdentityFacetState> =
+  createEntityMatcher(IDENTITY_FACETS)

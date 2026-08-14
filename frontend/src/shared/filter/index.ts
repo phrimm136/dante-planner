@@ -42,6 +42,8 @@ export type { SearchMappings } from './hooks/useSearchMappings'
 
 export { applyFacets } from './lib/applyFacets'
 export type { Facet, FacetMode } from './lib/applyFacets'
+export { createEntityMatcher } from './lib/entityMatcher'
+export type { EntityMatcher } from './lib/entityMatcher'
 export { calculateActiveFilterCount } from './lib/filterUtils'
 export { collectKeywordTerms, matchesSearch } from './lib/searchTerms'
 export { entriesSortedById, sortByReleaseDate, sortEGOByDate } from './lib/entitySort'

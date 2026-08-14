@@ -5,9 +5,8 @@
  * grid's card slots subscribe through.
  */
 
-import type { Facet, SearchMappings } from '@/shared/filter'
-import { applyFacets, collectKeywordTerms, matchesSearch } from '@/shared/filter'
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
+import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { EGOGiftAttributeType, EGOGiftDifficulty, EGOGiftTier } from '@/shared/gameData'
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { parseTier, toRomanTier } from './egoGiftTier'
@@ -91,12 +90,5 @@ export function buildEGOGiftSearchTerms(
 }
 
 /** Whether one gift survives the current facets and search query. */
-export function matchesEGOGift(
-  gift: EGOGiftListItem,
-  state: FilterState<EGOGiftFacetState>,
-  searchTerms: readonly string[],
-): boolean {
-  if (!applyFacets(gift, state.values, EGO_GIFT_FACETS)) return false
-
-  return matchesSearch(state.searchQuery, searchTerms)
-}
+export const matchesEGOGift: EntityMatcher<EGOGiftListItem, EGOGiftFacetState> =
+  createEntityMatcher(EGO_GIFT_FACETS)

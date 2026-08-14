@@ -6,9 +6,8 @@
  */
 
 import type { z } from 'zod'
-import type { Facet } from '@/shared/filter'
-import { applyFacets, matchesSearch } from '@/shared/filter'
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { EntityMatcher, Facet } from '@/shared/filter'
+import { createEntityMatcher } from '@/shared/filter'
 import type { DungeonIdx, ThemePackFloor } from '@/shared/gameData'
 import type { ThemePackI18nSchema } from '../schemas/ThemePackSchemas'
 import type { ThemePackEntry } from '../types/ThemePackTypes'
@@ -50,12 +49,5 @@ export function buildThemePackSearchTerms(
 }
 
 /** Whether one theme pack survives the current facets and search query. */
-export function matchesThemePack(
-  entry: ThemePackEntry,
-  state: FilterState<ThemePackFacetState>,
-  searchTerms: readonly string[],
-): boolean {
-  if (!applyFacets(entry, state.values, THEME_PACK_FACETS)) return false
-
-  return matchesSearch(state.searchQuery, searchTerms)
-}
+export const matchesThemePack: EntityMatcher<ThemePackEntry, ThemePackFacetState> =
+  createEntityMatcher(THEME_PACK_FACETS)

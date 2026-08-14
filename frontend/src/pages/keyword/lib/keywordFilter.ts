@@ -5,9 +5,8 @@
  * card slots subscribe through.
  */
 
-import type { Facet } from '@/shared/filter'
-import { applyFacets, matchesSearch } from '@/shared/filter'
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { EntityMatcher, Facet } from '@/shared/filter'
+import { createEntityMatcher } from '@/shared/filter'
 import type { BuffType } from '@/shared/gameData'
 import type { BattleKeywordI18nEntry } from '@/shared/gameText'
 
@@ -45,12 +44,5 @@ export function buildKeywordSearchTerms(
 }
 
 /** Whether one keyword survives the current facets and search query. */
-export function matchesKeyword(
-  keyword: KeywordFacetItem,
-  state: FilterState<KeywordFacetState>,
-  searchTerms: readonly string[],
-): boolean {
-  if (!applyFacets(keyword, state.values, KEYWORD_FACETS)) return false
-
-  return matchesSearch(state.searchQuery, searchTerms)
-}
+export const matchesKeyword: EntityMatcher<KeywordFacetItem, KeywordFacetState> =
+  createEntityMatcher(KEYWORD_FACETS)

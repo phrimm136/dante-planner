@@ -5,9 +5,8 @@
  * slots subscribe through.
  */
 
-import type { Facet, SearchMappings } from '@/shared/filter'
-import { applyFacets, collectKeywordTerms, matchesSearch } from '@/shared/filter'
-import type { FilterState } from '@/components/hooks/useSetFilters'
+import type { EntityMatcher, Facet, SearchMappings } from '@/shared/filter'
+import { collectKeywordTerms, createEntityMatcher } from '@/shared/filter'
 import type { AtkType, EgoType, Season, SkillAttributeType } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import type { EGOListItem } from '../types/EGOTypes'
@@ -52,12 +51,4 @@ export function buildEGOSearchTerms(
 }
 
 /** Whether one EGO survives the current facets and search query. */
-export function matchesEGO(
-  ego: EGOListItem,
-  state: FilterState<EGOFacetState>,
-  searchTerms: readonly string[],
-): boolean {
-  if (!applyFacets(ego, state.values, EGO_FACETS)) return false
-
-  return matchesSearch(state.searchQuery, searchTerms)
-}
+export const matchesEGO: EntityMatcher<EGOListItem, EGOFacetState> = createEntityMatcher(EGO_FACETS)
