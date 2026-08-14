@@ -13,9 +13,6 @@ import java.util.stream.Collectors;
  * via {@link #getValue()}; a typo now fails to compile instead of silently dropping a client event.
  */
 public enum SseEventType {
-    CREATED("created", false, UserDelivery.EMITTERS),
-    UPDATED("updated", false, UserDelivery.EMITTERS),
-    DELETED("deleted", false, UserDelivery.EMITTERS),
     COMMENT_ADDED("comment:added", false, UserDelivery.EMITTERS),
     NOTIFY_COMMENT("notify:comment", true, UserDelivery.EMITTERS),
     NOTIFY_PUBLISHED("notify:published", true, UserDelivery.EMITTERS),

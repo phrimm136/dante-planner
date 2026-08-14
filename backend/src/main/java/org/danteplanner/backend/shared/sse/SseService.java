@@ -97,7 +97,7 @@ public class SseService extends AbstractSseService<Long> {
      * Send an event to a user if their settings allow it.
      *
      * @param userId    the user ID
-     * @param eventType the event type (e.g., "updated", "notify:comment")
+     * @param eventType the event type (e.g., "comment:added", "notify:comment")
      * @param data      the event data object
      */
     public void sendToUser(Long userId, String eventType, Object data) {
@@ -286,7 +286,7 @@ public class SseService extends AbstractSseService<Long> {
             case NOTIFY_COMMENT -> settings.notifyComments();
             case NOTIFY_RECOMMENDED -> settings.notifyRecommendations();
             case NOTIFY_PUBLISHED -> settings.notifyNewPublications();
-            case CREATED, UPDATED, DELETED, COMMENT_ADDED, SETTINGS_INVALIDATED, ACCOUNT_SUSPENDED -> true;
+            case COMMENT_ADDED, SETTINGS_INVALIDATED, ACCOUNT_SUSPENDED -> true;
         };
     }
 

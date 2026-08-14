@@ -31,9 +31,6 @@ class SseEventTypeMatrixTest {
      */
     private static Map<SseEventType, String[]> table() {
         Map<SseEventType, String[]> rows = new LinkedHashMap<>();
-        rows.put(SseEventType.CREATED, new String[] {"created", "EMITTERS", "envelope"});
-        rows.put(SseEventType.UPDATED, new String[] {"updated", "EMITTERS", "envelope"});
-        rows.put(SseEventType.DELETED, new String[] {"deleted", "EMITTERS", "envelope"});
         rows.put(SseEventType.COMMENT_ADDED, new String[] {"comment:added", "EMITTERS", "envelope"});
         rows.put(SseEventType.NOTIFY_COMMENT, new String[] {"notify:comment", "EMITTERS", "payload"});
         rows.put(SseEventType.NOTIFY_PUBLISHED, new String[] {"notify:published", "EMITTERS", "payload"});
