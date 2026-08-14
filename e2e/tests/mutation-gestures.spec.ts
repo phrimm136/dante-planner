@@ -218,10 +218,3 @@ test('a settings toggle sends the flipped value and reports it', async ({
     await deleteUser(user)
   }
 })
-
-// `usePlannerBookmark` posts /api/planner/md/{id}/bookmark and the endpoint is live, but the hook
-// has no caller: PublishedPlannerCard renders the bookmark only as a read-only indicator, and the
-// card's context menu offers no bookmark item. There is no gesture to drive until one ships.
-test.fixme('bookmarking a planner reaches the server and reports it', async ({ page }) => {
-  await page.getByRole('button', { name: 'Bookmark' }).click()
-})
