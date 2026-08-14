@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
@@ -33,14 +33,12 @@ function SyncSectionContent() {
     updateSettings.mutate(
       { syncEnabled: checked },
       {
-        onSuccess: () => {
-          const message = checked
-            ? t('settings.sync.enabledSuccess', 'Sync enabled')
-            : t('settings.sync.disabledSuccess', 'Sync disabled')
-          toast.success(message)
-        },
-        onError: () => {
-          toast.error(t('settings.sync.updateError', 'Failed to update sync setting'))
+        onSuccess: (settings) => {
+          showSuccess(
+            settings.syncEnabled
+              ? 'common:settings.sync.enabledSuccess'
+              : 'common:settings.sync.disabledSuccess',
+          )
         },
       },
     )

@@ -1,6 +1,6 @@
 import { useState, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 
 import { useAuthQuery } from '@/shared/auth'
 import { useEpithetsQuery, useUpdateEpithetMutation } from '../hooks/useUserSettingsQuery'
@@ -46,11 +46,8 @@ function UsernameSectionContent() {
       { epithet: selectedEpithet },
       {
         onSuccess: () => {
-          toast.success(t('settings.username.saveSuccess', 'Username updated'))
+          showSuccess('common:settings.username.saveSuccess')
           setSelectedEpithet(null) // Reset to sync with server state
-        },
-        onError: () => {
-          toast.error(t('settings.username.saveError', 'Failed to update username'))
         },
       }
     )

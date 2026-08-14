@@ -1,6 +1,6 @@
 import { useState, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 
@@ -39,13 +39,10 @@ function AccountDeleteSectionContent() {
             DATE_FORMATS.LONG_DATE,
           ) ?? UNKNOWN_DATE_PLACEHOLDER
 
-        // Show success toast
-        toast.success(
-          t('settings.deleteAccount.success', {
-            date: formattedDate,
-            days: response.gracePeriodDays ?? 30,
-          }),
-        )
+        showSuccess('common:settings.deleteAccount.success', {
+          date: formattedDate,
+          days: response.gracePeriodDays ?? 30,
+        })
 
         // Close dialog
         setDialogOpen(false)
@@ -57,10 +54,6 @@ function AccountDeleteSectionContent() {
         setTimeout(() => {
           void navigate({ to: '/' })
         }, 2000)
-      },
-      onError: () => {
-        toast.error(t('settings.deleteAccount.error'))
-        // Keep dialog open for retry
       },
     })
   }

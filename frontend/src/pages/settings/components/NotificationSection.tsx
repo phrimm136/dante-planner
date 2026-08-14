@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
@@ -53,13 +53,10 @@ function NotificationSectionContent() {
     updateSettings.mutate(
       { [key]: checked },
       {
-        onSuccess: () => {
-          toast.success(t('settings.notifications.updateSuccess', 'Notification setting updated'))
-        },
-        onError: () => {
-          toast.error(
-            t('settings.notifications.updateError', 'Failed to update notification setting'),
-          )
+        onSuccess: (settings) => {
+          if (settings[key] === checked) {
+            showSuccess('common:settings.notifications.updateSuccess')
+          }
         },
       },
     )
