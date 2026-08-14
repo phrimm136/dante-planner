@@ -38,10 +38,11 @@ import { matchesPlannerFilters } from '../lib/plannerContentExtractors'
 
 import { isMDPlanner } from '../types/PlannerTypes'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type { ConflictOps, ConflictOutcome } from '../lib/conflictChoice'
+import type { ConflictEffect, ConflictOps, ConflictOutcome } from '../lib/conflictChoice'
 import type { PlannerSummary, SaveablePlanner } from '../types/PlannerTypes'
 import type { PlannerSearchFilters } from '../types/PlannerSearchTypes'
 import type { ConflictItem, ConflictResolution } from '../components/BatchConflictDialog'
+import type { ConflictResolutionChoice } from '../types/PlannerTypes'
 import type { MDCategory } from '@/shared/gameData'
 
 // ============================================================================
@@ -174,6 +175,16 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   const [pendingConflicts, setPendingConflicts] = useState<ConflictItem[]>([])
   const [isResolvingConflicts, setIsResolvingConflicts] = useState(false)
 
+  /**
+   * The plan built for each pending conflict, held across resubmissions.
+   *
+   * Re-planning after a partial failure would mint a second copy for every item
+   * the user resubmits, so a retry re-interprets what its item already built.
+   */
+  const heldPlans = useRef(
+    new Map<string, { choice: ConflictResolutionChoice; plan: ConflictEffect[] }>(),
+  )
+
   // EGO Gift spec for affordability validation in conflict resolution
   const { spec: egoGiftSpec, i18n: egoGiftI18n } = useEGOGiftListData()
 
@@ -284,6 +295,7 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
             }
           }
           if (conflicts.length > 0) {
+            heldPlans.current.clear()
             setPendingConflicts(conflicts)
           }
         }
@@ -359,7 +371,10 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
    * Mirrors performSave: strict when published, structural checks otherwise.
    */
   const validateBeforeSync = (planner: SaveablePlanner): AppError | null => {
-    if (!isMDPlanner(planner) || !egoGiftSpec) return null
+    if (!isMDPlanner(planner)) return null
+    // Without the gift spec the affordability rules cannot run at all, and a
+    // resolution that skips them pushes content no validator ever checked.
+    if (!egoGiftSpec) return { kind: 'retryable' }
 
     const { content } = planner
     const { category } = planner.config
@@ -383,10 +398,23 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
   /** The effects one conflict's resolution runs against storage and the server. */
   const conflictOps = (conflict: ConflictItem): ConflictOps => ({
     local: () => conflict.localPlanner,
-    incoming: async () => ok(conflict.serverPlanner),
+    incoming: async () => {
+      // Read at resolution time: the copy captured during sync can be minutes
+      // stale, and discarding local changes for a stale server copy loses both.
+      const fetched = await syncAdapter.fetchFromServer(conflict.id)
+      return fetched.ok ? ok(fetched.value.planner) : err(fetched.error)
+    },
     validate: validateBeforeSync,
     saveLocal: storage.saveToLocal,
     deleteLocal: storage.deleteFromLocal,
+    deleteRemote: async (id) => {
+      try {
+        await syncAdapter.deleteFromServer(id)
+        return ok(undefined)
+      } catch (removal: unknown) {
+        return err(classifyAppError(removal))
+      }
+    },
     sync: async (planner, force) => {
       try {
         return ok(acknowledgedCopy(await syncAdapter.syncToServer(planner, force)))
@@ -412,49 +440,60 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
 
     setIsResolvingConflicts(true)
 
-    // The copy is stamped with this device, and the id lives in the same store
-    // the copy would be written to.
-    const deviceId = await storage.getOrCreateDeviceId()
-    if (!deviceId.ok) {
+    try {
+      // The copy is stamped with this device, and the id lives in the same store
+      // the copy would be written to.
+      const deviceId = await storage.getOrCreateDeviceId()
+      if (!deviceId.ok) {
+        // Nothing was attempted, so this failed the submission, not its first row.
+        return [{ id: first.id, result: err({ step: 'precondition', error: { kind: 'unknown' } }) }]
+      }
+
+      const outcomes: ConflictOutcome[] = []
+      const resolved = new Set<string>()
+
+      for (const resolution of resolutions) {
+        const conflict = pendingConflicts.find((c) => c.id === resolution.id)
+        if (!conflict) continue
+
+        const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
+        const held = heldPlans.current.get(conflict.id)
+        const plan =
+          held?.choice === resolution.choice
+            ? held.plan
+            : planConflictResolution(
+                resolution.choice,
+                { forkSide: 'local', forkTitle: conflict.localPlanner.metadata.title },
+                {
+                  ...ctx,
+                  copyTitle: (title: string) =>
+                    t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
+                },
+              )
+        heldPlans.current.set(conflict.id, { choice: resolution.choice, plan })
+
+        const result = await interpretConflictPlan(plan, conflictOps(conflict), ctx)
+        outcomes.push({ id: conflict.id, result })
+        if (!result.ok) break
+
+        resolved.add(conflict.id)
+      }
+
+      setPendingConflicts((pending) => pending.filter((conflict) => !resolved.has(conflict.id)))
+      // A plan outlives only the conflict it belongs to.
+      for (const id of resolved) heldPlans.current.delete(id)
+
+      const updatedLocal = await storage.listLocal()
+      queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
+      void queryClient.invalidateQueries({
+        queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
+      })
+
+      return outcomes
+    } finally {
+      // Left set by a throw, the dialog's buttons stay disabled for good.
       setIsResolvingConflicts(false)
-      return [{ id: first.id, result: err({ step: 'saveLocal', error: { kind: 'unknown' } }) }]
     }
-
-    const outcomes: ConflictOutcome[] = []
-    const resolved = new Set<string>()
-
-    for (const resolution of resolutions) {
-      const conflict = pendingConflicts.find((c) => c.id === resolution.id)
-      if (!conflict) continue
-
-      const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
-      const plan = planConflictResolution(
-        resolution.choice,
-        { forkSide: 'local', forkTitle: conflict.localPlanner.metadata.title },
-        {
-          ...ctx,
-          copyTitle: (title: string) =>
-            t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
-        },
-      )
-
-      const result = await interpretConflictPlan(plan, conflictOps(conflict), ctx)
-      outcomes.push({ id: conflict.id, result })
-      if (!result.ok) break
-
-      resolved.add(conflict.id)
-    }
-
-    setPendingConflicts((pending) => pending.filter((conflict) => !resolved.has(conflict.id)))
-
-    const updatedLocal = await storage.listLocal()
-    queryClient.setQueryData(userPlannersQueryKeys.list(isAuthenticated), updatedLocal)
-    void queryClient.invalidateQueries({
-      queryKey: userPlannersQueryKeys.listFull(isAuthenticated),
-    })
-
-    setIsResolvingConflicts(false)
-    return outcomes
   }
 
   return {

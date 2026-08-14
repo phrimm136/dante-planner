@@ -423,6 +423,20 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const [error, setError] = useState<AppError | null>(null)
   const [resolutionError, setResolutionError] = useState<AppError | null>(null)
 
+  /**
+   * The plan built for the conflict now on screen, held across retries.
+   *
+   * Planning again would mint a second identity, so a retried "keep both" would
+   * write a second copy while the first attempt's copy is already rolled back or
+   * still on disk. The conflict object is its own identity: a newer conflict is
+   * a new object and earns a new plan.
+   */
+  const heldPlan = useRef<{
+    conflict: AppError
+    choice: ConflictResolutionChoice
+    plan: ConflictEffect[]
+  } | null>(null)
+
   // Split adapters
   const storage = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
@@ -511,6 +525,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const reportFailure = (failure: AppError) => {
     reactToFailure(failure)
     setError(failure)
+    // The incoming failure is the current one; a previous resolution's reason
+    // describes a conflict that is no longer the one on screen.
+    setResolutionError(null)
   }
 
   /**
@@ -790,8 +807,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const untitled = (): string => t('pages.plannerMD.untitled', 'Untitled')
 
   /** The local side of the conflict, as the editor holds it right now. */
-  const localSide = (deviceId: string): SaveablePlanner =>
-    createSaveablePlanner({
+  const localSide = (deviceId: string): SaveablePlanner => {
+    // A null here would stamp a fresh createdAt onto a planner that already exists.
+    if (createdAtRef.current === null) {
+      createdAtRef.current = new Date().toISOString()
+    }
+
+    return createSaveablePlanner({
       state: getState(),
       plannerId,
       deviceId,
@@ -803,6 +825,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       published,
       status: 'saved',
     })
+  }
 
   /**
    * Report a failed resolution.
@@ -838,16 +861,24 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       const deviceId = await storage.getOrCreateDeviceId()
       if (!deviceId.ok) return failResolution({ kind: 'unknown' })
 
+      const held =
+        heldPlan.current?.conflict === error && heldPlan.current.choice === choice
+          ? heldPlan.current
+          : null
+
       const ctx = { deviceId: deviceId.value, now: new Date().toISOString(), newId: generateUUID }
-      const plan = planConflictResolution(
-        choice,
-        { forkSide: 'local', forkTitle: getState().title || untitled() },
-        {
-          ...ctx,
-          copyTitle: (title) =>
-            t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
-        },
-      )
+      const plan =
+        held?.plan ??
+        planConflictResolution(
+          choice,
+          { forkSide: 'local', forkTitle: getState().title || untitled() },
+          {
+            ...ctx,
+            copyTitle: (title) =>
+              t('pages.plannerMD.conflict.copySuffix', '{{title}} (Copy)', { title }),
+          },
+        )
+      heldPlan.current = { conflict: error, choice, plan }
 
       // A conflict that reported no server version leaves the local syncVersion
       // unanchored, so read the server's back before writing over it.
@@ -871,6 +902,14 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         validate: validateForSave,
         saveLocal: storage.saveToLocal,
         deleteLocal: storage.deleteFromLocal,
+        deleteRemote: async (id) => {
+          try {
+            await syncAdapter.deleteFromServer(id)
+            return ok(undefined)
+          } catch (removal: unknown) {
+            return err(classifyAppError(removal))
+          }
+        },
         sync: async (planner, force) => {
           // The user chose this resolution, so it uploads whatever the sync
           // setting says; a signed-out editor still resolves locally.
@@ -909,6 +948,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       if (forked && onKeepBothCreated) onKeepBothCreated(forked.metadata.id)
 
       // Clear conflict state only on success
+      heldPlan.current = null
       setError(null)
       return true
     } catch (failure: unknown) {
@@ -922,6 +962,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * Clear error state
    */
   const clearError = () => {
+    heldPlan.current = null
     setError(null)
     setResolutionError(null)
   }

@@ -18,10 +18,13 @@ const syncMocks = vi.hoisted(() => ({
   syncEnabled: true,
   listFromServer: vi.fn(async (): Promise<unknown[]> => []),
   listLocal: vi.fn(async (): Promise<unknown[]> => []),
+  getOrCreateDeviceId: vi.fn(async (): Promise<unknown> => ({ ok: true, value: 'test-device' })),
   saveToLocal: vi.fn(async (_planner: unknown): Promise<unknown> => ({ ok: true })),
   loadFromLocal: vi.fn(async (_id: string): Promise<unknown> => null),
   fetchFromServer: vi.fn(async (_id: string): Promise<unknown> => null),
   syncToServer: vi.fn(async (_planner: unknown, _force?: boolean): Promise<unknown> => null),
+  /** Null stands for a gift spec that has not loaded, which now fails closed. */
+  egoGiftSpec: {} as unknown,
   /** Stands in for the chunked pull: one yield per request. */
   batchChunks: vi.fn(async function* (ids: string[]): AsyncGenerator<unknown[]> {
     yield ids.map((id) => ({ id }))
@@ -36,7 +39,7 @@ vi.mock('../../lib/plannerApi', () => ({
 // dependency-array stability must not rest on their identity.
 vi.mock('../usePlannerStorage', () => ({
   usePlannerStorage: () => ({
-    getOrCreateDeviceId: vi.fn(async () => ({ ok: true, value: 'test-device' })),
+    getOrCreateDeviceId: syncMocks.getOrCreateDeviceId,
     saveToLocal: syncMocks.saveToLocal,
     loadFromLocal: syncMocks.loadFromLocal,
     listLocal: syncMocks.listLocal,
@@ -75,7 +78,14 @@ vi.mock('@/pages/settings', () => ({
 }))
 
 vi.mock('@/pages/egoGift', () => ({
-  useEGOGiftListData: () => ({ spec: null, i18n: null }),
+  useEGOGiftListData: () => ({ spec: syncMocks.egoGiftSpec, i18n: {} }),
+}))
+
+// The validators have their own suites; what this one pins is the wiring around
+// them — which planner is validated, and what a refusal does to the batch.
+vi.mock('../../lib/plannerValidation', () => ({
+  validatePlannerForDraftSave: () => null,
+  validatePlannerForPublish: () => ({ isValid: true, errors: [] }),
 }))
 
 import { userPlannersQueryKeys, useMDUserPlannersData } from '../useMDUserPlannersData'
@@ -396,8 +406,12 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
   beforeEach(() => {
     syncMocks.isAuthenticated = true
     syncMocks.syncEnabled = true
+    syncMocks.egoGiftSpec = {}
+    syncMocks.getOrCreateDeviceId.mockResolvedValue({ ok: true, value: 'test-device' })
     syncMocks.saveToLocal.mockClear()
     syncMocks.syncToServer.mockClear()
+    syncMocks.fetchFromServer.mockClear()
+    syncMocks.listLocal.mockResolvedValue([])
   })
 
   /** Three drafts the server has moved past, which categorizeSync sends to conflict. */
@@ -504,5 +518,111 @@ describe('useMDUserPlannersData batch conflict resolution', () => {
 
     expect(outcomes.every((outcome) => outcome.result.ok)).toBe(true)
     expect(result.current.pendingConflicts).toEqual([])
+  })
+
+  it('reads the server side again at resolution time, not the copy sync captured', async () => {
+    const result = await pendingThreeConflicts()
+    syncMocks.syncToServer.mockImplementation(async (planner: unknown) => ({
+      planner,
+      ack: { syncVersion: 6 },
+    }))
+    // The server moved on after the conflict was detected.
+    syncMocks.fetchFromServer.mockResolvedValue({
+      ok: true,
+      value: {
+        planner: {
+          metadata: { id: 'planner-0', title: 'moved on', syncVersion: 11 },
+          config: { type: 'MIRROR_DUNGEON', category: '5F' },
+          content: {},
+        },
+        ack: { syncVersion: 11 },
+      },
+    })
+    syncMocks.saveToLocal.mockClear()
+
+    await act(async () => {
+      await result.current.resolveConflicts([{ id: 'planner-0', choice: 'discard' }])
+    })
+
+    const stored = syncMocks.saveToLocal.mock.calls[0]![0] as SaveablePlanner
+    expect(stored.metadata.syncVersion).toBe(11)
+    expect(stored.metadata.title).toBe('moved on')
+  })
+
+  it('refuses to push a planner it cannot validate for want of the gift spec', async () => {
+    // The spec load has not landed, so the affordability rules cannot run.
+    syncMocks.egoGiftSpec = null
+    const result = await pendingThreeConflicts()
+
+    let outcomes: ConflictOutcome[] = []
+    await act(async () => {
+      outcomes = await result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }])
+    })
+
+    expect(outcomes[0]!.result).toEqual({
+      ok: false,
+      error: { step: 'validate', error: { kind: 'retryable' } },
+    })
+    expect(syncMocks.syncToServer).not.toHaveBeenCalled()
+  })
+
+  it('re-interprets the plan an item already built, so a resubmission adds no copy', async () => {
+    const result = await pendingThreeConflicts()
+    // The first attempt fails at the copy's upload; the retry must reuse its id.
+    syncMocks.syncToServer.mockImplementationOnce(async () => {
+      throw new Error('upload rejected')
+    })
+    syncMocks.syncToServer.mockImplementation(async (planner: unknown) => ({
+      planner,
+      ack: { syncVersion: 6 },
+    }))
+    syncMocks.saveToLocal.mockClear()
+
+    await act(async () => {
+      await result.current.resolveConflicts([{ id: 'planner-0', choice: 'both' }])
+    })
+    await act(async () => {
+      await result.current.resolveConflicts([{ id: 'planner-0', choice: 'both' }])
+    })
+
+    const copyIds = syncMocks.saveToLocal.mock.calls
+      .map((call) => (call[0] as SaveablePlanner).metadata.id)
+      .filter((id) => id !== 'planner-0')
+    expect(copyIds).toHaveLength(2)
+    expect(new Set(copyIds).size).toBe(1)
+  })
+
+  it('reports an unreadable device id against the submission, not its first row', async () => {
+    const result = await pendingThreeConflicts()
+    syncMocks.getOrCreateDeviceId.mockResolvedValueOnce({ ok: false, error: 'readFailed' })
+
+    let outcomes: ConflictOutcome[] = []
+    await act(async () => {
+      outcomes = await result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }])
+    })
+
+    expect(outcomes[0]!.result).toEqual({
+      ok: false,
+      error: { step: 'precondition', error: { kind: 'unknown' } },
+    })
+    expect(result.current.pendingConflicts).toHaveLength(3)
+  })
+
+  it('clears the resolving flag when a step throws, so the dialog is usable again', async () => {
+    const result = await pendingThreeConflicts()
+    syncMocks.syncToServer.mockImplementation(async (planner: unknown) => ({
+      planner,
+      ack: { syncVersion: 6 },
+    }))
+    // The post-resolution cache refresh is outside every per-item guard.
+    syncMocks.listLocal.mockRejectedValue(new Error('local store went away'))
+
+    await act(async () => {
+      await expect(
+        result.current.resolveConflicts([{ id: 'planner-0', choice: 'overwrite' }]),
+      ).rejects.toThrow('local store went away')
+    })
+
+    expect(result.current.isResolvingConflicts).toBe(false)
   })
 })

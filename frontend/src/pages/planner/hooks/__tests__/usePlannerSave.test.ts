@@ -69,6 +69,10 @@ vi.mock('../usePlannerSyncAdapter', () => ({
   }),
 }))
 
+/** Minted ids are counted: a retried resolution must not mint a second copy. */
+const mockGenerateUUID = vi.fn(() => `uuid-${mockGenerateUUID.mock.calls.length}`)
+vi.mock('@/lib/uuid', () => ({ generateUUID: () => mockGenerateUUID() }))
+
 const mockUseAuthQuery = vi.fn()
 vi.mock('@/shared/auth/hooks/useAuthQuery', () => ({
   useAuthQuery: () => mockUseAuthQuery(),
@@ -1081,5 +1085,55 @@ describe('usePlannerSave - failed resolution surface', () => {
 
     expect(result.current.error).toBeNull()
     expect(result.current.resolutionError).toBeNull()
+  })
+})
+
+describe('usePlannerSave - retried resolution', () => {
+  const PLANNER_ID = '11111111-1111-4111-8111-111111111111'
+
+  /** Reach the conflict through the one public path that sets it: a rejected save. */
+  async function driveIntoConflict() {
+    mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', 7))
+    const hook = renderHook(() =>
+      usePlannerSave(baseOptions({ initialPlannerId: PLANNER_ID, onKeepBothCreated: vi.fn() })),
+    )
+
+    await act(async () => {
+      await hook.result.current.save({ published: false })
+    })
+
+    expect(hook.result.current.error?.kind).toBe('conflict')
+    callOrder.length = 0
+    return hook
+  }
+
+  it('re-interprets the plan it already built, so a retried keep-both mints one copy', async () => {
+    authenticated()
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
+    const { result } = await driveIntoConflict()
+
+    // The copy is written locally, then its upload is rejected: the resolution
+    // fails and the copy is rolled back.
+    mockSyncToServer.mockRejectedValueOnce(new Error('upload rejected'))
+    mockGenerateUUID.mockClear()
+
+    await act(async () => {
+      await result.current.resolveConflict('both')
+    })
+    expect(result.current.error?.kind).toBe('conflict')
+
+    await act(async () => {
+      await result.current.resolveConflict('both')
+    })
+
+    // Planning again would mint a second identity, and the retry would leave the
+    // rolled-back copy's twin behind.
+    expect(mockGenerateUUID).toHaveBeenCalledTimes(1)
+    // Every write the minter named: one copy id, written twice under the same identity.
+    const copyIds = mockSaveToLocal.mock.calls
+      .map((call) => call[0].metadata.id)
+      .filter((id) => typeof id === 'string' && id.startsWith('uuid-'))
+    expect(copyIds).toHaveLength(2)
+    expect(new Set(copyIds).size).toBe(1)
   })
 })

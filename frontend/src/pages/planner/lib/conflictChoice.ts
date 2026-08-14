@@ -61,7 +61,8 @@ export type ConflictForkMetadata = {
 export type ConflictEffect =
   | { kind: 'keepLocal' }
   | { kind: 'adoptIncoming' }
-  | { kind: 'forkCopy'; metadata: ConflictForkMetadata }
+  /** `side` names which of the two versions is copied; the other keeps the id. */
+  | { kind: 'forkCopy'; side: 'local' | 'incoming'; metadata: ConflictForkMetadata }
 
 function forkMetadata(
   conflict: PlannerConflict,
@@ -79,9 +80,14 @@ function forkMetadata(
   }
 }
 
-/** Which step of a resolution failed, and why. */
+/**
+ * Which step of a resolution failed, and why.
+ *
+ * `precondition` names a failure before any item was attempted, so it belongs to
+ * the whole submission rather than to the row it happened to stop at.
+ */
 export interface ConflictFailure {
-  step: 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
+  step: 'precondition' | 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
   error: AppError
 }
 
@@ -100,6 +106,8 @@ export interface ConflictOps {
   validate: (planner: SaveablePlanner) => AppError | null
   saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
   deleteLocal: (id: string) => Promise<Result<void, AppError>>
+  /** Rollback for a fork the server already accepted. */
+  deleteRemote: (id: string) => Promise<Result<void, AppError>>
   sync: (planner: SaveablePlanner, force: boolean) => Promise<Result<SaveablePlanner, AppError>>
   sanitizeTitle: (title: string) => string
 }
@@ -158,16 +166,19 @@ async function adoptIncoming(ops: ConflictOps): Promise<Result<void, ConflictFai
  * behind by a later failure is the duplicate the user did not ask for.
  */
 async function forkCopy(
-  metadata: ConflictForkMetadata,
+  effect: Extract<ConflictEffect, { kind: 'forkCopy' }>,
   remaining: ConflictEffect[],
   ops: ConflictOps,
   ctx: ConflictInterpreterContext,
 ): Promise<Result<void, ConflictFailure>> {
-  const source = ops.local()
+  const { metadata } = effect
+  const source = effect.side === 'incoming' ? await ops.incoming() : ok(ops.local())
+  if (!source.ok) return failed('sync', source.error)
+
   const copy: SaveablePlanner = {
-    ...source,
+    ...source.value,
     metadata: {
-      ...source.metadata,
+      ...source.value.metadata,
       ...metadata,
       title: ops.sanitizeTitle(metadata.title),
       // The original keeps the publication; a copy of it starts unpublished.
@@ -178,6 +189,10 @@ async function forkCopy(
   const invalid = ops.validate(copy)
   if (invalid) return failed('validate', invalid)
 
+  // A copy the server accepted is pulled back by the next sync, so a rollback
+  // that only deletes locally resurrects what it undid.
+  let uploaded = false
+
   const outcome = await withRollback<ConflictFailure>({
     create: async () => {
       const saved = await ops.saveLocal(copy)
@@ -186,11 +201,14 @@ async function forkCopy(
     rest: async () => {
       const synced = await ops.sync(copy, false)
       if (!synced.ok) return failed('sync', synced.error)
+      uploaded = true
       return interpretConflictPlan(remaining, ops, ctx)
     },
     rollback: async () => {
-      const deleted = await ops.deleteLocal(copy.metadata.id)
-      return deleted.ok ? ok(undefined) : failed('deleteLocal', deleted.error)
+      const remote = uploaded ? await ops.deleteRemote(copy.metadata.id) : ok(undefined)
+      const local = await ops.deleteLocal(copy.metadata.id)
+      if (!local.ok) return failed('deleteLocal', local.error)
+      return remote.ok ? ok(undefined) : failed('deleteLocal', remote.error)
     },
   })
 
@@ -225,7 +243,7 @@ export async function interpretConflictPlan(
 
   switch (effect.kind) {
     case 'forkCopy':
-      return forkCopy(effect.metadata, remaining, ops, ctx)
+      return forkCopy(effect, remaining, ops, ctx)
     case 'keepLocal': {
       const kept = await keepLocal(ops, ctx)
       if (!kept.ok) return kept
@@ -256,7 +274,7 @@ export function planConflictResolution(
       return [{ kind: 'adoptIncoming' }]
     case 'both':
       return [
-        { kind: 'forkCopy', metadata: forkMetadata(conflict, ctx) },
+        { kind: 'forkCopy', side: conflict.forkSide, metadata: forkMetadata(conflict, ctx) },
         conflict.forkSide === 'local' ? { kind: 'adoptIncoming' } : { kind: 'keepLocal' },
       ]
     default:

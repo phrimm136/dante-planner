@@ -80,6 +80,7 @@ describe('planConflictResolution', () => {
 
     expect(effect).toEqual({
       kind: 'forkCopy',
+      side: 'local',
       metadata: {
         id: 'copy-id',
         title: 'My Run [copy]',
@@ -100,6 +101,14 @@ describe('planConflictResolution', () => {
 
     expect(copyTitle).toHaveBeenCalledWith('My Run')
     expect(effect).toMatchObject({ metadata: { title: 'My Run (복사본)' } })
+  })
+
+  it('names the side each fork copies, so the interpreter cannot copy the other one', () => {
+    const [local] = planConflictResolution('both', FORK_LOCAL, context())
+    const [incoming] = planConflictResolution('both', FORK_INCOMING, context())
+
+    expect(local).toMatchObject({ kind: 'forkCopy', side: 'local' })
+    expect(incoming).toMatchObject({ kind: 'forkCopy', side: 'incoming' })
   })
 
   it('mints an id only for the copy', () => {
@@ -132,6 +141,7 @@ describe('interpretConflictPlan', () => {
       validate: () => null,
       saveLocal: async () => ok(undefined),
       deleteLocal: async () => ok(undefined),
+      deleteRemote: async () => ok(undefined),
       sync: async (planner) => ok(planner),
       sanitizeTitle: (title) => title,
       ...overrides,
@@ -191,6 +201,39 @@ describe('interpretConflictPlan', () => {
     expect(deleteLocal).toHaveBeenCalledWith('copy-id')
   })
 
+  it('deletes a copy the server already took when a later effect fails', async () => {
+    // A copy left on the server is pulled straight back by the next sync, so a
+    // local-only rollback undoes nothing.
+    const deleteRemote = vi.fn(async (_id: string) => ok(undefined))
+    const deleteLocal = vi.fn(async (_id: string) => ok(undefined))
+    const ctx = interpreterContext()
+    const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
+
+    const outcome = await interpretConflictPlan(
+      plan,
+      operations({ deleteRemote, deleteLocal, incoming: async () => err({ kind: 'notFound' }) }),
+      ctx,
+    )
+
+    expect(outcome).toEqual({ ok: false, error: { step: 'sync', error: { kind: 'notFound' } } })
+    expect(deleteLocal).toHaveBeenCalledWith('copy-id')
+    expect(deleteRemote).toHaveBeenCalledWith('copy-id')
+  })
+
+  it('leaves the server alone when the copy never reached it', async () => {
+    const deleteRemote = vi.fn(async (_id: string) => ok(undefined))
+    const ctx = interpreterContext()
+    const plan = planConflictResolution('both', FORK_LOCAL, { ...ctx, copyTitle: (t) => t })
+
+    await interpretConflictPlan(
+      plan,
+      operations({ deleteRemote, sync: async () => err({ kind: 'quota' }) }),
+      ctx,
+    )
+
+    expect(deleteRemote).not.toHaveBeenCalled()
+  })
+
   it('reports the failure that stopped the plan, not the rollback that also failed', async () => {
     // The orphaned copy is visible in the planner list; the cause the user has to
     // act on is the one that stopped the resolution.
@@ -246,6 +289,22 @@ describe('interpretConflictPlan', () => {
 
     const stored = saveLocal.mock.calls[0][0] as SaveablePlanner
     expect(stored.metadata).toMatchObject({ status: 'saved', savedAt: NOW, syncVersion: 12 })
+  })
+
+  it('copies the side the plan names, not whichever side is cheapest to reach', async () => {
+    // Copying local under an incoming-sided plan destroys the very version the
+    // user asked to keep.
+    const saveLocal = vi.fn(async (_planner: SaveablePlanner) => ok(undefined))
+    const ctx = interpreterContext()
+    const plan = planConflictResolution('both', FORK_INCOMING, { ...ctx, copyTitle: (t) => t })
+
+    await interpretConflictPlan(plan, operations({ saveLocal }), ctx)
+
+    const copy = saveLocal.mock.calls[0]![0]
+    expect(copy.metadata.id).toBe('copy-id')
+    expect(copy.metadata.syncVersion).toBe(1)
+    // The incoming side carries syncVersion 9 before the fork metadata lands on it.
+    expect(copy.content).toBe(INCOMING.content)
   })
 
   it('leaves the copy unpublished whatever the original was', async () => {
