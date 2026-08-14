@@ -30,7 +30,11 @@ describe('useSavedPlannerQuery window-focus policy', () => {
     const planner = { metadata: { id: PLANNER_ID } } as unknown as SaveablePlanner
     mocks.loadFromLocal.mockResolvedValue({ ok: true, value: planner })
 
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    // The client carries the app-wide default, so this proves an override
+    // rather than the absence of a setting.
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, refetchOnWindowFocus: true } },
+    })
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={queryClient}>
         <React.Suspense fallback={null}>{children}</React.Suspense>

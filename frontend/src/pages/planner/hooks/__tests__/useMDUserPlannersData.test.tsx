@@ -350,10 +350,14 @@ describe('userPlannersQueryKeys', () => {
 })
 
 describe('useMDUserPlannersData window-focus policy', () => {
-  it('opts its local-storage query out of the global focus refetch', async () => {
+  it('opts both local-storage queries out of the global focus refetch', async () => {
     syncMocks.isAuthenticated = true
     syncMocks.syncEnabled = true
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    // The client carries the app-wide default, so the assertions below prove an
+    // override rather than the absence of a setting.
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, refetchOnWindowFocus: true } },
+    })
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={queryClient}>
         <React.Suspense fallback={null}>{children}</React.Suspense>
@@ -368,10 +372,10 @@ describe('useMDUserPlannersData window-focus policy', () => {
 
     // IndexedDB is the source of truth here, so a focus event carries no news
     // about it; only server-backed planner queries take the global default.
-    const localList = queryClient.getQueryCache().find({
-      queryKey: userPlannersQueryKeys.list(true),
-    })
+    const focusOptionFor = (queryKey: readonly unknown[]) =>
+      queryClient.getQueryCache().find({ queryKey })?.observers[0]?.options.refetchOnWindowFocus
 
-    expect(localList?.observers[0]?.options.refetchOnWindowFocus).toBe(false)
+    expect(focusOptionFor(userPlannersQueryKeys.list(true))).toBe(false)
+    expect(focusOptionFor(userPlannersQueryKeys.listFull(true))).toBe(false)
   })
 })
