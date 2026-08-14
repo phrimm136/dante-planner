@@ -32,6 +32,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PlannerDriftAuditRepository {
 
+    /**
+     * How far back {@link #stampedRecommendationsWithoutEffect()} treats a missing carrier as
+     * evidence. Well inside both notification retention windows (90 days to soft delete, 365 more
+     * to hard delete) and inside any plausible {@code domain_events} retention, so a stamp within
+     * it that has neither row never had one.
+     */
+    private static final int RECOMMENDED_AUDIT_WINDOW_DAYS = 30;
+
     private final JdbcTemplate jdbc;
     private final NamedParameterJdbcTemplate namedJdbc;
 
@@ -268,10 +276,20 @@ public class PlannerDriftAuditRepository {
      * <p>Both sides must be absent: an event row aged out of retention after its notification
      * landed is not drift, and neither is a dispatched event whose recipient deleted the row.</p>
      *
+     * <p>Bounded to {@link #RECOMMENDED_AUDIT_WINDOW_DAYS} for the same reason. Past that age an
+     * absent carrier stops being evidence — every latch taken before the outbox existed has no
+     * event row at all, and the notification rows that once carried them are hard-deleted at 465
+     * days — so an unbounded audit converts the whole back catalogue into permanent findings that
+     * no repair can clear.</p>
+     *
+     * <p>The cutoff is computed from the database clock because the stamp is written with
+     * {@code CURRENT_TIMESTAMP(6)}; a cutoff bound as an {@code Instant} would be rendered by the
+     * driver in the JVM's zone and land hours off on any non-UTC host.</p>
+     *
      * @return the planner ids
      */
     public List<UUID> stampedRecommendationsWithoutEffect() {
-        return jdbc.query("""
+        return namedJdbc.query("""
                 SELECT BIN_TO_UUID(s.planner_id) AS planner_id
                 FROM planner_stats s
                 LEFT JOIN domain_events e
@@ -280,9 +298,11 @@ public class PlannerDriftAuditRepository {
                        ON n.content_id = BIN_TO_UUID(s.planner_id)
                       AND n.notification_type = 'PLANNER_RECOMMENDED'
                 WHERE s.recommended_notified_at IS NOT NULL
+                  AND s.recommended_notified_at > DATE_SUB(NOW(6), INTERVAL :windowDays DAY)
                   AND e.id IS NULL
                   AND n.id IS NULL
                 """,
+                Map.of("windowDays", RECOMMENDED_AUDIT_WINDOW_DAYS),
                 (rs, rowNum) -> UUID.fromString(rs.getString("planner_id")));
     }
 

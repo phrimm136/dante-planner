@@ -388,6 +388,19 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
                 .as("the audit repairs nothing").isZero();
     }
 
+    @Test
+    @DisplayName("recommendation stamp older than the audit window: absence is age, not drift")
+    void recommendedNotificationDrift_WhenTheStampPredatesTheAuditWindow_ReportsNothing() {
+        Planner aged = publishClean("Stamped Long Ago");
+        jdbc.update("UPDATE planner_stats SET recommended_notified_at = DATE_SUB(NOW(6), INTERVAL 60 DAY) "
+                + "WHERE planner_id = UUID_TO_BIN(?)", aged.getId().toString());
+
+        assertThat(kindsFor(reconciler.reconcile(), aged.getId()))
+                .as("both carriers are swept on their own retention, so an old stamp with neither "
+                        + "row is the expected end state rather than a finding")
+                .doesNotContain("recommended_notification");
+    }
+
     private void stampRecommended(Planner planner) {
         jdbc.update("UPDATE planner_stats SET recommended_notified_at = NOW(6) "
                 + "WHERE planner_id = UUID_TO_BIN(?)", planner.getId().toString());
