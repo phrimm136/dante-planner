@@ -13,6 +13,7 @@ import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
+import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +73,7 @@ class CommentReceivedEffectTest {
     @BeforeEach
     void setUp() {
         effect = new CommentReceivedEffect(commentRepository, commentQueryService,
-                plannerQueryService, notificationDispatchService, ssePublisher,
+                plannerQueryService, notificationDispatchService,
                 new DomainEventPayloadReader(new ObjectMapper()));
     }
 
@@ -91,7 +92,7 @@ class CommentReceivedEffectTest {
                 anyLong(), any(), any(), any(), any(), anyLong()))
                 .thenReturn(delivered());
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verify(notificationDispatchService).notifyCommentReceived(
                 eq(COMMENT_ID), any(), eq(PLANNER_ID), eq("Test Planner"), eq("A comment"),
@@ -108,7 +109,7 @@ class CommentReceivedEffectTest {
         givenAComment(OWNER_ID);
         givenAPlanner(true);
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService);
         verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any());
@@ -122,7 +123,7 @@ class CommentReceivedEffectTest {
         givenAComment(COMMENTER_ID);
         givenAPlanner(false);
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService);
         verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any());
@@ -135,7 +136,22 @@ class CommentReceivedEffectTest {
     void applyEffect_WhenTheCommentIsGone_AnnouncesNothing() {
         when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.empty());
 
-        effect.applyEffect(event());
+        applyAndFlush();
+
+        verifyNoInteractions(notificationDispatchService, ssePublisher);
+    }
+
+    @Test
+    @DisplayName("a comment withdrawn before dispatch announces nothing")
+    void applyEffect_WhenTheCommentWasWithdrawn_AnnouncesNothing() {
+        PlannerComment comment = new PlannerComment(PLANNER_ID, COMMENTER_ID, "A comment", null, 0);
+        comment.setId(COMMENT_ID);
+        comment.setPublicId(UUID.randomUUID());
+        comment.setCreatedAt(Instant.now());
+        comment.softDelete();
+        when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
+
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService, ssePublisher);
     }
@@ -146,9 +162,18 @@ class CommentReceivedEffectTest {
         givenAComment(COMMENTER_ID);
         when(plannerQueryService.notificationTargetOf(PLANNER_ID)).thenReturn(Optional.empty());
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService, ssePublisher);
+    }
+
+    /**
+     * Runs the arm and releases its queue, which is what the dispatch commit does in production.
+     */
+    private void applyAndFlush() {
+        EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
+        effect.applyEffect(event(), pushes);
+        pushes.flush();
     }
 
     private void givenAComment(Long authorId) {

@@ -11,7 +11,7 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffect;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -26,7 +26,6 @@ public class PlannerPublishedEffect implements DomainEffect {
 
     private final PlannerRepository plannerRepository;
     private final NotificationDispatchService notificationDispatchService;
-    private final SsePublisher ssePublisher;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -35,17 +34,20 @@ public class PlannerPublishedEffect implements DomainEffect {
     }
 
     @Override
-    public void applyEffect(DomainEvent event) {
-        Optional<Planner> found = plannerRepository.findAggregate(event.getAggregateId());
+    public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
+        // The predicate of the raise site, not merely the row: a planner withdrawn between the vote
+        // to publish and this dispatch has nothing left to announce.
+        Optional<Planner> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
         if (found.isEmpty()) {
-            log.info("Planner {} is gone before its publication was announced", event.getAggregateId());
+            log.info("Planner {} is no longer published; its publication goes unannounced",
+                    event.getAggregateId());
             return;
         }
 
         Planner planner = found.get();
         long authorId = payloads.requireId(event, "authorId");
         notificationDispatchService.notifyPlannerPublished(authorId, planner.getId(), planner.getTitle());
-        ssePublisher.publishBroadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
+        pushes.broadcast(authorId, SseEventType.NOTIFY_PUBLISHED,
                 PlannerPublishedPayload.fromEntity(planner));
     }
 }

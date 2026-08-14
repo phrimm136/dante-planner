@@ -3,7 +3,6 @@ package org.danteplanner.backend.shared.outbox.scheduler;
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.danteplanner.backend.shared.outbox.repository.DomainEventRepository;
 import org.danteplanner.backend.shared.outbox.service.DomainEventDispatcher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,22 +18,28 @@ import java.time.Instant;
  * loss: whatever a dead pod left undispatched is found here on the next tick. The grace window
  * keeps the relay off rows the eager hop may still be holding, so the two do not contend for the
  * same row lock in the common case.</p>
+ *
+ * <p>Each event is dispatched in a transaction of its own, and the scan runs in one more. A single
+ * transaction spanning the batch would hold every row it touched until the last one finished, and
+ * one poisoned event would take the whole batch down with it.</p>
+ *
+ * <p>The lease is sized for the degraded case rather than the healthy one: a full batch published
+ * through a Redis that is timing out spends its command timeout per push, which runs far past the
+ * five minutes a healthy batch needs — and a lease that expires mid-batch puts a second pod on the
+ * rows this one is still working through.</p>
  */
 @Component
 @Slf4j
 public class DomainEventRelay {
 
-    private final DomainEventRepository events;
     private final DomainEventDispatcher dispatcher;
     private final Duration graceDuration;
     private final int batchSize;
 
     public DomainEventRelay(
-            DomainEventRepository events,
             DomainEventDispatcher dispatcher,
             @Value("${outbox.relay.grace}") Duration graceDuration,
             @Value("${outbox.relay.batch-size}") int batchSize) {
-        this.events = events;
         this.dispatcher = dispatcher;
         this.graceDuration = graceDuration;
         this.batchSize = batchSize;
@@ -44,10 +49,10 @@ public class DomainEventRelay {
      * Dispatch one batch of events the eager hop left open.
      */
     @Scheduled(fixedDelayString = "${outbox.relay.fixed-delay-ms:60000}")
-    @SchedulerLock(name = "dispatchDomainEvents", lockAtMostFor = "PT5M", lockAtLeastFor = "PT30S")
+    @SchedulerLock(name = "dispatchDomainEvents", lockAtMostFor = "PT30M", lockAtLeastFor = "PT30S")
     public void dispatchPendingEvents() {
         Instant cutoff = Instant.now().minus(graceDuration);
-        events.undispatchedIdsOlderThan(cutoff, batchSize).forEach(this::relayOne);
+        dispatcher.pendingEventIds(cutoff, batchSize).forEach(this::relayOne);
     }
 
     private void relayOne(long eventId) {

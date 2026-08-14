@@ -14,7 +14,7 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffect;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -33,7 +33,6 @@ public class ReplyReceivedEffect implements DomainEffect {
     private final CommentQueryService commentQueryService;
     private final PublishedPlannerQueryService plannerQueryService;
     private final NotificationDispatchService notificationDispatchService;
-    private final SsePublisher ssePublisher;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -42,7 +41,7 @@ public class ReplyReceivedEffect implements DomainEffect {
     }
 
     @Override
-    public void applyEffect(DomainEvent event) {
+    public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long replyId = payloads.requireId(event, "replyId");
         Optional<PlannerComment> found = commentRepository.findById(replyId);
         if (found.isEmpty()) {
@@ -51,6 +50,13 @@ public class ReplyReceivedEffect implements DomainEffect {
         }
 
         PlannerComment reply = found.get();
+        // A withdrawal replaces the content with a placeholder and the lookup is unfiltered, so
+        // announcing here would deliver the placeholder as though it were what the author wrote.
+        if (reply.isDeleted()) {
+            log.info("Reply {} was withdrawn before it was announced", replyId);
+            return;
+        }
+
         Optional<PlannerNotificationTarget> target =
                 plannerQueryService.notificationTargetOf(reply.getPlannerId());
         if (target.isEmpty()) {
@@ -61,16 +67,16 @@ public class ReplyReceivedEffect implements DomainEffect {
 
         Optional<PlannerComment> parent = Optional.ofNullable(reply.getParentCommentId())
                 .flatMap(commentRepository::findById);
-        parent.ifPresent(it -> notifyParentAuthor(reply, it, target.get()));
+        parent.ifPresent(it -> notifyParentAuthor(reply, it, target.get(), pushes));
 
         UUID parentPublicId = parent.map(PlannerComment::getPublicId).orElse(null);
-        ssePublisher.publishCommentEvent(reply.getPlannerId(), SseEventType.COMMENT_ADDED,
+        pushes.commentEvent(reply.getPlannerId(), SseEventType.COMMENT_ADDED,
                 reply.getPublicId().toString(), reply.getUserId(),
                 commentQueryService.broadcastNode(reply, parentPublicId));
     }
 
-    private void notifyParentAuthor(
-            PlannerComment reply, PlannerComment parent, PlannerNotificationTarget target) {
+    private void notifyParentAuthor(PlannerComment reply, PlannerComment parent,
+            PlannerNotificationTarget target, EffectPushQueue pushes) {
         if (reply.getUserId().equals(parent.getUserId()) || !parent.isAuthorNotificationsEnabled()) {
             return;
         }
@@ -84,7 +90,7 @@ public class ReplyReceivedEffect implements DomainEffect {
                 parent.getUserId());
 
         if (outcome instanceof NotificationOutcome.Delivered delivered) {
-            ssePublisher.publishUserEvent(delivered.userId(), SseEventType.NOTIFY_COMMENT,
+            pushes.userEvent(delivered.userId(), SseEventType.NOTIFY_COMMENT,
                     delivered.payload().id(), delivered.payload());
         }
     }

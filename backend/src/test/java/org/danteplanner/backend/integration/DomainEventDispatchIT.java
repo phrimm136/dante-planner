@@ -119,8 +119,9 @@ class DomainEventDispatchIT extends SharedMySqlContainerSupport {
         verify(ssePublisher, times(1)).publishCommentEvent(
                 eq(planner.getId()), eq(SseEventType.COMMENT_ADDED), any(), eq(commenter.getId()), any());
         assertThat(attempts(eventId))
-                .as("the row records the one attempt that closed it")
-                .isEqualTo(1);
+                .as("both attempts are counted — the count is what the poison cap reads — while "
+                        + "only the first derived anything")
+                .isEqualTo(2);
     }
 
     private long recordEvent(Long commentId) {

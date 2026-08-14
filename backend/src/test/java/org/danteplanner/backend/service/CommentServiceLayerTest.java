@@ -82,8 +82,8 @@ class CommentServiceLayerTest {
     private DomainEventRecorder domainEventRecorder;
 
 
-    // Comment fan-out is raised as an event and published after commit, so no create test here
-    // can assert delivery.
+    // A comment write records one domain event and nothing else; who hears about it is decided by
+    // the arm that dispatches the row, so no create test here can assert delivery.
 
     @Mock
     private CommentReportService commentReportService;

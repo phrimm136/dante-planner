@@ -11,7 +11,7 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffect;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -30,7 +30,6 @@ public class PlannerRecommendedEffect implements DomainEffect {
 
     private final PlannerRepository plannerRepository;
     private final NotificationDispatchService notificationDispatchService;
-    private final SsePublisher ssePublisher;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -39,10 +38,13 @@ public class PlannerRecommendedEffect implements DomainEffect {
     }
 
     @Override
-    public void applyEffect(DomainEvent event) {
-        Optional<Planner> found = plannerRepository.findAggregate(event.getAggregateId());
+    public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
+        // A recommendation is a fact about a public planner; one withdrawn since the vote crossed
+        // the threshold has nothing to recommend.
+        Optional<Planner> found = plannerRepository.findPublishedAggregate(event.getAggregateId());
         if (found.isEmpty()) {
-            log.info("Planner {} is gone before its recommendation was announced", event.getAggregateId());
+            log.info("Planner {} is no longer published; its recommendation goes unannounced",
+                    event.getAggregateId());
             return;
         }
 
@@ -52,7 +54,7 @@ public class PlannerRecommendedEffect implements DomainEffect {
                 planner.getId(), planner.getTitle(), ownerId);
 
         if (outcome instanceof NotificationOutcome.Delivered delivered) {
-            ssePublisher.publishUserEvent(delivered.userId(), SseEventType.NOTIFY_RECOMMENDED,
+            pushes.userEvent(delivered.userId(), SseEventType.NOTIFY_RECOMMENDED,
                     delivered.payload().id(), delivered.payload());
         }
     }

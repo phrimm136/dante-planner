@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.retry.annotation.EnableRetry;
@@ -113,6 +114,33 @@ class SsePublisherTest {
             when(template.convertAndSend(anyString(), any()))
                     .thenThrow(new RedisConnectionFailureException("primary unreachable"))
                     .thenThrow(new RedisConnectionFailureException("primary unreachable"))
+                    .thenReturn(1L);
+
+            SsePublisher publisher = new SsePublisher(
+                    context.getBean(SseChannelSender.class), objectMapper, meterRegistry);
+
+            publisher.publishUserEvent(1L, SseEventType.NOTIFY_COMMENT, "planner-9", Map.of());
+
+            verify(template, times(3)).convertAndSend(eq("sse:user"), anyString());
+            assertThat(meterRegistry.find("sse.publish.dropped").counter())
+                    .as("the send succeeded, so nothing was dropped")
+                    .isNull();
+        }
+    }
+
+    /**
+     * A Lettuce failover surfaces as a command timeout once the connection is already held, which
+     * the connection-acquisition failure does not cover — so the retry has to name both or the
+     * commoner symptom goes unretried.
+     */
+    @Test
+    void publishUserEvent_WhenTheSendTimesOut_IsRetriedOnTheSameTerms() {
+        try (AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(RetryHarness.class)) {
+            StringRedisTemplate template = context.getBean(StringRedisTemplate.class);
+            when(template.convertAndSend(anyString(), any()))
+                    .thenThrow(new QueryTimeoutException("command timed out during failover"))
+                    .thenThrow(new QueryTimeoutException("command timed out during failover"))
                     .thenReturn(1L);
 
             SsePublisher publisher = new SsePublisher(

@@ -13,6 +13,7 @@ import org.danteplanner.backend.shared.entity.SseEventType;
 import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
+import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.danteplanner.backend.shared.sse.SsePublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +73,7 @@ class ReplyReceivedEffectTest {
     @BeforeEach
     void setUp() {
         effect = new ReplyReceivedEffect(commentRepository, commentQueryService,
-                plannerQueryService, notificationDispatchService, ssePublisher,
+                plannerQueryService, notificationDispatchService,
                 new DomainEventPayloadReader(new ObjectMapper()));
         when(plannerQueryService.notificationTargetOf(PLANNER_ID)).thenReturn(Optional.of(
                 new PlannerNotificationTarget(PLANNER_ID, "Test Planner", OWNER_ID, true)));
@@ -92,7 +93,7 @@ class ReplyReceivedEffectTest {
                 anyLong(), any(), any(), any(), any(), anyLong()))
                 .thenReturn(delivered());
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verify(notificationDispatchService).notifyReplyReceived(
                 eq(REPLY_ID), any(), eq(PLANNER_ID), eq("Test Planner"), eq("A reply"),
@@ -108,7 +109,7 @@ class ReplyReceivedEffectTest {
     void applyEffect_WhenTheReplierWroteTheParent_NotifiesNobodyButStillPushesTheThread() {
         givenAReplyTo(givenAParent(REPLIER_ID, true));
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService);
         verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any());
@@ -121,7 +122,7 @@ class ReplyReceivedEffectTest {
     void applyEffect_WhenTheParentAuthorDisabledNotifications_NotifiesNobodyButStillPushesTheThread() {
         givenAReplyTo(givenAParent(PARENT_AUTHOR_ID, false));
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService);
         verify(ssePublisher, never()).publishUserEvent(any(), any(), any(), any());
@@ -130,13 +131,39 @@ class ReplyReceivedEffectTest {
     }
 
     @Test
+    @DisplayName("a reply withdrawn before dispatch announces nothing")
+    void applyEffect_WhenTheReplyWasWithdrawn_AnnouncesNothing() {
+        PlannerComment parent = givenAParent(PARENT_AUTHOR_ID, true);
+        PlannerComment reply =
+                new PlannerComment(PLANNER_ID, REPLIER_ID, "A reply", parent.getId(), 1);
+        reply.setId(REPLY_ID);
+        reply.setPublicId(UUID.randomUUID());
+        reply.setCreatedAt(Instant.now());
+        reply.softDelete();
+        when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
+
+        applyAndFlush();
+
+        verifyNoInteractions(notificationDispatchService, ssePublisher);
+    }
+
+    @Test
     @DisplayName("a reply deleted before dispatch announces nothing")
     void applyEffect_WhenTheReplyIsGone_AnnouncesNothing() {
         when(commentRepository.findById(REPLY_ID)).thenReturn(Optional.empty());
 
-        effect.applyEffect(event());
+        applyAndFlush();
 
         verifyNoInteractions(notificationDispatchService, ssePublisher);
+    }
+
+    /**
+     * Runs the arm and releases its queue, which is what the dispatch commit does in production.
+     */
+    private void applyAndFlush() {
+        EffectPushQueue pushes = new EffectPushQueue(ssePublisher);
+        effect.applyEffect(event(), pushes);
+        pushes.flush();
     }
 
     private PlannerComment givenAParent(Long authorId, boolean authorNotificationsEnabled) {

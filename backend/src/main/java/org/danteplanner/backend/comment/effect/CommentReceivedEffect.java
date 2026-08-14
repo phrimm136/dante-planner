@@ -14,7 +14,7 @@ import org.danteplanner.backend.shared.outbox.entity.DomainEvent;
 import org.danteplanner.backend.shared.outbox.entity.DomainEventType;
 import org.danteplanner.backend.shared.outbox.service.DomainEffect;
 import org.danteplanner.backend.shared.outbox.service.DomainEventPayloadReader;
-import org.danteplanner.backend.shared.sse.SsePublisher;
+import org.danteplanner.backend.shared.outbox.service.EffectPushQueue;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -35,7 +35,6 @@ public class CommentReceivedEffect implements DomainEffect {
     private final CommentQueryService commentQueryService;
     private final PublishedPlannerQueryService plannerQueryService;
     private final NotificationDispatchService notificationDispatchService;
-    private final SsePublisher ssePublisher;
     private final DomainEventPayloadReader payloads;
 
     @Override
@@ -44,7 +43,7 @@ public class CommentReceivedEffect implements DomainEffect {
     }
 
     @Override
-    public void applyEffect(DomainEvent event) {
+    public void applyEffect(DomainEvent event, EffectPushQueue pushes) {
         long commentId = payloads.requireId(event, "commentId");
         Optional<PlannerComment> found = commentRepository.findById(commentId);
         if (found.isEmpty()) {
@@ -53,6 +52,13 @@ public class CommentReceivedEffect implements DomainEffect {
         }
 
         PlannerComment comment = found.get();
+        // A withdrawal replaces the content with a placeholder and the lookup is unfiltered, so
+        // announcing here would deliver the placeholder as though it were what the author wrote.
+        if (comment.isDeleted()) {
+            log.info("Comment {} was withdrawn before it was announced", commentId);
+            return;
+        }
+
         Optional<PlannerNotificationTarget> target =
                 plannerQueryService.notificationTargetOf(comment.getPlannerId());
         if (target.isEmpty()) {
@@ -61,14 +67,15 @@ public class CommentReceivedEffect implements DomainEffect {
             return;
         }
 
-        notifyOwner(comment, target.get());
+        notifyOwner(comment, target.get(), pushes);
 
-        ssePublisher.publishCommentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
+        pushes.commentEvent(comment.getPlannerId(), SseEventType.COMMENT_ADDED,
                 comment.getPublicId().toString(), comment.getUserId(),
                 commentQueryService.broadcastNode(comment, null));
     }
 
-    private void notifyOwner(PlannerComment comment, PlannerNotificationTarget target) {
+    private void notifyOwner(PlannerComment comment, PlannerNotificationTarget target,
+            EffectPushQueue pushes) {
         if (comment.getUserId().equals(target.ownerId()) || !target.ownerNotificationsEnabled()) {
             return;
         }
@@ -82,7 +89,7 @@ public class CommentReceivedEffect implements DomainEffect {
                 target.ownerId());
 
         if (outcome instanceof NotificationOutcome.Delivered delivered) {
-            ssePublisher.publishUserEvent(delivered.userId(), SseEventType.NOTIFY_COMMENT,
+            pushes.userEvent(delivered.userId(), SseEventType.NOTIFY_COMMENT,
                     delivered.payload().id(), delivered.payload());
         }
     }

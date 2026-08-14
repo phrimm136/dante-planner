@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.util.Assert;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -145,16 +144,4 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             @Param("authorId") Long authorId,
             @Param("plannerId") String plannerId,
             @Param("plannerTitle") String plannerTitle);
-
-    /**
-     * Persists a notification that does not exist yet.
-     *
-     * @param notification the notification to insert, carrying no id
-     * @return the persisted notification, carrying its generated id
-     * @throws IllegalArgumentException if the notification already carries an id
-     */
-    default Notification insert(Notification notification) {
-        Assert.isNull(notification.getId(), "insert() takes new rows only");
-        return save(notification);
-    }
 }

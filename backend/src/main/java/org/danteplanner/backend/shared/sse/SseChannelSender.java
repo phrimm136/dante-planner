@@ -1,6 +1,7 @@
 package org.danteplanner.backend.shared.sse;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.retry.annotation.Backoff;
@@ -14,8 +15,11 @@ import org.springframework.stereotype.Component;
  * and an annotation there would be inert. Delegating the send to a collaborator is what puts a
  * proxy boundary between the caller and the network hop.</p>
  *
- * <p>Retried only for a connection failure, which is what a primary failover looks like from here.
- * Anything else is a fault the same call would reproduce.</p>
+ * <p>Retried for the two shapes a failover takes: the connection cannot be acquired, or it can and
+ * the command then times out. Only the first is a {@code RedisConnectionFailureException} — Lettuce
+ * raises {@code RedisCommandTimeoutException} for the second, which Spring translates to
+ * {@link QueryTimeoutException}, so naming the connection failure alone leaves the more common
+ * failover symptom unretried. Anything else is a fault the same call would reproduce.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -28,9 +32,9 @@ public class SseChannelSender {
      *
      * @param topic the Redis pub/sub channel
      * @param json  the serialized envelope
-     * @throws RedisConnectionFailureException when every attempt found the primary unreachable
+     * @throws RedisConnectionFailureException when every attempt failed to reach the primary
      */
-    @Retryable(retryFor = RedisConnectionFailureException.class,
+    @Retryable(retryFor = {RedisConnectionFailureException.class, QueryTimeoutException.class},
             maxAttempts = SseConstants.PUBLISH_MAX_ATTEMPTS,
             backoff = @Backoff(delay = SseConstants.PUBLISH_RETRY_DELAY_MS,
                     multiplier = SseConstants.PUBLISH_RETRY_MULTIPLIER))

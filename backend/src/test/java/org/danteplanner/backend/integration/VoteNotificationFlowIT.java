@@ -188,7 +188,7 @@ class VoteNotificationFlowIT {
         // Act - Cast vote that crosses threshold
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
-        // Commit to trigger AFTER_COMMIT listener, then start new transaction for assertions
+        // The vote commits its event row; the dispatch derives from it afterwards.
 
         // Assert - Notification derived from the committed event
         List<Notification> notifications = awaitNotifications(plannerOwner.getId(), 1);
@@ -217,7 +217,7 @@ class VoteNotificationFlowIT {
         // Act - Cast vote that doesn't cross threshold
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
-        // Commit to trigger any listeners, then start new transaction for assertions
+        // The vote commits its event row; the dispatch derives from it afterwards.
 
         // Assert - No notification created
         long notificationsCount = notificationRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(
@@ -240,7 +240,7 @@ class VoteNotificationFlowIT {
         // Act - Cast vote that exactly meets threshold
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
-        // Commit to trigger AFTER_COMMIT listener
+        // The vote commits its event row; the dispatch derives from it afterwards.
 
         // Assert - Notification derived from the committed event
         assertEquals(1, awaitNotifications(plannerOwner.getId(), 1).size());
@@ -288,7 +288,7 @@ class VoteNotificationFlowIT {
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
 
-        // Poll for the AFTER_COMMIT listener to persist the notification instead of a fixed sleep.
+        // Poll for the dispatch to derive the notification instead of a fixed sleep.
         long deadline = System.currentTimeMillis() + 2000;
         while (System.currentTimeMillis() < deadline) {
             entityManager.clear();
@@ -389,7 +389,7 @@ class VoteNotificationFlowIT {
         // Act - Cast vote crossing threshold
         plannerEngagementService.castVote(voter1.getId(), testPlanner.getId(), VoteType.UP);
 
-        // Commit to trigger AFTER_COMMIT listener
+        // The vote commits its event row; the dispatch derives from it afterwards.
 
         // Assert - Both vote and notification persisted
         // 1. Vote exists

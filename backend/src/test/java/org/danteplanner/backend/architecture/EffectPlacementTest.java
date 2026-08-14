@@ -5,6 +5,7 @@ import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.domain.JavaMethodCall;
+import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 
@@ -29,15 +30,30 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * <p>MySQL and Redis share no transaction, so ordering substitutes for atomicity and the order is
  * chosen per effect by which stale combination is survivable. Observer effects — SSE publishes —
- * follow the commit in an {@code @TransactionalEventListener(AFTER_COMMIT)} listener, because an
- * inline publish announces rows to subscribers on every rollback path. Guard effects — token
- * revocation — precede the commit so their failure aborts it, because a deleted account with live
- * tokens has no durable record to retry from.</p>
+ * follow a commit, because an inline publish announces rows to subscribers on every rollback path
+ * and the frontend patches its cache straight from the envelope. Guard effects — token revocation —
+ * precede the commit so their failure aborts it, because a deleted account with live tokens has no
+ * durable record to retry from.</p>
  *
- * <p>The rule below is the negative form of that split: a transactional method reaches no
- * cross-store effect, except the guard calls named in {@link #GUARDS_ALLOWED_INLINE}. Reachability
- * is transitive through non-transactional helpers, because a private helper is how the ban would
- * otherwise be evaded; a transactional callee ends the walk since it is checked as its own root.</p>
+ * <p>An observer effect reaches that after-commit position through the outbox: the causing
+ * transaction commits a {@code domain_events} row, {@code DomainEventDispatcher} derives the effect
+ * in a transaction of its own, and the arm enqueues its pushes on an {@code EffectPushQueue} that
+ * an after-commit synchronization releases. The two remaining after-commit listeners that publish
+ * directly are suspension and settings invalidation, which carry no durable row.</p>
+ *
+ * <p>The rules below are the negative form of that split, and each is stated at the width it can
+ * actually check:</p>
+ *
+ * <ul>
+ *   <li>a transactional method's call graph reaches no cross-store effect, except the guard calls
+ *       named in {@link #GUARDS_ALLOWED_INLINE}. Reachability is transitive through
+ *       non-transactional helpers and resolves interface calls onto their implementations, because
+ *       a private helper and an interface hop are both how the ban would otherwise be evaded; a
+ *       transactional callee ends the walk since it is checked as its own root;</li>
+ *   <li>no arm depends on {@code SsePublisher} at all. That is what makes the first rule true of
+ *       the outbox rather than merely unreached by it — an arm that published would be caught by
+ *       the walk, and an arm that cannot name the publisher cannot publish.</li>
+ * </ul>
  */
 class EffectPlacementTest {
 
@@ -91,11 +107,12 @@ class EffectPlacementTest {
         }
 
         assertThat(offenders)
-                .as("an observer publish inside a transaction announces rows that a rollback then "
-                        + "discards; publish an event and move the call into a "
-                        + "@TransactionalEventListener(AFTER_COMMIT) listener. A guard belongs "
-                        + "inline, but a new one is a deliberate decision: add it to "
-                        + "GUARDS_ALLOWED_INLINE with the reason it cannot be deferred")
+                .as("an observer publish inside a transaction announces a row that a rollback then "
+                        + "discards, and the recipient's cache keeps it; record a domain event and "
+                        + "let an effect arm enqueue the push, which the dispatcher releases only "
+                        + "once its commit is durable. A guard belongs inline, but a new one is a "
+                        + "deliberate decision: add it to GUARDS_ALLOWED_INLINE with the reason it "
+                        + "cannot be deferred")
                 .isEmpty();
     }
 
@@ -210,7 +227,8 @@ class EffectPlacementTest {
 
         for (JavaClass caller : MAIN_CLASSES) {
             if (caller.getPackageName().contains(".effect")
-                    || caller.getPackageName().startsWith(NOTIFICATION_PACKAGE)) {
+                    || DOMAIN_EVENT_DISPATCHER.equals(topLevel(caller))
+                    || NOTIFICATION_DISPATCH_SERVICE.equals(topLevel(caller))) {
                 continue;
             }
             for (JavaMethodCall call : caller.getMethodCallsFromSelf()) {
@@ -241,6 +259,62 @@ class EffectPlacementTest {
                 .as("an arm belongs to the feature that owns the rows it writes, in that feature's "
                         + "effect package; shared/outbox carries the mechanism and no feature")
                 .isEmpty();
+    }
+
+    @Test
+    @DisplayName("no effect arm can reach the publisher at all")
+    void effectArm_WhenItDependsOnThePublisher_IsRejected() {
+        Set<String> offenders = MAIN_CLASSES.stream()
+                .filter(javaClass -> javaClass.getPackageName().contains(".effect"))
+                .filter(javaClass -> javaClass.getDirectDependenciesFromSelf().stream()
+                        .anyMatch(dependency ->
+                                SSE_PUBLISHER.equals(dependency.getTargetClass().getFullName())))
+                .map(JavaClass::getFullName)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        assertThat(offenders)
+                .as("an arm runs inside the dispatch transaction, so a publish it made would "
+                        + "announce a row the dispatch may still roll back; enqueue on the "
+                        + "EffectPushQueue the dispatcher hands it, which is released after commit")
+                .isEmpty();
+    }
+
+    /**
+     * The methods a call can land on: the declared target, plus every implementation of it in this
+     * tree when the target is an interface or abstract.
+     *
+     * <p>Without the implementations the walk dead-ends at every seam, and a rule that stops at the
+     * first interface reports compliance for code it never looked at.</p>
+     *
+     * @param call the call to resolve
+     * @return the concrete methods reachable through it
+     */
+    private static List<JavaMethod> calleesOf(JavaMethodCall call) {
+        Optional<JavaMethod> declared = call.getTarget().resolveMember();
+        if (declared.isEmpty()) {
+            return List.of();
+        }
+        JavaMethod target = declared.get();
+        if (!target.getOwner().isInterface() && !target.getModifiers().contains(JavaModifier.ABSTRACT)) {
+            return List.of(target);
+        }
+
+        List<JavaMethod> resolved = new ArrayList<>();
+        resolved.add(target);
+        for (JavaClass implementation : target.getOwner().getAllSubclasses()) {
+            implementation.getMethods().stream()
+                    .filter(method -> method.getName().equals(target.getName()))
+                    .filter(method -> method.getRawParameterTypes()
+                            .equals(target.getRawParameterTypes()))
+                    .forEach(resolved::add);
+        }
+        return resolved;
+    }
+
+    private static String topLevel(JavaClass javaClass) {
+        String fullName = javaClass.getFullName();
+        int nested = fullName.indexOf('$');
+        return nested < 0 ? fullName : fullName.substring(0, nested);
     }
 
     private static List<JavaMethod> afterCommitListeners() {
@@ -318,12 +392,13 @@ class EffectPlacementTest {
                 if (!owner.startsWith("org.danteplanner.backend")) {
                     continue;
                 }
-                Optional<JavaMethod> callee = call.getTarget().resolveMember();
-                if (callee.isEmpty() || isTransactional(callee.get())) {
-                    continue;
-                }
-                if (visited.add(qualifiedName(callee.get()))) {
-                    pending.push(callee.get());
+                for (JavaMethod callee : calleesOf(call)) {
+                    if (isTransactional(callee)) {
+                        continue;
+                    }
+                    if (visited.add(qualifiedName(callee))) {
+                        pending.push(callee);
+                    }
                 }
             }
         }

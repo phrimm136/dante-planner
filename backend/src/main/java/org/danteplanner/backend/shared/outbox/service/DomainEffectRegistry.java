@@ -29,13 +29,14 @@ public class DomainEffectRegistry {
     /**
      * Apply the arm registered for this event's type.
      *
-     * @param event the event being dispatched
+     * @param event  the event being dispatched
+     * @param pushes the queue the arm enqueues its announcements on
      * @throws IllegalStateException if no arm answers for the event's type
      */
-    public void applyEffectFor(DomainEvent event) {
+    public void applyEffectFor(DomainEvent event, EffectPushQueue pushes) {
         Optional.ofNullable(effectsByType.get(event.getEventType()))
                 .orElseThrow(() -> new IllegalStateException(
                         "no effect arm for " + event.getEventType()))
-                .applyEffect(event);
+                .applyEffect(event, pushes);
     }
 }
