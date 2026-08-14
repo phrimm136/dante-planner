@@ -7,7 +7,13 @@
  * 3. Content rendering and controlled component pattern
  */
 
+import { useEffect } from 'react'
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from 'vitest'
+import {
+  NoteDeliveryProvider,
+  useNoteDeliveryRegistry,
+  type NoteDeliveryRegistry,
+} from '../../context/NoteDeliveryRegistry'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NoteEditor } from '../NoteEditor'
@@ -691,24 +697,55 @@ describe('NoteEditor - debounce flush on unmount', () => {
     expect(onChange).toHaveBeenCalledTimes(1)
   })
 
-  it.each([['beforeunload'], ['pagehide']])(
-    'hands the typed content over when the page goes away via %s',
-    async (eventName) => {
-      const onChange = vi.fn()
-      render(<NoteEditor value={emptyValue} onChange={onChange} />)
+  it('hands pending text to its owner when the registry is drained', async () => {
+    const onChange = vi.fn()
+    let registry: NoteDeliveryRegistry | null = null
+    const captureRegistry = (owned: NoteDeliveryRegistry) => {
+      registry = owned
+    }
 
-      const container = document.querySelector('.note-editor') as Element
-      await waitFor(() => expect(container).toBeTruthy())
-      fireEvent.click(container)
+    function Harness({ onReady }: { onReady: (owned: NoteDeliveryRegistry) => void }) {
+      const owned = useNoteDeliveryRegistry()
+      useEffect(() => {
+        onReady(owned)
+      }, [owned, onReady])
+      return (
+        <NoteDeliveryProvider registry={owned}>
+          <NoteEditor value={emptyValue} onChange={onChange} />
+        </NoteDeliveryProvider>
+      )
+    }
 
-      typeText('held by the debounce')
-      expect(onChange).not.toHaveBeenCalled()
+    render(<Harness onReady={captureRegistry} />)
 
-      window.dispatchEvent(new Event(eventName, { cancelable: true }))
+    const container = document.querySelector('.note-editor') as Element
+    await waitFor(() => expect(container).toBeTruthy())
+    fireEvent.click(container)
 
-      expect(onChange).toHaveBeenCalledTimes(1)
-      const delivered = onChange.mock.calls[0][0] as NoteContent
-      expect(JSON.stringify(delivered.content)).toContain('held by the debounce')
-    },
-  )
+    onChange.mockClear()
+    typeText('held by the debounce')
+    expect(onChange).not.toHaveBeenCalled()
+
+    registry?.drain()
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    const delivered = onChange.mock.calls[0][0] as NoteContent
+    expect(JSON.stringify(delivered.content)).toContain('held by the debounce')
+  })
+
+  it('registers no unload listener of its own', async () => {
+    // Pushing from here would race the owner's own handler: at the window target
+    // listeners run in registration order, and an editor revealed later registers
+    // after it. The owner pulls instead, so there is nothing to order.
+    const addSpy = vi.spyOn(window, 'addEventListener')
+    render(<NoteEditor value={emptyValue} onChange={vi.fn()} />)
+    await waitFor(() => expect(document.querySelector('.note-editor')).toBeTruthy())
+
+    const unloadListeners = addSpy.mock.calls
+      .map(([type]) => type)
+      .filter((type) => type === 'beforeunload' || type === 'pagehide')
+
+    expect(unloadListeners).toEqual([])
+    addSpy.mockRestore()
+  })
 })

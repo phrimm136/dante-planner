@@ -80,6 +80,10 @@ import {
   SkillGridSkeleton,
 } from '../plannerSkeletons'
 import { DeckImportConfirmDialog } from '../deckBuilder/DeckImportConfirmDialog'
+import {
+  NoteDeliveryProvider,
+  useNoteDeliveryRegistry,
+} from '@/shared/noteEditor/context/NoteDeliveryRegistry'
 import { StoreBoundSectionNote } from './StoreBoundSectionNote'
 import { ConflictResolutionDialog } from './ConflictResolutionDialog'
 import { SyncOffWarningDialog } from '../SyncOffWarningDialog'
@@ -124,6 +128,9 @@ export function PlannerEditorShell({
 
   // Ref to skip beforeunload warning during intentional navigation (e.g., "Keep Both")
   const isIntentionalNavigationRef = useRef(false)
+
+  // The note editors' pending text, collected on the way out.
+  const noteDelivery = useNoteDeliveryRegistry()
 
   // Callback for "Keep Both" - navigate to the newly created copy
   const handleKeepBothCreated = (newPlannerId: string) => {
@@ -267,19 +274,34 @@ export function PlannerEditorShell({
   // Warn before closing the tab if changes have not reached IndexedDB yet. The
   // listener is registered for the whole mount and asks at fire time, because an
   // edit can arrive between renders and the close would then go unwarned.
+  //
+  // Collect the note editors' pending text first: it is the other half of what is
+  // unsaved, and until it lands in the store no dirtiness check can see it. That
+  // is a pull rather than each editor pushing, so no listener ordering matters.
+  // `pagehide` is the mobile route out, where no warning is possible but the text
+  // still has to reach the store.
   // Skip if intentional navigation (e.g., "Keep Both" conflict resolution)
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    const handleUnload = (e: Event) => {
+      noteDelivery.drain()
+
       // Skip warning during intentional navigation
       if (isIntentionalNavigationRef.current) return
       if (!isDirty()) return
       e.preventDefault()
-      e.returnValue = ''
+      if (e.type === 'beforeunload') {
+        // Older browsers gate the prompt on this rather than on preventDefault.
+        ;(e as BeforeUnloadEvent).returnValue = ''
+      }
     }
 
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
-  }, [isDirty])
+    window.addEventListener('beforeunload', handleUnload)
+    window.addEventListener('pagehide', handleUnload)
+    return () => {
+      window.removeEventListener('beforeunload', handleUnload)
+      window.removeEventListener('pagehide', handleUnload)
+    }
+  }, [isDirty, noteDelivery])
 
   const {
     handleImport: handleDeckImport,
@@ -616,142 +638,144 @@ export function PlannerEditorShell({
   }, [category, visibleSections, setVisibleSections, regularSectionCount])
 
   return (
-    <div className={SECTION_STYLES.LAYOUT.page}>
-      <ConflictResolutionDialog
-        open={saveError?.kind === 'conflict'}
-        conflictState={conflictState}
-        onChoice={handleConflictResolution}
-        isResolving={isSaving}
-      />
-
-      <SyncOffWarningDialog
-        action="save"
-        open={showSaveWarning}
-        onOpenChange={setShowSaveWarning}
-        onConfirm={handleSaveWithSync}
-        isPending={isSaving}
-      />
-
-      <div className="flex items-center justify-end gap-2 mb-4">
-        {isAutoSaving ? (
-          <span className={SECTION_STYLES.TEXT.caption}>
-            {t('pages.plannerMD.save.autoSaving', 'Saving...')}
-            <LastSavedLabel lastSavedAt={lastSavedAt} inline />
-          </span>
-        ) : (
-          <LastSavedLabel lastSavedAt={lastSavedAt} />
-        )}
-        <Button onClick={handleSave} disabled={isSaving} variant="outline">
-          <Save className="w-4 h-4 mr-2" />
-          {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
-        </Button>
-      </div>
-
-      <div className="bg-background rounded-lg space-y-2">
-        <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 items-start">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
-            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
-              {t('pages.plannerMD.category')}
-            </label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-auto min-w-24 h-10 justify-between">
-                  <MdCategoryLabel category={category} />
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                {MD_CATEGORIES.map((cat) => (
-                  <DropdownMenuItem
-                    key={cat}
-                    onClick={() => {
-                      handleCategoryChange(cat)
-                    }}
-                  >
-                    <MdCategoryLabel category={cat} />
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-start gap-2 w-full sm:w-auto">
-            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
-              {t('pages.plannerMD.keywords')}
-            </label>
-            <div className="w-full sm:w-80">
-              <KeywordSelector
-                options={PLANNER_KEYWORDS}
-                selectedOptions={selectedKeywords}
-                onSelectionChange={setSelectedKeywords}
-                getIconPath={getKeywordIconPath}
-                placeholder={t('pages.plannerMD.keywordsPlaceholder')}
-                clearLabel={t('pages.plannerMD.clearKeywords')}
-                selectedCountText={t('pages.plannerMD.keywordSelector.selected', {
-                  count: selectedKeywords.size,
-                })}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-          <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
-            {t('pages.plannerMD.planTitle')}
-          </label>
-          <div className="flex flex-col gap-1 flex-1">
-            <input
-              type="text"
-              value={title}
-              onChange={handleTitleChange}
-              placeholder={t('pages.plannerMD.titlePlaceholder')}
-              className={`w-full px-3 py-2 border rounded-md bg-background ${
-                !isTitleValid ? 'border-destructive' : 'border-border'
-              } focus:outline-none focus:ring-2 focus:ring-primary`}
-            />
-            <span
-              className={`text-xs text-right ${
-                !isTitleValid ? 'text-destructive' : 'text-muted-foreground'
-              }`}
-            >
-              {titleByteLength}/{MAX_TITLE_BYTES} {t('pages.plannerMD.bytes')}
-            </span>
-          </div>
-        </div>
-
-        <PlannerSection title={t('pages.plannerMD.introduction')}>
-          <StoreBoundSectionNote
-            sectionKey="intro"
-            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-          />
-        </PlannerSection>
-
-        <DeckImportConfirmDialog
-          pendingImport={pendingImport}
-          onConfirm={handleImportConfirm}
-          onCancel={clearPending}
+    <NoteDeliveryProvider registry={noteDelivery}>
+      <div className={SECTION_STYLES.LAYOUT.page}>
+        <ConflictResolutionDialog
+          open={saveError?.kind === 'conflict'}
+          conflictState={conflictState}
+          onChoice={handleConflictResolution}
+          isResolving={isSaving}
         />
 
-        {sections.map((section, index) => (
-          <RevealSection key={section.id} visible={visibleSections >= index + 1}>
-            {section.node}
-          </RevealSection>
-        ))}
+        <SyncOffWarningDialog
+          action="save"
+          open={showSaveWarning}
+          onOpenChange={setShowSaveWarning}
+          onConfirm={handleSaveWithSync}
+          isPending={isSaving}
+        />
 
-        <PlannerSection title={t('pages.plannerMD.closingNotes')}>
-          <StoreBoundSectionNote
-            sectionKey="outro"
-            placeholder={t('pages.plannerMD.noteEditor.placeholder')}
-          />
-        </PlannerSection>
-
-        <div className="flex justify-end gap-2 pt-6 border-t">
+        <div className="flex items-center justify-end gap-2 mb-4">
+          {isAutoSaving ? (
+            <span className={SECTION_STYLES.TEXT.caption}>
+              {t('pages.plannerMD.save.autoSaving', 'Saving...')}
+              <LastSavedLabel lastSavedAt={lastSavedAt} inline />
+            </span>
+          ) : (
+            <LastSavedLabel lastSavedAt={lastSavedAt} />
+          )}
           <Button onClick={handleSave} disabled={isSaving} variant="outline">
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
           </Button>
         </div>
+
+        <div className="bg-background rounded-lg space-y-2">
+          <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 items-start">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-2 h-12">
+              <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+                {t('pages.plannerMD.category')}
+              </label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="w-auto min-w-24 h-10 justify-between">
+                    <MdCategoryLabel category={category} />
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {MD_CATEGORIES.map((cat) => (
+                    <DropdownMenuItem
+                      key={cat}
+                      onClick={() => {
+                        handleCategoryChange(cat)
+                      }}
+                    >
+                      <MdCategoryLabel category={cat} />
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-start gap-2 w-full sm:w-auto">
+              <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+                {t('pages.plannerMD.keywords')}
+              </label>
+              <div className="w-full sm:w-80">
+                <KeywordSelector
+                  options={PLANNER_KEYWORDS}
+                  selectedOptions={selectedKeywords}
+                  onSelectionChange={setSelectedKeywords}
+                  getIconPath={getKeywordIconPath}
+                  placeholder={t('pages.plannerMD.keywordsPlaceholder')}
+                  clearLabel={t('pages.plannerMD.clearKeywords')}
+                  selectedCountText={t('pages.plannerMD.keywordSelector.selected', {
+                    count: selectedKeywords.size,
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+            <label className="text-sm font-medium whitespace-nowrap sm:mt-2">
+              {t('pages.plannerMD.planTitle')}
+            </label>
+            <div className="flex flex-col gap-1 flex-1">
+              <input
+                type="text"
+                value={title}
+                onChange={handleTitleChange}
+                placeholder={t('pages.plannerMD.titlePlaceholder')}
+                className={`w-full px-3 py-2 border rounded-md bg-background ${
+                  !isTitleValid ? 'border-destructive' : 'border-border'
+                } focus:outline-none focus:ring-2 focus:ring-primary`}
+              />
+              <span
+                className={`text-xs text-right ${
+                  !isTitleValid ? 'text-destructive' : 'text-muted-foreground'
+                }`}
+              >
+                {titleByteLength}/{MAX_TITLE_BYTES} {t('pages.plannerMD.bytes')}
+              </span>
+            </div>
+          </div>
+
+          <PlannerSection title={t('pages.plannerMD.introduction')}>
+            <StoreBoundSectionNote
+              sectionKey="intro"
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
+          </PlannerSection>
+
+          <DeckImportConfirmDialog
+            pendingImport={pendingImport}
+            onConfirm={handleImportConfirm}
+            onCancel={clearPending}
+          />
+
+          {sections.map((section, index) => (
+            <RevealSection key={section.id} visible={visibleSections >= index + 1}>
+              {section.node}
+            </RevealSection>
+          ))}
+
+          <PlannerSection title={t('pages.plannerMD.closingNotes')}>
+            <StoreBoundSectionNote
+              sectionKey="outro"
+              placeholder={t('pages.plannerMD.noteEditor.placeholder')}
+            />
+          </PlannerSection>
+
+          <div className="flex justify-end gap-2 pt-6 border-t">
+            <Button onClick={handleSave} disabled={isSaving} variant="outline">
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? t('pages.plannerMD.save.saving') : t('pages.plannerMD.save.button')}
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
+    </NoteDeliveryProvider>
   )
 }

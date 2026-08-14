@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
+import { useEditor, EditorContent, EditorContext, type JSONContent } from '@tiptap/react'
 import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { showErrorMessage } from '@/lib/errorPresentation'
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { measureDocBytes, largestPrefixWithinLimit } from '../lib/noteUtils'
 import { sanitizeUrl } from '../lib/tiptap-utils'
 import { AUTO_SAVE_DEBOUNCE_MS, MAX_NOTE_BYTES } from '@/lib/constants'
+import { useNoteDelivery } from '../context/NoteDeliveryRegistry'
 import type { NoteEditorProps } from '../types/NoteEditorTypes'
 import { SpoilerExtension } from './extensions/SpoilerExtension'
 import { ByteLimitExtension, BYTE_LIMIT_BYPASS } from './extensions/ByteLimitExtension'
@@ -71,6 +72,9 @@ function NoteEditorInner({
   // What the armed debounce would have delivered, callable outside its timer.
   const pendingRef = useRef<(() => void) | null>(null)
 
+  // Tiptap's parsed form of `value.content`, awaiting its one-time delivery.
+  const normalizedRef = useRef<JSONContent | null>(null)
+
   // Debounced sync to parent - fires AUTO_SAVE_DEBOUNCE_MS after typing stops
   useEffect(() => {
     pendingRef.current = null
@@ -95,25 +99,18 @@ function NoteEditorInner({
   // The debounce effect re-runs on every keystroke and clears its timer each time,
   // so unmount would otherwise drop the last edit. Flush it from an unmount-only
   // effect, which runs after that cleanup.
-  //
-  // A tab closing inside the debounce window loses the same text, and silently:
-  // the parent was never told anything changed, so it raises no warning. Capture
-  // runs ahead of the parent's own handler, so what this delivers is what that
-  // handler sees. A mobile tab is discarded through `pagehide` without ever
-  // firing `beforeunload`, which is where this loss is most common.
-  useEffect(() => {
-    const deliverPending = () => {
-      pendingRef.current?.()
-    }
+  useEffect(() => () => pendingRef.current?.(), [])
 
-    window.addEventListener('beforeunload', deliverPending, { capture: true })
-    window.addEventListener('pagehide', deliverPending, { capture: true })
-    return () => {
-      window.removeEventListener('beforeunload', deliverPending, { capture: true })
-      window.removeEventListener('pagehide', deliverPending, { capture: true })
-      deliverPending()
-    }
-  }, [])
+  // An owner collecting pending text before the page goes away pulls it from
+  // here. Listening for the unload directly would put this editor's delivery at
+  // the mercy of listener registration order against the owner's own handler.
+  const delivery = useNoteDelivery()
+  useEffect(() => {
+    if (!delivery) return
+    return delivery.register(() => {
+      pendingRef.current?.()
+    })
+  }, [delivery])
 
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
@@ -146,6 +143,9 @@ function NoteEditorInner({
     extensions,
     content: value.content,
     editable: !readOnly && isFocused,
+    onCreate: ({ editor }) => {
+      normalizedRef.current = editor.getJSON()
+    },
     onUpdate: ({ editor }) => {
       // Update local state only - parent sync happens on blur
       const newContent = editor.getJSON()
@@ -199,6 +199,18 @@ function NoteEditorInner({
       },
     },
   })
+
+  // Hand Tiptap's parsed document over at mount instead of letting it travel as a
+  // debounced edit. Child effects run before the owner's, so the owner's baseline
+  // already holds the normalized form: opening a planner is not a change, arms no
+  // autosave, and never rewrites a saved row as a draft.
+  useEffect(() => {
+    const normalized = normalizedRef.current
+    if (!normalized) return
+
+    normalizedRef.current = null
+    onChange?.({ content: normalized })
+  }, [onChange])
 
   // Whether a pointer is currently pressed, and the wait for its release if one is
   // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.
