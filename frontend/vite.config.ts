@@ -36,6 +36,7 @@ const EDITOR_TESTS = [
   'src/shared/noteEditor/**/__tests__/**',
   'src/pages/planner/__tests__/PlannerMDEditPage.test.tsx',
   'src/pages/planner/components/planner/__tests__/PlannerMDEditorContent.test.tsx',
+  'src/pages/planner/components/planner/__tests__/PlannerEditorShellFlush.test.tsx',
 ]
 
 function serveWhitelistedStatic(): Plugin {
