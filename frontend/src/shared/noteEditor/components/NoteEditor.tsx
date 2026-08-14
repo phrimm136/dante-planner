@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
-import { useEditor, EditorContent, EditorContext, type JSONContent } from '@tiptap/react'
+import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 import { useTranslation } from 'react-i18next'
 import { showErrorMessage } from '@/lib/errorPresentation'
 import StarterKit from '@tiptap/starter-kit'
 
 import { cn } from '@/lib/utils'
-import { measureDocBytes, largestPrefixWithinLimit } from '../lib/noteUtils'
+import { measureDocBytes, largestPrefixWithinLimit, isNoteEmpty } from '../lib/noteUtils'
 import { sanitizeUrl } from '../lib/tiptap-utils'
 import { AUTO_SAVE_DEBOUNCE_MS, MAX_NOTE_BYTES } from '@/lib/constants'
+import { env } from '@/lib/env'
 import { useNoteDelivery } from '../context/NoteDeliveryRegistry'
 import type { NoteEditorProps } from '../types/NoteEditorTypes'
 import { SpoilerExtension } from './extensions/SpoilerExtension'
@@ -72,8 +73,11 @@ function NoteEditorInner({
   // What the armed debounce would have delivered, callable outside its timer.
   const pendingRef = useRef<(() => void) | null>(null)
 
-  // Tiptap's parsed form of `value.content`, awaiting its one-time delivery.
-  const normalizedRef = useRef<JSONContent | null>(null)
+  // Whether the note arrived empty, and whether anything has been handed to the
+  // owner since. Together they bound the window in which Tiptap's own reparse of
+  // the loaded note can be told apart from the user typing.
+  const [loadedEmpty] = useState(() => isNoteEmpty(value))
+  const hasDeliveredRef = useRef(false)
 
   // Debounced sync to parent - fires AUTO_SAVE_DEBOUNCE_MS after typing stops
   useEffect(() => {
@@ -82,6 +86,7 @@ function NoteEditorInner({
 
     const flush = () => {
       if (hasLocalChangesRef.current) {
+        hasDeliveredRef.current = true
         onChange?.({ content: localContent })
         hasLocalChangesRef.current = false
       }
@@ -111,6 +116,15 @@ function NoteEditorInner({
       pendingRef.current?.()
     })
   }, [delivery])
+
+  // An editable editor with no owner to pull from it loses whatever the debounce
+  // is holding when the page closes, and nothing at runtime would say so.
+  useEffect(() => {
+    if (!env.DEV || delivery || readOnly || !onChange) return
+    console.warn(
+      'NoteEditor is editable but has no NoteDeliveryProvider above it: text still inside its debounce will be lost when the page closes.',
+    )
+  }, [delivery, readOnly, onChange])
 
   // Measure the same { content } shape the cap and schema enforce, so the
   // counter never disagrees with what the editor actually rejects.
@@ -143,13 +157,18 @@ function NoteEditorInner({
     extensions,
     content: value.content,
     editable: !readOnly && isFocused,
-    onCreate: ({ editor }) => {
-      normalizedRef.current = editor.getJSON()
-    },
     onUpdate: ({ editor }) => {
       // Update local state only - parent sync happens on blur
       const newContent = editor.getJSON()
       setLocalContent(newContent)
+
+      // Tiptap reparses the loaded note as it starts up and reports that as an
+      // update. A note stored without content arrives as `''` and parses into a
+      // document holding a single empty paragraph, so that first update looks
+      // like a change while nothing about the note has changed. Until this editor
+      // has handed something over, an empty note that is still empty is no edit.
+      if (!hasDeliveredRef.current && loadedEmpty && isNoteEmpty({ content: newContent })) return
+
       hasLocalChangesRef.current = true
     },
     editorProps: {
@@ -201,16 +220,24 @@ function NoteEditorInner({
   })
 
   // Hand Tiptap's parsed document over at mount instead of letting it travel as a
-  // debounced edit. Child effects run before the owner's, so the owner's baseline
-  // already holds the normalized form: opening a planner is not a change, arms no
-  // autosave, and never rewrites a saved row as a draft.
+  // debounced edit: the stored form and the parsed form differ for anything that
+  // does not round-trip, and an owner that saw only the difference would read a
+  // plain load as an edit. This effect runs before the owner's own, which is when
+  // the owner takes the loaded planner as its baseline.
   useEffect(() => {
-    const normalized = normalizedRef.current
-    if (!normalized) return
+    if (!editor || hasDeliveredRef.current) return
 
-    normalizedRef.current = null
-    onChange?.({ content: normalized })
-  }, [onChange])
+    // An empty note that parses into an empty document has not changed, however
+    // little the two shapes resemble each other — the stored form is `''` and the
+    // parsed one a document holding one empty paragraph. Sections reveal one frame
+    // at a time, long after the owner took its baseline, so reporting this would
+    // make merely opening a planner an edit for every note that was blank.
+    const loaded = editor.getJSON()
+    if (loadedEmpty && isNoteEmpty({ content: loaded })) return
+
+    hasDeliveredRef.current = true
+    onChange?.({ content: loaded })
+  }, [editor, onChange, loadedEmpty])
 
   // Whether a pointer is currently pressed, and the wait for its release if one is
   // already scheduled. Read by collapseToolbar, which must not reflow mid-gesture.

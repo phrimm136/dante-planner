@@ -119,8 +119,9 @@ import { PlannerEditorShell } from '../PlannerEditorShell'
 import {
   PlannerEditorStoreProvider,
   usePlannerEditorStoreApi,
+  createDefaultSectionNotes,
 } from '../../../stores/usePlannerEditorStore'
-import type { PlannerEditorStore } from '../../../stores/usePlannerEditorStore'
+import type { PlannerEditorStore, PlannerEditorState } from '../../../stores/usePlannerEditorStore'
 import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import type { StoreApi } from 'zustand'
 
@@ -199,10 +200,10 @@ function StoreCapture({ onReady }: { onReady: (api: StoreApi<PlannerEditorStore>
   return null
 }
 
-function renderShell() {
+function renderShell(initialState?: Partial<PlannerEditorState>) {
   let storeApi: StoreApi<PlannerEditorStore> | null = null
   const utils = render(
-    <PlannerEditorStoreProvider>
+    <PlannerEditorStoreProvider initialState={initialState}>
       <StoreCapture
         onReady={(api) => {
           storeApi = api
@@ -296,6 +297,25 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     renderShell()
     await settleMount()
 
+    expect(fireBeforeUnload()).toBe(false)
+  })
+
+  it('writes nothing when a stored planner whose notes are empty strings is opened', async () => {
+    // What the load path actually hands over: a stored note with no content
+    // becomes `{ content: '' }`, which Tiptap parses into an empty document. That
+    // reparse is not an edit, however little it resembles what was stored.
+    //
+    // The double assertion is the point rather than a shortcut: `''` is not a
+    // JSONContent, so the shape the loader produces is one the type says cannot
+    // exist, and only a cast can reproduce it here.
+    const emptied = Object.fromEntries(
+      Object.keys(createDefaultSectionNotes()).map((key) => [key, { content: '' }]),
+    ) as unknown as PlannerEditorState['sectionNotes']
+
+    renderShell({ sectionNotes: emptied })
+    await settleMount()
+
+    expect(mockSaveToLocal).not.toHaveBeenCalled()
     expect(fireBeforeUnload()).toBe(false)
   })
 

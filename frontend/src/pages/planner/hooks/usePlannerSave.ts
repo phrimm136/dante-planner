@@ -394,11 +394,13 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }, AUTO_SAVE_DEBOUNCE_MS)
   }
 
-  // The planner as it stood when this editor opened. Both baselines start here
-  // rather than being filled in later: a window in which no baseline exists is a
-  // window in which a flush cannot tell unsaved work from an untouched load, and
-  // in which the dirty flags below have nothing to compare against.
+  // The planner as it stood at first render, so the dirty flags below have
+  // something to compare against before any effect has run. The subscription
+  // replaces it once the editors have handed over their loaded content.
   const [mountComparable] = useState(() => stateToComparableString(options.getState()))
+
+  // Whether that replacement has already happened.
+  const baselineSettledRef = useRef(false)
 
   // Previous state for dirty checking
   const previousStateRef = useRef<string>(mountComparable)
@@ -994,6 +996,20 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!isClient) return
 
     unmountedRef.current = false
+
+    // Adopt the store as it stands now, not as it stood at render. Each editor
+    // hands Tiptap's reparse of its stored note over in its own mount effect, and
+    // those run before this one — a note stored without content arrives as `''`
+    // and reparses into an empty document, which is a load, not an edit. Compare
+    // against the render-time capture and every such planner opens dirty and gets
+    // written back as a draft.
+    if (!baselineSettledRef.current) {
+      baselineSettledRef.current = true
+      const settled = stateToComparableString(getStateRef.current())
+      previousStateRef.current = settled
+      lastSyncedStateRef.current = settled
+      dirtyRef.current = false
+    }
 
     const unsubscribe = subscribe(() => {
       dirtyRef.current = true
