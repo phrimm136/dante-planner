@@ -699,9 +699,9 @@ describe('NoteEditor - debounce flush on unmount', () => {
 
   it('hands pending text to its owner when the registry is drained', async () => {
     const onChange = vi.fn()
-    let registry: NoteDeliveryRegistry | null = null
+    const captured: { registry: NoteDeliveryRegistry | null } = { registry: null }
     const captureRegistry = (owned: NoteDeliveryRegistry) => {
-      registry = owned
+      captured.registry = owned
     }
 
     function Harness({ onReady }: { onReady: (owned: NoteDeliveryRegistry) => void }) {
@@ -726,7 +726,7 @@ describe('NoteEditor - debounce flush on unmount', () => {
     typeText('held by the debounce')
     expect(onChange).not.toHaveBeenCalled()
 
-    registry?.drain()
+    captured.registry?.drain()
 
     expect(onChange).toHaveBeenCalledTimes(1)
     const delivered = onChange.mock.calls[0][0] as NoteContent
