@@ -1,6 +1,14 @@
 import { assertNever } from '@/lib/utils'
+import { ok, err } from '@/lib/result'
+import { withRollback } from '@/lib/withRollback'
 
-import type { ConflictResolutionChoice, PlannerStatus } from '../types/PlannerTypes'
+import type { Result } from '@/lib/result'
+import type { AppError } from '@/lib/apiErrorClassifier'
+import type {
+  ConflictResolutionChoice,
+  PlannerStatus,
+  SaveablePlanner,
+} from '../types/PlannerTypes'
 
 /**
  * Success toast for each conflict resolution, keyed so a new choice cannot ship
@@ -69,6 +77,164 @@ function forkMetadata(
     lastModifiedAt: ctx.now,
     savedAt: ctx.now,
   }
+}
+
+/** Which step of a resolution failed, and why. */
+export interface ConflictFailure {
+  step: 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
+  error: AppError
+}
+
+/** The effectful operations a resolution needs, injected so the interpreter stays testable. */
+export interface ConflictOps {
+  /** The side that ends up under the conflicting id when local wins. */
+  local: () => SaveablePlanner
+  /** The server's side, read here when the caller does not already hold it. */
+  incoming: () => Promise<Result<SaveablePlanner, AppError>>
+  validate: (planner: SaveablePlanner) => AppError | null
+  saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
+  deleteLocal: (id: string) => Promise<Result<void, AppError>>
+  sync: (planner: SaveablePlanner, force: boolean) => Promise<Result<SaveablePlanner, AppError>>
+  sanitizeTitle: (title: string) => string
+}
+
+/**
+ * The same context value that built `plan`. The interpreter never calls `newId` —
+ * reusing one context across build and interpret is what makes "minted once" checkable.
+ */
+export interface ConflictInterpreterContext {
+  newId: () => string
+  deviceId: string
+  now: string
+}
+
+function failed(step: ConflictFailure['step'], error: AppError): Result<never, ConflictFailure> {
+  return err({ step, error })
+}
+
+/** Force-push the local side, then store what the server acknowledged. */
+async function keepLocal(
+  ops: ConflictOps,
+  ctx: ConflictInterpreterContext,
+): Promise<Result<void, ConflictFailure>> {
+  const planner = ops.local()
+
+  const invalid = ops.validate(planner)
+  if (invalid) return failed('validate', invalid)
+
+  const synced = await ops.sync(planner, true)
+  if (!synced.ok) return failed('sync', synced.error)
+
+  // The server echoes the status it was sent, so the resolution marks the row
+  // saved itself. Left a draft it would stay badged unsaved and turn the next
+  // server-version bump into another conflict prompt.
+  const saved = await ops.saveLocal({
+    ...synced.value,
+    metadata: { ...synced.value.metadata, status: 'saved', savedAt: ctx.now },
+  })
+  return saved.ok ? ok(undefined) : failed('saveLocal', saved.error)
+}
+
+/** Take the server's side as the local one. */
+async function adoptIncoming(ops: ConflictOps): Promise<Result<void, ConflictFailure>> {
+  const incoming = await ops.incoming()
+  if (!incoming.ok) return failed('sync', incoming.error)
+
+  const saved = await ops.saveLocal(incoming.value)
+  return saved.ok ? ok(undefined) : failed('saveLocal', saved.error)
+}
+
+/**
+ * Save the copy locally, sync it, then run what the plan has left.
+ *
+ * The copy is written before it is synced so a rejected upload has something to
+ * undo; the rest of the plan runs inside the same rollback, because a copy left
+ * behind by a later failure is the duplicate the user did not ask for.
+ */
+async function forkCopy(
+  metadata: ConflictForkMetadata,
+  remaining: ConflictEffect[],
+  ops: ConflictOps,
+  ctx: ConflictInterpreterContext,
+): Promise<Result<void, ConflictFailure>> {
+  const source = ops.local()
+  const copy: SaveablePlanner = {
+    ...source,
+    metadata: {
+      ...source.metadata,
+      ...metadata,
+      title: ops.sanitizeTitle(metadata.title),
+      // The original keeps the publication; a copy of it starts unpublished.
+      published: false,
+    },
+  }
+
+  const invalid = ops.validate(copy)
+  if (invalid) return failed('validate', invalid)
+
+  const outcome = await withRollback<ConflictFailure>({
+    create: async () => {
+      const saved = await ops.saveLocal(copy)
+      return saved.ok ? ok(undefined) : failed('saveLocal', saved.error)
+    },
+    rest: async () => {
+      const synced = await ops.sync(copy, false)
+      if (!synced.ok) return failed('sync', synced.error)
+      return interpretConflictPlan(remaining, ops, ctx)
+    },
+    rollback: async () => {
+      const deleted = await ops.deleteLocal(copy.metadata.id)
+      return deleted.ok ? ok(undefined) : failed('deleteLocal', deleted.error)
+    },
+  })
+
+  switch (outcome.kind) {
+    case 'completed':
+      return ok(undefined)
+    case 'undone':
+      return err(outcome.error)
+    case 'undoFailed':
+      // The copy survives the failure, so the caller reports the original cause
+      // while the orphan stays visible in the planner list.
+      console.error('Rollback of the forked planner failed:', outcome.rollbackError)
+      return err(outcome.error)
+    default:
+      return assertNever(outcome)
+  }
+}
+
+/**
+ * Execute a resolution plan in order, undoing a fork that a later step defeats.
+ *
+ * Re-interpreting the same plan repeats the same writes under the same ids, so a
+ * retried "keep both" cannot mint a second copy.
+ */
+export async function interpretConflictPlan(
+  plan: ConflictEffect[],
+  ops: ConflictOps,
+  ctx: ConflictInterpreterContext,
+): Promise<Result<void, ConflictFailure>> {
+  const [effect, ...remaining] = plan
+  if (!effect) return ok(undefined)
+
+  switch (effect.kind) {
+    case 'forkCopy':
+      return forkCopy(effect.metadata, remaining, ops, ctx)
+    case 'keepLocal': {
+      const kept = await keepLocal(ops, ctx)
+      if (!kept.ok) return kept
+      break
+    }
+    case 'adoptIncoming': {
+      const adopted = await adoptIncoming(ops)
+      if (!adopted.ok) return adopted
+      break
+    }
+    default:
+      return assertNever(effect)
+  }
+
+  return interpretConflictPlan(remaining, ops, ctx)
 }
 
 /** Effects that resolve a conflict, in execution order. */
