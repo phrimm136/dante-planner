@@ -5,7 +5,6 @@
  * Most mutations use cache invalidation. Notification toggle uses direct cache update (no refetch).
  */
 
-
 import { ApiClient, ConflictError } from '@/lib/api'
 import { showErrorMessage } from '@/lib/errorPresentation'
 import { requestNotificationPermission } from '@/shared/notifications'
@@ -103,7 +102,6 @@ interface UpvoteCommentInput {
 }
 
 export function useUpvoteComment() {
-
   return useApiMutation<void, UpvoteCommentInput>({
     mutationFn: async ({ commentId }) => {
       await ApiClient.post(`/api/comments/${commentId}/upvote`, {})
@@ -138,7 +136,6 @@ interface ReportCommentInput {
 }
 
 export function useReportComment() {
-
   return useApiMutation<void, ReportCommentInput>({
     mutationFn: async ({ commentId, reason }) => {
       await ApiClient.post(`/api/comments/${commentId}/report`, { reason })

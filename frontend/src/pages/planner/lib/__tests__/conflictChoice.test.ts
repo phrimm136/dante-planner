@@ -304,7 +304,10 @@ describe('interpretConflictPlan', () => {
       ctx,
     )
 
-    expect(outcome).toEqual({ ok: false, error: { step: 'saveLocal', error: { kind: 'notFound' } } })
+    expect(outcome).toEqual({
+      ok: false,
+      error: { step: 'saveLocal', error: { kind: 'notFound' } },
+    })
     expect(sync).not.toHaveBeenCalled()
   })
 

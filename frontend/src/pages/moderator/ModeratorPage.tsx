@@ -108,10 +108,7 @@ interface ModerationVariables {
 
 /** The slice of a mutation result the dialog table needs. */
 interface ModerationMutation {
-  mutate: (
-    variables: ModerationVariables,
-    options: { onSuccess: () => void },
-  ) => void
+  mutate: (variables: ModerationVariables, options: { onSuccess: () => void }) => void
   isPending: boolean
 }
 

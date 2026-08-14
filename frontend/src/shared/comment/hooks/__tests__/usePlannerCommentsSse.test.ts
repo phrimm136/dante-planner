@@ -219,6 +219,8 @@ describe('usePlannerCommentsSse — planner removed elsewhere', () => {
     await settle()
 
     expect(presenterMocks.showErrorMessage).toHaveBeenCalledTimes(1)
-    expect(presenterMocks.showErrorMessage).toHaveBeenCalledWith('planner:sync.removedOnAnotherDevice')
+    expect(presenterMocks.showErrorMessage).toHaveBeenCalledWith(
+      'planner:sync.removedOnAnotherDevice',
+    )
   })
 })

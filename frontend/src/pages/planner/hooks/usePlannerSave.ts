@@ -492,12 +492,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       return isValid ? null : plannerValidationError(toUserFriendlyError(errors[0]))
     }
 
-    const validationError = validatePlannerForDraftSave(
-      content,
-      category,
-      egoGiftSpec,
-      egoGiftI18n,
-    )
+    const validationError = validatePlannerForDraftSave(content, category, egoGiftSpec, egoGiftI18n)
     return validationError ? plannerValidationError(validationError) : null
   }
 
