@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
+import { presentError } from '@/lib/errorPresentation'
+import type { AppError } from '@/lib/apiErrorClassifier'
 import type {
   ConflictState,
   ConflictResolutionChoice,
@@ -32,6 +34,8 @@ export interface ConflictResolutionDialogProps {
   onChoice: (choice: ConflictResolutionChoice) => void
   /** Whether resolution is in progress */
   isResolving?: boolean
+  /** Why the last attempt at this conflict failed, or null when none has */
+  resolutionError?: AppError | null
 }
 
 /**
@@ -62,12 +66,17 @@ export function ConflictResolutionDialog({
   serverPlanner,
   onChoice,
   isResolving = false,
+  resolutionError = null,
 }: ConflictResolutionDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
 
   // Format the conflict detection time for display
   const formatTime = (isoString: string): string =>
     formatPlannerDate(isoString, undefined, DATE_FORMATS.TIME_ONLY) ?? ''
+
+  // This dialog is the mounted owner of the conflict, so a failure it caused is
+  // reported here rather than through a toast the conflict itself never gets.
+  const failure = resolutionError && presentError(resolutionError)
 
   // Prevent dismissal via ESC key or clicking outside
   const preventDismissal = (e: Event) => {
@@ -127,6 +136,8 @@ export function ConflictResolutionDialog({
             {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
           </p>
         )}
+
+        {failure && <p className="text-sm text-destructive">{t(failure.key, failure.params)}</p>}
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button

@@ -228,6 +228,7 @@ export function PlannerEditorShell({
     isAutoSaving,
     isSaving,
     error: saveError,
+    resolutionError,
     clearError,
     save,
     resolveConflict,
@@ -643,6 +644,7 @@ export function PlannerEditorShell({
         <ConflictResolutionDialog
           open={saveError?.kind === 'conflict'}
           conflictState={conflictState}
+          resolutionError={resolutionError}
           onChoice={handleConflictResolution}
           isResolving={isSaving}
         />
