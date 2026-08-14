@@ -101,7 +101,7 @@ describe('extractIdentityIds', () => {
   it('returns empty set when equipment is undefined', () => {
     const content = createMockMDContent()
     // Force undefined to test the guard
-    ;(content as Record<string, unknown>).equipment = undefined
+    Object.assign(content, { equipment: undefined })
     expect(extractIdentityIds(content)).toEqual(new Set())
   })
 
@@ -249,10 +249,12 @@ describe('extractGiftIds', () => {
 
   it('handles undefined sources gracefully', () => {
     const content = createMockMDContent()
-    ;(content as Record<string, unknown>).selectedGiftIds = undefined
-    ;(content as Record<string, unknown>).observationGiftIds = undefined
-    ;(content as Record<string, unknown>).comprehensiveGiftIds = undefined
-    ;(content as Record<string, unknown>).floorSelections = undefined
+    Object.assign(content, {
+      selectedGiftIds: undefined,
+      observationGiftIds: undefined,
+      comprehensiveGiftIds: undefined,
+      floorSelections: undefined,
+    })
 
     expect(extractGiftIds(content)).toEqual(new Set())
   })
@@ -298,7 +300,7 @@ describe('extractThemePackIds', () => {
 
   it('returns empty set when floorSelections is undefined', () => {
     const content = createMockMDContent()
-    ;(content as Record<string, unknown>).floorSelections = undefined
+    Object.assign(content, { floorSelections: undefined })
     expect(extractThemePackIds(content)).toEqual(new Set())
   })
 })
@@ -473,7 +475,7 @@ describe('matchesPlannerFilters', () => {
           savedAt: null,
           deviceId: 'test-device',
         },
-        config: { type: 'REFRACTED_RAILWAY', category: 'RR5' },
+        config: { type: 'REFRACTED_RAILWAY', category: 'RR_PLACEHOLDER' },
         content: {},
       }
       const filters = createFilters({ keywords: ['Burn'] })
@@ -496,7 +498,7 @@ describe('matchesPlannerFilters', () => {
           savedAt: null,
           deviceId: 'test-device',
         },
-        config: { type: 'REFRACTED_RAILWAY', category: 'RR5' },
+        config: { type: 'REFRACTED_RAILWAY', category: 'RR_PLACEHOLDER' },
         content: {},
       }
       const filters = createFilters({ title: 'railway' })
@@ -508,9 +510,9 @@ describe('matchesPlannerFilters', () => {
   describe('missing content edge cases', () => {
     it('returns false when plan has no keywords but keyword filter is active', () => {
       const content = createMockMDContent()
-      ;(content as Record<string, unknown>).selectedKeywords = undefined
+      Object.assign(content, { selectedKeywords: undefined })
       const plan = createMockPlanner()
-      ;(plan.content as Record<string, unknown>).selectedKeywords = undefined
+      Object.assign(plan.content, { selectedKeywords: undefined })
       const filters = createFilters({ keywords: ['Burn'] })
 
       expect(matchesPlannerFilters(plan, filters)).toBe(false)

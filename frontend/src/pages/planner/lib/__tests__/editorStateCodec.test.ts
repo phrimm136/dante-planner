@@ -9,13 +9,22 @@ import {
 import { DUNGEON_IDX } from '@/shared/gameData'
 import { createEmptyNoteContent } from '@/shared/noteEditor'
 
+import type { JSONContent } from '@tiptap/core'
 import type { EditorMetadata } from '../editorStateCodec'
 import type { MDPlannerContent } from '../../types/PlannerTypes'
 import type { PlannerState } from '../../hooks/usePlannerSave'
 
+// hydrateEditorState substitutes '' for a note body it cannot read, so both the
+// fixtures and the round-tripped map carry a string where the type says JSONContent.
+type LooseNoteMap = Record<string, { content: JSONContent | string }>
+
 const METADATA: EditorMetadata = { title: 'Round Trip', category: '10F', isPublished: true }
 
-function makeContent(overrides: Partial<MDPlannerContent> = {}): MDPlannerContent {
+function makeContent(
+  overrides: Partial<Omit<MDPlannerContent, 'sectionNotes'>> & {
+    sectionNotes?: LooseNoteMap
+  } = {},
+): MDPlannerContent {
   return {
     selectedKeywords: ['Combustion'],
     selectedBuffIds: [3],
@@ -74,7 +83,9 @@ describe('hydrateEditorState / projectEditorState round trip', () => {
   const cases: {
     name: string
     content: MDPlannerContent
-    expected: Partial<ReturnType<typeof serialize>>
+    expected: Partial<Omit<ReturnType<typeof serialize>, 'sectionNotes'>> & {
+      sectionNotes?: LooseNoteMap
+    }
   }[] = [
     {
       name: 'full content survives the round trip unchanged',

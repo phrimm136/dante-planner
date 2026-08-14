@@ -8,16 +8,16 @@
 import { describe, it, expect } from 'vitest'
 import { matchesDeckFilter } from '../deckFilter'
 import type { DeckFilterState, EntityMode } from '../../types/DeckTypes'
+import type { IdentityListItem } from '@/pages/identity'
+import type { EGOListItem } from '@/pages/ego'
 import type { SearchMappings } from '@/shared/filter'
 import type { Keyword } from '@/shared/gameData'
 import { getSinnerFromId } from '@/shared/gameData'
 import { enumerateSelectionStates, findParityMismatches } from '@/test-utils/facetParity'
 
-// Taken from the predicate itself: tsconfig.app.json excludes tests, so the
-// type-aware lint pass cannot resolve a barrel type import from here.
-type DeckFilterItem = Parameters<typeof matchesDeckFilter>[0]
-type IdentityOverrides = Omit<Partial<DeckFilterItem>, 'id'> & { id: string }
-type EgoOverrides = IdentityOverrides
+type DeckFilterItem = IdentityListItem | EGOListItem
+type IdentityOverrides = Omit<Partial<IdentityListItem>, 'id'> & { id: string }
+type EgoOverrides = Omit<Partial<EGOListItem>, 'id'> & { id: string }
 
 const EMPTY_MAPPINGS: SearchMappings = {
   keywordToValue: new Map(),
@@ -111,7 +111,7 @@ function legacyMatches(
   return true
 }
 
-function makeIdentity(overrides: IdentityOverrides) {
+function makeIdentity(overrides: IdentityOverrides): IdentityListItem {
   return {
     name: 'Fixture Identity',
     rank: 0,
@@ -127,7 +127,7 @@ function makeIdentity(overrides: IdentityOverrides) {
   }
 }
 
-function makeEgo(overrides: EgoOverrides) {
+function makeEgo(overrides: EgoOverrides): EGOListItem {
   return {
     name: 'Fixture EGO',
     egoType: 'ZAYIN',

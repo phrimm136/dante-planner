@@ -112,7 +112,7 @@ describe('computeAffinityEA', () => {
   })
 
   describe('consumption from equipped EGO requirements', () => {
-    it.each([
+    it.each<{ case: string; requirements: Record<string, number>; expected: number }>([
       { case: 'a single requirement is consumed', requirements: { CRIMSON: 4 }, expected: 4 },
       { case: 'a zero cost is ignored', requirements: { CRIMSON: 0 }, expected: 0 },
       { case: 'a negative cost is ignored', requirements: { CRIMSON: -3 }, expected: 0 },

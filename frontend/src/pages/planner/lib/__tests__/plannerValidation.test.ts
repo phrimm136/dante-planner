@@ -25,7 +25,8 @@ import { calculateNoteByteLength } from '@/shared/noteEditor'
 import type { FloorValidationError, DifficultyValidationError } from '../plannerValidationErrors'
 import type { EGOGiftSpec } from '@/pages/egoGift'
 import type { FloorThemeSelection } from '@/pages/themePack'
-import type { MDPlannerContent } from '../../types/PlannerTypes'
+import type { DungeonIdx } from '@/shared/gameData'
+import type { MDPlannerContent, SerializableFloorSelection } from '../../types/PlannerTypes'
 import type { SinnerEquipment, SkillEAState } from '../../types/DeckTypes'
 
 // ============================================================================
@@ -73,8 +74,8 @@ function makeValidSkillEAState(): Record<string, SkillEAState> {
  */
 function makeValidFloorSelections(
   count: number,
-  opts: { difficulty?: number; startPackId?: number } = {},
-) {
+  opts: { difficulty?: DungeonIdx; startPackId?: number } = {},
+): SerializableFloorSelection[] {
   const { difficulty = 1, startPackId = 1001 } = opts
   return Array.from({ length: count }, (_, i) => ({
     themePackId: String(startPackId + i),
