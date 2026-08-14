@@ -298,22 +298,38 @@ One interpreter executes a resolution plan, for both the single-planner path
 (`usePlannerSave.resolveConflict`) and the batch path
 (`useMDUserPlannersData.resolveConflicts`). Identity is minted once, when the plan is built, and a
 retry re-interprets the same plan rather than planning again — so a retried "keep both" cannot
-create a second copy. A fork that saves locally and then fails to sync is rolled back by deleting
-the local copy.
+create a second copy. The invariant needs an owner or it is prose: **the caller holds the built
+plan keyed by the conflict's identity** (a ref in the save hook; a per-item map for the batch
+submission), builds it only when a conflict is first presented, and re-interprets the held plan on
+every retry; the plan is dropped when its conflict resolves or is dismissed. A fork that saves
+locally and then fails to sync is rolled back by deleting the local copy — and a fork whose sync
+SUCCEEDED before a later effect failed is rolled back on the server too (`deleteRemote`), because
+"nothing the run created survives" is a lie if the server keeps the copy and the next sync pulls
+it back. A remote rollback that itself fails is logged and reported with the original failure.
+
+`forkCopy` names its source side explicitly: the interpreter holds both `local()` and `incoming()`
+and copies whichever the plan names — a fork effect that silently copies local while the plan says
+incoming destroys the very side the user chose to keep.
 
 ```ts
 // pages/planner/lib/conflictChoice.ts
-/** Which step of a resolution failed, and why. */
+/** Which step of a resolution failed, and why. `precondition` names a failure before any item
+ *  was attempted (a device id that could not be read); it is batch-wide, never per-row. */
 export interface ConflictFailure {
-  step: 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
+  step: 'precondition' | 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
   error: AppError
 }
 
 /** The effectful operations a resolution needs, injected so the interpreter stays testable. */
 export interface ConflictOps {
+  /** The two sides of the conflict, supplied by the caller that holds them. */
+  local: () => SaveablePlanner
+  incoming: () => Promise<Result<SaveablePlanner, AppError>>
   validate: (planner: SaveablePlanner) => AppError | null
   saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
   deleteLocal: (id: string) => Promise<Result<void, AppError>>
+  /** Rollback for a fork the server already accepted. */
+  deleteRemote: (id: string) => Promise<Result<void, AppError>>
   sync: (planner: SaveablePlanner, force: boolean) => Promise<Result<SaveablePlanner, AppError>>
   sanitizeTitle: (title: string) => string
 }
@@ -373,8 +389,17 @@ export interface BatchConflictDialogProps {
 ```
 
 with an internal `dismissed` flag ANDed into `open`, `showCloseButton` on `DialogContent`, and the
-`preventDismissal` handlers (`:186-189`, `:201-203`) removed. The consumer keys the dialog by the
-joined conflict ids so a new batch remounts it with `dismissed` reset.
+`preventDismissal` handlers (`:186-189`, `:201-203`) removed. The remount key is a **batch epoch**
+— a counter that advances only when a new batch arrives (pending conflicts transition from empty
+to non-empty) — never the joined id set: keying by ids makes every partial success a remount that
+resets the surviving rows' choices to the destructive default, and makes a dismissal under an
+unchanged id set unrecoverable. Choices therefore survive partial failure exactly as the user set
+them. Dismissal parks, never discards: the list surfaces a visible reopen affordance ("N
+unresolved conflicts") while any conflict is pending, and reopening clears `dismissed` without a
+new epoch. The dialog's second consumer — the import flow in `PlannerExportImportSection`, which
+previously relied on `preventDismissal` — treats dismissal as an explicit cancel: remaining
+conflicted planners are skipped, counts reported, and the section returns to idle rather than
+wedging in `awaitingChoice`.
 
 `PersonalPlannerList` renders the dialog as a sibling of the list, outside the empty-state branch —
 a filtered-to-empty personal list currently returns before the dialog is ever rendered
@@ -1157,8 +1182,10 @@ rewrites under its own authorization. Behavior-preserving: no assertion may weak
 - [ ] Keys are `planner:{id}` at all six sites; `loadPlannerTitle` uses the builder; the v1→v2
       migration is copy-verify-delete inside the versionchange transaction, newest-wins on
       collision, and the device-id singleton survives.
-- [ ] One interpreter runs every conflict plan; identity is minted once; a fork whose sync fails is
-      deleted locally.
+- [ ] One interpreter runs both sync-path conflict plans; the plan is held by its caller and a
+      retry re-interprets it, never re-plans; identity is minted once; a fork whose sync fails is
+      deleted locally, and one the server accepted is deleted remotely on rollback. (The import
+      flow's hand-rolled executor is recorded debt, not silent divergence.)
 - [ ] Batch resolution stops at the first failure, removes only resolved items, and surfaces the
       failure; the dialog can be closed; it is reachable from a filtered-empty personal list.
 - [ ] Non-conflict resolution failures reach the user without displacing the conflict.
