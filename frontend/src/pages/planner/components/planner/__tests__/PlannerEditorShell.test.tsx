@@ -12,10 +12,11 @@ import type { StoreApi } from 'zustand'
 import { ok } from '@/lib/result'
 import type { Result } from '@/lib/result'
 import type { SaveablePlanner } from '../../../types/PlannerTypes'
-import type { SaveError } from '../../../lib/plannerSaveErrors'
+import type { AppError } from '@/lib/apiErrorClassifier'
+import type { StorageReadError } from '@/lib/storage'
 
-const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, SaveError>>>()
-const mockGetOrCreateDeviceId = vi.fn<() => Promise<string>>()
+const mockSaveToLocal = vi.fn<(planner: SaveablePlanner) => Promise<Result<void, AppError>>>()
+const mockGetOrCreateDeviceId = vi.fn<() => Promise<Result<string, StorageReadError>>>()
 
 vi.mock('@/pages/planner/hooks/usePlannerStorage', () => ({
   usePlannerStorage: () => ({
@@ -154,7 +155,7 @@ function renderShell() {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockGetOrCreateDeviceId.mockResolvedValue('device-123')
+  mockGetOrCreateDeviceId.mockResolvedValue(ok('device-123'))
   mockSaveToLocal.mockResolvedValue(ok(undefined))
 })
 

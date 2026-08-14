@@ -614,7 +614,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * error state and its toast reach nobody. Leave the loss in the console with
    * enough to identify which planner lost what.
    */
-  const reportLostFlush = (flushing: boolean, failure: SaveError) => {
+  const reportLostFlush = (flushing: boolean, failure: AppError) => {
     if (!flushing) return
     console.error('Planner autosave flush lost after teardown', { plannerId, failure })
   }
