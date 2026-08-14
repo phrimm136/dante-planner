@@ -6,8 +6,6 @@ files:
   - src/**/*.test.tsx
   - src/**/*.spec.tsx
   - src/**/__tests__/**
-ignores:
-  - '**/*.snap'
 rule:
   pattern: expect($RECEIVER).toBeDefined()
   has:
