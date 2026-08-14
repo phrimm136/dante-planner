@@ -31,9 +31,10 @@ desync class from silent to loud.
 - The bookmark write path was deleted by RFC 0003 Stream 1 item 16; the read side survives:
   `PlannerBookmarkRepository` serves `isBookmarked` on three GET endpoints, the
   `planner_bookmarks` table (created in `V006`, repointed in `V052`) has no writer,
-  `KnownConstraint.PLANNER_BOOKMARK` maps violations nothing can produce, and four i18n stubs plus
-  stale docs still advertise the toggle. `docs/debt.md` records the table-and-mapping drop as an
-  undecided tail.
+  `KnownConstraint.PLANNER_BOOKMARK` maps violations nothing can produce,
+  `PlannerBookmarkRepository.countByPlannerId` has no caller, and four i18n stubs plus stale docs
+  still advertise the toggle. `docs/debt.md` records the table-and-mapping drop as an undecided
+  tail.
 - `JwtAuthenticationFilter` holds ten collaborators. Its non-lineage rotation branch is guarded by
   `LineageRotationFlag` (`jwt.rotation.lineage-enabled`, default `false`) although the lineage
   rollout completed around 2026-05; `RefreshRotationService` still admits legacy-format tokens via
@@ -49,10 +50,11 @@ desync class from silent to loud.
 - `PlannerCommandService.upsertAggregate` propagates edits of a published planner to the public
   catalog via `PlannerCatalogService.onVisibleEditCommitted` with no restriction check, while
   every other public-contribution write calls `PlannerAccessGuard`. The frontend disables the sync
-  button for restricted users, so enforcement exists only client-side. `createPlanner` and
-  `updatePlanner` have no production callers.
+  button for restricted users, so enforcement exists only client-side. `createPlanner`,
+  `updatePlanner`, and `PublishedPlannerQueryService.incrementViewCount` have no production
+  callers.
 - Twenty-nine constructor parameters are `@Value`-bound in feature classes;
-  `planner.recommended-threshold` binds in three classes, four other keys bind twice, and
+  `planner.recommended-threshold` binds in three classes, five other keys bind twice, and
   `JwtProperties` owns the `jwt` prefix while two `jwt.*` keys are read beside it via `@Value`.
 
 ## Prior art
@@ -68,24 +70,28 @@ desync class from silent to loud.
 
 ## Proposal
 
-Remove the bookmark feature entirely — read side, storage, wire field, translations, and stale
-documentation — in one coordinated release. Restructure the refresh path: delete the legacy
+Remove the bookmark feature entirely — read side, storage, wire field, icon rendering,
+translations, and stale documentation — in one coordinated release; the table drop is a
+forward-only migration, and the i18n stubs land as their own commit in the static submodule. Restructure the refresh path: delete the legacy
 non-lineage rotation branch and legacy-token admission, extract the filter's refresh orchestration
 into a `SessionRefresher` collaborator, consolidate `jwt.rotation.*` binding under the existing
 `jwt` properties class, and merge the blacklist and rotation services into one
 `TokenLifecycleService` owning all token revocation and lineage state, with the fail-open posture
 scoped to revocation reads and the fail-closed posture to lineage writes. Complete the
-notification feature: named static factories per notification type, deletion of the dead
-constructor and of nothing else, and production of `REPORT_RECEIVED` from both report services to
-admin recipients through the outbox. Close the restriction gap: an upsert that would mutate a
+notification feature: named static factories per notification type (`forComment`, `forReply`,
+`forReport`, and `forRecommendation`, the last specializing the existing `plannerScoped` and
+dropping its type parameter), deletion of the dead constructor and of nothing else, and
+production of `REPORT_RECEIVED` from the planner and comment report services to admin recipients
+through the outbox; the native published-fanout insert never constructs the entity, so no factory
+applies to it and it stays untouched. Close the restriction gap: an upsert that would mutate a
 published planner rejects restricted users before validation. Guard the config surface with an
 ArchUnit rule banning `@Value` constructor parameters outside `@ConfigurationProperties` classes.
 
 ## Decomposition
 
 ```
-- bookmark-removal — the bookmark feature, its table, wire field, i18n stubs, and doc references are gone
-- legacy-lineage-removal — the non-lineage rotation branch, legacy admission, synthesized family ids, and the rollout flag are gone
+- bookmark-removal — the bookmark feature, its table (forward-only drop), wire field, icon rendering, unreachable constraint mapping, i18n stubs (separate static-submodule commit), and doc references are gone, and the open debt entries recording them are closed
+- legacy-lineage-removal — the non-lineage rotation branch, legacy admission, synthesized family ids and their call sites, and the rollout flag are gone
 - session-refresher — the filter delegates refresh orchestration to one collaborator; behavior unchanged (after: legacy-lineage-removal)
 - rotation-properties — jwt.rotation.* binds once, nested under the existing jwt properties class (after: legacy-lineage-removal)
 - token-lifecycle-consolidation — one TokenLifecycleService owns access hashes, user invalidation, families, and both Lua scripts; logout drops the refresh token revocation (after: legacy-lineage-removal)
@@ -93,7 +99,7 @@ ArchUnit rule banning `@Value` constructor parameters outside `@ConfigurationPro
 - report-received-wiring — REPORT_RECEIVED flows from both report services to admin inboxes through the outbox; the NotificationType matrix test exists (after: notification-factories)
 - upsert-restriction-gate — restricted users cannot mutate published planners; the FE disable narrows to published planners
 - config-consolidation — every duplicated property key binds in exactly one place; feature config moves to @ConfigurationProperties
-- dead-surface-removal — dead service methods, the unused controller dependency, stale doc rows, and the unreachable constraint mapping are gone
+- dead-surface-removal — the dead command methods and duplicate constructor, the unused controller token validator, the dead view-count increment, and the stale RFC index status row are gone
 - value-param-ratchet — the ArchUnit ban on @Value constructor params is blocking at a zero baseline (after: rotation-properties, config-consolidation)
 ```
 
@@ -112,18 +118,18 @@ Scenario: The bookmark table is gone (bookmark-removal)
 
 Scenario: No bookmark identifier survives outside history (bookmark-removal)
   Given the change is complete
-  When backend main sources, frontend sources, and static i18n files are swept case-insensitively for "bookmark"
+  When backend sources, frontend sources including tests, e2e sources, and static i18n files are swept case-insensitively for "bookmark"
   Then the sweep returns zero hits (RFC and ADR history exempt)
 
 Scenario: A legacy-format refresh token is rejected (legacy-lineage-removal)
   Given a refresh token carrying no familyId claim
   When it is presented for refresh
-  Then the session is abandoned, auth cookies are cleared, and the request continues as guest
+  Then both auth cookies are cleared, the security context stays empty, and the request proceeds unauthenticated
 
 Scenario: Refresh still works through the extraction (session-refresher)
-  Given a user with an expired access cookie and a valid lineage refresh token
+  Given lineage tokens are the only admitted refresh format and a user holds an expired access cookie with a valid refresh token
   When they make an authenticated request
-  Then the response is 200 with a new access cookie and a rotated refresh cookie
+  Then the response is 200 with a new access cookie and a rotated refresh cookie, and the refresher contains no non-lineage branch
 
 Scenario: Redis outage during refresh still degrades (session-refresher)
   Given Redis is unreachable
@@ -133,7 +139,7 @@ Scenario: Redis outage during refresh still degrades (session-refresher)
 Scenario: Rotation reads its window from the properties class (rotation-properties)
   Given jwt.rotation.retry-reuse-window-ms is set to 30000
   When the application boots
-  Then the rotation service observes 30000 and no @Value binding for a jwt.rotation key exists
+  Then the rotation service observes 30000, no @Value binding for a jwt.rotation key exists, and no binding for jwt.rotation.lineage-enabled exists at all
 
 Scenario: Logout kills the family and the access token atomically (token-lifecycle-consolidation)
   Given a logged-in session with a lineage refresh token
@@ -143,12 +149,17 @@ Scenario: Logout kills the family and the access token atomically (token-lifecyc
 Scenario: A comment notification is built by its factory (notification-factories)
   Given a comment lands on a published planner
   When the notification row is created
-  Then its type is COMMENT_RECEIVED and its comment fields are populated, and no caller constructs Notification through a public multi-argument constructor
+  Then its type is COMMENT_RECEIVED, its comment snippet and comment public id are populated, the 3-arg constructor no longer exists, and dispatch call sites construct only through the named factories
 
 Scenario: A planner report notifies admins (report-received-wiring)
-  Given at least one admin user exists
+  Given exactly two admin users exist
   When a user reports a published planner
-  Then the reporting transaction commits exactly one domain_events row of type REPORT_RECEIVED, and the dispatcher derives one notification per admin with type REPORT_RECEIVED
+  Then the reporting transaction commits exactly one domain_events row of type REPORT_RECEIVED, and the dispatcher derives exactly two notification rows of type REPORT_RECEIVED, one per admin, each built through the report factory
+
+Scenario: A comment report notifies admins (report-received-wiring)
+  Given exactly one admin user exists
+  When a user reports a comment
+  Then the reporting transaction commits exactly one domain_events row of type REPORT_RECEIVED and the admin receives exactly one notification row of type REPORT_RECEIVED
 
 Scenario: Duplicate reports collapse (report-received-wiring)
   Given an admin already has a REPORT_RECEIVED notification for a piece of content
@@ -158,27 +169,32 @@ Scenario: Duplicate reports collapse (report-received-wiring)
 Scenario: A crash before dispatch is redelivered (report-received-wiring)
   Given a committed REPORT_RECEIVED domain_events row whose dispatched_at is null past the grace window
   When the relay runs
-  Then the notification rows exist and dispatched_at is set
+  Then exactly one notification row per admin exists and the domain_events row's dispatched_at is non-null
 
 Scenario: A restricted user cannot edit published content (upsert-restriction-gate)
   Given a banned or timed-out user owning a published planner
   When they upsert that planner
-  Then the response is 403 (UserBannedException or UserTimedOutException) and the catalog receives no visible-edit call
+  Then the response is 403 (UserBannedException or UserTimedOutException), no planner field is modified, and the catalog receives no visible-edit call
 
 Scenario: A restricted user keeps private planner work (upsert-restriction-gate)
   Given a banned or timed-out user owning an unpublished planner
   When they upsert that planner
-  Then the write succeeds exactly as for an unrestricted user
+  Then the response is 200 and the planner's syncVersion has advanced by 1
 
 Scenario: A new @Value constructor parameter fails the build (value-param-ratchet)
   Given a class outside @ConfigurationProperties gains an @Value-annotated constructor parameter
   When the architecture tests run
-  Then the @Value ratchet rule fails
+  Then the rule banning @Value constructor parameters outside @ConfigurationProperties fails the build
+
+Scenario: The ratchet flips blocking at a zero baseline (value-param-ratchet)
+  Given rotation-properties and config-consolidation have landed
+  When the architecture suite runs on current sources
+  Then the @Value constructor-parameter rule reports zero violations and runs as a blocking rule
 
 Scenario: Duplicated keys bind once (config-consolidation)
   Given the application boots
   When property bindings are inspected
-  Then planner.recommended-threshold, planner.schema-version, planner.md.current-version, planner.rr.available-versions, cors.allowed-origins, and app.user.deletion.grace-period-days each have exactly one binding site
+  Then planner.recommended-threshold, planner.schema-version, planner.md.current-version, planner.rr.available-versions, cors.allowed-origins, and app.user.deletion.grace-period-days each have exactly one binding site, and each surviving binding goes through a @ConfigurationProperties class
 
 Scenario: The dead command surface is gone (dead-surface-removal)
   Given the change is complete
@@ -207,10 +223,12 @@ Scenario: The dead command surface is gone (dead-surface-removal)
   REJECTED: keeping the read-side projection — it renders a constant.
 - @bookmark @deploy — Big-bang single release. REJECTED: FE-first two-step ordering — accepted
   consequence instead: browsers holding the old bundle fail list parsing until reload.
-- @notification — Named static factories per type. REJECTED: JPA inheritance — the hottest write
-  path bypasses entity construction entirely and the read side never dispatches on type.
+- @notification — Named static factories per type: `forComment`, `forReply`, `forReport`, and
+  `forRecommendation`, the last specializing `plannerScoped` and dropping its type parameter.
+  REJECTED: JPA inheritance — the hottest write path bypasses entity construction entirely and
+  the read side never dispatches on type.
 - @notification @report — `REPORT_RECEIVED` is wired, not deleted: recipients are admin/moderator
-  users, producers are both report services, dedup key is (user_id, content_id,
+  users, producers are the planner and comment report services, dedup key is (user_id, content_id,
   notification_type) so repeat reports collapse. REJECTED: deleting the enum value — the type was
   intended, not accidental.
 - @auth @rotation — The legacy non-lineage path is removed now, because the rollout completed and
@@ -244,7 +262,8 @@ Scenario: The dead command surface is gone (dead-surface-removal)
   selection and re-encodes it as dispatch. REJECTED: a bundled holder object — count cosmetics.
   REJECTED: per-command handler split — same verdict as the publishing service's accept.
 - @planner @moderation — Restriction gates on the planner's public state, not the endpoint's
-  classification: upsert of a published planner rejects restricted users before validation, and
+  classification: upsert of a published planner rejects restricted users before sync-version
+  validation (403 beats 409), rejecting the write in its entirety, and
   the frontend's blanket sync disable narrows to published planners. REJECTED: blocking all sync
   for restricted users — withdraws the private work the guard's contract preserves. REJECTED:
   status quo — the only public mutation without a server-side check, enforced solely in the
@@ -273,6 +292,8 @@ Scenario: The dead command surface is gone (dead-surface-removal)
 - Splitting `PublishedPlannerQueryService`, unifying validators, or re-partitioning notification
   storage — argued and closed as rejections above; they must not ride along.
 - Matrix ratchets beyond `NotificationType`.
+- The native `PLANNER_PUBLISHED` fanout insert: it constructs no entity, so the factory work must
+  not touch it.
 - Negative scenario: no unit of this RFC adds a restriction check to any private-planner write
   path other than the published-upsert branch.
 
