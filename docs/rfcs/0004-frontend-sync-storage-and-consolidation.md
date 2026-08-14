@@ -254,10 +254,20 @@ function parseStorageKey(key: string): { prefix: string; plannerId: string } | n
    `router.tsx:231` and `:243` call the exported function.
 2. `lib/storage.ts` — `StorageReadError`; `getItem` returns `Result<string | null,
    StorageReadError>`; `dbPromise = null` on `onerror`; `onblocked` and `onversionchange` handlers.
-3. `lib/storage.ts` — `DB_VERSION` 2; `onupgradeneeded` switches on `oldVersion`; `migrateToFlatKeys`
-   copies each `planner:md:*:*` key to `planner:{id}`, verifies the written value, deletes the
-   source, and on collision keeps the row whose parsed `metadata.lastModifiedAt` is newest. The
-   `deviceId` key is skipped by the same parse that skips it at read time.
+   The write side adopts the same shape: `setItem`/`removeItem` return `Result<void, …>` — a
+   storage layer whose reads are fallible but whose writes swallow converts a stuck upgrade into
+   silent data loss, since every caller is told the save succeeded. Handler-owned promise state is
+   identity-guarded: a stale open request's late events must not clobber a newer `dbPromise` or
+   leak its connection.
+3. `lib/storage.ts` — `DB_VERSION` 2; `onupgradeneeded` switches on `oldVersion` but keeps the
+   store-existence self-heal; `migrateToFlatKeys` copies each `planner:md:*:*` key to
+   `planner:{id}`, verifies the written value, deletes the source, and on collision keeps the row
+   whose parsed `metadata.lastModifiedAt` is newest. A source row is deleted only under a strictly
+   newer winner or a byte-identical one: an exact timestamp tie (or two unreadable timestamps)
+   with differing content retains the loser's source row and logs the choice — the migration runs
+   once, so an arbitrary destructive pick is unrecoverable. Migration request and transaction
+   errors are handled and logged with their cause; a verify mismatch is loud, never a silent
+   `return`. The `deviceId` key is skipped by the same parse that skips it at read time.
 4. Flip, one change: `hooks/usePlannerStorage.ts` builder `:22-28`; build sites `:210`, `:238`,
    `:432`; parse sites `:298`, `:380`; `parseStorageKey` `:35-46`.
 5. `hooks/usePlannerStorage.ts:154-177` — `getOrCreateDeviceId` refuses to mint on an `err` read.
