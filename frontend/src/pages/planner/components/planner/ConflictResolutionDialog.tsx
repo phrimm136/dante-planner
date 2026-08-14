@@ -11,11 +11,7 @@ import { Button } from '@/components/ui/button'
 import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
 import { presentError } from '@/lib/errorPresentation'
 import type { AppError } from '@/lib/apiErrorClassifier'
-import type {
-  ConflictState,
-  ConflictResolutionChoice,
-  SaveablePlanner,
-} from '../../types/PlannerTypes'
+import type { ConflictState, ConflictResolutionChoice } from '../../types/PlannerTypes'
 import { SECTION_STYLES } from '@/lib/constants'
 
 /**
@@ -26,10 +22,6 @@ export interface ConflictResolutionDialogProps {
   open: boolean
   /** Conflict information (serverVersion, detectedAt) */
   conflictState: ConflictState | null
-  /** Local planner data (for display in enhanced mode) */
-  localPlanner?: SaveablePlanner
-  /** Server planner data (for display in enhanced mode) */
-  serverPlanner?: SaveablePlanner
   /** Callback when user makes a choice */
   onChoice: (choice: ConflictResolutionChoice) => void
   /** Whether resolution is in progress */
@@ -52,8 +44,6 @@ export interface ConflictResolutionDialogProps {
  * <ConflictResolutionDialog
  *   open={errorCode === 'conflict'}
  *   conflictState={conflictState}
- *   localPlanner={localPlanner}
- *   serverPlanner={serverPlanner}
  *   onChoice={resolveConflict}
  *   isResolving={isSaving}
  * />
@@ -62,8 +52,6 @@ export interface ConflictResolutionDialogProps {
 export function ConflictResolutionDialog({
   open,
   conflictState,
-  localPlanner,
-  serverPlanner,
   onChoice,
   isResolving = false,
   resolutionError = null,
@@ -77,6 +65,15 @@ export function ConflictResolutionDialog({
   // This dialog is the mounted owner of the conflict, so a failure it caused is
   // reported here rather than through a toast the conflict itself never gets.
   const failure = resolutionError && presentError(resolutionError)
+  const failureMessage = !resolutionError
+    ? null
+    : failure
+      ? t(failure.key, failure.params)
+      : // The presenter yields nothing for a conflict, and this dialog is what owns it.
+        t(
+          'pages.plannerMD.conflict.conflictAgain',
+          'The planner changed again while this conflict was open. Choose again.',
+        )
 
   // Prevent dismissal via ESC key or clicking outside
   const preventDismissal = (e: Event) => {
@@ -109,35 +106,20 @@ export function ConflictResolutionDialog({
           </div>
         )}
 
-        {/* Version comparison when planner data is available */}
-        {localPlanner && serverPlanner && (
-          <div className="space-y-2 py-2 text-sm">
-            <div className="flex justify-between">
-              <span className={SECTION_STYLES.TEXT.muted}>
-                {t('pages.plannerMD.conflict.localVersion', 'Local version')}:
-              </span>
-              <span className="font-medium truncate max-w-[60%]">
-                {localPlanner.metadata.title}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className={SECTION_STYLES.TEXT.muted}>
-                {t('pages.plannerMD.conflict.serverVersion', 'Server version')}:
-              </span>
-              <span className="font-medium truncate max-w-[60%]">
-                {serverPlanner.metadata.title}
-              </span>
-            </div>
+        {conflictState?.serverVersion != null && (
+          <div className="flex justify-between py-2 text-sm">
+            <span className={SECTION_STYLES.TEXT.muted}>
+              {t('pages.plannerMD.conflict.serverVersion', 'Server version')}:
+            </span>
+            <span className="font-medium">{conflictState.serverVersion}</span>
           </div>
         )}
 
-        {(localPlanner?.metadata.published || serverPlanner?.metadata.published) && (
-          <p className={SECTION_STYLES.TEXT.captionSmall}>
-            {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
-          </p>
-        )}
+        <p className={SECTION_STYLES.TEXT.captionSmall}>
+          {t('pages.plannerMD.conflict.keepBothUnpublished', 'The copy will not be published')}
+        </p>
 
-        {failure && <p className="text-sm text-destructive">{t(failure.key, failure.params)}</p>}
+        {failureMessage && <p className="text-sm text-destructive">{failureMessage}</p>}
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
