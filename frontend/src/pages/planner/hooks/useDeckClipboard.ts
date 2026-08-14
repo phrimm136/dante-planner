@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
-import { toast } from '@/lib/toast'
+import { showError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
 import { useIdentityListSpec } from '@/pages/identity'
 import { useEGOListSpec } from '@/pages/ego'
 
@@ -36,7 +35,6 @@ export interface DeckClipboard {
  * non-null exactly while the confirmation is open.
  */
 export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckClipboard {
-  const { t } = useTranslation(['planner', 'common'])
   const identitySpec = useIdentityListSpec()
   const egoSpec = useEGOListSpec()
 
@@ -47,9 +45,9 @@ export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckCli
       const { equipment, deploymentOrder } = readDeck()
       const code = encodeDeckCode(equipment, deploymentOrder)
       await navigator.clipboard.writeText(code)
-      toast.success(t('deckBuilder.exportSuccess'))
-    } catch {
-      toast.error(t('deckBuilder.exportError'))
+      showSuccess('planner:deckBuilder.exportSuccess')
+    } catch (error) {
+      showError(error)
     }
   }
 
@@ -59,13 +57,13 @@ export function useDeckClipboard({ readDeck }: UseDeckClipboardOptions): DeckCli
       const validation = validateDeckCode(clipboardText)
 
       if (!validation.isValid) {
-        toast.error(t('deckBuilder.importError'))
+        showErrorMessage('planner:deckBuilder.importError')
         return
       }
 
       setPendingImport(decodeDeckCode(clipboardText, identitySpec, egoSpec))
-    } catch {
-      toast.error(t('deckBuilder.importError'))
+    } catch (error) {
+      showError(error)
     }
   }
 

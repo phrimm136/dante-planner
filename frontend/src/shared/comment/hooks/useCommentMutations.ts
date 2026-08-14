@@ -5,10 +5,9 @@
  * Most mutations use cache invalidation. Notification toggle uses direct cache update (no refetch).
  */
 
-import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
 
 import { ApiClient, ConflictError } from '@/lib/api'
+import { showErrorMessage } from '@/lib/errorPresentation'
 import { requestNotificationPermission } from '@/shared/notifications'
 import { useApiMutation } from '@/components/hooks/useApiMutation'
 import { updateCommentInTree } from '../lib/commentTree'
@@ -104,7 +103,6 @@ interface UpvoteCommentInput {
 }
 
 export function useUpvoteComment() {
-  const { t } = useTranslation()
 
   return useApiMutation<void, UpvoteCommentInput>({
     mutationFn: async ({ commentId }) => {
@@ -140,7 +138,6 @@ interface ReportCommentInput {
 }
 
 export function useReportComment() {
-  const { t } = useTranslation()
 
   return useApiMutation<void, ReportCommentInput>({
     mutationFn: async ({ commentId, reason }) => {

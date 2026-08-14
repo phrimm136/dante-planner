@@ -11,6 +11,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { ApiClient, ConflictError } from '@/lib/api'
+import { showErrorMessage } from '@/lib/errorPresentation'
 import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'
 import { gesellschaftQueryKeys } from './useMDGesellschaftData'
@@ -95,12 +96,7 @@ export function usePlannerVote() {
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
-        // 409 Conflict: User already voted (votes are immutable)
-        console.error('Vote already exists - votes are permanent and cannot be changed')
-        // TODO: Show toast notification when toast utility is implemented
-        // toast.error('You have already voted. Votes are permanent and cannot be changed.')
-      } else {
-        console.error('Vote failed:', error)
+        showErrorMessage('planner:pages.plannerList.contextMenu.alreadyVoted')
       }
     },
   })

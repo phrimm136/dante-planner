@@ -119,6 +119,7 @@ export function useLogout() {
     mutationFn: async () => {
       await ApiClient.post('/api/auth/logout')
     },
+    meta: { successMessage: 'common:header.auth.successLogout' },
     onSuccess: () => {
       // Clear auth cache
       queryClient.setQueryData(authQueryKeys.me, null)

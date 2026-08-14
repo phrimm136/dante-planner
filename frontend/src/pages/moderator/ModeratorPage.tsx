@@ -110,7 +110,7 @@ interface ModerationVariables {
 interface ModerationMutation {
   mutate: (
     variables: ModerationVariables,
-    options: { onSuccess: () => void; onError: () => void },
+    options: { onSuccess: () => void },
   ) => void
   isPending: boolean
 }

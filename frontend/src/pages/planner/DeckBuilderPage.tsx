@@ -2,8 +2,7 @@
 import { Suspense, useId, useState } from 'react'
 
 // Third-party libraries
-import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 
 // shadcn/ui components
 import { Skeleton } from '@/components/ui/skeleton'
@@ -79,7 +78,6 @@ function DeckBuilderPageSkeleton() {
  * Uses Summary + Pane pattern: SinnerGrid viewer + Edit dialog.
  */
 function DeckBuilderPageContent() {
-  const { t } = useTranslation(['planner', 'common'])
   const storeApi = usePlannerEditorStoreApi()
 
   // Store actions
@@ -102,7 +100,7 @@ function DeckBuilderPageContent() {
     setDeploymentOrder(pendingImport.deploymentOrder)
 
     clearPending()
-    toast.success(t('deckBuilder.importSuccess'))
+    showSuccess('planner:deckBuilder.importSuccess')
   }
 
   const handleResetOrder = () => {

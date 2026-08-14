@@ -31,11 +31,11 @@ export const queryClient = new QueryClient({
     },
   }),
   mutationCache: new MutationCache({
-    onError: (error, _variables, _context, mutation) => {
+    onError: (error, _variables, _onMutateResult, mutation) => {
       if (mutation.meta?.suppressErrorToast === true) return
       showError(error)
     },
-    onSuccess: (_data, _variables, _context, mutation) => {
+    onSuccess: (_data, _variables, _onMutateResult, mutation) => {
       const message = mutation.meta?.successMessage
       if (message !== undefined) showSuccess(message, mutation.meta?.successParams)
     },

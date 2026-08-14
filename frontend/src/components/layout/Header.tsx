@@ -21,7 +21,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { HeaderNav } from '@/components/HeaderNav'
-import { toast } from '@/lib/toast'
 import { startGoogleLogin } from '@/shared/auth'
 import { SECTION_STYLES } from '@/lib/constants'
 
@@ -130,7 +129,6 @@ function AuthSection() {
                   onClick={() => {
                     logout.mutate(undefined, {
                       onSuccess: () => {
-                        toast.success(t('header.auth.successLogout'))
                         window.location.reload()
                       },
                     })

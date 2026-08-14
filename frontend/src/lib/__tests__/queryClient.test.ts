@@ -35,11 +35,13 @@ vi.mock('sonner', () => {
 import { toast } from 'sonner'
 import { queryClient } from '../queryClient'
 
-type MutationMeta = NonNullable<Mutation['meta']>
+/** The cache config is declared over the fully unknown mutation. */
+type AnyMutation = Mutation<unknown, unknown, unknown, unknown>
+type MutationMeta = NonNullable<AnyMutation['meta']>
 
 /** The cache only ever reads `meta` off the mutation it is handed. */
-function mutationWith(meta?: MutationMeta): Mutation {
-  return { meta } as Mutation
+function mutationWith(meta?: MutationMeta): AnyMutation {
+  return { meta } as AnyMutation
 }
 
 function toastCount(): number {
@@ -95,7 +97,7 @@ describe('QueryCache onError', () => {
 
 describe('MutationCache onError', () => {
   it('toasts exactly once for a failed mutation', () => {
-    mutationOnError?.(new Error('boom'), {} as never, {} as never, mutationWith())
+    mutationOnError?.(new Error('boom'), {} as never, {} as never, mutationWith(), {} as never)
 
     expect(toastCount()).toBe(1)
     expect(toast.error).toHaveBeenCalledWith('common:errors.generic.message', {
@@ -109,6 +111,7 @@ describe('MutationCache onError', () => {
       {} as never,
       {} as never,
       mutationWith({ suppressErrorToast: true }),
+      {} as never,
     )
 
     expect(toastCount()).toBe(0)
@@ -120,6 +123,7 @@ describe('MutationCache onError', () => {
       {} as never,
       {} as never,
       mutationWith({ successMessage: 'common:saved' }),
+      {} as never,
     )
 
     expect(toastCount()).toBe(1)
@@ -131,6 +135,7 @@ describe('MutationCache onError', () => {
       {} as never,
       {} as never,
       mutationWith(),
+      {} as never,
     )
 
     expect(toastCount()).toBe(0)
@@ -144,6 +149,7 @@ describe('MutationCache onSuccess', () => {
       {} as never,
       {} as never,
       mutationWith({ successMessage: 'common:settings.username.saved' }),
+      {} as never,
     )
 
     expect(toast.success).toHaveBeenCalledWith('common:settings.username.saved')
@@ -151,7 +157,7 @@ describe('MutationCache onSuccess', () => {
   })
 
   it('stays silent for a mutation that declared none', () => {
-    mutationOnSuccess?.(undefined, {} as never, {} as never, mutationWith())
+    mutationOnSuccess?.(undefined, {} as never, {} as never, mutationWith(), {} as never)
 
     expect(toastCount()).toBe(0)
   })
@@ -162,6 +168,7 @@ describe('MutationCache onSuccess', () => {
       {} as never,
       {} as never,
       mutationWith({ successMessage: 'common:settings.username.saved' }),
+      {} as never,
     )
 
     expect(toast.success).not.toHaveBeenCalled()

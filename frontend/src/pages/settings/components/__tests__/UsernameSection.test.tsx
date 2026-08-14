@@ -221,12 +221,11 @@ describe('UsernameSection', () => {
       const saveButton = screen.getByRole('button', { name: /save/i })
       await user.click(saveButton)
 
+      // RFC 0004 stream 4(d) line 526 deletes this component's error toast, so
+      // it no longer supplies an onError; the mutation cache reports failures.
       expect(mockMutate).toHaveBeenCalledWith(
         { epithet: 'W_CORP' },
-        expect.objectContaining({
-          onSuccess: expect.any(Function),
-          onError: expect.any(Function),
-        }),
+        expect.objectContaining({ onSuccess: expect.any(Function) }),
       )
     })
   })

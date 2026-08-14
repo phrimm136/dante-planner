@@ -131,7 +131,9 @@ describe('LogoutEverywhereSection', () => {
     buttons.forEach((button) => expect(button).toBeDisabled())
   })
 
-  it('error path shows error toast and does not redirect', async () => {
+  // RFC 0004 stream 4(d) line 523 deletes this component's error toast; the
+  // mutation cache reports the failure, so only the non-redirect survives here.
+  it('error path does not redirect or clear the auth cache', async () => {
     const user = userEvent.setup()
     const mockMutateWithError = vi.fn<LogoutEverywhereMutate>((_, options) => {
       options?.onError?.(new Error('network'), undefined, undefined, mutationContext)
@@ -151,7 +153,6 @@ describe('LogoutEverywhereSection', () => {
     const confirmButton = within(dialog).getByRole('button', { name: /log out everywhere/i })
     await user.click(confirmButton)
 
-    expect(toast.error).toHaveBeenCalled()
     expect(mockNavigate).not.toHaveBeenCalled()
     expect(mockSetQueryData).not.toHaveBeenCalled()
   })

@@ -143,12 +143,6 @@ export function PlannerCardContextMenu({
       return // Ignore rapid clicks
     }
 
-    // IMMUTABLE VOTING: No toggle, vote once only
-    if (planner.hasUpvoted) {
-      // User already voted - mutation will return 409 Conflict
-      // Error handled by hook (shows toast)
-    }
-
     voteInProgressRef.current = true
     voteMutation.mutate(
       { plannerId: planner.id, voteType: 'UP' },
