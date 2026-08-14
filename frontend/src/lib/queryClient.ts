@@ -1,13 +1,7 @@
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
 
-import {
-  ServiceUpdatingError,
-  BackendUnavailableError,
-  AuthTemporarilyUnavailableError,
-  RetryableUnavailableError,
-} from './api'
-import { toast } from './toast'
-import i18n from './i18n'
+import { ServiceUpdatingError, BackendUnavailableError, RetryableUnavailableError } from './api'
+import { showError, showSuccess, showUnavailable } from './errorPresentation'
 import {
   STALE_TIME,
   GC_TIME,
@@ -16,30 +10,34 @@ import {
   RETRY_MAX_MS,
 } from '@/lib/constants'
 
-export function handleBackendDownError(error: Error): void {
-  if (error instanceof ServiceUpdatingError) {
-    toast.error(i18n.t('errors.serviceUpdating'))
-  } else if (error instanceof BackendUnavailableError) {
-    toast.error(i18n.t('errors.backendUnavailable'))
-  } else if (error instanceof AuthTemporarilyUnavailableError) {
-    toast.error(i18n.t('errors.authUnavailable'))
+declare module '@tanstack/react-query' {
+  interface Register {
+    mutationMeta: {
+      successMessage?: string
+      successParams?: Record<string, unknown>
+      /** Opt out where the mutation renders its own failure surface. */
+      suppressErrorToast?: boolean
+    }
   }
 }
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
-      // Log errors for debugging
       console.error('Query failed:', error)
-      handleBackendDownError(error)
-      // Note: Other toast notifications are disabled for queries
-      // useSuspenseQuery throws errors that are caught by RouteErrorComponent
-      // This prevents duplicate error displays (toast + error page)
+      // Queries stay narrow: a thrown query error already reaches the route
+      // error component, so toasting anything else would double-report it.
+      showUnavailable(error)
     },
   }),
   mutationCache: new MutationCache({
-    onError: (error) => {
-      handleBackendDownError(error)
+    onError: (error, _variables, _context, mutation) => {
+      if (mutation.meta?.suppressErrorToast === true) return
+      showError(error)
+    },
+    onSuccess: (_data, _variables, _context, mutation) => {
+      const message = mutation.meta?.successMessage
+      if (message !== undefined) showSuccess(message, mutation.meta?.successParams)
     },
   }),
   defaultOptions: {

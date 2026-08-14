@@ -1,36 +1,63 @@
 /**
- * queryClient.test.ts
- *
- * Tests for global error handling in QueryCache and MutationCache.
- * Validates that 503 errors trigger the correct toast based on error type:
- * - ServiceUpdatingError (planned deploy) → serviceUpdating toast
- * - BackendUnavailableError (unexpected crash) → backendUnavailable toast
+ * The caches are the app's only toast sink, so these tests drive the real
+ * `queryClient`'s cache config rather than a locally built stand-in.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { QueryCache, MutationCache } from '@tanstack/react-query'
+import type { Mutation } from '@tanstack/react-query'
 
 import {
   ServiceUpdatingError,
   BackendUnavailableError,
   AuthTemporarilyUnavailableError,
+  ValidationError,
+  WriteTemporarilyUnavailableError,
 } from '../api'
 
-vi.mock('../toast', () => ({
-  toast: {
+vi.mock('@/lib/i18n', () => ({
+  default: { t: (key: string) => key },
+}))
+
+vi.mock('@/components/ui/LinkifyText', () => ({
+  linkifyText: (text: string) => text,
+}))
+
+vi.mock('sonner', () => {
+  const toastFn = Object.assign(vi.fn(), {
     error: vi.fn(),
     success: vi.fn(),
-  },
-}))
+    warning: vi.fn(),
+    dismiss: vi.fn(),
+  })
+  return { toast: toastFn }
+})
 
-vi.mock('../i18n', () => ({
-  default: {
-    t: (key: string) => key,
-  },
-}))
+import { toast } from 'sonner'
+import { queryClient } from '../queryClient'
 
-import { toast } from '../toast'
-import { handleBackendDownError, queryClient } from '../queryClient'
+type MutationMeta = NonNullable<Mutation['meta']>
+
+/** The cache only ever reads `meta` off the mutation it is handed. */
+function mutationWith(meta?: MutationMeta): Mutation {
+  return { meta } as Mutation
+}
+
+function toastCount(): number {
+  return (
+    vi.mocked(toast.error).mock.calls.length +
+    vi.mocked(toast.warning).mock.calls.length +
+    vi.mocked(toast.success).mock.calls.length
+  )
+}
+
+const queryOnError = queryClient.getQueryCache().config.onError
+const mutationOnError = queryClient.getMutationCache().config.onError
+const mutationOnSuccess = queryClient.getMutationCache().config.onSuccess
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  vi.spyOn(console, 'error').mockImplementation(() => undefined)
+})
 
 describe('window-focus refetching', () => {
   it('refetches on focus by default, which is what keeps server-backed data fresh', () => {
@@ -39,94 +66,104 @@ describe('window-focus refetching', () => {
 })
 
 describe('QueryCache onError', () => {
-  let queryCache: QueryCache
+  it('reports a planned deploy', () => {
+    queryOnError?.(new ServiceUpdatingError('updating'), {} as never)
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    queryCache = new QueryCache({
-      onError: (error) => {
-        handleBackendDownError(error)
-      },
-    })
+    expect(toast.warning).toHaveBeenCalledWith('common:errors.serviceUpdating', undefined)
   })
 
-  it('shows serviceUpdating toast for ServiceUpdatingError', () => {
-    const error = new ServiceUpdatingError('Service temporarily unavailable')
-    queryCache.config.onError?.(error, {} as never)
+  it('reports an unreachable backend', () => {
+    queryOnError?.(new BackendUnavailableError('down'), {} as never)
 
-    expect(toast.error).toHaveBeenCalledWith('errors.serviceUpdating')
+    expect(toast.warning).toHaveBeenCalledWith('common:errors.backendUnavailable', undefined)
   })
 
-  it('shows backendUnavailable toast for BackendUnavailableError', () => {
-    const error = new BackendUnavailableError('Server is temporarily unavailable')
-    queryCache.config.onError?.(error, {} as never)
+  it('reports unavailable auth', () => {
+    queryOnError?.(new AuthTemporarilyUnavailableError('paused'), {} as never)
 
-    expect(toast.error).toHaveBeenCalledWith('errors.backendUnavailable')
+    expect(toast.warning).toHaveBeenCalledWith('common:errors.authUnavailable', undefined)
   })
 
-  it('shows authUnavailable toast for AuthTemporarilyUnavailableError', () => {
-    const error = new AuthTemporarilyUnavailableError(
-      'Authentication service temporarily unavailable, please retry',
-    )
-    queryCache.config.onError?.(error, {} as never)
+  it('stays silent for anything the route error component already shows', () => {
+    queryOnError?.(new Error('HTTP error! status: 500'), {} as never)
+    queryOnError?.(new Error('Failed to fetch'), {} as never)
+    queryOnError?.(new ValidationError('TITLE_TOO_LONG', 'invalid'), {} as never)
 
-    expect(toast.error).toHaveBeenCalledWith('errors.authUnavailable')
-  })
-
-  it('does not toast for generic errors', () => {
-    const error = new Error('HTTP error! status: 500')
-    queryCache.config.onError?.(error, {} as never)
-
-    expect(toast.error).not.toHaveBeenCalled()
-  })
-
-  it('does not toast for network errors', () => {
-    const error = new Error('Failed to fetch')
-    queryCache.config.onError?.(error, {} as never)
-
-    expect(toast.error).not.toHaveBeenCalled()
+    expect(toastCount()).toBe(0)
   })
 })
 
 describe('MutationCache onError', () => {
-  let mutationCache: MutationCache
+  it('toasts exactly once for a failed mutation', () => {
+    mutationOnError?.(new Error('boom'), {} as never, {} as never, mutationWith())
 
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mutationCache = new MutationCache({
-      onError: (error) => {
-        handleBackendDownError(error)
-      },
+    expect(toastCount()).toBe(1)
+    expect(toast.error).toHaveBeenCalledWith('common:errors.generic.message', {
+      description: 'common:errors.contactOnRepeat',
     })
   })
 
-  it('shows serviceUpdating toast for ServiceUpdatingError', () => {
-    const error = new ServiceUpdatingError('Service temporarily unavailable')
-    mutationCache.config.onError?.(error, {} as never, {} as never, {} as never, {} as never)
-
-    expect(toast.error).toHaveBeenCalledWith('errors.serviceUpdating')
-  })
-
-  it('shows backendUnavailable toast for BackendUnavailableError', () => {
-    const error = new BackendUnavailableError('Server is temporarily unavailable')
-    mutationCache.config.onError?.(error, {} as never, {} as never, {} as never, {} as never)
-
-    expect(toast.error).toHaveBeenCalledWith('errors.backendUnavailable')
-  })
-
-  it('shows authUnavailable toast for AuthTemporarilyUnavailableError', () => {
-    const error = new AuthTemporarilyUnavailableError(
-      'Authentication service temporarily unavailable, please retry',
+  it('toasts nothing when the mutation renders its own failure surface', () => {
+    mutationOnError?.(
+      new Error('boom'),
+      {} as never,
+      {} as never,
+      mutationWith({ suppressErrorToast: true }),
     )
-    mutationCache.config.onError?.(error, {} as never, {} as never, {} as never, {} as never)
 
-    expect(toast.error).toHaveBeenCalledWith('errors.authUnavailable')
+    expect(toastCount()).toBe(0)
   })
 
-  it('does not toast for generic errors', () => {
-    const error = new Error('HTTP error! status: 500')
-    mutationCache.config.onError?.(error, {} as never, {} as never, {} as never, {} as never)
+  it('still toasts when the opt-out is absent rather than false', () => {
+    mutationOnError?.(
+      new Error('boom'),
+      {} as never,
+      {} as never,
+      mutationWith({ successMessage: 'common:saved' }),
+    )
 
-    expect(toast.error).not.toHaveBeenCalled()
+    expect(toastCount()).toBe(1)
+  })
+
+  it('leaves the errors a dedicated surface owns to that surface', () => {
+    mutationOnError?.(
+      new WriteTemporarilyUnavailableError('paused'),
+      {} as never,
+      {} as never,
+      mutationWith(),
+    )
+
+    expect(toastCount()).toBe(0)
+  })
+})
+
+describe('MutationCache onSuccess', () => {
+  it('toasts the message the mutation declared', () => {
+    mutationOnSuccess?.(
+      undefined,
+      {} as never,
+      {} as never,
+      mutationWith({ successMessage: 'common:settings.username.saved' }),
+    )
+
+    expect(toast.success).toHaveBeenCalledWith('common:settings.username.saved')
+    expect(toastCount()).toBe(1)
+  })
+
+  it('stays silent for a mutation that declared none', () => {
+    mutationOnSuccess?.(undefined, {} as never, {} as never, mutationWith())
+
+    expect(toastCount()).toBe(0)
+  })
+
+  it('does not fire the success message on failure', () => {
+    mutationOnError?.(
+      new Error('boom'),
+      {} as never,
+      {} as never,
+      mutationWith({ successMessage: 'common:settings.username.saved' }),
+    )
+
+    expect(toast.success).not.toHaveBeenCalled()
   })
 })
