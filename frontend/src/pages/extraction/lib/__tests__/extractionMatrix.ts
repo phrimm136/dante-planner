@@ -182,10 +182,7 @@ export function runMatrix(mod: CalculatorModule, scale: MatrixScale): MatrixGrou
       for (const hits of wanted) {
         groups.atLeastKHits.push({
           label: `pulls=${p},rate=${rate},hits=${hits}`,
-          values: [
-            mod.calculateAtLeastKHits(p, rate, hits),
-            mod.calculateMultiCopyProbability(p, rate, hits),
-          ],
+          values: [mod.calculateAtLeastKHits(p, rate, hits)],
         })
       }
 

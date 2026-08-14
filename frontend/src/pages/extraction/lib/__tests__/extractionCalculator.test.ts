@@ -11,7 +11,7 @@ import {
   getRateTableName,
   calculateRateForTarget,
   calculateSingleTargetProbability,
-  calculateMultiCopyProbability,
+  calculateAtLeastKHits,
   calculateMultiTargetProbability,
   calculatePityAdjustedProbability,
   calculateExpectedPulls,
@@ -177,23 +177,23 @@ describe('calculateSingleTargetProbability', () => {
   })
 })
 
-describe('calculateMultiCopyProbability', () => {
+describe('calculateAtLeastKHits', () => {
   describe('standard calculations', () => {
     it('returns same as single target for 1 copy', () => {
       const single = calculateSingleTargetProbability(100, 0.0145)
-      const multi = calculateMultiCopyProbability(100, 0.0145, 1)
+      const multi = calculateAtLeastKHits(100, 0.0145, 1)
       expect(multi).toBeCloseTo(single, 5)
     })
 
     it('returns lower probability for multiple copies', () => {
-      const oneCopy = calculateMultiCopyProbability(100, 0.0145, 1)
-      const twoCopies = calculateMultiCopyProbability(100, 0.0145, 2)
+      const oneCopy = calculateAtLeastKHits(100, 0.0145, 1)
+      const twoCopies = calculateAtLeastKHits(100, 0.0145, 2)
       expect(twoCopies).toBeLessThan(oneCopy)
     })
 
     it('calculates correctly for 2 copies at 100 pulls', () => {
       // This is more complex binomial calculation
-      const probability = calculateMultiCopyProbability(100, 0.0145, 2)
+      const probability = calculateAtLeastKHits(100, 0.0145, 2)
       expect(probability).toBeGreaterThan(0.3)
       expect(probability).toBeLessThan(0.5)
     })
@@ -201,27 +201,27 @@ describe('calculateMultiCopyProbability', () => {
 
   describe('edge cases', () => {
     it('returns 1 for 0 copies wanted (trivially satisfied)', () => {
-      expect(calculateMultiCopyProbability(100, 0.0145, 0)).toBe(1)
+      expect(calculateAtLeastKHits(100, 0.0145, 0)).toBe(1)
     })
 
     it('returns 0 for zero pulls when copies wanted', () => {
-      expect(calculateMultiCopyProbability(0, 0.0145, 1)).toBe(0)
+      expect(calculateAtLeastKHits(0, 0.0145, 1)).toBe(0)
     })
 
     it('returns 0 when pulls less than copies wanted', () => {
-      expect(calculateMultiCopyProbability(2, 0.0145, 3)).toBe(0)
+      expect(calculateAtLeastKHits(2, 0.0145, 3)).toBe(0)
     })
 
     it('returns 0 for zero rate when copies wanted', () => {
-      expect(calculateMultiCopyProbability(100, 0, 1)).toBe(0)
+      expect(calculateAtLeastKHits(100, 0, 1)).toBe(0)
     })
 
     it('returns 1 for 100% rate with enough pulls', () => {
-      expect(calculateMultiCopyProbability(10, 1, 5)).toBe(1)
+      expect(calculateAtLeastKHits(10, 1, 5)).toBe(1)
     })
 
     it('returns 0 for 100% rate with not enough pulls', () => {
-      expect(calculateMultiCopyProbability(3, 1, 5)).toBe(0)
+      expect(calculateAtLeastKHits(3, 1, 5)).toBe(0)
     })
   })
 })

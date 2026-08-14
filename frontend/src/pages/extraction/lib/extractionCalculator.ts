@@ -229,9 +229,6 @@ export function calculateCouponCollectorProbability(
   return clamp01(probAtLeastN)
 }
 
-// Keep old function name for backwards compatibility
-export const calculateMultiCopyProbability = calculateAtLeastKHits
-
 /**
  * Calculate natural probability for a target (without pity)
  *
@@ -550,7 +547,7 @@ export function calculateMultiTargetProbability(
     }
 
     const rate = calculateRateForTarget(target.type, featuredCounts[target.type], allEgoCollected)
-    const targetProb = calculateMultiCopyProbability(pulls, rate, copiesNeeded)
+    const targetProb = calculateAtLeastKHits(pulls, rate, copiesNeeded)
     probability *= targetProb
   }
 
