@@ -371,7 +371,6 @@ export function DeckFilterBar() {
               <FilterSection
                 key={filter.key}
                 title={t(filter.labelKey, filter.label)}
-                defaultExpanded={filter.primary === true}
                 activeCount={filterState[filter.key].size}
               >
                 {filter.dropdown ? (

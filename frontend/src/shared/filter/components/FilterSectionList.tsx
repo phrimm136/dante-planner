@@ -16,7 +16,6 @@ export interface FilterSectionEntry {
   titleKey: string
   titleFallback?: string
   activeCount: number
-  defaultExpanded?: boolean
   suspense?: boolean
   control: ReactNode
 }
@@ -32,7 +31,6 @@ interface FilterSectionSpec<TSelection extends { readonly size: number }, TProps
   onSelectionChange: (next: TSelection) => void
   /** Everything the control needs beyond the selection pair. */
   props?: Omit<TProps, keyof FilterControlProps<TSelection>>
-  defaultExpanded?: boolean
   /** Wraps the control in the shared dropdown-loading fallback. */
   suspense?: boolean
 }
@@ -62,7 +60,6 @@ export function filterSection<
   selected,
   onSelectionChange,
   props,
-  defaultExpanded,
   suspense,
 }: FilterSectionSpec<TSelection, TProps>): FilterSectionEntry {
   const controlProps = {
@@ -76,7 +73,6 @@ export function filterSection<
     titleKey,
     titleFallback,
     activeCount: selected.size,
-    defaultExpanded,
     suspense,
     control: <Component {...controlProps} />,
   }
@@ -99,7 +95,6 @@ export function FilterSectionList({ sections }: FilterSectionListProps) {
         <FilterSection
           key={section.key}
           title={t(section.titleKey, { defaultValue: section.titleFallback })}
-          defaultExpanded={section.defaultExpanded}
           activeCount={section.activeCount}
         >
           {section.suspense === true ? (
