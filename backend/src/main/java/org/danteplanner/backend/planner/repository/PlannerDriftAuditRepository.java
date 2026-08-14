@@ -163,6 +163,12 @@ public class PlannerDriftAuditRepository {
      * Catalog scalar copies that disagree with the content row they were copied from, one row per
      * disagreeing column.
      *
+     * <p>Compared under {@code utf8mb4_0900_bin} rather than the columns' own
+     * {@code utf8mb4_unicode_ci}, which is case-insensitive, accent-insensitive and PAD SPACE: a
+     * copy left behind by a rename that only changed capitalization, or one carrying a trailing
+     * space, is byte-stale and collation-equal. The {@code _0900_} form is the one that answers
+     * the trailing space — {@code utf8mb4_bin} is itself PAD SPACE.</p>
+     *
      * @return one row per disagreeing catalog column
      */
     public List<CatalogScalarDriftRow> driftedCatalogScalars() {
@@ -171,13 +177,13 @@ public class PlannerDriftAuditRepository {
                        c.title AS expected, cat.title AS actual
                 FROM planner_catalog cat
                 JOIN planner_content c ON c.planner_id = cat.planner_id
-                WHERE NOT (cat.title <=> c.title)
+                WHERE NOT (cat.title <=> c.title COLLATE utf8mb4_0900_bin)
                 UNION ALL
                 SELECT BIN_TO_UUID(cat.planner_id) AS planner_id, 'category' AS field,
                        c.category AS expected, cat.category AS actual
                 FROM planner_catalog cat
                 JOIN planner_content c ON c.planner_id = cat.planner_id
-                WHERE NOT (cat.category <=> c.category)
+                WHERE NOT (cat.category <=> c.category COLLATE utf8mb4_0900_bin)
                 """,
                 (rs, rowNum) -> new CatalogScalarDriftRow(UUID.fromString(rs.getString("planner_id")),
                         rs.getString("field"), rs.getString("expected"), rs.getString("actual")));

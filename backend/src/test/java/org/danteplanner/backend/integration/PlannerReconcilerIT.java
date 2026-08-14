@@ -281,6 +281,29 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
+    @DisplayName("catalog scalar drift: a copy differing only by case or by a trailing space is still stale")
+    void catalogTitleDrift_WhenTheCopyDiffersOnlyByCaseOrTrailingSpace_ReportsEachAsDrift() {
+        Planner caseOnly = publishClean("Sinking Build");
+        jdbc.update("UPDATE planner_catalog SET title = 'sinking build' WHERE planner_id = UUID_TO_BIN(?)",
+                caseOnly.getId().toString());
+
+        Planner spaceOnly = publishClean("Trailing Space");
+        jdbc.update("UPDATE planner_catalog SET title = 'Trailing Space ' WHERE planner_id = UUID_TO_BIN(?)",
+                spaceOnly.getId().toString());
+
+        List<DriftRecord> records = reconciler.reconcile();
+
+        assertThat(recordsFor(records, caseOnly.getId(), "catalog_title"))
+                .as("the columns collate case-insensitively, which is where a half-landed rename hides")
+                .singleElement()
+                .satisfies(record -> assertThat(record.actual()).isEqualTo("sinking build"));
+        assertThat(recordsFor(records, spaceOnly.getId(), "catalog_title"))
+                .as("the columns collate PAD SPACE, so a trailing space is invisible to the default comparison")
+                .singleElement()
+                .satisfies(record -> assertThat(record.actual()).isEqualTo("Trailing Space "));
+    }
+
+    @Test
     @DisplayName("catalog keyword drift: element order is not drift, a different set is")
     void catalogKeywordDrift_WhenTheStoredArraysDifferInOrderAndInMembership_ReportsOnlyTheSetDifference() {
         Planner reordered = publishClean("Reordered Keywords", Set.of("Burst", "Sinking"));
