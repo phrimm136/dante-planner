@@ -15,8 +15,10 @@ import {
   findEncodedGiftId,
   buildSelectionLookup,
   getCascadeIngredients,
+  ENCODED_SELECTION_PATTERN,
 } from '../egoGiftEncoding'
 import type { EGOGiftRecipe } from '@/pages/egoGift'
+import { GiftIdSchema } from '@/pages/planner'
 
 describe('encodeGiftSelection', () => {
   it('returns just giftId when enhancement is 0', () => {
@@ -251,5 +253,41 @@ describe('getCascadeIngredients', () => {
       const result = getCascadeIngredients(recipe)
       expect(result.sort((a, b) => a - b)).toEqual([9759, 9760])
     })
+  })
+})
+
+describe('ENCODED_SELECTION_PATTERN vs GiftIdSchema', () => {
+  // Exhaustive over the schema's domain: an optional enhancement prefix, then
+  // 9 followed by three digits. Widening GiftIdSchema without widening the
+  // decoder pattern would strand the new ids as undecodable.
+  function everyGiftIdSchemaAccepts(): string[] {
+    const ids: string[] = []
+    for (const prefix of ['', '1', '2']) {
+      for (let suffix = 0; suffix < 1000; suffix++) {
+        ids.push(`${prefix}9${String(suffix).padStart(3, '0')}`)
+      }
+    }
+    return ids
+  }
+
+  it('covers the whole GiftIdSchema domain', () => {
+    const ids = everyGiftIdSchemaAccepts()
+    expect(ids).toHaveLength(3000)
+    expect(ids.every((id) => GiftIdSchema.safeParse(id).success)).toBe(true)
+  })
+
+  it('accepts every string GiftIdSchema accepts', () => {
+    const undecodable = everyGiftIdSchemaAccepts().filter(
+      (id) => !ENCODED_SELECTION_PATTERN.test(id),
+    )
+    expect(undecodable).toEqual([])
+  })
+
+  it('decodes every schema-valid gift id back to its base id', () => {
+    const roundTripFailures = everyGiftIdSchemaAccepts().filter((id) => {
+      const decoded = decodeGiftSelection(id)
+      return decoded === null || encodeGiftSelection(decoded.enhancement, decoded.giftId) !== id
+    })
+    expect(roundTripFailures).toEqual([])
   })
 })

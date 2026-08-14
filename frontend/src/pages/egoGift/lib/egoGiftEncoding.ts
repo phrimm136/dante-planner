@@ -23,7 +23,7 @@ export function encodeGiftSelection(enhancement: EnhancementLevel, giftId: strin
 /**
  * Encoded selection: an optional enhancement digit followed by the 4-digit gift ID.
  */
-const ENCODED_SELECTION_PATTERN = /^([12])?(\d{4})$/
+export const ENCODED_SELECTION_PATTERN = /^([12])?(\d{4})$/
 
 /**
  * A decoded gift selection
