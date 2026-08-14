@@ -87,8 +87,16 @@ export interface SseEngineConfig {
   /** Runs on every open, the first one and every reconnect alike. */
   onConnected?: () => void
   /**
-   * The server answered the open with `STREAM_GONE_STATUS`. Fires once; the
-   * engine stops retrying, so this is the caller's only notice.
+   * Treat a `STREAM_GONE_STATUS` open as terminal. Only a stream whose URL
+   * names a resource may set this: where the path names none, a 404 is a
+   * routing miss or a deploy window, and giving up would kill the stream for
+   * the session. Without it a 404 takes the ordinary backoff path.
+   */
+  stopOnNotFound?: boolean
+  /**
+   * The server answered the open with `STREAM_GONE_STATUS` while
+   * `stopOnNotFound` is set. Fires once; the engine stops retrying, so this is
+   * the caller's only notice.
    */
   onStreamGone?: () => void
   /** Reconnect timings; defaults to the app-wide stream's policy. */
@@ -112,6 +120,7 @@ export function useSseEngine({
   url,
   handlers,
   onConnected,
+  stopOnNotFound = false,
   onStreamGone,
   policy = DEFAULT_SSE_POLICY,
   state,
@@ -119,9 +128,25 @@ export function useSseEngine({
   // The effect owns the whole lifecycle, so only `shouldConnect` may retrigger
   // it. Everything else reaches the running connection through this ref, which
   // the callbacks read at dispatch time rather than capturing at open time.
-  const configRef = useRef({ url, handlers, onConnected, onStreamGone, policy, state })
+  const configRef = useRef({
+    url,
+    handlers,
+    onConnected,
+    stopOnNotFound,
+    onStreamGone,
+    policy,
+    state,
+  })
   useEffect(() => {
-    configRef.current = { url, handlers, onConnected, onStreamGone, policy, state }
+    configRef.current = {
+      url,
+      handlers,
+      onConnected,
+      stopOnNotFound,
+      onStreamGone,
+      policy,
+      state,
+    }
   })
 
   const setConnected = useSseStore((s) => s.setConnected)
@@ -225,9 +250,9 @@ export function useSseEngine({
     function handleClosed(status: number | null) {
       connectionState.setConnected(false)
 
-      // A stream whose subject the server says is gone will not come back, so
-      // retrying only spends the attempt budget against a certain 404.
-      if (status === SSE_TRANSPORT.STREAM_GONE_STATUS) {
+      // Only a stream that names a resource can read a 404 as final; for the
+      // rest it is transient, so this stays behind the caller's opt-in.
+      if (configRef.current.stopOnNotFound && status === SSE_TRANSPORT.STREAM_GONE_STATUS) {
         streamGone = true
         clearAllTimers()
         configRef.current.onStreamGone?.()

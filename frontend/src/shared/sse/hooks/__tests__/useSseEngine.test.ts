@@ -182,7 +182,9 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('dispatches injected handlers for their event type', async () => {
     const onUpdate = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })))
+    renderHook(() =>
+      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
+    )
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     emit(lastStream(), SSE_EVENTS.COMMENT_ADDED, { plannerId: 'p1' })
@@ -194,7 +196,9 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('assembles a frame split across chunk boundaries', async () => {
     const onUpdate = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })))
+    renderHook(() =>
+      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
+    )
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     const stream = lastStream()
@@ -214,7 +218,9 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('joins multiple data lines with a newline and ignores comment lines', async () => {
     const onUpdate = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })))
+    renderHook(() =>
+      useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })),
+    )
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     lastStream().push(`:keep-alive\nevent: ${SSE_EVENTS.COMMENT_ADDED}\ndata: one\ndata: two\n\n`)
@@ -384,10 +390,10 @@ describe('useSseEngine — backoff + reconnect', () => {
 })
 
 describe('useSseEngine — stream gone', () => {
-  it('reports a 404 open exactly once and never reconnects', async () => {
+  it('reports a 404 open exactly once and never reconnects when opted in', async () => {
     serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
     const onStreamGone = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ onStreamGone })))
+    renderHook(() => useSseEngine(makeConfig({ stopOnNotFound: true, onStreamGone })))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     expect(globalThis.fetch).toHaveBeenCalledTimes(1)
@@ -401,9 +407,9 @@ describe('useSseEngine — stream gone', () => {
     expect(useSseStore.getState().isConnected).toBe(false)
   })
 
-  it('spends no reconnect attempt on a 404', async () => {
+  it('spends no reconnect attempt on a 404 when opted in', async () => {
     serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
-    renderHook(() => useSseEngine(makeConfig()))
+    renderHook(() => useSseEngine(makeConfig({ stopOnNotFound: true })))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     await advance(SSE_CONNECTION.IDLE_RESET_TIMEOUT)
@@ -411,10 +417,25 @@ describe('useSseEngine — stream gone', () => {
     expect(useSseStore.getState().reconnectAttempts).toBe(0)
   })
 
+  it('keeps the backoff on a 404 without the opt-in', async () => {
+    // A path that names no resource answers 404 for a routing miss or a deploy
+    // window; stopping there would kill the stream for the whole session.
+    serveAlways(statusResponse(SSE_TRANSPORT.STREAM_GONE_STATUS))
+    const onStreamGone = vi.fn()
+    renderHook(() => useSseEngine(makeConfig({ onStreamGone })))
+
+    await advance(SSE_CONNECTION.INITIAL_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+
+    await advance(SSE_CONNECTION.BASE_DELAY)
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+    expect(onStreamGone).not.toHaveBeenCalled()
+  })
+
   it('still reconnects when the open fails with a status that is not 404', async () => {
     serveAlways(statusResponse(500))
     const onStreamGone = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ onStreamGone })))
+    renderHook(() => useSseEngine(makeConfig({ stopOnNotFound: true, onStreamGone })))
 
     await advance(SSE_CONNECTION.INITIAL_DELAY)
     await advance(SSE_CONNECTION.BASE_DELAY)

@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 
 import i18n from '@/lib/i18n'
 import { SSE_EVENTS } from '@/lib/constants'
@@ -210,15 +209,6 @@ export function useAppSse(): void {
     hasConnectedRef.current = true
   }
 
-  /**
-   * The stream 404s when the planner it followed was deleted on another
-   * device. The engine has stopped retrying by now, so this is the only
-   * notice the user gets.
-   */
-  const handleStreamGone = () => {
-    toast.error(i18n.t('sync.removedOnAnotherDevice', { ns: 'planner' }))
-  }
-
   const handlers = {
     [SSE_EVENTS.NOTIFY_COMMENT]: handleNotification,
     [SSE_EVENTS.NOTIFY_RECOMMENDED]: handleNotification,
@@ -226,11 +216,12 @@ export function useAppSse(): void {
     [SSE_EVENTS.ACCOUNT_SUSPENDED]: handleAccountSuspended,
   }
 
+  // This path names no resource, so its 404s are infrastructure rather than a
+  // missing subject: it keeps the ordinary backoff instead of stopping.
   useSseEngine({
     shouldConnect,
     url: APP_SSE_PATH,
     handlers,
     onConnected: handleConnected,
-    onStreamGone: handleStreamGone,
   })
 }
