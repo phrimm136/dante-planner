@@ -139,6 +139,17 @@ describe('useAuthQuery transient-failure session preservation (Fix 2b)', () => {
     expect(result).toEqual(mockUserResponse)
   })
 
+  it('preserves the cached user when the fetch itself rejects (offline blip)', async () => {
+    queryClient.setQueryData(authQueryKeys.me, mockUserResponse)
+    vi.mocked(ApiClient.get).mockRejectedValue(new TypeError('Failed to fetch'))
+
+    const result = await callQueryFn()
+
+    // A request that never reached the server says nothing about the session,
+    // and focus refetching makes a wifi blip a routine way to hit this path.
+    expect(result).toEqual(mockUserResponse)
+  })
+
   it('degrades to guest (null) on a transient error when there is no cached identity', async () => {
     queryClient.removeQueries({ queryKey: authQueryKeys.me })
     vi.mocked(ApiClient.get).mockRejectedValue(new BackendUnavailableError('server down'))

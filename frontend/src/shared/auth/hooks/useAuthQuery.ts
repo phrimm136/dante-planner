@@ -34,7 +34,13 @@ export function createAuthMeQueryOptions() {
         // Transient backend/DB unavailability must NOT log the user out: preserve the
         // last-known identity so a maintenance blip doesn't flip an authed user to guest.
         // Only a genuine auth failure (401 / invalid token / null body) degrades to guest.
-        if (error instanceof BackendUnavailableError || error instanceof ServiceUpdatingError) {
+        // A bare fetch rejection (TypeError) never reached the server at all, so it says
+        // nothing about the session — and window-focus refetching makes it routine.
+        if (
+          error instanceof BackendUnavailableError ||
+          error instanceof ServiceUpdatingError ||
+          error instanceof TypeError
+        ) {
           const cached = queryClient.getQueryData<User | null>(authQueryKeys.me)
           if (cached) return cached
         }
