@@ -1,0 +1,1115 @@
+---
+status: Accepted
+tracking: none
+---
+
+# 0004 Frontend sync identity, storage, and consolidation
+
+## Scope
+
+The frontend half of four already-argued designs — sync identity (ADR 071, paired with RFC 0003
+stream 1), IndexedDB read fallibility and key migration (ADR 074), SSE reduced to notification
+transport (ADR 073), and the error/effect conventions the frontend owes the backend conventions in
+RFC 0002 (ADR 072). Eight streams. Streams 1–3 change how a save is identified, stored, and
+reconciled and must land together with their backend counterparts; streams 4–8 are independently
+landable and carry the consolidation work each stream's seam exposes. Every stream below states its
+target design, the snippets that bind it to real signatures, the ordered change list, and its test
+plan. Stream 8 is a table-only appendix of mechanical and structural work with no design content.
+
+Decision references are `NNN @tag` addresses into `docs/adr/`; those bullets are authoritative and
+this document is the implementation contract, not the record.
+
+---
+
+## Stream 1 — Sync identity
+
+Refs: 071 @sync @identity, 071 @sync @digest, 071 @sync @adoption.
+
+### Target design
+
+A save is identified by the pair `(syncVersion, contentDigest)`, not by `syncVersion` alone. The
+digest is SHA-256 over the exact content string the client sent, so an acknowledgement can be
+matched to the payload that produced it. Version state inside `usePlannerSave` splits into a pure
+reader and a digest-gated writer: nothing writes `syncVersionRef` except an acknowledgement whose
+digest matches the content in hand.
+
+`digestOf` hashes the string, not the object. The only string that may be passed to it is the one
+`usePlannerSyncAdapter` sends as `UpsertPlannerRequest.content`
+(`hooks/usePlannerSyncAdapter.ts:117`, `JSON.stringify(planner.content)`); any second
+stringification is a different string and a different digest.
+
+```ts
+// pages/planner/types/PlannerTypes.ts
+/** What the server confirms about a write: which version it assigned, over which content. */
+export interface ServerAck {
+  syncVersion: number
+  /** Lowercase hex SHA-256 of the content string the write carried. */
+  contentDigest: string
+}
+```
+
+```ts
+// pages/planner/lib/contentDigest.ts
+/** SHA-256 of the exact string sent to the server, lowercase hex. */
+export async function digestOf(content: string): Promise<string> {
+  const bytes = new TextEncoder().encode(content)
+  const hash = await crypto.subtle.digest('SHA-256', bytes)
+  return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('')
+}
+```
+
+Version handling in `usePlannerSave` becomes two functions replacing `adoptSyncVersion`
+(`hooks/usePlannerSave.ts:376-381`):
+
+```ts
+/** The version the next write presents. Forward-only, and it writes nothing. */
+const presentedVersion = (): number =>
+  Math.max(syncVersionRef.current, initialSyncVersion ?? INITIAL_SYNC_VERSION)
+
+/**
+ * Take the server's version only when its digest matches the content in hand.
+ * A mismatch means the ack answers a different payload than the one just built.
+ */
+const adoptAck = (incoming: ServerAck, digestInHand: string): boolean => {
+  if (incoming.contentDigest !== digestInHand) return false
+  syncVersionRef.current = incoming.syncVersion
+  return true
+}
+```
+
+`adoptAck` takes a digest, not content, and that is the whole lineage discipline in one signature.
+A write supplies `await digestOf(requestBody)` — the exact string the adapter sent (`:495`). A
+fetch supplies the `contentDigest` the response itself carried (`:709`, `:721`), where the match is
+true by construction. Neither path may recompute a digest from a `content` field read off a
+response: RFC 0003 pins the server's digest to the request body and warns that a stored document can
+differ from the author's bytes by the database's re-serialization, so a recomputed digest is not
+comparable to the stored one.
+
+`adoptAck` may move the version backwards, and that is correct at the two sites that adopt server
+content at the same moment (`:709`, `:721`): the local copy becomes the server's copy, so its
+version is the server's version. Only `presentedVersion` is forward-only.
+
+`syncPlan.ts` grows a per-row decision extracted out of the loop, and a digest short-circuit ahead
+of the version comparison:
+
+```ts
+// pages/planner/lib/syncPlan.ts
+export type PlannerVerdict = 'pull' | 'conflict' | 'skip'
+
+/**
+ * What one server row means against its local counterpart.
+ * Equal digests mean equal content whatever the versions say, so the row is skipped.
+ * A local row with no digest has never been acknowledged, so the version path decides.
+ */
+export function categorizePlanner(
+  local: PlannerSummary | undefined,
+  server: PlannerSummary,
+): PlannerVerdict {
+  if (!local) return 'pull'
+  if (local.contentDigest !== undefined && local.contentDigest === server.contentDigest) {
+    return 'skip'
+  }
+  if (versionOf(server) <= versionOf(local)) return 'skip'
+  return local.status === 'draft' ? 'conflict' : 'pull'
+}
+```
+
+`PlannerSummary` (`types/PlannerTypes.ts:196-217`) gains `contentDigest?: string`;
+`ServerPlannerSummarySchema` (`schemas/PlannerSchemas.ts:611-628`) and
+`ServerPlannerResponseSchema` (`:572-605`) gain
+`contentDigest: z.string().length(64).regex(/^[0-9a-f]+$/)` — RFC 0003 pins the wire form as 64
+lowercase hex characters. Both schemas are `.strict()`, so the field must be added or the backend's
+new field fails parsing outright.
+
+`runSync` fetches its pull residue in one call instead of a per-id loop:
+
+```ts
+// pages/planner/lib/plannerApi.ts
+/**
+ * Fetch several planners in one round trip, chunked to the server's id cap.
+ * The response is a bare array, not positionally aligned with the request: ids
+ * naming nothing, a deleted planner, or another user's planner are simply absent.
+ */
+async batch(ids: string[]): Promise<ServerPlannerResponse[]> {
+  const out: ServerPlannerResponse[] = []
+  for (let i = 0; i < ids.length; i += BATCH_PULL_MAX_IDS) {
+    const data = await ApiClient.post(`${PLANNERS_BASE}/batch`, {
+      ids: ids.slice(i, i + BATCH_PULL_MAX_IDS),
+    })
+    out.push(...ServerPlannerBatchResponseSchema.parse(data))
+  }
+  return out
+},
+```
+
+`BATCH_PULL_MAX_IDS` is `PlannerConstants.BATCH_PULL_MAX_IDS` from RFC 0003, mirrored into
+`lib/constants/planner.ts`; the request is rejected outright above it, so chunking is required, not
+an optimization. An empty `ids` array is `@NotEmpty` on the server, so a pull residue of zero rows
+must not issue a request at all.
+
+### Ordered change list
+
+1. `types/PlannerTypes.ts` — add `ServerAck`; add `contentDigest?: string` to `PlannerSummary`.
+2. `lib/contentDigest.ts` — new, `digestOf` as above.
+3. `schemas/PlannerSchemas.ts` — `contentDigest` on `ServerPlannerResponseSchema` (`:572`) and
+   `ServerPlannerSummarySchema` (`:611`); new
+   `ServerPlannerBatchResponseSchema = z.array(ServerPlannerResponseSchema)` — the endpoint answers
+   a bare array, so an object wrapper would fail every parse.
+4. `hooks/usePlannerSyncAdapter.ts` — build the content string once, hand it to `digestOf`, and
+   return the `ServerAck` alongside the `SaveablePlanner` from `syncToServer` (`:111-138`);
+   propagate `contentDigest` through `serverSummaryToLocal` (`:69-80`).
+5. `hooks/usePlannerSave.ts` — replace `adoptSyncVersion` (`:376-381`) with `presentedVersion` and
+   `adoptAck`; call `presentedVersion()` at the two save sites (`:478`, `:573`); replace the three
+   raw `syncVersionRef.current = …` writes with `adoptAck` (`:495`, `:709`, `:721`).
+6. `hooks/usePlannerSave.ts` — introduce `INITIAL_SYNC_VERSION = 1` and use it at the seed (`:358`,
+   currently `?? 1`) and at the return (`:884`, currently `?? 0`); the wire type is
+   `z.number().int().positive()`, so `0` was never a reachable server version.
+7. `lib/syncPlan.ts` — extract `categorizePlanner` from the `categorizeSync` loop (`:52-66`); add
+   the digest short-circuit; `categorizeSync` keeps its three-way partition and calls the extracted
+   function per row.
+8. `lib/plannerApi.ts` — add `batch`.
+9. `lib/constants/planner.ts` — mirror `BATCH_PULL_MAX_IDS` from RFC 0003.
+10. `hooks/useMDUserPlannersData.ts` — replace the per-id `fetchFromServer` loop in `runSync`
+    (`:244-260`) with one `plannerApi.batch(plan.pull.map((p) => p.id))` call, keeping the
+    per-planner save and the `syncedCount` accounting. An empty residue issues no request.
+
+### Test plan
+
+- `lib/__tests__/contentDigest.test.ts` — known-vector SHA-256; identical strings hash equal;
+  a one-character change produces a different digest.
+- `lib/__tests__/syncPlan.test.ts` — `categorizePlanner` table: equal digests → `skip` even when
+  the server version is higher; missing local digest with a higher server version over a draft →
+  `conflict`, over a saved row → `pull`; no local row → `pull`.
+- `hooks/__tests__/usePlannerSave.test.ts:527-577` — the two version-adoption pins are updated:
+  the `mockSyncToServer` implementation (`:518-523`) must return a `contentDigest` matching the
+  content it received, because an ack without a matching digest is now refused. Add a third case:
+  an ack carrying a mismatched digest leaves `syncVersionRef` untouched and the next save presents
+  the unchanged version.
+- `hooks/__tests__/useMDUserPlannersData.test.tsx` — a pull of three rows issues exactly one batch
+  request; a residue one over `BATCH_PULL_MAX_IDS` issues two; an empty residue issues none; rows
+  the response omits are left local-untouched.
+
+---
+
+## Stream 2 — Storage reads and key migration
+
+Refs: 074 @storage @fallibility, 074 @storage @keys, 074 @storage @migration.
+
+### Target design
+
+`storage.getItem` reports why a read failed instead of answering `null` for both "absent" and
+"broken". The shared connection promise is cleared on failure so a transient open error does not
+poison every later read, and the connection yields when another tab requests an upgrade.
+
+```ts
+// lib/storage.ts
+/** Why a read could not be performed. Absence is not a failure — it is `ok(null)`. */
+// lib/result.ts gains the shared shape for every discriminated error union in the app.
+// Unions stay per-boundary (StorageReadError, SaveError, AppError) so each switch remains
+// exhaustively narrow; Tagged only dedupes the member shape, it never merges the unions.
+export type Tagged<K extends string, P = object> = { kind: K } & P
+
+export type StorageReadError = Tagged<'notInBrowser'> | Tagged<'ioError', { cause: unknown }>
+
+async getItem(key: string): Promise<Result<string | null, StorageReadError>>
+```
+
+Keys drop the type and device segments: `planner:{id}` replaces
+`planner:md:{deviceId}:{plannerId}`. The device id remains a one-part singleton key (`deviceId`),
+which parses to `null` under both the old and the new parser and so needs no special case. The
+migration runs inside the `versionchange` transaction at `DB_VERSION` 2, copy-verify-delete per
+key, newest `lastModifiedAt` winning a collision.
+
+```ts
+// lib/storage.ts
+const DB_VERSION = 2
+
+dbPromise = new Promise((resolve, reject) => {
+  const request = indexedDB.open(DB_NAME, DB_VERSION)
+
+  request.onerror = () => {
+    dbPromise = null
+    reject(request.error)
+  }
+  request.onblocked = () => {
+    dbPromise = null
+    reject(new Error('IndexedDB upgrade blocked by another tab'))
+  }
+  request.onsuccess = () => {
+    request.result.onversionchange = () => {
+      request.result.close()
+      dbPromise = null
+    }
+    resolve(request.result)
+  }
+  request.onupgradeneeded = (event) => {
+    const { oldVersion } = event as IDBVersionChangeEvent
+    const db = (event.target as IDBOpenDBRequest).result
+    if (oldVersion < 1) db.createObjectStore(STORAGE_STORE_NAME)
+    if (oldVersion < 2) {
+      migrateToFlatKeys((event.target as IDBOpenDBRequest).transaction!)
+    }
+  }
+})
+```
+
+`getOrCreateDeviceId` (`hooks/usePlannerStorage.ts:154-177`) must not mint a new id on a failed
+read: a failed read followed by a mint orphans every row written under the previous device id.
+Under the new `Result`, `err` returns without writing and the caller reports the failure; only
+`ok(null)` mints.
+
+The key builder's device parameter disappears, so the hand-rolled seventh site in the router
+(`lib/router.tsx:48`) has nowhere to hide. It is extracted **before** the flip, so the flip is a
+single coherent change across six sites rather than seven with one out of reach.
+
+```ts
+// pages/planner/hooks/usePlannerStorage.ts
+const storageKeys = {
+  /** Planner row key: planner:{plannerId} */
+  planner: (plannerId: string) => `${PLANNER_STORAGE_KEYS.PLANNER}:${plannerId}`,
+  deviceId: () => PLANNER_STORAGE_KEYS.DEVICE_ID,
+}
+
+function parseStorageKey(key: string): { prefix: string; plannerId: string } | null {
+  const parts = key.split(':')
+  if (parts.length !== 2) return null
+  return { prefix: parts[0], plannerId: parts[1] }
+}
+```
+
+### Ordered change list
+
+1. **Preceding step.** Extract `loadPlannerTitle` (`lib/router.tsx:43-57`) into the planner slice
+   and export it from `pages/planner/index.ts`; it builds its key with the real builder and returns
+   the placeholder only for `ok(null)`, reporting an `ioError` rather than swallowing it (`:54`).
+   `router.tsx:231` and `:243` call the exported function.
+2. `lib/storage.ts` — `StorageReadError`; `getItem` returns `Result<string | null,
+   StorageReadError>`; `dbPromise = null` on `onerror`; `onblocked` and `onversionchange` handlers.
+3. `lib/storage.ts` — `DB_VERSION` 2; `onupgradeneeded` switches on `oldVersion`; `migrateToFlatKeys`
+   copies each `planner:md:*:*` key to `planner:{id}`, verifies the written value, deletes the
+   source, and on collision keeps the row whose parsed `metadata.lastModifiedAt` is newest. The
+   `deviceId` key is skipped by the same parse that skips it at read time.
+4. Flip, one change: `hooks/usePlannerStorage.ts` builder `:22-28`; build sites `:210`, `:238`,
+   `:432`; parse sites `:298`, `:380`; `parseStorageKey` `:35-46`.
+5. `hooks/usePlannerStorage.ts:154-177` — `getOrCreateDeviceId` refuses to mint on an `err` read.
+6. All other `storage.getItem` callers adopt the `Result`.
+
+### Test plan
+
+- `lib/__tests__/storage.test.ts` — an `onerror` open leaves `dbPromise` null, so the next call
+  reopens; a rejected open surfaces `{kind:'ioError'}`, not `null`; absence is `ok(null)`.
+- `lib/__tests__/storageMigration.test.ts` — a v1 database holding `planner:md:devA:p1` and
+  `planner:md:devB:p1` upgrades to a single `planner:p1` carrying the newer `lastModifiedAt`; the
+  `deviceId` key survives verbatim; source keys are gone; a second open at v2 is a no-op.
+- `hooks/__tests__/usePlannerStorage.test.ts` — a failed device-id read returns the failure and
+  writes nothing; `listLocal` includes rows under two-part keys and ignores the singleton.
+
+---
+
+## Stream 3 — Conflict flow
+
+Refs: 062 @sync @choice, 072 @errors @surfacing.
+
+### Target design
+
+One interpreter executes a resolution plan, for both the single-planner path
+(`usePlannerSave.resolveConflict`) and the batch path
+(`useMDUserPlannersData.resolveConflicts`). Identity is minted once, when the plan is built, and a
+retry re-interprets the same plan rather than planning again — so a retried "keep both" cannot
+create a second copy. A fork that saves locally and then fails to sync is rolled back by deleting
+the local copy.
+
+```ts
+// pages/planner/lib/conflictChoice.ts
+/** Which step of a resolution failed, and why. */
+export interface ConflictFailure {
+  step: 'validate' | 'saveLocal' | 'sync' | 'deleteLocal'
+  error: AppError
+}
+
+/** The effectful operations a resolution needs, injected so the interpreter stays testable. */
+export interface ConflictOps {
+  validate: (planner: SaveablePlanner) => AppError | null
+  saveLocal: (planner: SaveablePlanner) => Promise<Result<void, AppError>>
+  deleteLocal: (id: string) => Promise<Result<void, AppError>>
+  sync: (planner: SaveablePlanner, force: boolean) => Promise<Result<SaveablePlanner, AppError>>
+  sanitizeTitle: (title: string) => string
+}
+
+/**
+ * The same context value that built `plan`. The interpreter never calls `newId` —
+ * reusing one context across build and interpret is what makes "minted once" checkable.
+ */
+export interface ConflictInterpreterContext {
+  newId: () => string
+  deviceId: string
+  now: string
+}
+
+export async function interpretConflictPlan(
+  plan: ConflictEffect[],
+  ops: ConflictOps,
+  ctx: ConflictInterpreterContext,
+): Promise<Result<void, ConflictFailure>>
+```
+
+Batch resolution stops at the first failure, reports one outcome per item, and removes only the
+items that resolved. The dialog stays open showing which item failed rather than clearing
+everything or nothing.
+
+```ts
+// pages/planner/hooks/useMDUserPlannersData.ts
+export interface ConflictOutcome {
+  id: string
+  result: Result<void, ConflictFailure>
+}
+
+resolveConflicts: (resolutions: ConflictResolution[]) => Promise<ConflictOutcome[]>
+```
+
+`usePlannerSave.failResolution` (`:773-779`) surfaces every failure kind, not only conflicts. A
+non-conflict failure must not close the conflict dialog by displacing the conflict error, so the
+hook returns a second slot:
+
+```ts
+// PlannerSaveResult
+/** Why the last resolution attempt failed. The conflict itself stays in `error`. */
+resolutionError: AppError | null
+```
+
+`BatchConflictDialog` becomes dismissable and renders per-item outcomes:
+
+```ts
+export interface BatchConflictDialogProps {
+  open: boolean
+  conflicts: ConflictItem[]
+  onResolve: (resolutions: ConflictResolution[]) => void
+  isResolving?: boolean
+  /** One entry per attempted item, in submission order. */
+  outcomes?: ConflictOutcome[]
+}
+```
+
+with an internal `dismissed` flag ANDed into `open`, `showCloseButton` on `DialogContent`, and the
+`preventDismissal` handlers (`:186-189`, `:201-203`) removed. The consumer keys the dialog by the
+joined conflict ids so a new batch remounts it with `dismissed` reset.
+
+`PersonalPlannerList` renders the dialog as a sibling of the list, outside the empty-state branch —
+a filtered-to-empty personal list currently returns before the dialog is ever rendered
+(`components/plannerList/PersonalPlannerList.tsx:94-96` returning ahead of `:101`), so conflicts are
+unreachable exactly when the user filtered.
+
+### Ordered change list
+
+1. `lib/conflictChoice.ts` — add `ConflictFailure`, `ConflictOps`, `ConflictInterpreterContext`,
+   `interpretConflictPlan`; `planConflictResolution` and `ConflictEffect` are unchanged.
+2. `hooks/usePlannerSave.ts` — `runEffects` (`:733-765`) and `forkLocalChanges` (`:635-702`) are
+   replaced by one `interpretConflictPlan` call wired to `storage`/`syncAdapter`;
+   `withRollback` moves inside the interpreter.
+3. `hooks/usePlannerSave.ts:773-779` — `failResolution` sets `resolutionError` for every kind and
+   refreshes `error` only when the failure is itself a newer conflict; add `resolutionError` to
+   `PlannerSaveResult` (`:144-171`).
+4. `hooks/useMDUserPlannersData.ts:403-480` — `resolveConflicts` calls the interpreter per item,
+   stops at the first failure, returns `ConflictOutcome[]`, and removes resolved ids from
+   `pendingConflicts` instead of clearing the whole list (`:461`). The bespoke
+   `Object.assign(new Error(...))` validation channel (`:391-396`, `:467-477`) is deleted — the
+   interpreter's `validate` op reports it as a value.
+5. `components/BatchConflictDialog.tsx` — `outcomes` prop, `dismissed` state, `showCloseButton`,
+   per-item outcome row; drop `preventDismissal`.
+6. `components/plannerList/PersonalPlannerList.tsx` — single return with a ternary; the dialog is a
+   sibling of both branches and is keyed by `pendingConflicts.map((c) => c.id).join(',')`.
+7. `components/planner/PlannerEditorShell.tsx` — render `resolutionError`; its bespoke
+   conflict-failure toast (`:357`) is deleted (stream 4).
+
+### Test plan
+
+- `lib/__tests__/conflictChoice.test.ts` — interpreting the same "both" plan twice calls
+  `ops.newId` zero times and produces one fork id; a fork whose `sync` fails calls
+  `ops.deleteLocal` with the fork id and reports `{step:'sync'}`; a fork whose rollback also fails
+  reports the original `sync` failure, not the rollback's.
+- `hooks/__tests__/useMDUserPlannersData.test.tsx` — three resolutions where the second fails:
+  outcomes are `[ok, err, …]` with the third never attempted, `pendingConflicts` retains exactly
+  the unresolved ids, and the resolved id is gone.
+- `components/__tests__/BatchConflictDialog.test.tsx` — the close button dismisses; a new
+  `conflicts` array reopens it; a failed outcome renders against its own row.
+- `components/plannerList/__tests__/PersonalPlannerList.test.tsx` — with a filter matching nothing
+  and two pending conflicts, the dialog is in the document alongside the empty state.
+
+---
+
+## Stream 4 — Error classification and toast consolidation
+
+Refs: 072 @errors @classifier, 072 @errors @presentation, 072 @errors @sink, 045 @errors @boundary.
+
+Order is load-bearing: (a) widens the classifier, (b) builds the presenter on it, (c) makes the
+cache the single sink, (d) sweeps the call sites onto that sink, (e) locks the sweep with a rule.
+Doing (d) before (c) leaves a window with two sinks and double toasts.
+
+### (a) Classifier
+
+`classifySaveError` moves out of the planner slice and widens from the four cases it recognized to
+every error class `lib/api.ts` throws — twelve classes at `:32`, `:49`, `:61`, `:75`, `:86`, `:99`,
+`:112`, `:126`, `:139`, `:152`, `:165`, `:178` — plus the storage quota `DOMException`.
+
+```ts
+// lib/apiErrorClassifier.ts
+/** Every failure the API layer can hand a consumer, as one closed union. */
+export type AppError =
+  | Tagged<'conflict', { code: string; serverVersion: number | null }>
+  | Tagged<'validation', { key: string; params?: Record<string, string> }>
+  | Tagged<'restricted', { reason: 'banned' | 'timedOut' }>
+  | Tagged<'rateLimit'>
+  | Tagged<'forbidden', { code: string }>
+  | Tagged<'notFound'>
+  | Tagged<'unavailable', { scope: 'service' | 'backend' | 'auth' | 'write' }>
+  | Tagged<'retryable'>
+  | Tagged<'quota'>
+  | Tagged<'unknown'>
+
+export function classifyAppError(error: unknown): AppError
+
+/** A validation failure raised by client-side rules rather than by the API. */
+export function validationAppError(friendly: {
+  key: string
+  params?: Record<string, string>
+}): AppError
+```
+
+`SaveError` (`pages/planner/lib/plannerSaveErrors.ts:30-36`) is deleted, not adapted: its six cases
+are `AppError` cases (`syncPaused` is `{kind:'unavailable', scope:'write'}`, `moderation` is
+`{kind:'restricted'}`). Every `Result<_, SaveError>` in `usePlannerSave`, `usePlannerStorage`,
+`usePlannerSyncAdapter` and `conflictChoice` becomes `Result<_, AppError>`.
+
+### (b) Presentation
+
+```ts
+// lib/errorPresentation.ts
+export interface ErrorPresentation {
+  key: string
+  params?: Record<string, string>
+  severity: 'error' | 'warning'
+  /** Append the contact-on-repeat description. Opt-in, per error. */
+  supportHint: boolean
+}
+
+/** How an error is shown, or null when a dedicated surface owns it. */
+export function presentError(error: AppError): ErrorPresentation | null
+
+export function showError(error: unknown): void
+/** Only the unavailable family, for the query cache's deliberately narrow toasting. */
+export function showUnavailable(error: unknown): void
+export function showSuccess(key: string, params?: Record<string, unknown>): void
+```
+
+`presentError` returns `null` for `conflict` (the conflict dialog owns it) and for
+`{kind:'unavailable', scope:'write'}` (the sync-paused banner owns it). `supportHint` replaces the
+unconditional `contactOnRepeat` description that `lib/toast.ts`'s `Proxy` (`:18-23`) appends to
+every error toast; the proxy is deleted and `lib/toast.ts` re-exports sonner's `toast` unwrapped.
+
+### (c) Cache as the single sink
+
+```ts
+// lib/queryClient.ts
+declare module '@tanstack/react-query' {
+  interface Register {
+    mutationMeta: {
+      successMessage?: string
+      successParams?: Record<string, unknown>
+      /** Opt out where the mutation renders its own failure surface. */
+      suppressErrorToast?: boolean
+    }
+  }
+}
+
+mutationCache: new MutationCache({
+  onError: (error, _vars, _ctx, mutation) => {
+    if (mutation.meta?.suppressErrorToast === true) return
+    showError(error)
+  },
+  onSuccess: (_data, _vars, _ctx, mutation) => {
+    const message = mutation.meta?.successMessage
+    if (message !== undefined) showSuccess(message, mutation.meta?.successParams)
+  },
+}),
+```
+
+`handleBackendDownError` (`:19-27`) is deleted; the query cache's `onError` (`:30-39`) keeps its
+narrow behavior through `showUnavailable`. A mutation's own `onError` runs **in addition to** the
+cache's, never instead of it — that is the double-toast source, and it is why (d) deletes rather
+than rewrites the mutation-level error toasts.
+
+### (d) Sweep
+
+Delete — subsumed by the cache sink (13):
+
+| # | Site |
+|---|---|
+| 1 | `components/hooks/useApiMutation.ts:64` (with the `errorToastKey`/`errorLogPrefix` options) |
+| 2–4 | `lib/queryClient.ts:21`, `:23`, `:25` |
+| 5 | `pages/moderator/ModeratorPage.tsx:152` |
+| 6 | `pages/planner/components/plannerViewer/PublishedPlannerHeader.tsx:145` |
+| 7 | `pages/planner/components/plannerViewer/PersonalPlannerHeader.tsx:141` (`toastForError`) |
+| 8 | `pages/planner/components/planner/PlannerEditorShell.tsx:357` (stream 3 renders it) |
+| 9 | `pages/settings/components/AccountDeleteSection.tsx:62` |
+| 10 | `pages/settings/components/LogoutEverywhereSection.tsx:40` |
+| 11 | `pages/settings/components/NotificationSection.tsx:60` |
+| 12 | `pages/settings/components/SyncSection.tsx:43` |
+| 13 | `pages/settings/components/UsernameSection.tsx:53` |
+
+Route through `showError` — catch blocks outside a mutation (11):
+`PlannerExportImportSection.tsx:139`, `:173`, `:325`; `PersonalPlannerHeader.tsx:162`;
+`useDeckClipboard.ts:52`, `:68`; `CopyUrlButton.tsx:41`; `useCommentMutations.ts:135`, `:165`;
+`usePlannerOwnerNotifications.ts:81`; `SyncChoiceDialog.tsx:55`.
+
+Keep as bespoke validation messages — they are not classifications of a thrown error (7):
+`PlannerExportImportSection.tsx:191` (extension), `:197` (size); `PlannerEditorShell.tsx:179`
+(non-MD type guard); `PersonalPlannerHeader.tsx:194` (`toUserFriendlyError`);
+`useDeckClipboard.ts:62` (deck-code validation); `NoteEditor.tsx:304` (URL sanitization);
+`useCommentMutations.ts:132`+`:162` (the 409 already-voted / already-reported branches).
+
+Gate the early-firing success toasts (9):
+
+| # | Site | Gate |
+|---|---|---|
+| 1 | `components/layout/Header.tsx:133` | `meta.successMessage`; the reload follows the toast |
+| 2 | `PersonalPlannerHeader.tsx:131` | read the `Result` it currently discards |
+| 3 | `NotificationSection.tsx:57` | `meta.successMessage` |
+| 4 | `PlannerExportImportSection.tsx:168` | assert the export produced a file |
+| 5 | `PlannerExportImportSection.tsx:321` | gate the descriptor on the import counts |
+| 6 | `PlannerExportImportSection.tsx:412` | gate the descriptor on the resolve counts |
+| 7 | `SyncSection.tsx:40` | assert the new setting from the response, not the intent |
+| 8 | `PlannerEditorShell.tsx:330` | gate on `save()`'s boolean |
+| 9 | `PlannerEditorShell.tsx:361` | gate on `resolveConflict()`'s boolean |
+
+Also in this stream: `usePlannerVote.ts:96-105` — the `ConflictError` branch gets its real toast
+(`comments.toast.alreadyUpvoted`-style key under `planner`), and the stale TODO at `:100-101` is
+deleted; `PlannerCardContextMenu.tsx:146-150` — the empty `hasUpvoted` block and its
+"Error handled by hook (shows toast)" comment go with it.
+
+### (e) Rule
+
+Bare `toast.error` / `toast.success` outside `lib/errorPresentation.ts` and `lib/toast.ts` fails
+the build.
+
+Verify first that oxlint implements `no-restricted-syntax` — run
+`yarn --cwd frontend oxlint --print-config` and confirm the rule appears, because oxlint drops
+unknown bare rule names silently and a rule that never runs is worse than no rule. If it is absent,
+implement the ban as an ast-grep rule pair (`TypeScript` + `Tsx` twins, per stream 7's house
+format) under `frontend/scripts/ast-grep-rules/`, which `yarn check:fp` already runs.
+
+### Test plan
+
+- `lib/__tests__/apiErrorClassifier.test.ts` — one case per api error class, twelve assertions plus
+  quota and unknown; an unrecognized throw is `{kind:'unknown'}`.
+- `lib/__tests__/errorPresentation.test.ts` — `presentError` returns `null` for `conflict` and for
+  write-unavailable; `supportHint` true adds the contact description and false omits it.
+- `lib/__tests__/queryClient.test.ts` — a failing mutation toasts exactly once; the same mutation
+  with `meta.suppressErrorToast` toasts zero times; `meta.successMessage` toasts on success only.
+- A green `yarn check:fp` (or `yarn lint`) with a deliberately introduced bare `toast.error` in a
+  page component failing it.
+
+---
+
+## Stream 5 — SSE removal, frontend half
+
+Refs: 073 @sse @scope, 073 @sse @refetch, 042 @sse @exclusion.
+
+### Target design
+
+SSE carries notifications and account-state events only. Planner cache mutation from SSE is gone;
+freshness for server-backed planner queries comes from window-focus refetching. The Last-Event-ID
+replay contract disappears with the planner events that needed it, and the frontend's SSE event
+vocabulary is derived from one list instead of transcribed twice.
+
+```ts
+// lib/constants/api.ts
+export type SseEventType = (typeof SSE_EVENTS)[keyof typeof SSE_EVENTS]
+```
+
+```ts
+// shared/sse/schemas/SseEnvelopeSchemas.ts
+/** Derived from SSE_EVENTS so the enum cannot drift from the transport's vocabulary. */
+export const SseEventTypeSchema = z.enum(
+  Object.values(SSE_EVENTS) as [SseEventType, ...SseEventType[]],
+)
+```
+
+```ts
+// shared/sse/hooks/useSseEngine.ts
+handlers: Partial<Record<SseEventType, (event: MessageEvent) => void>>
+```
+
+A cross-device delete makes the next open 404. `SseStreamCallbacks` gains a status-carrying close so
+the engine can stop retrying and say so, instead of backing off forever against a stream that will
+never exist:
+
+```ts
+// shared/sse/lib/sseStream.ts
+export interface SseStreamCallbacks {
+  onOpen: () => void
+  onFrame: (frame: SseFrame) => void
+  onRateLimited: (retryAfterMs: number | null) => void
+  /** `status` is the HTTP status when the open itself failed, null on a normal end. */
+  onClosed: (status: number | null) => void
+}
+```
+
+### Ordered change list
+
+1. `pages/planner/hooks/useAppSse.ts` — delete `applyPlannerDeleted` (`:124-135`),
+   `applyPlannerUpsert` (`:137-148`), `PLANNER_EVENT_APPLIERS` (`:150-156`) and
+   `handlePlannerUpdate` (`:158-169`); remove `created`/`updated`/`deleted` from the handlers map
+   (`:274-282`). Notification, published, account-suspended and connected handling stays.
+2. `pages/planner/schemas/PlannerSchemas.ts:658` — delete `SsePlannerPayloadSchema`; delete its
+   tests (`schemas/__tests__/PlannerSchemas.test.ts:390-413`) and the stale comment at
+   `hooks/__tests__/useAppSse.test.tsx:248`.
+3. `shared/sse/lib/sseStream.ts` — delete `buildHeaders` (`:91-97`) and the `lastEventId` parameter
+   of `runSseStream` (`:137-142`); widen `onClosed` to carry the status (`:164-167`).
+4. `shared/sse/hooks/useSseEngine.ts` — delete the `lastEventId` local (`:137`, `:165`, `:265`);
+   type `handlers` as `Partial<Record<SseEventType, …>>` (`:79`); stop reconnecting on a 404 open
+   and report it once.
+5. `lib/constants/api.ts` — delete `SSE_TRANSPORT.LAST_EVENT_ID_HEADER` (`:112`); export
+   `SseEventType`.
+6. `shared/sse/schemas/SseEnvelopeSchemas.ts:7-17` — derive the enum from `SSE_EVENTS`; reconcile
+   the two vocabularies as one (`settings:invalidated` and `connected` both belong).
+7. `lib/queryClient.ts:59` — `refetchOnWindowFocus: true`; the local-storage-backed planner queries
+   (`useSavedPlannerQuery`, `useMDUserPlannersData`) set it back to `false` at their own query
+   options, since a focus event tells them nothing.
+8. `pages/planner/hooks/useAppSse.ts` — on a 404 open, show a graceful message keyed under
+   `planner` explaining the planner was removed on another device.
+
+### Test plan
+
+- `shared/sse/hooks/__tests__/useSseEngine.test.ts` — delete the Last-Event-ID replay pin
+  (`:238-250`); add: a 404 open produces exactly one closed report and no reconnect attempt.
+- `pages/planner/hooks/__tests__/useAppSse.test.tsx` — delete the applier cases (`:267`, `:289`,
+  `:302`, `:309`, `:329`, `:347`, `:409`); keep gating (`:188-245`), unparseable (`:389`), unknown
+  type (`:399`) and unmount cleanup (`:448-470`).
+- `shared/sse/schemas/__tests__/SseEnvelopeSchemas.test.ts` — the parity test now asserts the enum
+  equals `Object.values(SSE_EVENTS)` sorted, and separately that this matches the backend list.
+- A published-planner detail query refetches on window focus; a saved (local) planner query does
+  not.
+
+---
+
+## Stream 6 — Editor flush
+
+Refs: 072 @effects @flush.
+
+### Target design
+
+One debounce interval governs both the editor→store hop and the store→IndexedDB autosave, so the
+worst-case unflushed window is one interval rather than the sum of two. Both timers flush on
+teardown instead of being cancelled: a cancelled timer is silent data loss on unmount and on tab
+close. The unload warning is armed from a store subscription, so it is registered whenever state is
+dirty rather than whenever the last render happened to observe dirtiness.
+
+```ts
+// lib/constants/planner.ts
+/** One interval for every editor-side debounce, so a flush window is never additive. */
+export const AUTO_SAVE_DEBOUNCE_MS = 200
+```
+
+```tsx
+// shared/noteEditor/components/NoteEditor.tsx
+// The debounce effect keeps cancelling on re-run; a separate unmount-only effect flushes.
+const pendingRef = useRef<(() => void) | null>(null)
+useEffect(() => () => pendingRef.current?.(), [])
+```
+
+```ts
+// pages/planner/hooks/usePlannerSave.ts — replaces the cleanup at :853-858
+return () => {
+  unsubscribe()
+  if (timerRef.current) {
+    clearTimeout(timerRef.current)
+    timerRef.current = null
+    void autoSaveRef.current()
+  }
+}
+```
+
+### Ordered change list
+
+1. `lib/constants/planner.ts:42` — `AUTO_SAVE_DEBOUNCE_MS` becomes `200`.
+2. `shared/noteEditor/components/NoteEditor.tsx:80` — the hardcoded `500` becomes
+   `AUTO_SAVE_DEBOUNCE_MS`; add the unmount-only flush effect; clear the uncleaned
+   `setTimeout(…, 0)` at `:258` while the file is open.
+3. `pages/planner/hooks/usePlannerSave.ts:853-858` — flush the armed timer.
+4. `pages/planner/hooks/usePlannerSave.ts` — a `dirtyRef` maintained by the existing `subscribe`
+   callback (`:843-851`), exposed on `PlannerSaveResult` as a stable
+   `isDirty: () => boolean` reader.
+5. `pages/planner/components/planner/PlannerEditorShell.tsx:253-265` — register `beforeunload`
+   once on mount with an empty dependency list; the handler consults `isDirty()` and
+   `isIntentionalNavigationRef` (`:122`).
+
+### Test plan
+
+- `shared/noteEditor/__tests__/NoteEditor.test.tsx` — typing then unmounting before the interval
+  elapses still calls `onChange` exactly once with the typed content.
+- `pages/planner/hooks/__tests__/usePlannerSave.test.ts` — unmounting with an armed autosave timer
+  writes to storage exactly once; unmounting with no armed timer writes zero times.
+- `PlannerEditorShell` — a `beforeunload` fired immediately after a store write (before any
+  re-render) is prevented; the same event after a save is not.
+
+---
+
+## Stream 7 — Test and fixture safety
+
+Refs: 031 @testing @gates, 028 @toolchain @ci.
+
+### Target design
+
+Test files are type-checked. Fixtures are built by factories that parse through the same schemas
+production parses through, so a fixture that drifts from a component's props fails the build rather
+than passing a hollow assertion. The two lint gates that exist but never run in CI, run in CI. One
+ast-grep rule closes the assertion hole that let a hollow test look green.
+
+`tsconfig.app.json` excludes tests, so a solution-style build is the only way `tsc -b` reaches them.
+Composite projects must emit, so declarations go to a temp directory that nothing ships — Vite owns
+the real build.
+
+```jsonc
+// frontend/tsconfig.json
+{ "files": [], "references": [
+  { "path": "./tsconfig.app.json" },
+  { "path": "./tsconfig.test.json" },
+  { "path": "./tsconfig.node.json" }
+] }
+```
+
+```jsonc
+// frontend/tsconfig.test.json
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "composite": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./node_modules/.tmp/types/test",
+    "types": ["vite/client", "vitest/globals"]
+  },
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/__tests__/**", "src/test-utils"],
+  "references": [{ "path": "./tsconfig.app.json" }]
+}
+```
+
+```ts
+// src/test-utils/fixtures.ts
+/** A floor selection that has survived the same schema production parses through. */
+export function buildFloorSelection(
+  overrides: Partial<SerializableFloorSelection> = {},
+): SerializableFloorSelection {
+  return FloorSelectionDraftSchema.parse({
+    themePackId: '1001',
+    difficulty: DUNGEON_IDX.NORMAL,
+    giftIds: [],
+    ...overrides,
+  })
+}
+```
+
+```yaml
+# frontend/scripts/ast-grep-rules/no-tobedefined-on-queryby.yml
+id: no-tobedefined-on-queryby
+language: TypeScript
+severity: error
+message: queryBy* answers null when absent, so toBeDefined() passes on a missing element; assert toBeInTheDocument() or not.toBeNull().
+files:
+  - src/**/*.test.ts
+  - src/**/__tests__/**
+ignores:
+  - '**/*.snap'
+rule:
+  pattern: expect($RECEIVER).toBeDefined()
+  has:
+    kind: call_expression
+    regex: 'queryBy|queryAllBy'
+    stopBy: end
+```
+
+The `Tsx` twin is byte-identical but for `language: Tsx` and the `.tsx` file globs — `language:
+TypeScript` does not match `.tsx`, so a rule without its twin silently ignores every component
+test. Validate both patterns with `ast-grep run --debug-query` before committing.
+
+### Ordered change list
+
+1. `frontend/tsconfig.app.json` — `composite: true`, `emitDeclarationOnly: true`,
+   `outDir: ./node_modules/.tmp/types/app`; keep the test exclusions.
+2. `frontend/tsconfig.node.json` — same composite settings so the solution can reference it.
+3. `frontend/tsconfig.test.json` — new, as above.
+4. `frontend/tsconfig.json` — becomes the solution file; the current `extends`/`incremental` block
+   is deleted.
+5. `frontend/package.json` — declare `tsx` and `@ast-grep/cli` as devDependencies (both are
+   invoked by scripts today and resolve only from a hoist or from the machine).
+6. `src/test-utils/fixtures.ts` — new; `buildFloorSelection`, `buildSaveablePlanner`,
+   `buildPlannerSummary`, `buildEgoGiftListItem`, each parsing through its schema; export from
+   `src/test-utils/index.ts`.
+7. `frontend/scripts/ast-grep-rules/no-tobedefined-on-queryby.yml` and its `-tsx` twin;
+   `frontend/scripts/ast-grep-tests/no-tobedefined-on-queryby-test.yml` and the twin's test file.
+   Add the missing `queryfn-consumes-signal-tsx-test.yml` while in the directory, and give the twin
+   the `ignores:` list its `.ts` sibling carries.
+8. `.github/workflows/pr-gate.yml` — the `test-frontend` job (`:202-229`) gains
+   `yarn typecheck`, `yarn check:fp`, and `yarn check:compiler-bailouts` steps.
+9. `frontend/vite.config.ts` — coverage (`:194-204`) gains `thresholds`, an `lcov` reporter, and
+   `src/test-utils/**` in `exclude`; the `plugin` project (`:238-245`) gains
+   `environment: 'node'`; CI runs `yarn test:coverage`.
+10. `pages/egoGift/lib/egoGiftEncoding.ts:26` — export `ENCODED_SELECTION_PATTERN`.
+11. `pages/planner/components/plannerViewer/__tests__/ComprehensiveGiftGridTracker.test.tsx` —
+    rewritten against the real props (`ComprehensiveGiftGridTracker.tsx:21-29`): the non-existent
+    `doneMarks` prop becomes `egoGiftDoneMarks?: Set<string>`, the required `comprehensiveGiftIds`
+    is supplied, fixtures come from `buildFloorSelection`, gift ids are schema-valid, and the four
+    `expect(container).toBeDefined()` assertions become real ones.
+
+### Test plan
+
+- `yarn --cwd frontend typecheck` fails on a deliberately wrong prop in a test file.
+- `pages/egoGift/lib/__tests__/egoGiftEncoding.test.ts` — a pin asserting every string accepted by
+  `GiftIdSchema` is also accepted by `ENCODED_SELECTION_PATTERN`, so a widened gift id cannot
+  silently become undecodable.
+- `ComprehensiveGiftGridTracker.test.tsx` gains a decode-survival positive control: an encoded
+  selection built by `encodeGiftSelection` renders its base gift and its enhancement badge.
+- `ast-grep test` passes for both twins; a `.tsx` file containing the banned assertion fails
+  `yarn check:fp`.
+
+---
+
+## Stream 8 — Mechanical and structural batch
+
+No design content. One row per item: the change, the files it touches, and what proves it.
+
+### Deletions
+
+| Change | Files | Verification |
+|---|---|---|
+| Delete `usePlannerBookmark` and its test | `pages/planner/hooks/usePlannerBookmark.ts`, `hooks/__tests__/usePlannerBookmark.test.tsx` | No production importer; the doc reference at `usePlannerSubscription.ts:8` goes too |
+| Delete the phantom mock of it | `pages/planner/components/plannerList/__tests__/PlannerCardContextMenu.test.tsx:45-46,54,87-90` | The SUT never imports the hook; suite stays green |
+| Delete the bookmark write endpoint | `backend/.../planner/controller/PlannerEngagementController.java:82-96`, `PlannerControllerIT.java:1359-1445` | Gate on the legacy-toggle counter at zero; the read projection (`isBookmarked`) is untouched |
+| Un-`fixme` or delete the e2e placeholder | `e2e/tests/mutation-gestures.spec.ts:222-226` | Matches whichever way the endpoint goes |
+| Delete dead O(n) scans, keep `buildSelectionLookup` | `pages/egoGift/lib/egoGiftEncoding.ts:72-79,89-97`, `pages/egoGift/index.ts:76-77` | `isGiftSelected`/`getGiftEnhancement` have no non-test caller |
+| Replace `findEncodedGiftId` in loops with a lookup | `ComprehensiveGiftSelectorPane.tsx:102,129`, `FloorGiftSelectorPane.tsx:113,146` | O(n·m) → O(n); precedent at `EGOGiftSelectionList.tsx:78` |
+| Delete extraction dead exports + compat alias | `pages/extraction/lib/extractionCalculator.ts` (16 exports incl. the alias at `:233`), `extractionRates.ts:86` | Only `calculateExtraction` has a caller (`ExtractionCalculator.tsx:22`) |
+| Delete the extraction self-barrel import | `pages/extraction/ExtractionPlannerPage.tsx:16` → relative | Slice's public API stops cycling into itself |
+| Collapse the duplicated status vocabulary | `lib/constants/planner.ts:105-114`, `PublishedPlannerCard.tsx:10,79-83,131`, `pages/planner/lib/plannerBadges.ts:12-18,28-38` | One table keys one concept |
+| Delete the empty `hasUpvoted` block | `plannerList/PlannerCardContextMenu.tsx:146-150` | Stream 4 makes the comment false either way |
+| IconFilter, step 1: `CompactIconFilter` gains `layout` + `onClearAll` | `shared/filter/components/CompactIconFilter.tsx:5-18` | Existing 16 consumers unaffected (both props optional) |
+| step 2: `EGOGiftKeywordFilter` migrates onto it | `pages/egoGift/components/EGOGiftKeywordFilter.tsx:2,34-53` | Its `h-14` wrapper and "None" child move to the new props |
+| step 3: delete `IconFilter` and the duplicate `CompactEGOGiftKeywordFilter` | `shared/filter/components/IconFilter.tsx`, `shared/filter/index.ts:25`, `pages/egoGift/components/CompactEGOGiftKeywordFilter.tsx` | Zero importers after step 2 |
+| step 4: rename `CompactIconFilter` → `IconFilter` and `Compact*Filter` → `*Filter` | 16 consumers + `shared/filter/index.ts:9` | "Compact" names nothing once the other is gone |
+| Remove unused deps | `frontend/package.json:76` (`radix-ui` umbrella), `:59` (`@tiptap/cli`), `:102` (`@types/dompurify`) | Zero imports; `dompurify@3` ships its own types |
+| Move `shadcn` to devDependencies | `frontend/package.json:82` | CLI-only; `components/ui/CLAUDE.md:5` documents the workflow |
+| Reconcile the `@babel/core` major split | `frontend/package.json:23` (resolutions `^7`) vs `:89` (devDep `^8`) | Peer of `@rolldown/plugin-babel`; pin one major, do not delete |
+| Delete the frontend Dockerfile | `frontend/Dockerfile` | No compose file, CI job, or terraform references it; nginx serves the build |
+
+### Moves
+
+| Change | Files | Verification |
+|---|---|---|
+| `isRestricted` → `shared/moderation/hooks/useRestrictionStatus` | new hook; `usePlannerSave.ts:869-874,888-889,166-170`; `shared/moderation/components/BanStatusBanner.tsx:19-20`; `shared/moderation/index.ts` | One derivation, two consumers; `usePlannerSave.test.ts:327,335` follow |
+| `useUserSettings` + `useFirstLoginStore` → `shared/userSettings` | from `pages/settings/hooks/`, `pages/settings/stores/`; 7 planner importers + `GlobalLayout.tsx:5,8`; `pages/settings/index.ts:1-3` | Breaks the settings↔planner edge; prerequisite for `import/no-cycle: error` |
+| `sanityConditionFormatter` → `pages/identity/hooks/` | `pages/identity/lib/sanityConditionFormatter.ts`; `SanityI18n.tsx:9`; 3 test mock paths | A hook does not live in `lib/`; `no-throw-in-lib` scope shrinks correctly |
+| Color/class tables → `lib/constants/theme` | `shared/gameData/constants.ts:55,116,336,347,356,376,394`; `lib/constants/layout.ts:22,204`; `lib/constants/planner.ts:105`; `pages/abEvent/lib/abEventTextResolver.ts:11`; `pages/planner/lib/plannerBadges.ts:28` | `lib` may not import `@/shared/*` (`.oxlintrc.json:108-114`), so moved tables carry no gameData types |
+| `seasons`/`unitKeywords` module-scope JSON → explicit derived module | `shared/gameData/constants.ts:5-6,410,421`; `SeasonDropdown.tsx:3,30`; `UnitKeywordDropdown.tsx:3,38` | Two JSON bundles leave the main chunk; lazy precedent at `useFilterI18nData.ts:17,26` |
+| `PlannerSection` → `components/layout/` | `pages/planner/components/PlannerSection.tsx`, `pages/planner/index.ts`, ~15 in-slice importers, `ExtractionCalculator.tsx:19` | Only deps are `components/ui/button` + `SECTION_STYLES`; kills a cross-slice reach |
+| `classifySaveError` → `lib/apiErrorClassifier.ts` | per stream 4 | — |
+
+### Injections
+
+| Change | Files | Verification |
+|---|---|---|
+| `DetailEntitySelector` takes `tierIconPath` and bounds as props | `components/layout/DetailEntitySelector.tsx:15-32,64-65,68,114` | Component stops knowing entity types; delete the never-destructured `disabledTiers` (`:29`) |
+| `EntityMetaInfo` takes resolved labels | `components/layout/EntityMetaInfo.tsx:7-12,26-32` | Drops the suspending `useFilterI18nData` from a leaf |
+| `editorStateCodec` takes `maxThreadspin` injected | `pages/planner/lib/editorStateCodec.ts:9,24,28` | Kills the static `egoSpecList` import and the unchecked cast; precedent `deckCode.ts:168` |
+
+### Bundles
+
+| Change | Files | Verification |
+|---|---|---|
+| `ActionDialogBaseProps` (8 shared fields); `ModerationReasonDialog` composes it | `components/feedback/ConfirmActionDialog.tsx:14-38`; `shared/moderation/components/ModerationReasonDialog.tsx:8-25`; 7 wrapper dialogs | Wrappers stop re-declaring `open`/`onOpenChange`/`isPending`/`onConfirm` |
+| `CatalogSlice<TItem>` with an asymmetric ego extension | `pages/{identity,ego,egoGift,abEvent,themePack}/components/*List.tsx`; the three `EntityListDataConfig` instances | EGO alone carries `maxThreadspin` and its own sorter; the extension is the asymmetry, not a special case |
+| `ThemePackDescriptor` replaces loose theme-pack params | `pages/planner/lib/floorGiftBucketing.ts:20-25`; `FloorGiftSelectorPane.tsx:21-29,89,94-96`; `HorizontalThemePackGallery.tsx:16-19` | `FloorThemeSelection` (`pages/themePack/types/ThemePackTypes.ts:13`) already is the descriptor |
+| `Partial<DeckBuilderActions>` on `DeckBuilderSummary` | `deckBuilder/DeckBuilderSummary.tsx:14-27`; `deckBuilder/DeckBuilderContent.tsx:35-41` | Three optionals stop duplicating the action type |
+| 9-prop filter bundle from `useMDGesellschaftFilters` | `plannerList/PublishedPlannerList.tsx:15-38,65-75`; `hooks/useMDGesellschaftFilters.ts:31-60` | The 8 filter props are already re-spread verbatim into the data hook |
+| `CardGeometry` on `FilteredEntityGrid` | `shared/filter/components/FilteredEntityGrid.tsx:13-35,84-88,97-99,127-136` | `cardWidth`/`cardHeight`/`mobileScale`/`fixedRowHeight` are threaded twice today |
+| `ExtractionScenario` replaces the 5-param bundles | `pages/extraction/lib/extractionCalculator.ts:247-253,342-348,376-382` | Three orderings of the same five values, side by side at `lib/__tests__/extractionMatrix.ts:186-202` |
+
+### Generalizations
+
+| Change | Files | Verification |
+|---|---|---|
+| `useUrlFilters<T>` | new; replaces `useMDGesellschaftFilters.ts:89`, `useMDUserFilters.ts:70`, `usePlannerSearchFilters.ts:89` | All three repeat `useSearch({strict:false}) as T \| undefined` + defaults-omitted `setFilters`; the unchecked cast (`useMDGesellschaftFilters.ts:92`) dies once |
+| `createEntityMatcher` for the five `matchesX` | `identityFilter.ts:62`, `egoFilter.ts:55`, `egoGiftFilter.ts:94`, `themePackFilter.ts:53`, `keywordFilter.ts:48` | `matchesAbEvent` (no `searchTerms`) and `matchesDeckFilter` (raw state) stay out |
+| `SelectorPaneShell` from `DeckBuilderPane` + `useCappedSelection` | `deckBuilder/DeckBuilderPane.tsx:8-12`; `startGift/StartGiftEditPane.tsx:46-55,122,144,190`; `startGift/StartGiftRow.tsx:15,77` | Cap logic exists twice; the dead `maxSelectable` prop (`EGOGiftSelectionList.tsx:18,37`) and its 4 call sites go |
+| Static-i18n hooks onto `useEntityListData` configs | `useTraitsI18n.ts`, `useFilterI18nData.ts`, `useSearchMappings.ts`, `useSkillTagI18n.ts`, `useKeywordListData.ts`, `useBattleKeywords.ts`, `useSanityConditionData.ts`, `useColorCodes.ts`, `usePlannerKeywordsI18n.ts` | — |
+| Remove `keepPrevious` everywhere; rewrite the rule to name skeletons + Deferred hooks | `lib/queryOptions.ts:9,12,50`; the 6 `{keepPrevious:true}` callers; `src/pages/CLAUDE.md:15` | Inert under Suspense — the boundary shows the skeleton, so a placeholder is never rendered |
+| `FILTER_SECTIONS` registry; delete dead `defaultExpanded` | `shared/filter/components/FilterSectionList.tsx:14-36,52-79,102`; `FilterSection.tsx:4,14`; 16 call sites in `EGOPage.tsx`/`IdentityPage.tsx`, plus `DeckFilterBar.tsx:374` | The prop is passed 17 times and destructured zero times |
+| `unitKeywords` single owner hook | `shared/gameData/constants.ts:6,421`; `useSearchMappings.ts:37`; `useFilterI18nData.ts:26`; `useTraitsI18n.ts:16` | Four readers, one of them eager and EN-only |
+| `invalidatePlannerLists` called by publish/delete/vote/fork | new helper; `usePlannerPublish.ts:69`, `usePlannerDelete.ts:65-66`, `usePlannerHeaderActions.ts:72,113-114`, `usePlannerVote.ts:81,94`, `usePlannerFork.ts:155`, `useModeratorPlannerDelete.ts:14-19`, `PublishedPlannerHeader.tsx:131-135`, `PersonalPlannerHeader.tsx:127` | Nine sites, nine different key sets today |
+
+### Branded entity-id primitives and schema composition
+
+`shared/gameData/ids.ts` declares one branded primitive per value-role entity id. Value-role ids are
+numbers in the source data; key-role record keys and route params stay plain `string`, converted once
+where list items are constructed (per the sweep: entity ids as referenced values are `z.number()`
+throughout the data — the brands make transposition a compile error, per the `PlannerIdSchema`
+precedent at `schemas/PlannerSchemas.ts:566`).
+
+```ts
+// shared/gameData/ids.ts
+export const IdentityIdSchema = z.number().int().brand<'IdentityId'>()
+export const EGOIdSchema = z.number().int().brand<'EGOId'>()
+export const EGOGiftIdSchema = z.number().int().brand<'EGOGiftId'>() // base id, no enhancement prefix
+export const PassiveIdSchema = z.number().int().brand<'PassiveId'>()
+export const SkillIdSchema = z.number().int().brand<'SkillId'>()
+export const ThemePackIdSchema = z.number().int().brand<'ThemePackId'>()
+export const SeasonSchema = z.number().int().brand<'Season'>()
+
+export type IdentityId = z.infer<typeof IdentityIdSchema>
+// ... one type per schema
+```
+
+Composition rules, in dependency order:
+
+1. Entity slices' Zod schemas reference these primitives for every value-role field (recipe
+   materials, passive lists, theme-pack pools, `FeaturedBoss.unitId`), replacing bare `z.number()`.
+   The two realignments from the sweep (ego passive ids, `EGOGiftSpec.themePack` — string→number,
+   data included) land first so every value-role field has a numeric source.
+2. String wire forms compose from the primitives, not from local regexes: `shared/gameData/ids.ts`
+   also exports the base string patterns (`GIFT_ID_PATTERN` = the `9\d{3}` base), and
+   `schemas/PlannerSchemas.ts:42-70` re-derives its `IdentityIdSchema`/`EGOIdSchema`/`GiftIdSchema`/
+   `ThemePackSchema` string regexes from them instead of restating the formats — closing the
+   divergence between the planner's gift regex and `egoGiftEncoding`'s pattern at the source.
+   `ENCODED_SELECTION_PATTERN` (`pages/egoGift/lib/egoGiftEncoding.ts:26`) derives its body from the
+   same exported base, and the superset pin test (stream 7) locks the relation.
+3. Adoption is boundary-only: parse at list-item construction and Zod ingest; components receive
+   already-branded values and never call `Number()`/`String()`/`parseInt` on ids (the ~25 scattered
+   coercion sites collapse into the constructors named in the fixlet row below).
+4. Planner UUIDs (`PlannerIdSchema`, already branded, 33 bypasses to adopt) and encoded gift
+   selection ids (family c — strings by design) are out of scope for numeric branding.
+
+### Correctness fixlets
+
+| Change | Files | Verification |
+|---|---|---|
+| `GIFT_UNKNOWN_ID` splits into a floor-scoped code with emitter context | `lib/plannerValidationErrors.ts:56,83,159`; `lib/plannerValidation.ts:334,654` | Removes the `as FloorValidationError` cast; the non-floor emitter stops producing empty `floor`/`gifts` params |
+| Difficulty switch → per-category table keyed by `FLOOR_COUNTS` | `lib/plannerValidation.ts:575-623`; `shared/gameData/constants.ts:365-369` | Four branches push one identical error; only the allowed set differs |
+| Gate the per-render stringify behind the store subscription | `hooks/usePlannerSave.ts:258,863-867` | Full planner JSON on every render today; stream 6's `dirtyRef` supplies the answer |
+| `setComprehensiveGift(base, enhancement)` shared by the three panes | `stores/usePlannerEditorStore.tsx:97,217-218`; `StartGiftEditPane.tsx:49-77,80-97,100-128,150-160`; `EGOGiftObservationEditPane.tsx:103-125,148-157`; `ComprehensiveGiftSelectorPane.tsx:93-138,153-155` | Whole-Set replace forces four hand-written mirrorings per pane |
+| Rename `sortGiftSelections` to name what it does; add the merged variant | `pages/egoGift/lib/egoGiftEncoding.ts:209-217`; `pages/egoGift/index.ts:82`; `ComprehensiveGiftSummary.tsx:78`; `FloorGiftViewer.tsx:54` | It re-pairs enhancement levels onto `sortEGOGifts` output; it does not sort selections |
+| Branded entity-ID schemas adopted at list-item construction | new `shared/gameData/ids.ts`; `ComprehensiveGiftSelectorPane.tsx:58-70`, `EGOGiftObservationEditPane.tsx:52-63`, `FloorGiftSelectorPane.tsx:71`, `EGOGiftObservationSummary.tsx:56`, `EGOGiftObservationSelection.tsx:29` | Five hand-rolled constructors; one omits `recipe` |
+| Ego passive ids and `EGOGiftSpec.themePack` become numbers | `pages/ego/schemas/EGOSchemas.ts:57-66,70,81,111`; `pages/egoGift/schemas/EGOGiftSchemas.ts:48,65`; `pages/egoGift/types/EGOGiftTypes.ts:36`; `static/data/ego/*.json` (111 files, 116 entries); `static/data/egoGiftSpecList.json` (230 records) | Skill ids are already numbers in the same files; i18n keys stay strings |
+| i18n key fixes | `ThemePackTrackerCard.tsx:80-81`, `ComprehensiveGiftGridTracker.tsx:284-285` (add the missing `markAsDone`/`markAsNotDone` keys); `CopyUrlButton.tsx:41` (`common:error` resolves to the literal `error`); `CommentEditor.tsx:45` (uses `error` as a namespace) | The two usages of `error` are mutually incompatible; pick one shape |
+| Rename the `t` shadow | `components/layout/DetailEntitySelector.tsx:97,111,115` | Unblocks the i18n `t` for the two hardcoded `Tier ${t}` strings |
+| Restore the `.env` ignores | `frontend/.gitignore:27` | The line reads `.env.env.production` — a bad append onto an unterminated final line that also destroyed the original `.env` entry; the pattern matches no file, so both `.env` and `.env.production` are committable today |
+| Drop the `association` namespace | `components/layout/Header.tsx:183`; `lib/i18n.ts:14` | `useTranslation(['common', 'association'])` requests a namespace that exists in no locale directory and is absent from `NAMESPACES` |
+| Enable `jsx-a11y`; label 5 icon-only buttons | `.oxlintrc.json:3`; `Header.tsx:164`; `CommentActionButtons.tsx:167-169`; `PlannerDetailFooter.tsx:88-113`; `PersonalPlannerHeader.tsx:247-253`; `PublishedPlannerHeader.tsx:198-201,279-286` | `hidden lg:inline` labels are `display:none` below `lg`, so those buttons have no accessible name on mobile |
+
+### Security and ingest hardening
+
+| Change | Files | Verification |
+|---|---|---|
+| `sanitizeUserHtml` wrapper with the tiptap-schema allowlist (`FORBID_ATTR: ['style']`, no `form`/`input`/`style` tags); `sanitizeToPlainText` absorbs the existing `ALLOWED_TAGS: []` call; oxlint `no-restricted-imports` bans bare `dompurify` outside `shared/sanitize/` | new `shared/sanitize/`; `shared/comment/components/CommentCard.tsx:57`; `PlannerExportImportSection.tsx:60`; `.oxlintrc.json` | Default DOMPurify keeps `<style>` and styled full-viewport anchors — click-hijack on public planner pages; backend sanitization of comment content is a tracked `PENDING` exemption, so this is the standing defense |
+| Bound both decompressions: chunked inflate aborted past `EXPORT_MAX_FILE_SIZE * 20` output; clipboard deck codes rejected past a small length constant before `atob` | `pages/planner/lib/plannerExportImport.ts:108`; `pages/planner/lib/deckCode.ts:180,308`; `lib/constants/planner.ts` | pako has no `maxOutputLength`; the import gate bounds compressed bytes only, and the clipboard path bounds nothing while a real deck code is ~150 chars |
+| Skill-EA values coerced to numbers at ingest with a read-time reconciler; numeric guard before `total +=` | `pages/planner/lib/editorStateCodec.ts:208` (bare `??` on `skillEAState` while every sibling field re-checks); `lib/plannerValidation.ts:290` | No production path enforces number values — the enforcing schema is test-only; a stored `"3"` concatenates to `total = "0321"` |
+| `usePlannerCommentsSse` payload validated with `CommentNodeSchema.safeParse`, bail on failure | `shared/comment/hooks/usePlannerCommentsSse.ts:105-115` | `payload as CommentNode` guarded only by `typeof added.id`; the sibling SSE handlers all `safeParse` |
+| `usePublishedPlannerQuery` routes `JSON.parse(content)` through draft-mode validation instead of `as MDPlannerContent` / `as MDCategory` casts | `pages/planner/hooks/usePublishedPlannerQuery.ts:65,87-93`; `schemas/PlannerSchemas.ts:436` | `validateSaveablePlanner` and the content field schemas are production-dead today — this is their first live ingest call site |
+| Latent-cast hardening: RR save branch fails fast instead of `as unknown as RRCategory`; `api.ts` caller headers via `new Headers(options.headers)`; `featuredCount <= 0` returns `Infinity` expected-pulls; sync-adapter/fork `as PlannerEditorConfig` ingest goes through the same draft validation; ast-grep rule bans `as unknown as` on ingest paths (TypeScript + Tsx twins) | `hooks/usePlannerSave.ts:247-252`; `lib/api.ts:229-238`; `pages/extraction/lib/extractionCalculator.ts:793`; `hooks/usePlannerSyncAdapter.ts:38,58-61`; `hooks/usePlannerFork.ts:111,130-133`; `scripts/ast-grep-rules/` | Each is guarded one layer away today (schema-on-write, UI clamps, object-literal callers); the rule is what prevents the guards and the casts drifting apart |
+| Type the vote cache updater | `hooks/usePlannerVote.ts:81-91` | `(old: any)` erases the `apiData` guard; field names match `PublicPlannerSchema` only by coincidence of no rename yet |
+
+### Consolidation residue
+
+| Change | Files | Verification |
+|---|---|---|
+| `ModeratorPage`: staff gate moves ahead of the suspense hooks (`enabled`/route-level guard); one mutation-hook set per table, not per row | `pages/moderator/ModeratorPage.tsx:274-289,126-234` | Non-staff visitors currently suspend into a 403 boundary before the access-denied panel can render; `UserRow` mounts 4×N mutations and dialogs |
+| One relative-time owner in `lib/formatDate.ts` (Intl), one internal locale resolver; delete `formatShortRelativeTime`, `LastSavedLabel`'s date-fns import, and the `date-fns` dependency | `lib/formatDate.ts:61-204`; `lib/utils.ts:3,210`; `components/planner/LastSavedLabel.tsx:2-11`; `package.json` | Three implementations across two libraries with three locale maps; adjacent surfaces render different locales today |
+| Boundary-validation idiom converges on `validateData`/`validateDataOrNull`; the five non-error `console.log` calls are removed | `pages/planner/lib/plannerApi.ts:39-139`; `hooks/useAppSse.ts`; `hooks/usePlannerStorage.ts`; `hooks/useMDUserPlannersData.ts:249,273`; `GlobalLayout.tsx:49` | 21/11/9 three-way split today; one SSE file uses two idioms at two log severities for identical contract violations |
+| Settings hooks un-collide: the hook named `useUserSettingsQuery` moves into the file of that name or both rename by domain; one query-key export name | `pages/settings/hooks/useUserSettings.ts:23`; `useUserSettingsQuery.ts` | The barrel re-exports the hook from the file that does not bear its name; two near-identical key factories coexist |
+| Dual named+default exports drop the default on the 16 non-page components | `DetailRightPanel.tsx:27`, `Toolbar.tsx:179`, `SinnerGrid.tsx:113`, +13 | Default stays reserved for `lazyRouteComponent` pages; only 3 non-test default imports exist |
+| `DeckFilterBar` derives count and reset from its `FILTERS` registry; the codec's fourth copy reads the same registry | `pages/planner/components/deckBuilder/DeckFilterBar.tsx:166,261-272,287-302`; `lib/editorStateCodec.ts:106-121` | The ten filter sets are enumerated four times; the variadic counter silently under-counts a missed set |
+| `usePlannerSave` decomposition: restriction status out (per the `shared/moderation` move), sync/conflict behind their own seam, `buildSaveable(status, published)` collapsing the `performSave`/`autoSave` preamble; `validateBeforeSync` returns `Result` instead of the throw-decorated `Error`; `runSync` splits into named pull/purge/conflict-collect functions in `lib/syncPlan` | `hooks/usePlannerSave.ts` (891 lines, 12-field options/13-field result); `hooks/useMDUserPlannersData.ts:227-317,370-397` | The five-concern fusion and the 11-field duplicated preamble are the two largest remaining god-shapes after streams 1-6 land |
+| Import/export handlers split into decode → partition → persist phases in `lib/plannerExportImport.ts`; `AccountDeleteSection`'s 34-line mutation callback delegates to a `useDeleteAccountFlow` hook; `NoteEditor.handlePaste` policy moves onto its imported primitives in `lib/noteUtils.ts`; the enhancement-toggle/recipe-cascade block dedupes into one `applyGiftToggle` | `PlannerExportImportSection.tsx:97-329`; `settings/AccountDeleteSection.tsx:32`; `shared/noteEditor/components/NoteEditor.tsx:132-166`; `floorTheme/FloorGiftSelectorPane.tsx:102-156` + `ComprehensiveGiftSelectorPane.tsx:93-138` | The remaining round-one logic/view extractions with existing tested lib/ homes; the export path's inline `try/finally` is a compiler-bailout allowlist entry that this removes |
+| Hardcoded `alt` literals through `t()` or `alt=""` | `DetailEntitySelector.tsx:115`; `EGOCard.tsx:73`; `AllEnhancementsPanel.tsx:60`; `CostDisplay.tsx:11`; `SkillInfoPanel.tsx:95`; `SkillImageComposite.tsx:76`; `SkillImageSimple.tsx:57`; `ResistancePanel.tsx:28,39,50` | Decorative glyphs take `alt=""`; meaningful ones take a key |
+| Set `components.json` hooks alias | `frontend/components.json:18` → `@/components/hooks` | `@/hooks` is not a real directory |
+| Drop the stale oxlint exemption | `.oxlintrc.json:119-132` — remove `RouteErrorComponent.tsx` from `files` | It imports no `@/pages/*` or `@/shared/*` |
+| Delete the duplicate `cn` | `shared/noteEditor/lib/tiptap-utils.ts:20`; `components/tiptap-ui-primitive/button/button.tsx:7` → `@/lib/utils` | The local copy has no tailwind-merge, so conflicting classes are not deduped |
+| Split `api.ts`; hoist 401 eviction to the auth layer | `lib/api.ts:2,259-262` (358 lines) → `lib/apiErrors.ts` + the eviction at the auth boundary; `lib/queryClient.ts:3-8` | Breaks the hard `api.ts` ↔ `queryClient.ts` cycle; the hand-rolled `['auth','me']` key becomes the factory's |
+| Split `router.tsx` | `lib/router.tsx` (587 lines): 9 loaders (`:187-412`) → `routeLoaders.ts`; the language listener (`:569-580`) → `routerTitle.ts`; the MD search schemas (`:63-101`) derive from `MD_CATEGORIES` (`shared/gameData/constants.ts:182`) | `.oxlintrc.json:133-138` already permits the canonical import here |
+| `import/no-cycle` → `error` | `.oxlintrc.json:78`; `frontend/package.json:11` gains a warning-denying flag | Only after the `shared/userSettings` move, the `PlannerSection` move, the extraction self-barrel fix, and the `api.ts` split |
+| ErrorBoundary alias convention | `CommentEditor.tsx:14`; `NoteEditor.tsx:3`; `ExtractionPlannerPage.tsx:15`; `EGOGiftTooltipContent.tsx:3` | Library import is visually identical to the project wrapper's today |
+| Parameterize the three keyword backlink lists | `pages/keyword/KeywordDetailPage.tsx:58-92,98-132,138-167,191-197,228-230` → `components/KeywordBacklinkList.tsx` | Label key, name hook, route, and label formatter are the only differences |
+| Skeleton reuse | `plannerViewer/TrackerModeViewer.tsx:193-205` → `SkillGridSkeleton` (`plannerSkeletons.tsx:81-102`); `home/components/RecentlyReleasedSection.tsx:205-240` reuses the card shell; `components/feedback/DetailPageSkeleton.tsx` becomes a layout-only shell with per-slice presets moved into the slices | `GuideModeViewer.tsx:144` and `PlannerEditorShell.tsx:497` already use the shared one |
+| `StartBuffCard.onSelect(id, selected)` | `startBuff/StartBuffCard.tsx:191-205,268-274` | Replaces `onSelect(-id)` sign encoding the prop type does not express |
+| Extract `CARD_VARIANTS` and fix the inert class | `startBuff/StartBuffCard.tsx:53-104,86,109-119,232-233` | `text-[${MD_ACCENT_COLORS[7]}]` is runtime-interpolated, so Tailwind never generates it; `:328` shows the inline-style form that works |
+| `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` | `frontend/tsconfig.app.json:23-29` | Surfaces `plannerValidation.ts:319`, `StartBuffCard.tsx:233`, `DetailEntitySelector.tsx:71`, `api.ts:21`; land after stream 7 so tests are checked too |
+
+
+---
+
+## Rollout
+
+**Inside the big-bang window** — these change a wire contract or an on-disk format and must land
+with their counterparts, in this order:
+
+1. Stream 1 with RFC 0003 stream 1. `contentDigest` on the two `.strict()` schemas means a
+   frontend without it rejects every response from a backend with it, and a backend without it
+   fails a frontend that requires it. Ship the schema field as required on both sides in the same
+   release, or the parse fails one way or the other.
+2. Stream 2's `DB_VERSION` 2 migration. It is not reversible: a client that has upgraded and then
+   loads an older bundle finds two-part keys under a v1 reader. A rollback of the frontend after
+   this ships strands local planners.
+3. Stream 5 with RFC 0003's SSE half. Removing planner appliers before the backend stops emitting
+   planner events is safe (unknown types dispatch to nothing); removing the Last-Event-ID header
+   before the backend stops requiring it is not. Header removal follows the backend's.
+
+**Freely landable, any order:**
+
+- Stream 3 — behavior-only, no wire or storage change. Depends on stream 1's `AppError` only if
+  stream 4(a) has already landed; otherwise it uses `SaveError` and is retyped by 4(a).
+- Stream 4 — internal to the frontend. Sub-order (a)→(b)→(c)→(d)→(e) is mandatory within it.
+- Stream 6 — behavior-only.
+- Stream 7 — tooling; land early, because it is what makes the other streams' tests type-check.
+- Stream 8 — one row at a time, except the four IconFilter steps and the four `import/no-cycle`
+  prerequisites, which are ordered within their rows.
+
+Land stream 7 first if anything is landed out of order: every other stream's test plan assumes
+fixtures that type-check.
+
+---
+
+## Acceptance checklist
+
+- [ ] A save presents `(syncVersion, contentDigest)`; an acknowledgement whose digest does not
+      match the content in hand leaves the local version untouched.
+- [ ] `presentedVersion` never decreases; `adoptAck` decreases it only at the two sites that adopt
+      server content in the same step.
+- [ ] Seed and exit defaults agree on `INITIAL_SYNC_VERSION`; no code path can present `0`.
+- [ ] `categorizePlanner` skips rows whose digests match, regardless of version, and falls back to
+      the version path when the local digest is absent.
+- [ ] `runSync` fetches its pull residue through the batch endpoint, chunked to
+      `BATCH_PULL_MAX_IDS`, issuing no request for an empty residue.
+- [ ] `storage.getItem` distinguishes absence from failure; a failed open does not poison later
+      reads; `getOrCreateDeviceId` never mints on a failed read.
+- [ ] Keys are `planner:{id}` at all six sites; `loadPlannerTitle` uses the builder; the v1→v2
+      migration is copy-verify-delete inside the versionchange transaction, newest-wins on
+      collision, and the device-id singleton survives.
+- [ ] One interpreter runs every conflict plan; identity is minted once; a fork whose sync fails is
+      deleted locally.
+- [ ] Batch resolution stops at the first failure, removes only resolved items, and surfaces the
+      failure; the dialog can be closed; it is reachable from a filtered-empty personal list.
+- [ ] Non-conflict resolution failures reach the user without displacing the conflict.
+- [ ] `AppError` covers all twelve api error classes plus quota; `SaveError` is gone.
+- [ ] Exactly one toast per failed mutation; `contactOnRepeat` appears only where `supportHint` is
+      set; success toasts fire only after a confirmed result.
+- [ ] A bare `toast.error`/`toast.success` outside the two sanctioned modules fails the build, and
+      the rule is proven to run (not silently unknown).
+- [ ] No SSE handler mutates a planner cache; no Last-Event-ID is sent; the FE event enum is
+      derived from `SSE_EVENTS`; server-backed planner queries refetch on focus and local ones do
+      not; a 404 open reports once and stops retrying.
+- [ ] One debounce constant; both the editor and the autosave flush on teardown; the unload warning
+      is armed from the store subscription.
+- [ ] `tsc -b` type-checks tests and `test-utils`; fixtures parse through production schemas; both
+      ast-grep twins ship with tests; `typecheck`, `check:fp`, `check:compiler-bailouts` and
+      coverage thresholds run in the frontend CI job.
+- [ ] `ComprehensiveGiftGridTracker.test.tsx` uses the real props, schema-valid fixtures, real
+      assertions, and a decode-survival positive control.
+- [ ] Every stream 8 row is landed or explicitly deferred with a reason in `docs/debt.md`.
+- [ ] `import/no-cycle` is an error and the build is clean.
