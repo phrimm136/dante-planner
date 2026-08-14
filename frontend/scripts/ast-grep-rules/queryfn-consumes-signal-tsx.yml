@@ -2,11 +2,6 @@ id: queryfn-consumes-signal-tsx
 language: Tsx
 severity: error
 message: queryFn must take the TanStack Query context and forward its signal; a zero-parameter queryFn cannot be aborted.
-ignores:
-  - src/lib/queryOptions.ts
-  - src/pages/planner/hooks/useStartBuffData.ts
-  - src/pages/planner/hooks/useSavedPlannerQuery.ts
-  - src/pages/planner/hooks/useMDUserPlannersData.ts
 rule:
   kind: pair
   all:
