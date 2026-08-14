@@ -15,7 +15,7 @@ function toastError(message: string | React.ReactNode, options?: ExternalToast) 
  * Wrapped toast that appends a contact-support description to every error toast.
  * All other methods (success, warning, dismiss, custom) pass through to sonner.
  */
-export const toast = new Proxy(sonnerToast, {
+export const toast: typeof sonnerToast = new Proxy(sonnerToast, {
   get(target, prop, receiver) {
     if (prop === 'error') return toastError
     return Reflect.get(target, prop, receiver)
