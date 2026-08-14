@@ -12,7 +12,7 @@
  * Pattern: usePlannerListFilters.ts (useSearch + useNavigate)
  */
 
-import { useSearch, useNavigate } from '@tanstack/react-router'
+import { useUrlFilters } from '@/components/hooks/useUrlFilters'
 
 import type { MDCategory } from '@/shared/gameData'
 import type { MDGesellschaftMode, MDGesellschaftSearchParams } from '../types/MDPlannerListTypes'
@@ -87,11 +87,11 @@ export interface UseMDGesellschaftFiltersResult {
  * ```
  */
 export function useMDGesellschaftFilters(): UseMDGesellschaftFiltersResult {
-  // Get current search params from URL
-  // Route must define validateSearch for type safety
-  const search = useSearch({ strict: false }) as MDGesellschaftSearchParams | undefined
-
-  const navigate = useNavigate()
+  const {
+    params: search,
+    setParams: setFilters,
+    clearParams: clearFilters,
+  } = useUrlFilters<MDGesellschaftSearchParams>()
 
   // Extract values with defaults
   const category = search?.category
@@ -103,33 +103,6 @@ export function useMDGesellschaftFilters(): UseMDGesellschaftFiltersResult {
   const ego = search?.ego
   const gift = search?.gift
   const themePack = search?.themePack
-
-  /**
-   * Update filter values in URL
-   * Merges with existing params, defaults are omitted to keep URL clean
-   */
-  const setFilters = (updates: Partial<MDGesellschaftSearchParams>) => {
-    void navigate({
-      to: '.',
-      search: (prev) => {
-        const next = { ...prev, ...updates }
-        return next
-      },
-      replace: false,
-    })
-  }
-
-  /**
-   * Clear all filters
-   * Resets to default state (empty URL params)
-   */
-  const clearFilters = () => {
-    void navigate({
-      to: '.',
-      search: {},
-      replace: false,
-    })
-  }
 
   /**
    * Reset page to 0

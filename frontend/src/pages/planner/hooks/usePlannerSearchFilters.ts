@@ -11,7 +11,7 @@
  * Pattern: useSearch + useNavigate (same as useMDGesellschaftFilters)
  */
 
-import { useSearch, useNavigate } from '@tanstack/react-router'
+import { useUrlFilters } from '@/components/hooks/useUrlFilters'
 
 import type { PlannerSearchFilters, PlannerSearchParams } from '../types/PlannerSearchTypes'
 
@@ -86,8 +86,7 @@ export interface UsePlannerSearchFiltersResult {
  * ```
  */
 export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
-  const search = useSearch({ strict: false }) as PlannerSearchParams | undefined
-  const navigate = useNavigate()
+  const { params: search, setParams } = useUrlFilters<PlannerSearchParams>()
 
   // Parse URL params to filter state
   const filters: PlannerSearchFilters = {
@@ -115,18 +114,13 @@ export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
   const setFilters = (updates: Partial<PlannerSearchFilters>) => {
     const merged = { ...filters, ...updates }
 
-    void navigate({
-      to: '.',
-      search: (prev) => ({
-        ...prev,
-        q: merged.title || undefined,
-        keyword: toCsvParam(merged.keywords),
-        identity: toCsvParam(merged.identityIds),
-        ego: toCsvParam(merged.egoIds),
-        gift: toCsvParam(merged.giftIds),
-        themePack: toCsvParam(merged.themePackIds),
-      }),
-      replace: false,
+    setParams({
+      q: merged.title || undefined,
+      keyword: toCsvParam(merged.keywords),
+      identity: toCsvParam(merged.identityIds),
+      ego: toCsvParam(merged.egoIds),
+      gift: toCsvParam(merged.giftIds),
+      themePack: toCsvParam(merged.themePackIds),
     })
   }
 
@@ -135,18 +129,13 @@ export function usePlannerSearchFilters(): UsePlannerSearchFiltersResult {
    * Preserves existing non-search params (category, page, mode)
    */
   const clearFilters = () => {
-    void navigate({
-      to: '.',
-      search: (prev) => ({
-        ...prev,
-        q: undefined,
-        keyword: undefined,
-        identity: undefined,
-        ego: undefined,
-        gift: undefined,
-        themePack: undefined,
-      }),
-      replace: false,
+    setParams({
+      q: undefined,
+      keyword: undefined,
+      identity: undefined,
+      ego: undefined,
+      gift: undefined,
+      themePack: undefined,
     })
   }
 
