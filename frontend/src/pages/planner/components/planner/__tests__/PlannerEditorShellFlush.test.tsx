@@ -221,6 +221,23 @@ describe('PlannerEditorShell - teardown with real note editors', () => {
     expect(JSON.stringify(written)).toContain('typed just before leaving')
   })
 
+  it('persists note text typed before the planner has written anything at all', async () => {
+    // No settling: nothing has been written yet, and the editor's delivery lands
+    // after the subscription is already gone, so nothing marks the planner dirty.
+    // Only the baseline installed at mount can tell the flush there is work to do.
+    const { unmount } = renderShell()
+    await waitFor(() => expect(document.querySelector('.note-editor-content')).toBeTruthy())
+
+    typeIntoFirstNote('typed before any baseline')
+
+    unmount()
+
+    await waitFor(() => {
+      expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
+    })
+    expect(JSON.stringify(mockSaveToLocal.mock.calls[0][0])).toContain('typed before any baseline')
+  })
+
   it('warns on a tab close within one debounce of typing a note', async () => {
     renderShell()
     await settleMountChurn()
