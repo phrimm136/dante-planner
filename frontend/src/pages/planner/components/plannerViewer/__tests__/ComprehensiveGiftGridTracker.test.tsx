@@ -2,31 +2,53 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ComprehensiveGiftGridTracker } from '../ComprehensiveGiftGridTracker'
-import type { SerializableFloorSelection } from '../../../types/PlannerTypes'
+import { encodeGiftSelection } from '@/pages/egoGift'
+import { buildFloorSelection } from '@/test-utils'
 
-// Mock hooks
+// The card is the seam the grid renders through, so the mock surfaces the three
+// values the grid computes: which gift, at which enhancement, and highlighted or not.
+vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
+  EGOGiftCard: ({
+    gift,
+    enhancement,
+    isSelected,
+  }: {
+    gift: { id: string; name: string }
+    enhancement: number
+    isSelected: boolean
+  }) => (
+    <div
+      data-testid={`gift-card-${gift.id}`}
+      data-enhancement={String(enhancement)}
+      data-selected={String(isSelected)}
+    >
+      {gift.name}
+    </div>
+  ),
+}))
+
 vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
   useEGOGiftListData: () => ({
     spec: {
       9001: {
-        tag: ['ATTACK'],
+        tag: ['TIER_3'],
         keyword: 'Burn',
         attributeType: 'WRATH',
-        themePack: 'pack1',
+        themePack: '1001',
         maxEnhancement: 3,
       },
       9002: {
-        tag: ['DEFENSE'],
+        tag: ['TIER_2'],
         keyword: 'Bleed',
         attributeType: 'LUST',
-        themePack: 'pack2',
+        themePack: '1002',
         maxEnhancement: 3,
       },
       9003: {
-        tag: ['ATTACK'],
+        tag: ['TIER_1'],
         keyword: 'Tremor',
         attributeType: 'PRIDE',
-        themePack: 'pack1',
+        themePack: '1001',
         maxEnhancement: 3,
       },
     },
@@ -44,12 +66,8 @@ vi.mock('@/shared/filter/hooks/useSearchMappings', () => ({
   }),
 }))
 
-vi.mock('@/pages/egoGift/components/EGOGiftCard', () => ({
-  EGOGiftCard: ({ gift }: { gift: { id: string } }) => <div data-testid={`gift-card-${gift.id}`} />,
-}))
-
 vi.mock('@/pages/egoGift/components/EGOGiftTooltip', () => ({
-  EGOGiftTooltip: ({ children }: { children: JSX.Element }) => children,
+  EGOGiftTooltip: ({ children }: { children: React.ReactElement }) => children,
 }))
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -76,34 +94,18 @@ function createWrapper() {
 
 describe('ComprehensiveGiftGridTracker', () => {
   describe('Rendering', () => {
-    it('renders component without crashing', () => {
-      const floorSelections: SerializableFloorSelection[] = [
-        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:9001', '0:9002', '0:9003'] },
-      ]
-
-      const { container } = render(
-        <ComprehensiveGiftGridTracker
-          floorSelections={floorSelections}
-          doneMarks={{}}
-          hoveredThemePackId={null}
-        />,
-        { wrapper: createWrapper() },
-      )
-
-      expect(container).toBeDefined()
-    })
-
-    it('renders empty state when no gifts selected', () => {
+    it('renders the empty state when no floor and no comprehensive gift is selected', () => {
       const { container } = render(
         <ComprehensiveGiftGridTracker
           floorSelections={[]}
-          doneMarks={{}}
+          comprehensiveGiftIds={[]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
       )
 
       expect(container.textContent).toContain('pages.plannerMD.emptyState.noEgoGifts')
+      expect(container.querySelector('[data-testid^="gift-card-"]')).toBeNull()
     })
 
     // The populated grid reserves a fixed scroll height. The Suspense skeleton in
@@ -111,13 +113,9 @@ describe('ComprehensiveGiftGridTracker', () => {
     // lg:h-[416px] so the section does not jump when the grid resolves. If this
     // height changes, those two skeletons must change with it.
     it('reserves the fixed scroll height that the Suspense skeleton mirrors', () => {
-      const floorSelections: SerializableFloorSelection[] = [
-        { themePackId: 'pack1', difficulty: 0, giftIds: ['9001'] },
-      ]
-
       const { container } = render(
         <ComprehensiveGiftGridTracker
-          floorSelections={floorSelections}
+          floorSelections={[buildFloorSelection({ giftIds: ['9001'] })]}
           comprehensiveGiftIds={['9001']}
           hoveredThemePackId={null}
         />,
@@ -131,79 +129,116 @@ describe('ComprehensiveGiftGridTracker', () => {
 
   describe('comprehensiveGiftIds as authoritative source', () => {
     it('displays a gift in comprehensiveGiftIds that is absent from all floor giftIds', () => {
-      const floorSelections: SerializableFloorSelection[] = [
-        { themePackId: 'pack1', difficulty: 0, giftIds: [] },
-      ]
-
       const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
-          floorSelections={floorSelections}
+          floorSelections={[buildFloorSelection({ giftIds: [] })]}
           comprehensiveGiftIds={['9001']}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
       )
 
-      expect(getByTestId('gift-card-9001')).toBeDefined()
+      expect(getByTestId('gift-card-9001')).toBeInTheDocument()
+      expect(getByTestId('gift-card-9001')).toHaveTextContent('Gift One')
     })
 
-    it('display gifts present in both a floor giftIds and comprehensiveGiftIds', () => {
-      const floorSelections: SerializableFloorSelection[] = [
-        { themePackId: 'pack1', difficulty: 0, giftIds: ['9002'] },
-      ]
-
-      const { queryByTestId } = render(
+    it('displays gifts present in a floor giftIds and in comprehensiveGiftIds', () => {
+      const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
-          floorSelections={floorSelections}
+          floorSelections={[buildFloorSelection({ giftIds: ['9002'] })]}
           comprehensiveGiftIds={['9001']}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
       )
 
-      expect(queryByTestId('gift-card-9001')).toBeDefined()
-      expect(queryByTestId('gift-card-9002')).toBeDefined()
+      expect(getByTestId('gift-card-9001')).toBeInTheDocument()
+      expect(getByTestId('gift-card-9002')).toBeInTheDocument()
     })
   })
 
-  describe('Highlighting Logic', () => {
-    it('accepts hoveredThemePackId prop', () => {
-      const floorSelections: SerializableFloorSelection[] = [
-        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:9001', '0:9002'] },
-      ]
+  describe('decode survival', () => {
+    it('renders the base gift and its enhancement for an encoded selection', () => {
+      const encoded = encodeGiftSelection(2, '9001')
 
-      const { container } = render(
+      const { getByTestId } = render(
         <ComprehensiveGiftGridTracker
-          floorSelections={floorSelections}
-          doneMarks={{}}
-          hoveredThemePackId="pack1"
-        />,
-        { wrapper: createWrapper() },
-      )
-
-      // Should render without errors
-      expect(container).toBeDefined()
-    })
-
-    it('accepts doneMarks prop', () => {
-      const floorSelections: SerializableFloorSelection[] = [
-        { floorIndex: 0, themePackId: 'pack1', giftIds: ['0:9001', '0:9002'] },
-      ]
-      const doneMarks: Record<number, Set<string>> = {
-        0: new Set(['pack1']),
-      }
-
-      const { container } = render(
-        <ComprehensiveGiftGridTracker
-          floorSelections={floorSelections}
-          doneMarks={doneMarks}
+          floorSelections={[buildFloorSelection({ giftIds: [] })]}
+          comprehensiveGiftIds={[encoded]}
           hoveredThemePackId={null}
         />,
         { wrapper: createWrapper() },
       )
 
-      // Should render without errors
-      expect(container).toBeDefined()
+      expect(encoded).toBe('29001')
+      expect(getByTestId('gift-card-9001')).toBeInTheDocument()
+      expect(getByTestId('gift-card-9001')).toHaveAttribute('data-enhancement', '2')
+    })
+
+    it('keeps an enhanced and an unenhanced selection of the same base gift distinct', () => {
+      const { getAllByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={[buildFloorSelection({ giftIds: [] })]}
+          comprehensiveGiftIds={[encodeGiftSelection(0, '9001'), encodeGiftSelection(1, '9001')]}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      const enhancements = getAllByTestId('gift-card-9001')
+        .map((node) => node.getAttribute('data-enhancement'))
+        .sort((a, b) => String(a).localeCompare(String(b)))
+      expect(enhancements).toEqual(['0', '1'])
+    })
+  })
+
+  describe('Highlighting logic', () => {
+    it('marks the hovered theme pack floor gifts as selected', () => {
+      const floor = buildFloorSelection({ themePackId: '1001', giftIds: ['9001'] })
+
+      const { getByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={[floor]}
+          comprehensiveGiftIds={['9001', '9002']}
+          hoveredThemePackId="1001"
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      expect(getByTestId('gift-card-9001')).toHaveAttribute('data-selected', 'true')
+      expect(getByTestId('gift-card-9002')).toHaveAttribute('data-selected', 'false')
+    })
+
+    it('leaves every gift unselected when no theme pack is hovered', () => {
+      const floor = buildFloorSelection({ themePackId: '1001', giftIds: ['9001'] })
+
+      const { getByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={[floor]}
+          comprehensiveGiftIds={['9001']}
+          hoveredThemePackId={null}
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      expect(getByTestId('gift-card-9001')).toHaveAttribute('data-selected', 'false')
+    })
+  })
+
+  describe('egoGiftDoneMarks', () => {
+    it('dims a gift whose encoded id is marked done', () => {
+      const { getByTestId } = render(
+        <ComprehensiveGiftGridTracker
+          floorSelections={[buildFloorSelection({ giftIds: [] })]}
+          comprehensiveGiftIds={['9001', '9002']}
+          hoveredThemePackId={null}
+          egoGiftDoneMarks={new Set(['9001'])}
+        />,
+        { wrapper: createWrapper() },
+      )
+
+      expect(getByTestId('gift-card-9001').parentElement).toHaveClass('brightness-50')
+      expect(getByTestId('gift-card-9002').parentElement).not.toHaveClass('brightness-50')
     })
   })
 })
