@@ -10,20 +10,6 @@ import { loadPlannerTitle, untitledPlannerTitle } from '@/pages/planner/lib/load
  * bundler needs the shape to enumerate the matching files.
  */
 
-/** Read `name` out of a per-entity i18n file, falling back to the raw id. */
-async function entityName(dir: string, id: string, stripNewlines: boolean): Promise<string> {
-  const module = await import(`@static/i18n/${i18n.language}/${dir}/${id}.json`)
-  const name = (module.default as { name?: string }).name
-  if (name === undefined) return id
-  return stripNewlines ? name.replace(/\n/g, ' ') : name
-}
-
-/** Read `name` for one id out of a single keyed i18n file. */
-async function nameFromIndex(file: string, id: string): Promise<string> {
-  const module = await import(`@static/i18n/${i18n.language}/${file}.json`)
-  return (module.default as Record<string, { name?: string }>)[id]?.name ?? id
-}
-
 export async function loadPublishedPlanner({ params }: { params: { id: string } }) {
   // Dynamic so the published-planner schemas stay out of the entry chunk.
   const {
@@ -47,23 +33,34 @@ export async function loadPlannerTitleRoute({ params }: { params: { id: string }
 }
 
 export async function loadIdentityName({ params }: { params: { id: string } }) {
-  return { name: await entityName('identity', params.id, true) }
+  const module = await import(`@static/i18n/${i18n.language}/identity/${params.id}.json`)
+  const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
+  return { name }
 }
 
 export async function loadEgoName({ params }: { params: { id: string } }) {
-  return { name: await entityName('ego', params.id, true) }
+  const module = await import(`@static/i18n/${i18n.language}/ego/${params.id}.json`)
+  const name = (module.default as { name?: string }).name?.replace(/\n/g, ' ') ?? params.id
+  return { name }
 }
 
 export async function loadEgoGiftName({ params }: { params: { id: string } }) {
-  return { name: await entityName('egoGift', params.id, false) }
+  const module = await import(`@static/i18n/${i18n.language}/egoGift/${params.id}.json`)
+  const name = (module.default as { name?: string }).name ?? params.id
+  return { name }
 }
 
 export async function loadThemePackName({ params }: { params: { id: string } }) {
-  return { name: await nameFromIndex('themePack', params.id) }
+  const module = await import(`@static/i18n/${i18n.language}/themePack.json`)
+  const name = (module.default as Record<string, { name?: string }>)[params.id]?.name ?? params.id
+  return { name }
 }
 
 export async function loadKeywordName({ params }: { params: { id: string } }) {
-  return { name: await nameFromIndex('battleKeywords', params.id) }
+  const module = await import(`@static/i18n/${i18n.language}/battleKeywords.json`)
+  const keywords = module.default as Record<string, { name?: string }>
+  const name = keywords[params.id]?.name ?? params.id
+  return { name }
 }
 
 export async function loadAbEventTitle({ params }: { params: { id: string } }) {
