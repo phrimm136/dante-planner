@@ -50,6 +50,16 @@ public interface PlannerRepository extends JpaRepository<Planner, UUID> {
     Optional<Planner> findAggregateForOwner(@Param("id") UUID id, @Param("userId") Long userId);
 
     /**
+     * Load the full aggregates for the owner-scoped, non-deleted planners among the named ids.
+     *
+     * <p>An id naming no planner, a soft-deleted one, or another user's is absent from the result
+     * rather than an error, so the result is not positionally aligned with the argument.</p>
+     */
+    @Query(AGGREGATE_LOAD + "WHERE p.id IN :ids AND p.user.id = :userId AND c.deletedAt IS NULL")
+    List<Planner> findAggregatesForOwner(@Param("ids") Collection<UUID> ids,
+            @Param("userId") Long userId);
+
+    /**
      * Load the full aggregate for a planner regardless of owner or publication,
      * excluding soft-deleted rows (moderation paths).
      */

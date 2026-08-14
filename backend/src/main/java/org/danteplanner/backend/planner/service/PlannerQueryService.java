@@ -8,12 +8,16 @@ import org.danteplanner.backend.planner.entity.Planner;
 import org.danteplanner.backend.planner.exception.PlannerNotFoundException;
 import org.danteplanner.backend.planner.repository.PlannerRepository;
 import org.danteplanner.backend.planner.repository.PlannerStatsRepository;
+import org.danteplanner.backend.planner.repository.PlannerUpvoteRow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Service for a planner owner's read operations (CQRS read side for owned planners).
@@ -37,6 +41,26 @@ public class PlannerQueryService {
     @Transactional(readOnly = true)
     public Page<PlannerSummaryResponse> getPlanners(Long userId, Pageable pageable) {
         return plannerRepository.findOwnerSummaries(userId, pageable).map(PlannerSummaryResponse::from);
+    }
+
+    /**
+     * Get several of a user's planners in one round trip.
+     *
+     * <p>An id naming no planner, a deleted one, or another user's is absent from the result
+     * rather than an error, so the result is not positionally aligned with the argument.</p>
+     *
+     * @param userId the user ID
+     * @param ids    the planner IDs to pull
+     * @return the responses for the owned, live planners among the ids
+     */
+    @Transactional(readOnly = true)
+    public List<PlannerResponse> getPlanners(Long userId, List<UUID> ids) {
+        Map<UUID, Integer> upvotes = statsRepository.upvoteCounts(ids).stream()
+                .collect(Collectors.toMap(PlannerUpvoteRow::getPlannerId, PlannerUpvoteRow::getUpvotes));
+        return plannerRepository.findAggregatesForOwner(ids, userId).stream()
+                .map(planner -> PlannerResponse.fromEntity(planner,
+                        upvotes.getOrDefault(planner.getId(), 0)))
+                .toList();
     }
 
     /**

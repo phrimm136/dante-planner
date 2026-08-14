@@ -78,6 +78,7 @@ class RateLimitBindingFreezeTest {
             "PlannerPublishingController.toggleOwnerNotifications -> CRUD:notifications-toggle (RESPOND)",
             "PlannerPublishingController.unpublishPlanner -> CRUD:unpublish (RESPOND)",
             "PlannerQueryController.getPlanner -> CRUD:get (RESPOND)",
+            "PlannerQueryController.getPlannerBatch -> CRUD:batch (RESPOND)",
             "PlannerQueryController.getPlanners -> CRUD:list (RESPOND)",
             "PlannerSseController.subscribeToEvents -> SSE (RESPOND)",
             "PublishedPlannerController.getPublishedPlanner -> PUBLIC_READ (RESPOND)",

@@ -12,6 +12,12 @@ public final class PlannerConstants {
      */
     public static final int TITLE_MAX_LENGTH = 255;
 
+    /**
+     * Maximum number of planner ids one batch pull may name. Each id resolves to a full content
+     * document, so the bound is the same one the bulk import is held to.
+     */
+    public static final int BATCH_PULL_MAX_IDS = 50;
+
     private PlannerConstants() {
         // Utility class - prevent instantiation
     }

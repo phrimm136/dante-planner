@@ -1,7 +1,9 @@
 package org.danteplanner.backend.planner.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.danteplanner.backend.shared.ratelimit.RateLimitPolicy;
+import org.danteplanner.backend.planner.dto.PlannerBatchRequest;
 import org.danteplanner.backend.planner.dto.PlannerResponse;
 import org.danteplanner.backend.planner.dto.PlannerSummaryResponse;
 import org.danteplanner.backend.planner.service.PlannerQueryService;
@@ -13,9 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -47,6 +52,25 @@ public class PlannerQueryController {
 
         Page<PlannerSummaryResponse> planners = plannerQueryService.getPlanners(userId, pageable);
         return ResponseEntity.ok(planners);
+    }
+
+    /**
+     * Get several of the authenticated user's planners in one round trip.
+     *
+     * <p>An id naming no planner, a deleted one, or another user's is absent from the response
+     * array rather than an error, so the array is not positionally aligned with the request.</p>
+     *
+     * @param userId  the authenticated user ID
+     * @param request the planner ids to pull
+     * @return the owned, live planners among the requested ids
+     */
+    @RateLimited(value = RateLimitPolicy.CRUD, endpoint = "batch")
+    @PostMapping("/batch")
+    public ResponseEntity<List<PlannerResponse>> getPlannerBatch(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody PlannerBatchRequest request) {
+
+        return ResponseEntity.ok(plannerQueryService.getPlanners(userId, request.ids()));
     }
 
     /**
