@@ -251,7 +251,10 @@ function parseStorageKey(key: string): { prefix: string; plannerId: string } | n
 1. **Preceding step.** Extract `loadPlannerTitle` (`lib/router.tsx:43-57`) into the planner slice
    and export it from `pages/planner/index.ts`; it builds its key with the real builder and returns
    the placeholder only for `ok(null)`, reporting an `ioError` rather than swallowing it (`:54`).
-   `router.tsx:231` and `:243` call the exported function.
+   `router.tsx:231` and `:243` call it through the router's sanctioned deep-path exemption, not the
+   barrel: a static barrel edge from the eagerly-loaded router drags slice components into the
+   entry chunk — verified by chunk-content markers, and invisible to a size-only comparison, since
+   re-chunking can shrink the entry while leaking.
 2. `lib/storage.ts` — `StorageReadError`; `getItem` returns `Result<string | null,
    StorageReadError>`; `dbPromise = null` on `onerror`; `onblocked` and `onversionchange` handlers.
    The write side adopts the same shape: `setItem`/`removeItem` return `Result<void, …>` — a
