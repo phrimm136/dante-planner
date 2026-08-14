@@ -5,6 +5,7 @@
 export { createTestFilterStore } from './filterStore'
 export {
   buildEgoGiftListItem,
+  buildEgoGiftSpecList,
   buildFloorSelection,
   buildPlannerSummary,
   buildSaveablePlanner,
