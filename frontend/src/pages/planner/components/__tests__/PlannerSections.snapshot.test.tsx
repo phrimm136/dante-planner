@@ -196,7 +196,7 @@ vi.mock('../../hooks/useStartBuffSelection', () => ({
 const EMPTY_EQUIPMENT: Record<string, SinnerEquipment> = {}
 const DEPLOYMENT_ORDER = [0, 2, 4]
 const SKILL_EA: Record<string, SkillEAState> = createDefaultSkillEAState()
-const CURRENT_EA: Record<string, SkillEAState> = { '1': { s1: 2, s2: 3, s3: 1 } as SkillEAState }
+const CURRENT_EA: Record<string, SkillEAState> = { '1': { 0: 2, 1: 3, 2: 1 } }
 const MD_VERSION = 7
 
 function withStore(state: Partial<PlannerEditorState>, ui: ReactElement) {
