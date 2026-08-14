@@ -690,4 +690,25 @@ describe('NoteEditor - debounce flush on unmount', () => {
 
     expect(onChange).toHaveBeenCalledTimes(1)
   })
+
+  it.each([['beforeunload'], ['pagehide']])(
+    'hands the typed content over when the page goes away via %s',
+    async (eventName) => {
+      const onChange = vi.fn()
+      render(<NoteEditor value={emptyValue} onChange={onChange} />)
+
+      const container = document.querySelector('.note-editor') as Element
+      await waitFor(() => expect(container).toBeTruthy())
+      fireEvent.click(container)
+
+      typeText('held by the debounce')
+      expect(onChange).not.toHaveBeenCalled()
+
+      window.dispatchEvent(new Event(eventName, { cancelable: true }))
+
+      expect(onChange).toHaveBeenCalledTimes(1)
+      const delivered = onChange.mock.calls[0][0] as NoteContent
+      expect(JSON.stringify(delivered.content)).toContain('held by the debounce')
+    },
+  )
 })

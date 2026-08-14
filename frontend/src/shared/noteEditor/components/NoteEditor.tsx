@@ -99,15 +99,18 @@ function NoteEditorInner({
   // A tab closing inside the debounce window loses the same text, and silently:
   // the parent was never told anything changed, so it raises no warning. Capture
   // runs ahead of the parent's own handler, so what this delivers is what that
-  // handler sees.
+  // handler sees. A mobile tab is discarded through `pagehide` without ever
+  // firing `beforeunload`, which is where this loss is most common.
   useEffect(() => {
     const deliverPending = () => {
       pendingRef.current?.()
     }
 
     window.addEventListener('beforeunload', deliverPending, { capture: true })
+    window.addEventListener('pagehide', deliverPending, { capture: true })
     return () => {
       window.removeEventListener('beforeunload', deliverPending, { capture: true })
+      window.removeEventListener('pagehide', deliverPending, { capture: true })
       deliverPending()
     }
   }, [])
