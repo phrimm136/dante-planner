@@ -92,19 +92,18 @@ follow-up.
 ```ts
 // pages/planner/lib/plannerApi.ts
 /**
- * Fetch several planners in one round trip, chunked to the server's id cap.
- * The response is a bare array, not positionally aligned with the request: ids
+ * Fetch several planners chunked to the server's id cap, yielding each parsed
+ * chunk as it lands so a failing chunk cannot discard rows already fetched.
+ * Responses are bare arrays, not positionally aligned with the request: ids
  * naming nothing, a deleted planner, or another user's planner are simply absent.
  */
-async batch(ids: string[]): Promise<ServerPlannerResponse[]> {
-  const out: ServerPlannerResponse[] = []
+async *batchChunks(ids: string[]): AsyncGenerator<ServerPlannerResponse[]> {
   for (let i = 0; i < ids.length; i += BATCH_PULL_MAX_IDS) {
     const data = await ApiClient.post(`${PLANNERS_BASE}/batch`, {
       ids: ids.slice(i, i + BATCH_PULL_MAX_IDS),
     })
-    out.push(...ServerPlannerBatchResponseSchema.parse(data))
+    yield ServerPlannerBatchResponseSchema.parse(data)
   }
-  return out
 },
 ```
 
