@@ -444,7 +444,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
 
   it('overwrite force-saves via performSave: sync THEN local, clears conflict', async () => {
     authenticated()
-    const onServerReload = vi.fn()
+    const onServerReload = vi.fn(() => true)
     const { result } = await driveIntoConflict({ onServerReload })
 
     let outcome: boolean | undefined
@@ -528,7 +528,7 @@ describe('usePlannerSave - resolveConflict adapter ordering (golden master)', ()
     // Silent data loss: a discard whose GET fails must never report success, or the
     // editor keeps holding content the user believes it threw away.
     authenticated()
-    const onServerReload = vi.fn()
+    const onServerReload = vi.fn(() => true)
     const { result } = await driveIntoConflict({ onServerReload })
 
     mockFetchFromServer.mockResolvedValue(err({ kind: 'unknown' }))
@@ -1036,6 +1036,8 @@ describe('usePlannerSave - isDirty', () => {
     })
 
     expect(result.current.isDirty()).toBe(false)
+  })
+})
 
 describe('usePlannerSave - failed resolution surface', () => {
   /** Reach the conflict through the one public path that sets it: a rejected save. */
@@ -1090,7 +1092,7 @@ describe('usePlannerSave - failed resolution surface', () => {
 
   it('clears the previous resolution failure when a later attempt succeeds', async () => {
     authenticated()
-    const onServerReload = vi.fn()
+    const onServerReload = vi.fn(() => true)
     const { result } = await driveIntoConflict({ onServerReload })
     mockFetchFromServer.mockResolvedValue(err({ kind: 'quota' }))
 

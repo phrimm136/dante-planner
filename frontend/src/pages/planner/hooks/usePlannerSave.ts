@@ -891,8 +891,15 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       // adopted once its content is durable locally.
       const fetched: { value: AcknowledgedPlanner | null } = { value: null }
 
+      // The comparable of the exact state handed to the interpreter: a note
+      // delivery can land mid-resolution, and the baseline must describe what
+      // was pushed, not what the store holds afterwards.
+      const handed: { comparable: string | null } = { comparable: null }
       const ops: ConflictOps = {
-        local: async () => ok(localSide(deviceId.value)),
+        local: async () => {
+          handed.comparable = stateToComparableString(getState())
+          return ok(localSide(deviceId.value))
+        },
         incoming: async () => {
           const incoming = await syncAdapter.fetchFromServer(plannerId)
           if (!incoming.ok) return err(incoming.error)
@@ -931,10 +938,17 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
       if (fetched.value) {
         adoptAck(fetched.value.ack)
-        if (onServerReload) onServerReload(fetched.value.planner)
+        // A reload that refused the copy leaves the editor holding the old local
+        // content; reporting success would announce a discard that never happened.
+        if (onServerReload) {
+          if (!onServerReload(fetched.value.planner)) {
+            return failResolution({ kind: 'unknown' })
+          }
+          markSaved(stateToComparableString(getState()))
+        }
       }
-      if (plan.some((effect) => effect.kind === 'keepLocal')) {
-        markSaved()
+      if (plan.some((effect) => effect.kind === 'keepLocal') && handed.comparable !== null) {
+        markSaved(handed.comparable)
       }
 
       // Write-through: every mounted consumer (publish header, list pages) must
