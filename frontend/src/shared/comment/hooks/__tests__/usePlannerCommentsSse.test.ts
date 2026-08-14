@@ -21,6 +21,10 @@ vi.mock('@/shared/sse', async (importOriginal) => ({
   },
 }))
 
+const toastMocks = vi.hoisted(() => ({ error: vi.fn() }))
+vi.mock('@/lib/toast', () => ({ toast: toastMocks }))
+vi.mock('@/lib/i18n', () => ({ default: { t: (key: string) => key } }))
+
 import { usePlannerCommentsSse } from '../usePlannerCommentsSse'
 
 const encoder = new TextEncoder()
@@ -194,5 +198,27 @@ describe('usePlannerCommentsSse — comment tree cache patch', () => {
       { id: 'c1', content: 'root', replies: [] },
     ])
     expect(result.current.newCommentsCount).toBe(1)
+  })
+})
+
+describe('usePlannerCommentsSse — planner removed elsewhere', () => {
+  it('answers a 404 open with the removal message', async () => {
+    // This path names one planner, so its 404 is the planner itself going away.
+    vi.mocked(globalThis.fetch).mockImplementation(
+      () =>
+        Promise.resolve({
+          ok: false,
+          status: 404,
+          headers: new Headers(),
+          body: null,
+        } as unknown as Response) as Promise<Response>,
+    )
+    const { wrapper } = createWrapper()
+
+    renderHook(() => usePlannerCommentsSse('planner-1'), { wrapper })
+    await settle()
+
+    expect(toastMocks.error).toHaveBeenCalledTimes(1)
+    expect(toastMocks.error).toHaveBeenCalledWith('sync.removedOnAnotherDevice')
   })
 })
