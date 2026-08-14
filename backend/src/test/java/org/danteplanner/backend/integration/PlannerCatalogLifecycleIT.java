@@ -144,7 +144,7 @@ class PlannerCatalogLifecycleIT extends SharedMySqlContainerSupport {
         // republish then owner delete -> gone
         publishingService.publish(owner.getId(), planner.getId());
         assertThat(hasCatalogRow(planner.getId())).isTrue();
-        commandService.deletePlanner(owner.getId(), null, planner.getId());
+        commandService.deletePlanner(owner.getId(), planner.getId());
         assertThat(hasCatalogRow(planner.getId())).as("deleted planner has no catalog row").isFalse();
 
         // fresh published planner, moderator takedown -> gone

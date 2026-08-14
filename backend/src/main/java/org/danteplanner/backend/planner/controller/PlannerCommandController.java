@@ -69,7 +69,6 @@ public class PlannerCommandController {
      * Delete a planner (soft delete).
      *
      * @param userId   the authenticated user ID
-     * @param deviceId the device identifier (from HTTP-only cookie)
      * @param id       the planner ID
      * @return no content
      */
@@ -77,10 +76,9 @@ public class PlannerCommandController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanner(
             @AuthenticationPrincipal Long userId,
-            @DeviceId UUID deviceId,
             @PathVariable UUID id) {
 
-        plannerCommandService.deletePlanner(userId, deviceId, id);
+        plannerCommandService.deletePlanner(userId, id);
         return ResponseEntity.noContent().build();
     }
 

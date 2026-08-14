@@ -238,7 +238,7 @@ class PlannerCommandFlowIT extends SharedMySqlContainerSupport {
         assertThat(entityIndex(plannerId)).isNotEmpty();
         assertThat(keywordIndex(plannerId)).isNotEmpty();
 
-        commandService.deletePlanner(owner.getId(), deviceId, plannerId);
+        commandService.deletePlanner(owner.getId(), plannerId);
 
         assertThat(contentRepository.findById(plannerId).orElseThrow().getDeletedAt())
                 .as("the deletion stamp is on the committed row, not only on the in-memory aggregate")

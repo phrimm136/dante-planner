@@ -418,12 +418,11 @@ public class PlannerCommandService {
      * Soft delete a planner.
      *
      * @param userId   the user ID
-     * @param deviceId the device ID making the request (for SSE notification exclusion)
      * @param id       the planner ID
      * @throws PlannerNotFoundException if planner not found
      */
     @Transactional
-    public void deletePlanner(Long userId, UUID deviceId, UUID id) {
+    public void deletePlanner(Long userId, UUID id) {
         // Check if user has any restrictions
         Planner planner = accessGuard.findPlannerOrThrow(userId, id);
 

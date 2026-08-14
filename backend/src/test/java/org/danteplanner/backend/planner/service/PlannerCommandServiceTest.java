@@ -434,7 +434,7 @@ class PlannerCommandServiceTest {
             // Act & Assert
             assertThrows(
                     PlannerNotFoundException.class,
-                    () -> commandService.deletePlanner(testUser.getId(), deviceId, plannerId)
+                    () -> commandService.deletePlanner(testUser.getId(), plannerId)
             );
 
             verify(plannerRepository, never()).insert(any());
@@ -451,7 +451,7 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
 
             // Act
-            commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+            commandService.deletePlanner(testUser.getId(), planner.getId());
 
             // Assert
             assertFalse(planner.isPublished()); // Auto-unpublished
@@ -468,7 +468,7 @@ class PlannerCommandServiceTest {
                     .thenReturn(Optional.of(planner));
 
             // Act
-            commandService.deletePlanner(testUser.getId(), deviceId, planner.getId());
+            commandService.deletePlanner(testUser.getId(), planner.getId());
 
             // Assert
             assertFalse(planner.isPublished()); // Still unpublished

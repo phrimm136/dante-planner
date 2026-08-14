@@ -225,7 +225,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
         try {
             replicationControl.stopReplica();
 
-            plannerCommandService.deletePlanner(userId, UUID.randomUUID(), plannerId);
+            plannerCommandService.deletePlanner(userId, plannerId);
 
             Timestamp replicaDeletedAt = replicaJdbcTemplate.queryForObject(
                     "SELECT deleted_at FROM planner_content WHERE planner_id = UUID_TO_BIN(?)",
@@ -257,7 +257,7 @@ class ReplicaLagIT extends CausalHarnessSupport {
         Planner p = TestDataFactory.createTestPlanner(plannerRepository, owner, false);
         UUID plannerId = p.getId();
 
-        plannerCommandService.deletePlanner(owner.getId(), UUID.randomUUID(), plannerId);
+        plannerCommandService.deletePlanner(owner.getId(), plannerId);
 
         String key = "del:planner:" + plannerId;
 
