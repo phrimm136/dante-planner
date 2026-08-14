@@ -17,7 +17,7 @@ import { CommunityPlansErrorFallback } from '@/components/feedback/CommunityPlan
 import { usePublishedPlannerQuery, isPlannerRemoved } from './hooks/usePublishedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDGesellschaftFilters } from './hooks/useMDGesellschaftFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 

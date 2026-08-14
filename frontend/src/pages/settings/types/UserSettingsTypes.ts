@@ -9,6 +9,4 @@ export type {
   EpithetListResponse,
   UpdateUsernameEpithetRequest,
   UserDeletionResponse,
-  UserSettingsResponse,
-  UpdateUserSettingsRequest,
 } from '../schemas/UserSettingsSchemas'

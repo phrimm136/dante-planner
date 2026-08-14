@@ -14,7 +14,7 @@ import {
   notificationQueryKeys,
 } from '@/shared/notifications'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
-import { useUserSettingsQuery, userSettingsKeys } from '@/pages/settings'
+import { useUserSettingsQuery, userSettingsKeys } from '@/shared/userSettings'
 
 import type { SseNotificationEvent, NotificationType } from '@/shared/notifications'
 

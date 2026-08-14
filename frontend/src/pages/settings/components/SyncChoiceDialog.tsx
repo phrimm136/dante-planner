@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
+import { useUpdateUserSettingsMutation } from '@/shared/userSettings'
 
 /**
  * Props for SyncChoiceDialog

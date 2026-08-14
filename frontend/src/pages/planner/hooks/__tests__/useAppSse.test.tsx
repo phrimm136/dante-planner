@@ -41,7 +41,7 @@ const h = vi.hoisted(() => ({
   SETTINGS_KEYS: { settings: () => ['user', 'settings'] as const },
 }))
 
-vi.mock('@/pages/settings', () => ({
+vi.mock('@/shared/userSettings', () => ({
   useUserSettingsQuery: () => ({ data: h.settingsRef.current, isLoading: false }),
   userSettingsKeys: h.SETTINGS_KEYS,
 }))

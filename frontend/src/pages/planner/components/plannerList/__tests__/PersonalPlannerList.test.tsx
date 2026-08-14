@@ -48,7 +48,7 @@ vi.mock('../../../hooks/useMDUserPlannersData', () => ({
   }),
 }))
 
-vi.mock('@/pages/settings', () => ({
+vi.mock('@/shared/userSettings', () => ({
   useUserSettingsQuery: () => ({ data: { syncEnabled: true } }),
 }))
 

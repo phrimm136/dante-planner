@@ -14,7 +14,7 @@ import { PlannerGridSkeleton } from '@/components/feedback/ListPageSkeleton'
 import { useSavedPlannerQuery } from './hooks/useSavedPlannerQuery'
 import { isMDPlanner } from './types/PlannerTypes'
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useMDUserFilters } from './hooks/useMDUserFilters'
 import { SECTION_STYLES } from '@/lib/constants'
 

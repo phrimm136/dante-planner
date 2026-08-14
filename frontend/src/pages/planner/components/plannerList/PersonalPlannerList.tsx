@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useMDUserPlannersData } from '../../hooks/useMDUserPlannersData'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 import { useProgressiveCount } from '@/components/hooks/useProgressiveReveal'
 import { CARD_GRID, PROGRESSIVE_REVEAL, calculatePlannerPages } from '@/lib/constants'
 

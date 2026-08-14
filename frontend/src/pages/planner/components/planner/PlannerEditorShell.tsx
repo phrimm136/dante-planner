@@ -54,7 +54,7 @@ import { useDeckClipboard } from '../../hooks/useDeckClipboard'
 import { usePlannerSave } from '../../hooks/usePlannerSave'
 import type { SaveOptions } from '../../hooks/usePlannerSave'
 import { usePlannerConfig } from '../../hooks/usePlannerConfig'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery } from '@/shared/userSettings'
 
 // Project components (@/components)
 import { StoreBoundDeckBuilderSummary } from '../deckBuilder/DeckBuilderSummary'

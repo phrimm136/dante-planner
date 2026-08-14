@@ -2,10 +2,10 @@ import { Suspense, lazy, useEffect } from 'react'
 import { Header } from './Header'
 import { Footer } from '../Footer'
 import { LanguageSync } from '../LanguageSync'
-import { SyncChoiceDialog, useFirstLoginStore } from '@/pages/settings'
+import { SyncChoiceDialog } from '@/pages/settings'
 import { useDragToScroll } from '@/components/hooks/useDragToScroll'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
-import { useUserSettingsQuery } from '@/pages/settings'
+import { useUserSettingsQuery, useFirstLoginStore } from '@/shared/userSettings'
 
 /**
  * `useAppSse` reaches the planner storage, validation and EGO Gift graphs.

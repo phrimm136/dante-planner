@@ -73,7 +73,7 @@ vi.mock('@/shared/auth', () => ({
   useAuthQuery: () => ({ data: syncMocks.isAuthenticated ? { id: 'user-1' } : null }),
 }))
 
-vi.mock('@/pages/settings', () => ({
+vi.mock('@/shared/userSettings', () => ({
   useUserSettingsQuery: () => ({ data: { syncEnabled: syncMocks.syncEnabled } }),
 }))
 

@@ -4,7 +4,7 @@ import { ApiClient } from '@/lib/api'
 import { validateData } from '@/lib/validation'
 import { UserSettingsResponseSchema } from '../schemas/UserSettingsSchemas'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
-import type { UserSettingsResponse, UpdateUserSettingsRequest } from '../types/UserSettingsTypes'
+import type { UserSettingsResponse, UpdateUserSettingsRequest } from '../schemas/UserSettingsSchemas'
 import { STALE_TIME } from '@/lib/constants'
 
 /**

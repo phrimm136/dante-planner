@@ -47,7 +47,7 @@ vi.mock('@/pages/egoGift', () => ({
   useEGOGiftListData: () => ({ spec: {}, i18n: {} }),
 }))
 
-vi.mock('@/pages/settings', () => ({
+vi.mock('@/shared/userSettings', () => ({
   useUserSettingsQuery: () => ({ data: { syncEnabled: false } }),
 }))
 

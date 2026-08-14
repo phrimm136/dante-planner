@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { showSuccess } from '@/lib/errorPresentation'
 
 import { useAuthQuery } from '@/shared/auth'
-import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '../hooks/useUserSettings'
+import { useUserSettingsQuery, useUpdateUserSettingsMutation } from '@/shared/userSettings'
 import { useNotificationPermission } from '@/shared/notifications'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
