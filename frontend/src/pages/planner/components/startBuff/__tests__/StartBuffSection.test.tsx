@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { StartBuffSection } from '../StartBuffSection'
-import { CURRENT_MD_VERSION } from '@/lib/constants'
+import { PLANNER_CONFIG } from '@/lib/constants'
+
+const CURRENT_MD_VERSION = PLANNER_CONFIG.mdCurrentVersion
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {

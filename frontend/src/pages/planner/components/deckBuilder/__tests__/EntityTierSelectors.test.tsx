@@ -7,26 +7,24 @@ import { EgoThreadspinSelector, IdentityTierSelector } from '../EntityTierSelect
 // inner component from ever mounting. Override per-suite so observe() fires
 // the visibility callback synchronously — the inner mounts on first render.
 beforeEach(() => {
-  globalThis.IntersectionObserver = class IntersectionObserver {
+  globalThis.IntersectionObserver = class SynchronousIntersectionObserver implements IntersectionObserver {
     private cb: IntersectionObserverCallback
     constructor(cb: IntersectionObserverCallback) {
       this.cb = cb
     }
     observe(target: Element) {
-      this.cb(
-        [{ isIntersecting: true, target } as IntersectionObserverEntry],
-        this as unknown as IntersectionObserver,
-      )
+      this.cb([{ isIntersecting: true, target } as IntersectionObserverEntry], this)
     }
     disconnect() {}
     unobserve() {}
-    takeRecords() {
+    takeRecords(): IntersectionObserverEntry[] {
       return []
     }
     readonly root = null
     readonly rootMargin = ''
+    readonly scrollMargin = ''
     readonly thresholds: ReadonlyArray<number> = []
-  } as unknown as typeof IntersectionObserver
+  }
 })
 
 function openPopover(container: HTMLElement) {

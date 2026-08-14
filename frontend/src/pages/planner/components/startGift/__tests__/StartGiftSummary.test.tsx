@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftSummary } from '../StartGiftSummary'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { buildEgoGiftSpecList } from '@/test-utils'
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -31,20 +32,24 @@ vi.mock('react-i18next', async (importOriginal) => {
 })
 
 // Mock gift spec data
-const mockSpec: Record<string, EGOGiftSpec> = {
+const mockSpec: Record<string, EGOGiftSpec> = buildEgoGiftSpecList({
   '9001': {
-    tag: ['TIER_1'] as EGOGiftSpec['tag'],
+    tag: ['TIER_1'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
   '9002': {
-    tag: ['TIER_2'] as EGOGiftSpec['tag'],
+    tag: ['TIER_2'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
-}
+})
 
 const mockI18n: EGOGiftNameList = {
   '9001': 'Burning Gift 1',

@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StartGiftEditPane } from '../StartGiftEditPane'
 import type { EGOGiftSpec, EGOGiftNameList } from '@/pages/egoGift'
+import { PLANNER_CONFIG } from '@/lib/constants'
+import { buildEgoGiftSpecList } from '@/test-utils'
 
 // Mock react-i18next
 vi.mock('react-i18next', async (importOriginal) => {
@@ -55,26 +57,32 @@ const mockPools: Record<string, number[]> = {
   Bleed: [9004, 9005, 9006],
 }
 
-const mockSpec: Record<string, EGOGiftSpec> = {
+const mockSpec: Record<string, EGOGiftSpec> = buildEgoGiftSpecList({
   '9001': {
-    tag: ['TIER_1'] as EGOGiftSpec['tag'],
+    tag: ['TIER_1'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
   '9002': {
-    tag: ['TIER_2'] as EGOGiftSpec['tag'],
+    tag: ['TIER_2'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
   '9003': {
-    tag: ['TIER_3'] as EGOGiftSpec['tag'],
+    tag: ['TIER_3'],
     keyword: 'Burn',
+    battleKeywordList: [],
     attributeType: 'Red',
     themePack: [],
+    maxEnhancement: 0,
   },
-}
+})
 
 const mockI18n: EGOGiftNameList = {
   '9001': 'Burning Gift 1',
@@ -113,7 +121,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
 }))
 
 vi.mock('../../../lib/startGiftCalculator', () => ({
-  calculateMaxGiftSelection: (buffs: unknown[], selectedBuffIds: Set<number>) => {
+  calculateMaxGiftSelection: (_buffs: unknown[], selectedBuffIds: Set<number>) => {
     // Return 2 if buff 200 is selected, else 1
     return selectedBuffIds.has(200) ? 2 : 1
   },
@@ -147,7 +155,7 @@ describe('StartGiftEditPane', () => {
   const defaultProps = {
     open: true,
     onOpenChange: vi.fn(),
-    mdVersion: 'MD6' as const,
+    mdVersion: PLANNER_CONFIG.mdCurrentVersion,
   }
 
   beforeEach(() => {

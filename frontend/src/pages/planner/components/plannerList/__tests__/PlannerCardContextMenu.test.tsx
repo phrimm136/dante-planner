@@ -8,8 +8,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { PublicPlanner } from '../../../types/PlannerListTypes'
+import type { BookmarkResponse, PublicPlanner, VoteResponse } from '../../../types/PlannerListTypes'
 import { ConflictError } from '@/lib/api'
+import { buildMutationResult } from '@/test-utils'
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: vi.fn(() => vi.fn()),
@@ -51,13 +52,20 @@ vi.mock('../../../hooks/usePlannerFork', () => ({
 }))
 
 import { usePlannerVote } from '../../../hooks/usePlannerVote'
+import type { VotePlannerInput } from '../../../hooks/usePlannerVote'
 import { usePlannerBookmark } from '../../../hooks/usePlannerBookmark'
+import type { BookmarkVariables } from '../../../hooks/usePlannerBookmark'
 import { usePlannerFork } from '../../../hooks/usePlannerFork'
 import { PlannerCardContextMenu } from '../PlannerCardContextMenu'
 
-const mockVoteMutate = vi.fn()
-const mockBookmarkMutate = vi.fn()
-const mockForkMutate = vi.fn()
+/** Fork input and result are module-private; recover them from the hook's result type. */
+type ForkMutation = ReturnType<typeof usePlannerFork>
+type ForkResult = NonNullable<ForkMutation['data']>
+type ForkInput = NonNullable<ForkMutation['variables']>
+
+const mockVoteMutate = vi.fn<ReturnType<typeof usePlannerVote>['mutate']>()
+const mockBookmarkMutate = vi.fn<ReturnType<typeof usePlannerBookmark>['mutate']>()
+const mockForkMutate = vi.fn<ForkMutation['mutate']>()
 
 const basePlanner: PublicPlanner = {
   id: '123e4567-e89b-12d3-a456-426614174000',
@@ -67,37 +75,44 @@ const basePlanner: PublicPlanner = {
   selectedKeywords: null,
   upvotes: 10,
   viewCount: 100,
-  hasUpvoted: null,
+  commentCount: 0,
+  hasUpvoted: false,
   isBookmarked: false,
   authorUsernameEpithet: 'NAIVE',
   authorUsernameSuffix: '1234A',
   createdAt: new Date('2025-01-01T00:00:00Z').toISOString(),
-  lastModifiedAt: new Date('2025-01-10T00:00:00Z').toISOString(),
+  firstPublishedAt: new Date('2025-01-10T00:00:00Z').toISOString(),
 }
 
 describe('PlannerCardContextMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(usePlannerVote).mockReturnValue({
-      mutate: mockVoteMutate,
-      isPending: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof usePlannerVote>)
-    vi.mocked(usePlannerBookmark).mockReturnValue({
-      mutate: mockBookmarkMutate,
-      isPending: false,
-    } as ReturnType<typeof usePlannerBookmark>)
-    vi.mocked(usePlannerFork).mockReturnValue({
-      mutate: mockForkMutate,
-      isPending: false,
-    } as ReturnType<typeof usePlannerFork>)
+    vi.mocked(usePlannerVote).mockReturnValue(
+      buildMutationResult<VoteResponse, Error, VotePlannerInput>({
+        mutate: mockVoteMutate,
+        isPending: false,
+        isError: false,
+        error: null,
+      }),
+    )
+    vi.mocked(usePlannerBookmark).mockReturnValue(
+      buildMutationResult<BookmarkResponse, Error, BookmarkVariables>({
+        mutate: mockBookmarkMutate,
+        isPending: false,
+      }),
+    )
+    vi.mocked(usePlannerFork).mockReturnValue(
+      buildMutationResult<ForkResult, Error, ForkInput>({
+        mutate: mockForkMutate,
+        isPending: false,
+      }),
+    )
   })
 
   describe('vote button states (immutable voting)', () => {
     it('enables upvote button when user has not voted', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
@@ -153,7 +168,7 @@ describe('PlannerCardContextMenu', () => {
   describe('vote mutation calls', () => {
     it('calls vote mutation with UP when upvote is clicked', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
@@ -196,14 +211,16 @@ describe('PlannerCardContextMenu', () => {
   describe('vote error handling (409 Conflict)', () => {
     it('usePlannerVote hook handles 409 error internally', () => {
       const mockError = new ConflictError('CONCURRENT_WRITE', 'Vote already exists', null)
-      vi.mocked(usePlannerVote).mockReturnValue({
-        mutate: mockVoteMutate,
-        isPending: false,
-        isError: true,
-        error: mockError,
-      } as ReturnType<typeof usePlannerVote>)
+      vi.mocked(usePlannerVote).mockReturnValue(
+        buildMutationResult<VoteResponse, Error, VotePlannerInput>({
+          mutate: mockVoteMutate,
+          isPending: false,
+          isError: true,
+          error: mockError,
+        }),
+      )
 
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
@@ -218,7 +235,7 @@ describe('PlannerCardContextMenu', () => {
   describe('unauthenticated state', () => {
     it('does not show vote buttons when not authenticated', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={false}>
@@ -234,7 +251,7 @@ describe('PlannerCardContextMenu', () => {
 
     it('shows only View option when not authenticated', async () => {
       const user = userEvent.setup()
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={false}>
@@ -256,14 +273,16 @@ describe('PlannerCardContextMenu', () => {
   describe('pending state', () => {
     it('disables vote button when vote mutation is pending', async () => {
       const user = userEvent.setup()
-      vi.mocked(usePlannerVote).mockReturnValue({
-        mutate: mockVoteMutate,
-        isPending: true,
-        isError: false,
-        error: null,
-      } as ReturnType<typeof usePlannerVote>)
+      vi.mocked(usePlannerVote).mockReturnValue(
+        buildMutationResult<VoteResponse, Error, VotePlannerInput>({
+          mutate: mockVoteMutate,
+          isPending: true,
+          isError: false,
+          error: null,
+        }),
+      )
 
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
@@ -282,18 +301,22 @@ describe('PlannerCardContextMenu', () => {
 
     it('keeps fork button enabled when vote mutation is pending', async () => {
       const user = userEvent.setup()
-      vi.mocked(usePlannerVote).mockReturnValue({
-        mutate: mockVoteMutate,
-        isPending: true,
-        isError: false,
-        error: null,
-      } as ReturnType<typeof usePlannerVote>)
-      vi.mocked(usePlannerFork).mockReturnValue({
-        mutate: mockForkMutate,
-        isPending: false,
-      } as ReturnType<typeof usePlannerFork>)
+      vi.mocked(usePlannerVote).mockReturnValue(
+        buildMutationResult<VoteResponse, Error, VotePlannerInput>({
+          mutate: mockVoteMutate,
+          isPending: true,
+          isError: false,
+          error: null,
+        }),
+      )
+      vi.mocked(usePlannerFork).mockReturnValue(
+        buildMutationResult<ForkResult, Error, ForkInput>({
+          mutate: mockForkMutate,
+          isPending: false,
+        }),
+      )
 
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
@@ -312,18 +335,22 @@ describe('PlannerCardContextMenu', () => {
 
     it('keeps vote button enabled when fork mutation is pending', async () => {
       const user = userEvent.setup()
-      vi.mocked(usePlannerVote).mockReturnValue({
-        mutate: mockVoteMutate,
-        isPending: false,
-        isError: false,
-        error: null,
-      } as ReturnType<typeof usePlannerVote>)
-      vi.mocked(usePlannerFork).mockReturnValue({
-        mutate: mockForkMutate,
-        isPending: true,
-      } as ReturnType<typeof usePlannerFork>)
+      vi.mocked(usePlannerVote).mockReturnValue(
+        buildMutationResult<VoteResponse, Error, VotePlannerInput>({
+          mutate: mockVoteMutate,
+          isPending: false,
+          isError: false,
+          error: null,
+        }),
+      )
+      vi.mocked(usePlannerFork).mockReturnValue(
+        buildMutationResult<ForkResult, Error, ForkInput>({
+          mutate: mockForkMutate,
+          isPending: true,
+        }),
+      )
 
-      const planner = { ...basePlanner, hasUpvoted: null }
+      const planner = { ...basePlanner, hasUpvoted: false }
 
       render(
         <PlannerCardContextMenu planner={planner} view="community" isAuthenticated={true}>
