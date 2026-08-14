@@ -10,6 +10,7 @@ export {
   buildPlannerSummary,
   buildSaveablePlanner,
 } from './fixtures'
+export { buildMutationResult } from './mutationResult'
 export { createTestQueryClient } from './queryClient'
 export { createTestRouter } from './router'
 export { renderWithProviders } from './renderWithProviders'
