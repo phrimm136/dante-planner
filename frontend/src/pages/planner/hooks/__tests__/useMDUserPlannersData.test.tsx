@@ -10,12 +10,25 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import type { SaveablePlanner } from '../../types/PlannerTypes'
+import { BATCH_PULL_MAX_IDS } from '@/lib/constants'
 
 const syncMocks = vi.hoisted(() => ({
   isAuthenticated: true,
   syncEnabled: true,
   listFromServer: vi.fn(async (): Promise<unknown[]> => []),
   listLocal: vi.fn(async (): Promise<unknown[]> => []),
+  saveToLocal: vi.fn(async (_planner: unknown): Promise<unknown> => ({ ok: true })),
+  loadFromLocal: vi.fn(async (_id: string): Promise<unknown> => null),
+  fetchFromServer: vi.fn(async (_id: string): Promise<unknown> => null),
+  syncToServer: vi.fn(async (_planner: unknown, _force?: boolean): Promise<unknown> => null),
+  /** Stands in for the chunked pull: one yield per request. */
+  batchChunks: vi.fn(async function* (ids: string[]): AsyncGenerator<unknown[]> {
+    yield ids.map((id) => ({ id }))
+  }),
+}))
+
+vi.mock('../../lib/plannerApi', () => ({
+  plannerApi: { batchChunks: (ids: string[]) => syncMocks.batchChunks(ids) },
 }))
 
 // Both real hooks return a fresh object literal per render, so the mocks do too:
@@ -23,8 +36,8 @@ const syncMocks = vi.hoisted(() => ({
 vi.mock('../usePlannerStorage', () => ({
   usePlannerStorage: () => ({
     getOrCreateDeviceId: vi.fn(async () => 'test-device'),
-    saveToLocal: vi.fn(async () => ({ success: true })),
-    loadFromLocal: vi.fn(async () => null),
+    saveToLocal: syncMocks.saveToLocal,
+    loadFromLocal: syncMocks.loadFromLocal,
     listLocal: syncMocks.listLocal,
     listLocalFull: vi.fn(async () => []),
     deleteFromLocal: vi.fn(async () => undefined),
@@ -34,10 +47,21 @@ vi.mock('../usePlannerStorage', () => ({
 
 vi.mock('../usePlannerSyncAdapter', () => ({
   usePlannerSyncAdapter: () => ({
-    syncToServer: vi.fn(),
-    fetchFromServer: vi.fn(async () => null),
+    syncToServer: syncMocks.syncToServer,
+    fetchFromServer: syncMocks.fetchFromServer,
     deleteFromServer: vi.fn(),
     listFromServer: syncMocks.listFromServer,
+  }),
+  serverResponseToSaveable: (response: { id: string }) => ({ metadata: { id: response.id } }),
+  acknowledgedCopy: ({
+    planner,
+    ack,
+  }: {
+    planner: SaveablePlanner
+    ack: { syncVersion: number }
+  }) => ({
+    ...planner,
+    metadata: { ...planner.metadata, syncVersion: ack.syncVersion },
   }),
 }))
 
@@ -76,6 +100,18 @@ describe('useMDUserPlannersData background sync', () => {
     syncMocks.syncEnabled = true
     syncMocks.listFromServer.mockClear()
     syncMocks.listLocal.mockClear()
+    syncMocks.saveToLocal.mockClear()
+    syncMocks.batchChunks.mockClear()
+    syncMocks.loadFromLocal.mockClear()
+    syncMocks.fetchFromServer.mockClear()
+    syncMocks.syncToServer.mockClear()
+    syncMocks.listFromServer.mockResolvedValue([])
+    syncMocks.listLocal.mockResolvedValue([])
+    syncMocks.loadFromLocal.mockResolvedValue(null)
+    syncMocks.fetchFromServer.mockResolvedValue(null)
+    syncMocks.batchChunks.mockImplementation(async function* (ids: string[]) {
+      yield ids.map((id) => ({ id }))
+    })
   })
 
   it('pulls from the server once and stays at once across re-renders', async () => {
@@ -137,6 +173,81 @@ describe('useMDUserPlannersData background sync', () => {
     expect(syncMocks.listFromServer).not.toHaveBeenCalled()
     expect(result.current.isAuthenticated).toBe(false)
   })
+
+  /** Server rows with no local counterpart, which categorizeSync sends to the pull residue. */
+  function serverRows(count: number): unknown[] {
+    return Array.from({ length: count }, (_, i) => ({
+      id: `planner-${i}`,
+      title: `Planner ${i}`,
+      plannerType: 'MIRROR_DUNGEON',
+      category: '5F',
+      status: 'saved',
+      lastModifiedAt: '2026-01-01T00:00:00.000Z',
+      savedAt: '2026-01-01T00:00:00.000Z',
+      syncVersion: 1,
+    }))
+  }
+
+  async function runSyncWith(rows: unknown[]) {
+    syncMocks.listFromServer.mockResolvedValue(rows)
+    const { result } = renderHook((props: { page: number }) => useMDUserPlannersData(props), {
+      wrapper: createWrapper(),
+      initialProps: { page: 0 },
+    })
+    await waitFor(() => expect(result.current).not.toBeNull())
+    await waitFor(() => expect(result.current.isSyncing).toBe(false))
+    return result
+  }
+
+  /** The planner ids handed to storage, in the order they were written. */
+  function savedIds(): string[] {
+    return syncMocks.saveToLocal.mock.calls.map((call) => (call[0] as SaveablePlanner).metadata.id)
+  }
+
+  it('pulls a residue of three rows in exactly one batch request', async () => {
+    await runSyncWith(serverRows(3))
+
+    expect(syncMocks.batchChunks).toHaveBeenCalledTimes(1)
+    expect(syncMocks.batchChunks).toHaveBeenCalledWith(['planner-0', 'planner-1', 'planner-2'])
+  })
+
+  it('hands the whole residue to one call, leaving chunking to the api client', async () => {
+    await runSyncWith(serverRows(BATCH_PULL_MAX_IDS + 1))
+
+    expect(syncMocks.batchChunks).toHaveBeenCalledTimes(1)
+    expect(syncMocks.batchChunks.mock.calls[0][0]).toHaveLength(BATCH_PULL_MAX_IDS + 1)
+  })
+
+  it('issues no request for an empty residue, which the server would reject', async () => {
+    await runSyncWith([])
+
+    expect(syncMocks.batchChunks).not.toHaveBeenCalled()
+  })
+
+  it('leaves rows the response omits local-untouched', async () => {
+    // The response is not positionally aligned: the middle id resolves to nothing.
+    syncMocks.batchChunks.mockImplementation(async function* (ids: string[]) {
+      yield ids.filter((id) => id !== 'planner-1').map((id) => ({ id }))
+    })
+
+    await runSyncWith(serverRows(3))
+
+    expect(syncMocks.saveToLocal).toHaveBeenCalledTimes(2)
+    expect(savedIds()).toEqual(['planner-0', 'planner-2'])
+  })
+
+  it('keeps the rows earlier chunks delivered when a later chunk fails', async () => {
+    syncMocks.batchChunks.mockImplementation(async function* (ids: string[]) {
+      yield ids.slice(0, 2).map((id) => ({ id }))
+      throw new Error('second chunk failed')
+    })
+
+    await runSyncWith(serverRows(3))
+
+    // The failure aborts the remaining chunks without discarding what already landed.
+    expect(savedIds()).toEqual(['planner-0', 'planner-1'])
+  })
+
 })
 
 describe('userPlannersQueryKeys', () => {

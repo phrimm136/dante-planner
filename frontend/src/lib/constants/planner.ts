@@ -97,6 +97,13 @@ export const PLANNER_LIST = {
 } as const
 
 /**
+ * Maximum planner ids accepted by one batch pull request.
+ * Mirrors PlannerConstants.BATCH_PULL_MAX_IDS; the server rejects a longer list
+ * outright, so callers chunk to this size rather than truncate.
+ */
+export const BATCH_PULL_MAX_IDS = 50
+
+/**
  * The version a planner presents before the server has assigned one.
  * The wire type is a positive integer, so 0 is not a reachable server version.
  */

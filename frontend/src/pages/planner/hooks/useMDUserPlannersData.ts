@@ -16,7 +16,8 @@ import { useTranslation } from 'react-i18next'
 import { useSuspenseQuery, useQuery, queryOptions, useQueryClient } from '@tanstack/react-query'
 
 import { usePlannerStorage } from './usePlannerStorage'
-import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
+import { usePlannerSyncAdapter, serverResponseToSaveable } from './usePlannerSyncAdapter'
+import { plannerApi } from '../lib/plannerApi'
 import { useAuthQuery } from '@/shared/auth'
 import { useUserSettingsQuery } from '@/pages/settings'
 import { useEGOGiftListData } from '@/pages/egoGift'
@@ -239,23 +240,29 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
         hasSyncedRef.current = true
         lastSyncKeyRef.current = syncKey
 
-        // Pull non-conflicting planners automatically
+        // Pull non-conflicting planners in chunked round trips. Each chunk is
+        // written as it arrives, so a later chunk failing keeps what came before;
+        // the response is not positionally aligned, so omitted rows stay local-untouched.
         let syncedCount = 0
-        for (const serverPlanner of plan.pull) {
+        const pullIds = plan.pull.map((p) => p.id)
+        if (pullIds.length > 0) {
           try {
-            const fetched = await syncAdapter.fetchFromServer(serverPlanner.id)
-            if (fetched.ok) {
-              const fullPlanner = fetched.value.planner
-              console.log(`Saving planner ${serverPlanner.id}:`, fullPlanner.metadata)
-              const result = await storage.saveToLocal(fullPlanner)
-              if (result.ok) {
-                syncedCount++
-              } else {
-                console.error(`Failed to save planner ${serverPlanner.id}:`, result.error)
+            for await (const chunk of plannerApi.batchChunks(pullIds)) {
+              for (const response of chunk) {
+                try {
+                  const result = await storage.saveToLocal(serverResponseToSaveable(response))
+                  if (result.ok) {
+                    syncedCount++
+                  } else {
+                    console.error(`Failed to save planner ${response.id}:`, result.error)
+                  }
+                } catch (error) {
+                  console.error(`Failed to save planner ${response.id}:`, error)
+                }
               }
             }
           } catch (error) {
-            console.error(`Failed to fetch planner ${serverPlanner.id}:`, error)
+            console.error('Stopped fetching planners for sync:', error)
           }
         }
 

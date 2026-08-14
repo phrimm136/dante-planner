@@ -6,8 +6,10 @@
  */
 
 import { ApiClient } from '@/lib/api'
+import { BATCH_PULL_MAX_IDS } from '@/lib/constants'
 import {
   ServerPlannerResponseSchema,
+  ServerPlannerBatchResponseSchema,
   ServerPlannerSummaryPageSchema,
   ImportPlannersResponseSchema,
 } from '../schemas/PlannerSchemas'
@@ -73,6 +75,26 @@ export const plannerApi = {
   async get(id: PlannerId | string): Promise<ServerPlannerResponse> {
     const data = await ApiClient.get(`${PLANNERS_BASE}/${id}`)
     return ServerPlannerResponseSchema.parse(data)
+  },
+
+  /**
+   * Fetch several planners, chunked to the server's id cap, one chunk per yield.
+   * A chunk is parsed whole, so a malformed row fails its chunk loudly; yielding
+   * per chunk lets the caller keep rows it already received when a later chunk
+   * fails. The response is a bare array, not positionally aligned with the
+   * request: ids naming nothing, a deleted planner, or another user's planner
+   * are simply absent.
+   *
+   * @param ids - Planner UUIDs to fetch
+   * @yields The planners the caller may see, one chunk at a time
+   */
+  async *batchChunks(ids: string[]): AsyncGenerator<ServerPlannerResponse[]> {
+    for (let i = 0; i < ids.length; i += BATCH_PULL_MAX_IDS) {
+      const data = await ApiClient.post(`${PLANNERS_BASE}/batch`, {
+        ids: ids.slice(i, i + BATCH_PULL_MAX_IDS),
+      })
+      yield ServerPlannerBatchResponseSchema.parse(data)
+    }
   },
 
   /**
