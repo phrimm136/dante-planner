@@ -160,6 +160,229 @@ applies to it and it stays untouched. Close the restriction gap: an upsert that 
 published planner rejects restricted users before validation. Guard the config surface with an
 ArchUnit rule banning `@Value` constructor parameters outside `@ConfigurationProperties` classes.
 
+The bookmark table drop is one migration, one statement:
+
+```sql
+DROP TABLE planner_bookmarks;
+```
+
+Legacy removal collapses `rotateRefreshCookie` to the lineage arm; the `user` and `claims`
+parameters leave with the local-mint branch that needed them:
+
+```java
+private boolean rotateRefreshCookie(
+        String refreshToken, HttpServletRequest request, HttpServletResponse response) {
+    try {
+        RotationResult.Rotated rotated = refreshRotationService.rotate(refreshToken).orThrow();
+        cookieUtils.setCookie(response, CookieConstants.REFRESH_TOKEN, rotated.newRefreshJwt(),
+                jwtProperties.getRefreshTokenExpirySeconds());
+        return true;
+    } catch (SessionRevokedException e) {
+        return abandonSession(request, response, CustomAuthenticationEntryPoint.SESSION_REVOKED);
+    } catch (InvalidTokenException e) {
+        return abandonSession(request, response, CustomAuthenticationEntryPoint.INVALID_TOKEN);
+    }
+}
+```
+
+The refresher extraction gives the filter one collaborator for the whole refresh path and
+shrinks its field block to plumbing:
+
+```java
+@Component
+public class SessionRefresher {
+
+    /** Owns refresh validation, rotation, access minting, and both cookie writes. */
+    public RefreshOutcome attemptRefresh(HttpServletRequest request, HttpServletResponse response) { ... }
+
+    public enum RefreshOutcome { REFRESHED, ABANDONED, OUTAGE_REPORTED }
+}
+
+// JwtAuthenticationFilter after extraction:
+private final AccessTokenAuthenticator accessTokenAuthenticator;
+private final SessionRefresher sessionRefresher;
+private final AuthDegradationResponder degradationResponder;
+private final CookieUtils cookieUtils;
+```
+
+Rotation config nests under the class that owns the prefix; the two legacy keys get no
+successor fields because their feature is gone:
+
+```java
+@ConfigurationProperties(prefix = "jwt")
+public class JwtProperties {
+    private final Rotation rotation = new Rotation();
+
+    @Getter @Setter
+    public static class Rotation {
+        @Min(0)
+        private long retryReuseWindowMs = 30000L;
+    }
+}
+```
+
+The consolidated service keeps the two failure postures as two method groups:
+
+```java
+@Service
+public class TokenLifecycleService {
+    // fail-open reads (replica template)
+    public boolean isBlacklisted(String token) { ... }
+    public boolean isUserTokenInvalidated(Long userId, long issuedAtMs) { ... }
+
+    // fail-closed lineage writes (primary template, Lua)
+    public RotationResult rotate(String refreshJwt) { ... }
+    public void revokeLogoutSession(Collection<LogoutRevocation> revocations) { ... }
+    public void invalidateUserTokens(Long userId) { ... }
+}
+```
+
+Its rotate script, with renamed states and named arguments; the logout script text stays
+byte-identical to today's, only its call population shrinking:
+
+```lua
+-- KEYS = rt:fam:{F}, uinv:{user}
+local familyKey, invalidationKey = KEYS[1], KEYS[2]
+local jti, parentJti, succJti                     = ARGV[1], ARGV[2], ARGV[3]
+local succExpiryMs, nowMs, familyTtlMs            = ARGV[4], ARGV[5], ARGV[6]
+local succJwt, reuseWindowMs, presentedIssuedAtMs = ARGV[7], ARGV[8], ARGV[9]
+
+local invalidatedAtMs = redis.call('GET', invalidationKey)
+if invalidatedAtMs and tonumber(presentedIssuedAtMs) < tonumber(invalidatedAtMs) then
+  return 'INVALIDATED'
+end
+
+if redis.call('HGET', familyKey, '__revoked__') then return 'REVOKED' end
+
+local entry = redis.call('HGET', familyKey, jti)           -- "STATE|succJti|expiryMs" or false
+local state = entry and string.match(entry, '^[^|]+') or 'LIVE'
+
+if state == 'RETIRED' or state == 'SUPERSEDED' then
+  redis.call('HSET', familyKey, '__revoked__', nowMs)
+  return 'THEFT'
+end
+
+if parentJti ~= '' then
+  local parentEntry = redis.call('HGET', familyKey, parentJti)
+  if parentEntry and string.match(parentEntry, '^[^|]+') == 'IN_GRACE' then
+    redis.call('HSET', familyKey, parentJti, 'RETIRED||' .. succExpiryMs)
+    redis.call('HDEL', familyKey, 'succjwt:' .. parentJti)
+  end
+end
+
+local outcome = 'ROTATED'
+if state == 'IN_GRACE' then
+  local priorSuccJti = string.match(entry, '|([^|]*)|')
+  local memo = redis.call('HGET', familyKey, 'succjwt:' .. jti)
+  if memo and priorSuccJti and priorSuccJti ~= '' then
+    local mintedAtMs, memoJwt = string.match(memo, '^(%d+)|(.+)$')
+    local priorSuccEntry = redis.call('HGET', familyKey, priorSuccJti)
+    if mintedAtMs and priorSuccEntry and string.match(priorSuccEntry, '^[^|]+') == 'LIVE'
+        and tonumber(nowMs) - tonumber(mintedAtMs) < tonumber(reuseWindowMs) then
+      return 'REUSED|' .. memoJwt
+    end
+  end
+  if priorSuccJti and priorSuccJti ~= '' then
+    redis.call('HSET', familyKey, priorSuccJti, 'SUPERSEDED||' .. succExpiryMs)
+  end
+  outcome = 'SUPERSEDED'
+end
+
+redis.call('HSET', familyKey, succJti, 'LIVE||' .. succExpiryMs)
+redis.call('HSET', familyKey, jti, 'IN_GRACE|' .. succJti .. '|' .. succExpiryMs)
+redis.call('HSET', familyKey, 'succjwt:' .. jti, nowMs .. '|' .. succJwt)
+redis.call('PEXPIRE', familyKey, familyTtlMs)
+return outcome
+```
+
+The boot-time converter, deleted in the release after it runs:
+
+```java
+private static final Map<String, String> STATE_RENAMES = Map.of(
+        "UNUSED_LATEST", "LIVE",
+        "PENDING", "IN_GRACE",
+        "USED", "RETIRED");
+
+// SCAN rt:fam:* ; rewrite only the state prefix of jti fields; HSET preserves key TTLs
+for (var entry : hash.entrySet()) {
+    String field = entry.getKey();
+    if (field.equals("__revoked__") || field.startsWith("succjwt:")) continue;
+    String state = entry.getValue().substring(0, entry.getValue().indexOf('|'));
+    String renamed = STATE_RENAMES.get(state);
+    if (renamed != null) {
+        redis.opsForHash().put(key, field, renamed + entry.getValue().substring(state.length()));
+    }
+}
+```
+
+The upsert gate is one guarded call ahead of the sync-version check, so 403 wins over 409:
+
+```java
+if (existingPlanner.isPresent()) {
+    Planner planner = existingPlanner.get();
+
+    if (planner.isPublished()) {
+        accessGuard.checkNotRestricted(userId);
+    }
+    syncVersionValidator.requireSyncVersionMatch(force, request.syncVersion(), planner.getSyncVersion());
+```
+
+The notification factories replace the public constructors:
+
+```java
+public static Notification forComment(Long recipientId, UUID commentId, UUID plannerId,
+        String plannerTitle, String commentSnippet, UUID commentPublicId) { ... }
+public static Notification forReply(Long recipientId, UUID replyId, UUID plannerId,
+        String plannerTitle, String replySnippet, UUID replyPublicId) { ... }
+public static Notification forReport(Long adminId, String reportedContentId) { ... }
+public static Notification forRecommendation(Long ownerId, UUID plannerId, String plannerTitle) { ... }
+```
+
+`REPORT_RECEIVED` wiring follows the existing effect shape end to end:
+
+```java
+public enum DomainEventType {
+    PLANNER_PUBLISHED, PLANNER_RECOMMENDED, COMMENT_RECEIVED, REPLY_RECEIVED, REPORT_RECEIVED
+}
+
+// PlannerReportService and CommentReportService, inside the creating transaction:
+domainEventRecorder.recordDomainEvent(DomainEventType.REPORT_RECEIVED, report.getId(),
+        Map.of("subjectType", subjectType, "subjectId", subjectId));
+
+// effect arm, the CommentReceivedEffect shape:
+@Component
+public class ReportReceivedEffect implements DomainEffect {
+    public DomainEventType type() { return DomainEventType.REPORT_RECEIVED; }
+    public void apply(DomainEvent event) {
+        userService.findAdminIds().forEach(adminId -> notificationDispatchService
+                .raise(Notification.forReport(adminId, event.getAggregateId())));
+    }
+}
+```
+
+Feature config gets its first `@ConfigurationProperties` class, absorbing every duplicated key:
+
+```java
+@ConfigurationProperties(prefix = "planner")
+@Validated @Getter @Setter
+public class PlannerProperties {
+    private int recommendedThreshold;
+    private int schemaVersion;
+    private int maxPerUser;
+}
+```
+
+And the ratchet is one architecture rule:
+
+```java
+@ArchTest
+static final ArchRule noValueConstructorParams = constructors()
+        .that().areDeclaredInClassesThat().areNotAnnotatedWith(ConfigurationProperties.class)
+        .should(haveNoParameterAnnotatedWith(Value.class));
+```
+
+Dead-surface removal is pure deletion and carries no constructive code.
+
 ## Decomposition
 
 ```
