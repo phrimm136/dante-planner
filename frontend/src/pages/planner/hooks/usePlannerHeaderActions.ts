@@ -7,7 +7,7 @@ import { showSuccess } from '@/lib/errorPresentation'
 import { showSyncFailure } from '../lib/syncFailure'
 import { plannerQueryKeys } from '../lib/plannerQueryKeys'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 import { usePlannerDelete } from './usePlannerDelete'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter, acknowledgedCopy } from './usePlannerSyncAdapter'
@@ -44,6 +44,7 @@ export function usePlannerHeaderActions({
 }: UsePlannerHeaderActionsOptions) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
   const config = usePlannerConfig()
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -67,7 +68,7 @@ export function usePlannerHeaderActions({
 
     const cleanup = () => {
       void deleteFromLocal(plannerId)
-      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
+      invalidatePlannerLists()
       setShowDeleteDialog(false)
       setTimeout(() => {
         void navigate({ to: listRoute })

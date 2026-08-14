@@ -9,12 +9,11 @@
  * Pattern: usePlannerFork.ts (mutation with onSuccess callback)
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { NotFoundError } from '@/lib/apiErrors'
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 
 // ============================================================================
 // Main Hook
@@ -47,7 +46,7 @@ import { userPlannersQueryKeys } from './useMDUserPlannersData'
  * ```
  */
 export function usePlannerDelete() {
-  const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
 
   return useMutation({
     mutationFn: async (plannerId: string): Promise<void> => {
@@ -62,9 +61,7 @@ export function usePlannerDelete() {
       }
     },
     onSuccess: () => {
-      // Backend auto-unpublishes before deleting, so both lists can change
-      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
-      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+      invalidatePlannerLists()
     },
     onError: (error) => {
       console.error('Delete failed:', error)

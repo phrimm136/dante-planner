@@ -8,11 +8,11 @@
  * Pattern: Conflict resolution "Save as Copy" (usePlannerSave.ts)
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { INITIAL_SYNC_VERSION } from '@/lib/constants'
 
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { useUserSettingsQuery } from '@/shared/userSettings'
@@ -72,7 +72,7 @@ interface ForkResult {
  * ```
  */
 export function usePlannerFork() {
-  const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
   const storage = usePlannerStorage()
   const syncAdapter = usePlannerSyncAdapter()
   const { t } = useTranslation('planner')
@@ -152,8 +152,7 @@ export function usePlannerFork() {
       return { newPlannerId }
     },
     onSuccess: () => {
-      // Invalidate planner list queries (my plans will have new entry)
-      void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
+      invalidatePlannerLists()
     },
     onError: (error) => {
       console.error('Fork failed:', error)

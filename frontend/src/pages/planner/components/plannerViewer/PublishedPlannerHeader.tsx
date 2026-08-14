@@ -127,12 +127,8 @@ export function PublishedPlannerHeader({
       { plannerId: planner.id, reason },
       {
         onSuccess: () => {
-          // Invalidate planner queries to remove from cache
           void queryClient.invalidateQueries({
             queryKey: plannerQueryKeys.detail(planner.id),
-          })
-          void queryClient.invalidateQueries({
-            queryKey: plannerQueryKeys.list(),
           })
 
           showSuccess('moderation:plannerTakedown.success')

@@ -15,7 +15,7 @@ import { ConflictError } from '@/lib/apiErrors'
 import { showErrorMessage } from '@/lib/errorPresentation'
 import { validateData } from '@/lib/validation'
 import { VoteResponseSchema } from '../schemas/PlannerListSchemas'
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 import { publishedPlannerQueryKeys } from './usePublishedPlannerQuery'
 
 import type { VoteResponse } from '../types/PlannerListTypes'
@@ -72,6 +72,7 @@ export interface VotePlannerInput {
  */
 export function usePlannerVote() {
   const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
 
   return useMutation({
     mutationFn: async ({ plannerId, voteType }: VotePlannerInput): Promise<VoteResponse> => {
@@ -93,7 +94,7 @@ export function usePlannerVote() {
       })
 
       // Also invalidate list queries to refresh cards
-      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+      invalidatePlannerLists()
     },
     onError: (error) => {
       if (error instanceof ConflictError) {

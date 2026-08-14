@@ -9,13 +9,13 @@
  * Pattern: usePlannerFork.ts (mutation + cache invalidation)
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 
 import { ApiClient } from '@/lib/api'
 import { validateData } from '@/lib/validation'
 import { requestNotificationPermission } from '@/shared/notifications'
 import { ServerPlannerResponseSchema } from '../schemas/PlannerSchemas'
-import { gesellschaftQueryKeys } from './useMDGesellschaftData'
+import { useInvalidatePlannerLists } from './useInvalidatePlannerLists'
 
 import type { ServerPlannerResponse } from '../types/PlannerTypes'
 
@@ -53,7 +53,7 @@ interface PublishVariables {
 }
 
 export function usePlannerPublish() {
-  const queryClient = useQueryClient()
+  const invalidatePlannerLists = useInvalidatePlannerLists()
 
   return useMutation({
     mutationFn: async ({
@@ -65,8 +65,7 @@ export function usePlannerPublish() {
       return validateData(data, ServerPlannerResponseSchema, 'planner publish')
     },
     onSuccess: (response) => {
-      // Invalidate all planner list queries to refresh publish state
-      void queryClient.invalidateQueries({ queryKey: gesellschaftQueryKeys.all })
+      invalidatePlannerLists()
 
       // Request browser notification permission when publishing (not unpublishing)
       if (response.published) {

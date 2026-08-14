@@ -515,28 +515,3 @@ export function useMDUserPlannersData(options: UseMDUserPlannersDataOptions): MD
     isResolvingConflicts,
   }
 }
-
-// ============================================================================
-// Cache Invalidation Helper
-// ============================================================================
-
-/**
- * Hook to get invalidation function for user planners cache
- * Use after planner create/update/delete operations
- *
- * @example
- * ```tsx
- * const invalidate = useInvalidateUserPlanners();
- * await storage.deleteFromLocal(id);
- * invalidate();
- * ```
- */
-export function useInvalidateUserPlanners() {
-  const queryClient = useQueryClient()
-
-  return () => {
-    void queryClient.invalidateQueries({
-      queryKey: userPlannersQueryKeys.all,
-    })
-  }
-}
