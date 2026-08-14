@@ -1,6 +1,6 @@
 import { Fragment, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
 import type { RevealSectionSpec } from '../RevealSection'
 import { GiftGridSkeleton, SectionBlockSkeleton } from '../plannerSkeletons'

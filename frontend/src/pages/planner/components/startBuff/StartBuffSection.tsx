@@ -4,7 +4,7 @@ import { useStartBuffSelection } from '../../hooks/useStartBuffSelection'
 import { EMPTY_STATE } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { StarlightCostDisplay } from '../StarlightCostDisplay'
 import { StartBuffMiniCard } from './StartBuffMiniCard'
 

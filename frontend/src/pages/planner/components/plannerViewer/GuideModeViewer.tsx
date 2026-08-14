@@ -8,7 +8,7 @@ import { EGOGiftObservationSummary } from '../egoGift/EGOGiftObservationSummary'
 import { SkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { ComprehensiveGiftGridTracker } from './ComprehensiveGiftGridTracker'
 import { FloorGalleryTracker } from './FloorGalleryTracker'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
 import type { RevealSectionSpec } from '../RevealSection'
 import {

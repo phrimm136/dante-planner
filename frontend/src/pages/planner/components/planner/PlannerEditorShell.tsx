@@ -70,7 +70,7 @@ import { StoreBoundComprehensiveGiftSummary } from '../egoGift/ComprehensiveGift
 import { ComprehensiveGiftSelectorPane } from '../egoGift/ComprehensiveGiftSelectorPane'
 import { StoreBoundSkillReplacementSection } from '../skillReplacement/SkillReplacementSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { RevealSection } from '../RevealSection'
 import type { RevealSectionSpec } from '../RevealSection'
 import {

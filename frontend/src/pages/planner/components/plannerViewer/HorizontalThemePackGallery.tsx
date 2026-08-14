@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { ScaledCardWrapper } from '@/components/layout/ScaledCardWrapper'
 import { ThemePackTrackerCard } from './ThemePackTrackerCard'
 import { useThemePackListData } from '@/pages/themePack'

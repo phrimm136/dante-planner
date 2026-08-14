@@ -3,7 +3,6 @@
 // Components
 export { PublishedPlannerCard } from './components/plannerList/PublishedPlannerCard'
 export { PlannerExportImportSection } from './components/PlannerExportImportSection'
-export { PlannerSection } from './components/PlannerSection'
 
 // Hooks
 export { fetchPublishedPlanner, publishedPlannerQueryKeys } from './hooks/usePublishedPlannerQuery'

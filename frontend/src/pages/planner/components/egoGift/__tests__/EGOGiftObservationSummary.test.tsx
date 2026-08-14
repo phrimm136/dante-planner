@@ -84,7 +84,7 @@ vi.mock('@/pages/egoGift/hooks/useEGOGiftListData', () => ({
 }))
 
 // Mock PlannerSection to simplify testing
-vi.mock('../../PlannerSection', () => ({
+vi.mock('@/components/layout/PlannerSection', () => ({
   PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
     <section data-testid="planner-section">
       <h2>{title}</h2>

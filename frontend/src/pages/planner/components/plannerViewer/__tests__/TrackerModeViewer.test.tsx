@@ -166,7 +166,7 @@ vi.mock('../../skillReplacement/SkillReplacementSection', () => ({
   ),
 }))
 
-vi.mock('../../PlannerSection', () => ({
+vi.mock('@/components/layout/PlannerSection', () => ({
   PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div data-testid="planner-section">
       <h3>{title}</h3>

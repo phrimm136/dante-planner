@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { DEFAULT_DEPLOYMENT_MAX } from '@/shared/gameData'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { useIdentityListData } from '@/pages/identity'
 import { useEGOListData } from '@/pages/ego'
 import { usePlannerEditorStore } from '../../stores/usePlannerEditorStore'

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { FloorThemeGiftSection } from '../floorTheme/FloorThemeGiftSection'
 import { NoteEditor } from '@/shared/noteEditor/components/NoteEditor'
 import type { SerializableFloorSelection } from '../../types/PlannerTypes'

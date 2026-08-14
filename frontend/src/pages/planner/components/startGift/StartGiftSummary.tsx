@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { PlannerSection } from '../PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 import { EGOGiftCard, toEGOGiftCardProps } from '@/pages/egoGift'
 import type { EGOGiftListItem } from '@/pages/egoGift'
 import { getKeywordIconPath } from '@/shared/assets'

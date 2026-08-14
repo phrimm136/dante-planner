@@ -47,7 +47,7 @@ vi.mock('../StartBuffMiniCard', () => ({
 }))
 
 // Mock PlannerSection
-vi.mock('../../PlannerSection', () => ({
+vi.mock('@/components/layout/PlannerSection', () => ({
   PlannerSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
     <section>
       <h2>{title}</h2>

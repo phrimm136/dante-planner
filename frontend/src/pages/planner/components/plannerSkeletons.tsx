@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { STAGGER_STEP_MS, SECTION_STYLES } from '@/lib/constants'
 import { staggerDelay } from '@/lib/stagger'
 
-import { PlannerSection } from './PlannerSection'
+import { PlannerSection } from '@/components/layout/PlannerSection'
 
 const SINNER_TILES = 12
 const GIFT_TILES = 6
