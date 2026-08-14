@@ -492,7 +492,9 @@ no surface owns write-pauses (the sync-paused banner this table once cited never
 silent failed save is the worst outcome this stream exists to remove. The rule in one line: `null`
 requires a named, mounted owner; absent one, the presenter speaks. `supportHint` replaces the
 unconditional `contactOnRepeat` description that `lib/toast.ts`'s `Proxy` (`:18-23`) appends to
-every error toast; the proxy is deleted and `lib/toast.ts` re-exports sonner's `toast` unwrapped.
+every error toast; the proxy is deleted, and once the presenter channels absorb the last importer,
+`lib/toast.ts` is deleted with it — an unreferenced re-export whose only effect is widening the
+import ban's exemption surface fails the deletion test.
 
 ### (c) Cache as the single sink
 
@@ -593,8 +595,10 @@ format) under `frontend/scripts/ast-grep-rules/`, which `yarn check:fp` already 
 
 - `lib/__tests__/apiErrorClassifier.test.ts` — one case per api error class, twelve assertions plus
   quota and unknown; an unrecognized throw is `{kind:'unknown'}`.
-- `lib/__tests__/errorPresentation.test.ts` — `presentError` returns `null` for `conflict` and for
-  write-unavailable; `supportHint` true adds the contact description and false omits it.
+- `lib/__tests__/errorPresentation.test.ts` — `presentError` returns `null` for `conflict` alone
+  (write-unavailable presents as a warning); a standing guard walks every `AppError` kind so a new
+  case cannot silently join the null set; `supportHint` true adds the contact description and
+  false omits it.
 - `lib/__tests__/queryClient.test.ts` — a failing mutation toasts exactly once; the same mutation
   with `meta.suppressErrorToast` toasts zero times; `meta.successMessage` toasts on success only.
 - A green `yarn check:fp` (or `yarn lint`) with a deliberately introduced bare `toast.error` in a
