@@ -220,8 +220,6 @@ describe('useAppSse — gating truth-table', () => {
 })
 
 describe('useAppSse — event → effect map', () => {
-  const P1 = '11111111-1111-4111-8111-111111111111'
-
   async function connectAndOpen() {
     h.userRef.current = USER
     h.settingsRef.current = SYNC_ON
@@ -266,24 +264,27 @@ describe('useAppSse — event → effect map', () => {
     expect(h.showNotificationToast).toHaveBeenCalled()
   })
 
-  it('an unparseable planner event touches no cache and does not throw', async () => {
-    const { stream, invalidateSpy, setDataSpy } = await connectAndOpen()
+  it('an unparseable payload on a handled type raises no notification and does not throw', async () => {
+    const { stream, invalidateSpy } = await connectAndOpen()
 
-    stream.push(`event: ${SSE_EVENTS.UPDATED}\ndata: not json at all\n\n`)
+    stream.push(`event: ${SSE_EVENTS.NOTIFY_COMMENT}\ndata: not json at all\n\n`)
     await settle()
 
-    expect(setDataSpy).not.toHaveBeenCalled()
-    expect(invalidateSpy).not.toHaveBeenCalled()
+    // The handler invalidates before it parses, so the cache refresh still runs;
+    // what the unparseable body must not do is surface a notification.
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['notifications'] })
+    expect(h.showNotificationToast).not.toHaveBeenCalled()
+    expect(h.showBrowserNotification).not.toHaveBeenCalled()
   })
 
-  it('a planner event with an unknown type is dispatched to nothing', async () => {
+  it('a frame whose type is outside the vocabulary reaches no handler', async () => {
     const { stream, invalidateSpy, setDataSpy } = await connectAndOpen()
 
-    // No handler is registered for any planner event type, so nothing is dispatched.
-    await emit(stream, SSE_EVENTS.UPDATED, { type: 'renamed', entityId: P1 })
+    await emit(stream, 'renamed', { entityId: 'p1' })
 
     expect(setDataSpy).not.toHaveBeenCalled()
     expect(invalidateSpy).not.toHaveBeenCalled()
+    expect(h.showNotificationToast).not.toHaveBeenCalled()
   })
 })
 

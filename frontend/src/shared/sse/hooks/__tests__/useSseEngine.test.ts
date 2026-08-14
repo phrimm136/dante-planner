@@ -182,10 +182,10 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('dispatches injected handlers for their event type', async () => {
     const onUpdate = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.UPDATED]: onUpdate } })))
+    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
-    emit(lastStream(), SSE_EVENTS.UPDATED, { plannerId: 'p1' })
+    emit(lastStream(), SSE_EVENTS.COMMENT_ADDED, { plannerId: 'p1' })
     await settle()
 
     expect(onUpdate).toHaveBeenCalledTimes(1)
@@ -194,11 +194,11 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('assembles a frame split across chunk boundaries', async () => {
     const onUpdate = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.UPDATED]: onUpdate } })))
+    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
     const stream = lastStream()
-    stream.push(`event: ${SSE_EVENTS.UPDATED}\ndata: {"plan`)
+    stream.push(`event: ${SSE_EVENTS.COMMENT_ADDED}\ndata: {"plan`)
     await settle()
     expect(onUpdate).not.toHaveBeenCalled()
 
@@ -214,10 +214,10 @@ describe('useSseEngine — connection lifecycle', () => {
 
   it('joins multiple data lines with a newline and ignores comment lines', async () => {
     const onUpdate = vi.fn()
-    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.UPDATED]: onUpdate } })))
+    renderHook(() => useSseEngine(makeConfig({ handlers: { [SSE_EVENTS.COMMENT_ADDED]: onUpdate } })))
     await advance(SSE_CONNECTION.INITIAL_DELAY)
 
-    lastStream().push(`:keep-alive\nevent: ${SSE_EVENTS.UPDATED}\ndata: one\ndata: two\n\n`)
+    lastStream().push(`:keep-alive\nevent: ${SSE_EVENTS.COMMENT_ADDED}\ndata: one\ndata: two\n\n`)
     await settle()
 
     expect(onUpdate).toHaveBeenCalledTimes(1)

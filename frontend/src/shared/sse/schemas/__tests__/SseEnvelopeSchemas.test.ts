@@ -5,13 +5,10 @@ import { SseAccountSuspendedSchema, SseEnvelopeSchema, SseEventTypeSchema } from
 
 /**
  * Transcribed from backend `SseEventType`: every constant's `@JsonValue`, in
- * declaration order. `connected` is absent by design — it is the transport's
- * own handshake frame, not a backend event constant.
+ * declaration order. `connected` is absent — `AbstractSseService` emits it as a
+ * literal, so it is a transport handshake rather than a backend event constant.
  */
 const BACKEND_SSE_EVENT_TYPES = [
-  'created',
-  'updated',
-  'deleted',
   'comment:added',
   'notify:comment',
   'notify:published',
@@ -23,12 +20,6 @@ const BACKEND_SSE_EVENT_TYPES = [
 const byValue = (a: string, b: string) => a.localeCompare(b)
 
 describe('SseEventTypeSchema', () => {
-  it('names exactly the transport vocabulary it is derived from', () => {
-    expect([...SseEventTypeSchema.options].sort(byValue)).toEqual(
-      Object.values(SSE_EVENTS).sort(byValue),
-    )
-  })
-
   it('carries the backend wire values plus the transport handshake', () => {
     expect([...SseEventTypeSchema.options].sort(byValue)).toEqual(
       [...BACKEND_SSE_EVENT_TYPES, SSE_EVENTS.CONNECTED].sort(byValue),
@@ -37,9 +28,9 @@ describe('SseEventTypeSchema', () => {
 })
 
 describe('SseEnvelopeSchema', () => {
-  it('accepts a planner sync envelope', () => {
+  it('accepts an envelope carrying every optional field', () => {
     const result = SseEnvelopeSchema.safeParse({
-      type: 'updated',
+      type: 'settings:invalidated',
       userId: 1,
       plannerId: 'pl',
       entityId: 'e1',

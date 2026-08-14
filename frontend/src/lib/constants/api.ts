@@ -126,9 +126,6 @@ export const SSE_TRANSPORT = {
  */
 export const SSE_EVENTS = {
   CONNECTED: 'connected',
-  CREATED: 'created',
-  UPDATED: 'updated',
-  DELETED: 'deleted',
   COMMENT_ADDED: 'comment:added',
   NOTIFY_COMMENT: 'notify:comment',
   NOTIFY_RECOMMENDED: 'notify:recommended',
