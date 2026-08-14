@@ -40,12 +40,12 @@ The string the write path receives is the output of the request DTO's `@Sanitize
 bind-time normalization — Jackson re-serialization plus any Tiptap URL rewrite — not the raw request
 body, so the digest identifies that normalized string.
 
-Because normalization makes `contentDigest` incomparable to anything the client can compute from its
-own bytes, the write response additionally echoes `requestDigest`: 64 lowercase hex characters,
-SHA-256 over the `content` string exactly as the request carried it, captured at the sanitizer's
-input before any normalization. It exists solely so the client can match an acknowledgement to the
-payload that produced it (RFC 0004 stream 1); it is never stored, never compared server-side, and
-appears on the write response only — summaries, batch rows, and reads carry `contentDigest` alone.
+Because normalization makes `contentDigest` incomparable to anything the client can compute from
+its own bytes, the digest never crosses the wire: it is server-internal, computed at the write path
+and compared there alongside the version check, so a stale-version write over byte-identical
+content is not a conflict. The clients identify saves by `syncVersion` alone (RFC 0004 stream 1);
+withdrawing the `contentDigest` field from the response DTOs is part of this stream's wire
+contract. The conflict-check semantics are specified by this RFC's owning session.
 
 Digest recomputation is therefore conditional on the save carrying a content document at all, not on
 the document having changed. Every save whose request carried one re-derives the digest from it; a

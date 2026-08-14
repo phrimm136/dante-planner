@@ -27,116 +27,65 @@ Refs: 071 @sync @identity, 071 @sync @digest, 071 @sync @adoption.
 
 ### Target design
 
-A save is identified by the pair `(syncVersion, contentDigest)`, not by `syncVersion` alone. The
-digest is SHA-256 over the exact content string the client sent, so an acknowledgement can be
-matched to the payload that produced it. Version state inside `usePlannerSave` splits into a pure
-reader and a digest-gated writer: nothing writes `syncVersionRef` except an acknowledgement whose
-digest matches the content in hand.
+The client identifies a save by `syncVersion` alone. Content digests exist only server-side: the
+write path computes them and compares them at the conflict check (RFC 0003), so a stale-version
+write over byte-identical content is not a conflict — and no digest field crosses the wire in
+either direction. The client neither computes, stores, nor compares digests.
 
-`digestOf` hashes the string, not the object. The only string that may be passed to it is the one
-`usePlannerSyncAdapter` sends as `UpsertPlannerRequest.content`
-(`hooks/usePlannerSyncAdapter.ts:117`, `JSON.stringify(planner.content)`); any second
-stringification is a different string and a different digest.
+Version state inside `usePlannerSave` splits into a pure reader and a single writer replacing
+`adoptSyncVersion` (`hooks/usePlannerSave.ts:376-381`): the writer takes its version from the
+acknowledgement of the request the caller just awaited — HTTP pairing is what ties an ack to the
+payload that produced it, and the server's version check is what rejects stale concurrent writes.
 
 ```ts
 // pages/planner/types/PlannerTypes.ts
-/** What the server confirms about a write: which version it assigned, over which content. */
+/** What the server confirms about a write: which version it assigned. */
 export interface ServerAck {
   syncVersion: number
-  /** Lowercase hex SHA-256 of the stored content's normalized string — the row's canonical identity. */
-  contentDigest: string
-  /** Lowercase hex SHA-256 of the content string exactly as the request carried it. Write acks only. */
-  requestDigest?: string
 }
 ```
-
-```ts
-// pages/planner/lib/contentDigest.ts
-/** SHA-256 of the exact string sent to the server, lowercase hex. */
-export async function digestOf(content: string): Promise<string> {
-  const bytes = new TextEncoder().encode(content)
-  const hash = await crypto.subtle.digest('SHA-256', bytes)
-  return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('')
-}
-```
-
-Version handling in `usePlannerSave` becomes two functions replacing `adoptSyncVersion`
-(`hooks/usePlannerSave.ts:376-381`):
 
 ```ts
 /** The version the next write presents. Forward-only, and it writes nothing. */
 const presentedVersion = (): number =>
   Math.max(syncVersionRef.current, initialSyncVersion ?? INITIAL_SYNC_VERSION)
 
-/**
- * Take the server's version only when the ack's request digest matches the content in hand.
- * A mismatch means the ack answers a different payload than the one just built.
- * On success the ack's canonical contentDigest becomes the local row's stored digest.
- */
-const adoptAck = (incoming: ServerAck, digestInHand: string): boolean => {
-  if (incoming.requestDigest !== digestInHand) return false
-  syncVersionRef.current = incoming.syncVersion
-  return true
-}
-
-/** Adopt the server's copy: content, version, and canonical digest move together, no gate. */
-const adoptServerCopy = (incoming: ServerAck): void => {
+/** Adopt the version the awaited response assigned. The only writer of syncVersionRef. */
+const adoptAck = (incoming: ServerAck): void => {
   syncVersionRef.current = incoming.syncVersion
 }
 ```
 
-`adoptAck` takes a digest, not content, and that is the whole lineage discipline in one signature.
-A write supplies `await digestOf(requestBody)` — the exact string the adapter sent (`:495`) —
-matched against the ack's `requestDigest`, which RFC 0003 echoes over those same bytes. The ack's
-`contentDigest` is NOT comparable to anything the client computes: RFC 0003 pins it to the
-sanitizer's normalized output (Jackson re-serialization plus URL rewrites), and the stored column's
-bytes differ again by database re-serialization. No path may recompute a digest from a `content`
-field read off a response, and no path may compare a locally computed digest against
-`contentDigest`.
+`adoptAck` may move the version backwards, and that is correct at the two sites that adopt server
+content in the same step (`:709`, `:721`): the local copy becomes the server's copy, so its version
+is the server's version, and the write must be confirmed before the version is adopted. The
+pre-force-push read (`:762-765`) is forward-only — it adopts no content, so it may never lower the
+presented version. Only `presentedVersion` is forward-only by construction.
 
-The two sites that adopt server content in the same step (`:709`, `:721`) use `adoptServerCopy`:
-the digest arrives alongside the content it identifies, so there is nothing to gate — the local
-copy becomes the server's copy, version, content, and canonical digest together, and the version
-may move backwards there. Only `presentedVersion` is forward-only.
-
-At every adoption site — a matched write ack or an adopted server copy — the ack's `contentDigest`
-is persisted into the planner's local metadata as its canonical digest, and `listLocal`'s summary
-surfaces it. That stored digest is what `categorizePlanner` compares; a local row with no stored
-digest has never been acknowledged and falls to the version path.
-
-`syncPlan.ts` grows a per-row decision extracted out of the loop, and a digest short-circuit ahead
-of the version comparison:
+`syncPlan.ts` grows a per-row decision extracted out of the loop:
 
 ```ts
 // pages/planner/lib/syncPlan.ts
 export type PlannerVerdict = 'pull' | 'conflict' | 'skip'
 
-/**
- * What one server row means against its local counterpart.
- * Equal digests mean equal content whatever the versions say, so the row is skipped.
- * A local row with no digest has never been acknowledged, so the version path decides.
- */
+/** What one server row means against its local counterpart. */
 export function categorizePlanner(
   local: PlannerSummary | undefined,
   server: PlannerSummary,
 ): PlannerVerdict {
   if (!local) return 'pull'
-  if (local.contentDigest !== undefined && local.contentDigest === server.contentDigest) {
-    return 'skip'
-  }
   if (versionOf(server) <= versionOf(local)) return 'skip'
   return local.status === 'draft' ? 'conflict' : 'pull'
 }
 ```
 
-`PlannerSummary` (`types/PlannerTypes.ts:196-217`) gains `contentDigest?: string`;
-`ServerPlannerSummarySchema` (`schemas/PlannerSchemas.ts:611-628`) and
-`ServerPlannerResponseSchema` (`:572-605`) gain
-`contentDigest: z.string().length(64).regex(/^[0-9a-f]+$/)` — RFC 0003 pins the wire form as 64
-lowercase hex characters. The write-response schema additionally requires `requestDigest` in the
-same wire form — RFC 0003 echoes it on write acks only, so summary and batch rows carry
-`contentDigest` alone. All these schemas are `.strict()`, so each field must be added or the
-backend's new field fails parsing outright.
+**Coexistence window.** The backend currently emits `contentDigest` on planner responses and
+summaries; the digest is being withdrawn from the wire entirely (server-side comparison only, RFC
+0003). Until the backend removes the field, the two `.strict()` schemas
+(`ServerPlannerSummarySchema` `schemas/PlannerSchemas.ts:611-628`, `ServerPlannerResponseSchema`
+`:572-605`) carry `contentDigest: z.string().optional()` as a tolerated, never-read field. Removing
+that line when the backend stops emitting the key is part of RFC 0003's wire cleanup, not a
+follow-up.
 
 `runSync` fetches its pull residue in one call instead of a per-id loop:
 
@@ -166,50 +115,49 @@ must not issue a request at all.
 
 ### Ordered change list
 
-1. `types/PlannerTypes.ts` — add `ServerAck`; add `contentDigest?: string` to `PlannerSummary`.
-2. `lib/contentDigest.ts` — new, `digestOf` as above.
-3. `schemas/PlannerSchemas.ts` — `contentDigest` on `ServerPlannerResponseSchema` (`:572`) and
-   `ServerPlannerSummarySchema` (`:611`); new
+1. `types/PlannerTypes.ts` — add `ServerAck` (version only).
+2. `schemas/PlannerSchemas.ts` — the tolerated optional `contentDigest` on
+   `ServerPlannerResponseSchema` (`:572`) and `ServerPlannerSummarySchema` (`:611`) per the
+   coexistence window; new
    `ServerPlannerBatchResponseSchema = z.array(ServerPlannerResponseSchema)` — the endpoint answers
    a bare array, so an object wrapper would fail every parse.
-4. `hooks/usePlannerSyncAdapter.ts` — build the content string once, hand it to `digestOf`, and
-   return the `ServerAck` alongside the `SaveablePlanner` from `syncToServer` (`:111-138`);
-   propagate `contentDigest` through `serverSummaryToLocal` (`:69-80`).
-5. `hooks/usePlannerSave.ts` — replace `adoptSyncVersion` (`:376-381`) with `presentedVersion` and
-   `adoptAck`; call `presentedVersion()` at the two save sites (`:478`, `:573`); replace the three
-   raw `syncVersionRef.current = …` writes with `adoptAck` (`:495`, `:709`, `:721`).
-6. `hooks/usePlannerSave.ts` — introduce `INITIAL_SYNC_VERSION = 1` and use it at the seed (`:358`,
-   currently `?? 1`) and at the return (`:884`, currently `?? 0`); the wire type is
+3. `hooks/usePlannerSyncAdapter.ts` — return the `ServerAck` alongside the `SaveablePlanner` from
+   `syncToServer` (`:111-138`).
+4. `hooks/usePlannerSave.ts` — replace `adoptSyncVersion` (`:376-381`) with `presentedVersion` and
+   `adoptAck`; call `presentedVersion()` at the two save sites (`:478`, `:573`); route the three
+   raw `syncVersionRef.current = …` writes (`:495`, `:709`, `:721`) through `adoptAck`, adopting
+   only after the local write is confirmed at the server-copy sites; the pre-force-push read
+   (`:762-765`) becomes a forward-only take.
+5. `hooks/usePlannerSave.ts` — introduce `INITIAL_SYNC_VERSION = 1` in `lib/constants/planner.ts`
+   and use it at the seed (`:358`, currently `?? 1`), at the return (`:884`, currently `?? 0`), at
+   `usePlannerFork.ts:123`, and at `PlannerSchemas.ts:243`; the wire type is
    `z.number().int().positive()`, so `0` was never a reachable server version.
-7. `lib/syncPlan.ts` — extract `categorizePlanner` from the `categorizeSync` loop (`:52-66`); add
-   the digest short-circuit; `categorizeSync` keeps its three-way partition and calls the extracted
-   function per row.
-8. `lib/plannerApi.ts` — add `batch`.
-9. `lib/constants/planner.ts` — mirror `BATCH_PULL_MAX_IDS` from RFC 0003.
-10. `hooks/useMDUserPlannersData.ts` — replace the per-id `fetchFromServer` loop in `runSync`
-    (`:244-260`) with one `plannerApi.batch(plan.pull.map((p) => p.id))` call, keeping the
-    per-planner save and the `syncedCount` accounting. An empty residue issues no request. Rows are
-    written per chunk as each chunk parses, so a failing chunk cannot discard rows already fetched.
-11. Persist the canonical digest: planner metadata gains `contentDigest?: string`, written at every
-    adoption site (matched write ack, adopted server copy, `serverResponseToSaveable`);
-    `listLocal`'s summary surfaces it. Without this the digest short-circuit in `categorizePlanner`
-    can never fire outside a test.
+6. `lib/syncPlan.ts` — extract `categorizePlanner` from the `categorizeSync` loop (`:52-66`);
+   `categorizeSync` keeps its three-way partition and calls the extracted function per row.
+7. `lib/plannerApi.ts` — add `batch`, yielding per chunk so a failing chunk cannot discard rows
+   already fetched.
+8. `lib/constants/planner.ts` — mirror `BATCH_PULL_MAX_IDS` from RFC 0003 (value 50, per
+   `PlannerConstants.java`).
+9. `hooks/useMDUserPlannersData.ts` — replace the per-id `fetchFromServer` loop in `runSync`
+   (`:244-260`) with the chunked batch pull, keeping the per-planner save and the `syncedCount`
+   accounting; rows are written as each chunk parses. An empty residue issues no request. The
+   sites persisting server state outside `usePlannerSave` (`:440`, `usePlannerHeaderActions.ts:106`,
+   `PersonalPlannerHeader.tsx:159`) take their version from the returned ack, not from
+   `synced.planner.metadata`.
 
 ### Test plan
 
-- `lib/__tests__/contentDigest.test.ts` — known-vector SHA-256; identical strings hash equal;
-  a one-character change produces a different digest.
-- `lib/__tests__/syncPlan.test.ts` — `categorizePlanner` table: equal digests → `skip` even when
-  the server version is higher; missing local digest with a higher server version over a draft →
-  `conflict`, over a saved row → `pull`; no local row → `pull`.
-- `hooks/__tests__/usePlannerSave.test.ts:527-577` — the two version-adoption pins are updated:
-  the `mockSyncToServer` implementation (`:518-523`) must return a `contentDigest` matching the
-  content it received, because an ack without a matching digest is now refused. Add a third case:
-  an ack carrying a mismatched digest leaves `syncVersionRef` untouched and the next save presents
-  the unchanged version.
+- `lib/__tests__/syncPlan.test.ts` — `categorizePlanner` table: higher server version over a draft
+  → `conflict`, over a saved row → `pull`; equal or lower server version → `skip`; no local row →
+  `pull`.
+- `hooks/__tests__/usePlannerSave.test.ts:527-577` — the two version-adoption pins are updated to
+  the `ServerAck` return shape; a save's ack moves the presented version forward; the pre-force-push
+  take never lowers it.
 - `hooks/__tests__/useMDUserPlannersData.test.tsx` — a pull of three rows issues exactly one batch
-  request; a residue one over `BATCH_PULL_MAX_IDS` issues two; an empty residue issues none; rows
-  the response omits are left local-untouched.
+  request; an empty residue issues none; rows the response omits are left local-untouched; a chunk
+  failure keeps the rows chunks before it already delivered.
+- `lib/__tests__/plannerApi.test.ts` — chunking at the cap boundary: at-cap → one request, one-over
+  → two; an empty ids array issues no request.
 
 ---
 
@@ -1092,10 +1040,10 @@ Composition rules, in dependency order:
 **Inside the big-bang window** — these change a wire contract or an on-disk format and must land
 with their counterparts, in this order:
 
-1. Stream 1 with RFC 0003 stream 1. `contentDigest` on the two `.strict()` schemas means a
-   frontend without it rejects every response from a backend with it, and a backend without it
-   fails a frontend that requires it. Ship the schema field as required on both sides in the same
-   release, or the parse fails one way or the other.
+1. Stream 1 with RFC 0003 stream 1. The `.strict()` schemas tolerate the transitional
+   `contentDigest` key as optional while the backend still emits it; the backend's wire cleanup
+   (withdrawing the field) and the batch endpoint are the coupled halves. The frontend must not
+   land its optional-field removal before the backend stops emitting the key.
 2. Stream 2's `DB_VERSION` 2 migration. It is not reversible: a client that has upgraded and then
    loads an older bundle finds two-part keys under a v1 reader. A rollback of the frontend after
    this ships strands local planners.
@@ -1129,13 +1077,14 @@ rewrites under its own authorization. Behavior-preserving: no assertion may weak
 
 ## Acceptance checklist
 
-- [ ] A save presents `(syncVersion, contentDigest)`; an acknowledgement whose digest does not
-      match the content in hand leaves the local version untouched.
+- [ ] The client presents and adopts `syncVersion` only; no digest is computed, stored, or
+      compared client-side, and the tolerated wire field is never read.
 - [ ] `presentedVersion` never decreases; `adoptAck` decreases it only at the two sites that adopt
-      server content in the same step.
+      server content in the same step, and only after the local write is confirmed; the
+      pre-force-push read is forward-only.
 - [ ] Seed and exit defaults agree on `INITIAL_SYNC_VERSION`; no code path can present `0`.
-- [ ] `categorizePlanner` skips rows whose digests match, regardless of version, and falls back to
-      the version path when the local digest is absent.
+- [ ] `categorizePlanner` decides per row on version and status; `categorizeSync` keeps its
+      three-way partition.
 - [ ] `runSync` fetches its pull residue through the batch endpoint, chunked to
       `BATCH_PULL_MAX_IDS`, issuing no request for an empty residue.
 - [ ] `storage.getItem` distinguishes absence from failure; a failed open does not poison later
