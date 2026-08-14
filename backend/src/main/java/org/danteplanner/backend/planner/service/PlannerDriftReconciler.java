@@ -213,7 +213,7 @@ public class PlannerDriftReconciler {
         Set<UUID> unreadable = new HashSet<>();
         for (ContentDocumentRow row : auditRepository.visibleContentDocuments()) {
             UUID plannerId = row.plannerId();
-            Set<String> entities = extractEntityKeys(row.content()).orElse(null);
+            Set<String> entities = extractEntityKeys(plannerId, row.content()).orElse(null);
             Set<String> keywords = parseKeywords(plannerId, "content", row.selectedKeywords()).orElse(null);
 
             if (entities == null || keywords == null) {
@@ -229,9 +229,11 @@ public class PlannerDriftReconciler {
     }
 
     /**
+     * @param plannerId   the planner whose document is being read
+     * @param contentJson the stored document
      * @return the entity keys the stored document carries, or empty when it cannot be read
      */
-    private Optional<Set<String>> extractEntityKeys(String contentJson) {
+    private Optional<Set<String>> extractEntityKeys(UUID plannerId, String contentJson) {
         if (contentJson == null || contentJson.isBlank()) {
             return Optional.of(Set.of());
         }
@@ -243,7 +245,8 @@ public class PlannerDriftReconciler {
             }
             return Optional.of(keys);
         } catch (JsonProcessingException | IllegalArgumentException e) {
-            log.warn("Unreadable planner content during reconciliation: {}", e.getMessage());
+            log.warn("Unreadable content for planner {} during reconciliation: {}",
+                    plannerId, e.getMessage());
             return Optional.empty();
         }
     }
