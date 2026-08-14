@@ -738,7 +738,7 @@ export function validateSelectedKeywords(keywords: string[]): KeywordValidationE
  * if (!result.isValid) {
  *   console.error('Validation failed:', result.errors)
  *   // Show first error to user
- *   toast.error(result.errors[0].message)
+ *   showErrorMessage(`planner:${toUserFriendlyError(result.errors[0]).key}`)
  * }
  */
 export function validatePlannerForPublish(
