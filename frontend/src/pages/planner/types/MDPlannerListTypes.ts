@@ -68,3 +68,25 @@ export interface MDGesellschaftSearchParams {
   /** Comma-separated theme pack IDs */
   themePack?: string
 }
+
+/** The filter values a gesellschaft list reads from the URL, as one object. */
+export interface MDGesellschaftFilters {
+  /** MD category filter (undefined = all categories) */
+  category: MDCategory | undefined
+  /** Current page (0-indexed) */
+  page: number
+  /** Display mode: 'published' (all) or 'best' (recommended only) */
+  mode: MDGesellschaftMode
+  /** Search query for title filtering */
+  search: string
+  /** Raw comma-separated keyword filter from URL */
+  keyword: string | undefined
+  /** Raw comma-separated identity ID filter from URL */
+  identity: string | undefined
+  /** Raw comma-separated EGO ID filter from URL */
+  ego: string | undefined
+  /** Raw comma-separated gift ID filter from URL */
+  gift: string | undefined
+  /** Raw comma-separated theme pack ID filter from URL */
+  themePack: string | undefined
+}

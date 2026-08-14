@@ -14,8 +14,11 @@
 
 import { useUrlFilters } from '@/components/hooks/useUrlFilters'
 
-import type { MDCategory } from '@/shared/gameData'
-import type { MDGesellschaftMode, MDGesellschaftSearchParams } from '../types/MDPlannerListTypes'
+import type {
+  MDGesellschaftFilters,
+  MDGesellschaftMode,
+  MDGesellschaftSearchParams,
+} from '../types/MDPlannerListTypes'
 
 // ============================================================================
 // Default Values
@@ -29,24 +32,8 @@ const DEFAULT_MODE: MDGesellschaftMode = 'published'
 // ============================================================================
 
 export interface UseMDGesellschaftFiltersResult {
-  /** MD category filter (undefined = all categories) */
-  category: MDCategory | undefined
-  /** Current page (0-indexed) */
-  page: number
-  /** Display mode: 'published' (all) or 'best' (recommended only) */
-  mode: MDGesellschaftMode
-  /** Search query for title filtering */
-  search: string
-  /** Raw comma-separated keyword filter from URL */
-  keyword: string | undefined
-  /** Raw comma-separated identity ID filter from URL */
-  identity: string | undefined
-  /** Raw comma-separated EGO ID filter from URL */
-  ego: string | undefined
-  /** Raw comma-separated gift ID filter from URL */
-  gift: string | undefined
-  /** Raw comma-separated theme pack ID filter from URL */
-  themePack: string | undefined
+  /** Every filter value the list needs, ready to hand on as one prop */
+  filters: MDGesellschaftFilters
   /** Update one or more filter values */
   setFilters: (updates: Partial<MDGesellschaftSearchParams>) => void
   /** Reset all filters to defaults */
@@ -131,15 +118,17 @@ export function useMDGesellschaftFilters(): UseMDGesellschaftFiltersResult {
   }
 
   return {
-    category,
-    page,
-    mode,
-    search: searchQuery,
-    keyword,
-    identity,
-    ego,
-    gift,
-    themePack,
+    filters: {
+      category,
+      page,
+      mode,
+      search: searchQuery,
+      keyword,
+      identity,
+      ego,
+      gift,
+      themePack,
+    },
     setFilters,
     clearFilters,
     resetPage,

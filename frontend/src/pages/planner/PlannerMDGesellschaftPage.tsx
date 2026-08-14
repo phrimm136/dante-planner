@@ -54,8 +54,7 @@ function GesellschaftPageContent() {
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
 
-  const { category, page, mode, search, keyword, identity, ego, gift, themePack, setFilters } =
-    useMDGesellschaftFilters()
+  const { filters, setFilters } = useMDGesellschaftFilters()
 
   const { filters: searchFilters, setFilters: setSearchFilters } = usePlannerSearchFilters()
 
@@ -79,10 +78,10 @@ function GesellschaftPageContent() {
       {/* Toolbar: Search + Mode Toggle */}
       <div className="mb-4">
         <MDPlannerToolbar
-          search={search}
+          search={filters.search}
           onSearchChange={(q) => setFilters({ q, page: 0 })}
           showModeToggle
-          mode={mode}
+          mode={filters.mode}
           onModeChange={(m) => setFilters({ mode: m, page: 0 })}
         />
       </div>
@@ -90,7 +89,7 @@ function GesellschaftPageContent() {
       {/* Category Filter Pills */}
       <div className="mb-4">
         <PlannerListFilterPills
-          selectedCategory={category}
+          selectedCategory={filters.category}
           onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
         />
       </div>
@@ -106,15 +105,7 @@ function GesellschaftPageContent() {
       <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
         <Suspense fallback={<PlannerGridSkeleton />}>
           <PublishedPlannerList
-            mode={mode}
-            category={category}
-            page={page}
-            search={search}
-            keyword={keyword}
-            identity={identity}
-            ego={ego}
-            gift={gift}
-            themePack={themePack}
+            filters={filters}
             isAuthenticated={isAuthenticated}
             onPageChange={(p) => setFilters({ page: p })}
           />

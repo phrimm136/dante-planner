@@ -71,7 +71,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
   const syncEnabled = userSettings?.syncEnabled
 
   // URL search params for list section
-  const { category, page, mode, search, setFilters } = useMDGesellschaftFilters()
+  const { filters, setFilters } = useMDGesellschaftFilters()
 
   if (isPlannerRemoved(queryState)) {
     return (
@@ -156,10 +156,10 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         {/* Toolbar: Search + Mode Toggle */}
         <div className="mb-4">
           <MDPlannerToolbar
-            search={search}
+            search={filters.search}
             onSearchChange={(q) => setFilters({ q, page: 0 })}
             showModeToggle
-            mode={mode}
+            mode={filters.mode}
             onModeChange={(m) => setFilters({ mode: m, page: 0 })}
           />
         </div>
@@ -167,7 +167,7 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         {/* Category Filter Pills */}
         <div className="mb-6">
           <PlannerListFilterPills
-            selectedCategory={category}
+            selectedCategory={filters.category}
             onCategoryChange={(c) => setFilters({ category: c, page: 0 })}
           />
         </div>
@@ -176,10 +176,16 @@ function PublishedPlannerDetailContent({ plannerId }: { plannerId: string }) {
         <ReactErrorBoundary FallbackComponent={CommunityPlansErrorFallback}>
           <Suspense fallback={<PlannerGridSkeleton />}>
             <PublishedPlannerList
-              mode={mode}
-              category={category}
-              page={page}
-              search={search}
+              filters={{
+                ...filters,
+                // The list under a plan is not narrowed by the entity filters the
+                // gesellschaft page applies; only category, mode, search and page carry over.
+                keyword: undefined,
+                identity: undefined,
+                ego: undefined,
+                gift: undefined,
+                themePack: undefined,
+              }}
               isAuthenticated={isAuthenticated}
               onPageChange={(p) => setFilters({ page: p })}
             />

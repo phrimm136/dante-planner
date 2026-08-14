@@ -9,28 +9,11 @@ import { PlannerListPagination } from './PlannerListPagination'
 import { PlannerEmptyState } from './PlannerEmptyState'
 import { ResponsiveCardGrid } from '@/components/layout/ResponsiveCardGrid'
 
-import type { MDCategory } from '@/shared/gameData'
-import type { MDGesellschaftMode } from '../../types/MDPlannerListTypes'
+import type { MDGesellschaftFilters } from '../../types/MDPlannerListTypes'
 
 export interface PublishedPlannerListProps {
-  /** Display mode: 'published' (all) or 'best' (recommended only) */
-  mode: MDGesellschaftMode
-  /** MD category filter (optional) */
-  category?: MDCategory
-  /** Current page number (0-indexed) */
-  page: number
-  /** Search query for title filtering (optional) */
-  search?: string
-  /** Comma-separated keyword filter */
-  keyword?: string
-  /** Comma-separated identity ID filter */
-  identity?: string
-  /** Comma-separated EGO ID filter */
-  ego?: string
-  /** Comma-separated gift ID filter */
-  gift?: string
-  /** Comma-separated theme pack ID filter */
-  themePack?: string
+  /** Every filter value the query runs under */
+  filters: MDGesellschaftFilters
   /** Whether user is authenticated (for bookmark display) */
   isAuthenticated: boolean
   /** Callback when page changes */
@@ -50,28 +33,13 @@ export interface PublishedPlannerListProps {
  * Usage: Gesellschaft list page and detail page bottom section
  */
 export function PublishedPlannerList({
-  mode,
-  category,
-  page,
-  search,
-  keyword,
-  identity,
-  ego,
-  gift,
-  themePack,
+  filters,
   isAuthenticated,
   onPageChange,
 }: PublishedPlannerListProps) {
   const { data } = useMDGesellschaftData({
-    mode,
-    page,
-    category,
-    search: search || undefined,
-    keyword,
-    identity,
-    ego,
-    gift,
-    themePack,
+    ...filters,
+    search: filters.search || undefined,
   })
 
   const currentSearch = useSearch({ strict: false })
@@ -85,14 +53,14 @@ export function PublishedPlannerList({
 
   // Determine if any filters are active (for empty state messaging)
   const hasActiveFilters =
-    !!category ||
-    !!search ||
-    mode === 'best' ||
-    !!keyword ||
-    !!identity ||
-    !!ego ||
-    !!gift ||
-    !!themePack
+    !!filters.category ||
+    !!filters.search ||
+    filters.mode === 'best' ||
+    !!filters.keyword ||
+    !!filters.identity ||
+    !!filters.ego ||
+    !!filters.gift ||
+    !!filters.themePack
 
   // Handle empty state
   if (data.content.length === 0) {
@@ -118,7 +86,7 @@ export function PublishedPlannerList({
       {data.page.totalPages > 1 && (
         <div className="mt-6">
           <PlannerListPagination
-            currentPage={page}
+            currentPage={filters.page}
             totalPages={data.page.totalPages}
             onPageChange={onPageChange}
           />
