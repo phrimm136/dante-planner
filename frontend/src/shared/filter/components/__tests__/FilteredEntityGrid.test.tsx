@@ -8,7 +8,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-import { FilteredEntityGrid } from '../FilteredEntityGrid'
+import { FilteredEntityGrid, type CardGeometry } from '../FilteredEntityGrid'
 import { createTestFilterStore } from '@/test-utils/filterStore'
 
 interface Item {
@@ -37,6 +37,8 @@ function matches(
   return terms.includes(state.searchQuery)
 }
 
+const GEOMETRY: CardGeometry = { cardWidth: 100, cardHeight: 200, mobileScale: 0.8 }
+
 function renderGrid(
   values: Partial<State> = {},
   searchQuery = '',
@@ -56,9 +58,7 @@ function renderGrid(
       renderCard={(item) => <a data-testid={item.id}>{item.id}</a>}
       emptyStateKey="test.emptyState"
       emptyStateFallback="Nothing matches."
-      cardWidth={100}
-      cardHeight={200}
-      mobileScale={0.8}
+      geometry={GEOMETRY}
       {...overrides}
     />,
   )
@@ -123,7 +123,9 @@ describe('FilteredEntityGrid', () => {
     const { container: loose } = renderGrid()
     expect(loose.querySelector('div.grid')).not.toHaveStyle({ gridAutoRows: '200px' })
 
-    const { container: pinned } = renderGrid({}, '', { fixedRowHeight: true })
+    const { container: pinned } = renderGrid({}, '', {
+      geometry: { ...GEOMETRY, fixedRowHeight: true },
+    })
     expect(pinned.querySelector('div.grid')).toHaveStyle({ gridAutoRows: '200px' })
   })
 })

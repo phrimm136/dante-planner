@@ -10,6 +10,20 @@ import { FilteredCardSlot } from './FilteredCardSlot'
 
 const NO_TERMS: readonly string[] = []
 
+/**
+ * A list's card sizing, read by both the grid and every cell in it.
+ *
+ * Cells are memoized on it, so it must keep a stable identity across renders —
+ * declare it once per list rather than inline at the call site.
+ */
+export interface CardGeometry {
+  cardWidth: number
+  cardHeight: number
+  mobileScale: number
+  /** Pins grid rows to the card height. Omitted for variable-height cards. */
+  fixedRowHeight?: boolean
+}
+
 interface FilteredEntityGridProps<TItem, TState> {
   /** Items in final render order — the grid sorts nothing. */
   items: readonly TItem[]
@@ -25,11 +39,7 @@ interface FilteredEntityGridProps<TItem, TState> {
   /** Message shown while nothing matches, keyed in the `database` namespace. */
   emptyStateKey: string
   emptyStateFallback?: string
-  cardWidth: number
-  cardHeight: number
-  mobileScale: number
-  /** Pins grid rows to the card height. Omitted for variable-height cards. */
-  fixedRowHeight?: boolean
+  geometry: CardGeometry
   /** Class of the element wrapping the grid. Omitted leaves the grid unwrapped. */
   gridWrapperClassName?: string
 }
@@ -47,10 +57,7 @@ interface FilteredEntityGridProps<TItem, TState> {
  *   buildTerms={(ego) => buildEGOSearchTerms(ego, egoNames, mappings)}
  *   renderCard={(ego) => <EGOCardLink ego={ego} />}
  *   emptyStateKey="ego.emptyState"
- *   cardWidth={CARD_GRID.WIDTH.EGO}
- *   cardHeight={CARD_GRID.HEIGHT.EGO}
- *   mobileScale={0.8}
- *   fixedRowHeight
+ *   geometry={EGO_GEOMETRY}
  *   gridWrapperClassName="pt-4"
  * />
  */
@@ -63,10 +70,7 @@ export function FilteredEntityGrid<TItem, TState>({
   renderCard,
   emptyStateKey,
   emptyStateFallback,
-  cardWidth,
-  cardHeight,
-  mobileScale,
-  fixedRowHeight,
+  geometry,
   gridWrapperClassName,
 }: FilteredEntityGridProps<TItem, TState>) {
   const { t } = useTranslation('database')
@@ -82,9 +86,9 @@ export function FilteredEntityGrid<TItem, TState>({
 
   const grid = (
     <ResponsiveCardGrid
-      cardWidth={cardWidth}
-      cardHeight={fixedRowHeight === true ? cardHeight : undefined}
-      mobileScale={mobileScale}
+      cardWidth={geometry.cardWidth}
+      cardHeight={geometry.fixedRowHeight === true ? geometry.cardHeight : undefined}
+      mobileScale={geometry.mobileScale}
     >
       {items.slice(0, displayCount).map((item) => (
         <FilteredEntityCell
@@ -94,9 +98,7 @@ export function FilteredEntityGrid<TItem, TState>({
           matches={matches}
           buildTerms={buildTerms}
           renderCard={renderCard}
-          cardWidth={cardWidth}
-          cardHeight={cardHeight}
-          mobileScale={mobileScale}
+          geometry={geometry}
         />
       ))}
     </ResponsiveCardGrid>
@@ -130,9 +132,7 @@ interface FilteredEntityCellProps<TItem, TState> {
   matches: (item: TItem, state: FilterState<TState>, terms: readonly string[]) => boolean
   buildTerms?: (item: TItem) => string[]
   renderCard: (item: TItem) => ReactNode
-  cardWidth: number
-  cardHeight: number
-  mobileScale: number
+  geometry: CardGeometry
 }
 
 /**
@@ -149,9 +149,7 @@ function FilteredEntityCellInner<TItem, TState>({
   matches,
   buildTerms,
   renderCard,
-  cardWidth,
-  cardHeight,
-  mobileScale,
+  geometry,
 }: FilteredEntityCellProps<TItem, TState>) {
   const terms = buildTerms?.(item) ?? NO_TERMS
 
@@ -159,9 +157,9 @@ function FilteredEntityCellInner<TItem, TState>({
     <FilteredCardSlot
       store={store}
       selectVisible={(state) => matches(item, state, terms)}
-      mobileScale={mobileScale}
-      cardWidth={cardWidth}
-      cardHeight={cardHeight}
+      mobileScale={geometry.mobileScale}
+      cardWidth={geometry.cardWidth}
+      cardHeight={geometry.cardHeight}
     >
       {renderCard(item)}
     </FilteredCardSlot>

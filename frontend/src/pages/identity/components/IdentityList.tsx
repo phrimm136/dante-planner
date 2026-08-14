@@ -3,13 +3,20 @@ import { useSearchMappingsDeferred } from '@/shared/filter'
 import { useIdentityListI18nDeferred } from '../hooks/useIdentityListData'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { CARD_GRID } from '@/lib/constants'
-import { FilteredEntityGrid, sortByReleaseDate } from '@/shared/filter'
+import { FilteredEntityGrid, sortByReleaseDate, type CardGeometry } from '@/shared/filter'
 import {
   buildIdentitySearchTerms,
   matchesIdentity,
   type IdentityFacetState,
 } from '../lib/identityFilter'
 import { IdentityCardLink } from './IdentityCardLink'
+
+const IDENTITY_GEOMETRY: CardGeometry = {
+  cardWidth: CARD_GRID.WIDTH.IDENTITY,
+  cardHeight: CARD_GRID.HEIGHT.IDENTITY,
+  mobileScale: 0.8,
+  fixedRowHeight: true,
+}
 
 interface IdentityListProps {
   identities: IdentityListItem[]
@@ -48,10 +55,7 @@ export function IdentityList({ identities, store }: IdentityListProps) {
       buildTerms={(identity) => buildIdentitySearchTerms(identity, identityNames, mappings)}
       renderCard={(identity) => <IdentityCardLink identity={identity} />}
       emptyStateKey="identity.emptyState"
-      cardWidth={CARD_GRID.WIDTH.IDENTITY}
-      cardHeight={CARD_GRID.HEIGHT.IDENTITY}
-      mobileScale={0.8}
-      fixedRowHeight
+      geometry={IDENTITY_GEOMETRY}
       gridWrapperClassName="pt-4"
     />
   )

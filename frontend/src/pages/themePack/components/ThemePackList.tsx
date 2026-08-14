@@ -1,7 +1,7 @@
 import type { ThemePackList as ThemePackListType } from '../types/ThemePackTypes'
 import { CARD_GRID } from '@/lib/constants'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
-import { entriesSortedById, FilteredEntityGrid } from '@/shared/filter'
+import { entriesSortedById, FilteredEntityGrid, type CardGeometry } from '@/shared/filter'
 import { useThemePackI18n } from '../hooks/useThemePackListData'
 import {
   buildThemePackSearchTerms,
@@ -9,6 +9,12 @@ import {
   type ThemePackFacetState,
 } from '../lib/themePackFilter'
 import { ThemePackCardLink } from './ThemePackCardLink'
+
+const THEME_PACK_GEOMETRY: CardGeometry = {
+  cardWidth: CARD_GRID.WIDTH.THEME_PACK,
+  cardHeight: CARD_GRID.HEIGHT.THEME_PACK,
+  mobileScale: 0.8,
+}
 
 interface ThemePackListProps {
   spec: ThemePackListType
@@ -42,9 +48,7 @@ export function ThemePackList({ spec, store }: ThemePackListProps) {
       )}
       emptyStateKey="themePack.emptyState"
       emptyStateFallback="No theme packs found."
-      cardWidth={CARD_GRID.WIDTH.THEME_PACK}
-      cardHeight={CARD_GRID.HEIGHT.THEME_PACK}
-      mobileScale={0.8}
+      geometry={THEME_PACK_GEOMETRY}
     />
   )
 }

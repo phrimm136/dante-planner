@@ -1,9 +1,15 @@
 import type { AbEventSpecList } from '../schemas/AbEventSchemas'
 import { CARD_GRID } from '@/lib/constants'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
-import { entriesSortedById, FilteredEntityGrid } from '@/shared/filter'
+import { entriesSortedById, FilteredEntityGrid, type CardGeometry } from '@/shared/filter'
 import { matchesAbEvent, type AbEventFacetState } from '../lib/abEventFilter'
 import { AbEventCardLink } from './AbEventCardLink'
+
+const AB_EVENT_GEOMETRY: CardGeometry = {
+  cardWidth: CARD_GRID.WIDTH.AB_EVENT,
+  cardHeight: CARD_GRID.HEIGHT.AB_EVENT,
+  mobileScale: 0.8,
+}
 
 interface AbEventListProps {
   spec: AbEventSpecList
@@ -29,9 +35,7 @@ export function AbEventList({ spec, store }: AbEventListProps) {
       )}
       emptyStateKey="abEvent.emptyState"
       emptyStateFallback="No events found."
-      cardWidth={CARD_GRID.WIDTH.AB_EVENT}
-      cardHeight={CARD_GRID.HEIGHT.AB_EVENT}
-      mobileScale={0.8}
+      geometry={AB_EVENT_GEOMETRY}
     />
   )
 }

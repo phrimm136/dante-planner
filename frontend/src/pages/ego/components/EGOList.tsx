@@ -3,9 +3,16 @@ import { useSearchMappingsDeferred } from '@/shared/filter'
 import { useEGOListI18nDeferred } from '../hooks/useEGOListData'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { CARD_GRID } from '@/lib/constants'
-import { FilteredEntityGrid, sortEGOByDate } from '@/shared/filter'
+import { FilteredEntityGrid, sortEGOByDate, type CardGeometry } from '@/shared/filter'
 import { buildEGOSearchTerms, matchesEGO, type EGOFacetState } from '../lib/egoFilter'
 import { EGOCardLink } from './EGOCardLink'
+
+const EGO_GEOMETRY: CardGeometry = {
+  cardWidth: CARD_GRID.WIDTH.EGO,
+  cardHeight: CARD_GRID.HEIGHT.EGO,
+  mobileScale: 0.8,
+  fixedRowHeight: true,
+}
 
 interface EGOListProps {
   egos: EGOListItem[]
@@ -31,10 +38,7 @@ export function EGOList({ egos, store }: EGOListProps) {
       buildTerms={(ego) => buildEGOSearchTerms(ego, egoNames, mappings)}
       renderCard={(ego) => <EGOCardLink ego={ego} />}
       emptyStateKey="ego.emptyState"
-      cardWidth={CARD_GRID.WIDTH.EGO}
-      cardHeight={CARD_GRID.HEIGHT.EGO}
-      mobileScale={0.8}
-      fixedRowHeight
+      geometry={EGO_GEOMETRY}
       gridWrapperClassName="pt-4"
     />
   )

@@ -1,6 +1,6 @@
 import type { EGOGiftListItem } from '../types/EGOGiftTypes'
 import { CARD_GRID } from '@/lib/constants'
-import { FilteredEntityGrid, useSearchMappingsDeferred } from '@/shared/filter'
+import { FilteredEntityGrid, useSearchMappingsDeferred, type CardGeometry } from '@/shared/filter'
 import { useEGOGiftListI18nDeferred } from '../hooks/useEGOGiftListData'
 import type { FilterStore } from '@/components/hooks/useSetFilters'
 import { sortEGOGifts } from '../lib/egoGiftSort'
@@ -10,6 +10,12 @@ import {
   type EGOGiftFacetState,
 } from '../lib/egoGiftFilter'
 import { EGOGiftCardLink } from './EGOGiftCardLink'
+
+const EGO_GIFT_GEOMETRY: CardGeometry = {
+  cardWidth: CARD_GRID.WIDTH.EGO_GIFT,
+  cardHeight: CARD_GRID.HEIGHT.EGO_GIFT,
+  mobileScale: 0.8,
+}
 
 interface EGOGiftListProps {
   gifts: EGOGiftListItem[]
@@ -47,9 +53,7 @@ export function EGOGiftList({ gifts, store }: EGOGiftListProps) {
       buildTerms={(gift) => buildEGOGiftSearchTerms(gift, giftNames, mappings)}
       renderCard={(gift) => <EGOGiftCardLink gift={gift} />}
       emptyStateKey="egoGift.emptyState"
-      cardWidth={CARD_GRID.WIDTH.EGO_GIFT}
-      cardHeight={CARD_GRID.HEIGHT.EGO_GIFT}
-      mobileScale={0.8}
+      geometry={EGO_GIFT_GEOMETRY}
     />
   )
 }
