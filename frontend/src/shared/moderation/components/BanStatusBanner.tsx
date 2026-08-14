@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { useAuthQuery } from '@/shared/auth'
 import { LinkifyText } from '@/components/ui/LinkifyText'
+import { useRestrictionStatus } from '../hooks/useRestrictionStatus'
 
 /**
  * Global banner displaying account suspension status (ban or timeout).
@@ -12,17 +12,14 @@ import { LinkifyText } from '@/components/ui/LinkifyText'
  */
 export function BanStatusBanner() {
   const { t } = useTranslation(['common'])
-  const { data: user } = useAuthQuery()
+  const { isRestricted, reason } = useRestrictionStatus()
   const [isDismissed, setIsDismissed] = useState(false)
 
   // Only show if user is restricted and not dismissed
-  const isRestricted = user?.isBanned === true || user?.isTimedOut === true
   if (!isRestricted || isDismissed) {
     return null
   }
 
-  const isBanned = user.isBanned === true
-  const reason = isBanned ? user.banReason : user.timeoutReason
   const message = reason
     ? t('moderation.accountSuspended', { reason })
     : t('moderation.accountSuspendedNoReason')

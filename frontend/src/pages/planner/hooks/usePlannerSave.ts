@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import i18n from '@/lib/i18n'
 import { useAuthQuery, authQueryKeys } from '@/shared/auth'
+import { useRestrictionStatus } from '@/shared/moderation'
 import { usePlannerStorage } from './usePlannerStorage'
 import { usePlannerSyncAdapter } from './usePlannerSyncAdapter'
 import { userPlannersQueryKeys } from './useMDUserPlannersData'
@@ -345,6 +346,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Auth state
   const { data: user } = useAuthQuery()
   const isAuthenticated = !!user
+  const { isRestricted, isBanned, reason: restrictionRawReason } = useRestrictionStatus()
 
   // Planner ID - create once and persist
   const [plannerId] = useState<string>(() => initialPlannerId ?? generateUUID())
@@ -1042,12 +1044,12 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const hasUnsyncedChanges = currentComparable !== lastSyncedStateRef.current
   const hasLocalUnsavedChanges = currentComparable !== previousStateRef.current
 
-  const isRestricted = user?.isBanned === true || user?.isTimedOut === true
   const restrictionReason = !isRestricted
     ? undefined
-    : user?.isBanned
-      ? user.banReason || i18n.t('moderation.bannedNoReason', { ns: 'common' })
-      : user?.timeoutReason || i18n.t('moderation.timedOutNoReason', { ns: 'common' })
+    : restrictionRawReason ||
+      i18n.t(isBanned ? 'moderation.bannedNoReason' : 'moderation.timedOutNoReason', {
+        ns: 'common',
+      })
 
   return {
     plannerId,
