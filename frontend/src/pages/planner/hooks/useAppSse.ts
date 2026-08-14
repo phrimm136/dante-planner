@@ -1,16 +1,11 @@
 import { useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import i18n from '@/lib/i18n'
 import { SSE_EVENTS } from '@/lib/constants'
 import { formatUsername } from '@/lib/formatUsername'
-import {
-  useSseEngine,
-  useSseStore,
-  SseEnvelopeSchema,
-  SseAccountSuspendedSchema,
-  type SseEnvelope,
-} from '@/shared/sse'
+import { useSseEngine, useSseStore, SseAccountSuspendedSchema } from '@/shared/sse'
 import {
   showBrowserNotification,
   isTabHidden,
@@ -21,9 +16,6 @@ import {
 } from '@/shared/notifications'
 import { useAuthQueryNonBlocking } from '@/shared/auth'
 import { useUserSettingsQuery, userSettingsKeys } from '@/pages/settings'
-import { plannerQueryKeys } from '../lib/plannerQueryKeys'
-import { usePlannerStorage } from './usePlannerStorage'
-import { userPlannersQueryKeys } from './useMDUserPlannersData'
 
 import type { SseNotificationEvent, NotificationType } from '@/shared/notifications'
 
@@ -80,11 +72,12 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
  *
  * Owns the domain wiring the generic `useSseEngine` deliberately does not:
  * gating the connection on auth + user settings (sync OR any notification pref),
- * opening the planner event stream, and the per-event side-effects (planner
- * cache invalidation + local purge, notification cache invalidation + toast,
- * auth refresh on suspension). Lives in `pages/planner` because it composes the
- * planner and settings slices — a legal page→page dependency — which keeps the
- * SSE primitive itself free of any page import.
+ * opening the app event stream, and the per-event side-effects (notification
+ * cache invalidation + toast, auth refresh on suspension). Planner freshness is
+ * not among them — server-backed planner queries refetch on window focus
+ * instead. Lives in `pages/planner` because it composes the planner and
+ * settings slices — a legal page→page dependency — which keeps the SSE
+ * primitive itself free of any page import.
  *
  * @example
  * ```tsx
@@ -96,7 +89,6 @@ function showNotificationForEvent(data: SseNotificationEvent): void {
  */
 export function useAppSse(): void {
   const queryClient = useQueryClient()
-  const storage = usePlannerStorage()
   const setLastEventTime = useSseStore((s) => s.setLastEventTime)
 
   // Auth and settings state (non-blocking to avoid suspending page load)
@@ -114,59 +106,6 @@ export function useAppSse(): void {
 
   // SSE needed for sync OR notifications
   const shouldConnect = isAuthenticated && (syncEnabled || notificationsEnabled)
-
-  /**
-   * On 'deleted', purge the row from IndexedDB so a stale local copy can't
-   * trigger an upsert against the soft-deleted server row on next edit.
-   * The underlying IndexedDB delete is idempotent — safe if the row is
-   * already absent (e.g. self-originated event echoed back).
-   */
-  const applyPlannerDeleted = (_envelope: SseEnvelope, deletedId: string | undefined) => {
-    if (!deletedId) return
-
-    void storage.deleteFromLocal(deletedId).then((purge) => {
-      if (!purge.ok) {
-        console.error('Failed to purge local planner after SSE delete:', purge.error.kind)
-      }
-    })
-    queryClient.setQueryData(plannerQueryKeys.list(), (prev) =>
-      Array.isArray(prev) ? prev.filter((p) => p?.id !== deletedId) : prev,
-    )
-  }
-
-  const applyPlannerUpsert = (_envelope: SseEnvelope, plannerId: string | undefined) => {
-    if (!plannerId) return
-
-    // The event payload is the server's flat row; the detail cache holds a nested
-    // SaveablePlanner. The shapes must never cross — invalidate, never patch.
-    void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.detail(plannerId) })
-    void queryClient.invalidateQueries({ queryKey: plannerQueryKeys.list() })
-    // userPlanners reads IndexedDB, so this refetch cannot race replica
-    // replication; without it, mounted pages keep a pre-save syncVersion
-    // and later present it to the server (409).
-    void queryClient.invalidateQueries({ queryKey: userPlannersQueryKeys.all })
-  }
-
-  const PLANNER_EVENT_APPLIERS: Partial<
-    Record<SseEnvelope['type'], (envelope: SseEnvelope, plannerId: string | undefined) => void>
-  > = {
-    deleted: applyPlannerDeleted,
-    created: applyPlannerUpsert,
-    updated: applyPlannerUpsert,
-  }
-
-  const handlePlannerUpdate = (event: MessageEvent) => {
-    let envelope: SseEnvelope
-    try {
-      envelope = SseEnvelopeSchema.parse(JSON.parse(event.data as string))
-    } catch (e) {
-      console.error('Failed to parse SSE planner-update event:', e)
-      return
-    }
-
-    PLANNER_EVENT_APPLIERS[envelope.type]?.(envelope, envelope.entityId ?? envelope.plannerId)
-    setLastEventTime(Date.now())
-  }
 
   /**
    * Handle SSE notification event (comment, recommended, published)
@@ -271,15 +210,27 @@ export function useAppSse(): void {
     hasConnectedRef.current = true
   }
 
+  /**
+   * The stream 404s when the planner it followed was deleted on another
+   * device. The engine has stopped retrying by now, so this is the only
+   * notice the user gets.
+   */
+  const handleStreamGone = () => {
+    toast.error(i18n.t('sync.removedOnAnotherDevice', { ns: 'planner' }))
+  }
+
   const handlers = {
-    [SSE_EVENTS.CREATED]: handlePlannerUpdate,
-    [SSE_EVENTS.UPDATED]: handlePlannerUpdate,
-    [SSE_EVENTS.DELETED]: handlePlannerUpdate,
     [SSE_EVENTS.NOTIFY_COMMENT]: handleNotification,
     [SSE_EVENTS.NOTIFY_RECOMMENDED]: handleNotification,
     [SSE_EVENTS.NOTIFY_PUBLISHED]: handlePublished,
     [SSE_EVENTS.ACCOUNT_SUSPENDED]: handleAccountSuspended,
   }
 
-  useSseEngine({ shouldConnect, url: APP_SSE_PATH, handlers, onConnected: handleConnected })
+  useSseEngine({
+    shouldConnect,
+    url: APP_SSE_PATH,
+    handlers,
+    onConnected: handleConnected,
+    onStreamGone: handleStreamGone,
+  })
 }
