@@ -1,5 +1,5 @@
 ---
-status: Accepted
+status: Implemented
 tracking: none
 ---
 
@@ -39,6 +39,13 @@ hash what it received and expect a match.
 The string the write path receives is the output of the request DTO's `@Sanitized(PLANNER_CONTENT)`
 bind-time normalization — Jackson re-serialization plus any Tiptap URL rewrite — not the raw request
 body, so the digest identifies that normalized string.
+
+Because normalization makes `contentDigest` incomparable to anything the client can compute from its
+own bytes, the write response additionally echoes `requestDigest`: 64 lowercase hex characters,
+SHA-256 over the `content` string exactly as the request carried it, captured at the sanitizer's
+input before any normalization. It exists solely so the client can match an acknowledgement to the
+payload that produced it (RFC 0004 stream 1); it is never stored, never compared server-side, and
+appears on the write response only — summaries, batch rows, and reads carry `contentDigest` alone.
 
 Digest recomputation is therefore conditional on the save carrying a content document at all, not on
 the document having changed. Every save whose request carried one re-derives the digest from it; a

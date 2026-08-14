@@ -43,8 +43,10 @@ stringification is a different string and a different digest.
 /** What the server confirms about a write: which version it assigned, over which content. */
 export interface ServerAck {
   syncVersion: number
-  /** Lowercase hex SHA-256 of the content string the write carried. */
+  /** Lowercase hex SHA-256 of the stored content's normalized string — the row's canonical identity. */
   contentDigest: string
+  /** Lowercase hex SHA-256 of the content string exactly as the request carried it. Write acks only. */
+  requestDigest?: string
 }
 ```
 
@@ -67,27 +69,40 @@ const presentedVersion = (): number =>
   Math.max(syncVersionRef.current, initialSyncVersion ?? INITIAL_SYNC_VERSION)
 
 /**
- * Take the server's version only when its digest matches the content in hand.
+ * Take the server's version only when the ack's request digest matches the content in hand.
  * A mismatch means the ack answers a different payload than the one just built.
+ * On success the ack's canonical contentDigest becomes the local row's stored digest.
  */
 const adoptAck = (incoming: ServerAck, digestInHand: string): boolean => {
-  if (incoming.contentDigest !== digestInHand) return false
+  if (incoming.requestDigest !== digestInHand) return false
   syncVersionRef.current = incoming.syncVersion
   return true
+}
+
+/** Adopt the server's copy: content, version, and canonical digest move together, no gate. */
+const adoptServerCopy = (incoming: ServerAck): void => {
+  syncVersionRef.current = incoming.syncVersion
 }
 ```
 
 `adoptAck` takes a digest, not content, and that is the whole lineage discipline in one signature.
-A write supplies `await digestOf(requestBody)` — the exact string the adapter sent (`:495`). A
-fetch supplies the `contentDigest` the response itself carried (`:709`, `:721`), where the match is
-true by construction. Neither path may recompute a digest from a `content` field read off a
-response: RFC 0003 pins the server's digest to the request body and warns that a stored document can
-differ from the author's bytes by the database's re-serialization, so a recomputed digest is not
-comparable to the stored one.
+A write supplies `await digestOf(requestBody)` — the exact string the adapter sent (`:495`) —
+matched against the ack's `requestDigest`, which RFC 0003 echoes over those same bytes. The ack's
+`contentDigest` is NOT comparable to anything the client computes: RFC 0003 pins it to the
+sanitizer's normalized output (Jackson re-serialization plus URL rewrites), and the stored column's
+bytes differ again by database re-serialization. No path may recompute a digest from a `content`
+field read off a response, and no path may compare a locally computed digest against
+`contentDigest`.
 
-`adoptAck` may move the version backwards, and that is correct at the two sites that adopt server
-content at the same moment (`:709`, `:721`): the local copy becomes the server's copy, so its
-version is the server's version. Only `presentedVersion` is forward-only.
+The two sites that adopt server content in the same step (`:709`, `:721`) use `adoptServerCopy`:
+the digest arrives alongside the content it identifies, so there is nothing to gate — the local
+copy becomes the server's copy, version, content, and canonical digest together, and the version
+may move backwards there. Only `presentedVersion` is forward-only.
+
+At every adoption site — a matched write ack or an adopted server copy — the ack's `contentDigest`
+is persisted into the planner's local metadata as its canonical digest, and `listLocal`'s summary
+surfaces it. That stored digest is what `categorizePlanner` compares; a local row with no stored
+digest has never been acknowledged and falls to the version path.
 
 `syncPlan.ts` grows a per-row decision extracted out of the loop, and a digest short-circuit ahead
 of the version comparison:
@@ -118,8 +133,10 @@ export function categorizePlanner(
 `ServerPlannerSummarySchema` (`schemas/PlannerSchemas.ts:611-628`) and
 `ServerPlannerResponseSchema` (`:572-605`) gain
 `contentDigest: z.string().length(64).regex(/^[0-9a-f]+$/)` — RFC 0003 pins the wire form as 64
-lowercase hex characters. Both schemas are `.strict()`, so the field must be added or the backend's
-new field fails parsing outright.
+lowercase hex characters. The write-response schema additionally requires `requestDigest` in the
+same wire form — RFC 0003 echoes it on write acks only, so summary and batch rows carry
+`contentDigest` alone. All these schemas are `.strict()`, so each field must be added or the
+backend's new field fails parsing outright.
 
 `runSync` fetches its pull residue in one call instead of a per-id loop:
 
@@ -171,7 +188,12 @@ must not issue a request at all.
 9. `lib/constants/planner.ts` — mirror `BATCH_PULL_MAX_IDS` from RFC 0003.
 10. `hooks/useMDUserPlannersData.ts` — replace the per-id `fetchFromServer` loop in `runSync`
     (`:244-260`) with one `plannerApi.batch(plan.pull.map((p) => p.id))` call, keeping the
-    per-planner save and the `syncedCount` accounting. An empty residue issues no request.
+    per-planner save and the `syncedCount` accounting. An empty residue issues no request. Rows are
+    written per chunk as each chunk parses, so a failing chunk cannot discard rows already fetched.
+11. Persist the canonical digest: planner metadata gains `contentDigest?: string`, written at every
+    adoption site (matched write ack, adopted server copy, `serverResponseToSaveable`);
+    `listLocal`'s summary surfaces it. Without this the digest short-circuit in `categorizePlanner`
+    can never fire outside a test.
 
 ### Test plan
 
