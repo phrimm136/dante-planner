@@ -15,10 +15,11 @@
 --   - ENUM/JSON values must match the schema after all MERGED migrations
 --   - Every keyword and ENUM value should appear in at least one row
 --
--- Schema version: V058 (planner aggregate + projections; planners table gone;
+-- Schema version: V059 (planner aggregate + projections; planners table gone;
 --                       user_settings sync choice split into two non-null flags;
 --                       planner_views no longer foreign-keys the planner core;
---                       planner_content carries a NOT NULL content_digest)
+--                       planner_content carries a NOT NULL content_digest;
+--                       domain_events outbox)
 --
 -- Coverage:
 --   - selected_keywords: all 35 keywords across 4 planners (JSON arrays)
@@ -35,6 +36,7 @@
 --   - planner_catalog: visible rows only; one recommended (upvotes >= 10)
 --   - planner_views: several view_date values, and a row whose planner_id
 --     matches no planner row — legal since V057 dropped fk_view_planner
+--   - domain_events: every event_type, dispatched and undispatched
 
 -- ============================================================================
 -- users (sentinel id=0 already exists from V009)
@@ -322,3 +324,18 @@ VALUES (2, 1, 'SPAM', NOW());
 
 INSERT IGNORE INTO moderation_actions (action_type, actor_id, target_uuid, target_type, reason, created_at)
 VALUES ('TIMEOUT', 2, '33333333-3333-3333-3333-333333333333', 'USER', 'Test moderation action', NOW(6));
+
+-- ============================================================================
+-- domain_events — one dispatched row and one still awaiting the relay
+-- ============================================================================
+
+INSERT IGNORE INTO domain_events (id, event_type, aggregate_id, payload, created_at, dispatched_at, attempts)
+VALUES
+    (1, 'PLANNER_PUBLISHED', UNHEX('AAAA0001000000000000000000000001'),
+     JSON_OBJECT('authorId', 1), NOW(6), NOW(6), 1),
+    (2, 'PLANNER_RECOMMENDED', UNHEX('AAAA0001000000000000000000000001'),
+     JSON_OBJECT('ownerId', 1), NOW(6), NULL, 0),
+    (3, 'COMMENT_RECEIVED', UNHEX('AAAA0001000000000000000000000001'),
+     JSON_OBJECT('commentId', 1), NOW(6), NOW(6), 1),
+    (4, 'REPLY_RECEIVED', UNHEX('AAAA0001000000000000000000000001'),
+     JSON_OBJECT('replyId', 2), NOW(6), NOW(6), 1);
