@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest'
 
+import { SSE_EVENTS } from '@/lib/constants'
 import { SseAccountSuspendedSchema, SseEnvelopeSchema, SseEventTypeSchema } from '@/shared/sse'
 
 /**
  * Transcribed from backend `SseEventType`: every constant's `@JsonValue`, in
- * declaration order.
+ * declaration order. `connected` is absent by design — it is the transport's
+ * own handshake frame, not a backend event constant.
  */
 const BACKEND_SSE_EVENT_TYPES = [
   'created',
@@ -18,11 +20,18 @@ const BACKEND_SSE_EVENT_TYPES = [
   'account_suspended',
 ]
 
+const byValue = (a: string, b: string) => a.localeCompare(b)
+
 describe('SseEventTypeSchema', () => {
-  it('names exactly the backend wire values', () => {
-    const byValue = (a: string, b: string) => a.localeCompare(b)
+  it('names exactly the transport vocabulary it is derived from', () => {
     expect([...SseEventTypeSchema.options].sort(byValue)).toEqual(
-      [...BACKEND_SSE_EVENT_TYPES].sort(byValue),
+      Object.values(SSE_EVENTS).sort(byValue),
+    )
+  })
+
+  it('carries the backend wire values plus the transport handshake', () => {
+    expect([...SseEventTypeSchema.options].sort(byValue)).toEqual(
+      [...BACKEND_SSE_EVENT_TYPES, SSE_EVENTS.CONNECTED].sort(byValue),
     )
   })
 })

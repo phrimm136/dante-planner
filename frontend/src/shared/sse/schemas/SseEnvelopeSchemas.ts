@@ -1,20 +1,11 @@
 import { z } from 'zod'
 
-/**
- * Every event type the stream can name, mirroring the backend `SseEventType`
- * wire values.
- */
-export const SseEventTypeSchema = z.enum([
-  'created',
-  'updated',
-  'deleted',
-  'comment:added',
-  'notify:comment',
-  'notify:published',
-  'notify:recommended',
-  'settings:invalidated',
-  'account_suspended',
-])
+import { SSE_EVENTS, type SseEventType } from '@/lib/constants'
+
+/** Derived from SSE_EVENTS so the enum cannot drift from the transport's vocabulary. */
+export const SseEventTypeSchema = z.enum(
+  Object.values(SSE_EVENTS) as [SseEventType, ...SseEventType[]],
+)
 
 /**
  * The routing shell around a server event, for the types delivered as an
@@ -37,6 +28,6 @@ export const SseAccountSuspendedSchema = z.object({
   durationMinutes: z.number().int(),
 })
 
-export type SseEventType = z.infer<typeof SseEventTypeSchema>
+export type { SseEventType }
 export type SseEnvelope = z.infer<typeof SseEnvelopeSchema>
 export type SseAccountSuspended = z.infer<typeof SseAccountSuspendedSchema>

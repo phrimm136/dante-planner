@@ -133,5 +133,8 @@ export const SSE_EVENTS = {
   NOTIFY_COMMENT: 'notify:comment',
   NOTIFY_RECOMMENDED: 'notify:recommended',
   NOTIFY_PUBLISHED: 'notify:published',
+  SETTINGS_INVALIDATED: 'settings:invalidated',
   ACCOUNT_SUSPENDED: 'account_suspended',
 } as const
+
+export type SseEventType = (typeof SSE_EVENTS)[keyof typeof SSE_EVENTS]
