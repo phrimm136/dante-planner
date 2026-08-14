@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ThemePackTrackerCard } from '../ThemePackTrackerCard'
+import type { ThemePackEntry } from '@/pages/themePack'
+import type { NoteContent } from '@/shared/noteEditor'
 
 // Mock react-i18next with initReactI18next for proper module loading
 vi.mock('react-i18next', async (importOriginal) => {
@@ -55,17 +57,17 @@ vi.mock('../FloorNoteDialog', () => ({
 }))
 
 describe('ThemePackTrackerCard', () => {
-  const mockPackEntry = {
-    floorNumber: 1,
+  const mockPackEntry: ThemePackEntry = {
     themePackConfig: {
       textColor: 'FFFFFF',
     },
     exceptionConditions: [],
+    specificEgoGiftPool: [],
   }
 
-  const mockNoteContent = {
+  const mockNoteContent: NoteContent = {
     content: {
-      type: 'doc' as const,
+      type: 'doc',
       content: [],
     },
   }

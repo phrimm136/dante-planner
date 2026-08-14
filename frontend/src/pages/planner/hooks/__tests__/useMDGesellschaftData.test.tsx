@@ -19,6 +19,15 @@ vi.mock('@/lib/api', () => ({
 import { ApiClient } from '@/lib/api'
 
 /**
+ * The published key factory spreads its argument into the key unchanged, so a
+ * caller may hand it a field the parameter type does not declare and the key
+ * still carries it. `sort` is such a field.
+ */
+type PublishedKeyParamsWithSort = Parameters<typeof gesellschaftQueryKeys.published>[0] & {
+  sort: string
+}
+
+/**
  * Mock response data matching the schema
  */
 const mockPaginatedResponse = {
@@ -101,8 +110,10 @@ describe('gesellschaftQueryKeys', () => {
   })
 
   it('includes sort parameter in published key', () => {
-    const key1 = gesellschaftQueryKeys.published({ page: 0, size: 20, sort: 'recent' })
-    const key2 = gesellschaftQueryKeys.published({ page: 0, size: 20, sort: 'popular' })
+    const recentParams: PublishedKeyParamsWithSort = { page: 0, size: 20, sort: 'recent' }
+    const popularParams: PublishedKeyParamsWithSort = { page: 0, size: 20, sort: 'popular' }
+    const key1 = gesellschaftQueryKeys.published(recentParams)
+    const key2 = gesellschaftQueryKeys.published(popularParams)
 
     expect(key1).not.toEqual(key2)
     expect(key1[2]).toHaveProperty('sort', 'recent')

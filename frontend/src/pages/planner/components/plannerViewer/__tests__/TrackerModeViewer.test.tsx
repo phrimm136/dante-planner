@@ -3,7 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TrackerModeViewer } from '../TrackerModeViewer'
-import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
+import { DUNGEON_IDX, MAX_LEVEL } from '@/shared/gameData'
+import type { MDSaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
 
 // Create wrapper with QueryClient
 function createWrapper() {
@@ -179,10 +180,10 @@ vi.mock('../../SectionNoteDialog', () => ({
 }))
 
 describe('TrackerModeViewer', () => {
-  const createMockPlanner = (floorCount: number): SaveablePlanner => {
+  const createMockPlanner = (floorCount: number): MDSaveablePlanner => {
     const floorSelections = Array.from({ length: floorCount }, (_, i) => ({
       themePackId: `themePack${i + 1}`,
-      difficulty: i as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14,
+      difficulty: DUNGEON_IDX.NORMAL,
       giftIds: [`gift${i + 1}A`, `gift${i + 1}B`],
     }))
 
@@ -203,10 +204,10 @@ describe('TrackerModeViewer', () => {
 
     const content: MDPlannerContent = {
       equipment: {
-        YiSang: { identity: { id: 'ident1', uptie: 3 }, ego: [] },
-        Faust: { identity: { id: 'ident2', uptie: 4 }, ego: [] },
+        YiSang: { identity: { id: 'ident1', uptie: 3, level: MAX_LEVEL }, egos: {} },
+        Faust: { identity: { id: 'ident2', uptie: 4, level: MAX_LEVEL }, egos: {} },
       },
-      deploymentOrder: ['YiSang', 'Faust'],
+      deploymentOrder: [0, 1],
       selectedKeywords: [],
       selectedBuffIds: [1, 2],
       selectedGiftKeyword: null,
@@ -224,6 +225,7 @@ describe('TrackerModeViewer', () => {
     return {
       metadata: {
         id: 'planner-1',
+        title: 'Tracker Fixture',
         status: 'draft',
         schemaVersion: 2,
         contentVersion: 6,
@@ -232,7 +234,6 @@ describe('TrackerModeViewer', () => {
         createdAt: '2025-01-01T00:00:00Z',
         lastModifiedAt: '2025-01-01T00:00:00Z',
         savedAt: null,
-        userId: null,
         deviceId: 'device-1',
       },
       config: {

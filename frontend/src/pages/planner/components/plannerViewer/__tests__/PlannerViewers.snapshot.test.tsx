@@ -12,7 +12,8 @@ import { render } from '@testing-library/react'
 import { GuideModeViewer } from '../GuideModeViewer'
 import { TrackerModeViewer } from '../TrackerModeViewer'
 
-import type { SaveablePlanner, MDPlannerContent } from '../../../types/PlannerTypes'
+import type { MDSaveablePlanner } from '../../../types/PlannerTypes'
+import type { MDCategory } from '@/shared/gameData'
 import type { NoteContent } from '@/shared/noteEditor'
 
 vi.mock('react-i18next', async (importOriginal) => {
@@ -85,7 +86,10 @@ function note(text: string): NoteContent {
 
 const EMPTY_NOTE: NoteContent = { content: { type: 'doc', content: [] } } as NoteContent
 
-function makePlanner(sectionNotes: Record<string, NoteContent>, category = '5F'): SaveablePlanner {
+function makePlanner(
+  sectionNotes: Record<string, NoteContent>,
+  category: MDCategory = '5F',
+): MDSaveablePlanner {
   return {
     metadata: {
       id: 'p1',
@@ -114,8 +118,8 @@ function makePlanner(sectionNotes: Record<string, NoteContent>, category = '5F')
       skillEAState: {},
       floorSelections: [],
       sectionNotes,
-    } as MDPlannerContent,
-  } as SaveablePlanner
+    },
+  }
 }
 
 const ALL_KEYS = [
@@ -129,7 +133,7 @@ const ALL_KEYS = [
   'outro',
 ]
 
-const MATRIX: Array<[string, SaveablePlanner]> = [
+const MATRIX: Array<[string, MDSaveablePlanner]> = [
   ['no notes at all', makePlanner({})],
   ['every note filled', makePlanner(Object.fromEntries(ALL_KEYS.map((key) => [key, note(key)])))],
   [

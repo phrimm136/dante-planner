@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { useTrackerState } from '../useTrackerState'
-import { DEFAULT_SKILL_EA, SINNERS } from '@/shared/gameData'
+import { DEFAULT_SKILL_EA, MAX_LEVEL, SINNERS } from '@/shared/gameData'
 
 // Default test props - hook requires initialEquipment and initialDeployment
 const defaultInitialEquipment = {}
@@ -222,7 +222,9 @@ describe('useTrackerState', () => {
 
   describe('Reset State', () => {
     it('resets all state to defaults', () => {
-      const initialEquipment = { '1': { identityId: 'test', ego: {} } }
+      const initialEquipment = {
+        '1': { identity: { id: 'test', uptie: 4 as const, level: MAX_LEVEL }, egos: {} },
+      }
       const initialDeployment = [0, 1, 2]
       const { result } = renderHook(() => useTrackerState(initialEquipment, initialDeployment))
 
