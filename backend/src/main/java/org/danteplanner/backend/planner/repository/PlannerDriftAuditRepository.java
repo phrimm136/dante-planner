@@ -177,13 +177,15 @@ public class PlannerDriftAuditRepository {
                        c.title AS expected, cat.title AS actual
                 FROM planner_catalog cat
                 JOIN planner_content c ON c.planner_id = cat.planner_id
-                WHERE NOT (cat.title <=> c.title COLLATE utf8mb4_0900_bin)
+                WHERE c.deleted_at IS NULL
+                  AND NOT (cat.title <=> c.title COLLATE utf8mb4_0900_bin)
                 UNION ALL
                 SELECT BIN_TO_UUID(cat.planner_id) AS planner_id, 'category' AS field,
                        c.category AS expected, cat.category AS actual
                 FROM planner_catalog cat
                 JOIN planner_content c ON c.planner_id = cat.planner_id
-                WHERE NOT (cat.category <=> c.category COLLATE utf8mb4_0900_bin)
+                WHERE c.deleted_at IS NULL
+                  AND NOT (cat.category <=> c.category COLLATE utf8mb4_0900_bin)
                 """,
                 (rs, rowNum) -> new CatalogScalarDriftRow(UUID.fromString(rs.getString("planner_id")),
                         rs.getString("field"), rs.getString("expected"), rs.getString("actual")));
@@ -206,6 +208,7 @@ public class PlannerDriftAuditRepository {
                        c.selected_keywords AS content_keywords
                 FROM planner_catalog cat
                 JOIN planner_content c ON c.planner_id = cat.planner_id
+                WHERE c.deleted_at IS NULL
                 """,
                 (rs, rowNum) -> new CatalogKeywordRow(UUID.fromString(rs.getString("planner_id")),
                         rs.getString("catalog_keywords"), rs.getString("content_keywords")));

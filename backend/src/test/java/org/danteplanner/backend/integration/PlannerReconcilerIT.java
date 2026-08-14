@@ -325,6 +325,25 @@ class PlannerReconcilerIT extends SharedMySqlContainerSupport {
     }
 
     @Test
+    @DisplayName("catalog copies of a tombstoned planner: one leftover row is one finding, not three")
+    void catalogCopyDrift_WhenThePlannerIsTombstoned_ReportsMembershipAlone() {
+        Planner tombstoned = publishClean("Tombstoned Copy");
+        jdbc.update("UPDATE planner_catalog SET title = 'Stale', selected_keywords = '[\"Combustion\"]' "
+                + "WHERE planner_id = UUID_TO_BIN(?)", tombstoned.getId().toString());
+        jdbc.update("UPDATE planner_content SET deleted_at = NOW(6) WHERE planner_id = UUID_TO_BIN(?)",
+                tombstoned.getId().toString());
+
+        Set<String> kinds = kindsFor(reconciler.reconcile(), tombstoned.getId());
+
+        assertThat(kinds)
+                .as("the leftover row is the bug, and the audit that owns it already names it")
+                .contains("catalog_membership");
+        assertThat(kinds)
+                .as("its copies are stale because the row should be gone, which is not a second bug")
+                .doesNotContain("catalog_title", "catalog_keywords");
+    }
+
+    @Test
     @DisplayName("recommendation stamp with neither an event nor a notification row is reported; either row clears it")
     void recommendedNotificationDrift_WhenTheStampCarriesNeitherRow_ReportsUntilEitherExists() {
         Planner neither = publishClean("Stamped Without Effect");
