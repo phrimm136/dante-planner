@@ -1,6 +1,10 @@
 import { QueryClient, QueryCache, MutationCache } from '@tanstack/react-query'
 
-import { ServiceUpdatingError, BackendUnavailableError, RetryableUnavailableError } from './apiErrors'
+import {
+  ServiceUpdatingError,
+  BackendUnavailableError,
+  RetryableUnavailableError,
+} from './apiErrors'
 import { showError, showSuccess, showUnavailable } from './errorPresentation'
 import {
   STALE_TIME,

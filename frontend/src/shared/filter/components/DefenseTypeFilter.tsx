@@ -7,10 +7,7 @@ interface DefenseTypeFilterProps {
   onSelectionChange: (types: Set<DefType>) => void
 }
 
-export function DefenseTypeFilter({
-  selected,
-  onSelectionChange,
-}: DefenseTypeFilterProps) {
+export function DefenseTypeFilter({ selected, onSelectionChange }: DefenseTypeFilterProps) {
   return (
     <IconFilter
       options={DEF_TYPES}

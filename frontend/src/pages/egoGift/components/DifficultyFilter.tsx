@@ -23,10 +23,7 @@ interface DifficultyFilterProps {
  *
  * Pattern: Wraps IconFilter in text mode (no getIconPath)
  */
-export function DifficultyFilter({
-  selected,
-  onSelectionChange,
-}: DifficultyFilterProps) {
+export function DifficultyFilter({ selected, onSelectionChange }: DifficultyFilterProps) {
   return (
     <IconFilter
       options={EGO_GIFT_DIFFICULTIES}

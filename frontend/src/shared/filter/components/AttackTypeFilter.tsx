@@ -13,10 +13,7 @@ interface AttackTypeFilterProps {
  * Icons stay small and left-aligned, not stretching to fill container width
  *
  */
-export function AttackTypeFilter({
-  selected,
-  onSelectionChange,
-}: AttackTypeFilterProps) {
+export function AttackTypeFilter({ selected, onSelectionChange }: AttackTypeFilterProps) {
   return (
     <IconFilter
       options={ATK_TYPES}

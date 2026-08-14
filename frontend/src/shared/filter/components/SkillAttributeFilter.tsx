@@ -13,10 +13,7 @@ interface SkillAttributeFilterProps {
  *
  * Pattern: Wraps IconFilter like SkillAttributeFilter wraps IconFilter
  */
-export function SkillAttributeFilter({
-  selected,
-  onSelectionChange,
-}: SkillAttributeFilterProps) {
+export function SkillAttributeFilter({ selected, onSelectionChange }: SkillAttributeFilterProps) {
   return (
     <IconFilter
       options={AFFINITIES}

@@ -16,10 +16,7 @@ interface AttributeTypeFilterProps {
  *
  * Pattern: Wraps IconFilter like EGOTypeFilter
  */
-export function AttributeTypeFilter({
-  selected,
-  onSelectionChange,
-}: AttributeTypeFilterProps) {
+export function AttributeTypeFilter({ selected, onSelectionChange }: AttributeTypeFilterProps) {
   return (
     <IconFilter
       options={EGO_GIFT_ATTRIBUTE_TYPES}
