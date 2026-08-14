@@ -12,9 +12,10 @@
  * content fixtures — plannerValidation is deliberately NOT mocked.
  */
 
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { queryClient } from '@/lib/queryClient'
+import { AUTO_SAVE_DEBOUNCE_MS } from '@/lib/constants'
 import { createPlannerEditorStore } from '../../stores/usePlannerEditorStore'
 import type { PlannerState, UsePlannerSaveOptions } from '../usePlannerSave'
 import type { AppError } from '@/lib/apiErrorClassifier'
@@ -758,7 +759,128 @@ describe('usePlannerSave - autosave flush on teardown', () => {
   })
 })
 
+describe('usePlannerSave - edits during an in-flight manual save', () => {
+  it('persists an edit made while a save is in flight, and keeps warning until it lands', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    // Land one save first, so the comparison baseline exists.
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    mockSaveToLocal.mockClear()
+
+    // The next save parks on the server until the test releases it.
+    let releaseSync: (() => void) | null = null
+    mockSyncToServer.mockImplementation(
+      (planner) =>
+        new Promise((resolve) => {
+          releaseSync = () => {
+            resolve({ planner, ack: { syncVersion: 5 } })
+          }
+        }),
+    )
+
+    let savePromise: Promise<boolean> | undefined
+    await act(async () => {
+      savePromise = result.current.save({ published: false })
+      // Let performSave capture its snapshot and reach the parked upload.
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+
+    // The user keeps typing while the save is still in flight.
+    currentState = validState({ title: 'after' })
+    act(() => {
+      store.notify()
+    })
+
+    // The debounce elapses mid-save: it must re-arm rather than drop the edit.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, AUTO_SAVE_DEBOUNCE_MS * 2))
+    })
+    expect(result.current.isDirty()).toBe(true)
+
+    await act(async () => {
+      releaseSync?.()
+      await savePromise
+    })
+
+    await waitFor(() => {
+      const titles = mockSaveToLocal.mock.calls.map(([planner]) => planner.metadata.title)
+      expect(titles).toContain('after')
+    })
+    await waitFor(() => {
+      expect(result.current.isDirty()).toBe(false)
+    })
+  })
+})
+
+describe('usePlannerSave - discard adoption', () => {
+  it('leaves the adopted server copy clean instead of queued for a draft rewrite', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'local' })
+    // The reload rewrites the store with the server's content, as the shell does.
+    const onServerReload = vi.fn(() => {
+      currentState = validState({ title: 'from server' })
+      store.notify()
+    })
+
+    mockSyncToServer.mockRejectedValueOnce(new ConflictError('SYNC_CONFLICT', 'conflict', 7))
+    const { result } = renderHook(() =>
+      usePlannerSave(
+        baseOptions({ getState: () => currentState, subscribe: store.subscribe, onServerReload }),
+      ),
+    )
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+    expect(result.current.error?.kind).toBe('conflict')
+
+    mockFetchFromServer.mockResolvedValue(ok(fetchedAt(9)))
+    mockSaveToLocal.mockClear()
+
+    await act(async () => {
+      await result.current.resolveConflict('discard')
+    })
+
+    expect(result.current.isDirty()).toBe(false)
+
+    // The debounce the reload armed must find nothing left to write.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, AUTO_SAVE_DEBOUNCE_MS * 2))
+    })
+    expect(mockSaveToLocal).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('usePlannerSave - isDirty', () => {
+  it('reads clean after a manual save adopts the state it wrote', async () => {
+    authenticated()
+    const store = manualStore()
+    let currentState = validState({ title: 'before' })
+    const { result } = renderHook(() =>
+      usePlannerSave(baseOptions({ getState: () => currentState, subscribe: store.subscribe })),
+    )
+
+    currentState = validState({ title: 'after' })
+    act(() => {
+      store.notify()
+    })
+    expect(result.current.isDirty()).toBe(true)
+
+    await act(async () => {
+      await result.current.save({ published: false })
+    })
+
+    expect(result.current.isDirty()).toBe(false)
+  })
+
   it('reads dirty as soon as the store notifies, without an intervening render', async () => {
     authenticated()
     const store = manualStore()

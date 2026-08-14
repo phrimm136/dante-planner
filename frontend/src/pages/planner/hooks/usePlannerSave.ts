@@ -356,6 +356,26 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   // Debounce timer ref
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // The autosave the debounce runs, and the run already under way. Both are refs
+  // so the subscription never has to re-subscribe to see the current one.
+  const autoSaveRef = useRef<(flushing?: boolean) => Promise<void>>(async () => {})
+  const inFlightRef = useRef<Promise<void>>(Promise.resolve())
+
+  // Read by isDirty, which must stay stable for a listener registered once.
+  const getStateRef = useRef(options.getState)
+
+  /** Arm, or re-arm, the debounce that runs the autosave. */
+  const armAutoSave = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null
+      void autoSaveRef.current()
+    }, AUTO_SAVE_DEBOUNCE_MS)
+  }
+
   // Previous state for dirty checking - empty string means "not yet initialized"
   const previousStateRef = useRef<string>('')
 
@@ -476,7 +496,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   const performSave = async (
     status: PlannerStatus,
     opts: PerformSaveOptions,
-  ): Promise<Result<void, AppError>> => {
+  ): Promise<Result<string, AppError>> => {
     if (!isClient) return err({ kind: 'unknown' })
 
     // Set createdAt on first save
@@ -489,6 +509,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     if (!deviceId.ok) return err({ kind: 'unknown' })
 
     const currentState = getState()
+    // The snapshot this save is about to write. Everything after here may await,
+    // so the live state can move on; the baseline must describe what was written.
+    const savedComparable = stateToComparableString(currentState)
     const isCurrentlyPublished = opts.published ?? published
 
     const saveable = createSaveablePlanner({
@@ -534,7 +557,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
       })
     }
 
-    return ok(undefined)
+    return ok(savedComparable)
   }
 
   /** Adopt `comparable` as the local-write baseline; nothing is dirty against it. */
@@ -543,9 +566,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     dirtyRef.current = false
   }
 
-  /** Adopt the just-saved state as both dirty-check baselines. */
-  const markSaved = () => {
-    const comparable = stateToComparableString(getState())
+  /**
+   * Adopt the state a save actually wrote as both dirty-check baselines. Reading
+   * the live state here instead would adopt edits typed during the save as clean.
+   */
+  const markSaved = (comparable: string) => {
     markLocalBaseline(comparable)
     lastSyncedStateRef.current = comparable
     setLastSavedAt(new Date().toISOString())
@@ -556,15 +581,21 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
    * Auto-saves ALWAYS go to IndexedDB only (local-first architecture);
    * syncing to the server is manual-save only.
    */
-  const autoSave = async () => {
-    // CRITICAL: Prevent race condition with manual save
-    if (isSaving) return
+  const runAutoSave = async (flushing: boolean) => {
+    // A manual save owns the write. Re-arm rather than return: dropping the timer
+    // here loses every edit made between the save starting and it finishing.
+    if (isSaving) {
+      armAutoSave()
+      return
+    }
 
     const currentState = getState()
     const currentStateString = stateToComparableString(currentState)
 
-    // First run: initialize baseline and skip save (handles planner loading in edit mode)
-    if (previousStateRef.current === '') {
+    // First run: initialize baseline and skip save (handles planner loading in edit
+    // mode, where the store already matches storage). A teardown flush has no next
+    // run to write for it, so unsaved changes are written even without a baseline.
+    if (previousStateRef.current === '' && !(flushing && dirtyRef.current)) {
       markLocalBaseline(currentStateString)
       lastSyncedStateRef.current = currentStateString
       return
@@ -619,6 +650,17 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
     }
   }
 
+  /**
+   * Run autosaves one after another. The teardown flush can start while a
+   * debounced run is still awaiting storage, and two concurrent writes would
+   * race, the older snapshot landing last.
+   */
+  const autoSave = (flushing = false): Promise<void> => {
+    const chained = inFlightRef.current.then(() => runAutoSave(flushing)).catch(() => undefined)
+    inFlightRef.current = chained
+    return chained
+  }
+
   /** Drop a pending auto-save so it cannot land on top of a manual write. */
   const cancelPendingAutoSave = () => {
     if (timerRef.current) {
@@ -649,7 +691,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         return false
       }
 
-      markSaved()
+      markSaved(saved.value)
       return true
     } catch (saveFailure: unknown) {
       reportFailure(classifyAppError(saveFailure))
@@ -761,6 +803,9 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     if (onServerReload) {
       onServerReload(serverPlanner)
+      // The reload rewrote the store with the server's copy. Without adopting it
+      // as the baseline, the next autosave writes it straight back as a draft.
+      markSaved(stateToComparableString(getState()))
     }
     return ok(undefined)
   }
@@ -783,7 +828,7 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
         }
         const saved = await performSave('saved', { mode: 'forcePush' })
         if (!saved.ok) return saved
-        markSaved()
+        markSaved(saved.value)
         break
       }
       case 'forkCopy':
@@ -866,10 +911,11 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
   }
 
   // The subscription must survive re-renders, so the effect reads the auto-save
-  // through a ref instead of depending on a closure that changes every render.
-  const autoSaveRef = useRef(autoSave)
+  // and the state getter through refs instead of depending on closures that
+  // change every render.
   useEffect(() => {
     autoSaveRef.current = autoSave
+    getStateRef.current = getState
   })
 
   // Debounced auto-save driven by store subscription rather than a state
@@ -879,30 +925,34 @@ export function usePlannerSave(options: UsePlannerSaveOptions): PlannerSaveResul
 
     const unsubscribe = subscribe(() => {
       dirtyRef.current = true
-
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
-
-      timerRef.current = setTimeout(() => {
-        timerRef.current = null
-        void autoSaveRef.current()
-      }, AUTO_SAVE_DEBOUNCE_MS)
+      armAutoSave()
     })
 
     return () => {
       unsubscribe()
-      // A cancelled timer is silent data loss on unmount and on tab close, so the
-      // teardown runs what it was holding instead of dropping it.
       if (timerRef.current) {
         clearTimeout(timerRef.current)
         timerRef.current = null
-        void autoSaveRef.current()
       }
+
+      // A cancelled timer is silent data loss on unmount and on tab close. React
+      // destroys a parent's effects before its children's, so a descendant editor
+      // has not yet handed over its last keystrokes; a microtask runs after every
+      // destroy in the commit, and the flush reads the store rather than the
+      // subscription this cleanup just dropped.
+      queueMicrotask(() => void autoSaveRef.current(true))
     }
   }, [subscribe])
 
-  const isDirty = useCallback(() => dirtyRef.current, [])
+  // The ref is a fast path only: it arms on any store notification, including
+  // writes that change nothing persistable. Confirm before claiming dirtiness —
+  // the caller is an unload handler, so the comparison runs rarely.
+  const isDirty = useCallback(() => {
+    if (!dirtyRef.current) return false
+    // Nothing has been written yet, so there is no baseline to acquit the change.
+    if (previousStateRef.current === '') return true
+    return stateToComparableString(getStateRef.current()) !== previousStateRef.current
+  }, [])
 
   // Dirty flags compare the live state against the two save baselines. An
   // uninitialized baseline ('') means there is nothing to compare against yet.
