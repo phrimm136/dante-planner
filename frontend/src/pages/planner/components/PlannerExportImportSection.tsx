@@ -427,6 +427,8 @@ function PlannerExportImportSectionContent() {
                   id: effect.metadata.id,
                   title: sanitizeTitle(effect.metadata.title),
                   deviceId: effect.metadata.deviceId,
+                  // The original keeps the publication; a copy of it starts unpublished.
+                  published: false,
                 },
               }
               const copied = await saveToLocal(copyPlanner)
@@ -451,6 +453,21 @@ function PlannerExportImportSectionContent() {
     setState({ k: 'idle' })
 
     const counts = { saved, errors }
+    const descriptor = RESOLVE_OUTCOME_TOASTS[classifyResolveOutcome(counts)]
+    showToast(descriptor, descriptor.params(counts))
+  }
+
+  /**
+   * Closing the dialog cancels the import's conflict step.
+   *
+   * The section owns a run, not a pending list: left in `awaitingChoice` behind a
+   * closed dialog it would refuse every later export and import.
+   */
+  const handleConflictDismiss = () => {
+    clearFileInput()
+    setState({ k: 'idle' })
+
+    const counts = { saved: 0, errors: 0 }
     const descriptor = RESOLVE_OUTCOME_TOASTS[classifyResolveOutcome(counts)]
     showToast(descriptor, descriptor.params(counts))
   }
@@ -512,6 +529,7 @@ function PlannerExportImportSectionContent() {
         conflicts={conflicts}
         onResolve={handleConflictResolve}
         isResolving={state.k === 'resolving'}
+        onDismiss={handleConflictDismiss}
       />
     </div>
   )
