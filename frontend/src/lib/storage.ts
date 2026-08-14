@@ -45,22 +45,51 @@ function lastModifiedAtOf(value: string): number {
   }
 }
 
+/** One v1 row considered for migration. */
+interface MigrationRow {
+  key: string
+  value: string
+  modifiedAt: number
+}
+
 /**
  * Rewrite `planner:md:{deviceId}:{plannerId}` rows as `planner:{plannerId}`.
  *
  * Two devices can hold the same planner id, so a collision keeps whichever row
- * was modified last. Each source is deleted only after its copy reads back at
- * the new key, so an interrupted upgrade loses nothing.
+ * was modified last. A source row is dropped only when nothing it holds can be
+ * lost: either the flat row now carries its exact bytes, or a strictly newer
+ * row won. An exact tie between rows that differ keeps the loser, because this
+ * runs once and an arbitrary destructive pick could not be undone.
  *
  * Runs inside the `versionchange` transaction: every request below is queued on
- * it, so the upgrade cannot complete until the last delete has run.
+ * it, so the upgrade cannot complete until the last delete has run. Every
+ * failure is logged with its cause — the migration has exactly one chance to
+ * run, so a silent failure is one nobody could ever diagnose.
  */
 export function migrateToFlatKeys(transaction: IDBTransaction): void {
   const store = transaction.objectStore(STORAGE_STORE_NAME)
-  const winners = new Map<string, { value: string; modifiedAt: number }>()
-  const sources = new Map<string, string[]>()
+  const groups = new Map<string, MigrationRow[]>()
+  let unverified = 0
+  let retained = 0
+
+  const report = (what: string, cause: unknown) => {
+    console.error(`IndexedDB migration: ${what}`, cause)
+  }
+
+  transaction.addEventListener('abort', () => {
+    report('the upgrade transaction aborted, so no key was migrated', transaction.error)
+  })
+  transaction.addEventListener('complete', () => {
+    if (unverified > 0 || retained > 0) {
+      report(
+        `finished with ${unverified} unverified copies and ${retained} source rows kept`,
+        transaction.error,
+      )
+    }
+  })
 
   const cursorRequest = store.openCursor()
+  cursorRequest.onerror = () => report('reading the existing rows failed', cursorRequest.error)
   cursorRequest.onsuccess = () => {
     const cursor = cursorRequest.result
     if (cursor) {
@@ -71,23 +100,75 @@ export function migrateToFlatKeys(transaction: IDBTransaction): void {
       if (typeof key === 'string' && typeof value === 'string') {
         const flatKey = flatKeyFor(key)
         if (flatKey) {
-          const modifiedAt = lastModifiedAtOf(value)
-          const held = winners.get(flatKey)
-          if (!held || modifiedAt > held.modifiedAt) winners.set(flatKey, { value, modifiedAt })
-          sources.set(flatKey, [...(sources.get(flatKey) ?? []), key])
+          const row: MigrationRow = { key, value, modifiedAt: lastModifiedAtOf(value) }
+          groups.set(flatKey, [...(groups.get(flatKey) ?? []), row])
         }
       }
       cursor.continue()
       return
     }
 
-    for (const [flatKey, winner] of winners) {
-      const put = store.put(winner.value, flatKey)
-      put.onsuccess = () => {
-        const verify = store.get(flatKey)
-        verify.onsuccess = () => {
-          if (verify.result !== winner.value) return
-          for (const sourceKey of sources.get(flatKey) ?? []) store.delete(sourceKey)
+    for (const [flatKey, rows] of groups) {
+      const incumbentRequest = store.get(flatKey)
+      incumbentRequest.onerror = () =>
+        report(`reading the existing ${flatKey} failed`, incumbentRequest.error)
+      incumbentRequest.onsuccess = () => {
+        const existing: unknown = incumbentRequest.result
+
+        // A row already at the flat key is a candidate like any other, and it is
+        // listed first so it wins a tie: whatever is already being read there
+        // must never be replaced by a leftover that is no newer than it.
+        const candidates: MigrationRow[] =
+          typeof existing === 'string'
+            ? [{ key: flatKey, value: existing, modifiedAt: lastModifiedAtOf(existing) }, ...rows]
+            : rows
+
+        const winner = candidates.reduce((best, row) =>
+          row.modifiedAt > best.modifiedAt ? row : best,
+        )
+
+        /** Drop the source rows the winner makes safe to lose. */
+        const dropSources = () => {
+          for (const row of rows) {
+            const identical = row.value === winner.value
+            const superseded = winner.modifiedAt > row.modifiedAt
+            if (!identical && !superseded) {
+              retained += 1
+              report(
+                `${row.key} ties ${flatKey} on lastModifiedAt but differs in content, so it was kept`,
+                row.modifiedAt,
+              )
+              continue
+            }
+
+            const removal = store.delete(row.key)
+            removal.onerror = () => report(`deleting ${row.key} failed`, removal.error)
+          }
+        }
+
+        if (winner.key === flatKey) {
+          // The flat row already holds the winning content; there is nothing to
+          // copy, only sources to retire.
+          dropSources()
+          return
+        }
+
+        const put = store.put(winner.value, flatKey)
+        put.onerror = () => report(`writing ${flatKey} failed`, put.error)
+        put.onsuccess = () => {
+          const verify = store.get(flatKey)
+          verify.onerror = () => report(`verifying ${flatKey} failed`, verify.error)
+          verify.onsuccess = () => {
+            if (verify.result !== winner.value) {
+              unverified += 1
+              report(
+                `${flatKey} did not read back as written, so its sources were kept`,
+                verify.error,
+              )
+              return
+            }
+            dropSources()
+          }
         }
       }
     }
@@ -110,25 +191,38 @@ function getDB(): Promise<IDBDatabase> {
     return dbPromise
   }
 
-  dbPromise = new Promise((resolve, reject) => {
+  let pending: Promise<IDBDatabase> | null = null
+
+  pending = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
 
-    // Every failure path drops the shared promise: a rejected promise that
-    // stays cached turns one transient open error into every later read.
+    /** Whether this request still owns the shared promise. */
+    const owns = () => dbPromise === pending
+
+    // Every failure path drops the shared promise, but only while this request
+    // still owns it: a stale request's late event must not clear a newer one.
     request.onerror = () => {
-      dbPromise = null
+      if (owns()) dbPromise = null
       reject(request.error)
     }
     request.onblocked = () => {
-      dbPromise = null
+      if (owns()) dbPromise = null
       reject(new Error('IndexedDB upgrade blocked by another tab'))
     }
     request.onsuccess = () => {
-      request.result.onversionchange = () => {
-        request.result.close()
-        dbPromise = null
+      const db = request.result
+      if (!owns()) {
+        // A newer open already replaced this one. Closing keeps the connection
+        // from outliving the promise nobody holds any more.
+        db.close()
+        reject(new Error('IndexedDB connection superseded before it opened'))
+        return
       }
-      resolve(request.result)
+      db.onversionchange = () => {
+        db.close()
+        if (owns()) dbPromise = null
+      }
+      resolve(db)
     }
 
     request.onupgradeneeded = (event) => {
@@ -136,12 +230,22 @@ function getDB(): Promise<IDBDatabase> {
       const openRequest = event.target as IDBOpenDBRequest
       const db = openRequest.result
 
-      if (oldVersion < 1) db.createObjectStore(STORAGE_STORE_NAME)
-      if (oldVersion < 2 && openRequest.transaction) {
-        migrateToFlatKeys(openRequest.transaction)
+      // The store-existence check is not implied by the version gate: a database
+      // left at v1 with no store would otherwise abort every open from here on.
+      if (oldVersion < 1 || !db.objectStoreNames.contains(STORAGE_STORE_NAME)) {
+        db.createObjectStore(STORAGE_STORE_NAME)
+      }
+      if (oldVersion < 2) {
+        const upgrade = openRequest.transaction
+        // Committing v2 with no migration would strand every row under a key
+        // nothing reads, so refuse the upgrade instead.
+        if (!upgrade) throw new Error('IndexedDB upgrade ran without its transaction')
+        migrateToFlatKeys(upgrade)
       }
     }
   })
+
+  dbPromise = pending
 
   return dbPromise
 }
@@ -153,6 +257,39 @@ function getDB(): Promise<IDBDatabase> {
 export async function openStorageDb(): Promise<IDBDatabase | null> {
   if (!isClient) return null
   return getDB()
+}
+
+/**
+ * Run a write on the shared connection, resolving only once its transaction
+ * commits.
+ *
+ * The commit is what makes a write durable: a request can report success and
+ * the transaction still abort, which is exactly how a quota failure arrives.
+ * Reporting on the request alone would tell the caller its data is saved when
+ * the store dropped it.
+ */
+async function runWrite(
+  label: string,
+  issue: (store: IDBObjectStore) => IDBRequest,
+): Promise<Result<void, StorageReadError>> {
+  if (!isClient) return err({ kind: 'notInBrowser' })
+
+  try {
+    const db = await getDB()
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+      const request = issue(transaction.objectStore(STORAGE_STORE_NAME))
+
+      transaction.oncomplete = () => resolve()
+      transaction.onabort = () => reject(transaction.error ?? request.error)
+      transaction.onerror = () => reject(transaction.error ?? request.error)
+      request.onerror = () => reject(request.error)
+    })
+    return ok(undefined)
+  } catch (error) {
+    console.error(`IndexedDB.${label} failed`, error)
+    return err({ kind: 'ioError', cause: error })
+  }
 }
 
 export const storage = {
@@ -187,68 +324,22 @@ export const storage = {
   },
 
   /**
-   * Set item in IndexedDB (SSR-safe)
-   * Silently fails during SSR
+   * Set item in IndexedDB (SSR-safe).
+   *
+   * Reports whether the write committed. A caller told a save succeeded when it
+   * did not will happily discard the only copy it still had.
    */
-  async setItem(key: string, value: string): Promise<void> {
-    if (!isClient) return
-
-    try {
-      const db = await getDB()
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
-        const store = transaction.objectStore(STORAGE_STORE_NAME)
-        const request = store.put(value, key)
-
-        request.onsuccess = () => resolve()
-        request.onerror = () => reject(request.error)
-      })
-    } catch (error) {
-      console.error(`IndexedDB.setItem failed for key: ${key}`, error)
-    }
+  async setItem(key: string, value: string): Promise<Result<void, StorageReadError>> {
+    return runWrite(`setItem for key: ${key}`, (store) => store.put(value, key))
   },
 
-  /**
-   * Remove item from IndexedDB (SSR-safe)
-   * Silently fails during SSR
-   */
-  async removeItem(key: string): Promise<void> {
-    if (!isClient) return
-
-    try {
-      const db = await getDB()
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
-        const store = transaction.objectStore(STORAGE_STORE_NAME)
-        const request = store.delete(key)
-
-        request.onsuccess = () => resolve()
-        request.onerror = () => reject(request.error)
-      })
-    } catch (error) {
-      console.error(`IndexedDB.removeItem failed for key: ${key}`, error)
-    }
+  /** Remove item from IndexedDB (SSR-safe), reporting whether the delete committed. */
+  async removeItem(key: string): Promise<Result<void, StorageReadError>> {
+    return runWrite(`removeItem for key: ${key}`, (store) => store.delete(key))
   },
 
-  /**
-   * Clear all items from IndexedDB (SSR-safe)
-   * Silently fails during SSR
-   */
-  async clear(): Promise<void> {
-    if (!isClient) return
-
-    try {
-      const db = await getDB()
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
-        const store = transaction.objectStore(STORAGE_STORE_NAME)
-        const request = store.clear()
-
-        request.onsuccess = () => resolve()
-        request.onerror = () => reject(request.error)
-      })
-    } catch (error) {
-      console.error('IndexedDB.clear failed', error)
-    }
+  /** Clear all items from IndexedDB (SSR-safe), reporting whether the clear committed. */
+  async clear(): Promise<Result<void, StorageReadError>> {
+    return runWrite('clear', (store) => store.clear())
   },
 }

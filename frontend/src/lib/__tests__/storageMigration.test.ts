@@ -69,9 +69,21 @@ function stubStore(initial: Iterable<readonly [string, string]>) {
       }),
   }
 
-  const transaction = { objectStore: () => store } as unknown as IDBTransaction
+  const listeners = new Map<string, (() => void)[]>()
+  const transaction = {
+    objectStore: () => store,
+    error: null,
+    addEventListener: (type: string, handler: () => void) => {
+      listeners.set(type, [...(listeners.get(type) ?? []), handler])
+    },
+  } as unknown as IDBTransaction
 
-  return { transaction, rows, written, deleted }
+  /** Fire a transaction lifecycle event the way the real store would. */
+  const emit = (type: string) => {
+    for (const handler of listeners.get(type) ?? []) handler()
+  }
+
+  return { transaction, rows, written, deleted, emit }
 }
 
 /** Drain the microtask queue the stub requests settle on. */
@@ -250,6 +262,35 @@ async function readAll(factory: IDBFactory): Promise<Map<string, string>> {
   return rows
 }
 
+/** Write one row on its own connection, outside the module under test. */
+async function writeRow(factory: IDBFactory, key: string, value: string): Promise<void> {
+  const db = await openRaw(factory)
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+    transaction.objectStore(STORAGE_STORE_NAME).put(value, key)
+    transaction.oncomplete = () => resolve()
+    transaction.onabort = () => reject(transaction.error)
+  })
+  db.close()
+}
+
+/**
+ * Run the migration over the current database on its own transaction.
+ *
+ * The version gate would never call it again once the store is at v2, so this
+ * is the only way to see what it would do to rows written since the upgrade.
+ */
+async function runMigrationDirectly(factory: IDBFactory): Promise<void> {
+  const db = await openRaw(factory)
+  await new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(STORAGE_STORE_NAME, 'readwrite')
+    migrateToFlatKeys(transaction)
+    transaction.oncomplete = () => resolve()
+    transaction.onabort = () => reject(transaction.error)
+  })
+  db.close()
+}
+
 /** The database version currently on disk, read on its own connection. */
 async function currentVersion(factory: IDBFactory): Promise<number> {
   const db = await openRaw(factory)
@@ -311,7 +352,7 @@ describe('the v1 to v2 upgrade over a real IndexedDB', () => {
     expect([...rows.keys()].sort()).toEqual(['planner:p1', 'planner:p2'])
   })
 
-  it('is a no-op on a second open at v2', async () => {
+  it('does not run the migration again on a second open at v2', async () => {
     await seedV1(factory, {
       deviceId: 'a-device-uuid',
       'planner:md:devA:p1': plannerRow('p1', '2026-01-01T00:00:00.000Z'),
@@ -320,11 +361,49 @@ describe('the v1 to v2 upgrade over a real IndexedDB', () => {
     await openThroughStorage()
     const afterUpgrade = await readAll(factory)
 
+    // A row written after the upgrade would be destroyed by a migration that
+    // ran a second time, so its survival is what makes the no-op observable.
+    await writeRow(factory, 'planner:p1', plannerRow('p1', '2026-09-01T00:00:00.000Z'))
     await openThroughStorage()
     const afterSecondOpen = await readAll(factory)
 
-    expect(afterSecondOpen).toEqual(afterUpgrade)
+    expect(afterUpgrade.get('planner:p1')).toBe(plannerRow('p1', '2026-01-01T00:00:00.000Z'))
+    expect(afterSecondOpen.get('planner:p1')).toBe(plannerRow('p1', '2026-09-01T00:00:00.000Z'))
+    expect(afterSecondOpen.get('deviceId')).toBe('a-device-uuid')
     expect(await currentVersion(factory)).toBe(2)
+  })
+
+  it('leaves a current flat row alone when a stale source key is still present', async () => {
+    const current = plannerRow('p1', '2026-09-01T00:00:00.000Z')
+    const stale = plannerRow('p1', '2026-01-01T00:00:00.000Z')
+    await seedV1(factory, { 'planner:md:devA:p1': stale })
+    await openThroughStorage()
+    await writeRow(factory, 'planner:p1', current)
+    await writeRow(factory, 'planner:md:devA:p1', stale)
+
+    // The database is already at v2, so drive the migration directly to prove
+    // what it would do to a flat row that a later save has moved on.
+    await runMigrationDirectly(factory)
+
+    const rows = await readAll(factory)
+    expect(rows.get('planner:p1')).toBe(current)
+    expect(rows.has('planner:md:devA:p1')).toBe(false)
+  })
+
+  it('keeps both rows when a stale source ties the flat row but differs', async () => {
+    const flat = plannerRow('p1', '2026-01-01T00:00:00.000Z')
+    const other = JSON.stringify({
+      metadata: { id: 'p1', title: 'divergent', lastModifiedAt: '2026-01-01T00:00:00.000Z' },
+    })
+    await seedV1(factory, { 'planner:md:devA:p1': flat })
+    await openThroughStorage()
+    await writeRow(factory, 'planner:md:devA:p1', other)
+
+    await runMigrationDirectly(factory)
+
+    const rows = await readAll(factory)
+    expect(rows.get('planner:p1')).toBe(flat)
+    expect(rows.get('planner:md:devA:p1')).toBe(other)
   })
 
   it('creates an empty store when no database existed, with nothing to migrate', async () => {
