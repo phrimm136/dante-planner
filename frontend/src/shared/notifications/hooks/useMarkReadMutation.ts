@@ -54,6 +54,5 @@ export function useMarkReadMutation() {
     },
     // Invalidate notifications list and unread count
     invalidateKeys: () => [notificationQueryKeys.all],
-    errorLogPrefix: 'Mark read failed',
   })
 }

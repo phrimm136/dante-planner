@@ -42,8 +42,6 @@ export function useCreateComment() {
     onSuccess: () => {
       void requestNotificationPermission()
     },
-    errorLogPrefix: 'Create comment failed',
-    errorToastKey: 'comments.toast.postFailed',
   })
 }
 
@@ -73,8 +71,6 @@ export function useEditComment() {
         }))
       })
     },
-    errorLogPrefix: 'Edit comment failed',
-    errorToastKey: 'comments.toast.editFailed',
   })
 }
 
@@ -94,9 +90,7 @@ export function useDeleteComment() {
     },
     // Invalidate to refetch from server - backend prunes deleted leaf comments
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
-    successToastKey: 'comments.toast.deletedSuccess',
-    errorLogPrefix: 'Delete comment failed',
-    errorToastKey: 'comments.toast.deleteFailed',
+    successToastKey: 'common:comments.toast.deletedSuccess',
   })
 }
 
@@ -129,10 +123,7 @@ export function useUpvoteComment() {
     },
     onError: (error) => {
       if (error instanceof ConflictError) {
-        toast.error(t('comments.toast.alreadyUpvoted'))
-      } else {
-        console.error('Upvote failed:', error)
-        toast.error(t('comments.toast.upvoteFailed'))
+        showErrorMessage('common:comments.toast.alreadyUpvoted')
       }
     },
   })
@@ -156,13 +147,10 @@ export function useReportComment() {
       await ApiClient.post(`/api/comments/${commentId}/report`, { reason })
     },
     invalidateKeys: ({ plannerId }) => [commentsQueryKeys.list(plannerId)],
-    successToastKey: 'comments.toast.reportedSuccess',
+    successToastKey: 'common:comments.toast.reportedSuccess',
     onError: (error) => {
       if (error instanceof ConflictError) {
-        toast.error(t('comments.toast.alreadyReported'))
-      } else {
-        console.error('Report failed:', error)
-        toast.error(t('comments.toast.reportFailed'))
+        showErrorMessage('common:comments.toast.alreadyReported')
       }
     },
   })
@@ -193,7 +181,5 @@ export function useToggleCommentNotifications() {
         }))
       })
     },
-    errorLogPrefix: 'Toggle notifications failed',
-    errorToastKey: 'comments.toast.notificationUpdateFailed',
   })
 }

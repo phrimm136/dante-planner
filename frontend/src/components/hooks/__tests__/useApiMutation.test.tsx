@@ -3,19 +3,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useApiMutation } from '../useApiMutation'
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => `t(${key})` }),
-}))
-
-vi.mock('@/lib/toast', () => ({
-  toast: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}))
-
-import { toast } from '@/lib/toast'
-
 function createClientAndWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -79,14 +66,14 @@ describe('useApiMutation', () => {
     expect(onSuccess).toHaveBeenCalledWith('value-7', 7, queryClient)
   })
 
-  it('shows a translated success toast when successToastKey is set', async () => {
-    const { wrapper } = createClientAndWrapper()
+  it('declares the success message for the cache to report', async () => {
+    const { queryClient, wrapper } = createClientAndWrapper()
 
     const { result } = renderHook(
       () =>
         useApiMutation<void>({
           mutationFn: async () => {},
-          successToastKey: 'comments.toast.deletedSuccess',
+          successToastKey: 'common:comments.toast.deletedSuccess',
         }),
       { wrapper },
     )
@@ -94,34 +81,27 @@ describe('useApiMutation', () => {
     result.current.mutate()
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(toast.success).toHaveBeenCalledWith('t(comments.toast.deletedSuccess)')
-    expect(toast.error).not.toHaveBeenCalled()
+    expect(queryClient.getMutationCache().getAll()[0].meta).toEqual({
+      successMessage: 'common:comments.toast.deletedSuccess',
+    })
   })
 
-  it('logs with the errorLogPrefix and shows the error toast on failure', async () => {
-    const { wrapper } = createClientAndWrapper()
-    const failure = new Error('boom')
+  it('declares no success message when none is configured', async () => {
+    const { queryClient, wrapper } = createClientAndWrapper()
 
-    const { result } = renderHook(
-      () =>
-        useApiMutation<void>({
-          mutationFn: async () => {
-            throw failure
-          },
-          errorLogPrefix: 'Edit comment failed',
-          errorToastKey: 'comments.toast.editFailed',
-        }),
-      { wrapper },
-    )
+    const { result } = renderHook(() => useApiMutation<void>({ mutationFn: async () => {} }), {
+      wrapper,
+    })
 
     result.current.mutate()
-    await waitFor(() => expect(result.current.isError).toBe(true))
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(console.error).toHaveBeenCalledWith('Edit comment failed:', failure)
-    expect(toast.error).toHaveBeenCalledWith('t(comments.toast.editFailed)')
+    expect(queryClient.getMutationCache().getAll()[0].meta).toEqual({
+      successMessage: undefined,
+    })
   })
 
-  it('an onError override replaces the default log + toast behavior', async () => {
+  it('runs the onError extension on failure', async () => {
     const { wrapper } = createClientAndWrapper()
     const failure = new Error('conflict')
     const onError = vi.fn()
@@ -132,8 +112,6 @@ describe('useApiMutation', () => {
           mutationFn: async () => {
             throw failure
           },
-          errorLogPrefix: 'Should not log',
-          errorToastKey: 'should.not.toast',
           onError,
         }),
       { wrapper },
@@ -143,11 +121,9 @@ describe('useApiMutation', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     expect(onError).toHaveBeenCalledWith(failure)
-    expect(console.error).not.toHaveBeenCalled()
-    expect(toast.error).not.toHaveBeenCalled()
   })
 
-  it('stays silent on failure when no error handling is configured', async () => {
+  it('reports nothing itself on failure, leaving that to the cache', async () => {
     const { wrapper } = createClientAndWrapper()
 
     const { result } = renderHook(
@@ -164,6 +140,5 @@ describe('useApiMutation', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     expect(console.error).not.toHaveBeenCalled()
-    expect(toast.error).not.toHaveBeenCalled()
   })
 })

@@ -103,8 +103,8 @@ export function showUnavailable(error: unknown): void {
   emit(presentation)
 }
 
-/** Report a failure a client-side rule raised, which never reached the API. */
-export function showValidationError(key: string, params?: Record<string, string>): void {
+/** Report a failure under a message the caller chose, not one the classifier picked. */
+export function showErrorMessage(key: string, params?: Record<string, string>): void {
   const presentation = presentError(validationAppError({ key, params }))
   if (presentation === null) return
   emit(presentation)

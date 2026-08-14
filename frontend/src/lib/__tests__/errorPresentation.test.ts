@@ -14,7 +14,7 @@ import {
   showError,
   showSuccess,
   showUnavailable,
-  showValidationError,
+  showErrorMessage,
 } from '../errorPresentation'
 import type { ErrorPresentation } from '../errorPresentation'
 import type { AppError } from '../apiErrorClassifier'
@@ -198,9 +198,9 @@ describe('showUnavailable', () => {
   })
 })
 
-describe('showValidationError', () => {
+describe('showErrorMessage', () => {
   it('reports a client-side rule under its own key, with no support hint', () => {
-    showValidationError('planner:exportImport.invalidFileFormat')
+    showErrorMessage('planner:exportImport.invalidFileFormat')
 
     expect(sonnerToast.error).toHaveBeenCalledWith(
       'planner:exportImport.invalidFileFormat',
@@ -209,7 +209,7 @@ describe('showValidationError', () => {
   })
 
   it('carries the rule params through to the message', () => {
-    showValidationError('planner:exportImport.fileTooLarge', { max: '10MB' })
+    showErrorMessage('planner:exportImport.fileTooLarge', { max: '10MB' })
 
     expect(sonnerToast.error).toHaveBeenCalledOnce()
   })

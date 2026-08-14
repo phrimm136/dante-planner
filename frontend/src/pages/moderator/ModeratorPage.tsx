@@ -14,7 +14,7 @@ import { BanDialog, TimeoutDialog, UnbanDialog, ClearTimeoutDialog } from '@/sha
 import { Button } from '@/components/ui/button'
 import { formatUsername } from '@/lib/formatUsername'
 import { formatRelativeTime } from '@/lib/formatDate'
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 
 import type { ModerationDialogProps } from '@/shared/moderation'
 import type { UserForMod, ModerationAction, ModerationDialogKind } from './types/ModeratorTypes'
@@ -72,33 +72,28 @@ function TableHeaderRow({ labelKeys }: { labelKeys: readonly string[] }) {
   )
 }
 
-/** What one user-row dialog renders and which toasts its mutation resolves to. */
+/** What one user-row dialog renders and which toast its mutation resolves to. */
 interface ModerationDialogSpec {
   Dialog: (props: ModerationDialogProps) => React.ReactNode
   successKey: string
-  failKey: string
 }
 
 const MODERATION_DIALOGS: Record<ModerationDialogKind, ModerationDialogSpec> = {
   ban: {
     Dialog: BanDialog,
-    successKey: 'dashboard.userBanned',
-    failKey: 'dashboard.banFailed',
+    successKey: 'moderation:dashboard.userBanned',
   },
   unban: {
     Dialog: UnbanDialog,
-    successKey: 'dashboard.userUnbanned',
-    failKey: 'dashboard.unbanFailed',
+    successKey: 'moderation:dashboard.userUnbanned',
   },
   timeout: {
     Dialog: TimeoutDialog,
-    successKey: 'dashboard.userTimedOut',
-    failKey: 'dashboard.timeoutFailed',
+    successKey: 'moderation:dashboard.userTimedOut',
   },
   clearTimeout: {
     Dialog: ClearTimeoutDialog,
-    successKey: 'dashboard.timeoutRemoved',
-    failKey: 'dashboard.untimeoutFailed',
+    successKey: 'moderation:dashboard.timeoutRemoved',
   },
 }
 
@@ -141,15 +136,14 @@ function UserRow({ user, currentUserSuffix }: { user: UserForMod; currentUserSuf
 
   const confirmModeration =
     (kind: ModerationDialogKind) => (reason: string, durationMinutes?: number) => {
-      const { successKey, failKey } = MODERATION_DIALOGS[kind]
+      const { successKey } = MODERATION_DIALOGS[kind]
       mutations[kind].mutate(
         { usernameSuffix: user.usernameSuffix, reason, durationMinutes: durationMinutes ?? 0 },
         {
           onSuccess: () => {
-            toast.success(t(successKey))
+            showSuccess(successKey)
             setOpenDialog(null)
           },
-          onError: () => toast.error(t(failKey)),
         },
       )
     }

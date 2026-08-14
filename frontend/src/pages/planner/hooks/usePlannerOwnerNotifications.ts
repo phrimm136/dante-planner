@@ -8,8 +8,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
 
 import { z } from 'zod'
 
@@ -55,7 +53,6 @@ type ToggleOwnerNotificationsResponse = z.infer<typeof ToggleOwnerNotificationsR
  */
 export function useToggleOwnerNotifications() {
   const queryClient = useQueryClient()
-  const { t } = useTranslation()
 
   return useMutation({
     mutationFn: async ({
@@ -78,7 +75,6 @@ export function useToggleOwnerNotifications() {
     },
     onError: (error) => {
       console.error('Toggle owner notifications failed:', error)
-      toast.error(t('comments.toast.notificationUpdateFailed'))
     },
   })
 }

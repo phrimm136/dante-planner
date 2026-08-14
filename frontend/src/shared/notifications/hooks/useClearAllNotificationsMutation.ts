@@ -43,6 +43,5 @@ export function useClearAllNotificationsMutation() {
     },
     // Invalidate all notification queries (inbox list and unread count)
     invalidateKeys: () => [notificationQueryKeys.all],
-    errorLogPrefix: 'Clear all notifications failed',
   })
 }

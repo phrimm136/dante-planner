@@ -14,7 +14,7 @@ import {
   Trash2,
 } from 'lucide-react'
 
-import { toast } from '@/lib/toast'
+import { showSuccess } from '@/lib/errorPresentation'
 import { Button } from '@/components/ui/button'
 import { I18N_LOCALE_MAP, RECOMMENDED_THRESHOLD, SECTION_STYLES } from '@/lib/constants'
 import { DATE_FORMATS, formatPlannerDate } from '@/lib/formatDate'
@@ -135,14 +135,11 @@ export function PublishedPlannerHeader({
             queryKey: plannerQueryKeys.list(),
           })
 
-          toast.success(t('plannerTakedown.success', { ns: 'moderation' }))
+          showSuccess('moderation:plannerTakedown.success')
           setShowModeratorDeleteDialog(false)
           setTimeout(() => {
             void navigate({ to: '/planner/md/gesellschaft' })
           }, NAVIGATE_AFTER_TAKEDOWN_MS)
-        },
-        onError: () => {
-          toast.error(t('plannerTakedown.failed', { ns: 'moderation' }))
         },
       },
     )

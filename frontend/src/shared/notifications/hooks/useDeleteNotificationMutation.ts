@@ -42,6 +42,5 @@ export function useDeleteNotificationMutation() {
     },
     // Invalidate notifications list and unread count
     invalidateKeys: () => [notificationQueryKeys.all],
-    errorLogPrefix: 'Delete notification failed',
   })
 }
