@@ -231,6 +231,9 @@ jobs:
       - name: FE False Positive Scan
         working-directory: ./frontend
         run: yarn check:fp
+      - name: FE Rule Tests
+        working-directory: ./frontend
+        run: yarn check:rules
       - name: FE Compiler Bailouts
         working-directory: ./frontend
         run: yarn check:compiler-bailouts
