@@ -41,30 +41,60 @@ function conflictItem(id: string, title: string): ConflictItem {
 const CONFLICTS = [conflictItem(FIRST_ID, 'First Run'), conflictItem(SECOND_ID, 'Second Run')]
 
 describe('BatchConflictDialog', () => {
-  it('closes on the close button, leaving the list reachable', async () => {
+  it('hands a close to its consumer, which decides what a dismissal means', async () => {
     const user = userEvent.setup()
-    render(<BatchConflictDialog open conflicts={CONFLICTS} onResolve={vi.fn()} />)
+    const onDismiss = vi.fn()
+    const { rerender } = render(
+      <BatchConflictDialog open conflicts={CONFLICTS} onResolve={vi.fn()} onDismiss={onDismiss} />,
+    )
 
     expect(screen.getByText('First Run')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /close/i }))
+    expect(onDismiss).toHaveBeenCalledTimes(1)
 
+    rerender(
+      <BatchConflictDialog
+        open={false}
+        conflicts={CONFLICTS}
+        onResolve={vi.fn()}
+        onDismiss={onDismiss}
+      />,
+    )
     expect(screen.queryByText('First Run')).toBeNull()
   })
 
-  it('reopens for a new batch, which the consumer mounts under its own key', async () => {
+  it('keeps the choices made before a close, so reopening resumes them', async () => {
     const user = userEvent.setup()
-    const { rerender } = render(
-      <BatchConflictDialog key={FIRST_ID} open conflicts={[CONFLICTS[0]!]} onResolve={vi.fn()} />,
-    )
-    await user.click(screen.getByRole('button', { name: /close/i }))
-    expect(screen.queryByText('First Run')).toBeNull()
+    const onResolve = vi.fn()
+    const props = { conflicts: CONFLICTS, onResolve, onDismiss: vi.fn() }
+    const { rerender } = render(<BatchConflictDialog open {...props} />)
 
-    rerender(
-      <BatchConflictDialog key={SECOND_ID} open conflicts={[CONFLICTS[1]!]} onResolve={vi.fn()} />,
+    // Second row; index 0 is the apply-to-all row.
+    await user.click(screen.getAllByRole('button', { name: 'Use Server' })[2]!)
+
+    rerender(<BatchConflictDialog open={false} {...props} />)
+    rerender(<BatchConflictDialog open {...props} />)
+
+    await user.click(screen.getByRole('button', { name: 'Resolve All' }))
+
+    expect(onResolve).toHaveBeenCalledWith([
+      { id: FIRST_ID, choice: 'overwrite' },
+      { id: SECOND_ID, choice: 'discard' },
+    ])
+  })
+
+  it('reports a submission-wide failure as a banner, not against the first row', () => {
+    const outcomes: ConflictOutcome[] = [
+      { id: FIRST_ID, result: err({ step: 'precondition', error: { kind: 'unknown' } }) },
+    ]
+
+    render(
+      <BatchConflictDialog open conflicts={CONFLICTS} onResolve={vi.fn()} outcomes={outcomes} />,
     )
 
-    expect(screen.getByText('Second Run')).toBeInTheDocument()
+    expect(screen.getByTestId('batch-failure')).toBeInTheDocument()
+    expect(screen.queryByTestId(`outcome-${FIRST_ID}`)).toBeNull()
   })
 
   it('reports a failed item against its own row, leaving the others unmarked', () => {

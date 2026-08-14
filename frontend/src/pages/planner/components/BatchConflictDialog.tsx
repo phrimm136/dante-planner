@@ -55,6 +55,11 @@ export interface BatchConflictDialogProps {
   isResolving?: boolean
   /** One entry per attempted item, in submission order. */
   outcomes?: ConflictOutcome[]
+  /**
+   * The user closed the dialog. Its consumer decides what that means — parking
+   * the batch behind a reopen, or cancelling the run that raised it.
+   */
+  onDismiss?: () => void
 }
 
 /** The choices in the order both the per-item row and the apply-to-all row show them. */
@@ -150,18 +155,21 @@ export function BatchConflictDialog({
   onResolve,
   isResolving = false,
   outcomes = [],
+  onDismiss,
 }: BatchConflictDialogProps) {
   const { t } = useTranslation(['planner', 'common'])
 
-  // Closing is per batch: the consumer keys this dialog by the conflicts it
-  // carries, so a new batch mounts a fresh, undismissed one.
-  const [dismissed, setDismissed] = useState(false)
+  /** Failures of the whole submission, which belong to no single row. */
+  const batchFailures = outcomes
+    .map((outcome) => (outcome.result.ok ? null : outcome.result.error))
+    .filter((failure): failure is ConflictFailure => failure?.step === 'precondition')
 
   /** Why the attempt on this row failed, or null when it did not fail. */
   const failureOf = (id: string): ConflictFailure | null => {
     const outcome = outcomes.find((entry) => entry.id === id)
     if (!outcome || outcome.result.ok) return null
-    return outcome.result.error
+    // A precondition failure stopped the submission before this row was reached.
+    return outcome.result.error.step === 'precondition' ? null : outcome.result.error
   }
 
   const failureMessage = (failure: ConflictFailure): string => {
@@ -214,9 +222,9 @@ export function BatchConflictDialog({
 
   return (
     <Dialog
-      open={open && !dismissed}
+      open={open}
       onOpenChange={(next) => {
-        if (!next) setDismissed(true)
+        if (!next) onDismiss?.()
       }}
     >
       <DialogContent className="max-w-2xl">
@@ -232,6 +240,12 @@ export function BatchConflictDialog({
             )}
           </DialogDescription>
         </DialogHeader>
+
+        {batchFailures.map((failure, index) => (
+          <p key={index} className="text-sm text-destructive" data-testid="batch-failure">
+            {failureMessage(failure)}
+          </p>
+        ))}
 
         {/* Apply to All section - vertical layout */}
         <div className="flex flex-col gap-2 py-3 border-b border-border">
