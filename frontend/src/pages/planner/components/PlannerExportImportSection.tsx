@@ -1,7 +1,12 @@
 import { Suspense, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/lib/toast'
-import { showError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
+import {
+  showError,
+  showErrorMessage,
+  showInfo,
+  showSuccess,
+  showWarning,
+} from '@/lib/errorPresentation'
 import { gzip } from 'pako'
 import DOMPurify from 'dompurify'
 
@@ -80,7 +85,23 @@ function PlannerExportImportSectionContent() {
     state.k === 'awaitingChoice' || state.k === 'resolving' ? state.conflicts : NO_CONFLICTS
 
   const showToast = (descriptor: ToastDescriptor, params?: Record<string, number>) => {
-    toast[descriptor.severity](t(descriptor.key, descriptor.fallback, params))
+    const key = `common:${descriptor.key}`
+    switch (descriptor.severity) {
+      case 'success':
+        showSuccess(key, params)
+        return
+      case 'warning':
+        showWarning(key, params)
+        return
+      case 'info':
+        showInfo(key, params)
+        return
+      case 'error':
+        showErrorMessage(key)
+        return
+      default:
+        assertNever(descriptor.severity)
+    }
   }
 
   /**
@@ -103,7 +124,7 @@ function PlannerExportImportSectionContent() {
       const summaries = await listLocal()
 
       if (summaries.length === 0) {
-        toast.info(t('exportImport.noPlannersToExport', 'No planners to export'))
+        showInfo('common:exportImport.noPlannersToExport')
         return
       }
 
@@ -165,15 +186,15 @@ function PlannerExportImportSectionContent() {
 
       setState({ k: 'exporting', pct: 80 })
 
-      if (compressed.length === 0) {
-        showErrorMessage('common:exportImport.exportFailed')
-        return
-      }
-
-      downloadBlob(
+      const saved = downloadBlob(
         `plans-${new Date().toISOString().split('T')[0]}${EXPORT_FILE_EXTENSION}`,
         new Blob([compressed], { type: MIME_TYPE }),
       )
+
+      if (!saved) {
+        showErrorMessage('common:exportImport.exportFailed')
+        return
+      }
 
       setState({ k: 'exporting', pct: 100 })
       showSuccess('common:exportImport.exportSuccess', { count: planners.length })

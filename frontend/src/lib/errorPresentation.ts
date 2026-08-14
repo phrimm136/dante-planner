@@ -119,3 +119,13 @@ export function showErrorMessage(key: string, params?: Record<string, string>): 
 export function showSuccess(key: string, params?: Record<string, unknown>): void {
   toast.success(i18n.t(key, params))
 }
+
+/** An outcome that is neither a failure nor a clean success. */
+export function showWarning(key: string, params?: Record<string, unknown>): void {
+  toast.warning(i18n.t(key, params))
+}
+
+/** A neutral notice. Carried here so no other module needs the toast import. */
+export function showInfo(key: string, params?: Record<string, unknown>): void {
+  toast.info(i18n.t(key, params))
+}

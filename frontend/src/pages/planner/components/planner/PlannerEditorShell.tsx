@@ -10,7 +10,6 @@ import { publishedPlannerQueryKeys } from '../../hooks/usePublishedPlannerQuery'
 // Third-party libraries
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, Save } from 'lucide-react'
-import { toast } from '@/lib/toast'
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button'
@@ -34,7 +33,13 @@ import { getKeywordIconPath } from '@/shared/assets'
 import { assertNever, calculateByteLength } from '@/lib/utils'
 import { CONFLICT_TOAST_KEY } from '../../lib/conflictChoice'
 import { MdCategoryLabel } from '../MdCategoryLabel'
-import { presentError, showAppError, showErrorMessage, showSuccess } from '@/lib/errorPresentation'
+import {
+  presentError,
+  showAppError,
+  showErrorMessage,
+  showSuccess,
+  showWarning,
+} from '@/lib/errorPresentation'
 
 // Project types & schemas
 import type { MDCategory } from '@/shared/gameData'
@@ -200,7 +205,7 @@ export function PlannerEditorShell({
         .some((floor) => floor.difficulty === DUNGEON_IDX.NORMAL)
 
       if (hasNormalDifficulty) {
-        toast.warning(t('pages.plannerMD.publish.requiresHardMode'))
+        showWarning('planner:pages.plannerMD.publish.requiresHardMode')
       }
     }
 

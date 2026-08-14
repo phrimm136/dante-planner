@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/shallow'
 import { useThemePackListData } from '@/pages/themePack'
 import { useEGOGiftListData } from '@/pages/egoGift'
-import { toast } from 'sonner'
+import { showWarning } from '@/lib/errorPresentation'
 import { usePlannerEditorStoreSafe } from '../../stores/usePlannerEditorStore'
 import { DifficultyIndicator, getFloorDifficultyLabel } from './DifficultyIndicator'
 import { ThemePackViewer, ThemePackPlaceholder } from './ThemePackViewer'
@@ -127,12 +127,10 @@ export function FloorThemeGiftSection({
         )
         if (names.length > 0) {
           newGiftIds = new Set([...existingGifts].filter((id) => !ids.includes(id)))
-          toast.warning(
-            t('pages.plannerMD.gifts.unaffordableWarning', {
-              floor: floorNumber,
-              gifts: names.join(', '),
-            }),
-          )
+          showWarning('planner:pages.plannerMD.gifts.unaffordableWarning', {
+            floor: floorNumber,
+            gifts: names.join(', '),
+          })
         }
       }
 
