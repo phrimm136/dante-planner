@@ -32,7 +32,17 @@ export function useNoteDeliveryRegistry(): NoteDeliveryRegistry {
         }
       },
       drain: () => {
-        for (const deliver of deliveries.current) deliver()
+        // A delivery may unregister its own editor as it runs, so iterate a copy.
+        // One that throws must not cost the editors after it their text, or the
+        // caller the decision it drained for.
+        const snapshot = Array.from(deliveries.current)
+        for (const deliver of snapshot) {
+          try {
+            deliver()
+          } catch (failure: unknown) {
+            console.error('A note editor failed to hand over its pending text', failure)
+          }
+        }
       },
     }),
     [],
