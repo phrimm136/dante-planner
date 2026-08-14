@@ -1,0 +1,15 @@
+id: no-tobedefined-on-queryby
+valid:
+  - expect(queryByTestId('gift-card-9001')).toBeInTheDocument()
+  - expect(queryByTestId('gift-card-9001')).not.toBeNull()
+  - expect(getByTestId('gift-card-9001')).toBeDefined()
+  - expect(screen.getByRole('button')).toBeDefined()
+  - expect(result.current.value).toBeDefined()
+  - expect(queryAllByRole('row')).toHaveLength(2)
+invalid:
+  - expect(queryByTestId('gift-card-9001')).toBeDefined()
+  - expect(screen.queryByText('Gift One')).toBeDefined()
+  - expect(queryAllByRole('row')).toBeDefined()
+  - |
+    const found = renderHeadless()
+    expect(found.queryByLabelText('Mark as Done')).toBeDefined()

@@ -1,0 +1,44 @@
+id: no-tobedefined-on-queryby-tsx
+snapshots:
+  ? |
+    const { queryByLabelText } = render(<Grid />)
+    expect(queryByLabelText('Mark as Done')).toBeDefined()
+  : labels:
+    - source: expect(queryByLabelText('Mark as Done')).toBeDefined()
+      style: primary
+      start: 46
+      end: 100
+    - source: expect(queryByLabelText('Mark as Done'))
+      style: secondary
+      start: 46
+      end: 86
+  expect(queryByTestId('gift-card-9001')).toBeDefined():
+    labels:
+    - source: expect(queryByTestId('gift-card-9001')).toBeDefined()
+      style: primary
+      start: 0
+      end: 53
+    - source: expect(queryByTestId('gift-card-9001'))
+      style: secondary
+      start: 0
+      end: 39
+  expect(render(<Grid />).queryByTestId('gift-card-9001')).toBeDefined():
+    labels:
+    - source: expect(render(<Grid />).queryByTestId('gift-card-9001')).toBeDefined()
+      style: primary
+      start: 0
+      end: 70
+    - source: expect(render(<Grid />).queryByTestId('gift-card-9001'))
+      style: secondary
+      start: 0
+      end: 56
+  expect(screen.queryByText('Gift One')).toBeDefined():
+    labels:
+    - source: expect(screen.queryByText('Gift One')).toBeDefined()
+      style: primary
+      start: 0
+      end: 52
+    - source: expect(screen.queryByText('Gift One'))
+      style: secondary
+      start: 0
+      end: 38

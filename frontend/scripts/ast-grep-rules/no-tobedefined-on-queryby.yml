@@ -1,0 +1,15 @@
+id: no-tobedefined-on-queryby
+language: TypeScript
+severity: error
+message: queryBy* answers null when absent, so toBeDefined() passes on a missing element; assert toBeInTheDocument() or not.toBeNull().
+files:
+  - src/**/*.test.ts
+  - src/**/__tests__/**
+ignores:
+  - '**/*.snap'
+rule:
+  pattern: expect($RECEIVER).toBeDefined()
+  has:
+    kind: call_expression
+    regex: 'queryBy|queryAllBy'
+    stopBy: end

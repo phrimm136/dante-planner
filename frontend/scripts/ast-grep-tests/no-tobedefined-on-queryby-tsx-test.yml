@@ -1,0 +1,14 @@
+id: no-tobedefined-on-queryby-tsx
+valid:
+  - expect(queryByTestId('gift-card-9001')).toBeInTheDocument()
+  - expect(queryByTestId('gift-card-9001')).not.toBeNull()
+  - expect(getByTestId('gift-card-9001')).toBeDefined()
+  - expect(render(<Grid />).getByRole('button')).toBeDefined()
+  - expect(result.current.value).toBeDefined()
+invalid:
+  - expect(queryByTestId('gift-card-9001')).toBeDefined()
+  - expect(screen.queryByText('Gift One')).toBeDefined()
+  - expect(render(<Grid />).queryByTestId('gift-card-9001')).toBeDefined()
+  - |
+    const { queryByLabelText } = render(<Grid />)
+    expect(queryByLabelText('Mark as Done')).toBeDefined()
